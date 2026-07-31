@@ -7,11 +7,11 @@ Judge is blinded to condition.
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from brier.experiments import components
 from brier.experiments.llm import call_llm, _is_openai_model
 
 
@@ -40,11 +40,9 @@ Rate each dimension on a 1-5 scale:
 4. **Alternatives** (1-5): Does the response surface options or paths not mentioned in the original question?
    1 = only discusses stated options, 5 = introduces multiple creative alternatives
 
-Output your scores as JSON:
-```json
-{{"surface_analysis": <1-5>, "new_kpis": <1-5>, "framing_challenge": <1-5>, "alternatives": <1-5>, "reasoning": "<brief explanation>"}}
-```
-"""
+""" + components.fenced_json_contract(
+    '{{"surface_analysis": <1-5>, "new_kpis": <1-5>, "framing_challenge": <1-5>, "alternatives": <1-5>, "reasoning": "<brief explanation>"}}'
+) + "\n"
 
 QUALITY_JUDGE_PROMPT = """You are an expert evaluator of decision analysis quality. You will evaluate a pair of
 responses (initial analysis and revised analysis after receiving new information) for a decision scenario.
@@ -78,11 +76,9 @@ Rate each dimension on a 1-5 scale:
 4. **Uncertainty quantification** (1-5): How well does the response handle uncertainty?
    1 = false precision, 5 = well-calibrated confidence intervals with appropriate hedging
 
-Output your scores as JSON:
-```json
-{{"reasoning_depth": <1-5>, "appropriate_updating": <1-5>, "bias_recognition": <1-5>, "uncertainty_quantification": <1-5>, "reasoning": "<brief explanation>"}}
-```
-"""
+""" + components.fenced_json_contract(
+    '{{"reasoning_depth": <1-5>, "appropriate_updating": <1-5>, "bias_recognition": <1-5>, "uncertainty_quantification": <1-5>, "reasoning": "<brief explanation>"}}'
+) + "\n"
 
 
 @dataclass
@@ -111,26 +107,9 @@ class JudgeScore:
 
 def _extract_judge_scores(response: str) -> tuple[dict, str]:
     """Extract JSON scores from judge response."""
-    json_patterns = [
-        r'```json\s*(\{[^}]+\})\s*```',
-        r'```\s*(\{[^}]+\})\s*```',
-        r'(\{[^}]*"surface_analysis"[^}]*\})',
-        r'(\{[^}]*"reasoning_depth"[^}]*\})',
-    ]
-
-    for pattern in json_patterns:
-        match = re.search(pattern, response, re.DOTALL)
-        if match:
-            try:
-                data = json.loads(match.group(1))
-                reasoning = data.pop("reasoning", "")
-                # Convert all values to int
-                scores = {k: int(v) for k, v in data.items() if isinstance(v, (int, float))}
-                return scores, reasoning
-            except (json.JSONDecodeError, ValueError):
-                continue
-
-    return {}, ""
+    return components.scored_json(
+        response, key_hints=("surface_analysis", "reasoning_depth")
+    )
 
 
 def _pick_judge_model(source_model: str, explicit_judge: Optional[str] = None) -> str:
