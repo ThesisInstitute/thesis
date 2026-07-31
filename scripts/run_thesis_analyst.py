@@ -293,7 +293,17 @@ def materialize_run_distributions(
 ) -> dict[str, Any] | list[dict[str, Any]]:
     distributions = []
     for cell in cells:
-        distribution = ladder_distribution(cell) or interval_distribution(cell)
+        distribution = ladder_distribution(cell)
+        if distribution is None and cell.get("thresholdLadder") is not None:
+            # The cell DECLARED a quantile contract; degrading it to the
+            # interval_seeded transform would mislabel provenance and discard
+            # the distribution the run authored. Fail closed instead.
+            raise ValueError(
+                "cell declares a thresholdLadder that did not materialize; "
+                "refusing to fall back to interval_seeded "
+                f"(dataPointId={cell.get('dataPointId')!r})"
+            )
+        distribution = distribution or interval_distribution(cell)
         cell["predictionDistribution"] = distribution
         distributions.append(distribution)
     return distributions[0] if len(distributions) == 1 else distributions
