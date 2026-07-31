@@ -142,8 +142,8 @@ agencies ship with no registry edits; add a display label to
 
 Next.js App Router site with Tailwind CSS v4, deployed to Vercel as the
 `thesis-forecasts` project behind app.thesisinstitute.org (standard SSG build —
-all forecast pages prerender from `src/data/markets.ts`; four live cells
-stream from forecast-api at runtime).
+all forecast pages prerender from `src/data/forecast-cells.ts`; four live
+cells stream from forecast-api at runtime).
 
 ### Ledger database (Supabase)
 
