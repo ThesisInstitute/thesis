@@ -577,15 +577,67 @@ jobs:
           fi
 
       - name: Test and build the trusted regenerated site
+        id: site_test
         if: needs.select.result == 'success' && needs.select.outputs.count != '0' && needs.generate.result == 'success'
+        # Does NOT gate any less strictly than before: the commit step below
+        # still requires this to have passed. continue-on-error only buys the
+        # chance to quarantine the batch before the job dies.
+        continue-on-error: true
         run: |
+          set -euo pipefail
           cd site
-          bun install --frozen-lockfile
+          # Retry the install. A transient 504 from api.github.com in the
+          # sibling prospect loop on 2026-07-22 discarded a completed analyst
+          # batch and left three targets permanently unforecast.
+          for install_attempt in 1 2 3; do
+            if bun install --frozen-lockfile; then break; fi
+            if [ "$install_attempt" = 3 ]; then
+              echo "bun install failed after 3 attempts" >&2
+              exit 1
+            fi
+            echo "bun install failed (attempt $install_attempt/3); retrying" >&2
+            sleep $((install_attempt * 15))
+          done
           bun run test
           bun run build
 
+      - name: Quarantine the validated batch when the site gate fails
+        if: steps.site_test.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # The bundle has already cleared provenance, custody and record-chain
+          # verification by this point; only the site suite failed, and that
+          # suite is global -- it goes red for reasons that have nothing to do
+          # with this batch. Preserve the work on a branch instead of dropping
+          # it. Nothing reaches main: the gate is unchanged.
+          git config user.name "thesis-strategy-runner"
+          git config user.email "recorder@thesisinstitute.org"
+          git add records/thesis-analyst/ \
+            site/src/data/thesis-strategy-comparisons.ts \
+            site/src/data/model-lane-stats.generated.ts
+          if git diff --cached --quiet; then
+            echo "no publication content to quarantine"
+            exit 0
+          fi
+          python3 scripts/docket_publication.py scan-staged
+          git commit -m "Quarantined strategy publication $(date -u +%F) (run ${{ github.run_id }})"
+          BRANCH="docket-quarantine/${{ github.run_id }}"
+          auth_helper="!f() { echo username=x-access-token; echo \"password=\$GH_TOKEN\"; }; f"
+          git -c credential.helper= -c credential.helper="$auth_helper" \
+            push origin "HEAD:refs/heads/$BRANCH"
+          echo "Batch preserved on \`$BRANCH\`. Fix the site failure, then" \
+            "re-publish from that branch." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail the job after quarantining
+        if: steps.site_test.outcome == 'failure'
+        run: |
+          echo "site gate failed; batch quarantined rather than published" >&2
+          exit 1
+
       - name: Commit records and trusted generated comparisons
-        if: needs.select.result == 'success' && needs.select.outputs.count != '0' && needs.generate.result == 'success'
+        if: needs.select.result == 'success' && needs.select.outputs.count != '0' && needs.generate.result == 'success' && steps.site_test.outcome != 'failure'
         id: commit
         run: |
           set -euo pipefail
@@ -657,7 +709,18 @@ jobs:
             done < <(find records/thesis-analyst -name custody_root.json -type f -print0 | sort -z)
             (
               cd site
-              bun install --frozen-lockfile
+              # install_attempt, not attempt: the enclosing publication push
+              # loop owns $attempt, and only the subshell keeps this from
+              # clobbering it.
+              for install_attempt in 1 2 3; do
+                if bun install --frozen-lockfile; then break; fi
+                if [ "$install_attempt" = 3 ]; then
+                  echo "bun install failed after 3 attempts" >&2
+                  exit 1
+                fi
+                echo "bun install failed (attempt $install_attempt/3); retrying" >&2
+                sleep $((install_attempt * 15))
+              done
               bun run test
               bun run build
             )
@@ -722,11 +785,49 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          SELECT: ${{ needs.select.result }}
+          GENERATE: ${{ needs.generate.result }}
+          SITE_GATE: ${{ steps.site_test.outcome }}
+          COMMIT: ${{ steps.commit.outcome }}
+          PUSH: ${{ steps.final_push.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          QUARANTINE: docket-quarantine/${{ github.run_id }}
         run: |
+          set -euo pipefail
+          # A bare run link means the reader has to open the run, find the
+          # failing job and read the log before knowing whether any work
+          # survived. Say where it stopped and what it implies.
           title="Strategy docket failed $(date -u +%F)"
           existing=$(gh issue list --state open --search "\"$title\" in:title" \
             --json number --jq '.[0].number' || true)
+          {
+            echo "The strategy docket failed: $RUN_URL"
+            echo
+            echo '```'
+            echo "select     ${SELECT:-skipped}"
+            echo "generate   ${GENERATE:-skipped}"
+            echo "site gate  ${SITE_GATE:-skipped}"
+            echo "commit     ${COMMIT:-skipped}"
+            echo "push       ${PUSH:-skipped}"
+            echo '```'
+            echo
+            if [ "${SITE_GATE:-}" = "failure" ]; then
+              echo "**The analyst batch completed and is not lost.** It passed bundle"
+              echo "validation, record-chain and custody verification; only the site"
+              echo "suite failed. The work is preserved on \`$QUARANTINE\` -- fix the"
+              echo "site failure, then re-publish from that branch."
+            elif [ "${PUSH:-}" = "failure" ]; then
+              echo "Records were committed but the push did not converge. Check for a"
+              echo "competing writer or a rejected push; the commit exists only in this"
+              echo "run's workspace, so nothing reached main."
+            elif [ -n "${GENERATE:-}" ] && [ "${GENERATE:-}" != "success" ]; then
+              echo "The analyst leg failed, so no comparisons were produced."
+            fi
+          } > /tmp/alert-body.md
           if [ -z "$existing" ]; then
-            gh issue create --title "$title" \
-              --body "The strategy docket failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
+            gh issue create --title "$title" --body-file /tmp/alert-body.md
+          else
+            # Same title, different cause: comment rather than drop it, or the
+            # second distinct failure of the day is invisible.
+            gh issue comment "$existing" --body-file /tmp/alert-body.md
           fi
