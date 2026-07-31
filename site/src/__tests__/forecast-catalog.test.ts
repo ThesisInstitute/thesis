@@ -1388,6 +1388,51 @@ describe("forecast catalog", () => {
     }
   });
 
+  const describeTarget = (target: TargetRegisteredLedgerEntry): string => {
+    const window = target.sourceBinding?.expectedReleaseWindow;
+    const registered = (target.registeredAt ?? "?").slice(0, 10);
+    const opens = window?.start ?? "(no window recorded)";
+    const closes = window?.end ?? "(no window recorded)";
+    const alreadyOpen = Boolean(window?.start && registered > window.start);
+    return [
+      `  ${target.dataPointId}`,
+      `      slug         ${target.catalogSlug}`,
+      `      registered   ${registered}`,
+      `      window       ${opens} -> ${closes}` +
+        (alreadyOpen
+          ? "   <-- ALREADY OPEN at registration; never forecastable"
+          : ""),
+    ].join("\n");
+  };
+
+  const failureReport = (targets: TargetRegisteredLedgerEntry[]): string =>
+    [
+      "",
+      `${targets.length} registered ledger target(s) have no forecast and are out of grace.`,
+      "",
+      "Every registered target must reach exactly one of two terminal states:",
+      "  1. a forecast cell carrying its dataPointId, or",
+      "  2. an entry in site/src/data/expired-unforecast-registrations.ts",
+      "",
+      "A target lands here when its analyst run never published -- usually a",
+      "publish leg that died after `generate` had already succeeded -- and it",
+      "is now past the point where forecasting it would be honest.",
+      "",
+      "TO CLEAR THIS:",
+      "  - if the release window has NOT opened, publish the missing forecast",
+      "    (the awaiting-forecast lane exists to do this);",
+      "  - if it HAS opened, the print is public and no forecast can be honest,",
+      "    so add the id to expired-unforecast-registrations.ts with a comment",
+      "    saying why it was never forecast.",
+      "",
+      "Do NOT relax this assertion. It is the preregistration integrity",
+      "guarantee: it is the only thing preventing a registration from being",
+      "quietly abandoned when its forecast fails to publish.",
+      "",
+      ...targets.map(describeTarget),
+      "",
+    ].join("\n");
+
   it("forecasts every registered ledger target", () => {
     const forecastDataPointIds = new Set(
       FORECAST_CELLS.flatMap((forecast) =>
@@ -1401,7 +1446,14 @@ describe("forecast catalog", () => {
         !EXPIRED_UNFORECAST_SET.has(target.dataPointId),
     );
 
-    expect(missingForecastTargets).toEqual([]);
+    // Raw objects here dump ~25 keys apiece and say nothing about which
+    // invariant broke or how to clear it, which is how this failure came to
+    // read as an unexplained outage on 2026-07-31. Compare ids and put the
+    // whole diagnosis in the message instead.
+    expect(
+      missingForecastTargets.map((target) => target.dataPointId),
+      failureReport(missingForecastTargets),
+    ).toEqual([]);
   });
 
   it("keeps the expired-unforecast list exact", () => {
@@ -1420,14 +1472,27 @@ describe("forecast catalog", () => {
     );
     for (const dataPointId of EXPIRED_UNFORECAST_REGISTRATIONS) {
       const target = targetsById.get(dataPointId);
-      expect(target, `${dataPointId} is not a registered target`).toBeDefined();
+      expect(
+        target,
+        `${dataPointId} is listed as expired-unforecast but is not a ` +
+          "registered ledger target at all. Either it was never registered, " +
+          "or its id is misspelled, or the registration left the ledger. " +
+          "Remove it from expired-unforecast-registrations.ts.",
+      ).toBeDefined();
       expect(
         forecastDataPointIds.has(dataPointId),
-        `${dataPointId} has a forecast and must leave the expired list`,
+        `${dataPointId} now HAS a forecast, so it is no longer expired ` +
+          "unforecast. Delete it from expired-unforecast-registrations.ts -- " +
+          "the list is a record of registrations that ended without a " +
+          "forecast, and leaving a forecast id on it misreports the record.",
       ).toBe(false);
       expect(
         isPreregisteredTargetWithinOrphanGrace(target!),
-        `${dataPointId} is still inside the orphan grace window`,
+        `${dataPointId} is still awaiting its forecast (its release window ` +
+          `opens ${target?.sourceBinding?.expectedReleaseWindow?.start ?? "?"}` +
+          "), so it is too early to call it expired. Either forecast it, or " +
+          "wait until the window opens before listing it. Expiring a target " +
+          "that is still forecastable throws away a usable registration.",
       ).toBe(false);
     }
   });
