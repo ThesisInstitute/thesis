@@ -2958,6 +2958,8 @@ def main() -> int:
         # gates (sigma vs ladder-quantile) key off the mode downstream in
         # both the python validator and trace-depth.test.ts.
         cell["promptMode"] = args.prompt_mode
+        if args.codex_reasoning_effort:
+            cell["reasoningEffort"] = args.codex_reasoning_effort
         cell.update(binding)
         pin_comparison_contract(cell, target_context)
     materialized_distributions = materialize_run_distributions(normalized_cells)

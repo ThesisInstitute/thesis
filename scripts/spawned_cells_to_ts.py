@@ -345,6 +345,8 @@ def to_forecast_cell(cell: dict) -> dict:
     }
     if cell.get("promptMode"):
         out["predictionRun"]["promptMode"] = cell["promptMode"]
+    if cell.get("reasoningEffort"):
+        out["predictionRun"]["reasoningEffort"] = cell["reasoningEffort"]
     if cell.get("activityLog"):
         out["predictionRun"]["activityLog"] = cell["activityLog"]
     if cell.get("custodyRootSha256"):

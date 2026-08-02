@@ -80,6 +80,11 @@ the command names one with `-m`, `--model`, or `--model=...`; otherwise it
 falls back to the agent.yaml default. Bump the version when any agent file
 changes.
 
+Runs whose command sets a reasoning effort also stamp
+`predictionRun.reasoningEffort` (harness-stamped from the run command, like
+`promptMode` — never the agent's claim), so score comparisons can condition on
+it.
+
 New runs also stamp `predictionRun.custodyRootSha256`. The converter verifies
 the sibling `custody_root.json` before carrying that root into the catalog,
 Thesis Log, and Brier reward provenance.

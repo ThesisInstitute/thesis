@@ -198,3 +198,28 @@ def test_sealed_agent_meta_rejects_incomplete_manifest_identity(
     )
     assert spawned_cells_to_ts.sealed_agent_meta(tmp_path) is None
     assert spawned_cells_to_ts.sealed_agent_meta(tmp_path / "missing") is None
+
+
+def test_reasoning_effort_carried_into_prediction_run() -> None:
+    import spawned_cells_to_ts as converter
+
+    base = {k: "x" for k in (
+        "slug", "country", "type", "title", "question", "unit",
+        "resolutionDate", "resolutionSource", "resolutionSourceUrl",
+        "resolutionRule", "sourceContext", "reasoning", "runAt",
+    )}
+    base.update({
+        "pointEstimate": 1.0, "ciLow": 0.5, "ciHigh": 1.5, "confidence": 0.8,
+        "historicalContext": [], "drivers": [],
+        "promptMode": "fast", "reasoningEffort": "max",
+        converter.SEALED_AGENT_KEY: {
+            "agent": "t", "model": "m", "agentVersion": "v",
+            "promptHash": "h", "toolPolicyHash": "h2",
+        },
+    })
+    out = converter.to_forecast_cell(base)
+    assert out["predictionRun"]["reasoningEffort"] == "max"
+    # absent -> field absent, not null
+    del base["reasoningEffort"]
+    out2 = converter.to_forecast_cell(base)
+    assert "reasoningEffort" not in out2["predictionRun"]
