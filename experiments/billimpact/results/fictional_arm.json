@@ -1,0 +1,15 @@
+{
+ "n_rows": 216,
+ "n_usable": 216,
+ "recognized_identified": 107,
+ "n_fictional": 108,
+ "paired_units": 36,
+ "mean_real": 0.26799577975728495,
+ "mean_fictional": 0.3085435079071814,
+ "paired_delta_fic_minus_real": 0.040547728149896385,
+ "delta_bootstrap_ci": [
+  -0.003351987787697742,
+  0.09260947672087949
+ ],
+ "fictional_better_units": 16
+}

@@ -1,0 +1,1 @@
+{"point": 37.1, "ci_low": 35.7, "ci_high": 38.4, "rationale": "Participation has been declining steadily (~0.3-0.6M/month, decelerating), so extrapolating a moderating downtrend of ~0.2M/month from February's 37.9M yields roughly 37.1M by June 2026, with uncertainty from possible policy-driven drops or stabilization."}

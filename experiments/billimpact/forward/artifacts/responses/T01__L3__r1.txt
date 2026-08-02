@@ -1,0 +1,1 @@
+{"point": 37400000, "ci_low": 36500000, "ci_high": 38300000, "rationale": "Participation has declined steadily (~0.3-0.6M/month) from 39.4M in Nov 2025 to 37.9M in Feb 2026, so extrapolating a moderating decline gives roughly 37.4M by April 2026, with uncertainty for policy or economic shifts."}

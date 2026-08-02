@@ -1,0 +1,1 @@
+{"baseline_no_policy": 37.4, "policy_delta": 0, "point": 37.4, "ci_low": 36.6, "ci_high": 38.2, "rationale": "Recent months show a steady decline of roughly 0.4-0.6M per month (39.4→38.8→38.2→37.9), so extrapolating this decelerating downward trend to April 2026 (two months ahead) gives ~37.4M with no known policy shocks factored in."}

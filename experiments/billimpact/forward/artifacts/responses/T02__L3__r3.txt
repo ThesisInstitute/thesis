@@ -1,0 +1,1 @@
+{"point": 37.3, "ci_low": 36.2, "ci_high": 38.3, "rationale": "Participation has been declining roughly 0.3-0.6 million per month amid policy tightening, so extrapolating a moderating downward trend from February's 37.9 gives about 37.3 million by May 2026."}

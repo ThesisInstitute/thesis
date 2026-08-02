@@ -1,0 +1,1 @@
+{"point": 37200000, "ci_low": 36200000, "ci_high": 38300000, "rationale": "Participation has been declining ~0.3-0.6M/month but decelerating, so extending a moderating downward trend five months from February's 37.9M yields roughly 37.2M with uncertainty for policy or economic shifts."}

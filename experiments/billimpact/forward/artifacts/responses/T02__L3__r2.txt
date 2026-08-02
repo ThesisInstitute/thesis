@@ -1,0 +1,1 @@
+{"point": 37.0, "ci_low": 36.0, "ci_high": 38.0, "rationale": "Participation has been declining roughly 0.3-0.6 million per month amid tightening eligibility rules, so extrapolating a moderating downward trend from February's 37.9M gives about 37.0M by May 2026."}

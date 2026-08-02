@@ -1,0 +1,1 @@
+{"point": 37.0, "ci_low": 35.7, "ci_high": 38.1, "rationale": "Participation has been declining ~0.3-0.6M per month; extrapolating a decelerating decline of roughly 0.15-0.2M/month from February's 37.9M over five months, with added downside risk from tightened eligibility rules, yields about 37.0M."}

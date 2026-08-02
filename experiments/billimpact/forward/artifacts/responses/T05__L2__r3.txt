@@ -1,0 +1,1 @@
+{"baseline_no_policy": 6.623, "policy_delta": 0.0, "point": 6.623, "ci_low": 6.56, "ci_high": 6.69, "rationale": "Extrapolating the decelerating month-over-month decline (-0.08, -0.04, -0.02) forward implies further small decreases (~-0.01, -0.005, -0.0025) to about 6.62-6.63 million by May 2026, with no policy change indicated to shift this baseline."}

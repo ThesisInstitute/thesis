@@ -1,0 +1,423 @@
+{
+  "_readme": [
+    "Forward-registration target pack for the harness-sensitivity lanes (see FORWARD-REGISTRATION.md).",
+    "Every field under 'target' is copied VERBATIM from site/src/data/ledger-targets.generated.ts at repo commit 1f7c654d.",
+    "Every history block records where its numbers came from. Two provenance classes:",
+    "  repo_recorded_run  — values read from a forecast-example file in this repo that records a real fetch (file, and the as-of date the file itself records).",
+    "  alfred_vintage_fetch — values fetched live from ALFRED at pack-build time (2026-07-31, vintage column CCSA_20260731).",
+    "Histories are the information set SUPPLIED to every lane; no lane fetches anything itself. Harness sensitivity is measured across lanes at a fixed information set.",
+    "Known caveat, disclosed rather than resolved: the repo-recorded FNS/CMS histories end 2026-02 (as-of 2026-05-08 / 2026-05-29). The illustrative launch-cadence.ts blocks for the same series disagree (they carry no as-of date and sit under the forecast-cells.ts 'constructed to demonstrate' banner); the recorded agent-runs.ts / benefits-delivery.ts values are used, and the discrepancy is flagged in FORWARD-REGISTRATION.md."
+  ],
+  "selected": [
+    {
+      "id": "T01",
+      "target": {
+        "dataPointId": "usda.fns.snap.persons.april_2026",
+        "unit": "millions",
+        "resolutionDate": "2026-08-31",
+        "resolutionSource": "USDA Food and Nutrition Service, SNAP national monthly data",
+        "resolutionSourceUrl": null,
+        "resolutionRule": "Resolves to the April 2026 average monthly SNAP persons count in USDA FNS national program data. If USDA updates the monthly table, the first version available by August 31, 2026 governs.",
+        "resolutionPolicy": "fixed_vintage"
+      },
+      "series_desc": "US national monthly SNAP participation - average monthly persons (USDA FNS national data tables)",
+      "period_label": "April 2026",
+      "already_forecast_in_catalog": true,
+      "fallback_resolution_source_url": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+      "history": [
+        {"month": "2025-11", "value": 39.4},
+        {"month": "2025-12", "value": 38.8},
+        {"month": "2026-01", "value": 38.2},
+        {"month": "2026-02", "value": 37.9}
+      ],
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/agent-runs.ts",
+        "series_block": "usda.fns.snap.participation",
+        "recorded_fetch_result": "{ feb2026_persons: 37870817, data_as_of: '2026-05-08', preliminary: true }",
+        "as_of": "2026-05-08",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/agent-runs.ts",
+        "note": "Read from the local checkout at commit 1f7c654d, not fetched over HTTP."
+      }
+    },
+    {
+      "id": "T02",
+      "target": {
+        "dataPointId": "usda.fns.snap.persons.may_2026",
+        "unit": "millions",
+        "resolutionDate": "2026-09-30",
+        "resolutionSource": "USDA Food and Nutrition Service SNAP Data Tables",
+        "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+        "resolutionRule": "Resolve to the first official USDA FNS SNAP data-table print for national monthly participation, table Persons, May 2026. Use the reported national Persons value in thousands and multiply by 0.001 to express millions. Do not use later revisions or same-day corrected files unless the first print itself is withdrawn before publication as an official file.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "US national monthly SNAP participation - average monthly persons (USDA FNS national data tables)",
+      "period_label": "May 2026",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2025-11", "value": 39.4},
+        {"month": "2025-12", "value": 38.8},
+        {"month": "2026-01", "value": 38.2},
+        {"month": "2026-02", "value": 37.9}
+      ],
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/agent-runs.ts",
+        "series_block": "usda.fns.snap.participation",
+        "recorded_fetch_result": "{ feb2026_persons: 37870817, data_as_of: '2026-05-08', preliminary: true }",
+        "as_of": "2026-05-08",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/agent-runs.ts",
+        "note": "Read from the local checkout at commit 1f7c654d, not fetched over HTTP."
+      }
+    },
+    {
+      "id": "T03",
+      "target": {
+        "dataPointId": "usda.fns.snap.persons.june_2026",
+        "unit": "millions",
+        "resolutionDate": "2026-11-03",
+        "resolutionSource": "USDA Food and Nutrition Service SNAP Data Tables",
+        "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+        "resolutionRule": "Resolve to the first value published for Persons for June 2026 in the USDA FNS SNAP national monthly participation table, reported in thousands and multiplied by 0.001 to millions. Use the first print available on the specified SNAP Data Tables page; disregard later revisions. Round the resolved value to three decimal places in millions.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "US national monthly SNAP participation - average monthly persons (USDA FNS national data tables)",
+      "period_label": "June 2026",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2025-11", "value": 39.4},
+        {"month": "2025-12", "value": 38.8},
+        {"month": "2026-01", "value": 38.2},
+        {"month": "2026-02", "value": 37.9}
+      ],
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/agent-runs.ts",
+        "series_block": "usda.fns.snap.participation",
+        "recorded_fetch_result": "{ feb2026_persons: 37870817, data_as_of: '2026-05-08', preliminary: true }",
+        "as_of": "2026-05-08",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/agent-runs.ts",
+        "note": "Read from the local checkout at commit 1f7c654d, not fetched over HTTP."
+      }
+    },
+    {
+      "id": "T04",
+      "target": {
+        "dataPointId": "usda.fns.snap.persons.july_2026",
+        "unit": "millions",
+        "resolutionDate": "2026-12-07",
+        "resolutionSource": "USDA Food and Nutrition Service SNAP Data Tables",
+        "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+        "resolutionRule": "Resolve to the Persons value for July 2026 in the first official FNS SNAP national monthly participation table published for that month. Convert the table value from thousands to millions by multiplying by 0.001 and round to three decimals; ignore all subsequent revisions. No release-day correction or grace exception applies.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "US national monthly SNAP participation - average monthly persons (USDA FNS national data tables)",
+      "period_label": "July 2026",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2025-11", "value": 39.4},
+        {"month": "2025-12", "value": 38.8},
+        {"month": "2026-01", "value": 38.2},
+        {"month": "2026-02", "value": 37.9}
+      ],
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/agent-runs.ts",
+        "series_block": "usda.fns.snap.participation",
+        "recorded_fetch_result": "{ feb2026_persons: 37870817, data_as_of: '2026-05-08', preliminary: true }",
+        "as_of": "2026-05-08",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/agent-runs.ts",
+        "note": "Read from the local checkout at commit 1f7c654d, not fetched over HTTP."
+      }
+    },
+    {
+      "id": "T05",
+      "target": {
+        "dataPointId": "fns.wic.total_participation.2026-05.first_print",
+        "unit": "millions",
+        "resolutionDate": "2026-08-14",
+        "resolutionSource": "Official agency release",
+        "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+        "resolutionRule": "Resolve to the national WIC Total Participants value for May 2026 in the first official USDA FNS WIC monthly program-data posting or latest-month table that first includes May 2026. The expected displayed FNS monthly table value is a whole participant count, as in 6,894,610 for May 2025; convert that displayed person count to millions by dividing by 1,000,000 and round to 0.001 million for the cell. If the ledger adapter instead extracts an intermediate value expressed in thousands of participants, its listed factor 0.001 produces the same final unit of millions. Use the first posted May 2026 value only; ignore later preliminary/final revisions or annual-summary revisions.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "US national monthly WIC total participants (USDA FNS WIC program data)",
+      "period_label": "May 2026",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2025-11", "value": 6.78},
+        {"month": "2025-12", "value": 6.70},
+        {"month": "2026-01", "value": 6.66},
+        {"month": "2026-02", "value": 6.64}
+      ],
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/agent-runs.ts",
+        "series_block": "usda.fns.wic.total_participants",
+        "recorded_fetch_result": "{ feb2026_total_participants: 6640819, data_as_of: '2026-05-08', preliminary: true }",
+        "as_of": "2026-05-08",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/agent-runs.ts",
+        "note": "Read from the local checkout at commit 1f7c654d, not fetched over HTTP. The resolution rule itself records May 2025 = 6,894,610; that value is part of the verbatim rule shown to every lane."
+      }
+    },
+    {
+      "id": "T06",
+      "target": {
+        "dataPointId": "fns.wic.total_participation.2026-06.first_print",
+        "unit": "millions",
+        "resolutionDate": "2026-09-18",
+        "resolutionSource": "Official agency release",
+        "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+        "resolutionRule": "Resolve to the total participants value for June 2026 in the first official USDA FNS WIC monthly national-level table published on the WIC Data Tables page. Apply the ledger conversion from thousands of participants to millions by multiplying by 0.001. Use that first print without incorporating later revisions or corrections, and round only the resolved millions value to six decimal places.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "US national monthly WIC total participants (USDA FNS WIC program data)",
+      "period_label": "June 2026",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2025-11", "value": 6.78},
+        {"month": "2025-12", "value": 6.70},
+        {"month": "2026-01", "value": 6.66},
+        {"month": "2026-02", "value": 6.64}
+      ],
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/agent-runs.ts",
+        "series_block": "usda.fns.wic.total_participants",
+        "recorded_fetch_result": "{ feb2026_total_participants: 6640819, data_as_of: '2026-05-08', preliminary: true }",
+        "as_of": "2026-05-08",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/agent-runs.ts",
+        "note": "Read from the local checkout at commit 1f7c654d, not fetched over HTTP."
+      }
+    },
+    {
+      "id": "T07",
+      "target": {
+        "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+        "unit": "millions",
+        "resolutionDate": "2026-10-22",
+        "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+        "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+        "resolutionRule": "Resolve to the first national total-participation value published by USDA FNS for July 2026 in the WIC monthly data table, converting the official count in thousands to millions by multiplying by 0.001. Use the first published value even if FNS later revises it; round the converted result to three decimal places. The registered expected release window is October 14-22, 2026, with October 22 as the resolution date.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "US national monthly WIC total participants (USDA FNS WIC program data)",
+      "period_label": "July 2026",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2025-11", "value": 6.78},
+        {"month": "2025-12", "value": 6.70},
+        {"month": "2026-01", "value": 6.66},
+        {"month": "2026-02", "value": 6.64}
+      ],
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/agent-runs.ts",
+        "series_block": "usda.fns.wic.total_participants",
+        "recorded_fetch_result": "{ feb2026_total_participants: 6640819, data_as_of: '2026-05-08', preliminary: true }",
+        "as_of": "2026-05-08",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/agent-runs.ts",
+        "note": "Read from the local checkout at commit 1f7c654d, not fetched over HTTP."
+      }
+    },
+    {
+      "id": "T08",
+      "target": {
+        "dataPointId": "cms.medicaid_chip.enrollment.april_2026",
+        "unit": "millions",
+        "resolutionDate": "2026-09-30",
+        "resolutionSource": "CMS Medicaid and CHIP monthly enrollment data",
+        "resolutionSourceUrl": null,
+        "resolutionRule": "Resolves to the national Medicaid and CHIP enrollment total for April 2026 in CMS monthly enrollment data. If CMS posts preliminary and updated versions, the first updated national file available by September 30, 2026 governs.",
+        "resolutionPolicy": "fixed_vintage"
+      },
+      "series_desc": "US national monthly Medicaid and CHIP total enrollment (CMS monthly enrollment data)",
+      "period_label": "April 2026",
+      "already_forecast_in_catalog": true,
+      "fallback_resolution_source_url": "https://www.medicaid.gov/medicaid/program-information/medicaid-and-chip-enrollment-data/index.html",
+      "history": [
+        {"month": "2025-11", "value": 76.2},
+        {"month": "2025-12", "value": 75.6},
+        {"month": "2026-01", "value": 75.1},
+        {"month": "2026-02", "value": 74.9}
+      ],
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/agent-runs.ts",
+        "series_block": "cms.medicaid_chip.monthly_enrollment",
+        "recorded_fetch_result": "{ feb2026_preliminary_total_enrollment: 74877742, last_updated: '2026-05-29' }",
+        "as_of": "2026-05-29",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/agent-runs.ts",
+        "note": "Read from the local checkout at commit 1f7c654d, not fetched over HTTP."
+      }
+    },
+    {
+      "id": "T09",
+      "target": {
+        "dataPointId": "dol.eta.continued_claims.sa.week_2026-07-25.first_print",
+        "unit": "millions",
+        "resolutionDate": "2026-08-06",
+        "resolutionSource": "ALFRED CCSA advance vintage, sourced from U.S. Department of Labor ETA",
+        "resolutionSourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+        "resolutionRule": "Resolve through the canonical ALFRED CCSA source binding to the advance (first-print) seasonally adjusted insured unemployment level published by DOL ETA for the week ending July 25, 2026, converted from claims to millions by multiplying by 0.000001 and rounded to 0.001 million. Ignore all subsequent revisions. The expected ETA release date is August 6, 2026, within the ledger release window of August 4-8, 2026.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "US insured unemployment (continued claims), state programs, seasonally adjusted, weekly (DOL ETA; FRED/ALFRED series CCSA)",
+      "period_label": "week ending 2026-07-25",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2026-04-04", "value": 1.809},
+        {"month": "2026-04-11", "value": 1.808},
+        {"month": "2026-04-18", "value": 1.776},
+        {"month": "2026-04-25", "value": 1.758},
+        {"month": "2026-05-02", "value": 1.776},
+        {"month": "2026-05-09", "value": 1.771},
+        {"month": "2026-05-16", "value": 1.785},
+        {"month": "2026-05-23", "value": 1.771},
+        {"month": "2026-05-30", "value": 1.786},
+        {"month": "2026-06-06", "value": 1.800},
+        {"month": "2026-06-13", "value": 1.812},
+        {"month": "2026-06-20", "value": 1.806},
+        {"month": "2026-06-27", "value": 1.821},
+        {"month": "2026-07-04", "value": 1.798},
+        {"month": "2026-07-11", "value": 1.789},
+        {"month": "2026-07-18", "value": 1.782}
+      ],
+      "history_provenance": {
+        "class": "alfred_vintage_fetch",
+        "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+        "vintage_column": "CCSA_20260731",
+        "fetched_at": "2026-07-31",
+        "note": "Fetched live at pack build; raw persons divided by 1,000,000 and rounded to 0.001. Last published observation in the vintage is the week ending 2026-07-18 - both claims targets are unpublished as of this fetch."
+      }
+    },
+    {
+      "id": "T10",
+      "target": {
+        "dataPointId": "dol.eta.continued_claims.sa.week_2026-08-01.first_print",
+        "unit": "millions",
+        "resolutionDate": "2026-08-13",
+        "resolutionSource": "ALFRED/FRED CCSA advance vintage mirror of the U.S. Department of Labor ETA Unemployment Insurance Weekly Claims first print",
+        "resolutionSourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+        "resolutionRule": "Resolve through the ledger-bound ALFRED advance vintage for CCSA, which mirrors the first official DOL ETA UI Weekly Claims print for seasonally adjusted insured unemployment during the week ending August 1, 2026. Use the advance seasonally adjusted insured unemployment count for regular state programs, divide the persons count by 1,000,000 to express millions, and ignore later revisions. The canonical expected release window is 2026-08-11 through 2026-08-15; the official DOL schedule indicates the relevant weekly release date is Thursday, 2026-08-13.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "US insured unemployment (continued claims), state programs, seasonally adjusted, weekly (DOL ETA; FRED/ALFRED series CCSA)",
+      "period_label": "week ending 2026-08-01",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2026-04-04", "value": 1.809},
+        {"month": "2026-04-11", "value": 1.808},
+        {"month": "2026-04-18", "value": 1.776},
+        {"month": "2026-04-25", "value": 1.758},
+        {"month": "2026-05-02", "value": 1.776},
+        {"month": "2026-05-09", "value": 1.771},
+        {"month": "2026-05-16", "value": 1.785},
+        {"month": "2026-05-23", "value": 1.771},
+        {"month": "2026-05-30", "value": 1.786},
+        {"month": "2026-06-06", "value": 1.800},
+        {"month": "2026-06-13", "value": 1.812},
+        {"month": "2026-06-20", "value": 1.806},
+        {"month": "2026-06-27", "value": 1.821},
+        {"month": "2026-07-04", "value": 1.798},
+        {"month": "2026-07-11", "value": 1.789},
+        {"month": "2026-07-18", "value": 1.782}
+      ],
+      "history_provenance": {
+        "class": "alfred_vintage_fetch",
+        "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+        "vintage_column": "CCSA_20260731",
+        "fetched_at": "2026-07-31",
+        "note": "Fetched live at pack build; raw persons divided by 1,000,000 and rounded to 0.001."
+      }
+    },
+    {
+      "id": "T11",
+      "target": {
+        "dataPointId": "cms.medicaid_pi.beneficiaries_disenrolled_procedural.california.2026-06.first_print",
+        "unit": "count",
+        "resolutionDate": "2026-09-25",
+        "resolutionSource": "CMS Medicaid and CHIP Eligibility Operations and Enrollment Snapshot Data",
+        "resolutionSourceUrl": "https://data.medicaid.gov/medicaid-chip-eligibility-enrollment-snapshot-data",
+        "resolutionRule": "Resolve to the California state row for the June 2026 reporting month in CMS Medicaid and CHIP Eligibility Operations and Enrollment Snapshot Data, Eligibility Processing Data, original/preliminary first print, for beneficiaries disenrolled for a procedural or administrative reason. Use the first posted CMS monthly snapshot/Data.Medicaid.gov value only; do not revise to later quarterly updated renewal outcomes or later corrections. Unit is persons, as an official integer count.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "California Medicaid/CHIP beneficiaries disenrolled for procedural reasons at renewal, monthly reporting period (CMS eligibility processing data)",
+      "period_label": "June 2026 reporting period",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2026-02 procedural disenrollments (count)", "value": 197693},
+        {"month": "2026-02 total disenrollments (count)", "value": 213206},
+        {"month": "2025-05 procedural share of disenrollments (%)", "value": 62.9},
+        {"month": "2025-08 procedural share of disenrollments (%)", "value": 83.8},
+        {"month": "2025-11 procedural share of disenrollments (%)", "value": 89.7},
+        {"month": "2026-02 procedural share of disenrollments (%)", "value": 92.7}
+      ],
+      "history_thin": true,
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/benefits-delivery.ts",
+        "series_block": "ca-medicaid-procedural-disenrollment-share-aug-2026 cell (counts from its ledger.lookup tool results; shares from its historicalContext)",
+        "recorded_fetch_result": "procedural feb_2026 = 197693; total feb_2026 = 213206 (ledger source records cms.medicaid_pi.beneficiaries_disenrolled_{procedural,total}.california.feb_2026.original_submission)",
+        "as_of": "2026-06-10",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/benefits-delivery.ts",
+        "note": "Only one COUNT-level month (Feb 2026) exists in the repo; the share trajectory is quarterly. This history is thin and is flagged as such in FORWARD-REGISTRATION.md."
+      }
+    },
+    {
+      "id": "T12",
+      "target": {
+        "dataPointId": "cms.medicaid_pi.beneficiaries_disenrolled_total.california.2026-06.first_print",
+        "unit": "count",
+        "resolutionDate": "2026-09-25",
+        "resolutionSource": "CMS Medicaid and CHIP Eligibility Operations and Enrollment Snapshot / Data.Medicaid.gov Eligibility Processing Data",
+        "resolutionSourceUrl": "https://data.medicaid.gov/dataset/6165f45b-ca93-5bb5-9d06-db29c692a360",
+        "resolutionRule": "Resolve to the first official CMS preliminary/original print for the California state row in the Medicaid and CHIP Eligibility Processing Data for reporting period June 2026, field total beneficiaries/individuals disenrolled from Medicaid/CHIP coverage, in persons. Use the first posted value only; ignore later updated quarterly renewal-outcome revisions or corrections unless CMS replaces the first-print file before publication is complete on the release date.",
+        "resolutionPolicy": "first_print"
+      },
+      "series_desc": "California Medicaid/CHIP total beneficiaries disenrolled at renewal, monthly reporting period (CMS eligibility processing data)",
+      "period_label": "June 2026 reporting period",
+      "already_forecast_in_catalog": false,
+      "history": [
+        {"month": "2026-02 total disenrollments (count)", "value": 213206},
+        {"month": "2026-02 procedural disenrollments (count)", "value": 197693},
+        {"month": "2025-05 procedural share of disenrollments (%)", "value": 62.9},
+        {"month": "2025-08 procedural share of disenrollments (%)", "value": 83.8},
+        {"month": "2025-11 procedural share of disenrollments (%)", "value": 89.7},
+        {"month": "2026-02 procedural share of disenrollments (%)", "value": 92.7}
+      ],
+      "history_thin": true,
+      "history_provenance": {
+        "class": "repo_recorded_run",
+        "file": "site/src/data/forecast-examples/benefits-delivery.ts",
+        "series_block": "ca-medicaid-procedural-disenrollment-share-aug-2026 cell (counts from its ledger.lookup tool results; shares from its historicalContext)",
+        "recorded_fetch_result": "procedural feb_2026 = 197693; total feb_2026 = 213206 (ledger source records cms.medicaid_pi.beneficiaries_disenrolled_{procedural,total}.california.feb_2026.original_submission)",
+        "as_of": "2026-06-10",
+        "public_url": "https://github.com/ThesisInstitute/thesis/blob/main/site/src/data/forecast-examples/benefits-delivery.ts",
+        "note": "Only one COUNT-level month (Feb 2026) exists in the repo; the share trajectory is quarterly. This history is thin and is flagged as such in FORWARD-REGISTRATION.md."
+      }
+    }
+  ],
+  "dropped": [
+    {
+      "dataPointId": "ssa.ssi.total_recipients.2026-07.first_print",
+      "resolutionDate": "2026-08-31",
+      "reason": "No real in-repo history (the only ssa.ssi cells sit in forecast-cells.ts under its 'numbers are constructed to demonstrate' banner) and no clean FRED/ALFRED mapping for SSA SSI Monthly Statistics Table 2. Same reason drops ssa.ssi.recipients.colorado.2026-07.first_print and ssa.ssi.recipients.colorado.aged_65_plus.2026-07.first_print."
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.beneficiaries_renewed_ex_parte.california.2026-06.preliminary_first_print",
+      "resolutionDate": "2026-09-25",
+      "reason": "The repo records the ledger source-record ids for the Feb 2026 renewed counts but not their values; no count history is recoverable from repo data and there is no FRED/ALFRED mapping. Same reason drops cms.medicaid_pi.beneficiaries_renewed_total.california.2026-06.first_print."
+    },
+    {
+      "dataPointId": "co.hcpf.medicaid.total_caseload.2026-08.first_print",
+      "resolutionDate": "2026-09-15",
+      "reason": "No forecast-example cell carries this series (no 'hcpf' match anywhere in site/src/data) and no FRED/ALFRED mapping."
+    },
+    {
+      "dataPointId": "usda.fns.snap.maximum_allotment.household_size_4.48dc.fy2027",
+      "resolutionDate": "2026-09-30",
+      "reason": "Administrative Thrifty-Food-Plan COLA determination rather than a caseload series; no series history in repo forecast examples. Excluded as structurally unlike the program-flow targets rather than for eligibility."
+    }
+  ]
+}

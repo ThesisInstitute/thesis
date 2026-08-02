@@ -1,0 +1,12 @@
+# Large source texts are reproducible from govinfo and are not committed.
+# Re-fetch with:
+#   https://www.govinfo.gov/content/pkg/PLAW-<congress>publ<num>/html/PLAW-<congress>publ<num>.htm
+# The sliced, verbatim provisions actually used by the experiment ARE committed
+# (provisions.json, provisions_extra.json), together with their SHA-256 prefixes
+# in PREREGISTRATION.md, so the corpus stays auditable without the omnibus bulk.
+bills/*.raw.htm
+bills/CAA-2023-117publ328.txt
+bills/CAA-2021-116publ260.txt
+
+# Python bytecode
+__pycache__/

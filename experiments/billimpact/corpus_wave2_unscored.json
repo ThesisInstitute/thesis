@@ -1,0 +1,15 @@
+[
+  {
+    "unit_id": "aptc9661.us.unscored",
+    "policy_event": "PL117-2-arpa-s9661",
+    "state": "US",
+    "series_id": null,
+    "target_month": null,
+    "origin_vintage": "2021-02-15",
+    "history_through": null,
+    "months_back": null,
+    "classification": "dose_response_only",
+    "reason": "No FRED/ALFRED-mirrored, vintage-archived series exists for the natural indicator (CMS Health Insurance Marketplace effectuated enrollment). CMS publishes effectuated enrollment as point-in-time snapshot reports (fact sheets / state XLSX), which the house ALFRED first-print fetcher cannot resolve, so the unit fails the first-print bar and is classified dose-response-only (unscored) rather than dropped.",
+    "indicator_candidate": "CMS Health Insurance Marketplace effectuated enrollment (quarterly snapshot reports), https://www.cms.gov/data-research/statistics-trends-and-reports/marketplace-products/quarterly-marketplace-effectuated-enrollment-snapshots-state"
+  }
+]

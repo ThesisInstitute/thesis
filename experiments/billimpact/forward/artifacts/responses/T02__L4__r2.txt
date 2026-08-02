@@ -1,0 +1,8 @@
+```json
+{
+  "point": 37.6,
+  "ci_low": 36.8,
+  "ci_high": 38.5,
+  "rationale": "Recent trend shows steady decline from November 2025 (39.4M) to February 2026 (37.9M), averaging ~0.5M per month; projecting this linear decline 3 months forward to May 2026 yields approximately 37.6M, with uncertainty bands reflecting both trend continuation and possible stabilization or volatility."
+}
+```

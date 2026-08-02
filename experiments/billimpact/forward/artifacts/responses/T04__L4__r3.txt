@@ -1,0 +1,3 @@
+```json
+{"point": 37.400, "ci_low": 36.800, "ci_high": 38.100, "rationale": "SNAP participation shows a consistent declining trend of approximately 0.3 million persons per month from November 2025 through February 2026; extrapolating this linear trend forward 5 months to July 2026 yields a point estimate of 37.4 million, with uncertainty bounds reflecting both trend continuation variation and potential economic/policy shifts."}
+```

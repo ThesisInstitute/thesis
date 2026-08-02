@@ -1,0 +1,33 @@
+You are forecasting a US public-benefit program indicator. This is a FORWARD
+forecast: the target value had not been published anywhere when this prompt was
+built.
+
+TARGET
+  Series: US national monthly SNAP participation - average monthly persons (USDA FNS national data tables)
+  Values are in the same units as the history shown below, exactly as stated.
+  Target period: May 2026.
+
+RESOLUTION RULE (this rule defines exactly the number you are forecasting)
+Resolve to the first official USDA FNS SNAP data-table print for national monthly participation, table Persons, May 2026. Use the reported national Persons value in thousands and multiply by 0.001 to express millions. Do not use later revisions or same-day corrected files unless the first print itself is withdrawn before publication as an official file.
+
+WHAT YOU KNOW
+  The most recent published history available to this run is given below.
+  Nothing more recent was available to this run.
+
+HISTORY (period, value in millions)
+  2025-11  39.400
+  2025-12  38.800
+  2026-01  38.200
+  2026-02  37.900
+
+Decompose the forecast before you state it:
+1. BASELINE: what would the target month's value be with NO change in policy —
+   pure continuation of the history's trend and seasonality?
+2. POLICY DELTA: separately, what is the effect of the policy context supplied
+   (zero if none was supplied or if it has no mechanical effect on this series
+   by the target month)? State the mechanism in one clause.
+3. Your point forecast = baseline + delta. Give an 80% central credible
+   interval around it.
+
+Respond with ONLY a JSON object, no prose before or after:
+{"baseline_no_policy": <number>, "policy_delta": <number>, "point": <number>, "ci_low": <number>, "ci_high": <number>, "rationale": "<one sentence>"}

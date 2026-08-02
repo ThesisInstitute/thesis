@@ -1,0 +1,72 @@
+[
+  {
+    "unit_id": "ctcadv.us.2021-07",
+    "policy_event": "PL117-2-tIX-subG-pt2-s9611",
+    "state": "US",
+    "series_id": "W827RC1",
+    "target_month": "2021-07-01",
+    "origin_vintage": "2021-03-01",
+    "history_through": "2021-01-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "ctcadv.us.2021-12",
+    "policy_event": "PL117-2-tIX-subG-pt2-s9611",
+    "state": "US",
+    "series_id": "W827RC1",
+    "target_month": "2021-12-01",
+    "origin_vintage": "2021-03-01",
+    "history_through": "2021-01-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "iijahwy.us.2022-06",
+    "policy_event": "PL117-58-divJ-tVIII-fhwa-hip",
+    "state": "US",
+    "series_id": "PBHWYCONS",
+    "target_month": "2022-06-01",
+    "origin_vintage": "2021-11-01",
+    "history_through": "2021-09-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "iijahwy.us.2022-12",
+    "policy_event": "PL117-58-divJ-tVIII-fhwa-hip",
+    "state": "US",
+    "series_id": "PBHWYCONS",
+    "target_month": "2022-12-01",
+    "origin_vintage": "2021-11-01",
+    "history_through": "2021-09-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "acp.us.2022-06",
+    "policy_event": "PL117-58-divF-tV-s60502-acp",
+    "state": "US",
+    "series_id": null,
+    "target_month": "2022-06-01",
+    "origin_vintage": "2021-11-01",
+    "history_through": null,
+    "months_back": 0,
+    "regime": "dose_response_only",
+    "scoring_eligible": false,
+    "indicator": "USAC ACP Enrollment and Claims Tracker - total households enrolled, national (weekly snapshots 2022-01-03 through 2024-02-08)",
+    "indicator_source_url": "https://www.usac.org/about/affordable-connectivity-program/acp-enrollment-and-claims-tracker/",
+    "exclusion_reason": "No FRED/ALFRED mirror exists for ACP enrollment (searched 2026-07-31; FRED's Monthly Treasury Statement release carries 6 aggregate series only), and USAC republishes its tracker at a single current vintage with no archive of previously published versions, so the first-print recoverability test cannot be run. Unit serves dose-response arms (no scoring), not accuracy arms."
+  },
+  {
+    "unit_id": "acp.us.2022-12",
+    "policy_event": "PL117-58-divF-tV-s60502-acp",
+    "state": "US",
+    "series_id": null,
+    "target_month": "2022-12-01",
+    "origin_vintage": "2021-11-01",
+    "history_through": null,
+    "months_back": 0,
+    "regime": "dose_response_only",
+    "scoring_eligible": false,
+    "indicator": "USAC ACP Enrollment and Claims Tracker - total households enrolled, national (weekly snapshots 2022-01-03 through 2024-02-08)",
+    "indicator_source_url": "https://www.usac.org/about/affordable-connectivity-program/acp-enrollment-and-claims-tracker/",
+    "exclusion_reason": "No FRED/ALFRED mirror exists for ACP enrollment (searched 2026-07-31; FRED's Monthly Treasury Statement release carries 6 aggregate series only), and USAC republishes its tracker at a single current vintage with no archive of previously published versions, so the first-print recoverability test cannot be run. Unit serves dose-response arms (no scoring), not accuracy arms."
+  }
+]

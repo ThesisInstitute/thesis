@@ -1,0 +1,293 @@
+{
+ "rows": [
+  {
+   "arm": "fable bill effort=max",
+   "n_units": 28,
+   "n_runs": 140,
+   "mean_ncrps": 0.20786943037677275,
+   "median_ncrps": 0.15674388365372716,
+   "mean_winkler": 1.2951080244590896,
+   "cov80": 0.75,
+   "med_width_pct": 7.434949709706435,
+   "med_abserr_pct": 2.4543578894007814,
+   "per_event": {
+    "fpuc300": 0.12,
+    "medicaid": 0.282,
+    "ssfa": 0.193,
+    "vetcola": 0.167
+   }
+  },
+  {
+   "arm": "opus no-bill max [premortem]",
+   "n_units": 26,
+   "n_runs": 74,
+   "mean_ncrps": 0.2304376751976323,
+   "median_ncrps": 0.17770185217625742,
+   "mean_winkler": 1.4319334430896289,
+   "cov80": 0.8378378378378378,
+   "med_width_pct": 10.858287882806184,
+   "med_abserr_pct": 2.726419933949055,
+   "per_event": {
+    "fpuc300": 0.134,
+    "medicaid": 0.185,
+    "ssfa": 0.228,
+    "vetcola": 0.402
+   }
+  },
+  {
+   "arm": "opus no-bill max [reference_class]",
+   "n_units": 26,
+   "n_runs": 73,
+   "mean_ncrps": 0.23703831743531392,
+   "median_ncrps": 0.16695902115605563,
+   "mean_winkler": 1.475295431426216,
+   "cov80": 0.7397260273972602,
+   "med_width_pct": 9.412435824301198,
+   "med_abserr_pct": 2.4255788313120177,
+   "per_event": {
+    "fpuc300": 0.14,
+    "medicaid": 0.208,
+    "ssfa": 0.262,
+    "vetcola": 0.339
+   }
+  },
+  {
+   "arm": "opus no-bill max [plain]",
+   "n_units": 27,
+   "n_runs": 81,
+   "mean_ncrps": 0.24070623306807948,
+   "median_ncrps": 0.18762744254308722,
+   "mean_winkler": 1.4667472945044122,
+   "cov80": 0.8024691358024691,
+   "med_width_pct": 10.565424358527807,
+   "med_abserr_pct": 2.8127143837182738,
+   "per_event": {
+    "fpuc300": 0.136,
+    "medicaid": 0.19,
+    "ssfa": 0.241,
+    "vetcola": 0.395
+   }
+  },
+  {
+   "arm": "opus bill effort=max",
+   "n_units": 28,
+   "n_runs": 140,
+   "mean_ncrps": 0.2470239305984695,
+   "median_ncrps": 0.20631525146147173,
+   "mean_winkler": 1.4806516890749295,
+   "cov80": 0.7857142857142857,
+   "med_width_pct": 10.878944348823866,
+   "med_abserr_pct": 3.0123761846904107,
+   "per_event": {
+    "fpuc300": 0.132,
+    "medicaid": 0.203,
+    "ssfa": 0.274,
+    "vetcola": 0.349
+   }
+  },
+  {
+   "arm": "opus no-bill max [quantiles]",
+   "n_units": 26,
+   "n_runs": 76,
+   "mean_ncrps": 0.25256372424671086,
+   "median_ncrps": 0.16855848627633307,
+   "mean_winkler": 1.6209910076921,
+   "cov80": 0.6842105263157895,
+   "med_width_pct": 9.880916404234663,
+   "med_abserr_pct": 2.7243767810326953,
+   "per_event": {
+    "fpuc300": 0.124,
+    "medicaid": 0.18,
+    "ssfa": 0.281,
+    "vetcola": 0.461
+   }
+  },
+  {
+   "arm": "opus no-bill max [scenario_mixture]",
+   "n_units": 28,
+   "n_runs": 82,
+   "mean_ncrps": 0.25309643334939486,
+   "median_ncrps": 0.20921389460308837,
+   "mean_winkler": 1.4490683042469485,
+   "cov80": 0.8292682926829268,
+   "med_width_pct": 10.844713274493817,
+   "med_abserr_pct": 3.4173499722322016,
+   "per_event": {
+    "fpuc300": 0.182,
+    "medicaid": 0.235,
+    "ssfa": 0.244,
+    "vetcola": 0.33
+   }
+  },
+  {
+   "arm": "opus no-bill",
+   "n_units": 28,
+   "n_runs": 140,
+   "mean_ncrps": 0.2532637152441779,
+   "median_ncrps": 0.23408666930878247,
+   "mean_winkler": 1.6116144487472746,
+   "cov80": 0.8214285714285714,
+   "med_width_pct": 11.91101367154242,
+   "med_abserr_pct": 3.088111005991801,
+   "per_event": {
+    "fpuc300": 0.174,
+    "medicaid": 0.275,
+    "ssfa": 0.203,
+    "vetcola": 0.317
+   }
+  },
+  {
+   "arm": "opus bill",
+   "n_units": 28,
+   "n_runs": 140,
+   "mean_ncrps": 0.2606153855686057,
+   "median_ncrps": 0.2289384937919512,
+   "mean_winkler": 1.5880859047477711,
+   "cov80": 0.8285714285714286,
+   "med_width_pct": 12.16607730652033,
+   "med_abserr_pct": 3.4064878638397973,
+   "per_event": {
+    "fpuc300": 0.173,
+    "medicaid": 0.268,
+    "ssfa": 0.248,
+    "vetcola": 0.312
+   }
+  },
+  {
+   "arm": "opus bill decomposed",
+   "n_units": 28,
+   "n_runs": 140,
+   "mean_ncrps": 0.2611508315800973,
+   "median_ncrps": 0.22439298195679397,
+   "mean_winkler": 1.5484402220004116,
+   "cov80": 0.7214285714285714,
+   "med_width_pct": 9.721955473378827,
+   "med_abserr_pct": 3.5280538139028117,
+   "per_event": {
+    "fpuc300": 0.158,
+    "medicaid": 0.318,
+    "ssfa": 0.256,
+    "vetcola": 0.244
+   }
+  },
+  {
+   "arm": "opus no-bill max [persona_pool]",
+   "n_units": 27,
+   "n_runs": 81,
+   "mean_ncrps": 0.2670631550456838,
+   "median_ncrps": 0.23119517761538788,
+   "mean_winkler": 1.648393297563627,
+   "cov80": 0.8395061728395061,
+   "med_width_pct": 11.18760757314974,
+   "med_abserr_pct": 3.3199771036061887,
+   "per_event": {
+    "fpuc300": 0.229,
+    "medicaid": 0.325,
+    "ssfa": 0.222,
+    "vetcola": 0.248
+   }
+  },
+  {
+   "arm": "opus no-bill max [variance_auditor]",
+   "n_units": 27,
+   "n_runs": 75,
+   "mean_ncrps": 0.2709206481357403,
+   "median_ncrps": 0.22596551562767808,
+   "mean_winkler": 1.8297604248781318,
+   "cov80": 0.8933333333333333,
+   "med_width_pct": 14.66359976998275,
+   "med_abserr_pct": 2.241024468328381,
+   "per_event": {
+    "fpuc300": 0.178,
+    "medicaid": 0.228,
+    "ssfa": 0.238,
+    "vetcola": 0.443
+   }
+  },
+  {
+   "arm": "fable no-bill",
+   "n_units": 28,
+   "n_runs": 140,
+   "mean_ncrps": 0.2923115817559077,
+   "median_ncrps": 0.18136766742508192,
+   "mean_winkler": 1.8403746554782014,
+   "cov80": 0.6642857142857143,
+   "med_width_pct": 8.280520527953255,
+   "med_abserr_pct": 3.6328843247356732,
+   "per_event": {
+    "fpuc300": 0.184,
+    "medicaid": 0.485,
+    "ssfa": 0.253,
+    "vetcola": 0.118
+   }
+  },
+  {
+   "arm": "drift",
+   "n_units": 28,
+   "n_runs": 28,
+   "mean_ncrps": 0.32122302157714294,
+   "median_ncrps": 0.2611439851865753,
+   "mean_winkler": 2.800334578631507,
+   "cov80": 0.5714285714285714,
+   "med_width_pct": 6.931620224604604,
+   "med_abserr_pct": 3.3257969090562503,
+   "per_event": {
+    "fpuc300": 0.588,
+    "medicaid": 0.201,
+    "ssfa": 0.237,
+    "vetcola": 0.425
+   }
+  },
+  {
+   "arm": "persistence",
+   "n_units": 28,
+   "n_runs": 28,
+   "mean_ncrps": 0.32584717912414096,
+   "median_ncrps": 0.21957293501510386,
+   "mean_winkler": 2.199093540284081,
+   "cov80": 0.6428571428571429,
+   "med_width_pct": 6.931620224604604,
+   "med_abserr_pct": 8.793438652033954,
+   "per_event": {
+    "fpuc300": 0.649,
+    "medicaid": 0.395,
+    "ssfa": 0.211,
+    "vetcola": 0.157
+   }
+  },
+  {
+   "arm": "fable bill",
+   "n_units": 28,
+   "n_runs": 140,
+   "mean_ncrps": 0.33901737621565187,
+   "median_ncrps": 0.22655776466929844,
+   "mean_winkler": 2.050585110270647,
+   "cov80": 0.6142857142857143,
+   "med_width_pct": 9.216583745638001,
+   "med_abserr_pct": 4.613630716961302,
+   "per_event": {
+    "fpuc300": 0.173,
+    "medicaid": 0.595,
+    "ssfa": 0.278,
+    "vetcola": 0.13
+   }
+  },
+  {
+   "arm": "fable bill decomposed",
+   "n_units": 28,
+   "n_runs": 140,
+   "mean_ncrps": 0.3803618022190093,
+   "median_ncrps": 0.25121992211938576,
+   "mean_winkler": 2.656581885936675,
+   "cov80": 0.39285714285714285,
+   "med_width_pct": 7.469873233512731,
+   "med_abserr_pct": 4.075979422239807,
+   "per_event": {
+    "fpuc300": 0.304,
+    "medicaid": 0.668,
+    "ssfa": 0.264,
+    "vetcola": 0.129
+   }
+  }
+ ]
+}

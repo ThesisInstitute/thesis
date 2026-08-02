@@ -1,0 +1,818 @@
+{
+  "validator": "scripts/spawned_cells_to_ts.py:validate",
+  "ciMirror": "site/src/__tests__/trace-depth.test.ts",
+  "diagnosticOnlyRunAt": "2026-07-31T14:42:34Z",
+  "cells": 60,
+  "passing": 0,
+  "failureTally": {
+    "tool steps < 2": 60,
+    "resolutionDate not after runAt (leakage gate)": 60,
+    "math step does not show interval derivation (sigma = X or 1.28)": 60,
+    "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)": 60
+  },
+  "perCell": [
+    {
+      "slug": "billimpact-snap-ca-2023-12-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2024-03-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2023-12-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2024-03-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2023-12-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2024-03-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2023-12-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2024-03-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2023-12-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2024-03-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2023-12-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2024-03-none",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2023-12-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2024-03-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2023-12-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2024-03-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2023-12-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2024-03-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2023-12-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2024-03-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2023-12-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2024-03-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2023-12-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2024-03-summary",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2023-12-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2024-03-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2023-12-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2024-03-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2023-12-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2024-03-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2023-12-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2024-03-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2023-12-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2024-03-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2023-12-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2024-03-operative-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2023-12-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2024-03-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2023-12-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2024-03-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2023-12-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2024-03-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2023-12-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2024-03-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2023-12-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2024-03-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2023-12-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2024-03-purpose-only",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2023-12-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ca-2024-03-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2023-12-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-fl-2024-03-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2023-12-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-ny-2024-03-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2023-12-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-tx-2024-03-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2023-12-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-pa-2024-03-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2023-12-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    },
+    {
+      "slug": "billimpact-snap-oh-2024-03-operative-plus-purpose",
+      "strictErrors": [
+        "validator raised AttributeError: 'NoneType' object has no attribute 'replace' (runAt is null, and validate() assumes a string)"
+      ],
+      "diagnosticErrors": [
+        "only 0 tool steps (need >=2)",
+        "resolutionDate 2026-02-01 is not after runAt 2026-07-31 — target already published (leakage)",
+        "math step does not show interval derivation (sigma = X or 1.28)",
+        "no interval-falsification phrasing (CI regex — say what would land outside the 80% interval / upside risk / downside risk)"
+      ],
+      "passes": false
+    }
+  ],
+  "reference": {
+    "config": {
+      "elicitation": "point_ci_json",
+      "pipeline": "single_pass",
+      "model": "claude-sonnet-5",
+      "magnitude": "actual"
+    },
+    "policyContexts": [
+      "none",
+      "summary",
+      "operative_only",
+      "purpose_only",
+      "operative_plus_purpose"
+    ],
+    "units": 12,
+    "expectedCells": 60,
+    "emittedCells": 60,
+    "missingCombinations": [],
+    "runsFile": "experiments/billimpact/runs_api.reparsed.jsonl",
+    "runsFileSha256": "cae07f6545613b0f1b95ad3bea186420077ccb847ed6134076ddd473233efd6f",
+    "runsFileRows": 2520,
+    "runsMatchingReferenceConfig": 300
+  }
+}

@@ -1,0 +1,1 @@
+{"point": 37400000, "ci_low": 36500000, "ci_high": 38400000, "rationale": "Recent history shows a steady monthly decline (~0.3–0.6M/month) that is decelerating, so extrapolating two more months from February's 37.9M gives roughly 37.4M for April 2026, with uncertainty for policy or economic shifts."}

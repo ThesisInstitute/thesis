@@ -1,0 +1,1 @@
+{"baseline_no_policy": 37.300, "policy_delta": 0.0, "point": 37.300, "ci_low": 36.800, "ci_high": 37.800, "rationale": "Recent months show a consistent decline of roughly 0.3-0.6 million per month, so extrapolating this trend from Feb 2026 (37.9) to June 2026 yields approximately 37.3 million."}

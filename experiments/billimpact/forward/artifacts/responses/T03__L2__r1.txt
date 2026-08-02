@@ -1,0 +1,1 @@
+{"baseline_no_policy": 37.400, "policy_delta": 0.0, "point": 37.400, "ci_low": 36.900, "ci_high": 37.900, "rationale": "Extrapolating the recent monthly decline (~0.4-0.6M/month) from Feb 2026 forward to June 2026 with no additional policy shock assumed."}

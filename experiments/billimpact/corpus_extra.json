@@ -1,0 +1,82 @@
+[
+  {
+    "unit_id": "vetcola.us.2023-12",
+    "policy_event": "PL118-6-vetcola-2023",
+    "state": "US",
+    "series_id": "W826RC1",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-04-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "vetcola.us.2024-03",
+    "policy_event": "PL118-6-vetcola-2023",
+    "state": "US",
+    "series_id": "W826RC1",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-04-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "ssfa.us.2025-03",
+    "policy_event": "PL118-273-ssfa-2023",
+    "state": "US",
+    "series_id": "W823RC1",
+    "target_month": "2025-03-01",
+    "origin_vintage": "2024-12-15",
+    "history_through": "2024-10-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "ssfa.us.2025-06",
+    "policy_event": "PL118-273-ssfa-2023",
+    "state": "US",
+    "series_id": "W823RC1",
+    "target_month": "2025-06-01",
+    "origin_vintage": "2024-12-15",
+    "history_through": "2024-10-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "fpuc300.us.2021-01",
+    "policy_event": "PL116-260-divN-tII-ch1-s203",
+    "state": "US",
+    "series_id": "W825RC1",
+    "target_month": "2021-01-01",
+    "origin_vintage": "2020-12-15",
+    "history_through": "2020-10-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "fpuc300.us.2021-03",
+    "policy_event": "PL116-260-divN-tII-ch1-s203",
+    "state": "US",
+    "series_id": "W825RC1",
+    "target_month": "2021-03-01",
+    "origin_vintage": "2020-12-15",
+    "history_through": "2020-10-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "medicaid.us.2023-06",
+    "policy_event": "PL117-328-divFF-tV-s5131",
+    "state": "US",
+    "series_id": "W729RC1",
+    "target_month": "2023-06-01",
+    "origin_vintage": "2022-12-15",
+    "history_through": "2022-10-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "medicaid.us.2023-12",
+    "policy_event": "PL117-328-divFF-tV-s5131",
+    "state": "US",
+    "series_id": "W729RC1",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2022-12-15",
+    "history_through": "2022-10-01",
+    "months_back": 60
+  }
+]

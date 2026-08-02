@@ -1,0 +1,27 @@
+You are forecasting a US public-benefit program indicator. This is a FORWARD
+forecast: the target value had not been published anywhere when this prompt was
+built.
+
+TARGET
+  Series: US national monthly WIC total participants (USDA FNS WIC program data)
+  Values are in the same units as the history shown below, exactly as stated.
+  Target period: May 2026.
+
+RESOLUTION RULE (this rule defines exactly the number you are forecasting)
+Resolve to the national WIC Total Participants value for May 2026 in the first official USDA FNS WIC monthly program-data posting or latest-month table that first includes May 2026. The expected displayed FNS monthly table value is a whole participant count, as in 6,894,610 for May 2025; convert that displayed person count to millions by dividing by 1,000,000 and round to 0.001 million for the cell. If the ledger adapter instead extracts an intermediate value expressed in thousands of participants, its listed factor 0.001 produces the same final unit of millions. Use the first posted May 2026 value only; ignore later preliminary/final revisions or annual-summary revisions.
+
+WHAT YOU KNOW
+  The most recent published history available to this run is given below.
+  Nothing more recent was available to this run.
+
+HISTORY (period, value in millions)
+  2025-11  6.780
+  2025-12  6.700
+  2026-01  6.660
+  2026-02  6.640
+
+Give your forecast for the target month.
+
+Respond with ONLY a JSON object, no prose before or after:
+{"point": <number of persons>, "ci_low": <number>, "ci_high": <number>, "rationale": "<one sentence>"}
+where [ci_low, ci_high] is your 80% central credible interval.

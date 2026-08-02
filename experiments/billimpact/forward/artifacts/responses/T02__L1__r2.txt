@@ -1,0 +1,1 @@
+{"point": 37.4, "ci_low": 36.7, "ci_high": 38.1, "rationale": "Extrapolating the recent steady monthly decline (~0.4-0.6M) from Nov 2025-Feb 2026 trend forward to May 2026."}

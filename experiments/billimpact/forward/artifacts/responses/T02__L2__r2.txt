@@ -1,0 +1,1 @@
+{"baseline_no_policy": 37.0, "policy_delta": 0, "point": 37.0, "ci_low": 36.3, "ci_high": 37.7, "rationale": "Continuing the steady ~0.4-0.6M monthly decline seen Nov25-Feb26 through Mar-Apr-May 2026 yields roughly 37.0M with no additional policy shock assumed."}

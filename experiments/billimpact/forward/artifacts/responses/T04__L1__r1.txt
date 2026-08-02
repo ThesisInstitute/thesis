@@ -1,0 +1,1 @@
+{"point": 37.300, "ci_low": 36.400, "ci_high": 38.200, "rationale": "Continuing the observed declining trend (~0.3-0.6M/month) from late 2025 into early 2026, extrapolated forward to July 2026 with seasonal moderation of the decline rate."}

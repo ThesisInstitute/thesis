@@ -1,0 +1,1 @@
+{"point": 6580000, "ci_low": 6480000, "ci_high": 6680000, "rationale": "Extrapolating the recent steady monthly decline (~0.02-0.04M/month) from Feb 2026 through May 2026 suggests continued gradual decrease in total WIC participants."}

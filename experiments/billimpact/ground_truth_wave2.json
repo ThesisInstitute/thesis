@@ -1,0 +1,1123 @@
+[
+  {
+    "unit_id": "tariff301.us.2018-10",
+    "policy_event": "USTR-2018-s301-china",
+    "state": "US",
+    "series_id": "B235RC1Q027SBEA",
+    "target_month": "2018-10-01",
+    "origin_vintage": "2018-09-22",
+    "history_through": "2018-04-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "B235RC1Q027SBEA",
+      "observation_month": "2018-10-01",
+      "first_print_value": 72.387,
+      "first_print_vintage": "2019-03-01",
+      "latest_value": 71.898,
+      "revision": -0.489,
+      "vintage_trail": [
+        {
+          "vintage": "2018-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2018-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2019-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2019-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2019-03-01",
+          "present": true,
+          "value": 72.387
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T16:18:29Z"
+    },
+    "history": [
+      {
+        "month": "2003-07-01",
+        "value": 21.461
+      },
+      {
+        "month": "2003-10-01",
+        "value": 21.404
+      },
+      {
+        "month": "2004-01-01",
+        "value": 22.432
+      },
+      {
+        "month": "2004-04-01",
+        "value": 23.001
+      },
+      {
+        "month": "2004-07-01",
+        "value": 23.511
+      },
+      {
+        "month": "2004-10-01",
+        "value": 24.188
+      },
+      {
+        "month": "2005-01-01",
+        "value": 25.045
+      },
+      {
+        "month": "2005-04-01",
+        "value": 25.355
+      },
+      {
+        "month": "2005-07-01",
+        "value": 25.544
+      },
+      {
+        "month": "2005-10-01",
+        "value": 25.397
+      },
+      {
+        "month": "2006-01-01",
+        "value": 25.928
+      },
+      {
+        "month": "2006-04-01",
+        "value": 27.157
+      },
+      {
+        "month": "2006-07-01",
+        "value": 27.811
+      },
+      {
+        "month": "2006-10-01",
+        "value": 25.852
+      },
+      {
+        "month": "2007-01-01",
+        "value": 28.43
+      },
+      {
+        "month": "2007-04-01",
+        "value": 28.229
+      },
+      {
+        "month": "2007-07-01",
+        "value": 28.982
+      },
+      {
+        "month": "2007-10-01",
+        "value": 29.531
+      },
+      {
+        "month": "2008-01-01",
+        "value": 29.494
+      },
+      {
+        "month": "2008-04-01",
+        "value": 29.77
+      },
+      {
+        "month": "2008-07-01",
+        "value": 29.272
+      },
+      {
+        "month": "2008-10-01",
+        "value": 28.436
+      },
+      {
+        "month": "2009-01-01",
+        "value": 24.353
+      },
+      {
+        "month": "2009-04-01",
+        "value": 22.336
+      },
+      {
+        "month": "2009-07-01",
+        "value": 21.326
+      },
+      {
+        "month": "2009-10-01",
+        "value": 24.309
+      },
+      {
+        "month": "2010-01-01",
+        "value": 26.217
+      },
+      {
+        "month": "2010-04-01",
+        "value": 27.856
+      },
+      {
+        "month": "2010-07-01",
+        "value": 30.031
+      },
+      {
+        "month": "2010-10-01",
+        "value": 30.308
+      },
+      {
+        "month": "2011-01-01",
+        "value": 30.695
+      },
+      {
+        "month": "2011-04-01",
+        "value": 32.177
+      },
+      {
+        "month": "2011-07-01",
+        "value": 32.883
+      },
+      {
+        "month": "2011-10-01",
+        "value": 31.809
+      },
+      {
+        "month": "2012-01-01",
+        "value": 32.019
+      },
+      {
+        "month": "2012-04-01",
+        "value": 33.98
+      },
+      {
+        "month": "2012-07-01",
+        "value": 34.134
+      },
+      {
+        "month": "2012-10-01",
+        "value": 33.88
+      },
+      {
+        "month": "2013-01-01",
+        "value": 35.081
+      },
+      {
+        "month": "2013-04-01",
+        "value": 34.533
+      },
+      {
+        "month": "2013-07-01",
+        "value": 35.187
+      },
+      {
+        "month": "2013-10-01",
+        "value": 37.071
+      },
+      {
+        "month": "2014-01-01",
+        "value": 36.524
+      },
+      {
+        "month": "2014-04-01",
+        "value": 36.726
+      },
+      {
+        "month": "2014-07-01",
+        "value": 37.487
+      },
+      {
+        "month": "2014-10-01",
+        "value": 38.803
+      },
+      {
+        "month": "2015-01-01",
+        "value": 37.48
+      },
+      {
+        "month": "2015-04-01",
+        "value": 40.767
+      },
+      {
+        "month": "2015-07-01",
+        "value": 35.67
+      },
+      {
+        "month": "2015-10-01",
+        "value": 38.666
+      },
+      {
+        "month": "2016-01-01",
+        "value": 38.667
+      },
+      {
+        "month": "2016-04-01",
+        "value": 36.923
+      },
+      {
+        "month": "2016-07-01",
+        "value": 37.494
+      },
+      {
+        "month": "2016-10-01",
+        "value": 37.148
+      },
+      {
+        "month": "2017-01-01",
+        "value": 37.417
+      },
+      {
+        "month": "2017-04-01",
+        "value": 38.334
+      },
+      {
+        "month": "2017-07-01",
+        "value": 38.428
+      },
+      {
+        "month": "2017-10-01",
+        "value": 39.977
+      },
+      {
+        "month": "2018-01-01",
+        "value": 41.266
+      },
+      {
+        "month": "2018-04-01",
+        "value": 44.634
+      }
+    ]
+  },
+  {
+    "unit_id": "tariff301.us.2019-04",
+    "policy_event": "USTR-2018-s301-china",
+    "state": "US",
+    "series_id": "B235RC1Q027SBEA",
+    "target_month": "2019-04-01",
+    "origin_vintage": "2018-09-22",
+    "history_through": "2018-04-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "B235RC1Q027SBEA",
+      "observation_month": "2019-04-01",
+      "first_print_value": 71.536,
+      "first_print_vintage": "2019-08-01",
+      "latest_value": 70.03,
+      "revision": -1.506,
+      "vintage_trail": [
+        {
+          "vintage": "2019-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2019-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2019-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2019-08-01",
+          "present": true,
+          "value": 71.536
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T16:18:28Z"
+    },
+    "history": [
+      {
+        "month": "2003-07-01",
+        "value": 21.461
+      },
+      {
+        "month": "2003-10-01",
+        "value": 21.404
+      },
+      {
+        "month": "2004-01-01",
+        "value": 22.432
+      },
+      {
+        "month": "2004-04-01",
+        "value": 23.001
+      },
+      {
+        "month": "2004-07-01",
+        "value": 23.511
+      },
+      {
+        "month": "2004-10-01",
+        "value": 24.188
+      },
+      {
+        "month": "2005-01-01",
+        "value": 25.045
+      },
+      {
+        "month": "2005-04-01",
+        "value": 25.355
+      },
+      {
+        "month": "2005-07-01",
+        "value": 25.544
+      },
+      {
+        "month": "2005-10-01",
+        "value": 25.397
+      },
+      {
+        "month": "2006-01-01",
+        "value": 25.928
+      },
+      {
+        "month": "2006-04-01",
+        "value": 27.157
+      },
+      {
+        "month": "2006-07-01",
+        "value": 27.811
+      },
+      {
+        "month": "2006-10-01",
+        "value": 25.852
+      },
+      {
+        "month": "2007-01-01",
+        "value": 28.43
+      },
+      {
+        "month": "2007-04-01",
+        "value": 28.229
+      },
+      {
+        "month": "2007-07-01",
+        "value": 28.982
+      },
+      {
+        "month": "2007-10-01",
+        "value": 29.531
+      },
+      {
+        "month": "2008-01-01",
+        "value": 29.494
+      },
+      {
+        "month": "2008-04-01",
+        "value": 29.77
+      },
+      {
+        "month": "2008-07-01",
+        "value": 29.272
+      },
+      {
+        "month": "2008-10-01",
+        "value": 28.436
+      },
+      {
+        "month": "2009-01-01",
+        "value": 24.353
+      },
+      {
+        "month": "2009-04-01",
+        "value": 22.336
+      },
+      {
+        "month": "2009-07-01",
+        "value": 21.326
+      },
+      {
+        "month": "2009-10-01",
+        "value": 24.309
+      },
+      {
+        "month": "2010-01-01",
+        "value": 26.217
+      },
+      {
+        "month": "2010-04-01",
+        "value": 27.856
+      },
+      {
+        "month": "2010-07-01",
+        "value": 30.031
+      },
+      {
+        "month": "2010-10-01",
+        "value": 30.308
+      },
+      {
+        "month": "2011-01-01",
+        "value": 30.695
+      },
+      {
+        "month": "2011-04-01",
+        "value": 32.177
+      },
+      {
+        "month": "2011-07-01",
+        "value": 32.883
+      },
+      {
+        "month": "2011-10-01",
+        "value": 31.809
+      },
+      {
+        "month": "2012-01-01",
+        "value": 32.019
+      },
+      {
+        "month": "2012-04-01",
+        "value": 33.98
+      },
+      {
+        "month": "2012-07-01",
+        "value": 34.134
+      },
+      {
+        "month": "2012-10-01",
+        "value": 33.88
+      },
+      {
+        "month": "2013-01-01",
+        "value": 35.081
+      },
+      {
+        "month": "2013-04-01",
+        "value": 34.533
+      },
+      {
+        "month": "2013-07-01",
+        "value": 35.187
+      },
+      {
+        "month": "2013-10-01",
+        "value": 37.071
+      },
+      {
+        "month": "2014-01-01",
+        "value": 36.524
+      },
+      {
+        "month": "2014-04-01",
+        "value": 36.726
+      },
+      {
+        "month": "2014-07-01",
+        "value": 37.487
+      },
+      {
+        "month": "2014-10-01",
+        "value": 38.803
+      },
+      {
+        "month": "2015-01-01",
+        "value": 37.48
+      },
+      {
+        "month": "2015-04-01",
+        "value": 40.767
+      },
+      {
+        "month": "2015-07-01",
+        "value": 35.67
+      },
+      {
+        "month": "2015-10-01",
+        "value": 38.666
+      },
+      {
+        "month": "2016-01-01",
+        "value": 38.667
+      },
+      {
+        "month": "2016-04-01",
+        "value": 36.923
+      },
+      {
+        "month": "2016-07-01",
+        "value": 37.494
+      },
+      {
+        "month": "2016-10-01",
+        "value": 37.148
+      },
+      {
+        "month": "2017-01-01",
+        "value": 37.417
+      },
+      {
+        "month": "2017-04-01",
+        "value": 38.334
+      },
+      {
+        "month": "2017-07-01",
+        "value": 38.428
+      },
+      {
+        "month": "2017-10-01",
+        "value": 39.977
+      },
+      {
+        "month": "2018-01-01",
+        "value": 41.266
+      },
+      {
+        "month": "2018-04-01",
+        "value": 44.634
+      }
+    ]
+  },
+  {
+    "unit_id": "loanrestart.us.2023-09",
+    "policy_event": "PL118-5-fra-s271",
+    "state": "US",
+    "series_id": "B069RC1",
+    "target_month": "2023-09-01",
+    "origin_vintage": "2023-05-25",
+    "history_through": "2023-03-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "B069RC1",
+      "observation_month": "2023-09-01",
+      "first_print_value": 539.6,
+      "first_print_vintage": "2023-11-01",
+      "latest_value": 561.9,
+      "revision": 22.3,
+      "vintage_trail": [
+        {
+          "vintage": "2023-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2023-11-01",
+          "present": true,
+          "value": 539.6
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T16:18:27Z"
+    },
+    "history": [
+      {
+        "month": "2018-04-01",
+        "value": 311.3
+      },
+      {
+        "month": "2018-05-01",
+        "value": 314.8
+      },
+      {
+        "month": "2018-06-01",
+        "value": 319.4
+      },
+      {
+        "month": "2018-07-01",
+        "value": 324.9
+      },
+      {
+        "month": "2018-08-01",
+        "value": 328.1
+      },
+      {
+        "month": "2018-09-01",
+        "value": 329.1
+      },
+      {
+        "month": "2018-10-01",
+        "value": 328.9
+      },
+      {
+        "month": "2018-11-01",
+        "value": 329.2
+      },
+      {
+        "month": "2018-12-01",
+        "value": 330.1
+      },
+      {
+        "month": "2019-01-01",
+        "value": 328.4
+      },
+      {
+        "month": "2019-02-01",
+        "value": 328.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 329.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 332.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 336.6
+      },
+      {
+        "month": "2019-06-01",
+        "value": 342.9
+      },
+      {
+        "month": "2019-07-01",
+        "value": 346.8
+      },
+      {
+        "month": "2019-08-01",
+        "value": 347.8
+      },
+      {
+        "month": "2019-09-01",
+        "value": 345.9
+      },
+      {
+        "month": "2019-10-01",
+        "value": 344.8
+      },
+      {
+        "month": "2019-11-01",
+        "value": 345.1
+      },
+      {
+        "month": "2019-12-01",
+        "value": 346.8
+      },
+      {
+        "month": "2020-01-01",
+        "value": 346.1
+      },
+      {
+        "month": "2020-02-01",
+        "value": 344.6
+      },
+      {
+        "month": "2020-03-01",
+        "value": 321.6
+      },
+      {
+        "month": "2020-04-01",
+        "value": 290.3
+      },
+      {
+        "month": "2020-05-01",
+        "value": 273.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 255.8
+      },
+      {
+        "month": "2020-07-01",
+        "value": 264.5
+      },
+      {
+        "month": "2020-08-01",
+        "value": 272.6
+      },
+      {
+        "month": "2020-09-01",
+        "value": 280.3
+      },
+      {
+        "month": "2020-10-01",
+        "value": 266.3
+      },
+      {
+        "month": "2020-11-01",
+        "value": 253.7
+      },
+      {
+        "month": "2020-12-01",
+        "value": 242.2
+      },
+      {
+        "month": "2021-01-01",
+        "value": 250.2
+      },
+      {
+        "month": "2021-02-01",
+        "value": 258.2
+      },
+      {
+        "month": "2021-03-01",
+        "value": 266.4
+      },
+      {
+        "month": "2021-04-01",
+        "value": 271.4
+      },
+      {
+        "month": "2021-05-01",
+        "value": 275.7
+      },
+      {
+        "month": "2021-06-01",
+        "value": 279.4
+      },
+      {
+        "month": "2021-07-01",
+        "value": 280.1
+      },
+      {
+        "month": "2021-08-01",
+        "value": 281.1
+      },
+      {
+        "month": "2021-09-01",
+        "value": 282.3
+      },
+      {
+        "month": "2021-10-01",
+        "value": 282.7
+      },
+      {
+        "month": "2021-11-01",
+        "value": 282.9
+      },
+      {
+        "month": "2021-12-01",
+        "value": 282.7
+      },
+      {
+        "month": "2022-01-01",
+        "value": 288.1
+      },
+      {
+        "month": "2022-02-01",
+        "value": 293.5
+      },
+      {
+        "month": "2022-03-01",
+        "value": 298.8
+      },
+      {
+        "month": "2022-04-01",
+        "value": 306.0
+      },
+      {
+        "month": "2022-05-01",
+        "value": 313.1
+      },
+      {
+        "month": "2022-06-01",
+        "value": 320.2
+      },
+      {
+        "month": "2022-07-01",
+        "value": 338.7
+      },
+      {
+        "month": "2022-08-01",
+        "value": 357.1
+      },
+      {
+        "month": "2022-09-01",
+        "value": 375.6
+      },
+      {
+        "month": "2022-10-01",
+        "value": 389.1
+      },
+      {
+        "month": "2022-11-01",
+        "value": 402.6
+      },
+      {
+        "month": "2022-12-01",
+        "value": 416.1
+      },
+      {
+        "month": "2023-01-01",
+        "value": 429.1
+      },
+      {
+        "month": "2023-02-01",
+        "value": 442.1
+      },
+      {
+        "month": "2023-03-01",
+        "value": 455.1
+      }
+    ]
+  },
+  {
+    "unit_id": "loanrestart.us.2023-12",
+    "policy_event": "PL118-5-fra-s271",
+    "state": "US",
+    "series_id": "B069RC1",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-05-25",
+    "history_through": "2023-03-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "B069RC1",
+      "observation_month": "2023-12-01",
+      "first_print_value": 564.2,
+      "first_print_vintage": "2024-02-01",
+      "latest_value": 519.1,
+      "revision": -45.1,
+      "vintage_trail": [
+        {
+          "vintage": "2024-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-02-01",
+          "present": true,
+          "value": 564.2
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T16:18:27Z"
+    },
+    "history": [
+      {
+        "month": "2018-04-01",
+        "value": 311.3
+      },
+      {
+        "month": "2018-05-01",
+        "value": 314.8
+      },
+      {
+        "month": "2018-06-01",
+        "value": 319.4
+      },
+      {
+        "month": "2018-07-01",
+        "value": 324.9
+      },
+      {
+        "month": "2018-08-01",
+        "value": 328.1
+      },
+      {
+        "month": "2018-09-01",
+        "value": 329.1
+      },
+      {
+        "month": "2018-10-01",
+        "value": 328.9
+      },
+      {
+        "month": "2018-11-01",
+        "value": 329.2
+      },
+      {
+        "month": "2018-12-01",
+        "value": 330.1
+      },
+      {
+        "month": "2019-01-01",
+        "value": 328.4
+      },
+      {
+        "month": "2019-02-01",
+        "value": 328.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 329.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 332.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 336.6
+      },
+      {
+        "month": "2019-06-01",
+        "value": 342.9
+      },
+      {
+        "month": "2019-07-01",
+        "value": 346.8
+      },
+      {
+        "month": "2019-08-01",
+        "value": 347.8
+      },
+      {
+        "month": "2019-09-01",
+        "value": 345.9
+      },
+      {
+        "month": "2019-10-01",
+        "value": 344.8
+      },
+      {
+        "month": "2019-11-01",
+        "value": 345.1
+      },
+      {
+        "month": "2019-12-01",
+        "value": 346.8
+      },
+      {
+        "month": "2020-01-01",
+        "value": 346.1
+      },
+      {
+        "month": "2020-02-01",
+        "value": 344.6
+      },
+      {
+        "month": "2020-03-01",
+        "value": 321.6
+      },
+      {
+        "month": "2020-04-01",
+        "value": 290.3
+      },
+      {
+        "month": "2020-05-01",
+        "value": 273.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 255.8
+      },
+      {
+        "month": "2020-07-01",
+        "value": 264.5
+      },
+      {
+        "month": "2020-08-01",
+        "value": 272.6
+      },
+      {
+        "month": "2020-09-01",
+        "value": 280.3
+      },
+      {
+        "month": "2020-10-01",
+        "value": 266.3
+      },
+      {
+        "month": "2020-11-01",
+        "value": 253.7
+      },
+      {
+        "month": "2020-12-01",
+        "value": 242.2
+      },
+      {
+        "month": "2021-01-01",
+        "value": 250.2
+      },
+      {
+        "month": "2021-02-01",
+        "value": 258.2
+      },
+      {
+        "month": "2021-03-01",
+        "value": 266.4
+      },
+      {
+        "month": "2021-04-01",
+        "value": 271.4
+      },
+      {
+        "month": "2021-05-01",
+        "value": 275.7
+      },
+      {
+        "month": "2021-06-01",
+        "value": 279.4
+      },
+      {
+        "month": "2021-07-01",
+        "value": 280.1
+      },
+      {
+        "month": "2021-08-01",
+        "value": 281.1
+      },
+      {
+        "month": "2021-09-01",
+        "value": 282.3
+      },
+      {
+        "month": "2021-10-01",
+        "value": 282.7
+      },
+      {
+        "month": "2021-11-01",
+        "value": 282.9
+      },
+      {
+        "month": "2021-12-01",
+        "value": 282.7
+      },
+      {
+        "month": "2022-01-01",
+        "value": 288.1
+      },
+      {
+        "month": "2022-02-01",
+        "value": 293.5
+      },
+      {
+        "month": "2022-03-01",
+        "value": 298.8
+      },
+      {
+        "month": "2022-04-01",
+        "value": 306.0
+      },
+      {
+        "month": "2022-05-01",
+        "value": 313.1
+      },
+      {
+        "month": "2022-06-01",
+        "value": 320.2
+      },
+      {
+        "month": "2022-07-01",
+        "value": 338.7
+      },
+      {
+        "month": "2022-08-01",
+        "value": 357.1
+      },
+      {
+        "month": "2022-09-01",
+        "value": 375.6
+      },
+      {
+        "month": "2022-10-01",
+        "value": 389.1
+      },
+      {
+        "month": "2022-11-01",
+        "value": 402.6
+      },
+      {
+        "month": "2022-12-01",
+        "value": 416.1
+      },
+      {
+        "month": "2023-01-01",
+        "value": 429.1
+      },
+      {
+        "month": "2023-02-01",
+        "value": 442.1
+      },
+      {
+        "month": "2023-03-01",
+        "value": 455.1
+      }
+    ]
+  }
+]

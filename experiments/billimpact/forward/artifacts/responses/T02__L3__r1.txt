@@ -1,0 +1,1 @@
+{"point": 37.1, "ci_low": 36.2, "ci_high": 38.1, "rationale": "The series shows a steady decline (~0.3–0.6M/month, decelerating), so extrapolating a ~0.25–0.3M monthly decrease from February's 37.9M gives roughly 37.1M by May 2026, with uncertainty for policy changes or trend reversal."}

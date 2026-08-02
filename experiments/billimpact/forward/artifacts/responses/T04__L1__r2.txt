@@ -1,0 +1,1 @@
+{"point": 37.300, "ci_low": 36.400, "ci_high": 38.200, "rationale": "Continuing the observed downward trend of roughly 0.3-0.6 million per month with some seasonal moderation expected by mid-2026."}

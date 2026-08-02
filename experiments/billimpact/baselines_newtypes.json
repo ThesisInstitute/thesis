@@ -1,0 +1,194 @@
+[
+  {
+    "unit_id": "ctcadv.us.2021-07",
+    "truth": 907.1,
+    "horizon_months": 6,
+    "persistence": {
+      "point": 2336.9,
+      "ci_low": 2327.53,
+      "ci_high": 2567.4500000000003,
+      "crps": 1448.7329060485913,
+      "pit": 0.0,
+      "covered80": 0.0,
+      "abs_error": 1429.8000000000002
+    },
+    "drift": {
+      "point": 2526.5508474576272,
+      "ci_low": 2517.1808474576274,
+      "ci_high": 2757.1008474576274,
+      "crps": 1638.3837535085913,
+      "pit": 0.0,
+      "covered80": 0.0,
+      "abs_error": 1619.4508474576273
+    },
+    "corpus": "NT"
+  },
+  {
+    "unit_id": "ctcadv.us.2021-12",
+    "truth": 916.6,
+    "horizon_months": 11,
+    "persistence": {
+      "point": 2336.9,
+      "ci_low": 2336.02,
+      "ci_high": 2605.62,
+      "crps": 1448.8821122441102,
+      "pit": 0.0,
+      "covered80": 0.0,
+      "abs_error": 1420.3000000000002
+    },
+    "drift": {
+      "point": 2684.593220338983,
+      "ci_low": 2683.713220338983,
+      "ci_high": 2953.313220338983,
+      "crps": 1796.5753325841101,
+      "pit": 0.0,
+      "covered80": 0.0,
+      "abs_error": 1767.993220338983
+    },
+    "corpus": "NT"
+  },
+  {
+    "unit_id": "iijahwy.us.2022-06",
+    "truth": 97403.0,
+    "horizon_months": 9,
+    "persistence": {
+      "point": 99806.0,
+      "ci_low": 94722.0,
+      "ci_high": 107468.0,
+      "crps": 1835.2286217200635,
+      "pit": 0.3109362706534512,
+      "covered80": 1.0,
+      "abs_error": 2403.0
+    },
+    "drift": {
+      "point": 100104.37288135593,
+      "ci_low": 95020.37288135593,
+      "ci_high": 107766.37288135593,
+      "crps": 1955.056036595815,
+      "pit": 0.28746082758455493,
+      "covered80": 1.0,
+      "abs_error": 2701.3728813559283
+    },
+    "corpus": "NT"
+  },
+  {
+    "unit_id": "iijahwy.us.2022-12",
+    "truth": 117290.0,
+    "horizon_months": 15,
+    "persistence": {
+      "point": 99806.0,
+      "ci_low": 91351.8,
+      "ci_high": 112567.2,
+      "crps": 11297.258430670647,
+      "pit": 0.9246727058062856,
+      "covered80": 0.0,
+      "abs_error": 17484.0
+    },
+    "drift": {
+      "point": 100303.28813559322,
+      "ci_low": 91849.08813559322,
+      "ci_high": 113064.48813559322,
+      "crps": 10876.180947661287,
+      "pit": 0.92207478849437,
+      "covered80": 0.0,
+      "abs_error": 16986.71186440678
+    },
+    "corpus": "NT"
+  },
+  {
+    "unit_id": "tariff301.us.2018-10",
+    "truth": 72.387,
+    "horizon_months": 6,
+    "persistence": {
+      "point": 44.634,
+      "ci_low": 41.9315,
+      "ci_high": 49.8896,
+      "crps": 24.67331854658377,
+      "pit": 1.0,
+      "covered80": 0.0,
+      "abs_error": 27.753
+    },
+    "drift": {
+      "point": 46.99057627118644,
+      "ci_low": 44.28807627118644,
+      "ci_high": 52.24617627118644,
+      "crps": 22.31674227538377,
+      "pit": 1.0,
+      "covered80": 0.0,
+      "abs_error": 25.39642372881356
+    },
+    "corpus": "NT"
+  },
+  {
+    "unit_id": "tariff301.us.2019-04",
+    "truth": 71.536,
+    "horizon_months": 12,
+    "persistence": {
+      "point": 44.634,
+      "ci_low": 43.910000000000004,
+      "ci_high": 51.8296,
+      "crps": 22.36276658612535,
+      "pit": 1.0,
+      "covered80": 0.0,
+      "abs_error": 26.902
+    },
+    "drift": {
+      "point": 49.34715254237288,
+      "ci_low": 48.623152542372885,
+      "ci_high": 56.54275254237288,
+      "crps": 17.649614043725343,
+      "pit": 1.0,
+      "covered80": 0.0,
+      "abs_error": 22.18884745762712
+    },
+    "corpus": "NT"
+  },
+  {
+    "unit_id": "loanrestart.us.2023-09",
+    "truth": 539.6,
+    "horizon_months": 6,
+    "persistence": {
+      "point": 455.1,
+      "ci_low": 418.90000000000003,
+      "ci_high": 533.7900000000001,
+      "crps": 48.597998811398924,
+      "pit": 0.904922268818617,
+      "covered80": 0.0,
+      "abs_error": 84.5
+    },
+    "drift": {
+      "point": 469.7237288135593,
+      "ci_low": 433.52372881355933,
+      "ci_high": 548.4137288135594,
+      "crps": 37.266636674591645,
+      "pit": 0.8551977185714321,
+      "covered80": 1.0,
+      "abs_error": 69.8762711864407
+    },
+    "corpus": "NT"
+  },
+  {
+    "unit_id": "loanrestart.us.2023-12",
+    "truth": 564.2,
+    "horizon_months": 9,
+    "persistence": {
+      "point": 455.1,
+      "ci_low": 380.3,
+      "ci_high": 556.1,
+      "crps": 65.96735077348156,
+      "pit": 0.9053465346534164,
+      "covered80": 0.0,
+      "abs_error": 109.10000000000002
+    },
+    "drift": {
+      "point": 477.035593220339,
+      "ci_low": 402.235593220339,
+      "ci_high": 578.035593220339,
+      "crps": 49.13455373113628,
+      "pit": 0.8452055714061755,
+      "covered80": 1.0,
+      "abs_error": 87.16440677966102
+    },
+    "corpus": "NT"
+  }
+]

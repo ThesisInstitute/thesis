@@ -1,0 +1,1 @@
+{"baseline_no_policy": 37.0, "policy_delta": 0, "point": 37.0, "ci_low": 36.4, "ci_high": 37.6, "rationale": "Extrapolating the slowing month-over-month decline (-0.6, -0.6, -0.3) from Feb 2026 over five months yields roughly 37.0 million by July 2026 with no additional policy effect assumed."}

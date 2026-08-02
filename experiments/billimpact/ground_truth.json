@@ -1,0 +1,4628 @@
+[
+  {
+    "unit_id": "snap.ca.2023-12",
+    "state": "CA",
+    "series_id": "BRCA06M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRCA06M647NCEN",
+      "observation_month": "2023-12-01",
+      "first_print_value": 5318809.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 5318809.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 5318809.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:07Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 4257428.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 4267498.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 4252654.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 4230399.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 4228297.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 4194962.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 4165897.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 4126328.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 4117613.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 4071767.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 4058708.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 4048374.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 4021166.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 4040968.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 4040313.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 4041711.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 4025040.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 4025533.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 4003826.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 3969931.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 3980048.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 3938934.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 3922366.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 3894395.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 3871003.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 3875364.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 3846268.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 3830650.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 3795514.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 3773446.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 3737633.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 3685682.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 3677090.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 3623654.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 3636313.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 3775793.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 3914962.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 3987750.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 4004917.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 4040645.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 4042531.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 4059554.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 4043672.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 4031055.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 4041711.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 4451007.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 4637893.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 4775267.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 4564117.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 4519289.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 4537280.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 4375694.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 4245238.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 4234649.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 4368759.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 4451404.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 4309750.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 4291627.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 4259446.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 4237518.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.ca.2024-03",
+    "state": "CA",
+    "series_id": "BRCA06M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRCA06M647NCEN",
+      "observation_month": "2024-03-01",
+      "first_print_value": 5406892.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 5406892.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 5406892.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:07Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 4257428.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 4267498.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 4252654.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 4230399.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 4228297.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 4194962.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 4165897.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 4126328.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 4117613.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 4071767.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 4058708.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 4048374.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 4021166.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 4040968.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 4040313.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 4041711.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 4025040.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 4025533.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 4003826.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 3969931.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 3980048.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 3938934.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 3922366.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 3894395.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 3871003.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 3875364.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 3846268.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 3830650.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 3795514.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 3773446.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 3737633.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 3685682.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 3677090.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 3623654.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 3636313.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 3775793.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 3914962.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 3987750.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 4004917.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 4040645.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 4042531.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 4059554.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 4043672.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 4031055.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 4041711.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 4451007.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 4637893.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 4775267.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 4564117.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 4519289.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 4537280.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 4375694.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 4245238.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 4234649.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 4368759.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 4451404.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 4309750.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 4291627.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 4259446.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 4237518.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.fl.2023-12",
+    "state": "FL",
+    "series_id": "BRFL12M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRFL12M647NCEN",
+      "observation_month": "2023-12-01",
+      "first_print_value": 3004132.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 3004132.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 3004132.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:09Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 3262475.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 3288860.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 3287446.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 3279009.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 3265019.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 3274938.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 3232682.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 3176287.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 3178027.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 3126089.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 3110913.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 3129822.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 3115778.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 3132728.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 3122190.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 3124831.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 3095659.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 3068255.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 3005608.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 2958565.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 2998889.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 3018378.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 3042303.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 3042160.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 3005762.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 2947869.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 2941835.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 2961854.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 2968328.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 2944370.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 2872852.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 2792585.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 2780799.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 2765663.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 2779400.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 2789098.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 2779754.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 2770280.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 2755509.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 2779312.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 2765924.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 2731271.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 2683906.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 2634689.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 2634892.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 3123525.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 3527762.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 3731605.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 3793271.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 3834528.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 3886747.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 3672011.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 3510072.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 3462997.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 3465806.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 3343701.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 3299396.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 3270866.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 3332113.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 3334019.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.fl.2024-03",
+    "state": "FL",
+    "series_id": "BRFL12M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRFL12M647NCEN",
+      "observation_month": "2024-03-01",
+      "first_print_value": 2923520.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 2923520.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 2923520.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:09Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 3262475.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 3288860.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 3287446.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 3279009.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 3265019.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 3274938.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 3232682.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 3176287.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 3178027.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 3126089.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 3110913.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 3129822.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 3115778.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 3132728.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 3122190.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 3124831.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 3095659.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 3068255.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 3005608.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 2958565.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 2998889.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 3018378.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 3042303.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 3042160.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 3005762.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 2947869.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 2941835.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 2961854.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 2968328.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 2944370.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 2872852.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 2792585.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 2780799.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 2765663.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 2779400.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 2789098.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 2779754.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 2770280.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 2755509.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 2779312.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 2765924.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 2731271.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 2683906.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 2634689.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 2634892.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 3123525.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 3527762.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 3731605.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 3793271.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 3834528.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 3886747.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 3672011.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 3510072.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 3462997.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 3465806.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 3343701.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 3299396.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 3270866.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 3332113.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 3334019.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.ny.2023-12",
+    "state": "NY",
+    "series_id": "BRNY36M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRNY36M647NCEN",
+      "observation_month": "2023-12-01",
+      "first_print_value": 2859633.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 2859633.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 2859633.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:21Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 2941315.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 2957116.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 2950208.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 2938258.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 2940107.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 2949168.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 2944348.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 2922436.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 2927021.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 2900177.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 2907545.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 2896869.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 2880757.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 2869135.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 2854907.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 2833407.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 2834579.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 2833768.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 2831503.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 2808410.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 2824677.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 2794249.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 2787447.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 2769827.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 2756993.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 2751082.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 2733500.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 2727462.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 2706697.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 2702602.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 2705107.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 2690578.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 2681717.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 2662511.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 2642450.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 2623177.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 2613091.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 2598826.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 2586186.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 2576099.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 2573483.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 2570821.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 2570601.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 2560098.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 2561187.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 2683002.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 2735982.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 2774025.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 2750252.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 2756187.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 2789533.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 2781742.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 2720372.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 2742577.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 2758288.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 2760769.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 2790766.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 2818184.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 2815830.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 2826820.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.ny.2024-03",
+    "state": "NY",
+    "series_id": "BRNY36M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRNY36M647NCEN",
+      "observation_month": "2024-03-01",
+      "first_print_value": 2942731.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 2942731.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 2942731.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:21Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 2941315.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 2957116.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 2950208.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 2938258.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 2940107.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 2949168.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 2944348.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 2922436.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 2927021.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 2900177.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 2907545.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 2896869.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 2880757.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 2869135.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 2854907.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 2833407.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 2834579.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 2833768.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 2831503.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 2808410.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 2824677.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 2794249.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 2787447.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 2769827.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 2756993.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 2751082.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 2733500.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 2727462.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 2706697.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 2702602.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 2705107.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 2690578.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 2681717.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 2662511.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 2642450.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 2623177.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 2613091.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 2598826.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 2586186.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 2576099.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 2573483.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 2570821.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 2570601.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 2560098.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 2561187.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 2683002.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 2735982.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 2774025.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 2750252.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 2756187.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 2789533.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 2781742.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 2720372.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 2742577.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 2758288.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 2760769.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 2790766.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 2818184.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 2815830.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 2826820.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.tx.2023-12",
+    "state": "TX",
+    "series_id": "BRTX48M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRTX48M647NCEN",
+      "observation_month": "2023-12-01",
+      "first_print_value": 3146168.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 3146168.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 3146168.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:22Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 3796484.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 3840366.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 3864686.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 3891234.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 3882738.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 3849095.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 3826344.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 3755726.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 3769743.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 3735048.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 3746646.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 3744463.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 3756058.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 3786510.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 3816052.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 3874406.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 3868089.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 3845396.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 3823986.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 3738628.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 3710811.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 3650170.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 3610348.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 3619343.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 3616565.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 3620064.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 3602528.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 3610340.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 3544393.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 3496398.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 3457568.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 3373004.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 3342252.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 3292703.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 3291843.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 3339430.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 3364115.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 3376727.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 3346851.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 3348300.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 3280049.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 3247148.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 3231991.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 3162216.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 3214013.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 3632605.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 3877726.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 3884584.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 3870588.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 3900408.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 3962503.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 3747996.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 3674212.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 3644422.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 3514348.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 3396209.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 3392447.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 3499514.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 3436958.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 3159949.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.tx.2024-03",
+    "state": "TX",
+    "series_id": "BRTX48M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRTX48M647NCEN",
+      "observation_month": "2024-03-01",
+      "first_print_value": 3103359.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 3103359.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 3103359.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:23Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 3796484.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 3840366.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 3864686.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 3891234.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 3882738.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 3849095.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 3826344.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 3755726.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 3769743.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 3735048.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 3746646.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 3744463.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 3756058.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 3786510.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 3816052.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 3874406.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 3868089.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 3845396.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 3823986.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 3738628.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 3710811.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 3650170.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 3610348.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 3619343.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 3616565.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 3620064.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 3602528.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 3610340.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 3544393.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 3496398.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 3457568.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 3373004.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 3342252.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 3292703.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 3291843.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 3339430.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 3364115.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 3376727.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 3346851.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 3348300.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 3280049.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 3247148.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 3231991.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 3162216.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 3214013.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 3632605.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 3877726.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 3884584.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 3870588.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 3900408.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 3962503.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 3747996.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 3674212.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 3644422.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 3514348.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 3396209.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 3392447.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 3499514.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 3436958.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 3159949.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.pa.2023-12",
+    "state": "PA",
+    "series_id": "BRPA42M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRPA42M647NCEN",
+      "observation_month": "2023-12-01",
+      "first_print_value": 1975317.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 1975317.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 1975317.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:34Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 1854367.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 1860044.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 1858232.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 1855129.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 1851309.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 1846117.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 1849422.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 1845237.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 1838124.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 1837461.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 1834131.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 1837088.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 1837947.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 1842248.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 1841128.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 1838086.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 1836747.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 1828230.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 1832440.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 1825566.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 1822560.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 1817145.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 1814910.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 1806510.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 1802599.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 1801513.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 1796760.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 1791564.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 1780497.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 1769604.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 1765262.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 1755732.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 1748715.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 1747214.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 1741489.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 1741026.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 1746086.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 1755663.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 1744769.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 1744319.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 1741549.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 1725850.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 1725978.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 1728680.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 1732446.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 1843929.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 1899944.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 1891660.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 1821999.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 1826611.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 1852391.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 1841766.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 1810277.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 1797999.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 1799807.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 1795163.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 1783981.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 1782922.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 1778560.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 1771130.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.pa.2024-03",
+    "state": "PA",
+    "series_id": "BRPA42M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BRPA42M647NCEN",
+      "observation_month": "2024-03-01",
+      "first_print_value": 1993394.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 1993394.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 1993394.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:34Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 1854367.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 1860044.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 1858232.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 1855129.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 1851309.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 1846117.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 1849422.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 1845237.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 1838124.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 1837461.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 1834131.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 1837088.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 1837947.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 1842248.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 1841128.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 1838086.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 1836747.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 1828230.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 1832440.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 1825566.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 1822560.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 1817145.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 1814910.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 1806510.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 1802599.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 1801513.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 1796760.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 1791564.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 1780497.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 1769604.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 1765262.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 1755732.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 1748715.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 1747214.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 1741489.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 1741026.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 1746086.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 1755663.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 1744769.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 1744319.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 1741549.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 1725850.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 1725978.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 1728680.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 1732446.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 1843929.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 1899944.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 1891660.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 1821999.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 1826611.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 1852391.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 1841766.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 1810277.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 1797999.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 1799807.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 1795163.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 1783981.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 1782922.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 1778560.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 1771130.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.oh.2023-12",
+    "state": "OH",
+    "series_id": "BROH39M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BROH39M647NCEN",
+      "observation_month": "2023-12-01",
+      "first_print_value": 1383070.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 1383070.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 1383070.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:35Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 1566937.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 1576754.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 1564498.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 1553901.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 1549654.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 1539886.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 1532807.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 1510943.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 1522223.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 1491788.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 1490125.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 1476547.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 1445160.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 1459106.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 1449403.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 1454106.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 1445457.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 1447154.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 1438832.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 1421394.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 1418692.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 1403759.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 1417857.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 1409275.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 1402925.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 1401376.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 1395560.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 1400704.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 1401599.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 1406880.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 1412021.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 1396598.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 1394981.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 1385222.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 1378556.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 1379247.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 1375056.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 1375316.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 1381245.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 1380490.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 1374527.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 1373772.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 1377403.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 1365936.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 1374108.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 1382485.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 1390914.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 1403021.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 1538558.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 1399895.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 1401212.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 1498880.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 1464612.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 1456030.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 1536645.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 1532847.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 1535731.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 1535325.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 1539008.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 1542770.0
+      }
+    ]
+  },
+  {
+    "unit_id": "snap.oh.2024-03",
+    "state": "OH",
+    "series_id": "BROH39M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60,
+    "truth": {
+      "series_id": "BROH39M647NCEN",
+      "observation_month": "2024-03-01",
+      "first_print_value": 1392442.0,
+      "first_print_vintage": "2026-02-01",
+      "latest_value": 1392442.0,
+      "revision": 0.0,
+      "vintage_trail": [
+        {
+          "vintage": "2024-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2024-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-02-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-03-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-04-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-05-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-06-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-07-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-08-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-09-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-10-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-11-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2025-12-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-01-01",
+          "present": false,
+          "value": null
+        },
+        {
+          "vintage": "2026-02-01",
+          "present": true,
+          "value": 1392442.0
+        }
+      ],
+      "source": "ALFRED vintage archive (history mirror of Census/USDA-FNS SNAP series)",
+      "fetched_at_utc": "2026-07-31T13:58:36Z"
+    },
+    "history": [
+      {
+        "month": "2016-07-01",
+        "value": 1566937.0
+      },
+      {
+        "month": "2016-08-01",
+        "value": 1576754.0
+      },
+      {
+        "month": "2016-09-01",
+        "value": 1564498.0
+      },
+      {
+        "month": "2016-10-01",
+        "value": 1553901.0
+      },
+      {
+        "month": "2016-11-01",
+        "value": 1549654.0
+      },
+      {
+        "month": "2016-12-01",
+        "value": 1539886.0
+      },
+      {
+        "month": "2017-01-01",
+        "value": 1532807.0
+      },
+      {
+        "month": "2017-02-01",
+        "value": 1510943.0
+      },
+      {
+        "month": "2017-03-01",
+        "value": 1522223.0
+      },
+      {
+        "month": "2017-04-01",
+        "value": 1491788.0
+      },
+      {
+        "month": "2017-05-01",
+        "value": 1490125.0
+      },
+      {
+        "month": "2017-06-01",
+        "value": 1476547.0
+      },
+      {
+        "month": "2017-07-01",
+        "value": 1445160.0
+      },
+      {
+        "month": "2017-08-01",
+        "value": 1459106.0
+      },
+      {
+        "month": "2017-09-01",
+        "value": 1449403.0
+      },
+      {
+        "month": "2017-10-01",
+        "value": 1454106.0
+      },
+      {
+        "month": "2017-11-01",
+        "value": 1445457.0
+      },
+      {
+        "month": "2017-12-01",
+        "value": 1447154.0
+      },
+      {
+        "month": "2018-01-01",
+        "value": 1438832.0
+      },
+      {
+        "month": "2018-02-01",
+        "value": 1421394.0
+      },
+      {
+        "month": "2018-03-01",
+        "value": 1418692.0
+      },
+      {
+        "month": "2018-04-01",
+        "value": 1403759.0
+      },
+      {
+        "month": "2018-05-01",
+        "value": 1417857.0
+      },
+      {
+        "month": "2018-06-01",
+        "value": 1409275.0
+      },
+      {
+        "month": "2018-07-01",
+        "value": 1402925.0
+      },
+      {
+        "month": "2018-08-01",
+        "value": 1401376.0
+      },
+      {
+        "month": "2018-09-01",
+        "value": 1395560.0
+      },
+      {
+        "month": "2018-10-01",
+        "value": 1400704.0
+      },
+      {
+        "month": "2018-11-01",
+        "value": 1401599.0
+      },
+      {
+        "month": "2018-12-01",
+        "value": 1406880.0
+      },
+      {
+        "month": "2019-01-01",
+        "value": 1412021.0
+      },
+      {
+        "month": "2019-02-01",
+        "value": 1396598.0
+      },
+      {
+        "month": "2019-03-01",
+        "value": 1394981.0
+      },
+      {
+        "month": "2019-04-01",
+        "value": 1385222.0
+      },
+      {
+        "month": "2019-05-01",
+        "value": 1378556.0
+      },
+      {
+        "month": "2019-06-01",
+        "value": 1379247.0
+      },
+      {
+        "month": "2019-07-01",
+        "value": 1375056.0
+      },
+      {
+        "month": "2019-08-01",
+        "value": 1375316.0
+      },
+      {
+        "month": "2019-09-01",
+        "value": 1381245.0
+      },
+      {
+        "month": "2019-10-01",
+        "value": 1380490.0
+      },
+      {
+        "month": "2019-11-01",
+        "value": 1374527.0
+      },
+      {
+        "month": "2019-12-01",
+        "value": 1373772.0
+      },
+      {
+        "month": "2020-01-01",
+        "value": 1377403.0
+      },
+      {
+        "month": "2020-02-01",
+        "value": 1365936.0
+      },
+      {
+        "month": "2020-03-01",
+        "value": 1374108.0
+      },
+      {
+        "month": "2020-04-01",
+        "value": 1382485.0
+      },
+      {
+        "month": "2020-05-01",
+        "value": 1390914.0
+      },
+      {
+        "month": "2020-06-01",
+        "value": 1403021.0
+      },
+      {
+        "month": "2020-07-01",
+        "value": 1538558.0
+      },
+      {
+        "month": "2020-08-01",
+        "value": 1399895.0
+      },
+      {
+        "month": "2020-09-01",
+        "value": 1401212.0
+      },
+      {
+        "month": "2020-10-01",
+        "value": 1498880.0
+      },
+      {
+        "month": "2020-11-01",
+        "value": 1464612.0
+      },
+      {
+        "month": "2020-12-01",
+        "value": 1456030.0
+      },
+      {
+        "month": "2021-01-01",
+        "value": 1536645.0
+      },
+      {
+        "month": "2021-02-01",
+        "value": 1532847.0
+      },
+      {
+        "month": "2021-03-01",
+        "value": 1535731.0
+      },
+      {
+        "month": "2021-04-01",
+        "value": 1535325.0
+      },
+      {
+        "month": "2021-05-01",
+        "value": 1539008.0
+      },
+      {
+        "month": "2021-06-01",
+        "value": 1542770.0
+      }
+    ]
+  }
+]

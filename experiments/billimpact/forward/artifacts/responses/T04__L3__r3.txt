@@ -1,0 +1,1 @@
+{"point": 36700000, "ci_low": 35400000, "ci_high": 37900000, "rationale": "Participation has been declining ~0.3-0.6M per month (39.4M in Nov 2025 to 37.9M in Feb 2026), likely due to tightened eligibility/work requirements; extrapolating a moderating decline of ~0.25M/month over five months yields roughly 36.7M by July 2026, with uncertainty around the pace of attrition."}

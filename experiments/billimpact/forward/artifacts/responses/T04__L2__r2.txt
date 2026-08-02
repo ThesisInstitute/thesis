@@ -1,0 +1,1 @@
+{"baseline_no_policy": 36.9, "policy_delta": 0.0, "point": 36.9, "ci_low": 36.3, "ci_high": 37.5, "rationale": "Extrapolating the decelerating monthly decline (~-0.6 to -0.3 million) observed Nov 2025–Feb 2026 forward five months yields a continued gradual drop to about 36.9 million by July 2026, with no policy change assumed to alter this trend."}

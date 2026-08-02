@@ -1,0 +1,3 @@
+```json
+{"point": 6.620, "ci_low": 6.550, "ci_high": 6.690, "rationale": "WIC participation shows a consistent downward trend of approximately -0.04 million per month from November 2025 through February 2026; extrapolating this linear decline to May 2026 yields 6.620 million with an 80% CI accounting for uncertainty in trend continuation and seasonal variation."}
+```

@@ -1,0 +1,45 @@
+
+=== matched-unit comparison vs 'opus no-bill' (common units only) ===
+arm                                    nCommon   ΔnCRPS  ΔWinkler
+fable bill effort=max                       28   -0.045          
+opus no-bill max [premortem]                26   -0.013          
+opus no-bill max [reference_class]          26   -0.006          
+opus no-bill max [plain]                    27   -0.011          
+opus bill effort=max                        28   -0.006          
+opus no-bill max [quantiles]                26   +0.009          
+opus no-bill max [scenario_mixture]         28   -0.000          
+opus bill                                   28   +0.007          
+opus bill decomposed                        28   +0.008          
+opus no-bill max [persona_pool]             27   +0.016          
+opus no-bill max [variance_auditor]         27   +0.020          
+fable no-bill                               28   +0.039          
+drift                                       28   +0.068          
+persistence                                 28   +0.073          
+fable bill                                  28   +0.086          
+fable bill decomposed                       28   +0.127          
+arm                                     nU   nR   nCRPS    med   wink  cov80  width%  |err|%
+fable bill effort=max                   28  140   0.208  0.157   1.30   0.75    7.43    2.45
+opus no-bill max [premortem]            26   74   0.230  0.178   1.43   0.84   10.86    2.73
+opus no-bill max [reference_class]      26   73   0.237  0.167   1.48   0.74    9.41    2.43
+opus no-bill max [plain]                27   81   0.241  0.188   1.47   0.80   10.57    2.81
+opus bill effort=max                    28  140   0.247  0.206   1.48   0.79   10.88    3.01
+opus no-bill max [quantiles]            26   76   0.253  0.169   1.62   0.68    9.88    2.72
+opus no-bill max [scenario_mixture]     28   82   0.253  0.209   1.45   0.83   10.84    3.42
+opus no-bill                            28  140   0.253  0.234   1.61   0.82   11.91    3.09
+opus bill                               28  140   0.261  0.229   1.59   0.83   12.17    3.41
+opus bill decomposed                    28  140   0.261  0.224   1.55   0.72    9.72    3.53
+opus no-bill max [persona_pool]         27   81   0.267  0.231   1.65   0.84   11.19    3.32
+opus no-bill max [variance_auditor]     27   75   0.271  0.226   1.83   0.89   14.66    2.24
+fable no-bill                           28  140   0.292  0.181   1.84   0.66    8.28    3.63
+drift                                   28   28   0.321  0.261   2.80   0.57    6.93    3.33
+persistence                             28   28   0.326  0.220   2.20   0.64    6.93    8.79
+fable bill                              28  140   0.339  0.227   2.05   0.61    9.22    4.61
+fable bill decomposed                   28  140   0.380  0.251   2.66   0.39    7.47    4.08
+
+per-event nCRPS for top arms:
+  fable bill effort=max                {'fpuc300': 0.12, 'medicaid': 0.282, 'ssfa': 0.193, 'vetcola': 0.167}
+  opus no-bill max [premortem]         {'fpuc300': 0.134, 'medicaid': 0.185, 'ssfa': 0.228, 'vetcola': 0.402}
+  opus no-bill max [reference_class]   {'fpuc300': 0.14, 'medicaid': 0.208, 'ssfa': 0.262, 'vetcola': 0.339}
+  opus no-bill max [plain]             {'fpuc300': 0.136, 'medicaid': 0.19, 'ssfa': 0.241, 'vetcola': 0.395}
+  opus bill effort=max                 {'fpuc300': 0.132, 'medicaid': 0.203, 'ssfa': 0.274, 'vetcola': 0.349}
+  opus no-bill max [quantiles]         {'fpuc300': 0.124, 'medicaid': 0.18, 'ssfa': 0.281, 'vetcola': 0.461}

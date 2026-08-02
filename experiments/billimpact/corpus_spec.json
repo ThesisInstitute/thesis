@@ -1,0 +1,110 @@
+[
+  {
+    "unit_id": "snap.ca.2023-12",
+    "state": "CA",
+    "series_id": "BRCA06M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.ca.2024-03",
+    "state": "CA",
+    "series_id": "BRCA06M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.fl.2023-12",
+    "state": "FL",
+    "series_id": "BRFL12M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.fl.2024-03",
+    "state": "FL",
+    "series_id": "BRFL12M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.ny.2023-12",
+    "state": "NY",
+    "series_id": "BRNY36M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.ny.2024-03",
+    "state": "NY",
+    "series_id": "BRNY36M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.tx.2023-12",
+    "state": "TX",
+    "series_id": "BRTX48M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.tx.2024-03",
+    "state": "TX",
+    "series_id": "BRTX48M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.pa.2023-12",
+    "state": "PA",
+    "series_id": "BRPA42M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.pa.2024-03",
+    "state": "PA",
+    "series_id": "BRPA42M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.oh.2023-12",
+    "state": "OH",
+    "series_id": "BROH39M647NCEN",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "snap.oh.2024-03",
+    "state": "OH",
+    "series_id": "BROH39M647NCEN",
+    "target_month": "2024-03-01",
+    "origin_vintage": "2023-06-01",
+    "history_through": "2023-05-01",
+    "months_back": 60
+  }
+]

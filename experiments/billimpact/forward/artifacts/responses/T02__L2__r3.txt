@@ -1,0 +1,1 @@
+{"baseline_no_policy": 37.3, "policy_delta": 0, "point": 37.3, "ci_low": 36.6, "ci_high": 38.0, "rationale": "Extrapolating the steady ~0.4-0.6M monthly decline trend from Nov 2025-Feb 2026 forward three months to May 2026 with no distinct policy shock assumed."}

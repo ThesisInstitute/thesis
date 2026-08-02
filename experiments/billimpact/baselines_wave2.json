@@ -1,0 +1,102 @@
+[
+  {
+    "unit_id": "tariff301.us.2018-10",
+    "truth": 72.387,
+    "corpus": "B2",
+    "horizon_months": 6,
+    "horizon_obs_steps": 2,
+    "persistence": {
+      "point": 44.634,
+      "ci_low": 43.1773,
+      "ci_high": 47.262,
+      "crps": 26.224435504889968,
+      "pit": 1.0,
+      "covered80": 0.0,
+      "abs_error": 27.753
+    },
+    "drift": {
+      "point": 45.419525423728814,
+      "ci_low": 43.962825423728816,
+      "ci_high": 48.047525423728814,
+      "crps": 25.438910081189967,
+      "pit": 1.0,
+      "covered80": 0.0,
+      "abs_error": 26.967474576271186
+    }
+  },
+  {
+    "unit_id": "tariff301.us.2019-04",
+    "truth": 71.536,
+    "corpus": "B2",
+    "horizon_months": 12,
+    "horizon_obs_steps": 4,
+    "persistence": {
+      "point": 44.634,
+      "ci_low": 42.9665,
+      "ci_high": 48.815,
+      "crps": 24.39978302526392,
+      "pit": 1.0,
+      "covered80": 0.0,
+      "abs_error": 26.902
+    },
+    "drift": {
+      "point": 46.20505084745763,
+      "ci_low": 44.53755084745763,
+      "ci_high": 50.386050847457625,
+      "crps": 22.828732177763918,
+      "pit": 1.0,
+      "covered80": 0.0,
+      "abs_error": 25.330949152542374
+    }
+  },
+  {
+    "unit_id": "loanrestart.us.2023-09",
+    "truth": 539.6,
+    "corpus": "B2",
+    "horizon_months": 6,
+    "horizon_obs_steps": 6,
+    "persistence": {
+      "point": 455.1,
+      "ci_low": 418.90000000000003,
+      "ci_high": 533.7900000000001,
+      "crps": 48.597998811398924,
+      "pit": 0.904922268818617,
+      "covered80": 0.0,
+      "abs_error": 84.5
+    },
+    "drift": {
+      "point": 469.7237288135593,
+      "ci_low": 433.52372881355933,
+      "ci_high": 548.4137288135594,
+      "crps": 37.266636674591645,
+      "pit": 0.8551977185714321,
+      "covered80": 1.0,
+      "abs_error": 69.8762711864407
+    }
+  },
+  {
+    "unit_id": "loanrestart.us.2023-12",
+    "truth": 564.2,
+    "corpus": "B2",
+    "horizon_months": 9,
+    "horizon_obs_steps": 9,
+    "persistence": {
+      "point": 455.1,
+      "ci_low": 380.3,
+      "ci_high": 556.1,
+      "crps": 65.96735077348156,
+      "pit": 0.9053465346534164,
+      "covered80": 0.0,
+      "abs_error": 109.10000000000002
+    },
+    "drift": {
+      "point": 477.035593220339,
+      "ci_low": 402.235593220339,
+      "ci_high": 578.035593220339,
+      "crps": 49.13455373113628,
+      "pit": 0.8452055714061755,
+      "covered80": 1.0,
+      "abs_error": 87.16440677966102
+    }
+  }
+]

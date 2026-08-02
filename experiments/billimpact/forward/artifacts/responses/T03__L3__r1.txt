@@ -1,0 +1,1 @@
+{"point": 37.0, "ci_low": 35.7, "ci_high": 38.2, "rationale": "The series is declining steadily (~0.3-0.6M/month, decelerating), so extrapolating four months from February's 37.9M with a slowing rate of roughly 0.2-0.25M/month yields about 37.0M, with uncertainty for policy-driven eligibility changes and trend reversal."}

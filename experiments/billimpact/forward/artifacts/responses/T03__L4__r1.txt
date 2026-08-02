@@ -1,0 +1,3 @@
+```json
+{"point": 37.600, "ci_low": 37.100, "ci_high": 38.100, "rationale": "Linear trend from recent data shows consistent monthly decline of approximately 0.3 million persons, with June 2026 representing four months of continued gradual decrease from February 2026 baseline."}
+```

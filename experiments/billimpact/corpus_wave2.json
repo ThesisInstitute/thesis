@@ -1,0 +1,42 @@
+[
+  {
+    "unit_id": "tariff301.us.2018-10",
+    "policy_event": "USTR-2018-s301-china",
+    "state": "US",
+    "series_id": "B235RC1Q027SBEA",
+    "target_month": "2018-10-01",
+    "origin_vintage": "2018-09-22",
+    "history_through": "2018-04-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "tariff301.us.2019-04",
+    "policy_event": "USTR-2018-s301-china",
+    "state": "US",
+    "series_id": "B235RC1Q027SBEA",
+    "target_month": "2019-04-01",
+    "origin_vintage": "2018-09-22",
+    "history_through": "2018-04-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "loanrestart.us.2023-09",
+    "policy_event": "PL118-5-fra-s271",
+    "state": "US",
+    "series_id": "B069RC1",
+    "target_month": "2023-09-01",
+    "origin_vintage": "2023-05-25",
+    "history_through": "2023-03-01",
+    "months_back": 60
+  },
+  {
+    "unit_id": "loanrestart.us.2023-12",
+    "policy_event": "PL118-5-fra-s271",
+    "state": "US",
+    "series_id": "B069RC1",
+    "target_month": "2023-12-01",
+    "origin_vintage": "2023-05-25",
+    "history_through": "2023-03-01",
+    "months_back": 60
+  }
+]

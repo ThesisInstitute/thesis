@@ -1,0 +1,62 @@
+<svg viewBox="0 0 1500 560" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica,Arial,sans-serif">
+<rect width="1500" height="560" fill="#fafaf8"/>
+<text x="40" y="52" font-size="27" font-weight="bold" fill="#111">Bill-conditioned forecasting under the microscope — nine enacted laws, ~7,000 pre-registered runs</text>
+<text x="40" y="78" font-size="15" fill="#555">first-print ground truth frozen before any model call · every statistic independently re-derived · N stated everywhere</text>
+
+<!-- Panel 1: accuracy ladder -->
+<g transform="translate(40,110)">
+<text x="0" y="0" font-size="17" font-weight="bold" fill="#111">Out-of-sample accuracy (nCRPS, 36 units, lower = better)</text>
+<g font-size="14" fill="#333">
+<rect x="150" y="20" width="128" height="26" fill="#b30000" rx="3"/><text x="0" y="38">fable · bill · max effort</text><text x="286" y="38" font-weight="bold">0.21</text>
+<rect x="150" y="56" width="160" height="26" fill="#888" rx="3"/><text x="0" y="74">opus · naive</text><text x="318" y="74">0.25</text>
+<rect x="150" y="92" width="205" height="26" fill="#aaa" rx="3"/><text x="0" y="110">fable · naive</text><text x="363" y="110">0.32</text>
+<rect x="150" y="128" width="240" height="26" fill="#ccc" rx="3"/><text x="0" y="146">persistence</text><text x="398" y="146">0.37</text>
+</g>
+<text x="0" y="185" font-size="13.5" fill="#333">vs naive: −0.094 [−0.174, −0.022] · 26/36 units</text>
+<text x="0" y="205" font-size="13.5" fill="#333">vs persistence: −0.518 [−0.863, −0.228] · 29/36</text>
+<text x="0" y="232" font-size="13.5" fill="#b30000" font-weight="bold">Same recipe at default effort: among the worst arms.</text>
+<text x="0" y="251" font-size="13.5" fill="#555">Bill text pays only with reasoning budget behind it.</text>
+</g>
+
+<!-- Panel 2: recall anchoring -->
+<g transform="translate(555,110)">
+<text x="0" y="0" font-size="17" font-weight="bold" fill="#111">Does the forecast track the statute&#8217;s own numbers?</text>
+<text x="0" y="22" font-size="13.5" fill="#555">FPUC supplement rewritten $100 / $300 / $900 — monotone response?</text>
+<g font-size="14">
+<text x="0" y="56" fill="#333">2021 target (memorized)</text>
+<text x="250" y="56" fill="#b30000" font-weight="bold">flat — 0/3 formats</text>
+<text x="0" y="84" fill="#333">2026 target (nothing to recall)</text>
+<text x="250" y="84" fill="#0a7a2f" font-weight="bold">monotone — 6/6 cells</text>
+<text x="0" y="112" fill="#333">2021 + directed derivation</text>
+<text x="250" y="112" fill="#0a7a2f" font-weight="bold">restored — 3/3</text>
+<text x="0" y="140" fill="#333">2021 + max reasoning effort</text>
+<text x="250" y="140" fill="#b30000" font-weight="bold">still flat — 0/4</text>
+</g>
+<text x="0" y="180" font-size="13.5" fill="#111" font-weight="bold">Memory overrides the text; restructuring the question fixes it,</text>
+<text x="0" y="199" font-size="13.5" fill="#111" font-weight="bold">thinking harder does not.</text>
+<text x="0" y="230" font-size="13.5" fill="#555">Purpose-clause effect: redact the statute&#8217;s NAME and the</text>
+<text x="0" y="248" font-size="13.5" fill="#555">shift collapses (−2.65% &#8594; −0.35% n.s.) — the name recalls the law.</text>
+</g>
+
+<!-- Panel 3: what to change -->
+<g transform="translate(1055,110)">
+<text x="0" y="0" font-size="17" font-weight="bold" fill="#111">What this changes in the pipeline</text>
+<g font-size="13.5" fill="#333">
+<text x="0" y="30">1&#8194;Statutory deltas enter computed (PolicyEngine),</text>
+<text x="16" y="48">never from model memory — tools take the</text>
+<text x="16" y="66">mechanical leg to 100% at every tier.</text>
+<text x="0" y="96">2&#8194;Quantile-native runs must keep their own CDF —</text>
+<text x="16" y="114">re-deriving through the interval transform costs</text>
+<text x="16" y="132">−0.034 nCRPS [−0.068, −0.003].</text>
+<text x="0" y="162">3&#8194;A harness-disclosure block on every forecast:</text>
+<text x="16" y="180">model · effort · elicitation · context · reps —</text>
+<text x="16" y="198">model tier alone moved forecasts 12.4&#215; noise.</text>
+</g>
+<text x="0" y="238" font-size="13.5" fill="#555">Registered S.3596 delta under 16 harnesses: 14 agree;</text>
+<text x="0" y="256" font-size="13.5" fill="#555">both outliers gave the model only the bill&#8217;s name.</text>
+</g>
+
+<line x1="530" y1="115" x2="530" y2="500" stroke="#ddd"/>
+<line x1="1030" y1="115" x2="1030" y2="500" stroke="#ddd"/>
+<text x="40" y="530" font-size="12.5" fill="#777">Retrospective accuracy sits inside model training windows and is treated as an upper bound throughout — which is finding 2&#8217;s own point. Designs and amendments committed to git before their runs; adversarial statistical audit and independent re-derivation applied; corrections documented in-repo.</text>
+</svg>
