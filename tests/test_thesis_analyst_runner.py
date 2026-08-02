@@ -1822,3 +1822,39 @@ def test_history_anchor_gate_flows_through_target_context_validation() -> None:
         cell, {"anchors": {"2024": 88.2}}
     )
     assert any("anchor" in error for error in errors)
+
+
+def _quantile_cell(ladder: object) -> dict:
+    return {
+        "pointEstimate": 100.0,
+        "ciLow": 90.0,
+        "ciHigh": 110.0,
+        "thresholdLadder": ladder,
+    }
+
+
+def test_declared_ladder_must_promote_or_fail_closed() -> None:
+    # A cell that DECLARES a quantile contract but carries a malformed ladder
+    # must fail promotion, not silently degrade to the interval_seeded CDF
+    # (which both mislabels provenance and re-derives a distribution the run
+    # already authored).
+    malformed = _quantile_cell({"thresholds": [90.0, 100.0]})  # missing probs
+    with pytest.raises(ValueError, match="thresholdLadder"):
+        analyst_runner.materialize_run_distributions([malformed])
+
+
+def test_wellformed_ladder_still_promotes_agent_reported() -> None:
+    cell = _quantile_cell(
+        {
+            "thresholds": [90.0, 100.0, 110.0],
+            "cumulativeProbabilities": [0.1, 0.5, 0.9],
+        }
+    )
+    distribution = analyst_runner.materialize_run_distributions([cell])
+    assert distribution["provenance"] == "agent_reported"
+
+
+def test_cell_without_ladder_keeps_interval_path() -> None:
+    cell = {"pointEstimate": 100.0, "ciLow": 90.0, "ciHigh": 110.0}
+    distribution = analyst_runner.materialize_run_distributions([cell])
+    assert distribution["provenance"] == "interval_seeded"
