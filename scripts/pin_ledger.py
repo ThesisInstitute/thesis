@@ -163,11 +163,7 @@ def _validate_release_head(value: Any, label: str = "releaseHead") -> dict[str, 
             f"missing={sorted(RELEASE_HEAD_KEYS - actual)}, "
             f"unknown={sorted(actual - RELEASE_HEAD_KEYS)}"
         )
-    if (
-        type(value["index"]) is not int
-        or value["index"] < 0
-        or value["index"] > 9_999
-    ):
+    if type(value["index"]) is not int or value["index"] < 0 or value["index"] > 9_999:
         raise PinError(
             f"{label}.index must be a non-negative integer no greater than 9999"
         )
@@ -250,9 +246,7 @@ def _tree_entries_at(tree_sha: str) -> dict[str, dict[str, Any]]:
         object_id = entry.get("sha")
         if type(mode) is not str or type(object_type) is not str:
             raise PinError(f"GitHub tree {tree_sha} entry {name!r} lacks mode/type")
-        if type(object_id) is not str or not re.fullmatch(
-            r"[0-9a-f]{40}", object_id
-        ):
+        if type(object_id) is not str or not re.fullmatch(r"[0-9a-f]{40}", object_id):
             raise PinError(
                 f"GitHub tree {tree_sha} entry {name!r} has invalid object ID"
             )
@@ -366,9 +360,7 @@ def _remote_commit_entries(
         ledger_entries, jsonl_name, label=LEDGER_JSONL_PATH
     )
     if _git_blob_sha1(expected_jsonl) != jsonl_entry["sha"]:
-        raise PinError(
-            "branch head JSONL bytes disagree with the same-commit Git tree"
-        )
+        raise PinError("branch head JSONL bytes disagree with the same-commit Git tree")
     return root_entries, ledger_entries
 
 
@@ -489,9 +481,7 @@ def _validated_manifest_inventory(
                     f"{label}/{name} must have exactly freetsa and digicert receipts"
                 )
             if stem not in producer_signatures:
-                raise PinError(
-                    f"{label}/{name} is missing its producer signature"
-                )
+                raise PinError(f"{label}/{name} is missing its producer signature")
     return {
         name: f"{entries[name]['mode']}:{entries[name]['sha']}"
         for name in sorted(entries)
@@ -545,9 +535,7 @@ def _local_release_inventory_at_commit(
     """Read a commit's manifest inventory directly from local Git objects."""
 
     try:
-        raw_entries = git_tree_entries(
-            ledger_git, sha, "releases/manifests"
-        )
+        raw_entries = git_tree_entries(ledger_git, sha, "releases/manifests")
     except ReleaseChainError as exc:
         raise PinError(f"cannot enumerate release manifests at {sha}: {exc}") from exc
     if not raw_entries:
@@ -592,9 +580,7 @@ def _require_inventory_progress(
     candidate_manifests = sorted(
         name for name in candidate if MANIFEST_RE.fullmatch(name)
     )
-    final_manifests = sorted(
-        name for name in final if MANIFEST_RE.fullmatch(name)
-    )
+    final_manifests = sorted(name for name in final if MANIFEST_RE.fullmatch(name))
 
     for name, object_id in candidate.items():
         if final.get(name) != object_id:
@@ -685,9 +671,7 @@ def _compare_commits(base: str, head: str) -> list[dict[str, Any]]:
     while len(commits) < total:
         payload = _api(f"compare/{base}...{head}?per_page=100&page={page}")
         if type(payload) is not dict or not isinstance(payload.get("commits"), list):
-            raise PinError(
-                f"compare {base[:12]}..{head[:12]} page {page} is malformed"
-            )
+            raise PinError(f"compare {base[:12]}..{head[:12]} page {page} is malformed")
         batch = payload["commits"]
         if not batch:
             break
@@ -709,9 +693,7 @@ def _compare_commits(base: str, head: str) -> list[dict[str, Any]]:
             )
         commit_shas.append(str(commit_sha))
     if len(set(commit_shas)) != len(commit_shas):
-        raise PinError(
-            f"compare {base[:12]}..{head[:12]} contains duplicate commits"
-        )
+        raise PinError(f"compare {base[:12]}..{head[:12]} contains duplicate commits")
     if commit_shas[-1] != head:
         raise PinError(
             f"compare {base[:12]}..{head[:12]} ends at {commit_shas[-1][:12]}"
@@ -762,9 +744,7 @@ def _require_walk_parent(
             f"{expected_parent[:12]}"
         )
     strangers = [
-        sha
-        for sha in parent_shas
-        if sha != expected_parent and sha not in visited
+        sha for sha in parent_shas if sha != expected_parent and sha not in visited
     ]
     if strangers:
         raise PinError(
@@ -839,9 +819,7 @@ def _validate_catalog_binding(
         if type(declared_registry) is not str or not re.fullmatch(
             r"[0-9a-f]{64}", declared_registry
         ):
-            raise PinError(
-                f"{label} uuid_registry_sha256 must be a SHA-256 digest"
-            )
+            raise PinError(f"{label} uuid_registry_sha256 must be a SHA-256 digest")
         if registry_raw is None:
             raise PinError(
                 f"{label} declares uuid_registry_sha256 but same-commit "
@@ -919,12 +897,11 @@ def _source_record_id(line: str, index: int) -> str:
     return str(record_id)
 
 
-def _require_extension(
-    previous: list[str], current: list[str], *, label: str
-) -> None:
+def _require_extension(previous: list[str], current: list[str], *, label: str) -> None:
     if len(current) < len(previous):
-        raise PinError(f"{label} truncates the ledger: "
-                       f"{len(previous)} -> {len(current)} rows")
+        raise PinError(
+            f"{label} truncates the ledger: {len(previous)} -> {len(current)} rows"
+        )
     for index, line in enumerate(previous):
         if current[index] != line:
             raise PinError(
@@ -1178,9 +1155,7 @@ def _local_release_history_state(
                     cwd=ledger_git,
                 )
             except subprocess.CalledProcessError as exc:
-                raise PinError(
-                    f"cannot read {LEDGER_JSONL_PATH} at {commit}"
-                ) from exc
+                raise PinError(f"cannot read {LEDGER_JSONL_PATH} at {commit}") from exc
             _require_inventory_head_witnesses_state(
                 inventory,
                 state.verification,
@@ -1200,9 +1175,7 @@ def _null_release_window() -> dict[str, Any]:
     return {key: None for key in RELEASE_WINDOW_KEYS}
 
 
-def _release_window(
-    included: Any, excluded: Any | None
-) -> dict[str, Any]:
+def _release_window(included: Any, excluded: Any | None) -> dict[str, Any]:
     value = {
         "witnessedInReleaseIndex": included.release_index,
         "witnessedInReleaseFreetsaGenTimeUtc": _format_utc(
@@ -1295,9 +1268,7 @@ def load_pin() -> dict[str, Any] | None:
         )
     if pin["repo"] != LEDGER_REPO or pin["branch"] != LEDGER_BRANCH:
         raise PinError("pin repo/branch does not match the configured ledger")
-    if type(pin["sha"]) is not str or not re.fullmatch(
-        r"[0-9a-f]{40}", pin["sha"]
-    ):
+    if type(pin["sha"]) is not str or not re.fullmatch(r"[0-9a-f]{40}", pin["sha"]):
         raise PinError("pin sha is not a commit SHA")
     if type(pin["jsonlSha256"]) is not str or not re.fullmatch(
         r"[0-9a-f]{64}", pin["jsonlSha256"]
@@ -1386,18 +1357,12 @@ def _write_outputs(
         "branch": LEDGER_BRANCH,
         "headSha": sha,
         "jsonlSha256": pin["jsonlSha256"],
-        **(
-            {"catalogSha256": pin["catalogSha256"]}
-            if catalog_raw is not None
-            else {}
-        ),
+        **({"catalogSha256": pin["catalogSha256"]} if catalog_raw is not None else {}),
         "legacyQuarantineLineCount": quarantine_count,
         "historyAnomalies": anomalies,
         "rows": rows,
     }
-    body = ",\n".join(
-        "  " + json.dumps(row, separators=(",", ":")) for row in rows
-    )
+    body = ",\n".join("  " + json.dumps(row, separators=(",", ":")) for row in rows)
     generated = (
         "// Generated by scripts/pin_ledger.py from the thesis-facts branch\n"
         "// history. Do not edit: acceptance times witness when each row\n"
@@ -1466,9 +1431,7 @@ def _write_outputs(
 
 
 def _git(ledger_git: pathlib.Path, *args: str) -> str:
-    return subprocess.check_output(
-        ["git", *args], cwd=ledger_git, text=True
-    ).strip()
+    return subprocess.check_output(["git", *args], cwd=ledger_git, text=True).strip()
 
 
 def _local_catalog_at_commit(
@@ -1485,9 +1448,7 @@ def _local_catalog_at_commit(
             cwd=ledger_git,
         )
     except subprocess.CalledProcessError as exc:
-        raise PinError(
-            f"cannot inspect {LEDGER_CATALOG_PATH} at {sha}"
-        ) from exc
+        raise PinError(f"cannot inspect {LEDGER_CATALOG_PATH} at {sha}") from exc
     records = [record for record in listing.split(b"\0") if record]
     if not records:
         if required:
@@ -1509,9 +1470,7 @@ def _local_catalog_at_commit(
         or mode not in {"100644", "100755"}
         or re.fullmatch(r"[0-9a-f]{40}", object_id) is None
     ):
-        raise PinError(
-            f"{LEDGER_CATALOG_PATH} at {sha} is not a regular Git blob"
-        )
+        raise PinError(f"{LEDGER_CATALOG_PATH} at {sha} is not a regular Git blob")
     try:
         raw = subprocess.check_output(
             ["git", "show", f"{sha}:{LEDGER_CATALOG_PATH}"], cwd=ledger_git
@@ -1526,9 +1485,7 @@ def _local_catalog_at_commit(
     return raw
 
 
-def _local_registry_at_commit(
-    ledger_git: pathlib.Path, sha: str
-) -> bytes | None:
+def _local_registry_at_commit(ledger_git: pathlib.Path, sha: str) -> bytes | None:
     """Read the optional UUID registry from one local commit, blob-bound."""
 
     try:
@@ -1537,9 +1494,7 @@ def _local_registry_at_commit(
             cwd=ledger_git,
         )
     except subprocess.CalledProcessError as exc:
-        raise PinError(
-            f"cannot inspect {LEDGER_REGISTRY_PATH} at {sha}"
-        ) from exc
+        raise PinError(f"cannot inspect {LEDGER_REGISTRY_PATH} at {sha}") from exc
     records = [record for record in listing.split(b"\0") if record]
     if not records:
         return None
@@ -1559,9 +1514,7 @@ def _local_registry_at_commit(
         or mode not in {"100644", "100755"}
         or re.fullmatch(r"[0-9a-f]{40}", object_id) is None
     ):
-        raise PinError(
-            f"{LEDGER_REGISTRY_PATH} at {sha} is not a regular Git blob"
-        )
+        raise PinError(f"{LEDGER_REGISTRY_PATH} at {sha} is not a regular Git blob")
     try:
         raw = subprocess.check_output(
             ["git", "show", f"{sha}:{LEDGER_REGISTRY_PATH}"], cwd=ledger_git
@@ -1575,6 +1528,64 @@ def _local_registry_at_commit(
             f"tree requires {object_id}"
         )
     return raw
+
+
+def _walked_lineage_declares_registry(ledger_git: pathlib.Path, head_sha: str) -> bool:
+    """Whether any ancestor catalog of ``head_sha`` ever declared a UUID
+    registry — and refuse an undeclared head once one did.
+
+    Operator recovery must not become a laundering path, and merge
+    topology cannot be trusted to expose one: branch names are not part
+    of history, so a walk along any single parent line cannot tell "a
+    side branch offered a declaration we declined" apart from "we were
+    declared, an undeclared branch swallowed us with ``-s ours``, and the
+    ref fast-forwarded onto the merge" — the DAGs are identical, only the
+    ref movements differ. The ratchet is therefore existential over the
+    FULL ancestry: every commit that touched the catalog (``rev-list
+    --full-history``, no parent restriction, so neither history
+    simplification nor second-parent placement can hide one) is read, and
+    if any version declared ``uuid_registry_sha256``, the catalog at
+    ``head_sha`` itself must still declare it. Fail-closed by design: a
+    declaration merged in from an abandoned side branch binds the head
+    even if its content was never adopted — re-declaring is the recovery,
+    silently shedding custody is not.
+
+    A shallow clone is refused outright: git treats the shallow boundary
+    as a root, so ``rev-list`` silently omits everything behind it and an
+    ancestor declaration would vanish without any error — fail open.
+    """
+    shallow = _git(ledger_git, "rev-parse", "--is-shallow-repository")
+    if shallow.strip() == "true":
+        raise PinError(
+            "ledger clone is shallow — the shallow boundary poses as a "
+            "root, so the ancestry scan cannot prove the registry "
+            "ratchet; run `git fetch --unshallow` first"
+        )
+    listing = _git(
+        ledger_git,
+        "rev-list",
+        "--full-history",
+        head_sha,
+        "--",
+        LEDGER_CATALOG_PATH,
+    )
+    declaring_commit = None
+    for commit in [line for line in listing.splitlines() if line]:
+        catalog_raw = _local_catalog_at_commit(ledger_git, commit, required=False)
+        if _declares_registry(catalog_raw):
+            declaring_commit = commit
+            break
+    if declaring_commit is None:
+        return False
+    head_catalog = _local_catalog_at_commit(ledger_git, head_sha, required=False)
+    if not _declares_registry(head_catalog):
+        raise PinError(
+            f"catalog at {head_sha} lacks the UUID registry declaration "
+            f"although ancestor commit {declaring_commit} established one "
+            "— registry binding cannot be downgraded away, even through "
+            "rebuild_from_history"
+        )
+    return True
 
 
 def rebuild_from_history(
@@ -1600,6 +1611,7 @@ def rebuild_from_history(
         raise PinError(f"no history for {LEDGER_JSONL_PATH} at {head_sha}")
 
     previous_lines: list[str] = []
+    lineage_declared = _walked_lineage_declares_registry(ledger_git, head_sha)
     accepted: list[tuple[str, str]] = []  # per index: (acceptedAtUtc, commit)
     introduced: list[str] = []  # per index: first content seen
     rewritten: set[int] = set()
@@ -1620,8 +1632,8 @@ def rebuild_from_history(
                     "toRows": len(lines),
                 }
             )
-            del accepted[len(lines):]
-            del introduced[len(lines):]
+            del accepted[len(lines) :]
+            del introduced[len(lines) :]
             rewritten = {index for index in rewritten if index < len(lines)}
         for index, line in enumerate(lines):
             if index >= len(accepted):
@@ -1679,6 +1691,7 @@ def rebuild_from_history(
         _local_registry_at_commit(ledger_git, head_sha),
         raw,
         label=f"{LEDGER_CATALOG_PATH} at {head_sha}",
+        registry_expected=lineage_declared,
     )
     _write_outputs(
         sha=head_sha,
@@ -1843,6 +1856,12 @@ def refresh(*, require_catalog: bool = False) -> None:
     previous_raw = old_raw
     expected_parent = pin["sha"]
     visited: set[str] = {pin["sha"]}
+    # The registry ratchet must hold across the CROSSED commits too, not
+    # just the two endpoints: a declaration committed and then removed
+    # between refreshes would otherwise advance the pin straight over the
+    # downgrade. Once a declaration is seen the flag latches and no
+    # further catalog fetches are needed.
+    declared_seen = _declares_registry(old_catalog)
     for commit in commits:
         commit_sha = str(commit["sha"])
         commit_payload = (
@@ -1853,6 +1872,15 @@ def refresh(*, require_catalog: bool = False) -> None:
         )
         visited.add(commit_sha)
         raw = _jsonl_at(commit_sha)
+        if not declared_seen and _declares_registry(
+            _remote_catalog_at_commit(
+                commit_sha,
+                commit_payload,
+                raw,
+                required=False,
+            )
+        ):
+            declared_seen = True
         lines = _lines(raw)
         if is_merge and raw != previous_raw:
             raise PinError(
@@ -1865,9 +1893,7 @@ def refresh(*, require_catalog: bool = False) -> None:
                 lines,
                 label=f"commit {commit_sha[:12]}",
             )
-            accepted_at = _utc_instant(
-                str(commit["commit"]["committer"]["date"])
-            )
+            accepted_at = _utc_instant(str(commit["commit"]["committer"]["date"]))
             for index in range(len(previous_lines), len(lines)):
                 rows.append(
                     _row(
@@ -1911,7 +1937,7 @@ def refresh(*, require_catalog: bool = False) -> None:
         head_registry,
         head_raw,
         label=f"{LEDGER_CATALOG_PATH} at {head_sha}",
-        registry_expected=_declares_registry(old_catalog),
+        registry_expected=declared_seen,
     )
     _write_outputs(
         sha=head_sha,

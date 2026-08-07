@@ -122,6 +122,11 @@ def _resolve_concept_candidates(
     ]
     if not observed:
         country = (entry.get("extras") or {}).get("country")
+        if country is not None and country not in COUNTRY_IDS:
+            return None, (
+                f"{name}: unmapped docket country {country!r} — extend "
+                "COUNTRY_IDS or fix the entry"
+            )
         expected_id = COUNTRY_IDS.get(country) if country else None
         compatible = [
             row

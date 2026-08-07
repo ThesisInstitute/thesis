@@ -64,10 +64,13 @@ def _commit(repo: pathlib.Path, message: str) -> str:
 
 
 def _row_bytes(identity: str) -> bytes:
-    return json.dumps(
-        {"source_record_id": identity, "value": identity},
-        separators=(",", ":"),
-    ).encode() + b"\n"
+    return (
+        json.dumps(
+            {"source_record_id": identity, "value": identity},
+            separators=(",", ":"),
+        ).encode()
+        + b"\n"
+    )
 
 
 def _catalog_bytes(jsonl: bytes) -> bytes:
@@ -609,8 +612,7 @@ def _install_test_verifier(
         "PRODUCER_SPKI_SHA256",
         _spki_sha256(
             (
-                trusted_anchors
-                / ledger_release_chain.PRODUCER_PUBLIC_KEY_FILENAME
+                trusted_anchors / ledger_release_chain.PRODUCER_PUBLIC_KEY_FILENAME
             ).read_bytes()
         ),
     )
@@ -823,11 +825,14 @@ def test_local_catalog_read_allows_legacy_absence_and_requires_forward_presence(
             required=True,
         )
 
-    assert pin_ledger._local_catalog_at_commit(
-        release_repo.repo,
-        release_repo.head,
-        required=True,
-    ) == (release_repo.repo / pin_ledger.LEDGER_CATALOG_PATH).read_bytes()
+    assert (
+        pin_ledger._local_catalog_at_commit(
+            release_repo.repo,
+            release_repo.head,
+            required=True,
+        )
+        == (release_repo.repo / pin_ledger.LEDGER_CATALOG_PATH).read_bytes()
+    )
 
 
 def test_refresh_required_catalog_rejects_legacy_head_before_writes(
@@ -1211,9 +1216,7 @@ def test_refresh_refuses_unsigned_three_sibling_post_genesis_release(
     tmp_path: pathlib.Path,
     release_repo: ReleaseRepo,
 ) -> None:
-    manifest = next(
-        (release_repo.repo / "releases" / "manifests").glob("0002-*.json")
-    )
+    manifest = next((release_repo.repo / "releases" / "manifests").glob("0002-*.json"))
     manifest.with_name(f"{manifest.stem}.producer.sig").unlink()
     _commit(release_repo.repo, "remove post-genesis producer signature")
     pin_path, availability_path, generated_path, pin_requests = _prepare_refresh(
@@ -1237,9 +1240,7 @@ def test_refresh_refuses_wrong_key_producer_signature(
     tmp_path: pathlib.Path,
     release_repo: ReleaseRepo,
 ) -> None:
-    manifest = next(
-        (release_repo.repo / "releases" / "manifests").glob("0002-*.json")
-    )
+    manifest = next((release_repo.repo / "releases" / "manifests").glob("0002-*.json"))
     wrong_key = _generate_producer_key(release_repo.tsa, "wrong-producer")
     _sign_manifest(manifest, wrong_key)
     _commit(release_repo.repo, "replace producer signature with wrong key")
@@ -1353,9 +1354,7 @@ def test_refresh_refuses_absent_chain_after_stored_release_head(
     tmp_path: pathlib.Path,
     release_repo: ReleaseRepo,
 ) -> None:
-    pin_path, _, _, pin_requests = _prepare_refresh(
-        monkeypatch, tmp_path, release_repo
-    )
+    pin_path, _, _, pin_requests = _prepare_refresh(monkeypatch, tmp_path, release_repo)
     pin_ledger.refresh()
     witnessed_pin = pin_path.read_bytes()
     shutil.rmtree(release_repo.repo / "releases" / "manifests")
@@ -1508,9 +1507,7 @@ def test_refresh_refuses_transient_release_manifest_replacement(
     tmp_path: pathlib.Path,
     release_repo: ReleaseRepo,
 ) -> None:
-    manifest = next(
-        (release_repo.repo / "releases/manifests").glob("0002-*.json")
-    )
+    manifest = next((release_repo.repo / "releases/manifests").glob("0002-*.json"))
     original = manifest.read_bytes()
     manifest.write_bytes(original + b"tampered")
     _commit(release_repo.repo, "transient manifest replacement")
@@ -1538,9 +1535,7 @@ def test_refresh_refuses_transient_producer_signature_replacement(
     release_repo: ReleaseRepo,
 ) -> None:
     signature = next(
-        (release_repo.repo / "releases" / "manifests").glob(
-            "0002-*.producer.sig"
-        )
+        (release_repo.repo / "releases" / "manifests").glob("0002-*.producer.sig")
     )
     original = signature.read_bytes()
     signature.write_bytes(b"x" * ledger_release_chain.PRODUCER_SIGNATURE_BYTES)
@@ -1569,10 +1564,7 @@ def test_refresh_refuses_crossed_manifest_missing_from_final_chain(
     release_repo: ReleaseRepo,
 ) -> None:
     transient = (
-        release_repo.repo
-        / "releases"
-        / "manifests"
-        / "0003-0000000000000000.json"
+        release_repo.repo / "releases" / "manifests" / "0003-0000000000000000.json"
     )
     transient.write_bytes(b"transient release manifest\n")
     _commit(release_repo.repo, "add release artifact absent from final chain")
@@ -1938,10 +1930,7 @@ def test_v2_registration_hashes_remain_stable() -> None:
 
 def test_pin_binding_validation_fails_closed() -> None:
     assert validate_ledger_pin_binding(_pin_binding()) == _pin_binding()
-    assert (
-        validate_ledger_pin_binding(_catalog_pin_binding())
-        == _catalog_pin_binding()
-    )
+    assert validate_ledger_pin_binding(_catalog_pin_binding()) == _catalog_pin_binding()
     with pytest.raises(RegistrationError, match="bind exactly"):
         validate_ledger_pin_binding({**_pin_binding(), "extra": 1})
     with pytest.raises(RegistrationError, match="bind exactly"):
@@ -1961,9 +1950,7 @@ def test_pin_binding_validation_fails_closed() -> None:
             {**_catalog_pin_binding(), "catalogSha256": int("1" * 64)}
         )
     with pytest.raises(RegistrationError, match="catalogBytes"):
-        validate_ledger_pin_binding(
-            {**_catalog_pin_binding(), "catalogBytes": True}
-        )
+        validate_ledger_pin_binding({**_catalog_pin_binding(), "catalogBytes": True})
 
 
 @pytest.mark.parametrize(
@@ -2045,9 +2032,7 @@ def test_release_head_index_cannot_exceed_four_digit_manifest_namespace() -> Non
         pin_ledger._validate_release_head(release_head)
 
 
-@pytest.mark.parametrize(
-    "expected_binding", [_pin_binding(), _catalog_pin_binding()]
-)
+@pytest.mark.parametrize("expected_binding", [_pin_binding(), _catalog_pin_binding()])
 def test_registration_reads_the_committed_pin(
     monkeypatch, tmp_path, expected_binding
 ) -> None:
@@ -2095,12 +2080,8 @@ def test_registration_rejects_a_partial_catalog_pin_binding(
         register_targets.load_ledger_pin_binding()
 
 
-def test_registration_without_a_pin_file_fails_closed(
-    monkeypatch, tmp_path
-) -> None:
-    monkeypatch.setattr(
-        register_targets, "LEDGER_PIN_PATH", tmp_path / "missing.json"
-    )
+def test_registration_without_a_pin_file_fails_closed(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(register_targets, "LEDGER_PIN_PATH", tmp_path / "missing.json")
 
     with pytest.raises(RegistrationError, match="committed ledger pin"):
         register_targets.load_ledger_pin_binding()
@@ -2129,12 +2110,300 @@ def test_walk_parent_admits_branch_internal_merge_only() -> None:
 
     # A merge whose other parent was never walked splices foreign history.
     with pytest.raises(PinError, match="unwalked history"):
-        _require_walk_parent(payload(merge, ["e" * 40, side]), merge, side, {base, side})
+        _require_walk_parent(
+            payload(merge, ["e" * 40, side]), merge, side, {base, side}
+        )
 
     # A merge that does not continue the walk predecessor is rejected too.
     with pytest.raises(PinError, match="does not continue the walk"):
-        _require_walk_parent(payload(merge, [base, "e" * 40]), merge, side, {base, side})
+        _require_walk_parent(
+            payload(merge, [base, "e" * 40]), merge, side, {base, side}
+        )
 
     # No parents at all is never traversable.
     with pytest.raises(PinError, match="linear single-parent"):
         _require_walk_parent(payload(merge, []), merge, side, {base, side})
+
+
+def test_rebuild_from_history_carries_the_ratchet(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    # Final-review residual: operator rebuild reset the monotonic registry
+    # ratchet, accepting a v2/no-registry head after a v3+registry commit.
+    registry = _registry_bytes()
+    _declare_registry(
+        release_repo.repo,
+        registry=registry,
+        declared_digest=hashlib.sha256(registry).hexdigest(),
+        message="declare uuid registry",
+    )
+    catalog_path = release_repo.repo / pin_ledger.LEDGER_CATALOG_PATH
+    catalog = json.loads(catalog_path.read_text())
+    catalog.pop("uuid_registry_sha256", None)
+    catalog_path.write_text(json.dumps(catalog, separators=(",", ":")) + "\n")
+    (release_repo.repo / pin_ledger.LEDGER_REGISTRY_PATH).unlink()
+    _commit(release_repo.repo, "downgrade after declaring")
+    _prepare_refresh(monkeypatch, tmp_path, release_repo)
+
+    with pytest.raises(pin_ledger.PinError, match="downgraded away"):
+        pin_ledger.rebuild_from_history(release_repo.repo, "HEAD")
+
+
+def test_lineage_scan_survives_merge_dags(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    # Review repro (a): a merge ADOPTING an undeclared side catalog used
+    # to be pruned by path-limited history simplification, letting the
+    # downgrade through rebuild_from_history.
+    repo = release_repo.repo
+    registry = _registry_bytes()
+    _declare_registry(
+        repo,
+        registry=registry,
+        declared_digest=hashlib.sha256(registry).hexdigest(),
+        message="declare uuid registry",
+    )
+    declared_sha = _git(repo, "rev-parse", "HEAD")
+    catalog_path = repo / pin_ledger.LEDGER_CATALOG_PATH
+
+    # Side branch: still-undeclared catalog, distinguishable content.
+    _git(repo, "checkout", "-q", "-b", "side", f"{declared_sha}~1")
+    side_catalog = json.loads(catalog_path.read_text())
+    side_catalog["comment"] = "side variant, never declared"
+    catalog_path.write_text(json.dumps(side_catalog, separators=(",", ":")) + "\n")
+    _commit(repo, "side: undeclared catalog variant")
+
+    # Mainline merge that ADOPTS the side catalog and drops the registry.
+    _git(repo, "checkout", "-q", declared_sha)
+    _git(repo, "checkout", "-q", "-b", "mainline")
+    subprocess.run(
+        ["git", "merge", "--no-ff", "--no-commit", "side"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+    )  # a content conflict is expected; the resolution is written below
+    catalog_path.write_text(json.dumps(side_catalog, separators=(",", ":")) + "\n")
+    registry_file = repo / pin_ledger.LEDGER_REGISTRY_PATH
+    if registry_file.exists():
+        registry_file.unlink()
+    _commit(repo, "merge side (adopts undeclared catalog)")
+
+    with pytest.raises(pin_ledger.PinError, match="downgraded away"):
+        pin_ledger.rebuild_from_history(repo, "HEAD")
+
+
+def test_lineage_scan_accepts_declaration_retaining_merge(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    # Round-1 false-rejection repro: a DECLARED mainline merges an
+    # undeclared sibling while RETAINING its declared catalog. The scan
+    # must report the declaration and must not read the sibling's
+    # undeclared content as a downgrade.
+    repo = release_repo.repo
+    base_sha = _git(repo, "rev-parse", "HEAD")
+    catalog_path = repo / pin_ledger.LEDGER_CATALOG_PATH
+
+    _git(repo, "checkout", "-q", "-b", "undeclared-side")
+    catalog = json.loads(catalog_path.read_text())
+    catalog["comment"] = "sibling touch, never declared"
+    catalog_path.write_text(json.dumps(catalog, separators=(",", ":")) + "\n")
+    _commit(repo, "side: touch catalog, still undeclared")
+
+    registry = _registry_bytes()
+    _git(repo, "checkout", "-q", base_sha)
+    _git(repo, "checkout", "-q", "-b", "declared-mainline")
+    _declare_registry(
+        repo,
+        registry=registry,
+        declared_digest=hashlib.sha256(registry).hexdigest(),
+        message="mainline: declare uuid registry",
+    )
+    _git(
+        repo,
+        "merge",
+        "-q",
+        "--no-ff",
+        "-s",
+        "ours",
+        "undeclared-side",
+        "-m",
+        "merge sibling, retain declared catalog",
+    )
+
+    assert (
+        pin_ledger._walked_lineage_declares_registry(
+            repo, _git(repo, "rev-parse", "HEAD")
+        )
+        is True
+    )
+
+
+def test_unadopted_side_declaration_binds_fail_closed(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    # Merge topology cannot distinguish "we declined a side branch's
+    # declaration" from "an undeclared branch swallowed a declared
+    # mainline and the ref fast-forwarded onto the merge" — the DAGs are
+    # identical. The ratchet is therefore existential: once a declaring
+    # catalog is in the ancestry, an undeclared head refuses, even when
+    # the declaration's content was never adopted.
+    repo = release_repo.repo
+    base_sha = _git(repo, "rev-parse", "HEAD")
+    catalog_path = repo / pin_ledger.LEDGER_CATALOG_PATH
+
+    registry = _registry_bytes()
+    _git(repo, "checkout", "-q", "-b", "declaring-side")
+    _declare_registry(
+        repo,
+        registry=registry,
+        declared_digest=hashlib.sha256(registry).hexdigest(),
+        message="side: declare uuid registry",
+    )
+    _git(repo, "checkout", "-q", base_sha)
+    _git(repo, "checkout", "-q", "-b", "mainline2")
+    catalog = json.loads(catalog_path.read_text())
+    catalog["comment"] = "mainline touch"
+    catalog_path.write_text(json.dumps(catalog, separators=(",", ":")) + "\n")
+    _commit(repo, "mainline: touch catalog, still undeclared")
+    _git(
+        repo,
+        "merge",
+        "-q",
+        "--no-ff",
+        "-s",
+        "ours",
+        "declaring-side",
+        "-m",
+        "merge side, retain mainline catalog",
+    )
+
+    with pytest.raises(pin_ledger.PinError, match="downgraded away"):
+        pin_ledger._walked_lineage_declares_registry(
+            repo, _git(repo, "rev-parse", "HEAD")
+        )
+
+
+def test_second_parent_declaration_cannot_be_laundered(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    # Round-2 repro: mainline DECLARES; an undeclared branch merges the
+    # declared tip with `-s ours` (declaration content discarded, the
+    # declaring commit demoted to second parent and TREESAME to the first
+    # parent), then the ref fast-forwards onto the merge. A single-parent
+    # walk never lists the declaring commit; the existential scan must
+    # still find it and refuse the undeclared head.
+    repo = release_repo.repo
+    undeclared_sha = _git(repo, "rev-parse", "HEAD")
+    branch = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+
+    registry = _registry_bytes()
+    _declare_registry(
+        repo,
+        registry=registry,
+        declared_digest=hashlib.sha256(registry).hexdigest(),
+        message="mainline declares uuid registry",
+    )
+    declared_sha = _git(repo, "rev-parse", "HEAD")
+
+    _git(repo, "checkout", "-q", "-b", "swallow", undeclared_sha)
+    (repo / "side-note.txt").write_text("diverged while undeclared\n")
+    _commit(repo, "side diverges while undeclared")
+    _git(
+        repo,
+        "merge",
+        "-q",
+        "--no-ff",
+        "-s",
+        "ours",
+        branch,
+        "-m",
+        "swallow declared mainline as second parent",
+    )
+    merge_sha = _git(repo, "rev-parse", "HEAD")
+    _git(repo, "checkout", "-q", branch)
+    _git(repo, "merge", "-q", "--ff-only", "swallow")
+    assert _git(repo, "rev-parse", "HEAD") == merge_sha
+    parents = _git(repo, "show", "-s", "--format=%P", merge_sha).split()
+    assert parents[1] == declared_sha
+
+    with pytest.raises(pin_ledger.PinError, match="downgraded away"):
+        pin_ledger.rebuild_from_history(repo, "HEAD")
+
+
+def test_refresh_cannot_cross_declaration_then_downgrade(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    # Round-3 repro: the pin sits at an UNDECLARED commit; a later commit
+    # declares the registry and the next removes it again, leaving a
+    # well-formed v2 head. registry_expected derived from the endpoints
+    # alone would advance the pin straight over the crossed declaration;
+    # the walk must latch it and refuse the downgraded head.
+    pin_path, availability_path, generated_path, _ = _prepare_refresh(
+        monkeypatch, tmp_path, release_repo
+    )
+    pin_ledger.refresh()  # pin at the undeclared base
+
+    registry = _registry_bytes()
+    _declare_registry(
+        release_repo.repo,
+        registry=registry,
+        declared_digest=hashlib.sha256(registry).hexdigest(),
+        message="declare uuid registry mid-window",
+    )
+    catalog_path = release_repo.repo / pin_ledger.LEDGER_CATALOG_PATH
+    catalog = json.loads(catalog_path.read_text())
+    catalog["generator_version"] = 3
+    catalog_path.write_text(json.dumps(catalog, separators=(",", ":")) + "\n")
+    _commit(release_repo.repo, "v3 catalog mid-window")
+
+    catalog = json.loads(catalog_path.read_text())
+    catalog["generator_version"] = 2
+    catalog.pop("uuid_registry_sha256", None)
+    catalog_path.write_text(json.dumps(catalog, separators=(",", ":")) + "\n")
+    (release_repo.repo / pin_ledger.LEDGER_REGISTRY_PATH).unlink()
+    _commit(release_repo.repo, "downgrade back to v2 in the same window")
+
+    before = pin_path.read_bytes()
+    with pytest.raises(pin_ledger.PinError, match="downgraded away"):
+        pin_ledger.refresh()
+    assert pin_path.read_bytes() == before
+
+
+def test_lineage_scan_refuses_shallow_clone(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    # Round-3 repro: a depth-limited clone turns the shallow boundary into
+    # a root, so rev-list silently omits every commit behind it — an
+    # ancestor declaration disappears without error. The scan must refuse
+    # shallow repositories instead of reporting "never declared".
+    repo = release_repo.repo
+    registry = _registry_bytes()
+    _declare_registry(
+        repo,
+        registry=registry,
+        declared_digest=hashlib.sha256(registry).hexdigest(),
+        message="declare uuid registry",
+    )
+    shallow = tmp_path / "shallow-clone"
+    _run(
+        ["git", "clone", "-q", "--depth", "1", f"file://{repo}", str(shallow)],
+        cwd=repo.parent,
+    )
+    with pytest.raises(pin_ledger.PinError, match="shallow"):
+        pin_ledger._walked_lineage_declares_registry(
+            shallow, _git(shallow, "rev-parse", "HEAD")
+        )

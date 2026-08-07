@@ -118,7 +118,9 @@ def _assert_containment(
     assert "comment" not in catalog or type(catalog["comment"]) is str, (
         f"{label}.comment must be a string when present"
     )
-    assert catalog["generator_version"] == 3, (
+    assert type(catalog["generator_version"]) is int and (
+        catalog["generator_version"] == 3
+    ), (
         f"{label}.generator_version must be exactly 3 — the schema below "
         "is frozen on generator v3, and a masquerading version is drift"
     )
@@ -254,15 +256,36 @@ def _assert_containment(
                     f"{expected_cadence}, catalog has {catalog_row['cadence']}"
                 )
         else:
-            # Docket-only rows were minted from this registry, so their cadence
-            # is inherited rather than independent evidence for containment.
+            # Docket-only rows were minted from this registry, so their
+            # cadence is inherited rather than independent evidence — but
+            # when present it must still agree with the entry it was
+            # seeded from.
             assert catalog_row["status"] == "docket-only", (
                 f"{series}: unsupported catalog status {catalog_row['status']!r}"
             )
+            if (
+                catalog_row["cadence"] is not None
+                and expected_cadence is not None
+                and catalog_row["cadence"] != expected_cadence
+            ):
+                cadence_mismatches.append(
+                    f"{series}: placeholder cadence "
+                    f"{catalog_row['cadence']!r} disagrees with docket "
+                    f"{docket_cadence!r}"
+                )
 
         extras = entry.get("extras")
         target_unit = extras.get("targetUnit") if type(extras) is dict else None
         value_scale = extras.get("valueScale") if type(extras) is dict else None
+        if (
+            target_unit is not None
+            and catalog_row["status"] == "observed"
+            and catalog_row["unit"] is None
+        ):
+            unit_mismatches.append(
+                f"{series}: docket declares targetUnit={target_unit!r} but "
+                "the observed catalog row declares no unit at all"
+            )
         if not _units_agree(target_unit, catalog_row["unit"], value_scale):
             unit_mismatches.append(
                 f"{series}: docket targetUnit={target_unit!r} does not agree "
@@ -764,3 +787,37 @@ def test_containment_rejects_masquerades(tmp_path: pathlib.Path) -> None:
             _catalog_shell([relabeled]), "test catalog",
             docket_path=docket_path,
         )
+
+
+def test_residual_polish_from_final_review(tmp_path: pathlib.Path) -> None:
+    # 3.0 is not 3.
+    float_version = _catalog_shell([_catalog_row()])
+    float_version["generator_version"] = 3.0
+    with pytest.raises(AssertionError, match="exactly 3"):
+        _assert_containment(float_version, "t", docket_path=_docket_file(tmp_path, []))
+    # An observed pin may not answer a declared targetUnit with unit null.
+    row = _catalog_row(uuid="00000000-0000-4000-8000-00000000000d",
+                       concept="unitless.series", unit=None)
+    entry = {
+        "series": "unitless.series", "cadence": "monthly", "slug": "u",
+        "extras": {"targetUnit": "percent"},
+        "ledger": {"uuid": row["uuid"], "concept": row["concept"]},
+    }
+    with pytest.raises(AssertionError, match="no unit at all"):
+        _assert_containment(_catalog_shell([row]), "t",
+                            docket_path=_docket_file(tmp_path, [entry]))
+    # A placeholder's seeded cadence must agree with its entry.
+    ph = _catalog_row(
+        uuid="00000000-0000-4000-8000-00000000000e",
+        concept="weekly.placeholder", status="docket-only",
+        cadence="week_ending", unit=None, entity=None, sources=[],
+        rid_patterns=[], first_observed_period=None,
+        last_observed_period=None, observation_count=0,
+    )
+    entry = {
+        "series": "weekly.placeholder", "cadence": "annual", "slug": "w",
+        "ledger": {"uuid": ph["uuid"], "concept": ph["concept"]},
+    }
+    with pytest.raises(AssertionError, match="placeholder cadence"):
+        _assert_containment(_catalog_shell([ph]), "t",
+                            docket_path=_docket_file(tmp_path, [entry]))

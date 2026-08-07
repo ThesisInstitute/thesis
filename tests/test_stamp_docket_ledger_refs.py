@@ -363,3 +363,20 @@ def test_docket_only_placeholder_pins_directly() -> None:
     }
     stamped, notes = stamp_docket(catalog, docket)
     assert stamped["series"][0]["ledger"]["uuid"] == "uuid-ph"
+
+
+def test_placeholder_path_rejects_unmapped_country() -> None:
+    catalog = {
+        "series": [
+            _row("uuid-ph", "zz.series", status="docket-only", unit=None,
+                 cadence="month", entity=None, first_observed_period=None),
+        ]
+    }
+    docket = {
+        "series": [
+            {"series": "zz.series", "cadence": "monthly", "slug": "z",
+             "extras": {"country": "ZZ"}}
+        ]
+    }
+    with pytest.raises(StampError, match="unmapped docket country"):
+        stamp_docket(catalog, docket)
