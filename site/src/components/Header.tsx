@@ -10,6 +10,7 @@ export function Header({
     | "brier"
     | "paper"
     | "forecasts"
+    | "core"
     | "bills"
     | "briefings"
     | "log"
@@ -101,6 +102,16 @@ export function Header({
             }
           >
             Forecasts
+          </Link>
+          <Link
+            href="/core"
+            className={`[font-family:var(--font-body)] text-[0.82rem] font-normal no-underline transition-colors duration-200 hover:no-underline ${
+              activePage === "core"
+                ? "text-[#A94E80]"
+                : "text-[var(--theme-text-muted)]"
+            }`}
+          >
+            Experiments
           </Link>
           <Link
             href="/bills"

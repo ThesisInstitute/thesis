@@ -61,6 +61,33 @@ from history_floor import (
     reviewed_history_floor_authorization,
 )
 
+# thesis_core also has to import when this file runs as a plain checkout script
+# (`python3 scripts/run_thesis_analyst.py`, including by absolute path from
+# another working directory), where only scripts/ is on sys.path.
+_CHECKOUT_ROOT = str(pathlib.Path(__file__).resolve().parents[1])
+if _CHECKOUT_ROOT not in sys.path:
+    sys.path.insert(0, _CHECKOUT_ROOT)
+
+from thesis_core.diagnostics import safe_exception_text  # noqa: E402
+from thesis_core.security import (  # noqa: E402
+    AGENT_ENV_ALLOWLIST,  # noqa: F401 - re-exported for callers and tests
+    ENV_SECRET_ASSIGNMENT_RE,  # noqa: F401 - re-exported
+    JSON_SECRET_FIELD_RE,  # noqa: F401 - re-exported
+    REDACTED_PLACEHOLDER,  # noqa: F401 - re-exported
+    SECRET_TOKEN_RE,  # noqa: F401 - re-exported
+    RedactionError,
+    agent_subprocess_env,
+    is_credential_key,  # noqa: F401 - re-exported
+    redact_headers,  # noqa: F401 - re-exported
+    redact_json_value,  # noqa: F401 - re-exported
+    redact_response_text,
+    redact_stream_line,  # noqa: F401 - re-exported
+    redact_stream_text,
+    redact_text,
+    redact_url,  # noqa: F401 - re-exported
+    redact_value,  # noqa: F401 - re-exported
+)
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 AGENT_ROOT = ROOT / "agents" / "thesis-analyst"
 SCRIPTS = ROOT / "scripts"
@@ -1320,6 +1347,11 @@ def default_out_dir(series: str, period: str, run_at: str) -> pathlib.Path:
 
 
 # --- Credential hygiene -----------------------------------------------------
+# The two defenses below now live in thesis_core/security.py so the legacy
+# runner, the thesis_core execution path and the source adapters scrub with
+# one implementation; the names above are re-exported unchanged for callers
+# and tests that import them from this module.
+#
 # Incident 2026-07-21: during an aging-wave batch, the codex agent ran
 # `env | rg -i 'CENSUS|API|KEY'` while hunting for a Census API key, and 18
 # credential env vars inherited from the interactive shell landed verbatim in
@@ -1334,126 +1366,18 @@ def default_out_dir(series: str, period: str, run_at: str) -> pathlib.Path:
 #    records/ — and custody roots seal the already-clean bytes, so no
 #    post-hoc scrub can break attestation.
 
-AGENT_ENV_ALLOWLIST = (
-    "PATH",
-    "HOME",
-    "TERM",
-    "SHELL",
-    "TMPDIR",
-    "LANG",
-    "LC_ALL",
-    "LC_CTYPE",
-    # Non-secret directory path selecting which codex auth/config dir to use.
-    "CODEX_HOME",
-)
 
-REDACTED_PLACEHOLDER = "[REDACTED]"
-
-# `NAME=value` lines for credential-shaped env var names: the incident shape.
-ENV_SECRET_ASSIGNMENT_RE = re.compile(
-    r"([A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)=\S+"
-)
-
-# `"name": "value"` JSON fields with credential-shaped names — catches an
-# agent cat-ing auth/config files (auth.json and friends) into its trace.
-JSON_SECRET_FIELD_RE = re.compile(
-    r"\"([A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)\"\s*:\s*\"[^\"]*\"",
-    re.IGNORECASE,
-)
-
-# Well-known credential token formats (the incident list plus legacy
-# OpenAI `sk-` keys, which auth.json can hold under API-key login).
-SECRET_TOKEN_RE = re.compile(
-    "|".join(
-        [
-            r"sk-(?:ant|proj|or)-[A-Za-z0-9_-]+",  # Anthropic/OpenAI/OpenRouter
-            r"sk-[A-Za-z0-9]{20,}",  # legacy OpenAI secret keys
-            r"ghp_[A-Za-z0-9]+",  # GitHub classic PAT
-            r"github_pat_[A-Za-z0-9_]+",  # GitHub fine-grained PAT
-            r"xox[bp]-[A-Za-z0-9-]+",  # Slack bot/user tokens
-            r"AIza[A-Za-z0-9_-]+",  # Google API keys
-            r"eyJhbGciOi[A-Za-z0-9_.=-]+",  # JWTs (Supabase service keys, ...)
-            r"AKIA[A-Z0-9]+",  # AWS access key ids
-        ]
-    )
-)
-
-
-def agent_subprocess_env(
-    overrides: dict[str, str] | None = None,
-) -> dict[str, str]:
-    """Minimal explicit environment for recorded agent subprocesses."""
-    env = {
-        name: os.environ[name] for name in AGENT_ENV_ALLOWLIST if os.environ.get(name)
-    }
-    if overrides:
-        env.update(overrides)
-    return env
-
-
-def redact_text(text: str) -> str:
-    """Redact credential values from plain text (idempotent)."""
-    if not text:
-        return text
-    text = ENV_SECRET_ASSIGNMENT_RE.sub(rf"\1={REDACTED_PLACEHOLDER}", text)
-    text = JSON_SECRET_FIELD_RE.sub(rf'"\1": "{REDACTED_PLACEHOLDER}"', text)
-    return SECRET_TOKEN_RE.sub(REDACTED_PLACEHOLDER, text)
-
-
-def redact_json_value(value: Any) -> Any:
-    if isinstance(value, str):
-        return redact_text(value)
-    if isinstance(value, list):
-        return [redact_json_value(item) for item in value]
-    if isinstance(value, dict):
-        return {
-            (redact_text(key) if isinstance(key, str) else key): (
-                redact_json_value(item)
-            )
-            for key, item in value.items()
-        }
-    return value
-
-
-def redact_stream_line(line: str) -> str:
-    stripped = line.strip()
-    if not stripped:
-        return line
+def _redact_captured_text(text: str, *, response: bool = False) -> tuple[str, bool]:
+    """Preserve an observed result even when one channel cannot be archived."""
     try:
-        payload = json.loads(stripped)
-    except json.JSONDecodeError:
-        return redact_text(line)
-    redacted = redact_json_value(payload)
-    return line if redacted == payload else json.dumps(redacted)
-
-
-def redact_stream_text(text: str) -> str:
-    """Redact a line-oriented agent stream without breaking its structure.
-
-    JSONL event lines are redacted value-wise so they stay parseable;
-    non-JSON lines get plain-text redaction. Clean content passes through
-    byte-identical.
-    """
-    if not text:
-        return text
-    return "\n".join(redact_stream_line(line) for line in text.split("\n"))
-
-
-def redact_response_text(text: str) -> str:
-    """Redact an agent response document.
-
-    A whole-document JSON response (the usual final-message shape) is
-    redacted value-wise so it stays parseable even when pretty-printed;
-    anything else falls back to line-oriented stream redaction.
-    """
-    if not text:
-        return text
-    try:
-        payload = json.loads(text)
-    except json.JSONDecodeError:
-        return redact_stream_text(text)
-    redacted = redact_json_value(payload)
-    return text if redacted == payload else json.dumps(redacted, indent=2)
+        redactor = redact_response_text if response else redact_stream_text
+        return redactor(text), False
+    except RedactionError:
+        size = len(text.encode("utf-8", errors="replace"))
+        return (
+            f"[Output omitted: safe redaction was unavailable; {size} bytes.]\n",
+            True,
+        )
 
 
 def run_agent_command(
@@ -1478,15 +1402,26 @@ def run_agent_command(
             env=agent_subprocess_env(),
         )
         finished_at = utc_now()
+        stdout, unsafe_stdout = _redact_captured_text(completed.stdout)
+        stderr, unsafe_stderr = _redact_captured_text(completed.stderr)
+        refused = [
+            name
+            for name, unsafe in (("stdout", unsafe_stdout), ("stderr", unsafe_stderr))
+            if unsafe
+        ]
         return {
             "backend": "external_command",
             "argv": argv,
             "startedAt": started_at,
             "finishedAt": finished_at,
-            "returnCode": completed.returncode,
+            "returnCode": (completed.returncode or 1)
+            if refused
+            else completed.returncode,
+            "processReturnCode": completed.returncode,
             "timedOut": False,
-            "stdout": redact_stream_text(completed.stdout),
-            "stderr": redact_stream_text(completed.stderr),
+            "stdout": stdout,
+            "stderr": stderr,
+            **({"redactionFailures": refused} if refused else {}),
         }
     except subprocess.TimeoutExpired as exc:
         finished_at = utc_now()
@@ -1496,8 +1431,8 @@ def run_agent_command(
             stdout = stdout.decode(errors="replace")
         if isinstance(stderr, bytes):
             stderr = stderr.decode(errors="replace")
-        stdout = redact_stream_text(stdout)
-        stderr = redact_stream_text(stderr)
+        stdout, unsafe_stdout = _redact_captured_text(stdout)
+        stderr, unsafe_stderr = _redact_captured_text(stderr)
         stderr = (
             f"{stderr}\nagent command timed out after {timeout_seconds} seconds\n"
         ).lstrip()
@@ -1510,6 +1445,20 @@ def run_agent_command(
             "timedOut": True,
             "stdout": stdout,
             "stderr": stderr,
+            **(
+                {
+                    "redactionFailures": [
+                        name
+                        for name, unsafe in (
+                            ("stdout", unsafe_stdout),
+                            ("stderr", unsafe_stderr),
+                        )
+                        if unsafe
+                    ]
+                }
+                if unsafe_stdout or unsafe_stderr
+                else {}
+            ),
         }
     except OSError as exc:
         finished_at = utc_now()
@@ -1521,7 +1470,7 @@ def run_agent_command(
             "returnCode": 127,
             "timedOut": False,
             "stdout": "",
-            "stderr": f"agent command could not start: {exc}\n",
+            "stderr": f"agent command could not start: {safe_exception_text(exc)}\n",
         }
 
 
@@ -1914,6 +1863,7 @@ def run_codex_agent_command(
     stdout_text = ""
     stderr_text = ""
     process_return_code = 1
+    redaction_failures: list[str] = []
 
     try:
         codex_home_dir = tempfile.mkdtemp(prefix="thesis-codex-home-")
@@ -1963,8 +1913,13 @@ def run_codex_agent_command(
         finally:
             shutil.rmtree(codex_home_dir, ignore_errors=True)
 
-        stdout_text = redact_stream_text(stdout_path.read_text())
-        stderr_text = redact_stream_text(stderr_path.read_text())
+        stdout_text, unsafe_stdout = _redact_captured_text(stdout_path.read_text())
+        stderr_text, unsafe_stderr = _redact_captured_text(stderr_path.read_text())
+        redaction_failures.extend(
+            name
+            for name, unsafe in (("stdout", unsafe_stdout), ("stderr", unsafe_stderr))
+            if unsafe
+        )
         stdout_path.unlink(missing_ok=True)
         stderr_path.unlink(missing_ok=True)
         workspace_mutations = (
@@ -2001,6 +1956,7 @@ def run_codex_agent_command(
         }
     except Exception as exc:
         finished_at = utc_now()
+        diagnostic = safe_exception_text(exc)
         return {
             "backend": "codex",
             "argv": logged_cmd,
@@ -2011,9 +1967,9 @@ def run_codex_agent_command(
             "returnCode": 1,
             "timedOut": False,
             "stdout": "",
-            "stderr": f"Error running codex CLI: {exc}",
+            "stderr": f"Error running codex CLI: {diagnostic}",
             "codexStdoutRaw": "",
-            "codexStderrRaw": f"Error running codex CLI: {exc}",
+            "codexStderrRaw": f"Error running codex CLI: {diagnostic}",
             "codexEventsJsonl": "",
             "codexLastMessage": "",
             "codexTrace": {
@@ -2021,7 +1977,7 @@ def run_codex_agent_command(
                 "backend": "codex-exec",
                 "model": model,
                 "timeoutSeconds": timeout_seconds,
-                "error": str(exc),
+                "error": diagnostic,
             },
         }
 
@@ -2031,7 +1987,11 @@ def run_codex_agent_command(
     last_message_text = ""
     if last_message_file.exists():
         stripped_last_message = last_message_file.read_text().strip()
-        last_message_text = redact_response_text(stripped_last_message)
+        last_message_text, unsafe_last_message = _redact_captured_text(
+            stripped_last_message, response=True
+        )
+        if unsafe_last_message:
+            redaction_failures.append("last_message")
         if last_message_text != stripped_last_message:
             # Codex wrote this file directly into the run dir; keep the
             # on-disk copy clean even if sealing fails before the artifact
@@ -2047,6 +2007,8 @@ def run_codex_agent_command(
         process_return_code == 0 or terminated_after_output or timed_out
     ):
         effective_return_code = 0
+    if redaction_failures:
+        effective_return_code = effective_return_code or 1
 
     return {
         "backend": "codex",
@@ -2065,6 +2027,7 @@ def run_codex_agent_command(
         "timedOut": timed_out,
         "timeoutReason": timeout_reason,
         "terminatedAfterOutput": terminated_after_output,
+        **({"redactionFailures": redaction_failures} if redaction_failures else {}),
         "stdout": final_text,
         "stderr": parsed["nonJsonStderr"] or stderr_text,
         "codexStdoutRaw": stdout_text,
@@ -2089,6 +2052,7 @@ def run_codex_agent_command(
             "usage": parsed["usage"],
             "eventCount": len(parsed["events"]),
             "lastError": parsed["lastError"],
+            **({"redactionFailures": redaction_failures} if redaction_failures else {}),
         },
     }
 
@@ -2147,6 +2111,11 @@ def append_command_artifacts(
                     ),
                     "returnCode": command_result["returnCode"],
                     "processReturnCode": command_result.get("processReturnCode"),
+                    **(
+                        {"redactionFailures": command_result["redactionFailures"]}
+                        if command_result.get("redactionFailures")
+                        else {}
+                    ),
                     "timedOut": command_result.get("timedOut", False),
                     "timeoutReason": command_result.get("timeoutReason"),
                     "terminatedAfterOutput": command_result.get(

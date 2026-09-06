@@ -1,0 +1,11 @@
+[Unit]
+Description=Check durable Thesis source schedules every minute
+
+[Timer]
+OnBootSec=60
+OnUnitInactiveSec=60
+Unit=thesis-source-poll.service
+
+[Install]
+WantedBy=timers.target
+

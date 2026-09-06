@@ -1,0 +1,1 @@
+"""Packaged PostgreSQL migration assets."""

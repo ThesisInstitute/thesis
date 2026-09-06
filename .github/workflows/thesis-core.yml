@@ -1,0 +1,105 @@
+name: Thesis core
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  postgres:
+    name: PostgreSQL ${{ matrix.postgres }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: [14, 16]
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_USER: thesis_core
+          POSTGRES_PASSWORD: thesis_core_test
+          POSTGRES_DB: thesis_core
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U thesis_core -d thesis_core"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      THESIS_CORE_REQUIRE_POSTGRES: "1"
+      THESIS_CORE_TEST_DSN: postgresql://thesis_core:thesis_core_test@127.0.0.1:5432/thesis_core
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+      - uses: oven-sh/setup-bun@v2
+      - name: Install locked core dependencies
+        run: uv sync --frozen --extra dev --extra custody --extra core
+      - name: Test the real database and scientific contracts
+        run: uv run --frozen --extra dev --extra custody --extra core pytest tests/thesis_core -q
+      - name: Check generated contracts
+        run: uv run --frozen --extra core python -m thesis_core.schema --check
+      - name: Verify shared legacy parsers and credential hygiene
+        run: >-
+          uv run --frozen --extra dev --extra custody --extra core pytest
+          tests/test_resolve_pending.py tests/test_bea_release_adapter.py
+          tests/test_thesis_analyst_env_hygiene.py -q
+
+  custody-only:
+    name: Legacy entry points without core dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+      - name: Install only the locked custody extra
+        run: uv sync --frozen --extra custody
+      - name: Check direct legacy invocation from outside the checkout
+        run: |
+          .venv/bin/python - <<'PY'
+          import importlib.util
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+          import tempfile
+
+          checkout = Path.cwd()
+          for module in ("pydantic", "psycopg", "fastapi"):
+              assert importlib.util.find_spec(module) is None, module
+          env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
+          with tempfile.TemporaryDirectory() as workdir:
+              for script in ("canonical_json.py", "run_thesis_analyst.py", "resolve_pending.py", "run_thesis_batch.py"):
+                  subprocess.run(
+                      [sys.executable, "-S", "-E", str(checkout / "scripts" / script), "--help"],
+                      cwd=workdir, env=env, check=True,
+                  )
+              custody = subprocess.run(
+                  [sys.executable, "-S", "-E", str(checkout / "scripts" / "verify_custody.py"), "absent-run"],
+                  cwd=workdir, env=env, capture_output=True, text=True,
+              )
+              assert custody.returncode == 1 and "CUSTODY BROKEN:" in custody.stderr
+              subprocess.run(
+                  [sys.executable, "-S", "-E", "-c",
+                   "import sys; sys.path.insert(0, sys.argv[1]); "
+                   "import verify_record_chain, producer_signing_pins, verify_custody; "
+                   "assert callable(verify_record_chain.verify_chain)",
+                   str(checkout / "scripts")],
+                  cwd=workdir, env=env, check=True,
+              )
+          PY
+      - name: Verify the scheduled custody command
+        run: uv run --locked --extra custody python scripts/verify_record_chain.py records

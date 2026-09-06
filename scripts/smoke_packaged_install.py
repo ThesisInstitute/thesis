@@ -13,7 +13,6 @@ import textwrap
 import venv
 from pathlib import Path
 
-
 FAKE_AGENT_SCRIPT = """#!/usr/bin/env python3
 import json
 import os
@@ -96,7 +95,18 @@ if __name__ == "__main__":
 
 def run(command: list[str], *, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
     print(f"+ {shlex.join(command)}")
-    return subprocess.run(command, check=True, capture_output=True, text=True, env=env)
+    completed = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=Path(env["FAKE_MCP_ROOT"]).parent,
+    )
+    if completed.returncode:
+        print(completed.stdout)
+        print(completed.stderr, file=sys.stderr)
+    completed.check_returncode()
+    return completed
 
 
 def write_fake_agent_cli(bin_dir: Path, name: str) -> None:
@@ -120,20 +130,58 @@ def main() -> None:
         fake_bin = root / "fake-bin"
         fake_bin.mkdir(parents=True)
 
-        venv.EnvBuilder(with_pip=True, clear=True).create(venv_dir)
+        venv.EnvBuilder(
+            with_pip=True, clear=True, symlinks=os.name != "nt"
+        ).create(venv_dir)
         python_bin = venv_dir / "bin" / "python"
 
         for agent in ("codex", "claude"):
             write_fake_agent_cli(fake_bin, agent)
 
         env = os.environ.copy()
+        for name in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP"):
+            env.pop(name, None)
         env.update(
             {
                 "HOME": str(root / "home"),
                 "CODEX_HOME": str(root / "codex-home"),
                 "FAKE_MCP_ROOT": str(root / "fake-mcp"),
-                "PATH": os.pathsep.join([str(fake_bin), str(venv_dir / "bin"), env["PATH"]]),
+                "PATH": os.pathsep.join(
+                    [str(fake_bin), str(venv_dir / "bin"), env["PATH"]]
+                ),
             }
+        )
+
+        run(
+            [str(python_bin), "-m", "pip", "install", "--no-deps", str(artifact)],
+            env=env,
+        )
+        # Run from outside the checkout with no optional dependencies. This
+        # catches accidental core imports in the scheduled custody primitives.
+        run(
+            [
+                str(python_bin),
+                "-c",
+                textwrap.dedent("""
+                    import importlib.util
+                    from importlib.resources import files
+                    for name in ('pydantic', 'psycopg', 'fastapi'):
+                        assert importlib.util.find_spec(name) is None, name
+                    from thesis_core import canonical, record_chain, security, tsa
+                    from thesis_core.adapters import parsers
+                    assert callable(record_chain.verify_chain)
+                    assert callable(canonical.canonical_bytes)
+                    root = files('thesis_core')
+                    assert root.joinpath('migrations/001_initial.sql').is_file()
+                    for name in (
+                        'tsa-anchors-v1.json', 'tsa-anchors-v2.json',
+                        'digicert-trusted-root-g4.pem', 'freetsa-root-2016.pem',
+                    ):
+                        assert root.joinpath('trust', name).read_bytes(), name
+                    print('Installed pure core and trust assets verified')
+                """),
+            ],
+            env=env,
         )
 
         run(
@@ -142,10 +190,39 @@ def main() -> None:
                 "-m",
                 "pip",
                 "install",
-                f"brier[mcp] @ {artifact.as_uri()}",
+                f"brier[mcp,core] @ {artifact.as_uri()}",
             ],
             env=env,
         )
+
+        run([str(venv_dir / "bin" / "thesis-core"), "--help"], env=env)
+        run(
+            [
+                str(python_bin),
+                "-c",
+                textwrap.dedent("""
+                    import json
+                    from importlib.resources import files
+                    from thesis_core import contracts, schema, store
+                    root = files('thesis_core')
+                    assets = list(root.joinpath('schemas').iterdir())
+                    schemas = [a for a in assets if a.name.endswith('.json')]
+                    assert schemas, 'No JSON Schema assets in the installed wheel'
+                    for asset in schemas:
+                        assert isinstance(json.loads(asset.read_text()), dict)
+                    assert len(contracts.RECORD_TYPES) >= 16
+                    assert callable(store.Store.migrate)
+                    for name in (
+                        '002_scientific_execution.sql',
+                        '003_publication_attempts.sql',
+                    ):
+                        assert root.joinpath('migrations', name).is_file()
+                    print('Installed core contracts, CLI and migration assets verified')
+                """),
+            ],
+            env=env,
+        )
+        run([str(python_bin), "-m", "thesis_core.schema", "--stdout"], env=env)
 
         brier = [str(venv_dir / "bin" / "brier")]
         codex_skill = Path(env["CODEX_HOME"]) / "skills" / "brier" / "SKILL.md"

@@ -30,3 +30,6 @@ claude-plugin/skills/decision-framework-workspace/
 
 # OS
 .DS_Store
+
+# Local Thesis core state (scientific bytes live in this external artifact store)
+.thesis-core/

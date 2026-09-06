@@ -1,0 +1,20 @@
+[Unit]
+Description=Thesis bounded official source capture and nonforecast follow-ups
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=thesis
+Group=thesis
+WorkingDirectory=/opt/thesis
+EnvironmentFile=/etc/thesis/runtime.env
+ExecStart=/opt/thesis/.venv/bin/python -m thesis_core poll --max-jobs 20
+TimeoutStartSec=900
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/thesis
+
