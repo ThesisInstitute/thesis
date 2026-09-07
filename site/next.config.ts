@@ -5,6 +5,13 @@ const APP_HOST = "app.thesisinstitute.org";
 const LEGACY_HOSTS = ["www.thesisinstitute.org"];
 
 const nextConfig: NextConfig = {
+  // The published app uses the committed, explicit public snapshot. Operators
+  // select live mode when running against their private PostgreSQL/CAS service.
+  env: { THESIS_LAB_DATA_MODE: process.env.THESIS_LAB_DATA_MODE ?? "snapshot" },
+  outputFileTracingIncludes: {
+    "/api/core/**/*": ["./lab-publication/**/*"],
+    "/lab/**/*": ["./lab-publication/manifest.json"],
+  },
   async redirects() {
     return [
       // /about retired in the ledger migration; its successor is /thesis.

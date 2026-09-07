@@ -187,6 +187,7 @@ export type ConditionalDetail = {
   readonly "scoring_status"?: "not_registered";
   readonly "trust_class"?: "local_operator";
   readonly "requested_model": string;
+  readonly "provider_metadata": ConditionalProviderMetadata | null;
   readonly "observed_model"?: null;
   readonly "execution_state": "running" | "succeeded" | "failed" | "unknown";
   readonly "started_at": string;
@@ -194,6 +195,8 @@ export type ConditionalDetail = {
   readonly "error_code": string | null;
   readonly "schema_version": "thesis_lab_v1";
   readonly "generated_at": string;
+  readonly "reviews": ReadonlyArray<ConditionalReviewView>;
+  readonly "revision_history": ReadonlyArray<ConditionalRevisionEntry>;
   readonly "contract_id": string;
   readonly "shared_evidence_id": string;
   readonly "contract": ConditionalContract;
@@ -207,6 +210,14 @@ export type ConditionalDetail = {
 export type ConditionalEvidence = {
   readonly "claim": string;
   readonly "source_ids": ReadonlyArray<string>;
+};
+
+export type ConditionalFinding = {
+  readonly "id": string;
+  readonly "title": string;
+  readonly "detail": string;
+  readonly "source_ids": ReadonlyArray<string>;
+  readonly "response_location": string;
 };
 
 export type ConditionalHistory = {
@@ -231,9 +242,49 @@ export type ConditionalOutcome = {
 export type ConditionalPage = {
   readonly "schema_version": "thesis_lab_v1";
   readonly "generated_at": string;
+  readonly "requested_models": ReadonlyArray<string>;
   readonly "items": ReadonlyArray<ConditionalSummary>;
   readonly "total": number;
   readonly "next_cursor": string | null;
+};
+
+export type ConditionalProviderMetadata = {
+  readonly "provider": "google";
+  readonly "reported_model": string;
+  readonly "response_id": string | null;
+  readonly "usage": ConditionalUsage;
+  readonly "source_artifact": ArtifactLink;
+  readonly "verification": "matched_recorded_response";
+};
+
+export type ConditionalReviewView = {
+  readonly "id": string;
+  readonly "attempt_id": string;
+  readonly "response_sha256": string;
+  readonly "recorded_at": string;
+  readonly "reviewer": string;
+  readonly "review_basis": "operator_assessment";
+  readonly "outcome": "issues_remaining" | "no_actionable_findings";
+  readonly "findings": ReadonlyArray<ConditionalFinding>;
+  readonly "report": ArtifactLink;
+  readonly "record_artifact": ArtifactLink;
+};
+
+export type ConditionalRevisionEntry = {
+  readonly "attempt_id": string;
+  readonly "contract_id": string;
+  readonly "shared_evidence_id": string;
+  readonly "parent_attempt_id": string | null;
+  readonly "started_at": string;
+  readonly "execution_state": "running" | "succeeded" | "failed" | "unknown";
+  readonly "requested_model": string;
+  readonly "provider_metadata": ConditionalProviderMetadata | null;
+  readonly "arm_quantiles": ReadonlyArray<Quantiles>;
+  readonly "feedback": ArtifactLink | null;
+  readonly "triggering_review_id": string | null;
+  readonly "linked_at": string | null;
+  readonly "association_basis": "retrospective_association" | null;
+  readonly "association_artifact": ArtifactLink | null;
 };
 
 export type ConditionalSource = {
@@ -254,11 +305,19 @@ export type ConditionalSummary = {
   readonly "scoring_status"?: "not_registered";
   readonly "trust_class"?: "local_operator";
   readonly "requested_model": string;
+  readonly "provider_metadata": ConditionalProviderMetadata | null;
   readonly "observed_model"?: null;
   readonly "execution_state": "running" | "succeeded" | "failed" | "unknown";
   readonly "started_at": string;
   readonly "finished_at": string | null;
   readonly "error_code": string | null;
+};
+
+export type ConditionalUsage = {
+  readonly "prompt_tokens": number | null;
+  readonly "output_tokens": number | null;
+  readonly "total_tokens": number | null;
+  readonly "thought_tokens": number | null;
 };
 
 export type Cost = {

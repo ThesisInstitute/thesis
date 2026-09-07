@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { handlePublishedArtifactRequest, snapshotEnabled } from "./published-lab";
 import {
   buildUpstreamUrl,
   CORE_API_BASE_ENV,
@@ -33,6 +34,8 @@ export async function handleArtifactProxyRequest(
   const match = /^\/api\/core\/artifacts\/([0-9a-f]{64})$/.exec(url.pathname);
   if (!match || url.search) return coreProxyError("invalid_path");
   const sha = match[1];
+  if (snapshotEnabled(options.env))
+    return handlePublishedArtifactRequest(sha);
   const base = resolveUpstreamBase(
     (options.env ?? process.env)[CORE_API_BASE_ENV],
   );

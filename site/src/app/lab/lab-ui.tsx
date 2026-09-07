@@ -50,7 +50,15 @@ export function time(value: string | null): string {
         .replace("Z", " UTC");
 }
 
-export function LabShell({ children }: { children: ReactNode }) {
+export function LabShell({
+  children,
+  snapshot = false,
+  publication,
+}: {
+  children: ReactNode;
+  snapshot?: boolean;
+  publication?: { generated_at: string; attempts: number } | null;
+}) {
   const path = usePathname();
   return (
     <div className="lab">
@@ -58,43 +66,56 @@ export function LabShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <header className="lab-header">
-        <Link className="lab-brand" href="/lab/forecasts">
+        <Link
+          className="lab-brand"
+          href={snapshot ? "/lab/conditionals" : "/lab/forecasts"}
+        >
           <span className="lab-mark" aria-hidden="true">
             ∿
           </span>
           thesis<span className="lab-brand-sub">lab</span>
         </Link>
         <nav aria-label="Forecast lab">
-          {["forecasts", "conditionals", "experiments", "agents"].map(
-            (page) => (
-              <Link
-                key={page}
-                href={`/lab/${page}`}
-                aria-current={
-                  path?.startsWith(`/lab/${page}`) ? "page" : undefined
-                }
-              >
-                {page[0].toUpperCase() + page.slice(1)}
-              </Link>
-            ),
-          )}
+          {(snapshot
+            ? ["conditionals"]
+            : ["forecasts", "conditionals", "experiments", "agents"]
+          ).map((page) => (
+            <Link
+              key={page}
+              href={`/lab/${page}`}
+              aria-current={
+                path?.startsWith(`/lab/${page}`) ? "page" : undefined
+              }
+            >
+              {page[0].toUpperCase() + page.slice(1)}
+            </Link>
+          ))}
         </nav>
         <div className="lab-secondary-nav">
-          <Link
-            href="/lab/operations"
-            aria-current={path === "/lab/operations" ? "page" : undefined}
-          >
-            Operations
-          </Link>
+          {!snapshot && (
+            <Link
+              href="/lab/operations"
+              aria-current={path === "/lab/operations" ? "page" : undefined}
+            >
+              Operations
+            </Link>
+          )}
           <Link href="/forecasts">Legacy archive ↗</Link>
         </div>
       </header>
       <main id="lab-main" className="lab-main">
+        {snapshot && (
+          <p className="lab-muted" role="note">
+            {publication
+              ? `Shared snapshot · ${publication.attempts} conditional attempts · published ${time(publication.generated_at)}. Forecast times and original evidence are preserved.`
+              : "Shared snapshot · publication currently unavailable."}
+          </p>
+        )}
         {children}
       </main>
       <footer className="lab-footer">
         <span>Public forecasts. Inspectable evidence.</span>
-        <Link href="/core">Record inspector</Link>
+        {!snapshot && <Link href="/core">Record inspector</Link>}
         <Link href="/">Thesis Institute ↗</Link>
       </footer>
     </div>

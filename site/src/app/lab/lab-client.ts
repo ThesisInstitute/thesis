@@ -71,6 +71,14 @@ export async function fetchLab<M extends LabModel>(
   if ("items" in data)
     for (const item of data.items) {
       if (
+        collection === "conditionals" &&
+        !id &&
+        url.searchParams.has("requested_model") &&
+        "requested_model" in item &&
+        item.requested_model !== url.searchParams.get("requested_model")
+      )
+        mismatch();
+      if (
         collection === "forecasts" &&
         child === "comparisons" &&
         "target_id" in item &&

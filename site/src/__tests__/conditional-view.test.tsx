@@ -3,6 +3,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +14,8 @@ import {
   conditionalSummary,
   expiredConditional,
   expiredSummary,
+  reviewedOriginal,
+  reviewedRevision,
   unsuccessful,
 } from "./conditional-fixtures";
 import { ids } from "./lab-fixtures";
@@ -164,5 +167,191 @@ describe("paired conditional working surfaces", () => {
     expect(
       screen.queryByText(/Registered records will appear/),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows model attribution and unresolved review findings before the unchanged native chart", async () => {
+    respond(reviewedRevision);
+    const { container } = render(<ConditionalView id={reviewedRevision.id} />);
+    const review = await screen.findByRole("heading", {
+      name: "Review findings remain",
+    });
+    expect(
+      screen.getByText(
+        "This recorded revision still has a synthetic reasoning gap.",
+      ),
+    ).toBeVisible();
+    expect(
+      review.compareDocumentPosition(
+        screen.getByRole("heading", { name: "Paired distributions" }),
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    const identity = container.querySelector(
+      ".lab-conditional-identity",
+    ) as HTMLElement;
+    expect(within(identity).getByText("test/requested-model")).toBeVisible();
+    expect(
+      within(identity).getByText("synthetic-returned-model"),
+    ).toBeVisible();
+    expect(
+      within(identity).getByText(/Model authorship is unverified/),
+    ).toBeVisible();
+    expect(container.querySelectorAll('[data-point-count="201"]')).toHaveLength(
+      3,
+    );
+    expect(
+      screen.queryByText(/source.clean|approved estimate/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps original and revised numbers, links and full recorded feedback inspectable", async () => {
+    const feedback =
+      "Exact synthetic feedback.\n<em>This stays plain text.</em>";
+    const report =
+      "Exact synthetic review report, including its original limitations.";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (path: string) => {
+        if (
+          path ===
+          `/api/core${reviewedRevision.revision_history[1].feedback!.download_path}`
+        )
+          return new Response(feedback);
+        if (
+          path ===
+          `/api/core${reviewedRevision.reviews[0].report.download_path}`
+        )
+          return new Response(report);
+        return new Response(JSON.stringify(reviewedRevision));
+      }),
+    );
+    const { container } = render(<ConditionalView id={reviewedRevision.id} />);
+    await screen.findByRole("heading", { name: "Revision history" });
+    const table = container.querySelector(
+      ".lab-conditional-revisions",
+    ) as HTMLElement;
+    const rows = within(table).getAllByRole("row");
+    expect(
+      within(rows[1]).getByRole("link", { name: "Original attempt" }),
+    ).toHaveAttribute("href", `/lab/conditionals/${reviewedOriginal.id}`);
+    expect(within(rows[1]).getByText("7")).toBeVisible();
+    expect(within(rows[1]).getByText("3–11")).toBeVisible();
+    expect(within(rows[1]).getByText("4")).toBeVisible();
+    expect(within(rows[2]).getByText("8")).toBeVisible();
+    expect(within(rows[2]).getByText("6")).toBeVisible();
+    expect(rows[2]).toHaveAttribute("aria-current", "true");
+    expect(
+      screen.getByText(/Revision relationship recorded retrospectively/),
+    ).toBeVisible();
+    fireEvent.click(
+      screen.getByText(
+        `Revision feedback · ${reviewedRevision.id.slice(0, 12)}`,
+      ),
+    );
+    expect(
+      await screen.findByText(/Exact synthetic feedback/),
+    ).toHaveTextContent("<em>This stays plain text.</em>");
+    expect(
+      container.querySelector(".lab-conditional-artifact-text em"),
+    ).toBeNull();
+    fireEvent.click(screen.getByText("Full review report"));
+    expect(await screen.findByText(report)).toBeVisible();
+    expect(
+      screen.getByRole("link", {
+        name: "Review that prompted this revision →",
+      }),
+    ).toHaveAttribute(
+      "href",
+      `/lab/conditionals/${reviewedOriginal.id}#conditional-review-${reviewedOriginal.reviews[0].id}`,
+    );
+  });
+
+  it("filters on the server and cancels a stale unfiltered next page", async () => {
+    const other = {
+      ...conditionalSummary,
+      id: ids.agent,
+      title: "Another synthetic model",
+      requested_model: "models/other-version",
+    };
+    const options = [conditionalSummary.requested_model, other.requested_model];
+    let finishOldPage!: (value: Response) => void;
+    const fetcher = vi.fn((path: string) => {
+      if (path.includes("after="))
+        return new Promise<Response>((resolve) => {
+          finishOldPage = resolve;
+        });
+      if (path.includes("requested_model="))
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              ...conditionalPage,
+              requested_models: options,
+              items: [other],
+              total: 1,
+            }),
+          ),
+        );
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            ...conditionalPage,
+            requested_models: options,
+            total: 2,
+            next_cursor: ids.run,
+          }),
+        ),
+      );
+    });
+    vi.stubGlobal("fetch", fetcher);
+    render(<ConditionalsView />);
+    await screen.findByRole("link", { name: conditionalSummary.title });
+    fireEvent.click(screen.getByRole("button", { name: /load more/i }));
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Requested model" }),
+      { target: { value: other.requested_model } },
+    );
+    expect(
+      await screen.findByRole("link", { name: other.title }),
+    ).toBeVisible();
+    expect(fetcher).toHaveBeenCalledWith(
+      "/api/core/lab/conditionals?limit=20&requested_model=models%2Fother-version",
+      expect.anything(),
+    );
+    expect(
+      screen.getByRole("option", { name: conditionalSummary.requested_model }),
+    ).toBeInTheDocument();
+    finishOldPage(
+      new Response(
+        JSON.stringify({
+          ...conditionalPage,
+          requested_models: options,
+          items: [conditionalSummary],
+        }),
+      ),
+    );
+    await waitFor(() =>
+      expect(screen.getByText("1 of 1 loaded")).toBeVisible(),
+    );
+    expect(
+      screen.queryByRole("link", { name: conditionalSummary.title }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("copies the actual current page URL, with an accessible fallback if clipboard access fails", async () => {
+    respond(conditional);
+    const copy = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: copy },
+    });
+    render(<ConditionalView id={conditional.id} />);
+    const share = await screen.findByRole("button", { name: "Share" });
+    fireEvent.click(share);
+    await screen.findByText("Link copied");
+    expect(copy).toHaveBeenCalledWith(window.location.href);
+    copy.mockRejectedValueOnce(new Error("No clipboard"));
+    fireEvent.click(share);
+    expect(
+      await screen.findByRole("textbox", { name: "Copy this link" }),
+    ).toHaveValue(window.location.href);
   });
 });

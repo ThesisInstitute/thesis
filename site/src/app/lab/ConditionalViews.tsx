@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import type {
+  ArtifactLink,
   ConditionalDetail,
   ConditionalSummary,
   Quantiles,
 } from "@/data/generated/thesis-lab";
 import { labProxyPath } from "@/lib/lab-paths";
 import { DistributionChart } from "./CdfChart";
-import { useLab, useLabPages } from "./lab-client";
+import { useLab, useLabPages, withQuery } from "./lab-client";
 import {
   Evidence,
   Fact,
@@ -37,7 +39,11 @@ function ConditionalState({
 }
 
 export function ConditionalsView() {
-  const page = useLabPages("/lab/conditionals?limit=20", "ConditionalPage");
+  const [model, setModel] = useState("");
+  const page = useLabPages(
+    withQuery("/lab/conditionals?limit=20", "requested_model", model || null),
+    "ConditionalPage",
+  );
   return (
     <>
       <Heading
@@ -52,9 +58,27 @@ export function ConditionalsView() {
       <State resource={page.resource}>
         {(data) => (
           <>
+            <label className="lab-cohort-selector lab-model-filter">
+              <span>Requested model</span>
+              <select
+                value={model}
+                onChange={(event) => setModel(event.target.value)}
+              >
+                <option value="">All models</option>
+                {data.requested_models.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </label>
             {page.items.length === 0 ? (
               <div className="lab-notice">
-                <strong>No conditional attempts yet</strong>
+                <strong>
+                  {model
+                    ? "No attempts for this model"
+                    : "No conditional attempts yet"}
+                </strong>
                 <p>
                   Paired forecasts and unsuccessful attempts will appear here
                   when recorded.
@@ -66,6 +90,7 @@ export function ConditionalsView() {
                   <thead>
                     <tr>
                       <th>Conditional question</th>
+                      <th>Requested / provider-reported model</th>
                       <th>Attempt</th>
                       <th>Started</th>
                     </tr>
@@ -82,6 +107,14 @@ export function ConditionalsView() {
                           </Link>
                           <small>
                             {item.measurement_period} · {unit(item.unit)}
+                          </small>
+                        </td>
+                        <td className="lab-conditional-model-cell">
+                          <span>{item.requested_model}</span>
+                          <small>
+                            Provider-reported:{" "}
+                            {item.provider_metadata?.reported_model ??
+                              "Not reported"}
                           </small>
                         </td>
                         <td>
@@ -109,8 +142,8 @@ export function ConditionalsView() {
               loadMore={page.loadMore}
             />
             <p className="lab-caption">
-              Every recorded attempt remains visible, including failed and
-              unknown outcomes. Updated {time(data.generated_at)}.
+              Recorded attempts remain individually inspectable, including
+              failed and unknown outcomes. Updated {time(data.generated_at)}.
             </p>
           </>
         )}
@@ -133,7 +166,10 @@ export function ConditionalView({ id }: { id: string }) {
             description={data.question}
             back={{ href: "/lab/conditionals", label: "Conditionals" }}
           >
-            <Refresh onClick={refresh} />
+            <div className="lab-conditional-actions">
+              <ShareLink key={id} />
+              <Refresh onClick={refresh} />
+            </div>
           </Heading>
           <div className="lab-conditional-status">
             <p className="lab-conditional-disclosure">
@@ -143,6 +179,35 @@ export function ConditionalView({ id }: { id: string }) {
               Attempt <ConditionalState state={data.execution_state} />
             </span>
           </div>
+          <div className="lab-conditional-identity">
+            <Facts>
+              <Fact label="Requested model">{data.requested_model}</Fact>
+              <Fact label="Provider-reported model">
+                {data.provider_metadata?.reported_model ?? "Not reported"}
+              </Fact>
+              <Fact label="Completed">{time(data.finished_at)}</Fact>
+            </Facts>
+            <p className="lab-caption">
+              {data.provider_metadata
+                ? "Provider-reported metadata matches the recorded response. Model authorship is unverified."
+                : "No provider model metadata was reported. Model authorship is unverified."}
+              {data.provider_metadata && (
+                <>
+                  {" "}
+                  <a
+                    className="lab-record"
+                    href={labProxyPath(
+                      data.provider_metadata.source_artifact.download_path,
+                    )}
+                    download
+                  >
+                    Provider response ↓
+                  </a>
+                </>
+              )}
+            </p>
+          </div>
+          <ConditionalReviews data={data} />
           {data.response ? (
             <PairedDistributions data={data} />
           ) : (
@@ -162,6 +227,7 @@ export function ConditionalView({ id }: { id: string }) {
               {data.error_code && <p>{words(data.error_code)}</p>}
             </div>
           )}
+          <RevisionHistory data={data} />
           <Section
             title="Conditions"
             description={`Condition deadline: ${time(data.contract.condition_deadline)}. ${data.contract.condition_resolution_note}`}
@@ -241,6 +307,14 @@ export function ConditionalView({ id }: { id: string }) {
                 {data.requested_model}
                 <small>Model authorship unverified</small>
               </Fact>
+              <Fact label="Provider-reported model">
+                {data.provider_metadata?.reported_model ?? "Not reported"}
+              </Fact>
+              {data.provider_metadata && (
+                <Fact label="Provider response ID">
+                  {data.provider_metadata.response_id ?? "Not reported"}
+                </Fact>
+              )}
               <Fact label="Started">{time(data.started_at)}</Fact>
               <Fact label="Finished">{time(data.finished_at)}</Fact>
               <Fact label="Execution deadline">{time(data.expires_at)}</Fact>
@@ -249,6 +323,29 @@ export function ConditionalView({ id }: { id: string }) {
                 {data.error_code && <small>{words(data.error_code)}</small>}
               </Fact>
             </Facts>
+            {data.provider_metadata && (
+              <details className="lab-disclosure">
+                <summary>Provider-reported usage</summary>
+                <Facts>
+                  <Fact label="Prompt tokens">
+                    {data.provider_metadata.usage.prompt_tokens ??
+                      "Not reported"}
+                  </Fact>
+                  <Fact label="Output tokens">
+                    {data.provider_metadata.usage.output_tokens ??
+                      "Not reported"}
+                  </Fact>
+                  <Fact label="Thought tokens">
+                    {data.provider_metadata.usage.thought_tokens ??
+                      "Not reported"}
+                  </Fact>
+                  <Fact label="Total tokens">
+                    {data.provider_metadata.usage.total_tokens ??
+                      "Not reported"}
+                  </Fact>
+                </Facts>
+              </details>
+            )}
             <details className="lab-disclosure">
               <summary>Record identifiers</summary>
               <Facts>
@@ -271,6 +368,291 @@ export function ConditionalView({ id }: { id: string }) {
         </>
       )}
     </State>
+  );
+}
+
+function ShareLink() {
+  const [copied, setCopied] = useState(false);
+  const [fallback, setFallback] = useState<string | null>(null);
+  async function share() {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setFallback(null);
+    } catch {
+      setCopied(false);
+      setFallback(url);
+    }
+  }
+  return (
+    <div className="lab-share">
+      <button className="lab-button" type="button" onClick={share}>
+        Share
+      </button>
+      <span className="lab-caption" role="status">
+        {copied ? "Link copied" : ""}
+      </span>
+      {fallback && (
+        <label className="lab-share-fallback">
+          Copy this link
+          <input
+            readOnly
+            value={fallback}
+            onFocus={(event) => event.target.select()}
+          />
+        </label>
+      )}
+    </div>
+  );
+}
+
+/** Show exact archived text on demand without treating its contents as markup. */
+function ArtifactText({
+  artifact,
+  label,
+}: {
+  artifact: ArtifactLink;
+  label: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [content, setContent] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    setContent(null);
+    setError(false);
+    void fetch(labProxyPath(artifact.download_path), {
+      credentials: "omit",
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Artifact unavailable");
+        const value = await response.text();
+        if (!controller.signal.aborted) setContent(value);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setError(true);
+      });
+    return () => controller.abort();
+  }, [open, artifact.download_path]);
+  return (
+    <details
+      className="lab-disclosure"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary>{label}</summary>
+      {open &&
+        (error ? (
+          <p className="lab-muted">
+            The archived text could not be loaded. Its download link remains
+            available.
+          </p>
+        ) : content === null ? (
+          <p className="lab-muted">Loading recorded text…</p>
+        ) : (
+          <pre className="lab-conditional-artifact-text">{content}</pre>
+        ))}
+      <a
+        className="lab-record"
+        href={labProxyPath(artifact.download_path)}
+        download
+      >
+        Download recorded text ↓
+      </a>
+    </details>
+  );
+}
+
+function ConditionalReviews({ data }: { data: ConditionalDetail }) {
+  if (data.reviews.length === 0)
+    return (
+      <p className="lab-caption lab-conditional-no-review">
+        No source or reasoning review recorded.
+      </p>
+    );
+  return (
+    <section
+      className="lab-conditional-reviews"
+      aria-label="Source and reasoning reviews"
+    >
+      {data.reviews.map((review) => (
+        <article
+          key={review.id}
+          id={`conditional-review-${review.id}`}
+          className="lab-conditional-review"
+        >
+          <h2>
+            {review.outcome === "issues_remaining"
+              ? "Review findings remain"
+              : "No actionable findings reported"}
+          </h2>
+          <p className="lab-caption">
+            {review.reviewer} · {time(review.recorded_at)} · operator assessment
+          </p>
+          <ul className="lab-conditional-review-findings">
+            {review.findings.map((finding) => (
+              <li key={finding.id}>
+                <strong>{finding.title}</strong>
+                <p>{finding.detail}</p>
+                <div className="lab-links">
+                  {finding.source_ids.map((sourceId) => (
+                    <a
+                      key={sourceId}
+                      className="lab-record"
+                      href={`#conditional-source-${sourceId}`}
+                    >
+                      {
+                        data.contract.sources.find(
+                          (source) => source.id === sourceId,
+                        )!.title
+                      }
+                    </a>
+                  ))}
+                </div>
+                <small className="lab-muted">
+                  Response location: {finding.response_location}
+                </small>
+              </li>
+            ))}
+          </ul>
+          <ArtifactText artifact={review.report} label="Full review report" />
+          <a
+            className="lab-record"
+            href={labProxyPath(review.record_artifact.download_path)}
+            download
+          >
+            Review record ↓
+          </a>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function RevisionHistory({ data }: { data: ConditionalDetail }) {
+  if (data.revision_history.length < 2) return null;
+  return (
+    <Section
+      title="Revision history"
+      description="Each recorded attempt retains its original forecasts, reasoning and review."
+    >
+      <div className="lab-table-scroll">
+        <table className="lab-table lab-conditional-revisions">
+          <thead>
+            <tr>
+              <th>Attempt</th>
+              <th>Requested model</th>
+              {data.contract.arms.map((arm) => (
+                <th key={arm.id}>
+                  {arm.label}
+                  <small>Median · 80% interval</small>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.revision_history.map((entry) => (
+              <tr
+                key={entry.attempt_id}
+                aria-current={entry.attempt_id === data.id ? "true" : undefined}
+              >
+                <td>
+                  <Link
+                    className="lab-name"
+                    href={`/lab/conditionals/${entry.attempt_id}`}
+                  >
+                    {entry.parent_attempt_id
+                      ? "Revised attempt"
+                      : "Original attempt"}
+                  </Link>
+                  <small>
+                    {time(entry.started_at)} · {entry.attempt_id.slice(0, 12)}
+                  </small>
+                  <small>
+                    <ConditionalState state={entry.execution_state} />
+                    {entry.attempt_id === data.id
+                      ? " · Viewing this attempt"
+                      : ""}
+                  </small>
+                  {entry.parent_attempt_id && (
+                    <small>
+                      Revision of{" "}
+                      <Link
+                        href={`/lab/conditionals/${entry.parent_attempt_id}`}
+                      >
+                        {entry.parent_attempt_id.slice(0, 12)}
+                      </Link>
+                    </small>
+                  )}
+                </td>
+                <td className="lab-conditional-model-cell">
+                  {entry.requested_model}
+                  <small>
+                    Provider-reported:{" "}
+                    {entry.provider_metadata?.reported_model ?? "Not reported"}
+                  </small>
+                </td>
+                {data.contract.arms.map((arm, i) => (
+                  <td key={arm.id} className="lab-number">
+                    {entry.arm_quantiles[i] ? (
+                      <>
+                        <strong>{number(entry.arm_quantiles[i].q50)}</strong>
+                        <small>
+                          {number(entry.arm_quantiles[i].q10)}–
+                          {number(entry.arm_quantiles[i].q90)}
+                        </small>
+                      </>
+                    ) : (
+                      "Not available"
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {data.revision_history
+        .filter((entry) => entry.feedback)
+        .map((entry) => (
+          <div key={entry.attempt_id} className="lab-revision-feedback">
+            <ArtifactText
+              artifact={entry.feedback!}
+              label={`Revision feedback · ${entry.attempt_id.slice(0, 12)}`}
+            />
+            {entry.triggering_review_id && entry.parent_attempt_id && (
+              <a
+                className="lab-record"
+                href={`/lab/conditionals/${entry.parent_attempt_id}#conditional-review-${entry.triggering_review_id}`}
+              >
+                Review that prompted this revision →
+              </a>
+            )}
+            {entry.association_artifact && (
+              <>
+                {" "}
+                <a
+                  className="lab-record"
+                  href={labProxyPath(entry.association_artifact.download_path)}
+                  download
+                >
+                  Revision record ↓
+                </a>
+              </>
+            )}
+            {entry.linked_at && (
+              <p className="lab-caption">
+                Revision relationship recorded retrospectively on{" "}
+                {time(entry.linked_at)}. This timestamp records the association,
+                not when the review was performed.
+              </p>
+            )}
+          </div>
+        ))}
+    </Section>
   );
 }
 
