@@ -18,3 +18,7 @@ tests/fixtures/qcew/*.csv binary
 tests/fixtures/eia_dnav/*.html binary
 tests/fixtures/eia_dnav/*.xls binary
 tests/fixtures/eia_dnav/api-no-key.json binary
+
+# Official capture fixtures retain exact response bytes, including CRLF/folding
+# and whitespace covered by their provenance hashes.
+tests/fixtures/thesis_core/bea-release-schedule-2026-09-04.ics -text -whitespace
