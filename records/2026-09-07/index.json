@@ -2,6 +2,7 @@
   "schemaVersion": "thesis_record_day_index_v1",
   "integrityNote": "informational only; chain links are authoritative",
   "snapshots": [
-    "digest-34150816457-1.json"
+    "digest-34150816457-1.json",
+    "digest-34152723192-1.json"
   ]
 }
