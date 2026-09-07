@@ -190,7 +190,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.2" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.1.0" },
     { name = "pyyaml", marker = "extra == 'dev'", specifier = ">=6.0.2" },
-    { name = "receipt", marker = "python_full_version >= '3.11' and extra == 'custody'", specifier = "==0.5.1" },
+    { name = "receipt", marker = "python_full_version >= '3.11' and extra == 'custody'", specifier = "==0.6.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.7" },
     { name = "scipy", marker = "extra == 'experiments'", specifier = ">=1.15.3" },
     { name = "selectolax", marker = "extra == 'bills'", specifier = ">=0.3.21" },
@@ -2408,14 +2408,14 @@ wheels = [
 
 [[package]]
 name = "receipt"
-version = "0.5.1"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography", marker = "python_full_version >= '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c1/86/d57c13d77a8357d2cebb59365587867324186bd5751a902a338eb74baed6/receipt-0.5.1.tar.gz", hash = "sha256:17f8eaec43aab450193a9d793c92f75364c6055fbd634ee5ab4ea69bbe4ba958", size = 1173686, upload-time = "2026-08-17T19:08:01.001Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/19/2d/952e672b5de571712ab896b9f93fd3ea373429eac0b24c88fb90dcc6cfc0/receipt-0.6.0.tar.gz", hash = "sha256:c84f221d83099dcd86d271de8ecadf10e7eb987b7a13761af520ac9311bf773d", size = 1615892, upload-time = "2026-09-05T16:51:22.81Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c0/06/e455ce392677130b7d55272a7ff486fa4825f43cea2c242eb1fbfc7752af/receipt-0.5.1-py3-none-any.whl", hash = "sha256:baacd750659773c84fe6a0da3ece9f50804ce3e8ccd23e21bced7440b7dee350", size = 78025, upload-time = "2026-08-17T19:07:59.633Z" },
+    { url = "https://files.pythonhosted.org/packages/ff/40/1bdf7498ff671dcb69dba776695f9d257d86a39dff689da63263282dc5b7/receipt-0.6.0-py3-none-any.whl", hash = "sha256:84dd540bc77f14547bcf5b4654ff22184a404aa280d8b13cda8e179593575734", size = 233986, upload-time = "2026-09-05T16:51:21.113Z" },
 ]
 
 [[package]]

@@ -9,7 +9,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import type { TaskComparison } from "@/data/generated/thesis-lab";
+import type { DistributionCurve } from "./CdfChart";
 import { axisLabel } from "./chart-axis";
 import { cdfAt, densityBinAt, inspectionLabels } from "./chart-inspection";
 import type { DensityInterval } from "./density";
@@ -34,7 +34,7 @@ export function ChartInspector({
   upper,
   view,
   unitName,
-  comparisons,
+  curves,
   densities,
   children,
 }: {
@@ -42,7 +42,7 @@ export function ChartInspector({
   upper: number;
   view: "cdf" | "pdf";
   unitName: string;
-  comparisons: readonly TaskComparison[];
+  curves: readonly DistributionCurve[];
   densities: readonly (DensityInterval[] | null)[];
   children: (interaction: PlotInteraction) => ReactNode;
 }) {
@@ -172,32 +172,32 @@ export function ChartInspector({
                 ? "Probability at or below this value"
                 : "Displayed density bins"}
             </span>
-            {comparisons.map((row, index) => {
+            {curves.map((row, index) => {
               const bins = densities[index];
               const bin = bins ? densityBinAt(bins, value) : null;
               const bounds = bin
                 ? inspectionLabels([bin.lower, bin.upper])
                 : null;
               const mass = bin
-                ? cdfAt(row.distribution!.points, bin.upper) -
-                  cdfAt(row.distribution!.points, bin.lower)
+                ? cdfAt(row.distribution.points, bin.upper) -
+                  cdfAt(row.distribution.points, bin.lower)
                 : 0;
               return (
-                <div key={row.task.id} className="lab-tooltip-method">
+                <div key={row.id} className="lab-tooltip-method">
                   <span className="lab-tooltip-name">
                     <i
                       className={
-                        row.is_baseline
+                        row.reference
                           ? "lab-legend-line lab-baseline"
                           : "lab-legend-line"
                       }
                     />
-                    {row.agent.label}
+                    {row.label}
                   </span>
                   {view === "cdf" ? (
                     <b>
                       {tooltipLabel(
-                        cdfAt(row.distribution!.points, value) * 100,
+                        cdfAt(row.distribution.points, value) * 100,
                       )}
                       %
                     </b>

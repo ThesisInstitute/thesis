@@ -1,13 +1,23 @@
 "use client";
 
 import { useId, useState } from "react";
-import type { TaskComparison } from "@/data/generated/thesis-lab";
+import type { NumericCdf, TaskComparison } from "@/data/generated/thesis-lab";
 import { axisLabels, niceAxis } from "./chart-axis";
 import { ChartInspector } from "./ChartInspector";
 import { deriveDensity } from "./density";
 import { number, unit } from "./lab-ui";
 
-/** Draw the sealed CDF or a binned density. Scores and quantiles come from the API. */
+/** Display-only data: a conditional curve does not imply an experiment or task. */
+export interface DistributionCurve {
+  id: string;
+  label: string;
+  distribution: NumericCdf;
+  reference?: boolean;
+  note?: string;
+  version?: string;
+}
+
+/** Preserve the registered-task chart API while sharing only curve rendering. */
 export function CdfChart({
   comparisons,
   outcome,
@@ -17,11 +27,44 @@ export function CdfChart({
   outcome: number | null;
   unitName: string;
 }) {
+  return (
+    <DistributionChart
+      curves={comparisons.flatMap((row) =>
+        row.distribution
+          ? [
+              {
+                id: row.task.id,
+                label: row.agent.label,
+                distribution: row.distribution,
+                reference: row.is_baseline,
+                note: row.is_baseline ? "baseline" : undefined,
+                version: row.selected_run?.id,
+              },
+            ]
+          : [],
+      )}
+      outcome={outcome}
+      unitName={unitName}
+    />
+  );
+}
+
+/** Draw original CDF points or probability-preserving binned density. */
+export function DistributionChart({
+  curves,
+  outcome = null,
+  unitName,
+  seriesLabel = "loaded methods",
+}: {
+  curves: readonly DistributionCurve[];
+  outcome?: number | null;
+  unitName: string;
+  seriesLabel?: string;
+}) {
   const titleId = useId();
   const descriptionId = useId();
   const [focused, setFocused] = useState<string | null>(null);
   const [view, setView] = useState<"cdf" | "pdf">("cdf");
-  const curves = comparisons.filter((row) => row.distribution !== null);
   if (curves.length === 0)
     return (
       <div className="lab-notice">
@@ -31,7 +74,7 @@ export function CdfChart({
   let min = outcome ?? Infinity;
   let max = outcome ?? -Infinity;
   for (const row of curves)
-    for (const point of row.distribution!.points) {
+    for (const point of row.distribution.points) {
       min = Math.min(min, point.value);
       max = Math.max(max, point.value);
     }
@@ -39,7 +82,7 @@ export function CdfChart({
   const { lower, upper } = xAxis;
   const x = (value: number) => 68 + ((value - lower) / (upper - lower)) * 824;
   const densities = curves.map((row) =>
-    deriveDensity(row.distribution!.points, 5),
+    deriveDensity(row.distribution.points, 5),
   );
   const densityMax = densities.reduce(
     (peak, intervals) =>
@@ -86,12 +129,12 @@ export function CdfChart({
         </div>
       </div>
       <ChartInspector
-        key={`${view}:${lower}:${upper}:${curves.map((row) => `${row.task.id}:${row.selected_run?.id}`).join(":")}`}
+        key={`${view}:${lower}:${upper}:${curves.map((row) => `${row.id}:${row.version}`).join(":")}`}
         lower={lower}
         upper={upper}
         view={view}
         unitName={unitName}
-        comparisons={curves}
+        curves={curves}
         densities={densities}
       >
         {({ value: inspectedValue, plotRef, onPointerMove, onPointerDown }) => (
@@ -109,7 +152,7 @@ export function CdfChart({
               {view === "cdf"
                 ? "Each curve plots all 201 original CDF points. The vertical axis is the probability the outcome is at or below the horizontal value."
                 : `An approximate density in 40 bins, each averaging five adjacent CDF intervals to reduce rounding noise. Every bin preserves the probability between its stored endpoints. The vertical axis is density per ${densityUnit}.`}{" "}
-              {curves.length} loaded methods.
+              {curves.length} {seriesLabel}.
               {outcome !== null && ` Official outcome: ${outcome} ${unitName}.`}
             </desc>
             {yAxis.ticks.map((value, index) => (
@@ -161,29 +204,23 @@ export function CdfChart({
                     ].join(" ");
               return (
                 <path
-                  key={row.task.id}
-                  data-testid={`${view}-${row.task.id}`}
-                  data-point-count={row.distribution!.points.length}
+                  key={row.id}
+                  data-testid={`${view}-${row.id}`}
+                  data-point-count={row.distribution.points.length}
                   data-segment-count={
                     view === "pdf" ? intervals!.length : undefined
                   }
                   d={path}
-                  fill={view === "pdf" && !row.is_baseline ? "#783d68" : "none"}
+                  fill={view === "pdf" && !row.reference ? "#783d68" : "none"}
                   fillOpacity={0.07}
-                  stroke={row.is_baseline ? "#797780" : "#783d68"}
+                  stroke={row.reference ? "#797780" : "#783d68"}
                   strokeWidth={
-                    focused === row.task.id ? 3.5 : view === "pdf" ? 1.6 : 2.4
+                    focused === row.id ? 3.5 : view === "pdf" ? 1.6 : 2.4
                   }
                   strokeDasharray={
-                    row.is_baseline
-                      ? "5 5"
-                      : i > 1
-                        ? `${4 + i * 2} 3`
-                        : undefined
+                    row.reference ? "5 5" : i > 1 ? `${4 + i * 2} 3` : undefined
                   }
-                  opacity={
-                    focused !== null && focused !== row.task.id ? 0.23 : 1
-                  }
+                  opacity={focused !== null && focused !== row.id ? 0.23 : 1}
                   className="lab-curve"
                 />
               );
@@ -229,9 +266,9 @@ export function CdfChart({
         curves.map(
           (row, i) =>
             densities[i] === null && (
-              <p className="lab-notice" key={row.task.id}>
-                {row.agent.label}: density is unavailable at this numeric scale.
-                View the CDF.
+              <p className="lab-notice" key={row.id}>
+                {row.label}: density is unavailable at this numeric scale. View
+                the CDF.
               </p>
             ),
         )}
@@ -239,24 +276,24 @@ export function CdfChart({
         <div className="lab-chart-legend">
           {curves.map((row, i) => (
             <button
-              key={row.task.id}
+              key={row.id}
               type="button"
-              onMouseEnter={() => setFocused(row.task.id)}
+              onMouseEnter={() => setFocused(row.id)}
               onMouseLeave={() => setFocused(null)}
-              onFocus={() => setFocused(row.task.id)}
+              onFocus={() => setFocused(row.id)}
               onBlur={() => setFocused(null)}
-              aria-label={`Emphasize ${row.agent.label}`}
+              aria-label={`Emphasize ${row.label}`}
             >
               <span
                 className={
-                  row.is_baseline
+                  row.reference
                     ? "lab-legend-line lab-baseline"
                     : "lab-legend-line"
                 }
                 style={i > 1 ? { borderTopStyle: "dashed" } : undefined}
               />
-              {row.agent.label}
-              {row.is_baseline && <small>baseline</small>}
+              {row.label}
+              {row.note && <small>{row.note}</small>}
             </button>
           ))}
         </div>
@@ -264,7 +301,7 @@ export function CdfChart({
           {view === "cdf"
             ? "Original 201-point distributions"
             : "40 bins · approximate density · each bin preserves its probability"}{" "}
-          · {curves.length} loaded methods
+          · {curves.length} {seriesLabel}
         </p>
       </figcaption>
     </figure>

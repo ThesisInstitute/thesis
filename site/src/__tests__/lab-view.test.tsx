@@ -187,7 +187,7 @@ describe("truthful curves and timing", () => {
     const labels = (axis: string) => [...container.querySelectorAll(`[data-axis="${axis}"]`)].map((el) => el.textContent);
     expect(labels("x")).toEqual(["0", "1", "2", "3", "4", "5"]);
     expect(labels("y")).toEqual(["0%", "20%", "40%", "60%", "80%", "100%"]);
-    fireEvent.click(screen.getByRole("button", { name: "PDF", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "PDF" }));
     expect(labels("y")).toEqual(["0", "0.05", "0.1", "0.15", "0.2", "0.25"]);
     rerender(<CdfChart comparisons={[shifted]} outcome={8.3} unitName="percent" />);
     expect(labels("x")).toEqual(["0", "2", "4", "6", "8", "10"]);
@@ -199,9 +199,9 @@ describe("truthful curves and timing", () => {
     const before = JSON.stringify(comparison.distribution);
     render(<CdfChart comparisons={[comparison]} outcome={4} unitName="percent" />);
     const originalPath = screen.getByTestId(`cdf-${ids.task}`).getAttribute("d");
-    expect(screen.getByRole("button", { name: "CDF", exact: true })).toHaveAttribute("aria-pressed", "true");
-    fireEvent.click(screen.getByRole("button", { name: "PDF", exact: true }));
-    expect(screen.getByRole("button", { name: "PDF", exact: true })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "CDF" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "PDF" }));
+    expect(screen.getByRole("button", { name: "PDF" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("Binned density · per percentage point")).toBeVisible();
     expect(screen.getByRole("img", { name: /Forecast probability densities/ })).toBeVisible();
     expect(screen.queryByText("100%")).not.toBeInTheDocument();
@@ -213,7 +213,7 @@ describe("truthful curves and timing", () => {
     expect(screen.getByText("Observed 4")).toBeVisible();
     fireEvent.focus(screen.getByRole("button", { name: /Emphasize Recorded forecaster/ }));
     expect(path).toHaveAttribute("stroke-width", "3.5");
-    fireEvent.click(screen.getByRole("button", { name: "CDF", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "CDF" }));
     expect(screen.getByTestId(`cdf-${ids.task}`)).toHaveAttribute("d", originalPath);
     expect(JSON.stringify(comparison.distribution)).toBe(before);
   });
@@ -229,7 +229,7 @@ describe("truthful curves and timing", () => {
       },
     };
     render(<CdfChart comparisons={[comparison, baseline]} outcome={null} unitName="percent" />);
-    fireEvent.click(screen.getByRole("button", { name: "PDF", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "PDF" }));
     // Densities 0.1 and 0.2 must be half-height and full-height on the same axis.
     expect(screen.getByTestId(`pdf-${ids.task}`).getAttribute("d")).toContain(",172.0000");
     expect(screen.getByTestId(`pdf-${baseline.task.id}`).getAttribute("d")).toContain(",34.0000");
@@ -245,10 +245,10 @@ describe("truthful curves and timing", () => {
       },
     };
     render(<CdfChart comparisons={[narrow]} outcome={null} unitName="percent" />);
-    fireEvent.click(screen.getByRole("button", { name: "PDF", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "PDF" }));
     expect(screen.getByText(/density is unavailable at this numeric scale/)).toBeVisible();
     expect(screen.queryByTestId(`pdf-${ids.task}`)).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "CDF", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "CDF" }));
     expect(screen.getByTestId(`cdf-${ids.task}`).getAttribute("d")).not.toMatch(/NaN|Infinity/);
   });
   it("draws the original 201 CDF points and offers keyboard curve emphasis", () => {

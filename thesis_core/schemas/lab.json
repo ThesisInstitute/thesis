@@ -368,6 +368,33 @@
       "title": "ArtifactLink",
       "type": "object"
     },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sha256",
+        "bytes",
+        "media_type"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
     "AttemptCounts": {
       "additionalProperties": false,
       "properties": {
@@ -824,6 +851,702 @@
         "next_cursor"
       ],
       "title": "ComparisonPage",
+      "type": "object"
+    },
+    "ConditionalArmForecast": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "baseline_delta": {
+          "title": "Baseline Delta",
+          "type": "number"
+        },
+        "distribution": {
+          "$ref": "#/$defs/NumericCdf"
+        },
+        "reasoning": {
+          "minLength": 1,
+          "title": "Reasoning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "baseline_delta",
+        "distribution",
+        "reasoning"
+      ],
+      "title": "ConditionalArmForecast",
+      "type": "object"
+    },
+    "ConditionalArmSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "condition": {
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "condition",
+        "assumptions"
+      ],
+      "title": "ConditionalArmSpec",
+      "type": "object"
+    },
+    "ConditionalContract": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_conditional_contract_v1",
+          "default": "thesis_conditional_contract_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "question": {
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/ConditionalOutcome"
+        },
+        "arms": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/ConditionalArmSpec"
+            },
+            {
+              "$ref": "#/$defs/ConditionalArmSpec"
+            }
+          ],
+          "title": "Arms",
+          "type": "array"
+        },
+        "reference_description": {
+          "minLength": 1,
+          "title": "Reference Description",
+          "type": "string"
+        },
+        "condition_deadline": {
+          "format": "date-time",
+          "title": "Condition Deadline",
+          "type": "string"
+        },
+        "condition_resolution_note": {
+          "minLength": 1,
+          "title": "Condition Resolution Note",
+          "type": "string"
+        },
+        "exhaustive": {
+          "title": "Exhaustive",
+          "type": "boolean"
+        },
+        "shared_history": {
+          "items": {
+            "$ref": "#/$defs/ConditionalHistory"
+          },
+          "minItems": 1,
+          "title": "Shared History",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/ConditionalSource"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "shared_evidence": {
+          "items": {
+            "$ref": "#/$defs/ConditionalEvidence"
+          },
+          "minItems": 1,
+          "title": "Shared Evidence",
+          "type": "array"
+        },
+        "limitations": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Limitations",
+          "type": "array"
+        },
+        "methodology": {
+          "const": "paired_conditional_v1",
+          "default": "paired_conditional_v1",
+          "title": "Methodology",
+          "type": "string"
+        },
+        "status": {
+          "const": "exploratory",
+          "default": "exploratory",
+          "title": "Status",
+          "type": "string"
+        },
+        "scoring_status": {
+          "const": "not_registered",
+          "default": "not_registered",
+          "title": "Scoring Status",
+          "type": "string"
+        },
+        "trust_class": {
+          "const": "local_operator",
+          "default": "local_operator",
+          "title": "Trust Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "question",
+        "outcome",
+        "arms",
+        "reference_description",
+        "condition_deadline",
+        "condition_resolution_note",
+        "exhaustive",
+        "shared_history",
+        "sources",
+        "shared_evidence",
+        "limitations"
+      ],
+      "title": "ConditionalContract",
+      "type": "object"
+    },
+    "ConditionalDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "measurement_period": {
+          "title": "Measurement Period",
+          "type": "string"
+        },
+        "status": {
+          "const": "exploratory",
+          "default": "exploratory",
+          "title": "Status",
+          "type": "string"
+        },
+        "scoring_status": {
+          "const": "not_registered",
+          "default": "not_registered",
+          "title": "Scoring Status",
+          "type": "string"
+        },
+        "trust_class": {
+          "const": "local_operator",
+          "default": "local_operator",
+          "title": "Trust Class",
+          "type": "string"
+        },
+        "requested_model": {
+          "title": "Requested Model",
+          "type": "string"
+        },
+        "observed_model": {
+          "default": null,
+          "title": "Observed Model",
+          "type": "null"
+        },
+        "execution_state": {
+          "enum": [
+            "running",
+            "succeeded",
+            "failed",
+            "unknown"
+          ],
+          "title": "Execution State",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Started At",
+          "type": "string"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finished At"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Code"
+        },
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "contract_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "shared_evidence_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Shared Evidence Id",
+          "type": "string"
+        },
+        "contract": {
+          "$ref": "#/$defs/ConditionalContract"
+        },
+        "response": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PairedModelResponse"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reference_quantiles": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quantiles"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "arm_quantiles": {
+          "items": {
+            "$ref": "#/$defs/Quantiles"
+          },
+          "title": "Arm Quantiles",
+          "type": "array"
+        },
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/ArtifactLink"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Expires At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "question",
+        "unit",
+        "measurement_period",
+        "requested_model",
+        "execution_state",
+        "started_at",
+        "finished_at",
+        "error_code",
+        "schema_version",
+        "generated_at",
+        "contract_id",
+        "shared_evidence_id",
+        "contract",
+        "response",
+        "reference_quantiles",
+        "arm_quantiles",
+        "artifacts",
+        "expires_at"
+      ],
+      "title": "ConditionalDetail",
+      "type": "object"
+    },
+    "ConditionalEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "claim": {
+          "minLength": 1,
+          "title": "Claim",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,95}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "claim",
+        "source_ids"
+      ],
+      "title": "ConditionalEvidence",
+      "type": "object"
+    },
+    "ConditionalHistory": {
+      "additionalProperties": false,
+      "properties": {
+        "period": {
+          "minLength": 1,
+          "title": "Period",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "source_id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "period",
+        "value",
+        "source_id"
+      ],
+      "title": "ConditionalHistory",
+      "type": "object"
+    },
+    "ConditionalOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "country": {
+          "minLength": 1,
+          "title": "Country",
+          "type": "string"
+        },
+        "geography": {
+          "minLength": 1,
+          "title": "Geography",
+          "type": "string"
+        },
+        "population": {
+          "minLength": 1,
+          "title": "Population",
+          "type": "string"
+        },
+        "measure": {
+          "minLength": 1,
+          "title": "Measure",
+          "type": "string"
+        },
+        "measurement_period": {
+          "minLength": 1,
+          "title": "Measurement Period",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "resolution_rule": {
+          "minLength": 1,
+          "title": "Resolution Rule",
+          "type": "string"
+        },
+        "resolution_source_url": {
+          "minLength": 1,
+          "title": "Resolution Source Url",
+          "type": "string"
+        },
+        "release_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Release Date"
+        }
+      },
+      "required": [
+        "name",
+        "country",
+        "geography",
+        "population",
+        "measure",
+        "measurement_period",
+        "unit",
+        "resolution_rule",
+        "resolution_source_url",
+        "release_date"
+      ],
+      "title": "ConditionalOutcome",
+      "type": "object"
+    },
+    "ConditionalPage": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ConditionalSummary"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "items",
+        "total",
+        "next_cursor"
+      ],
+      "title": "ConditionalPage",
+      "type": "object"
+    },
+    "ConditionalSource": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "minLength": 1,
+          "title": "Url",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "url",
+        "retrieved_at",
+        "artifact"
+      ],
+      "title": "ConditionalSource",
+      "type": "object"
+    },
+    "ConditionalSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "measurement_period": {
+          "title": "Measurement Period",
+          "type": "string"
+        },
+        "status": {
+          "const": "exploratory",
+          "default": "exploratory",
+          "title": "Status",
+          "type": "string"
+        },
+        "scoring_status": {
+          "const": "not_registered",
+          "default": "not_registered",
+          "title": "Scoring Status",
+          "type": "string"
+        },
+        "trust_class": {
+          "const": "local_operator",
+          "default": "local_operator",
+          "title": "Trust Class",
+          "type": "string"
+        },
+        "requested_model": {
+          "title": "Requested Model",
+          "type": "string"
+        },
+        "observed_model": {
+          "default": null,
+          "title": "Observed Model",
+          "type": "null"
+        },
+        "execution_state": {
+          "enum": [
+            "running",
+            "succeeded",
+            "failed",
+            "unknown"
+          ],
+          "title": "Execution State",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Started At",
+          "type": "string"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finished At"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Code"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "question",
+        "unit",
+        "measurement_period",
+        "requested_model",
+        "execution_state",
+        "started_at",
+        "finished_at",
+        "error_code"
+      ],
+      "title": "ConditionalSummary",
       "type": "object"
     },
     "Cost": {
@@ -2376,6 +3099,52 @@
       "title": "OperationsSummary",
       "type": "object"
     },
+    "PairedModelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "shared_evidence_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Shared Evidence Id",
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/NumericCdf"
+        },
+        "reference_reasoning": {
+          "minLength": 1,
+          "title": "Reference Reasoning",
+          "type": "string"
+        },
+        "arms": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/ConditionalArmForecast"
+            },
+            {
+              "$ref": "#/$defs/ConditionalArmForecast"
+            }
+          ],
+          "title": "Arms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contract_id",
+        "shared_evidence_id",
+        "reference",
+        "reference_reasoning",
+        "arms"
+      ],
+      "title": "PairedModelResponse",
+      "type": "object"
+    },
     "PollWorkerStatus": {
       "additionalProperties": false,
       "properties": {
@@ -2972,6 +3741,12 @@
     }
   },
   "anyOf": [
+    {
+      "$ref": "#/$defs/ConditionalPage"
+    },
+    {
+      "$ref": "#/$defs/ConditionalDetail"
+    },
     {
       "$ref": "#/$defs/ForecastPage"
     },

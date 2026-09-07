@@ -39,7 +39,7 @@ jobs:
           # receipt: the staged chronicle series-catalog generator (run during
           # witnessed append proposals) imports it via check_thesis_facts_append.
           # Exact-pinned like its neighbors and matching chronicle's own pin.
-          pip install --user xlrd==2.0.1 pypdf==6.14.2 receipt==0.5.1
+          pip install --user xlrd==2.0.1 pypdf==6.14.2 receipt==0.6.0
           sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
           pdftotext -v 2>&1 | head -1
           # SSA official pages resolve through a declared headless-browser

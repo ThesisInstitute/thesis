@@ -65,17 +65,19 @@ export function LabShell({ children }: { children: ReactNode }) {
           thesis<span className="lab-brand-sub">lab</span>
         </Link>
         <nav aria-label="Forecast lab">
-          {["forecasts", "experiments", "agents"].map((page) => (
-            <Link
-              key={page}
-              href={`/lab/${page}`}
-              aria-current={
-                path?.startsWith(`/lab/${page}`) ? "page" : undefined
-              }
-            >
-              {page[0].toUpperCase() + page.slice(1)}
-            </Link>
-          ))}
+          {["forecasts", "conditionals", "experiments", "agents"].map(
+            (page) => (
+              <Link
+                key={page}
+                href={`/lab/${page}`}
+                aria-current={
+                  path?.startsWith(`/lab/${page}`) ? "page" : undefined
+                }
+              >
+                {page[0].toUpperCase() + page.slice(1)}
+              </Link>
+            ),
+          )}
         </nav>
         <div className="lab-secondary-nav">
           <Link
@@ -169,7 +171,7 @@ export function State<T>({
   if (resource.state === "loading")
     return (
       <div role="status" className="lab-notice lab-loading">
-        Reading experiment records…
+        Reading lab records…
       </div>
     );
   if (resource.state === "error")

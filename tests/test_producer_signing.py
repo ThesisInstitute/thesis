@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 if sys.version_info < (3, 11):
     pytest.skip(
-        "receipt==0.5.1 requires Python 3.11 or newer",
+        "receipt==0.6.0 requires Python 3.11 or newer",
         allow_module_level=True,
     )
 

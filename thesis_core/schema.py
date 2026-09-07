@@ -53,6 +53,12 @@ def _typescript(schema: dict[str, Any]) -> str:
         )
     kind = schema.get("type")
     if kind == "array":
+        if "prefixItems" in schema:
+            return (
+                "readonly ["
+                + ", ".join(_typescript(item) for item in schema["prefixItems"])
+                + "]"
+            )
         return f"ReadonlyArray<{_typescript(schema.get('items', {}))}>"
     if kind == "object":
         if "properties" not in schema:
