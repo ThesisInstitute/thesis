@@ -1,0 +1,3009 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Thesis lab read API v1",
+  "$defs": {
+    "AgentDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "model_request": {
+          "title": "Model Request",
+          "type": "string"
+        },
+        "observed_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed Model"
+        },
+        "agent_version": {
+          "title": "Agent Version",
+          "type": "string"
+        },
+        "harness_version": {
+          "title": "Harness Version",
+          "type": "string"
+        },
+        "experiment_count": {
+          "minimum": 0,
+          "title": "Experiment Count",
+          "type": "integer"
+        },
+        "declared_task_count": {
+          "minimum": 0,
+          "title": "Declared Task Count",
+          "type": "integer"
+        },
+        "attempt_counts": {
+          "$ref": "#/$defs/AttemptCounts"
+        },
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/RecordLink"
+        },
+        "inference_settings": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Inference Settings",
+          "type": "object"
+        },
+        "execution_policy": {
+          "enum": [
+            "operator_subprocess",
+            "baseline"
+          ],
+          "title": "Execution Policy",
+          "type": "string"
+        },
+        "aggregation": {
+          "const": "none",
+          "title": "Aggregation",
+          "type": "string"
+        },
+        "retry_policy": {
+          "enum": [
+            "known_failure",
+            "none"
+          ],
+          "title": "Retry Policy",
+          "type": "string"
+        },
+        "prompt_template": {
+          "$ref": "#/$defs/ArtifactLink"
+        },
+        "system_prompt": {
+          "$ref": "#/$defs/ArtifactLink"
+        },
+        "briefing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tool_policy": {
+          "$ref": "#/$defs/ArtifactLink"
+        },
+        "experiments_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Experiments Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "provider",
+        "model_request",
+        "observed_model",
+        "agent_version",
+        "harness_version",
+        "experiment_count",
+        "declared_task_count",
+        "attempt_counts",
+        "schema_version",
+        "generated_at",
+        "record",
+        "inference_settings",
+        "execution_policy",
+        "aggregation",
+        "retry_policy",
+        "prompt_template",
+        "system_prompt",
+        "briefing",
+        "tool_policy",
+        "experiments_path"
+      ],
+      "title": "AgentDetail",
+      "type": "object"
+    },
+    "AgentIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "model_request": {
+          "title": "Model Request",
+          "type": "string"
+        },
+        "observed_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed Model"
+        },
+        "agent_version": {
+          "title": "Agent Version",
+          "type": "string"
+        },
+        "harness_version": {
+          "title": "Harness Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "provider",
+        "model_request",
+        "observed_model",
+        "agent_version",
+        "harness_version"
+      ],
+      "title": "AgentIdentity",
+      "type": "object"
+    },
+    "AgentPage": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/AgentSummary"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "items",
+        "total",
+        "next_cursor"
+      ],
+      "title": "AgentPage",
+      "type": "object"
+    },
+    "AgentSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "model_request": {
+          "title": "Model Request",
+          "type": "string"
+        },
+        "observed_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed Model"
+        },
+        "agent_version": {
+          "title": "Agent Version",
+          "type": "string"
+        },
+        "harness_version": {
+          "title": "Harness Version",
+          "type": "string"
+        },
+        "experiment_count": {
+          "minimum": 0,
+          "title": "Experiment Count",
+          "type": "integer"
+        },
+        "declared_task_count": {
+          "minimum": 0,
+          "title": "Declared Task Count",
+          "type": "integer"
+        },
+        "attempt_counts": {
+          "$ref": "#/$defs/AttemptCounts"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "provider",
+        "model_request",
+        "observed_model",
+        "agent_version",
+        "harness_version",
+        "experiment_count",
+        "declared_task_count",
+        "attempt_counts"
+      ],
+      "title": "AgentSummary",
+      "type": "object"
+    },
+    "ArtifactLink": {
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Bytes"
+        },
+        "media_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Media Type"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "download_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Download Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sha256",
+        "bytes",
+        "media_type",
+        "role",
+        "download_path"
+      ],
+      "title": "ArtifactLink",
+      "type": "object"
+    },
+    "AttemptCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "succeeded": {
+          "minimum": 0,
+          "title": "Succeeded",
+          "type": "integer"
+        },
+        "failed": {
+          "minimum": 0,
+          "title": "Failed",
+          "type": "integer"
+        },
+        "unknown": {
+          "minimum": 0,
+          "title": "Unknown",
+          "type": "integer"
+        },
+        "pending": {
+          "minimum": 0,
+          "title": "Pending",
+          "type": "integer"
+        },
+        "reconciled": {
+          "minimum": 0,
+          "title": "Reconciled",
+          "type": "integer"
+        },
+        "unknown_history": {
+          "minimum": 0,
+          "title": "Unknown History",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "succeeded",
+        "failed",
+        "unknown",
+        "pending",
+        "reconciled",
+        "unknown_history"
+      ],
+      "title": "AttemptCounts",
+      "type": "object"
+    },
+    "AttemptItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/RecordLink"
+        },
+        "task_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "started_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Started At",
+          "type": "string"
+        },
+        "execution_policy": {
+          "enum": [
+            "operator_subprocess",
+            "baseline"
+          ],
+          "title": "Execution Policy",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "pending",
+            "succeeded",
+            "failed",
+            "unknown"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "selected": {
+          "title": "Selected",
+          "type": "boolean"
+        },
+        "selected_run": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed Model"
+        },
+        "elapsed_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Elapsed Seconds"
+        },
+        "elapsed_basis": {
+          "anyOf": [
+            {
+              "const": "recorded_attempt_elapsed",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Elapsed Basis"
+        },
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/AttemptResultItem"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "evidence_links": {
+          "items": {
+            "$ref": "#/$defs/ArtifactLink"
+          },
+          "title": "Evidence Links",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "record",
+        "task_id",
+        "sequence",
+        "started_at",
+        "execution_policy",
+        "outcome",
+        "selected",
+        "selected_run",
+        "observed_model",
+        "elapsed_seconds",
+        "elapsed_basis",
+        "cost",
+        "results",
+        "evidence_links"
+      ],
+      "title": "AttemptItem",
+      "type": "object"
+    },
+    "AttemptPage": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/AttemptItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "items",
+        "total",
+        "next_cursor"
+      ],
+      "title": "AttemptPage",
+      "type": "object"
+    },
+    "AttemptResultItem": {
+      "additionalProperties": false,
+      "properties": {
+        "record": {
+          "$ref": "#/$defs/RecordLink"
+        },
+        "outcome": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "unknown"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Completed At"
+        },
+        "exit_code": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Exit Code"
+        },
+        "run": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reconciles_result_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reconciles Result Id"
+        },
+        "reconciliation_method": {
+          "anyOf": [
+            {
+              "enum": [
+                "sealed_artifacts",
+                "no_sealed_result"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reconciliation Method"
+        },
+        "reconciliation_verified": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reconciliation Verified"
+        },
+        "evidence_links": {
+          "items": {
+            "$ref": "#/$defs/ArtifactLink"
+          },
+          "title": "Evidence Links",
+          "type": "array"
+        }
+      },
+      "required": [
+        "record",
+        "outcome",
+        "recorded_at",
+        "completed_at",
+        "exit_code",
+        "run",
+        "reconciles_result_id",
+        "reconciliation_method",
+        "reconciliation_verified",
+        "evidence_links"
+      ],
+      "title": "AttemptResultItem",
+      "type": "object"
+    },
+    "CdfPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "probability": {
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "probability"
+      ],
+      "title": "CdfPoint",
+      "type": "object"
+    },
+    "CdfSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "pointEstimate": {
+          "title": "Pointestimate",
+          "type": "number"
+        },
+        "median": {
+          "title": "Median",
+          "type": "number"
+        },
+        "interval80": {
+          "$ref": "#/$defs/CdfSupport"
+        }
+      },
+      "required": [
+        "pointEstimate",
+        "median",
+        "interval80"
+      ],
+      "title": "CdfSummary",
+      "type": "object"
+    },
+    "CdfSupport": {
+      "additionalProperties": false,
+      "properties": {
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "title": "CdfSupport",
+      "type": "object"
+    },
+    "ComparisonPage": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/TaskComparison"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "items",
+        "total",
+        "next_cursor"
+      ],
+      "title": "ComparisonPage",
+      "type": "object"
+    },
+    "Cost": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "title": "Amount",
+          "type": "null"
+        },
+        "currency": {
+          "title": "Currency",
+          "type": "null"
+        },
+        "state": {
+          "const": "not_reported",
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "currency",
+        "state"
+      ],
+      "title": "Cost",
+      "type": "object"
+    },
+    "Coverage": {
+      "additionalProperties": false,
+      "properties": {
+        "declared_targets": {
+          "minimum": 0,
+          "title": "Declared Targets",
+          "type": "integer"
+        },
+        "declared_tasks": {
+          "minimum": 0,
+          "title": "Declared Tasks",
+          "type": "integer"
+        },
+        "selected_tasks": {
+          "minimum": 0,
+          "title": "Selected Tasks",
+          "type": "integer"
+        },
+        "succeeded_tasks": {
+          "minimum": 0,
+          "title": "Succeeded Tasks",
+          "type": "integer"
+        },
+        "failed_tasks": {
+          "minimum": 0,
+          "title": "Failed Tasks",
+          "type": "integer"
+        },
+        "unknown_tasks": {
+          "minimum": 0,
+          "title": "Unknown Tasks",
+          "type": "integer"
+        },
+        "queued_tasks": {
+          "minimum": 0,
+          "title": "Queued Tasks",
+          "type": "integer"
+        },
+        "running_tasks": {
+          "minimum": 0,
+          "title": "Running Tasks",
+          "type": "integer"
+        },
+        "not_scheduled_tasks": {
+          "minimum": 0,
+          "title": "Not Scheduled Tasks",
+          "type": "integer"
+        },
+        "invalid_tasks": {
+          "minimum": 0,
+          "title": "Invalid Tasks",
+          "type": "integer"
+        },
+        "resolved_targets": {
+          "minimum": 0,
+          "title": "Resolved Targets",
+          "type": "integer"
+        },
+        "eligible_tasks": {
+          "minimum": 0,
+          "title": "Eligible Tasks",
+          "type": "integer"
+        },
+        "paired_targets": {
+          "minimum": 0,
+          "title": "Paired Targets",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "declared_targets",
+        "declared_tasks",
+        "selected_tasks",
+        "succeeded_tasks",
+        "failed_tasks",
+        "unknown_tasks",
+        "queued_tasks",
+        "running_tasks",
+        "not_scheduled_tasks",
+        "invalid_tasks",
+        "resolved_targets",
+        "eligible_tasks",
+        "paired_targets"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "DatabaseStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "available",
+          "title": "State",
+          "type": "string"
+        },
+        "checked_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Checked At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "checked_at"
+      ],
+      "title": "DatabaseStatus",
+      "type": "object"
+    },
+    "EligibilitySummary": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "not_assessed",
+            "eligible",
+            "ineligible"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "reason_codes": {
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "eligible",
+                  "replay",
+                  "live_pilot",
+                  "late_pilot_execution",
+                  "invalid_contract",
+                  "invalid_resolution",
+                  "missing_artifact",
+                  "missing_acknowledgement",
+                  "evidence_unavailable",
+                  "invalid_normalization",
+                  "unresolved_attempt",
+                  "not_selected",
+                  "late_attempt_reconciliation",
+                  "outcome_availability_unknown",
+                  "invalid_publication",
+                  "late_publication",
+                  "missing_cohort_proof",
+                  "invalid_cohort",
+                  "late_cohort",
+                  "execution_policy_mismatch"
+                ],
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "awaiting_resolution",
+                  "no_selected_run"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Reason Codes",
+          "type": "array"
+        },
+        "ranking_allowed": {
+          "title": "Ranking Allowed",
+          "type": "boolean"
+        },
+        "reward": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reward"
+        }
+      },
+      "required": [
+        "state",
+        "reason_codes",
+        "ranking_allowed",
+        "reward"
+      ],
+      "title": "EligibilitySummary",
+      "type": "object"
+    },
+    "ExecutionSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "not_scheduled",
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "unknown",
+            "invalid"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "attempt_counts": {
+          "$ref": "#/$defs/AttemptCounts"
+        },
+        "elapsed_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Elapsed Seconds"
+        },
+        "elapsed_basis": {
+          "anyOf": [
+            {
+              "const": "recorded_attempt_elapsed",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Elapsed Basis"
+        },
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        },
+        "attempts_path": {
+          "anyOf": [
+            {
+              "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Attempts Path"
+        }
+      },
+      "required": [
+        "state",
+        "attempt_counts",
+        "elapsed_seconds",
+        "elapsed_basis",
+        "cost",
+        "attempts_path"
+      ],
+      "title": "ExecutionSummary",
+      "type": "object"
+    },
+    "ExperimentDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "hypothesis": {
+          "title": "Hypothesis",
+          "type": "null"
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay",
+            "live_pilot"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "baseline": {
+          "$ref": "#/$defs/AgentIdentity"
+        },
+        "target_count": {
+          "minimum": 0,
+          "title": "Target Count",
+          "type": "integer"
+        },
+        "agent_count": {
+          "minimum": 0,
+          "title": "Agent Count",
+          "type": "integer"
+        },
+        "registration_deadline": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Registration Deadline",
+          "type": "string"
+        },
+        "coverage": {
+          "$ref": "#/$defs/Coverage"
+        },
+        "rank_eligible_agent_count": {
+          "minimum": 0,
+          "title": "Rank Eligible Agent Count",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/RecordLink"
+        },
+        "ranking_policy": {
+          "title": "Ranking Policy",
+          "type": "string"
+        },
+        "declared_information_cutoff": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Information Cutoff"
+        },
+        "effective_information_boundary": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective Information Boundary"
+        },
+        "matrix_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Matrix Path",
+          "type": "string"
+        },
+        "results_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Results Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "hypothesis",
+        "mode",
+        "baseline",
+        "target_count",
+        "agent_count",
+        "registration_deadline",
+        "coverage",
+        "rank_eligible_agent_count",
+        "schema_version",
+        "generated_at",
+        "record",
+        "ranking_policy",
+        "declared_information_cutoff",
+        "effective_information_boundary",
+        "matrix_path",
+        "results_path"
+      ],
+      "title": "ExperimentDetail",
+      "type": "object"
+    },
+    "ExperimentPage": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ExperimentSummary"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "items",
+        "total",
+        "next_cursor"
+      ],
+      "title": "ExperimentPage",
+      "type": "object"
+    },
+    "ExperimentResult": {
+      "additionalProperties": false,
+      "properties": {
+        "experiment_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Experiment Id",
+          "type": "string"
+        },
+        "experiment_title": {
+          "title": "Experiment Title",
+          "type": "string"
+        },
+        "forecaster_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Forecaster Id",
+          "type": "string"
+        },
+        "agent": {
+          "$ref": "#/$defs/AgentIdentity"
+        },
+        "is_baseline": {
+          "title": "Is Baseline",
+          "type": "boolean"
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay",
+            "live_pilot"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "rank": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rank"
+        },
+        "rank_eligible": {
+          "title": "Rank Eligible",
+          "type": "boolean"
+        },
+        "paired_coverage": {
+          "minimum": 0,
+          "title": "Paired Coverage",
+          "type": "integer"
+        },
+        "targets": {
+          "minimum": 0,
+          "title": "Targets",
+          "type": "integer"
+        },
+        "mean_normalized_crps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mean Normalized Crps"
+        },
+        "attempt_counts": {
+          "$ref": "#/$defs/AttemptCounts"
+        },
+        "mean_elapsed_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mean Elapsed Seconds"
+        },
+        "elapsed_sample_count": {
+          "minimum": 0,
+          "title": "Elapsed Sample Count",
+          "type": "integer"
+        },
+        "cost": {
+          "$ref": "#/$defs/Cost"
+        },
+        "exclusions": {
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "eligible",
+                  "replay",
+                  "live_pilot",
+                  "late_pilot_execution",
+                  "invalid_contract",
+                  "invalid_resolution",
+                  "missing_artifact",
+                  "missing_acknowledgement",
+                  "evidence_unavailable",
+                  "invalid_normalization",
+                  "unresolved_attempt",
+                  "not_selected",
+                  "late_attempt_reconciliation",
+                  "outcome_availability_unknown",
+                  "invalid_publication",
+                  "late_publication",
+                  "missing_cohort_proof",
+                  "invalid_cohort",
+                  "late_cohort",
+                  "execution_policy_mismatch"
+                ],
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "awaiting_resolution",
+                  "no_selected_run"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Exclusions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "experiment_id",
+        "experiment_title",
+        "forecaster_id",
+        "agent",
+        "is_baseline",
+        "mode",
+        "rank",
+        "rank_eligible",
+        "paired_coverage",
+        "targets",
+        "mean_normalized_crps",
+        "attempt_counts",
+        "mean_elapsed_seconds",
+        "elapsed_sample_count",
+        "cost",
+        "exclusions"
+      ],
+      "title": "ExperimentResult",
+      "type": "object"
+    },
+    "ExperimentResultPage": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ExperimentResult"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "items",
+        "total",
+        "next_cursor"
+      ],
+      "title": "ExperimentResultPage",
+      "type": "object"
+    },
+    "ExperimentSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "hypothesis": {
+          "title": "Hypothesis",
+          "type": "null"
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay",
+            "live_pilot"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "baseline": {
+          "$ref": "#/$defs/AgentIdentity"
+        },
+        "target_count": {
+          "minimum": 0,
+          "title": "Target Count",
+          "type": "integer"
+        },
+        "agent_count": {
+          "minimum": 0,
+          "title": "Agent Count",
+          "type": "integer"
+        },
+        "registration_deadline": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Registration Deadline",
+          "type": "string"
+        },
+        "coverage": {
+          "$ref": "#/$defs/Coverage"
+        },
+        "rank_eligible_agent_count": {
+          "minimum": 0,
+          "title": "Rank Eligible Agent Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "hypothesis",
+        "mode",
+        "baseline",
+        "target_count",
+        "agent_count",
+        "registration_deadline",
+        "coverage",
+        "rank_eligible_agent_count"
+      ],
+      "title": "ExperimentSummary",
+      "type": "object"
+    },
+    "ForecastDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceIdentity"
+        },
+        "measurement_period": {
+          "title": "Measurement Period",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "mode_counts": {
+          "$ref": "#/$defs/ModeCounts"
+        },
+        "experiment_count": {
+          "minimum": 0,
+          "title": "Experiment Count",
+          "type": "integer"
+        },
+        "coverage": {
+          "$ref": "#/$defs/Coverage"
+        },
+        "resolution": {
+          "$ref": "#/$defs/ResolutionSummary"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseSummary"
+        },
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/RecordLink"
+        },
+        "target_label": {
+          "title": "Target Label",
+          "type": "string"
+        },
+        "resolution_rule": {
+          "title": "Resolution Rule",
+          "type": "string"
+        },
+        "resolution_policy": {
+          "title": "Resolution Policy",
+          "type": "string"
+        },
+        "vintage_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vintage Date"
+        },
+        "submission_deadline": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Submission Deadline",
+          "type": "string"
+        },
+        "source_record": {
+          "$ref": "#/$defs/RecordLink"
+        },
+        "experiments_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Experiments Path",
+          "type": "string"
+        },
+        "comparisons_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Comparisons Path",
+          "type": "string"
+        },
+        "evidence_links": {
+          "items": {
+            "$ref": "#/$defs/ArtifactLink"
+          },
+          "title": "Evidence Links",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "source",
+        "measurement_period",
+        "unit",
+        "mode_counts",
+        "experiment_count",
+        "coverage",
+        "resolution",
+        "release",
+        "schema_version",
+        "generated_at",
+        "target",
+        "target_label",
+        "resolution_rule",
+        "resolution_policy",
+        "vintage_date",
+        "submission_deadline",
+        "source_record",
+        "experiments_path",
+        "comparisons_path",
+        "evidence_links"
+      ],
+      "title": "ForecastDetail",
+      "type": "object"
+    },
+    "ForecastPage": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ForecastSummary"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "items",
+        "total",
+        "next_cursor"
+      ],
+      "title": "ForecastPage",
+      "type": "object"
+    },
+    "ForecastSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceIdentity"
+        },
+        "measurement_period": {
+          "title": "Measurement Period",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "mode_counts": {
+          "$ref": "#/$defs/ModeCounts"
+        },
+        "experiment_count": {
+          "minimum": 0,
+          "title": "Experiment Count",
+          "type": "integer"
+        },
+        "coverage": {
+          "$ref": "#/$defs/Coverage"
+        },
+        "resolution": {
+          "$ref": "#/$defs/ResolutionSummary"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseSummary"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "source",
+        "measurement_period",
+        "unit",
+        "mode_counts",
+        "experiment_count",
+        "coverage",
+        "resolution",
+        "release"
+      ],
+      "title": "ForecastSummary",
+      "type": "object"
+    },
+    "JobCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "pending": {
+          "minimum": 0,
+          "title": "Pending",
+          "type": "integer"
+        },
+        "leased": {
+          "minimum": 0,
+          "title": "Leased",
+          "type": "integer"
+        },
+        "complete": {
+          "minimum": 0,
+          "title": "Complete",
+          "type": "integer"
+        },
+        "failed": {
+          "minimum": 0,
+          "title": "Failed",
+          "type": "integer"
+        },
+        "unknown": {
+          "minimum": 0,
+          "title": "Unknown",
+          "type": "integer"
+        },
+        "expired_leases": {
+          "minimum": 0,
+          "title": "Expired Leases",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "pending",
+        "leased",
+        "complete",
+        "failed",
+        "unknown",
+        "expired_leases"
+      ],
+      "title": "JobCounts",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "MatrixCell": {
+      "additionalProperties": false,
+      "properties": {
+        "target_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "forecaster_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Forecaster Id",
+          "type": "string"
+        },
+        "task": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay",
+            "live_pilot"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "execution": {
+          "$ref": "#/$defs/ExecutionSummary"
+        },
+        "selected_run": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quantiles": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quantiles"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resolution": {
+          "$ref": "#/$defs/ResolutionSummary"
+        },
+        "score": {
+          "$ref": "#/$defs/ScoreSummary"
+        },
+        "declared_information_cutoff": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Declared Information Cutoff"
+        },
+        "effective_information_boundary": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective Information Boundary"
+        },
+        "submission_deadline": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Submission Deadline"
+        },
+        "comparison_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Comparison Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_id",
+        "forecaster_id",
+        "task",
+        "mode",
+        "execution",
+        "selected_run",
+        "quantiles",
+        "resolution",
+        "score",
+        "declared_information_cutoff",
+        "effective_information_boundary",
+        "submission_deadline",
+        "comparison_path"
+      ],
+      "title": "MatrixCell",
+      "type": "object"
+    },
+    "MatrixColumn": {
+      "additionalProperties": false,
+      "properties": {
+        "forecaster_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Forecaster Id",
+          "type": "string"
+        },
+        "agent": {
+          "$ref": "#/$defs/AgentIdentity"
+        },
+        "is_baseline": {
+          "title": "Is Baseline",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "forecaster_id",
+        "agent",
+        "is_baseline"
+      ],
+      "title": "MatrixColumn",
+      "type": "object"
+    },
+    "MatrixPage": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "experiment_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Experiment Id",
+          "type": "string"
+        },
+        "experiment_title": {
+          "title": "Experiment Title",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay",
+            "live_pilot"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/MatrixColumn"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/MatrixRow"
+          },
+          "title": "Rows",
+          "type": "array"
+        },
+        "total_targets": {
+          "minimum": 0,
+          "title": "Total Targets",
+          "type": "integer"
+        },
+        "total_methods": {
+          "minimum": 0,
+          "title": "Total Methods",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        },
+        "next_method_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Method Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "experiment_id",
+        "experiment_title",
+        "mode",
+        "columns",
+        "rows",
+        "total_targets",
+        "total_methods",
+        "next_cursor",
+        "next_method_cursor"
+      ],
+      "title": "MatrixPage",
+      "type": "object"
+    },
+    "MatrixRow": {
+      "additionalProperties": false,
+      "properties": {
+        "target_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "measurement_period": {
+          "title": "Measurement Period",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "forecast_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Forecast Path",
+          "type": "string"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/MatrixCell"
+          },
+          "title": "Cells",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_id",
+        "title",
+        "measurement_period",
+        "unit",
+        "forecast_path",
+        "cells"
+      ],
+      "title": "MatrixRow",
+      "type": "object"
+    },
+    "ModeCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "prospective": {
+          "minimum": 0,
+          "title": "Prospective",
+          "type": "integer"
+        },
+        "replay": {
+          "minimum": 0,
+          "title": "Replay",
+          "type": "integer"
+        },
+        "live_pilot": {
+          "minimum": 0,
+          "title": "Live Pilot",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prospective",
+        "replay",
+        "live_pilot"
+      ],
+      "title": "ModeCounts",
+      "type": "object"
+    },
+    "NumericCdf": {
+      "additionalProperties": false,
+      "description": "Sealed 201-point wire format; never rematerialized on ingestion.",
+      "properties": {
+        "format": {
+          "const": "numeric_cdf_v1",
+          "default": "numeric_cdf_v1",
+          "title": "Format",
+          "type": "string"
+        },
+        "pointCount": {
+          "const": 201,
+          "default": 201,
+          "title": "Pointcount",
+          "type": "integer"
+        },
+        "support": {
+          "$ref": "#/$defs/CdfSupport"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/CdfPoint"
+          },
+          "title": "Points",
+          "type": "array"
+        },
+        "summary": {
+          "$ref": "#/$defs/CdfSummary"
+        },
+        "provenance": {
+          "enum": [
+            "agent_reported",
+            "interval_seeded"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "transformVersion": {
+          "minLength": 1,
+          "title": "Transformversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "support",
+        "points",
+        "summary",
+        "provenance",
+        "transformVersion"
+      ],
+      "title": "NumericCdf",
+      "type": "object"
+    },
+    "OperationTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "target_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseSummary"
+        },
+        "resolution": {
+          "$ref": "#/$defs/ResolutionSummary"
+        },
+        "polling_state": {
+          "enum": [
+            "not_scheduled",
+            "active",
+            "resolved",
+            "overdue",
+            "paused"
+          ],
+          "title": "Polling State",
+          "type": "string"
+        },
+        "next_poll_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Poll At"
+        },
+        "last_success_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Success At"
+        },
+        "attention_codes": {
+          "items": {
+            "enum": [
+              "capture_not_scheduled",
+              "capture_stale",
+              "release_passed_unresolved",
+              "resolution_invalid",
+              "job_failed",
+              "attempt_unknown"
+            ],
+            "type": "string"
+          },
+          "title": "Attention Codes",
+          "type": "array"
+        },
+        "recovery_action_codes": {
+          "items": {
+            "enum": [
+              "schedule_capture",
+              "inspect_capture",
+              "inspect_resolution",
+              "inspect_jobs",
+              "reconcile_attempt"
+            ],
+            "type": "string"
+          },
+          "title": "Recovery Action Codes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_id",
+        "title",
+        "release",
+        "resolution",
+        "polling_state",
+        "next_poll_at",
+        "last_success_at",
+        "attention_codes",
+        "recovery_action_codes"
+      ],
+      "title": "OperationTarget",
+      "type": "object"
+    },
+    "OperationsSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "thesis_lab_v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "database": {
+          "$ref": "#/$defs/DatabaseStatus"
+        },
+        "jobs": {
+          "$ref": "#/$defs/JobCounts"
+        },
+        "worker": {
+          "$ref": "#/$defs/WorkerStatus"
+        },
+        "polling": {
+          "$ref": "#/$defs/PollingSummary"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/OperationTarget"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Cursor"
+        }
+      },
+      "required": [
+        "schema_version",
+        "generated_at",
+        "database",
+        "jobs",
+        "worker",
+        "polling",
+        "items",
+        "total",
+        "next_cursor"
+      ],
+      "title": "OperationsSummary",
+      "type": "object"
+    },
+    "PollWorkerStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "never_seen",
+            "recent",
+            "stale"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "last_poll_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Poll At"
+        }
+      },
+      "required": [
+        "status",
+        "last_poll_at"
+      ],
+      "title": "PollWorkerStatus",
+      "type": "object"
+    },
+    "PollingSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "not_scheduled",
+            "scheduled",
+            "stale",
+            "unknown"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "scheduled_sources": {
+          "minimum": 0,
+          "title": "Scheduled Sources",
+          "type": "integer"
+        },
+        "next_poll_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Poll At"
+        },
+        "last_success_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Success At"
+        },
+        "worker": {
+          "$ref": "#/$defs/PollWorkerStatus"
+        }
+      },
+      "required": [
+        "state",
+        "scheduled_sources",
+        "next_poll_at",
+        "last_success_at",
+        "worker"
+      ],
+      "title": "PollingSummary",
+      "type": "object"
+    },
+    "Quantiles": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "inverse_piecewise_linear_cdf_v1",
+          "title": "Method",
+          "type": "string"
+        },
+        "q10": {
+          "title": "Q10",
+          "type": "number"
+        },
+        "q50": {
+          "title": "Q50",
+          "type": "number"
+        },
+        "q90": {
+          "title": "Q90",
+          "type": "number"
+        }
+      },
+      "required": [
+        "method",
+        "q10",
+        "q50",
+        "q90"
+      ],
+      "title": "Quantiles",
+      "type": "object"
+    },
+    "RecordLink": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "record_path": {
+          "pattern": "^/(?:lab|records|artifacts)/[A-Za-z0-9_/?=&.-]+$",
+          "title": "Record Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "record_path"
+      ],
+      "title": "RecordLink",
+      "type": "object"
+    },
+    "ReleaseSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "verified",
+            "unknown",
+            "invalid"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "lower": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lower"
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upper"
+        },
+        "raw_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Raw Value"
+        },
+        "timezone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Timezone"
+        },
+        "official_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Official Url"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "lower",
+        "upper",
+        "raw_value",
+        "timezone",
+        "official_url",
+        "evidence"
+      ],
+      "title": "ReleaseSummary",
+      "type": "object"
+    },
+    "ResolutionSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "pending",
+            "resolved",
+            "invalid"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "resolution": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "recorded_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Recorded At"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "const": "invalid_resolution",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason Code"
+        }
+      },
+      "required": [
+        "state",
+        "resolution",
+        "observation",
+        "value",
+        "unit",
+        "recorded_at",
+        "reason_code"
+      ],
+      "title": "ResolutionSummary",
+      "type": "object"
+    },
+    "ScoreSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "score": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "crps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Crps"
+        },
+        "normalized_crps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Normalized Crps"
+        },
+        "pit": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pit"
+        },
+        "scoring_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scoring Version"
+        },
+        "eligibility": {
+          "$ref": "#/$defs/EligibilitySummary"
+        }
+      },
+      "required": [
+        "score",
+        "crps",
+        "normalized_crps",
+        "pit",
+        "scoring_version",
+        "eligibility"
+      ],
+      "title": "ScoreSummary",
+      "type": "object"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "adapter_id": {
+          "title": "Adapter Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "adapter_id"
+      ],
+      "title": "SourceIdentity",
+      "type": "object"
+    },
+    "TaskComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "task": {
+          "$ref": "#/$defs/RecordLink"
+        },
+        "target_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "experiment_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Experiment Id",
+          "type": "string"
+        },
+        "agent": {
+          "$ref": "#/$defs/AgentIdentity"
+        },
+        "is_baseline": {
+          "title": "Is Baseline",
+          "type": "boolean"
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay",
+            "live_pilot"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "execution": {
+          "$ref": "#/$defs/ExecutionSummary"
+        },
+        "selected_run": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "distribution": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NumericCdf"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quantiles": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quantiles"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resolution": {
+          "$ref": "#/$defs/ResolutionSummary"
+        },
+        "score": {
+          "$ref": "#/$defs/ScoreSummary"
+        },
+        "declared_information_cutoff": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Declared Information Cutoff",
+          "type": "string"
+        },
+        "effective_information_boundary": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effective Information Boundary"
+        },
+        "submission_deadline": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+          "title": "Submission Deadline",
+          "type": "string"
+        },
+        "evidence_links": {
+          "items": {
+            "$ref": "#/$defs/ArtifactLink"
+          },
+          "title": "Evidence Links",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task",
+        "target_id",
+        "experiment_id",
+        "agent",
+        "is_baseline",
+        "mode",
+        "execution",
+        "selected_run",
+        "distribution",
+        "quantiles",
+        "resolution",
+        "score",
+        "declared_information_cutoff",
+        "effective_information_boundary",
+        "submission_deadline",
+        "evidence_links"
+      ],
+      "title": "TaskComparison",
+      "type": "object"
+    },
+    "WorkerStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "unknown",
+            "observed_active",
+            "stale"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "last_activity_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Activity At"
+        },
+        "basis": {
+          "enum": [
+            "job_lease_observation",
+            "not_reported"
+          ],
+          "title": "Basis",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "last_activity_at",
+        "basis"
+      ],
+      "title": "WorkerStatus",
+      "type": "object"
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/ForecastPage"
+    },
+    {
+      "$ref": "#/$defs/ForecastDetail"
+    },
+    {
+      "$ref": "#/$defs/ExperimentPage"
+    },
+    {
+      "$ref": "#/$defs/ExperimentDetail"
+    },
+    {
+      "$ref": "#/$defs/ComparisonPage"
+    },
+    {
+      "$ref": "#/$defs/MatrixPage"
+    },
+    {
+      "$ref": "#/$defs/AttemptPage"
+    },
+    {
+      "$ref": "#/$defs/AgentPage"
+    },
+    {
+      "$ref": "#/$defs/AgentDetail"
+    },
+    {
+      "$ref": "#/$defs/ExperimentResultPage"
+    },
+    {
+      "$ref": "#/$defs/OperationsSummary"
+    }
+  ]
+}

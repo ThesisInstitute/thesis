@@ -1,0 +1,24 @@
+{
+  "gate_id": "20260904-183206-plan-34cfc839",
+  "gate_status": "completed",
+  "approved_at": "2026-09-04T18:58:31-04:00",
+  "served_model": "claude-fable-5-1",
+  "subject": {
+    "kind": "plan",
+    "path": "/Users/maxghenis/ThesisInstitute/wt-thesis-core-20260904/docs/thesis-core-plan.md",
+    "sha256": "3b566fa29473c1fc7119ec85380717fa7c0e53a1c0d6999c9692eba5d5954519",
+    "bytes": 38578
+  },
+  "verdict": {
+    "artifact_revision": {
+      "bytes": 38578,
+      "kind": "plan",
+      "sha256": "3b566fa29473c1fc7119ec85380717fa7c0e53a1c0d6999c9692eba5d5954519"
+    },
+    "findings": [],
+    "notes": [],
+    "schema_version": 1,
+    "summary": "Both prior findings are resolved in this revision. Line 77 defines established_upper once as the minimum of the valid acknowledgement, authenticated publication-upper and verified-witness bounds; lines 57, 79, 87 and 89 route prospective evidence, replay evidence, normalization and as-of export through that single value with acknowledgement existence still mandatory; line 81 pins explicit per-consumer outcomes for the date-only, DST-ambiguous, late-acknowledgement and missing-acknowledgement cases; and line 73 now names the outcome-availability lower boundary as the earliest official print for the same series/period rather than the resolving vintage. Boundary strictness remains consistent (inclusive <= for data/as-of filters, strict < for cohort receipt, dispatch, witness and outcome ordering), the record-level inclusive filter in prospective mode is dominated by the strict bundle-freeze < cohort-witness < cutoff chain so no admission gap exists, and the acyclic task/experiment graph, cohort-proof commitment before dispatch, reconciliation, proxy, packaging and PostgreSQL CI requirements are unchanged from the previously agreed text. Only read-only file access was available: the review directory contains solely artifact.snapshot, and the supplied byte count and SHA-256 are copied as supplied rather than independently recomputed. No actionable defect remains at the plan level; residual risk moves to implementation fidelity, which the plan itself routes to independent code review and the enumerated acceptance tests.",
+    "verdict": "approve"
+  }
+}
