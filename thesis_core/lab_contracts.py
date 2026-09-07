@@ -15,6 +15,7 @@ from pydantic import (
     StrictInt,
 )
 
+from .conditional_contracts import ConditionalContract, PairedModelResponse
 from .contracts import Eligibility, NumericCdf
 
 
@@ -482,7 +483,43 @@ class ExperimentResultPage(Envelope):
     next_cursor: Digest | None
 
 
+class ConditionalSummary(DTO):
+    id: Digest
+    title: str
+    question: str
+    unit: str
+    measurement_period: str
+    status: Literal["exploratory"] = "exploratory"
+    scoring_status: Literal["not_registered"] = "not_registered"
+    trust_class: Literal["local_operator"] = "local_operator"
+    requested_model: str
+    observed_model: None = None
+    execution_state: Literal["running", "succeeded", "failed", "unknown"]
+    started_at: Instant
+    finished_at: Instant | None
+    error_code: str | None
+
+
+class ConditionalDetail(Envelope, ConditionalSummary):
+    contract_id: Digest
+    shared_evidence_id: Digest
+    contract: ConditionalContract
+    response: PairedModelResponse | None
+    reference_quantiles: Quantiles | None
+    arm_quantiles: tuple[Quantiles, ...]
+    artifacts: tuple[ArtifactLink, ...]
+    expires_at: Instant
+
+
+class ConditionalPage(Envelope):
+    items: list[ConditionalSummary]
+    total: Count
+    next_cursor: Digest | None
+
+
 RESPONSE_MODELS = (
+    ConditionalPage,
+    ConditionalDetail,
     ForecastPage,
     ForecastDetail,
     ExperimentPage,

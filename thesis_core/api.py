@@ -246,6 +246,9 @@ def create_app(store: Store | None = None) -> FastAPI:
     from .lab import mount_routes
 
     mount_routes(application, current_store)
+    from .conditionals import mount_routes as mount_conditionals
+
+    mount_conditionals(application, current_store)
     return application
 
 

@@ -64,6 +64,12 @@ export type ArtifactLink = {
   readonly "download_path": string;
 };
 
+export type ArtifactRef = {
+  readonly "sha256": string;
+  readonly "bytes": number;
+  readonly "media_type": string;
+};
+
 export type AttemptCounts = {
   readonly "total": number;
   readonly "succeeded": number;
@@ -135,6 +141,124 @@ export type ComparisonPage = {
   readonly "items": ReadonlyArray<TaskComparison>;
   readonly "total": number;
   readonly "next_cursor": string | null;
+};
+
+export type ConditionalArmForecast = {
+  readonly "id": string;
+  readonly "baseline_delta": number;
+  readonly "distribution": NumericCdf;
+  readonly "reasoning": string;
+};
+
+export type ConditionalArmSpec = {
+  readonly "id": string;
+  readonly "label": string;
+  readonly "condition": string;
+  readonly "assumptions": ReadonlyArray<string>;
+};
+
+export type ConditionalContract = {
+  readonly "schema_version"?: "thesis_conditional_contract_v1";
+  readonly "title": string;
+  readonly "question": string;
+  readonly "outcome": ConditionalOutcome;
+  readonly "arms": readonly [ConditionalArmSpec, ConditionalArmSpec];
+  readonly "reference_description": string;
+  readonly "condition_deadline": string;
+  readonly "condition_resolution_note": string;
+  readonly "exhaustive": boolean;
+  readonly "shared_history": ReadonlyArray<ConditionalHistory>;
+  readonly "sources": ReadonlyArray<ConditionalSource>;
+  readonly "shared_evidence": ReadonlyArray<ConditionalEvidence>;
+  readonly "limitations": ReadonlyArray<string>;
+  readonly "methodology"?: "paired_conditional_v1";
+  readonly "status"?: "exploratory";
+  readonly "scoring_status"?: "not_registered";
+  readonly "trust_class"?: "local_operator";
+};
+
+export type ConditionalDetail = {
+  readonly "id": string;
+  readonly "title": string;
+  readonly "question": string;
+  readonly "unit": string;
+  readonly "measurement_period": string;
+  readonly "status"?: "exploratory";
+  readonly "scoring_status"?: "not_registered";
+  readonly "trust_class"?: "local_operator";
+  readonly "requested_model": string;
+  readonly "observed_model"?: null;
+  readonly "execution_state": "running" | "succeeded" | "failed" | "unknown";
+  readonly "started_at": string;
+  readonly "finished_at": string | null;
+  readonly "error_code": string | null;
+  readonly "schema_version": "thesis_lab_v1";
+  readonly "generated_at": string;
+  readonly "contract_id": string;
+  readonly "shared_evidence_id": string;
+  readonly "contract": ConditionalContract;
+  readonly "response": PairedModelResponse | null;
+  readonly "reference_quantiles": Quantiles | null;
+  readonly "arm_quantiles": ReadonlyArray<Quantiles>;
+  readonly "artifacts": ReadonlyArray<ArtifactLink>;
+  readonly "expires_at": string;
+};
+
+export type ConditionalEvidence = {
+  readonly "claim": string;
+  readonly "source_ids": ReadonlyArray<string>;
+};
+
+export type ConditionalHistory = {
+  readonly "period": string;
+  readonly "value": number;
+  readonly "source_id": string;
+};
+
+export type ConditionalOutcome = {
+  readonly "name": string;
+  readonly "country": string;
+  readonly "geography": string;
+  readonly "population": string;
+  readonly "measure": string;
+  readonly "measurement_period": string;
+  readonly "unit": string;
+  readonly "resolution_rule": string;
+  readonly "resolution_source_url": string;
+  readonly "release_date": string | null;
+};
+
+export type ConditionalPage = {
+  readonly "schema_version": "thesis_lab_v1";
+  readonly "generated_at": string;
+  readonly "items": ReadonlyArray<ConditionalSummary>;
+  readonly "total": number;
+  readonly "next_cursor": string | null;
+};
+
+export type ConditionalSource = {
+  readonly "id": string;
+  readonly "title": string;
+  readonly "url": string;
+  readonly "retrieved_at": string;
+  readonly "artifact": ArtifactRef;
+};
+
+export type ConditionalSummary = {
+  readonly "id": string;
+  readonly "title": string;
+  readonly "question": string;
+  readonly "unit": string;
+  readonly "measurement_period": string;
+  readonly "status"?: "exploratory";
+  readonly "scoring_status"?: "not_registered";
+  readonly "trust_class"?: "local_operator";
+  readonly "requested_model": string;
+  readonly "observed_model"?: null;
+  readonly "execution_state": "running" | "succeeded" | "failed" | "unknown";
+  readonly "started_at": string;
+  readonly "finished_at": string | null;
+  readonly "error_code": string | null;
 };
 
 export type Cost = {
@@ -389,6 +513,14 @@ export type OperationsSummary = {
   readonly "items": ReadonlyArray<OperationTarget>;
   readonly "total": number;
   readonly "next_cursor": string | null;
+};
+
+export type PairedModelResponse = {
+  readonly "contract_id": string;
+  readonly "shared_evidence_id": string;
+  readonly "reference": NumericCdf;
+  readonly "reference_reasoning": string;
+  readonly "arms": readonly [ConditionalArmForecast, ConditionalArmForecast];
 };
 
 export type PollWorkerStatus = {

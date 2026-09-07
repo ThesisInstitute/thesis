@@ -39,7 +39,7 @@ describe("forecast inspection", () => {
     render(
       <CdfChart comparisons={[offset]} outcome={null} unitName="percent" />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "PDF", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "PDF" }));
     fireEvent.change(
       screen.getByRole("slider", { name: "Inspect forecast value" }),
       { target: { value: "1000002.5" } },
@@ -117,7 +117,7 @@ describe("forecast inspection", () => {
     fireEvent.keyDown(control, { key: "Escape" });
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
     fireEvent.focus(control);
-    fireEvent.click(screen.getByRole("button", { name: "PDF", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "PDF" }));
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
     fireEvent.focus(
       screen.getByRole("slider", { name: "Inspect forecast value" }),
@@ -160,7 +160,7 @@ describe("forecast inspection", () => {
         unitName="percent"
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "PDF", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "PDF" }));
     fireEvent.change(
       screen.getByRole("slider", { name: "Inspect forecast value" }),
       { target: { value: "2.5" } },

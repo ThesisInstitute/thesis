@@ -13,13 +13,19 @@ export function labRoute(segments: readonly string[]): LabRoute | null {
   const page = { queries: ["limit", "after"] };
   if (
     segments.length === 2 &&
-    ["forecasts", "experiments", "agents", "operations"].includes(collection)
+    [
+      "forecasts",
+      "conditionals",
+      "experiments",
+      "agents",
+      "operations",
+    ].includes(collection)
   )
     return page;
   if (!LAB_DIGEST.test(id ?? "")) return null;
   if (
     segments.length === 3 &&
-    ["forecasts", "experiments", "agents"].includes(collection)
+    ["forecasts", "conditionals", "experiments", "agents"].includes(collection)
   )
     return { queries: [] };
   if (segments.length !== 4) return null;

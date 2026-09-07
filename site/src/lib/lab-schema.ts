@@ -6,6 +6,8 @@ type Schema = boolean | { [key: string]: unknown };
 const schema = generatedSchema as unknown as { $defs: Record<string, Schema> };
 
 export interface LabModels {
+  ConditionalPage: Lab.ConditionalPage;
+  ConditionalDetail: Lab.ConditionalDetail;
   ForecastPage: Lab.ForecastPage;
   ForecastDetail: Lab.ForecastDetail;
   ExperimentPage: Lab.ExperimentPage;
@@ -127,9 +129,14 @@ function validate(value: unknown, rule: Schema, depth = 0): void {
       fail();
     if (typeof rule.maxItems === "number" && values.length > rule.maxItems)
       fail();
-    if (rule.items)
-      for (const item of values)
-        validate(item, rule.items as Schema, depth + 1);
+    const prefix = Array.isArray(rule.prefixItems)
+      ? (rule.prefixItems as Schema[])
+      : [];
+    values.forEach((item, index) => {
+      const childRule = prefix[index] ?? rule.items;
+      if (childRule !== undefined)
+        validate(item, childRule as Schema, depth + 1);
+    });
   }
   if (rule.type === "object") {
     if (!object(value)) fail();
@@ -149,6 +156,10 @@ function validate(value: unknown, rule: Schema, depth = 0): void {
 
 const INSTANT_FIELDS = new Set([
   "generated_at",
+  "finished_at",
+  "expires_at",
+  "retrieved_at",
+  "condition_deadline",
   "checked_at",
   "recorded_at",
   "completed_at",
@@ -190,7 +201,10 @@ function semantic(value: unknown): void {
         child === `/lab/forecasts/${value.id}/comparisons`;
       if (!template && !isLabApiPath(child)) fail();
     }
-    if (key === "official_url" && child !== null) {
+    if (
+      ["official_url", "resolution_source_url", "url"].includes(key) &&
+      child !== null
+    ) {
       if (typeof child !== "string") fail();
       try {
         const url = new URL(child as string);
@@ -337,6 +351,129 @@ function semantic(value: unknown): void {
   }
 }
 
+function conditionalSummary(value: Lab.ConditionalSummary): void {
+  if (
+    value.status !== "exploratory" ||
+    value.scoring_status !== "not_registered" ||
+    value.trust_class !== "local_operator" ||
+    value.observed_model !== null ||
+    (value.execution_state === "running" && value.finished_at !== null) ||
+    (value.execution_state !== "running" &&
+      !(
+        value.execution_state === "unknown" &&
+        value.error_code === "lease_expired"
+      ) &&
+      value.finished_at === null) ||
+    ["failed", "unknown"].includes(value.execution_state) !==
+      (value.error_code !== null) ||
+    (value.finished_at !== null &&
+      Date.parse(value.finished_at) < Date.parse(value.started_at))
+  )
+    fail();
+}
+
+/** A conditional pair joins only its frozen contract and native distributions. */
+function conditionalDetail(value: Lab.ConditionalDetail): void {
+  conditionalSummary(value);
+  const { contract, response } = value;
+  if (
+    contract.schema_version !== "thesis_conditional_contract_v1" ||
+    contract.methodology !== "paired_conditional_v1" ||
+    contract.status !== value.status ||
+    contract.scoring_status !== value.scoring_status ||
+    contract.trust_class !== value.trust_class ||
+    contract.title !== value.title ||
+    contract.question !== value.question ||
+    contract.outcome.unit !== value.unit ||
+    contract.outcome.measurement_period !== value.measurement_period ||
+    contract.arms.length !== 2 ||
+    contract.arms[0].id === contract.arms[1].id ||
+    Date.parse(value.expires_at) <= Date.parse(value.started_at)
+  )
+    fail();
+  const sourceIds = new Set(contract.sources.map((source) => source.id));
+  if (sourceIds.size !== contract.sources.length) fail();
+  for (const history of contract.shared_history)
+    if (!sourceIds.has(history.source_id)) fail();
+  for (const evidence of contract.shared_evidence)
+    for (const id of evidence.source_ids) if (!sourceIds.has(id)) fail();
+  if (
+    contract.outcome.release_date !== null &&
+    !isUtcInstant(`${contract.outcome.release_date}T00:00:00Z`)
+  )
+    fail();
+  if (value.execution_state !== "succeeded") {
+    if (
+      response !== null ||
+      value.reference_quantiles !== null ||
+      value.arm_quantiles.length !== 0
+    )
+      fail();
+    return;
+  }
+  if (
+    response === null ||
+    value.reference_quantiles === null ||
+    value.arm_quantiles.length !== 2 ||
+    response.contract_id !== value.contract_id ||
+    response.shared_evidence_id !== value.shared_evidence_id ||
+    response.arms.length !== 2
+  )
+    fail();
+  const paired = response as Lab.PairedModelResponse;
+  paired.arms.forEach((arm, i) => {
+    if (arm.id !== contract.arms[i].id) fail();
+  });
+  const close = (a: number, b: number) => Math.abs(a - b) <= 1e-8;
+  const distributions = [
+    paired.reference,
+    ...paired.arms.map((arm) => arm.distribution),
+  ];
+  const quantiles = [value.reference_quantiles!, ...value.arm_quantiles];
+  distributions.forEach((distribution, index) => {
+    if (
+      distribution.provenance !== "agent_reported" ||
+      distribution.transformVersion !== "native_conditional_v1"
+    )
+      fail();
+    const inverse = (probability: number) => {
+      const i = distribution.points.findIndex(
+        (point) => point.probability >= probability,
+      );
+      if (i < 0) fail();
+      const point = distribution.points[i];
+      if (i === 0 || point.probability === probability) return point.value;
+      const previous = distribution.points[i - 1];
+      return (
+        previous.value +
+        ((point.value - previous.value) *
+          (probability - previous.probability)) /
+          (point.probability - previous.probability)
+      );
+    };
+    const q = quantiles[index];
+    if (
+      !close(q.q10, inverse(0.1)) ||
+      !close(q.q50, inverse(0.5)) ||
+      !close(q.q90, inverse(0.9)) ||
+      !close(distribution.summary.pointEstimate, q.q50) ||
+      !close(distribution.summary.median, q.q50) ||
+      !close(distribution.summary.interval80.lower, q.q10) ||
+      !close(distribution.summary.interval80.upper, q.q90)
+    )
+      fail();
+  });
+  paired.arms.forEach((arm, i) => {
+    if (
+      !close(
+        arm.baseline_delta,
+        value.arm_quantiles[i].q50 - value.reference_quantiles!.q50,
+      )
+    )
+      fail();
+  });
+}
+
 export function parseLab<M extends LabModel>(
   model: M,
   value: unknown,
@@ -345,6 +482,11 @@ export function parseLab<M extends LabModel>(
   if (!rule) fail();
   validate(value, rule);
   semantic(value);
+  if (model === "ConditionalDetail")
+    conditionalDetail(value as Lab.ConditionalDetail);
+  if (model === "ConditionalPage")
+    for (const item of (value as Lab.ConditionalPage).items)
+      conditionalSummary(item);
   if (model === "MatrixPage") {
     const matrix = value as Lab.MatrixPage;
     if (

@@ -101,6 +101,17 @@ def parser() -> argparse.ArgumentParser:
     )
     poll.add_argument("--max-jobs", type=int, default=20)
     commands.add_parser("poll-status", help="Show safe source polling status")
+    conditional = commands.add_parser(
+        "forecast-conditionals",
+        help="Record one exploratory paired forecast from frozen public inputs",
+    )
+    conditional.add_argument("contract", type=Path)
+    conditional.add_argument("--model", required=True)
+    conditional.add_argument("--timeout-seconds", type=int, default=600)
+    commands.add_parser(
+        "recover-conditionals",
+        help="Record expired conditional attempts as unknown without retrying",
+    )
     manifest = commands.add_parser("manifest")
     manifest.add_argument("experiment_id")
     manifest.add_argument("--run-id")
@@ -384,6 +395,22 @@ def _dispatch(args, store):
         from .polling import public_status
 
         return public_status(store)
+    if command == "forecast-conditionals":
+        from .conditional_contracts import ConditionalContract
+        from .conditional_runner import run_conditional
+        from .execution import _unique_keys
+
+        # Reject duplicate keys before Pydantic's JSON parser can collapse them.
+        payload = json.loads(args.contract.read_bytes(), object_pairs_hook=_unique_keys)
+        contract = ConditionalContract.model_validate_json(json.dumps(payload))
+        result = run_conditional(
+            store, contract, model=args.model, timeout_seconds=args.timeout_seconds
+        )
+        return result.model_dump(mode="json", by_alias=True)
+    if command == "recover-conditionals":
+        from .conditionals import recover_attempts
+
+        return {"recovered": recover_attempts(store)}
     if command == "manifest":
         from .publication import create_manifest
 

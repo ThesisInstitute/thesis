@@ -145,6 +145,7 @@ export function withQuery(
 
 type PageModel =
   | "ForecastPage"
+  | "ConditionalPage"
   | "ExperimentPage"
   | "ComparisonPage"
   | "AttemptPage"

@@ -18,6 +18,9 @@ afterEach(() => vi.useRealTimers());
 describe("exact lab proxy routes", () => {
   it.each([
     "lab/forecasts?limit=20",
+    "lab/conditionals?limit=20",
+    `lab/conditionals?after=${ids.task}`,
+    `lab/conditionals/${ids.task}`,
     `lab/forecasts/${ids.target}`,
     `lab/forecasts/${ids.target}/experiments?after=${ids.experiment}`,
     `lab/forecasts/${ids.target}/comparisons?experiment_id=${ids.experiment}`,
@@ -35,6 +38,13 @@ describe("exact lab proxy routes", () => {
     `lab/experiments/${ids.experiment}/matrix?limit=21`,
     `lab/experiments/${ids.experiment}/matrix?method_limit=11`,
     "lab/operations?worker=private",
+    `lab/conditionals/${ids.task}/attempts`,
+    `lab/conditionals/${ids.task}/results`,
+    `lab/conditionals/${ids.task}?experiment_id=${ids.experiment}`,
+    "lab/conditionals?url=https://private",
+    "lab/conditionals?limit=20&limit=40",
+    "lab/conditionals?after=invalid",
+    "lab/conditionals/invalid",
     "lab/agents?limit=1e2",
     `lab/agents/${ids.agent}/attempts`,
     `lab/forecasts/${ids.target}/unknown`,
