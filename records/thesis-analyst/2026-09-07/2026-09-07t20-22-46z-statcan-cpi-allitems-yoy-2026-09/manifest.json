@@ -1,0 +1,373 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-07T20:22:46Z",
+  "runStartedAt": "2026-09-07T20:22:46Z",
+  "sealedAt": "2026-09-07T20:24:55Z",
+  "series": "statcan.cpi.allitems.yoy",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "canada-cpi-annual-rate-september-2026",
+    "country": "CA",
+    "dataPointId": "statcan.cpi.allitems.yoy.2026_09.first_print",
+    "expectedReleaseDate": "2026-10-19",
+    "expectedReleaseWindow": {
+      "end": "2026-10-19",
+      "start": "2026-10-19"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-07T20:04:45Z",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "series": "statcan.cpi.allitems.yoy",
+    "sourceBinding": {
+      "adapter": "statcan-wds",
+      "allowedHosts": [
+        "www150.statcan.gc.ca"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-19",
+        "start": "2026-10-19"
+      },
+      "field": "v41690973",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "v41690973",
+      "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+      "table": "Consumer Price Index, Table 18-10-0004-01 (all-items, Canada)",
+      "transform": {
+        "factor": 1,
+        "operation": "percent_change_year_ago"
+      }
+    },
+    "targetContentHash": "30e18f817d32a7f592e96369a07833d40974bb0a480ea38e5a77847b642a9af6",
+    "targetRegistrationPath": "records/targets/2026-09-07-30e18f817d32a7f592e96369a07833d40974bb0a480ea38e5a77847b642a9af6.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+  "targetContentHash": "30e18f817d32a7f592e96369a07833d40974bb0a480ea38e5a77847b642a9af6",
+  "targetRegistrationPath": "records/targets/2026-09-07-30e18f817d32a7f592e96369a07833d40974bb0a480ea38e5a77847b642a9af6.json",
+  "registeredAtUtc": "2026-09-07T20:04:45Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-07T20:22:46Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "be660ab64a19a16829a0b77bfcabc15eb85a3bf0b60e830c7842f9ee4825db75"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Identify the exact source used for the historical CPI annual-rate and level anchors if it was not the registered Statistics Canada WDS endpoint."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Consider either quantifying or removing the driver that core inflation measures remain near 2 percent, since it is not used in the arithmetic update."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: Accepted the source-grounding suggestion by naming the Statistics Canada WDS vector/table basis for the annual-rate and level-anchor fetches, and accepted the calibration suggestion by removing the unused core-inflation driver from the driver list.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: Accepted the source-grounding suggestion by naming the Statistics Canada WDS vector/table basis for the annual-rate and level-anchor fetches, and accepted the calibration suggestion by removing the unused core-inflation driver from the driver list.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is publishable with no blocking issues; resolver contract, prior/update/interval, tails, and JSON fields are coherent with the target."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/prompt.md",
+      "sha256": "c520b9e3865d244900ebf6e27e7678856b2a33ddefb6227f15f2e88d36daabe2",
+      "bytes": 10476,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_command.json",
+      "sha256": "08c072f052a0ee606591a8e62db26854de4c39960ca51ffcf313ba89bdd3e109",
+      "bytes": 754,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "492204c186d3b33e8e7832014bf9c5a78b61eb75134fbc27fcf43065fa0eb681",
+      "bytes": 23556,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_codex_stderr.log",
+      "sha256": "2ae8b0f33573326c38c1fe5ab37403578cde9ad2b0b6a85a460a943c58903fd0",
+      "bytes": 233,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_codex_events.jsonl",
+      "sha256": "d06270f3cfc55fc16030fb04cd67c6752734cca941e328e68409395a731df29a",
+      "bytes": 23680,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_codex_last_message.txt",
+      "sha256": "d3291f73954cabde284096bd84caf4b4c00428dead403edc714695072037070d",
+      "bytes": 6188,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_codex_trace.json",
+      "sha256": "74054e9e8a305f2e7ddd2b780e1806c9ef1e6bd654f09469b18946033ee0ecdc",
+      "bytes": 560,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_stdout.txt",
+      "sha256": "d3291f73954cabde284096bd84caf4b4c00428dead403edc714695072037070d",
+      "bytes": 6188,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/draft_stderr.txt",
+      "sha256": "2890ce076b05ab4f4a438a470a39f2cc3e139e1ac7e47d3aa49129bc70e65dd9",
+      "bytes": 248,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_prompt.md",
+      "sha256": "06c01c6d77c2b88f474c930346d975923840d3e2c6b0f0b905feb3965c8a3095",
+      "bytes": 9448,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_command.json",
+      "sha256": "2e06028366ef609b2ae7518006a4befb822160dbc8a317c5819b77cc37583dc2",
+      "bytes": 750,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "89a9d2e29decbeac59372f70430b39daadaef1eec130d6b5bc167b88666dd31d",
+      "bytes": 825,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "8568aca25f824df3d62660ffd58ae8625482270bdcf2df3ce783318ed453e5ae",
+      "bytes": 233,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "17fa3fedb320766e7ab4ea70bbc47a87d1a306596ce4ad1975ead799a2511d34",
+      "bytes": 847,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "0c470ff71c7313e2dc2f05a82f785842ebfcba407cc4bacf382a036e91a6b447",
+      "bytes": 496,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "bbb4df5ed76c928b2778ee7af32b5577023968dab952d809dc1eb283cf167097",
+      "bytes": 555,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "0c470ff71c7313e2dc2f05a82f785842ebfcba407cc4bacf382a036e91a6b447",
+      "bytes": 496,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "d6b22809c1166e4924d5322afea7d09fc2c5948af283dd50e61a296989b005f8",
+      "bytes": 248,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/revision_prompt.md",
+      "sha256": "9f572eeb04b3a278ab6db16f86bf9dcbb7b8d1f412a93435693b7e2932169720",
+      "bytes": 18096,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/command.json",
+      "sha256": "7e83b9d111e1fdf0c4ca263d0229880f96bfb8e1baf84b8cf3f683e88eafd048",
+      "bytes": 748,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/codex_stdout.jsonl",
+      "sha256": "97e674b80592b8587df529ad5dcf2c969a9a6a00b4b65b1e9ade724f4d174ae8",
+      "bytes": 7138,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/codex_stderr.log",
+      "sha256": "44f7f84bef1235805bd25a5bfd605cea6debf49d6faf65e0550c91cfdf2e536a",
+      "bytes": 233,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/codex_events.jsonl",
+      "sha256": "0d21b4ebee237433bbfb73acdbc9ec906b349c7edfeda39da345184396404711",
+      "bytes": 7160,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/codex_last_message.txt",
+      "sha256": "16373f54a1a181cd2bf72c98258518b4dc2b6807a689afb040079f5e1bce2d67",
+      "bytes": 6424,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/codex_trace.json",
+      "sha256": "e2dd9569f094101c1aa7cbdcbf029cac5eb52d8680d7b392c25aeec83c86bbc3",
+      "bytes": 555,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/stdout.txt",
+      "sha256": "16373f54a1a181cd2bf72c98258518b4dc2b6807a689afb040079f5e1bce2d67",
+      "bytes": 6424,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/stderr.txt",
+      "sha256": "6b51b72b11a9e9efe67aa5403306ed5975dfee24760aeca998786a18147a7960",
+      "bytes": 248,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/raw_response.txt",
+      "sha256": "16373f54a1a181cd2bf72c98258518b4dc2b6807a689afb040079f5e1bce2d67",
+      "bytes": 6424,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/parsed_cells.json",
+      "sha256": "ff0217b6202176c73edc1531df30efd29a104f5c768924ed961a69fcab7c1770",
+      "bytes": 8034,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/normalized_cells.json",
+      "sha256": "eca0b948ce9da4eb23c8b715e8d42ac25363fb35217597a3d271fbe9906b1e9e",
+      "bytes": 25290,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/distribution.json",
+      "sha256": "3a1b7251c52a56ca0b0a1bfc54ecf0ee54b8923e8ebef89c03ea19a1138b8c9e",
+      "bytes": 13472,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/validation.json",
+      "sha256": "2934a63ef7149d8b1ee1888072876fec44eb9d8216be6597918c1dee188a8b78",
+      "bytes": 138,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/cells.with_activity.json",
+      "sha256": "60a933107c6349686bf470841339de352ee092977c22d55304f90c550cb06e40",
+      "bytes": 38793,
+      "createdAt": "2026-09-07T20:22:46Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/manifest.json",
+      "sha256": "93ac94f8c4ef2b48fe6e92d2b9d970f294a20d2c7a1df4dd769f7cf2617768e9",
+      "bytes": 14017,
+      "createdAt": "2026-09-07T20:22:46Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "canada-cpi-annual-rate-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "f1baea413714fe099f71118840f6363977fcdb5c",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "755641247eff7f934b660b647c89c008cbfa88d83ff1b0b4980decbc8703f50c"
+}

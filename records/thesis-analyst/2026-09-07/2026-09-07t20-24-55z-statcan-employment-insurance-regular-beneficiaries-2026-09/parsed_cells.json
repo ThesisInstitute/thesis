@@ -1,0 +1,160 @@
+[
+  {
+    "slug": "canada-ei-regular-beneficiaries-september-2026",
+    "country": "CA",
+    "type": "data",
+    "title": "Canada Regular EI Beneficiaries, Sep 2026",
+    "question": "What will Statistics Canada first report for Canada regular Employment Insurance beneficiaries, seasonally adjusted, September 2026, in Table 14-10-0011-01 vector v64549350?",
+    "unit": "thousands",
+    "pointEstimate": 538,
+    "ciLow": 524,
+    "ciHigh": 552,
+    "confidence": 0.8,
+    "resolutionDate": "2026-11-25",
+    "resolutionSource": "Statistics Canada Table 14-10-0011-01 and The Daily Employment Insurance release",
+    "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+    "resolutionRule": "Resolve to the first Statistics Canada published value for Canada, regular Employment Insurance beneficiaries, seasonally adjusted, reference period September 2026, Table 14-10-0011-01 / vector v64549350, transformed from persons to thousands by multiplying by 0.001. Use the first print only; ignore later revisions or corrections.",
+    "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.september_2026.first_print",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        },
+        "label": "December 2025",
+        "value": 569.11
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        },
+        "label": "January 2026",
+        "value": 554.83
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        },
+        "label": "February 2026",
+        "value": 545.67
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "March 2026",
+        "value": 548
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "April 2026",
+        "value": 544.44
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "May 2026",
+        "value": 543.69
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "June 2026",
+        "value": 541.96
+      }
+    ],
+    "drivers": [
+      "Recent EI beneficiary level drifted down from December to June",
+      "June first-print level was 541.96 thousand",
+      "July labour market improved before August softened",
+      "August unemployment rate held at 6.4 percent",
+      "EI eligibility and exhaustion damp direct translation from unemployment"
+    ],
+    "sourceContext": [
+      "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+      "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101&request_locale=en",
+      "https://www150.statcan.gc.ca/n1/dai-quo/cal2-eng.htm",
+      "https://www.statcan.gc.ca/o1/en/calendar",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260219/dq260219b-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260325/dq260325a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260423/dq260423c-eng.htm?HPA=1",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260522/dq260522b-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260618/dq260618d-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260723/dq260723c-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260819/dq260819d-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260807/dq260807a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm"
+    ],
+    "runAt": "2026-09-07T20:24:59Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "September 2026 Canada regular EI beneficiary forecast"
+      },
+      {
+        "kind": "text",
+        "text": "The resolver is Statistics Canada Table 14-10-0011-01, vector v64549350: Canada regular Employment Insurance beneficiaries, seasonally adjusted, in persons, converted to thousands. This is the same seasonally adjusted Canada regular-beneficiaries variant throughout, not unadjusted beneficiaries, claims, active recipients, or provincial subtotals."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked Statistics Canada release schedule/calendar for the September 2026 EI release.",
+        "result": "The Statistics Canada calendar publishes releases at 8:30 a.m. Eastern and lists Employment Insurance for September 2026 on November 25, 2026, within the registered 2026-11-17 to 2026-11-25 window."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched recent same-series Statistics Canada EI values from The Daily/Table 14-10-0011-01 releases for December 2025 through March 2026.",
+        "result": "Canada regular EI beneficiaries, seasonally adjusted: December 2025 569,110 persons; January 2026 554,830 persons; March 2026 548,000 persons, up 2,330 from February, implying February 2026 545,670 persons."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched recent same-series Statistics Canada EI values from The Daily/Table 14-10-0011-01 releases for April through June 2026.",
+        "result": "Canada regular EI beneficiaries, seasonally adjusted: April 2026 544,440 persons; May 2026 543,690 persons; June 2026 541,960 persons, with June down 2,300 or about 0.4 percent from May."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked Statistics Canada Labour Force Survey releases available before this September EI target resolves.",
+        "result": "The July 2026 LFS reported employment +75,000 and unemployment rate 6.4 percent; the August 2026 LFS reported employment 21,173,000, down 42,000 or 0.2 percent, unemployment rate 6.4 percent, participation rate 65.0 percent, and long-term unemployment share 24.0 percent."
+      },
+      {
+        "kind": "text",
+        "text": "Reference class/base rate: the same official series from December 2025 through June 2026 is 569.11, 554.83, 545.67, 548.00, 544.44, 543.69, and 541.96 thousand. The level has drifted lower since the late-2025 high, but the last four prints are tightly clustered around 542 to 548 thousand rather than continuing the December-to-January drop."
+      },
+      {
+        "kind": "text",
+        "text": "Level, momentum, one-off, and policy-mechanism effects: level starts from June's 541.96 thousand. Momentum is slightly negative, with May and June declines of 0.75 and 1.73 thousand. One-off risk is that summer employment strength in July may reduce new EI inflow before the August employment decline shows up. Policy-mechanism effect is limited because the resolver is an administrative beneficiary stock; eligibility and benefit exhaustion mean LFS unemployment moves do not map one-for-one into EI beneficiaries."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior is the latest official level, 541.96 thousand, with reference class from seven same-variant official prints. Adjustment components are -4.5 thousand as a single net three-month drift adjustment from June to September, +1.0 thousand because August unemployment stayed at 6.4 percent rather than rising, and -0.5 thousand for expected continued exhaustion after the earlier high, giving 541.96 - 4.5 + 1.0 - 0.5 = 537.96, rounded to 538. For interval sizing, successive changes are -14.28, -9.16, +2.33, -3.56, -0.75, and -1.73 thousand; sample sigma = 6.11 thousand, 1.28*sigma = 7.82 thousand for a one-month 80% interval. Because the target is roughly three monthly steps after the latest June EI print, I scale the half-width by sqrt(3): 7.82*1.73 = 13.53 thousand, rounded to a 14 thousand half-width, so 538 +/- 14 gives [524, 552]."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk is that August's employment decline and core-age male unemployment pressure feed into new EI claims faster than expected, which would land above the interval if September regular beneficiaries print above 552 thousand. Downside risk is that July labour strength and benefit exhaustion dominate, which would land below the interval if the level falls under 524 thousand. Outside the interval would likely require either a clear layoff shock or an unexpectedly sharp administrative outflow."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the optional clarity fixes by stating that the -4.5 thousand trend is a single net June-to-September adjustment and that the interval is the 80% interval from 1.28*sigma scaled by sqrt(3); no reviewer critiques were rejected."
+      },
+      {
+        "kind": "forecast",
+        "point": 538,
+        "ciLow": 524,
+        "ciHigh": 552
+      }
+    ]
+  }
+]

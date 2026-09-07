@@ -1,0 +1,1312 @@
+[
+  {
+    "slug": "japan-tokyo-cpi-annual-rate-september-2026-prelim",
+    "country": "JP",
+    "type": "data",
+    "title": "Tokyo CPI All Items YoY, Sep 2026 Prelim",
+    "question": "What will the Statistics Bureau of Japan first print for the 2026-09 Ku-area of Tokyo mid-month preliminary Consumer Price Index, all items, year-over-year percent change, not seasonally adjusted?",
+    "unit": "percent",
+    "pointEstimate": 2.1,
+    "ciLow": 1.7,
+    "ciHigh": 2.5,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-02",
+    "resolutionSource": "Statistics Bureau of Japan CPI Tokyo preliminary release",
+    "resolutionSourceUrl": "https://www.stat.go.jp/data/cpi/sokuhou/tsuki/index-t.html",
+    "resolutionRule": "Resolve to the first official Statistics Bureau of Japan print for the 2026-09 2020-base CPI Ku-area of Tokyo mid-month preliminary all-items series in the release's e-Stat table 1-2 workbook, field/series code 0001, year-over-year percent change in percent computed from the rounded index and rounded to one decimal place. Use the first print only; ignore later revisions or final values.",
+    "dataPointId": "statjp.cpi.tokyo_all_items_annual_rate.september_2026.preliminary",
+    "historicalContext": [
+      {
+        "label": "2025-09",
+        "value": 2.5,
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        }
+      },
+      {
+        "label": "2025-10",
+        "value": 2.7,
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        }
+      },
+      {
+        "label": "2025-11",
+        "value": 2.7,
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        }
+      },
+      {
+        "label": "2025-12",
+        "value": 2,
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        }
+      },
+      {
+        "label": "2026-01",
+        "value": 1.6,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "2026-02",
+        "value": 1.6,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "2026-03",
+        "value": 1.5,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "2026-04",
+        "value": 1.4,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "2026-05",
+        "value": 1.3,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "2026-06",
+        "value": 1.6,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "2026-07",
+        "value": 1.8,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "2026-08",
+        "value": 1.9,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      }
+    ],
+    "drivers": [
+      "August all-items YoY was 1.9 percent and still rising modestly",
+      "September 2025 index base was low after a -0.6 percent monthly fall",
+      "Recent seasonally adjusted all-items momentum was positive at 0.2 to 0.4 percent per month",
+      "Energy was a drag in August while food and rent remained positive contributors"
+    ],
+    "sourceContext": [
+      "https://www.stat.go.jp/english/data/cpi/1582.htm",
+      "https://www.stat.go.jp/data/cpi/sokuhou/tsuki/index-t.html",
+      "https://www.stat.go.jp/data/cpi/sokuhou/tsuki/pdf/kubu.pdf",
+      "https://www.e-stat.go.jp/en/stat-search/files?cycle=0&cycle_facet=tclass1%3Atclass2&layout=datalist&page=1&tclass1=000001243880&tclass2=000001243881&tclass3=000001243884&tclass4=000001243888&tclass5val=0&toukei=00200573&tstat=000001243876"
+    ],
+    "runAt": "2026-09-07T20:28:48Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Tokyo all-items CPI preliminary forecast for September 2026"
+      },
+      {
+        "kind": "text",
+        "text": "The resolver is the Ku-area of Tokyo mid-month preliminary, all-items CPI, not seasonally adjusted, year-over-year percent change. The registered target contract specifies the 2020-base Tokyo ku-area preliminary CPI e-Stat table 1-2 workbook, field/series code 0001, first print; this forecast keeps that resolver rather than the later final Tokyo value or national CPI."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked Statistics Bureau of Japan CPI release schedule for the Ku-area of Tokyo preliminary survey month September 2026.",
+        "result": "The official schedule lists survey month September for Ku-area of Tokyo preliminary with release date October 2, 2026, inside the registered 2026-09-30 to 2026-10-08 expectedReleaseWindow; the same schedule lists August release on August 28, 2026 and October survey release on October 30, 2026."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the current Statistics Bureau Tokyo preliminary PDF for table 1 headline all-items values.",
+        "result": "The August 2026 preliminary all-items index was 102.4 and the all-items year-over-year change was 1.9 percent; July 2026 was index 102.0 and 1.8 percent year-over-year; June 2026 was index 101.5 and 1.6 percent year-over-year."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the official table 1 recent all-items YoY sequence in the August 2026 Tokyo preliminary PDF.",
+        "result": "Fetched all-items YoY prints were 2025-09 2.5, 2025-10 2.7, 2025-11 2.7, 2025-12 2.0, 2026-01 1.6, 2026-02 1.6, 2026-03 1.5, 2026-04 1.4, 2026-05 1.3, 2026-06 1.6, 2026-07 1.8, and 2026-08 1.9 percent."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the same official PDF for level, momentum, and component information around the latest print.",
+        "result": "Official all-items indexes were 2025-08 100.4, 2025-09 99.8, 2026-07 102.0, and 2026-08 102.4; seasonally adjusted all-items monthly changes were 2026-06 0.3, 2026-07 0.4, and 2026-08 0.2 percent; August energy YoY was -0.7 with contribution -0.03 and food excluding fresh food YoY was 3.8 with contribution 0.87."
+      },
+      {
+        "kind": "text",
+        "text": "Reference class/base rate: for this same official Tokyo preliminary all-items YoY series, the recent 12-print history from 2025-09 through 2026-08 averages about 1.88 percent, with the last three prints at 1.6, 1.8, and 1.9 percent. This is a persistence/recent-delta prior, not a fitted formal model, and it supports a near-2 percent prior before month-specific adjustment."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior is August 2026 all-items YoY = 1.9 using the official 2025-09 to 2026-08 same-variant history. Adjustment components: level/base effect adds about +0.2 because September 2025 all-items index 99.8 was 0.6 below August 2025's 100.4, while 2026 momentum is positive but likely partly offset by normal September seasonal softness; energy drag roughly -0.1 and sticky food/rent services roughly +0.1, net point = 2.1. Interval method: month-to-month changes in YoY prints from the 2025-09 through 2026-08 official same-variant sample are +0.2, 0.0, -0.7, -0.4, 0.0, -0.1, -0.1, -0.1, +0.3, +0.2, +0.1, so sigma = 0.27 percentage point; 1.28*sigma = 0.35, rounded to an 80 percent interval of 1.7 to 2.5 percent."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk is a smaller-than-usual September unadjusted decline, renewed food price pressure, or less energy drag, which would land above the interval. Downside risk is a sharper September seasonal fall, weaker fresh food, or stronger utility/gasoline subsidy drag; a broad monthly index drop of about 0.8 percent from August would land outside the interval on the low side."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the blocking resolver correction by changing the rule to the registered 2020-base Tokyo preliminary e-Stat table 1-2 workbook, field 0001, YoY-from-rounded-index target; accepted optional clarifications on the official October 2, 2026 schedule date, persistence/recent-delta prior, and sigma basis."
+      },
+      {
+        "kind": "forecast",
+        "point": 2.1,
+        "ciLow": 1.7,
+        "ciHigh": 2.5
+      }
+    ],
+    "agentReportedRunAt": "2026-09-07T20:27:04Z",
+    "runStartedAt": "2026-09-07T20:27:00Z",
+    "promptMode": "fast",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "targetContentHash": "d97d696169f6aa085cb6595247b04eb5495beddbba4f778e2106a1c4ac953e72",
+    "targetRegistrationPath": "records/targets/2026-09-07-d97d696169f6aa085cb6595247b04eb5495beddbba4f778e2106a1c4ac953e72.json",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 1.1,
+        "upper": 3.1
+      },
+      "points": [
+        {
+          "value": 1.1,
+          "probability": 0.0
+        },
+        {
+          "value": 1.11,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 1.12,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 1.13,
+          "probability": 0.005
+        },
+        {
+          "value": 1.14,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 1.15,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 1.16,
+          "probability": 0.01
+        },
+        {
+          "value": 1.17,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 1.18,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 1.19,
+          "probability": 0.015
+        },
+        {
+          "value": 1.2,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 1.21,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 1.22,
+          "probability": 0.02
+        },
+        {
+          "value": 1.23,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 1.24,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 1.25,
+          "probability": 0.025
+        },
+        {
+          "value": 1.26,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 1.27,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 1.28,
+          "probability": 0.03
+        },
+        {
+          "value": 1.29,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 1.3,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 1.31,
+          "probability": 0.035
+        },
+        {
+          "value": 1.32,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 1.33,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 1.34,
+          "probability": 0.04
+        },
+        {
+          "value": 1.35,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 1.36,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 1.37,
+          "probability": 0.045
+        },
+        {
+          "value": 1.38,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 1.39,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 1.4,
+          "probability": 0.05
+        },
+        {
+          "value": 1.41,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 1.42,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 1.43,
+          "probability": 0.055
+        },
+        {
+          "value": 1.44,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 1.45,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 1.46,
+          "probability": 0.06
+        },
+        {
+          "value": 1.47,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 1.48,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 1.49,
+          "probability": 0.065
+        },
+        {
+          "value": 1.5,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 1.51,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 1.52,
+          "probability": 0.07
+        },
+        {
+          "value": 1.53,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 1.54,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 1.55,
+          "probability": 0.075
+        },
+        {
+          "value": 1.56,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 1.57,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 1.58,
+          "probability": 0.08
+        },
+        {
+          "value": 1.59,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 1.6,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 1.61,
+          "probability": 0.085
+        },
+        {
+          "value": 1.62,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 1.63,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 1.64,
+          "probability": 0.09
+        },
+        {
+          "value": 1.65,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 1.66,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 1.67,
+          "probability": 0.095
+        },
+        {
+          "value": 1.68,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 1.69,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 1.7,
+          "probability": 0.1
+        },
+        {
+          "value": 1.71,
+          "probability": 0.11
+        },
+        {
+          "value": 1.72,
+          "probability": 0.12
+        },
+        {
+          "value": 1.73,
+          "probability": 0.13
+        },
+        {
+          "value": 1.74,
+          "probability": 0.14
+        },
+        {
+          "value": 1.75,
+          "probability": 0.15
+        },
+        {
+          "value": 1.76,
+          "probability": 0.16
+        },
+        {
+          "value": 1.77,
+          "probability": 0.17
+        },
+        {
+          "value": 1.78,
+          "probability": 0.18
+        },
+        {
+          "value": 1.79,
+          "probability": 0.19
+        },
+        {
+          "value": 1.8,
+          "probability": 0.2
+        },
+        {
+          "value": 1.81,
+          "probability": 0.21
+        },
+        {
+          "value": 1.82,
+          "probability": 0.22
+        },
+        {
+          "value": 1.83,
+          "probability": 0.23
+        },
+        {
+          "value": 1.84,
+          "probability": 0.24
+        },
+        {
+          "value": 1.85,
+          "probability": 0.25
+        },
+        {
+          "value": 1.86,
+          "probability": 0.26
+        },
+        {
+          "value": 1.87,
+          "probability": 0.27
+        },
+        {
+          "value": 1.88,
+          "probability": 0.28
+        },
+        {
+          "value": 1.89,
+          "probability": 0.29
+        },
+        {
+          "value": 1.9,
+          "probability": 0.3
+        },
+        {
+          "value": 1.91,
+          "probability": 0.31
+        },
+        {
+          "value": 1.92,
+          "probability": 0.32
+        },
+        {
+          "value": 1.93,
+          "probability": 0.33
+        },
+        {
+          "value": 1.94,
+          "probability": 0.34
+        },
+        {
+          "value": 1.95,
+          "probability": 0.35
+        },
+        {
+          "value": 1.96,
+          "probability": 0.36
+        },
+        {
+          "value": 1.97,
+          "probability": 0.37
+        },
+        {
+          "value": 1.98,
+          "probability": 0.38
+        },
+        {
+          "value": 1.99,
+          "probability": 0.39
+        },
+        {
+          "value": 2.0,
+          "probability": 0.4
+        },
+        {
+          "value": 2.01,
+          "probability": 0.41
+        },
+        {
+          "value": 2.02,
+          "probability": 0.42
+        },
+        {
+          "value": 2.03,
+          "probability": 0.43
+        },
+        {
+          "value": 2.04,
+          "probability": 0.44
+        },
+        {
+          "value": 2.05,
+          "probability": 0.45
+        },
+        {
+          "value": 2.06,
+          "probability": 0.46
+        },
+        {
+          "value": 2.07,
+          "probability": 0.47
+        },
+        {
+          "value": 2.08,
+          "probability": 0.48
+        },
+        {
+          "value": 2.09,
+          "probability": 0.49
+        },
+        {
+          "value": 2.1,
+          "probability": 0.5
+        },
+        {
+          "value": 2.11,
+          "probability": 0.51
+        },
+        {
+          "value": 2.12,
+          "probability": 0.52
+        },
+        {
+          "value": 2.13,
+          "probability": 0.53
+        },
+        {
+          "value": 2.14,
+          "probability": 0.54
+        },
+        {
+          "value": 2.15,
+          "probability": 0.55
+        },
+        {
+          "value": 2.16,
+          "probability": 0.56
+        },
+        {
+          "value": 2.17,
+          "probability": 0.57
+        },
+        {
+          "value": 2.18,
+          "probability": 0.58
+        },
+        {
+          "value": 2.19,
+          "probability": 0.59
+        },
+        {
+          "value": 2.2,
+          "probability": 0.6
+        },
+        {
+          "value": 2.21,
+          "probability": 0.61
+        },
+        {
+          "value": 2.22,
+          "probability": 0.62
+        },
+        {
+          "value": 2.23,
+          "probability": 0.63
+        },
+        {
+          "value": 2.24,
+          "probability": 0.64
+        },
+        {
+          "value": 2.25,
+          "probability": 0.65
+        },
+        {
+          "value": 2.26,
+          "probability": 0.66
+        },
+        {
+          "value": 2.27,
+          "probability": 0.67
+        },
+        {
+          "value": 2.28,
+          "probability": 0.68
+        },
+        {
+          "value": 2.29,
+          "probability": 0.69
+        },
+        {
+          "value": 2.3,
+          "probability": 0.7
+        },
+        {
+          "value": 2.31,
+          "probability": 0.71
+        },
+        {
+          "value": 2.32,
+          "probability": 0.72
+        },
+        {
+          "value": 2.33,
+          "probability": 0.73
+        },
+        {
+          "value": 2.34,
+          "probability": 0.74
+        },
+        {
+          "value": 2.35,
+          "probability": 0.75
+        },
+        {
+          "value": 2.36,
+          "probability": 0.76
+        },
+        {
+          "value": 2.37,
+          "probability": 0.77
+        },
+        {
+          "value": 2.38,
+          "probability": 0.78
+        },
+        {
+          "value": 2.39,
+          "probability": 0.79
+        },
+        {
+          "value": 2.4,
+          "probability": 0.8
+        },
+        {
+          "value": 2.41,
+          "probability": 0.81
+        },
+        {
+          "value": 2.42,
+          "probability": 0.82
+        },
+        {
+          "value": 2.43,
+          "probability": 0.83
+        },
+        {
+          "value": 2.44,
+          "probability": 0.84
+        },
+        {
+          "value": 2.45,
+          "probability": 0.85
+        },
+        {
+          "value": 2.46,
+          "probability": 0.86
+        },
+        {
+          "value": 2.47,
+          "probability": 0.87
+        },
+        {
+          "value": 2.48,
+          "probability": 0.88
+        },
+        {
+          "value": 2.49,
+          "probability": 0.89
+        },
+        {
+          "value": 2.5,
+          "probability": 0.9
+        },
+        {
+          "value": 2.51,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 2.52,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 2.53,
+          "probability": 0.905
+        },
+        {
+          "value": 2.54,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 2.55,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 2.56,
+          "probability": 0.91
+        },
+        {
+          "value": 2.57,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 2.58,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 2.59,
+          "probability": 0.915
+        },
+        {
+          "value": 2.6,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 2.61,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 2.62,
+          "probability": 0.92
+        },
+        {
+          "value": 2.63,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 2.64,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 2.65,
+          "probability": 0.925
+        },
+        {
+          "value": 2.66,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 2.67,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 2.68,
+          "probability": 0.93
+        },
+        {
+          "value": 2.69,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 2.7,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 2.71,
+          "probability": 0.935
+        },
+        {
+          "value": 2.72,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 2.73,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 2.74,
+          "probability": 0.94
+        },
+        {
+          "value": 2.75,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 2.76,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 2.77,
+          "probability": 0.945
+        },
+        {
+          "value": 2.78,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 2.79,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 2.8,
+          "probability": 0.95
+        },
+        {
+          "value": 2.81,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 2.82,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 2.83,
+          "probability": 0.955
+        },
+        {
+          "value": 2.84,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 2.85,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 2.86,
+          "probability": 0.96
+        },
+        {
+          "value": 2.87,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 2.88,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 2.89,
+          "probability": 0.965
+        },
+        {
+          "value": 2.9,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 2.91,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 2.92,
+          "probability": 0.97
+        },
+        {
+          "value": 2.93,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 2.94,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 2.95,
+          "probability": 0.975
+        },
+        {
+          "value": 2.96,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 2.97,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 2.98,
+          "probability": 0.98
+        },
+        {
+          "value": 2.99,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 3.0,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 3.01,
+          "probability": 0.985
+        },
+        {
+          "value": 3.02,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 3.03,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 3.04,
+          "probability": 0.99
+        },
+        {
+          "value": 3.05,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 3.06,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 3.07,
+          "probability": 0.995
+        },
+        {
+          "value": 3.08,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 3.09,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 3.1,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 2.1,
+        "median": 2.1,
+        "interval80": {
+          "lower": 1.7,
+          "upper": 2.5
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/prompt.md",
+        "sha256": "8abe13bace382d71d9cfd799461cda7e3f7371bb3a459e15a71bd407efa7f797",
+        "bytes": 10627,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_command.json",
+        "sha256": "c8b9fdb8d58a724683915da4e88c134c1385a0885ab4c2eabec1ad1b40f83787",
+        "bytes": 760,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_codex_stdout.jsonl",
+        "sha256": "e3d3713c1872451c711c9bfb1abc05a9b2911cfd04cb8593c48245a522f3da09",
+        "bytes": 11317,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_codex_stderr.log",
+        "sha256": "b726894bf687e5f90685988babf9c8a6a9471a48e9e05506b5ddc2f0a799f90c",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_codex_events.jsonl",
+        "sha256": "7fd62a83234e6786f129ec51b012fe2d809144c1f0c7e0ec6e32d4537345a405",
+        "bytes": 11304,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_codex_last_message.txt",
+        "sha256": "96ec2842c692832b6f5f291e90b2d746ee02d2b5bc1576a3815a42709ebeab2c",
+        "bytes": 6269,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_codex_trace.json",
+        "sha256": "8633be912c6dda8cbd73eea2ccf03e203946c25e559ac661210613a22cee67a9",
+        "bytes": 557,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_stdout.txt",
+        "sha256": "96ec2842c692832b6f5f291e90b2d746ee02d2b5bc1576a3815a42709ebeab2c",
+        "bytes": 6269,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_stderr.txt",
+        "sha256": "1efb7b6f05fc15129a185c4238cf0c8cd5adf06eea8ac1736de64835dba42b7f",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_prompt.md",
+        "sha256": "61cb406b7d5cfcd730a29e270229ba4c6d4b4addc19d3403e12e783b994ea3b9",
+        "bytes": 9661,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_command.json",
+        "sha256": "fd534b506bc2dd1278ce2b11259fcb478d606032eecfdde9b7d265624eb9902c",
+        "bytes": 756,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "f96feea45a4b284f68f52ffedd33b2be4deab3012ac963b6144a3405f4792817",
+        "bytes": 1213876,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_codex_stderr.log",
+        "sha256": "ef1fddc35a47f8aa3abbf7a405f6121b48a4f5a8df1c580e63e0f1f778922b4d",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_codex_events.jsonl",
+        "sha256": "4005c61eb79d3ad21b9e0ba97b4ed007336b8eb361128417a2df4443778a32cc",
+        "bytes": 1214015,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_codex_last_message.txt",
+        "sha256": "9e283c79025c312ac4d6fab1258574dc0896dd5455b9593869d89e766eaf01cb",
+        "bytes": 1305,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_codex_trace.json",
+        "sha256": "51afa7e816351869b23eb1f012ff6a65508909223914e8a5a598b9a1c9d5768b",
+        "bytes": 559,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_stdout.txt",
+        "sha256": "9e283c79025c312ac4d6fab1258574dc0896dd5455b9593869d89e766eaf01cb",
+        "bytes": 1305,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_stderr.txt",
+        "sha256": "d1a7384ad0c3387afc579c40906a42b99232d13114b7cfc921240bcba9bebd8f",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/revision_prompt.md",
+        "sha256": "ee61a4cf6eb24172bc12639d33214ad103253aea91a4166ddba00b28b09dcbd0",
+        "bytes": 19137,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/command.json",
+        "sha256": "77a6d49dbfa4baec69116235132fe21bb52ccd0b0940b8adbfb9ba6bc85fd3a7",
+        "bytes": 754,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/codex_stdout.jsonl",
+        "sha256": "5b4a9c7ff7f992e58a2e3d0be691ece3a0a3fcd063a76f55eeaa5fd9a809dcfd",
+        "bytes": 7720,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/codex_stderr.log",
+        "sha256": "6eb964627f050e35da3a9d69a9b3ffb8fc555c99c6b7c8beb0dba802514c315e",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/codex_events.jsonl",
+        "sha256": "6e51952706d98f4fb05bddccab4d8658a31ad2b67d5e56dffabe7f6921da85dc",
+        "bytes": 7742,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/codex_last_message.txt",
+        "sha256": "1033bee8c9e191f3c9addc7162040dd982cbc83e3e0963874c6b389222903097",
+        "bytes": 7008,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/codex_trace.json",
+        "sha256": "beb4fd49908aa3d0b6d461b4b2f855d6308ddace2446fc631eae234c44ecdf46",
+        "bytes": 555,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/stdout.txt",
+        "sha256": "1033bee8c9e191f3c9addc7162040dd982cbc83e3e0963874c6b389222903097",
+        "bytes": 7008,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/stderr.txt",
+        "sha256": "6cf55d0c87ae6ecbb4a5492d584afef3743f903c1b5045a88e49aa2954e1ae51",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/raw_response.txt",
+        "sha256": "1033bee8c9e191f3c9addc7162040dd982cbc83e3e0963874c6b389222903097",
+        "bytes": 7008,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/parsed_cells.json",
+        "sha256": "5be2c621c8fe005d96a5c57e5a14d937ba62a987f5bc07d5ec1e9a0de8c60451",
+        "bytes": 8611,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/normalized_cells.json",
+        "sha256": "24b2dd057d6064a6b3f561916b25f1acdb1496c6587077aff0d48262b43384e7",
+        "bytes": 25623,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/distribution.json",
+        "sha256": "b20d02b6179821c4133f56033d0b0760499cacaa96eb98f062860c0d9a7fe111",
+        "bytes": 13228,
+        "createdAt": "2026-09-07T20:27:00Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/validation.json",
+        "sha256": "61e8cedec36df3120c046c8c5140b58fe54083472aae22f0213f3f069315d00e",
+        "bytes": 150,
+        "createdAt": "2026-09-07T20:27:00Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-07T20:27:00Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "8e915eb6fa1827259cf92f839429c25beb58a6aa5858422f0477963de39c0ce9"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-27-00z-statjp-cpi-tokyo-all-items-yoy-2026-09/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.finding.1",
+          "severity": "blocking",
+          "rubricItem": "resolver",
+          "summary": "The registered sourceBinding specifies the 2020-base Tokyo ku-area preliminary CPI table, while the draft resolutionRule says 2025-base CPI.",
+          "actionRequested": "Change the resolver text to match the registered target contract byte-for-concept: 2020-base CPI Tokyo ku-area mid-month preliminary, e-Stat table 1-2 workbook, all-items series code/field 0001, YoY computed from the rounded index; if the forecaster believes the ledger base is wrong, keep the same target and explicitly state that discrepancy in reasoning rather than silently using 2025-base."
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "State explicitly that the October 2, 2026 resolutionDate comes from the official release schedule and falls inside the registered September 30 to October 8 expectedReleaseWindow."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Add one sentence saying the time-series prior is a persistence/recent-delta prior rather than a fitted formal model, to satisfy stricter model-prior checks."
+        },
+        {
+          "findingId": "review.suggestion.3",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "The interval method is acceptable, but clarify that sigma is based on month-to-month changes in YoY prints from the 2025-09 through 2026-08 official same-variant sample."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.finding.1",
+          "decision": "accepted",
+          "rationale": "Review disposition: accepted the blocking resolver correction by changing the rule to the registered 2020-base Tokyo preliminary e-Stat table 1-2 workbook, field 0001, YoY-from-rounded-index target; accepted optional clarifications on the official October 2, 2026 schedule date, persistence/recent-delta prior, and sigma basis.",
+          "forecastChanged": true
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver correction by changing the rule to the registered 2020-base Tokyo preliminary e-Stat table 1-2 workbook, field 0001, YoY-from-rounded-index target; accepted optional clarifications on the official October 2, 2026 schedule date, persistence/recent-delta prior, and sigma basis.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver correction by changing the rule to the registered 2020-base Tokyo preliminary e-Stat table 1-2 workbook, field 0001, YoY-from-rounded-index target; accepted optional clarifications on the official October 2, 2026 schedule date, persistence/recent-delta prior, and sigma basis.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.3",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver correction by changing the rule to the registered 2020-base Tokyo preliminary e-Stat table 1-2 workbook, field 0001, YoY-from-rounded-index target; accepted optional clarifications on the official October 2, 2026 schedule date, persistence/recent-delta prior, and sigma basis.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "Draft is mostly coherent, but the resolver text conflicts with the registered target contract on CPI base/table identity."
+    }
+  }
+]

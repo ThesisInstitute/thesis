@@ -1,0 +1,21 @@
+{
+  "summary": "Draft is broadly publishable but has a blocking resolver/source mismatch against the registered ledger contract.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "blocking",
+      "summary": "The draft sets resolutionSourceUrl to the predicted September 2026 table URL, but the ledger sourceBinding sourceUrl is the registered SSA July 2026 Table 2 URL and the target is bounded by expectedReleaseWindow ending 2026-11-08.",
+      "actionRequested": "Align the resolver/source text and URL with the registered target contract, or explicitly state any concrete ledger discrepancy while keeping the same target."
+    },
+    {
+      "rubricItem": "resolver",
+      "severity": "warning",
+      "summary": "The resolutionRule says convert whole-recipient first print to millions by dividing by 1,000,000, while the registered sourceBinding transform is multiply by 0.001.",
+      "actionRequested": "Clarify the source extraction unit so the stated conversion is consistent with the registered transform and final unit 'millions'."
+    }
+  ],
+  "optionalSuggestions": [
+    "The prior/update/interval step is strong; keep the explicit sigma and 80% bound arithmetic.",
+    "The downside tail threshold could be restated relative to the final interval lower bound to make the tail math easier to audit."
+  ]
+}

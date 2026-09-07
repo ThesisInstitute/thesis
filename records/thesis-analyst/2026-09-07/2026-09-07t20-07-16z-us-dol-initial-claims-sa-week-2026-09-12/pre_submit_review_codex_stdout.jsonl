@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a07d7c-c04f-7ae3-833e-4ef16c155850"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\n  \"summary\": \"Draft is publication-ready against the rubric, with resolver, prior, update, interval, tails, and JSON fields coherent with the registered target.\",\n  \"requiredFixes\": [],\n  \"optionalSuggestions\": [\n    \"Consider shortening the resolver note so the agency first-print date and ledger resolutionDate distinction is easier to scan.\",\n    \"The interval method is acceptable; a larger historical sample could be mentioned if available, but the current explicit 12-week volatility basis is sufficient.\"\n  ]\n}"}}
+{"type":"turn.completed","usage":{"input_tokens":20075,"cached_input_tokens":0,"output_tokens":625,"reasoning_output_tokens":516}}
