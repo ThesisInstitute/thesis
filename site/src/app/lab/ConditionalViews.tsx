@@ -495,26 +495,28 @@ function ConditionalReviews({ data }: { data: ConditionalDetail }) {
           <ul className="lab-conditional-review-findings">
             {review.findings.map((finding) => (
               <li key={finding.id}>
-                <strong>{finding.title}</strong>
-                <p>{finding.detail}</p>
-                <div className="lab-links">
-                  {finding.source_ids.map((sourceId) => (
-                    <a
-                      key={sourceId}
-                      className="lab-record"
-                      href={`#conditional-source-${sourceId}`}
-                    >
-                      {
-                        data.contract.sources.find(
-                          (source) => source.id === sourceId,
-                        )!.title
-                      }
-                    </a>
-                  ))}
-                </div>
-                <small className="lab-muted">
-                  Response location: {finding.response_location}
-                </small>
+                <details className="lab-review-finding">
+                  <summary>{finding.title}</summary>
+                  <p>{finding.detail}</p>
+                  <div className="lab-links">
+                    {finding.source_ids.map((sourceId) => (
+                      <a
+                        key={sourceId}
+                        className="lab-record"
+                        href={`#conditional-source-${sourceId}`}
+                      >
+                        {
+                          data.contract.sources.find(
+                            (source) => source.id === sourceId,
+                          )!.title
+                        }
+                      </a>
+                    ))}
+                  </div>
+                  <small className="lab-muted">
+                    Response location: {finding.response_location}
+                  </small>
+                </details>
               </li>
             ))}
           </ul>

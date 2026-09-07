@@ -175,6 +175,13 @@ describe("paired conditional working surfaces", () => {
     const review = await screen.findByRole("heading", {
       name: "Review findings remain",
     });
+    expect(screen.getByText("Synthetic review findings remain")).toBeVisible();
+    expect(
+      screen.getByText(
+        "This recorded revision still has a synthetic reasoning gap.",
+      ),
+    ).not.toBeVisible();
+    fireEvent.click(screen.getByText("Synthetic review findings remain"));
     expect(
       screen.getByText(
         "This recorded revision still has a synthetic reasoning gap.",

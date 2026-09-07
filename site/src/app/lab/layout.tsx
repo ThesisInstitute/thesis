@@ -6,7 +6,7 @@ import "./lab.css";
 export const metadata: Metadata = {
   title: { default: "Forecast lab — Thesis", template: "%s — Thesis lab" },
   description:
-    "Registered forecast experiments, original distributions and official outcomes.",
+    "Forecasts, conditional comparisons, original distributions and evidence.",
   robots: { index: false, follow: false },
 };
 export default async function LabLayout({

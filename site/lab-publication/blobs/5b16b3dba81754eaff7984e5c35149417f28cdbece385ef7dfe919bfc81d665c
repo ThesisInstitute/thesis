@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Adobe RoboHelp 9" />
+<title>Jurisdictions</title>
+<link rel="stylesheet" href="nde2.css" type="text/css" />
+<script type="text/javascript" language="JavaScript">
+//<![CDATA[
+function ehlp_showtip(current,e,text)
+{
+  if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == 'Netscape'))
+  {
+    document.tooltip.document.write("<layer bgColor='yellow' style='border:1px solid black;font-size:12px;'>"+ text + "</layer>");
+    document.tooltip.document.close();
+    document.tooltip.left=e.pageX+5;
+    document.tooltip.top=e.pageY+5;
+    document.tooltip.visibility="show";
+  }
+}
+function ehlp_hidetip()
+{
+  document.tooltip.visibility="hidden";
+}
+//]]>
+</script>
+<script type="text/javascript" language="JavaScript">
+//<![CDATA[
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//]]>
+</script>
+<style type="text/css">
+<!--
+div.WebHelpPopupMenu { position:absolute;
+left:0px;
+top:0px;
+z-index:4;
+visibility:hidden; }
+p.WebHelpNavBar { text-align:right; }
+-->
+</style>
+<script type="text/javascript" language="javascript1.2" src="whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="whlang.js"></script>
+<script type="text/javascript" language="javascript1.2" src="whtopic.js"></script>
+<script type="text/javascript" language="javascript1.2">//<![CDATA[
+<!--
+if (window.gbWhTopic)
+{
+	var strUrl = document.location.href;
+	var bc = 0;
+	var n = strUrl.toLowerCase().indexOf("bc-");
+	if(n != -1)
+	{
+		document.location.href = strUrl.substring(0, n);
+		bc = strUrl.substring(n+3);
+	}
+
+	if (window.setRelStartPage)
+	{
+	addTocInfo("NAEP Data Explorer Definitions\nJurisdictions");
+addButton("prev",BTN_TEXT,"<<","","","","",0,0,"whd_prev0.gif","whd_prev2.gif","whd_prev1.gif");
+addButton("next",BTN_TEXT,">>","","","","",0,0,"whd_next0.gif","whd_next2.gif","whd_next1.gif");
+
+	}
+
+	document.write("<p style=\"font-family: Verdana; font-size: 8pt; font-weight: 700;  font-style:normal; color: rgb(0, 128, 0); text-decoration:none; text-align: left; background: white\"> ");
+AddMasterBreadcrumbs("nde_help_main.htm", "font-family: Verdana; font-size: 8pt; font-weight: 700;  font-style:normal; color: rgb(0, 128, 0); text-decoration:none; text-align: left; background: white", "&gt;", "Home", "welcome_to_the_naep_data_explorer.htm");
+document.write("<a style=\"font-family: Verdana; font-size: 8pt; font-weight: 700;  font-style:normal; color: rgb(0, 128, 0); text-decoration:none; text-align: left; background: white\" href=\"naep_data_explorer_definitions.htm\">NAEP Data Explorer Definitions<\/a> &gt; Jurisdictions<\/p>");
+
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("nde_help_main.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+//]]></script>
+</head>
+<body><script type="text/javascript" language="javascript1.2">//<![CDATA[
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(4);
+//-->
+//]]></script>
+<div style="width: 100%; position: relative;" id="header">
+	<p class="Style1" style="margin-top: 0pt; margin-bottom: 12pt; font-family: Verdana, sans-serif; 
+		 font-size: 10pt; font-weight: normal; text-align: right; padding-top: 2px;"><a href="#" ;=""="" onclick="window.print()" title="Print" onmouseover="if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == 'Netscape')) ehlp_showtip(this,event,'Print');" onmouseout="if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == 'Netscape')) ehlp_hidetip();">Print</a> | <a 
+	 href="javascript:top.window.close();">Close Window</a> </p>
+</div>
+
+<p class="Style2" style="margin-right: 5px;">Jurisdictions</p>
+<p style="margin-right: 5px;">To explore Main NAEP Mathematics, Reading, Science, and Writing, consider all the Jurisdictions under Groups: <span style="font-weight: bold;"><b>National</b></span>, <span style="font-weight: bold;"><b>State</b></span>, <span style="font-weight: bold;"><b>District</b></span>, <span style="font-weight: bold;"><b>Territory/Other</b></span>, and <span style="font-weight: bold;"><b>Region</b></span>. Results for states, and since 2002 for selected urban districts, are available only for these assessments.</p>
+<p style="margin-right: 5px;">For Civics, Economics, Geography, Music, U.S. History, and Visual Arts, the only group available is <span style="font-weight: bold;"><b>National</b></span>. National includes students from public and private schools, public schools only, and private schools only (where sample sizes are large enough).</p>
+<p style="margin-right: 5px;">In national-only assessments (Civics, Economics, Geography, Music, U.S. History, and Visual Arts) and grade 12 assessments for the other four subjects, Jurisdictions are limited to National (public and private), National Public, National Private (where sample sizes are large enough).</p>
+<ul>
+<li class="p-Bullets">
+<p class="Bullets">For Main NAEP Mathematics, Reading, Science, and Writing for grades 4 and 8, all Groups and Jurisdictions are available: <span style="font-weight: bold;"><b>National</b></span>, <span style="font-weight: bold;"><b>State</b></span>, <span style="font-weight: bold;"><b>District</b></span>, <span style="font-weight: bold;"><b>Territory/Other</b></span>, and <span style="font-weight: bold;"><b>Region</b></span>. In state assessments with Trial Urban District Assessments, Large Central City is available. It is used as a benchmark for urban districts, and is not synonymous with the term inner city; read more in the glossary.</p>
+</li>
+</ul>
+<p style="margin-right: 5px; margin-left: 40px;">For grade 12 of the above subjects along with Civics, Economics, Geography, Music, U.S. History, and Visual Arts, the only group available is <span style="font-weight: bold;"><b>National</b></span>. National jurisdictions include <span style="font-weight: bold;"><b>National</b></span> (including both public and nonpublic schools), <span style="font-weight: bold;"><b>National Public</b></span> only, <span style="font-weight: bold;"><b>National Private</b></span> only, and <span style="font-weight: bold;"><b>Private</b></span> Only -- where sample sizes are large enough.</p>
+<ul>
+<li class="p-Bullets">
+<p class="Bullets"><span style="font-weight: bold;"><b>State, District, or Territory/Other</b></span> results are available for Mathematics, Reading, Science, or Writing at grades 4 or 8. District results for selected urban districts started with the 2002 Writing assessment, as part of the Trial Urban District Assessment (TUDA). For more information, see <a href="http://nces.ed.gov/nationsreportcard/about/district.asp">http://nces.ed.gov/nationsreportcard/about/district.asp</a>.</p>
+</li>
+</ul>
+<ul>
+<li class="p-Bullets">
+<p class="Bullets"><span style="font-weight: bold;"><b>Territory/Other</b></span> refers to territories that volunteered to take NAEP before the 2002 reauthorization of the Elementary and Secondary Education Act (ESEA). In that reauthorization, all states, the District of Columbia, and Puerto Rico are to receive support for conducting NAEP. The territories of American Samoa, Guam, and the Virgin Islands conducted NAEP at their own expense for only a few years before 2002, and were not covered by the 2002 reauthorization. For more information, search for “ESEA” on this website.</p>
+</li>
+</ul>
+<ul>
+<li class="p-Bullets">
+<p class="Bullets"><span style="font-weight: bold;"><b>Region</b></span> depends on Census definitions since the 2003 assessment. A different definition of region was used up to 2002. Click on details for a listing of the states in each region. In the glossary, “region” gives more information. Note that NIES uses a different definition of region, which you will see described in "Welcome to the NAEP Data Explorer" page.</p>
+</li>
+</ul>
+<p style="margin-right: 5px;">When in Main NAEP, see the footnote, “1 Accommodations were not permitted for this assessment for certain years.” This refers to assessments from 1990 to 1996 that were developed based on frameworks that did not allow testing accommodations for students with special needs. Beginning in 1996, NAEP studied adding accommodations using a split sample (with and without accommodations for students), and determined that new trend lines for assessments allowing accommodations could be linked to past results that did not permit accommodations. Search for “inclusion policy” on this website.</p>
+<p style="margin-right: 5px;">When in Long-Term Trend (LTT) NAEP, see the footnote, “1 Original assessment format.” This relates to a bridge study performed in 2004 to introduce new procedures. Search for “bridge study” on this website.</p>
+<p style="margin-right: 5px;">To learn more about assessment frameworks, search for “frameworks” on this website.</p>
+<p style="font-weight: bold; font-style: italic; margin-bottom: 3pt; margin-top: 6pt; border-top-style: Groove; border-top-width: 4px; margin-right: 5px;"><span style="font-weight: bold; font-style: italic; "><i><b>Related Links</b></i></span></p>
+<p style="margin-bottom: 3pt; margin-top: 3pt; margin-left: 40px; margin-right: 5px; font-weight: normal; font-style: normal; text-decoration: underline;"><a href="choose_jurisdiction_and_year.htm" style="font-weight: normal; font-style: normal; text-decoration: underline;">Choose Jurisdiction and Year</a></p>
+<p style="margin-bottom: 3pt; margin-top: 3pt; margin-right: 5px; margin-left: 0px; text-decoration: underline;">&#160;</p>
+<script type="text/javascript" language="JavaScript">
+//<![CDATA[
+ if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == 'Netscape'))
+  document.write("<div id='tooltip' class='WebHelpPopupMenu'></div>");
+//]]>
+</script><script type="text/javascript" language="javascript1.2">//<![CDATA[
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+
+highlightSearch();
+//-->
+//]]></script>
+</body>
+</html>
+<script id="f5_cspm">(function(){var f5_cspm={f5_p:'ACILEHIOLFLFKLMMPAGOHMDANOJGGEEOAFGNPNKFJOMNDFIFLCILMFIAANAIFLBGDKKBBIHNAAOPHFNMPMLACJDAAAFBGBGMPAEIOMHGKLMGCINJOELAPMBINIDDLKFA',setCharAt:function(str,index,chr){if(index>str.length-1)return str;return str.substr(0,index)+chr+str.substr(index+1);},get_byte:function(str,i){var s=(i/16)|0;i=(i&15);s=s*32;return((str.charCodeAt(i+16+s)-65)<<4)|(str.charCodeAt(i+s)-65);},set_byte:function(str,i,b){var s=(i/16)|0;i=(i&15);s=s*32;str=f5_cspm.setCharAt(str,(i+16+s),String.fromCharCode((b>>4)+65));str=f5_cspm.setCharAt(str,(i+s),String.fromCharCode((b&15)+65));return str;},set_latency:function(str,latency){latency=latency&0xffff;str=f5_cspm.set_byte(str,40,(latency>>8));str=f5_cspm.set_byte(str,41,(latency&0xff));str=f5_cspm.set_byte(str,35,2);return str;},wait_perf_data:function(){try{var wp=window.performance.timing;if(wp.loadEventEnd>0){var res=wp.loadEventEnd-wp.navigationStart;if(res<60001){var cookie_val=f5_cspm.set_latency(f5_cspm.f5_p,res);window.document.cookie='f5avr0284328824aaaaaaaaaaaaaaaa_cspm_='+encodeURIComponent(cookie_val)+';path=/;'+'';}
+return;}}
+catch(err){return;}
+setTimeout(f5_cspm.wait_perf_data,100);return;},go:function(){var chunk=window.document.cookie.split(/\s*;\s*/);for(var i=0;i<chunk.length;++i){var pair=chunk[i].split(/\s*=\s*/);if(pair[0]=='f5_cspm'&&pair[1]=='1234')
+{var d=new Date();d.setTime(d.getTime()-1000);window.document.cookie='f5_cspm=;expires='+d.toUTCString()+';path=/;'+';';setTimeout(f5_cspm.wait_perf_data,100);}}}}
+f5_cspm.go();}());</script>

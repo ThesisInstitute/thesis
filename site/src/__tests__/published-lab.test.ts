@@ -69,6 +69,29 @@ async function fixture(models = ["synthetic-a", "synthetic-b", "synthetic-a"]) {
   return { directory, rows, manifest, save, sha256, bytes };
 }
 describe("published lab snapshots", () => {
+  it("loads the committed Python export through the real browser contract and verifies every published artifact", async () => {
+    const directory = path.join(process.cwd(), "lab-publication");
+    const manifest = await readPublicationManifest(directory);
+    const response = await handlePublishedLabRequest(
+      ["lab", "conditionals"],
+      "",
+      directory,
+    );
+    expect(response.status).toBe(200);
+    const page = await response.json();
+    expect(page.total).toBe(manifest.attempts.length);
+    expect(page.generated_at).toBe(manifest.generated_at);
+    for (const artifact of manifest.artifacts) {
+      const download = await handlePublishedArtifactRequest(
+        artifact.sha256,
+        directory,
+      );
+      expect(download.status).toBe(200);
+      const bytes = Buffer.from(await download.arrayBuffer());
+      expect(bytes.length).toBe(artifact.bytes);
+      expect(hash(bytes)).toBe(artifact.sha256);
+    }
+  });
   it("filters before pagination and preserves global model options and frozen timestamps", async () => {
     const { directory, rows } = await fixture();
     const first = await handlePublishedLabRequest(

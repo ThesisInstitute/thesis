@@ -1196,6 +1196,7 @@
 .lab-conditional-identity .lab-facts {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0 0 10px;
+  padding: 0;
 }
 .lab-conditional-identity dd {
   overflow-wrap: anywhere;
@@ -1227,7 +1228,14 @@
   font-size: 13px;
 }
 .lab-conditional-review-findings li + li {
-  margin-top: 15px;
+  margin-top: 9px;
+}
+.lab-review-finding summary {
+  cursor: pointer;
+  font-weight: 500;
+}
+.lab-review-finding[open] {
+  padding-bottom: 8px;
 }
 .lab-conditional-review-findings p {
   margin: 4px 0 5px;
