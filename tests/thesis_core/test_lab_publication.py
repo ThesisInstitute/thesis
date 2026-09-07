@@ -76,10 +76,22 @@ def test_export_closes_revision_history_and_preserves_exact_public_artifacts(
         assert hashlib.sha256(raw).hexdigest() == item["sha256"]
     details = exported_details(destination, manifest)
     for identity, data in details.items():
-        original = conditional_detail(core_store, identity).model_dump(mode="json")
+        original = conditional_detail(core_store, identity).model_dump(
+            mode="json", by_alias=True
+        )
         original["generated_at"] = manifest["generated_at"]
         assert data == original
         assert data["scoring_status"] == "not_registered"
+        response = data["response"]
+        for cdf in [
+            response["reference"],
+            *(arm["distribution"] for arm in response["arms"]),
+        ]:
+            assert cdf["pointCount"] == 201
+            assert "transformVersion" in cdf
+            assert "pointEstimate" in cdf["summary"]
+            assert not {"point_count", "transform_version"}.intersection(cdf)
+            assert "point_estimate" not in cdf["summary"]
         item = next(item for item in manifest["attempts"] if item["id"] == identity)
         raw = (destination / "blobs" / item["detail"]["sha256"]).read_bytes()
         assert hashlib.sha256(raw).hexdigest() == item["detail"]["sha256"]

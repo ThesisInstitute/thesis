@@ -206,7 +206,9 @@ def export_conditionals(
     artifact_bytes = 0
     detail_bytes = 0
     for identity, detail in sorted(details.items()):
-        data = detail.model_dump(mode="json")
+        # Match FastAPI's public wire shape and the generated TypeScript schema.
+        # NumericCdf's internal snake_case names have camelCase JSON aliases.
+        data = detail.model_dump(mode="json", by_alias=True)
         for ref in _artifact_refs(data):
             if ref.bytes > MAX_ARTIFACT_BYTES:
                 raise ValueError("snapshot artifact exceeds 32 MiB")
