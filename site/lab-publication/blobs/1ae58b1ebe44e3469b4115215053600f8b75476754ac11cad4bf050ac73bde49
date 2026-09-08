@@ -1,0 +1,30 @@
+# First Gemini paired response: source review
+
+**Recommendation: retain this raw response and its critique, then allow one explicitly disclosed Gemini revision on source and arithmetic feedback.** The first pass is an actual structurally valid Gemini result, but its reasoning is not clean enough to present as a reviewed policy example. A revision should keep the frozen contract and freely reconsider its forecast; the reviewer should prescribe no target values or direction of contrast. Preserve both attempts and disclose that the revised example received one review round. If the revision retains substantive issues, present it with critique rather than conceal defects or continue selecting outputs.
+
+Run ID: `f8780f671529f6141a5f69c6fd6c8f6b8d58753b3e77b9da59ccb5c365843141`.
+
+Contract: `3d8929b6610cc465a8d5c7b59c7746268ce8a4b275d9b523149fd9015e57a913`.
+
+The provider response reports `modelVersion=gemini-3.1-pro-preview`. The parsed candidate text exactly equals the stored response. Result SHA-256: `5f10a1f90842412a9d9a0d8b4b12e48d2ac760d590098cc45228e76bd9268b0b`; provider-response SHA-256: `8b15f83b2b235abecb184476514fa0a70a35595a82b39dcb7653078d80f9467e`.
+
+Four substantive findings:
+
+1. **Causal overclaim.** The final sentence of `reference_reasoning` says the shared baseline can “rigorously isolate marginal policy effects” ([result.json, line 1135](result.json)). Shared inputs improve consistency; they do not identify causal effects. This contradicts the contract's explicit interpretation limits.
+2. **Authorization treated as assured funded implementation.** Enacted reasoning describes grants guaranteeing the salary floor, followed by significant pay increases as if those consequences followed from enactment alone ([line 1964](result.json)). Section 3(a)(2) conditions grants on amounts made available; section 8 authorizes appropriations rather than supplying them. Funding, state participation, exposure and implementation timing remain required assumptions. The not-enacted arm similarly treats a “massive” funding infusion as otherwise established ([line 2793](result.json)). The source establishes no funding amount.
+3. **Unsupported quantitative bridge and inconsistent attenuation.** The enacted arm introduces a national +0.002 SD effect, converts it to +0.07 NAEP points, then says it shrinks the extrapolation toward zero while assigning a larger +0.2 reference shift. The conversion implicitly uses 35 NAEP points per SD, without a supplied source or explicit distribution definition. Neither the national extrapolation nor the subsequent increase is accounted for. The Texas figure is a retention-only teacher-value-added simulation; it supplies no ready national NAEP effect. An elicited adjustment is permissible if labeled judgment, but the purported derivation is unsupported and internally inconsistent.
+4. **Non-enactment adjustment lacks a coherent reference decomposition.** The arm subtracts a productivity bump described as completely absent, without explaining why that bump was present in the common reference. Other legislation remains possible under the exact named-bill condition. A negative adjustment could be a judgment, but this account instead relies on unestablished funding and achievement gains. It should identify assumptions and explain its relationship to the same common reference.
+
+The mechanical arithmetic does pass: every enacted quantile equals the reference plus 0.2 and every not-enacted quantile equals the reference minus 0.1; both 80% widths remain ten points. The historical recovery to 276.5 is approximately one-third of the 2019–2024 loss. Population remains NT, and the Indonesia null finding and quoted Texas simulation value are reported correctly. Structural success does not cure the reasoning findings.
+
+## Suggested neutral revision feedback
+
+Review the same frozen contract and revise your complete paired response once, correcting the following source and reasoning issues. There is no desired forecast value, ranking of the arms, or size or sign of their difference.
+
+- A shared baseline coordinates conditional forecasts; it does not causally identify or isolate policy effects. Keep the contract's interpretation limits explicit.
+- For `hr2021-text`, distinguish section 3(a)(2)'s grants from amounts made available and section 8's authorization from actual appropriations. State funding, state participation, pupil exposure and implementation timing as explicit assumptions. Enactment alone establishes neither funded universal coverage nor an assured large infusion. Preserve section 3(c)'s supplement-not-supplant and compensation-maintenance restrictions; distinguish prohibited noncompliance from any lawful indirect fiscal assumptions.
+- For `hendricks-texas` and `jpal-indonesia`, do not present an unsupported national extrapolation or SD-to-NAEP conversion as an empirical result. If you use a numerical bridge, identify its units, conversion assumptions and complete arithmetic. Otherwise give an openly judgmental adjustment. Any claimed attenuation must be consistent with the stated final adjustment, or additional components must be explained.
+- Explain both arms relative to the same common reference. Do not subtract an assumed funded achievement gain unless you explain why it is included in that reference. Non-enactment of this exact bill does not rule out other bills or state action.
+- Separate sourced observations from recovery, policy-response and interval assumptions. Ensure the distributions and summaries agree with the reasoning. This remains an exploratory predictive comparison, not a calibrated causal estimate.
+
+No model calls or modifications to the input or response were performed for this review. Only this report was created.

@@ -1,4 +1,5 @@
 import { labRoute, validLabQuery } from "./lab-paths";
+import { handlePublishedLabRequest, snapshotEnabled } from "./published-lab";
 
 /**
  * Read-only server proxy to the Thesis core API.
@@ -89,7 +90,8 @@ export type CoreQueryName =
   | "experiment_id"
   | "as_of"
   | "method_limit"
-  | "method_after";
+  | "method_after"
+  | "requested_model";
 
 /**
  * Exact collection endpoints, each with the query keys it accepts. Anything
@@ -185,6 +187,8 @@ function isValidQueryValue(name: CoreQueryName, value: string): boolean {
       return isStrictIsoInstant(value);
     case "method_limit":
       return /^[1-9][0-9]?$/.test(value) && Number(value) <= 10;
+    case "requested_model":
+      return false; // Lab-only: validated against the shared lab route contract.
   }
 }
 
@@ -474,6 +478,8 @@ export async function handleCoreProxyRequest(
   if (!target.ok) return coreProxyError(target.code);
 
   const env = options.env ?? process.env;
+  if (snapshotEnabled(options.env))
+    return handlePublishedLabRequest(target.segments, target.search);
   const base = resolveUpstreamBase(env[CORE_API_BASE_ENV]);
   if (!base.ok) return coreProxyError(base.code);
 

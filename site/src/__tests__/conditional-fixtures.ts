@@ -1,5 +1,6 @@
 /** Synthetic paired forecasts for contract/UI tests only; never product data. */
 import type {
+  ArtifactLink,
   ConditionalDetail,
   ConditionalPage,
   ConditionalSummary,
@@ -40,15 +41,42 @@ export const conditionalSummary: ConditionalSummary = {
   scoring_status: "not_registered",
   trust_class: "local_operator",
   requested_model: "synthetic-test-model",
+  provider_metadata: null,
   observed_model: null,
   execution_state: "succeeded",
   started_at: instant,
   finished_at: "2026-09-05T12:00:30Z",
   error_code: null,
 };
-export const conditional: ConditionalDetail = {
+function withSelfHistory(
+  data: Omit<ConditionalDetail, "revision_history">,
+): ConditionalDetail {
+  return {
+    ...data,
+    revision_history: [
+      {
+        attempt_id: data.id,
+        contract_id: data.contract_id,
+        shared_evidence_id: data.shared_evidence_id,
+        parent_attempt_id: null,
+        started_at: data.started_at,
+        execution_state: data.execution_state,
+        requested_model: data.requested_model,
+        provider_metadata: data.provider_metadata,
+        arm_quantiles: data.arm_quantiles,
+        feedback: null,
+        triggering_review_id: null,
+        linked_at: null,
+        association_basis: null,
+        association_artifact: null,
+      },
+    ],
+  };
+}
+export const conditional: ConditionalDetail = withSelfHistory({
   ...envelope,
   ...conditionalSummary,
+  reviews: [],
   contract_id: ids.target,
   shared_evidence_id: ids.source,
   contract: {
@@ -141,23 +169,23 @@ export const conditional: ConditionalDetail = {
     },
   ],
   expires_at: "2026-09-05T12:05:00Z",
-};
+});
 export const conditionalPage: ConditionalPage = {
   ...envelope,
+  requested_models: [conditionalSummary.requested_model],
   items: [conditionalSummary],
   total: 1,
   next_cursor: null,
 };
-export const unsuccessful = (
-  state: "failed" | "unknown",
-): ConditionalDetail => ({
-  ...conditional,
-  execution_state: state,
-  error_code: state === "failed" ? "invalid_response" : "attempt_expired",
-  response: null,
-  reference_quantiles: null,
-  arm_quantiles: [],
-});
+export const unsuccessful = (state: "failed" | "unknown"): ConditionalDetail =>
+  withSelfHistory({
+    ...conditional,
+    execution_state: state,
+    error_code: state === "failed" ? "invalid_response" : "attempt_expired",
+    response: null,
+    reference_quantiles: null,
+    arm_quantiles: [],
+  });
 
 /** API shape when a lease expires before an operator records recovery. */
 export const expiredSummary: ConditionalSummary = {
@@ -168,9 +196,129 @@ export const expiredSummary: ConditionalSummary = {
   error_code: "lease_expired",
   finished_at: null,
 };
-export const expiredConditional: ConditionalDetail = {
+export const expiredConditional: ConditionalDetail = withSelfHistory({
   ...unsuccessful("unknown"),
   ...expiredSummary,
   contract: { ...conditional.contract, title: expiredSummary.title },
   generated_at: "2026-09-05T12:06:00Z",
+});
+
+const syntheticArtifact = (role: string, hash: string): ArtifactLink => ({
+  role,
+  sha256: hash,
+  bytes: 12,
+  media_type: "text/plain",
+  download_path: `/artifacts/${hash}`,
+});
+const originalResponse = syntheticArtifact("response", "8".repeat(64));
+const originalStdout = syntheticArtifact("stdout", "9".repeat(64));
+const provider = {
+  provider: "google" as const,
+  reported_model: "synthetic-returned-model",
+  response_id: "synthetic-provider-response",
+  usage: {
+    prompt_tokens: 120,
+    output_tokens: 200,
+    total_tokens: 330,
+    thought_tokens: 10,
+  },
+  source_artifact: { ...originalStdout, role: "provider_response" },
+  verification: "matched_recorded_response" as const,
+};
+const originalReview = {
+  id: "b".repeat(64),
+  attempt_id: ids.task,
+  response_sha256: originalResponse.sha256,
+  recorded_at: "2026-09-05T12:10:00Z",
+  reviewer: "Synthetic source reviewer",
+  review_basis: "operator_assessment" as const,
+  outcome: "issues_remaining" as const,
+  findings: [
+    {
+      id: "synthetic-source-gap",
+      title: "Unsupported synthetic assumption",
+      detail: "The synthetic source does not establish this test assumption.",
+      source_ids: ["synthetic-source"],
+      response_location: "arms[0].reasoning",
+    },
+  ],
+  report: syntheticArtifact("source_review", "a".repeat(64)),
+  record_artifact: syntheticArtifact("review_record", "b".repeat(64)),
+};
+const originalBase = withSelfHistory({
+  ...conditional,
+  requested_model: "test/requested-model",
+  provider_metadata: provider,
+  artifacts: [...conditional.artifacts, originalResponse, originalStdout],
+  reviews: [originalReview],
+});
+const revisedResponse = syntheticArtifact("response", "e".repeat(64));
+const revisedStdout = syntheticArtifact("stdout", "f".repeat(64));
+const revisedBase = withSelfHistory({
+  ...conditional,
+  id: ids.run,
+  requested_model: originalBase.requested_model,
+  started_at: "2026-09-05T12:02:00Z",
+  finished_at: "2026-09-05T12:02:30Z",
+  expires_at: "2026-09-05T12:07:00Z",
+  provider_metadata: {
+    ...provider,
+    response_id: "synthetic-revised-response",
+    source_artifact: { ...revisedStdout, role: "provider_response" },
+  },
+  response: {
+    ...conditional.response!,
+    reference: distribution(1),
+    arms: [
+      {
+        ...conditional.response!.arms[0],
+        distribution: distribution(3),
+        baseline_delta: 2,
+      },
+      {
+        ...conditional.response!.arms[1],
+        distribution: distribution(1),
+        baseline_delta: 0,
+      },
+    ],
+  },
+  reference_quantiles: quantiles(1),
+  arm_quantiles: [quantiles(3), quantiles(1)],
+  artifacts: [...conditional.artifacts, revisedResponse, revisedStdout],
+  reviews: [
+    {
+      ...originalReview,
+      id: "ab".repeat(32),
+      attempt_id: ids.run,
+      response_sha256: revisedResponse.sha256,
+      findings: [
+        {
+          ...originalReview.findings[0],
+          title: "Synthetic review findings remain",
+          detail: "This recorded revision still has a synthetic reasoning gap.",
+        },
+      ],
+      record_artifact: syntheticArtifact("review_record", "ab".repeat(32)),
+    },
+  ],
+});
+const revisionHistory: ConditionalDetail["revision_history"] = [
+  originalBase.revision_history[0],
+  {
+    ...revisedBase.revision_history[0],
+    parent_attempt_id: originalBase.id,
+    triggering_review_id: originalReview.id,
+    feedback: syntheticArtifact("revision_feedback", "d".repeat(64)),
+    linked_at: "2026-09-05T12:11:00Z",
+    association_basis: "retrospective_association",
+    association_artifact: syntheticArtifact("revision_record", "c".repeat(64)),
+  },
+];
+export const reviewedOriginal: ConditionalDetail = {
+  ...originalBase,
+  revision_history: revisionHistory,
+};
+export const reviewedRevision: ConditionalDetail = {
+  ...revisedBase,
+  revision_history: revisionHistory,
 };

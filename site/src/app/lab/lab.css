@@ -1150,3 +1150,129 @@
 .lab-conditional-history td:first-child {
   min-width: 60px;
 }
+
+.lab-conditional-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.lab-share {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+}
+.lab-share [role="status"]:empty {
+  display: none;
+}
+.lab-share-fallback {
+  display: grid;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--lab-muted);
+  max-width: 220px;
+}
+.lab-share-fallback input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid var(--lab-rule);
+  background: transparent;
+  font: inherit;
+  color: var(--lab-ink);
+}
+.lab-model-filter {
+  margin-bottom: 24px;
+}
+.lab-conditional-model-cell {
+  min-width: 205px;
+  max-width: 290px;
+  overflow-wrap: anywhere;
+}
+.lab-conditional-identity {
+  border-bottom: 1px solid var(--lab-rule);
+  padding: 18px 0 13px;
+  margin-bottom: 22px;
+}
+.lab-conditional-identity .lab-facts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 0 10px;
+  padding: 0;
+}
+.lab-conditional-identity dd {
+  overflow-wrap: anywhere;
+}
+.lab-conditional-no-review {
+  margin-bottom: 22px;
+}
+.lab-conditional-reviews {
+  margin: 24px 0 36px;
+}
+.lab-conditional-review {
+  border-left: 2px solid var(--lab-accent);
+  padding: 0 0 0 18px;
+  scroll-margin-top: 96px;
+}
+.lab-conditional-review + .lab-conditional-review {
+  margin-top: 24px;
+}
+.lab-conditional-review h2 {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--lab-accent);
+}
+.lab-conditional-review-findings {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0;
+  max-width: 1040px;
+  font-size: 13px;
+}
+.lab-conditional-review-findings li + li {
+  margin-top: 9px;
+}
+.lab-review-finding summary {
+  cursor: pointer;
+  font-weight: 500;
+}
+.lab-review-finding[open] {
+  padding-bottom: 8px;
+}
+.lab-conditional-review-findings p {
+  margin: 4px 0 5px;
+}
+.lab-conditional-review-findings small {
+  font-size: 11px;
+}
+.lab-conditional-artifact-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 14px 0;
+  max-width: 1080px;
+  line-height: 1.7;
+}
+.lab-conditional-revisions tr[aria-current="true"] {
+  background: #f3eff1;
+}
+.lab-conditional-revisions th {
+  white-space: normal;
+  min-width: 170px;
+}
+.lab-conditional-revisions .lab-number strong {
+  font-size: 15px;
+  font-weight: 500;
+}
+.lab-revision-feedback {
+  margin-top: 18px;
+}
+@media (max-width: 760px) {
+  .lab-conditional-identity .lab-facts {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+  .lab-conditional-actions {
+    flex-wrap: wrap;
+  }
+  .lab-conditional-review {
+    padding-left: 12px;
+  }
+}

@@ -85,6 +85,8 @@ def start_attempt(
     timeout_seconds: int = 600,
 ) -> ConditionalAttempt:
     """Commit durable dispatch before the caller invokes any model."""
+    if not valid_requested_model(requested_model):
+        raise ValueError("A valid concrete requested model is required")
     if type(timeout_seconds) is not int or not 1 <= timeout_seconds <= 600:
         raise ValueError("conditional timeout must be 1..600 seconds")
     for source in contract.sources:
@@ -322,6 +324,7 @@ def conditional_detail(store, identity):
         raise KeyError(identity)
     attempt, contract = _load(store, row)
     state, error, parsed = "running", None, None
+    result = None
     artifacts = list(attempt.artifacts)
     if row["result_hash"]:
         result = ConditionalResult.model_validate_json(
@@ -383,6 +386,8 @@ def conditional_detail(store, identity):
                 download_path="/artifacts/" + item.artifact.sha256,
             )
         )
+    from .conditional_reviews import provider_metadata, review_views, revision_history
+
     return ConditionalDetail(
         schema_version="thesis_lab_v1",
         generated_at=_timestamp(row["now"]),
@@ -392,6 +397,9 @@ def conditional_detail(store, identity):
         unit=contract.outcome.unit,
         measurement_period=contract.outcome.measurement_period,
         requested_model=attempt.requested_model,
+        provider_metadata=provider_metadata(store, attempt, result),
+        reviews=review_views(store, identity),
+        revision_history=revision_history(store, identity),
         execution_state=state,
         started_at=_timestamp(attempt.started_at),
         finished_at=_timestamp(row["finished_at"]),
@@ -409,24 +417,45 @@ def conditional_detail(store, identity):
     )
 
 
-def conditional_page(store, *, limit=20, after=None):
+def valid_requested_model(value):
+    import re
+
+    return (
+        isinstance(value, str)
+        and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}", value) is not None
+    )
+
+
+def conditional_page(store, *, limit=20, after=None, requested_model=None):
     from .lab_contracts import ConditionalPage, ConditionalSummary
 
     if type(limit) is not int or not 1 <= limit <= 100:
         raise ValueError("conditional page limit must be 1..100")
+    if requested_model is not None and not valid_requested_model(requested_model):
+        raise ValueError("invalid requested model filter")
     with store.connection() as connection:
         rows = connection.execute(
-            "SELECT id FROM conditional_attempts WHERE (%s::text IS NULL OR id > %s) "
-            "ORDER BY id LIMIT %s",
-            (after, after, limit + 1),
+            "SELECT * FROM conditional_attempts ORDER BY id"
         ).fetchall()
-        total = connection.execute(
-            "SELECT count(*) AS total,clock_timestamp() AS now FROM "
-            "conditional_attempts"
-        ).fetchone()
+        now = connection.execute("SELECT clock_timestamp() AS now").fetchone()["now"]
+    # Model labels live in the immutable attempt artifacts. Inspect their small
+    # manifests across the collection so filtering precedes pagination.
+    indexed = []
+    models = set()
+    for row in rows:
+        attempt = ConditionalAttempt.model_validate_json(
+            store.artifacts.read_bytes(row["attempt_hash"])
+        )
+        if attempt.id != row["id"] or attempt.contract_id != row["contract_id"]:
+            raise ValueError("conditional model index disagrees with frozen content")
+        models.add(attempt.requested_model)
+        if requested_model is None or attempt.requested_model == requested_model:
+            indexed.append(row["id"])
+    total = len(indexed)
+    remaining = [identity for identity in indexed if after is None or identity > after]
     items = []
-    for row in rows[:limit]:
-        detail = conditional_detail(store, row["id"])
+    for identity in remaining[:limit]:
+        detail = conditional_detail(store, identity)
         items.append(
             ConditionalSummary.model_validate(
                 {
@@ -437,10 +466,11 @@ def conditional_page(store, *, limit=20, after=None):
         )
     return ConditionalPage(
         schema_version="thesis_lab_v1",
-        generated_at=_timestamp(total["now"]),
+        generated_at=_timestamp(now),
         items=items,
-        total=total["total"],
-        next_cursor=rows[limit - 1]["id"] if len(rows) > limit else None,
+        total=total,
+        requested_models=sorted(models),
+        next_cursor=remaining[limit - 1] if len(remaining) > limit else None,
     )
 
 
@@ -454,7 +484,7 @@ def mount_routes(application, current_store):
 
         pairs = list(request.query_params.multi_items())
         if len({key for key, _ in pairs}) != len(pairs) or any(
-            key not in ("limit", "after") for key, _ in pairs
+            key not in ("limit", "after", "requested_model") for key, _ in pairs
         ):
             raise HTTPException(422, detail={"code": "invalid_request"})
         after = request.query_params.get("after")
@@ -465,7 +495,10 @@ def mount_routes(application, current_store):
             or (after is not None and not re.fullmatch(r"[0-9a-f]{64}", after))
         ):
             raise HTTPException(422, detail={"code": "invalid_request"})
-        return dict(limit=int(limit), after=after)
+        requested_model = request.query_params.get("requested_model")
+        if requested_model is not None and not valid_requested_model(requested_model):
+            raise HTTPException(422, detail={"code": "invalid_request"})
+        return dict(limit=int(limit), after=after, requested_model=requested_model)
 
     @application.get("/lab/conditionals", response_model=ConditionalPage)
     def page(request: Request):

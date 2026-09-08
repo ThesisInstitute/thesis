@@ -1,0 +1,911 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
+<head id="ctl00_Head1"><title>
+	
+NAEP Data Service API
+
+</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta http-equiv="Expires" content="0" /><meta charset="UTF-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="rating" content="General" /><meta name="ROBOTS" content="ALL" /><meta name="DC.Publisher" content="The Nation's Report Card" /><meta name="DC.Language" scheme="RFC1766" content="EN" />
+
+    <!-- Google Tag Manager -->
+    <script type="text/javascript">
+        (function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-N6K3L68');
+    </script>
+    <!-- End Google Tag Manager -->
+
+    
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800|Montserrat:400,700" rel="stylesheet" type="text/css" /><link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet" /><link rel="stylesheet" type="text/css" href="/shared/shared/Bootstrap3/css/bootstrap3.min.css" /><link rel="stylesheet" type="text/css" href="/shared/shared/Bootstrap3/css/bootstrap2-custom.min.css" /><link rel="stylesheet" type="text/css" href="/shared/shared/Bootstrap3/css/sp-responsive.css" /><link rel="stylesheet" type="text/css" href="/shared/shared/Bootstrap3/css/bootstrap3-custom.min.css" /><link rel="stylesheet" type="text/css" href="/adminonly/themes/theme_main/css/NRCUserSelectableStyle.css" /><link rel="stylesheet" type="text/css" href="/adminonly/themes/redesign_2015/css/NRC_Redesign_UserSelectableStyle.css" />
+
+    
+    <script src="/adminonly/themes/redesign_2024/jquery/jquery-3.6.0.min.js" type="text/javascript"></script>
+    <script src="/shared/shared/Bootstrap3/js/bootstrap3.min.js" type="text/javascript"></script>
+    <script src="/shared/shared/Bootstrap3/js/bootstrap3-custom.js" type="text/javascript"></script>
+    <script src="/adminonly/themes/redesign_2015/scripts/nde_dropdown_selector.js" type="text/javascript"></script>
+    <script src="/adminonly/scripts/urlDecode.js" type="text/javascript"></script>	
+    <script type="text/javascript" src="/adminonly/scripts/GlossaryMigratedPageFix.js"></script>
+    <script type="text/javascript" src="/adminonly/themes/theme_main/scripts/nrcmain.js"></script>
+
+    
+    <script type="text/javascript" src="/shared/shared/js/jquery-ui-1.9.2.accordion.min.js"></script>
+
+    <style type="text/css">
+        /* override fancybox style */
+        .fancybox-wrap {
+            overflow: visible !important;
+        }
+    </style>
+    <script type="text/javascript">		
+        jQuery(function () {
+            // Call DocumentReadyCall() function
+            // located in /adminonly/themes/redesign_2015/scripts/NRC_redesign_2015.js	
+            DocumentReadyCall();
+
+            // remove saved complex 508 table header metadata from SP.
+            $("table .complex-table-headers-metadata").remove();
+
+            // span tag around of .BackToTop that is added via reusable content in CF.
+            // this span tag prevents from align to right in IE7.
+            // so remove the span.
+            var backtotop = $(".BackToTop").parent();	//<p align="right"> tag
+            if (backtotop.parent().is("span.ms-reusableTextView")) {
+                backtotop.unwrap();
+            }
+        });
+    </script>
+
+    
+<meta name="keywords" content="NAEP, Data Service, API" />
+<meta name="description" content="NAEP Data Service API" />
+<meta name="DC.Description" content="NAEP Data Service API" />
+<meta name="DC.Title" content="NAEP Data Service API" />
+
+<style>
+table.nrc-error-flag tbody tr:nth-child(odd) {
+background-color:#f0f4f7;
+}
+
+table.nrc-error-flag thead th {
+border-width:1px;
+border-style:solid;
+border-color:grey;
+border-spacing:2px;
+text-align:center;
+}
+
+table.nrc-error-flag tbody td {
+border-width:1px;
+border-style:solid;
+border-color:grey;
+border-spacing:2px;
+}
+
+table.nrc-error-flag tbody td {
+border-width:1px;
+border-style:solid;
+border-color:grey;
+border-spacing:2px;
+padding-left:4px;
+}
+
+table.nrc-error-flag tbody td:nth-child(2) {
+text-align:right;
+padding-right:4px;
+}
+
+table.nrc-error-flag tbody td:nth-child(6) {
+text-align:right;
+padding-right:4px;
+}
+
+table.nrc-error-flag tbody td:first-child {
+text-align:right;
+padding-right:4px;
+}
+table.nrc-error-flag caption {
+text-align: left
+}
+h3 {
+    -ms-name: "Heading 3";
+    color: #000000;
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin: 0;
+    padding: 2px 0;
+}
+
+h1 {
+color:#ffffff; font-size:28px;margin: 20px 0 20px 0;
+}
+a {
+overflow-wrap: break-word; 
+
+}
+</style>
+
+<script src="/WebResource.axd?d=83YH02CngNfhebMAwpJ80nzegirEEhRPtvzHun6SckZrlhuTQ2vSw3L-aITUyLZKh85KzBz8GmoBkXgfoSHc-W4yMT27lqZ4PD-KNuxI_TU1&amp;t=638901392248157332" type="text/javascript"></script>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N6K3L68" height="0" width="0" style="display: none; visibility: hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="nrc_bodyContainer">
+        <!-- Begin header -->
+        <!-- top anchor -->
+        <a name="top"></a>
+        <link rel="stylesheet" type="text/css" href="/adminonly/themes/redesign_2015/header/header.css" />
+<link rel="stylesheet" type="text/css" href="/adminonly/themes/redesign_2015/css/NRC_redesign_2015.css" />
+<link rel="stylesheet" type="text/css" href="/adminonly/themes/redesign_2015/css/NRC_redesign_2015_small.css" media="(max-width: 1023px)" />
+
+<script src="/adminonly/themes/redesign_2024/jquery/jquery-3.6.0.min.js" type="text/javascript"></script>
+<script src="/adminonly/themes/redesign_2015/scripts/jquery-accessibleMegaMenu.js" type="text/javascript"></script>
+<script src="/adminonly/themes/redesign_2015/header/header.js" type="text/javascript"></script>
+<script src="/adminonly/themes/redesign_2015/scripts/NRC_redesign_2015.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+function ToggleSearchButton(e)
+	{
+		if (e.keyCode == 13 || e==0) {
+			var searchBox = jQuery("#search-container-id");
+			if (searchBox.hasClass('hide-search-box'))
+			{
+				searchBox.removeClass('hide-search-box');
+				searchBox.addClass('show-search-box');
+				jQuery("#searchBox").focus();
+			} else
+			{
+				if(e.keyCode != 13 ){
+					searchBox.removeClass('show-search-box').removeClass('search-clicked');
+					searchBox.addClass('hide-search-box');
+				}
+			}
+		}
+	}
+</script>
+
+<div class="nrc-header-top-container">
+	<div class="header__top">
+		<div class="header__top__inner">
+			<div class="header__logo">
+				<a href="/">
+					<img alt="The Nation's Report Card" src="/adminonly/themes/redesign_2015/images/nationsreportcard-logo.png">
+				</a>
+			</div>
+			<button class="nav--button nav--button--open active" aria-label="Open nav menu">MENU</button>
+			<button class="nav--button nav--button--close" aria-label="Close nav menu">CLOSE</button>
+	
+			<nav class="closed minimized">
+				<ul class="nav-menu nav--utility">
+					<li class="nav-item">
+						<div class="nav-heading subs" tabindex="0" aria-label="Reports" role="button">Reports</div>
+						<div class="sub-nav reports">
+							<ul class="sub-nav-group">
+								<li class="sub-nav-section">
+									<div>Current Releases</div>
+									<ul>
+										<li class="sub-nav-item">
+											<a href="/arts_2016/">ARTS</a>
+										</li>
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Civics" role="button">Civics</div>
+											<ul>                           
+												<li class="sub-nav-item">
+													<a href="/highlights/civics/2022/">Highlights from the 2022 Assessment</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/civics/">Report Card</a>
+												</li>
+											</ul>
+										</li>
+										<li class="sub-nav-item">
+											<a href="/economics_2012/">Economics</a>
+										</li>
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Geography" role="button">Geography</div>
+											<ul>                           
+												<li class="sub-nav-item">
+													<a href="/highlights/geography/2018/">Highlights from the 2018 Assessment</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/geography/">Report Card</a>
+												</li>
+											</ul>
+										</li>
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Long Term Trend" role="button">Long-Term Trend</div>
+											<ul>                           
+												
+												<li class="sub-nav-item">
+													<a href="/ltt/2025/">Long-Term Trend at Age 9 and 13</a>
+												</li>
+											</ul>
+										</li>
+
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Mathematics" role="button">Mathematics</div>
+											<ul>                           
+																								<li class="sub-nav-item"><a href="/reports/mathematics/2024/g4_8/?grade=4">Report Card for the Nation, States, and Districts (grades 4 and 8)</a>
+												</li>
+																								<li class="sub-nav-item">
+													<a href="/reports/mathematics/2024/g12/">Report Card for Grade 12</a>
+												</li>
+											</ul>
+										</li>
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Reading" role="button">Reading</div>
+											<ul>                            
+												
+												<li class="sub-nav-item">
+													<a href="/reports/reading/2024/g4_8/?grade=4">Report Card for the Nation, States, and Districts (grades 4 and 8)</a>
+												</li>												<li class="sub-nav-item">
+													<a href="/reports/reading/2024/g12/">Report Card for Grade 12</a>
+												</li>
+											</ul>
+										</li>
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Science" role="button">Science</div>
+											<ul>
+												<li class="sub-nav-item">
+													<a href="/reports/science/2024/">Report Card for the Nation (grade 8)</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/science/">2019 Report Card for the Nation (grades 4, 8 and 12)</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/science_2015/#overview/accordion-3?grade=4">2015 State Assessment</a>
+												</li>
+																							
+											</ul>
+										</li>									
+									</ul>
+								</li>
+							</ul>
+							<ul class="sub-nav-group">
+								<li class="sub-nav-section">
+									<ul>
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Survey Questionnaires" role="button">Survey Questionnaires</div>
+											<ul>
+												<li class="sub-nav-item"><a href="/stq/">School and Teacher Questionnaire Special Study</a></li>
+												<li class="sub-nav-item">
+													<a href="/sq_students_views_2015/">Students' Views of Mathematics, Reading, and Science</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/sq_computer/">Students' Computer Access and Use</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/sq_classroom/">Classroom Instruction for Mathematics, Reading, and Science</a>
+												</li>
+											</ul>
+										</li>
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Technology and Engineering Literacy" role="button">Technology and Engineering Literacy</div>
+											<ul>
+												<li class="sub-nav-item">
+													<a href="/tel_2018_highlights/">Highlights from the 2018 Assessment</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/tel/">Report Card</a>
+												</li>
+											</ul>
+										</li>
+
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="U.S. History" role="button">U.S. History</div>
+											<ul>                           
+												<li class="sub-nav-item">
+													<a href="/highlights/ushistory/2022/">Highlights from the 2022 Assessment</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/ushistory/">Report Card</a>
+												</li>
+											</ul>
+										</li>
+										<li class="sub-nav-element">
+											<div class="sub-nav-heading" tabindex="0" aria-label="Writing" role="button">Writing</div>
+											<ul>
+												<li class="sub-nav-item">
+													<a href="/writing_2011/">National</a>
+												</li>
+												<li class="sub-nav-item">
+													<a href="/writing_2007/w0037.aspx">Trial Urban District Assessment</a>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+								<li class="sub-nav-section special-case">
+									<a href="/report_archive.aspx">Report Library</a>
+								</li>
+								<li class="sub-nav-section space-before">
+									<div>Special Studies</div>
+									<ul>
+										<li class="sub-nav-item">
+											<a href="/process_data/">2017 Mathematics Process Data</a>
+										</li>
+										<li class="sub-nav-item">
+											<a href="/hstsreport/#home">High School Transcript Study</a>
+										</li>
+										<li class="sub-nav-item">
+											<a href="/megastates/">Mega-States</a>
+										</li>
+										<li class="sub-nav-item">
+											<a href="/mssls_2022/">Monthly School Survey Linking Study</a>
+										</li>
+										<li class="sub-nav-item">
+											<a href="/puerto_rico_2013/#/">Mathematics Puerto Rico</a>
+										</li>
+										<li class="sub-nav-item">
+											<a href="/reading_2013/vocabulary/">Vocabulary</a>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<div class="nav-heading subs" tabindex="0" aria-label="Dashboards" role="button">Dashboards</div>
+						<div class="sub-nav">
+							<ul class="sub-nav-group">
+								<li class="sub-nav-item">
+									<a href="/dashboards/otl/">Experiences and Opportunities in Education Dashboard</a>
+								</li>
+								
+								<li class="sub-nav-item">
+									<a href="/dashboards/achievement_gaps.aspx">Achievement Gap Dashboard</a>
+								</li>
+								<li class="sub-nav-item">
+									<a href="/dashboards/regression/">Racial/Ethnic Score Gap Tool</a>
+								</li>
+								<li class="sub-nav-item">
+									<a href="/dashboards/schools_dashboard.aspx">Public, Private, and Charter Schools Dashboard</a>
+								</li>
+								<li class="sub-nav-item">
+									<a href="/dashboards/sesindex/">Socioeconomic Status Index Dashboard</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<div class="nav-heading subs" tabindex="0" aria-label="Data Tools" role="button">Data Tools</div>
+						<div class="sub-nav">
+							<ul class="sub-nav-group">
+								<li class="sub-nav-item">
+									<a href="/data_tools.aspx">Data Tools Home</a>
+								</li>
+								<li class="sub-nav-item">
+									<a href="/ndecore/">Data Explorer</a>
+								</li>
+
+								<li class="sub-nav-item">
+									<a href="/profiles/stateprofile/">State Profiles</a>
+								</li>
+								<li class="sub-nav-item">
+									<a href="/profiles/districtprofile/">District Profiles</a>
+								</li>
+								<li class="sub-nav-item">
+									<a href="/api_documentation.aspx">NAEP Data Service API</a>
+								</li>
+								<li class="sub-nav-item">
+									<a href="/nqt/">Questions Tool</a>
+								</li>
+								<li class="sub-nav-item">
+									<a href="/itemmaps/">Item Maps</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<div class="nav-heading">
+							<a href="/media.aspx">Newsroom</a>
+						</div>
+						<div class="sub-nav" style="display:none;"/>
+					</li>
+					<li class="nav-item">
+						<div class="nav-heading">
+							<a href="/focus_on_naep/">Focus on NAEP</a>
+						</div>
+						<div class="sub-nav" style="display:none;"/>
+					</li>
+					<li class="nav-item">
+						<div class="nav-heading">
+							<a href="/takenaepnow/">Take NAEP Now</a>
+						</div>
+						<div class="sub-nav" style="display:none;"/>
+					</li>
+				</ul>
+				<div class="small-search-container">
+					<form action="/search/">
+						<input name="q" title="Search Box" id="searchBox2" type="text" maxlength="256" class="search-textbox" onblur="HideSearch(event)">
+						<button title="Search Button" id="searchButton2" type="submit" value="Search" class="search-button">
+							<span class="search-text">SEARCH</span>
+						</button>	
+						<input name="output" type="hidden" value="xml_no_dtd" />
+						<input name="client" type="hidden" value="nces" /> 
+						<input name="sort" type="hidden" value="date:D:L:d1" />
+						<input name="entqr" type="hidden" value="3" /> 
+						<input name="site" type="hidden" value="nationsreportcard" />
+					</form>
+				</div>	
+			</nav>
+			<div class="large-search-container">
+				<form action="/search/">
+					<div class="search-box" onKeyPress="ToggleSearchButton(event)" tabIndex="0" aria-label="Search" role="button">
+						<img  alt="Select to Open Search" id="magnifier" class="magnifying-glass"src="/adminonly/themes/redesign_2015/images/mag.png"  onclick="ToggleSearchButton(0)" />
+						<div id="search-container-id" class="hide-search-box">
+							<img  alt="Carrot Image" id="carrot-glass-id" class="carrot-image" src="/adminonly/themes/redesign_2015/images/carrot.png" />
+							<div class="search-container">
+								<input name="q" title="Search Box" id="searchBox" type="text" maxlength="256" class="search-textbox" onblur="HideSearch(event)">
+								<button title="Search Button" id="searchButton" type="submit" value="Search" class="search-button">
+									<span class="search-text">SEARCH</span>
+								</button>	
+								<input name="output" type="hidden" value="xml_no_dtd" />
+								<input name="client" type="hidden" value="nces" /> 
+								<input name="sort" type="hidden" value="date:D:L:d1" />
+								<input name="entqr" type="hidden" value="3" /> 
+								<input name="site" type="hidden" value="nationsreportcard" />
+							</div>				
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+<div>
+        <!-- End of header -->
+
+        <form name="aspnetForm" method="post" action="api_documentation.aspx" id="aspnetForm">
+<div>
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUJODk5OTg5MTY2ZGSOdBxwM3+z/v27i2exzPWL4nmmaQ==" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=4YDspzl80Djre14BmLSjJfxXT_TbbWLd1t0QvYBZ2U9JakoTVXjL9CexfMq1hHG-PZp391FwE488vq1tj8lJtDGi-yU1&amp;t=638313619312541215" type="text/javascript"></script>
+
+
+<script src="/ScriptResource.axd?d=zWqqsAfcya1G4sOQF_AJkr9ULcNcVYbG8Z4nDYy0SSLnWq3GtJOemi7x2rTLw9fc6buGcEwcAaQyFbocDDv9AXeN8lP13Rkq0huf4dpnZzmo9-lGiByvlhS5HHdhIrmM_2rrTgvBc-KGgAlE0yfGJCzQQCs1&amp;t=ffffffffa50b82b2" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=GbvT-mx9IAcW6B2GnjFK503dwTlL-4F9ihqDnK9OqrT4ABba_55MGDKWSIJKkQP0jaXzunBl3qStcsMIfmGbQOSIDGTbEm7_ahQJlnP_NsK1icZqRVCExd6isHLKEYYlf1-0ziS4yZ3uMSqfSbOYDunmfQdD5Qgw_h5eo_4ODOfNOtQN0&amp;t=ffffffffa50b82b2" type="text/javascript"></script>
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="B5CC1142" />
+</div>
+            <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ctl00$ScriptManager1', document.getElementById('aspnetForm'));
+Sys.WebForms.PageRequestManager.getInstance()._updateControls([], [], [], 90);
+//]]>
+</script>
+
+
+            <div id="body" class="nrc_body">
+                
+<div id="pageContentContainer" class="nrc_pageContentContainer">	
+		
+		<div id="pageContent" class="nrc_pageContent">
+			
+				<div id="PubContent">
+					<div id="contentWrapper" class="single-column">
+						<div class="row top-bluerow">
+							<div class="col-xs-9">
+								<!--BEGIN CONTENT-->
+								<h1>​​​​​​​​​​​​NAEP Data Service API<br></h1>							
+								<!--END CONTENT-->
+							</div>
+							<div class="social col-xs-3">
+								<!--<div class="icon-email">
+									<a href="mailto:?to=&amp;subject=NAEP Reading and Mathematics 2015 Results&amp;body=http://www.nationsreportcard.gov/reading_math_2015/">
+										<img src="/adminonly/themes/redesign_2015/images/spacer.gif" alt="Email" />
+									</a>
+								</div>-->
+								<div class="icon-print">
+									<a href="javascript:window.print();">
+										<img src="/adminonly/themes/redesign_2015/images/spacer.gif" alt="Print" />
+									</a>
+								</div>
+								<!--<div class="icon-twitter">
+									<a href="https://twitter.com/NAEP_NCES" target="_blank">
+										<img src="/adminonly/themes/redesign_2015/images/spacer.gif" alt="Twitter" />
+									</a>
+								</div>
+								<div class="icon-facebook">
+									<a href="https://www.facebook.com/NationalAssessmentofEducationalProgress" target="_blank">
+										<img src="/adminonly/themes/redesign_2015/images/spacer.gif" alt="Facebook" />
+									</a>
+								</div>-->
+							</div>
+						</div>
+						<div class="row main-content">
+							<div class="col-xs-12">
+								<!--BEGIN CONTENT-->
+								<p class="nrc-rteElement-p">Are you interested in obtaining NAEP results in a machine-readable format? Do you create your own data visualizations or use tools for data analytics?<br></p><p>The ins​​truction​​​​s below will help you to directly query the NAEP Data Service API to acquire JSON of the same results available in the 
+   <a href="/ndecore/landing">NAEP Data​ Explorer</a>.<br></p><p style="padding-left:30px;padding-right:60px;font-style:italic;"> Data service timeouts may occur when calls require too much time to complete. To avoid this, break up your calls into small manageable parts instead of large individual calls that span across multiple years. Data service results are not intended to be stored in spreadsheets or databases because these results may change over time​ and consequently may reflect inaccurate data. </p><p> If you ​​would like to report an issue or provide a suggestion for improving this API, please 
+   <a href="https://nces.ed.gov/nationsreportcard/contactus.aspx">contact us</a>. </p><h2 class="nrc-rteElement-h2"> 
+   <span class="nrc-rteStyle-SubtitleTurquoise">Tab​le of Contents</span><br></h2><ul><li> 
+      <a href="#bookmark-01-Basic">The Basics</a><br></li><li> 
+      <a href="#bookmark-02-Request">Request Types and Their Returns</a><br></li><li>
+      <a href="#bookmark-06-Example">Examples of Request Types and Their Returns</a></li><li> 
+      <a href="#bookmark-03-Parameter">Parameter Values</a><br></li><li> 
+      <a href="#bookmark-07-SpecialValues">Special and Optional Parameter Values​</a><br></li><li> 
+      <a href="#bookmark-04-Assessment">Assessment Year and Subject Combinations</a></li><li> 
+      <a href="#bookmark-05-ErrorCodes">Error Codes</a><br></li></ul><hr /><h3> 
+   <span class="nrc-rteStyle-SubtitleTurquoise">The Basics</span><a id="bookmark-01-Basic"><br></a></h3><h3>
+   <span class="nrc-rteStyle-SubtitleTurquoise"></span>Lo<span style="color:#231f20;font-family:&quot;helvetica neue&quot;, helvetica, arial, sans-serif;font-size:18px;">cation/Path&#160;</span></h3><p>
+   <a href="/DataService/GetAdhocData.aspx">https://www.nationsreportcard.gov/DataService/GetAdhocData.aspx</a></p><h3>Response Format&#160;<br></h3><p class="nrc-rteElement-p"> 
+   <span style="font-size:1em;">&#123;&quot;status&quot;:200,&quot;result&quot;:[<</span><span style="font-size:1em;">1st result>, <2nd result>, …]&#125;</span></p><ul class="nrc-rteElement-p"><li>If the request returns a successful response, status is 200.<br></li><li>A successful response will have a result that is an array.<br></li><li>Depending on the request, the result array may have more than 1 element.<br></li></ul> Gaps<br> 
+<ul class="nrc-rteElement-p"><li>Gaps in the return are the score or percentage differences in NAEP results between different student groups, jurisdictions, or assessment years.</li><li>Gaps in the return can also mean differences in other previously calculated differences as mentioned above.<br></li></ul><div class="back_to_top"><p style="text-align:right;"> 
+      <a href="#top">Back to Top</a></p></div><h2 class="nrc-rteElement-h2"> 
+   <span class="nrc-rteStyle-SubtitleTurquoise">Request Types and Their Returns</span><a id="bookmark-02-Request"><br></a></h2><h3>Overview<br></h3><div><ul><li>Main URL – nationsreportcard.gov</li><li>Query String Parameters ​ 
+         <ul><li>Type – what kind of data to return</li><li>Subject – e.g., mathematics or reading</li><li>Grade – e.g., grades 4, 8, and 12</li><li>Subscale – For example, in addition to the composite mathematics scale (MRPCM), NAEP mathematics has five subscales, which are MRPS1: Numbers and Operations, MRPS2: Mathematics Measurement, MRPS3: Mathematics Geometry, MRPS4: Mathematics Data Analysis, Statistics, and Probability, MRPS: Mathematics Algebra and Functions.</li><li>Variable – student demographic groups (e.g., GENDER) or survey question variable or index.</li><li>ComparisonValues – allow you to choose specific variable categories (e.g., for GENDER, 1 is male and 2 is female)</li><li>Jurisdiction – national, state, and district&#160;</li><li>Stattype – different type of statistical estimates (e.g. mean or percentages)</li><li>Year<br></li><li>StackType 
+               <ul><li>Values 
+                     <ul><li>ColThenRow (default)</li><li>RowThenCol<br></li></ul></li><li>Determines the order of returns</li><li>ColThenRow will group the returns based on the first variable (e.g. for SDRACE+GENDER, the return will be group by white+male, white+female, black+male, black+male …</li><li>RowThenCol will group the returns based on the second variable (e.g. for SDRACE+GENDER, the return will be group by white+male, black+male, hispanic+male, asian+male …<br></li></ul></li></ul></li><li>There are many data points. Each data point also contains the query information. For example, if you select 2 years, 1 jurisdiction, TOTAL (all students) and a composite scale, you will get 2 data points.&#160; Each data point contains information indicating the year that the data point represents.<br></li><li>Please see the section Parameter Values below for more details for all parameters.</li><li>Significance indicates if the focal value is significantly higher or lower, or not significantly different than the target value.<br></li></ul></div><h2 class="nrc-rteElement-h2"> 
+   <span class="nrc-rteStyle-SubtitleTurquoise">Examples of Request Types and Their Returns</span><a id="bookmark-06-Example"></a></h2><h3>Basic data requests<br></h3><div>
+   <a id="bookmark-02-Request"> </a>
+   <a href="/Dataservice/GetAdhocData.aspx?type=data&amp;subject=writing&amp;grade=8&amp;subscale=WRIRP&amp;variable=GENDER&amp;jurisdiction=NP&amp;stattype=MN%3aMN&amp;Year=2011">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=data&amp;subject=writing&amp;grade=8&amp;subscale=WRIRP&amp;variable=GENDER&amp;jurisdiction=NP&amp;stattype=MN:MN&amp;Year=2011</a></div><div><ul><li>type – data​<br></li><li>Important return: value – the statistic you are looking for.</li></ul></div><h3 class="nrc-rteElement-h3">Crosstabluation data requests<br></h3><div> 
+   <a href="/Dataservice/GetAdhocData.aspx?type=data&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=SDRACE%2BGENDER&amp;categoryindex=2%2B1%2c2%2B2%2c3%2B1%2c3%2B2&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2013%2c2015&amp;StackType=RowThenCol">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=data&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=SDRACE%2BGENDER&amp;categoryindex=2%2B1,2%2B2,3%2B1,3%2B2&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2013,2015&amp;StackType=RowThenCol</a></div><div><ul><li>type – data<br></li><li>StackType 
+         <ul><li>ColThenRow (default)<br></li><li>RowThenCol</li></ul></li><li>Must have 2 variables (here is SDRACE and GENDER)<br></li><li>Important return : varValue – the category value within each student group&#160; (e.g., for GENDER, male is 1, female is 2)</li></ul></div><h3>Significance gap across years<br></h3><div> 
+   <a href="/Dataservice/GetAdhocData.aspx?type=sigacrossyear&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=TOTAL&amp;jurisdiction=NP&amp;stattype=MN%3aMN&amp;Year=2015%2c2013">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=sigacrossyear&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=TOTAL&amp;jurisdiction=NP&amp;stattype=MN%3AMN&amp;Year=2015,2013</a></div><div><ul><li>type – sigacrossyear</li><li>Used to return whether there is a significant difference in values between two or more years. The example shown here will return the comparison results between assessment years 2013 and 2015 in the average mathematics scores for public school students in the nation (NP).</li><li>Must have more than one year, separated by commas</li><li>Important returns&#160; 
+         <ul><li>focalValue – value for focal year</li><li>targetValue – value for target year</li><li>gap – difference between focalValue and targetValue</li></ul></li></ul> 
+   <br> 
+</div><h3>Significance gap across jurisdictions</h3><div> 
+   <a href="/Dataservice/GetAdhocData.aspx?type=sigacrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2015%2c2013">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=sigacrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2015,2013</a></div><div><ul><li>Type – sigacrossjuris<br></li><li>Must have more than 1 jurisdiction, separated by commas</li><li>Important returns&#160; 
+         <ul><li>focalValue – value for a focal jurisdiction</li><li>targetValue – value for a target jurisdiction</li><li>gap – difference between focalValue and targetValue</li></ul></li></ul></div><div><h3>Significance gap across variable</h3><div> 
+      <a href="/Dataservice/GetAdhocData.aspx?type=sigacrossvalue&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2015">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=sigacrossvalue&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2015</a></div><div><ul><li>Type – sigacrossvalue</li><li>Variable must be a non “TOTAL” value (e.g., GENDER in the example here)</li><li>Important returns 
+            <ul><li>focalValue – value for variable focal category value (e.g. Male)</li><li>targetValue – value for variable target category value (e.g. Female)</li><li>gap – difference between focalValue and targetValue</li></ul></li></ul> 
+      <br> 
+   </div><h3>Significance gap across variable (with crosstab)<br></h3><div> 
+      <a href="/Dataservice/GetAdhocData.aspx?type=sigacrossvalue&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=SDRACE%2BGENDER&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2015">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=sigacrossvalue&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=SDRACE%2BGENDER&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2015</a></div><div><ul><li>Type – sigacrossvalue</li><li>A crosstab will allow you to compare the relationship between two variables. You can examine the significance gap between specific demographic groups (e.g., (e.g., White/Male versus White/Female, White/Male versus Black/Male, etc.)</li><li>If the ComparisonValues parameter is not set, all variable categories from each variable will be compared to each other.</li><li>If the ComparisonValues parameter is set, you can return just the specific demographic groups you are interested in.</li><li>You may even choose up to three variables when performing crosstabs.</li></ul></div><h3>Gap between year and jurisdiction</h3><div>&#160;</div><div> 
+      <a href="/Dataservice/GetAdhocData.aspx?type=gaponyearacrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=TOTAL&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2015%2c2013">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=gaponyearacrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=TOTAL&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2015,2013</a></div><div><ul><li>Type – gaponyearacrossjuris</li><li>Must have 2 years</li><li>Important returns 
+            <ul><li>Innerdiff1 – difference between stattype values between 2 years for focal jurisdiction</li><li>Innerdiff2 – difference between stattype values between 2 years for target jurisdiction</li><li>Gap – difference between innerdiff1 and innerdiff2</li></ul></li></ul>
+      <br>
+   </div><h3>Significance of gap of two variable category values across years</h3><div> 
+      <a href="/Dataservice/GetAdhocData.aspx?type=gaponvaracrossyear&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2015%2c2013">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=gaponvaracrossyear&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2015,2013</a></div><div><ul><li>Type – gaponvaracrossyear</li><li>Must have 2 or more years</li><li>Must have a non “TOTAL” variable with 2 or more category values (e.g. GENDER, SDRACE)</li><li>Important returns 
+            <ul><li>Innerdiff1 – difference of stattype values between variable values (e.g., between male and female students) for focal year&#160;</li><li>Innerdiff2 – difference of stattype values between variable values for target year</li><li>Gap – difference between innerdiff1 and innerdiff2</li></ul></li></ul> 
+      <br> 
+   </div><h3>Significance of gap of two variable category values across jurisdictions</h3><div> 
+      <a href="/Dataservice/GetAdhocData.aspx?type=gaponvaracrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2015%2c2013">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=gaponvaracrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2015,2013</a></div><div><ul><li>Type – gaponvaracrossjuris</li><li>Must have 2 or more jurisdictions&#160;</li><li>Must have a non “TOTAL” variable with 2 or more category values</li><li>Important returns 
+            <ul><li>Innerdiff1 – difference of stattype values between variable category values (e.g., between male and female students) for focal jurisdiction</li><li>Innerdiff2 – difference of stattype values between variable category values for target jurisdiction</li><li>Gap – difference between innerdiff1 and innerdiff2</li></ul></li></ul> 
+      <br> 
+   </div><h3>Significance of gap of two variable category values and two years across jurisdictions</h3><div> 
+      <a href="/Dataservice/GetAdhocData.aspx?type=gaponvarandyearacrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2015%2c2013">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=gaponvarandyearacrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2015,2013</a></div><div><ul><li>Type – gaponvarandyearacrossjuris</li><li>Must have 2 or more jurisdictions</li><li>Must have 2 or more years</li><li>Must have a non “TOTAL” variable with 2 or more category values</li><li>Important returns 
+            <ul><li>innerdiff1 – difference of stattype values between variable category values (e.g., between male and female students) in focal jurisdiction for focal year.</li><li>innerdiff2 – difference of stattype values between variable category values (e.g., between male and female students) in focal jurisdiction for target year.<br></li><li>innerdiff3 – difference of stattype values between variable category values (e.g., between male and female students) in target jurisdiction for focal year.</li><li>innerdiff4 – difference of stattype values between variable category values (e.g., between male and female students) in target jurisdiction for target year.</li><li>yeardiff1 – difference between innerdiff1 and innerdiff2</li><li>yeardiff2 – difference between innerdiff3 and innerdiff4</li><li>Gap – difference between yeardif1 and yeardiff2<br></li></ul></li></ul> 
+      <br> 
+   </div><div>
+      <br>
+   </div><div><div class="back_to_top"><p style="text-align:right;">
+            <a href="#top">Back to Top</a></p></div><h2 class="nrc-rteElement-h2"> 
+         <span class="nrc-rteStyle-SubtitleTurquoise">Parameter Values</span><a id="bookmark-03-Parameter"></a></h2> 
+      <a id="subject"></a> 
+      <h3> 
+         <br> 
+      </h3><h3>Subject and Subscale<br></h3><div><ul><li>Civics 
+               <ul><li>CIVRP – Civics scale<br></li></ul></li><li>Economics 
+               <ul><li>ERPCM – Composite scale<br></li><li>ERPS1 – Market scale<br></li><li>ERPS2 – National scale<br></li><li>ERPS3 – International scale<br></li></ul></li><li>Geography 
+               <ul><li>GRPCM – Composite scale<br></li><li>GRPS1 – Space and place scale<br></li><li>GRPS2 – Environment and society scale<br></li><li>GRPS3 – Spatial dynamics scale<br></li></ul></li><li>Mathematics 1990R2 
+               <ul><li>MRPCM – Composite scale<br></li><li>MRPS1 – Number properties and operations scale<br></li><li>MRPS2 – Measurement scale<br></li><li>MRPS3 – Geometry scale<br></li><li>MRPS4 – Data analysis, statistics, and probability scale<br></li><li>MRPS5 – Algebra scale<br></li><li>Mathematics 2005R3<br></li><li>MWPCM – Composite Scale<br></li><li>MWPS1 – Number properties and operations scale<br></li><li>MWPS2 – Measurement and geometry scale<br></li><li>MWPS3 – Data analysis, statistics, and probability scale<br></li><li>MWPS4 – Algebra scale<br></li></ul></li><li>Music 
+               <ul><li>MUSRP – Music scale<br></li></ul></li><li>Reading 
+               <ul><li>RRPCM – Composite scale<br></li><li>RRPS1 – Literary experience<br></li><li>RRPS2 – Gain information scale<br></li><li>RRPS3 – Perform a task scale<br></li><li>RRPS4 – Gain and use information scale<br></li></ul></li><li>Science 1990R2 
+               <ul><li>SRPCM – Composite scale<br></li><li>SRPS1 – Physical science scale<br></li><li>SRPS2 – Earth science scale<br></li><li>SRPS3 – Life science scale<br></li><li>Science 2005R3<br></li><li>SRPUV – Overall science scale<br></li></ul></li><li>TEL 
+               <ul><li>TRPUN – Overall scale<br></li><li>TRPP1 – Communicating and collaborating practice scale<br></li><li>TRPP2 – Developing solutions and Achieving goals practice scale<br></li><li>TRPP3 – Understanding Technological Principles practice scale<br></li></ul></li><li>History 
+               <ul><li>HRPCM – Composite scale<br></li><li>HRPS1 – Democracy Scale<br></li><li>HRPS2 – Cultures scale<br></li><li>HRPS3 – Technology scale<br></li><li>HRPS4 – World role scale<br></li></ul></li><li>Visual Arts 
+               <ul><li>VISRP – Visual arts scale<br></li></ul></li><li>Vocabulary 
+               <ul><li>VOCRP – Meaning vocabulary scale<br></li></ul></li><li>Writing 
+               <ul><li>WRIRP – Writing scale<br></li></ul></li></ul><h3>Jurisdiction</h3><ul><li>NT – National<br></li><li>NP – National public<br></li><li>NR – National private<br></li><li>NL – Large city<br></li><li>AL – Alabama<br></li><li>AK – Alaska<br></li><li>AZ – Arizona<br></li><li>AR – Arkansas<br></li><li>CA – California<br></li><li>CO – Colorado<br></li><li>CT – Connecticut<br></li><li>DE – Delaware<br></li><li>DC – District of Columbia<br></li><li>DS – DoDEA<br></li><li>FL – Florida<br></li><li>GA – Georgia<br></li><li>HI – Hawaii<br></li><li>ID – Idaho<br></li><li>IL – Illinois<br></li><li>IN – Indiana<br></li><li>IA – Iowa<br></li><li>KS – Kansas<br></li><li>KY – Kentucky<br></li><li>LA – Louisiana<br></li><li>ME – Maine<br></li><li>MD – Maryland<br></li><li>MA – Massachusetts<br></li><li>MI – Michigan<br></li><li>MN – Minnesota<br></li><li>MS – Mississippi<br></li><li>MO – Missouri<br></li><li>MT – Montana<br></li><li>NE – Nebraska<br></li><li>NV – Nevada<br></li><li>NH – New Hampshire<br></li><li>NJ – New Jersey<br></li><li>NM – New Mexico<br></li><li>NY – New York<br></li><li>NC – North Carolina<br></li><li>ND – North Dakota<br></li><li>OH – Ohio<br></li><li>OK – Oklahoma<br></li><li>OR – Oregon<br></li><li>PA – Pennsylvania<br></li><li>RI – Rhode Island<br></li><li>SC – South Carolina<br></li><li>SD – South Dakota<br></li><li>TN – Tennessee<br></li><li>TX – Texas<br></li><li>UT – Utah<br></li><li>VT – Vermont<br></li><li>VA – Virginia<br></li><li>WA – Washington<br></li><li>WV – West Virginia<br></li><li>WI – Wisconsin<br></li><li>WY – Wyoming<br></li><li>DD – DoDEA/DDESS<br></li><li>DO – DoDEA/DoDDS<br></li><li>XQ – Albuquerque<br></li><li>XA – Atlanta<br></li><li>XU – Austin<br></li><li>XM – Baltimore City<br></li><li>XB – Boston<br></li><li>XT – Charlotte<br></li><li>XC – Chicago<br></li><li>XX – Clark County (NV)<br></li><li>XV – Cleveland<br></li><li>XS – Dallas<br></li><li>XY – Denver<br></li><li>XR – Detroit<br></li><li>XW – District of Columbia (DCPS)<br></li><li>XE – Duval County (FL)<br></li><li>XZ – Fort Worth (TX)<br></li><li>XF – Fresno<br></li><li>XG – Guilford County (NC)<br></li><li>XO – Hillsborough County (FL)<br></li><li>XH – Houston<br></li><li>XJ – Jefferson County (KY)<br></li><li>XL – Los Angeles​<br></li><li>XI – Miami-Dade<br></li><li>XK – Milwaukee<br></li><li>XN – New York City<br></li><li>XP – Philadelphia<br></li><li>XD – San Diego<br></li><li>YA – Shelby County (TN)<br></li><li>YB - Orange County (FL)</li><li>​XFCA – California without Fresno<br></li><li>XLCA – California without Los Angeles</li><li>XDCA – California without San Diego</li><li>​QQCA – California without any TUDAs</li><li>XYCO – Colorado without Denver</li><li>XWDC – District of Columbia without DCPS</li><li>XEFL – Florida without Duval County</li><li>XOFL – Florida without Hillsborough County</li><li>XIFL – Florida without Miami-Dade</li><li>YBFL – Florida without Orange County</li><li>QQFL – Florida without any TUDAs</li><li>XAGA – Georgia without Atlanta</li><li>XCIL – Illinois without Chicago</li><li>XJKY – Kentucky without Jefferson County</li><li>XMMD – Maryland without Baltimore</li><li>XBMA – Massachusetts without Boston</li><li>XRMI – Michigan without Detroit</li><li>XXNV – Nevada without Clark County</li><li>XQNM – New Mexico without Albuquerque</li><li>XNNY – New York without New York City</li><li>XTNC – North Carolina without Charlotte</li><li>XGNC – North Carolina without Guilford County</li><li>QQNC – North Carolina without any TUDAs</li><li>XVOH – Ohio without Cleveland</li><li>XPPA – Pennsylvania without Philadelphia</li><li>YATN – Tennessee without Shelby County</li><li>XUTX – Texas without Austin</li><li>XSTX – Texas without Dallas</li><li>XZTX – Texas without Forth Worth</li><li>XHTX – Texas without Houston</li><li>QQTX – Texas without any TUDAs</li><li>XKWI – Wisconsin without Milwaukee</li><li>AS – American Samoa<br></li><li>GU – Guam<br></li><li>PR – Puerto Rico<br></li><li>VI – Virgin Islands<br></li></ul> 
+         <a id="cohort"></a> 
+         <h3>Grade/Cohort<br></h3><ul><li>Use either grade or cohort, newer calls only take cohort<br></li><li>Grade 
+               <ul><li>4</li><li>8</li><li>12</li></ul></li><li>Cohort<br> 
+               <ul><li>1 = Grade 4 or Age 9<br></li><li>2 = Grade 8 or Age 13<br></li><li>3 = Grade 12 or Age 17<br></li></ul></li></ul>​ 
+         <a id="year"></a> 
+         <h3>Year</h3><ul><li><Year>R2&#160; e.g., 1990R2 (R2 stands for accommodations not permitted sample)<br></li><li><Year>R3&#160; e.g., 2016R3 (R3 stands for accommodations permitted sample)<br></li><li>If R2 or R3 is not indicated, default is R3<br></li><li>Base, Current, and Prior are keywords 
+               <ul><li>Base – first assessment year<br></li><li>Current – most recent assessment year<br></li><li>Prior – second most recent assessment year<br></li></ul></li></ul><h3>StatType</h3><ul><li>MN:MN – Mean<br></li><li>RP:RP – Row percent<br></li><li>ALD:BA – Discrete achievement level – At Basic<br></li><li>ALD:PR – Discrete achievement level – At Proficient<br></li><li>ALD:AD – Discrete achievement level – At Advanced<br></li><li>ALC:BB – Cumulative achievement level&#160; - Below Basic<br></li><li>ALC:AB – Cumulative achievement level – At or above Basic<br></li><li>ALC:AP – Cumulative achievement level – At or above Proficient<br></li><li>ALC:AD – Cumulative achievement level – At Advanced<br></li><li>SD:SD – Standard deviations<br></li><li>PC:P1 – 10th percentile<br></li><li>PC:P2 – 25th percentile<br></li><li>PC:P5 – 50th percentile<br></li><li>PC:P7 – 75th percentile<br></li><li>PC:P9 – 90th percentile</li><li>DP:DP&#160;–&#160;Distribution percentages in 10-point scale score intervals&#160;&#160;<br></li></ul><h3>Categoryindex<br></h3><ul><li>Categories are also known as variable values.<br></li><li>For example, for SDRACE, White = 1, Black = 2, Hispanic = 3<br></li><li>For example, for GENDER+SDRACE, 1+3 returns male Hispanic, 2+2 returns female Black, encode as 1%2B3,2%2B2</li><li>CategoryIndex&#160;is not required in requests, If omitted all the values are returned<br></li><li>NAEP Variable Values List API<br>
+               <ul><li>Returns variables values for the set of variables requested.<br>
+                     <ul><li>Returns list&#160;of Varnames and its values.<br></li><li>Use Value as categoryindex&#160;parameters for&#160;the main NAEP Data Service API.<br></li></ul></li><li>Parameters<br> 
+                     <ul><li>type = VariableValues<br></li><li>NAEPIDs = Variable ID's<br></li></ul></li><li>Example Call<br><a href="/Dataservice/GetAdhocData.aspx?type=VariableValues&amp;NAEPIDs=Gender%2cSDRACE">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=VariableValues&amp;NAEPIDs=Gender,SDRACE</a><br></li></ul></li></ul>​​ 
+         <h3>Variable<br></h3><ul><li>Student demographic groups&#160;or survey question variable or index.<br></li><li>Commonly used variables 
+               <ul><li>TOTAL – All students<br></li><li>SDRACE – Race/ethnicity used to report trends<br></li><li>SRACE10&#160;– Race/ethnicity using 2011 guidelines<br></li><li>GENDER – Gender<br></li><li>SLUNCH3&#160;– National School Lunch Program eligibility<br></li><li>PARED&#160;– Parental education level<br></li><li>SCHTYPE&#160;– Public or nonpublic school<br></li><li>CHRTRPT&#160;– School identified as charter<br></li><li>UTOL4&#160;– School location<br></li><li>CENSREG&#160;– Region of the country<br></li><li>IEP&#160;– Disability status of student, including those with 504 plan<br></li><li>LEP&#160;– Status as English language learner<br></li></ul></li><li>NAEP Variable List API 
+               <ul><li>Returns a set of independent variables for each year and&#160;sample for&#160;the specified&#160;subject and cohort<br> 
+                     <ul><li>Returns Varname, short label and long label<br></li><li>Use Varname as parameters for&#160;the main NAEP Data Service API<br></li></ul></li><li>​Parameters<br>
+                     <ul><li>type = independentvariables<br></li><li>1 
+                           <a href="#subject">subject</a><br></li><li> 1 
+                           <a href="#cohort">cohort</a>, this call does not take the grade parameter<br></li><li>List of valid 
+                           <a href="#year">years</a> separated by commas<br></li></ul></li><li>Example Call<br><a href="https://www.nationsreportcard.gov/dataservice/getadhocdata.aspx?type=independentvariables&amp;subject=RED&amp;cohort=2&amp;Year=1998%2c2019">https://www.nationsreportcard.gov/dataservice/getadhocdata.aspx?type=independentvariables&amp;subject=RED&amp;cohort=2&amp;Year=1998,2019</a><br></li></ul></li><li>In addition to learning about the available variables using the API, details about the variable code used in the query string can be found in the 
+               <a href="/ndecore/landing">NAEP Data Explorer</a>. In the “Select Variables” section, a pull- down menu containing the variable code appears when you click details, circled below by&#160;<img alt="gold oval" src="/subject/_commonobjects/images/api_gold_circle_100.png" style="margin:0px;" />.<br></li></ul>
+         <br> 
+      </div><div> 
+         <img alt="Image from the Nation's Report Card NAEP Data Explorer (NDE) web page showing student variable selection screen. This interface allows users to switch between major reporting groups and student factors. The selected variable has its attributes shown which include student group, category, and all years data is available. There are two examples highlighted with a gold oval. One highlights the TOTAL of All Students and the other highlights SDRACE for Race/ethnicity used to report trends, school-reported category." src="/subject/_commonobjects/images/api_screenshot.png" style="margin:0px;" /> 
+         <br> 
+      </div>​</div><div><h3>Program parameter<br></h3><div>The API supports multiple programs. When querying non-default datasets, the 'Program' parameter must be explicitly provided.</div><div> 
+         <br> 
+      </div><div>Supported programs include:</div><div><ul><li>NDE (default if omitted)</li><li>LTT</li><li>NIES</li><li>STQ​</li><li>HSTS</li></ul></div><div></div><div></div><div>​​Note: If 'Program' is not specified, the API will default to NDE.</div><div> 
+         <br> 
+      </div><h4 class="nrc-rteElement-h4">LTT Query Specifications<br></h4><div> 
+         <br> 
+      </div><div>The subscale uses LTT-specific values (e.g., MRPSCT, RRPSCT).</div><div><ul><li>Year values must include sample designation: 
+               <ul><li>1971–2004: use 'R1' (e.g., 1984R1)</li><li>2004–present: defaults to 'R3' if not specified</li></ul></li></ul></div><div> 
+         <br> 
+      </div><div>Example:</div><div>
+         <a href="/Dataservice/GetAdhocData.aspx?type=data&amp;Program=LTT&amp;subject=MAT&amp;cohort=1&amp;subscale=MRPSCT&amp;variable=TOTAL&amp;jurisdiction=NT&amp;stattype=MN%3aMN&amp;Year=2022R3">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=data&amp;Program=LTT&amp;subject=MAT&amp;cohort=1&amp;subscale=MRPSCT&amp;variable=TOTAL&amp;jurisdiction=NT&amp;stattype=MN%3aMN&amp;Year=2022R3</a>&#160;<br></div><div> 
+         <br> 
+      </div><h4 class="nrc-rteElement-h4">NIES Query Specifications<br></h4><div><ul><li>Subjects and Subscales:&#160; 
+               <ul><li>​MAT and RED subjects use the same subscales as NDE<br></li><li>For survey response results, use NIE as the subject and CONSTANT as the subscale&#160;<br></li></ul></li><li>Variables can be found in the Data Explorer.</li><li>Jurisdiction codes differ from standard NAEP codes.&#160;</li></ul></div><div> ​ 
+         <table class="nrc-error-flag">
+            <caption>NIES Jurisdiction p​arameters</caption>
+            <thead><tr><th scope="col">​​Parameter</th><th scope="col">Jurisdiction</th></tr></thead><tbody><tr><td>NI</td><td>National AI/AN</td></tr><tr><td>NB</td><td>National AI/AN public and BIE</td></tr><tr><td>QK</td><td>Alaska AI/AN public (no BIE)</td></tr><tr><td>QZ</td><td>Arizona AI/AN public and BIE</td></tr><tr><td>QN</td><td>Minnesota AI/AN public and BIE</td></tr><tr><td>QT</td><td>Montana AI/AN public and BIE</td></tr><tr><td>QB</td><td>Nebraska AI/AN public and BIE</td></tr><tr><td>QM</td><td>New Mexico AI/AN public and BIE</td></tr><tr><td>QC</td><td>North Carolina public (no BIE)</td></tr><tr><td>QD</td><td>North Dakota AI/AN public and BIE</td></tr><tr><td>QO</td><td>Oklahoma AI/AN public and BIE</td></tr><tr><td>QR</td><td>Oregon public (no BIE)</td></tr><tr><td>QS</td><td>South Dakota AI/AN public and BIE</td></tr><tr><td>QU</td><td>Utah AI/AN public and BIE</td></tr><tr><td>QA</td><td>Washington AI/AN public and BIE</td></tr><tr><td>QW</td><td>Wisconsin AI/AN public and BIE</td></tr><tr><td>QY</td><td>Wyoming AI/AN public and BIE</td></tr><tr><td>I1</td><td> Atlantic AI/AN</td></tr><tr><td>B1</td><td>Atlantic AI/AN public and BIE</td></tr><tr><td>I2</td><td>North central AI/AN</td></tr><tr><td>B2</td><td>North central AI/AN public and BIE</td></tr><tr><td>I3</td><td>South central AI/AN</td></tr><tr><td>B3</td><td>South central AI/AN public and BIE</td></tr><tr><td>I4</td><td>Mountain AI/AN</td></tr><tr><td>B4</td><td>Mountain AI/AN public and BIE</td></tr><tr><td>I5</td><td>Pacific AI/AN</td></tr><tr><td>B5</td><td>Pacific AI/AN public and BIE</td></tr></tbody></table> 
+         <br> 
+         <br> 
+      </div><div>Example (NIES math average score):</div><div>
+         <a href="/Dataservice/GetAdhocData.aspx?type=data&amp;Program=NIES&amp;subject=MAT&amp;cohort=1&amp;subscale=MRPCM&amp;variable=TOTAL&amp;jurisdiction=NI%2cNB&amp;stattype=MN%3aMN&amp;Year=2019R3">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=data&amp;Program=NIES&amp;subject=MAT&amp;cohort=1&amp;subscale=MRPCM&amp;variable=TOTAL&amp;jurisdiction=NI,NB&amp;stattype=MN%3aMN&amp;Year=2019R3</a></div><div> 
+         <br> 
+      </div><div>Example (NIES survey percentage​):</div><div>
+         <a href="/Dataservice/GetAdhocData.aspx?type=data&amp;Program=NIES&amp;subject=NIE&amp;cohort=1&amp;subscale=CONSTANT&amp;variable=IB19901&amp;jurisdiction=NI%2cNB&amp;stattype=RP%3aRP&amp;Year=2019R3">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=data&amp;Program=NIES&amp;subject=NIE&amp;cohort=1&amp;subscale=CONSTANT&amp;variable=IB19901&amp;jurisdiction=NI,NB&amp;stattype=RP%3aRP&amp;Year=2019R3</a>​</div><div> 
+         <br> 
+      </div><div><h4 class="nrc-rteElement-h4">STQ Query Specifications<br></h4><div><ul><li>Uses standard NAEP jurisdiction codes</li><li>Only one dependent variable is available: CONSTANT</li></ul></div><div> 
+            <br> 
+         </div><div>Example:<br></div><div> 
+            <a href="/Dataservice/GetAdhocData.aspx?type=data&amp;Program=STQ&amp;subject=TCH&amp;cohort=1&amp;subscale=CONSTANT&amp;variable=CVS0302&amp;jurisdiction=AL%2cAK&amp;stattype=RP%3aRP&amp;Year=2021R3">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=data&amp;Program=STQ&amp;subject=TCH&amp;cohort=1&amp;subscale=CONSTANT&amp;variable=CVS0302&amp;jurisdiction=AL,AK&amp;stattype=RP%3aRP&amp;Year=2021R3</a>​<br></div> 
+         <br> 
+      </div><h4 class="nrc-rteElement-h4">HSTS Query Specificatons<br></h4><div><ul><li>Jurisdiction: National-only jurisdiction (NT)</li><li>Subjects:- MAT, SCI, TRN​</li><li>Subscales:&#160; 
+               <ul><li>Mathematics (MWPCM, MWPS1–MWPS4)</li><li>Science (SRPCM, SRPS1–SRPS3, SRPUV)</li><li>Transcript (extensive TRN variables)</li></ul></li></ul></div><div><div> 
+            <br> 
+         </div><div>Example<br></div><div> 
+            <a href="/Dataservice/GetAdhocData.aspx?type=data&amp;subject=MAT&amp;grade=12&amp;subscale=MWPCM&amp;variable=TOTAL&amp;jurisdiction=NT&amp;stattype=MN%3aMN&amp;Year=2019&amp;program=HSTS">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=data&amp;subject=MAT&amp;grade=12&amp;subscale=MWPCM&amp;variable=TOTAL&amp;jurisdiction=NT&amp;stattype=MN:MN&amp;Year=2019&amp;program=HSTS</a><br></div> 
+         <br> 
+      </div><div>Note:<br></div><div>- Users must reference valid dependent variable codes from the 
+         <a href="https://www.nationsreportcard.gov/ndecore/xplore/hsts">Data Explorer</a>​</div><div>- Subject-specific dependents are required. See a 
+         <a href="/subject/_commonobjects/api-hsts-dependents.xlsx">list of parameters for each subject-specific dependent variable.</a>​<br></div><div> 
+         <br> 
+      </div><div>​​<br></div> 
+      <br> 
+      <div><div class="back_to_top"><p style="text-align:right;">
+               <a href="#top">Back to Top</a></p></div><h2 class="nrc-rteElement-h2"> 
+            <span class="nrc-rteStyle-SubtitleTurquoise">Special and Optional Parameter Values</span><a id="bookmark-07-SpecialValues"></a></h2> 
+         <a id="subject"></a> 
+         <h3>RevealDa​taKeys</h3><ul><li>Special parameter that exposes data keys in all the data points in the return<br></li><li>Set value to true to see the data keys</li><li>Example Call: 
+               <a href="/nrcdataservice/GetAdhocData.aspx?type=gaponvaracrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP%2cCA%2cCO%2cNJ%2cPA%2cNV&amp;stattype=MN%3aMN&amp;Year=2015%2c2013&amp;RevealDataKeys=true">https://www.nationsreportcard.gov/nrcdataservice/GetAdhocData.aspx?type=gaponvaracrossjuris&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=GENDER&amp;jurisdiction=NP,CA,CO,NJ,PA,NV&amp;stattype=MN%3AMN&amp;Year=2015,2013&amp;RevealDataKeys=true</a></li></ul><h3 class="nrc-rteElement-h3"> ShowDetails (Show&#160;Standard Errors)<br></h3></div><div><div></div><div><div>The API can return additional statistical details for data queries when the optional parameter 'QCData=true' is included.</div>
+            <br> 
+            <div>When enabled, the response includes:</div><div>- Standard errors</div><div>- Coefficient of variation (CV)</div><div> 
+               <br> 
+            </div><div>Example:</div><div> 
+               <a href="/Dataservice/GetAdhocData.aspx?type=data&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=SDRACE%2BGENDER&amp;categoryindex=2%2B1%2c2%2B2%2c3%2B1%2c3%2B2&amp;jurisdiction=NP%2cCA&amp;stattype=MN%3aMN&amp;Year=2013%2c2015&amp;StackType=RowThenCol&amp;ShowDetails=true">https://www.nationsreportcard.gov/Dataservice/GetAdhocData.aspx?type=data&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=SDRACE%2BGENDER&amp;categoryindex=2%2B1,2%2B2,3%2B1,3%2B2&amp;jurisdiction=NP,CA&amp;stattype=MN%3AMN&amp;Year=2013,2015&amp;StackType=RowThenCol&amp;ShowDetails=true</a><br><br></div></div></div><div><h3>CollapseJ (Combine Jurisdictions)<br></h3><ul><li>Special parameter that allows collapsed Jurisdictions<br></li><li>CollapseJ - [code]:[jurisdictions]-[label] 
+               <ul><li>code - custom code or id to refer to the jurisdiction group</li><li>jurisdicitons - list of jurisdictions separated by hyphen</li><li>label - custom label to describe jurisdiction group</li></ul></li><li>Example Call: 
+               <a href="/GetAdhocData.aspx?type=data&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=SDRACE&amp;jurisdiction=NP%2cCA%2cCO%2cNJ%2cPA%2cNY%2cNV&amp;stattype=MN%3aMN&amp;Year=2013%2c2015&amp;CollapseJ=THEC%3aCA-CO-The%20C%20States%2cATL%3aNJ-PA-NY-CT-DE-Atlantic%20States">https://nationsreportcard.gov/GetAdhocData.aspx?type=data&amp;subject=mathematics&amp;grade=8&amp;subscale=MRPCM&amp;variable=SDRACE&amp;jurisdiction=NP,CA,CO,NJ,PA,NY,NV&amp;stattype=MN%3AMN&amp;Year=2013,2015&amp;CollapseJ=THEC:CA-CO-The%20C%20States,ATL:NJ-PA-NY-CT-DE-Atlantic%20States </a></li><li>Example Breakdown: THEC:CA-CO-The%20C%20States,ATL:NJ-PA-NY-CT-DE-Atlantic%20States 
+               <ul><li>There are 2 jurisdiction groups</li><li>Jurisdiction Group 1 
+                     <ul><li>Code - THEC<br></li><li>Jurisdictions - California and Colorado</li><li>Label - The C States (%20 is the code for a space)</li></ul></li><li>Jurisdiction Group 2 
+                     <ul><li>Code - ATL</li><li>Jurisdictions - NJ, PA, NY, CT, DE</li><li>Label - Atlantic States​<br><br></li></ul></li></ul>​<br></li></ul></div><div class="back_to_top"><p style="text-align:right;"> 
+            <a href="#top">Back to Top</a></p></div><h2 class="nrc-rteElement-h2"> 
+         <span class="nrc-rteStyle-SubtitleTurquoise">Assessment Year and Subject Combinations</span><a id="bookmark-04-Assessment"><br></a></h2><div><ul><li>Not all year, subject combinations have data.<br></li><li>For information about year and subject combinations at the&#160;national, state, and district levels,&#160;see the&#160;<a href="https://www.nagb.gov/about-naep/assessment-schedule.html">full schedule of NAEP assessments</a>&#160;or the 
+               <a href="/ndecore/landing">NAEP Data Explorer</a>.<br></li><li>See further&#160;information about 
+               <a href="https://nces.ed.gov/nationsreportcard/about/state.aspx">state</a>&#160;and&#160;<a href="https://nces.ed.gov/nationsreportcard/tuda/">district</a>&#160;participation.<br></li></ul></div></div><div class="back_to_top"><p style="text-align:right;"> 
+         <a href="#top">Back to Top</a></p></div>
+   <br>
+   <h2 class="nrc-rteElement-h2"> 
+      <span class="nrc-rteStyle-SubtitleTurquoise">Error Codes</span><a id="bookmark-05-ErrorCodes"></a></h2><div> ​ 
+      <table class="nrc-error-flag">
+         <caption>The error code is a numeric value that is the sum of multiple error flags. Each number is the sum of a unique set of error codes. For example, an error code of 33 would signify error flags with numeric values of 1 and 32 and indicate the error flags, &quot;Reporting Standard Not Met&quot; and &quot;Non-qualified independent variable&quot;. Priority means if multiple error flags are present, an error flag with priority 1 takes precedence over an error flag with priority 2.<br>&#160;</caption>
+         <thead><tr><th scope="col">​​​Numeric Value</th><th scope="col">Actual Bit Number</th><th scope="col">Description</th><th scope="col">Symbol Shown Stat</th><th scope="col">Symbol Shown SE</th><th scope="col">Priority</th></tr></thead><tbody><tr><td>1</td><td>1<br></td><td>Reporting Standard Not Met (NDE)</td><td>‡</td><td>†</td><td>No Priority</td></tr><tr><td>​2<br></td><td>2<br></td><td>Extreme P</td><td>‡</td><td>†<br></td><td>No Priority</td></tr><tr><td>​4<br></td><td>3<br></td><td>High CV</td><td>Stat is shown​​<br></td><td>†<br></td><td>No Priority</td></tr><tr><td>8<br></td><td>4<br></td><td>Non-accommodated Sample<br></td><td>Stat is shown<br></td><td>SE is shown<br></td><td>No Priority</td></tr><tr><td>16</td><td>5<br></td><td>Exclusion List</td><td>‡</td><td>†<br></td><td>1</td></tr><tr><td>32</td><td>6</td><td>Non-qualified independent Variable</td><td>‡</td><td>†</td><td>1</td></tr><tr><td>64</td><td>7</td><td>No Data</td><td aria-label="em-dash">—<br></td><td>†</td><td>1</td></tr><tr><td>128</td><td>8<br></td><td>Rounds to Zero</td><td>#<br></td><td>†</td><td>2</td></tr><tr><td>256</td><td>9</td><td>SE Not Applicable</td><td>No Symbol<br></td><td>†<br></td><td>No Priority<br></td></tr><tr><td>512</td><td>10<br></td><td>Race Note Type 1</td><td>NOTE - Stat is shown</td><td>NOTE</td><td>
+                  <span style="text-align:right;background-color:#f0f4f7;">No P</span><span style="text-align:right;background-color:#f0f4f7;">riority</span>&#160;</td></tr><tr><td>2048</td><td>12</td><td>Response Rate Below 85%</td><td>Statistic is shown with !</td><td>SE is shown<br></td><td>No Priority</td></tr><tr><td>4096</td><td>13<br></td><td>Response Rate Below 50% But > 0%</td><td>‡</td><td>†</td><td>1</td></tr><tr><td>16384</td><td>15</td><td>Significance</td><td>Statistics shown with star in charts</td><td>SE is shown</td><td>No Priority</td></tr><tr><td>32768</td><td>16</td><td>Zero Percent Response Rate</td><td aria-label="em-dash">—<br></td><td>†</td><td>1</td></tr><tr><td>131072</td><td>18</td><td>Jurisdiction Note</td><td>NOTE - Stat is shown</td><td>NOTE - Stat is shown</td><td>No Priority</td></tr><tr><td>4194304</td><td>23</td><td>Race Note Type 2</td><td>NOTE - Stat is shown</td><td>No Symbol<br></td><td>No Priority</td></tr><tr><td>8388608<br></td><td>24</td><td>Race Note Type 3</td><td>NOTE - Stat is shown</td><td>No Symbol</td><td>No Priority</td></tr><tr><td>16777216<br></td><td>25</td><td>IEP Note</td><td>NOTE - Stat is shown</td><td>No Symbol</td><td>No Priority</td></tr><tr><td>33554432</td><td>26</td><td>IEP2009 Note</td><td>NOTE - Stat is shown</td><td>No Symbol</td><td>No Priority<br></td></tr><tr><td>67108864</td><td>27</td><td>DoDEA Note<br></td><td>NOTE - Stat is shown</td><td>No Symbol</td><td>No Priority</td></tr><tr><td>134217728</td><td>28</td><td>Dallas Note</td><td>NOTE - Stat is shown</td><td>No Symbol</td><td>No Priority</td></tr><tr><td>268435456</td><td>29</td><td>Skipped Variables Note</td><td>NOTE - Stat is shown</td><td>No Symbol</td><td>No Priority</td></tr></tbody></table>
+      <br>
+      <table class="nrc-error-flag">
+         <caption>An error flag indicated as producing NOTE text means that in the NAEP Data Explorer tool, a note would appear below the tabular result for the selected variable. EXAMPLE: A report produced in the NAEP Data Explorer using the SDRACE variable would produce an API Result with the numeric error value 512 indicated (error bit 10) triggered for each statistic returned. The error code table says &quot;NOTE – Stat is shown&quot;. This means that the statistic is displayed in the results table as requested, but that a note applies to the result relating to the variable SDRACE. When more than one note text applies, the various statements will be stitched together as sentences in a paragraph following the word NOTE. This logic is defined as part of the NAEP statistical reporting standards set forth by NCES. The easiest way to see how notes work together is to perform some queries in the NAEP Data Explorer that trigger note conditions, such as SDRACE for Washington DC (combines the race note number 512 with the jurisdiction note 131072).<br>&#160;</caption>
+         <thead><tr><th scope="col" style="width:20%;">Numeric Value</th><th scope="col" style="width:20%;">Actual Bit Number</th><th scope="col">Note Text</th></tr></thead><tbody><tr><td>512</td><td>10</td><td>Black includes African American, Hispanic includes Latino, and Pacific Islander includes Native Hawaiian.  Race categories exclude Hispanic origin. Prior to 2011, students in the &quot;Two or More Races&quot; category were categorized as &quot;unclassified.&quot;</td></tr><tr><td>131072</td><td>18</td><td>DCPS = District of Columbia Public Schools.</td></tr><tr><td>4194304</td><td>23</td><td>Black includes African American, and Hispanic includes Latino. Race categories exclude Hispanic origin.</td></tr><tr><td>8388608</td><td>24</td><td>Black includes African American, Hispanic includes Latino, and Pacific Islander includes Native Hawaiian. Race categories exclude Hispanic origin.</td></tr><tr><td>16777216</td><td>25</td><td>IEP NOTE: The category &quot;students with disabilities&quot; includes students identified as having either an Individualized Education Program (IEP) or protection under Section 504 of the Rehabilitation Act of 1973.</td></tr><tr><td>33554432</td><td>26</td><td>IEP2009 NOTE: The category &quot;students with disabilities&quot; includes students identified as having an Individualized Education Program (IEP) but excludes those identified under Section 504 of the Rehabilitation Act of 1973.</td></tr><tr><td>67108864</td><td>27</td><td>DoDEA NOTE: DoDEA = Department of Defense Education Activity. Some apparent differences between estimates may not be statistically significant.</td></tr><tr><td>134217728</td><td>28</td><td>Dallas NOTE: The 2017 assessed sample for Dallas in grade 4 reading was not representative of the target population for two major reporting groups: Hispanic and English language learner students. Assessed samples in Dallas for other grades and subjects in 2017 were unaffected.<br></td></tr><tr><td>268435456</td><td>29</td><td>Some respondents did not receive this question based on their response to a previous question in the survey, and those respondents are included in the &quot;missing&quot; category.</td></tr></tbody></table>
+      <br>
+   </div>
+   <br> 
+   <div class="back_to_top"><p style="text-align:right;"> 
+         <a href="#top">Back to Top</a></p></div>
+   <br>
+   <br>
+   <br> 
+   <br>
+   <br>
+   <br>
+   <br> 
+​<br><br></div>
+								<!--END CONTENT-->
+							</div>
+						</div>
+					</div>
+				</div>
+			
+			
+	    				
+			
+		</div>
+	</div>
+
+            </div>
+
+            <!-- Begin footer -->
+			<div id="footer" class="nrc_footer">
+				<div class="footer-container">
+					<div class="tabs">
+						<ul class="tab-links">
+							<li class="tab1 active"><button type="button" name="tab1">Download Data Tables</button></li>
+							<li class="tab2"><button type="button" name="tab2">Customize Data Tables</button></li>
+						</ul>
+						<div class="tab-content">									
+							<div id="tab1" class="tab tab1 active">
+								<div class="nde-data-filter-content">
+									<div class="nde-data-filter-wrapper">
+										Download data summarizing:<br/>							        		
+										<ul>
+											<li>participation rates</li>
+											<li>inclusion rates and other information about students with disabilities (SD) and English learners (EL)</li>
+										</ul>
+										<div class="nde-data-filter subject">
+											<label for="subject" class="screen-reader-only">Subject</label>
+											<span class="select-default" title="MATHNS"></span>
+											<select title="Subject selection menu for download data" id="downloadsubject" name="subject" class="dropdown" onchange="subjectOnChange()">
+												<option value="ART">Arts</option>
+												<option value="CIV">Civics</option>
+												<option value="GEO">Geography</option>
+												<option value="LTT9">Long-Term Trend Reading & Mathematics at Age 9</option>
+												<option value="LTT13">Long-Term Trend Reading & Mathematics at Age 13</option>
+												<option value="MATHNS" class="default-text">Mathematics (National)</option>
+												<option value="MATHTUDA">Mathematics {State/District}</option>  -->
+												<option value="MATH12">Mathematics (Grade 12)</option>
+												<option value="READNS">Reading (National)</option>
+												<option value="READTUDA">Reading (State/District)</option>  -->
+												<option value="READ12">Reading (Grade 12)</option>
+												<option value="SCI">Science</option>
+												<option value="TEL">Technology & Engineering Literacy</option>
+												<option value="HIS">U.S. History</option>
+												<option value="VOC">Vocabulary</option>
+											</select>
+										</div>
+										<div class="btn-download-table">
+											<a href="#" class="button" onclick="downloadData('xls')">excel file</a><a id="downloadPdfButton" href="#" class="button" onclick="downloadData('pdf')">pdf file</a>
+										</div>
+									</div>
+								</div>
+							</div><!-- End of #tab1 -->
+								<div id="tab2" class="tab tab2">
+									<div class="nde-data-filter-content">
+										<div class="nde-data-filter-wrapper">
+											Generate custom tables by selecting criteria below:<br/>
+											<div class="nde-data-filter jurisdiction">
+												<label for="jurisdiction" class="screen-reader-only">Jurisdiction</label>
+												<span title="National" class="select-default"></span>
+												<select title="Jurisdiction selection menu" id="jurdid" name="jurisdiction" class="dropdown">
+													<option value="0">Select a Jurisdiction</option>
+													<option value="National" class="default-text">National</option>
+													<option value="States">States</option>
+													<option value="Districts">Districts</option>
+												</select>
+											</div>
+											<div class="nde-data-filter grade">
+												<label for="grade" class="screen-reader-only">Grade</label>
+												<span title="1" class="select-default"></span>
+												<select title="Grade selection menu" id="gradeid" name="grade" class="dropdown">
+													<option value="0">Select a Grade</option>
+													<option value="1" class="default-text">Grade 4</option>
+													<option value="2">Grade 8</option>
+													<option value="3">Grade 12</option>
+												</select>
+											</div>
+											<div class="nde-data-filter subject">
+												<label for="subject" class="screen-reader-only">Subject</label>
+												<span title="4" class="select-default"></span>
+												<select title="Subject selection menu" name="subject" id="subjectid" class="dropdown">
+													<option value="0">Select a Subject</option>
+													<option value="1">Civics</option>
+													<option value="2">Economics</option>
+													<option value="3">Geography</option>
+													<option value="4" class="default-text">Mathematics</option>
+													<option value="5">Music</option>
+													<option value="6">Reading</option>
+													<option value="7">Science</option>
+													<option value="8">Technology & Engineering Literacy</option>
+													<option value="9">U.S. History</option>
+													<option value="10">Visual Arts</option>
+													<option value="11">Vocabulary</option>
+													<option value="12">Writing</option>													
+												</select>
+											</div>
+											<div class="nde-data-filter statistic">
+												<label for="statistic" class="screen-reader-only">Statistic</label>
+												<span title="2" class="select-default"></span>
+												<select title="Statistics selection menu" id="statid" name="statistic" class="dropdown">
+													<option value="1" class="default-text">Average Score</option>
+													<option value="2">Percentages</option>
+													<option value="3">Achievement Level</option>
+													<option value="4">Percentiles</option>
+												</select>
+											</div>
+											<div class="nde-data-filter variable">
+												<label for="variable" class="screen-reader-only">Variable</label>
+												<span title="1" class="select-default">Overall</span>
+												<select title="Variable selection menu" id="variid" name="variable" class="dropdown">
+													<option value="1" class="default-text">Overall</option>
+													<option value="2">Gender</option>
+													<option value="3">Race/Ethnicity</option>
+													<option value="4">Region</option>
+													<option value="5">Type of School</option>
+													<option value="6">Charter Schools</option>
+													<option value="7">NSLP Eligibility</option>
+													<option value="8">Parental Education</option>
+													<option value="9">School Location</option>
+													<option value="9">Students with Disabilities</option>
+													<option value="10">English Learners</option>
+												</select>							            	
+											</div>
+											<div class="btn-customize-table">
+												<a href="#" class="button" onclick="return showtable()">create table</a>
+											</div>
+										</div>
+									</div>							            
+								</div><!-- End of #tab2 -->							        
+							<div class="nde-logo">
+								<img src="/adminonly/themes/redesign_2015/images/footer-ndequick.png" alt="NDE Quick View"/></div>
+						</div><!-- End of .tab-content -->	
+					</div><!-- End of .tabs -->
+					<div class="fixed-tab">
+						<div class="tab-link">Related Links</div>
+						<div class="tab-content tab">
+							<ul>
+								<li><a href="/about.aspx">About The Nation's Report Card</a></li>
+								<li><a href="http://nces.ed.gov/nationsreportcard/about/">About National Assessment of Educational Progress (NAEP)</a></li>
+								<li><a href="/contacts.aspx">Contacts</a></li>
+								<li><a href="/faq.aspx">FAQs</a></li>
+								<li><a href="/glossary.aspx?ispopup=false">Glossary</a></li>
+							</ul>
+							<div>
+								FOLLOW US
+								<a class="icon_footer_twitter" title="Follow us on Twitter" aria-label="Follow us on Twitter" href="https://twitter.com/naep_nces" data-twitter=""><img alt="twitter" src="/adminonly/themes/redesign_2015/images/icon-twitter.png"/></a>
+								<a class="icon_footer_facebook" title="Follow us on Facebook" aria-label="Follow us on Facebook" href="https://www.facebook.com/NationalAssessmentofEducationalProgress" data-facebook="">	<img alt="facebook" src="/adminonly/themes/redesign_2015/images/icon-facebook-inv.png"/></a>
+							</div>							
+						</div>
+					</div>
+				</div><!-- End of .footer-container -->  
+					<div class="container-footer-bg-left" aria-hidden="true"></div>
+					<div class="container-footer-bg-right" aria-hidden="true"></div>				
+			</div><!-- End of #footer -->	
+
+            <!-- Handle Search "enter" key and back button -->
+            <input type="text" name="__spDummyText1" style="display: none;" size="1" />
+            <input type="text" name="__spDummyText2" style="display: none;" size="1" />
+            
+        
+
+<script type="text/javascript">
+//<![CDATA[
+Sys.Application.initialize();
+//]]>
+</script>
+</form>
+    </div>
+    <script type="text/javascript" src="/js/federated-analytics.all.min.js"></script>
+</body>
+
+</html>

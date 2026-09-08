@@ -98,12 +98,15 @@ describe("Next.js migration", () => {
         // (which the pending state also shows).
         const card = screen.getByText(eiaMatch.title).closest("a");
         expect(card).not.toBeNull();
-        expect(within(card as HTMLElement).getByText("Current forecast"))
-          .toBeInTheDocument();
-        expect(within(card as HTMLElement).getByText(eiaMatch.pointLabel))
-          .toBeInTheDocument();
-        expect(within(card as HTMLElement).getByText(eiaMatch.ciLabel))
-          .toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText("Current forecast"),
+        ).toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText(eiaMatch.pointLabel),
+        ).toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText(eiaMatch.ciLabel),
+        ).toBeInTheDocument();
       } else {
         expect(
           screen.getByText(
@@ -743,6 +746,19 @@ describe("Next.js migration", () => {
   // Paper page is now rendered by Quarto (not a React component)
 
   describe("shared Header component", () => {
+    it("links the conditional forecasts from the public app navigation", async () => {
+      const { Header } = await import("../components/Header");
+      render(<Header activePage="conditionals" />);
+      const navigation = screen.getByRole("navigation", {
+        name: "Main navigation",
+      });
+      expect(
+        within(navigation).getByRole("link", { name: "Conditionals" }),
+      ).toHaveAttribute("href", "/lab/conditionals");
+      expect(
+        within(navigation).getByRole("link", { name: "Conditionals" }),
+      ).toHaveAttribute("aria-current", "page");
+    });
     it("renders nav links on all pages", () => {
       render(<HomePage />);
       expect(screen.getAllByText("Docs").length).toBeGreaterThan(0);

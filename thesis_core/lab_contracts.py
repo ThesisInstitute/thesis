@@ -16,6 +16,7 @@ from pydantic import (
 )
 
 from .conditional_contracts import ConditionalContract, PairedModelResponse
+from .conditional_review_contracts import ConditionalFinding
 from .contracts import Eligibility, NumericCdf
 
 
@@ -483,6 +484,52 @@ class ExperimentResultPage(Envelope):
     next_cursor: Digest | None
 
 
+class ConditionalUsage(DTO):
+    prompt_tokens: Count | None
+    output_tokens: Count | None
+    total_tokens: Count | None
+    thought_tokens: Count | None
+
+
+class ConditionalProviderMetadata(DTO):
+    provider: Literal["google"]
+    reported_model: str
+    response_id: str | None
+    usage: ConditionalUsage
+    source_artifact: ArtifactLink
+    verification: Literal["matched_recorded_response"]
+
+
+class ConditionalReviewView(DTO):
+    id: Digest
+    attempt_id: Digest
+    response_sha256: Digest
+    recorded_at: Instant
+    reviewer: str
+    review_basis: Literal["operator_assessment"]
+    outcome: Literal["issues_remaining", "no_actionable_findings"]
+    findings: tuple[ConditionalFinding, ...]
+    report: ArtifactLink
+    record_artifact: ArtifactLink
+
+
+class ConditionalRevisionEntry(DTO):
+    attempt_id: Digest
+    contract_id: Digest
+    shared_evidence_id: Digest
+    parent_attempt_id: Digest | None
+    started_at: Instant
+    execution_state: Literal["running", "succeeded", "failed", "unknown"]
+    requested_model: str
+    provider_metadata: ConditionalProviderMetadata | None
+    arm_quantiles: tuple[Quantiles, ...]
+    feedback: ArtifactLink | None
+    triggering_review_id: Digest | None
+    linked_at: Instant | None
+    association_basis: Literal["retrospective_association"] | None
+    association_artifact: ArtifactLink | None
+
+
 class ConditionalSummary(DTO):
     id: Digest
     title: str
@@ -493,6 +540,7 @@ class ConditionalSummary(DTO):
     scoring_status: Literal["not_registered"] = "not_registered"
     trust_class: Literal["local_operator"] = "local_operator"
     requested_model: str
+    provider_metadata: ConditionalProviderMetadata | None
     observed_model: None = None
     execution_state: Literal["running", "succeeded", "failed", "unknown"]
     started_at: Instant
@@ -501,6 +549,8 @@ class ConditionalSummary(DTO):
 
 
 class ConditionalDetail(Envelope, ConditionalSummary):
+    reviews: tuple[ConditionalReviewView, ...]
+    revision_history: tuple[ConditionalRevisionEntry, ...]
     contract_id: Digest
     shared_evidence_id: Digest
     contract: ConditionalContract
@@ -512,6 +562,7 @@ class ConditionalDetail(Envelope, ConditionalSummary):
 
 
 class ConditionalPage(Envelope):
+    requested_models: list[str]
     items: list[ConditionalSummary]
     total: Count
     next_cursor: Digest | None

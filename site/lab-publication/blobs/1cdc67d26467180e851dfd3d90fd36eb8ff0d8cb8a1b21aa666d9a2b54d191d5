@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" prefix="content: http://purl.org/rss/1.0/modules/content/  dc: http://purl.org/dc/terms/  foaf: http://xmlns.com/foaf/0.1/  og: http://ogp.me/ns#  rdfs: http://www.w3.org/2000/01/rdf-schema#  schema: http://schema.org/  sioc: http://rdfs.org/sioc/ns#  sioct: http://rdfs.org/sioc/types#  skos: http://www.w3.org/2004/02/skos/core#  xsd: http://www.w3.org/2001/XMLSchema# ">
+  <head>
+    <meta charset="utf-8" />
+<style>#block-jpal-cheeseburgermenu, #block-jpal-cheeseburgermenutrigger {--cheese-aside-bg-color: rgba( 36, 148, 219, 1);--cheese-aside-text-color: rgba( 255, 255, 255, 1);--cheese-main-bg-color: rgba( 255, 255, 255, 1);--cheese-main-text-color: rgba( 0, 0, 0, 1);--cheese-trigger-color: rgba( 7, 35, 176, 1);--cheese-trigger-bg-color: rgba( 67, 222, 249, 1);--cheese-scrollbar-color: rgba( 180, 245, 253, 1);}</style>
+<meta name="description" content="Researchers examined the impact of doubling teacher salary on student and teacher performance in Indonesia. This intervention had some positive effects on teachers: they reported higher levels of satisfaction with their jobs and less financial stress and were less likely to have a second job. However, doubling teacher salary had no effect on teacher knowledge, student test scores, or self-reported teacher attendance." />
+<link rel="canonical" href="https://www.povertyactionlab.org/evaluation/impact-doubling-teacher-salary-student-performance-indonesia?lang=en" />
+<meta property="og:site_name" content="The Abdul Latif Jameel Poverty Action Lab (J-PAL)" />
+<meta property="og:url" content="https://www.povertyactionlab.org/evaluation/impact-doubling-teacher-salary-student-performance-indonesia?lang=en" />
+<meta property="og:title" content="The Impact of Doubling Teacher Salary on Student Performance in Indonesia | The Abdul Latif Jameel Poverty Action Lab" />
+<meta property="og:description" content="Researchers examined the impact of doubling teacher salary on student and teacher performance in Indonesia. This intervention had some positive effects on teachers: they reported higher levels of satisfaction with their jobs and less financial stress and were less likely to have a second job. However, doubling teacher salary had no effect on teacher knowledge, student test scores, or self-reported teacher attendance." />
+<meta property="og:image:url" content="https://www.povertyactionlab.org/media/image-evaluation/shutterstock673443058mediumtermimpactcashtransfersjpg?lang=en" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@jpal" />
+<meta name="twitter:title" content="The Abdul Latif Jameel Poverty Action Lab (J-PAL)" />
+<meta name="twitter:site:id" content="361486440" />
+<meta name="twitter:image:alt" content="Children in a classroom in Indonesia." />
+<meta name="twitter:image" content="https://www.povertyactionlab.org/sites/default/files/styles/large/public/shutterstock_673443058_MediumTermImpactCashTransfers.jpg?itok=AbmZom9Z" />
+<meta name="google-site-verification" content="kmibR-p4A9DuKJZ--_iu1ExYdL9Awnyn7yUKc6II4Ac" />
+<meta name="Generator" content="Drupal 11 (https://www.drupal.org)" />
+<meta name="MobileOptimized" content="width" />
+<meta name="HandheldFriendly" content="true" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="/themes/custom/jpal/favicon.ico" type="image/vnd.microsoft.icon" />
+<link rel="alternate" hreflang="en" href="https://www.povertyactionlab.org/evaluation/impact-doubling-teacher-salary-student-performance-indonesia?lang=en" />
+<link rel="alternate" hreflang="fr" href="https://www.povertyactionlab.org/fr/evaluation/teacher-certification-and-salary-increase-indonesia?lang=en" />
+
+    <title>The Impact of Doubling Teacher Salary on Student Performance in Indonesia | The Abdul Latif Jameel Poverty Action Lab</title>
+    <link rel="stylesheet" media="all" href="/sites/default/files/css/css_0bsPe_4jz_-vQj7FzvTNZPJhhri24QOwZJF7yWOvH2Y.css?delta=0&amp;language=en&amp;theme=jpal&amp;include=eJxljoFuwyAMRH-Ihk9CJlwIncEIw5bs68cadatUybLu3tmWKVlKLrJ4YuNp_XBdZlX7ol1apRiP3tEcjiqK4LbE06qNKGhzd90BhR8tzqGMMuwbWVZVszKpnvO84qkzVCliZsLSvBw2YKPBfYIGG9qoxAvd6bhAkZaJ0zfMfQb2ev6m_eRU4oO5TaQX6VD7a29_1lRqFBvVXZ93_8kySh2ek-4IRk_tyNefnwlfah99yRIG4wcyOHnO" />
+<link rel="stylesheet" media="all" href="/sites/default/files/css/css_Qfi6WBEU5dH3PualxewL1-3PwrnfrrB2NX_tIekCHwE.css?delta=1&amp;language=en&amp;theme=jpal&amp;include=eJxljoFuwyAMRH-Ihk9CJlwIncEIw5bs68cadatUybLu3tmWKVlKLrJ4YuNp_XBdZlX7ol1apRiP3tEcjiqK4LbE06qNKGhzd90BhR8tzqGMMuwbWVZVszKpnvO84qkzVCliZsLSvBw2YKPBfYIGG9qoxAvd6bhAkZaJ0zfMfQb2ev6m_eRU4oO5TaQX6VD7a29_1lRqFBvVXZ93_8kySh2ek-4IRk_tyNefnwlfah99yRIG4wcyOHnO" />
+
+    <script type="application/json" data-drupal-selector="drupal-settings-json">{"path":{"baseUrl":"\/","pathPrefix":"","currentPath":"node\/1505","currentPathIsAdmin":false,"isFront":false,"currentLanguage":"en","themeUrl":"themes\/custom\/jpal","currentQuery":{"lang":"en"}},"pluralDelimiter":"\u0003","suppressDeprecationErrors":true,"gtag":{"tagId":"","consentMode":false,"otherIds":[],"events":[],"additionalConfigInfo":[]},"ajaxPageState":{"libraries":"eJyNkAFuwyAMRS9Ew5GQk_wSOoORDV2z04-1Wtd2mjQJWbz3LbBMyVMKkWUmdjMtb6HJONU_3ENapPwZnszNaA0acKliWMMx8UDzEQU6nl02wDB3jaMpo3T_y0yL2b_6xm8Lk9k-ZjB83zPMKGJkwqKzXPyKI3VudxFS4VTgX3jkCl9EM3H6gFupEdMO9TM2OidRe3AbuEJdFImM0Cj6OMorT3Siy7PM7lSJ_W3NB1s01WbPru1jnnhzmUyK7lcIR5FWpMH8Fx7u6CopRaW6mV-1j2z6MVMvtc-cbMPqbLeGfFvYOeHd_LVOWdbO-ATXE8lB","theme":"jpal","theme_token":null},"ajaxTrustedUrl":{"\/search?lang=en":true},"gtm":{"tagId":null,"settings":{"data_layer":"dataLayer","include_environment":false},"tagIds":["GTM-K93866P"]},"back_to_top":{"back_to_top_button_trigger":100,"back_to_top_speed":1200,"back_to_top_prevent_on_mobile":false,"back_to_top_prevent_in_admin":true,"back_to_top_button_type":"image","back_to_top_button_text":"Back to top"},"colorbox":{"transition":"elastic","speed":350,"opacity":0.6,"slideshow":false,"slideshowAuto":true,"slideshowSpeed":2500,"slideshowStart":"start slideshow","slideshowStop":"stop slideshow","current":"{current} of {total}","previous":"\u00ab Prev","next":"Next \u00bb","close":"Close","overlayClose":true,"returnFocus":true,"maxWidth":"80%","maxHeight":"80%","initialWidth":"300","initialHeight":"250","fixed":true,"scrolling":true,"mobiledetect":false,"mobiledevicewidth":"480px"},"dataLayer":{"defaultLang":"en","languages":{"en":{"id":"en","name":"English","direction":"ltr","weight":0},"fr":{"id":"fr","name":"French","direction":"ltr","weight":1},"es":{"id":"es","name":"Spanish","direction":"ltr","weight":2},"ar":{"id":"ar","name":"Arabic","direction":"rtl","weight":3},"id":{"id":"id","name":"Indonesian","direction":"ltr","weight":4},"pt-br":{"id":"pt-br","name":"Portuguese, Brazil","direction":"ltr","weight":5}}},"widthBreakpoint":1,"field_group":{"html_element":{"mode":"full","context":"view","settings":{"classes":"group-tags","show_empty_fields":false,"id":"","element":"div","show_label":false,"label_element":"h3","label_element_classes":"","attributes":"","effect":"none","speed":"fast","label_as_html":false}}},"langcode":"en","user":{"uid":0,"permissionsHash":"c16a756118b4c6c4b0dfdc4c8da75aa8bf5904f46b83aea1bfccbaab9625754c"}}</script>
+<script src="/sites/default/files/js/js_RAgyPpqk13tnjClXcFlw-l_Ua-A84OVJumdeuGDNqmI.js?scope=header&amp;delta=0&amp;language=en&amp;theme=jpal&amp;include=eJxlj4GqwzAIRX8om58UTHubps_GEO3o_v7lbTD2NhDxHFS4XIhLzKKJJSSefqLrqEZvc9wsJLijR5xNDXNcigw0yqjo43JaAUM6eh5LO-pBX-Y6vkwq2pOeNGPhQ_wlYqlSKuiDw8zOwnd0Slj5VrTbm1shDT1k1SyIzpnyaJ985Y3P_3IPW2OhZ-yLTb00t6fb2bT2-wPioupVHUZ_eHnhL_GIeXI"></script>
+<script src="/modules/contrib/google_tag/js/gtag.js?tksqpb"></script>
+<script src="/modules/contrib/google_tag/js/gtm.js?tksqpb"></script>
+
+    <meta name="cf-2fa-verify" content="5cf71e92848c543">
+  </head>
+  <body class="path-node page-node-type-evaluation">
+        <a href="#main-content" class="visually-hidden focusable skip-link">
+      Skip to main content
+    </a>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K93866P"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+      <div class="dialog-off-canvas-main-canvas" data-off-canvas-main-canvas>
+    
+
+
+
+<div class="layout-container">
+      <header role="banner">
+        <div class="region region-header">
+    <div id="block-jpal-branding" class="block block-system block-system-branding-block">
+  
+    
+        <a href="/" title="J-PAL" class="site-logo">
+      <span class="logo-desktop"><img src="/themes/custom/jpal/logo.svg" alt="J-PAL" /></span>
+      <span class="logo-mobile"><img src="/themes/custom/jpal/logo-mobile.svg" alt="J-PAL" /></span>
+    </a>
+        <div class="site-name">
+      <a href="/" title="Home" rel="home">The Abdul Latif Jameel Poverty Action Lab</a>
+    </div>
+    </div>
+<div style="display: none;" class="block-cheeseburgermenu-container block-cheeseburgermenu-container--with-navigation block block-cheeseburger-menu" id="block-jpal-cheeseburgermenu">
+  
+    
+      <div class="cheeseburger-menu__side-trigger" data-cheeseburger-close="true"><?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px"
+	 height="24px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve">
+<g id="Bounding_Boxes">
+	<path fill="none" d="M0,0h24v24H0V0z"/>
+</g>
+<g id="Rounded">
+	<path d="M18.3,5.71L18.3,5.71c-0.39-0.39-1.02-0.39-1.41,0L12,10.59L7.11,5.7c-0.39-0.39-1.02-0.39-1.41,0l0,0
+		c-0.39,0.39-0.39,1.02,0,1.41L10.59,12L5.7,16.89c-0.39,0.39-0.39,1.02,0,1.41h0c0.39,0.39,1.02,0.39,1.41,0L12,13.41l4.89,4.89
+		c0.39,0.39,1.02,0.39,1.41,0l0,0c0.39-0.39,0.39-1.02,0-1.41L13.41,12l4.89-4.89C18.68,6.73,18.68,6.09,18.3,5.71z"/>
+</g>
+</svg>
+</div>
+
+	<div class="cheeseburger-menu__side-menu">
+		      					      					      						</div>
+
+<div class="cheeseburger-menu__main-navigation-area">
+				<div  data-cheeseburger-id="menu-main" >
+						<ul
+				class="cheeseburger-menu__mainmenu">
+															<li  class="menu-link cheeseburger-menu__item main__item cheeseburger-parent">
+									<span class="cheeseburger-menu__item-label" data-cheeseburger-parent-trigger>
+					<span>About</span>
+				</span>
+					
+					<span class="cheeseburger-menu__submenu-trigger" data-cheeseburger-parent-trigger><div class="cheeseburger-menu__submenu-trigger-icon dropdown"></div></span>
+			<ul class="cheeseburger-menu__submenu">
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/about-us">
+				<span>Overview</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item cheeseburger-parent">
+									<span class="cheeseburger-menu__item-label" data-cheeseburger-parent-trigger>
+					<span>People</span>
+				</span>
+					
+					<span class="cheeseburger-menu__submenu-trigger" data-cheeseburger-parent-trigger><div class="cheeseburger-menu__submenu-trigger-icon dropdown"></div></span>
+			<ul class="cheeseburger-menu__submenu">
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/affiliated-professors">
+				<span>Affiliated Professors</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="https://www.povertyactionlab.org/invited-researchers">
+				<span>Invited Researchers</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/page/j-pal-scholars-and-fellows">
+				<span>J-PAL Scholars</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/board-members">
+				<span>Board</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/page/leadership">
+				<span>Leadership</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/staff">
+				<span>Staff</span>
+			</a>
+		
+			</li>
+
+							</ul>
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/strengthening-our-work">
+				<span>Strengthening Our Work</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/page/code-conduct-j-pal-community">
+				<span>Code of Conduct</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/initiatives">
+				<span>Initiatives</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/events">
+				<span>Events</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/blog">
+				<span>Blog</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/news">
+				<span>News</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/press-room">
+				<span>Press Room</span>
+			</a>
+		
+			</li>
+
+							</ul>
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item cheeseburger-parent">
+									<span class="cheeseburger-menu__item-label" data-cheeseburger-parent-trigger>
+					<span>Offices</span>
+				</span>
+					
+					<span class="cheeseburger-menu__submenu-trigger" data-cheeseburger-parent-trigger><div class="cheeseburger-menu__submenu-trigger-icon dropdown"></div></span>
+			<ul class="cheeseburger-menu__submenu">
+											<li  class="menu-link cheeseburger-menu__item main__item cheeseburger-parent">
+									<span class="cheeseburger-menu__item-label" data-cheeseburger-parent-trigger>
+					<span>Overview</span>
+				</span>
+					
+					<span class="cheeseburger-menu__submenu-trigger" data-cheeseburger-parent-trigger><div class="cheeseburger-menu__submenu-trigger-icon dropdown"></div></span>
+			<ul class="cheeseburger-menu__submenu">
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/egypt-impact-lab-home">
+				<span>Egypt Impact Lab (new)</span>
+			</a>
+		
+			</li>
+
+							</ul>
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/global">
+				<span>Global</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/j-pal-africa">
+				<span>Africa</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/j-pal-europe">
+				<span>Europe</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/j-pal-latin-america-and-caribbean">
+				<span>Latin America and the Caribbean</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/j-pal-middle-east-and-north-africa">
+				<span>Middle East and North Africa</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/j-pal-north-america">
+				<span>North America</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/j-pal-south-asia">
+				<span>South Asia</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/j-pal-southeast-asia">
+				<span>Southeast Asia</span>
+			</a>
+		
+			</li>
+
+							</ul>
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item cheeseburger-parent">
+									<span class="cheeseburger-menu__item-label" data-cheeseburger-parent-trigger>
+					<span>Sectors</span>
+				</span>
+					
+					<span class="cheeseburger-menu__submenu-trigger" data-cheeseburger-parent-trigger><div class="cheeseburger-menu__submenu-trigger-icon dropdown"></div></span>
+			<ul class="cheeseburger-menu__submenu">
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sectors">
+				<span>Overview</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/agriculture">
+				<span>Agriculture</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/crime-violence-conflict">
+				<span>Crime, Violence, and Conflict</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/education">
+				<span>Education</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/environment-energy-climate-change">
+				<span>Environment, Energy, and Climate Change</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/finance">
+				<span>Finance</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/firms">
+				<span>Firms</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/gender">
+				<span>Gender</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/health">
+				<span>Health</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/labor-markets">
+				<span>Labor Markets</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/political-economy-governance">
+				<span>Political Economy and Governance</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item main__item">
+					<a class="cheeseburger-menu__item-label" href="/sector/social-protection">
+				<span>Social Protection</span>
+			</a>
+		
+			</li>
+
+							</ul>
+			</li>
+
+							</ul>
+		</div>
+			<div  data-cheeseburger-id="menu-quick-links" >
+						<ul
+				class="cheeseburger-menu__mainmenu">
+															<li  class="menu-link cheeseburger-menu__item quick-links__item">
+					<a class="cheeseburger-menu__item-label" href="/evaluations">
+				<span>Evaluations</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item quick-links__item cheeseburger-parent">
+									<span class="cheeseburger-menu__item-label" data-cheeseburger-parent-trigger>
+					<span>Research Resources</span>
+				</span>
+					
+					<span class="cheeseburger-menu__submenu-trigger" data-cheeseburger-parent-trigger><div class="cheeseburger-menu__submenu-trigger-icon dropdown"></div></span>
+			<ul class="cheeseburger-menu__submenu">
+											<li  class="menu-link cheeseburger-menu__item quick-links__item">
+					<a class="cheeseburger-menu__item-label" href="/aspire">
+				<span>Home</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item quick-links__item">
+									<span class="cheeseburger-menu__item-label">
+					<span>About Us</span>
+				</span>
+					
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item quick-links__item">
+									<span class="cheeseburger-menu__item-label">
+					<span>Our Work</span>
+				</span>
+					
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item quick-links__item">
+									<span class="cheeseburger-menu__item-label">
+					<span>Join ASPIRE</span>
+				</span>
+					
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item quick-links__item">
+									<span class="cheeseburger-menu__item-label">
+					<span>Newsroom</span>
+				</span>
+					
+			</li>
+
+							</ul>
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item quick-links__item">
+					<a class="cheeseburger-menu__item-label" href="/policy-insights">
+				<span>Policy Insights</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item quick-links__item cheeseburger-parent">
+									<span class="cheeseburger-menu__item-label" data-cheeseburger-parent-trigger>
+					<span>Evidence to Policy</span>
+				</span>
+					
+					<span class="cheeseburger-menu__submenu-trigger" data-cheeseburger-parent-trigger><div class="cheeseburger-menu__submenu-trigger-icon dropdown"></div></span>
+			<ul class="cheeseburger-menu__submenu">
+											<li  class="menu-link cheeseburger-menu__item quick-links__item">
+					<a class="cheeseburger-menu__item-label" href="/evidence-policy">
+				<span>Pathways and Case Studies</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item quick-links__item">
+					<a class="cheeseburger-menu__item-label" href="/evidence-effect">
+				<span>The Evidence Effect</span>
+			</a>
+		
+			</li>
+
+							</ul>
+			</li>
+
+							</ul>
+		</div>
+			<div  data-cheeseburger-id="menu-utility-menu" >
+						<ul
+				class="cheeseburger-menu__mainmenu">
+															<li  class="menu-link cheeseburger-menu__item utility-menu__item">
+					<a class="cheeseburger-menu__item-label" href="/blog">
+				<span>Blog</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item utility-menu__item">
+					<a class="cheeseburger-menu__item-label" href="/careers">
+				<span>Careers</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item utility-menu__item">
+					<a class="cheeseburger-menu__item-label" href="/j-pal-courses">
+				<span>Courses</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item utility-menu__item">
+					<a class="cheeseburger-menu__item-label" href="/page/information-affiliated-researchers">
+				<span>For Affiliates</span>
+			</a>
+		
+			</li>
+
+											<li  class="menu-link cheeseburger-menu__item utility-menu__item">
+					<a class="cheeseburger-menu__item-label" href="/support-us">
+				<span>Support J-PAL</span>
+			</a>
+		
+			</li>
+
+							</ul>
+		</div>
+	</div>
+
+
+  </div>
+<div id="block-jpal-cheeseburgermenutrigger" class="block block-cheeseburger-menu block-cheeseburger-menu-trigger">
+  
+    
+      <div class="block-cheeseburgermenu__trigger-element" data-cheeseburger-id="block-jpal-cheeseburgermenu">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+
+  </div>
+<nav role="navigation" aria-labelledby="block-utilitymenu-menu" id="block-utilitymenu" class="block block-menu navigation menu--utility-menu">
+            
+  <h2 class="visually-hidden" id="block-utilitymenu-menu">Utility menu</h2>
+  
+
+        
+                <ul class="menu menu--level-1">
+                    <li class="menu-item">
+        <a href="/blog" data-drupal-link-system-path="node/34">Blog</a>
+              </li>
+                <li class="menu-item">
+        <a href="/careers" data-drupal-link-system-path="node/35">Careers</a>
+              </li>
+                <li class="menu-item">
+        <a href="/j-pal-courses" data-drupal-link-system-path="node/8136232">Courses</a>
+              </li>
+                <li class="menu-item">
+        <a href="/page/information-affiliated-researchers" data-drupal-link-system-path="node/4486">For Affiliates</a>
+              </li>
+                <li class="menu-item">
+        <a href="/support-us" data-drupal-link-system-path="node/7801045">Support J-PAL</a>
+              </li>
+        </ul>
+  
+
+
+  </nav>
+<div id="block-exposed-form-page-sitewide-search" class="block block-views block-views-exposed-filter-blocksitewide-search-page-sitewide-search">
+  
+    
+      <button class="search-toggle" type="button" aria-expanded="false" aria-label="search"></button>
+    <form class="views-exposed-form bef-exposed-form" data-drupal-selector="views-exposed-form-sitewide-search-page-sitewide-search" action="/search?lang=en" method="get" id="views-exposed-form-sitewide-search-page-sitewide-search" accept-charset="UTF-8">
+  <div class="form--inline clearfix">
+  <div class="js-form-item form-item js-form-type-textfield form-type-textfield js-form-item-search-api-fulltext form-item-search-api-fulltext">
+      <label for="edit-search-api-fulltext">Search</label>
+        <input data-drupal-selector="edit-search-api-fulltext" type="text" id="edit-search-api-fulltext" name="search_api_fulltext" value="" size="30" maxlength="128" class="form-text" />
+
+        </div>
+<div class="js-form-item form-item js-form-type-select form-type-select js-form-item-type form-item-type">
+      
+        <select data-drupal-selector="edit-type" id="edit-type" name="type" class="form-select"><option value="All" selected="selected">All Types</option><option value="big_idea">The Evidence Effect</option><option value="blog">Blog</option><option value="case_study">Case study</option><option value="evaluation">Evaluation</option><option value="event">Event</option><option value="initiative">Initiative</option><option value="initiative_subpage">Initiative projects and documents</option><option value="job">Job</option><option value="jpal_updates">J-PAL Updates</option><option value="landing_page">Landing page</option><option value="layout_page">Layout Page</option><option value="page">Basic page</option><option value="person">Person</option><option value="policy_insight">Policy insight</option><option value="policy_insight_sector_page">Policy insight sector page</option><option value="research_resource">Research resource</option></select>
+
+        </div>
+<div data-drupal-selector="edit-actions" class="form-actions js-form-wrapper form-wrapper" id="edit-actions"><input data-drupal-selector="edit-submit-sitewide-search" type="submit" id="edit-submit-sitewide-search" value="Search" class="button js-form-submit form-submit" />
+</div>
+
+</div>
+
+</form>
+
+  </div>
+<nav role="navigation" aria-labelledby="block-quicklinks-menu" id="block-quicklinks" class="block block-menu navigation menu--quick-links">
+            
+  <h2 class="visually-hidden" id="block-quicklinks-menu">Quick links</h2>
+  
+
+        
+                <ul class="menu menu--level-1">
+                    <li class="menu-item">
+        <a href="/evaluations" data-drupal-link-system-path="node/27">Evaluations</a>
+              </li>
+                <li class="menu-item">
+        <a href="/research-resources" data-drupal-link-system-path="node/26">Research Resources</a>
+              </li>
+                <li class="menu-item">
+        <a href="/policy-insights" data-drupal-link-system-path="node/30">Policy Insights</a>
+              </li>
+                <li class="menu-item menu-item--expanded">
+        <span>Evidence to Policy</span>
+                                  <ul class="menu">
+                    <li class="menu-item">
+        <a href="/evidence-policy" data-drupal-link-system-path="node/29">Pathways and Case Studies</a>
+              </li>
+                <li class="menu-item">
+        <a href="/evidence-effect" data-drupal-link-system-path="node/8136871">The Evidence Effect</a>
+              </li>
+        </ul>
+  
+              </li>
+        </ul>
+  
+
+
+  </nav>
+<div id="block-mainnavigation-2" class="block block-menu-item-fields block-menu-item-fieldsmain">
+  
+    
+      
+              <ul class="menu-level-0">
+              <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/about-us" data-drupal-link-system-path="node/43">About</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item"><p>The Abdul Latif Jameel Poverty Action Lab (J-PAL) is a global research center working to reduce poverty by ensuring that policy is informed by scientific evidence. Anchored by a network of more than 1,100 researchers at universities around the world, J-PAL conducts randomized impact evaluations to answer critical questions in the fight against poverty.</p></div>
+      
+</div>
+
+                                        <div class="menu-level-1-wrapper">
+      <ul class="menu-level-1">
+              <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/about-us" data-drupal-link-system-path="node/43">Overview</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item"><p>The Abdul Latif Jameel Poverty Action Lab (J-PAL) is a global research center working to reduce poverty by ensuring that policy is informed by scientific evidence. Anchored by a network of more than 1,100 researchers at universities around the world, J-PAL conducts randomized impact evaluations to answer critical questions in the fight against poverty.</p></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><button type="button">People</button></div>
+      
+</div>
+
+                                        <div class="menu-level-2-wrapper">
+      <ul class="menu-level-2">
+              <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/affiliated-professors" data-drupal-link-system-path="node/42">Affiliated Professors</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item"><p>Our affiliated professors are based at over 130 universities and conduct randomized evaluations around the world to design, evaluate, and improve programs and policies aimed at reducing poverty. They set their own research agendas, raise funds to support their evaluations, and work with J-PAL staff on research, policy outreach, and training.</p></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="https://www.povertyactionlab.org/invited-researchers" title="Invited Researchers">Invited Researchers</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/page/j-pal-scholars-and-fellows" data-drupal-link-system-path="node/8135112">J-PAL Scholars</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/board-members" data-drupal-link-system-path="node/40">Board</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">Our Board of Directors, which is composed of J-PAL affiliated professors and senior management, provides overall strategic guidance to J-PAL, our sector programs, and regional offices.</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/page/leadership" data-drupal-link-system-path="node/8137891">Leadership</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/staff" data-drupal-link-system-path="node/395951">Staff</a></div>
+      
+</div>
+
+                      </li>
+              </ul>
+      </div>
+      
+              </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/strengthening-our-work" data-drupal-link-system-path="node/6557141">Strengthening Our Work</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item"><p>Our research, policy, and training work is fundamentally better when it is informed by a broad range of perspectives.</p>
+</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/page/code-conduct-j-pal-community" title="Code of Conduct for the J-PAL Community" data-drupal-link-system-path="node/7821966">Code of Conduct</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/initiatives" title="J-PAL initiatives concentrate funding and other resources around priority topics for which rigorous policy-relevant research is urgently needed." data-drupal-link-system-path="node/37">Initiatives</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">J-PAL initiatives concentrate funding and other resources around priority topics for which rigorous policy-relevant research is urgently needed.</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/events" data-drupal-link-system-path="node/33">Events</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">We host events around the world and online to share results and policy lessons from randomized evaluations, to build new partnerships between researchers and practitioners, and to train organizations on how to design and conduct randomized evaluations, and use evidence from impact evaluations.</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/blog" data-drupal-link-system-path="node/34">Blog</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">News, ideas, and analysis from J-PAL staff and affiliated professors.</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/news" data-drupal-link-system-path="node/32">News</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">Browse news articles about J-PAL and our affiliated professors, read our press releases and monthly global and research newsletters, and connect with us for media inquiries.</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/press-room" data-drupal-link-system-path="node/7800470">Press Room</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">Based at leading universities around the world, our experts are economists who use randomized evaluations to answer critical questions in the fight against poverty. Connect with us for all media inquiries and we'll help you find the right person to shed insight on your story.</div>
+      
+</div>
+
+                      </li>
+              </ul>
+      </div>
+      
+              </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-offices" data-drupal-link-system-path="node/5120">Offices</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">J-PAL is based at MIT in Cambridge, MA and has seven regional offices at leading universities in Africa, Europe, Latin America and the Caribbean, Middle East and North Africa, North America, South Asia, and Southeast Asia.</div>
+      
+</div>
+
+                                        <div class="menu-level-1-wrapper">
+      <ul class="menu-level-1">
+              <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-offices" data-drupal-link-system-path="node/5120">Overview</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">J-PAL is based at MIT in Cambridge, MA and has seven regional offices at leading universities in Africa, Europe, Latin America and the Caribbean, Middle East and North Africa, North America, South Asia, and Southeast Asia.</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/global" data-drupal-link-system-path="taxonomy/term/352">Global</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">Our global office is based at the Department of Economics at the Massachusetts Institute of Technology. It serves as the head office for our network of seven independent regional offices.</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-africa" data-drupal-link-system-path="node/8137496">Africa</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-europe" data-drupal-link-system-path="node/8137389">Europe</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-latin-america-and-caribbean" data-drupal-link-system-path="node/8137499">Latin America and the Caribbean</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-middle-east-and-north-africa" data-drupal-link-system-path="node/8137455">Middle East and North Africa</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-north-america" data-drupal-link-system-path="node/8137481">North America</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-south-asia" data-drupal-link-system-path="node/8137315">South Asia</a></div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/j-pal-southeast-asia" data-drupal-link-system-path="node/8137454">Southeast Asia</a></div>
+      
+</div>
+
+                      </li>
+              </ul>
+      </div>
+      
+              </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sectors" data-drupal-link-system-path="node/39">Sectors</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">Led by affiliated professors, J-PAL sectors guide our research and policy work by conducting literature reviews; by managing research initiatives that promote the rigorous evaluation of innovative interventions by affiliates; and by summarizing findings and lessons from randomized evaluations and producing cost-effectiveness analyses to help inform relevant policy debates.</div>
+      
+</div>
+
+                                        <div class="menu-level-1-wrapper">
+      <ul class="menu-level-1">
+              <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sectors" data-drupal-link-system-path="node/39">Overview</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">Led by affiliated professors, J-PAL sectors guide our research and policy work by conducting literature reviews; by managing research initiatives that promote the rigorous evaluation of innovative interventions by affiliates; and by summarizing findings and lessons from randomized evaluations and producing cost-effectiveness analyses to help inform relevant policy debates.</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/agriculture" data-drupal-link-system-path="taxonomy/term/386">Agriculture</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How can we encourage small farmers to adopt proven agricultural practices and improve their yields and profitability?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/crime-violence-conflict" data-drupal-link-system-path="taxonomy/term/392">Crime, Violence, and Conflict</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">What are the causes and consequences of crime, violence, and conflict and how can policy responses improve outcomes for those affected?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/education" data-drupal-link-system-path="taxonomy/term/385">Education</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How can students receive high-quality schooling that will help them, their families, and their communities truly realize the promise of education?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/environment-energy-climate-change" data-drupal-link-system-path="taxonomy/term/390">Environment, Energy, and Climate Change</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How can we increase access to energy, reduce pollution, and mitigate and build resilience to climate change?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/finance" data-drupal-link-system-path="taxonomy/term/388">Finance</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How can financial products and services be more affordable, appropriate, and accessible to underserved households and businesses?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/firms" data-drupal-link-system-path="taxonomy/term/394">Firms</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How do policies affecting private sector firms impact productivity gaps between higher-income and lower-income countries? How do firms’ own policies impact economic growth and worker welfare?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/gender" data-drupal-link-system-path="taxonomy/term/393">Gender</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How can we reduce gender inequality and ensure that social programs are sensitive to existing gender dynamics?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/health" data-drupal-link-system-path="taxonomy/term/387">Health</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How can we increase access to and delivery of quality health care services and effectively promote healthy behaviors?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/labor-markets" data-drupal-link-system-path="taxonomy/term/391">Labor Markets</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How can we help people find and keep work, particularly young people entering the workforce?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/political-economy-governance" data-drupal-link-system-path="taxonomy/term/389">Political Economy and Governance</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">What are the causes and consequences of poor governance and how can policy improve public service delivery?</div>
+      
+</div>
+
+                      </li>
+          <li>
+                  <div>
+  
+  
+            <div class="field field--name-link field--type-link field--label-hidden field__item"><a href="/sector/social-protection" title="J-PAL’s Social Protection sector focuses on identifying policies and programs in low- and middle-income countries effective at providing financial assistance to low-income families, insuring against shocks, and breaking poverty traps." data-drupal-link-system-path="taxonomy/term/2236">Social Protection</a></div>
+      
+            <div class="clearfix text-formatted field field--name-field-description-long field--type-text-long field--label-hidden field__item">How can we identify effective policies and programs in low- and middle-income countries that provide financial assistance to low-income families, insuring against shocks and breaking poverty traps?</div>
+      
+</div>
+
+                      </li>
+              </ul>
+      </div>
+      
+              </li>
+              </ul>
+      
+
+
+  </div>
+
+  </div>
+
+    </header>
+
+    
+    
+
+    
+
+    
+
+    <div class="breadcrumbs-wrapper">
+        <div class="region region-breadcrumbs">
+    <div id="block-jpal-breadcrumbs" class="block block-system block-system-breadcrumb-block">
+  
+    
+        <nav class="breadcrumb" role="navigation" aria-labelledby="system-breadcrumb">
+    <h2 id="system-breadcrumb" class="visually-hidden">Breadcrumb</h2>
+    <ol>
+          <li class=>
+              <a href="/?lang=en">Home</a>
+            </li>
+          <li class=>
+              <a href="/evaluations?lang=en">Evaluations</a>
+            </li>
+        </ol>
+  </nav>
+
+  </div>
+
+  </div>
+
+    </div>
+  
+      <main role="main" class="">
+      
+      
+      <div class="layout-content">
+        <a id="main-content" tabindex="-1"></a>          <div class="region region-content">
+    <div id="block-translationoptionsblock" class="block block-jpal-translation block-translation-options-block">
+  
+    
+        <div class="translation-options-container">
+          <div class="top-bar">
+        <div class="translation-links">
+                      <a href="/fr/evaluation/teacher-certification-and-salary-increase-indonesia?lang=fr">
+              Voir en Français
+            </a>
+                  </div>
+      </div>
+          </div>
+
+  </div>
+<div data-drupal-messages-fallback class="hidden"></div>
+<div id="block-jpal-content" class="block block-system block-system-main-block">
+  
+    
+      <div data-history-node-id="1505" class="node node--type-evaluation node--view-mode-full ds-1col clearfix">
+
+  
+
+  
+<div  class="group-tags">
+          <ul  class="evaluation-full-sectors">
+        
+      <li><a href="/sector/education?lang=en" hreflang="en">Education</a></li>
+      <li><a href="/sector/political-economy-governance?lang=en" hreflang="en">Political Economy and Governance</a></li>
+      
+  
+    </ul>
+
+
+  </div>    
+            <h1>
+  The Impact of Doubling Teacher Salary on Student Performance in Indonesia
+</h1>
+
+      
+  
+
+
+<div  class="group-researchers-and-print">
+    <div class="print__wrapper print__wrapper--pdf"><a href="/print/pdf/node/1505?lang=en" class="print__link print__link--pdf">Print</a></div>
+
+  </div>      <div  class="evaluation-full-location eval-info">
+            <div  class="field__label field-label-inline">Location:</div>
+  
+            TBD, Indonesia
+      
+  
+    </div>
+
+      <div  class="evaluation-full-sample eval-info">
+            <div  class="field__label field-label-inline">Sample:</div>
+  
+            360 schools across twenty districts in all major regions of Indonesia
+      
+  
+    </div>
+
+      <div  class="evaluation-full-timeline eval-info">
+            <div  class="field__label field-label-inline">Timeline:</div>
+  
+            2008
+      
+  
+    </div>
+
+      <div  class="evaluation-full-target-group eval-info">
+            <div  class="field__label field-label-inline">Target group:</div>
+  
+            <ul >
+            <li>Teachers</li>
+      
+      </ul>
+  
+    </div>
+
+      <div  class="evaluation-full-outcome-interest eval-info">
+            <div  class="field__label field-label-inline">Outcome of interest:</div>
+  
+            <ul >
+            <li>Student learning</li>
+      
+      </ul>
+  
+    </div>
+
+      <div  class="evaluation-full-intervention-type eval-info">
+            <div  class="field__label field-label-inline">Intervention type:</div>
+  
+            <ul >
+            <li>Cash transfers</li>
+      <li>Unconditional cash transfers</li>
+      
+      </ul>
+  
+    </div>
+
+      <div  class="evaluation-full-rct-number eval-info">
+            <div  class="field__label field-label-inline">AEA RCT registration number:</div>
+  
+            <a href="https://www.socialscienceregistry.org/trials/1465">https://www.socialscienceregistry.org/trials/1465</a>
+      
+  
+    </div>
+
+      <div  class="evaluation-full-data eval-info">
+            <div  class="field__label field-label-inline">Data:</div>
+  
+            <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/MTVM5O">Download dataset from Harvard Dataverse</a>
+      
+  
+    </div>
+
+      <div  class="evaluation-full-research-papers eval-info">
+            <div  class="field__label field-label-inline">Research papers:</div>
+  
+            <ul><li><a href="https://academic.oup.com/qje/article/133/2/993/4622956" target="_blank">Double for nothing? experimental evidence on an unconditional teacher salary increase in Indonesia</a></li></ul>
+      
+  
+    </div>
+
+
+            <div class="field field--name-parnters-label field--type-ds field--label-hidden field__item"><div class="field__label">Partners:</div></div>
+      
+<div  class="group-partners-container glide">
+          <div  class="evaluation-full-partners glide__track" data-glide-el="track">
+        
+            <ul  class="glide__slides">
+            <li class="glide__slide"><div class="taxonomy-term taxonomy-term--type-partner taxonomy-term--view-mode-logo-small-linked ds-1col clearfix">
+
+  
+
+        <div  class="partner-logo-small-linked-image">
+        
+                        <a href="http://www.worldbank.org/" target="_blank" rel="nofollow">
+            <img src="/sites/default/files/styles/logo_small/public/partner/World_Bank_logo.jpg?itok=_dOHxnJ9" alt="World Bank" title="World Bank" />
+        </a>
+    
+      
+  
+    </div>
+
+
+
+</div>
+
+</li>
+      
+      </ul>
+  
+    </div>
+
+
+  </div>      <div  class="evaluation-full-abstract">
+        
+            <p>Higher teacher pay may increase teacher motivation and effort, yet little rigorous evidence exists on how large teacher salary increases might improve student learning. Researchers examined the impact of doubling teacher salary on student and teacher performance in Indonesia. This intervention had some positive effects on teachers: they reported higher levels of satisfaction with their jobs and less financial stress and were less likely to have a second job. However, doubling teacher salary had no effect on teacher knowledge, student test scores, or self-reported teacher attendance.&nbsp;</p>
+      
+  
+    </div>
+
+      <div  class="evaluation-full-policy-issue">
+            <h2  class="field-label-above">Policy issue</h2>
+  
+            <div class="paragraph paragraph--type-text paragraph--view-mode-default ds-1col clearfix">
+
+  
+
+        <div  class="text-full-body">
+        
+            <p>Policymakers sometimes implement large salary increases for public sector employees to attract high quality applicants to government jobs and to motivate existing employees. For the case of public teachers, advocates of higher pay argue that increasing teacher salaries may reduce the time spent on outside jobs and increase time and effort on teaching. While salary increases may improve the quality of new public teachers hired over time by attracting better candidates (see <a href="https://www.povertyactionlab.org/evaluation/role-financial-incentives-recruiting-public-sector-employees" target="_blank">related evaluation</a>), there is limited evidence about how pay increases affect the motivation and performance of incumbent teachers, and how this translates to student learning. Can unconditional doubling of teacher salaries improve teacher performance and student learning?</p>
+      
+  
+    </div>
+
+
+
+</div>
+
+
+      
+  
+    </div>
+
+      <div  class="evaluation-full-evaluation-context">
+            <h2  class="field-label-above">Context of the evaluation</h2>
+  
+            <div class="paragraph paragraph--type-text paragraph--view-mode-default ds-1col clearfix">
+
+  
+
+        <div  class="text-full-body">
+        
+            <p>Indonesia has one of largest educational systems in the world, with 50 million students in more than 500 districts. Indonesia exceeded 90 percent primary school enrollment by the early 1980s and has sustained high enrollment rates since. Before 2005, teacher salaries in Indonesia were lower than teacher salary benchmarks in other Southeast Asian countries. However, teacher jobs were still attractive, with salaries equal to the median salary for college graduates, and quit rates were low. Similar to most public sector employees in low- and middle-income countries, public teachers also enjoyed more generous benefits than private sector teachers and had high job security.</p>
+
+<p>The Indonesian national government passed the “Teacher Law” in 2005, stating that eligible teachers who also successfully completed a certification process would obtain a permanent doubling of their salaries. Civil service teachers with a four-year degree and a high rank in civil service through tenure were eligible. The certification process was guaranteed for most who tried; it included submitting a portfolio of work and attending a two-week training. Due to budgetary restrictions, the Indonesian government incrementally rolled out the “Teacher Law” with quotas enabling ten percent of eligible teachers to receive certification and the pay increase every year.</p>
+      
+  
+    </div>
+
+
+
+</div>
+
+
+      
+  
+    </div>
+
+      <div  class="evaluation-full-image">
+        
+            <div class="media media--type-image-evaluation media--view-mode-default ds-1col clearfix">
+
+  
+
+        <div  class="image-evaluation-image">
+        
+              <img loading="lazy" src="/sites/default/files/styles/full_evaluation_image/public/shutterstock_673443058_MediumTermImpactCashTransfers.jpg?itok=52O33nRs" width="1100" height="743" alt="Children in a classroom in Indonesia." typeof="foaf:Image" class="image-style-full-evaluation-image" />
+
+
+
+      
+  
+    </div>
+
+      <div  class="image-evaluation-caption">
+        
+            Children in a classroom in Indonesia. Photo: Shutterstock.com
+      
+  
+    </div>
+
+
+
+</div>
+
+
+      
+  
+    </div>
+
+      <div  class="evaluation-full-intervention-details">
+            <h2  class="field-label-above">Details of the intervention</h2>
+  
+            <div class="paragraph paragraph--type-text paragraph--view-mode-default ds-1col clearfix">
+
+  
+
+        <div  class="text-full-body">
+        
+            <p>Researchers worked closely with the Ministry of National Education of the Government of Indonesia to implement a randomized evaluation to assess the impact of doubling teacher salary on student performance. Researchers selected a nationally representative sample of 360 public primary and junior secondary schools across twenty&nbsp;districts in all major regions of Indonesia. In 2009, researchers randomly assigned 120 schools to receive the intervention, which consisted of speeding up the teacher certification process. Specifically, all eligible teachers in the intervention schools who had not yet been certified were invited to receive the certification and pay increase in the following year rather than waiting under the quota system. The remaining 240 schools made up the comparison group, which continued to implement the gradual phase-in of teacher certification with annual quotas of ten percent.&nbsp;</p>
+
+<p>To understand the impact of this pay increase, researchers interviewed head teachers, other teachers, and students across intervention and comparison schools two and three years after the intervention. They also analyzed test scores measuring student outcomes and teacher knowledge.</p>
+      
+  
+    </div>
+
+
+
+</div>
+
+
+      
+  
+    </div>
+
+      <div  class="evaluation-full-results-policy-lessons">
+            <h2  class="field-label-above">Results and policy lessons</h2>
+  
+            <div class="paragraph paragraph--type-text paragraph--view-mode-default ds-1col clearfix">
+
+  
+
+        <div  class="text-full-body">
+        
+            <p>Doubling public teacher salaries improved self-reported job satisfaction for teachers, but had no effect on test scores for students, teacher knowledge, or teacher work attendance. Researchers suggest that there may be more cost-effective ways of improving student learning outcomes, including other salary-based interventions.</p>
+
+<p><em>Speeding up the teacher certification process increased teacher salaries as intended. </em>Two years after the intervention, teachers in the intervention schools were more than twice as likely to have received certification and doubling of pay than those in the comparison schools. Those that received pay increases had a salary increase equivalent to moving from the median salary for college graduates to the top 10 percent.&nbsp;</p>
+
+<p><em>Teachers’ job satisfaction increased.</em> Teachers in intervention schools were 7 percentage points more likely to report being satisfied with their income three years after the intervention compared to 60 percent of their peers in the control schools (a 12 percent increase). In addition, they were 9 percentage points less likely to report having financial problems after three years compared to 56 percent of their peers in the control schools (a 16 percent decrease). They were also 5 percentage points less likely to be holding a second job compared to 27 percent of their peers in the comparison group (a 19 percent decrease).</p>
+
+<p><em>No impact on student or teacher test scores, teacher attendance, or teachers’ probability of pursuing further education</em>. Despite positive effects on teachers’ job satisfaction and financial conditions, students in intervention schools did not have higher language, mathematics, or science test scores than students in comparison schools, nor did students of eligible and certified teachers in intervention schools compared to their peers in the same school with teachers that were not eligible for the pay raise. Teachers in the intervention schools did not score better on teacher test scores or attendance rates, nor were they more likely to be pursuing further education.&nbsp;</p>
+
+<p><em>Cost effectiveness.&nbsp;</em>Pay increases are typically quite expensive for governments, so it is important to know their full impacts. Teacher salary increases cost US$138 per student per year—over 5 percent of the national budget. The researchers suggest that there may be more cost-effective ways of improving student learning outcomes, including other salary-based interventions. For example, an <a href="https://www.povertyactionlab.org/evaluation/teacher-performance-pay-andhra-pradesh-india" target="_blank">experiment </a>testing performance-based incentive pay in India achieved a 0.15 standard deviation math test score increase with an average annual cost of US$4.<a href="#fn1"><sup>1</sup></a>&nbsp;</p>
+
+<p>While student test scores did not increase in the short term as a result of doubling teacher salaries, it is possible that the higher salaries could attract stronger candidates in the future. However, the high costs incurred today for gains in the future mean that unconditional salary increases are unlikely to be a cost-effective policy option.&nbsp;</p>
+      
+  
+    </div>
+
+
+
+</div>
+
+
+      
+  
+    </div>
+
+
+      <div class="field field--name-field-footnotes field--type-entity-reference-revisions field--label-hidden field__items">
+              <div class="field__item"><div class="paragraph paragraph--type-footnote paragraph--view-mode-default ds-1col clearfix">
+
+  
+
+    <span class='footnote-index' id='fn1'>1.</span>
+        <div  class="footnote-full-text">
+        
+            <p>Muralidharan, Karthik and Venkatesh Sundarraman. 2011. "Teachers Performance Pay: Experimental Evidence from India." Journal of Political Economy 119, no. 1:39-77&nbsp;</p>
+      
+  
+    </div>
+
+
+
+</div>
+
+</div>
+          </div>
+  
+
+</div>
+
+
+  </div>
+<div id="block-views-block-related-content-block-3" class="block block-views block-views-blockrelated-content-block-3">
+  
+    
+      <div class="views-element-container"><div class="related-content view view-related-content view-id-related_content view-display-id-block_3 js-view-dom-id-724b797fa148a20479d95da7c4fee2bfc0d70174438a255bd6581ae92a489796">
+  
+    
+      
+  
+          </div>
+</div>
+
+  </div>
+<div id="block-views-block-related-content-block-4" class="block block-views block-views-blockrelated-content-block-4">
+  
+    
+      <div class="views-element-container"><div class="related-content view view-related-content view-id-related_content view-display-id-block_4 js-view-dom-id-0f3a4608b55c1724c21235a279e1266c3976b09d67452db8f0abf21fa0dabe92">
+  
+    
+      
+  
+          </div>
+</div>
+
+  </div>
+<div id="block-views-block-related-publications-block-1" class="block block-views block-views-blockrelated-publications-block-1">
+  
+    
+      <div class="views-element-container"><div class="related-content view view-related-publications view-id-related_publications view-display-id-block_1 js-view-dom-id-abca6011085efd3857dbc5e1805c4da70f57ce989644513728c186b660f54f25">
+  
+    
+      
+  
+          </div>
+</div>
+
+  </div>
+
+  </div>
+
+      </div>
+      
+          </main>
+
+      
+      
+        <section class="footer-wrapper">
+              <footer role="contentinfo">
+            <div class="region region-footer">
+    <div id="block-footerlogoblock" class="block block-jpal-blocks block-footer-logo-block">
+  
+    
+      <a href="/" target="_blank">
+  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127 54">
+    <style>.st0{fill:#ffffff}.st1{fill:#ffffff}.st7{fill:#ffffff}.st9{fill:#ffffff}</style>
+    <g id="Mobile-Header"><path class="st0" d="M18.9 35.5c-1.5 3-2.2 6.2-2.2 9.5 0 9.2 6.6 17 15.6 18.6 9.5 1.6 19.2-4.9 21.2-14.4 1.3-6.2-.3-11.6-4.4-16.4-4.5-5.2-8.8-10.5-13.3-15.7-1.5-1.8-3-3.5-4.5-5.3-.2-.2-.3-.4-.4-.6l.1-.1c.3.2.6.5.9.7 3 3.1 5.9 6.2 8.8 9.3 3.3 3.6 6.5 7.1 9.7 10.8 3.8 4.3 5.5 9.4 4.9 15.2-.4 4.6-2.3 8.6-5.6 11.9-3.4 3.4-7.5 5.5-12.4 5.9h-3c-.6-.1-1.2-.1-1.8-.2-8.1-1.3-14.8-8.1-16-16.2-.1-.6-.2-1.3-.3-1.9v-2.8c.1-.7.2-1.5.3-2.2.4-2.2 1-4.3 2.2-6.3.1.2.2.2.2.2z" transform="translate(-15 -11)"/><path class="st1" d="M140.9 50.2c-.2 0-.4-.1-.6-.1h-9V28h2v20.2h7.6v2z" transform="translate(-15 -11)"/><path d="M34.5 65.1s0-.1 0 0c1-.1 2-.1 2.9-.1v.1h-2.9z" fill="#ffffff" transform="translate(-15 -11)"/><path class="st0" d="M22.5 36.1c-1.9 2.9-2.6 6.2-2.5 9.6.2 7.5 6.2 13.9 13.6 14.7 8.2.9 15.9-5.2 16.7-13.4.5-4.5-.9-8.4-3.8-11.9L33.3 19.5c-1.5-1.8-3.1-3.6-4.6-5.4-.1-.2-.3-.3-.4-.5l.1-.1c.4.3.8.6 1.1 1 3.5 3.7 7 7.4 10.4 11.1l7.8 8.7C54.3 41.6 53 53 45 58.7c-9.4 6.9-22.9 1.3-25-10.3-.8-4.2-.2-8.2 2.1-12 .1-.2.2-.3.3-.5.1.1.1.1.1.2z" transform="translate(-15 -11)"/><path d="M105.4 50.1c3.2-7.7 6.5-15.3 9.7-23 3.1 7.7 6.2 15.3 9.3 23h-2c-.1 0-.3-.3-.4-.5-.8-2.2-1.6-4.3-2.4-6.5-.1-.4-.3-.5-.7-.5H111c-.4 0-.6.1-.8.5-.8 2.2-1.7 4.3-2.5 6.5-.2.4-.4.5-.8.5h-1.5zm9.6-18.7c-1.3 3.3-2.6 6.4-3.9 9.5h7.6c-1.2-3.2-2.4-6.3-3.7-9.5z" fill="#ffffff" transform="translate(-15 -11)"/><path class="st0" d="M26 15.9c.2.1.5.2.6.3 1.8 1.8 3.6 3.5 5.3 5.4 4.6 5 9.1 9.9 13.6 15 3.3 3.8 4.2 8.3 2.5 13-1.7 4.7-5.1 7.6-10.1 8.5-6.5 1.2-13.1-3.3-14.5-9.9-.6-3-.4-5.9.8-8.7l.3-.6.1.1c-.9 2-1.3 4.2-1.3 6.4.1 5.7 4.7 10.8 10.2 11.6 6.6.9 12.3-3.9 13.3-9.7.6-3.5-.2-6.8-2.5-9.6-4.6-5.6-9.3-11.1-14-16.6-1.4-1.6-2.8-3.2-4.1-4.9 0 0-.1-.2-.2-.3z" transform="translate(-15 -11)"/><path class="st1" d="M93 40.3v9.8h-2V28c2.4.1 4.8 0 7.1.2 2.5.3 4.3 2.2 4.5 4.8.1 1 .1 2.1-.2 3.1-.5 2.4-2.3 3.5-4.5 3.8-1.6.3-3.2.3-4.9.4zm0-1.8c1.4-.1 2.6-.1 3.9-.2.4 0 .7-.1 1-.2 1.3-.3 2.2-1.2 2.4-2.5.1-.7.1-1.4.1-2.1-.2-1.9-1.3-3.3-3.1-3.5-1.4-.2-2.9-.2-4.3-.3v8.8z" transform="translate(-15 -11)"/><path d="M27.8 40.3c-1.5 3.1-1.6 6.3.2 9.3 1.8 3 4.6 4.5 8.2 4.1 3.4-.4 5.7-2.3 7-5.4 1.3-3.2.6-6.1-1.6-8.7-4.4-5.2-8.8-10.4-13.1-15.6-1.4-1.7-2.9-3.4-4.3-5.1-.2-.2-.4-.5-.6-.8l.1-.1c.2.2.5.3.7.5 2.4 2.5 4.9 5 7.3 7.6 3.8 4.1 7.5 8.3 11.2 12.4 5.2 5.7 2.2 14.5-5 16.1-5.2 1.2-10.5-2.6-11.2-7.9-.3-2.2-.1-4.4 1-6.5 0-.1.1-.2.2-.2-.1.2-.1.2-.1.3z" fill="#ffffff" transform="translate(-15 -11)"/><path class="st0" d="M21.2 20.3c.5.4 1 .9 1.5 1.4 3.6 3.9 7.3 7.8 10.9 11.7 2.3 2.5 4.6 5.1 6.9 7.7 1.6 1.8 2.1 3.9 1.3 6.1-.7 2.3-2.3 3.8-4.7 4.3-3.5.8-7-1.9-7.2-5.5-.1-1.3-.1-2.6.6-3.8.1-.3.4-.5.5-.8l.1.1c-.1.2-.3.4-.4.6-1.8 3 0 7.4 3.4 8.2 2.1.5 4.4-.5 5.5-2.5 1.1-1.9.9-4.2-.6-5.9-4.4-5.2-8.8-10.5-13.2-15.7-1.4-1.7-2.9-3.4-4.3-5.1-.2-.2-.4-.5-.6-.7.2 0 .2-.1.3-.1z" transform="translate(-15 -11)"/><path d="M61.9 48.4c.5-.4.9-.8 1.4-1.3.2.2.3.4.5.5.6.4 1.1.9 1.7 1 1.6.4 2.8-.4 3.1-2.1.1-.7.2-1.5.2-2.2V28h2v17.5c0 .6-.1 1.3-.2 1.9-.5 1.9-1.7 3-3.8 3.2-2 .4-4-.5-4.9-2.2z" fill="#ffffff" transform="translate(-15 -11)"/><path d="M77.9 43v-1.9H84V43h-6.1z" fill="#ffffff" transform="translate(-15 -11)"/><path class="st7" d="M18.9 35.5l-.1-.1c.6-1.2 1.4-2.2 2.3-3.1-.7 1.1-1.4 2.2-2.2 3.2z" transform="translate(-15 -11)"/><path d="M24.7 39l-.1-.1c.5-1 1.1-1.8 2-2.5-.7.9-1.3 1.8-1.9 2.6z" fill="#ffffff" transform="translate(-15 -11)"/><path class="st9" d="M22.5 36.1l-.1-.1c.5-.6.9-1.1 1.4-1.7l.1.1c-.5.6-.9 1.1-1.4 1.7z" transform="translate(-15 -11)"/><path d="M27.8 40.3l-.1-.1c.4-.5.7-1 1.1-1.5.1 0 .1.1.2.1l-1.2 1.5z" fill="#ffffff" transform="translate(-15 -11)"/><path class="st9" d="M23.8 34.3l.3-.3.1.1-.3.3-.1-.1z" transform="translate(-15 -11)"/><path class="st7" d="M21.8 31.7l-.2.2s-.1 0-.1-.1c.1 0 .2-.1.3-.1 0-.1 0 0 0 0zm-.6.3c.1 0 .2-.1.3-.1l.1.1c-.1.1-.1.2-.2.2l-.2-.2z" transform="translate(-15 -11)"/><path class="st0" d="M26 15.9c0-.1 0-.1 0 0 0-.1 0-.1 0 0 0-.1 0-.1 0 0z" transform="translate(-15 -11)"/></g>
+  </svg>
+  <span class="visually-hidden">J-PAL</span>
+</a>
+
+  </div>
+<div id="block-views-block-office-contact-block-1" class="block block-views block-views-blockoffice-contact-block-1">
+  
+    
+      <div class="views-element-container"><div class="view view-office-contact view-id-office_contact view-display-id-block_1 js-view-dom-id-17dc4f69169b54d5aa284ec014889c74b1a763c95a20d619040d5664e4f0e5cb">
+  
+    
+      
+      <div class="view-empty">
+      <p><strong>J-PAL</strong></p>
+
+<p>400 Main Street</p>
+
+<p>E19-201</p>
+
+<p>Cambridge, MA 02142</p>
+
+<p>USA</p>
+    </div>
+  
+          </div>
+</div>
+
+  </div>
+<div id="block-views-block-office-contact-block-2" class="block block-views block-views-blockoffice-contact-block-2">
+  
+    
+      <div class="views-element-container"><div class="view view-office-contact view-id-office_contact view-display-id-block_2 js-view-dom-id-28880ade37d0bad298f3da6f1b59c78f9d21665f5aca3e8b0d99dc8362f74d04">
+  
+    
+      
+      <div class="view-empty">
+      <p><strong>Contact</strong></p>
+
+<p><a href="tel:+1 (617) 324-6566">+1 617 324 6566</a></p>
+
+<p><a href="/cdn-cgi/l/email-protection#caa3a4aca58abaa5bcafb8beb3aba9bea3a5a4a6aba8e4a5b8ad"><span class="__cf_email__" data-cfemail="92fbfcf4fdd2e2fde4f7e0e6ebf3f1e6fbfdfcfef3f0bcfde0f5">[email&#160;protected]</span></a></p>
+<br><p><a href="https://www.povertyactionlab.org/press-room"><strong>Press Room</strong></a></p>
+    </div>
+  
+          </div>
+</div>
+
+  </div>
+<div id="block-newsletterfooter" class="block--type-basic block block-block-content block-block-contentee5c15fe-40ea-48fa-8a78-ff644df4a785">
+  
+    
+      
+            <div class="clearfix text-formatted field field--name-body field--type-text-with-summary field--label-hidden field__item"><p><strong>Stay Informed</strong></p>
+
+<p>Receive our newsletters</p>
+
+<p><a href="/subscribe">Subscribe</a></p>
+
+<p>&nbsp;</p></div>
+      
+  </div>
+<div id="block-privacypolicy" class="block--type-basic block block-block-content block-block-content97adeaf4-491e-480d-aad0-f99185720b61">
+  
+    
+      
+            <div class="clearfix text-formatted field field--name-body field--type-text-with-summary field--label-hidden field__item"><p><a href="/privacy-policy"><strong>Privacy Policy</strong></a></p><p><a href="http://accessibility.mit.edu/" target="_blank"><strong>Accessibility</strong></a></p></div>
+      
+  </div>
+
+  </div>
+
+        </footer>
+      
+              <footer>
+            <div class="region region-subfooter">
+    <div id="block-mitlogoblock" class="block block-jpal-blocks block-mit-logo-block">
+  
+    
+      <a href="https://mit.edu" target="_blank">
+  <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 3660 1040" enable-background="new 0 0 3660 1040" xml:space="preserve"><path fill="#FFFFFF" d="M1737.06274,160l28.2522,100.41949c3.35645,12.86707,6.71301,25.73413,8.95105,36.36368 c1.39844,6.15405,2.51697,12.02808,3.63599,17.62259h0.55957c1.1189-5.59451,2.23792-11.46854,3.63647-17.62259 c2.23755-10.62955,5.03503-23.49661,8.67102-36.36368L1819.02124,160h57.90173v200h-37.76221V245.31491 c0-8.11203,0-18.18207,0.83899-26.85312c0.28003-4.75552,0.55957-9.79054,0.8396-14.54558h-0.55957 c-0.83948,4.75504-1.95801,9.23056-2.79749,13.70609c-1.95801,7.83252-3.91602,16.78357-5.87402,24.33562L1797.20264,360h-38.88074 l-33.56665-118.04208c-2.23755-7.55205-3.91602-16.5031-5.87402-24.33562c-0.83899-4.47552-1.95801-8.95105-2.79749-13.70609 h-0.55908c0.27954,4.75504,0.55908,9.79005,0.83899,14.54558c0.27954,8.67105,0.83899,18.74109,0.83899,26.85312V360H1680V160 H1737.06274z M1988.81104,344.05594h-0.55945c-3.6366,5.59451-8.11206,10.34955-14.54565,13.70605 c-6.7135,3.35703-15.38452,5.59454-27.69214,5.59454c-29.65063,0-50.07019-15.10458-50.07019-43.91574 c0-15.66458,6.15405-26.29413,16.78357-33.28717c10.62903-6.99252,24.61511-10.62906,40.83875-12.86707 c24.05603-3.35651,34.68567-5.31451,34.68567-16.22357c0-10.62955-7.83252-17.06308-24.05615-17.06308 c-17.9021,0-26.57361,6.15402-27.69214,20.14011h-33.84619c0.27954-12.8671,5.5946-24.33563,15.66406-33.00717 c10.07007-8.67105,25.17517-14.26558,46.15381-14.26558c43.07715,0,60.4198,19.02109,60.4198,52.86726v73.00687 c0,10.90906,1.67847,17.34259,5.03503,19.86011V360h-36.64319C1991.04858,356.923,1989.65002,350.48947,1988.81104,344.05594z M1980.41907,328.11185c5.59448-5.03503,8.67151-11.74808,8.67151-18.74109v-21.5386 c-6.7135,4.19601-16.78308,6.15402-26.57361,8.39154c-20.13965,4.47552-29.65015,8.95105-29.65015,22.37759 c0,13.42657,8.95105,18.1821,22.37756,18.1821C1966.15344,336.78339,1974.54504,333.42636,1980.41907,328.11185z M2038.31885,313.56628h35.24463c2.51758,16.78357,13.98608,23.77661,31.32861,23.77661c16.78369,0,26.2937-6.43402,26.2937-16.5036 c0-6.71353-4.75488-10.62955-11.46802-13.14706c-6.99292-2.51749-16.50366-3.91602-26.29419-5.87402 c-13.14648-2.51752-25.4541-5.31451-34.9646-11.74805c-9.79053-6.43353-15.94409-15.94409-15.94409-31.60867 c0-15.66406,6.15356-26.85312,17.0625-34.68517c10.62964-7.55254,24.89526-11.18906,41.39868-11.18906 c38.32178,0,58.46191,18.18208,61.53882,47.55275h-34.40552c-1.95801-15.66458-11.18921-20.97913-27.69263-20.97913 c-15.10474,0-24.61523,5.31454-24.61523,15.94409c0,6.43353,4.75513,9.51053,12.30762,11.74805 c7.27246,2.51752,17.06299,3.63654,27.13306,5.87454c12.02759,2.51703,24.61523,5.31451,34.40527,11.74805 c9.79053,6.71304,16.22412,16.78308,16.22412,33.56619c0,14.54556-6.15405,26.01413-16.78369,33.84616 c-10.90894,7.83252-25.73413,12.30804-43.63623,12.30804C2063.4939,364.19601,2040.55688,344.33591,2038.31885,313.56628z M2174.25903,313.56628h35.24487c2.51733,16.78357,13.98608,23.77661,31.32861,23.77661 c16.78345,0,26.29419-6.43402,26.29419-16.5036c0-6.71353-4.75562-10.62955-11.46875-13.14706 c-6.99292-2.51749-16.50342-3.91602-26.29395-5.87402c-13.14673-2.51752-25.45435-5.31451-34.96484-11.74805 c-9.79053-6.43353-15.94409-15.94409-15.94409-31.60867c0-15.66406,6.15356-26.85312,17.06323-34.68517 c10.62891-7.55254,24.89453-11.18906,41.39819-11.18906c38.32153,0,58.46167,18.18208,61.53833,47.55275h-34.40527 c-1.95801-15.66458-11.18896-20.97913-27.69263-20.97913c-15.10449,0-24.61499,5.31454-24.61499,15.94409 c0,6.43353,4.75488,9.51053,12.30737,11.74805c7.27319,2.51752,17.06323,3.63654,27.1333,5.87454 c12.02759,2.51703,24.61499,5.31451,34.40503,11.74805c9.79053,6.71304,16.22412,16.78308,16.22412,33.56619 c0,14.54556-6.15405,26.01413-16.78296,33.84616c-10.90967,7.83252-25.73462,12.30804-43.63672,12.30804 C2199.43433,364.19601,2176.49707,344.33591,2174.25903,313.56628z M2405.02539,344.05594h-0.55957 c-3.63647,5.59451-8.11206,10.34955-14.54541,13.70605c-6.71362,3.35703-15.38477,5.59454-27.69214,5.59454 c-29.65063,0-50.07031-15.10458-50.07031-43.91574c0-15.66458,6.15405-26.29413,16.78345-33.28717 c10.62915-6.99252,24.61523-10.62906,40.83887-12.86707c24.05615-3.35651,34.68555-5.31451,34.68555-16.22357 c0-10.62955-7.83252-17.06308-24.05615-17.06308c-17.9021,0-26.57349,6.15402-27.69214,20.14011h-33.84619 c0.27954-12.8671,5.59473-24.33563,15.66431-33.00717c10.06982-8.67105,25.17505-14.26558,46.15356-14.26558 c43.07739,0,60.41992,19.02109,60.41992,52.86726v73.00687c0,10.90906,1.67847,17.34259,5.03491,19.86011V360h-36.64307 C2407.26294,356.923,2405.8645,350.48947,2405.02539,344.05594z M2396.6333,328.11185 c5.59448-5.03503,8.67163-11.74808,8.67163-18.74109v-21.5386c-6.71362,4.19601-16.7832,6.15402-26.57373,8.39154 c-20.13965,4.47552-29.65015,8.95105-29.65015,22.37759c0,13.42657,8.95117,18.1821,22.37769,18.1821 C2382.36768,336.78339,2390.75928,333.42636,2396.6333,328.11185z M2476.35083,342.0979 c-12.86719-13.42654-19.86011-32.44763-19.86011-53.70627c0-21.25861,6.99292-40.27969,19.58057-53.98576 c12.30762-13.42657,29.93018-21.8186,52.02783-21.8186c18.74146,0,33.56665,5.59453,44.75513,14.54558 c10.90918,9.23105,17.9021,22.37759,20.41968,38.04218h-37.20264c-2.51758-12.86707-12.02808-22.09811-26.2937-22.09811 c-23.21655,0-34.6853,17.06311-34.6853,45.31473c0,27.41266,10.62915,45.31473,34.12573,45.31473 c15.66455,0,26.2937-7.83203,28.81128-24.3356h36.64307c-1.11841,15.38458-7.83203,28.81113-18.74097,38.6012 c-11.18872,10.07004-26.85327,16.22406-45.87427,16.22406C2507.11987,364.19601,2489.21777,355.80399,2476.35083,342.0979z M2648.37915,235.24487c10.62964-15.38458,21.81812-22.65761,41.67822-22.65761c15.10498,0,27.13306,5.59453,35.8042,15.10507 c8.67163,9.79005,13.70654,22.93712,13.70654,38.60121V360h-38.04224v-88.11194c0-15.66409-8.6709-26.29364-24.89502-26.29364 c-16.7832,0-29.09058,13.14706-29.09058,33.00717V360h-38.04224V160h38.04224v75.24487H2648.37915z M2852.01514,343.21692h-0.83887 c-9.79053,13.14658-20.97925,20.6991-41.11938,20.6991c-32.16748,0-49.78955-19.86008-49.78955-51.74826v-95.66397h37.76221 v89.23044c0,16.78311,7.27246,26.01413,23.77612,26.01413c17.9021,0,28.81104-13.42657,28.81104-32.44766v-82.79691h38.04175V360 h-36.64331V343.21692z M2902.64502,313.56628h35.24463c2.51758,16.78357,13.98608,23.77661,31.32861,23.77661 c16.78369,0,26.29419-6.43402,26.29419-16.5036c0-6.71353-4.75562-10.62955-11.46851-13.14706 c-6.99316-2.51749-16.50366-3.91602-26.29419-5.87402c-13.14648-2.51752-25.4541-5.31451-34.9646-11.74805 c-9.79077-6.43353-15.94409-15.94409-15.94409-31.60867c0-15.66406,6.15332-26.85312,17.06299-34.68517 c10.62915-7.55254,24.89453-11.18906,41.39819-11.18906c38.32178,0,58.46191,18.18208,61.53833,47.55275h-34.40527 c-1.95801-15.66458-11.18896-20.97913-27.69263-20.97913c-15.10449,0-24.61499,5.31454-24.61499,15.94409 c0,6.43353,4.75488,9.51053,12.30762,11.74805c7.27295,2.51752,17.06299,3.63654,27.13306,5.87454 c12.02759,2.51703,24.61499,5.31451,34.40527,11.74805c9.79053,6.71304,16.22388,16.78308,16.22388,33.56619 c0,14.54556-6.15405,26.01413-16.78296,33.84616c-10.90967,7.83252-25.73462,12.30804-43.63672,12.30804 C2927.82007,364.19601,2904.88306,344.33591,2902.64502,313.56628z M3059.28198,342.0979 c-12.86719-13.42654-19.30078-32.72714-19.30078-53.98575c0-21.25912,7.27319-40.27972,19.86011-53.70628 c12.30811-13.42657,29.93018-21.8186,50.90942-21.8186c23.21655,0,40.55908,8.67154,52.58716,24.05611 s18.18213,36.64319,18.18213,62.37781h-104.05615c3.07715,22.37762,14.8252,35.8042,36.64331,35.8042 c15.10498,0,23.49658-6.71353,27.69263-17.62259h37.48218c-2.51758,12.86707-9.5105,24.33563-20.41968,33.00717 c-11.18848,8.67105-26.01343,13.98605-44.4751,13.98605C3090.33105,364.19601,3072.14941,355.80399,3059.28198,342.0979z M3078.02344,272.72757h63.77637c-1.1189-18.46161-12.86768-30.76965-30.48975-30.76965 C3091.17017,241.95792,3081.38013,253.70645,3078.02344,272.72757z M3206.13477,216.50378v-44.75523h37.20264v44.75523h24.61548 v26.57312h-24.61548v74.68539c0,10.90906,5.59448,14.26556,14.26611,14.26556h7.27246c1.39844,0,2.51758,0,3.91602-0.27951v27.97214 C3266.83398,360,3264.87598,360,3262.63843,360c-4.19604,0.27951-10.07007,0.27951-17.62256,0.27951 c-9.23047,0-18.74121-1.67801-26.2937-6.99255c-7.55249-5.315-12.5874-13.98605-12.5874-27.41263V243.0769h-19.86011v-26.57312 H3206.13477z M3294.52417,216.50378v-44.75523h37.20264v44.75523h24.61572v26.57312h-24.61572v74.68539 c0,10.90906,5.59448,14.26556,14.26611,14.26556h7.27246c1.39868,0,2.51758,0,3.91602-0.27951v27.97214 C3355.22339,360,3353.26538,360,3351.02783,360c-4.19604,0.27951-10.07007,0.27951-17.62256,0.27951 c-9.23047,0-18.74097-1.67801-26.29346-6.99255c-7.55273-5.315-12.58765-13.98605-12.58765-27.41263V243.0769h-19.86011v-26.57312 H3294.52417z M3366.68555,313.56628h35.24487c2.51733,16.78357,13.98608,23.77661,31.32861,23.77661 c16.78345,0,26.29419-6.43402,26.29419-16.5036c0-6.71353-4.75562-10.62955-11.46875-13.14706 c-6.99292-2.51749-16.50342-3.91602-26.29395-5.87402c-13.14673-2.51752-25.4541-5.31451-34.96484-11.74805 c-9.79053-6.43353-15.94409-15.94409-15.94409-31.60867c0-15.66406,6.15356-26.85312,17.06323-34.68517 c10.62891-7.55254,24.89453-11.18906,41.39819-11.18906c38.32153,0,58.46167,18.18208,61.53833,47.55275h-34.40527 c-1.95801-15.66458-11.18896-20.97913-27.69263-20.97913c-15.10449,0-24.61499,5.31454-24.61499,15.94409 c0,6.43353,4.75488,9.51053,12.30737,11.74805c7.27319,2.51752,17.06323,3.63654,27.1333,5.87454 c12.02759,2.51703,24.61499,5.31451,34.40503,11.74805c9.79053,6.71304,16.22412,16.78308,16.22412,33.56619 c0,14.54556-6.15405,26.01413-16.78296,33.84616c-10.90967,7.83252-25.73462,12.30804-43.63672,12.30804 C3391.86084,364.19601,3368.92358,344.33591,3366.68555,313.56628z M1720.55969,420v200H1680V420H1720.55969z M1784.89258,496.08386 c9.79004-15.66406,22.6571-23.49658,42.51721-23.49658c15.1051,0,27.13318,5.59451,35.8042,15.10507 c8.67151,9.79007,13.70654,22.9371,13.70654,38.60117V620h-38.04211v-88.11194c0-15.66406-8.67114-26.29364-24.89514-26.29364 c-16.78308,0-29.0907,13.14709-29.0907,33.00714V620h-38.04211V476.50378h37.20264v19.58008H1784.89258z M1889.78711,573.56628 h35.24475c2.51746,16.78357,13.98596,23.77661,31.32861,23.77661c16.78357,0,26.29407-6.43402,26.29407-16.5036 c0-6.7135-4.75549-10.62952-11.46851-13.14703c-6.99304-2.51752-16.50354-3.91602-26.29407-5.87402 c-13.14661-2.51752-25.45422-5.31458-34.96472-11.74811c-9.79053-6.43353-15.94409-15.94409-15.94409-31.60864 c0-15.66406,6.15356-26.85312,17.06311-34.68518c10.62903-7.55252,24.89465-11.18903,41.39819-11.18903 c38.32166,0,58.46179,18.18207,61.53833,47.55273h-34.40527c-1.95801-15.66461-11.18896-20.97913-27.69263-20.97913 c-15.10449,0-24.61511,5.31451-24.61511,15.94409c0,6.43353,4.75513,9.51056,12.30762,11.74805 c7.27307,2.51752,17.06311,3.63654,27.13306,5.87451c12.02759,2.51703,24.61523,5.31458,34.40527,11.74811 c9.79053,6.71301,16.224,16.78308,16.224,33.56616c0,14.54553-6.15393,26.0141-16.78308,33.84613 c-10.90955,7.83258-25.73462,12.30811-43.63672,12.30811C1914.96228,624.19604,1892.02515,604.33594,1889.78711,573.56628z M2041.39343,476.50378v-44.75522h37.20276v44.75522h24.61548v26.57312h-24.61548v74.68536 c0,10.90906,5.59448,14.26562,14.26611,14.26562h7.27246c1.39844,0,2.51758,0,3.91602-0.27954v27.97217 C2102.09277,620,2100.13477,620,2097.89722,620c-4.19604,0.27948-10.07007,0.27948-17.62256,0.27948 c-9.23047,0-18.74121-1.67798-26.2937-6.99249c-7.55249-5.31506-12.58752-13.98608-12.58752-27.41266V503.0769h-19.86011v-26.57312 H2041.39343z M2159.1521,425.31503v34.12567h-38.04224v-34.12567H2159.1521z M2159.1521,476.50378V620h-38.04224V476.50378 H2159.1521z M2193.55786,476.50378v-44.75522h37.20264v44.75522h24.61572v26.57312h-24.61572v74.68536 c0,10.90906,5.59448,14.26562,14.26611,14.26562h7.27246c1.39844,0,2.51758,0,3.91602-0.27954v27.97217 C2254.25708,620,2252.29907,620,2250.06152,620c-4.19604,0.27948-10.07007,0.27948-17.62256,0.27948 c-9.23047,0-18.74097-1.67798-26.2937-6.99249c-7.55249-5.31506-12.5874-13.98608-12.5874-27.41266V503.0769h-19.86011v-26.57312 H2193.55786z M2363.90381,603.21692h-0.83911c-9.79053,13.14655-20.979,20.6991-41.11914,20.6991 c-32.16772,0-49.79028-19.86011-49.79028-51.74823v-95.664h37.7627v89.23047c0,16.78308,7.27246,26.0141,23.77612,26.0141 c17.9021,0,28.81104-13.42657,28.81104-32.44763v-82.79694h38.04175V620h-36.64307V603.21692z M2434.95361,476.50378v-44.75522 h37.20264v44.75522h24.61572v26.57312h-24.61572v74.68536c0,10.90906,5.59448,14.26562,14.26611,14.26562h7.27246 c1.39844,0,2.51758,0,3.91602-0.27954v27.97217C2495.65283,620,2493.69482,620,2491.45728,620 c-4.19604,0.27948-10.07007,0.27948-17.62256,0.27948c-9.23047,0-18.74097-1.67798-26.2937-6.99249 c-7.55249-5.31506-12.5874-13.98608-12.5874-27.41266V503.0769h-19.86011v-26.57312H2434.95361z M2525.58252,602.0979 c-12.86743-13.42657-19.30103-32.72717-19.30103-53.98578c0-21.25909,7.27295-40.27966,19.86011-53.70624 c12.30811-13.42657,29.93018-21.8186,50.90918-21.8186c23.21655,0,40.55933,8.67154,52.5874,24.05609 c12.02783,15.38458,18.18188,36.64319,18.18188,62.37781h-104.05591c3.0769,22.37762,14.82495,35.8042,36.64307,35.8042 c15.10522,0,23.49683-6.71356,27.69263-17.62262h37.48218c-2.51733,12.86713-9.5105,24.33563-20.41943,33.0072 c-11.18872,8.67102-26.01367,13.98608-44.47534,13.98608C2556.6311,624.19604,2538.44971,615.80402,2525.58252,602.0979z M2544.32373,532.72754h63.77612c-1.1189-18.46155-12.86743-30.76965-30.4895-30.76965 C2557.47021,501.95789,2547.68018,513.70648,2544.32373,532.72754z M2723.06299,602.0979 c-13.42651-13.42657-20.979-32.44763-20.979-53.70624s7.55249-40.27972,20.979-53.98578 c13.14722-13.42657,31.60864-21.8186,53.98633-21.8186s40.83862,8.39203,54.26538,21.8186 c13.14697,13.70605,20.69946,32.72717,20.69946,53.98578s-7.55249,40.27966-20.69946,53.70624 c-13.42676,13.70612-31.8877,22.09814-54.26538,22.09814S2736.21021,615.80402,2723.06299,602.0979z M2813.4126,548.39166 c0-28.25165-12.86719-46.99323-36.36328-46.99323c-23.49658,0-36.36377,18.74158-36.36377,46.99323 c0,27.97211,12.86719,46.7132,36.36377,46.7132C2800.54541,595.10486,2813.4126,576.36377,2813.4126,548.39166z M2876.34888,476.50378v-12.86755c0-17.6221,6.71313-29.37018,18.18164-36.36319 c11.18896-6.71353,27.13306-8.95105,45.59424-6.99304v29.37064c-17.9021-0.83948-25.73413,1.11853-25.73413,16.2236v10.62955 h25.73413v27.41217h-25.73413V620h-38.04175V503.91595h-19.58057v-27.41217H2876.34888z M1780.69897,680v34.12616h-60.13977V880 H1680V714.12616h-60.13977V680H1780.69897z M1776.505,862.0979c-12.86755-13.42657-19.30115-32.72717-19.30115-53.98578 c0-21.25909,7.27307-40.27966,19.86011-53.70624c12.30811-13.42657,29.93018-21.8186,50.9093-21.8186 c23.21655,0,40.5592,8.67151,52.58716,24.05609c12.02808,15.38458,18.18213,36.64319,18.18213,62.37781h-104.05603 c3.07703,22.37762,14.82507,35.8042,36.64319,35.8042c15.1051,0,23.49658-6.71356,27.69263-17.62262h37.48218 c-2.51746,12.86707-9.5105,24.33563-20.41956,33.0072c-11.1886,8.67102-26.01367,13.98608-44.47522,13.98608 C1807.55359,884.19604,1789.37207,875.80396,1776.505,862.0979z M1795.24609,792.72754h63.77625 c-1.11902-18.46155-12.86755-30.76965-30.48962-30.76965C1808.39258,761.95789,1798.60254,773.70648,1795.24609,792.72754z M1927.55127,862.0979c-12.86707-13.42657-19.86011-32.44763-19.86011-53.70624s6.99304-40.27972,19.58057-53.98578 c12.30762-13.42657,29.93018-21.8186,52.02783-21.8186c18.74158,0,33.56665,5.59448,44.75525,14.54553 c10.90906,9.23108,17.90198,22.37762,20.41956,38.04224h-37.20276c-2.51746-12.86707-12.02795-22.09814-26.29358-22.09814 c-23.21667,0-34.68518,17.06311-34.68518,45.31476c0,27.4126,10.62903,45.3147,34.12573,45.3147 c15.66455,0,26.29358-7.83203,28.81116-24.33563h36.64319c-1.11853,15.38458-7.83215,28.81116-18.74121,38.6012 c-11.18848,10.07007-26.85303,16.22412-45.87415,16.22412C1958.32092,884.19604,1940.41882,875.80396,1927.55127,862.0979z M2099.58008,755.24487c10.62964-15.38458,21.81812-22.65759,41.67822-22.65759c15.10498,0,27.13306,5.59448,35.8042,15.10504 c8.67163,9.79004,13.70654,22.93713,13.70654,38.6012V880h-38.04224v-88.11194c0-15.66406-8.6709-26.29364-24.89502-26.29364 c-16.7832,0-29.09058,13.14709-29.09058,33.00714V880h-38.04224V680h38.04224v75.24487H2099.58008z M2250.62842,756.08386 c9.79004-15.66406,22.65698-23.49658,42.51709-23.49658c15.10522,0,27.1333,5.59448,35.8042,15.10504 c8.67163,9.79004,13.70654,22.93713,13.70654,38.6012V880h-38.04199v-88.11194c0-15.66406-8.67114-26.29364-24.89526-26.29364 c-16.78296,0-29.09058,13.14709-29.09058,33.00714V880h-38.04224V736.50378h37.20264v19.58008H2250.62842z M2378.45996,862.0979 c-13.42651-13.42657-20.979-32.44763-20.979-53.70624s7.55249-40.27972,20.979-53.98578 c13.14722-13.42657,31.60864-21.8186,53.98633-21.8186s40.83862,8.39203,54.26538,21.8186 c13.14697,13.70605,20.69946,32.72717,20.69946,53.98578s-7.55249,40.27966-20.69946,53.70624 c-13.42676,13.70605-31.8877,22.09814-54.26538,22.09814S2391.60718,875.80396,2378.45996,862.0979z M2468.80957,808.39166 c0-28.25165-12.86719-46.99323-36.36328-46.99323c-23.49658,0-36.36377,18.74158-36.36377,46.99323 c0,27.97211,12.86719,46.7132,36.36377,46.7132C2455.94238,855.10486,2468.80957,836.36377,2468.80957,808.39166z M2561.95459,680 v200h-38.04224V680H2561.95459z M2599.43628,862.0979c-13.42651-13.42657-20.97925-32.44763-20.97925-53.70624 s7.55273-40.27972,20.97925-53.98578c13.14697-13.42657,31.60864-21.8186,53.98608-21.8186 c22.37769,0,40.83887,8.39203,54.26538,21.8186c13.14697,13.70605,20.69971,32.72717,20.69971,53.98578 s-7.55273,40.27966-20.69971,53.70624c-13.42651,13.70605-31.8877,22.09814-54.26538,22.09814 C2631.04492,884.19604,2612.58325,875.80396,2599.43628,862.0979z M2689.78564,808.39166 c0-28.25165-12.86694-46.99323-36.36328-46.99323c-23.49658,0-36.36353,18.74158-36.36353,46.99323 c0,27.97211,12.86694,46.7132,36.36353,46.7132C2676.9187,855.10486,2689.78564,836.36377,2689.78564,808.39166z M2740.41357,884.19604h37.76196c3.07715,8.95099,10.90918,15.94403,28.81128,15.94403 c21.25854,0,31.88818-9.79053,31.88818-29.93011v-15.66461h-0.83911c-8.67139,9.79059-19.021,16.78314-37.48267,16.78314 c-16.22363,0-31.60815-6.15356-43.35669-18.18164c-12.02759-11.74805-19.86011-28.53162-19.86011-50.34973 c0-21.25861,6.43359-38.88123,17.62256-51.18878c10.90918-12.30756,26.01416-19.02106,44.47534-19.02106 c17.9021,0,31.04907,6.99304,39.7207,19.02106h0.55884v-15.10455h36.6438v132.58716c0,20.13959-6.15405,33.84619-17.06299,43.63623 c-12.02808,11.18903-30.48975,16.22406-51.74829,16.22406C2767.82617,928.95123,2744.60938,912.16766,2740.41357,884.19604z M2833.00098,829.37073c5.31445-6.99304,7.83203-16.50354,7.83203-27.4126c0-10.62958-2.79712-20.41962-8.3916-27.41266 s-13.98608-11.46857-25.73413-11.46857c-19.58057,0-32.16821,14.82507-32.16821,39.16071 c0,24.6156,12.58765,38.60168,32.44775,38.60168C2819.01489,840.83929,2827.40649,836.36377,2833.00098,829.37073z M2915.79785,897.06311c15.38452,0,21.25854-7.55255,21.25854-19.58063c0-3.63654-0.55933-8.39154-2.23755-14.26556 c-1.95801-5.87402-4.47534-13.70654-8.67139-24.6156l-38.60132-102.09753h39.99976l21.25903,64.6153 c2.23755,6.71307,4.19556,14.26562,6.15356,20.69916c0.8396,3.63647,1.95801,6.99298,3.07715,10.62952h0.55933 c0.83911-3.63654,1.67871-6.99304,2.51758-10.62952c1.39844-6.43353,3.63647-13.98608,5.87402-20.69916l20.14014-64.6153h38.32178 l-50.07031,147.13275c-5.59399,16.22357-10.90918,26.85309-18.46167,33.56616c-7.83203,6.99304-17.62207,9.79053-32.16772,9.79053 h-22.37744v-29.93011H2915.79785z M880,880h160V400H880V880z M1120,320h400V160h-400V320z M880,160.00003h160v160H880V160.00003z M640,880h160V160H640V880z M400,720h160V160H400V720z M160,880h160V160H160V880z M1120,880h160V400h-160V880z"/></svg>
+  <span class="visually-hidden">MIT</span>
+</a>
+
+  </div>
+<div id="block-socialmediablock" class="block block-jpal-blocks block-social-media-block">
+  
+    
+      
+<div class="social-icons">
+      <a class="social-icon icon-linkedin" href="https://www.linkedin.com/company/j-pal" title="LinkedIn" target="_blank">
+        <svg height="30" width="30" viewBox="0 0 56.693 56.693" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#fff" d="M30.071,27.101v-0.077c-0.016,0.026-0.033,0.052-0.05,0.077H30.071z"/>
+    <path fill="#fff" d="M49.265,4.667H7.145c-2.016,0-3.651,1.596-3.651,3.563v42.613c0,1.966,1.635,3.562,3.651,3.562h42.12 c2.019,0,3.654-1.597,3.654-3.562V8.23C52.919,6.262,51.283,4.667,49.265,4.667z M18.475,46.304h-7.465V23.845h7.465V46.304z M14.743,20.777h-0.05c-2.504,0-4.124-1.725-4.124-3.88c0-2.203,1.67-3.88,4.223-3.88c2.554,0,4.125,1.677,4.175,3.88 C18.967,19.052,17.345,20.777,14.743,20.777z M45.394,46.304h-7.465V34.286c0-3.018-1.08-5.078-3.781-5.078 c-2.062,0-3.29,1.389-3.831,2.731c-0.197,0.479-0.245,1.149-0.245,1.821v12.543h-7.465c0,0,0.098-20.354,0-22.459h7.465v3.179 c0.992-1.53,2.766-3.709,6.729-3.709c4.911,0,8.594,3.211,8.594,10.11V46.304z"/>
+  </svg>
+
+    </a>
+      <a class="social-icon icon-instagram" href="https://www.instagram.com/jpal_org" title="@jpal_org" target="_blank">
+        <svg height="30" width="30" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#fff" d="M295.42,6c-53.2,2.51-89.53,11-121.29,23.48-32.87,12.81-60.73,30-88.45,57.82S40.89,143,28.17,175.92c-12.31,31.83-20.65,68.19-23,121.42S2.3,367.68,2.56,503.46,3.42,656.26,6,709.6c2.54,53.19,11,89.51,23.48,121.28,12.83,32.87,30,60.72,57.83,88.45S143,964.09,176,976.83c31.8,12.29,68.17,20.67,121.39,23s70.35,2.87,206.09,2.61,152.83-.86,206.16-3.39S799.1,988,830.88,975.58c32.87-12.86,60.74-30,88.45-57.84S964.1,862,976.81,829.06c12.32-31.8,20.69-68.17,23-121.35,2.33-53.37,2.88-70.41,2.62-206.17s-.87-152.78-3.4-206.1-11-89.53-23.47-121.32c-12.85-32.87-30-60.7-57.82-88.45S862,40.87,829.07,28.19c-31.82-12.31-68.17-20.7-121.39-23S637.33,2.3,501.54,2.56,348.75,3.4,295.42,6m5.84,903.88c-48.75-2.12-75.22-10.22-92.86-17-23.36-9-40-19.88-57.58-37.29s-28.38-34.11-37.5-57.42c-6.85-17.64-15.1-44.08-17.38-92.83-2.48-52.69-3-68.51-3.29-202s.22-149.29,2.53-202c2.08-48.71,10.23-75.21,17-92.84,9-23.39,19.84-40,37.29-57.57s34.1-28.39,57.43-37.51c17.62-6.88,44.06-15.06,92.79-17.38,52.73-2.5,68.53-3,202-3.29s149.31.21,202.06,2.53c48.71,2.12,75.22,10.19,92.83,17,23.37,9,40,19.81,57.57,37.29s28.4,34.07,37.52,57.45c6.89,17.57,15.07,44,17.37,92.76,2.51,52.73,3.08,68.54,3.32,202s-.23,149.31-2.54,202c-2.13,48.75-10.21,75.23-17,92.89-9,23.35-19.85,40-37.31,57.56s-34.09,28.38-57.43,37.5c-17.6,6.87-44.07,15.07-92.76,17.39-52.73,2.48-68.53,3-202.05,3.29s-149.27-.25-202-2.53m407.6-674.61a60,60,0,1,0,59.88-60.1,60,60,0,0,0-59.88,60.1M245.77,503c.28,141.8,115.44,256.49,257.21,256.22S759.52,643.8,759.25,502,643.79,245.48,502,245.76,245.5,361.22,245.77,503m90.06-.18a166.67,166.67,0,1,1,167,166.34,166.65,166.65,0,0,1-167-166.34"/>
+  </svg>
+
+    </a>
+      <a class="social-icon icon-x" href="https://x.com/jpal" title="X" target="_blank">
+        <svg height="30" width="30" viewBox="0 0 1200 1227" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#fff" d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/>
+  </svg>
+
+    </a>
+      <a class="social-icon icon-bsky" href="https://bsky.app/profile/j-pal.bsky.social" title="BlueSky" target="_blank">
+        <svg height="30" width="30" viewBox="0 0 600 530" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#fff" d="M135.72 44.03C202.216 93.951 273.74 195.17 300 249.49c26.262-54.316 97.782-155.54 164.28-205.46C512.26 8.009 590-19.862 590 68.825c0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.38-3.69-10.832-3.708-7.896-.017-2.936-1.193.516-3.707 7.896-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.45-163.25-81.433C20.15 217.613 9.997 86.535 9.997 68.825c0-88.687 77.742-60.816 125.72-24.795z"/>
+  </svg>
+
+    </a>
+      <a class="social-icon icon-youtube" href="https://www.youtube.com/user/povertyactionlab" title="YouTube" target="_blank">
+        <svg height="30" width="30" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#fff" d="M501.303,132.765c-5.887,-22.03 -23.235,-39.377 -45.265,-45.265c-39.932,-10.7 -200.038,-10.7 -200.038,-10.7c0,0 -160.107,0 -200.039,10.7c-22.026,5.888 -39.377,23.235 -45.264,45.265c-10.697,39.928 -10.697,123.238 -10.697,123.238c0,0 0,83.308 10.697,123.232c5.887,22.03 23.238,39.382 45.264,45.269c39.932,10.696 200.039,10.696 200.039,10.696c0,0 160.106,0 200.038,-10.696c22.03,-5.887 39.378,-23.239 45.265,-45.269c10.696,-39.924 10.696,-123.232 10.696,-123.232c0,0 0,-83.31 -10.696,-123.238Zm-296.506,200.039l0,-153.603l133.019,76.802l-133.019,76.801Z"/>
+  </svg>
+
+    </a>
+      <a class="social-icon icon-facebook" href="https://www.facebook.com/JPAL.Global" title="Facebook" target="_blank">
+        <svg height="30" width="30" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#fff" d="M512,257.555c0,-141.385 -114.615,-256 -256,-256c-141.385,0 -256,114.615 -256,256c0,127.777 93.616,233.685 216,252.89l0,-178.89l-65,0l0,-74l65,0l0,-56.4c0,-64.16 38.219,-99.6 96.695,-99.6c28.009,0 57.305,5 57.305,5l0,63l-32.281,0c-31.801,0 -41.719,19.733 -41.719,39.978l0,48.022l71,0l-11.35,74l-59.65,0l0,178.89c122.385,-19.205 216,-125.113 216,-252.89Z"/>
+  </svg>
+
+    </a>
+  </div>
+
+  </div>
+
+  </div>
+
+        </footer>
+          </section>
+      </div>
+
+  </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>window.dataLayer = window.dataLayer || []; window.dataLayer.push({"drupalLanguage":"en","drupalCountry":"US","siteName":"The Abdul Latif Jameel Poverty Action Lab","entityCreated":"1637175748","entityLangcode":"en","entityStatus":"1","entityUid":"1","entityUuid":"92052057-e91d-4bb7-a78f-d4b80248acc1","entityVid":"10435469","entityName":"jadmin","entityType":"node","entityBundle":"evaluation","entityId":"1505","entityTitle":"The Impact of Doubling Teacher Salary on Student Performance in Indonesia","entityTaxonomy":{"country":{"121":"Indonesia"},"intervention_type":{"14216":"Cash transfers","10694":"Unconditional cash transfers"},"outcome_of_interest":{"12223":"Student learning"},"partner":{"521":"World Bank"},"region":{"384":"Southeast Asia"},"sector":{"385":"Education","389":"Political Economy and Governance"},"target_group":{"7993":"Teachers"}},"userUid":0});</script>
+
+    <script src="/core/assets/vendor/jquery/jquery.min.js?v=4.0.0"></script>
+<script src="/sites/default/files/js/js_FxHKQ2gunRws2Uk7aLYox_XQIxfmmXRGjrKjsonVzFY.js?scope=footer&amp;delta=1&amp;language=en&amp;theme=jpal&amp;include=eJxlj4GqwzAIRX8om58UTHubps_GEO3o_v7lbTD2NhDxHFS4XIhLzKKJJSSefqLrqEZvc9wsJLijR5xNDXNcigw0yqjo43JaAUM6eh5LO-pBX-Y6vkwq2pOeNGPhQ_wlYqlSKuiDw8zOwnd0Slj5VrTbm1shDT1k1SyIzpnyaJ985Y3P_3IPW2OhZ-yLTb00t6fb2bT2-wPioupVHUZ_eHnhL_GIeXI"></script>
+<script src="/themes/custom/jpal/dist/jpal-script.js?tksqpb"></script>
+<script src="/sites/default/files/js/js_L-MMDDxrycJcrpAoqfC5dH4RvctGpQq3juZawf5Jtys.js?scope=footer&amp;delta=3&amp;language=en&amp;theme=jpal&amp;include=eJxlj4GqwzAIRX8om58UTHubps_GEO3o_v7lbTD2NhDxHFS4XIhLzKKJJSSefqLrqEZvc9wsJLijR5xNDXNcigw0yqjo43JaAUM6eh5LO-pBX-Y6vkwq2pOeNGPhQ_wlYqlSKuiDw8zOwnd0Slj5VrTbm1shDT1k1SyIzpnyaJ985Y3P_3IPW2OhZ-yLTb00t6fb2bT2-wPioupVHUZ_eHnhL_GIeXI"></script>
+
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"d44bc1837f094108a1e2dfd2f9fef5c8","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

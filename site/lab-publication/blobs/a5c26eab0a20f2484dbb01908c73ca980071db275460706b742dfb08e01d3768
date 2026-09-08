@@ -1,0 +1,25 @@
+# Gemini revision: final source and arithmetic review
+
+**The revision improves source fidelity but retains substantive limitations.** It is suitable for a transparently annotated example of Gemini output and review, not for presentation as a source-clean or validated policy estimate. Preserve both attempts. No additional model iteration or alteration of the raw response is recommended or performed here.
+
+Reviewed attempt: `30299a64369382fea583f60b0ccf5ca32a5065c744acf631e2404ac9e74e79e6`, completed `2026-09-07T17:38:46.824864Z`.
+
+The provider again returns `modelVersion=gemini-3.1-pro-preview`. Its candidate text parses exactly to the saved response. The frozen contract is unchanged: `3d8929b6610cc465a8d5c7b59c7746268ce8a4b275d9b523149fd9015e57a913`.
+
+[Revised result](revision-1/result.json) SHA-256: `6d63b87cc35b58c9e4abc97de7e2a93fcf41cd0a2e09107d6d783cc4b782374b`.
+
+[Provider response](revision-1/provider-response.json) SHA-256: `8be28ea5627eb94562f794745f63bb79bf3b4bdf1c861079b770a450bcd9cf6e`.
+
+The revision corrects the first response's treatment of section 8 authorization as guaranteed appropriations. It acknowledges section 3(c), rules out simple replacement of state/local salary spending, describes the reference as a modeling baseline, and expressly denies causal identification and calibration. The not-enacted arm now explains that the reference already contains ongoing investments and other possible policy responses.
+
+Three residual issues should remain visible:
+
+1. **Unsupported population share.** The enacted reasoning attributes roughly 10% nonpublic students to `naep-population`. That source defines the jurisdictions but supplies no enrollment percentage. The number could be an illustrative assumption; it is not a verified source statistic for the target's grade, assessment or year.
+2. **Unvalidated extrapolation described as a bound.** The response assumes a nationwide 20% public-school salary increase and linearly scales the Texas retention-only simulation. Although it now labels the bridge judgmental, this still conflicts with the contract's explicit caution against scaling the district result to a large national salary change. The local simulation does not establish national teacher-supply gains, linearity, or an upper bound. The assumed 30–40 NAEP points per SD also lacks a source or a defined linking population. Actual funding, participation and exposure are not quantified coherently enough to turn this illustration into a national estimate.
+3. **Attenuation and final adjustment remain unreconciled.** The stated bridge yields 0.002 × 30–40 = 0.06–0.08 points before dilution, or 0.054–0.072 after its assumed 10% dilution. Additional attenuation should reduce those amounts, yet the response reports +0.1. Rounding to tenths could explain some values, but no rounding step or additional component is disclosed. Therefore the response's derivation does not establish the precise final adjustment. This is a reasoning gap, not an instruction to replace the stored number.
+
+Mechanical checks pass: all 201 enacted quantiles equal the common reference plus 0.1; all not-enacted quantiles equal the reference. Medians are **278.1** and **278**, with central 80% intervals **274.1–282.1** and **274–282**. Both widths are eight points; neither distribution is wider. The baseline recovery, interval and continuous approximation to an integer published score remain elicited judgments, not fitted or calibrated quantities.
+
+Suggested short disclosure for GDM: “Gemini generated both scenarios together from the same source packet, then completed one revision after source and arithmetic feedback; the original is retained. These are exploratory model judgments: the numerical policy adjustment still relies on an unvalidated extrapolation and is not an estimated causal effect.” Include this review and the first-pass review in the companion record rather than describing the review as clean.
+
+Only this report was created during final review. No raw inputs, model responses, forecasts or model settings were changed.

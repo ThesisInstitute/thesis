@@ -141,6 +141,43 @@ def start(store, *, timeout=60):
     return spec, attempt
 
 
+@pytest.mark.parametrize(
+    "model", ["", "model name", "model+preview", "model@provider", "model#1", "x" * 201]
+)
+def test_invalid_requested_model_cannot_poison_existing_listing(core_store, model):
+    spec, existing = start(core_store)
+    with pytest.raises(ValueError, match="requested model"):
+        start_attempt(
+            core_store,
+            spec,
+            prompt=b"Frozen prompt",
+            command=b"arbitrary public command",
+            code=b"transport",
+            requested_model=model,
+        )
+    page = conditional_page(core_store)
+    assert page.total == 1
+    assert page.items[0].id == existing.id
+    assert page.requested_models == ["requested-model"]
+
+
+def test_requested_model_accepts_provider_qualified_name(core_store):
+    spec, _ = start(core_store)
+    model = "provider/model_v2.1:preview-2026"
+    attempt = start_attempt(
+        core_store,
+        spec,
+        prompt=b"Frozen prompt",
+        command=b"arbitrary public command",
+        code=b"transport",
+        requested_model=model,
+    )
+    page = conditional_page(core_store, requested_model=model)
+    assert page.total == 1
+    assert page.items[0].id == attempt.id
+    assert model in page.requested_models
+
+
 def test_pair_contract_accepts_real_knots_and_matching_deltas():
     spec = contract()
     response = PairedModelResponse.model_validate_json(json.dumps(response_data(spec)))

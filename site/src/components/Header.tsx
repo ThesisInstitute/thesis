@@ -10,6 +10,7 @@ export function Header({
     | "brier"
     | "paper"
     | "forecasts"
+    | "conditionals"
     | "core"
     | "bills"
     | "briefings"
@@ -25,7 +26,7 @@ export function Header({
         borderColor: "var(--theme-border)",
       }}
     >
-      <div className="w-full max-w-[1200px] mx-auto px-8 py-4 flex items-center justify-between max-md:px-4 max-md:py-3">
+      <div className="w-full max-w-[1200px] mx-auto px-8 py-4 flex items-center justify-between gap-4 max-md:px-4 max-md:py-3 max-md:flex-wrap max-md:gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/"
@@ -42,7 +43,10 @@ export function Header({
             Prototype
           </span>
         </div>
-        <nav className="flex gap-7 items-center max-md:gap-4">
+        <nav
+          aria-label="Main navigation"
+          className="flex flex-wrap justify-end gap-x-5 gap-y-2 items-center max-lg:gap-x-3 max-md:w-full max-md:justify-between"
+        >
           <Link
             href="/docs"
             className={`[font-family:var(--font-body)] text-[0.82rem] font-normal no-underline transition-colors duration-200 hover:no-underline max-md:hidden ${
@@ -102,6 +106,17 @@ export function Header({
             }
           >
             Forecasts
+          </Link>
+          <Link
+            href="/lab/conditionals"
+            aria-current={activePage === "conditionals" ? "page" : undefined}
+            className={`[font-family:var(--font-body)] text-[0.82rem] font-normal no-underline transition-colors duration-200 hover:no-underline ${
+              activePage === "conditionals"
+                ? "text-[#A94E80]"
+                : "text-[var(--theme-text-muted)]"
+            }`}
+          >
+            Conditionals
           </Link>
           <Link
             href="/core"

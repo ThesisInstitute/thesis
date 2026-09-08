@@ -191,9 +191,9 @@ def _code_bytes() -> bytes:
 
 def run_conditional(store, contract, *, model: str, timeout_seconds: int = 600):
     """Commit dispatch, invoke Codex once, then seal the complete pair or failure."""
-    from .conditionals import finish_attempt, start_attempt
+    from .conditionals import finish_attempt, start_attempt, valid_requested_model
 
-    if not isinstance(model, str) or not model.strip() or len(model) > 100:
+    if not valid_requested_model(model) or len(model) > 100:
         raise ValueError("A concrete requested model is required")
     if (
         isinstance(timeout_seconds, bool)

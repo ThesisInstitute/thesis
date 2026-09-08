@@ -1,5 +1,5 @@
 import generatedSchema from "@/data/generated/thesis-lab.schema.json";
-import { isLabApiPath } from "./lab-paths";
+import { isLabApiPath, LAB_MODEL } from "./lab-paths";
 import type * as Lab from "@/data/generated/thesis-lab";
 
 type Schema = boolean | { [key: string]: unknown };
@@ -162,6 +162,7 @@ const INSTANT_FIELDS = new Set([
   "condition_deadline",
   "checked_at",
   "recorded_at",
+  "linked_at",
   "completed_at",
   "started_at",
   "registration_deadline",
@@ -370,11 +371,154 @@ function conditionalSummary(value: Lab.ConditionalSummary): void {
       Date.parse(value.finished_at) < Date.parse(value.started_at))
   )
     fail();
+  conditionalProvider(value.provider_metadata, value.execution_state);
+}
+
+function conditionalProvider(
+  metadata: Lab.ConditionalProviderMetadata | null,
+  state: Lab.ConditionalSummary["execution_state"],
+): void {
+  if (
+    metadata !== null &&
+    (state !== "succeeded" ||
+      !metadata.reported_model.trim() ||
+      metadata.reported_model !== metadata.reported_model.trim() ||
+      metadata.source_artifact.role !== "provider_response")
+  )
+    fail();
+}
+
+function sameQuantiles(
+  a: readonly Lab.Quantiles[],
+  b: readonly Lab.Quantiles[],
+): boolean {
+  return (
+    a.length === b.length &&
+    a.every(
+      (q, i) =>
+        q.method === b[i].method &&
+        ["q10", "q50", "q90"].every(
+          (key) => Math.abs(q[key as "q10"] - b[i][key as "q10"]) <= 1e-8,
+        ),
+    )
+  );
+}
+
+function sameProvider(
+  a: Lab.ConditionalProviderMetadata | null,
+  b: Lab.ConditionalProviderMetadata | null,
+): boolean {
+  if (a === null || b === null) return a === b;
+  return (
+    a.provider === b.provider &&
+    a.reported_model === b.reported_model &&
+    a.response_id === b.response_id &&
+    a.verification === b.verification &&
+    a.source_artifact.sha256 === b.source_artifact.sha256 &&
+    a.source_artifact.bytes === b.source_artifact.bytes &&
+    a.source_artifact.media_type === b.source_artifact.media_type &&
+    a.usage.prompt_tokens === b.usage.prompt_tokens &&
+    a.usage.output_tokens === b.usage.output_tokens &&
+    a.usage.thought_tokens === b.usage.thought_tokens &&
+    a.usage.total_tokens === b.usage.total_tokens
+  );
+}
+
+function conditionalAnnotations(value: Lab.ConditionalDetail): void {
+  const responseArtifact = value.artifacts.find(
+    (item) => item.role === "response",
+  );
+  if (value.provider_metadata) {
+    const metadata = value.provider_metadata.source_artifact;
+    if (
+      !value.artifacts.some(
+        (item) =>
+          item.role === "stdout" &&
+          item.sha256 === metadata.sha256 &&
+          item.bytes === metadata.bytes &&
+          item.media_type === metadata.media_type,
+      )
+    )
+      fail();
+  }
+  const sourceIds = new Set(value.contract.sources.map((item) => item.id));
+  const reviewIds = new Set(value.reviews.map((item) => item.id));
+  if (reviewIds.size !== value.reviews.length) fail();
+  for (const review of value.reviews) {
+    if (
+      value.execution_state !== "succeeded" ||
+      review.attempt_id !== value.id ||
+      review.response_sha256 !== responseArtifact?.sha256 ||
+      (review.outcome === "issues_remaining") !== review.findings.length > 0 ||
+      review.report.role !== "source_review" ||
+      review.record_artifact.role !== "review_record" ||
+      review.record_artifact.sha256 !== review.id ||
+      new Set(review.findings.map((finding) => finding.id)).size !==
+        review.findings.length
+    )
+      fail();
+    for (const finding of review.findings)
+      if (finding.source_ids.some((id) => !sourceIds.has(id))) fail();
+  }
+  const history = value.revision_history;
+  const members = new Map(history.map((entry) => [entry.attempt_id, entry]));
+  const self = members.get(value.id);
+  if (
+    members.size !== history.length ||
+    !self ||
+    self.started_at !== value.started_at ||
+    self.execution_state !== value.execution_state ||
+    self.requested_model !== value.requested_model ||
+    !sameProvider(self.provider_metadata, value.provider_metadata) ||
+    !sameQuantiles(self.arm_quantiles, value.arm_quantiles) ||
+    history.filter((entry) => entry.parent_attempt_id === null).length !== 1
+  )
+    fail();
+  history.forEach((entry, index) => {
+    conditionalProvider(entry.provider_metadata, entry.execution_state);
+    if (
+      entry.contract_id !== value.contract_id ||
+      entry.shared_evidence_id !== value.shared_evidence_id ||
+      entry.arm_quantiles.length !==
+        (entry.execution_state === "succeeded" ? 2 : 0) ||
+      (index > 0 &&
+        Date.parse(entry.started_at) <
+          Date.parse(history[index - 1].started_at))
+    )
+      fail();
+    if (entry.parent_attempt_id === null) {
+      if (
+        entry.feedback !== null ||
+        entry.triggering_review_id !== null ||
+        entry.linked_at !== null ||
+        entry.association_basis !== null ||
+        entry.association_artifact !== null
+      )
+        fail();
+    } else {
+      const parent = members.get(entry.parent_attempt_id);
+      if (
+        !parent ||
+        parent.execution_state !== "succeeded" ||
+        Date.parse(parent.started_at) >= Date.parse(entry.started_at) ||
+        entry.feedback?.role !== "revision_feedback" ||
+        entry.association_artifact?.role !== "revision_record" ||
+        entry.triggering_review_id === null ||
+        entry.linked_at === null ||
+        entry.association_basis !== "retrospective_association" ||
+        Date.parse(entry.linked_at) < Date.parse(entry.started_at) ||
+        (parent.attempt_id === value.id &&
+          !reviewIds.has(entry.triggering_review_id))
+      )
+        fail();
+    }
+  });
 }
 
 /** A conditional pair joins only its frozen contract and native distributions. */
 function conditionalDetail(value: Lab.ConditionalDetail): void {
   conditionalSummary(value);
+  conditionalAnnotations(value);
   const { contract, response } = value;
   if (
     contract.schema_version !== "thesis_conditional_contract_v1" ||
@@ -484,9 +628,18 @@ export function parseLab<M extends LabModel>(
   semantic(value);
   if (model === "ConditionalDetail")
     conditionalDetail(value as Lab.ConditionalDetail);
-  if (model === "ConditionalPage")
-    for (const item of (value as Lab.ConditionalPage).items)
+  if (model === "ConditionalPage") {
+    const page = value as Lab.ConditionalPage;
+    if (
+      new Set(page.requested_models).size !== page.requested_models.length ||
+      page.requested_models.some((name) => !LAB_MODEL.test(name))
+    )
+      fail();
+    for (const item of page.items) {
       conditionalSummary(item);
+      if (!page.requested_models.includes(item.requested_model)) fail();
+    }
+  }
   if (model === "MatrixPage") {
     const matrix = value as Lab.MatrixPage;
     if (
