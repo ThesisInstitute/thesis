@@ -26,7 +26,9 @@ child's archived prompt. The association is retrospective: the index timestamp
 describes when it was recorded, not proof that a review existed before the model
 call. Neither endpoint changes the original forecast or creates HTTP write access.
 
-For the existing Gemini operator adapter, provider metadata is derived from the
+The Gemini operator adapter used for these recorded attempts is preserved as
+`operator/run_gemini_example.py` in each attempt's archived `code` artifact. It is
+not shipped as a tracked runtime module. Provider metadata is derived from the
 archived command and provider envelope. A single completed candidate must match
 the exact recorded response bytes and parsed response before its model version,
 response ID and token counts are displayed. `observed_model` remains null. This

@@ -85,6 +85,8 @@ def start_attempt(
     timeout_seconds: int = 600,
 ) -> ConditionalAttempt:
     """Commit durable dispatch before the caller invokes any model."""
+    if not valid_requested_model(requested_model):
+        raise ValueError("A valid concrete requested model is required")
     if type(timeout_seconds) is not int or not 1 <= timeout_seconds <= 600:
         raise ValueError("conditional timeout must be 1..600 seconds")
     for source in contract.sources:

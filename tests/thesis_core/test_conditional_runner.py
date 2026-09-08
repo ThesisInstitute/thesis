@@ -9,6 +9,32 @@ import pytest
 from thesis_core.conditional_runner import capture_pair
 
 
+@pytest.mark.parametrize(
+    "model",
+    [
+        None,
+        123,
+        "",
+        "model name",
+        "model+preview",
+        "model@provider",
+        "model#1",
+        "x" * 101,
+    ],
+)
+def test_invalid_model_is_rejected_before_dispatch(monkeypatch, model):
+    from thesis_core.conditional_runner import run_conditional
+
+    def unexpected_lookup(_):
+        pytest.fail("Invalid model must be rejected before resolving a transport")
+
+    monkeypatch.setattr(
+        "thesis_core.conditional_runner.shutil.which", unexpected_lookup
+    )
+    with pytest.raises(ValueError, match="requested model"):
+        run_conditional(None, None, model=model)
+
+
 def invoke(tmp_path, code, *, timeout=3):
     return capture_pair(
         (sys.executable, "-c", code),

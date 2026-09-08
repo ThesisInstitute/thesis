@@ -1,12 +1,14 @@
 """Real-PostgreSQL review/revision history and provider response binding."""
 
 import json
+from datetime import datetime, timedelta, timezone
 
 import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
 from tests.thesis_core.test_conditionals import contract, response_data
+from thesis_core import conditional_reviews
 from thesis_core.api import create_app
 from thesis_core.conditional_reviews import (
     create_review,
@@ -22,7 +24,13 @@ from thesis_core.conditionals import (
 
 
 def complete(
-    store, *, model="model-a", feedback=b"", changed=False, mutate_envelope=None
+    store,
+    *,
+    model="model-a",
+    feedback=b"",
+    changed=False,
+    mutate_envelope=None,
+    command_bytes=None,
 ):
     spec = contract(store.artifacts.put_bytes(b"official"))
     if changed:
@@ -40,7 +48,9 @@ def complete(
         store,
         spec,
         prompt=b"Frozen prompt\n" + feedback,
-        command=json.dumps(command).encode(),
+        command=json.dumps(command).encode()
+        if command_bytes is None
+        else command_bytes,
         code=b"public code",
         requested_model=model,
         timeout_seconds=60,
@@ -103,6 +113,56 @@ def test_provider_metadata_retains_null_observed_identity_and_links_raw_bytes(
     assert json.loads(raw)["modelVersion"] == metadata.reported_model
     assert detail.revision_history[0].attempt_id == attempt.id
     assert detail.revision_history[0].association_basis is None
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        b"codex run --some-flag",
+        b'echo \'{"transport":"gemini_rest_operator_v1"}\'',
+        b'{ echo \'{"transport":"gemini_rest_operator_v1"}\'; }',
+        b'["codex", "run"]',
+        b'"gemini_rest_operator_v1"',
+        b'{"transport":"codex", "flag":1, "flag":2}',
+        b'{"transport":"codex", "transport":"other"}',
+        b'{"transport":"codex", "value":NaN}',
+        b'{"transport":"codex",',
+        b'{"nested":{"transport":"gemini_rest_operator_v1"}}',
+        rb'{"note":"\"transport\":\"gemini_rest_operator_v1\"",',
+    ],
+)
+def test_legacy_command_bytes_do_not_break_detail_or_listing(core_store, command):
+    attempt, detail = complete(core_store, command_bytes=command)
+    assert detail.provider_metadata is None
+    assert detail.observed_model is None
+    assert conditional_page(core_store).items[0].provider_metadata is None
+    client = TestClient(create_app(core_store))
+    assert client.get("/lab/conditionals/" + attempt.id).status_code == 200
+    assert client.get("/lab/conditionals").status_code == 200
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        b'{"transport":"gemini_rest_operator_v1", "transport":"codex"}',
+        b'{"transport":"codex", "transport":"gemini_rest_operator_v1"}',
+        rb'{"trans\u0070ort":"gemini_rest_operator_v\u0031","transport":"codex"}',
+        b'{"transport":"gemini_rest_operator_v1", "flag":1, "flag":2}',
+        b'{"transport":"gemini_rest_operator_v1", "value":NaN}',
+        b'{"transport":"gemini_rest_operator_v1",',
+        rb'{"trans\u0070ort":"gemini_rest_operator_v\u0031",',
+    ],
+)
+def test_ambiguous_gemini_command_claims_still_fail_closed(core_store, command):
+    with pytest.raises(ValueError):
+        complete(core_store, model="gemini-test", command_bytes=command)
+    with core_store.connection() as connection:
+        identity = connection.execute("SELECT id FROM conditional_attempts").fetchone()[
+            "id"
+        ]
+    client = TestClient(create_app(core_store))
+    assert client.get("/lab/conditionals/" + identity).status_code == 409
+    assert client.get("/lab/conditionals").status_code == 409
 
 
 @pytest.mark.parametrize(
@@ -212,6 +272,41 @@ def test_revision_retains_both_attempts_feedback_and_retrospective_timing(core_s
             connection.execute(
                 "DELETE FROM conditional_revisions WHERE id=%s", (identity,)
             )
+
+
+def test_revision_history_sorts_instants_across_timestamp_precision(
+    core_store, monkeypatch
+):
+    parent, _ = complete(core_store)
+    review_id = review(core_store, parent.id)
+    feedback = b"Revisit the same forecast."
+    child, _ = complete(core_store, feedback=feedback)
+    link_revision(
+        core_store,
+        parent_attempt_id=parent.id,
+        revision_attempt_id=child.id,
+        triggering_review_id=review_id,
+        feedback=feedback,
+    )
+    whole = datetime(2026, 9, 7, 12, 0, 0, tzinfo=timezone.utc)
+    bound = conditional_reviews._bound
+
+    def precise_bound(store, identity):
+        # Keep real immutable records/bindings; pin the projection's clock input
+        # rather than waiting for a database clock to land on a whole second.
+        attempt, spec, result, row = bound(store, identity)
+        started = whole if identity == parent.id else whole + timedelta(seconds=0.5)
+        if identity == parent.id:
+            row = {**row, "finished_at": whole + timedelta(seconds=0.25)}
+        return attempt.model_copy(update={"started_at": started}), spec, result, row
+
+    monkeypatch.setattr(conditional_reviews, "_bound", precise_bound)
+    history = conditional_reviews.revision_history(core_store, child.id)
+    assert [entry["attempt_id"] for entry in history] == [parent.id, child.id]
+    assert [entry["started_at"] for entry in history] == [
+        "2026-09-07T12:00:00Z",
+        "2026-09-07T12:00:00.500000Z",
+    ]
 
 
 @pytest.mark.parametrize("change", ["feedback", "contract", "review_parent", "reverse"])

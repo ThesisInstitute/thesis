@@ -7,6 +7,7 @@ or whether it preceded model generation. Forecast bytes are never rewritten.
 from __future__ import annotations
 
 import json
+import re
 
 from .canonical import canonical_bytes
 from .conditional_contracts import PairedModelResponse, validate_response
@@ -23,6 +24,42 @@ def _json(raw):
     from .conditionals import _nonfinite, _unique
 
     return json.loads(raw, object_pairs_hook=_unique, parse_constant=_nonfinite)
+
+
+def _gemini_command(raw):
+    """Probe legacy commands without imposing the Gemini JSON contract on them."""
+
+    class ObjectPairs(list):
+        pass
+
+    marker = "gemini_rest_operator_v1"
+    try:
+        command = json.loads(raw, object_pairs_hook=ObjectPairs)
+    except ValueError:
+        # A malformed explicit claim must not silently lose its verification.
+        # Decode complete JSON string tokens so escaped markers count too, while
+        # a marker merely quoted inside a shell argument is not a field claim.
+        text = raw.decode("utf-8", errors="replace")
+        if not re.match(r'\s*\{\s*"', text):
+            return None
+        tokens = list(re.finditer(r'"(?:[^"\\]|\\.)*"', text))
+        for key, value in zip(tokens, tokens[1:]):
+            if text[key.end() : value.start()].strip() != ":":
+                continue
+            try:
+                claim = (json.loads(key[0]), json.loads(value[0]))
+            except ValueError:
+                continue
+            if claim == ("transport", marker):
+                raise ValueError("invalid provider command JSON") from None
+        return None
+    if not isinstance(command, ObjectPairs) or not any(
+        key == "transport" and value == marker for key, value in command
+    ):
+        return None
+    # Preserve all duplicate pairs in the probe: a later non-Gemini transport
+    # value cannot hide an earlier Gemini claim from the strict parser.
+    return _json(raw)
 
 
 def _artifact(store, raw, media_type="text/plain"):
@@ -288,13 +325,10 @@ def provider_metadata(store, attempt, result):
         or result.execution_state != "succeeded"
     ):
         return None
-    command = _json(
+    command = _gemini_command(
         store.artifacts.read_bytes(_role(attempt.artifacts, "command").sha256)
     )
-    if (
-        not isinstance(command, dict)
-        or command.get("transport") != "gemini_rest_operator_v1"
-    ):
+    if command is None:
         return None
     endpoint_model = attempt.requested_model.removeprefix("models/")
     endpoint = (
@@ -399,8 +433,10 @@ def revision_history(store, attempt_id):
                 changed |= len(members) != before
     links = {identity: _read_revision(store, row) for identity, row in related.items()}
     views = []
+    start_times = {}
     for identity in members:
         attempt, _, result, row = _bound(store, identity)
+        start_times[identity] = attempt.started_at
         revision = links.get(identity)
         state = (
             result.execution_state
@@ -442,5 +478,8 @@ def revision_history(store, attempt_id):
             )
         )
     return tuple(
-        sorted(views, key=lambda item: (item["started_at"], item["attempt_id"]))
+        sorted(
+            views,
+            key=lambda item: (start_times[item["attempt_id"]], item["attempt_id"]),
+        )
     )
