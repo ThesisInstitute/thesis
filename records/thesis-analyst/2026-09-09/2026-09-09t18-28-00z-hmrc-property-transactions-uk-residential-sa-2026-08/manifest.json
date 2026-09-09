@@ -1,0 +1,380 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-09T18:28:00Z",
+  "runStartedAt": "2026-09-09T18:28:00Z",
+  "sealedAt": "2026-09-09T18:30:16Z",
+  "series": "hmrc.property_transactions.uk_residential_sa",
+  "period": "2026-08",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "uk-residential-property-transactions-sa-august-2026",
+    "country": "UK",
+    "dataPointId": "hmrc.property_transactions.uk_residential_sa.2026_08.first_print",
+    "expectedReleaseDate": "2026-09-30",
+    "expectedReleaseWindow": {
+      "end": "2026-09-30",
+      "start": "2026-09-30"
+    },
+    "period": "2026-08",
+    "registeredAt": "2026-09-09T18:25:32Z",
+    "registeredAtUtc": "2026-09-09T18:25:32Z",
+    "registrationCommit": "178a51ccdef886b1402ac341feda74fc546c3091",
+    "registrationState": "preregistered",
+    "resolutionSourceUrl": "https://www.gov.uk/government/statistics/monthly-property-transactions-completed-in-the-uk-with-value-40000-or-above",
+    "series": "hmrc.property_transactions.uk_residential_sa",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.gov.uk"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-09-30",
+        "start": "2026-09-30"
+      },
+      "field": "provisional seasonally adjusted estimate of the number of UK residential transactions",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "MPT_UK_RESIDENTIAL_SA",
+      "sourceUrl": "https://www.gov.uk/government/statistics/monthly-property-transactions-completed-in-the-uk-with-value-40000-or-above",
+      "table": "UK monthly property transactions tables",
+      "transform": {
+        "factor": 1,
+        "operation": "identity"
+      }
+    },
+    "sourceField": "provisional seasonally adjusted estimate of the number of UK residential transactions",
+    "sourceSeriesId": "MPT_UK_RESIDENTIAL_SA",
+    "sourceTable": "UK monthly property transactions tables",
+    "targetContentHash": "4c090e13de6dd10b1a4aaadfee1f3e82662c6a2163e9ae9ce16f53d1950e740b",
+    "targetRegistrationPath": "records/targets/2026-09-09-4c090e13de6dd10b1a4aaadfee1f3e82662c6a2163e9ae9ce16f53d1950e740b.json",
+    "targetUnit": "count",
+    "transform": {
+      "factor": 1,
+      "operation": "identity"
+    },
+    "valueScale": 1
+  },
+  "registrationCommit": "178a51ccdef886b1402ac341feda74fc546c3091",
+  "targetContentHash": "4c090e13de6dd10b1a4aaadfee1f3e82662c6a2163e9ae9ce16f53d1950e740b",
+  "targetRegistrationPath": "records/targets/2026-09-09-4c090e13de6dd10b1a4aaadfee1f3e82662c6a2163e9ae9ce16f53d1950e740b.json",
+  "registeredAtUtc": "2026-09-09T18:25:32Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-09T18:28:00Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "a16f5aa51a4dabf3d531e8f7e139df56121d8e058b26664a3774f92648aef5cb"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Add the June 2026 Bank of England Money and Credit URL or avoid relying on exact June approval/rate figures if that source is not otherwise captured."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Note that the volatility estimate uses a short recent sample, so the 80% interval is mechanically derived but sample-limited."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the suggestion to include the June 2026 Bank of England Money and Credit URL because the draft used exact June approval and rate figures; accepted the suggestion to state that the sigma-based 80% interval is sample-limited. No required fixes were raised.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the suggestion to include the June 2026 Bank of England Money and Credit URL because the draft used exact June approval and rate figures; accepted the suggestion to state that the sigma-based 80% interval is sample-limited. No required fixes were raised.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "The draft is publishable: resolver, prior/update/interval, tails, and JSON fields are coherent with the registered target."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/prompt.md",
+      "sha256": "56e5f5634b6775ead8a865df8bd5c10098240097e42f7c5c897afa3ee5ea01eb",
+      "bytes": 10770,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_command.json",
+      "sha256": "1f0b6a43d1e7323c5ae34a2a662ae7e6f88e1d80cf9c844c27a3d325017254f6",
+      "bytes": 774,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_codex_stdout.jsonl",
+      "sha256": "07b03a5399d778f902a7afeb8b13e88170f0b2ced797960ab3ffff21b43a3d34",
+      "bytes": 149674,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_codex_stderr.log",
+      "sha256": "8bed860f5a6380165bc61f61851ac1473da6cc8b684183e2625a41e6e23406e8",
+      "bytes": 233,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_codex_events.jsonl",
+      "sha256": "26fa231496e46ebf88551137c6b7f915525d954b3aa4225d1b72a071f5dfd94b",
+      "bytes": 149911,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_codex_last_message.txt",
+      "sha256": "ae065ef63594e2c1fc01a55cacd084556e9e884b1dcba82b2838d1698d459674",
+      "bytes": 7035,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_codex_trace.json",
+      "sha256": "89061a9c1aba009d86964bbf4ede173375c2edf1cf6a6cbeb20a922a3c7d9935",
+      "bytes": 560,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_stdout.txt",
+      "sha256": "ae065ef63594e2c1fc01a55cacd084556e9e884b1dcba82b2838d1698d459674",
+      "bytes": 7035,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/draft_stderr.txt",
+      "sha256": "2bf7fd9d4850d9050438d70f4e2b8c1c740582bb69657f74c07523fa833e649a",
+      "bytes": 248,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_prompt.md",
+      "sha256": "ed4914fb031461021d563a5a67ab2e02fc6726ee1ce3173adf4de67d33903f08",
+      "bytes": 10570,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_command.json",
+      "sha256": "2f895ef30e231422956f90991956f21f0065a30228ec44d6e1ca6404bc14ce3e",
+      "bytes": 770,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "b58e493e5af080a346c037b34923b5c7281efaa4d70b829f2097495919ea211b",
+      "bytes": 785,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_codex_stderr.log",
+      "sha256": "4d78d509c62fca023e41d7fe32e55feeca1b6de24e529f496237f79e2b5a96ef",
+      "bytes": 233,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_codex_events.jsonl",
+      "sha256": "43f51f2f41ff8121af64213caeabb9a9a174b0e974b317563702223d10d5277f",
+      "bytes": 807,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_codex_last_message.txt",
+      "sha256": "5ebdb20f864ef55635ed93393649e88b58d2398158a5830d09e20ef4d63eee41",
+      "bytes": 459,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_codex_trace.json",
+      "sha256": "e00186dcf8ffbba9078c7360a5eb77faf888d550035c4cb9e914ef7d8e6750d7",
+      "bytes": 552,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_stdout.txt",
+      "sha256": "5ebdb20f864ef55635ed93393649e88b58d2398158a5830d09e20ef4d63eee41",
+      "bytes": 459,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/pre_submit_review_stderr.txt",
+      "sha256": "5115821bf45465f80cbbf54d05239251e9fd628d48814fa360071ace85537451",
+      "bytes": 248,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/revision_prompt.md",
+      "sha256": "2cfdb655a77b942542e2b157817bdf5ae53fbacbc31387b52aa636b792a80ba6",
+      "bytes": 19200,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/command.json",
+      "sha256": "27e2d4f01fde95ef5aa0b2c57adddf93522d4d845faf7ff8d8835a07bf96b173",
+      "bytes": 768,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/codex_stdout.jsonl",
+      "sha256": "0e8129b831f735d050098a66d39f5894be88042fa6e4d4d382b2c9c17d5c3c8a",
+      "bytes": 8178,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/codex_stderr.log",
+      "sha256": "a964e1f671da38030a5ed31dffef4c88c7aa6b5808978c5a05ce3904ae6a076c",
+      "bytes": 233,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/codex_events.jsonl",
+      "sha256": "54732bb852523b8d545f97f0cec2805e71f69732de1c067bfd3db28cedada07b",
+      "bytes": 8200,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/codex_last_message.txt",
+      "sha256": "f24cde93da43cc46f652e32a0e152815ee803ebe14f47b1a0ee2c1be4d281b9c",
+      "bytes": 7546,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/codex_trace.json",
+      "sha256": "29a97e0eac2e9159360aea48ff58e15d0efd5f229a637d2d9b5a3e5198c65596",
+      "bytes": 551,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/stdout.txt",
+      "sha256": "f24cde93da43cc46f652e32a0e152815ee803ebe14f47b1a0ee2c1be4d281b9c",
+      "bytes": 7546,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/stderr.txt",
+      "sha256": "ed3ce3411bf6e28c1d45fc68bc93e7d5308c82be62a35b767055efa99f2e4244",
+      "bytes": 248,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/raw_response.txt",
+      "sha256": "f24cde93da43cc46f652e32a0e152815ee803ebe14f47b1a0ee2c1be4d281b9c",
+      "bytes": 7546,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/parsed_cells.json",
+      "sha256": "0d94be2f4a0090151b3a08e0989eef0e64f14e8fdbd13bbe43dbee025231ee47",
+      "bytes": 8772,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/normalized_cells.json",
+      "sha256": "1039f0d0bb0adc7bf58f6c9366bbc6b01ccd955b9bdb6d130c167bbe4028815b",
+      "bytes": 26492,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/distribution.json",
+      "sha256": "dbe20455759ba959fa2b4ab24b2698d4d9bacb935dbf4b890b0a4312ebc0d663",
+      "bytes": 13936,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/validation.json",
+      "sha256": "31b5b3005910d37363e9c51dd3ace8eb0cb8d8ded7975e1e40e911315cd4a480",
+      "bytes": 152,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/cells.with_activity.json",
+      "sha256": "40eeb7b293aafc21ad7d70fd80744b4a12e3ffd5de988fafc3e753a1f1b48cc2",
+      "bytes": 40691,
+      "createdAt": "2026-09-09T18:28:00Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/manifest.json",
+      "sha256": "58fbeea111062bb3cf2f9feabf5650250c21beb88214c4e9b6364a97ab5873fd",
+      "bytes": 15222,
+      "createdAt": "2026-09-09T18:28:00Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "uk-residential-property-transactions-sa-august-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "178a51ccdef886b1402ac341feda74fc546c3091",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "64ccb71854f7b2143306f016244142c45336a68a09ae429f82e9b6f115681c80"
+}

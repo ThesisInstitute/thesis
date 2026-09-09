@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-09-09T18:28:00Z",
+  "finishedAt": "2026-09-09T18:30:17Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 1,
+  "ok": 1,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "uk-residential-property-transactions-sa-august-2026",
+        "country": "UK",
+        "dataPointId": "hmrc.property_transactions.uk_residential_sa.2026_08.first_print",
+        "expectedReleaseDate": "2026-09-30",
+        "expectedReleaseWindow": {
+          "end": "2026-09-30",
+          "start": "2026-09-30"
+        },
+        "period": "2026-08",
+        "registeredAt": "2026-09-09T18:25:32Z",
+        "registeredAtUtc": "2026-09-09T18:25:32Z",
+        "registrationCommit": "178a51ccdef886b1402ac341feda74fc546c3091",
+        "registrationState": "preregistered",
+        "resolutionSourceUrl": "https://www.gov.uk/government/statistics/monthly-property-transactions-completed-in-the-uk-with-value-40000-or-above",
+        "series": "hmrc.property_transactions.uk_residential_sa",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.gov.uk"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-09-30",
+            "start": "2026-09-30"
+          },
+          "field": "provisional seasonally adjusted estimate of the number of UK residential transactions",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "MPT_UK_RESIDENTIAL_SA",
+          "sourceUrl": "https://www.gov.uk/government/statistics/monthly-property-transactions-completed-in-the-uk-with-value-40000-or-above",
+          "table": "UK monthly property transactions tables",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "sourceField": "provisional seasonally adjusted estimate of the number of UK residential transactions",
+        "sourceSeriesId": "MPT_UK_RESIDENTIAL_SA",
+        "sourceTable": "UK monthly property transactions tables",
+        "targetContentHash": "4c090e13de6dd10b1a4aaadfee1f3e82662c6a2163e9ae9ce16f53d1950e740b",
+        "targetRegistrationPath": "records/targets/2026-09-09-4c090e13de6dd10b1a4aaadfee1f3e82662c6a2163e9ae9ce16f53d1950e740b.json",
+        "targetUnit": "count",
+        "transform": {
+          "factor": 1,
+          "operation": "identity"
+        },
+        "valueScale": 1
+      },
+      "startedAt": "2026-09-09T18:28:00Z",
+      "finishedAt": "2026-09-09T18:30:17Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/cells.with_activity.json",
+      "stdoutTail": "Type\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/distribution.json\",\n      \"sha256\": \"dbe20455759ba959fa2b4ab24b2698d4d9bacb935dbf4b890b0a4312ebc0d663\",\n      \"bytes\": 13936,\n      \"createdAt\": \"2026-09-09T18:28:00Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/validation.json\",\n      \"sha256\": \"31b5b3005910d37363e9c51dd3ace8eb0cb8d8ded7975e1e40e911315cd4a480\",\n      \"bytes\": 152,\n      \"createdAt\": \"2026-09-09T18:28:00Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/cells.with_activity.json\",\n      \"sha256\": \"40eeb7b293aafc21ad7d70fd80744b4a12e3ffd5de988fafc3e753a1f1b48cc2\",\n      \"bytes\": 40691,\n      \"createdAt\": \"2026-09-09T18:28:00Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-09/2026-09-09t18-28-00z-hmrc-property-transactions-uk-residential-sa-2026-08/manifest.json\",\n      \"sha256\": \"58fbeea111062bb3cf2f9feabf5650250c21beb88214c4e9b6364a97ab5873fd\",\n      \"bytes\": 15222,\n      \"createdAt\": \"2026-09-09T18:28:00Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"uk-residential-property-transactions-sa-august-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"178a51ccdef886b1402ac341feda74fc546c3091\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"64ccb71854f7b2143306f016244142c45336a68a09ae429f82e9b6f115681c80\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}
