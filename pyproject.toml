@@ -35,7 +35,7 @@ Issues = "https://github.com/ThesisInstitute/thesis/issues"
 
 [project.optional-dependencies]
 custody = [
-    "receipt==0.6.0; python_version >= '3.11'",
+    "receipt==0.6.1; python_version >= '3.11'",
     # SBA custody replays geometry through pypdf layout internals; any version
     # bump must pass the official-layout and adversarial-fixture suite first.
     "pypdf==6.14.2",
