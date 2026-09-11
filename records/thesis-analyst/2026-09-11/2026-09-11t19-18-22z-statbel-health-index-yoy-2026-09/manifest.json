@@ -1,0 +1,384 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-11T19:18:22Z",
+  "runStartedAt": "2026-09-11T19:18:22Z",
+  "sealedAt": "2026-09-11T19:19:53Z",
+  "series": "statbel.health_index.yoy",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "belgium-health-index-annual-rate-september-2026",
+    "country": "BE",
+    "dataPointId": "statbel.health_index.yoy.2026-09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-07",
+      "start": "2026-09-29"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-11T19:13:41Z",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "registrationState": "preregistered",
+    "series": "statbel.health_index.yoy",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "statbel.fgov.be"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-07",
+        "start": "2026-09-29"
+      },
+      "field": "statbel.health_index.yoy",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "statbel.health_index.yoy",
+      "sourceUrl": "https://statbel.fgov.be/en/themes/consumer-prices/consumer-price-index",
+      "table": "Statbel Consumer Price Index - Health Index release",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "eaaaec58dd39e441bfc202864aea5d116ae31c39676b46cac9aed4bccfe01c7d",
+    "targetRegistrationPath": "records/targets/2026-09-11-eaaaec58dd39e441bfc202864aea5d116ae31c39676b46cac9aed4bccfe01c7d.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "targetContentHash": "eaaaec58dd39e441bfc202864aea5d116ae31c39676b46cac9aed4bccfe01c7d",
+  "targetRegistrationPath": "records/targets/2026-09-11-eaaaec58dd39e441bfc202864aea5d116ae31c39676b46cac9aed4bccfe01c7d.json",
+  "registeredAtUtc": "2026-09-11T19:13:41Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-11T19:18:22Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "fa0e0e1257a2b92c4feac758ac302b850e17f075bd84e99e84592d64590c2fdb"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "Draft sets resolutionDate to 2026-09-29 and resolutionSourceUrl to a be.STAT crosstable, while the ledger contract binds this target to the Statbel CPI/Health Index source URL and the registered resolution-date basis/window ending 2026-10-07.",
+        "actionRequested": "Set the JSON resolver fields to the canonical target contract: use the ledger Statbel CPI source URL and the registered resolution date/window basis rather than silently substituting the 2026-09-29 calendar date; if noting the 2026-09-29 calendar evidence, keep it in reasoning as a discrepancy or supporting release-timing note."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Keep the be.STAT crosstable as evidence/history context, not the resolver URL, unless the registered target is amended upstream."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The prior/update/interval step is strong; preserve the sigma calculation and implied bounds after resolver-field correction."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking resolver critique by restoring the canonical registered resolutionDate 2026-10-07 and Statbel CPI/Health Index source URL, while keeping the 2026-09-29 calendar finding only as release-timing evidence and preserving the historical sample, point estimate, and sigma-based interval.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by restoring the canonical registered resolutionDate 2026-10-07 and Statbel CPI/Health Index source URL, while keeping the 2026-09-29 calendar finding only as release-timing evidence and preserving the historical sample, point estimate, and sigma-based interval.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by restoring the canonical registered resolutionDate 2026-10-07 and Statbel CPI/Health Index source URL, while keeping the 2026-09-29 calendar finding only as release-timing evidence and preserving the historical sample, point estimate, and sigma-based interval.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is methodologically coherent, but it conflicts with the canonical target contract on resolver URL and resolution date."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/prompt.md",
+      "sha256": "cc3e057aee1cf5ca6b0bee7d7220c2705364c771ac3ff4ba0bf457f04412fbc4",
+      "bytes": 10499,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_command.json",
+      "sha256": "78f14f30053badb1e9b7ce17dbb44fa2a2594491706927edaab1e6299e36a506",
+      "bytes": 754,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "8efea945e717b3962abc1415c56a371a9db7831cb54eecdb31283f9c0851542b",
+      "bytes": 1636446,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_stderr.log",
+      "sha256": "8df94de00157f8493411587dbf8c2a9d2cdeaf051fa1f05202fea612001e102a",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_events.jsonl",
+      "sha256": "0dede8b62e03446bfe274951c2b3a702f8fc92c351ad239c45aa67ff76e978b7",
+      "bytes": 1636592,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_last_message.txt",
+      "sha256": "f61727e640a93f085943b2be6b4450db3b6341d6b39b0629fc8572368b4ea450",
+      "bytes": 6709,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_trace.json",
+      "sha256": "59291e9b5a4b0718d0813040722d55d80298a5162d42fb4e59ab0c2b3c291565",
+      "bytes": 559,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_stdout.txt",
+      "sha256": "f61727e640a93f085943b2be6b4450db3b6341d6b39b0629fc8572368b4ea450",
+      "bytes": 6709,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_stderr.txt",
+      "sha256": "86c35a085930ff21b410bc4a933cb8c8954b26a0ffaff13685754a986349ada1",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_prompt.md",
+      "sha256": "d61b4deb7127aeb2c6f7f3cd8cefed3ccc08c6fd8624a5a7596bf59280ee175e",
+      "bytes": 9973,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_command.json",
+      "sha256": "03067839d4b1f70dc65b025913eb6b9e3ebe8d778c3a34ea578734eb1656f110",
+      "bytes": 750,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "5f1465aa9200c0af71185461d5dcf677db902420de74dbe8ef5672088cb5966c",
+      "bytes": 1436,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "de109bdc38c1c2f53f8cb3d8803d9dd275932b7c52bbc992f8eac4489d6c1577",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "23382c02438731b28312152e024cbf6132b7978fa0dd9b296e5c96cdd4e2ca39",
+      "bytes": 1458,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "a24d85f262c9d493d3ee5a6e7ad85af19b6a081633b76df11dda265ff320c8e2",
+      "bytes": 1091,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "8ad4648df26f6a98219138fd844aa190249636e7060c2ea42f03db4962711c09",
+      "bytes": 555,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "a24d85f262c9d493d3ee5a6e7ad85af19b6a081633b76df11dda265ff320c8e2",
+      "bytes": 1091,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "15dbb176da6b684228fc94e6a96b4324103576fd2501bfe2ea09bed582251408",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/revision_prompt.md",
+      "sha256": "8de0f98349226e27e88d73975b2502e370a91abb00908e378bd54bc887457614",
+      "bytes": 19235,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/command.json",
+      "sha256": "c71579991f43664ee8e9648f056b0179bcb43873ac0dd137e8fcf2f34ce49d3b",
+      "bytes": 748,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_stdout.jsonl",
+      "sha256": "dc3b8807b1a3c038b63e211c2a4473e353bb3d8b1f31183bc1aa5846ba70ca2a",
+      "bytes": 7983,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_stderr.log",
+      "sha256": "e528beb1262a866d1133ae66f82a81d23e20b722c362a4c54c8b7e062b46c2a4",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_events.jsonl",
+      "sha256": "a0ed7dee34317747c9a921e90268e44ddf06035a5ee73d9ba214466f4f1287c3",
+      "bytes": 8005,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_last_message.txt",
+      "sha256": "b08f1f753089431c4cf1b576f32e112c24b24d901e274965384c19ea74ad92e9",
+      "bytes": 7253,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_trace.json",
+      "sha256": "23497d7b0cef1719a7753366df8b17932662d97a7d71c1589438283dbc94c809",
+      "bytes": 555,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/stdout.txt",
+      "sha256": "b08f1f753089431c4cf1b576f32e112c24b24d901e274965384c19ea74ad92e9",
+      "bytes": 7253,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/stderr.txt",
+      "sha256": "101a57e596dbec6dd1d9022387255bcfb882cc06cab9e7767f13a1d254533507",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/raw_response.txt",
+      "sha256": "b08f1f753089431c4cf1b576f32e112c24b24d901e274965384c19ea74ad92e9",
+      "bytes": 7253,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/parsed_cells.json",
+      "sha256": "6515283a72f311a5d61af3b90691e5d9c50531261f892c8e2c561332d53d9373",
+      "bytes": 8940,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/normalized_cells.json",
+      "sha256": "6068342e079ef5100eb06c08e4cbaa3bdad1164bd8a7701725ef288d199959d7",
+      "bytes": 26427,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/distribution.json",
+      "sha256": "f24686556043e4dd37cac11f8f583d88cfc659d7e4377c8f51a1e1bddf005361",
+      "bytes": 13703,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/validation.json",
+      "sha256": "1c85ef27160f0f7af883088d746252934b25285283f4e9f2f398817c2aaffafa",
+      "bytes": 148,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/cells.with_activity.json",
+      "sha256": "a930ecd344d266ef2a0ed0a2969a2f4e98c178eeef8e386e2ed82cf501cfdfac",
+      "bytes": 41232,
+      "createdAt": "2026-09-11T19:18:22Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/manifest.json",
+      "sha256": "d23990b91eee8783b1c5e1c7bc5433c491bb57aa93a8313ea5892838d6c4bcac",
+      "bytes": 15068,
+      "createdAt": "2026-09-11T19:18:22Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "belgium-health-index-annual-rate-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "207f48871013c6873c6e36ed88001cad5e70d627d35e4bd614704011b9006041"
+}

@@ -1,0 +1,384 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-11T19:24:35Z",
+  "runStartedAt": "2026-09-11T19:24:35Z",
+  "sealedAt": "2026-09-11T19:26:48Z",
+  "series": "nbb.consumer_confidence.indicator",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "belgium-consumer-confidence-september-2026",
+    "country": "BE",
+    "dataPointId": "nbb.consumer_confidence.indicator.2026-09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-09-25",
+      "start": "2026-09-17"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-11T19:13:41Z",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "registrationState": "preregistered",
+    "series": "nbb.consumer_confidence.indicator",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.nbb.be"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-09-25",
+        "start": "2026-09-17"
+      },
+      "field": "nbb.consumer_confidence.indicator",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "nbb.consumer_confidence.indicator",
+      "sourceUrl": "https://www.nbb.be/en/statistics/business-surveys/consumer-survey",
+      "table": "National Bank of Belgium consumer survey release",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "d72d5551351863417bcb647e8da9f7cf61102d3bdb991fe8e9bbe6bd96367113",
+    "targetRegistrationPath": "records/targets/2026-09-11-d72d5551351863417bcb647e8da9f7cf61102d3bdb991fe8e9bbe6bd96367113.json",
+    "targetUnit": "index_points",
+    "valueScale": 1
+  },
+  "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "targetContentHash": "d72d5551351863417bcb647e8da9f7cf61102d3bdb991fe8e9bbe6bd96367113",
+  "targetRegistrationPath": "records/targets/2026-09-11-d72d5551351863417bcb647e8da9f7cf61102d3bdb991fe8e9bbe6bd96367113.json",
+  "registeredAtUtc": "2026-09-11T19:13:41Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-11T19:24:35Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "9787b738d3425caa7426bbdbcbd475338eacb7cd2317bfab295a01d5e77d7018"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "resolutionSourceUrl does not match the ledger sourceBinding sourceUrl, and the draft uses an alternate NBB topic URL with a misspelled path segment.",
+        "actionRequested": "Set resolutionSourceUrl to https://www.nbb.be/en/statistics/business-surveys/consumer-survey, or explicitly justify why the registered canonical source URL is wrong while keeping the same target."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Prefer citing the official NBB/DataExplorer source for the August value if available, with Trading Economics only as a mirror fallback."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Keep the 22 Sep 2026 official calendar discrepancy in reasoning, while preserving the registered 2026-09-25 resolutionDate as drafted."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking resolver critique by setting resolutionSourceUrl to the registered canonical NBB consumer survey page while preserving the target, registered 2026-09-25 resolutionDate, and the noted 22 Sep 2026 official-calendar discrepancy. Retained the mirror fallback for the August value because the draft's available official indexed context did not expose that table value directly.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by setting resolutionSourceUrl to the registered canonical NBB consumer survey page while preserving the target, registered 2026-09-25 resolutionDate, and the noted 22 Sep 2026 official-calendar discrepancy. Retained the mirror fallback for the August value because the draft's available official indexed context did not expose that table value directly.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by setting resolutionSourceUrl to the registered canonical NBB consumer survey page while preserving the target, registered 2026-09-25 resolutionDate, and the noted 22 Sep 2026 official-calendar discrepancy. Retained the mirror fallback for the August value because the draft's available official indexed context did not expose that table value directly.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is mostly coherent, but the resolver URL should be tied to the canonical ledger source rather than the alternate topic URL."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/prompt.md",
+      "sha256": "ddfb8ddba74cfbd0692035a1dcd9abeca8cd1be2e9b12b27eae1801a6dd2fbe7",
+      "bytes": 10522,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_command.json",
+      "sha256": "ee4a43e132f0a4130a4dc69ef1acadc6926823c7d6f96cfa571938bc7f1d377a",
+      "bytes": 763,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "9c190297408df9384ee650c8d3759cb75923f1e6ff455e903bccd5996e4fd038",
+      "bytes": 3815132,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_codex_stderr.log",
+      "sha256": "f538c0027e10bf30f22aa5e0fee0ce9d6bd1360ccee3dbcbfb9d6e4bcde17359",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_codex_events.jsonl",
+      "sha256": "d67404c89049045eac38ad553cdee4260d49d83cc9e69f5c2c7d2e21f7896ec0",
+      "bytes": 3815532,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_codex_last_message.txt",
+      "sha256": "8515f18254a2a7c5427dc717f757d751c4fb5735f2eb139e4b8a5fefe28893bb",
+      "bytes": 8408,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_codex_trace.json",
+      "sha256": "cab253230cf6d063cc85b37a2ba4436b2f9a5d96d843a02745ce92348d6f9185",
+      "bytes": 560,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_stdout.txt",
+      "sha256": "8515f18254a2a7c5427dc717f757d751c4fb5735f2eb139e4b8a5fefe28893bb",
+      "bytes": 8408,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/draft_stderr.txt",
+      "sha256": "893914fb43f502196a1d77b8ae25a4687f4650ba4de0f5af6a0149f8515a8b5f",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_prompt.md",
+      "sha256": "d93dee06b7c24315c61c64981aa29282759f9012b764511eaba2cc5870778999",
+      "bytes": 11695,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_command.json",
+      "sha256": "432126f68308c9d88d08b3f14d1a71543572ce7df3a58c7327bcb08ec69b5bab",
+      "bytes": 759,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "7fa3716b1e0c3bbc0c29698eea35008439b04e9cdc6d179749e56fe6f3de1ac5",
+      "bytes": 1315,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "a2a349672fd943955373c5dbdc46ade719eaa19656b8cb67bef962ca3144a58c",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "9c9f23f9c17495dc08e5f9dc68e4ac66a547c8424fc001462cdf07e6d0ad939e",
+      "bytes": 1337,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "48b51ae797afae743535330accdeb75f4245e0c31f67429ef6cd8f87acbb91cb",
+      "bytes": 956,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "60757ecf5ccd0ca14dfdcabe70f5c8b9a060d2294790f995f67178185d25c574",
+      "bytes": 555,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "48b51ae797afae743535330accdeb75f4245e0c31f67429ef6cd8f87acbb91cb",
+      "bytes": 956,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "fa4edaa41aeb259b658f28e8b20574a715a79221cde53a15da53bb7e938cc000",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/revision_prompt.md",
+      "sha256": "15203451b099efd57078ec99226ea3a28b00fc791bfb773b6314c165d677a2c6",
+      "bytes": 20822,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/command.json",
+      "sha256": "ed7dde582e96e0b50e218575eb0a672d6736805ec5f4f64aa71efc69a95d1a2c",
+      "bytes": 757,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/codex_stdout.jsonl",
+      "sha256": "609e432fbfbc69d26e4d246854515cbc1ddc8757d833d173278d2990f1efd542",
+      "bytes": 9472,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/codex_stderr.log",
+      "sha256": "792048f396cf3fed06e7327ca1f2803e041e528ace7913e6a3cc526d7c6d4a75",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/codex_events.jsonl",
+      "sha256": "db4fd5a3b4888a82c4c61707f785d86231241a190bb153368f7bc612343f9a4e",
+      "bytes": 9494,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/codex_last_message.txt",
+      "sha256": "86d3dc3fc092513c242edca7d81feb4a38fa3f182b804666cbf14f2393172fe2",
+      "bytes": 8732,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/codex_trace.json",
+      "sha256": "9bd4ed080527f6c139400b03dbf83548bc8aec69d4d7a25a26dc94e8b013eeb6",
+      "bytes": 555,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/stdout.txt",
+      "sha256": "86d3dc3fc092513c242edca7d81feb4a38fa3f182b804666cbf14f2393172fe2",
+      "bytes": 8732,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/stderr.txt",
+      "sha256": "bdb4771c5851b43c4fb74b98d103f32a5661be049a83bd2ea54328219a171e77",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/raw_response.txt",
+      "sha256": "86d3dc3fc092513c242edca7d81feb4a38fa3f182b804666cbf14f2393172fe2",
+      "bytes": 8732,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/parsed_cells.json",
+      "sha256": "76bc4e244296f726494324ce4e147cfc971d517211faf2aa6307788399681d5a",
+      "bytes": 10437,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/normalized_cells.json",
+      "sha256": "fb5dac0236c62972b4542f8731a838e88feaa90c89da767173e7661dd97e897f",
+      "bytes": 27959,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/distribution.json",
+      "sha256": "d07ed020059529e503e77bfafc0de4fd45458ff6e8759565cb74cf5d5afa1838",
+      "bytes": 13738,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/validation.json",
+      "sha256": "843cd0e7c361d0f370fe8e0e38e2dc642015b5e2d036aa53ab1a24b88740112b",
+      "bytes": 143,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/cells.with_activity.json",
+      "sha256": "4b4ad1f1cc8c61e90828b58db1bdb258ac787ed0ea94a56c7471fa63e45ebf7b",
+      "bytes": 43149,
+      "createdAt": "2026-09-11T19:24:35Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-24-35z-nbb-consumer-confidence-indicator-2026-09/manifest.json",
+      "sha256": "f439ad2c8eb91dcd2bb7bd97520f9d73d9fc3d7ed308bc8d05491c35ba0ed711",
+      "bytes": 15498,
+      "createdAt": "2026-09-11T19:24:35Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "belgium-consumer-confidence-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "127f1c75166208eb44b5027c4eff9e40e246a2218a1f166fc14ec440f7942cce"
+}

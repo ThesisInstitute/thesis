@@ -1,0 +1,4 @@
+{"type": "thread.started", "thread_id": "01a091eb-1ca1-7292-ba32-ba7c372fe4c2"}
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "{\"summary\":\"The draft is publication-ready on the rubric, with resolver, unit, prior, update logic, interval math, tails, and JSON fields aligned to the registered target.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Add the specific prior-release URLs for the 2026-06-01 and 2026-07-02 evidence if the trace validator expects every historical anchor to appear in sourceContext.\",\"Consider noting that the 5.9-6.3 interval is an 80% interval after one-decimal rounding.\"]}"}}
+{"type": "turn.completed", "usage": {"input_tokens": 19598, "cached_input_tokens": 9600, "output_tokens": 631, "reasoning_output_tokens": 516}}

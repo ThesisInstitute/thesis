@@ -1,0 +1,15 @@
+{
+  "summary": "Draft is mostly coherent, but the resolver URL should be tied to the canonical ledger source rather than the alternate topic URL.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "blocking",
+      "summary": "resolutionSourceUrl does not match the ledger sourceBinding sourceUrl, and the draft uses an alternate NBB topic URL with a misspelled path segment.",
+      "actionRequested": "Set resolutionSourceUrl to https://www.nbb.be/en/statistics/business-surveys/consumer-survey, or explicitly justify why the registered canonical source URL is wrong while keeping the same target."
+    }
+  ],
+  "optionalSuggestions": [
+    "Prefer citing the official NBB/DataExplorer source for the August value if available, with Trading Economics only as a mirror fallback.",
+    "Keep the 22 Sep 2026 official calendar discrepancy in reasoning, while preserving the registered 2026-09-25 resolutionDate as drafted."
+  ]
+}

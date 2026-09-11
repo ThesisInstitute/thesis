@@ -1,0 +1,21 @@
+{
+  "summary": "The draft is mostly publishable, but its interval math overstates rigor because it treats a non-contiguous August 2025 to June 2026 gap as a one-month realized change.",
+  "requiredFixes": [
+    {
+      "rubricItem": "interval",
+      "severity": "warning",
+      "summary": "The realized-volatility sample labels all successive differences as monthly changes even though the 2025-08 to 2026-06 step is a 10-month gap.",
+      "actionRequested": "Revise the interval explanation to either compute volatility only from contiguous month-to-month pairs or explicitly describe the sample as sparse same-row changes and justify using it for the 80% width."
+    },
+    {
+      "rubricItem": "prior_update_interval",
+      "severity": "warning",
+      "summary": "The compact Prior/update/interval step inherits the same non-contiguous-change issue in the historical sample and sigma derivation.",
+      "actionRequested": "Update the compact step so the historical sample, change calculation, sigma, and implied bounds use a coherent interval method."
+    }
+  ],
+  "optionalSuggestions": [
+    "Keep the explicit note that the BLS calendar appears to say October 2, 2026 while the registered target fixes resolutionDate as 2026-10-08.",
+    "Consider making the +0.011 million rebound adjustment less precise or tie it to a simple average of recent contiguous changes."
+  ]
+}

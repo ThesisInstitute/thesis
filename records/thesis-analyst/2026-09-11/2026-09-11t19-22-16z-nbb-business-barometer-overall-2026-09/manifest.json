@@ -1,0 +1,384 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-11T19:22:16Z",
+  "runStartedAt": "2026-09-11T19:22:16Z",
+  "sealedAt": "2026-09-11T19:24:35Z",
+  "series": "nbb.business_barometer.overall",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "belgium-nbb-business-barometer-september-2026",
+    "country": "BE",
+    "dataPointId": "nbb.business_barometer.overall.2026-09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-02",
+      "start": "2026-09-24"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-11T19:13:41Z",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "registrationState": "preregistered",
+    "series": "nbb.business_barometer.overall",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.nbb.be"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-02",
+        "start": "2026-09-24"
+      },
+      "field": "nbb.business_barometer.overall",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "nbb.business_barometer.overall",
+      "sourceUrl": "https://www.nbb.be/en/statistics/business-surveys/business-survey",
+      "table": "National Bank of Belgium business survey release",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "5b1c21497b8b7b76398409ef924ba2fadc48fff653b2e6ce4d9d50821db0aeec",
+    "targetRegistrationPath": "records/targets/2026-09-11-5b1c21497b8b7b76398409ef924ba2fadc48fff653b2e6ce4d9d50821db0aeec.json",
+    "targetUnit": "index_points",
+    "valueScale": 1
+  },
+  "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "targetContentHash": "5b1c21497b8b7b76398409ef924ba2fadc48fff653b2e6ce4d9d50821db0aeec",
+  "targetRegistrationPath": "records/targets/2026-09-11-5b1c21497b8b7b76398409ef924ba2fadc48fff653b2e6ce4d9d50821db0aeec.json",
+  "registeredAtUtc": "2026-09-11T19:13:41Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-11T19:22:16Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "93fa4cb95fb22883bd3d745ddc64212e45cb9345b4f9fd3b3b5a03f6e289d8e2"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "The draft resolutionSourceUrl uses nsidisseminate-stat.nbb.be, while the registered sourceBinding allows only www.nbb.be and names https://www.nbb.be/en/statistics/business-surveys/business-survey as the sourceUrl.",
+        "actionRequested": "Change resolutionSourceUrl to the registered NBB sourceBinding URL, or update the registered target through the proper reviewed ledger path if the SDMX endpoint is intended to be the resolver."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The use of Trading Economics/public mirrors for the August print should be framed as contextual evidence only; keep the final resolver explicitly official NBB first print."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Consider noting that 2026-09-24 comes from the official NBB release calendar even though the registered expected window ends 2026-10-02."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking resolver critique by changing resolutionSourceUrl to the registered www.nbb.be business survey source binding while keeping the SDMX key in the rule for exact series identity; accepted the clarification that public mirrors are contextual only and that final resolution remains the official NBB first print; retained the official-calendar 2026-09-24 release date note.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by changing resolutionSourceUrl to the registered www.nbb.be business survey source binding while keeping the SDMX key in the rule for exact series identity; accepted the clarification that public mirrors are contextual only and that final resolution remains the official NBB first print; retained the official-calendar 2026-09-24 release date note.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by changing resolutionSourceUrl to the registered www.nbb.be business survey source binding while keeping the SDMX key in the rule for exact series identity; accepted the clarification that public mirrors are contextual only and that final resolution remains the official NBB first print; retained the official-calendar 2026-09-24 release date note.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is mostly forecast-complete, but the resolver URL conflicts with the registered source binding host/source and should be fixed before publication."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/prompt.md",
+      "sha256": "65b2f7a43ad39dd6419c1588ba6ed2568bd1e31f1280f683516300f528ff125e",
+      "bytes": 10513,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_command.json",
+      "sha256": "0e650cd21e51a3fbc56feab24bb3ff472f762a7d1bdf5b75e3fae97e6c5d0ac7",
+      "bytes": 760,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "136e644c5fd06bd497b9b6b48e49845f69eee47bb01c7f69e9b46c3d7ab9e220",
+      "bytes": 1281428,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_codex_stderr.log",
+      "sha256": "38e21080fc88edc5604145ce99472b915dd548f797dc94609f69343e7acf63e6",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_codex_events.jsonl",
+      "sha256": "469246a53852ecd1b378a5aa6d1af10985e99591cbd590d65cc41cffeadc6f7f",
+      "bytes": 1281619,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_codex_last_message.txt",
+      "sha256": "fc15a44f75f4d46bced808261892e03a48f2409fb0faa428dee9a1da0d60eb3d",
+      "bytes": 8001,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_codex_trace.json",
+      "sha256": "39baaf5efd1e47aac019973c8ab42475e0d2b59ea8a194edd1fa5c5a33038667",
+      "bytes": 559,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_stdout.txt",
+      "sha256": "fc15a44f75f4d46bced808261892e03a48f2409fb0faa428dee9a1da0d60eb3d",
+      "bytes": 8001,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/draft_stderr.txt",
+      "sha256": "446ae8ee21c8a7b80bc8a49c92745f561fa1ba33fe7bf52621a8ebee9e33ab91",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_prompt.md",
+      "sha256": "025bb280301332dc90219f3bd5984bdeff764a3df9f0fe9a1b1d64c5f9bce9b1",
+      "bytes": 11279,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_command.json",
+      "sha256": "8f553f1a1303bbaa75f8b6123c976fbaefd6e3a612480b73dc812680cb3fa861",
+      "bytes": 756,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "8c6bda8f8e1a6536b0703ea4a96645b4ecd03e19699bbd8f9674d24036a7ebfc",
+      "bytes": 1354,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "a33610b82f5b1296824cb0572ec7a287b174575dce28b012ce8ac753761a7f2d",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "f2760091cf271d1587dadf658b0fde60299c5653e71e78b330442607988460a3",
+      "bytes": 1376,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "42e642244b911111846a49fa1554501de9ca5e7e703c89ba7778db01d0baf8a5",
+      "bytes": 1009,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "de654f4b7298a315ebbfa86edbdf0cdbcbfa0b1a7559267ea47e8ad13185401b",
+      "bytes": 555,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "42e642244b911111846a49fa1554501de9ca5e7e703c89ba7778db01d0baf8a5",
+      "bytes": 1009,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "b0823b486c63cbb5135a92d97b381abb0200e95b7d5b73b9d5ee551385eb7b78",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/revision_prompt.md",
+      "sha256": "0e313ad2798bdaf177890f66cdeeab85acb72736b690f9d3a7873654703a4616",
+      "bytes": 20459,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/command.json",
+      "sha256": "59c7e335c70cd6c2ab0768b0c867f4c6c7fc43839b533feb0c7ec51966fc245c",
+      "bytes": 754,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/codex_stdout.jsonl",
+      "sha256": "ae27a4fbc9f002e6411c1d7b11d287789ca3f108f857099a0b7aa3947f55505c",
+      "bytes": 9079,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/codex_stderr.log",
+      "sha256": "c8557da8c51ba60dea2cf8693cb80621f9fe5c13fc66f30b4b72d57a7e7f44d0",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/codex_events.jsonl",
+      "sha256": "0ce22d0bb26bbfa241eff772c03e848a983d58475dfeb81c7a1da7fe56f9ec27",
+      "bytes": 9101,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/codex_last_message.txt",
+      "sha256": "68a770a7aaeb4a485d591ab3d4cde98a10ea7a1f48201c5f17e137a4a52207e7",
+      "bytes": 8355,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/codex_trace.json",
+      "sha256": "5d3215c474361d61ffa9ead93d8e77c5bf7353e57a8534d926fed8ccf87bfa44",
+      "bytes": 555,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/stdout.txt",
+      "sha256": "68a770a7aaeb4a485d591ab3d4cde98a10ea7a1f48201c5f17e137a4a52207e7",
+      "bytes": 8355,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/stderr.txt",
+      "sha256": "e92bb5adcbe6f8fb773e500271f12e0670b187c1d6e95c5bc90bf249bbc9388d",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/raw_response.txt",
+      "sha256": "68a770a7aaeb4a485d591ab3d4cde98a10ea7a1f48201c5f17e137a4a52207e7",
+      "bytes": 8355,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/parsed_cells.json",
+      "sha256": "e35dd77c6e009892bc9175326ac53914b4b7238682f7e5484c9fdab516ccb954",
+      "bytes": 10006,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/normalized_cells.json",
+      "sha256": "bc9fcae8ca540c3ad48bde586a43c68e335f5c83ebb44f2f78518e410d1b4aca",
+      "bytes": 27375,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/distribution.json",
+      "sha256": "3546dacbc09eb16343300bfd21751556af8731b9efdb04cc296cd2f69f484004",
+      "bytes": 13585,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/validation.json",
+      "sha256": "77bd07f826476eca3ffd98e013e5ec6d58cf01f9f75bd372cd9ffa75fae38ade",
+      "bytes": 146,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/cells.with_activity.json",
+      "sha256": "83cf6239fed02c6fd1ffe4c67a935976c2cc64897a59efa6b5526cb9afcc2b92",
+      "bytes": 42571,
+      "createdAt": "2026-09-11T19:22:16Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-22-16z-nbb-business-barometer-overall-2026-09/manifest.json",
+      "sha256": "a85e2034b6a0f9d846b43550c0ff202b7a8f6de1f1184d1c0ee8808b00464eaa",
+      "bytes": 15489,
+      "createdAt": "2026-09-11T19:22:16Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "belgium-nbb-business-barometer-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "297221148a63fe4589742208c266d9aa50d4d2b2987eda180639f346187c79e1"
+}

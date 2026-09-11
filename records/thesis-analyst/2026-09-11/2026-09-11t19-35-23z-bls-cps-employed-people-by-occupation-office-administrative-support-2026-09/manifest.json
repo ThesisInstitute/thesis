@@ -1,0 +1,397 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-11T19:35:23Z",
+  "runStartedAt": "2026-09-11T19:35:23Z",
+  "sealedAt": "2026-09-11T19:37:17Z",
+  "series": "bls.cps.employed_people_by_occupation.office_administrative_support",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "cps-office-admin-employment-september-2026",
+    "country": "US",
+    "dataPointId": "bls.cps.employed_people_by_occupation.office_administrative_support.september_2026.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-15",
+      "start": "2026-10-07"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-11T19:13:41Z",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "registrationState": "preregistered",
+    "series": "bls.cps.employed_people_by_occupation.office_administrative_support",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-15",
+        "start": "2026-10-07"
+      },
+      "field": "Office and administrative support occupations",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "bls.cps.employed_people_by_occupation.office_administrative_support",
+      "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+      "table": "CPS Employment Situation Table A-19, employed persons by occupation, not seasonally adjusted (thousands)",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "10f4f7438b667b1f32e0e88a703dd95f27dbe44a6f2754ec09627e470eca77b3",
+    "targetRegistrationPath": "records/targets/2026-09-11-10f4f7438b667b1f32e0e88a703dd95f27dbe44a6f2754ec09627e470eca77b3.json",
+    "targetUnit": "millions",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "targetContentHash": "10f4f7438b667b1f32e0e88a703dd95f27dbe44a6f2754ec09627e470eca77b3",
+  "targetRegistrationPath": "records/targets/2026-09-11-10f4f7438b667b1f32e0e88a703dd95f27dbe44a6f2754ec09627e470eca77b3.json",
+  "registeredAtUtc": "2026-09-11T19:13:41Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-11T19:35:23Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "c7267e89c02731320173073023880dc9628f36269b4c1e65c40ec116f339f9ab"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "warning",
+        "rubricItem": "resolver",
+        "summary": "The cell matches the registered resolutionDate of 2026-10-15, but the resolutionRule embeds a conflicting claim that the BLS calendar says the September 2026 Employment Situation release is October 2, 2026.",
+        "actionRequested": "Keep resolutionDate tied to the ledger contract, but either remove the calendar-discrepancy sentence from the resolutionRule or move it to reasoning only with the exact cited evidence preserved; do not let the resolver text imply an alternate resolution date."
+      },
+      {
+        "findingId": "review.finding.2",
+        "severity": "warning",
+        "rubricItem": "interval",
+        "summary": "The interval says sigma = 0.248 and 1.28*sigma = 0.317, but the published 80% bounds are roughly +/-0.35 around the point estimate.",
+        "actionRequested": "State the explicit widening rule from 0.317 to about 0.35 million, or adjust the interval to match the stated volatility method."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The prior/update/interval step is otherwise compact and useful; keeping the arithmetic visibly tied to 16.154 + 0.068 = 16.222 would make the rounded 16.22 point clearer."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The tail scenarios are adequate, but naming approximate low/high values for repeat CPS-sample drops or rebounds would make them more concrete."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the resolver critique by keeping the official calendar discrepancy in reasoning rather than the resolutionRule, and accepted the interval critique by stating the explicit widening from 1.28*sigma = 0.317 million to about 0.350 million. The point estimate and 80% interval are otherwise unchanged.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.finding.2",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the resolver critique by keeping the official calendar discrepancy in reasoning rather than the resolutionRule, and accepted the interval critique by stating the explicit widening from 1.28*sigma = 0.317 million to about 0.350 million. The point estimate and 80% interval are otherwise unchanged.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the resolver critique by keeping the official calendar discrepancy in reasoning rather than the resolutionRule, and accepted the interval critique by stating the explicit widening from 1.28*sigma = 0.317 million to about 0.350 million. The point estimate and 80% interval are otherwise unchanged.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the resolver critique by keeping the official calendar discrepancy in reasoning rather than the resolutionRule, and accepted the interval critique by stating the explicit widening from 1.28*sigma = 0.317 million to about 0.350 million. The point estimate and 80% interval are otherwise unchanged.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "The draft is publishable in structure but should tighten the resolver-date discrepancy and interval arithmetic before publication."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/prompt.md",
+      "sha256": "208c92bfedf0743b97542dfbc8d25119727cb0962505d2aa80b3032069f7c435",
+      "bytes": 10782,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_command.json",
+      "sha256": "03c93149f0142df5181762a846d1153aa8fc5732f8a4dd073d361dc103657c83",
+      "bytes": 797,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "b6d8759d410a9ff247f9adc3760f4daf5294042ff07ec4060c9e333b62840ea2",
+      "bytes": 2457382,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_codex_stderr.log",
+      "sha256": "7cbc518b741830778a34cb5f6fac4eda2fa1be3a7084598cce97783cf2794c0a",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_codex_events.jsonl",
+      "sha256": "71d1faf7991d8269b9d6be5d048b5c4db539439c5708e08401069f17027a2f18",
+      "bytes": 2457611,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_codex_last_message.txt",
+      "sha256": "4049caeeb388b7838e582addf1e42412f53f97ba86cfa9eeb4439b0b3e6b65dd",
+      "bytes": 6791,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_codex_trace.json",
+      "sha256": "8390a0ffe1b9d6e6cddef16cadbab2db1730b074c0e4116f0c051fcaa347459c",
+      "bytes": 560,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_stdout.txt",
+      "sha256": "4049caeeb388b7838e582addf1e42412f53f97ba86cfa9eeb4439b0b3e6b65dd",
+      "bytes": 6791,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/draft_stderr.txt",
+      "sha256": "514e0f91dfbf52cc2e64ac21189265361b54e0864c6d8f63f8a073ae4379893f",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_prompt.md",
+      "sha256": "af07e58237535e7384fdec8bda715f503d239d29156411294b1fb5be253b22bd",
+      "bytes": 10234,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_command.json",
+      "sha256": "17552bd7b8895e7bd53aec7da1a487aeca688bedef26e577f3df554f6f7a90f9",
+      "bytes": 793,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "693d746f071d441e750df253c50e3566eb3af340efbcccd9c6b365a25f17d351",
+      "bytes": 1751,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "c91d74fbe18d1d7979caed6245acd9e363d6f8c4ac864eaa5492e461d5b0ec15",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "4f9d6ea9954a5ac11ae8f9c2d3ff2837aa177984ceb45cbb3a28be6e74523b91",
+      "bytes": 1773,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "4f0b15947ca25d35d29fe344d8c38c8b83fa358d94b979f39c61edbe9269051d",
+      "bytes": 1390,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "448b7d14a51acdf9b89aced2d62c3290269368c84091bec8dc5079ffa24d79fc",
+      "bytes": 555,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "4f0b15947ca25d35d29fe344d8c38c8b83fa358d94b979f39c61edbe9269051d",
+      "bytes": 1390,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "31ed25b98f10421bc814bc0e5291e37e69f9b2d3c2d68a6a3bc13e43f7da3174",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/revision_prompt.md",
+      "sha256": "338df2033dfced24aff54d41f2c8cef7c7f3da3204a183b1edfe39a30b019e21",
+      "bytes": 19899,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/command.json",
+      "sha256": "4d41e69f84f5240a4bf427a5524e9bbf0e48ac1ffec98d0618e42e9cfff468f6",
+      "bytes": 791,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/codex_stdout.jsonl",
+      "sha256": "c50be70b4050b3986bc8a47fee47e812309d6a1c238917a4ec95ac0506946e2e",
+      "bytes": 7620,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/codex_stderr.log",
+      "sha256": "beb484fbf2b1a075113c86fc65fc741790ba3d9eeccbb3960968b5f648237c95",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/codex_events.jsonl",
+      "sha256": "70850be4e80e4ac196ce1ac0d576375d5e1aad229f676b0488c084aa027445be",
+      "bytes": 7642,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/codex_last_message.txt",
+      "sha256": "710e767adfd5ff6e5fea3ed0b4980d0b2ed8618c0ca8de97b9625d7389f82371",
+      "bytes": 6976,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/codex_trace.json",
+      "sha256": "c9ca5a5e39356b3c481f57e9e0145cc637fc65cfad2ac1d85e16754a0b340525",
+      "bytes": 555,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/stdout.txt",
+      "sha256": "710e767adfd5ff6e5fea3ed0b4980d0b2ed8618c0ca8de97b9625d7389f82371",
+      "bytes": 6976,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/stderr.txt",
+      "sha256": "21ecacc5fe1189d53ef1bcf4c2bf8346cdf17b8b27692a653568062f0593d30f",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/raw_response.txt",
+      "sha256": "710e767adfd5ff6e5fea3ed0b4980d0b2ed8618c0ca8de97b9625d7389f82371",
+      "bytes": 6976,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/parsed_cells.json",
+      "sha256": "1285612b845c43e1ca9d3e0fb650ca355c7c938854a51143c051eb2740df9205",
+      "bytes": 8242,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/normalized_cells.json",
+      "sha256": "aa76de98ebd081cd6578da325c5a853e1e00dfc4b90a609a78bd600fc5b55ad2",
+      "bytes": 25914,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/distribution.json",
+      "sha256": "30a2901f4992a0b14fc4cc6b0cf234cc17b35c737d7bcec6f89a672e20ccea72",
+      "bytes": 13888,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/validation.json",
+      "sha256": "3456dcdb620d84051e16a68ce99638f238d1b939e0f8780ff609029a27ef3448",
+      "bytes": 143,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/cells.with_activity.json",
+      "sha256": "225df883f56a888ed89db14d6ce8c6365ca052388d72de97a22d1c5a72444c60",
+      "bytes": 43126,
+      "createdAt": "2026-09-11T19:35:23Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-35-23z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-09/manifest.json",
+      "sha256": "1364d7f86b08930275637c0d08ecfdc1aafb299cb9ce0367dfc6a029d74e7d3c",
+      "bytes": 17638,
+      "createdAt": "2026-09-11T19:35:23Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "cps-office-admin-employment-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "569302cc1e71165c07bce6f24b58119829f3f8c2f1e3193055337a543d8fc9d1"
+}

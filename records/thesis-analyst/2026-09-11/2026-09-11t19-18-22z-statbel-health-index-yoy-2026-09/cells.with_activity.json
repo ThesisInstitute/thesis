@@ -1,0 +1,1309 @@
+[
+  {
+    "slug": "belgium-health-index-annual-rate-september-2026",
+    "country": "BE",
+    "type": "data",
+    "title": "Belgium health-index inflation, September 2026",
+    "question": "What will Statbel first publish as the annual inflation rate based on the health index for September 2026, in percent, using the Health index special aggregate and not the smoothed health index?",
+    "unit": "percent",
+    "pointEstimate": 3.85,
+    "ciLow": 2.96,
+    "ciHigh": 4.74,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-07",
+    "resolutionSource": "Statbel Consumer Price Index - Health Index release",
+    "resolutionSourceUrl": "https://statbel.fgov.be/en/themes/consumer-prices/consumer-price-index",
+    "resolutionRule": "Resolve to the first Statbel-published annual inflation rate based on the Health index special aggregate for m-2026-09, reported in percent and rounded to the agency's published two-decimal precision. Use the first official print only; ignore later revisions, later database corrections, mirrors, and the smoothed health index. The registered target uses the Statbel CPI/Health Index source page and the expected release window ending 2026-10-07; the Statbel calendar evidence found during the run listed the planned m-2026-09 release on 2026-09-29.",
+    "dataPointId": "statbel.health_index.yoy.2026-09.first_print",
+    "historicalContext": [
+      {
+        "label": "August 2025",
+        "value": 2.04,
+        "period": {
+          "type": "month",
+          "value": "2025-08"
+        }
+      },
+      {
+        "label": "September 2025",
+        "value": 2.15,
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        }
+      },
+      {
+        "label": "October 2025",
+        "value": 2.1,
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        }
+      },
+      {
+        "label": "November 2025",
+        "value": 2.45,
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        }
+      },
+      {
+        "label": "December 2025",
+        "value": 2.21,
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        }
+      },
+      {
+        "label": "January 2026",
+        "value": 1.37,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "February 2026",
+        "value": 1.68,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "March 2026",
+        "value": 1.38,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 3.38,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 3.48,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 2.99,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": 3.22,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "August 2026",
+        "value": 3.44,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      }
+    ],
+    "drivers": [
+      "August health-index inflation was already elevated at 3.44 percent",
+      "September 2025 base index was below August 2025, mechanically lifting September 2026 year-over-year inflation if the index is flat",
+      "Energy-related pressure was strong in August, especially natural gas and electricity",
+      "Core inflation eased but remained near 3 percent",
+      "Motor fuels affect headline CPI more than the health index because they are excluded from the health index basket"
+    ],
+    "sourceContext": [
+      "https://statbel.fgov.be/en/calendar",
+      "https://statbel.fgov.be/en/themes/consumer-prices/consumer-price-index",
+      "https://bestat.statbel.fgov.be/bestat/crosstable.xhtml?view=31b8021d-3fcd-4a8b-ac49-92beabf434e9",
+      "https://bestat.statbel.fgov.be/bestat/crosstable.xhtml?view=e8fad1c0-5270-4d62-9118-0999ee8cb323"
+    ],
+    "runAt": "2026-09-11T19:19:53Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Belgium September 2026 health-index annual inflation forecast"
+      },
+      {
+        "kind": "text",
+        "text": "Framing and exact resolver: this targets Statbel's first print of annual inflation based on the Health index special aggregate for September 2026, in percent, distinct from headline CPI, index-without-energy aggregates, and the smoothed health index."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked the Statbel release calendar for Consumer Price Index - Health Index m-2026-09.",
+        "result": "The Statbel calendar lists Consumer Price Index - Health Index for m-2026-09 on 29 September 2026; the same calendar lists m-2026-10 on 29 October 2026 and m-2026-11 on 27 November 2026."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched Statbel be.STAT annual inflation rate by special aggregates, last 13 months, and selected the Health index column.",
+        "result": "Health index annual inflation prints were 2.04 in August 2025, 2.15 in September 2025, 2.10 in October 2025, 2.45 in November 2025, 2.21 in December 2025, 1.37 in January 2026, 1.68 in February 2026, 1.38 in March 2026, 3.38 in April 2026, 3.48 in May 2026, 2.99 in June 2026, 3.22 in July 2026, and 3.44 in August 2026."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched Statbel health-index levels by base year, last 13 months, to identify the base effect into September.",
+        "result": "On the 2025=100 base, the health index was 100.05 in August 2025, 99.77 in September 2025, 103.24 in July 2026, and 103.49 in August 2026; on the 2013=100 base, August 2026 was 140.30 and September 2025 was 135.26."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the latest Statbel CPI release text for current drivers and cross-checking the variant.",
+        "result": "The August 2026 release states health-index inflation rose from 3.22 in July to 3.44 in August, the health index increased by 0.25 points to 103.49, headline inflation was 3.97, core inflation was 2.99, natural gas prices rose 9.8 percent month over month, electricity rose 1.0 percent, and plane tickets fell 8.4 percent."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate/reference class: the recent official reference class is the 13 monthly Health index annual-rate prints from August 2025 through August 2026, averaging about 2.50 percent, but the live state is higher: the last five prints are 3.38, 3.48, 2.99, 3.22, and 3.44 percent."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior starts from August 2026 health-index inflation of 3.44 percent. Level/base adjustment: September 2025 health index of 99.77 was 0.28 index points below August 2025's 100.05, so an unchanged September 2026 index of 103.49 would imply about 3.73 percent year-over-year; allowing a modest September 2026 monthly rise of about 0.12 index point implies roughly 3.85 percent. Momentum/current drivers add support from August energy pressure but are tempered by lower core inflation and the exclusion of motor fuels from the health index. Interval method: monthly changes in the fetched health-index annual-rate prints are 0.11, -0.05, 0.35, -0.24, -0.84, 0.31, -0.30, 2.00, 0.10, -0.49, 0.23, and 0.22 percentage points; sample sigma = 0.6925, so 1.28*sigma = 0.8863. Applying that half-width to 3.85 gives 2.96 to 4.74 after rounding."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk comes from another utility-price jump or a larger September index increase, which would land above the interval if health-index inflation exceeded 4.74 percent. Downside risk comes from a reversal in household energy prices or broad service-price softness, which would land below the interval if the annual rate fell under 2.96 percent."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the blocking resolver critique by restoring the canonical registered resolutionDate 2026-10-07 and Statbel CPI/Health Index source URL, while keeping the 2026-09-29 calendar finding only as release-timing evidence and preserving the historical sample, point estimate, and sigma-based interval."
+      },
+      {
+        "kind": "forecast",
+        "point": 3.85,
+        "ciLow": 2.96,
+        "ciHigh": 4.74
+      }
+    ],
+    "agentReportedRunAt": "2026-09-11T19:18:36Z",
+    "runStartedAt": "2026-09-11T19:18:22Z",
+    "promptMode": "fast",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "targetContentHash": "eaaaec58dd39e441bfc202864aea5d116ae31c39676b46cac9aed4bccfe01c7d",
+    "targetRegistrationPath": "records/targets/2026-09-11-eaaaec58dd39e441bfc202864aea5d116ae31c39676b46cac9aed4bccfe01c7d.json",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 1.625,
+        "upper": 6.075
+      },
+      "points": [
+        {
+          "value": 1.625,
+          "probability": 0.0
+        },
+        {
+          "value": 1.64725,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 1.6695,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 1.69175,
+          "probability": 0.005
+        },
+        {
+          "value": 1.714,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 1.73625,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 1.7585,
+          "probability": 0.01
+        },
+        {
+          "value": 1.78075,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 1.803,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 1.82525,
+          "probability": 0.015
+        },
+        {
+          "value": 1.8475,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 1.86975,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 1.892,
+          "probability": 0.02
+        },
+        {
+          "value": 1.91425,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 1.9365,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 1.95875,
+          "probability": 0.025
+        },
+        {
+          "value": 1.981,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 2.00325,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 2.0255,
+          "probability": 0.03
+        },
+        {
+          "value": 2.04775,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 2.07,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 2.09225,
+          "probability": 0.035
+        },
+        {
+          "value": 2.1145,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 2.13675,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 2.159,
+          "probability": 0.04
+        },
+        {
+          "value": 2.18125,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 2.2035,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 2.22575,
+          "probability": 0.045
+        },
+        {
+          "value": 2.248,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 2.27025,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 2.2925,
+          "probability": 0.05
+        },
+        {
+          "value": 2.31475,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 2.337,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 2.35925,
+          "probability": 0.055
+        },
+        {
+          "value": 2.3815,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 2.40375,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 2.426,
+          "probability": 0.06
+        },
+        {
+          "value": 2.44825,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 2.4705,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 2.49275,
+          "probability": 0.065
+        },
+        {
+          "value": 2.515,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 2.53725,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 2.5595,
+          "probability": 0.07
+        },
+        {
+          "value": 2.58175,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 2.604,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 2.62625,
+          "probability": 0.075
+        },
+        {
+          "value": 2.6485,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 2.67075,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 2.693,
+          "probability": 0.08
+        },
+        {
+          "value": 2.71525,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 2.7375,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 2.75975,
+          "probability": 0.085
+        },
+        {
+          "value": 2.782,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 2.80425,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 2.8265,
+          "probability": 0.09
+        },
+        {
+          "value": 2.84875,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 2.871,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 2.89325,
+          "probability": 0.095
+        },
+        {
+          "value": 2.9155,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 2.93775,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 2.96,
+          "probability": 0.1
+        },
+        {
+          "value": 2.98225,
+          "probability": 0.11
+        },
+        {
+          "value": 3.0045,
+          "probability": 0.12
+        },
+        {
+          "value": 3.02675,
+          "probability": 0.13
+        },
+        {
+          "value": 3.049,
+          "probability": 0.14
+        },
+        {
+          "value": 3.07125,
+          "probability": 0.15
+        },
+        {
+          "value": 3.0935,
+          "probability": 0.16
+        },
+        {
+          "value": 3.11575,
+          "probability": 0.17
+        },
+        {
+          "value": 3.138,
+          "probability": 0.18
+        },
+        {
+          "value": 3.16025,
+          "probability": 0.19
+        },
+        {
+          "value": 3.1825,
+          "probability": 0.2
+        },
+        {
+          "value": 3.20475,
+          "probability": 0.21
+        },
+        {
+          "value": 3.227,
+          "probability": 0.22
+        },
+        {
+          "value": 3.24925,
+          "probability": 0.23
+        },
+        {
+          "value": 3.2715,
+          "probability": 0.24
+        },
+        {
+          "value": 3.29375,
+          "probability": 0.25
+        },
+        {
+          "value": 3.316,
+          "probability": 0.26
+        },
+        {
+          "value": 3.33825,
+          "probability": 0.27
+        },
+        {
+          "value": 3.3605,
+          "probability": 0.28
+        },
+        {
+          "value": 3.38275,
+          "probability": 0.29
+        },
+        {
+          "value": 3.405,
+          "probability": 0.3
+        },
+        {
+          "value": 3.42725,
+          "probability": 0.31
+        },
+        {
+          "value": 3.4495,
+          "probability": 0.32
+        },
+        {
+          "value": 3.47175,
+          "probability": 0.33
+        },
+        {
+          "value": 3.494,
+          "probability": 0.34
+        },
+        {
+          "value": 3.51625,
+          "probability": 0.35
+        },
+        {
+          "value": 3.5385,
+          "probability": 0.36
+        },
+        {
+          "value": 3.56075,
+          "probability": 0.37
+        },
+        {
+          "value": 3.583,
+          "probability": 0.38
+        },
+        {
+          "value": 3.60525,
+          "probability": 0.39
+        },
+        {
+          "value": 3.6275,
+          "probability": 0.4
+        },
+        {
+          "value": 3.64975,
+          "probability": 0.41
+        },
+        {
+          "value": 3.672,
+          "probability": 0.42
+        },
+        {
+          "value": 3.69425,
+          "probability": 0.43
+        },
+        {
+          "value": 3.7165,
+          "probability": 0.44
+        },
+        {
+          "value": 3.73875,
+          "probability": 0.45
+        },
+        {
+          "value": 3.761,
+          "probability": 0.46
+        },
+        {
+          "value": 3.78325,
+          "probability": 0.47
+        },
+        {
+          "value": 3.8055,
+          "probability": 0.48
+        },
+        {
+          "value": 3.82775,
+          "probability": 0.49
+        },
+        {
+          "value": 3.85,
+          "probability": 0.5
+        },
+        {
+          "value": 3.87225,
+          "probability": 0.51
+        },
+        {
+          "value": 3.8945,
+          "probability": 0.52
+        },
+        {
+          "value": 3.91675,
+          "probability": 0.53
+        },
+        {
+          "value": 3.939,
+          "probability": 0.54
+        },
+        {
+          "value": 3.96125,
+          "probability": 0.55
+        },
+        {
+          "value": 3.9835,
+          "probability": 0.56
+        },
+        {
+          "value": 4.00575,
+          "probability": 0.57
+        },
+        {
+          "value": 4.028,
+          "probability": 0.58
+        },
+        {
+          "value": 4.05025,
+          "probability": 0.59
+        },
+        {
+          "value": 4.0725,
+          "probability": 0.6
+        },
+        {
+          "value": 4.09475,
+          "probability": 0.61
+        },
+        {
+          "value": 4.117,
+          "probability": 0.62
+        },
+        {
+          "value": 4.13925,
+          "probability": 0.63
+        },
+        {
+          "value": 4.1615,
+          "probability": 0.64
+        },
+        {
+          "value": 4.18375,
+          "probability": 0.65
+        },
+        {
+          "value": 4.206,
+          "probability": 0.66
+        },
+        {
+          "value": 4.22825,
+          "probability": 0.67
+        },
+        {
+          "value": 4.2505,
+          "probability": 0.68
+        },
+        {
+          "value": 4.27275,
+          "probability": 0.69
+        },
+        {
+          "value": 4.295,
+          "probability": 0.7
+        },
+        {
+          "value": 4.31725,
+          "probability": 0.71
+        },
+        {
+          "value": 4.3395,
+          "probability": 0.72
+        },
+        {
+          "value": 4.36175,
+          "probability": 0.73
+        },
+        {
+          "value": 4.384,
+          "probability": 0.74
+        },
+        {
+          "value": 4.40625,
+          "probability": 0.75
+        },
+        {
+          "value": 4.4285,
+          "probability": 0.76
+        },
+        {
+          "value": 4.45075,
+          "probability": 0.77
+        },
+        {
+          "value": 4.473,
+          "probability": 0.78
+        },
+        {
+          "value": 4.49525,
+          "probability": 0.79
+        },
+        {
+          "value": 4.5175,
+          "probability": 0.8
+        },
+        {
+          "value": 4.53975,
+          "probability": 0.81
+        },
+        {
+          "value": 4.562,
+          "probability": 0.82
+        },
+        {
+          "value": 4.58425,
+          "probability": 0.83
+        },
+        {
+          "value": 4.6065,
+          "probability": 0.84
+        },
+        {
+          "value": 4.62875,
+          "probability": 0.85
+        },
+        {
+          "value": 4.651,
+          "probability": 0.86
+        },
+        {
+          "value": 4.67325,
+          "probability": 0.87
+        },
+        {
+          "value": 4.6955,
+          "probability": 0.88
+        },
+        {
+          "value": 4.71775,
+          "probability": 0.89
+        },
+        {
+          "value": 4.74,
+          "probability": 0.9
+        },
+        {
+          "value": 4.76225,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 4.7845,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 4.80675,
+          "probability": 0.905
+        },
+        {
+          "value": 4.829,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 4.85125,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 4.8735,
+          "probability": 0.91
+        },
+        {
+          "value": 4.89575,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 4.918,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 4.94025,
+          "probability": 0.915
+        },
+        {
+          "value": 4.9625,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 4.98475,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 5.007,
+          "probability": 0.92
+        },
+        {
+          "value": 5.02925,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 5.0515,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 5.07375,
+          "probability": 0.925
+        },
+        {
+          "value": 5.096,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 5.11825,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 5.1405,
+          "probability": 0.93
+        },
+        {
+          "value": 5.16275,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 5.185,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 5.20725,
+          "probability": 0.935
+        },
+        {
+          "value": 5.2295,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 5.25175,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 5.274,
+          "probability": 0.94
+        },
+        {
+          "value": 5.29625,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 5.3185,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 5.34075,
+          "probability": 0.945
+        },
+        {
+          "value": 5.363,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 5.38525,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 5.4075,
+          "probability": 0.95
+        },
+        {
+          "value": 5.42975,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 5.452,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 5.47425,
+          "probability": 0.955
+        },
+        {
+          "value": 5.4965,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 5.51875,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 5.541,
+          "probability": 0.96
+        },
+        {
+          "value": 5.56325,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 5.5855,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 5.60775,
+          "probability": 0.965
+        },
+        {
+          "value": 5.63,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 5.65225,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 5.6745,
+          "probability": 0.97
+        },
+        {
+          "value": 5.69675,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 5.719,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 5.74125,
+          "probability": 0.975
+        },
+        {
+          "value": 5.7635,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 5.78575,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 5.808,
+          "probability": 0.98
+        },
+        {
+          "value": 5.83025,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 5.8525,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 5.87475,
+          "probability": 0.985
+        },
+        {
+          "value": 5.897,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 5.91925,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 5.9415,
+          "probability": 0.99
+        },
+        {
+          "value": 5.96375,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 5.986,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 6.00825,
+          "probability": 0.995
+        },
+        {
+          "value": 6.0305,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 6.05275,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 6.075,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 3.85,
+        "median": 3.85,
+        "interval80": {
+          "lower": 2.96,
+          "upper": 4.74
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/prompt.md",
+        "sha256": "cc3e057aee1cf5ca6b0bee7d7220c2705364c771ac3ff4ba0bf457f04412fbc4",
+        "bytes": 10499,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_command.json",
+        "sha256": "78f14f30053badb1e9b7ce17dbb44fa2a2594491706927edaab1e6299e36a506",
+        "bytes": 754,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_stdout.jsonl",
+        "sha256": "8efea945e717b3962abc1415c56a371a9db7831cb54eecdb31283f9c0851542b",
+        "bytes": 1636446,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_stderr.log",
+        "sha256": "8df94de00157f8493411587dbf8c2a9d2cdeaf051fa1f05202fea612001e102a",
+        "bytes": 233,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_events.jsonl",
+        "sha256": "0dede8b62e03446bfe274951c2b3a702f8fc92c351ad239c45aa67ff76e978b7",
+        "bytes": 1636592,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_last_message.txt",
+        "sha256": "f61727e640a93f085943b2be6b4450db3b6341d6b39b0629fc8572368b4ea450",
+        "bytes": 6709,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_codex_trace.json",
+        "sha256": "59291e9b5a4b0718d0813040722d55d80298a5162d42fb4e59ab0c2b3c291565",
+        "bytes": 559,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_stdout.txt",
+        "sha256": "f61727e640a93f085943b2be6b4450db3b6341d6b39b0629fc8572368b4ea450",
+        "bytes": 6709,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_stderr.txt",
+        "sha256": "86c35a085930ff21b410bc4a933cb8c8954b26a0ffaff13685754a986349ada1",
+        "bytes": 248,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_prompt.md",
+        "sha256": "d61b4deb7127aeb2c6f7f3cd8cefed3ccc08c6fd8624a5a7596bf59280ee175e",
+        "bytes": 9973,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_command.json",
+        "sha256": "03067839d4b1f70dc65b025913eb6b9e3ebe8d778c3a34ea578734eb1656f110",
+        "bytes": 750,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "5f1465aa9200c0af71185461d5dcf677db902420de74dbe8ef5672088cb5966c",
+        "bytes": 1436,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_stderr.log",
+        "sha256": "de109bdc38c1c2f53f8cb3d8803d9dd275932b7c52bbc992f8eac4489d6c1577",
+        "bytes": 233,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_events.jsonl",
+        "sha256": "23382c02438731b28312152e024cbf6132b7978fa0dd9b296e5c96cdd4e2ca39",
+        "bytes": 1458,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_last_message.txt",
+        "sha256": "a24d85f262c9d493d3ee5a6e7ad85af19b6a081633b76df11dda265ff320c8e2",
+        "bytes": 1091,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_codex_trace.json",
+        "sha256": "8ad4648df26f6a98219138fd844aa190249636e7060c2ea42f03db4962711c09",
+        "bytes": 555,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_stdout.txt",
+        "sha256": "a24d85f262c9d493d3ee5a6e7ad85af19b6a081633b76df11dda265ff320c8e2",
+        "bytes": 1091,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_stderr.txt",
+        "sha256": "15dbb176da6b684228fc94e6a96b4324103576fd2501bfe2ea09bed582251408",
+        "bytes": 248,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/revision_prompt.md",
+        "sha256": "8de0f98349226e27e88d73975b2502e370a91abb00908e378bd54bc887457614",
+        "bytes": 19235,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/command.json",
+        "sha256": "c71579991f43664ee8e9648f056b0179bcb43873ac0dd137e8fcf2f34ce49d3b",
+        "bytes": 748,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_stdout.jsonl",
+        "sha256": "dc3b8807b1a3c038b63e211c2a4473e353bb3d8b1f31183bc1aa5846ba70ca2a",
+        "bytes": 7983,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_stderr.log",
+        "sha256": "e528beb1262a866d1133ae66f82a81d23e20b722c362a4c54c8b7e062b46c2a4",
+        "bytes": 233,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_events.jsonl",
+        "sha256": "a0ed7dee34317747c9a921e90268e44ddf06035a5ee73d9ba214466f4f1287c3",
+        "bytes": 8005,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_last_message.txt",
+        "sha256": "b08f1f753089431c4cf1b576f32e112c24b24d901e274965384c19ea74ad92e9",
+        "bytes": 7253,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/codex_trace.json",
+        "sha256": "23497d7b0cef1719a7753366df8b17932662d97a7d71c1589438283dbc94c809",
+        "bytes": 555,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/stdout.txt",
+        "sha256": "b08f1f753089431c4cf1b576f32e112c24b24d901e274965384c19ea74ad92e9",
+        "bytes": 7253,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/stderr.txt",
+        "sha256": "101a57e596dbec6dd1d9022387255bcfb882cc06cab9e7767f13a1d254533507",
+        "bytes": 248,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/raw_response.txt",
+        "sha256": "b08f1f753089431c4cf1b576f32e112c24b24d901e274965384c19ea74ad92e9",
+        "bytes": 7253,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/parsed_cells.json",
+        "sha256": "6515283a72f311a5d61af3b90691e5d9c50531261f892c8e2c561332d53d9373",
+        "bytes": 8940,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/normalized_cells.json",
+        "sha256": "6068342e079ef5100eb06c08e4cbaa3bdad1164bd8a7701725ef288d199959d7",
+        "bytes": 26427,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/distribution.json",
+        "sha256": "f24686556043e4dd37cac11f8f583d88cfc659d7e4377c8f51a1e1bddf005361",
+        "bytes": 13703,
+        "createdAt": "2026-09-11T19:18:22Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/validation.json",
+        "sha256": "1c85ef27160f0f7af883088d746252934b25285283f4e9f2f398817c2aaffafa",
+        "bytes": 148,
+        "createdAt": "2026-09-11T19:18:22Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-11T19:18:22Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "fa0e0e1257a2b92c4feac758ac302b850e17f075bd84e99e84592d64590c2fdb"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-18-22z-statbel-health-index-yoy-2026-09/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.finding.1",
+          "severity": "blocking",
+          "rubricItem": "resolver",
+          "summary": "Draft sets resolutionDate to 2026-09-29 and resolutionSourceUrl to a be.STAT crosstable, while the ledger contract binds this target to the Statbel CPI/Health Index source URL and the registered resolution-date basis/window ending 2026-10-07.",
+          "actionRequested": "Set the JSON resolver fields to the canonical target contract: use the ledger Statbel CPI source URL and the registered resolution date/window basis rather than silently substituting the 2026-09-29 calendar date; if noting the 2026-09-29 calendar evidence, keep it in reasoning as a discrepancy or supporting release-timing note."
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Keep the be.STAT crosstable as evidence/history context, not the resolver URL, unless the registered target is amended upstream."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "The prior/update/interval step is strong; preserve the sigma calculation and implied bounds after resolver-field correction."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.finding.1",
+          "decision": "accepted",
+          "rationale": "Review disposition: accepted the blocking resolver critique by restoring the canonical registered resolutionDate 2026-10-07 and Statbel CPI/Health Index source URL, while keeping the 2026-09-29 calendar finding only as release-timing evidence and preserving the historical sample, point estimate, and sigma-based interval.",
+          "forecastChanged": true
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver critique by restoring the canonical registered resolutionDate 2026-10-07 and Statbel CPI/Health Index source URL, while keeping the 2026-09-29 calendar finding only as release-timing evidence and preserving the historical sample, point estimate, and sigma-based interval.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver critique by restoring the canonical registered resolutionDate 2026-10-07 and Statbel CPI/Health Index source URL, while keeping the 2026-09-29 calendar finding only as release-timing evidence and preserving the historical sample, point estimate, and sigma-based interval.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "Draft is methodologically coherent, but it conflicts with the canonical target contract on resolver URL and resolution date."
+    }
+  }
+]
