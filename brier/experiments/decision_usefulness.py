@@ -25,6 +25,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
+from brier.experiments import components
 from brier.experiments.llm import call_llm, _is_openai_model, model_short_name
 
 
@@ -180,87 +181,92 @@ SEED_DECISION_USEFULNESS_CASES = [
 
 
 PROMPT_TEMPLATES = {
-    "naive": """You are a helpful assistant.
-
-A user needs help with this decision:
-
-"{scenario}"
-
-Give your recommendation and reasoning. Be concise but complete.""",
-    "format_control": """You are a decision analyst.
-
-A user needs help with this decision:
-
-"{scenario}"
-
-Respond using exactly these headings:
-- Goal
-- Options
-- Key considerations
-- Recommendation
-
-You may be qualitative. Do not introduce numeric forecasts unless they are obviously necessary for the scenario.""",
-    "forecast_only": """You are a decision analyst.
-
-A user needs help with this decision:
-
-"{scenario}"
-
-Do the following:
-1. Define 1-2 explicit KPIs that would determine whether the decision succeeded.
-2. Expand the option set beyond the user's first framing if needed.
-3. For each option, give numeric point estimates and 80% confidence intervals for each KPI.
-4. State the recommendation implied by those forecasts.
-5. Briefly state the main assumptions behind the forecast.
-
-Do not explicitly cite cognitive biases, base rates, disconfirming evidence, or review dates unless they are strictly necessary to support the forecast.""",
-    "farness": """You are a decision analyst using the brier framework.
-
-A user needs help with this decision:
-
-"{scenario}"
-
-Use this workflow:
-1. Define 1-2 explicit KPIs, including units and how they would resolve later.
-2. Expand the option set beyond the user's initial framing if appropriate.
-3. For each option, give numeric point estimates and 80% confidence intervals for each KPI.
-4. Cite outside-view base rates or reference classes before relying on inside-view adjustments.
-5. Surface the strongest disconfirming evidence and failure modes.
-6. Explain the main mechanism behind the forecast differences.
-7. Recommend the option implied by the forecasts.
-8. Give a review date and what would be checked later.
-
-Do not stop at qualitative vibes; make explicit numeric forecasts.""",
+    "naive": components.decision_task(
+        "You are a helpful assistant.",
+        "Give your recommendation and reasoning. Be concise but complete.",
+    ),
+    "format_control": components.decision_task(
+        "You are a decision analyst.",
+        components.paragraphs(
+            "Respond using exactly these headings:\n"
+            + components.bulleted(
+                [
+                    components.GOAL_HEADING,
+                    components.OPTIONS_HEADING,
+                    components.KEY_CONSIDERATIONS,
+                    components.RECOMMENDATION_HEADING,
+                ]
+            ),
+            components.NO_NUMERIC_FORECASTS,
+        ),
+    ),
+    "forecast_only": components.decision_task(
+        "You are a decision analyst.",
+        components.paragraphs(
+            "Do the following:\n"
+            + components.numbered(
+                [
+                    components.define_kpis(
+                        qualifier="that would determine whether the decision succeeded"
+                    ),
+                    components.option_expansion(),
+                    components.FORECAST_PER_OPTION_KPI,
+                    components.RECOMMENDATION_FROM_FORECASTS,
+                    components.FORECAST_ASSUMPTIONS,
+                ]
+            ),
+            components.NO_FRAMEWORK_FURNITURE,
+        ),
+    ),
+    "farness": components.decision_task(
+        "You are a decision analyst using the brier framework.",
+        components.paragraphs(
+            "Use this workflow:\n"
+            + components.numbered(
+                [
+                    components.define_kpis(
+                        qualifier="including units and how they would resolve later",
+                        sep=", ",
+                    ),
+                    components.option_expansion(
+                        framing="initial", hedge="if appropriate"
+                    ),
+                    components.FORECAST_PER_OPTION_KPI,
+                    components.OUTSIDE_VIEW_BEFORE_INSIDE,
+                    components.DISCONFIRMING_EVIDENCE,
+                    components.FORECAST_MECHANISM,
+                    components.RECOMMEND_OPTION_FROM_FORECASTS,
+                    components.REVIEW_DATE,
+                ]
+            ),
+            components.NO_QUALITATIVE_VIBES,
+        ),
+    ),
 }
 
 
-PAIRWISE_NEUTRAL_PROMPT = """You are evaluating two decision writeups for usefulness to a careful human decision-maker.
-
-Your job is not to guess which one came from a better prompt. Your job is to decide which analysis would better help a user make the decision.
-
-Do not reward verbosity, polish, headings, or visible process steps by themselves.
-Prefer the writeup that gives clearer action guidance, more discriminative reasoning between live alternatives, more useful caveat/uncertainty handling, and stronger quantitative support when that support meaningfully helps the recommendation.
-
-## Decision scenario
-{scenario}
-
-## Writeup A
-{analysis_a}
-
-## Writeup B
-{analysis_b}
-
-Score each analysis from 1-5 on:
-1. Action guidance
-2. Comparative reasoning
-3. Uncertainty handling
-4. Quantitative support
-5. Overall decision usefulness
-
-Then choose the overall winner.
-
-Return JSON only:
-{{
+PAIRWISE_NEUTRAL_PROMPT = components.paragraphs(
+    "You are evaluating two decision writeups for usefulness to a careful human decision-maker.",
+    components.JUDGE_NOT_PROVENANCE,
+    components.NO_REWARD_FOR_STRUCTURE
+    + "\nPrefer the writeup that gives clearer action guidance, more discriminative"
+    " reasoning between live alternatives, more useful caveat/uncertainty handling,"
+    " and stronger quantitative support when that support meaningfully helps the"
+    " recommendation.",
+    components.pairwise_exhibits("Writeup"),
+    "Score each analysis from 1-5 on:\n"
+    + components.numbered(
+        [
+            "Action guidance",
+            "Comparative reasoning",
+            "Uncertainty handling",
+            "Quantitative support",
+            "Overall decision usefulness",
+        ]
+    ),
+    "Then choose the overall winner.",
+    components.json_only_contract(
+        """{{
   "scores_a": {{
     "action_guidance": <1-5>,
     "comparative_reasoning": <1-5>,
@@ -278,36 +284,30 @@ Return JSON only:
   "overall_winner": "A" | "B" | "tie",
   "confidence": <0-100>,
   "rationale": "<<=120 words>"
-}}""".strip()
+}}"""
+    ),
+)
 
 
-PAIRWISE_ALIGNED_PROMPT = """You are evaluating two decision analyses for usefulness to a careful human decision-maker.
-
-Your job is not to guess which one came from a better prompt. Your job is to decide which analysis would better help a user make the decision.
-
-Do not reward verbosity, polish, or formatting alone. Prefer analyses that make the decision easier to audit, compare, and revisit later.
-
-## Decision scenario
-{scenario}
-
-## Analysis A
-{analysis_a}
-
-## Analysis B
-{analysis_b}
-
-Score each analysis from 1-5 on:
-1. KPI clarity and resolvability
-2. Option-set completeness
-3. Forecast specificity and comparability
-4. Outside-view grounding
-5. Disconfirming evidence / failure-mode coverage
-6. Recommendation traceability
-
-Then choose the overall winner.
-
-Return JSON only:
-{{
+PAIRWISE_ALIGNED_PROMPT = components.paragraphs(
+    "You are evaluating two decision analyses for usefulness to a careful human decision-maker.",
+    components.JUDGE_NOT_PROVENANCE,
+    components.NO_REWARD_FOR_FORMATTING,
+    components.pairwise_exhibits("Analysis"),
+    "Score each analysis from 1-5 on:\n"
+    + components.numbered(
+        [
+            "KPI clarity and resolvability",
+            "Option-set completeness",
+            "Forecast specificity and comparability",
+            "Outside-view grounding",
+            "Disconfirming evidence / failure-mode coverage",
+            "Recommendation traceability",
+        ]
+    ),
+    "Then choose the overall winner.",
+    components.json_only_contract(
+        """{{
   "scores_a": {{
     "kpi_clarity": <1-5>,
     "option_completeness": <1-5>,
@@ -327,62 +327,57 @@ Return JSON only:
   "overall_winner": "A" | "B" | "tie",
   "confidence": <0-100>,
   "rationale": "<<=120 words>"
-}}""".strip()
+}}"""
+    ),
+)
 
 
-PAIRWISE_OMISSION_PROMPT = """You are evaluating two decision analyses for the most important thing each one failed to consider.
-
-## Decision scenario
-{scenario}
-
-## Analysis A
-{analysis_a}
-
-## Analysis B
-{analysis_b}
-
-Return JSON only:
-{{
+PAIRWISE_OMISSION_PROMPT = components.paragraphs(
+    "You are evaluating two decision analyses for the most important thing each one failed to consider.",
+    components.pairwise_exhibits("Analysis"),
+    components.json_only_contract(
+        """{{
   "largest_missing_consideration_a": "<one concise omission or 'none'>",
   "largest_missing_consideration_b": "<one concise omission or 'none'>",
   "which_analysis_has_more_serious_omission": "A" | "B" | "tie",
   "confidence": <0-100>,
   "rationale": "<<=100 words>"
-}}""".strip()
+}}"""
+    ),
+)
 
 
-PAIRWISE_CRITIQUE_SURVIVAL_PROMPT = """You are stress-testing two decision writeups using held-out critique lenses.
+#: Held-out critique lenses, deliberately not tied to any framework the
+#: generator conditions were prompted with.
+CRITIQUE_LENSES = [
+    "implementation fragility",
+    "incentive or stakeholder response",
+    "opportunity cost",
+    "reversibility and switching cost",
+    "hidden dependencies",
+    "tail risk or timing risk",
+]
 
-Your job is to decide which recommendation is less undermined after applying critiques that are NOT tied to any particular decision framework.
 
-Use these critique lenses:
-- implementation fragility
-- incentive or stakeholder response
-- opportunity cost
-- reversibility and switching cost
-- hidden dependencies
-- tail risk or timing risk
-
-Do not reward visible process, headings, checklist completeness, or verbosity by themselves.
-Prefer the writeup whose recommendation would require less revision after these critiques.
-
-## Decision scenario
-{scenario}
-
-## Writeup A
-{analysis_a}
-
-## Writeup B
-{analysis_b}
-
-Return JSON only:
-{{
+PAIRWISE_CRITIQUE_SURVIVAL_PROMPT = components.paragraphs(
+    "You are stress-testing two decision writeups using held-out critique lenses.",
+    "Your job is to decide which recommendation is less undermined after applying"
+    " critiques that are NOT tied to any particular decision framework.",
+    "Use these critique lenses:\n" + components.bulleted(CRITIQUE_LENSES),
+    components.NO_REWARD_FOR_PROCESS
+    + "\nPrefer the writeup whose recommendation would require less revision after"
+    " these critiques.",
+    components.pairwise_exhibits("Writeup"),
+    components.json_only_contract(
+        """{{
   "most_damaging_critique_a": "<=35 words>",
   "most_damaging_critique_b": "<=35 words>",
   "less_undermined_analysis": "A" | "B" | "tie",
   "confidence": <0-100>,
   "rationale": "<<=120 words>"
-}}""".strip()
+}}"""
+    ),
+)
 
 
 SECTION_ALIASES = {
@@ -1015,28 +1010,7 @@ def _pick_judge_model(source_model: str, explicit_judge: Optional[str] = None) -
     return "gpt-5.4"
 
 
-def _extract_first_json_object(text: str) -> dict[str, Any]:
-    """Extract the first JSON object from a model response."""
-    fenced_match = re.search(r"```json\s*(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
-    if fenced_match:
-        return json.loads(fenced_match.group(1))
-
-    fenced_match = re.search(r"```\s*(.*?)\s*```", text, re.DOTALL)
-    if fenced_match:
-        return json.loads(fenced_match.group(1))
-
-    decoder = json.JSONDecoder()
-    for idx, char in enumerate(text):
-        if char != "{":
-            continue
-        try:
-            obj, _ = decoder.raw_decode(text[idx:])
-        except json.JSONDecodeError:
-            continue
-        if isinstance(obj, dict):
-            return obj
-
-    raise ValueError(f"No JSON object found in judge response: {text[:200]}")
+_extract_first_json_object = components.first_json_object
 
 
 def _deterministic_ordering(

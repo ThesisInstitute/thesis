@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from brier.experiments import components
 from brier.experiments.llm import call_llm
 
 try:
@@ -191,17 +192,20 @@ COT_PROMPT = """You are a helpful advisor. Think through this step by step.
 
 Think through this carefully step by step, then give me your honest recommendation with reasoning."""
 
-BRIER_PROMPT = """You are a decision analyst using the "Brier" framework. Apply this process:
-
-1. Define 2-3 explicit, measurable KPIs for this decision
-2. Identify the options (including ones not mentioned)
-3. For each option x KPI, give a point estimate and 80% confidence interval
-4. Cite relevant base rates (outside view)
-5. Identify cognitive biases in the framing
-6. Give a recommendation based on expected value
-
-Decision:
-{scenario}"""
+BRIER_PROMPT = (
+    'You are a decision analyst using the "Brier" framework. Apply this process:\n\n'
+    + components.numbered(
+        [
+            components.DEFINE_MEASURABLE_KPIS,
+            components.OPTIONS_INCLUDING_UNMENTIONED,
+            components.FORECAST_OPTION_BY_KPI,
+            components.BASE_RATES_RELEVANT,
+            components.COGNITIVE_BIASES_IN_FRAMING,
+            components.RECOMMENDATION_FROM_EV,
+        ]
+    )
+    + "\n\nDecision:\n{scenario}"
+)
 
 
 @dataclass
