@@ -733,6 +733,7 @@ def build_fast_prompt(
     width_discipline: str = "sigma",
     mode_label: str = "fast",
     network_tools: bool = False,
+    include_conditional_policy_chain: bool = True,
 ) -> str:
     """Compact prompt for scheduled public-release batches.
 
@@ -816,6 +817,24 @@ def build_fast_prompt(
         if conditional
         else "- conditionalOn: null\n"
     )
+    conditional_policy_chain = (
+        "# Conditional policy chain (required)\n"
+        "- Decompose the policy effect into: (a) the touched population, "
+        "including a fetched count; (b) propagation to the measured quantity, "
+        "anchored to at least one fetched study, program evaluation, or natural "
+        "experiment cited by URL; (c) offsetting responses; and (d) timing or "
+        "lag relative to the resolution period.\n"
+        "- Add one reasoning step whose text begins exactly `Policy chain:`. "
+        "Name every fetched precedent URL in that step and repeat each URL "
+        "exactly in sourceContext.\n"
+        "- If no fetched precedent is available, the `Policy chain:` step must "
+        "instead contain the exact phrase `no fetched precedent`, state a "
+        "numeric bound and label the policy term low-confidence; use the "
+        "explicit form `policy term bound: [LOW, HIGH] UNIT; policy term is "
+        "low-confidence`.\n\n"
+        if conditional and include_conditional_policy_chain
+        else ""
+    )
     target_context_block = format_target_context(target_context)
     target_context_text = f"{target_context_block}\n\n" if target_context_block else ""
     ticket_block = format_generation_ticket(ticket)
@@ -889,6 +908,7 @@ def build_fast_prompt(
         f"- series: {series}\n"
         f"- period: {period}\n"
         f"{conditional_line}\n"
+        f"{conditional_policy_chain}"
         f"{target_context_text}"
         f"{ticket_text}"
         "# Source hints\n"
@@ -1014,7 +1034,15 @@ def build_ladder_prompt(
     else — research discipline, sigma disclosure, risk steps — is the same
     contract as fast mode.
     """
-    base = build_fast_prompt(series, period, conditional, meta, target_context, ticket)
+    base = build_fast_prompt(
+        series,
+        period,
+        conditional,
+        meta,
+        target_context,
+        ticket,
+        include_conditional_policy_chain=False,
+    )
     ladder_schema = {
         "thresholds": ["strictly increasing numeric rungs"],
         "cumulativeProbabilities": ["non-decreasing, within [0.01, 0.99]"],
@@ -1079,6 +1107,7 @@ def build_ladder_v2_prompt(
         ticket,
         width_discipline="ladder_quantiles",
         mode_label="ladder_v2",
+        include_conditional_policy_chain=False,
     )
     ladder_schema = {
         "thresholds": ["strictly increasing numeric rungs"],
@@ -2238,10 +2267,30 @@ def build_pre_submit_review_prompt(
     target_context: dict[str, Any] | None,
     original_prompt: str,
     draft_response: str,
+    prompt_mode: str = "full",
 ) -> str:
     conditional_line = conditional if conditional else "null"
     target_context_block = format_target_context(target_context)
     target_context_text = f"\n{target_context_block}\n" if target_context_block else ""
+    enforce_policy_chain = bool(conditional) and prompt_mode in {"fast", "full"}
+    policy_chain_review_item = (
+        "10. For a conditional draft, require a reasoning step beginning "
+        "exactly `Policy chain:` that decomposes the touched population with a "
+        "fetched count, propagation to the measured quantity, offsetting "
+        "responses, and timing or lag. The step must either cite a fetched "
+        "precedent URL also listed exactly in sourceContext, or state `no "
+        "fetched precedent` with a numeric policy-term bound and a "
+        "low-confidence label. A missing or noncompliant step requires "
+        "REQUEST_CHANGES with a blocking policy_chain fix. Compare the policy "
+        "effect's direction and size with the cited precedent and flag any "
+        "inconsistency.\n"
+        if enforce_policy_chain
+        else ""
+    )
+    review_decision_field = (
+        '  "decision": "APPROVE|REQUEST_CHANGES",\n' if enforce_policy_chain else ""
+    )
+    policy_chain_rubric_item = "|policy_chain" if enforce_policy_chain else ""
     return (
         "# Thesis pre-submit forecast review\n\n"
         "You are a reviewer for a forecast before publication. Review the "
@@ -2267,15 +2316,19 @@ def build_pre_submit_review_prompt(
         "7. Tail scenarios are concrete and tied to the target.\n"
         "8. Point, interval, final forecast step, and JSON fields are coherent.\n"
         "9. No leakage, catalog point/interval circularity, subjective "
-        "resolver, or unit ambiguity.\n\n"
+        "resolver, or unit ambiguity.\n"
+        f"{policy_chain_review_item}"
+        "\n"
         "# Required response\n"
         "Return JSON only, with this shape:\n"
         "{\n"
+        f"{review_decision_field}"
         '  "summary": "one sentence",\n'
         '  "requiredFixes": [\n'
         "    {\n"
         '      "rubricItem": "resolver|base_rate|model_prior|update|'
-        'interval|prior_update_interval|tails|coherence|leakage",\n'
+        f"interval|prior_update_interval|tails|coherence|leakage"
+        f'{policy_chain_rubric_item}",\n'
         '      "severity": "warning|blocking",\n'
         '      "summary": "specific issue",\n'
         '      "actionRequested": "specific change requested"\n'
@@ -2688,6 +2741,145 @@ def seal_normalized_cells(
     return materialize_run_distributions(cells)
 
 
+POLICY_CHAIN_URL_RE = re.compile(r"https?://[^\s<>'\"`]+")
+POLICY_CHAIN_TERM_RE = r"(?:policy[- ](?:term|effect)|effect[- ](?:size|term))"
+POLICY_CHAIN_BOUND_CUE_RE = (
+    r"(?:bound(?:ed)?(?:\s+(?:between|from|to|at|by))?|"
+    r"(?:in\s+the\s+)?range(?:d)?(?:\s+(?:between|from|of))?|"
+    r"between|at most|no more than)"
+)
+POLICY_CHAIN_NUMBER_RE = (
+    r"(?<![\w.])(?:[+\-±]\s*)?"
+    r"(?:(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?|\.\d+)(?![\w.])"
+)
+POLICY_CHAIN_BOUND_RE = re.compile(
+    rf"(?:\b{POLICY_CHAIN_TERM_RE}\b\s+(?:is\s+)?"
+    rf"{POLICY_CHAIN_BOUND_CUE_RE}|"
+    rf"\bbound(?:ed)?\s+(?:the\s+)?{POLICY_CHAIN_TERM_RE}\b"
+    rf"(?:\s+(?:between|from|to|at|by))?)"
+    rf"\s*(?:is\s*)?(?::|=)?\s*[\[(]?\s*{POLICY_CHAIN_NUMBER_RE}|"
+    rf"\b{POLICY_CHAIN_TERM_RE}\b\s+(?:is\s+)?within\s+"
+    rf"±\s*{POLICY_CHAIN_NUMBER_RE}",
+    re.IGNORECASE,
+)
+POLICY_CHAIN_INEQUALITY_BOUND_RE = re.compile(
+    rf"{POLICY_CHAIN_NUMBER_RE}\s*(?:<=|≤)\s*"
+    rf"\b{POLICY_CHAIN_TERM_RE}\b\s*(?:<=|≤)\s*"
+    rf"{POLICY_CHAIN_NUMBER_RE}",
+    re.IGNORECASE,
+)
+POLICY_CHAIN_LOW_CONFIDENCE_RE = re.compile(
+    rf"(?:\blow-confidence\s+{POLICY_CHAIN_TERM_RE}\b|"
+    rf"\b{POLICY_CHAIN_TERM_RE}\b\s*(?::|-)?\s*"
+    rf"(?:is\s+|remains\s+|(?:is\s+)?label(?:ed)?(?:\s+as)?\s+)?"
+    rf"\blow-confidence\b|"
+    rf"\blabel(?:ed)?\s+(?:the\s+)?{POLICY_CHAIN_TERM_RE}\b\s+"
+    rf"(?:as\s+)?\blow-confidence\b)",
+    re.IGNORECASE,
+)
+
+
+def policy_chain_urls(text: str) -> list[str]:
+    """Extract cited HTTP(S) URLs without surrounding prose punctuation."""
+
+    urls = []
+    for match in POLICY_CHAIN_URL_RE.findall(text):
+        url = match.rstrip(".,;:!?")
+        for closing, opening in ((")", "("), ("]", "["), ("}", "{")):
+            while url.endswith(closing) and url.count(closing) > url.count(opening):
+                url = url[:-1]
+        try:
+            parsed = urlparse(url)
+            hostname = parsed.hostname
+        except ValueError:
+            continue
+        if parsed.scheme in {"http", "https"} and hostname:
+            urls.append(url)
+    return urls
+
+
+def has_numeric_policy_term_bound(text: str) -> bool:
+    """Recognize an explicit effect bound without accepting confidence levels."""
+
+    if POLICY_CHAIN_INEQUALITY_BOUND_RE.search(text):
+        return True
+    for match in POLICY_CHAIN_BOUND_RE.finditer(text):
+        suffix = text[match.end() :]
+        confidence_suffix = re.match(
+            r"[-\s]*(?:(?:%|percent(?:age)?|pct|per[-\s]+cent)[-\s]*)?"
+            r"(?:level[-\s]+of[-\s]+)?confidence\b",
+            suffix,
+            re.IGNORECASE,
+        )
+        if not confidence_suffix:
+            return True
+    return False
+
+
+def conditional_policy_chain_errors(cell: dict[str, Any]) -> list[str]:
+    """Validate the fetched-precedent branch for ordinary conditional runs."""
+
+    if cell.get("type") != "conditional":
+        return []
+    reasoning = cell.get("reasoning")
+    policy_steps = []
+    if isinstance(reasoning, list):
+        policy_steps = [
+            step["text"]
+            for step in reasoning
+            if isinstance(step, dict)
+            and isinstance(step.get("text"), str)
+            and step["text"].startswith("Policy chain:")
+        ]
+    if not policy_steps:
+        return [
+            "conditional policy chain: missing reasoning step beginning exactly "
+            "'Policy chain:'"
+        ]
+
+    source_context = cell.get("sourceContext")
+    source_urls = (
+        {entry for entry in source_context if isinstance(entry, str)}
+        if isinstance(source_context, list)
+        else set()
+    )
+    all_errors = []
+    for text in policy_steps:
+        errors = []
+        if "no fetched precedent" in text:
+            text_without_urls = POLICY_CHAIN_URL_RE.sub("", text)
+            if not has_numeric_policy_term_bound(text_without_urls):
+                errors.append(
+                    "conditional policy chain: 'no fetched precedent' path must "
+                    "state a numeric policy-term bound"
+                )
+            if not POLICY_CHAIN_LOW_CONFIDENCE_RE.search(text_without_urls):
+                errors.append(
+                    "conditional policy chain: 'no fetched precedent' path must "
+                    "label the policy term low-confidence"
+                )
+        else:
+            cited_urls = policy_chain_urls(text)
+            if not cited_urls:
+                errors.append(
+                    "conditional policy chain: Policy chain step must cite a "
+                    "precedent URL also listed exactly in sourceContext or contain "
+                    "exact phrase 'no fetched precedent'"
+                )
+            else:
+                for url in cited_urls:
+                    if url not in source_urls:
+                        errors.append(
+                            "conditional policy chain: precedent URL in Policy chain "
+                            "step is not listed exactly in sourceContext: "
+                            f"{url!r}"
+                        )
+        for error in errors:
+            if error not in all_errors:
+                all_errors.append(error)
+    return all_errors
+
+
 def validate_cells(
     cells: list[dict],
     allow_existing_slug: bool = False,
@@ -2744,6 +2936,8 @@ def validate_cells(
                 + authorization_error
             )
         errors.extend(target_context_validation_errors(cell, target_context))
+        if prompt_mode in {"fast", "full"}:
+            errors.extend(conditional_policy_chain_errors(cell))
         if prompt_mode in {"ladder", "ladder_v2"}:
             errors.extend(ladder_validation_errors(cell))
         if errors:
@@ -3709,6 +3903,7 @@ def main() -> int:
                     target_context=target_context,
                     original_prompt=prompt,
                     draft_response=draft_result["stdout"],
+                    prompt_mode=args.prompt_mode,
                 )
                 refs.append(
                     write_artifact(
