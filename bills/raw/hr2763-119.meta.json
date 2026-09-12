@@ -1,0 +1,14 @@
+{
+  "slug": "hr2763-119",
+  "bill_number": null,
+  "title": null,
+  "resolved_via": "direct-url",
+  "source_url": "https://www.govinfo.gov/content/pkg/BILLS-119hr2763ih/xml/BILLS-119hr2763ih.xml",
+  "version_label": null,
+  "format": "xml",
+  "text_sha256": "7174d16b5af55ab043fc4fbe93f2b69ba05b15057d819b25ee12eca249a776b7",
+  "source_fetched_at": null,
+  "retrieved_at": "2026-08-14T01:16:44+00:00",
+  "text_file": "hr2763-119.txt",
+  "source_file": "hr2763-119.xml"
+}

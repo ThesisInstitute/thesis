@@ -478,3 +478,110 @@ describe("s3596 ACTC threshold conditional pair (thesis#106)", () => {
     );
   });
 });
+
+describe("hr2763 AFA bundle conditional pair (thesis#113)", () => {
+  const enacted = CONDITIONS.find(
+    (condition) => condition.conditionId === "cond.hr2763-afa-bundle.enacted",
+  );
+  const currentLaw = CONDITIONS.find(
+    (condition) =>
+      condition.conditionId === "cond.hr2763-afa-bundle.current-law",
+  );
+
+  function requireEnacted(): ProvisionEnactedConditionDefinition {
+    if (!enacted || enacted.type !== "provision_enacted") {
+      throw new Error("AFA bundle enacted provision condition is missing");
+    }
+    return enacted;
+  }
+
+  it("registers the bundle as a provision_enacted condition", () => {
+    const condition = requireEnacted();
+    const actcConditional =
+      "Legislation enacted by 2027-12-31 puts every concept revision of " +
+      "the American Family Act introduced-text bundle " +
+      "hr2763-119-ih-2025-04-09-v1 in force for tax year 2028; enacting " +
+      "a bill number or a partial substitute is not sufficient.";
+    const spmConditional =
+      "For the CY2028 Census Supplemental Poverty Measure child-poverty " +
+      "outcome, legislation enacted by 2027-12-31 puts every concept " +
+      "revision of the American Family Act introduced-text bundle " +
+      "hr2763-119-ih-2025-04-09-v1 in force for tax year 2028; enacting " +
+      "a bill number or a partial substitute is not sufficient.";
+    expect(condition.statutoryTest).toBe(actcConditional);
+    expect(condition.matchStrings).toEqual([actcConditional, spmConditional]);
+    expect(condition.checkSource).toBe(PROVISION_ENACTED_CHECK_SOURCE);
+    expect(condition.deadline).toBe("2027-12-31");
+    expect(condition.resolvesBy).toBe("2027-12-31");
+    expect(condition.status).toBe("open");
+    expect(conditionForContract(actcConditional)).toBe(condition);
+    expect(conditionForContract(spmConditional)).toBe(condition);
+  });
+
+  it("versions the bundle against the committed bill artifact", () => {
+    // The statutory test names the versioned revision set; the referent
+    // must exist in the repository so "every concept revision" is a
+    // checkable list, not prose. bills/hr2763-119.json carries the
+    // bundleCondition with that exact version and the 38 revisions the
+    // bundle conjoins.
+    const artifact = JSON.parse(
+      readFileSync(join(__dirname, "../../../bills/hr2763-119.json"), "utf8"),
+    ) as {
+      bundleCondition: { version: string; revisionIds: string[] };
+      revisions: Array<{ id: string }>;
+    };
+    expect(requireEnacted().statutoryTest).toContain(
+      artifact.bundleCondition.version,
+    );
+    expect(artifact.bundleCondition.revisionIds.length).toBe(
+      artifact.revisions.length,
+    );
+    expect(new Set(artifact.bundleCondition.revisionIds)).toEqual(
+      new Set(artifact.revisions.map((revision) => revision.id)),
+    );
+  });
+
+  it("registers the current-law arm WITHOUT a complement declaration", () => {
+    // Partial enactment of the 38-revision bundle, an S.3596-style
+    // threshold-only change, or any other enacted §24 amendment falsifies
+    // BOTH premises — for a bundle, intermediate worlds are the NORM, so
+    // the non-complement design carries even more weight than for the
+    // single-atom S.3596 pair.
+    expect(currentLaw?.type).toBe("recorded_status");
+    expect(currentLaw?.complementOf).toBeUndefined();
+    expect(enacted?.complementOf).toBeUndefined();
+    expect(currentLaw?.resolvesBy).toBe("2027-12-31");
+    expect(currentLaw?.status).toBe("open");
+    const actcConditional =
+      "No legislation enacted by 2027-12-31 changes the IRC §24 child " +
+      "tax credit rules in force for tax year 2028; current law holds.";
+    const spmConditional =
+      "For the CY2028 Census Supplemental Poverty Measure child-poverty " +
+      "outcome, no legislation enacted by 2027-12-31 changes the IRC §24 " +
+      "child tax credit rules in force for tax year 2028; current law " +
+      "holds.";
+    expect(currentLaw?.matchStrings).toEqual([actcConditional, spmConditional]);
+    expect(conditionForContract(actcConditional)).toBe(currentLaw);
+    expect(conditionForContract(spmConditional)).toBe(currentLaw);
+  });
+
+  it("resolves the bundle condition from enrolled-bill evidence", () => {
+    const condition = requireEnacted();
+    const qualifying: ProvisionEnactmentEvidence = {
+      kind: "enacted_public_law",
+      enactedOn: "2027-09-30",
+      checkSource: PROVISION_ENACTED_CHECK_SOURCE,
+      statutoryTest: condition.statutoryTest,
+      satisfiesStatutoryTest: true,
+    };
+    expect(
+      resolveProvisionEnactedCondition(condition, "2027-10-01", [qualifying]),
+    ).toBe("satisfied");
+    expect(resolveProvisionEnactedCondition(condition, "2027-10-01", [])).toBe(
+      "open",
+    );
+    expect(resolveProvisionEnactedCondition(condition, "2027-12-31", [])).toBe(
+      "failed",
+    );
+  });
+});

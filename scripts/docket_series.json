@@ -2701,6 +2701,114 @@
     "uuid": "a2649fd9-f382-4003-ba70-01030bc93b5e",
     "concept": "usaspending.dod.prime_award_obligations"
    }
+  },
+  {
+   "series": "irs.actc.total_claims",
+   "cadence": "annual",
+   "period": "2028",
+   "conditionalPair": {
+    "conditionDeadline": "2027-12-31",
+    "arms": [
+     {
+      "catalogSlug": "additional-child-tax-credit-total-claims-ty2028-hr2763-bundle",
+      "dataPointId": "irs.actc.total_claims.2028.first_print.hr2763_bundle",
+      "conditionId": "cond.hr2763-afa-bundle.enacted",
+      "conditional": "Legislation enacted by 2027-12-31 puts every concept revision of the American Family Act introduced-text bundle hr2763-119-ih-2025-04-09-v1 in force for tax year 2028; enacting a bill number or a partial substitute is not sufficient."
+     },
+     {
+      "catalogSlug": "additional-child-tax-credit-total-claims-ty2028-current-law",
+      "dataPointId": "irs.actc.total_claims.2028.first_print.current_law",
+      "conditionId": "cond.hr2763-afa-bundle.current-law",
+      "conditional": "No legislation enacted by 2027-12-31 changes the IRC §24 child tax credit rules in force for tax year 2028; current law holds."
+     }
+    ]
+   },
+   "extras": {
+    "valueScale": 1e-06,
+    "targetUnit": "millions",
+    "country": "US",
+    "resolutionDate": "2030-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2030-01-01",
+     "end": "2030-12-31"
+    },
+    "anchors": {
+     "2020": 19.119,
+     "2021": 37.772,
+     "2022": 18.077,
+     "2023": 17.626
+    },
+    "sourceBinding": {
+     "adapter": "irs-soi-pub1304",
+     "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+     "sourceSeriesId": "irs.actc.total_claims",
+     "field": "refundable_child_tax_credit_returns",
+     "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-06
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "23396038-b31d-43cd-be08-4aa9fe916b56",
+    "concept": "irs.actc.total_claims"
+   }
+  },
+  {
+   "series": "census.spm.child_poverty_rate",
+   "cadence": "annual",
+   "period": "2028",
+   "comment": "Anchors are intentionally absent until Census publishes the revised-methodology 2019-2024 SPM estimates announced for September 2026; current-method prints are not comparable calibration anchors.",
+   "conditionalPair": {
+    "conditionDeadline": "2027-12-31",
+    "arms": [
+     {
+      "catalogSlug": "spm-child-poverty-rate-cy2028-hr2763-bundle",
+      "dataPointId": "census.spm.child_poverty_rate.2028.first_print.hr2763_bundle",
+      "conditionId": "cond.hr2763-afa-bundle.enacted",
+      "conditional": "For the CY2028 Census Supplemental Poverty Measure child-poverty outcome, legislation enacted by 2027-12-31 puts every concept revision of the American Family Act introduced-text bundle hr2763-119-ih-2025-04-09-v1 in force for tax year 2028; enacting a bill number or a partial substitute is not sufficient."
+     },
+     {
+      "catalogSlug": "spm-child-poverty-rate-cy2028-current-law",
+      "dataPointId": "census.spm.child_poverty_rate.2028.first_print.current_law",
+      "conditionId": "cond.hr2763-afa-bundle.current-law",
+      "conditional": "For the CY2028 Census Supplemental Poverty Measure child-poverty outcome, no legislation enacted by 2027-12-31 changes the IRC §24 child tax credit rules in force for tax year 2028; current law holds."
+     }
+    ]
+   },
+   "extras": {
+    "valueScale": 1,
+    "targetUnit": "percent",
+    "country": "US",
+    "resolutionDate": "2029-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2029-08-01",
+     "end": "2029-12-31"
+    },
+    "resolutionSource": "U.S. Census Bureau revised-SPM methodology announcement (identity) and Poverty in the United States: 2028, Supplemental Poverty Measure Table B-2 (resolving artifact)",
+    "resolutionSourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+    "resolutionRule": "Resolve to the first Census annual income-and-poverty release artifact for CY2028 using the revised SPM methodology whose identity is authenticated by the registered 2026-07-17 Census announcement: Poverty in the United States: 2028, Supplemental Poverty Measure Table B-2, ALL RACES 2028 row, Under 18 years / Below Poverty / Percent column. The 2029-08-01 through 2029-12-31 expected release window and 2029-12-31 resolve-by deadline are Thesis lab commitments; the announcement does not establish either timing value. Record the published percent without scaling or rounding and ignore later revisions.",
+    "sourceBinding": {
+     "adapter": "census-spm-annual-report",
+     "sourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+     "sourceSeriesId": "census.spm.child_poverty_rate",
+     "field": "under_18_percent_in_poverty",
+     "table": "Poverty in the United States annual income-and-poverty release, revised-methodology Supplemental Poverty Measure Table B-2, ALL RACES year row, Under 18 years / Below Poverty / Percent column",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "37841d30-5bd6-42a0-aea7-fc7b6d32dbcc",
+    "concept": "census.spm.child_poverty_rate"
+   }
   }
  ]
 }

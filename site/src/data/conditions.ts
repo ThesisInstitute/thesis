@@ -412,6 +412,67 @@ export const CONDITIONS: ConditionDefinition[] = [
       "deadline: exactly one of the two premises holds once 2026-12-31 " +
       "passes, so exactly one arm scores.",
   },
+  // The American Family Act BUNDLE pair (thesis#113's second condition
+  // layer, on the same series the S.3596 atom pairs occupy at the next
+  // period). The enacted condition is a bill_enactment-shaped bundle: it
+  // holds only when EVERY concept revision of the versioned introduced-
+  // text bundle (bills/hr2763-119.json `revisions` +
+  // `bundleCondition.version` hr2763-119-ih-2025-04-09-v1, 38 vehicle-
+  // independent legal states) is in force for tax year 2028 — enacting a
+  // bill number or a partial substitute is not enough. The current-law
+  // condition is deliberately NOT its complement: partial enactment, an
+  // S.3596-style threshold-only change, or any other §24 amendment
+  // falsifies BOTH premises and neither arm scores. TY2028 (not TY2027)
+  // keeps the bundle clear of retroactivity: enactment by 2027-12-31 puts
+  // §§24A-24B in force for taxable years beginning after 2024, so 2028 is
+  // the first full year the pair can measure without an in-year start.
+  // The ACTC and CY2028 SPM pairs share these legal-state IDs but use
+  // distinct, outcome-specific registered literals; every match string is
+  // byte-identical to a `conditional` text in scripts/docket_series.json
+  // and conditions.test.ts enforces that coupling.
+  {
+    type: "provision_enacted",
+    conditionId: "cond.hr2763-afa-bundle.enacted",
+    description:
+      "Legislation enacted on or before 2027-12-31 puts every concept " +
+      "revision of the American Family Act (H.R. 2763) introduced-text " +
+      "bundle in force for tax year 2028 — the full §§24A-24B monthly " +
+      "child allowance replacing legacy §24, in any vehicle; a partial " +
+      "substitute does not satisfy it.",
+    matchStrings: [
+      "Legislation enacted by 2027-12-31 puts every concept revision of the American Family Act introduced-text bundle hr2763-119-ih-2025-04-09-v1 in force for tax year 2028; enacting a bill number or a partial substitute is not sufficient.",
+      "For the CY2028 Census Supplemental Poverty Measure child-poverty outcome, legislation enacted by 2027-12-31 puts every concept revision of the American Family Act introduced-text bundle hr2763-119-ih-2025-04-09-v1 in force for tax year 2028; enacting a bill number or a partial substitute is not sufficient.",
+    ],
+    status: "open",
+    resolvesBy: "2027-12-31",
+    provisionDescription:
+      "Every concept revision of the American Family Act (H.R. 2763) " +
+      "introduced-text bundle hr2763-119-ih-2025-04-09-v1 in force for " +
+      "tax year 2028",
+    statutoryTest:
+      "Legislation enacted by 2027-12-31 puts every concept revision of the American Family Act introduced-text bundle hr2763-119-ih-2025-04-09-v1 in force for tax year 2028; enacting a bill number or a partial substitute is not sufficient.",
+    checkSource: PROVISION_ENACTED_CHECK_SOURCE,
+    deadline: "2027-12-31",
+  },
+  {
+    type: "recorded_status",
+    conditionId: "cond.hr2763-afa-bundle.current-law",
+    description:
+      "No legislation enacted by 2027-12-31 changes the IRC §24 child " +
+      "tax credit rules in force for tax year 2028; current law holds.",
+    matchStrings: [
+      "No legislation enacted by 2027-12-31 changes the IRC §24 child tax credit rules in force for tax year 2028; current law holds.",
+      "For the CY2028 Census Supplemental Poverty Measure child-poverty outcome, no legislation enacted by 2027-12-31 changes the IRC §24 child tax credit rules in force for tax year 2028; current law holds.",
+    ],
+    status: "open",
+    resolvesBy: "2027-12-31",
+    note:
+      "Not the logical complement of the bundle condition: partial " +
+      "enactment of the H.R. 2763 revisions, an S.3596-style threshold " +
+      "change, or any other enacted §24 amendment falsifies both " +
+      "premises and neither arm scores. Satisfied only when the deadline " +
+      "passes with the §24 rules for tax year 2028 unchanged.",
+  },
 ];
 
 const BY_MATCH_STRING = new Map<string, ConditionDefinition>(

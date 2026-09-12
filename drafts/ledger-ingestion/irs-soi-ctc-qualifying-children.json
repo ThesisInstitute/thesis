@@ -1,0 +1,17 @@
+{
+ "proposed_concept": "irs.soi.ctc.qualifying_children",
+ "status": "proposed",
+ "unit": "millions",
+ "cadence": "annual",
+ "proposedFrom": "hr2763-119",
+ "metricText": "IRS SOI count of qualifying children behind child tax credit claims, per tax year.",
+ "note": "UNVERIFIED offline candidate from the H.R. 2763 two-layer decomposition (bills/hr2763-119.json interactions): the American Family Act's specified-child rules change WHICH children qualify (no familial-relationship requirement in §24A(c)(1), monthly determination, presumptive eligibility), so a qualifying-children count is the direct transition benchmark alongside claimant returns. The registered irs.actc.total_claims series covers returns; no docket row or resolver covers children. The other two H.R. 2763 series hints are already registered (irs.actc.total_claims; census.spm.child_poverty_rate).",
+ "adapterFamily": "irs-soi-pub1304",
+ "billSlugs": [
+  "hr2763-119"
+ ],
+ "publisher": "Internal Revenue Service",
+ "statisticalProduct": "SOI Individual Income Tax Returns Complete Report (Publication 1304) / SOI child tax credit tables",
+ "likelyUrlPattern": "https://www.irs.gov/pub/irs-soi/{yy}in33ar.xls",
+ "verification": "UNVERIFIED: 1. Confirm which SOI product prints a qualifying-children COUNT (Publication 1304 tables print returns and amounts; the child count may live in the SOI CTC-specific tables or Publication 4801 line-count files). 2. Pin three first-published tax-year values with exact table/row/column coordinates and units. 3. Decide whether the irs-soi-pub1304 workbook parser extends to that artifact or a new fail-closed parser family is needed, and record three anchors before docket admission. 4. Note the transition fragility: if §24A replaces §24, IRS may rename or restructure the child-count line (bills/hr2763-119.json findings)."
+}

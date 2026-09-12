@@ -1,0 +1,1876 @@
+{
+  "bill": {
+    "slug": "hr2763-119",
+    "name": "American Family Act (H.R. 2763)",
+    "status": "Introduced in House 2025-04-09 · Rep. Rosa DeLauro · 119th Congress, 1st session · referred to House Ways and Means",
+    "pages": 65,
+    "analyzed": "Full introduced text, including all of section 2.",
+    "analysisDate": "2026-08-01",
+    "sourceUrl": "https://www.congress.gov/bill/119th-congress/house-bill/2763/text/ih"
+  },
+  "provisions": [
+    {
+      "title": "Section 2(a)",
+      "heading": "1. IRC §24A(a), (b)(1), (b)(3)(A), and (d): monthly amount schedule and refundability",
+      "quote": "“$300, with respect to each specified child of such taxpayer who will (as of the close of such month) have attained age 6”; “120 percent of the dollar amount in effect for such month under subparagraph (A)”; “800 percent”; and “shall be allowed under subpart C (and not allowed under this subpart)”.",
+      "context": "For taxable years beginning after 2024, new §24A calculates the annual child tax credit as the sum of monthly allowances. The statutory 2025 base is $300 per month for a specified child age 6 through 17, 120 percent of that base for a child under 6, and 800 percent rather than 120 percent for a child who is under one month old at month-end. The $300 base is adjusted upward after 2025 using prior-year CPI relative to 2024, with the increase rounded to the nearest $10. Allowances for months in which the taxpayer, or either spouse on a joint return, has a principal abode in the United States or Puerto Rico for more than half the month are refundable. This monthly entitlement calculation is distinct from the §7527A machinery that delivers advance payments during the year.",
+      "goals": [
+        "Increase the child tax credit's statutory monthly amount, with larger multipliers for children under 6 and for children under one month old at month-end.",
+        "Make the otherwise allowable credit available without an earned-income phase-in or refundable-per-child cap for qualifying residence months.",
+        "Preserve the real value of the age-based amount after 2025 through CPI indexing."
+      ],
+      "effects": [
+        {
+          "mechanism": "Age-based benefit schedule",
+          "text": "The indexed $300 base produces a larger allowance than the hypothetical allowance invoked by the bill's $166.67 initial-phaseout-cap language, while the 120-percent multiplier directs a still larger amount to children from one month through age 5."
+        },
+        {
+          "mechanism": "Newborn-month concentration",
+          "text": "The 800-percent rule is the total multiplier for a child under one month old at month-end, not a separate $2,400 bonus; before indexing it yields $2,400 for that qualifying month and depends on monthly child status."
+        },
+        {
+          "mechanism": "Refundability",
+          "text": "Removing the earned-income phase-in and refundable cap lets the scheduled allowance reach households with little or no earnings, but only for months satisfying the United States or Puerto Rico abode condition in §24A(d)."
+        },
+        {
+          "mechanism": "Index propagation",
+          "text": "Because the under-6 and newborn amounts are multiples of the indexed $300 base, one CPI adjustment changes all three age amounts together."
+        },
+        {
+          "mechanism": "Adversarial mechanism — month-end cliffs",
+          "text": "Age and residence are tested by month, so births, sixth birthdays, eighteenth birthdays, moves, and claimant changes can produce sharp differences between otherwise similar annual family circumstances."
+        }
+      ],
+      "barriers": [
+        {
+          "actor": "IRS forms, systems, and guidance",
+          "text": "The agency must implement a new §24A line, month-level age and residence logic, three linked amount tiers, refundability, and retroactive annual entitlement without treating advance-payment delivery as the entitlement itself."
+        },
+        {
+          "actor": "Taxpayers with changing households",
+          "text": "Families must establish which months satisfy child, claimant, residence, and identification rules, including a birth month whose 800-percent amount can be much larger than adjacent months."
+        },
+        {
+          "actor": "Forecast and model integrations",
+          "text": "The observed Thesis SOI Additional Child Tax Credit concept may cease to be directly comparable if §24 is replaced by §24A, and no registered series isolates §24A amounts by child age or newborn month."
+        }
+      ],
+      "metrics": [
+        {
+          "category": "intended",
+          "layer": "outcome",
+          "kind": "Child-poverty outcome",
+          "text": "U.S. Census Bureau, annual Supplemental Poverty Measure child poverty rate. This captures the combined resource effect of larger and fully refundable credits but does not identify the separate contribution of the age tier, newborn multiplier, or payment timing.",
+          "series_hint": "census.spm.child_poverty_rate",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "serves"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "serves"
+            }
+          ]
+        },
+        {
+          "category": "operational",
+          "layer": "participation",
+          "kind": "Legacy refundable-credit participation benchmark",
+          "text": "IRS Statistics of Income, number of returns claiming the Additional Child Tax Credit. Use only as a transition benchmark and verify the post-enactment table label and concept before registration because new §24A may replace rather than continue the ACTC reporting line.",
+          "series_hint": "irs.soi.additional_child_tax_credit_returns",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        },
+        {
+          "category": "operational",
+          "layer": "execution",
+          "kind": "Honest amount-schedule gap",
+          "text": "No registered recurring official series separately reports allowed §24A dollars for children age 6 through 17, children under 6, and children under one month old at month-end. IRS forms and instructions can verify the legal schedule, but they are policy-state sources rather than an outcome series.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        }
+      ],
+      "conditionals": [
+        "P(Census SPM child poverty rate in calendar year t | the §24A age-based amount schedule and qualified-month full refundability are in force versus not in force)",
+        "P(IRS SOI refundable-child-credit claimant returns in TYt | §24A has no earned-income floor or refundable cap versus the applicable baseline, conditional on a verified post-enactment SOI concept)",
+        "P(the official §24A base amount for month m | the CPI indexing rule is in force versus a fixed nominal base)"
+      ]
+    },
+    {
+      "title": "Section 2(a)",
+      "heading": "2. IRC §24A(b)(2)–(3): two-stage MAGI phaseouts, indexed initial thresholds, and income-year election",
+      "quote": "“reduced (but not below zero) by 1/12 of 5 percent of the excess”; “if the dollar amounts in effect under subparagraphs (A) and (B) of paragraph (1) were each equal to $166.67”; and “the preceding taxable year or the second preceding taxable year”.",
+      "context": "The first reduction applies at one-twelfth of 5 percent of MAGI above the initial threshold, subject to both a cap derived from a statutory $166.67 hypothetical allowance and a cap based on the gap between the initial and secondary thresholds. Initial statutory bases are $150,000 for joint returns and surviving spouses, half that joint amount for married filing separately, and $112,500 for every other filing status. They are adjusted for taxable years after 2024 using CPI relative to 2022, with increases rounded to the nearest $5,000. A second one-twelfth-of-5-percent reduction applies after the first at $400,000 joint or surviving spouse, $200,000 married filing separately, and $300,000 for every other status. Current-year MAGI applies by default, and taxpayers may elect a prior or second-prior applicable taxable year, which selects both MAGI and the initial threshold. Honesty note: the cap says to set the ‘dollar amounts’ in §24A(b)(1)(A) and (B) to $166.67 even though (B) is drafted as a percentage with a newborn override, so the hypothetical calculation is not mechanically unique on the face of the text. Section 24A(b)(3)(B) also imports a formula written around the calendar year in which a month begins into a taxable-year threshold rule, leaving the exact annual lookup convention ambiguous; and 12 times $166.67 is $2,000.04, not exactly $2,000.",
+      "goals": [
+        "Phase out the age-based enhancement above indexed initial income thresholds while retaining the statutory hypothetical-cap calculation.",
+        "Phase out the remaining monthly allowance above a second, higher set of income thresholds.",
+        "Let taxpayers use one of three recent taxable years for MAGI while indexing the initial thresholds."
+      ],
+      "effects": [
+        {
+          "mechanism": "Two-stage targeting",
+          "text": "The first phaseout removes the enhancement down to the allowance produced by the bill's $166.67 hypothetical-cap language, and the second phaseout then reduces the remaining allowance, so the two formulas jointly determine the credit at higher incomes."
+        },
+        {
+          "mechanism": "Filing-status thresholds",
+          "text": "The bill gives every filing status other than joint, surviving spouse, and married filing separately the same $112,500 initial statutory base and $300,000 secondary threshold, including single and head-of-household filers."
+        },
+        {
+          "mechanism": "Income smoothing by election",
+          "text": "Current-taxable-year MAGI applies by default, while an election of the preceding or second-preceding taxable year can protect a household from a temporary income spike but makes the ultimate phaseout depend on an affirmative election."
+        },
+        {
+          "mechanism": "Indexing lag",
+          "text": "The initial thresholds are already subject to indexing in TY2025, while the secondary thresholds are nominal amounts with no indexing rule in the introduced text."
+        },
+        {
+          "mechanism": "Adversarial mechanism — model mismatch",
+          "text": "The bill uses a continuous 5-percent calculation spread across months, whereas the nearest PolicyEngine phaseout amount and increment parameters encode stepped reductions, so a one-parameter reform cannot reproduce the legal formula exactly."
+        }
+      ],
+      "barriers": [
+        {
+          "actor": "Treasury and IRS rulemaking",
+          "text": "The agencies must specify the election's timing and form, coordinate it with filing-status changes, and resolve the taxable-year wording embedded in the CPI cross-reference."
+        },
+        {
+          "actor": "Tax preparation software",
+          "text": "Implementers must evaluate three possible MAGI years, two phaseout stages, two separate caps on the initial reduction, indexed initial thresholds, and unindexed secondary thresholds."
+        },
+        {
+          "actor": "Analysts and microsimulation models",
+          "text": "The listed dollar thresholds are statutory bases rather than operative TY2025 or TY2027 values, and the $166.67 language should not be silently normalized to an exact $2,000 annual amount."
+        }
+      ],
+      "metrics": [
+        {
+          "category": "operational",
+          "layer": "participation",
+          "kind": "Claimed-child participation",
+          "text": "IRS Statistics of Income, qualifying children associated with the child tax credit. This can reveal changes in positive-credit participation around the phaseouts, but a post-enactment table must be checked for continuity after §24 is replaced.",
+          "series_hint": "irs.soi.ctc.qualifying_children",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "serves"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "serves"
+            }
+          ]
+        },
+        {
+          "category": "intended",
+          "layer": "outcome",
+          "kind": "Child-poverty outcome",
+          "text": "U.S. Census Bureau, annual Supplemental Poverty Measure child poverty rate. It reflects the combined distribution of the amount and phaseout schedule but cannot isolate the initial threshold, secondary threshold, or income-year election.",
+          "series_hint": "census.spm.child_poverty_rate",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "serves"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "serves"
+            }
+          ]
+        },
+        {
+          "category": "operational",
+          "layer": "participation",
+          "kind": "Honest phaseout-margin gap",
+          "text": "No registered recurring official series reports §24A claimants, allowed dollars, or elected MAGI year at the exact initial and secondary phaseout margins. Aggregate SOI tables cannot identify the statutory caps without a new published tabulation.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        }
+      ],
+      "conditionals": [
+        "P(IRS SOI qualifying-child count in TYt | the indexed initial phaseout and secondary phaseout schedules are in force versus not in force)",
+        "P(Census SPM child poverty rate in calendar year t | the §24A phaseout schedule and amount schedule are jointly in force versus the applicable baseline)",
+        "P(positive §24A credit among tax units with volatile MAGI | the current/prior/second-prior election is available versus current-year MAGI only), pending an official recurring marginal-income tabulation"
+      ]
+    },
+    {
+      "title": "Section 2(a)",
+      "heading": "3. IRC §24A(c), (e), (f), and (g): monthly child status, claimant priority, identification, sanctions, and reconciliation",
+      "quote": "“who has the same principal place of abode as the taxpayer for more than one-half of such month”; “will not, as of the close of such month, have attained age 18”; “the period of 120 calendar months”; and “the period of 24 calendar months”.",
+      "context": "Specified-child status is determined month by month using abode, relative age, age under 18, uncompensated care, non-spouse, and citizenship, nationality, residency, or adoption conditions. Detailed rules govern care, competing claimants, temporary absences, divorced parents, and periods of presumptive eligibility. The taxpayer and child identification numbers generally must be issued by the return due date. Fraud produces a 120-month disallowance, reckless or intentional disregard produces a 24-month disallowance, and a prior deficiency denial triggers a later proof requirement. Annual credits are reconciled with advances, but excess advances increase tax only to the extent attributable to enumerated causes, including an open-ended Secretary-designated anti-abuse category. Honesty note: §24A(e)(1) says “qualifying child” even though §24A otherwise defines and uses “specified child”; this analysis preserves that mismatch rather than silently substituting one term for the other.",
+      "goals": [
+        "Assign each month's credit to a taxpayer who actually satisfies the bill's child, care, abode, and claimant-priority rules.",
+        "Require timely taxpayer identification while accommodating temporary absences, divorced parents, and presumptive eligibility.",
+        "Deter improper claims and reconcile advances while limiting tax increases for excess payments to stated causes."
+      ],
+      "effects": [
+        {
+          "mechanism": "Monthly household matching",
+          "text": "The credit follows month-level living and care arrangements rather than relying only on an annual dependent snapshot, allowing eligibility to change within a year."
+        },
+        {
+          "mechanism": "Claimant hierarchy",
+          "text": "Parent status, residence duration, relationship, and AGI resolve competing claims, while constrained elections allow some parents or specified relatives to yield to a higher-AGI claimant."
+        },
+        {
+          "mechanism": "Presumptive entitlement",
+          "text": "A §7527A presumptive-eligibility period can deem a child specified for the annual credit, subject to claimant-priority and fraud exceptions, so operational enrollment records can alter substantive tax entitlement."
+        },
+        {
+          "mechanism": "Compliance sanctions",
+          "text": "Long fraud and disregard disallowance periods, plus post-deficiency recertification, can deter abuse but can also suppress later valid claims by households that cannot satisfy the proof process."
+        },
+        {
+          "mechanism": "Repayment exposure",
+          "text": "The enumerated recapture rule narrows when excess advances increase tax, but the Secretary's authority to add circumstances prevents it from operating as a closed repayment safe harbor."
+        }
+      ],
+      "barriers": [
+        {
+          "actor": "IRS adjudication and data systems",
+          "text": "Month-level abode and care facts, competing claims, temporary absences, TIN issuance dates, presumptive periods, and later recertification require records that ordinary annual return processing does not fully expose."
+        },
+        {
+          "actor": "Families with shared or changing custody",
+          "text": "The claimant hierarchy can turn on days of residence and comparative AGI, while a presumptive period may later conflict with the annual facts used for reconciliation."
+        },
+        {
+          "actor": "Legislative or regulatory clarification",
+          "text": "The “qualifying child” reference in §24A(e)(1) does not match the new defined term “specified child,” leaving the child-TIN rule's literal reach uncertain."
+        }
+      ],
+      "metrics": [
+        {
+          "category": "operational",
+          "layer": "participation",
+          "kind": "Claimed-child participation",
+          "text": "IRS Statistics of Income, qualifying children associated with the child tax credit. The count is a useful aggregate participation readout, but it cannot identify month-level custody, presumptive eligibility, TIN timing, or competing-claim resolutions.",
+          "series_hint": "irs.soi.ctc.qualifying_children",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "serves"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        },
+        {
+          "category": "operational",
+          "layer": "participation",
+          "kind": "Refundable-credit claimant benchmark",
+          "text": "IRS Statistics of Income, returns claiming the Additional Child Tax Credit. This can show aggregate participation after sanctions and identification rules, subject to verifying that IRS continues or crosswalks the concept after §24A replaces §24.",
+          "series_hint": "irs.soi.additional_child_tax_credit_returns",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "serves"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "serves"
+            }
+          ]
+        },
+        {
+          "category": "operational",
+          "layer": "execution",
+          "kind": "Honest claimant-process gap",
+          "text": "No registered recurring official series reports monthly competing claims, presumptive-eligibility overrides, temporary-absence determinations, TIN failures, disallowance months, recertifications, or excess-advance causes under the proposed sections.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        }
+      ],
+      "conditionals": [
+        "P(IRS SOI qualifying-child count in TYt | the §24A monthly specified-child and claimant-priority rules are in force versus the applicable annual rules)",
+        "P(IRS SOI refundable-child-credit claimant returns in TYt | the proposed TIN, disallowance, and recertification rules are in force versus not, conditional on a verified post-enactment SOI concept)",
+        "No claimant-process conditional should be registered until an official recurring product reports the relevant month-level adjudication or recapture field"
+      ]
+    },
+    {
+      "title": "Section 2(a)",
+      "heading": "4. IRC §24B: $500 credit for certain other dependents, phaseout, eligibility, and age-18 proration",
+      "quote": "“an amount equal to $500 with respect to each specified dependent”; “reduced (but not below zero) by $50 for each $1,000 (or fraction thereof)”; and “the number of months during such taxable year with respect to which such dependent is a specified child”.",
+      "context": "New §24B restates a nonrefundable $500 annual credit for a specified dependent who is an IRC §152 dependent, was not any taxpayer's §24A specified child for any month of the year, and satisfies the bill's cross-referenced status condition. The credit falls by $50 for each $1,000 or fraction of MAGI above $400,000 for joint returns and surviving spouses, $200,000 for married filing separately, and $300,000 for every other status. A dependent who turns 18 receives a proration based on the number of months not treated as any taxpayer's specified child. Similar TIN rules apply, and short taxable years are barred except when the year closes because of the taxpayer's death. Honesty note: §24B(e)'s “rules similar to” §24A(e) inherit the unresolved “qualifying child” versus “specified child” terminology rather than supplying an exact dependent-specific translation.",
+      "goals": [
+        "Provide a $500 nonrefundable credit for dependents who do not qualify as specified children under §24A.",
+        "Reduce the other-dependent credit above the bill's stated MAGI thresholds.",
+        "Coordinate the transition from monthly child status to other-dependent status in the year a dependent turns 18."
+      ],
+      "effects": [
+        {
+          "mechanism": "Dependent coverage",
+          "text": "The provision preserves a separate annual credit for dependents outside the monthly specified-child category, including adult dependents who satisfy §152 and the stated status rule."
+        },
+        {
+          "mechanism": "Stepped phaseout",
+          "text": "The $50 reduction applies for every $1,000 or fraction thereof above the threshold, creating discrete income steps rather than the continuous monthly 5-percent formula used in §24A."
+        },
+        {
+          "mechanism": "Age-18 coordination",
+          "text": "The proration allocates the year between months counted under §24A and the remaining share of the $500 §24B amount, preventing a full annual other-dependent amount from stacking with monthly child allowances."
+        },
+        {
+          "mechanism": "Nonrefundability",
+          "text": "Because §24B remains in subpart A and has no refundability rule parallel to §24A(d), taxpayers without sufficient income-tax liability may not receive the full stated amount."
+        }
+      ],
+      "barriers": [
+        {
+          "actor": "IRS and return preparers",
+          "text": "Systems must cross-check whether any taxpayer treated the dependent as a specified child in any month, apply age-18 proration, and then apply a separate stepped phaseout."
+        },
+        {
+          "actor": "Taxpayers supporting adult or transitioning dependents",
+          "text": "Eligibility depends on §152, the exact cross-referenced status language, TIN rules incorporated only by analogy, and whether another taxpayer had monthly specified-child status."
+        },
+        {
+          "actor": "Outcome measurement",
+          "text": "No registered recurring official series isolates §24B returns, dependents, dollars, age-18 prorations, or phaseout-margin claims from the broader child and dependent credit tables."
+        }
+      ],
+      "metrics": [
+        {
+          "category": "operational",
+          "layer": "participation",
+          "kind": "Honest other-dependent participation gap",
+          "text": "A direct metric would use a recurring IRS Statistics of Income field for the number of returns, dependents, and dollars under §24B, with the first published tax-year table frozen. No such registered series is established in the supplied materials.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        },
+        {
+          "category": "intended",
+          "layer": "outcome",
+          "kind": "Honest dependent-resource gap",
+          "text": "No registered recurring official outcome series isolates resources for §24B specified dependents or families at the age-18 boundary. Aggregate poverty measures would not identify this provision's relatively small, nonrefundable contribution.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        }
+      ],
+      "conditionals": [
+        "P(IRS SOI §24B claimant returns, specified dependents, and allowed dollars in TYt | §24B is in force versus not), only after IRS publishes a stable exact field",
+        "P(§24B dollars for dependents attaining age 18 in TYt | the month-based proration is in force versus a full-year other-dependent amount), only after an official age-specific field exists"
+      ]
+    },
+    {
+      "title": "Section 2(b)",
+      "heading": "5. IRC §7527A(a)–(g): presumptive eligibility, monthly advances, portal, competing claims, and retroactive payments",
+      "quote": "“The Secretary shall pay to each taxpayer, during each calendar month which is during a period of presumptive eligibility with respect to the taxpayer and any child”; “The Secretary shall establish an on-line portal (available in multiple languages)”; and “one or more of the 3 months immediately preceding the first month of such period”.",
+      "context": "Rewritten §7527A directs Treasury to make monthly advance payments during a period of presumptive eligibility, estimated from reference-month children, rolled-forward ages, reference-taxable-year income, and reference-month abode. Periods begin after sufficient information is provided and require annual renewal, with special procedures for newborns, information from other government programs, and the first six implementation months. A multilingual portal must allow taxpayers to start or stop payments and update information. Competing claims receive adjudication and possible retroactive payment; separate grace and hardship rules permit make-up payments for up to three or six preceding months. These are operational delivery rules, so they are not standalone revision atoms; only §24A(c)(7)'s substantive deeming effect is represented in the revision layer.",
+      "goals": [
+        "Deliver the child tax credit during the year in monthly installments based on current-enough eligibility information.",
+        "Reach newborns, nonfilers, and families known through other government programs while requiring annual renewal and updates.",
+        "Resolve competing claims and compensate eligible taxpayers for specified delays, grace periods, and hardships."
+      ],
+      "effects": [
+        {
+          "mechanism": "Cash-flow timing",
+          "text": "Monthly advances generally move resources from filing season into the months when care costs arise without changing the annual allowance before reconciliation, except where §24A(c)(7) makes a presumptive-eligibility period determine substantive specified-child status."
+        },
+        {
+          "mechanism": "Presumptive enrollment",
+          "text": "Birth records, program data, prior returns, and portal submissions can start payments without waiting for the next return, potentially increasing take-up among nonfilers."
+        },
+        {
+          "mechanism": "Dynamic claimant administration",
+          "text": "Challenge adjudication can redirect future payments and generate make-up payments, but the original claim generally remains in place until termination."
+        },
+        {
+          "mechanism": "Retroactive relief",
+          "text": "The automatic grace rule reaches up to three prior months no more than once in 36 months, while the hardship rule reaches up to six prior months for specified or Secretary-recognized hardships."
+        },
+        {
+          "mechanism": "Adversarial mechanism — stale reference data",
+          "text": "Payments can rely on one of two prior returns or other reference information, so changes in income, residence, custody, or child status can create both underpayments and excess advances before the system catches up."
+        }
+      ],
+      "barriers": [
+        {
+          "actor": "IRS and Treasury delivery systems",
+          "text": "The agencies must build monthly eligibility, renewal, cross-program matching, multilingual portal, opt-out, challenge, appeal, and retroactive-payment functions that remain synchronized with annual reconciliation."
+        },
+        {
+          "actor": "Other government entities",
+          "text": "Automatic eligibility and adjudication depend on timely, lawful, and accurately matched information from Federal, State, local, Tribal, territorial, and other approved sources."
+        },
+        {
+          "actor": "Families with limited filing or digital access",
+          "text": "The portal can lower update costs only for taxpayers who can authenticate and use it, while annual renewal and the duty to report ineligibility create recurring compliance burdens."
+        }
+      ],
+      "metrics": [
+        {
+          "category": "operational",
+          "layer": "execution",
+          "kind": "Honest monthly-delivery gap",
+          "text": "The direct measures are monthly advance recipients, children, dollars, payment timeliness, failed payments, and correction time by delivery channel. The introduced text does not require a stable recurring public data product, and no registered exact series is available.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        },
+        {
+          "category": "operational",
+          "layer": "participation",
+          "kind": "Annual participation backstop",
+          "text": "IRS Statistics of Income, returns claiming the Additional Child Tax Credit, can serve only as a lagged annual participation backstop. It does not measure monthly advances, portal use, presumptive enrollment, challenges, grace, or hardship payments, and its label may change under §24A.",
+          "series_hint": "irs.soi.additional_child_tax_credit_returns",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        },
+        {
+          "category": "operational",
+          "layer": "execution",
+          "kind": "Honest adjudication gap",
+          "text": "No registered recurring official series reports competing claims filed, median adjudication time, expedited decisions, appeals, reinstatements, or retroactive dollars under the proposed process.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        }
+      ],
+      "conditionals": [
+        "P(monthly advance recipients, children, and dollars follow path a_t | the §7527A presumptive-payment system operates versus annual-only delivery), only after Treasury publishes a stable official product",
+        "P(median days from competing claim to adjudication and make-up payment | the §7527A challenge process is operating), only after an official recurring field exists",
+        "P(IRS SOI refundable-child-credit claimant returns in TYt | automatic newborn and government-program presumptive eligibility operate versus return-only enrollment), conditional on a verified post-enactment SOI concept"
+      ]
+    },
+    {
+      "title": "Sections 2(a), 2(b), and 2(d)",
+      "heading": "6. IRC §24A(h), §7527A(h)–(l), and §6103(e)(12): territories, protected delivery, notices, and disclosure",
+      "quote": "“subject to reduction or offset pursuant to section 3716 or 3720A of title 31, United States Code”; “The right of any person to any applicable payment shall not be transferable or assignable, at law or in equity”; and “Not later than January 31 of the calendar year following any calendar year during which the Secretary makes one or more payments”.",
+      "context": "The bill extends refundable-credit value to Puerto Rico through §24A(d), reimburses mirror-code possessions for revenue loss while preventing duplicate federal credits, and provides American Samoa equivalent aggregate benefits through an approved distribution plan or direct federal treatment when no plan is approved. Advance-payment administration requires electronic transfer, allows specified destination accounts, protects payments from federal offset and most garnishment or assignment, funds approved territorial administration, and requires annual and event notices. New §6103(e)(12) permits limited disclosure to former joint filers and competing claimants. Honesty note: §7527A(h)(6)(A)(ii) points to subsection (b)(4) although the Puerto Rico abode/payment rule appears in (b)(5), and §7527A(h)(5)(E)(iii)(II) points to the mirror-code definition in §24(h) although the new definition appears in §24A(h)(1)(C); neither cross-reference is silently repaired here.",
+      "goals": [
+        "Deliver advance payments safely and protect them from offset, assignment, garnishment, and similar collection processes.",
+        "Extend the credit and advance-payment structure to Puerto Rico and other U.S. possessions through the bill's specified direct and local-distribution routes.",
+        "Give taxpayers notice and limited return-information access needed to understand payments and resolve competing claims."
+      ],
+      "effects": [
+        {
+          "mechanism": "Payment protection",
+          "text": "Offset, levy, assignment, garnishment, and bankruptcy protections increase the share of an advance that reaches the household rather than a creditor or government collection process."
+        },
+        {
+          "mechanism": "Territorial delivery routes",
+          "text": "Puerto Rico can receive direct federal refundable treatment, mirror-code possessions depend on their tax systems and elections, and American Samoa uses an approved local plan or a direct-credit fallback."
+        },
+        {
+          "mechanism": "Administrative supplements",
+          "text": "Approved mirror-code plans receive $300,000 for each of TY2025 through TY2027, while an approved American Samoa advance-payment program receives $300,000 for each of TY2024 through TY2026."
+        },
+        {
+          "mechanism": "Information symmetry",
+          "text": "Annual notices and limited disclosures can help former joint filers and competing claimants understand the data used, while also exposing sensitive household information to another claimant within statutory limits."
+        },
+        {
+          "mechanism": "Adversarial mechanism — cross-reference defects",
+          "text": "The Puerto Rico and mirror-code cross-reference mismatches can delay implementation or produce inconsistent readings until Congress, Treasury, or a court resolves them."
+        }
+      ],
+      "barriers": [
+        {
+          "actor": "Treasury, financial institutions, and territorial governments",
+          "text": "They must coordinate payment encoding, account review, protected amounts, territorial elections and plans, reimbursement, and separate federal and local credits without duplicate payment."
+        },
+        {
+          "actor": "IRS privacy and notice systems",
+          "text": "The agency must deliver January notices, event warnings, and narrowly scoped disclosures to former joint filers and competing claimants while preserving return-information safeguards."
+        },
+        {
+          "actor": "Legislative or regulatory clarification",
+          "text": "Two facially mismatched cross-references affect Puerto Rico advance payments and the mirror-code definition, so implementation cannot assume corrected citations without an authoritative basis."
+        }
+      ],
+      "metrics": [
+        {
+          "category": "operational",
+          "layer": "execution",
+          "kind": "Honest protected-payment gap",
+          "text": "Direct metrics would count advance dollars protected from offset or garnishment, rejected deposits, reclaimed payments, and notices delivered. No stable recurring official series with those fields is registered in the supplied materials.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        },
+        {
+          "category": "operational",
+          "layer": "participation",
+          "kind": "Honest territorial-distribution gap",
+          "text": "Direct metrics would report §24A recipients, children, and dollars separately for Puerto Rico, each mirror-code possession, and American Samoa, including whether payment occurred through federal or approved local systems. No registered exact recurring series is available.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        },
+        {
+          "category": "unintended",
+          "layer": "execution",
+          "kind": "Honest privacy-and-dispute gap",
+          "text": "No registered recurring official series reports disclosure requests, disputed disclosures, privacy incidents, or claimant outcomes under proposed §6103(e)(12).",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ]
+        }
+      ],
+      "conditionals": [
+        "P(successfully delivered and legally protected advance dollars by month | the §7527A payment-protection rules are operating), only after Treasury publishes stable fields",
+        "P(§24A recipients and dollars by possession and delivery route | the relevant territorial election or approved plan is in force), only after a recurring official territorial product exists",
+        "P(competing-claim resolution time and privacy incidents | §6103(e)(12) disclosure authority is in force), only after official recurring fields exist"
+      ]
+    },
+    {
+      "title": "Sections 2(c), 2(e), and 2(f)",
+      "heading": "7. IRC §24(l), conforming amendments, and effective dates: legacy-credit shutdown and transition",
+      "quote": "“This section shall not apply to (and no payment shall be made under subsection (k) with respect to) any taxable year beginning after December 31, 2024.”; and “Except as otherwise provided in this subsection, the amendments made by this section shall apply to taxable years beginning after December 31, 2024.”.",
+      "context": "New §24(l) makes legacy §24 and its §24(k) advance-payment rule inapplicable for taxable years beginning after 2024, preventing the replacement §§24A and 24B from stacking with the old credit. Conforming amendments integrate §24A into tax limits, dependent definitions, withholding, information sharing, deficiency and mathematical-error rules, preparer due diligence, and refund appropriations. General amendments apply to taxable years beginning after 2024; rewritten §7527A generally applies to calendar months after enactment, its grace and hardship rules apply to months after 2024, and §6103 disclosure authority begins on enactment. A late enactment would therefore create retroactive annual entitlement and grace-period rules without retroactive monthly delivery generally.",
+      "goals": [
+        "Replace legacy §24 with §§24A and 24B without allowing duplicate child or dependent credits for the same taxable year.",
+        "Integrate the replacement credits into the surrounding tax-administration and refund statutes.",
+        "Specify when annual entitlement, monthly delivery, grace and hardship payments, and disclosure authority begin."
+      ],
+      "effects": [
+        {
+          "mechanism": "Anti-stacking architecture",
+          "text": "Terminating §24 after 2024 is necessary for the replacement structure to function as a substitute rather than an additional credit."
+        },
+        {
+          "mechanism": "Retroactive annual law",
+          "text": "Because the general effective date is TY2025 even though the bill was introduced in April 2025 and could be enacted later, forms, returns, amended returns, and fiscal estimates may need retroactive treatment."
+        },
+        {
+          "mechanism": "Heterogeneous commencement",
+          "text": "Annual entitlement, ordinary advance payments, grace and hardship payments, and information disclosure start on different statutory clocks."
+        },
+        {
+          "mechanism": "Conforming integration",
+          "text": "The surrounding amendments make §24A refundable amounts, reconciliation tax increases, TIN errors, preparer duties, withholding, and territorial payments legible to existing administration provisions."
+        }
+      ],
+      "barriers": [
+        {
+          "actor": "IRS transition planning",
+          "text": "The agency must stop using §24 for years after 2024, introduce two replacement sections, reconcile returns already filed or prepared under then-current law, and start advances only after enactment."
+        },
+        {
+          "actor": "Forecast condition design",
+          "text": "A single enactment flag cannot represent the bill's different effective dates, and a vehicle-independent benefit atom cannot by itself prove that legacy §24 was shut down to prevent stacking."
+        },
+        {
+          "actor": "Official-series continuity",
+          "text": "SOI concepts named for the Child Tax Credit or Additional Child Tax Credit may be renamed, split, or discontinued when the operative Code sections change."
+        }
+      ],
+      "metrics": [
+        {
+          "category": "operational",
+          "layer": "execution",
+          "kind": "Direct legal-state verification",
+          "text": "The enrolled Code, effective-date provisions, IRS forms, and official instructions can verify that §24 is inapplicable and §§24A and 24B apply for a tax year. This is a binary legal-state check rather than a recurring outcome series.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "serves"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "serves"
+            }
+          ]
+        },
+        {
+          "category": "unintended",
+          "layer": "execution",
+          "kind": "Transition-error gap",
+          "text": "A useful implementation series would report returns delayed, corrected, or amended because of the retroactive replacement and mismatched start dates. No registered recurring official series isolates those transition errors.",
+          "series_hint": null,
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "opposes"
+            },
+            {
+              "goal": 2,
+              "stance": "opposes"
+            }
+          ]
+        }
+      ],
+      "conditionals": [
+        "P(legacy IRC §24 is inapplicable for TYt and replacement §§24A and 24B are operative | the introduced-text transition bundle is enacted versus not)",
+        "P(IRS transition corrections and amended returns for TY2025 | enactment occurs after TY2025 filing or payment activity), only after an official recurring field exists"
+      ]
+    }
+  ],
+  "revisions": [
+    {
+      "id": "section-24-inapplicable-after-2024",
+      "state": "IRC §24 is inapplicable for taxable years beginning after 2024-12-31.",
+      "statuteCite": "IRC §24(l)",
+      "parameters": [
+        {
+          "name": "Last taxable-year start date still covered by legacy §24",
+          "value": "2024-12-31",
+          "unit": "date",
+          "effective": "taxable years beginning after 2024-12-31"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        6
+      ]
+    },
+    {
+      "id": "monthly-ctc-accrual",
+      "state": "For TY2025 and later, the federal child tax credit under IRC §24A equals the sum of the taxpayer's monthly specified-child allowances for each calendar month in the taxable year.",
+      "statuteCite": "IRC §24A(a)",
+      "parameters": [
+        {
+          "name": "Entitlement calculation period",
+          "value": "calendar month",
+          "unit": "period",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        0
+      ]
+    },
+    {
+      "id": "ctc-age-6-to-17-amount",
+      "state": "IRC §24A's statutory-base monthly allowance for a specified child age 6 through 17 at month-end is $300 for calendar months in 2025.",
+      "statuteCite": "IRC §§24A(b)(1)(A), 24A(c)(1)(B)",
+      "parameters": [
+        {
+          "name": "Statutory-base monthly amount",
+          "value": 300,
+          "unit": "USD per specified child per month",
+          "effective": "calendar months in 2025"
+        },
+        {
+          "name": "Minimum age at month-end",
+          "value": 6,
+          "unit": "years",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Maximum age at month-end",
+          "value": 17,
+          "unit": "years",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/amount/arpa.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        0
+      ]
+    },
+    {
+      "id": "ctc-under-6-multiplier",
+      "state": "For IRC §24A, a specified child who is at least one month old but under age 6 at month-end receives 120 percent of the indexed §24A(b)(1)(A) base amount for that month; the separate newborn override applies below one month.",
+      "statuteCite": "IRC §24A(b)(1)(B)",
+      "parameters": [
+        {
+          "name": "Age-one-month-through-five amount multiplier",
+          "value": 120,
+          "unit": "percent of indexed base amount",
+          "effective": "TY2025 and later; excludes a child under one month old at month-end"
+        },
+        {
+          "name": "Derived monthly amount before indexing",
+          "value": 360,
+          "unit": "USD per specified child per month",
+          "effective": "calendar months in 2025; excludes a child under one month old at month-end"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/amount/arpa.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        0
+      ]
+    },
+    {
+      "id": "ctc-newborn-month-multiplier",
+      "state": "For IRC §24A, a specified child who is under one month old at month-end receives 800 percent, instead of 120 percent, of the indexed §24A(b)(1)(A) base amount for that month.",
+      "statuteCite": "IRC §24A(b)(1)(B), final sentence",
+      "parameters": [
+        {
+          "name": "Under-one-month amount multiplier",
+          "value": 800,
+          "unit": "percent of indexed base amount",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Derived total monthly amount before indexing",
+          "value": 2400,
+          "unit": "USD per specified child for the qualifying month",
+          "effective": "calendar months in 2025"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        0
+      ]
+    },
+    {
+      "id": "ctc-enhancement-phaseout",
+      "state": "IRC §24A's initial reduction equals one-twelfth of 5 percent of applicable-taxable-year MAGI above the applicable initial threshold, subject to the separate §24A(b)(2)(B) limits.",
+      "statuteCite": "IRC §24A(b)(2)(A)",
+      "parameters": [
+        {
+          "name": "Annual phaseout rate applied monthly",
+          "value": 5,
+          "unit": "percent of MAGI excess, divided by 12",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/phase_out/arpa/amount.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        1
+      ]
+    },
+    {
+      "id": "ctc-enhancement-phaseout-thresholds",
+      "state": "Before §24A(b)(3)(B) indexing, IRC §24A's initial phaseout thresholds have statutory bases of $150,000 for a joint return or surviving spouse, $75,000 for married filing separately, and $112,500 for every other filing status.",
+      "statuteCite": "IRC §24A(b)(2)(D)(i)",
+      "parameters": [
+        {
+          "name": "Joint or surviving-spouse initial threshold statutory base",
+          "value": 150000,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later, subject to §24A(b)(3)(B) indexing"
+        },
+        {
+          "name": "Married-filing-separately initial threshold statutory base",
+          "value": 75000,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later, one-half the indexed joint amount"
+        },
+        {
+          "name": "Other-filer initial threshold statutory base",
+          "value": 112500,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later, subject to §24A(b)(3)(B) indexing"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/phase_out/arpa/threshold.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        1
+      ]
+    },
+    {
+      "id": "ctc-enhancement-phaseout-cap",
+      "state": "IRC §24A's initial reduction cannot exceed the lesser of (i) the allowance above a hypothetical allowance calculated by treating the ‘dollar amounts’ in §24A(b)(1)(A) and (B) as $166.67, even though (B) is drafted as a percentage and the text therefore leaves that substitution ambiguous, or (ii) one-twelfth of 5 percent of the secondary-threshold-minus-initial-threshold gap.",
+      "statuteCite": "IRC §24A(b)(2)(B)",
+      "parameters": [
+        {
+          "name": "Monthly comparison amount",
+          "value": 166.67,
+          "unit": "literal statutory input to the hypothetical allowance",
+          "effective": "TY2025 and later; application to §24A(b)(1)(B)'s percentage is textually ambiguous"
+        },
+        {
+          "name": "Threshold-gap cap rate applied monthly",
+          "value": 5,
+          "unit": "percent of threshold gap, divided by 12",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/amount/arpa_expansion_cap_percent_of_threshold_diff.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        1
+      ]
+    },
+    {
+      "id": "ctc-amount-cpi-indexing",
+      "state": "For calendar months after 2025, IRC §24A increases the $300 base by prior-calendar-year CPI growth above calendar-year 2024 CPI and rounds the increase to the nearest $10.",
+      "statuteCite": "IRC §§24A(b)(3)(A), (C)(i)",
+      "parameters": [
+        {
+          "name": "CPI base year",
+          "value": 2024,
+          "unit": "calendar year",
+          "effective": "calendar months after 2025-12-31"
+        },
+        {
+          "name": "Rounding increment for the increase",
+          "value": 10,
+          "unit": "USD",
+          "effective": "calendar months after 2025-12-31"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        0
+      ]
+    },
+    {
+      "id": "ctc-initial-threshold-indexing",
+      "state": "For taxable years after 2024, IRC §24A increases the joint and other-filer initial-threshold statutory bases by the percentage, if any, determined under §24A(b)(3)(A)(ii) after substituting 2022 for 2024, rounds the increase to the nearest $5,000, and sets the married-filing-separately threshold at half the indexed joint amount; the imported clause retains month-and-calendar-year wording and does not uniquely specify the lookup for every non-calendar taxable year.",
+      "statuteCite": "IRC §§24A(b)(2)(D)(i), 24A(b)(3)(B), (C)(ii)",
+      "parameters": [
+        {
+          "name": "CPI base year",
+          "value": 2022,
+          "unit": "calendar year",
+          "effective": "TY2025 and later; imported calendar-year lookup is ambiguous for non-calendar taxable years"
+        },
+        {
+          "name": "Rounding increment for the increase",
+          "value": 5000,
+          "unit": "USD",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Married-filing-separately ratio to joint threshold",
+          "value": 50,
+          "unit": "percent",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        1
+      ]
+    },
+    {
+      "id": "ctc-secondary-phaseout",
+      "state": "After the initial reduction, IRC §24A reduces the remaining monthly allowance by one-twelfth of 5 percent of applicable-taxable-year MAGI above the applicable secondary threshold.",
+      "statuteCite": "IRC §24A(b)(2)(C)",
+      "parameters": [
+        {
+          "name": "Annual phaseout rate applied monthly",
+          "value": 5,
+          "unit": "percent of MAGI excess, divided by 12",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/phase_out/amount.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        1
+      ]
+    },
+    {
+      "id": "ctc-secondary-phaseout-thresholds",
+      "state": "IRC §24A's secondary phaseout thresholds are $400,000 for a joint return or surviving spouse, $200,000 for married filing separately, and $300,000 for every other filing status.",
+      "statuteCite": "IRC §24A(b)(2)(D)(ii)",
+      "parameters": [
+        {
+          "name": "Joint or surviving-spouse secondary threshold",
+          "value": 400000,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Married-filing-separately secondary threshold",
+          "value": 200000,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Other-filer secondary threshold",
+          "value": 300000,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/phase_out/threshold.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        1
+      ]
+    },
+    {
+      "id": "ctc-income-lookback-election",
+      "state": "For IRC §24A phaseouts, the current taxable year supplies both MAGI and the applicable initial threshold by default; a taxpayer may instead elect the preceding or second-preceding taxable year as the applicable taxable year, selecting that year's MAGI and initial threshold, and MAGI adds back amounts excluded under IRC §§911, 931, and 933.",
+      "statuteCite": "IRC §24A(b)(2)(D)(iii)–(iv)",
+      "parameters": [
+        {
+          "name": "Permitted applicable-taxable-year selection",
+          "value": "current, 1 prior, or 2 prior taxable years for MAGI and the initial threshold",
+          "unit": "taxable-year election",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "MAGI addback sections",
+          "value": "IRC §§911, 931, and 933 exclusions",
+          "unit": "income definition",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        1
+      ]
+    },
+    {
+      "id": "specified-child-monthly-definition",
+      "state": "IRC §24A specified-child status is determined monthly and requires the same principal abode as the claimant for more than half the month, an individual younger than the claimant and under age 18 at month-end, uncompensated care from the claimant, and non-spouse status; the individual must be a U.S. citizen, national, or resident, or, when the claimant is a U.S. citizen or national, be that claimant's legally adopted child or lawfully placed with that claimant for legal adoption. Section 24A(c)(1) imposes no familial-relationship requirement.",
+      "statuteCite": "IRC §24A(c)(1)",
+      "parameters": [
+        {
+          "name": "Principal-abode duration",
+          "value": "more than one-half",
+          "unit": "calendar month",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Maximum age at month-end",
+          "value": 17,
+          "unit": "years",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "specified-child-care-test",
+      "state": "For IRC §24A specified-child status, whether an individual receives care from the taxpayer is a facts-and-circumstances determination based on supervision of daily activities and needs, maintenance of a secure residence, provision or arrangement of and transportation to medical care, involvement and support for educational or similar activities, and any other Treasury-specified factor; federal, State, local, Tribal, and U.S.-possession compensation is disregarded when determining whether that care is compensated.",
+      "statuteCite": "IRC §24A(c)(1)(C), (c)(3)",
+      "parameters": [
+        {
+          "name": "Care facts and circumstances",
+          "value": "supervision; secure residence; medical care and transportation; educational or similar involvement and support; Treasury-specified factors",
+          "unit": "eligibility test",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Government compensation disregarded",
+          "value": "Federal, State, local, Tribal, and U.S.-possession compensation",
+          "unit": "compensation exclusion",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "specified-child-claimant-priority",
+      "state": "When multiple taxpayers could claim the same IRC §24A specified child for a month, priority runs to a parent, then—if no parent qualifies—to the highest-AGI specified relative (a parent's ancestor or sibling, or the child's sibling or stepsibling), and otherwise to the highest-AGI claimant; among parents it uses longest monthly residence and then highest AGI. A parent or specified relative may elect out only when the successor claimant's AGI exceeds the highest AGI of the relevant parents or, for a relative's election, parents and specified relatives; each spouse filing jointly is assigned the return's total AGI, and ‘parent’ follows IRC §152(c)(4) unless Treasury provides otherwise.",
+      "statuteCite": "IRC §24A(c)(4)",
+      "parameters": [
+        {
+          "name": "Claimant-priority order",
+          "value": "parent; highest-AGI specified relative; highest-AGI other claimant",
+          "unit": "monthly claimant hierarchy",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Election-out condition",
+          "value": "successor claimant has higher AGI than the relevant parent or parent-and-specified-relative comparison group",
+          "unit": "monthly claimant exception",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Joint-return AGI attribution",
+          "value": "total AGI shown on the joint return for each spouse",
+          "unit": "claimant-priority income rule",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "specified-child-no-own-children",
+      "state": "An individual who is an IRC §24A specified child of another taxpayer for a calendar month is treated as having no specified children of their own for that month.",
+      "statuteCite": "IRC §24A(c)(2)",
+      "parameters": [
+        {
+          "name": "Ineligibility period",
+          "value": "each month the individual is another taxpayer's specified child",
+          "unit": "calendar month",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "specified-child-temporary-absence",
+      "state": "For IRC §24A, each day of a qualifying temporary absence counts only at the individual's principal abode and satisfies the care requirement when the individual otherwise would have resided there and is reasonably expected to return.",
+      "statuteCite": "IRC §24A(c)(5)",
+      "parameters": [
+        {
+          "name": "Temporary-absence treatment",
+          "value": "principal-abode and care days preserved",
+          "unit": "eligibility rule",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "specified-child-divorced-parent-rule",
+      "state": "Rules similar to IRC §152(e) apply when determining a specified child under IRC §24A for divorced or separated parents.",
+      "statuteCite": "IRC §24A(c)(6)",
+      "parameters": [
+        {
+          "name": "Imported rule",
+          "value": "rules similar to IRC §152(e)",
+          "unit": "eligibility rule",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "presumptive-eligibility-deeming",
+      "state": "An IRC §7527A presumptive-eligibility period deems the child to be that taxpayer's IRC §24A specified child for those months and excludes another taxpayer who lacks a presumptive period; a taxpayer may establish the period for annual-credit purposes despite opting out of advances. The deeming does not override the claimant-priority rules in §24A(c)(4)(A), specified retroactive-payment periods count as presumptive periods, and months affected by fraud or intentional disregard do not.",
+      "statuteCite": "IRC §24A(c)(7)",
+      "parameters": [
+        {
+          "name": "Deemed-child period",
+          "value": "§7527A period of presumptive eligibility",
+          "unit": "calendar months",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Ordinary §7527A period clock",
+          "value": "calendar months beginning after enactment",
+          "unit": "effective-date condition",
+          "effective": "on enactment"
+        },
+        {
+          "name": "Grace and hardship retroactive-period clock",
+          "value": "calendar months beginning after 2024-12-31",
+          "unit": "effective-date condition",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2,
+        4
+      ]
+    },
+    {
+      "id": "ctc-no-earned-income-floor",
+      "state": "Federal refundable CTC earned-income threshold is less than or equal to $1 for TY2027.",
+      "statuteCite": "IRC §§24A(a)–(b), 24A(d), 24(l)",
+      "parameters": [
+        {
+          "name": "AFA earned-income threshold",
+          "value": "none",
+          "unit": "USD earned income",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Shared-state comparison ceiling",
+          "value": 1,
+          "unit": "USD earned income",
+          "effective": "TY2027"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/refundable/phase_in/threshold.yaml",
+      "sharedWith": [
+        "S.3596"
+      ],
+      "provisionRefs": [
+        0
+      ]
+    },
+    {
+      "id": "ctc-full-refundability",
+      "state": "The full otherwise-allowable IRC §24A credit attributable to each month in which the taxpayer, or either spouse on a joint return, has a principal abode in the United States or Puerto Rico for more than half the month is refundable under subpart C.",
+      "statuteCite": "IRC §24A(d)",
+      "parameters": [
+        {
+          "name": "Refundable share for a qualifying residence month",
+          "value": 100,
+          "unit": "percent of otherwise-allowable monthly credit",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Required abode duration",
+          "value": "more than one-half",
+          "unit": "calendar month",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/refundable/fully_refundable.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        0
+      ]
+    },
+    {
+      "id": "ctc-no-separate-refundable-cap",
+      "state": "For TY2025 and later, the federal refundable child tax credit has no separate per-child refundable maximum below the full otherwise-allowable credit attributable to an IRC §24A(d)-qualified month.",
+      "statuteCite": "IRC §24A(d)",
+      "parameters": [
+        {
+          "name": "Separate refundable per-child cap",
+          "value": "none",
+          "unit": "USD per specified child",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/refundable/individual_max.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        0
+      ]
+    },
+    {
+      "id": "ctc-child-tin-deadline",
+      "state": "IRC §24A(e)(1) conditions credit for a statutorily termed ‘qualifying child’ on including that child's name and TIN on the return and having the TIN issued by the return due date; a timely TIN suffices and the provision imposes no SSN-only requirement, while its use of ‘qualifying child’ rather than ‘specified child’ leaves the referenced class textually ambiguous.",
+      "statuteCite": "IRC §24A(e)(1)",
+      "parameters": [
+        {
+          "name": "Child TIN issuance deadline",
+          "value": "return due date",
+          "unit": "filing deadline",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Child SSN-only requirement applies",
+          "value": "no",
+          "unit": "identification rule",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/child_ssn_requirement_applies.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "ctc-taxpayer-tin-deadline",
+      "state": "IRC §24A credit is unavailable when the taxpayer's TIN was issued after the return due date; a timely TIN suffices and the provision imposes no SSN-only requirement on the taxpayer.",
+      "statuteCite": "IRC §24A(e)(2)",
+      "parameters": [
+        {
+          "name": "Taxpayer TIN issuance deadline",
+          "value": "return due date",
+          "unit": "filing deadline",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Taxpayer SSN-only requirement applies",
+          "value": "no",
+          "unit": "identification rule",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/adult_ssn_requirement_applies.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "ctc-improper-claim-disallowance",
+      "state": "IRC §24A credit and §7527A payments are unavailable during a disallowance period defined as the 120 calendar months after the most recent calendar month for which a final fraud determination was made or the 24 calendar months after the most recent calendar month for which a final reckless-or-intentional-disregard determination was made, including corresponding possession claims and payments.",
+      "statuteCite": "IRC §24A(f)(1), (3)",
+      "parameters": [
+        {
+          "name": "Fraud disallowance period",
+          "value": 120,
+          "unit": "calendar months",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Reckless or intentional-disregard disallowance period",
+          "value": 24,
+          "unit": "calendar months",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Advance-payment restriction clock",
+          "value": "calendar months beginning after enactment",
+          "unit": "effective-date condition",
+          "effective": "on enactment"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "ctc-post-deficiency-recertification",
+      "state": "After an IRC §24 or §24A credit denial through deficiency procedures, including a corresponding possession-law denial, later §24A credits and §7527A payments require information demonstrating eligibility.",
+      "statuteCite": "IRC §24A(f)(2)–(3)",
+      "parameters": [
+        {
+          "name": "Post-denial requirement",
+          "value": "Secretary-required eligibility information",
+          "unit": "recertification condition",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Advance-payment restriction clock",
+          "value": "calendar months beginning after enactment",
+          "unit": "effective-date condition",
+          "effective": "on enactment"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2
+      ]
+    },
+    {
+      "id": "ctc-excess-advance-repayment",
+      "state": "After the annual IRC §24A credit is reduced, but not below zero, by aggregate §7527A advances, excess advances increase tax only to the extent attributable to taxpayer fraud or reckless or intentional disregard; MAGI or filing-status changes; payments for months outside a presumptive-eligibility period; failure of claimant priority, the qualified-month abode rule, or a taxpayer or child TIN rule; Treasury-identified administration, enforcement, eligibility, or anti-abuse circumstances; or payments identified in a §7527A(j)(2) notice. A delayed child TIN is excepted for reasonable cause when issuance is reasonably expected; joint-return advances are split equally unless Treasury provides otherwise; corresponding possession advances are included, possession-law recapture reduces the possession advance total, and Treasury must coordinate to prevent applications inconsistent with the reconciliation rules' purposes.",
+      "statuteCite": "IRC §24A(g)(1)–(4)",
+      "parameters": [
+        {
+          "name": "Advance reconciliation floor",
+          "value": 0,
+          "unit": "USD remaining annual credit minimum",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Joint-return advance allocation",
+          "value": 50,
+          "unit": "percent to each spouse unless Treasury provides otherwise",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Enumerated recapture causes",
+          "value": "fraud or disregard; MAGI or filing-status change; non-presumptive month; claimant-priority, abode, or TIN failure; Treasury-specified administration or anti-abuse circumstance; §7527A(j)(2) notice",
+          "unit": "excess-advance attribution rule",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Advance-payment timing",
+          "value": "ordinary §7527A months after enactment; §7527A(g) grace and hardship periods after 2024-12-31",
+          "unit": "effective-date condition",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        2,
+        4
+      ]
+    },
+    {
+      "id": "ctc-puerto-rico-coverage",
+      "state": "Puerto Rico counts with the United States for IRC §24A qualified-month refundability when the taxpayer or either joint filer has a principal abode there for more than half the month.",
+      "statuteCite": "IRC §§24A(d), 24A(h)(2)(A)",
+      "parameters": [
+        {
+          "name": "Puerto Rico abode duration",
+          "value": "more than one-half",
+          "unit": "calendar month",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        0,
+        5
+      ]
+    },
+    {
+      "id": "ctc-mirror-code-possession-reimbursement",
+      "state": "For TY2025 and later, Treasury reimburses each mirror-code possession for revenue loss caused by IRC §24A and denies a duplicate federal §24A credit to an individual for whom the corresponding possession credit is allowable.",
+      "statuteCite": "IRC §24A(h)(1)",
+      "parameters": [
+        {
+          "name": "Revenue-loss reimbursement",
+          "value": 100,
+          "unit": "percent of Secretary-determined possession loss",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        5
+      ]
+    },
+    {
+      "id": "ctc-american-samoa-distribution",
+      "state": "For TY2025 and later, Treasury provides American Samoa estimated aggregate IRC §24A-equivalent benefits under an approved prompt-distribution plan, and §24A other than subsection (h) does not apply to an individual eligible for that plan's distribution; when no plan is approved, §24A(d) direct-credit treatment extends to American Samoa.",
+      "statuteCite": "IRC §24A(h)(3)",
+      "parameters": [
+        {
+          "name": "Approved-plan benefit funding",
+          "value": 100,
+          "unit": "percent of Secretary-estimated equivalent aggregate benefits",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        5
+      ]
+    },
+    {
+      "id": "odc-amount",
+      "state": "For TY2025 and later, IRC §24B allows a nonrefundable $500 credit for each specified dependent.",
+      "statuteCite": "IRC §24B(a)",
+      "parameters": [
+        {
+          "name": "Other-dependent credit amount",
+          "value": 500,
+          "unit": "USD per specified dependent per taxable year",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/amount/adult_dependent.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        3
+      ]
+    },
+    {
+      "id": "odc-phaseout",
+      "state": "IRC §24B reduces the other-dependent credit by $50 for each $1,000 or fraction of MAGI above the applicable §24B(b)(2) threshold, with MAGI adding back exclusions under IRC §§911, 931, and 933.",
+      "statuteCite": "IRC §24B(b)(1), (3)",
+      "parameters": [
+        {
+          "name": "Credit reduction",
+          "value": 50,
+          "unit": "USD per income increment or fraction",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Income increment",
+          "value": 1000,
+          "unit": "USD MAGI or fraction",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "MAGI addback sections",
+          "value": "IRC §§911, 931, and 933 exclusions",
+          "unit": "income definition",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/phase_out/amount.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        3
+      ]
+    },
+    {
+      "id": "odc-phaseout-thresholds",
+      "state": "IRC §24B's other-dependent-credit phaseout thresholds are $400,000 for a joint return or surviving spouse, $200,000 for married filing separately, and $300,000 for every other filing status.",
+      "statuteCite": "IRC §24B(b)(2)",
+      "parameters": [
+        {
+          "name": "Joint or surviving-spouse threshold",
+          "value": 400000,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Married-filing-separately threshold",
+          "value": 200000,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Other-filer threshold",
+          "value": 300000,
+          "unit": "USD MAGI",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": "parameters/gov/irs/credits/ctc/phase_out/threshold.yaml",
+      "sharedWith": [],
+      "provisionRefs": [
+        3
+      ]
+    },
+    {
+      "id": "odc-definition",
+      "state": "Except for §24B(d)'s age-18 override, an IRC §24B specified dependent is an IRC §152 dependent who was not any taxpayer's IRC §24A specified child for any month in the taxable year and who would remain a dependent if IRC §152(b)(3)(A) ended immediately after the words ‘resident of the United States’.",
+      "statuteCite": "IRC §24B(c)",
+      "parameters": [
+        {
+          "name": "Specified-child exclusion window",
+          "value": "any month in the taxable year",
+          "unit": "eligibility condition",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Base dependent definition",
+          "value": "IRC §152 dependent under the literal §24B(c)(2) truncation of §152(b)(3)(A) after ‘resident of the United States’",
+          "unit": "eligibility condition",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        3
+      ]
+    },
+    {
+      "id": "odc-age-18-proration",
+      "state": "For a dependent who turns 18 during the taxable year, IRC §24B disregards the usual specified-child exclusion and allows $500 × ((12 − the number of months the dependent was any taxpayer's specified child) / 12).",
+      "statuteCite": "IRC §24B(d)",
+      "parameters": [
+        {
+          "name": "Annual amount before proration",
+          "value": 500,
+          "unit": "USD per dependent",
+          "effective": "taxable year in which the dependent attains age 18"
+        },
+        {
+          "name": "Proration denominator",
+          "value": 12,
+          "unit": "months",
+          "effective": "taxable year in which the dependent attains age 18"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        3
+      ]
+    },
+    {
+      "id": "odc-tin-deadline",
+      "state": "IRC §24B applies rules similar to IRC §24A(e)'s return-due-date TIN requirements to the other-dependent credit.",
+      "statuteCite": "IRC §24B(e)",
+      "parameters": [
+        {
+          "name": "Incorporated TIN timing",
+          "value": "rules similar to IRC §24A(e)",
+          "unit": "identification condition",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        3
+      ]
+    },
+    {
+      "id": "odc-full-taxable-year-rule",
+      "state": "IRC §24B is unavailable for a taxable year shorter than 12 months unless the taxable year closes because of the taxpayer's death.",
+      "statuteCite": "IRC §24B(f)",
+      "parameters": [
+        {
+          "name": "Required taxable-year length",
+          "value": 12,
+          "unit": "months",
+          "effective": "TY2025 and later"
+        },
+        {
+          "name": "Short-year exception",
+          "value": "taxable year closes because of taxpayer death",
+          "unit": "eligibility exception",
+          "effective": "TY2025 and later"
+        }
+      ],
+      "peParameterPath": null,
+      "sharedWith": [],
+      "provisionRefs": [
+        3
+      ]
+    }
+  ],
+  "interactions": [
+    {
+      "revisionIds": [
+        "ctc-age-6-to-17-amount",
+        "ctc-under-6-multiplier",
+        "ctc-no-earned-income-floor",
+        "ctc-full-refundability",
+        "ctc-no-separate-refundable-cap"
+      ],
+      "series_hint": "census.spm.child_poverty_rate",
+      "mechanism": "The larger age-based allowance reaches households with little or no earnings only because the earned-income floor and tax-liability or refundable-cap constraints are absent."
+    },
+    {
+      "revisionIds": [
+        "monthly-ctc-accrual",
+        "ctc-newborn-month-multiplier",
+        "presumptive-eligibility-deeming"
+      ],
+      "series_hint": "census.spm.child_poverty_rate",
+      "mechanism": "The birth month accrues under the monthly rule, and presumptive-eligibility deeming can establish or preserve that month's child status or support a catch-up payment when ordinary facts or claim timing do not already do so."
+    },
+    {
+      "revisionIds": [
+        "ctc-age-6-to-17-amount",
+        "ctc-under-6-multiplier",
+        "ctc-newborn-month-multiplier",
+        "ctc-amount-cpi-indexing"
+      ],
+      "series_hint": "census.spm.child_poverty_rate",
+      "mechanism": "Indexing the $300 base scales the older-child, under-6, and newborn monthly amounts together."
+    },
+    {
+      "revisionIds": [
+        "ctc-age-6-to-17-amount",
+        "ctc-under-6-multiplier",
+        "ctc-enhancement-phaseout",
+        "ctc-enhancement-phaseout-thresholds",
+        "ctc-enhancement-phaseout-cap",
+        "ctc-initial-threshold-indexing"
+      ],
+      "series_hint": "census.spm.child_poverty_rate",
+      "mechanism": "The indexed initial thresholds and capped 5-percent reduction determine which taxpayers retain the age-based enhancement above the allowance produced by the statute's $166.67 hypothetical-calculation input."
+    },
+    {
+      "revisionIds": [
+        "ctc-enhancement-phaseout",
+        "ctc-enhancement-phaseout-thresholds",
+        "ctc-enhancement-phaseout-cap",
+        "ctc-secondary-phaseout",
+        "ctc-secondary-phaseout-thresholds"
+      ],
+      "series_hint": "irs.soi.ctc.qualifying_children",
+      "mechanism": "The initial phaseout removes the enhanced slice first and the secondary phaseout then reduces the remaining amount, jointly determining positive-credit participation at higher incomes."
+    },
+    {
+      "revisionIds": [
+        "ctc-income-lookback-election",
+        "ctc-enhancement-phaseout",
+        "ctc-enhancement-phaseout-thresholds",
+        "ctc-enhancement-phaseout-cap",
+        "ctc-initial-threshold-indexing",
+        "ctc-secondary-phaseout",
+        "ctc-secondary-phaseout-thresholds"
+      ],
+      "series_hint": null,
+      "mechanism": "The elected MAGI year determines exposure to both stages of the phaseout schedule for families with volatile income."
+    },
+    {
+      "revisionIds": [
+        "monthly-ctc-accrual",
+        "specified-child-monthly-definition",
+        "specified-child-care-test",
+        "specified-child-claimant-priority",
+        "specified-child-no-own-children",
+        "specified-child-temporary-absence",
+        "specified-child-divorced-parent-rule",
+        "presumptive-eligibility-deeming",
+        "ctc-child-tin-deadline",
+        "ctc-taxpayer-tin-deadline"
+      ],
+      "series_hint": "irs.soi.ctc.qualifying_children",
+      "mechanism": "These rules jointly determine which documented claimant may accrue the credit for a child in each month, driving the annual claimed-child count."
+    },
+    {
+      "revisionIds": [
+        "specified-child-claimant-priority",
+        "presumptive-eligibility-deeming",
+        "ctc-excess-advance-repayment"
+      ],
+      "series_hint": null,
+      "mechanism": "Claimant priority and presumptive-eligibility outcomes determine whether advances match the ultimate credit and can become repayable excess."
+    },
+    {
+      "revisionIds": [
+        "ctc-improper-claim-disallowance",
+        "ctc-post-deficiency-recertification"
+      ],
+      "series_hint": "irs.soi.additional_child_tax_credit_returns",
+      "mechanism": "Prior-claim findings set both the temporary disallowance period and the later proof gate, jointly affecting future refundable-credit participation."
+    },
+    {
+      "revisionIds": [
+        "section-24-inapplicable-after-2024",
+        "monthly-ctc-accrual",
+        "specified-child-monthly-definition",
+        "odc-definition"
+      ],
+      "series_hint": null,
+      "mechanism": "Ending legacy §24 prevents benefit stacking while the monthly-child and other-dependent rules allocate each dependent to the replacement credit regime."
+    },
+    {
+      "revisionIds": [
+        "monthly-ctc-accrual",
+        "specified-child-monthly-definition",
+        "odc-definition",
+        "odc-age-18-proration",
+        "odc-amount"
+      ],
+      "series_hint": null,
+      "mechanism": "For a dependent who turns 18, months counted for the monthly CTC reduce the months used to prorate the $500 other-dependent credit."
+    },
+    {
+      "revisionIds": [
+        "odc-amount",
+        "odc-phaseout",
+        "odc-phaseout-thresholds",
+        "odc-definition",
+        "odc-tin-deadline",
+        "odc-full-taxable-year-rule"
+      ],
+      "series_hint": null,
+      "mechanism": "Dependent status, documentation, and taxable-year length gate the $500 entitlement before the income phaseout determines the allowed amount."
+    },
+    {
+      "revisionIds": [
+        "ctc-full-refundability",
+        "ctc-puerto-rico-coverage",
+        "ctc-mirror-code-possession-reimbursement",
+        "ctc-american-samoa-distribution"
+      ],
+      "series_hint": null,
+      "mechanism": "The territorial coverage route determines whether refundable value reaches residents directly under federal law or through reimbursed mirror-code and approved local-distribution systems."
+    }
+  ],
+  "bundleCondition": {
+    "version": "hr2763-119-ih-2025-04-09-v1",
+    "operator": "AND",
+    "revisionIds": [
+      "section-24-inapplicable-after-2024",
+      "monthly-ctc-accrual",
+      "ctc-age-6-to-17-amount",
+      "ctc-under-6-multiplier",
+      "ctc-newborn-month-multiplier",
+      "ctc-enhancement-phaseout",
+      "ctc-enhancement-phaseout-thresholds",
+      "ctc-enhancement-phaseout-cap",
+      "ctc-amount-cpi-indexing",
+      "ctc-initial-threshold-indexing",
+      "ctc-secondary-phaseout",
+      "ctc-secondary-phaseout-thresholds",
+      "ctc-income-lookback-election",
+      "specified-child-monthly-definition",
+      "specified-child-care-test",
+      "specified-child-claimant-priority",
+      "specified-child-no-own-children",
+      "specified-child-temporary-absence",
+      "specified-child-divorced-parent-rule",
+      "presumptive-eligibility-deeming",
+      "ctc-no-earned-income-floor",
+      "ctc-full-refundability",
+      "ctc-no-separate-refundable-cap",
+      "ctc-child-tin-deadline",
+      "ctc-taxpayer-tin-deadline",
+      "ctc-improper-claim-disallowance",
+      "ctc-post-deficiency-recertification",
+      "ctc-excess-advance-repayment",
+      "ctc-puerto-rico-coverage",
+      "ctc-mirror-code-possession-reimbursement",
+      "ctc-american-samoa-distribution",
+      "odc-amount",
+      "odc-phaseout",
+      "odc-phaseout-thresholds",
+      "odc-definition",
+      "odc-age-18-proration",
+      "odc-tin-deadline",
+      "odc-full-taxable-year-rule"
+    ],
+    "text": "H.R. 2763 (119th Congress), introduced-text bundle dated 2025-04-09, resolves YES only when every listed revision state is in force for its stated effective period; enactment of a bill number or a partial substitute is not enough. IRC §7527A delivery machinery is evaluated through operational provision metrics and is intentionally excluded from this conceptual conjunction except where §24A makes presumptive eligibility or reconciliation part of substantive entitlement."
+  }
+}
