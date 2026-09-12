@@ -1,0 +1,2253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Thesis scientific record",
+  "$defs": {
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sha256",
+        "bytes",
+        "media_type"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
+    "Attempt": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "attempt",
+          "default": "attempt",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "task_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Task Id",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "command_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Command Hash",
+          "type": "string"
+        },
+        "code_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Code Hash",
+          "type": "string"
+        },
+        "prompt_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Prompt Hash",
+          "type": "string"
+        },
+        "execution_policy": {
+          "enum": [
+            "operator_subprocess",
+            "baseline"
+          ],
+          "title": "Execution Policy",
+          "type": "string"
+        },
+        "cohort_proof_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cohort Proof Id"
+        },
+        "cohort_token_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cohort Token Hash"
+        }
+      },
+      "required": [
+        "task_id",
+        "sequence",
+        "started_at",
+        "command_hash",
+        "code_hash",
+        "prompt_hash",
+        "execution_policy"
+      ],
+      "title": "Attempt",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "task_id",
+          "target_kind": "evaluation_task",
+          "relation": "task",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "cohort_proof_id",
+          "target_kind": "publication_proof",
+          "relation": "cohort_proof",
+          "many": false,
+          "required": false
+        }
+      ],
+      "x-thesis-artifact-fields": [
+        "command_hash",
+        "code_hash",
+        "prompt_hash",
+        "cohort_token_hash"
+      ]
+    },
+    "AttemptResult": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "attempt_result",
+          "default": "attempt_result",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "unknown"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "completed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Completed At"
+        },
+        "exit_code": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exit Code"
+        },
+        "stdout_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stdout Hash"
+        },
+        "stderr_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stderr Hash"
+        },
+        "raw_response_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Response Hash"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "reconciles_result_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reconciles Result Id"
+        },
+        "reconciliation_method": {
+          "anyOf": [
+            {
+              "enum": [
+                "sealed_artifacts",
+                "no_sealed_result"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reconciliation Method"
+        },
+        "reconciled_by": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reconciled By"
+        },
+        "reconciliation_reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reconciliation Reason"
+        },
+        "reconciliation_evidence_hashes": {
+          "default": [],
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Reconciliation Evidence Hashes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "outcome",
+        "recorded_at"
+      ],
+      "title": "AttemptResult",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "attempt_id",
+          "target_kind": "attempt",
+          "relation": "attempt",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "run_id",
+          "target_kind": "forecast_run",
+          "relation": "run",
+          "many": false,
+          "required": false
+        },
+        {
+          "field": "reconciles_result_id",
+          "target_kind": "attempt_result",
+          "relation": "reconciles_result",
+          "many": false,
+          "required": false
+        }
+      ],
+      "x-thesis-artifact-fields": [
+        "stdout_hash",
+        "stderr_hash",
+        "raw_response_hash",
+        "reconciliation_evidence_hashes"
+      ]
+    },
+    "CdfPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "probability": {
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "probability"
+      ],
+      "title": "CdfPoint",
+      "type": "object"
+    },
+    "CdfSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "pointEstimate": {
+          "title": "Pointestimate",
+          "type": "number"
+        },
+        "median": {
+          "title": "Median",
+          "type": "number"
+        },
+        "interval80": {
+          "$ref": "#/$defs/CdfSupport"
+        }
+      },
+      "required": [
+        "pointEstimate",
+        "median",
+        "interval80"
+      ],
+      "title": "CdfSummary",
+      "type": "object"
+    },
+    "CdfSupport": {
+      "additionalProperties": false,
+      "properties": {
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "title": "CdfSupport",
+      "type": "object"
+    },
+    "EvaluationTask": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "evaluation_task",
+          "default": "evaluation_task",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "target_version_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Target Version Id",
+          "type": "string"
+        },
+        "forecaster_version_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Forecaster Version Id",
+          "type": "string"
+        },
+        "evidence_bundle_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Evidence Bundle Id",
+          "type": "string"
+        },
+        "information_cutoff": {
+          "format": "date-time",
+          "title": "Information Cutoff",
+          "type": "string"
+        },
+        "submission_deadline": {
+          "format": "date-time",
+          "title": "Submission Deadline",
+          "type": "string"
+        },
+        "max_attempts": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "selection_rule": {
+          "const": "first_valid",
+          "default": "first_valid",
+          "title": "Selection Rule",
+          "type": "string"
+        },
+        "execution_policy": {
+          "enum": [
+            "operator_subprocess",
+            "baseline"
+          ],
+          "title": "Execution Policy",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_version_id",
+        "forecaster_version_id",
+        "evidence_bundle_id",
+        "information_cutoff",
+        "submission_deadline",
+        "execution_policy",
+        "mode"
+      ],
+      "title": "EvaluationTask",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "target_version_id",
+          "target_kind": "target_version",
+          "relation": "target_version",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "forecaster_version_id",
+          "target_kind": "forecaster_version",
+          "relation": "forecaster_version",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "evidence_bundle_id",
+          "target_kind": "evidence_bundle",
+          "relation": "evidence_bundle",
+          "many": false,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    },
+    "EvidenceBundle": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "evidence_bundle",
+          "default": "evidence_bundle",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "source_series_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Series Id",
+          "type": "string"
+        },
+        "observation_ids": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Observation Ids",
+          "type": "array"
+        },
+        "artifact_refs": {
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "title": "Artifact Refs",
+          "type": "array"
+        },
+        "information_cutoff": {
+          "format": "date-time",
+          "title": "Information Cutoff",
+          "type": "string"
+        },
+        "policy_version": {
+          "const": "accepted_and_available_v1",
+          "default": "accepted_and_available_v1",
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_series_id",
+        "observation_ids",
+        "artifact_refs",
+        "information_cutoff",
+        "mode"
+      ],
+      "title": "EvidenceBundle",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "source_series_id",
+          "target_kind": "source_series",
+          "relation": "source_series",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "observation_ids",
+          "target_kind": "observation",
+          "relation": "observation",
+          "many": true,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    },
+    "Experiment": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "experiment",
+          "default": "experiment",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "task_ids": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Task Ids",
+          "type": "array"
+        },
+        "target_version_ids": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Target Version Ids",
+          "type": "array"
+        },
+        "forecaster_version_ids": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Forecaster Version Ids",
+          "type": "array"
+        },
+        "baseline_forecaster_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Baseline Forecaster Id",
+          "type": "string"
+        },
+        "normalization_ids": {
+          "default": [],
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Normalization Ids",
+          "type": "array"
+        },
+        "registration_deadline": {
+          "format": "date-time",
+          "title": "Registration Deadline",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "prospective",
+            "replay"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "ranking_policy": {
+          "const": "complete_paired_normalized_crps_v1",
+          "default": "complete_paired_normalized_crps_v1",
+          "title": "Ranking Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_ids",
+        "target_version_ids",
+        "forecaster_version_ids",
+        "baseline_forecaster_id",
+        "registration_deadline",
+        "mode"
+      ],
+      "title": "Experiment",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "task_ids",
+          "target_kind": "evaluation_task",
+          "relation": "task",
+          "many": true,
+          "required": true
+        },
+        {
+          "field": "target_version_ids",
+          "target_kind": "target_version",
+          "relation": "target_version",
+          "many": true,
+          "required": true
+        },
+        {
+          "field": "forecaster_version_ids",
+          "target_kind": "forecaster_version",
+          "relation": "forecaster_version",
+          "many": true,
+          "required": true
+        },
+        {
+          "field": "baseline_forecaster_id",
+          "target_kind": "forecaster_version",
+          "relation": "baseline_forecaster",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "normalization_ids",
+          "target_kind": "normalization",
+          "relation": "normalization",
+          "many": true,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    },
+    "ForecastRun": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "forecast_run",
+          "default": "forecast_run",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "attempt_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "distribution": {
+          "$ref": "#/$defs/NumericCdf"
+        },
+        "stdout_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Stdout Hash",
+          "type": "string"
+        },
+        "stderr_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Stderr Hash",
+          "type": "string"
+        },
+        "raw_response_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Raw Response Hash",
+          "type": "string"
+        },
+        "completed_at": {
+          "format": "date-time",
+          "title": "Completed At",
+          "type": "string"
+        },
+        "observed_model": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Model"
+        },
+        "execution_policy": {
+          "enum": [
+            "operator_subprocess",
+            "baseline"
+          ],
+          "title": "Execution Policy",
+          "type": "string"
+        },
+        "prompt_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Prompt Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "distribution",
+        "stdout_hash",
+        "stderr_hash",
+        "raw_response_hash",
+        "completed_at",
+        "execution_policy",
+        "prompt_hash"
+      ],
+      "title": "ForecastRun",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "attempt_id",
+          "target_kind": "attempt",
+          "relation": "attempt",
+          "many": false,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": [
+        "stdout_hash",
+        "stderr_hash",
+        "raw_response_hash",
+        "prompt_hash"
+      ]
+    },
+    "ForecasterVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "forecaster_version",
+          "default": "forecaster_version",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "model_request": {
+          "minLength": 1,
+          "title": "Model Request",
+          "type": "string"
+        },
+        "observed_model": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Model"
+        },
+        "inference_settings": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Inference Settings",
+          "type": "object"
+        },
+        "agent_version": {
+          "minLength": 1,
+          "title": "Agent Version",
+          "type": "string"
+        },
+        "harness_version": {
+          "minLength": 1,
+          "title": "Harness Version",
+          "type": "string"
+        },
+        "prompt_template_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Prompt Template Hash",
+          "type": "string"
+        },
+        "system_prompt_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "System Prompt Hash",
+          "type": "string"
+        },
+        "briefing_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Briefing Hash"
+        },
+        "tool_policy_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Tool Policy Hash",
+          "type": "string"
+        },
+        "aggregation": {
+          "const": "none",
+          "default": "none",
+          "title": "Aggregation",
+          "type": "string"
+        },
+        "retry_policy": {
+          "default": "known_failure",
+          "enum": [
+            "known_failure",
+            "none"
+          ],
+          "title": "Retry Policy",
+          "type": "string"
+        },
+        "execution_policy": {
+          "enum": [
+            "operator_subprocess",
+            "baseline"
+          ],
+          "title": "Execution Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "model_request",
+        "agent_version",
+        "harness_version",
+        "prompt_template_hash",
+        "system_prompt_hash",
+        "tool_policy_hash",
+        "execution_policy"
+      ],
+      "title": "ForecasterVersion",
+      "type": "object",
+      "x-thesis-links": [],
+      "x-thesis-artifact-fields": [
+        "prompt_template_hash",
+        "system_prompt_hash",
+        "briefing_hash",
+        "tool_policy_hash"
+      ]
+    },
+    "JsonValue": {},
+    "LegacyImport": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "legacy_import",
+          "default": "legacy_import",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "trust_class": {
+          "const": "legacy_custody_verified",
+          "default": "legacy_custody_verified",
+          "title": "Trust Class",
+          "type": "string"
+        },
+        "verifier_revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Verifier Revision",
+          "type": "string"
+        },
+        "verifier_code_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Verifier Code Hash",
+          "type": "string"
+        },
+        "custody_root_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Custody Root Hash",
+          "type": "string"
+        },
+        "manifest_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Hash",
+          "type": "string"
+        },
+        "descriptor_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Descriptor Hash",
+          "type": "string"
+        },
+        "artifact_hashes": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Artifact Hashes",
+          "type": "array"
+        },
+        "registration_hashes": {
+          "default": [],
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Registration Hashes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "verifier_revision",
+        "verifier_code_hash",
+        "custody_root_hash",
+        "manifest_hash",
+        "descriptor_hash",
+        "artifact_hashes"
+      ],
+      "title": "LegacyImport",
+      "type": "object",
+      "x-thesis-links": [],
+      "x-thesis-artifact-fields": [
+        "verifier_code_hash",
+        "custody_root_hash",
+        "manifest_hash",
+        "descriptor_hash",
+        "artifact_hashes"
+      ]
+    },
+    "NormalizationRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "normalization",
+          "default": "normalization",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "target_version_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Target Version Id",
+          "type": "string"
+        },
+        "source_series_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Series Id",
+          "type": "string"
+        },
+        "observation_ids": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Observation Ids",
+          "type": "array"
+        },
+        "information_cutoff": {
+          "format": "date-time",
+          "title": "Information Cutoff",
+          "type": "string"
+        },
+        "calculation_version": {
+          "const": "step_dispersion_floor_v1",
+          "default": "step_dispersion_floor_v1",
+          "title": "Calculation Version",
+          "type": "string"
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scale"
+        },
+        "unavailable_reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unavailable Reason"
+        }
+      },
+      "required": [
+        "target_version_id",
+        "source_series_id",
+        "observation_ids",
+        "information_cutoff",
+        "scale"
+      ],
+      "title": "NormalizationRecord",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "target_version_id",
+          "target_kind": "target_version",
+          "relation": "target_version",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "source_series_id",
+          "target_kind": "source_series",
+          "relation": "source_series",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "observation_ids",
+          "target_kind": "observation",
+          "relation": "observation",
+          "many": true,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    },
+    "NumericCdf": {
+      "additionalProperties": false,
+      "description": "Sealed 201-point wire format; never rematerialized on ingestion.",
+      "properties": {
+        "format": {
+          "const": "numeric_cdf_v1",
+          "default": "numeric_cdf_v1",
+          "title": "Format",
+          "type": "string"
+        },
+        "pointCount": {
+          "const": 201,
+          "default": 201,
+          "title": "Pointcount",
+          "type": "integer"
+        },
+        "support": {
+          "$ref": "#/$defs/CdfSupport"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/CdfPoint"
+          },
+          "title": "Points",
+          "type": "array"
+        },
+        "summary": {
+          "$ref": "#/$defs/CdfSummary"
+        },
+        "provenance": {
+          "enum": [
+            "agent_reported",
+            "interval_seeded"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "transformVersion": {
+          "minLength": 1,
+          "title": "Transformversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "support",
+        "points",
+        "summary",
+        "provenance",
+        "transformVersion"
+      ],
+      "title": "NumericCdf",
+      "type": "object"
+    },
+    "ObservationVintage": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "observation",
+          "default": "observation",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "source_series_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Series Id",
+          "type": "string"
+        },
+        "measurement_period": {
+          "minLength": 1,
+          "title": "Measurement Period",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "source_exchange_ids": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Source Exchange Ids",
+          "type": "array"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "accepted_at": {
+          "format": "date-time",
+          "title": "Accepted At",
+          "type": "string"
+        },
+        "parser_version": {
+          "minLength": 1,
+          "title": "Parser Version",
+          "type": "string"
+        },
+        "vintage_policy": {
+          "enum": [
+            "first_print",
+            "fixed_vintage",
+            "current_unverified"
+          ],
+          "title": "Vintage Policy",
+          "type": "string"
+        },
+        "publication_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicationTimingEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "source_series_id",
+        "measurement_period",
+        "value",
+        "unit",
+        "source_exchange_ids",
+        "retrieved_at",
+        "accepted_at",
+        "parser_version",
+        "vintage_policy"
+      ],
+      "title": "ObservationVintage",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "source_series_id",
+          "target_kind": "source_series",
+          "relation": "source_series",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "source_exchange_ids",
+          "target_kind": "source_exchange",
+          "relation": "source_exchange",
+          "many": true,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    },
+    "PublicationManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "publication_manifest",
+          "default": "publication_manifest",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "manifest_type": {
+          "enum": [
+            "cohort",
+            "run"
+          ],
+          "title": "Manifest Type",
+          "type": "string"
+        },
+        "experiment_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Experiment Id",
+          "type": "string"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "artifacts": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "code_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Code Hash",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "cohort_proof_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cohort Proof Id"
+        },
+        "cohort_token_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cohort Token Hash"
+        },
+        "attempt_result_ids": {
+          "default": [],
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Attempt Result Ids",
+          "type": "array"
+        },
+        "declared_information_cutoff": {
+          "format": "date-time",
+          "title": "Declared Information Cutoff",
+          "type": "string"
+        },
+        "effective_information_boundary": {
+          "format": "date-time",
+          "title": "Effective Information Boundary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "manifest_type",
+        "experiment_id",
+        "artifacts",
+        "code_hash",
+        "recorded_at",
+        "declared_information_cutoff",
+        "effective_information_boundary"
+      ],
+      "title": "PublicationManifest",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "experiment_id",
+          "target_kind": "experiment",
+          "relation": "experiment",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "run_id",
+          "target_kind": "forecast_run",
+          "relation": "run",
+          "many": false,
+          "required": false
+        },
+        {
+          "field": "cohort_proof_id",
+          "target_kind": "publication_proof",
+          "relation": "cohort_proof",
+          "many": false,
+          "required": false
+        },
+        {
+          "field": "attempt_result_ids",
+          "target_kind": "attempt_result",
+          "relation": "attempt_result",
+          "many": true,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": [
+        "artifacts",
+        "code_hash",
+        "cohort_token_hash"
+      ]
+    },
+    "PublicationProof": {
+      "additionalProperties": false,
+      "description": "Metadata is descriptive; verification always replays raw receipt bytes.",
+      "properties": {
+        "kind": {
+          "const": "publication_proof",
+          "default": "publication_proof",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "manifest_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Id",
+          "type": "string"
+        },
+        "request_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Hash",
+          "type": "string"
+        },
+        "token_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Token Hash",
+          "type": "string"
+        },
+        "subject_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Subject Hash",
+          "type": "string"
+        },
+        "trust_bundle_path": {
+          "minLength": 1,
+          "title": "Trust Bundle Path",
+          "type": "string"
+        },
+        "trust_bundle_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Trust Bundle Hash",
+          "type": "string"
+        },
+        "trust_anchor_id": {
+          "minLength": 1,
+          "title": "Trust Anchor Id",
+          "type": "string"
+        },
+        "gen_time": {
+          "format": "date-time",
+          "title": "Gen Time",
+          "type": "string"
+        },
+        "accuracy_micros": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Accuracy Micros"
+        },
+        "signer_identity": {
+          "minLength": 1,
+          "title": "Signer Identity",
+          "type": "string"
+        },
+        "policy_oid": {
+          "minLength": 1,
+          "title": "Policy Oid",
+          "type": "string"
+        },
+        "verification_version": {
+          "minLength": 1,
+          "title": "Verification Version",
+          "type": "string"
+        },
+        "verified_at": {
+          "format": "date-time",
+          "title": "Verified At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "manifest_id",
+        "request_hash",
+        "token_hash",
+        "subject_hash",
+        "trust_bundle_path",
+        "trust_bundle_hash",
+        "trust_anchor_id",
+        "gen_time",
+        "accuracy_micros",
+        "signer_identity",
+        "policy_oid",
+        "verification_version",
+        "verified_at"
+      ],
+      "title": "PublicationProof",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "manifest_id",
+          "target_kind": "publication_manifest",
+          "relation": "manifest",
+          "many": false,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": [
+        "request_hash",
+        "token_hash",
+        "subject_hash",
+        "trust_bundle_hash"
+      ]
+    },
+    "PublicationTimingEvidence": {
+      "additionalProperties": false,
+      "description": "Parsing claim authenticated only by reopening the source artifact.",
+      "properties": {
+        "raw_value": {
+          "minLength": 1,
+          "title": "Raw Value",
+          "type": "string"
+        },
+        "timezone": {
+          "minLength": 1,
+          "title": "Timezone",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "parser_version": {
+          "minLength": 1,
+          "title": "Parser Version",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "raw_value",
+        "timezone",
+        "source_url",
+        "parser_version",
+        "artifact"
+      ],
+      "title": "PublicationTimingEvidence",
+      "type": "object"
+    },
+    "ReleaseEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "raw_value": {
+          "minLength": 1,
+          "title": "Raw Value",
+          "type": "string"
+        },
+        "timezone": {
+          "minLength": 1,
+          "title": "Timezone",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "parser_version": {
+          "minLength": 1,
+          "title": "Parser Version",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "raw_value",
+        "timezone",
+        "source_url",
+        "parser_version",
+        "artifact"
+      ],
+      "title": "ReleaseEvidence",
+      "type": "object"
+    },
+    "Resolution": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "resolution",
+          "default": "resolution",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "target_version_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Target Version Id",
+          "type": "string"
+        },
+        "observation_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "resolution_policy": {
+          "enum": [
+            "first_print",
+            "fixed_vintage",
+            "current_unverified"
+          ],
+          "title": "Resolution Policy",
+          "type": "string"
+        },
+        "validation_version": {
+          "minLength": 1,
+          "title": "Validation Version",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_version_id",
+        "observation_id",
+        "resolution_policy",
+        "validation_version",
+        "recorded_at"
+      ],
+      "title": "Resolution",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "target_version_id",
+          "target_kind": "target_version",
+          "relation": "target_version",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "observation_id",
+          "target_kind": "observation",
+          "relation": "observation",
+          "many": false,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    },
+    "ScoreRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "score",
+          "default": "score",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "run_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "resolution_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Resolution Id",
+          "type": "string"
+        },
+        "experiment_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Experiment Id",
+          "type": "string"
+        },
+        "normalization_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalization Id"
+        },
+        "publication_proof_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publication Proof Id"
+        },
+        "attempt_result_ids": {
+          "default": [],
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Attempt Result Ids",
+          "type": "array"
+        },
+        "scoring_version": {
+          "const": "piecewise_linear_crps_v1",
+          "default": "piecewise_linear_crps_v1",
+          "title": "Scoring Version",
+          "type": "string"
+        },
+        "eligibility": {
+          "enum": [
+            "eligible",
+            "replay",
+            "invalid_contract",
+            "invalid_resolution",
+            "missing_artifact",
+            "missing_acknowledgement",
+            "evidence_unavailable",
+            "invalid_normalization",
+            "unresolved_attempt",
+            "not_selected",
+            "late_attempt_reconciliation",
+            "outcome_availability_unknown",
+            "invalid_publication",
+            "late_publication",
+            "missing_cohort_proof",
+            "invalid_cohort",
+            "late_cohort",
+            "execution_policy_mismatch"
+          ],
+          "title": "Eligibility",
+          "type": "string"
+        },
+        "crps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Crps"
+        },
+        "pit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pit"
+        },
+        "normalized_crps": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Normalized Crps"
+        },
+        "reward": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reward"
+        }
+      },
+      "required": [
+        "run_id",
+        "resolution_id",
+        "experiment_id",
+        "eligibility",
+        "crps",
+        "pit",
+        "normalized_crps",
+        "reward"
+      ],
+      "title": "ScoreRecord",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "publication_proof_id",
+          "target_kind": "publication_proof",
+          "relation": "publication_proof",
+          "many": false,
+          "required": false
+        },
+        {
+          "field": "attempt_result_ids",
+          "target_kind": "attempt_result",
+          "relation": "attempt_result",
+          "many": true,
+          "required": true
+        },
+        {
+          "field": "run_id",
+          "target_kind": "forecast_run",
+          "relation": "run",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "resolution_id",
+          "target_kind": "resolution",
+          "relation": "resolution",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "experiment_id",
+          "target_kind": "experiment",
+          "relation": "experiment",
+          "many": false,
+          "required": true
+        },
+        {
+          "field": "normalization_id",
+          "target_kind": "normalization",
+          "relation": "normalization",
+          "many": false,
+          "required": false
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    },
+    "SourceExchange": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "source_exchange",
+          "default": "source_exchange",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "source_series_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Series Id",
+          "type": "string"
+        },
+        "url": {
+          "minLength": 1,
+          "title": "Url",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "status_code": {
+          "maximum": 599,
+          "minimum": 100,
+          "title": "Status Code",
+          "type": "integer"
+        },
+        "body": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "response_headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Response Headers",
+          "type": "object"
+        },
+        "request_method": {
+          "default": "GET",
+          "enum": [
+            "GET",
+            "POST"
+          ],
+          "title": "Request Method",
+          "type": "string"
+        },
+        "request_body": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "role": {
+          "default": "data",
+          "enum": [
+            "data",
+            "release"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "live",
+            "replay"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_series_id",
+        "url",
+        "retrieved_at",
+        "status_code",
+        "body",
+        "mode"
+      ],
+      "title": "SourceExchange",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "source_series_id",
+          "target_kind": "source_series",
+          "relation": "source_series",
+          "many": false,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    },
+    "SourceSeries": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "source_series",
+          "default": "source_series",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "adapter_id": {
+          "minLength": 1,
+          "title": "Adapter Id",
+          "type": "string"
+        },
+        "adapter_version": {
+          "minLength": 1,
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "binding": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Binding",
+          "type": "object"
+        },
+        "vintage_policies": {
+          "items": {
+            "enum": [
+              "first_print",
+              "fixed_vintage",
+              "current_unverified"
+            ],
+            "type": "string"
+          },
+          "title": "Vintage Policies",
+          "type": "array"
+        }
+      },
+      "required": [
+        "adapter_id",
+        "adapter_version",
+        "name",
+        "unit",
+        "binding",
+        "vintage_policies"
+      ],
+      "title": "SourceSeries",
+      "type": "object",
+      "x-thesis-links": [],
+      "x-thesis-artifact-fields": []
+    },
+    "TargetVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "target_version",
+          "default": "target_version",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "target_id": {
+          "minLength": 1,
+          "title": "Target Id",
+          "type": "string"
+        },
+        "source_series_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Series Id",
+          "type": "string"
+        },
+        "measurement_period": {
+          "minLength": 1,
+          "title": "Measurement Period",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "resolution_policy": {
+          "enum": [
+            "first_print",
+            "fixed_vintage",
+            "current_unverified"
+          ],
+          "title": "Resolution Policy",
+          "type": "string"
+        },
+        "resolution_rule": {
+          "minLength": 1,
+          "title": "Resolution Rule",
+          "type": "string"
+        },
+        "submission_deadline": {
+          "format": "date-time",
+          "title": "Submission Deadline",
+          "type": "string"
+        },
+        "release_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReleaseEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "vintage_date": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vintage Date"
+        }
+      },
+      "required": [
+        "target_id",
+        "source_series_id",
+        "measurement_period",
+        "unit",
+        "resolution_policy",
+        "resolution_rule",
+        "submission_deadline"
+      ],
+      "title": "TargetVersion",
+      "type": "object",
+      "x-thesis-links": [
+        {
+          "field": "source_series_id",
+          "target_kind": "source_series",
+          "relation": "source_series",
+          "many": false,
+          "required": true
+        }
+      ],
+      "x-thesis-artifact-fields": []
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Attempt"
+    },
+    {
+      "$ref": "#/$defs/AttemptResult"
+    },
+    {
+      "$ref": "#/$defs/EvaluationTask"
+    },
+    {
+      "$ref": "#/$defs/EvidenceBundle"
+    },
+    {
+      "$ref": "#/$defs/Experiment"
+    },
+    {
+      "$ref": "#/$defs/ForecastRun"
+    },
+    {
+      "$ref": "#/$defs/ForecasterVersion"
+    },
+    {
+      "$ref": "#/$defs/LegacyImport"
+    },
+    {
+      "$ref": "#/$defs/NormalizationRecord"
+    },
+    {
+      "$ref": "#/$defs/ObservationVintage"
+    },
+    {
+      "$ref": "#/$defs/PublicationManifest"
+    },
+    {
+      "$ref": "#/$defs/PublicationProof"
+    },
+    {
+      "$ref": "#/$defs/Resolution"
+    },
+    {
+      "$ref": "#/$defs/ScoreRecord"
+    },
+    {
+      "$ref": "#/$defs/SourceExchange"
+    },
+    {
+      "$ref": "#/$defs/SourceSeries"
+    },
+    {
+      "$ref": "#/$defs/TargetVersion"
+    }
+  ]
+}

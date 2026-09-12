@@ -26,6 +26,7 @@ dependencies = []
 [project.scripts]
 brier = "brier.cli:main"
 brier-mcp = "brier.mcp_server:main"
+thesis-core = "thesis_core.cli:main"
 
 [project.urls]
 Homepage = "https://brier.institute"
@@ -34,6 +35,12 @@ Repository = "https://github.com/ThesisInstitute/thesis"
 Issues = "https://github.com/ThesisInstitute/thesis/issues"
 
 [project.optional-dependencies]
+core = [
+    "pydantic==2.12.5",
+    "psycopg[binary]==3.3.5",
+    "fastapi==0.141.1",
+    "uvicorn==0.42.0",
+]
 custody = [
     "receipt==0.6.1; python_version >= '3.11'",
     # SBA custody replays geometry through pypdf layout internals; any version
@@ -79,6 +86,7 @@ bills = [
     "selectolax>=0.3.21",
 ]
 dev = [
+    "httpx==0.28.1",
     "pytest>=9.0.2",
     "pytest-cov>=7.1.0",
     "black>=26.3.1",
@@ -89,13 +97,14 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["brier*"]
+include = ["brier*", "thesis_core*"]
 
 [tool.setuptools.package-data]
 brier = [
     "assets/skills/codex/SKILL.md",
     "assets/skills/claude/SKILL.md",
 ]
+thesis_core = ["migrations/*.sql", "schemas/*.json", "trust/*"]
 
 [tool.black]
 line-length = 88

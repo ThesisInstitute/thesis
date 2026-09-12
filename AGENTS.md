@@ -62,6 +62,26 @@ event for the registered announcement; never infer a day from cadence.
 
 ## Common Tasks
 
+### Work on the experiment core
+
+`thesis_core/` is the new experiment backend. Read
+`docs/thesis-core-architecture.md`, `docs/thesis-core-runbook.md` and
+`docs/thesis-core-verification.md` before changing it. The Fable-approved build
+contract is `docs/thesis-core-plan.md`; keep those reviewed bytes intact and
+record later decisions separately.
+
+Install `brier[core]` for the `thesis-core` CLI and read-only API; the existing
+site displays it at `/core` through `THESIS_CORE_API_URL`. Use a separate
+PostgreSQL schema and ignored `.thesis-core/` artifact storage for local work.
+Run database acceptance tests with `THESIS_CORE_REQUIRE_POSTGRES=1`; a skipped
+database suite is not acceptance. Regenerate shared contracts with
+`python -m thesis_core.schema` and check drift with `--check`.
+
+The core runs alongside the existing publishers. Do not rewrite `records/**`
+to migrate it, promote historical replay to prospective evidence, or treat a
+verified timestamp without a known accuracy bound as proof of strict ordering.
+Production cutover requires a separate release decision.
+
 ### Add Or Run Forecasts
 
 Use the thesis analyst runner:

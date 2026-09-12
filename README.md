@@ -8,6 +8,13 @@ For the current Thesis/Brier product vision, read
 [`docs/thesis-vision.md`](docs/thesis-vision.md) first. Future coding agents
 should start with [`AGENTS.md`](AGENTS.md).
 
+The new experiment backend is `thesis_core`: immutable scientific records,
+durable execution, source evidence, timestamp verification and a read-only API.
+See the [architecture](docs/thesis-core-architecture.md),
+[local runbook](docs/thesis-core-runbook.md) and
+[verification report](docs/thesis-core-verification.md). It runs alongside the
+existing publishing system; the site displays its experiments at `/core`.
+
 Instead of asking "Is X good?" or "Should I do Y?", brier helps you:
 1. Define what success looks like (KPIs)
 2. Expand your options (including ones you didn't consider)
