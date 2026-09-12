@@ -39,7 +39,7 @@ later scoring and Brier training.
   "runAt": "real `date -u +%Y-%m-%dT%H:%M:%SZ` at generation",
   "activityLog": [
     {
-      "artifactType": "prompt|command|stdout|stderr|codex_stdout_jsonl|codex_stderr_log|codex_events_jsonl|codex_last_message|codex_trace|draft_forecast|review_prompt|pre_submit_review|review_disposition|revision_prompt|raw_response|parsed_cell|normalized_cell|run_distribution|cells_with_activity|validation_report|model_candidates|manifest",
+      "artifactType": "prompt|command|stdout|stderr|codex_stdout_jsonl|codex_stderr_log|codex_events_jsonl|codex_last_message|codex_trace|gemini_stdout_jsonl|gemini_events_jsonl|gemini_last_message|gemini_trace|draft_forecast|review_prompt|pre_submit_review|review_disposition|revision_prompt|raw_response|parsed_cell|normalized_cell|run_distribution|cells_with_activity|validation_report|model_candidates|manifest",
       "path": "records/thesis-analyst/...",
       "sha256": "hex",
       "bytes": 0,
@@ -203,8 +203,12 @@ model-candidate JSON, and validation report. When pre-submit review is enabled,
 the draft forecast, review prompt, reviewer output, revision prompt, and final
 response are also artifacts. Codex CLI runs additionally preserve the raw
 stdout JSONL, raw stderr log, normalized event JSONL, last assistant message,
-and trace summary. The allowed artifact types include `model_candidates` for
-outputs from `scripts/run_time_series_models.py`.
+and trace summary. Gemini CLI runs preserve the raw stream JSONL, normalized
+`tool_use`/`tool_result` event JSONL, final assistant response, and a trace
+summary containing session, requested and runtime model, statistics, token
+usage, timeout, OAuth-refusal, and tool-event metadata. The allowed artifact
+types include `model_candidates` for outputs from
+`scripts/run_time_series_models.py`.
 
 Ticketed local runs add this deterministic block immediately after the target
 context in every prompt mode:

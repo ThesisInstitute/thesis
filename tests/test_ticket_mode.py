@@ -133,6 +133,7 @@ def build_ticket_repo(
         ("--max-failures", "1"),
         ("--command", "codex exec"),
         ("--codex-model", "gpt-override"),
+        ("--gemini-model", "gemini-3.7-flash"),
         ("--codex-reasoning-effort", "low"),
         ("--no-codex-search", None),
         ("--codex-sandbox", "workspace-write"),
@@ -333,6 +334,7 @@ def test_ticket_mode_derives_every_policy_argument_and_batch_path(
 
     assert args.prompt_mode == "fast"
     assert args.codex_model == "gpt-ticket-test"
+    assert args.gemini_model is None
     assert args.codex_reasoning_effort == "high"
     assert args.codex_sandbox == "read-only"
     assert args.codex_network is False
@@ -376,6 +378,7 @@ def test_ticket_run_one_uses_only_ticket_native_codex_policy(
 
     monkeypatch.setenv("THESIS_AGENT_COMMAND", "forbidden custom command")
     monkeypatch.setenv("THESIS_CODEX_MODEL", "forbidden-env-model")
+    monkeypatch.setenv("THESIS_GEMINI_MODEL", "forbidden-gemini-model")
     monkeypatch.setattr(batch_runner.subprocess, "run", fake_run)
 
     result = batch_runner.run_one(fixture["ticket"]["targets"][0], args, context)
@@ -386,6 +389,8 @@ def test_ticket_run_one_uses_only_ticket_native_codex_policy(
     assert "forbidden custom command" not in argv
     assert argv[argv.index("--codex-model") + 1] == "gpt-ticket-test"
     assert "forbidden-env-model" not in argv
+    assert "--gemini-model" not in argv
+    assert "forbidden-gemini-model" not in argv
     assert argv[argv.index("--codex-reasoning-effort") + 1] == "high"
     assert argv[argv.index("--codex-sandbox") + 1] == "read-only"
     assert argv[argv.index("--pre-submit-review-codex-model") + 1] == (
@@ -396,6 +401,51 @@ def test_ticket_run_one_uses_only_ticket_native_codex_policy(
     assert argv[argv.index("--ticket-id") + 1] == context["ticketId"]
     assert argv[argv.index("--ticket-path") + 1] == context["ticketPath"]
     assert argv[argv.index("--ticket-nonce") + 1] == NONCE
+
+
+@pytest.mark.parametrize("from_environment", [False, True])
+def test_non_ticket_run_one_passes_gemini_model_from_flag_or_env(
+    monkeypatch: pytest.MonkeyPatch,
+    from_environment: bool,
+) -> None:
+    model = "gemini-3.7-flash"
+    args = batch_runner.parse_args(
+        [] if from_environment else ["--gemini-model", model]
+    )
+    args.no_pre_submit_review = True
+    if from_environment:
+        monkeypatch.setenv("THESIS_GEMINI_MODEL", model)
+    seen: dict[str, Any] = {}
+
+    def fake_run(argv: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        seen["argv"] = argv
+        manifest = {"ok": True, "cellsPath": "cells.json", "artifacts": []}
+        return subprocess.CompletedProcess(argv, 0, json.dumps(manifest), "")
+
+    monkeypatch.setattr(batch_runner.subprocess, "run", fake_run)
+    result = batch_runner.run_one(
+        {"series": "test.gemini", "period": "2030-01"}, args
+    )
+
+    argv = seen["argv"]
+    assert result["ok"] is True
+    assert argv[argv.index("--gemini-model") + 1] == model
+    assert "--codex-model" not in argv
+    assert "--codex-reasoning-effort" not in argv
+    assert "--codex-sandbox" not in argv
+    assert "--codex-network" not in argv
+
+
+def test_non_ticket_batch_refuses_ambiguous_backend_selection() -> None:
+    args = batch_runner.parse_args(
+        ["--codex-model", "gpt-5.5", "--gemini-model", "gemini-3.7-flash"]
+    )
+
+    with pytest.raises(
+        batch_runner.BatchRunError,
+        match="non-ticket batch forecast backend is ambiguous",
+    ):
+        batch_runner.resolve_agent_backend(args)
 
 
 def test_ticket_batch_manifest_records_policy_binding_and_checkout(

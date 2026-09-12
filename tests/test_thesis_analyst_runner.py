@@ -1151,6 +1151,10 @@ def test_generation_ticket_internal_flags_are_all_or_none() -> None:
         (["--mock-cell"], "ticket mode refuses --mock-cell"),
         (["--command", "ignored"], "ticket mode refuses --command"),
         (
+            ["--gemini-model", "gemini-3.7-flash"],
+            "ticket mode refuses --gemini-model",
+        ),
+        (
             ["--pre-submit-review-command", "ignored"],
             "ticket mode refuses --pre-submit-review-command",
         ),
@@ -1912,6 +1916,388 @@ def write_fake_codex(
     path.chmod(0o755)
 
 
+def write_fake_gemini(
+    path: Path,
+    cell: dict,
+    extra_lines: list[str] | None = None,
+    *,
+    runtime_model: str = "gemini-3.7-flash-runtime",
+) -> None:
+    """Write a Gemini CLI 0.36 stream-json stand-in.
+
+    The success result intentionally has no response field. Real Gemini CLI
+    streams the assistant response as one or more delta message events, so the
+    runner must concatenate those chunks instead of treating result as a Codex-
+    style last-message event.
+    """
+    path.write_text(
+        "\n".join(
+            [
+                "#!/usr/bin/env python3",
+                "import json, os, pathlib, sys",
+                "args = sys.argv[1:]",
+                "model = args[args.index('-m') + 1]",
+                "prompt = args[args.index('-p') + 1]",
+                f"text = {json.dumps(json.dumps(cell))}",
+                "tool_output = 'Fetched official synthetic evidence.'",
+                f"runtime_model = {json.dumps(runtime_model)}",
+                *(extra_lines or []),
+                "split_at = len(text) // 2",
+                "events = [",
+                "  {",
+                "    'type': 'init',",
+                "    'timestamp': '2030-01-01T00:00:00Z',",
+                "    'session_id': 'fake-gemini-session',",
+                "    'model': model,",
+                "  },",
+                "  {",
+                "    'type': 'message',",
+                "    'timestamp': '2030-01-01T00:00:01Z',",
+                "    'role': 'user',",
+                "    'content': prompt,",
+                "  },",
+                "  {",
+                "    'type': 'tool_use',",
+                "    'timestamp': '2030-01-01T00:00:02Z',",
+                "    'tool_name': 'google_web_search',",
+                "    'tool_id': 'tool-1',",
+                "    'parameters': {'query': 'official synthetic release'},",
+                "  },",
+                "  {",
+                "    'type': 'tool_result',",
+                "    'timestamp': '2030-01-01T00:00:03Z',",
+                "    'tool_id': 'tool-1',",
+                "    'status': 'success',",
+                "    'output': tool_output,",
+                "  },",
+                "  {",
+                "    'type': 'message',",
+                "    'timestamp': '2030-01-01T00:00:04Z',",
+                "    'role': 'assistant',",
+                "    'content': text[:split_at],",
+                "    'delta': True,",
+                "  },",
+                "  {",
+                "    'type': 'message',",
+                "    'timestamp': '2030-01-01T00:00:05Z',",
+                "    'role': 'assistant',",
+                "    'content': text[split_at:],",
+                "    'delta': True,",
+                "  },",
+                "  {",
+                "    'type': 'result',",
+                "    'timestamp': '2030-01-01T00:00:06Z',",
+                "    'status': 'success',",
+                "    'stats': {",
+                "      'total_tokens': 15,",
+                "      'input_tokens': 10,",
+                "      'output_tokens': 5,",
+                "      'cached': 2,",
+                "      'input': 10,",
+                "      'duration_ms': 12,",
+                "      'tool_calls': 1,",
+                "      'models': {",
+                "        runtime_model: {",
+                "          'total_tokens': 15,",
+                "          'input_tokens': 10,",
+                "          'output_tokens': 5,",
+                "          'cached': 2,",
+                "          'input': 10,",
+                "        },",
+                "      },",
+                "    },",
+                "  },",
+                "]",
+                "for event in events:",
+                "    print(json.dumps(event), flush=True)",
+            ]
+        )
+    )
+    path.chmod(0o755)
+
+
+def test_gemini_model_run_captures_full_gemini_trace(tmp_path: Path) -> None:
+    out_dir = tmp_path / "gemini-run"
+    fake_gemini = tmp_path / "gemini"
+    requested_model = "gemini-3.7-flash"
+    runtime_model = "gemini-3.7-flash-runtime"
+    cell = review_test_cell(point=5.1, ci_low=4.7, ci_high=5.8)
+    write_fake_gemini(fake_gemini, cell, runtime_model=runtime_model)
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--series",
+            "test.gemini_rate",
+            "--period",
+            "2030-01",
+            "--gemini-model",
+            requested_model,
+            "--out-dir",
+            str(out_dir),
+        ],
+        cwd=ROOT,
+        env={
+            **os.environ,
+            "THESIS_GEMINI_BIN": str(fake_gemini),
+            "GEMINI_API_KEY": "not-a-real-gemini-key",
+        },
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    command = json.loads((out_dir / "command.json").read_text())
+    [normalized] = json.loads((out_dir / "normalized_cells.json").read_text())
+    [cell_with_activity] = json.loads(
+        (out_dir / "cells.with_activity.json").read_text()
+    )
+    artifact_names = {
+        artifact["artifactType"]: Path(artifact["path"]).name
+        for artifact in manifest["artifacts"]
+    }
+
+    assert completed.returncode == 0
+    assert manifest["ok"] is True
+    assert normalized["pointEstimate"] == 5.1
+    assert manifest["agent"]["backend"] == "gemini_cli"
+    assert manifest["agent"]["model"] == requested_model
+    assert manifest["agent"]["runtimeModel"] == runtime_model
+    assert cell_with_activity["model"] == requested_model
+    assert manifest["workspaceHygiene"] == {"guarded": True, "mutations": []}
+
+    assert command["backend"] == "gemini_cli"
+    assert command["workspaceMutations"] == []
+    assert command["argv"][0] == str(fake_gemini)
+    assert command["argv"][command["argv"].index("-m") + 1] == requested_model
+    assert command["argv"][command["argv"].index("--approval-mode") + 1] == "plan"
+    assert command["argv"][command["argv"].index("-o") + 1] == "stream-json"
+    assert command["argv"][command["argv"].index("-p") + 1] == "<prompt>"
+    assert "GEMINI_API_KEY" in command["envVarNames"]
+    assert all("=" not in name for name in command["envVarNames"])
+
+    assert {
+        "gemini_stdout_jsonl": "gemini_stdout.jsonl",
+        "gemini_events_jsonl": "gemini_events.jsonl",
+        "gemini_last_message": "gemini_last_message.txt",
+        "gemini_trace": "gemini_trace.json",
+    }.items() <= artifact_names.items()
+    raw_events = [
+        json.loads(line)
+        for line in (out_dir / "gemini_stdout.jsonl").read_text().splitlines()
+    ]
+    assert [event["type"] for event in raw_events] == [
+        "init",
+        "message",
+        "tool_use",
+        "tool_result",
+        "message",
+        "message",
+        "result",
+    ]
+    tool_events = [
+        json.loads(line)
+        for line in (out_dir / "gemini_events.jsonl").read_text().splitlines()
+    ]
+    assert [event["type"] for event in tool_events] == ["tool_use", "tool_result"]
+    assert json.loads((out_dir / "gemini_last_message.txt").read_text()) == cell
+
+    trace = json.loads((out_dir / "gemini_trace.json").read_text())
+    assert trace["backend"] == "gemini_cli"
+    assert trace["model"] == requested_model
+    assert trace["runtimeModel"] == runtime_model
+    assert trace["stats"]["tool_calls"] == 1
+    assert runtime_model in trace["stats"]["models"]
+    verification = verify_run(out_dir)
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is True
+
+
+def test_gemini_model_requires_api_key_with_exact_error(tmp_path: Path) -> None:
+    out_dir = tmp_path / "missing-key-run"
+    fake_gemini = tmp_path / "gemini"
+    write_fake_gemini(
+        fake_gemini,
+        review_test_cell(point=5.1, ci_low=4.7, ci_high=5.8),
+    )
+    env = {
+        name: value
+        for name, value in os.environ.items()
+        if name != "GEMINI_API_KEY"
+    }
+    env.update(
+        {
+            "THESIS_GEMINI_BIN": str(fake_gemini),
+            "GOOGLE_API_KEY": "must-not-substitute-for-gemini-api-key",
+        }
+    )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--series",
+            "test.gemini_rate",
+            "--period",
+            "2030-01",
+            "--gemini-model",
+            "gemini-3.7-flash",
+            "--out-dir",
+            str(out_dir),
+        ],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode != 0
+    assert completed.stderr.strip() == (
+        "Gemini CLI backend requires GEMINI_API_KEY in the parent environment"
+    )
+    assert "Traceback" not in completed.stderr
+
+
+def test_gemini_model_requires_cli_binary_with_clear_error(tmp_path: Path) -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--series",
+            "test.gemini_rate",
+            "--period",
+            "2030-01",
+            "--gemini-model",
+            "gemini-3.7-flash",
+            "--out-dir",
+            str(tmp_path / "missing-binary-run"),
+        ],
+        cwd=ROOT,
+        env={
+            **os.environ,
+            "THESIS_GEMINI_BIN": str(tmp_path / "not-installed-gemini"),
+            "GEMINI_API_KEY": "not-a-real-gemini-key",
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode != 0
+    assert completed.stderr.strip() == (
+        "Gemini CLI not found; install gemini or set THESIS_GEMINI_BIN"
+    )
+    assert "Traceback" not in completed.stderr
+
+
+def test_gemini_oauth_prompt_fails_closed_despite_valid_result(tmp_path: Path) -> None:
+    out_dir = tmp_path / "oauth-prompt-run"
+    fake_gemini = tmp_path / "gemini"
+    write_fake_gemini(
+        fake_gemini,
+        review_test_cell(point=5.1, ci_low=4.7, ci_high=5.8),
+        extra_lines=[
+            "print('Opening authentication page in your browser…', file=sys.stderr)"
+        ],
+    )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--series",
+            "test.gemini_rate",
+            "--period",
+            "2030-01",
+            "--gemini-model",
+            "gemini-3.7-flash",
+            "--out-dir",
+            str(out_dir),
+        ],
+        cwd=ROOT,
+        env={
+            **os.environ,
+            "THESIS_GEMINI_BIN": str(fake_gemini),
+            "GEMINI_API_KEY": "not-a-real-gemini-key",
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode != 0
+    command = json.loads((out_dir / "command.json").read_text())
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    trace = json.loads((out_dir / "gemini_trace.json").read_text())
+    assert command["returnCode"] != 0
+    assert manifest["ok"] is False
+    assert trace["oauthPromptDetected"] is True
+    assert "Opening authentication page in your browser" in (
+        out_dir / "stderr.txt"
+    ).read_text()
+    verification = verify_run(out_dir)
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is False
+
+
+@pytest.mark.parametrize(
+    ("other_flag", "other_value"),
+    [
+        ("--command", "ignored"),
+        ("--codex-model", "gpt-5.5"),
+        ("--response-file", "unused-response.json"),
+        ("--mock-cell", None),
+    ],
+)
+def test_gemini_model_is_mutually_exclusive_with_other_backends(
+    tmp_path: Path, other_flag: str, other_value: str | None
+) -> None:
+    fake_gemini = tmp_path / "gemini"
+    write_fake_gemini(
+        fake_gemini,
+        review_test_cell(point=5.1, ci_low=4.7, ci_high=5.8),
+    )
+    other_args = [other_flag]
+    if other_value is not None:
+        other_args.append(
+            str(tmp_path / other_value)
+            if other_flag == "--response-file"
+            else other_value
+        )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--series",
+            "test.gemini_rate",
+            "--period",
+            "2030-01",
+            "--gemini-model",
+            "gemini-3.7-flash",
+            *other_args,
+        ],
+        cwd=ROOT,
+        env={
+            **os.environ,
+            "THESIS_GEMINI_BIN": str(fake_gemini),
+            "GEMINI_API_KEY": "not-a-real-gemini-key",
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode != 0
+    assert completed.stderr.strip() == (
+        "Choose exactly one of --command, --codex-model, --gemini-model, "
+        "--response-file, or --mock-cell"
+    )
+
+
 def test_generation_ticket_codex_run_stamps_prompt_command_and_manifest(
     tmp_path: Path,
 ) -> None:
@@ -2235,6 +2621,57 @@ def test_codex_network_run_fails_closed_on_workspace_mutation(tmp_path):
     assert manifest["workspaceHygiene"]["mutations"] == mutations
 
 
+def test_gemini_run_fails_closed_on_workspace_mutation(tmp_path: Path) -> None:
+    out_dir = tmp_path / "gemini-mutating-run"
+    fake_gemini = tmp_path / "gemini"
+    write_fake_gemini(
+        fake_gemini,
+        review_test_cell(point=5.1, ci_low=4.7, ci_high=5.8),
+        extra_lines=[
+            f"run_dir = pathlib.Path({json.dumps(str(out_dir))})",
+            "(run_dir / 'planted.txt').write_text('agent wrote this')",
+            "prompt_md = run_dir / 'prompt.md'",
+            "prompt_md.write_text(prompt_md.read_text() + 'tampered')",
+        ],
+    )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--series",
+            "test.gemini_rate",
+            "--period",
+            "2030-01",
+            "--gemini-model",
+            "gemini-3.7-flash",
+            "--out-dir",
+            str(out_dir),
+        ],
+        cwd=ROOT,
+        env={
+            **os.environ,
+            "THESIS_GEMINI_BIN": str(fake_gemini),
+            "GEMINI_API_KEY": "not-a-real-gemini-key",
+        },
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode != 0
+    command = json.loads((out_dir / "command.json").read_text())
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    assert manifest["ok"] is False
+    mutations = command["workspaceMutations"]
+    assert any("planted.txt" in mutation for mutation in mutations)
+    assert any("prompt.md" in mutation for mutation in mutations)
+    assert manifest["workspaceHygiene"] == {
+        "guarded": True,
+        "mutations": mutations,
+    }
+
+
 def test_fast_prompt_network_note_is_gated_and_census_notes_name_endpoint():
     series = "census.acs.broadband_subscription_65_plus.share"
     prompt_with, _ = analyst_runner.build_run_prompt(
@@ -2371,6 +2808,85 @@ def test_parse_codex_jsonl_exposes_the_last_assistant_message() -> None:
 
     assert parsed["assistantText"] == "draft\nfinal"
     assert parsed["lastAssistantText"] == "final"
+
+
+def test_parse_gemini_jsonl_concatenates_deltas_and_keeps_tool_events() -> None:
+    runtime_model = "gemini-3.7-flash-runtime"
+    events = [
+        {
+            "type": "init",
+            "timestamp": "2030-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "model": "gemini-3.7-flash",
+        },
+        {
+            "type": "message",
+            "timestamp": "2030-01-01T00:00:01Z",
+            "role": "user",
+            "content": "ignored user prompt",
+        },
+        {
+            "type": "tool_use",
+            "timestamp": "2030-01-01T00:00:02Z",
+            "tool_name": "google_web_search",
+            "tool_id": "tool-1",
+            "parameters": {"query": "official release"},
+        },
+        {
+            "type": "tool_result",
+            "timestamp": "2030-01-01T00:00:03Z",
+            "tool_id": "tool-1",
+            "status": "success",
+            "output": "official result",
+        },
+        {
+            "type": "message",
+            "timestamp": "2030-01-01T00:00:04Z",
+            "role": "assistant",
+            "content": '{"pointEstimate":',
+            "delta": True,
+        },
+        {
+            "type": "message",
+            "timestamp": "2030-01-01T00:00:05Z",
+            "role": "assistant",
+            "content": " 5.1}",
+            "delta": True,
+        },
+        {
+            "type": "result",
+            "timestamp": "2030-01-01T00:00:06Z",
+            "status": "success",
+            "stats": {
+                "total_tokens": 15,
+                "input_tokens": 10,
+                "output_tokens": 5,
+                "cached": 2,
+                "input": 10,
+                "duration_ms": 12,
+                "tool_calls": 1,
+                "models": {runtime_model: {"total_tokens": 15}},
+            },
+        },
+    ]
+
+    parsed = analyst_runner.parse_gemini_jsonl(
+        "\n".join(json.dumps(event) for event in events) + "\n", ""
+    )
+
+    assert parsed["assistantText"] == '{"pointEstimate": 5.1}'
+    assert [event["type"] for event in parsed["toolEvents"]] == [
+        "tool_use",
+        "tool_result",
+    ]
+    assert [
+        json.loads(line)["type"] for line in parsed["eventsJsonl"].splitlines()
+    ] == ["tool_use", "tool_result"]
+    assert parsed["sessionId"] == "session-1"
+    assert parsed["initModel"] == "gemini-3.7-flash"
+    assert parsed["runtimeModels"] == [runtime_model]
+    assert parsed["resultStatus"] == "success"
+    assert parsed["stats"]["tool_calls"] == 1
 
 
 def test_ticket_codex_stream_binding_refuses_o_file_only_success() -> None:

@@ -77,6 +77,56 @@ Use `--no-codex-search` for reviewer-like runs that should not fetch new
 evidence, `--codex-sandbox` to change the execution sandbox, and
 `--codex-reasoning-effort` to change the Codex reasoning-effort config.
 
+## API-key-backed Gemini CLI run
+
+Use the native Gemini path to run the same Thesis prompt through Gemini CLI.
+Set `GEMINI_API_KEY` in the runner's parent environment first; the runner reads
+that variable but never invokes a secret manager itself. It resolves the binary
+from `THESIS_GEMINI_BIN` when set, otherwise from `gemini` on `PATH`, and fails
+closed when either the executable or API key is missing.
+
+```bash
+python3 scripts/run_thesis_analyst.py \
+  --series ons.labour.unemployment_rate \
+  --period 2026-Q4 \
+  --gemini-model gemini-3.7-flash
+```
+
+The invocation is:
+
+```text
+gemini -m MODEL --approval-mode plan -o stream-json -p PROMPT
+```
+
+The full prompt is passed directly as the `-p` value rather than on stdin or
+through a pointer file: `-p` is required for deterministic headless operation,
+while stdin content would be prepended to it. `command.json` records `<prompt>`
+in place of those bytes, and `prompt.md` remains the canonical prompt artifact.
+`plan` is the only approval mode used: read-only tools such as web search and
+fetch can run, while `yolo` and `auto_edit` are never enabled.
+
+Each Gemini stage runs with a fresh temporary `HOME` containing only
+`.gemini/settings.json` with
+`{"security":{"auth":{"selectedType":"gemini-api-key"}}}`. This prevents a
+real user setting such as `oauth-personal` from opening a browser in a headless
+run; the runner also detects the OAuth browser-prompt text and fails closed.
+Gemini CLI merges workspace settings over user settings, so the stage also uses
+a clean temporary working directory rather than a checkout that might contain
+`.gemini/settings.json`. The v1 Gemini backend therefore cannot read repository
+files. That isolation is intentional and does not prevent its plan-mode web
+tools from gathering public evidence.
+
+Plan mode is reinforced by an unconditional workspace guard around every
+Gemini stage. The runner fingerprints the run directory and repository tree
+before and after execution and fails the run closed on any mutation, recording
+`workspaceMutations` in `command.json` and `workspaceHygiene` in
+`manifest.json`.
+
+For batches, pass `--gemini-model` to `scripts/run_thesis_batch.py` or set
+`THESIS_GEMINI_MODEL`. Non-ticket batches refuse ambiguous command, Codex, and
+Gemini backend selections; when none is selected they retain the existing
+default Codex model. Generation tickets remain Codex-only.
+
 ## Network-enabled Codex runs
 
 The default read-only sandbox denies ALL sockets: `curl` inside it exits 6
@@ -141,12 +191,15 @@ smoke tests shorter or longer. A timeout writes `command.json`, `stdout.txt`,
 `stderr.txt`, `raw_response.txt`, `error.json`, and `manifest.json` with
 `ok: false`. Codex runs additionally write `codex_stdout.jsonl`,
 `codex_stderr.log`, `codex_events.jsonl`, `codex_last_message.txt`, and
-`codex_trace.json`.
+`codex_trace.json`. Gemini runs additionally write `gemini_stdout.jsonl`,
+`gemini_events.jsonl`, `gemini_last_message.txt`, and `gemini_trace.json`.
 
 When the command names a model with `-m`, `--model`, or `--model=...`, the
 runner records that runtime model in `manifest.json` and in generated cell
 metadata. If it differs from the agent default in `agent.yaml`, the manifest
-also keeps `configuredModel` for comparison.
+also keeps `configuredModel` for comparison. Gemini runtime metadata records
+`backend: "gemini_cli"`, keeps `model` as the requested model, and adds
+`runtimeModel` from the CLI's `stats.models` key when present.
 
 ## Credential hygiene
 
@@ -155,21 +208,25 @@ Incident 2026-07-21: during an aging-wave batch, the codex agent ran
 credential env vars inherited from the interactive shell landed verbatim in
 recorded trace files; GitHub push protection was the only thing that kept
 them out of the public repo. The runner now enforces two independent layers,
-covering the draft, pre-submit review, and final stages of both the native
-Codex path and the `--command` path:
+covering the draft, pre-submit review, and final stages of the native Codex,
+native Gemini, and `--command` paths:
 
 1. **Allowlisted subprocess environment.** Agent subprocesses receive only
    `PATH`, `HOME`, `TERM`, `SHELL`, `TMPDIR`, `LANG`, `LC_ALL`, `LC_CTYPE`,
    and `CODEX_HOME` (`AGENT_ENV_ALLOWLIST` in `run_thesis_analyst.py`) — an
    allowlist, never a denylist — so an env dump has nothing secret to print.
    Codex authenticates through `CODEX_HOME/auth.json` (subscription login or
-   CI `codex login --with-api-key`), not env vars. A `--command` agent that
-   genuinely needs another variable requires a deliberate, reviewed
+   CI `codex login --with-api-key`), not env vars. The Gemini backend alone
+   adds `GEMINI_API_KEY` and overrides `HOME` with its temporary directory.
+   The key value is never placed in argv or any artifact; `command.json`
+   records subprocess environment variable names only. A `--command` agent
+   that genuinely needs another variable requires a deliberate, reviewed
    extension of the allowlist.
 2. **Stream redaction before sealing.** Every captured agent stream —
-   codex stdout/stderr JSONL, events, last message, `--command`
-   stdout/stderr, recorded argv, and saved `--response-file` content — is
-   redacted before any artifact is written. Redaction covers
+   Codex stdout/stderr JSONL, Gemini stream JSONL and tool events, both native
+   backends' last messages, `--command` stdout/stderr, recorded argv, and saved
+   `--response-file` content — is redacted before any artifact is written.
+   Redaction covers
    `NAME=value` lines and `"name": "value"` JSON fields with
    credential-shaped names (`KEY`/`TOKEN`/`SECRET`/`PASSWORD`), plus
    well-known token formats (`sk-ant-`, `sk-proj-`, `sk-or-`, legacy `sk-`,
@@ -230,7 +287,10 @@ unreviewed runs later.
 The reviewer Codex path does not enable web search by default; add
 `--pre-submit-review-codex-search` only when the review should fetch additional
 public context. The normal review mode should judge the draft, cited evidence,
-and target spec.
+and target spec. The native reviewer backend remains Codex-only in v1, but a
+Gemini forecaster may use it: draft and final stages run through Gemini while
+the prefixed pre-submit-review stage runs through Codex, with both trace
+families preserved.
 
 ## Time-series model-candidate preflight
 
@@ -275,6 +335,8 @@ Every run writes a directory under `records/thesis-analyst/YYYY-MM-DD/` with:
 - `codex_stdout.jsonl`, `codex_stderr.log`, `codex_events.jsonl`,
   `codex_last_message.txt`, and `codex_trace.json` when `--codex-model` or
   `--pre-submit-review-codex-model` is used
+- `gemini_stdout.jsonl`, `gemini_events.jsonl`, `gemini_last_message.txt`, and
+  `gemini_trace.json` when `--gemini-model` is used
 - `raw_response.txt`
 - `draft_stdout.txt`, `pre_submit_review_stdout.txt`, and `revision_prompt.md`
   when pre-submit review is enabled
@@ -306,10 +368,12 @@ rejected if this verification fails.
 New roots use custody inventory v2. Successful analyst runs always preserve
 `command.json`, `stdout.txt`, and `stderr.txt`, including saved-response and
 mock modes. Codex stages always preserve all five Codex trace files, even when
-an individual stream is empty. The verifier rejects missing required files and
-any regular file in the run directory that is not referenced by the manifest.
-Roots without an inventory version remain verifiable only as
-`legacy-incomplete` records.
+an individual stream is empty; Gemini stages likewise preserve all four Gemini
+trace files. The verifier selects the required family from each stage's
+`command.json`, so mixed Gemini-forecaster/Codex-review runs remain complete.
+It rejects missing required files and any regular file in the run directory
+that is not referenced by the manifest. Roots without an inventory version
+remain verifiable only as `legacy-incomplete` records.
 
 ## Convert to a generated catalog module
 

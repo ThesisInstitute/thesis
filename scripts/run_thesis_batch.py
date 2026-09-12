@@ -40,6 +40,7 @@ TICKET_CONFLICT_FLAGS = (
     "--max-failures",
     "--command",
     "--codex-model",
+    "--gemini-model",
     "--codex-reasoning-effort",
     "--no-codex-search",
     "--codex-sandbox",
@@ -323,6 +324,7 @@ def apply_ticket_policy(args: argparse.Namespace, ticket: dict[str, Any]) -> Non
     policy = ticket["policy"]
     args.prompt_mode = policy["promptMode"]
     args.codex_model = policy["codexModel"]
+    args.gemini_model = None
     args.codex_reasoning_effort = policy["codexReasoningEffort"]
     args.codex_sandbox = policy["codexSandbox"]
     args.codex_network = policy["codexNetwork"]
@@ -362,25 +364,47 @@ def load_targets(args: argparse.Namespace) -> list[dict[str, Any]]:
     return targets
 
 
+def resolve_agent_backend(
+    args: argparse.Namespace,
+    ticket_context: dict[str, str] | None = None,
+) -> tuple[str, str]:
+    """Resolve one effective forecast backend without silently ignoring another."""
+
+    if ticket_context is not None:
+        return "codex", str(args.codex_model)
+
+    command = args.command or os.environ.get("THESIS_AGENT_COMMAND")
+    codex_model = args.codex_model or os.environ.get("THESIS_CODEX_MODEL")
+    gemini_model = args.gemini_model or os.environ.get("THESIS_GEMINI_MODEL")
+    selections = [
+        ("command", command),
+        ("codex", codex_model),
+        ("gemini", gemini_model),
+    ]
+    selected = [(backend, value) for backend, value in selections if value]
+    if len(selected) > 1:
+        labels = {
+            "command": "--command/THESIS_AGENT_COMMAND",
+            "codex": "--codex-model/THESIS_CODEX_MODEL",
+            "gemini": "--gemini-model/THESIS_GEMINI_MODEL",
+        }
+        conflicts = ", ".join(labels[backend] for backend, _value in selected)
+        raise BatchRunError(
+            "non-ticket batch forecast backend is ambiguous; choose exactly one of "
+            f"--command, --codex-model, or --gemini-model (selected: {conflicts})"
+        )
+    if selected:
+        backend, value = selected[0]
+        return backend, str(value)
+    return "codex", DEFAULT_CODEX_MODEL
+
+
 def run_one(
     target: dict[str, Any],
     args: argparse.Namespace,
     ticket_context: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    command = (
-        None
-        if ticket_context is not None
-        else args.command or os.environ.get("THESIS_AGENT_COMMAND")
-    )
-    codex_model = (
-        args.codex_model
-        if ticket_context is not None
-        else (
-            args.codex_model
-            or os.environ.get("THESIS_CODEX_MODEL")
-            or DEFAULT_CODEX_MODEL
-        )
-    )
+    backend, backend_value = resolve_agent_backend(args, ticket_context)
     argv = [
         sys.executable,
         str(RUNNER),
@@ -409,10 +433,12 @@ def run_one(
         )
     if target.get("conditional"):
         argv.extend(["--conditional", target["conditional"]])
-    if command:
-        argv.extend(["--command", command])
+    if backend == "command":
+        argv.extend(["--command", backend_value])
+    elif backend == "gemini":
+        argv.extend(["--gemini-model", backend_value])
     else:
-        argv.extend(["--codex-model", codex_model])
+        argv.extend(["--codex-model", backend_value])
         if args.no_codex_search:
             argv.append("--no-codex-search")
         if args.codex_reasoning_effort:
@@ -524,6 +550,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-failures", type=int, default=999)
     parser.add_argument("--command")
     parser.add_argument("--codex-model")
+    parser.add_argument("--gemini-model")
     parser.add_argument("--codex-reasoning-effort", default="low")
     parser.add_argument("--no-codex-search", action="store_true")
     parser.add_argument(
@@ -572,6 +599,7 @@ def main(
             targets = ticket["targets"]
         else:
             targets = load_targets(args)
+        resolve_agent_backend(args, ticket_context)
         started_at = utc_now()
         out = (
             ticket_batch_path(repo_root, started_at, ticket)

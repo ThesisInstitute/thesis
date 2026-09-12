@@ -29,7 +29,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import run_thesis_analyst as analyst_runner  # noqa: E402
 from verify_custody import verify_run  # noqa: E402
 
-from tests.test_thesis_analyst_runner import review_test_cell  # noqa: E402
+from tests.test_thesis_analyst_runner import (  # noqa: E402
+    review_test_cell,
+    write_fake_gemini,
+)
 
 PLANTED = {
     "anthropic": "sk-ant-" + "planted-incident-2026-07-21",
@@ -337,6 +340,124 @@ def test_codex_stages_get_minimal_env_and_redacted_records(tmp_path):
     cells = json.loads((out_dir / "cells.with_activity.json").read_text())
     assert cells[0]["pointEstimate"] == 5.2
     assert "ANTHROPIC_API_KEY=[REDACTED]" in json.dumps(cells)
+    verification = verify_run(out_dir)
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is True
+
+
+def test_gemini_stage_gets_only_its_key_and_seals_redacted(tmp_path: Path) -> None:
+    """Gemini gets its one backend-only key and every echoed copy is redacted."""
+    out_dir = tmp_path / "gemini-run"
+    fake_gemini = tmp_path / "gemini"
+    probe_path = tmp_path / "gemini_probe.json"
+    parent_secret = "parent-only-planted-" + "value-999"
+    parent_google_secret = "parent-google-only-" + "value-999"
+    cell = planted_cell(point=5.1, ci_low=4.7, ci_high=5.8)
+    cell["reasoning"][2]["result"] += (
+        f" Stray Gemini output: GEMINI_API_KEY={PLANTED['google']} and the "
+        "forecast continues."
+    )
+    write_fake_gemini(
+        fake_gemini,
+        cell,
+        extra_lines=[
+            f"probe_path = pathlib.Path({json.dumps(str(probe_path))})",
+            "gemini_home = pathlib.Path(os.environ['HOME'])",
+            "probe_path.write_text(json.dumps({",
+            "  'envNames': sorted(os.environ),",
+            "  'geminiKeyPresent': bool(os.environ.get('GEMINI_API_KEY')),",
+            "  'googleKeyPresent': 'GOOGLE_API_KEY' in os.environ,",
+            "  'home': str(gemini_home),",
+            "  'cwd': str(pathlib.Path.cwd()),",
+            "  'settings': json.loads(",
+            "    (gemini_home / '.gemini' / 'settings.json').read_text()",
+            "  ),",
+            "}))",
+            "tool_output = 'GEMINI_API_KEY=' + os.environ['GEMINI_API_KEY']",
+            "print(",
+            "  'GEMINI_API_KEY=' + os.environ['GEMINI_API_KEY'],",
+            "  file=sys.stderr,",
+            ")",
+        ],
+    )
+
+    env = {
+        **os.environ,
+        "THESIS_GEMINI_BIN": str(fake_gemini),
+        "GEMINI_API_KEY": PLANTED["google"],
+        "GOOGLE_API_KEY": parent_google_secret,
+        "PLANTED_PARENT_ONLY_API_KEY": parent_secret,
+    }
+    subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "--series",
+            "test.env_hygiene_rate",
+            "--period",
+            "2030-01",
+            "--gemini-model",
+            "gemini-3.7-flash",
+            "--out-dir",
+            str(out_dir),
+        ],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    probe = json.loads(probe_path.read_text())
+    child_names = set(probe["envNames"])
+    allowed_names = {
+        *analyst_runner.AGENT_ENV_ALLOWLIST,
+        "GEMINI_API_KEY",
+    }
+    assert "GEMINI_API_KEY" not in analyst_runner.AGENT_ENV_ALLOWLIST
+    # macOS injects this locale/encoding hint after execve; command.json pins
+    # the exact pre-exec allowlist below.
+    assert child_names <= allowed_names | {"__CF_USER_TEXT_ENCODING"}
+    assert probe["geminiKeyPresent"] is True
+    assert probe["googleKeyPresent"] is False
+    assert "GOOGLE_API_KEY" not in child_names
+    assert "THESIS_GEMINI_BIN" not in child_names
+    assert "PLANTED_PARENT_ONLY_API_KEY" not in child_names
+    assert [name for name in child_names if CREDENTIAL_NAME_RE.search(name)] == [
+        "GEMINI_API_KEY"
+    ]
+    assert Path(probe["home"]).name.startswith("thesis-gemini-home-")
+    assert Path(probe["cwd"]).name.startswith("thesis-gemini-work-")
+    assert Path(probe["cwd"]) != ROOT
+    assert probe["settings"] == {
+        "security": {"auth": {"selectedType": "gemini-api-key"}}
+    }
+
+    assert_no_planted_content(
+        out_dir,
+        [parent_secret, parent_google_secret],
+    )
+    stdout_jsonl = (out_dir / "gemini_stdout.jsonl").read_text()
+    events_jsonl = (out_dir / "gemini_events.jsonl").read_text()
+    last_message = (out_dir / "gemini_last_message.txt").read_text()
+    stderr_text = (out_dir / "stderr.txt").read_text()
+    assert "GEMINI_API_KEY=[REDACTED]" in stdout_jsonl
+    assert "GEMINI_API_KEY=[REDACTED]" in events_jsonl
+    assert "GEMINI_API_KEY=[REDACTED]" in last_message
+    assert "GEMINI_API_KEY=[REDACTED]" in stderr_text
+    for stream in (stdout_jsonl, events_jsonl):
+        for line in filter(None, stream.splitlines()):
+            json.loads(line)
+
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    [cell_with_activity] = json.loads(
+        (out_dir / "cells.with_activity.json").read_text()
+    )
+    command = json.loads((out_dir / "command.json").read_text())
+    assert manifest["ok"] is True
+    assert set(command["envVarNames"]) <= allowed_names
+    assert command["envVarNames"].count("GEMINI_API_KEY") == 1
+    assert "GEMINI_API_KEY=[REDACTED]" in json.dumps(cell_with_activity)
     verification = verify_run(out_dir)
     assert verification.inventory_status == "complete"
     assert verification.run_succeeded is True

@@ -5,8 +5,8 @@ The runner is intentionally thin:
 
 1. Build the prompt from agents/thesis-analyst/build_prompt.py, or use the
    inline fast prompt for high-volume release-series runs.
-2. Execute Codex CLI through subscription auth, run a custom headless command,
-   or read a saved response / mock cell.
+2. Execute Codex CLI through subscription auth, Gemini CLI through API-key
+   auth, run a custom headless command, or read a saved response / mock cell.
 3. Extract JSON, normalize the cell shape, and validate the spawned-cell
    contract.
 4. Write every activity artifact: prompt, command, stdout, stderr, raw
@@ -82,6 +82,14 @@ ANNOUNCEMENT_MCP_TOOL = "fetch_official_announcement"
 ANNOUNCEMENT_MCP_SCRIPT = SCRIPTS / "announcement_fetch_mcp.py"
 ANNOUNCEMENT_MCP_STARTUP_TIMEOUT_SECONDS = 10
 ANNOUNCEMENT_MCP_TOOL_TIMEOUT_SECONDS = 30
+GEMINI_API_KEY_ERROR = (
+    "Gemini CLI backend requires GEMINI_API_KEY in the parent environment"
+)
+GEMINI_CLI_NOT_FOUND_ERROR = (
+    "Gemini CLI not found; install gemini or set THESIS_GEMINI_BIN"
+)
+GEMINI_OAUTH_PROMPT_TEXT = "Opening authentication page in your browser"
+GEMINI_AUTH_SETTINGS = {"security": {"auth": {"selectedType": "gemini-api-key"}}}
 
 
 def utc_now() -> str:
@@ -1400,6 +1408,13 @@ def redact_text(text: str) -> str:
     return SECRET_TOKEN_RE.sub(REDACTED_PLACEHOLDER, text)
 
 
+def redact_exact_secrets(text: str, secrets: list[str]) -> str:
+    """Remove backend credentials even when an echoed value has no known shape."""
+    for secret in sorted({value for value in secrets if value}, key=len, reverse=True):
+        text = text.replace(secret, REDACTED_PLACEHOLDER)
+    return text
+
+
 def redact_json_value(value: Any) -> Any:
     if isinstance(value, str):
         return redact_text(value)
@@ -1538,6 +1553,15 @@ def resolve_codex_cli() -> str:
     return shutil.which("codex") or "codex"
 
 
+def resolve_gemini_cli() -> str:
+    """Return the configured Gemini executable or fail closed."""
+    override = os.getenv("THESIS_GEMINI_BIN")
+    resolved = shutil.which(override) if override else shutil.which("gemini")
+    if resolved is None:
+        raise RuntimeError(GEMINI_CLI_NOT_FOUND_ERROR)
+    return resolved
+
+
 def prepare_codex_home(codex_home: pathlib.Path) -> pathlib.Path:
     """Create a minimal CODEX_HOME that reuses subscription auth, not config."""
     codex_home.mkdir(parents=True, exist_ok=True)
@@ -1659,6 +1683,63 @@ def wait_for_codex_process(
         time.sleep(poll_interval)
 
 
+def wait_for_stream_process(
+    process: subprocess.Popen[str],
+    timeout_seconds: int,
+    *,
+    heartbeat_paths: list[pathlib.Path],
+    max_idle_seconds: float = 120.0,
+    poll_interval: float = 0.5,
+) -> None:
+    """Wait for a streaming CLI with Codex-equivalent wall/idle limits.
+
+    Codex has a separate `-o` last-message file whose stability lets the
+    harness terminate a CLI that lingers after completing. Gemini emits its
+    terminal result on stdout, so its waiter uses the same wall and idle
+    semantics without treating an early init/message event as completion.
+    """
+    start = time.time()
+    last_activity_at = start
+    heartbeat_snapshot: tuple[tuple[int, int, int], ...] | None = None
+
+    def snapshot_activity() -> tuple[tuple[int, int, int], ...]:
+        snapshot: list[tuple[int, int, int]] = []
+        for path in heartbeat_paths:
+            if not path.exists():
+                snapshot.append((0, 0, 0))
+                continue
+            try:
+                stat = path.stat()
+            except OSError:
+                snapshot.append((0, 0, 0))
+                continue
+            snapshot.append((1, stat.st_size, stat.st_mtime_ns))
+        return tuple(snapshot)
+
+    while True:
+        if process.poll() is not None:
+            return
+
+        now = time.time()
+        if now - start > timeout_seconds:
+            raise subprocess.TimeoutExpired(process.args, timeout_seconds)
+
+        current_heartbeat = snapshot_activity()
+        if current_heartbeat != heartbeat_snapshot:
+            heartbeat_snapshot = current_heartbeat
+            last_activity_at = now
+        elif now - last_activity_at >= max_idle_seconds:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+            raise subprocess.TimeoutExpired(process.args, max_idle_seconds)
+
+        time.sleep(poll_interval)
+
+
 def parse_codex_jsonl(stdout_text: str, stderr_text: str) -> dict[str, Any]:
     events: list[dict[str, Any]] = []
     assistant_messages: list[str] = []
@@ -1701,6 +1782,88 @@ def parse_codex_jsonl(stdout_text: str, stderr_text: str) -> dict[str, Any]:
         "usage": usage_payload,
         "lastError": last_error,
         "nonJsonStderr": "\n".join(non_json_lines),
+    }
+
+
+def parse_gemini_jsonl(stdout_text: str, stderr_text: str) -> dict[str, Any]:
+    """Parse Gemini CLI 0.36 stream-json without discarding raw events."""
+    events: list[dict[str, Any]] = []
+    tool_events: list[dict[str, Any]] = []
+    assistant_chunks: list[str] = []
+    result_response: str | None = None
+    stats: dict[str, Any] | None = None
+    result_status: str | None = None
+    session_id: str | None = None
+    init_model: str | None = None
+    last_error: str | None = None
+    non_json_lines: list[str] = []
+
+    for stream_name, text in (("stdout", stdout_text), ("stderr", stderr_text)):
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            try:
+                payload = json.loads(stripped)
+            except json.JSONDecodeError:
+                non_json_lines.append(f"{stream_name}: {line}")
+                continue
+            if not isinstance(payload, dict):
+                continue
+            events.append(payload)
+            event_type = payload.get("type")
+            if event_type == "init":
+                if payload.get("session_id"):
+                    session_id = str(payload["session_id"])
+                if payload.get("model"):
+                    init_model = str(payload["model"])
+            elif event_type == "message" and payload.get("role") == "assistant":
+                content = payload.get("content")
+                if isinstance(content, str):
+                    assistant_chunks.append(content)
+            elif event_type in {"tool_use", "tool_result"}:
+                tool_events.append(payload)
+            elif event_type == "error":
+                last_error = str(payload.get("message") or "Gemini CLI error")
+            elif event_type == "result":
+                result_status = (
+                    str(payload["status"])
+                    if payload.get("status") is not None
+                    else None
+                )
+                if isinstance(payload.get("stats"), dict):
+                    stats = payload["stats"]
+                for key in ("response", "content", "message"):
+                    if isinstance(payload.get(key), str) and payload[key]:
+                        result_response = payload[key]
+                        break
+                if isinstance(payload.get("error"), dict):
+                    last_error = str(
+                        payload["error"].get("message") or "Gemini CLI result error"
+                    )
+                elif isinstance(payload.get("error"), str):
+                    last_error = payload["error"]
+
+    events_jsonl = "\n".join(json.dumps(event) for event in tool_events)
+    if events_jsonl:
+        events_jsonl += "\n"
+    runtime_models = (
+        [str(name) for name in stats.get("models", {})]
+        if isinstance(stats, dict) and isinstance(stats.get("models"), dict)
+        else []
+    )
+    return {
+        "events": events,
+        "toolEvents": tool_events,
+        "eventsJsonl": events_jsonl,
+        "assistantText": result_response or "".join(assistant_chunks).strip(),
+        "stats": stats,
+        "resultStatus": result_status,
+        "sessionId": session_id,
+        "initModel": init_model,
+        "runtimeModels": runtime_models,
+        "lastError": last_error,
+        "nonJsonLines": "\n".join(non_json_lines),
     }
 
 
@@ -1821,12 +1984,89 @@ def git_porcelain_lines(out_dir: pathlib.Path) -> list[str] | None:
     return sorted(lines)
 
 
+def git_root_fingerprint(out_dir: pathlib.Path) -> str | None:
+    """Hash the complete git-visible ROOT state without rereading clean files.
+
+    `git diff HEAD` commits to every tracked change, including changes to a
+    file that was already dirty before the agent stage. Untracked contents are
+    added explicitly because porcelain status alone records only their names.
+    The run directory is excluded; its files are fingerprinted separately.
+    """
+    try:
+        out_relative = out_dir.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        out_relative = None
+
+    diff_argv = [
+        "git",
+        "-C",
+        str(ROOT),
+        "diff",
+        "--no-ext-diff",
+        "--binary",
+        "HEAD",
+        "--",
+        ".",
+    ]
+    if out_relative:
+        diff_argv.extend(
+            [f":(exclude){out_relative}", f":(exclude){out_relative}/**"]
+        )
+    try:
+        diff = subprocess.run(diff_argv, capture_output=True, timeout=120)
+        untracked = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(ROOT),
+                "ls-files",
+                "--others",
+                "--exclude-standard",
+                "-z",
+            ],
+            capture_output=True,
+            timeout=120,
+        )
+    except Exception:
+        return None
+    if diff.returncode != 0 or untracked.returncode != 0:
+        return None
+
+    digest = hashlib.sha256()
+    digest.update(diff.stdout)
+    for raw_name in sorted(filter(None, untracked.stdout.split(b"\0"))):
+        relative = raw_name.decode(errors="surrogateescape")
+        if out_relative and (
+            relative == out_relative or relative.startswith(f"{out_relative}/")
+        ):
+            continue
+        path = ROOT / relative
+        digest.update(raw_name)
+        digest.update(b"\0")
+        try:
+            if path.is_symlink():
+                digest.update(b"symlink\0")
+                digest.update(os.readlink(path).encode(errors="surrogateescape"))
+            elif path.is_file():
+                digest.update(b"file\0")
+                digest.update(path.read_bytes())
+            else:
+                digest.update(b"other\0")
+        except OSError:
+            digest.update(b"unreadable\0")
+    return digest.hexdigest()
+
+
 def workspace_guard_snapshot(out_dir: pathlib.Path) -> dict[str, Any]:
     hashes: dict[str, str] = {}
     for path in sorted(out_dir.rglob("*")):
         if path.is_file() and not path.is_symlink():
             hashes[str(path.relative_to(out_dir))] = sha256_bytes(path.read_bytes())
-    return {"outDirHashes": hashes, "gitStatus": git_porcelain_lines(out_dir)}
+    return {
+        "outDirHashes": hashes,
+        "gitStatus": git_porcelain_lines(out_dir),
+        "rootFingerprint": git_root_fingerprint(out_dir),
+    }
 
 
 def workspace_guard_violations(
@@ -1859,6 +2099,14 @@ def workspace_guard_violations(
             violations.append(
                 f"workspace tree entry cleared during agent stage: {line.strip()}"
             )
+    pre_fingerprint = pre.get("rootFingerprint")
+    post_fingerprint = post.get("rootFingerprint")
+    if (
+        pre_fingerprint is not None
+        and post_fingerprint is not None
+        and pre_fingerprint != post_fingerprint
+    ):
+        violations.append("workspace root fingerprint changed during agent stage")
     return violations
 
 
@@ -2093,6 +2341,205 @@ def run_codex_agent_command(
     }
 
 
+def run_gemini_agent_command(
+    *,
+    prompt: str,
+    timeout_seconds: int,
+    model: str,
+    out_dir: pathlib.Path,
+    prefix: str,
+) -> dict[str, Any]:
+    """Run a prompt through Gemini CLI and retain its complete stream trace."""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError(GEMINI_API_KEY_ERROR)
+
+    gemini_bin = resolve_gemini_cli()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        gemini_bin,
+        "-m",
+        model,
+        "--approval-mode",
+        "plan",
+        "-o",
+        "stream-json",
+        "-p",
+        prompt,
+    ]
+    logged_cmd = [
+        redact_text(redact_exact_secrets(str(arg), [api_key]))
+        for arg in [*cmd[:-1], "<prompt>"]
+    ]
+    recorded_model = redact_text(redact_exact_secrets(model, [api_key]))
+    guard_pre = workspace_guard_snapshot(out_dir)
+    started_at = utc_now()
+    timed_out = False
+    timeout_reason: str | None = None
+    process_return_code = 1
+    process_error: str | None = None
+    stdout_path: pathlib.Path | None = None
+    stderr_path: pathlib.Path | None = None
+    raw_stdout = ""
+    raw_stderr = ""
+    gemini_env_names: list[str] = []
+
+    try:
+        with (
+            tempfile.TemporaryDirectory(prefix="thesis-gemini-home-") as home_dir,
+            tempfile.TemporaryDirectory(prefix="thesis-gemini-work-") as work_dir,
+        ):
+            gemini_home = pathlib.Path(home_dir)
+            settings_dir = gemini_home / ".gemini"
+            settings_dir.mkdir(parents=True)
+            (settings_dir / "settings.json").write_text(
+                json.dumps(GEMINI_AUTH_SETTINGS, separators=(",", ":")) + "\n"
+            )
+            gemini_env = agent_subprocess_env(
+                {"HOME": str(gemini_home), "GEMINI_API_KEY": api_key}
+            )
+            gemini_env_names = sorted(gemini_env)
+            with (
+                tempfile.NamedTemporaryFile(mode="w+", delete=False) as stdout_file,
+                tempfile.NamedTemporaryFile(mode="w+", delete=False) as stderr_file,
+            ):
+                stdout_path = pathlib.Path(stdout_file.name)
+                stderr_path = pathlib.Path(stderr_file.name)
+                process = subprocess.Popen(
+                    cmd,
+                    stdin=subprocess.DEVNULL,
+                    stdout=stdout_file,
+                    stderr=stderr_file,
+                    text=True,
+                    cwd=work_dir,
+                    env=gemini_env,
+                )
+                idle_limit = positive_int_env(
+                    "THESIS_GEMINI_IDLE_TIMEOUT_SECONDS",
+                    min(timeout_seconds, 120),
+                )
+                try:
+                    wait_for_stream_process(
+                        process,
+                        timeout_seconds,
+                        heartbeat_paths=[stdout_path, stderr_path],
+                        max_idle_seconds=idle_limit,
+                    )
+                except subprocess.TimeoutExpired as exc:
+                    timed_out = True
+                    timeout_reason = "idle" if exc.timeout == idle_limit else "wall"
+                    if process.poll() is None:
+                        process.kill()
+                    process.wait()
+                process_return_code = process.returncode or 0
+    except FileNotFoundError:
+        process_return_code = 127
+        process_error = GEMINI_CLI_NOT_FOUND_ERROR
+    except Exception as exc:
+        process_return_code = 1
+        process_error = f"Error running Gemini CLI: {exc}"
+    finally:
+        if stdout_path is not None and stdout_path.exists():
+            raw_stdout = stdout_path.read_text()
+            stdout_path.unlink(missing_ok=True)
+        if stderr_path is not None and stderr_path.exists():
+            raw_stderr = stderr_path.read_text()
+            stderr_path.unlink(missing_ok=True)
+
+    stdout_text = redact_stream_text(redact_exact_secrets(raw_stdout, [api_key]))
+    stderr_text = redact_stream_text(redact_exact_secrets(raw_stderr, [api_key]))
+    workspace_mutations = workspace_guard_violations(
+        guard_pre, out_dir, allowed_new=set()
+    )
+    workspace_mutations = [
+        redact_text(redact_exact_secrets(mutation, [api_key]))
+        for mutation in workspace_mutations
+    ]
+    parsed = parse_gemini_jsonl(stdout_text, stderr_text)
+    final_text = redact_response_text(parsed["assistantText"])
+    runtime_models = parsed["runtimeModels"]
+    runtime_model = (
+        model
+        if model in runtime_models
+        else runtime_models[-1]
+        if runtime_models
+        else None
+    )
+    oauth_prompt_detected = GEMINI_OAUTH_PROMPT_TEXT.casefold() in (
+        f"{stdout_text}\n{stderr_text}".casefold()
+    )
+
+    effective_return_code = process_return_code
+    if final_text and (process_return_code == 0 or timed_out):
+        effective_return_code = 0
+    if parsed["resultStatus"] not in (None, "success"):
+        effective_return_code = 1
+    last_error = parsed["lastError"] or process_error
+    if last_error:
+        last_error = redact_text(redact_exact_secrets(str(last_error), [api_key]))
+    if oauth_prompt_detected:
+        effective_return_code = 1
+        last_error = (
+            "Gemini CLI emitted an OAuth browser prompt; refusing "
+            "non-interactive run"
+        )
+        final_text = ""
+    if timed_out and not final_text:
+        effective_return_code = 124
+
+    stderr_output = parsed["nonJsonLines"] or stderr_text
+    if last_error and last_error not in stderr_output:
+        stderr_output = f"{stderr_output.rstrip()}\n{last_error}\n".lstrip()
+    finished_at = utc_now()
+    trace = {
+        "provider": "google",
+        "backend": "gemini_cli",
+        "auth": "gemini-api-key",
+        "model": recorded_model,
+        "runtimeModel": runtime_model,
+        "runtimeModels": runtime_models,
+        "sessionId": parsed["sessionId"],
+        "initModel": parsed["initModel"],
+        "approvalMode": "plan",
+        "outputFormat": "stream-json",
+        "workingDirectory": "temporary",
+        "repositoryAccess": False,
+        "timeoutSeconds": timeout_seconds,
+        "timedOut": timed_out,
+        "timeoutReason": timeout_reason,
+        "processReturnCode": process_return_code,
+        "effectiveReturnCode": effective_return_code,
+        "resultStatus": parsed["resultStatus"],
+        "stats": parsed["stats"],
+        "eventCount": len(parsed["events"]),
+        "toolEventCount": len(parsed["toolEvents"]),
+        "oauthPromptDetected": oauth_prompt_detected,
+        "lastError": last_error,
+    }
+    return {
+        "backend": "gemini_cli",
+        "argv": logged_cmd,
+        "envVarNames": gemini_env_names,
+        "model": recorded_model,
+        "runtimeModel": runtime_model,
+        "timeoutSeconds": timeout_seconds,
+        "workspaceMutations": workspace_mutations,
+        "startedAt": started_at,
+        "finishedAt": finished_at,
+        "returnCode": effective_return_code,
+        "processReturnCode": process_return_code,
+        "timedOut": timed_out,
+        "timeoutReason": timeout_reason,
+        "terminatedAfterOutput": False,
+        "stdout": final_text,
+        "stderr": stderr_output,
+        "geminiStdoutRaw": stdout_text,
+        "geminiEventsJsonl": parsed["eventsJsonl"],
+        "geminiLastMessage": final_text,
+        "geminiTrace": trace,
+    }
+
+
 def command_hash(command_result: dict[str, Any] | None) -> str | None:
     if not command_result:
         return None
@@ -2143,6 +2590,11 @@ def append_command_artifacts(
                     **(
                         {"workspaceMutations": command_result["workspaceMutations"]}
                         if "workspaceMutations" in command_result
+                        else {}
+                    ),
+                    **(
+                        {"envVarNames": command_result["envVarNames"]}
+                        if "envVarNames" in command_result
                         else {}
                     ),
                     "returnCode": command_result["returnCode"],
@@ -2207,6 +2659,46 @@ def append_command_artifacts(
                 "codex_trace",
                 f"{prefix}codex_trace.json",
                 json.dumps(command_result["codexTrace"], indent=2),
+                created_at,
+            )
+        )
+    if command_result.get("geminiStdoutRaw") is not None:
+        refs.append(
+            write_artifact(
+                out_dir,
+                "gemini_stdout_jsonl",
+                f"{prefix}gemini_stdout.jsonl",
+                command_result["geminiStdoutRaw"],
+                created_at,
+            )
+        )
+    if command_result.get("geminiEventsJsonl") is not None:
+        refs.append(
+            write_artifact(
+                out_dir,
+                "gemini_events_jsonl",
+                f"{prefix}gemini_events.jsonl",
+                command_result["geminiEventsJsonl"],
+                created_at,
+            )
+        )
+    if command_result.get("geminiLastMessage") is not None:
+        refs.append(
+            write_artifact(
+                out_dir,
+                "gemini_last_message",
+                f"{prefix}gemini_last_message.txt",
+                command_result["geminiLastMessage"],
+                created_at,
+            )
+        )
+    if command_result.get("geminiTrace") is not None:
+        refs.append(
+            write_artifact(
+                out_dir,
+                "gemini_trace",
+                f"{prefix}gemini_trace.json",
+                json.dumps(command_result["geminiTrace"], indent=2),
                 created_at,
             )
         )
@@ -2479,6 +2971,19 @@ def stamp_runtime_invocation(
     command_result: dict[str, Any] | None,
 ) -> dict[str, Any]:
     runtime_meta = dict(meta)
+    if command_result and command_result.get("backend") == "gemini_cli":
+        requested_model = str(
+            command_result.get("model") or infer_command_model(command_result) or ""
+        )
+        if requested_model:
+            if requested_model != runtime_meta.get("model"):
+                runtime_meta["configuredModel"] = runtime_meta.get("model")
+            runtime_meta["model"] = requested_model
+        runtime_meta["backend"] = "gemini_cli"
+        runtime_model = command_result.get("runtimeModel")
+        if runtime_model:
+            runtime_meta["runtimeModel"] = str(runtime_model)
+        return runtime_meta
     runtime_model = infer_command_model(command_result)
     if runtime_model and runtime_model != runtime_meta.get("model"):
         runtime_meta["configuredModel"] = runtime_meta.get("model")
@@ -3405,6 +3910,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out-dir")
     parser.add_argument("--command")
     parser.add_argument("--codex-model")
+    parser.add_argument("--gemini-model")
     parser.add_argument("--codex-sandbox", default="read-only")
     parser.add_argument("--codex-reasoning-effort", default="low")
     parser.add_argument("--no-codex-search", action="store_true")
@@ -3453,6 +3959,8 @@ def parse_generation_ticket_context(
         raise SystemExit("ticket mode refuses --mock-cell")
     if args.command is not None:
         raise SystemExit("ticket mode refuses --command")
+    if args.gemini_model is not None:
+        raise SystemExit("ticket mode refuses --gemini-model")
     if args.pre_submit_review_command is not None:
         raise SystemExit("ticket mode refuses --pre-submit-review-command")
     if "THESIS_CODEX_IDLE_TIMEOUT_SECONDS" in os.environ:
@@ -3544,6 +4052,14 @@ def run_forecaster(
             network=args.codex_network,
             announcement_url=announcement_url,
         )
+    if args.gemini_model:
+        return run_gemini_agent_command(
+            prompt=prompt,
+            timeout_seconds=args.timeout_seconds,
+            model=args.gemini_model,
+            out_dir=out_dir,
+            prefix=prefix,
+        )
     return run_agent_command(
         args.command,
         prompt,
@@ -3623,6 +4139,7 @@ def main() -> int:
             for value in [
                 args.command,
                 args.codex_model,
+                args.gemini_model,
                 args.response_file,
                 args.mock_cell,
             ]
@@ -3630,8 +4147,8 @@ def main() -> int:
         != 1
     ):
         raise SystemExit(
-            "Choose exactly one of --command, --codex-model, --response-file, "
-            "or --mock-cell"
+            "Choose exactly one of --command, --codex-model, --gemini-model, "
+            "--response-file, or --mock-cell"
         )
     review_sources = [
         args.pre_submit_review_command,
@@ -3643,11 +4160,19 @@ def main() -> int:
             "--pre-submit-review-codex-model"
         )
     if any(bool(value) for value in review_sources) and not (
-        args.command or args.codex_model
+        args.command or args.codex_model or args.gemini_model
     ):
         raise SystemExit(
-            "Pre-submit review requires --command or --codex-model for the forecaster"
+            "Pre-submit review requires --command, --codex-model, or "
+            "--gemini-model for the forecaster"
         )
+    if args.gemini_model:
+        if not os.getenv("GEMINI_API_KEY"):
+            raise SystemExit(GEMINI_API_KEY_ERROR)
+        try:
+            resolve_gemini_cli()
+        except RuntimeError as exc:
+            raise SystemExit(str(exc)) from exc
 
     out_dir = (
         pathlib.Path(args.out_dir)
@@ -3676,7 +4201,7 @@ def main() -> int:
             hygiene_mutations.extend(stage_result["workspaceMutations"])
         return stage_result
 
-    if args.command or args.codex_model:
+    if args.command or args.codex_model or args.gemini_model:
         if args.pre_submit_review_command or args.pre_submit_review_codex_model:
             draft_result = collect_hygiene(
                 run_forecaster(

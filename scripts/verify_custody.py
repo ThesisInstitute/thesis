@@ -50,6 +50,12 @@ CODEX_STAGE_INVENTORY = {
     "codex_last_message.txt": "codex_last_message",
     "codex_trace.json": "codex_trace",
 }
+GEMINI_STAGE_INVENTORY = {
+    "gemini_stdout.jsonl": "gemini_stdout_jsonl",
+    "gemini_events.jsonl": "gemini_events_jsonl",
+    "gemini_last_message.txt": "gemini_last_message",
+    "gemini_trace.json": "gemini_trace",
+}
 REVIEWED_STAGE_INVENTORY = {
     "pre_submit_review_prompt.md": "review_prompt",
     "revision_prompt.md": "revision_prompt",
@@ -385,7 +391,13 @@ def _required(entries: list[dict[str, Any]], required: dict[str, str]) -> None:
 def _command_backend(run_dir: Path, prefix: str = "") -> str:
     command = _load_object(run_dir / f"{prefix}command.json")
     backend = command.get("backend")
-    if backend not in {"codex", "external_command", "response_file", "mock"}:
+    if backend not in {
+        "codex",
+        "gemini_cli",
+        "external_command",
+        "response_file",
+        "mock",
+    }:
         raise CustodyError(f"v2 analyst command.json has invalid backend: {backend!r}")
     return str(backend)
 
@@ -410,15 +422,38 @@ def _require_invocation_stage(
     }
     _required(entries, base)
     codex = _prefixed(CODEX_STAGE_INVENTORY, prefix)
+    gemini = _prefixed(GEMINI_STAGE_INVENTORY, prefix)
     paths = {str(entry["path"]) for entry in entries}
-    if _command_backend(run_dir, prefix) == "codex":
+    backend = _command_backend(run_dir, prefix)
+    if backend == "codex":
         _required(entries, codex)
+        unexpected_gemini = sorted(paths & set(gemini))
+        if unexpected_gemini:
+            raise CustodyError(
+                "Codex invocation contains Gemini trace artifacts: "
+                + ", ".join(unexpected_gemini)
+            )
         return {*base, *codex}
+    if backend == "gemini_cli":
+        _required(entries, gemini)
+        unexpected_codex = sorted(paths & set(codex))
+        if unexpected_codex:
+            raise CustodyError(
+                "Gemini invocation contains Codex trace artifacts: "
+                + ", ".join(unexpected_codex)
+            )
+        return {*base, *gemini}
     unexpected_codex = sorted(paths & set(codex))
     if unexpected_codex:
         raise CustodyError(
             "non-Codex invocation contains Codex trace artifacts: "
             + ", ".join(unexpected_codex)
+        )
+    unexpected_gemini = sorted(paths & set(gemini))
+    if unexpected_gemini:
+        raise CustodyError(
+            "non-Gemini invocation contains Gemini trace artifacts: "
+            + ", ".join(unexpected_gemini)
         )
     return set(base)
 
@@ -434,6 +469,7 @@ def _verify_invocation_stages(
         "stdout.txt",
         "stderr.txt",
         *CODEX_STAGE_INVENTORY,
+        *GEMINI_STAGE_INVENTORY,
     }
 
     def has_stage(prefix: str) -> bool:
