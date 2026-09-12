@@ -19,10 +19,11 @@ Two committed outputs:
   boundary freezes the row count at first indexing: earlier rows predate
   contract binding and are flagged wherever they grade forecasts.
 
-Refreshes verify every intermediate commit extends the previous version
-line-for-line. A rewritten or truncated upstream state refuses to advance the
-pin; adopting one requires deliberate ``--rebuild-from-history``, which
-re-derives custody flags rather than blessing the rewrite.
+Refreshes verify every intermediate commit against its actual parents, including
+parallel review branches. Row acceptance follows the journal's first-parent
+history. A rewritten or truncated upstream state refuses to advance the pin;
+adopting one requires deliberate ``--rebuild-from-history``, which re-derives
+custody flags rather than blessing the rewrite.
 
 Usage:
     python3 scripts/pin_ledger.py [--require-catalog]   # incremental refresh
@@ -701,57 +702,78 @@ def _compare_commits(base: str, head: str) -> list[dict[str, Any]]:
     return commits
 
 
-def _require_walk_parent(
-    commit_payload: Any,
-    commit_sha: str,
-    expected_parent: str,
-    visited: set[str],
-) -> bool:
-    """Admit a commit into the pin walk; True when it is a merge commit.
+@dataclass(frozen=True)
+class CommitGraph:
+    parents: dict[str, tuple[str, ...]]
+    order: tuple[str, ...]
+    first_parent: tuple[str, ...]
 
-    Ledger appends stay strictly linear: a single-parent commit must
-    continue the walk exactly. A multi-parent commit is traversable only
-    when the walk predecessor is among its parents and every other parent
-    was already walked (or is the pinned base), so a merge can reconcile
-    branch-internal history — a gate-class PR merged with a merge commit —
-    but can never splice in unwalked foreign history. The caller enforces
-    the companion content rule: a merge must leave the ledger bytes
-    exactly as its walk predecessor left them; appends arrive only on
-    single-parent commits.
+
+def _history_graph(commits: dict[str, Any], base: str, head: str) -> CommitGraph:
+    """Validate the complete base..head DAG before reading candidate states.
+
+    GitHub's compare array contains parallel branches, not a single parent
+    chain. Every actual parent must nevertheless be the pin or an enumerated
+    commit. Unknown parents, cycles and entries outside head's ancestry refuse;
+    ordering the array differently cannot hide or invent an ancestor.
     """
-    if type(commit_payload) is not dict or commit_payload.get("sha") != commit_sha:
-        raise PinError(f"commit response does not describe requested SHA {commit_sha}")
-    parents = commit_payload.get("parents")
-    if (
-        type(parents) is not list
-        or not parents
-        or any(type(parent) is not dict for parent in parents)
-    ):
-        raise PinError(
-            f"commit {commit_sha[:12]} is not on a linear single-parent history"
-        )
-    parent_shas = [str(parent.get("sha")) for parent in parents]
-    if len(parents) == 1:
-        if parent_shas[0] != expected_parent:
-            raise PinError(
-                f"commit history skips or reorders a parent at {commit_sha[:12]}: "
-                f"expected {expected_parent[:12]}, found {parent_shas[0][:12]}"
+    if base in commits or head not in commits:
+        raise PinError("commit history does not describe the requested base..head")
+    parents: dict[str, tuple[str, ...]] = {}
+    for sha, payload in commits.items():
+        if type(payload) is not dict or payload.get("sha") != sha:
+            raise PinError(f"commit response does not describe requested SHA {sha}")
+        raw_parents = payload.get("parents")
+        if (
+            type(raw_parents) is not list
+            or not raw_parents
+            or any(
+                type(parent) is not dict
+                or type(parent.get("sha")) is not str
+                or not re.fullmatch(r"[0-9a-f]{40}", parent["sha"])
+                for parent in raw_parents
             )
-        return False
-    if expected_parent not in parent_shas:
-        raise PinError(
-            f"merge commit {commit_sha[:12]} does not continue the walk from "
-            f"{expected_parent[:12]}"
-        )
-    strangers = [
-        sha for sha in parent_shas if sha != expected_parent and sha not in visited
-    ]
-    if strangers:
-        raise PinError(
-            f"merge commit {commit_sha[:12]} pulls in unwalked history "
-            f"({strangers[0][:12]}); refusing to advance the pin"
-        )
-    return True
+        ):
+            raise PinError(f"commit {sha[:12]} has no valid parent inventory")
+        parent_shas = tuple(parent["sha"] for parent in raw_parents)
+        if len(set(parent_shas)) != len(parent_shas):
+            raise PinError(f"commit {sha[:12]} repeats a parent")
+        for parent in parent_shas:
+            if parent != base and parent not in commits:
+                raise PinError(
+                    f"commit {sha[:12]} pulls in unwalked history "
+                    f"({parent[:12]}); refusing to advance the pin"
+                )
+        parents[sha] = parent_shas
+
+    # Iterative postorder avoids a recursion limit on long append histories.
+    order: list[str] = []
+    complete = {base}
+    active: set[str] = set()
+    pending = [(head, False)]
+    while pending:
+        sha, expanded = pending.pop()
+        if sha in complete:
+            continue
+        if expanded:
+            active.remove(sha)
+            complete.add(sha)
+            order.append(sha)
+            continue
+        if sha in active:
+            raise PinError(f"commit history contains a cycle at {sha[:12]}")
+        active.add(sha)
+        pending.append((sha, True))
+        pending.extend((parent, False) for parent in reversed(parents[sha]))
+    if complete != set(commits) | {base}:
+        raise PinError("commit history contains entries outside the head's ancestry")
+
+    first_parent: list[str] = []
+    sha = head
+    while sha != base:
+        first_parent.append(sha)
+        sha = parents[sha][0]
+    return CommitGraph(parents, tuple(order), tuple(reversed(first_parent)))
 
 
 def _lines(raw: bytes) -> list[str]:
@@ -1879,34 +1901,28 @@ def refresh(*, require_catalog: bool = False) -> None:
         label=f"pinned commit {pin['sha'][:12]}",
     )
 
-    # Every intermediate commit must extend its parent line-for-line, so a
-    # rewrite-then-restore between refreshes cannot hide. GitHub's compare
-    # endpoint caps its commit list at 250 and paginates beyond that; taking
-    # one page would skip the omitted middle, so a rewrite-then-restore in
-    # that gap could pass (finding 10). Page until every advertised commit
-    # is present and assert the count matches total_commits.
+    # Compare enumerates all ancestors, including parallel gate/doc branches.
+    # Fetch each exact commit and validate the entire graph before reading its
+    # states. Pagination/completeness checks remain necessary: an omitted
+    # rewrite-then-restore must never disappear behind endpoint equality.
     commits = _compare_commits(pin["sha"], head_sha)
+    commit_metadata = {commit["sha"]: commit for commit in commits}
+    payloads = {
+        sha: head if sha == head_sha else _api(f"commits/{sha}")
+        for sha in commit_metadata
+    }
+    graph = _history_graph(payloads, pin["sha"], head_sha)
+    mainline = set(graph.first_parent)
 
-    rows = list(availability["rows"])
-    previous_lines = old_lines
-    previous_raw = old_raw
-    expected_parent = pin["sha"]
-    visited: set[str] = {pin["sha"]}
+    states = {pin["sha"]: (old_raw, old_lines, previous_inventory)}
     # The registry ratchet must hold across the CROSSED commits too, not
     # just the two endpoints: a declaration committed and then removed
     # between refreshes would otherwise advance the pin straight over the
     # downgrade. Once a declaration is seen the flag latches and no
     # further catalog fetches are needed.
     declared_seen = _declares_registry(old_catalog)
-    for commit in commits:
-        commit_sha = str(commit["sha"])
-        commit_payload = (
-            head if commit_sha == head_sha else _api(f"commits/{commit_sha}")
-        )
-        is_merge = _require_walk_parent(
-            commit_payload, commit_sha, expected_parent, visited
-        )
-        visited.add(commit_sha)
+    for commit_sha in graph.order:
+        commit_payload = payloads[commit_sha]
         raw = _jsonl_at(commit_sha)
         if not declared_seen and _declares_registry(
             _remote_catalog_at_commit(
@@ -1918,27 +1934,21 @@ def refresh(*, require_catalog: bool = False) -> None:
         ):
             declared_seen = True
         lines = _lines(raw)
-        if is_merge and raw != previous_raw:
-            raise PinError(
-                f"merge commit {commit_sha[:12]} changes ledger bytes; "
-                "appends must arrive on single-parent commits"
-            )
-        if lines != previous_lines:
-            _require_extension(
-                previous_lines,
-                lines,
-                label=f"commit {commit_sha[:12]}",
-            )
-            accepted_at = _utc_instant(str(commit["commit"]["committer"]["date"]))
-            for index in range(len(previous_lines), len(lines)):
-                rows.append(
-                    _row(
-                        index,
-                        lines[index],
-                        accepted_at,
-                        commit_sha,
-                        "append_derived",
-                    )
+        parent_shas = graph.parents[commit_sha]
+        if len(parent_shas) > 1:
+            parent_raws = [states[parent][0] for parent in parent_shas]
+            if commit_sha in mainline and raw != parent_raws[0]:
+                raise PinError(
+                    f"merge commit {commit_sha[:12]} changes first-parent "
+                    "ledger bytes; appends must arrive on single-parent commits"
+                )
+            # An update-branch merge can import a direct journal append from
+            # its second parent. It must carry one parent's exact state, never
+            # introduce a new state even if that state extends both parents.
+            if raw not in parent_raws:
+                raise PinError(
+                    f"merge commit {commit_sha[:12]} does not retain any parent's "
+                    "exact ledger bytes; appends must arrive on single-parent commits"
                 )
         inventory, immutable_prefix = _remote_release_inventory_at_commit(
             commit_sha,
@@ -1946,12 +1956,19 @@ def refresh(*, require_catalog: bool = False) -> None:
             raw,
             require_complete_siblings=False,
         )
-        _require_inventory_progress(
-            previous_inventory,
-            inventory,
-            final_inventory,
-            label=f"commit {commit_sha[:12]}",
-        )
+        for parent_sha in parent_shas:
+            _, parent_lines, parent_inventory = states[parent_sha]
+            _require_extension(
+                parent_lines,
+                lines,
+                label=f"commit {commit_sha[:12]} from parent {parent_sha[:12]}",
+            )
+            _require_inventory_progress(
+                parent_inventory,
+                inventory,
+                final_inventory,
+                label=f"commit {commit_sha[:12]} from parent {parent_sha[:12]}",
+            )
         _require_inventory_head_witnesses_state(
             inventory,
             release_state.verification,
@@ -1959,15 +1976,29 @@ def refresh(*, require_catalog: bool = False) -> None:
             immutable_prefix,
             label=f"commit {commit_sha[:12]}",
         )
-        previous_inventory = inventory
-        expected_parent = commit_sha
-        previous_lines = lines
-        previous_raw = raw
+        states[commit_sha] = (raw, lines, inventory)
 
-    if head_raw != previous_raw or _lines(head_raw) != previous_lines:
+    checked_raw, checked_lines, checked_inventory = states[head_sha]
+    if head_raw != checked_raw or _lines(head_raw) != checked_lines:
         raise PinError("branch head bytes disagree with its own commit history")
-    if previous_inventory != final_inventory:
+    if checked_inventory != final_inventory:
         raise PinError("branch history does not end at the verified release inventory")
+
+    # A review branch's timestamp is not journal acceptance. Derive each new
+    # row only from the accepted first-parent path; merges on that path cannot
+    # add rows because their exact bytes were required to match their first parent.
+    rows = list(availability["rows"])
+    for commit_sha in graph.first_parent:
+        parent_sha = graph.parents[commit_sha][0]
+        parent_lines = states[parent_sha][1]
+        lines = states[commit_sha][1]
+        if len(lines) > len(parent_lines):
+            commit = commit_metadata[commit_sha]
+            accepted_at = _utc_instant(str(commit["commit"]["committer"]["date"]))
+            for index in range(len(parent_lines), len(lines)):
+                rows.append(
+                    _row(index, lines[index], accepted_at, commit_sha, "append_derived")
+                )
     _validate_catalog_and_registry(
         head_catalog,
         head_registry,

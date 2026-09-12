@@ -727,12 +727,11 @@ def test_compare_commit_list_is_unique_and_ends_at_requested_head(
 
 
 def test_refresh_parent_chain_cannot_skip_an_omitted_commit() -> None:
-    with pytest.raises(pin_ledger.PinError, match="skips or reorders"):
-        pin_ledger._require_walk_parent(
-            {"sha": "c" * 40, "parents": [{"sha": "d" * 40}]},
-            "c" * 40,
+    with pytest.raises(pin_ledger.PinError, match="unwalked history"):
+        pin_ledger._history_graph(
+            {"c" * 40: {"sha": "c" * 40, "parents": [{"sha": "d" * 40}]}},
             "b" * 40,
-            {"b" * 40},
+            "c" * 40,
         )
 
 
@@ -2087,42 +2086,244 @@ def test_registration_without_a_pin_file_fails_closed(monkeypatch, tmp_path) -> 
         register_targets.load_ledger_pin_binding()
 
 
-def test_walk_parent_admits_branch_internal_merge_only() -> None:
-    from pin_ledger import PinError, _require_walk_parent
+def test_history_graph_admits_branch_internal_merge_only() -> None:
+    from pin_ledger import PinError, _history_graph
 
     def payload(sha, parents):
         return {"sha": sha, "parents": [{"sha": parent} for parent in parents]}
 
     base, side, merge = "a" * 40, "b" * 40, "c" * 40
 
-    # Single-parent commits keep the exact-chain rule.
-    assert _require_walk_parent(payload(side, [base]), side, base, {base}) is False
-    with pytest.raises(PinError, match="skips or reorders"):
-        _require_walk_parent(payload(side, ["d" * 40]), side, base, {base})
+    graph = _history_graph({side: payload(side, [base])}, base, side)
+    assert graph.order == graph.first_parent == (side,)
+    with pytest.raises(PinError, match="unwalked history"):
+        _history_graph({side: payload(side, ["d" * 40])}, base, side)
 
     # The real 2026-07-18 diamond: side branch forked from the pin, merged
-    # back while the walk predecessor is the side commit. Both parents are
-    # walked, so the merge is traversable.
-    assert (
-        _require_walk_parent(payload(merge, [base, side]), merge, side, {base, side})
-        is True
+    # back without changing the ledger. Inspect the side branch, but do not
+    # treat its commit as the journal's accepted first-parent progression.
+    graph = _history_graph(
+        {merge: payload(merge, [base, side]), side: payload(side, [base])},
+        base,
+        merge,
     )
+    assert graph.order == (side, merge)
+    assert graph.first_parent == (merge,)
 
     # A merge whose other parent was never walked splices foreign history.
     with pytest.raises(PinError, match="unwalked history"):
-        _require_walk_parent(
-            payload(merge, ["e" * 40, side]), merge, side, {base, side}
+        _history_graph({merge: payload(merge, [base, "e" * 40])}, base, merge)
+
+    with pytest.raises(PinError, match="outside the head's ancestry"):
+        _history_graph(
+            {side: payload(side, [base]), merge: payload(merge, [base])}, base, merge
         )
 
-    # A merge that does not continue the walk predecessor is rejected too.
-    with pytest.raises(PinError, match="does not continue the walk"):
-        _require_walk_parent(
-            payload(merge, [base, "e" * 40]), merge, side, {base, side}
+    with pytest.raises(PinError, match="valid parent inventory"):
+        _history_graph({merge: payload(merge, [])}, base, merge)
+
+    with pytest.raises(PinError, match="repeats a parent"):
+        _history_graph({merge: payload(merge, [base, base])}, base, merge)
+
+    with pytest.raises(PinError, match="cycle"):
+        _history_graph(
+            {side: payload(side, [merge]), merge: payload(merge, [base, side])},
+            base,
+            merge,
         )
 
-    # No parents at all is never traversable.
-    with pytest.raises(PinError, match="linear single-parent"):
-        _require_walk_parent(payload(merge, []), merge, side, {base, side})
+
+def test_history_graph_replays_chronicle_parallel_pr_topology() -> None:
+    fixture = json.loads(
+        (ROOT / "tests/fixtures/ledger/chronicle_merge_graph_20260904.json").read_text()
+    )
+    # This is the exact September 4 failure: one append followed by three
+    # parallel gate/test/docs branches, including merges back into the PRs.
+    # Reverse the enumeration too: array neighbors are never parent evidence.
+    commits = {row["sha"]: row for row in reversed(fixture["commits"])}
+    graph = pin_ledger._history_graph(commits, fixture["base"], fixture["head"])
+    assert len(graph.order) == len(commits) == 24
+    assert graph.first_parent == tuple(fixture["first_parent"])
+    seen = {fixture["base"]}
+    for sha in graph.order:
+        assert set(graph.parents[sha]) <= seen
+        seen.add(sha)
+
+
+@pytest.mark.parametrize("fork_before_append", [False, True])
+def test_refresh_accepts_parallel_review_branches_and_preserves_acceptance(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+    fork_before_append: bool,
+) -> None:
+    repo = release_repo.repo
+    _git(repo, "checkout", "-qb", "journal")
+    fork = release_repo.release_one if fork_before_append else release_repo.head
+    for branch in ("gate-a", "gate-b", "docs"):
+        _git(repo, "checkout", "-qb", branch, fork)
+        (repo / f"{branch}.md").write_text(f"{branch} review\n")
+        _commit(repo, f"review {branch}")
+    _git(repo, "checkout", "-q", "journal")
+    _git(repo, "merge", "--no-ff", "-qm", "merge gate-b", "gate-b")
+    for branch in ("gate-a", "docs"):
+        _git(repo, "checkout", "-q", branch)
+        # When this branch predates row-2, updating it takes the ledger from
+        # the SECOND parent. The later journal merge still retains row-2 from
+        # its own first parent, the original direct append.
+        _git(repo, "merge", "--no-ff", "-qm", "update review branch", "journal")
+        _git(repo, "checkout", "-q", "journal")
+        _git(repo, "merge", "--no-ff", "-qm", f"merge {branch}", branch)
+    final_sha = _git(repo, "rev-parse", "HEAD")
+    pin_path, availability_path, _, pin_requests = _prepare_refresh(
+        monkeypatch, tmp_path, release_repo
+    )
+
+    pin_ledger.refresh(require_catalog=True)
+
+    assert pin_requests == [True]
+    pin = json.loads(pin_path.read_text())
+    assert pin["sha"] == final_sha
+    assert pin["lineCount"] == 3
+    assert pin["releaseHead"]["index"] == 2
+    rows = json.loads(availability_path.read_text())["rows"]
+    assert [row["acceptedCommit"] for row in rows] == [
+        release_repo.base,
+        release_repo.release_one,
+        release_repo.head,
+    ]
+    assert [row["acceptedAtUtc"] for row in rows] == [
+        _commit_time(repo, row["acceptedCommit"]) for row in rows
+    ]
+
+
+@pytest.mark.parametrize("mutation", ["ledger", "receipt", "registry"])
+def test_refresh_refuses_rewrite_then_restore_on_parallel_branch(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+    mutation: str,
+) -> None:
+    repo = release_repo.repo
+    _git(repo, "checkout", "-qb", "journal")
+    (repo / "mainline.md").write_text("parallel journal change\n")
+    _commit(repo, "journal change")
+    _git(repo, "checkout", "-qb", "side", release_repo.head)
+    if mutation == "ledger":
+        path = repo / pin_ledger.LEDGER_JSONL_PATH
+        original = path.read_bytes()
+        path.write_bytes(original.replace(b"row-1", b"other"))
+        diagnostic = "rewrit"
+    elif mutation == "receipt":
+        path = next((repo / "releases/manifests").glob("0002-*.freetsa.tsr"))
+        original = path.read_bytes()
+        path.write_bytes(original + b"tampered")
+        diagnostic = "absent or changed"
+    else:
+        path = repo / pin_ledger.LEDGER_CATALOG_PATH
+        original = path.read_bytes()
+        _declare_registry(
+            repo,
+            registry=_registry_bytes(),
+            declared_digest=hashlib.sha256(_registry_bytes()).hexdigest(),
+            message="side declares registry",
+        )
+        diagnostic = "downgraded away"
+    if mutation != "registry":
+        _commit(repo, f"side rewrites {mutation}")
+    path.write_bytes(original)
+    if mutation == "registry":
+        (repo / pin_ledger.LEDGER_REGISTRY_PATH).unlink()
+    _commit(repo, f"side restores {mutation}")
+    _git(repo, "checkout", "-q", "journal")
+    _git(repo, "merge", "--no-ff", "-qm", "merge restored side", "side")
+    paths = _prepare_refresh(monkeypatch, tmp_path, release_repo)[:3]
+    before = {path: path.read_bytes() for path in paths}
+
+    with pytest.raises(pin_ledger.PinError, match=diagnostic):
+        pin_ledger.refresh()
+
+    assert {path: path.read_bytes() for path in paths} == before
+
+
+def test_refresh_refuses_new_rows_introduced_by_merge(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    repo = release_repo.repo
+    # Both endpoints have valid signed releases. The merge must still not
+    # introduce the side branch's row as if it were a direct journal append.
+    _git(repo, "checkout", "-qb", "journal", release_repo.release_one)
+    _git(repo, "merge", "--no-ff", "-qm", "merge side append", release_repo.head)
+    paths = _prepare_refresh(monkeypatch, tmp_path, release_repo)[:3]
+    before = {path: path.read_bytes() for path in paths}
+
+    with pytest.raises(pin_ledger.PinError, match="changes first-parent ledger bytes"):
+        pin_ledger.refresh()
+
+    assert {path: path.read_bytes() for path in paths} == before
+
+
+def test_refresh_refuses_new_ledger_state_on_review_branch_merge(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    repo = release_repo.repo
+    _git(repo, "checkout", "-qb", "journal")
+    for branch in ("review-a", "review-b"):
+        _git(repo, "checkout", "-qb", branch, release_repo.release_one)
+        (repo / f"{branch}.md").write_text("review change\n")
+        _commit(repo, f"review {branch}")
+    _git(repo, "checkout", "-q", "review-a")
+    _git(repo, "merge", "--no-ff", "--no-commit", "review-b")
+    # Introduce row-2 and its valid signed release directly at this merge,
+    # whose parents both end at row-1. The final journal already has row-2,
+    # so endpoint equality and final-chain checks alone would miss this.
+    _git(repo, "checkout", release_repo.head, "--", "ledger", "releases")
+    _commit(repo, "review merge invents a ledger state absent from both parents")
+    _git(repo, "checkout", "-q", "journal")
+    _git(repo, "merge", "--no-ff", "-qm", "merge review", "review-a")
+    paths = _prepare_refresh(monkeypatch, tmp_path, release_repo)[:3]
+    before = {path: path.read_bytes() for path in paths}
+
+    with pytest.raises(pin_ledger.PinError, match="does not retain any parent's"):
+        pin_ledger.refresh()
+
+    assert {path: path.read_bytes() for path in paths} == before
+
+
+@pytest.mark.parametrize("mutation", ["omitted_commit", "foreign_parent"])
+def test_refresh_refuses_incomplete_parent_graph_before_outputs(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+    mutation: str,
+) -> None:
+    paths = _prepare_refresh(monkeypatch, tmp_path, release_repo)[:3]
+    before = {path: path.read_bytes() for path in paths}
+    original_api = pin_ledger._api
+
+    def api(path: str) -> Any:
+        result = original_api(path)
+        if mutation == "omitted_commit" and path.startswith("compare/"):
+            result["commits"] = [
+                row
+                for row in result["commits"]
+                if row["sha"] != release_repo.release_one
+            ]
+            result["total_commits"] = len(result["commits"])
+        if mutation == "foreign_parent" and path.startswith("commits/"):
+            if result["sha"] == release_repo.head:
+                result["parents"].append({"sha": "e" * 40})
+        return result
+
+    monkeypatch.setattr(pin_ledger, "_api", api)
+    with pytest.raises(pin_ledger.PinError, match="unwalked history"):
+        pin_ledger.refresh()
+
+    assert {path: path.read_bytes() for path in paths} == before
 
 
 def test_rebuild_from_history_carries_the_ratchet(
