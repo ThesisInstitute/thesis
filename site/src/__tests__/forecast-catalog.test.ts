@@ -38,7 +38,11 @@ import {
   buildPredictionPackCatalog,
   getPredictionPackCatalogEntry,
 } from "@/data/prediction-packs";
-import { buildBrierRewardExport, getBrierEvalSplit } from "@/data/brier-lab";
+import {
+  buildBrierRewardExport,
+  getBrierEvalSplit,
+  isNormalizedScoreAggregateEligible,
+} from "@/data/brier-lab";
 import { buildForecastJudgeExport } from "@/data/forecast-judges";
 import { buildStrategyLabReport } from "@/data/strategy-lab";
 import { buildTimeSeriesPriorAdjustmentReport } from "@/data/time-series-priors";
@@ -543,7 +547,7 @@ describe("forecast catalog", () => {
     expect(exportPayload.postResolution).toHaveLength(scores.length);
     expect(exportPayload.calibration.counts.judgedRuns).toBe(runs.length);
     expect(exportPayload.calibration.counts.scoredJudgedRuns).toBe(
-      scores.filter((score) => score.normalizationScale !== null).length,
+      scores.filter(isNormalizedScoreAggregateEligible).length,
     );
     expect(exportPayload.calibration.counts.pairwiseComparisons).toBe(
       exportPayload.pairwise.length,

@@ -23,6 +23,8 @@ import {
   buildBrierRewardExport,
   summarizeNormalizedScores,
 } from "@/data/brier-lab";
+import { buildForecastJudgeExport } from "@/data/forecast-judges";
+import { buildStrategyLabReport } from "@/data/strategy-lab";
 import { CONDITIONS, type ConditionStatus } from "@/data/conditions";
 import {
   FORECAST_CELLS,
@@ -408,6 +410,317 @@ describe("target normalization scale", () => {
       degenerateScore?.normalizedCrps,
     );
     expect(agent?.unpairedMeanNormalizedCrps).toBeNull();
+    // The raw row keeps its stored reward: the degenerate value publishes
+    // as-is and only aggregates exclude it.
+    expect(primary?.reward.value).toBeLessThan(-1_000_000);
+  });
+
+  it("keeps floating-point-zero dispersion out of judge calibration aggregates", () => {
+    const degenerateSeries = "census.spm.deep_child_poverty_rate";
+    const degenerateDataPointId = `${degenerateSeries}.2025`;
+    const degenerateCell: ForecastCell = {
+      ...baseCell,
+      slug: "test-cell-degenerate",
+      dataPointId: degenerateDataPointId,
+      historicalContext: [
+        { label: "2023", value: 1.2 },
+        { label: "2024", value: 1.3 },
+      ],
+      drivers: ["caseload"],
+      // A trace rich enough that the rubric judge scores this run >= 3: the
+      // degenerate score must reach the strong band and the
+      // high_judge_bad_score candidate pool, where only the aggregate
+      // eligibility gate can keep it out.
+      reasoning: [
+        {
+          kind: "text",
+          text: "Base rate: the historical baseline and prior come from official ledger data.",
+        },
+        {
+          kind: "tool",
+          call: "fetch official series",
+          result: "official ledger series; first print resolves on release",
+        },
+        {
+          kind: "tool",
+          call: "fetch release calendar",
+          result: "release published",
+        },
+        {
+          kind: "text",
+          text: "Driver: caseload pressure because momentum; however a surprise offset risk remains uncertain.",
+        },
+        {
+          kind: "text",
+          text: "Uncertainty: the 80% interval covers the tail risk.",
+        },
+        { kind: "forecast", point: 2, ciLow: 1, ciHigh: 3 },
+      ],
+    };
+    const combinedLedger: PolicyEngineLedgerEntry[] = [
+      target,
+      ...historyRegistrations,
+      ...history,
+      outcome,
+      registration("2025", degenerateDataPointId, degenerateSeries),
+      ...["2022", "2023", "2024"].map((period) =>
+        registration(period, `${degenerateSeries}.${period}`, degenerateSeries),
+      ),
+      // Equal decimal steps: a positive sub-epsilon ledger dispersion.
+      observation(
+        "2022",
+        1.1,
+        "2026-02-01T00:00:00Z",
+        `${degenerateSeries}.2022`,
+        degenerateSeries,
+      ),
+      observation(
+        "2023",
+        1.2,
+        "2026-03-01T00:00:00Z",
+        `${degenerateSeries}.2023`,
+        degenerateSeries,
+      ),
+      observation(
+        "2024",
+        1.3,
+        "2026-04-01T00:00:00Z",
+        `${degenerateSeries}.2024`,
+        degenerateSeries,
+      ),
+      observation(
+        "2025",
+        3,
+        "2026-08-01T12:00:00Z",
+        degenerateDataPointId,
+        degenerateSeries,
+      ),
+    ];
+
+    const scores = scoreResolvedForecasts(
+      [baseCell, degenerateCell],
+      combinedLedger,
+    );
+    const validScore = scores.find(
+      (score) => score.forecastSlug === baseCell.slug,
+    );
+    const degenerateScore = scores.find(
+      (score) => score.forecastSlug === degenerateCell.slug,
+    );
+    expect(validScore?.normalizationScale).toBeGreaterThan(Number.EPSILON);
+    expect(validScore?.normalizedCrps).toBeLessThan(1);
+    expect(degenerateScore?.normalizationScaleSource).toBe("ledger_dispersion");
+    expect(degenerateScore?.normalizationScale).toBeGreaterThan(0);
+    expect(degenerateScore?.normalizationScale).toBeLessThan(Number.EPSILON);
+    expect(degenerateScore?.normalizedCrps).toBeGreaterThan(1_000_000);
+
+    const judgeExport = buildForecastJudgeExport({
+      forecasts: [baseCell, degenerateCell],
+      scores,
+    });
+    const calibration = judgeExport.calibration;
+    const degenerateJudge = judgeExport.traceQuality.find(
+      (judge) => judge.runId === degenerateScore?.runId,
+    );
+    // Premise pin: the degenerate run really is a strong-band, high-judge
+    // run, so the band and disagreement assertions below bite.
+    expect(degenerateJudge?.overallScore).toBeGreaterThanOrEqual(3);
+
+    expect(calibration.counts.judgedRuns).toBe(2);
+    expect(calibration.counts.scoredJudgedRuns).toBe(1);
+    expect(calibration.meanNormalizedCrpsWhenScored).toBe(
+      validScore?.normalizedCrps,
+    );
+    expect(calibration.meanNormalizedCrpsWhenScored).toBeLessThan(1_000_000);
+    for (const row of calibration.disagreements) {
+      expect(row.runId).not.toBe(degenerateScore?.runId);
+      expect(row.normalizedCrps).toBeLessThan(1_000_000);
+    }
+    const strongBand = calibration.scoreBands.find(
+      (band) => band.label === "strong",
+    );
+    // The degenerate run stays judged and counted in its band; only the
+    // normalized mean refuses the unusable denominator.
+    expect(strongBand?.judgedRuns).toBe(1);
+    expect(strongBand?.scoredRuns).toBe(1);
+    expect(strongBand?.meanNormalizedCrps).toBeNull();
+    expect(strongBand?.meanAbsoluteError).toEqual(expect.any(Number));
+    for (const band of calibration.scoreBands) {
+      if (band.meanNormalizedCrps !== null) {
+        expect(Number.isFinite(band.meanNormalizedCrps)).toBe(true);
+        expect(band.meanNormalizedCrps).toBeLessThan(1_000_000);
+      }
+    }
+  });
+
+  it("keeps floating-point-zero dispersion out of Strategy Lab aggregates", () => {
+    const validSeries = "fns.snap.total_payment_error_rate.ak";
+    const degenerateSeries = "fns.snap.total_payment_error_rate.wy";
+    const snapPeriods = ["fy2022", "fy2023", "fy2024"];
+    const validSnapCell: ForecastCell = {
+      ...baseCell,
+      slug: "snap-payment-error-ak-fy2025",
+      title: "Alaska SNAP payment error rate FY2025",
+      dataPointId: `${validSeries}.fy2025`,
+      pointEstimate: 11.5,
+      ciLow: 10.5,
+      ciHigh: 12.5,
+      historicalContext: [
+        { label: "FY 2023", value: 10 },
+        { label: "FY 2024", value: 12 },
+      ],
+      resolvedOutcome: {
+        value: 11,
+        resolvedAt: "2026-08-01T12:00:00Z",
+        source: "Test",
+      },
+      reasoning: [
+        { kind: "forecast", point: 11.5, ciLow: 10.5, ciHigh: 12.5 },
+      ],
+    };
+    const degenerateSnapCell: ForecastCell = {
+      ...baseCell,
+      slug: "snap-payment-error-wy-fy2025",
+      title: "Wyoming SNAP payment error rate FY2025",
+      dataPointId: `${degenerateSeries}.fy2025`,
+      // The recorded agent run misses badly, so under the degenerate scale
+      // its normalized miss vs persistence is a huge positive delta —
+      // exactly the pair that would own the top-misses ranking.
+      pointEstimate: 5,
+      ciLow: 4,
+      ciHigh: 6,
+      historicalContext: [
+        { label: "FY 2023", value: 1.2 },
+        { label: "FY 2024", value: 1.3 },
+      ],
+      resolvedOutcome: {
+        value: 1.4,
+        resolvedAt: "2026-08-01T12:00:00Z",
+        source: "Test",
+      },
+      reasoning: [{ kind: "forecast", point: 5, ciLow: 4, ciHigh: 6 }],
+    };
+    const snapLedger: PolicyEngineLedgerEntry[] = [
+      registration("fy2025", `${validSeries}.fy2025`, validSeries),
+      registration("fy2025", `${degenerateSeries}.fy2025`, degenerateSeries),
+      ...snapPeriods.map((period) =>
+        registration(period, `${validSeries}.${period}`, validSeries),
+      ),
+      ...snapPeriods.map((period) =>
+        registration(period, `${degenerateSeries}.${period}`, degenerateSeries),
+      ),
+      observation(
+        "fy2022",
+        10,
+        "2026-02-01T00:00:00Z",
+        `${validSeries}.fy2022`,
+        validSeries,
+      ),
+      observation(
+        "fy2023",
+        14,
+        "2026-03-01T00:00:00Z",
+        `${validSeries}.fy2023`,
+        validSeries,
+      ),
+      observation(
+        "fy2024",
+        12,
+        "2026-04-01T00:00:00Z",
+        `${validSeries}.fy2024`,
+        validSeries,
+      ),
+      // Equal decimal steps: a positive sub-epsilon ledger dispersion.
+      observation(
+        "fy2022",
+        1.1,
+        "2026-02-01T00:00:00Z",
+        `${degenerateSeries}.fy2022`,
+        degenerateSeries,
+      ),
+      observation(
+        "fy2023",
+        1.2,
+        "2026-03-01T00:00:00Z",
+        `${degenerateSeries}.fy2023`,
+        degenerateSeries,
+      ),
+      observation(
+        "fy2024",
+        1.3,
+        "2026-04-01T00:00:00Z",
+        `${degenerateSeries}.fy2024`,
+        degenerateSeries,
+      ),
+    ];
+
+    const report = buildStrategyLabReport(
+      [validSnapCell, degenerateSnapCell],
+      snapLedger,
+    );
+    const family = report.families.find(
+      (candidate) => candidate.familyId === "snap_payment_error_fy2025_panel",
+    );
+    const degeneratePersistenceRow = report.scoreRows.find(
+      (row) =>
+        row.forecastSlug === degenerateSnapCell.slug &&
+        row.strategyId === "baseline.persistence.last_print",
+    );
+    const degenerateAgentRow = report.scoreRows.find(
+      (row) =>
+        row.forecastSlug === degenerateSnapCell.slug &&
+        row.strategyId === "agent.brier.primary",
+    );
+    // Premise pins: both panel members resolve, and the degenerate rows
+    // carry a sub-epsilon ledger_dispersion scale with trillion-scale
+    // normalized values on the raw row surface, which publishes as-is.
+    expect(family?.resolvedTargetCount).toBe(2);
+    expect(report.counts.scoredRows).toBe(6);
+    expect(degeneratePersistenceRow?.normalizationScaleSource).toBe(
+      "ledger_dispersion",
+    );
+    expect(degeneratePersistenceRow?.normalizationScale).toBeGreaterThan(0);
+    expect(degeneratePersistenceRow?.normalizationScale).toBeLessThan(
+      Number.EPSILON,
+    );
+    expect(degeneratePersistenceRow?.normalizedCrps).toBeGreaterThan(
+      1_000_000,
+    );
+    expect(degenerateAgentRow?.normalizedCrps).toBeGreaterThan(1_000_000);
+    // The degenerate pair's delta clears the ranking's > 0 threshold by a
+    // huge margin — its absence from the top-misses list below is the
+    // eligibility gate at work, not the threshold.
+    expect(
+      (degenerateAgentRow?.normalizedCrps ?? 0) -
+        (degeneratePersistenceRow?.normalizedCrps ?? 0),
+    ).toBeGreaterThan(1_000_000);
+
+    for (const summary of report.summaries) {
+      expect(summary.scoredRows).toBe(2);
+      expect(summary.meanNormalizedCrps).toEqual(expect.any(Number));
+      expect(summary.meanNormalizedCrps).toBeLessThan(1_000_000);
+      expect(summary.meanNormalizedAbsoluteError).toEqual(expect.any(Number));
+      expect(summary.meanNormalizedAbsoluteError).toBeLessThan(1_000_000);
+      if (summary.meanNormalizedCrpsVsPersistence !== null) {
+        expect(Math.abs(summary.meanNormalizedCrpsVsPersistence)).toBeLessThan(
+          1_000_000,
+        );
+      }
+    }
+    const agentSummary = report.summaries.find(
+      (summary) => summary.strategyId === "agent.brier.primary",
+    );
+    // The raw-unit pairwise mean keeps BOTH pairs: the Wyoming agent miss
+    // dominates it, so it stays positive even though the Alaska agent run
+    // beats persistence.
+    expect(agentSummary?.meanAbsoluteErrorVsPersistence).toBeGreaterThan(1);
+    expect(agentSummary?.meanNormalizedCrpsVsPersistence).toEqual(
+      expect.any(Number),
+    );
+    for (const row of family?.largestAgentNcrpsMissesVsPersistence ?? []) {
+      expect(row.forecastSlug).not.toBe(degenerateSnapCell.slug);
+      expect(row.agentMinusPersistenceNormalizedCrps).toBeLessThan(1_000_000);
+    }
   });
 
   it("ignores contract-bound observations from a foreign suffix series", () => {
