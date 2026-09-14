@@ -1,0 +1,208 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-09-14T20:25:58Z",
+  "finishedAt": "2026-09-14T20:37:10Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 4,
+  "ok": 4,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "initial-claims-week-2026-09-19",
+        "country": "US",
+        "dataPointId": "us.dol.initial_claims.sa.week_2026-09-19",
+        "expectedReleaseWindow": {
+          "end": "2026-10-08",
+          "start": "2026-10-04"
+        },
+        "period": "week_2026-09-19",
+        "registeredAt": "2026-09-14T20:23:15Z",
+        "registeredAtUtc": "2026-09-14T20:23:15Z",
+        "registrationCommit": "0f2c009b27e9b65c2aeb9b253934fd8b301b787e",
+        "registrationState": "preregistered",
+        "series": "us.dol.initial_claims.sa",
+        "sourceBinding": {
+          "adapter": "alfred-fred",
+          "allowedHosts": [
+            "alfred.stlouisfed.org"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-08",
+            "start": "2026-10-04"
+          },
+          "field": "ICSA",
+          "releasePolicy": "advance_vintage",
+          "sourceSeriesId": "ICSA",
+          "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA",
+          "table": "ALFRED graph CSV",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "6d82b49122ffb4cd1f0060be0af0e24dfc09633440999e0cfaf4d15c45183d94",
+        "targetRegistrationPath": "records/targets/2026-09-14-6d82b49122ffb4cd1f0060be0af0e24dfc09633440999e0cfaf4d15c45183d94.json",
+        "targetUnit": "thousands",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-09-14T20:25:58Z",
+      "finishedAt": "2026-09-14T20:31:14Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-25-58z-us-dol-initial-claims-sa-week-2026-09-19/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-25-58z-us-dol-initial-claims-sa-week-2026-09-19/cells.with_activity.json",
+      "stdoutTail": "     \"createdAt\": \"2026-09-14T20:25:58Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-25-58z-us-dol-initial-claims-sa-week-2026-09-19/distribution.json\",\n      \"sha256\": \"dc9c46688102e8a82b7a94fc86bea011e77004819a67c8919368d6e5836fa370\",\n      \"bytes\": 13554,\n      \"createdAt\": \"2026-09-14T20:25:58Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-25-58z-us-dol-initial-claims-sa-week-2026-09-19/validation.json\",\n      \"sha256\": \"ff7f4b696b3196972fc4d0ecdb749c2a54eed4cc57ab0743e444949fa74c6242\",\n      \"bytes\": 131,\n      \"createdAt\": \"2026-09-14T20:25:58Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-25-58z-us-dol-initial-claims-sa-week-2026-09-19/cells.with_activity.json\",\n      \"sha256\": \"0518d6051e6e8f6fe17801b442f039cb29c84e67d049354ec38e18d18509da3d\",\n      \"bytes\": 47009,\n      \"createdAt\": \"2026-09-14T20:25:58Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-25-58z-us-dol-initial-claims-sa-week-2026-09-19/manifest.json\",\n      \"sha256\": \"1ae68ce31cbac38eba6a234560a151a06211070a58381f351d49b5ce5da5b3a5\",\n      \"bytes\": 20238,\n      \"createdAt\": \"2026-09-14T20:25:58Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"initial-claims-week-2026-09-19\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"0f2c009b27e9b65c2aeb9b253934fd8b301b787e\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"c597616fc59410c75230a6bdd80b72166cc29635ce7aef89d14e6d75fecf121a\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "continued-claims-week-2026-09-19",
+        "country": "US",
+        "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-19.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-09",
+          "start": "2026-10-05"
+        },
+        "period": "week_2026-09-19",
+        "registeredAt": "2026-09-14T20:23:15Z",
+        "registeredAtUtc": "2026-09-14T20:23:15Z",
+        "registrationCommit": "0f2c009b27e9b65c2aeb9b253934fd8b301b787e",
+        "registrationState": "preregistered",
+        "series": "dol.eta.continued_claims.sa",
+        "sourceBinding": {
+          "adapter": "alfred-fred",
+          "allowedHosts": [
+            "alfred.stlouisfed.org"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-09",
+            "start": "2026-10-05"
+          },
+          "field": "CCSA",
+          "releasePolicy": "advance_vintage",
+          "sourceSeriesId": "CCSA",
+          "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+          "table": "ALFRED graph CSV",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "75a1aa15e93e29e83eb184f6b3af1b67c83c0bd5890038ce9f51827d8afba59e",
+        "targetRegistrationPath": "records/targets/2026-09-14-75a1aa15e93e29e83eb184f6b3af1b67c83c0bd5890038ce9f51827d8afba59e.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-09-14T20:31:14Z",
+      "finishedAt": "2026-09-14T20:33:08Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-31-15z-dol-eta-continued-claims-sa-week-2026-09-19/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-31-15z-dol-eta-continued-claims-sa-week-2026-09-19/cells.with_activity.json",
+      "stdoutTail": "t\": \"2026-09-14T20:31:15Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-31-15z-dol-eta-continued-claims-sa-week-2026-09-19/distribution.json\",\n      \"sha256\": \"7f2d480d28aeb8a540d752749c965b0b533798c84c1ab4500c75917aec7eea97\",\n      \"bytes\": 13910,\n      \"createdAt\": \"2026-09-14T20:31:15Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-31-15z-dol-eta-continued-claims-sa-week-2026-09-19/validation.json\",\n      \"sha256\": \"81f3466702154b197e8f12292cc37a082e0fcf59997af8ffc1ab0f3933949983\",\n      \"bytes\": 133,\n      \"createdAt\": \"2026-09-14T20:31:15Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-31-15z-dol-eta-continued-claims-sa-week-2026-09-19/cells.with_activity.json\",\n      \"sha256\": \"a7e3d7e8709dd529f79b38f07071195bf610bf9bdea234c84a6e1b39c873f742\",\n      \"bytes\": 44371,\n      \"createdAt\": \"2026-09-14T20:31:15Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-31-15z-dol-eta-continued-claims-sa-week-2026-09-19/manifest.json\",\n      \"sha256\": \"619c27e5f079ec80a6081b534d2152160dfebbc07f73e94b970e7b021a4b2eb7\",\n      \"bytes\": 15591,\n      \"createdAt\": \"2026-09-14T20:31:15Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"continued-claims-week-2026-09-19\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"0f2c009b27e9b65c2aeb9b253934fd8b301b787e\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"b8b4fcc38928ff30a2c1d4e92bbc24d895750f35e9ac3b24fed763f9f5cd2aa9\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "cps-transport-material-moving-employment-september-2026",
+        "country": "US",
+        "dataPointId": "bls.cps.employed_people_by_occupation.transportation_material_moving.september_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-14",
+          "start": "2026-10-06"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-14T20:23:15Z",
+        "registeredAtUtc": "2026-09-14T20:23:15Z",
+        "registrationCommit": "0f2c009b27e9b65c2aeb9b253934fd8b301b787e",
+        "registrationState": "preregistered",
+        "series": "bls.cps.employed_people_by_occupation.transportation_material_moving",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-14",
+            "start": "2026-10-06"
+          },
+          "field": "Transportation and material moving occupations",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "bls.cps.employed_people_by_occupation.transportation_material_moving",
+          "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+          "table": "CPS Employment Situation Table A-19, employed persons by occupation, not seasonally adjusted (thousands)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "d6e9c92086ea70e8b59790dcc9ac070c7eb079e22a59c17d88d559ebccc62072",
+        "targetRegistrationPath": "records/targets/2026-09-14-d6e9c92086ea70e8b59790dcc9ac070c7eb079e22a59c17d88d559ebccc62072.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-09-14T20:33:08Z",
+      "finishedAt": "2026-09-14T20:35:22Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/cells.with_activity.json",
+      "stdoutTail": "-cps-employed-people-by-occupation-transportation-material-moving-2026-09/distribution.json\",\n      \"sha256\": \"af9ce7f28204b1c9f8f6a55e563a27a6f29f21996d60949cb6c3b956ed3a8e34\",\n      \"bytes\": 14095,\n      \"createdAt\": \"2026-09-14T20:33:08Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/validation.json\",\n      \"sha256\": \"df1acec58b56d06ca46603dafc315a0a72640fe2ee2bd553f92b7de9f36708b2\",\n      \"bytes\": 156,\n      \"createdAt\": \"2026-09-14T20:33:08Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/cells.with_activity.json\",\n      \"sha256\": \"d84111c72f2bdf3da5cdeab29ab29f7871e775777d23206045bfbf0d3a13f9ae\",\n      \"bytes\": 42625,\n      \"createdAt\": \"2026-09-14T20:33:08Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/manifest.json\",\n      \"sha256\": \"750f596740ce1572d788cfe25793a79a74411e590d589baef818d0da66dbb675\",\n      \"bytes\": 16997,\n      \"createdAt\": \"2026-09-14T20:33:08Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"cps-transport-material-moving-employment-september-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"0f2c009b27e9b65c2aeb9b253934fd8b301b787e\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"3e0fc052307e74dd3d0e6cd9e461f0bf9fc296ff61507d6c2d2890bebe3d4852\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "abs-labour-employment-change-australia-september-2026",
+        "country": "AU",
+        "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-28",
+          "start": "2026-10-20"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-14T20:23:15Z",
+        "registeredAtUtc": "2026-09-14T20:23:15Z",
+        "registrationCommit": "0f2c009b27e9b65c2aeb9b253934fd8b301b787e",
+        "registrationState": "preregistered",
+        "series": "abs.labour.employment_change.australia",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "data.api.abs.gov.au"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-28",
+            "start": "2026-10-20"
+          },
+          "field": "LF/M3.3.1599.20.AUS.M",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LF/M3.3.1599.20.AUS.M",
+          "sourceUrl": "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+          "table": "Labour Force, Australia (dataflow LF: employed persons, seasonally adjusted, Australia; month-over-month change)",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "targetContentHash": "cb50e4f977134dd7052ae03768ee9c2e2d2606387498938baded80a6d1baf32b",
+        "targetRegistrationPath": "records/targets/2026-09-14-cb50e4f977134dd7052ae03768ee9c2e2d2606387498938baded80a6d1baf32b.json",
+        "targetUnit": "thousands",
+        "valueScale": 1
+      },
+      "startedAt": "2026-09-14T20:35:22Z",
+      "finishedAt": "2026-09-14T20:37:10Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-35-22z-abs-labour-employment-change-australia-2026-09/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-35-22z-abs-labour-employment-change-australia-2026-09/cells.with_activity.json",
+      "stdoutTail": "\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-35-22z-abs-labour-employment-change-australia-2026-09/distribution.json\",\n      \"sha256\": \"b2f8a617d9c728a77013647035dad3dacf7f355fbcf8bd4ad0d1b9565cb6e1a6\",\n      \"bytes\": 13800,\n      \"createdAt\": \"2026-09-14T20:35:22Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-35-22z-abs-labour-employment-change-australia-2026-09/validation.json\",\n      \"sha256\": \"512c3234c6a765805f3f447b9c63516315b2b140fc7eab84724dca311bac1ceb\",\n      \"bytes\": 154,\n      \"createdAt\": \"2026-09-14T20:35:22Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-35-22z-abs-labour-employment-change-australia-2026-09/cells.with_activity.json\",\n      \"sha256\": \"b27e6129294fddbc4daa68eefc965adfb5d9bf2af9894dd9a5898c3362c1fcf1\",\n      \"bytes\": 43053,\n      \"createdAt\": \"2026-09-14T20:35:22Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-14/2026-09-14t20-35-22z-abs-labour-employment-change-australia-2026-09/manifest.json\",\n      \"sha256\": \"f86f50012ddce3a999a9995f7b24f67f8ccd3cc2c0aff55472355ea47a32e489\",\n      \"bytes\": 15725,\n      \"createdAt\": \"2026-09-14T20:35:22Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"abs-labour-employment-change-australia-september-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"0f2c009b27e9b65c2aeb9b253934fd8b301b787e\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"2e42feece6e49865bc0000ab809cd5cb94da10c197befd4852bff964e8b55b90\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

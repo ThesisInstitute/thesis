@@ -1,0 +1,15 @@
+{
+  "summary": "Draft is largely publishable, but it should tighten the resolver/date discrepancy because the stated DOL cadence implies a first print before the registered resolution window.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "warning",
+      "summary": "The reasoning says the 2026-09-19 continued-claims first print may appear in the 2026-10-01 release, while the target contract uses resolutionDate 2026-10-09 and expectedReleaseWindow 2026-10-05 to 2026-10-09.",
+      "actionRequested": "Keep the registered slug, unit, dataPointId, source URL, and resolutionDate unchanged, but make the discrepancy explicit in the final reasoning/resolution rule as a target-registration timing issue and confirm the resolver still uses the first ALFRED advance vintage for observation_date 2026-09-19."
+    }
+  ],
+  "optionalSuggestions": [
+    "The prior/update/interval step is strong; consider naming the fetched sample endpoint explicitly as 2026-08-29 first print to avoid any revised-vintage ambiguity.",
+    "The interval method is coherent, but note that the sqrt(3) horizon assumes independent weekly changes."
+  ]
+}

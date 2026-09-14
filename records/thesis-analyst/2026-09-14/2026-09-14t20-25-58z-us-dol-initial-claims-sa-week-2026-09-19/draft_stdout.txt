@@ -1,0 +1,1 @@
+I’ve got enough source context. I’m just calculating the interval from the fetched same-series DOL table now, using recent successive changes in the seasonally adjusted initial claims series.

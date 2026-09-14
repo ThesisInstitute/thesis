@@ -1,0 +1,162 @@
+[
+  {
+    "slug": "initial-claims-week-2026-09-19",
+    "country": "US",
+    "type": "data",
+    "title": "US initial claims, week ending 2026-09-19",
+    "question": "What will the U.S. Department of Labor/ALFRED first advance vintage report for seasonally adjusted U.S. initial unemployment insurance claims (ICSA), in thousands, for the week ending September 19, 2026?",
+    "unit": "thousands",
+    "pointEstimate": 207,
+    "ciLow": 189,
+    "ciHigh": 225,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-08",
+    "resolutionSource": "U.S. Department of Labor Unemployment Insurance Weekly Claims News Release / ALFRED ICSA advance vintage",
+    "resolutionSourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA",
+    "resolutionRule": "Resolve to the first-print advance-vintage value for ALFRED/FRED series ICSA for observation date 2026-09-19, transformed from persons to thousands by multiplying by 0.001. Use the value available from the ALFRED graph CSV for the registered advance vintage associated with the official DOL UI Weekly Claims News Release dated 2026-10-08; ignore later revisions. Round to the nearest 1 thousand.",
+    "dataPointId": "us.dol.initial_claims.sa.week_2026-09-19",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-18"
+        },
+        "label": "week ending 2026-07-18",
+        "value": 189
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-25"
+        },
+        "label": "week ending 2026-07-25",
+        "value": 198
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-01"
+        },
+        "label": "week ending 2026-08-01",
+        "value": 200
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-08"
+        },
+        "label": "week ending 2026-08-08",
+        "value": 212
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-15"
+        },
+        "label": "week ending 2026-08-15",
+        "value": 207
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-22"
+        },
+        "label": "week ending 2026-08-22",
+        "value": 204
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-29"
+        },
+        "label": "week ending 2026-08-29",
+        "value": 207
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-09-05"
+        },
+        "label": "week ending 2026-09-05",
+        "value": 206
+      }
+    ],
+    "drivers": [
+      "Recent seasonally adjusted initial claims are stable near 206 thousand",
+      "Four-week moving average is 206 thousand",
+      "Two-week-ahead uncertainty is driven mostly by normal weekly claims volatility",
+      "No strong pre-release signal of a break in layoffs is visible in the latest DOL table"
+    ],
+    "sourceContext": [
+      "https://www.dol.gov/ui/data.pdf",
+      "https://oui.doleta.gov/unemploy/claims_arch.asp/claims.asp",
+      "https://fred.stlouisfed.org/releases/calendar?m=&ob=n&od=&pageID=2&rid=180&ve=2018-12-31&vs=2018-01-01&y=",
+      "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA"
+    ],
+    "runAt": "2026-09-14T20:30:29Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "US initial claims forecast for week ending 2026-09-19"
+      },
+      {
+        "kind": "text",
+        "text": "Target framing: the registered target is dataPointId us.dol.initial_claims.sa.week_2026-09-19, unit thousands, series code ICSA, seasonally adjusted initial claims. As-of cutoff is 2026-09-14T20:30:29Z; I used only public pre-resolution evidence and did not use catalog point estimates or intervals as evidence."
+      },
+      {
+        "kind": "text",
+        "text": "Resolver note: DOL weekly claims are normally released Thursday morning, and the DOL page states the UI Weekly Claims News Release is published each week on Thursday at 8:30 AM EST except listed holidays. The sealed ledger contract nevertheless binds this target to the ALFRED ICSA advance-vintage source and resolutionDate 2026-10-08; I keep that contract rather than inferring a different date from cadence."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Opened the DOL latest UI Weekly Claims News Release PDF and read the seasonally adjusted data section and regular state program table.",
+        "result": "For week ending 2026-09-05, the DOL advance seasonally adjusted initial claims figure was 206,000, down 1,000 from the revised 207,000 for 2026-08-29; the 4-week moving average was 206,000."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the DOL historical Seasonally Adjusted US Weekly UI Claims table for recent same-variant ICSA prints in thousands.",
+        "result": "Recent seasonally adjusted initial claims prints were 189 for 2026-07-18, 198 for 2026-07-25, 200 for 2026-08-01, 212 for 2026-08-08, 207 for 2026-08-15, 204 for 2026-08-22, 207 for 2026-08-29, and 206 for 2026-09-05."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked the DOL release table and state detail for contemporaneous one-off signals around the latest print.",
+        "result": "The latest DOL release showed unadjusted U.S. initial claims of 176,567 for week ending 2026-09-05, versus 171,403 the prior week; New York had a prior-week unadjusted increase of 4,338, while Michigan had 5,876 advance initial claims for 2026-09-05."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked public release-calendar context for the registered release date.",
+        "result": "The FRED release calendar listed the Unemployment Insurance Weekly Claims Report on Thursday 2026-10-08 at 7:30 AM Central; the latest DOL source also reported the numeric ICSA reference point of 206,000 for 2026-09-05."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate/reference class: the natural base rate is persistence in this weekly administrative flow series. The latest level is 206 thousand, the latest 4-week average is 206 thousand, and the last eight same-variant prints average 202.875 thousand; because the last eight include a low 189 thousand outlier, I put more weight on persistence and the 4-week average than on the 8-week mean."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior = 206 thousand from the 2026-09-05 DOL advance ICSA print; historical sample = 25 successive weekly changes from 2026-03-14 through 2026-09-05, with changes [6,-8,15,-10,7,-25,9,13,-2,2,13,5,-3,-11,1,0,-8,-20,9,2,12,-5,-3,3,-1]. The mean change was about 0.04 thousand and one-week sample sigma = 10.0 thousand. For a two-week-ahead target, sigma = sqrt(2)*10.0 = 14.2 thousand; 80% half-width = 1.28*sigma = 18.2 thousand. Level adjustment +1 thousand for mild rebound from the low 8-week mean but no labor-market break signal, giving point 207 and implied rounded bounds 207 +/- 18 = 189 to 225 thousand."
+      },
+      {
+        "kind": "text",
+        "text": "Variant discipline: all numerical anchors above are seasonally adjusted U.S. initial claims, the same ICSA concept as the registered ALFRED/FRED source; unadjusted state detail is used only as a qualitative one-off risk check, not as a replacement variant."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk is a sudden broad layoff pickup or another large state-specific filing surge that would land above the interval; downside risk is favorable seasonal-adjustment noise or lower post-holiday filings that would land below the interval. A move outside the interval would most likely require more than routine weekly administrative volatility."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted all blocking critiques by adding the exact resolver, ALFRED ICSA contract, base-rate persistence prior, public DOL evidence, quantified update, sigma-based 80% interval, target-specific tail risks, as-of cutoff, and complete JSON fields."
+      },
+      {
+        "kind": "forecast",
+        "point": 207,
+        "ciLow": 189,
+        "ciHigh": 225
+      }
+    ]
+  }
+]
