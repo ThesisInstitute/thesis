@@ -564,6 +564,17 @@ def redaction_violations(
     serialized = "\n".join(
         json.dumps(payload, sort_keys=True, default=str) for payload in payloads
     )
+    # Text the state is allowed to carry: every string under a non-redacted
+    # primary-cell field (title, question, resolution rule, source URLs,
+    # historical context labels). A reasoning heading or driver that merely
+    # repeats the target's own title is not a leak, so redacted text that is
+    # contained in an allowed string is exempt from the value scan.
+    allowed = {
+        text
+        for key, value in primary_cell.items()
+        if key not in REDACTED_CELL_FIELDS
+        for text in _all_strings(value)
+    }
     # Prose only. Public URLs, record paths and digests legitimately appear on
     # both sides (the state pins the primary cell's own custody path), so the
     # value scan looks for multi-word text of real length: driver phrases,
@@ -573,10 +584,13 @@ def redaction_violations(
         if field not in primary_cell:
             continue
         for text in sorted(_all_strings(primary_cell[field])):
-            if len(text) >= 24 and " " in text and text in serialized:
-                violations.append(
-                    f"redacted {field} content appears in the state: {text[:40]!r}"
-                )
+            if len(text) < 24 or " " not in text or text not in serialized:
+                continue
+            if any(text in allowed_text for allowed_text in allowed):
+                continue
+            violations.append(
+                f"redacted {field} content appears in the state: {text[:40]!r}"
+            )
     return sorted(set(violations))
 
 

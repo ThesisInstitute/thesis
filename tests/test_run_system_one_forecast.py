@@ -630,6 +630,31 @@ def test_redaction_violation_is_detected(repo: pathlib.Path):
     assert any("redacted reasoning content" in item for item in violations)
 
 
+def test_reasoning_that_repeats_the_title_is_not_a_violation(repo: pathlib.Path):
+    # Live analyst cells open their reasoning with a heading that repeats the
+    # target title, and the title legitimately sits in the state. The value
+    # scan must exempt redacted text contained in an allowed field (observed
+    # on australia-cpi-annual-rate-july-2026, 2026-09-15).
+    cell = primary_cell()
+    title = "Australia CPI annual inflation, July 2026 monthly indicator"
+    cell["title"] = title
+    cell["reasoning"] = [
+        {"kind": "heading", "text": title},
+        {"kind": "heading", "text": title[:32]},
+        {"kind": "text", "text": SENTINEL_REASONING},
+    ]
+    state = {"target": {"title": title, "question": f"What is {title}?"}}
+    assert system_one.redaction_violations(cell, [state]) == []
+    leaked = {"target": {"title": title}, "note": SENTINEL_REASONING}
+    violations = system_one.redaction_violations(cell, [leaked])
+    # The sentinel sits in every redacted prose field the fixture carries
+    # (reasoning and the pre-submit review), so each reports; the title
+    # never does.
+    assert violations
+    assert any("redacted reasoning content" in item for item in violations)
+    assert all(title[:24] not in item for item in violations)
+
+
 def test_requested_backends_refuse_missing_credentials(
     repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ):
