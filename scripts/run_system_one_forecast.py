@@ -91,7 +91,7 @@ DISPERSION_QUANTILE = 0.8
 
 QUESTION_TEMPLATE = (
     "The official first print of {title} for {period} will be at or below "
-    "{threshold} {unit}."
+    "{value}."
 )
 
 # Every forecast-bearing field of the published primary cell.  The state is
@@ -207,6 +207,13 @@ REGISTRATION_FIELDS = (
     "targetRegistrationPath",
     "registeredAtUtc",
 )
+
+
+def target_unit(target: dict[str, Any]) -> str | None:
+    """Trusted selection targets carry targetUnit; registration snapshots
+    carry unit. Either names the registered scoring unit."""
+
+    return target.get("targetUnit") or target.get("unit") or None
 
 
 class SystemOneInputError(ValueError):
@@ -327,7 +334,7 @@ def target_contract(target: dict[str, Any], primary_cell: dict[str, Any]) -> dic
         "catalogSlug": target.get("catalogSlug"),
         "title": primary_cell.get("title"),
         "question": primary_cell.get("question"),
-        "unit": target.get("targetUnit"),
+        "unit": target_unit(target),
         "country": target.get("country"),
         "series": target.get("series"),
         "period": target.get("period"),
@@ -414,7 +421,7 @@ def ledger_matches(
         for value in (binding.get("sourceSeriesId"), target.get("series"))
         if value
     }
-    unit = target.get("targetUnit")
+    unit = target_unit(target)
     target_kind, target_value = target_period_identity(target)
     cutoff_day = run_started_at[:10]
 
@@ -528,7 +535,7 @@ def build_state(
                         if value
                     }
                 ),
-                "unit": target.get("targetUnit"),
+                "unit": target_unit(target),
                 "periodBefore": target.get("period"),
                 "observedBefore": run_started_at,
             },
@@ -739,8 +746,7 @@ def question_payloads(
             "instructions": QUESTION_TEMPLATE.format(
                 title=title,
                 period=period,
-                threshold=f"{threshold:.{precision}f}",
-                unit=unit,
+                value=f"{threshold:.{precision}f}" + (f" {unit}" if unit else ""),
             ),
         }
     return payloads
@@ -957,7 +963,7 @@ def build_cell(
         "type": "data",
         "title": primary_cell.get("title"),
         "question": primary_cell.get("question"),
-        "unit": target.get("targetUnit"),
+        "unit": target_unit(target),
         "pointEstimate": quantiles["q50"],
         "ciLow": quantiles["q10"],
         "ciHigh": quantiles["q90"],
@@ -1071,7 +1077,7 @@ def validate_run(
         expected = target.get(target_key)
         if expected not in (None, "") and cell.get(cell_key) != expected:
             errors.append(f"{cell_key} does not equal the trusted target {target_key}")
-    if cell.get("unit") != target.get("targetUnit"):
+    if cell.get("unit") != target_unit(target):
         errors.append("unit does not equal the registered targetUnit")
     for field in REGISTRATION_FIELDS:
         expected = target.get(field)
