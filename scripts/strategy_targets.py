@@ -43,7 +43,15 @@ GENERATED_TARGETS_RELATIVE = pathlib.PurePosixPath(
 )
 CHAIN_HEAD_RELATIVE = pathlib.PurePosixPath("records/CHAIN_HEAD.json")
 SELECTION_SCHEMA = "thesis_strategy_selection_v1"
-SUITES = {"ladder", "median3", "both"}
+SUITES = {"ladder", "median3", "both", "system_one"}
+# The System One lane picks its forecaster at selection time: the backend
+# and model are trusted request fields, never generate-job inputs.
+SYSTEM_ONE_BACKENDS = {"typesafe", "adapter"}
+DEFAULT_SYSTEM_ONE_BACKEND = "adapter"
+# A model name reaches the runner as one argv element.  Refusing anything
+# outside this charset keeps a leading dash (or a path) from being read as
+# another runner flag.
+SYSTEM_ONE_MODEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 REGISTRATION_RE = re.compile(
@@ -507,6 +515,16 @@ def selection_hash(payload: dict[str, Any]) -> str:
     return canonical_sha256(value)
 
 
+def normalize_system_one_model(value: Any) -> str | None:
+    """Empty means the runner default for the trusted backend."""
+
+    if value is None or value == "":
+        return None
+    if not isinstance(value, str) or not SYSTEM_ONE_MODEL_RE.fullmatch(value):
+        raise StrategyTargetError(f"unsupported system_one model: {value!r}")
+    return value
+
+
 def select_targets(
     *,
     root: pathlib.Path,
@@ -518,6 +536,8 @@ def select_targets(
     max_targets: int,
     suite: str,
     ladder_prompt_mode: str = "ladder",
+    system_one_backend: str = DEFAULT_SYSTEM_ONE_BACKEND,
+    system_one_model: str | None = None,
     ledger_path: pathlib.Path,
     ledger_repository: str,
     ledger_branch: str,
@@ -535,6 +555,11 @@ def select_targets(
     if ladder_prompt_mode not in {"ladder", "ladder_v2"}:
         raise StrategyTargetError(
             f"unsupported ladder prompt mode: {ladder_prompt_mode!r}"
+        )
+    system_one_model = normalize_system_one_model(system_one_model)
+    if system_one_backend not in SYSTEM_ONE_BACKENDS:
+        raise StrategyTargetError(
+            f"unsupported system_one backend: {system_one_backend!r}"
         )
     if type(max_targets) is not int or max_targets < 0:
         raise StrategyTargetError("maxTargets must be a nonnegative integer")
@@ -638,6 +663,18 @@ def select_targets(
             **(
                 {"ladderPromptMode": ladder_prompt_mode}
                 if ladder_prompt_mode != "ladder"
+                else {}
+            ),
+            # Sparse the same way: only a system_one suite binds a
+            # forecaster, so every selection minted before this lane
+            # re-verifies byte-identically.  A null model means the
+            # runner default for the trusted backend.
+            **(
+                {
+                    "systemOneBackend": system_one_backend,
+                    "systemOneModel": system_one_model,
+                }
+                if suite == "system_one"
                 else {}
             ),
         },
@@ -745,6 +782,10 @@ def verify_selection(
         max_targets=request.get("maxTargets"),
         suite=str(request.get("suite") or ""),
         ladder_prompt_mode=str(request.get("ladderPromptMode") or "ladder"),
+        system_one_backend=str(
+            request.get("systemOneBackend") or DEFAULT_SYSTEM_ONE_BACKEND
+        ),
+        system_one_model=request.get("systemOneModel"),
         ledger_path=ledger_path,
         ledger_repository=str(evidence.get("repository") or ""),
         ledger_branch=str(evidence.get("branch") or ""),
@@ -808,6 +849,16 @@ def parse_args() -> argparse.Namespace:
         choices=["ladder", "ladder_v2"],
         default="ladder",
     )
+    select.add_argument(
+        "--system-one-backend",
+        choices=sorted(SYSTEM_ONE_BACKENDS),
+        default=DEFAULT_SYSTEM_ONE_BACKEND,
+    )
+    select.add_argument(
+        "--system-one-model",
+        default="",
+        help="empty means the runner default for the backend",
+    )
     select.add_argument("--selected-at-utc", required=True)
     select.add_argument("--checked-at-utc")
     select.add_argument("--source-sha", required=True)
@@ -869,6 +920,8 @@ def main() -> int:
                 max_targets=args.max_targets,
                 suite=args.suite,
                 ladder_prompt_mode=args.ladder_prompt_mode,
+                system_one_backend=args.system_one_backend,
+                system_one_model=args.system_one_model,
                 ledger_path=args.ledger_jsonl,
                 ledger_repository=args.ledger_repository,
                 ledger_branch=args.ledger_branch,

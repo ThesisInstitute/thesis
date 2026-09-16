@@ -25,6 +25,7 @@ on:
           - ladder
           - median3
           - both
+          - system_one
       codex_model:
         description: "Codex model for the suite (empty = gpt-5.5 default)"
         required: false
@@ -37,6 +38,18 @@ on:
         options:
           - ladder
           - ladder_v2
+      system_one_backend:
+        description: "System One forecaster backend"
+        type: choice
+        required: false
+        default: adapter
+        options:
+          - adapter
+          - typesafe
+      system_one_model:
+        description: "System One model (empty = backend default)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -117,6 +130,8 @@ jobs:
           MAX_TARGETS: ${{ inputs.max_targets }}
           SUITE: ${{ inputs.suite }}
           LADDER_PROMPT_MODE: ${{ inputs.ladder_prompt_mode || 'ladder' }}
+          SYSTEM_ONE_BACKEND: ${{ inputs.system_one_backend || 'adapter' }}
+          SYSTEM_ONE_MODEL: ${{ inputs.system_one_model }}
         run: |
           set -euo pipefail
           SELECTED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -126,6 +141,8 @@ jobs:
             --max-targets "$MAX_TARGETS"
             --suite "$SUITE"
             --ladder-prompt-mode "$LADDER_PROMPT_MODE"
+            --system-one-backend "$SYSTEM_ONE_BACKEND"
+            --system-one-model "$SYSTEM_ONE_MODEL"
             --selected-at-utc "$SELECTED_AT"
             --source-sha "$(git rev-parse HEAD)"
             --workflow-repository "$GITHUB_REPOSITORY"
@@ -215,7 +232,10 @@ jobs:
       contents: read
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
     steps:
+      - uses: astral-sh/setup-uv@v5
       - uses: actions/checkout@v5
         with:
           ref: ${{ needs.select.outputs.source_sha }}
@@ -306,33 +326,55 @@ jobs:
               or run_attempt < 1
           ):
               raise SystemExit("selection belongs to a different workflow invocation")
+          suite = (selection.get("request") or {}).get("suite")
+          if suite not in {"ladder", "median3", "both", "system_one"}:
+              raise SystemExit("selection carries an unsupported suite")
           print(f"run_id={run_id}")
           print(f"run_attempt={run_attempt}")
+          print(f"suite={suite}")
           print(f"publication_artifact=strategy-docket-{run_id}-{run_attempt}")
           PY
 
       - uses: oven-sh/setup-bun@v2
 
+      # The codex toolchain belongs to the ladder and rollout lanes only.
+      # The System One lane talks to its backend over HTTPS from the
+      # runner, so it neither installs nor authenticates codex, and the
+      # suite it runs comes from the TRUSTED selection, not the input.
       - name: Enable the agent sandbox
+        if: ${{ steps.invocation.outputs.suite != 'system_one' }}
         uses: ./.github/actions/enable-agent-sandbox
 
       - name: Install codex CLI
+        if: ${{ steps.invocation.outputs.suite != 'system_one' }}
         run: bun add -g @openai/codex@0.144.0
 
       - name: Authenticate codex
+        if: ${{ steps.invocation.outputs.suite != 'system_one' }}
         run: printenv OPENAI_API_KEY | codex login --with-api-key
 
       - name: Run the selected strategy suite
         id: suite
         env:
           CODEX_MODEL: ${{ github.event.inputs.codex_model || 'gpt-5.5' }}
+          SUITE: ${{ steps.invocation.outputs.suite }}
         run: |
           set -euo pipefail
-          python3 scripts/run_strategy_suite.py \
-            --selection /tmp/trusted-selection/strategy-targets.json \
-            --model "$CODEX_MODEL" \
-            --run-id "${{ steps.invocation.outputs.run_id }}" \
+          args=(
+            --selection /tmp/trusted-selection/strategy-targets.json
+            --model "$CODEX_MODEL"
+            --run-id "${{ steps.invocation.outputs.run_id }}"
             --run-attempt "${{ steps.invocation.outputs.run_attempt }}"
+            --ledger-jsonl /tmp/pinned-ledger.jsonl
+          )
+          if [ "$SUITE" = "system_one" ]; then
+            # Exact-pinned SDKs, and the per-target runner the lane spawns
+            # inherits this interpreter.
+            uv run --locked --extra system-one \
+              python scripts/run_strategy_suite.py "${args[@]}"
+          else
+            python3 scripts/run_strategy_suite.py "${args[@]}"
+          fi
           SUITE_MANIFEST=$(find records/thesis-analyst/strategy-suites \
             -type f -name "strategy-${{ steps.invocation.outputs.run_id }}-a${{ steps.invocation.outputs.run_attempt }}.json" \
             -print -quit)
@@ -566,6 +608,9 @@ jobs:
           if ladder:
               batches.append(ladder["batchManifest"])
           batches.extend(row["batchManifest"] for row in suite["lanes"]["rollouts"])
+          system_one = suite["lanes"].get("systemOne")
+          if system_one:
+              batches.append(system_one["batchManifest"])
           passing = any(
               result.get("ok") is True
               for path in batches
