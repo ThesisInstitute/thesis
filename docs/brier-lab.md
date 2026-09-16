@@ -68,6 +68,16 @@ agents by the target-paired difference `agent normalizedCrps - persistence
 normalizedCrps`. It also reports the share of paired targets where the agent's
 normalized CRPS is lower than persistence.
 
+## System One lane
+
+`thesis.system_one` is a comparison lane whose runs are scored here like any
+other: a System One model answers 15 independent threshold questions on a
+redacted evidence state, and the monotonized ladder becomes the `agent_reported`
+CDF the CRPS pipeline scores against `thesis.analyst` and the persistence
+baseline. See [`docs/system-one-lane.md`](system-one-lane.md) for the evidence
+boundary, the ladder rule, the backends, and what the lane does and does not
+establish.
+
 ## LLM Judges
 
 The Thesis Log carries judge summary counts and a link to the full judge export.

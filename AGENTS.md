@@ -13,6 +13,8 @@ surfaces, read these in order:
 3. `docs/thesis-analyst-runner.md` - how live agent runs become records.
 4. `docs/brier-lab.md` - reward export, splits, and scoring loop.
 5. `agents/thesis-analyst/system.md` - analyst method and honesty rules.
+6. `docs/system-one-lane.md` - the System One comparison lane: evidence
+   boundary, threshold ladder, backends, and limits.
 
 For UI work, also inspect the existing page/component before editing; preserve
 the utilitarian forecast-lab feel.
@@ -237,6 +239,35 @@ generator over the complete indexed strategy corpus; it is not an authority
 for bypassing the select → generate → publish boundary. If units differ
 between a run and its catalog target, encode the conversion in the trusted
 target or generator mapping so comparisons render in the catalog unit.
+
+### Run the System One lane
+
+`scripts/run_system_one_forecast.py` forecasts one published target with a
+System One model: 15 independent Noul questions of the form "the first print
+will be at or below t", monotonized into a CDF. It is a comparison lane, never
+a headline lane, and custody verifies it under run mode `system_one`. Read
+[`docs/system-one-lane.md`](docs/system-one-lane.md) before changing the
+runner, its question wording, or its ladder constants; the wording and
+constants are hashed into `promptHash`, so a silent edit makes old and new runs
+incomparable.
+
+Dispatch published runs through the strategy docket, never locally:
+
+```bash
+gh workflow run strategy-docket.yml --ref main \
+  -f catalog_slugs=us-natural-gas-vented-flared-2025 \
+  -f auto_select=false \
+  -f max_targets=1 \
+  -f suite=system_one \
+  -f system_one_backend=adapter \
+  -f system_one_model=
+```
+
+Run one target locally with `--backend mock` (no key, deterministic, says
+nothing about any model) or `--backend adapter` (spends provider credit)
+against a `--records-root` outside `records/`. `--backend typesafe` needs
+`TYPESAFE_API_KEY`; `--backend adapter` needs the provider's key. Both import
+the `system-one` extra lazily, so mock runs need only the base environment.
 
 ### Add Or Change Packs
 
