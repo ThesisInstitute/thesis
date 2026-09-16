@@ -277,3 +277,47 @@ def test_runner_and_verifier_agree_on_every_inventory():
     assert verify_custody.SYSTEM_ONE_PROMPT_MODE == system_one.PROMPT_MODE
     assert verify_custody.SYSTEM_ONE_AGENT == system_one.AGENT_NAME
     assert verify_custody.SYSTEM_ONE_MONOTONIZATION == system_one.MONOTONIZATION
+
+
+def test_a_snapshot_shaped_target_still_binds_the_unit(sealed_run: pathlib.Path):
+    # A trusted selection target spells the scoring unit targetUnit; a
+    # registration snapshot spells it unit, and the runner reads either. The
+    # resolver check has to read either too, or it silently checks nothing.
+    cells_path = sealed_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cells[0]["unit"] = "index_points"
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+
+    def to_snapshot_shape(manifest: dict) -> None:
+        target = manifest["targetContext"]
+        target["unit"] = target.pop("targetUnit")
+
+    reseal(sealed_run, to_snapshot_shape)
+
+    with pytest.raises(CustodyError, match="unit differs from the trusted target"):
+        verify_run(sealed_run)
+
+
+def test_a_failed_typesafe_run_may_record_no_answering_model(
+    sealed_run: pathlib.Path,
+):
+    # A run that failed before the service answered names no model; a
+    # successful one always must.
+    def clear_model(manifest: dict) -> None:
+        manifest["agent"]["model"] = None
+
+    reseal(sealed_run, clear_model)
+    with pytest.raises(CustodyError, match="agent lacks a model string"):
+        verify_run(sealed_run)
+
+
+def test_a_failed_run_with_no_model_verifies(failed_run: pathlib.Path):
+    def clear_model(manifest: dict) -> None:
+        manifest["agent"]["model"] = None
+        manifest["agent"]["backend"] = "typesafe"
+
+    reseal(failed_run, clear_model)
+
+    verification = verify_run(failed_run)
+    assert verification.run_mode == "system_one"
+    assert verification.run_succeeded is False

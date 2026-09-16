@@ -496,8 +496,10 @@ def test_system_one_projection_carries_the_lane_identity(
     assert prediction_run["promptMode"] == "system_one_noul_ladder"
     assert prediction_run["agentVersion"] == "0.1.0"
     assert prediction_run["kind"] == "recorded-agent-run"
-    assert run["label"] == "System One threshold ladder"
-    assert prediction_run["runLabel"] == "System One threshold ladder"
+    # A mock run is not a System One run, and the row says so; only the
+    # typesafe backend earns the bare lane label.
+    assert run["label"] == "System One emulation (mock)"
+    assert prediction_run["runLabel"] == "System One emulation (mock)"
 
     # The variant id and the copy are the lane's own: no analyst identity is
     # borrowed by a run the analyst never made.
@@ -505,9 +507,9 @@ def test_system_one_projection_carries_the_lane_identity(
     assert "thesis-analyst" not in run["variantId"]
     assert "thesis.analyst" not in json.dumps(run)
     assert "Codex" not in run["description"]
-    assert "no tools, no search, and no chain of thought" in run["description"]
-    assert "Backend mock" in run["description"]
-    assert "model mock" in run["description"]
+    assert "deterministic offline stand-in, not a model" in run["description"]
+    assert "no chain of thought" not in run["description"]
+    assert "monotonized ladder itself" in run["description"]
     assert "sealed" in prediction_run["runDescription"]
 
     # The activity log is the sealed inventory, not the cell's own claim.
@@ -716,3 +718,47 @@ def test_legacy_lane_inventory_without_the_system_one_key_still_loads(
 
     waves = strategy.load_suite_waves(root)
     assert waves[0]["systemOneBatches"] == []
+
+
+def test_system_one_lane_stats_are_tallied_per_run_not_per_batch(
+    repo: pathlib.Path,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+) -> None:
+    # A typesafe batch learns each model name from the response it got, so
+    # one batch can hold more than one, and a run that failed before any
+    # response names none. Filing the batch under its first result's model
+    # tallied the rest under a model that never answered them.
+    first_manifest, first_path = system_one_run(repo, ledger=ledger_rows())
+    second_manifest, second_path = system_one_run(
+        repo, ledger=ledger_rows(), run_at="2030-01-10T13:00:00Z"
+    )
+    second_manifest["agent"]["model"] = "jev-1-2030-01"
+    second_path.write_text(json.dumps(second_manifest, indent=2))
+    batch_path = write_system_one_batch(repo, first_manifest, first_path)
+    batch = json.loads(batch_path.read_text())
+    batch["results"].append(
+        {
+            "target": target_context(),
+            "startedAt": second_manifest["runStartedAt"],
+            "finishedAt": second_manifest["sealedAt"],
+            "ok": False,
+            "manifestPath": second_path.relative_to(repo).as_posix(),
+            "cellsPath": second_manifest["cellsPath"],
+            "error": "sealed failure",
+        }
+    )
+    batch_path.write_text(json.dumps(batch, indent=2))
+    monkeypatch.setattr(records_to_comparisons, "ROOT", repo)
+    suites_root = write_system_one_suite(repo, batch_path)
+    empty_legacy = tmp_path / "legacy.json"
+    empty_legacy.write_text(
+        json.dumps({"schemaVersion": strategy.LEGACY_INDEX_SCHEMA, "waves": []})
+    )
+
+    assert strategy.build_model_lane_stats(
+        legacy_index=empty_legacy, suites_root=suites_root
+    ) == [
+        {"model": "jev-1-2030-01", "lane": "system_one", "attempted": 1, "passed": 0},
+        {"model": "mock", "lane": "system_one", "attempted": 1, "passed": 1},
+    ]

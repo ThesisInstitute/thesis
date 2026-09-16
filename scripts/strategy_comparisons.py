@@ -12,8 +12,11 @@ graded against the same resolutions as the headline runs:
 - median3: derived median-of-rollouts runs from
   scripts/median_rollout_ensemble.py, published with the exact median CDF.
 - system_one: System One runs from scripts/run_system_one_forecast.py, a
-  ladder of independent Noul questions answered with no tools, no search,
-  and no chain of thought; the published CDF is the monotonized ladder.
+  ladder of Noul threshold questions; the published CDF is the monotonized
+  ladder. The lane has two backends and they are not the same mechanism, so
+  the label and the description come from the runner itself: only a typesafe
+  run is a System One run, and an adapter run says it emulates the interface
+  over a named provider model.
 
 Everything is emitted into site/src/data/thesis-strategy-comparisons.ts as
 STRATEGY_COMPARISON_RUN_AUGMENTS, merged onto cells alongside the existing
@@ -60,6 +63,7 @@ SYSTEM_ONE_LANE = "system_one"
 SYSTEM_ONE_LABEL = "System One threshold ladder"
 
 sys.path.insert(0, str(SCRIPTS))
+import run_system_one_forecast as system_one  # noqa: E402
 from thesis_records_to_comparisons import (  # noqa: E402
     comparison_run,
     effective_scale,
@@ -102,18 +106,24 @@ MODEL_LANE_STATS_OUT = (
 )
 
 
+def _result_model(result: dict[str, Any]) -> str | None:
+    """The model that answered one recorded result, or None."""
+
+    manifest_path = result.get("manifestPath")
+    if not manifest_path:
+        return None
+    manifest = json.loads(repo_path(manifest_path).read_text())
+    model = infer_runtime_model(manifest)
+    if not model:
+        model = (manifest.get("agent") or {}).get("model")
+    return str(model) if model else None
+
+
 def _batch_model(batch: dict[str, Any]) -> str | None:
     for result in batch.get("results", []):
-        manifest_path = result.get("manifestPath")
-        if not manifest_path:
-            continue
-        manifest = json.loads(repo_path(manifest_path).read_text())
-        model = infer_runtime_model(manifest)
-        if not model:
-            agent = manifest.get("agent") or {}
-            model = agent.get("model")
+        model = _result_model(result)
         if model:
-            return str(model)
+            return model
     return None
 
 
@@ -215,21 +225,25 @@ def build_model_lane_stats(
             )
             # The System One lane runs its own model, never the suite's
             # analyst model, so it is tallied from its own batch alone and
-            # never contributes to suite_model.
-            system_one = lanes.get("systemOne")
-            if isinstance(system_one, dict) and system_one.get("batchManifest"):
+            # never contributes to suite_model. It is also tallied per result
+            # rather than per batch: a typesafe batch learns each model name
+            # from the response it got, so one batch can legitimately hold
+            # more than one, and a run that failed before any response names
+            # none at all.
+            system_one_lane = lanes.get("systemOne")
+            if isinstance(system_one_lane, dict) and system_one_lane.get(
+                "batchManifest"
+            ):
                 batch = json.loads(
-                    repo_path(str(system_one["batchManifest"])).read_text()
+                    repo_path(str(system_one_lane["batchManifest"])).read_text()
                 )
-                results = batch.get("results", [])
-                bump(
-                    _batch_model(batch),
-                    SYSTEM_ONE_LANE,
-                    attempted=len(results),
-                    passed=sum(
-                        1 for result in results if result.get("ok") is True
-                    ),
-                )
+                for result in batch.get("results", []):
+                    bump(
+                        _result_model(result),
+                        SYSTEM_ONE_LANE,
+                        attempted=1,
+                        passed=1 if result.get("ok") is True else 0,
+                    )
 
     return [
         {
@@ -411,6 +425,11 @@ def system_one_augments(
     System One label. Everything the reader sees about the run comes from
     the manifest: the agent, the backend, the model, and the artifact
     inventory. The published CDF is the monotonized ladder itself.
+
+    The label and the mechanism sentence are the runner's own
+    (run_system_one_forecast.lane_label / lane_narrative), so the comparison
+    row and the cell can never describe the run differently: an emulated
+    run is labeled an emulation in both.
     """
 
     augments: dict[str, list[dict[str, Any]]] = {}
@@ -438,20 +457,18 @@ def system_one_augments(
         target_unit = target.get("targetUnit")
         scale = effective_scale(cell, value_scale, target_unit)
         run = comparison_run(cell, manifest, slug, value_scale, target_unit)
-        provider = agent.get("provider")
-        backend_label = f"{backend} ({provider})" if provider else backend
+        rungs = len((cell.get("thresholdLadder") or {}).get("thresholds") or [])
+        label = system_one.lane_label(str(backend), str(model))
         run["variantId"] = (
             f"{slug}-thesis-system-one-{slugify(cell['runAt'])}"
         )
-        run["label"] = SYSTEM_ONE_LABEL
+        run["label"] = label
         run["description"] = (
-            "System One run: the model answered 15 independent yes/no "
-            "threshold questions about one fixed pre-resolution evidence "
-            "state and returned a probability for each, with no tools, no "
-            "search, and no chain of thought. Backend "
-            f"{backend_label}, model {model}. The published CDF is the "
-            "monotonized ladder itself; the point estimate and the 80% "
-            "interval are interpolated from it."
+            system_one.lane_narrative(
+                backend=str(backend), model=str(model), rungs=rungs
+            )
+            + " The published CDF is the monotonized ladder itself; the point "
+            "estimate and the 80% interval are interpolated from it."
             + (
                 " Values converted to the catalog target unit."
                 if scale != 1
@@ -461,7 +478,7 @@ def system_one_augments(
         prediction_run = run["predictionRun"]
         prediction_run["agent"] = SYSTEM_ONE_AGENT
         prediction_run["model"] = str(model)
-        prediction_run["runLabel"] = SYSTEM_ONE_LABEL
+        prediction_run["runLabel"] = label
         prediction_run["runDescription"] = (
             "Recorded thesis.system_one run promoted from the sealed "
             "manifest; the request, the raw response, and the ladder are "

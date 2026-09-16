@@ -207,7 +207,47 @@ def write_primary_run(repo: pathlib.Path, cell: dict) -> pathlib.Path:
         "artifacts": [],
     }
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    write_catalog_module(repo, cell["slug"], run_dir)
     return cells_path
+
+
+def write_catalog_module(
+    repo: pathlib.Path, slug: str, run_dir: pathlib.Path
+) -> pathlib.Path:
+    """Publish the run as the catalog's primary cell for this slug.
+
+    The runner locates a primary cell the way the site does: the published
+    catalog cell names its own recorded run in its activity log. The fixture
+    writes a generated module of exactly that shape so discovery is exercised
+    rather than stubbed.
+    """
+
+    published = [
+        {
+            "slug": slug,
+            "predictionRun": {
+                "agent": "thesis.analyst",
+                "activityLog": [
+                    {
+                        "artifactType": "cells_with_activity",
+                        "path": (
+                            run_dir.relative_to(repo) / "cells.with_activity.json"
+                        ).as_posix(),
+                    }
+                ],
+            },
+        }
+    ]
+    path = repo / "site" / "src" / "data" / "forecast-examples" / "test-wave.ts"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        'import type { ForecastCell } from "../forecast-cells";\n\n'
+        "export const TEST_WAVE: ForecastCell[] = "
+        + json.dumps(published, indent=2)
+        + ";\n"
+    )
+    system_one._CATALOG_CACHE.clear()
+    return path
 
 
 def write_ledger(repo: pathlib.Path, rows: list[dict]) -> pathlib.Path:
@@ -317,9 +357,11 @@ def test_mock_run_is_custody_verifiable(repo: pathlib.Path):
 
     kinds = [step["kind"] for step in cell["reasoning"]]
     assert kinds == ["heading", "text", "tool", "math", "forecast"]
-    assert cell["reasoning"][0]["text"] == "System One threshold ladder"
+    assert cell["reasoning"][0]["text"] == "System One emulation (mock)"
     narrative = cell["reasoning"][1]["text"]
-    assert "no tools, no search, and no chain of thought" in narrative
+    # A mock run never claims a model answered it, let alone in isolation.
+    assert "deterministic offline stand-in, not a model" in narrative
+    assert "no chain of thought" not in narrative
     assert cell["reasoning"][2]["tool"] == "system_one.noul_ladder"
     math_text = cell["reasoning"][3]["text"]
     assert math_text.startswith("Ladder: P(X <= ")
@@ -673,7 +715,7 @@ def test_requested_backends_refuse_missing_credentials(
         )
 
 
-def test_primary_cell_is_discovered_from_the_records_tree(repo: pathlib.Path):
+def test_primary_cell_is_discovered_from_the_published_catalog(repo: pathlib.Path):
     write_primary_run(repo, primary_cell())
     manifest, manifest_path = system_one.run_forecast(
         target=target_context(),
@@ -821,3 +863,491 @@ def test_late_failure_records_the_model_that_answered(repo: pathlib.Path):
     recorded = json.loads((failed_path.parent / "response.json").read_text())
     assert recorded["model"] == "jev-1"
     assert verify_run(failed_path.parent).run_succeeded is False
+
+
+def write_comparison_run(
+    repo: pathlib.Path, cell: dict, *, stamp: str = "2029-12-31t23-00-00z"
+) -> pathlib.Path:
+    """A later successful analyst run for the same slug, outside the catalog.
+
+    Strategy lanes (ladder, ladder_v2, fast rollouts) write runs for the same
+    target into the same records tree. They are comparison runs, not the
+    target's published evidence, and nothing in the catalog cites them.
+    """
+
+    run_dir = (
+        repo
+        / "records"
+        / "thesis-analyst"
+        / "2029-12-31"
+        / f"{stamp}-ladder-v2-{SLUG}"
+    )
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "cells.with_activity.json").write_text(
+        json.dumps([cell], indent=2) + "\n"
+    )
+    (run_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "schemaVersion": "thesis_analyst_run_manifest_v1",
+                "createdAt": "2029-12-31T23:00:00Z",
+                "runStartedAt": "2029-12-31T23:00:00Z",
+                "runMode": "analyst",
+                "promptMode": "ladder_v2",
+                "targetContext": target_context(),
+                "ok": True,
+                "cellsPath": (
+                    run_dir.relative_to(repo) / "cells.with_activity.json"
+                ).as_posix(),
+                "artifacts": [],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
+    return run_dir
+
+
+def test_a_later_comparison_run_is_never_mistaken_for_the_primary_cell(
+    repo: pathlib.Path,
+):
+    # Observed on australia-cpi-annual-rate-july-2026 (2026-09-16): the
+    # newest successful analyst run for the slug was a ladder_v2 comparison
+    # run with a different title, question and history from the cell the
+    # catalog publishes.
+    write_primary_run(repo, primary_cell())
+    comparison = copy.deepcopy(primary_cell())
+    comparison["title"] = "Agency test rate, comparison lane wording"
+    comparison["historicalContext"] = history_rows(3)
+    write_comparison_run(repo, comparison)
+
+    manifest, manifest_path = system_one.run_forecast(
+        target=target_context(),
+        backend="mock",
+        records_root=repo / "records",
+        run_at=RUN_AT,
+    )
+
+    assert manifest["ok"] is True
+    state = json.loads((manifest_path.parent / "state.json").read_text())
+    assert state["primaryCellProvenance"]["cellPath"].endswith(
+        f"2029-12-31t00-00-00z-primary-{SLUG}/cells.with_activity.json"
+    )
+    assert state["target"]["title"] == "Agency test rate"
+    assert len(state["historicalContext"]["rows"]) == 6
+
+
+def test_an_explicit_primary_cell_must_be_the_one_the_catalog_binds(
+    repo: pathlib.Path,
+):
+    write_primary_run(repo, primary_cell())
+    comparison = write_comparison_run(repo, primary_cell())
+
+    with pytest.raises(
+        system_one.SystemOneInputError, match="not the published primary cell"
+    ):
+        system_one.run_forecast(
+            target=target_context(),
+            backend="mock",
+            records_root=repo / "records",
+            primary_cell_path=comparison / "cells.with_activity.json",
+            run_at=RUN_AT,
+        )
+
+
+def test_a_slug_the_catalog_does_not_publish_is_refused(repo: pathlib.Path):
+    with pytest.raises(
+        system_one.SystemOneInputError, match="no published catalog cell"
+    ):
+        system_one.run_forecast(
+            target=target_context(),
+            backend="mock",
+            records_root=repo / "records",
+            run_at=RUN_AT,
+        )
+    assert not (repo / "records" / "thesis-analyst" / RUN_AT[:10]).exists()
+
+
+# --- backend identity -------------------------------------------------------
+
+
+def test_each_backend_hashes_and_describes_its_own_mechanism(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    # The adapter sends every question in one structured-output request and
+    # the provider model may reason first (system-one-adapter 0.1.3), so an
+    # adapter run must never publish the isolation sentence.
+    monkeypatch.setenv("OPENAI_API_KEY", "runner-test-key")
+    monkeypatch.setattr(
+        system_one,
+        "call_adapter",
+        lambda *, state, payloads, provider, model: {
+            "model": model,
+            "usage": {"input_tokens": 512, "output_tokens": 64},
+            "answers": {
+                name: {"type": "noul", "noul": value}
+                for name, value in zip(
+                    payloads, [index / 16 for index in range(1, 16)]
+                )
+            },
+        },
+    )
+    write_primary_run(repo, primary_cell())
+
+    manifest, manifest_path = system_one.run_forecast(
+        target=target_context(),
+        backend="adapter",
+        records_root=repo / "records",
+        ledger_path=write_ledger(repo, ledger_rows()),
+        provider="openai",
+        model="gpt-5.5",
+        run_at=RUN_AT,
+    )
+
+    assert manifest["ok"] is True
+    assert manifest["agent"]["model"] == "openai/gpt-5.5"
+    cell = json.loads((manifest_path.parent / "cells.with_activity.json").read_text())[
+        0
+    ]
+    assert cell["reasoning"][0]["text"] == (
+        "System One emulation (adapter: openai/gpt-5.5)"
+    )
+    narrative = cell["reasoning"][1]["text"]
+    assert "emulates the System One interface rather than using it" in narrative
+    assert "one structured-output request" in narrative
+    assert "not isolated from one another" in narrative
+    assert "no chain of thought" not in narrative
+    assert "independent yes/no questions" not in narrative
+
+    policies = {
+        backend: system_one.backend_policy(backend)
+        for backend in system_one.BACKENDS
+    }
+    assert policies["typesafe"]["questionIsolation"] == (
+        "vendor_asserted_independent"
+    )
+    assert policies["adapter"]["questionIsolation"] == (
+        "single_request_all_questions"
+    )
+    assert policies["adapter"]["chainOfThought"] == "provider_default"
+    hashes = {
+        backend: system_one.agent_block(
+            backend=backend, provider="openai", model="m", response=None
+        )["toolPolicyHash"]
+        for backend in system_one.BACKENDS
+    }
+    assert len(set(hashes.values())) == len(hashes)
+
+
+def test_typesafe_narrative_is_the_isolated_one():
+    narrative = system_one.lane_narrative(
+        backend="typesafe", model="jev-1", rungs=15
+    )
+    assert system_one.lane_label("typesafe", "jev-1") == (
+        "System One threshold ladder"
+    )
+    assert "15 independent yes/no questions" in narrative
+    assert "no tools, no search, and no chain of thought" in narrative
+
+
+def test_a_typesafe_run_that_never_answered_records_no_model(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    # A failed run must not be tallied against a model that never spoke.
+    monkeypatch.setenv("TYPESAFE_API_KEY", "runner-test-key")
+
+    def refuse(**_kwargs):
+        raise system_one.SystemOneRunError(
+            "backend",
+            "system_one call failed: TypeSafeAuthenticationError",
+            {"exception": "TypeSafeAuthenticationError"},
+        )
+
+    monkeypatch.setattr(system_one, "call_typesafe", refuse)
+    write_primary_run(repo, primary_cell())
+
+    manifest, manifest_path = system_one.run_forecast(
+        target=target_context(),
+        backend="typesafe",
+        records_root=repo / "records",
+        ledger_path=write_ledger(repo, ledger_rows()),
+        run_at=RUN_AT,
+    )
+
+    assert manifest["ok"] is False
+    assert manifest["error"]["phase"] == "backend"
+    assert manifest["agent"]["model"] is None
+    verification = verify_run(manifest_path.parent)
+    assert verification.run_mode == "system_one"
+    assert verification.run_succeeded is False
+
+
+# --- ledger match rule ------------------------------------------------------
+
+
+def national(rows: list[dict]) -> list[dict]:
+    for row in rows:
+        row["geography"] = {
+            "level": "country",
+            "id": "0100000US",
+            "name": "United States",
+        }
+    return rows
+
+
+def test_state_geography_rows_are_not_this_targets_series(repo: pathlib.Path):
+    # The ledger carries one row per state as well as the national row for
+    # the same concept (fns.snap.total_payment_error_rate has 54). Pooling
+    # them would average a country into one series.
+    rows = ledger_rows()
+    for index, row in enumerate(rows):
+        row["geography"] = {
+            "level": "state",
+            "id": f"0400000US{index:02d}",
+            "name": f"State {index}",
+        }
+    _manifest, manifest_path = system_one_run(repo, ledger=rows)
+
+    questions = json.loads((manifest_path.parent / "questions.json").read_text())
+    state = json.loads((manifest_path.parent / "state.json").read_text())
+    assert questions["ladderBasis"] == "history_dispersion"
+    assert state["ledgerObservations"]["rows"] == []
+    assert state["ledgerObservations"]["rejectedRows"]["geography"] == len(rows)
+
+
+def test_national_geography_rows_still_match(repo: pathlib.Path):
+    _manifest, manifest_path = system_one_run(repo, ledger=national(ledger_rows()))
+
+    questions = json.loads((manifest_path.parent / "questions.json").read_text())
+    assert questions["ladderBasis"] == "ledger_dispersion"
+    state = json.loads((manifest_path.parent / "state.json").read_text())
+    assert state["ledgerObservations"]["matchRule"]["geographyId"] == "0100000US"
+
+
+def test_numeric_fiscal_year_periods_match_a_fiscal_year_target():
+    # Real ledger rows spell a fiscal year as a number; docket targets spell
+    # it FY2026. A string-only rule silently matched neither.
+    target = {**target_context(), "period": "FY2029"}
+    rows = []
+    for year in (2026, 2027, 2028, 2029):
+        row = ledger_rows()[0]
+        row["period"] = {"type": "fiscal_year", "value": year}
+        row["observed_at"] = f"{year}-10-15"
+        row["source_record_id"] = f"agency-test-rate-fy{year}"
+        rows.append(row)
+
+    selection = system_one.ledger_selection(target, national(rows), RUN_AT)
+
+    assert [row["period"]["value"] for row in selection["rows"]] == [
+        "2026",
+        "2027",
+        "2028",
+    ]
+
+
+def test_one_entity_lineage_survives():
+    rows = national(ledger_rows())
+    for row in rows[:2]:
+        row["entity"] = {"name": "person", "role": "legacy"}
+    for row in rows[2:]:
+        row["entity"] = {"name": "person", "role": "current"}
+
+    selection = system_one.ledger_selection(target_context(), rows, RUN_AT)
+
+    assert selection["entityLineage"] == {"name": "person", "role": "current"}
+    assert len(selection["rows"]) == len(rows) - 2
+    assert selection["rejectedRows"]["entity"] == 2
+
+
+def test_observed_at_cutoff_is_the_run_instant_not_the_day():
+    rows = national(ledger_rows())
+    rows[0]["observed_at"] = "2030-01-10T11:00:00Z"
+    rows[1]["observed_at"] = "2030-01-10T12:30:00Z"
+
+    selection = system_one.ledger_selection(target_context(), rows, RUN_AT)
+
+    identifiers = [row["sourceRecordId"] for row in selection["rows"]]
+    assert f"agency-test-rate-{HISTORY_PERIODS[0]}" in identifiers
+    assert f"agency-test-rate-{HISTORY_PERIODS[1]}" not in identifiers
+    assert selection["rejectedRows"]["observedAt"] == 1
+
+
+# --- history as a series ----------------------------------------------------
+
+
+def test_label_dated_history_is_ordered_by_its_own_period(repo: pathlib.Path):
+    # Most published cells carry a null period and name it only in the label.
+    cell = primary_cell()
+    labels = ["Nov 2029", "Jun 2029", "Jul 2029", "Aug 2029", "Sep 2029", "Oct 2029"]
+    values = [3.8, 3.1, 3.4, 3.2, 3.6, 3.5]
+    cell["historicalContext"] = [
+        {"label": label, "value": value, "period": None}
+        for label, value in zip(labels, values)
+    ]
+
+    _manifest, manifest_path = system_one_run(repo, cell=cell, ledger=None)
+
+    questions = json.loads((manifest_path.parent / "questions.json").read_text())
+    assert questions["ladderBasis"] == "history_dispersion"
+    # Ordered by period, the last observation is November, not the first row.
+    assert questions["center"] == pytest.approx(3.8)
+
+
+def test_history_that_repeats_a_period_is_refused(repo: pathlib.Path):
+    # A second series in the same list (a four-week average, a CPI row beside
+    # the real-earnings rows) reads as a series only because it is a list.
+    cell = primary_cell()
+    cell["historicalContext"] = [
+        {"label": "May 2029 target series", "value": 3.1, "period": None},
+        {"label": "Jun 2029 target series", "value": 3.4, "period": None},
+        {"label": "Jul 2029 target series", "value": 3.2, "period": None},
+        {"label": "Jul 2029 a different series entirely", "value": 41.0,
+         "period": None},
+    ]
+
+    manifest, manifest_path = system_one_run(repo, cell=cell, ledger=None)
+
+    assert manifest["ok"] is False
+    assert manifest["error"]["phase"] == "state"
+    assert manifest["error"]["detail"]["reason"] == "history_periods_repeat"
+    assert verify_run(manifest_path.parent).run_succeeded is False
+
+
+def test_undated_history_rows_are_dropped_not_reordered(repo: pathlib.Path):
+    cell = primary_cell()
+    cell["historicalContext"] = [
+        {"label": "Jun 2029", "value": 3.1, "period": None},
+        {"label": "Jul 2029", "value": 3.4, "period": None},
+        {"label": "Aug 2029", "value": 3.2, "period": None},
+        {"label": "latest 4-week average", "value": 90.0, "period": None},
+    ]
+
+    _manifest, manifest_path = system_one_run(repo, cell=cell, ledger=None)
+
+    questions = json.loads((manifest_path.parent / "questions.json").read_text())
+    assert questions["observationCount"] == 3
+    assert questions["center"] == pytest.approx(3.2)
+    state = json.loads((manifest_path.parent / "state.json").read_text())
+    # The model still sees every row the cell reported; only the ladder is
+    # built from the dated series.
+    assert len(state["historicalContext"]["rows"]) == 4
+
+
+# --- refusals and sealing ---------------------------------------------------
+
+
+def test_a_blank_credential_is_a_refused_input(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    # typesafe_sdk strips the key and raises from its own constructor, which
+    # used to escape halfway through a run.
+    monkeypatch.setenv("TYPESAFE_API_KEY", "   ")
+    write_primary_run(repo, primary_cell())
+
+    with pytest.raises(system_one.SystemOneInputError, match="TYPESAFE_API_KEY"):
+        system_one.run_forecast(
+            target=target_context(),
+            backend="typesafe",
+            records_root=repo / "records",
+            run_at=RUN_AT,
+        )
+
+    assert not (repo / "records" / "thesis-analyst" / RUN_AT[:10]).exists()
+
+
+def test_an_unreadable_response_file_is_refused_before_any_run_directory(
+    repo: pathlib.Path,
+):
+    write_primary_run(repo, primary_cell())
+
+    with pytest.raises(system_one.SystemOneInputError, match="response file"):
+        system_one.run_forecast(
+            target=target_context(),
+            backend="response_file",
+            records_root=repo / "records",
+            response_file=repo / "missing-response.json",
+            run_at=RUN_AT,
+        )
+
+    assert not (repo / "records" / "thesis-analyst" / RUN_AT[:10]).exists()
+
+
+def test_an_unexpected_backend_exception_is_sealed_as_a_backend_failure(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    def boom(**_kwargs):
+        raise RuntimeError("connection reset by peer")
+
+    monkeypatch.setattr(system_one, "call_mock", boom)
+    manifest, manifest_path = system_one_run(repo, ledger=ledger_rows())
+
+    assert manifest["ok"] is False
+    assert manifest["error"]["phase"] == "backend"
+    assert manifest["error"]["detail"]["exception"] == "RuntimeError"
+    # The exception text could carry request detail, so only the class name
+    # is recorded.
+    assert "connection reset" not in json.dumps(manifest)
+    assert [
+        (ref["artifactType"], pathlib.Path(ref["path"]).name)
+        for ref in manifest["artifacts"]
+    ] == [
+        ("system_one_state", "state.json"),
+        ("system_one_questions", "questions.json"),
+        ("system_one_request", "request.json"),
+        ("command", "command.json"),
+        ("error", "error.json"),
+        ("manifest", "manifest.json"),
+    ]
+    assert verify_run(manifest_path.parent).run_succeeded is False
+
+
+def test_a_crash_before_the_backend_seals_a_state_failure(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    def boom(**_kwargs):
+        raise RuntimeError("questions exploded")
+
+    monkeypatch.setattr(system_one, "question_payloads", boom)
+    write_primary_run(repo, primary_cell())
+
+    manifest, manifest_path = system_one.run_forecast(
+        target=target_context(),
+        backend="mock",
+        records_root=repo / "records",
+        run_at=RUN_AT,
+    )
+    # build_ladder ran, question_payloads did not: state.json alone is the
+    # state-phase inventory, so the failure seals rather than vanishing.
+    assert manifest["error"]["phase"] == "state"
+    assert manifest["error"]["detail"]["exception"] == "RuntimeError"
+    assert verify_run(manifest_path.parent).run_succeeded is False
+
+
+def test_an_unsealable_crash_leaves_nothing_behind(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    # Nothing written so far is a whole phase inventory, so there is no
+    # honest record to seal: the partial directory goes, and the runner
+    # reports a refused input, which is what exit code 2 promises.
+    real_write_artifact = system_one.write_artifact
+    calls: list[str] = []
+
+    def fail_on_request(out_dir, artifact_type, name, payload, created_at):
+        calls.append(name)
+        if name == "request.json":
+            raise RuntimeError("disk gave out")
+        return real_write_artifact(out_dir, artifact_type, name, payload, created_at)
+
+    monkeypatch.setattr(system_one, "write_artifact", fail_on_request)
+    write_primary_run(repo, primary_cell())
+
+    with pytest.raises(system_one.SystemOneInputError, match="RuntimeError"):
+        system_one.run_forecast(
+            target=target_context(),
+            backend="mock",
+            records_root=repo / "records",
+            run_at=RUN_AT,
+        )
+
+    assert calls == ["state.json", "questions.json", "request.json"]
+    assert list((repo / "records" / "thesis-analyst" / RUN_AT[:10]).iterdir()) == []

@@ -39,16 +39,20 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import copy
 import json
 import math
 import os
 import pathlib
+import re
+import shutil
 import sys
 import time
 from datetime import datetime, timezone
 from typing import Any
 
+import stamp_docket_ledger_refs
 from canonical_json import canonical_bytes, canonical_sha256
 from run_thesis_analyst import (
     CUSTODY_INVENTORY_VERSION,
@@ -113,19 +117,57 @@ REDACTED_CELL_FIELDS = (
     "runAt",
 )
 
-# Hashed into agent.toolPolicyHash.  It is a policy, not a deployment: the
-# concrete backend, provider and model live beside it in the manifest agent
-# block, so the same policy hash covers every backend of this lane.
-BACKEND_POLICY = {
-    "schemaVersion": "thesis_system_one_backend_policy_v1",
+# Hashed into agent.toolPolicyHash.  The policy is per backend because the
+# backends are not the same mechanism.  Only ``typesafe`` is the System One
+# interface, where TypeSafe states that every question is evaluated
+# independently and in isolation and no text is generated.  The adapter
+# emulates that interface over a general LLM: system-one-adapter 0.1.3
+# serializes the state once and sends all fifteen questions in a single
+# structured-output request, and the provider model may reason before it
+# emits the probabilities.  A run must never claim the isolation it did not
+# get, so the claim lives in the hashed policy and in the cell narrative.
+BACKEND_POLICY_BASE = {
+    "schemaVersion": "thesis_system_one_backend_policy_v2",
     "tools": [],
     "webAccess": False,
-    "chainOfThought": False,
     "questionTypes": ["noul"],
-    "questionsEvaluatedIndependently": True,
     "statePreResolutionOnly": True,
     "redactedPrimaryCellFields": list(REDACTED_CELL_FIELDS),
 }
+BACKEND_POLICIES = {
+    "typesafe": {
+        "elicitation": "system_one_native",
+        "questionIsolation": "vendor_asserted_independent",
+        "chainOfThought": "none",
+        "generatesText": False,
+    },
+    "adapter": {
+        "elicitation": "llm_structured_output_emulation",
+        "questionIsolation": "single_request_all_questions",
+        "chainOfThought": "provider_default",
+        "generatesText": True,
+    },
+    "response_file": {
+        "elicitation": "recorded_response_replay",
+        "questionIsolation": "inherited_from_recorded_run",
+        "chainOfThought": "inherited_from_recorded_run",
+        "generatesText": False,
+    },
+    "mock": {
+        "elicitation": "deterministic_offline_ladder",
+        "questionIsolation": "not_a_model",
+        "chainOfThought": "none",
+        "generatesText": False,
+    },
+}
+
+
+def backend_policy(backend: str) -> dict[str, Any]:
+    """The canonical policy JSON hashed into agent.toolPolicyHash."""
+
+    if backend not in BACKEND_POLICIES:
+        raise SystemOneInputError(f"unsupported backend: {backend!r}")
+    return {**BACKEND_POLICY_BASE, "backend": backend, **BACKEND_POLICIES[backend]}
 
 LADDER_POLICY = {
     "schemaVersion": "thesis_system_one_ladder_policy_v1",
@@ -145,6 +187,12 @@ PROVIDER_KEY_ENV = {
     "openai": "OPENAI_API_KEY",
     "anthropic": "ANTHROPIC_API_KEY",
 }
+FISCAL_YEAR_RE = re.compile(r"FY[-_ ]?(\d{4})", re.IGNORECASE)
+# Catalog geography ids per country code, taken from the map
+# scripts/stamp_docket_ledger_refs.py already binds docket series with; a
+# country it does not name spells its own ISO code in the ledger.  A row for
+# another geography is not this target's series.
+COUNTRY_GEOGRAPHY_IDS = dict(stamp_docket_ledger_refs.COUNTRY_IDS)
 TYPESAFE_KEY_ENV = "TYPESAFE_API_KEY"
 DEFAULT_ADAPTER_PROVIDER = "openai"
 DEFAULT_ADAPTER_MODEL = "gpt-5.5"
@@ -367,12 +415,25 @@ def history_rows(primary_cell: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def period_identity(period: Any) -> tuple[str, str] | None:
-    """A comparable (type, value) identity for a canonical period object."""
+    """A comparable (type, value) identity for a canonical period object.
+
+    Ledger rows spell an annual or fiscal-year period as a number
+    (``{"type": "fiscal_year", "value": 2025}``), so the value is coerced to
+    its decimal string rather than dropped.
+    """
 
     if isinstance(period, dict):
         kind = period.get("type")
         value = period.get("value")
-        if isinstance(kind, str) and isinstance(value, str):
+        if not isinstance(kind, str):
+            return None
+        if isinstance(value, bool):
+            return None
+        if isinstance(value, int):
+            return (kind, str(value))
+        if isinstance(value, float) and value.is_integer():
+            return (kind, str(int(value)))
+        if isinstance(value, str) and value:
             return (kind, value)
         return None
     if isinstance(period, str) and period:
@@ -399,20 +460,50 @@ def target_period_identity(target: dict[str, Any]) -> tuple[str, str]:
     period = str(target.get("period") or "")
     if period.startswith("week_"):
         return ("week_ending", period[len("week_") :])
+    fiscal = FISCAL_YEAR_RE.fullmatch(period)
+    if fiscal:
+        # Docket targets spell a fiscal year FY2026; the ledger spells the
+        # same period {"type": "fiscal_year", "value": 2026}.
+        return ("fiscal_year", fiscal.group(1))
     return (period_kind(period), period)
 
 
-def ledger_matches(
+def geography_identity(target: dict[str, Any]) -> str | None:
+    """The catalog geography id a same-series ledger row must carry.
+
+    Docket targets are national releases.  The ledger keys identity by
+    (concept, geography, entity), so one concept legitimately owns one row
+    per state as well as the national row; matching on concept and unit
+    alone pools them.  The country ids are the ones
+    scripts/stamp_docket_ledger_refs.py already binds docket series with.
+    """
+
+    country = target.get("country")
+    if not isinstance(country, str) or not country:
+        return None
+    return COUNTRY_GEOGRAPHY_IDS.get(country, country)
+
+
+def ledger_selection(
     target: dict[str, Any],
     ledger_rows: list[dict[str, Any]],
     run_started_at: str,
-) -> list[dict[str, Any]]:
+) -> dict[str, Any]:
     """Same-series official observations strictly before the target period.
 
     Match rule: measure.concept or measure.source_concept equals the target's
-    sourceBinding.sourceSeriesId or series, unit equals targetUnit, the
-    observation's period precedes the target period at the same granularity,
-    and observed_at precedes this run's start.
+    sourceBinding.sourceSeriesId or series, unit equals targetUnit, the row's
+    geography is the target country's national geography, the observation's
+    period precedes the target period at the same granularity, and observed_at
+    precedes this run's start instant.
+
+    The ledger keys identity by (concept, geography, entity), so the same
+    concept owns one row per state as well as the national row, and one
+    concept can carry sibling entity lineages.  Both would silently pool into
+    one series here, so geography is part of the key and, when the surviving
+    rows disagree about entity, only the lineage of the most recent
+    observation is kept.  Everything dropped is counted and recorded in the
+    state, so a fallback to the history basis is never silent.
     """
 
     binding = target.get("sourceBinding") or {}
@@ -423,9 +514,10 @@ def ledger_matches(
     }
     unit = target_unit(target)
     target_kind, target_value = target_period_identity(target)
-    cutoff_day = run_started_at[:10]
+    geography_id = geography_identity(target)
 
     matched: list[dict[str, Any]] = []
+    rejected = {"geography": 0, "period": 0, "observedAt": 0, "value": 0}
     for row in ledger_rows:
         if not isinstance(row, dict):
             continue
@@ -441,16 +533,30 @@ def ledger_matches(
             continue
         if measure.get("unit") != unit:
             continue
+        geography = row.get("geography")
+        if isinstance(geography, dict):
+            if (
+                geography.get("level") != "country"
+                or str(geography.get("id")) != str(geography_id)
+            ):
+                rejected["geography"] += 1
+                continue
+        elif geography is not None:
+            rejected["geography"] += 1
+            continue
         identity = period_identity(row.get("period"))
         if identity is None or identity[0] != target_kind:
+            rejected["period"] += 1
             continue
         if identity[1] >= target_value:
             continue
         observed_at = str(row.get("observed_at") or "")
-        if not observed_at or observed_at[:10] >= cutoff_day:
+        if not observed_at or not observed_before(observed_at, run_started_at):
+            rejected["observedAt"] += 1
             continue
         value = row.get("value")
         if not isinstance(value, (int, float)) or isinstance(value, bool):
+            rejected["value"] += 1
             continue
         matched.append(
             {
@@ -460,10 +566,49 @@ def ledger_matches(
                 "unit": measure.get("unit"),
                 "observedAt": observed_at,
                 "sourceRecordId": row.get("source_record_id"),
+                "_entity": canonical_bytes(row.get("entity")).decode(),
             }
         )
     matched.sort(key=lambda row: (row["period"]["value"], row["observedAt"]))
-    return matched
+    lineage: str | None = None
+    if matched:
+        lineage = matched[-1]["_entity"]
+        kept = [row for row in matched if row["_entity"] == lineage]
+        rejected["entity"] = len(matched) - len(kept)
+        matched = kept
+    else:
+        rejected["entity"] = 0
+    for row in matched:
+        del row["_entity"]
+    return {
+        "rows": matched,
+        "geographyId": geography_id,
+        "entityLineage": json.loads(lineage) if lineage is not None else None,
+        "rejectedRows": rejected,
+    }
+
+
+def observed_before(observed_at: str, run_started_at: str) -> bool:
+    """observed_at strictly precedes the run start instant.
+
+    Both are ISO-8601 UTC as the ledger and the runner write them, so the
+    comparison is lexical on the full instant.  A date-only observed_at is
+    treated as that day's start.
+    """
+
+    if len(observed_at) == 10:
+        observed_at = f"{observed_at}T00:00:00Z"
+    return observed_at < run_started_at
+
+
+def ledger_matches(
+    target: dict[str, Any],
+    ledger_rows: list[dict[str, Any]],
+    run_started_at: str,
+) -> list[dict[str, Any]]:
+    """The matched rows alone; see ledger_selection for the full rule."""
+
+    return ledger_selection(target, ledger_rows, run_started_at)["rows"]
 
 
 def read_ledger(path: pathlib.Path | None) -> list[dict[str, Any]]:
@@ -502,9 +647,16 @@ def build_state(
     target: dict[str, Any],
     primary_cell: dict[str, Any],
     primary_provenance: dict[str, Any],
-    ledger_observations: list[dict[str, Any]],
+    ledger: dict[str, Any],
     run_started_at: str,
 ) -> dict[str, Any]:
+    """The evidence state, rebuildable from trusted inputs alone.
+
+    Every field is a pure function of the trusted target, the published
+    primary cell, and the pinned ledger, so the publication boundary
+    recomputes this whole object and compares it byte for byte.
+    """
+
     binding = target.get("sourceBinding") or {}
     return {
         "schemaVersion": STATE_SCHEMA,
@@ -536,10 +688,13 @@ def build_state(
                     }
                 ),
                 "unit": target_unit(target),
+                "geographyId": ledger.get("geographyId"),
+                "entityLineage": ledger.get("entityLineage"),
                 "periodBefore": target.get("period"),
                 "observedBefore": run_started_at,
             },
-            "rows": ledger_observations,
+            "rejectedRows": ledger.get("rejectedRows"),
+            "rows": ledger.get("rows") or [],
         },
         "sourceContext": {
             "provenance": "agent_reported",
@@ -642,20 +797,23 @@ def build_ladder(
 ) -> dict[str, Any]:
     """Center, scale and 15 rounded thresholds, or a closed failure."""
 
+    ordered_history, history_refusal = history_series(history)
     if len(ledger_observations) >= MIN_LADDER_OBSERVATIONS:
         basis = "ledger_dispersion"
         rows = ledger_observations
-    elif len(history) >= MIN_LADDER_OBSERVATIONS:
+    elif history_refusal is None and len(ordered_history) >= MIN_LADDER_OBSERVATIONS:
         basis = "history_dispersion"
-        rows = sorted_history(history)
+        rows = ordered_history
     else:
+        reason = history_refusal or "insufficient_history"
         raise SystemOneRunError(
             "state",
-            "insufficient_history",
+            reason,
             {
-                "reason": "insufficient_history",
+                "reason": reason,
                 "ledgerObservations": len(ledger_observations),
                 "historicalContextRows": len(history),
+                "datedHistoryRows": len(ordered_history),
                 "required": MIN_LADDER_OBSERVATIONS,
             },
         )
@@ -699,18 +857,111 @@ def build_ladder(
     }
 
 
-def sorted_history(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    identities = [period_identity(row.get("period")) for row in history]
-    if all(identity is not None for identity in identities):
-        kinds = {identity[0] for identity in identities if identity}
-        if len(kinds) == 1:
-            return [
-                row
-                for _identity, row in sorted(
-                    zip(identities, history), key=lambda pair: pair[0][1]
-                )
-            ]
-    return list(history)
+MONTH_NUMBERS = {
+    name: number
+    for number, name in enumerate(
+        (
+            "jan",
+            "feb",
+            "mar",
+            "apr",
+            "may",
+            "jun",
+            "jul",
+            "aug",
+            "sep",
+            "oct",
+            "nov",
+            "dec",
+        ),
+        start=1,
+    )
+}
+LABEL_PERIOD_PATTERNS = (
+    ("week_ending", re.compile(r"(?<!\d)(\d{4}-\d{2}-\d{2})(?!\d)")),
+    ("quarter", re.compile(r"(?<!\w)(\d{4})[-\s_]?[Qq]([1-4])(?!\d)")),
+    ("quarter", re.compile(r"(?<!\w)[Qq]([1-4])[-\s_](\d{4})(?!\d)")),
+    ("month", re.compile(r"(?<!\d)(\d{4})-(0[1-9]|1[0-2])(?!\d)")),
+    (
+        "month",
+        re.compile(
+            r"(?<![A-Za-z])(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+            r"[A-Za-z]*\.?[\s_-]+(\d{4})(?!\d)",
+            re.IGNORECASE,
+        ),
+    ),
+    ("fiscal_year", re.compile(r"(?<!\w)FY[\s_-]?(\d{4})(?!\d)", re.IGNORECASE)),
+    ("year", re.compile(r"(?<!\d)((?:19|20)\d{2})(?!\d)")),
+)
+
+
+def label_period_identity(label: Any) -> tuple[str, str] | None:
+    """Read a period out of a history row label.
+
+    Most published cells report historicalContext rows with a null period and
+    the period only in the label ("May 2026 real AHE MoM, Table A-1").  The
+    ladder needs an order, and the reported order is not one, so the label is
+    parsed rather than trusted.  Nothing is guessed: a row whose label names
+    no period is dropped, and history that does not resolve to one dated
+    series is refused outright.
+    """
+
+    if not isinstance(label, str) or not label:
+        return None
+    for kind, pattern in LABEL_PERIOD_PATTERNS:
+        match = pattern.search(label)
+        if not match:
+            continue
+        if kind == "week_ending":
+            return (kind, match.group(1))
+        if kind == "quarter":
+            first, second = match.group(1), match.group(2)
+            year, quarter = (first, second) if len(first) == 4 else (second, first)
+            return (kind, f"{year}-Q{quarter}")
+        if kind == "month":
+            first, second = match.group(1), match.group(2)
+            if first.isdigit() and len(first) == 4:
+                return (kind, f"{first}-{second}")
+            return (kind, f"{second}-{MONTH_NUMBERS[first[:3].lower()]:02d}")
+        return (kind, match.group(1))
+    return None
+
+
+def history_identity(row: dict[str, Any]) -> tuple[str, str] | None:
+    identity = period_identity(row.get("period"))
+    if identity is not None:
+        return identity
+    return label_period_identity(row.get("label"))
+
+
+def history_series(
+    history: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Order agent-reported history as one dated series, or say why not.
+
+    Published cells mix series in one historicalContext list: a four-week
+    average beside its weekly prints, a CPI row beside the real-earnings rows
+    it explains, a second program beside the target program.  Read in the
+    reported order they look like a series and they are not, so the rows are
+    ordered by their own period and the list is refused when the periods
+    repeat (two lineages) or disagree about granularity.  Undated rows are
+    dropped, never reordered into the series.
+    """
+
+    dated: list[tuple[tuple[str, str], dict[str, Any]]] = []
+    for row in history:
+        identity = history_identity(row)
+        if identity is None:
+            continue
+        dated.append((identity, row))
+    kinds = {identity[0] for identity, _row in dated}
+    values = [identity[1] for identity, _row in dated]
+    if len(kinds) > 1:
+        return ([], "history_period_kinds_differ")
+    if len(set(values)) != len(values):
+        return ([], "history_periods_repeat")
+    ordered = [row for _identity, row in sorted(dated, key=lambda pair: pair[0][1])]
+    return (ordered, None)
 
 
 def question_title(title: str, period: str) -> str:
@@ -728,6 +979,44 @@ def question_title(title: str, period: str) -> str:
         if trimmed:
             return trimmed
     return stripped
+
+
+LADDER_QUESTION_FIELDS = (
+    "ladderBasis",
+    "center",
+    "scale",
+    "scaleMethod",
+    "sigma",
+    "precision",
+    "observationCount",
+    "thresholds",
+)
+
+
+def build_questions(
+    *,
+    ladder: dict[str, Any],
+    payloads: dict[str, dict[str, str]],
+    ledger_observations: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """questions.json: the ladder geometry and the questions as sent.
+
+    Like the state, it is a pure function of trusted inputs, so the
+    publication boundary rebuilds it and compares it byte for byte instead
+    of trusting the thresholds the run happened to seal.
+    """
+
+    return {
+        "schemaVersion": QUESTIONS_SCHEMA,
+        "questionType": "noul",
+        "questionTemplate": QUESTION_TEMPLATE,
+        "monotonization": MONOTONIZATION,
+        **{key: ladder[key] for key in LADDER_QUESTION_FIELDS},
+        "ledgerSourceRecordIds": [
+            row.get("sourceRecordId") for row in ledger_observations
+        ],
+        "questions": payloads,
+    }
 
 
 def question_payloads(
@@ -815,6 +1104,27 @@ def call_response_file(path: pathlib.Path) -> dict[str, Any]:
     }
 
 
+@contextlib.contextmanager
+def backend_phase(label: str):
+    """Seal anything raised inside as a backend-phase failure.
+
+    Only the exception class name is recorded. A client constructor or an
+    SDK error can carry request text, and the lane never writes anything a
+    key could travel in.
+    """
+
+    try:
+        yield
+    except SystemOneRunError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - class name only, never the text
+        raise SystemOneRunError(
+            "backend",
+            f"{label} failed: {type(exc).__name__}",
+            {"exception": type(exc).__name__},
+        ) from exc
+
+
 def call_typesafe(
     *,
     state: dict[str, Any],
@@ -831,21 +1141,15 @@ def call_typesafe(
             "(uv sync --extra system-one)",
             {"exception": type(exc).__name__},
         ) from exc
-    questions = {
-        name: Noul(instructions=payload["instructions"])
-        for name, payload in payloads.items()
-    }
-    _assert_request_fidelity(msgspec, questions, payloads)
-    client = TypeSafeClient(model=model)
-    try:
-        response = client.system_one(state, questions)
-    except Exception as exc:  # noqa: BLE001 - class name only, never the text
-        raise SystemOneRunError(
-            "backend",
-            f"system_one call failed: {type(exc).__name__}",
-            {"exception": type(exc).__name__},
-        ) from exc
-    return msgspec.to_builtins(response)
+    with backend_phase("typesafe setup"):
+        questions = {
+            name: Noul(instructions=payload["instructions"])
+            for name, payload in payloads.items()
+        }
+        _assert_request_fidelity(msgspec, questions, payloads)
+        client = TypeSafeClient(model=model)
+    with backend_phase("system_one call"):
+        return msgspec.to_builtins(client.system_one(state, questions))
 
 
 def call_adapter(
@@ -865,27 +1169,21 @@ def call_adapter(
             "(uv sync --extra system-one)",
             {"exception": type(exc).__name__},
         ) from exc
-    questions = {
-        name: Noul(instructions=payload["instructions"])
-        for name, payload in payloads.items()
-    }
-    _assert_request_fidelity(msgspec, questions, payloads)
-    client = SystemOneAdapterClient(
-        structured_outputs=True,
-        llm_answer_mode="probabilities",
-        normalize_probabilities=True,
-        provider=provider,
-        model=model,
-    )
-    try:
-        response = client.system_one(state, questions)
-    except Exception as exc:  # noqa: BLE001 - class name only, never the text
-        raise SystemOneRunError(
-            "backend",
-            f"system_one call failed: {type(exc).__name__}",
-            {"exception": type(exc).__name__},
-        ) from exc
-    return msgspec.to_builtins(response)
+    with backend_phase("adapter setup"):
+        questions = {
+            name: Noul(instructions=payload["instructions"])
+            for name, payload in payloads.items()
+        }
+        _assert_request_fidelity(msgspec, questions, payloads)
+        client = SystemOneAdapterClient(
+            structured_outputs=True,
+            llm_answer_mode="probabilities",
+            normalize_probabilities=True,
+            provider=provider,
+            model=model,
+        )
+    with backend_phase("system_one call"):
+        return msgspec.to_builtins(client.system_one(state, questions))
 
 
 def _assert_request_fidelity(msgspec_module, questions, payloads) -> None:
@@ -932,6 +1230,84 @@ def noul_probabilities(response: dict[str, Any], names: list[str]) -> list[float
             )
         probabilities.append(float(value))
     return probabilities
+
+
+# --- lane identity ----------------------------------------------------------
+
+SYSTEM_ONE_LABEL = "System One threshold ladder"
+EVIDENCE_SENTENCE = (
+    "The evidence state carries the target contract, the reported historical "
+    "prints, and the same-series official observations pinned before this run "
+    "started, with every forecast field of the published cell withheld."
+)
+
+
+def backend_descriptor(backend: str, model: str | None) -> str:
+    """How the run names its own machinery.
+
+    ``model`` is the manifest agent's model: the identifier the model
+    returned for typesafe, and ``provider/model`` for the adapter.
+    """
+
+    if backend in ("adapter", "typesafe") and model:
+        return f"{backend}: {model}"
+    return backend
+
+
+def lane_label(backend: str, model: str | None) -> str:
+    """The label a reader sees on the cell and in the comparison list.
+
+    Only the typesafe backend is a System One run.  Every other backend
+    emulates the interface, and the label says which one did it, so a reader
+    never has to infer the mechanism from a footnote.
+    """
+
+    if backend == "typesafe":
+        return SYSTEM_ONE_LABEL
+    return f"System One emulation ({backend_descriptor(backend, model)})"
+
+
+def lane_narrative(*, backend: str, model: str | None, rungs: int) -> str:
+    """What actually happened, stated per backend.
+
+    Verified 2026-09-16 against system-one-adapter 0.1.3 (_client.py
+    _prepare_evaluation and providers/openai.py _responses_request_kwargs):
+    the adapter serializes the state once and sends every question in one
+    request, with the provider's default reasoning setting.
+    """
+
+    if backend == "typesafe":
+        return (
+            f"A System One model answered {rungs} independent yes/no questions "
+            "about one fixed evidence state, one question per ladder rung. It "
+            "used no tools, no search, and no chain of thought, and it wrote "
+            "no text: each answer is a probability returned in isolation. "
+            + EVIDENCE_SENTENCE
+        )
+    if backend == "adapter":
+        return (
+            "This run emulates the System One interface rather than using it. "
+            f"A general language model ({model}) received the same "
+            f"fixed evidence state and all {rungs} threshold questions in one "
+            "structured-output request and returned one probability per rung. "
+            "The answers are therefore not isolated from one another, and the "
+            "model may reason internally before it emits them, so its output "
+            "tokens can include reasoning tokens. It used no tools and no "
+            "search. " + EVIDENCE_SENTENCE
+        )
+    if backend == "response_file":
+        return (
+            "This run replays a System One response recorded earlier; no "
+            f"model was called here. The {rungs} rung probabilities below are "
+            "that recorded response, monotonized and interpolated by this "
+            "runner. " + EVIDENCE_SENTENCE
+        )
+    return (
+        "This run is a deterministic offline stand-in, not a model: the "
+        f"{rungs} rung probabilities are computed from the evidence state by a "
+        "fixed formula in the runner so the record can be exercised end to "
+        "end. " + EVIDENCE_SENTENCE
+    )
 
 
 # --- cell assembly ----------------------------------------------------------
@@ -987,20 +1363,16 @@ def build_cell(
             "ladderBasis": ladder["ladderBasis"],
         },
         "reasoning": [
-            {"kind": "heading", "text": "System One threshold ladder"},
+            {
+                "kind": "heading",
+                "text": lane_label(str(agent.get("backend")), agent.get("model")),
+            },
             {
                 "kind": "text",
-                "text": (
-                    "A System One model answered "
-                    f"{len(thresholds)} independent yes/no questions about one "
-                    "fixed evidence state, one question per ladder rung. It "
-                    "used no tools, no search, and no chain of thought, and it "
-                    "wrote no text: each answer is a probability returned in "
-                    "isolation. The evidence state carries the target "
-                    "contract, the reported historical prints, and the "
-                    "same-series official observations pinned before this run "
-                    "started, with every forecast field of the published cell "
-                    "withheld."
+                "text": lane_narrative(
+                    backend=str(agent.get("backend")),
+                    model=agent.get("model"),
+                    rungs=len(thresholds),
                 ),
             },
             {
@@ -1203,6 +1575,24 @@ def base_manifest(
     return manifest
 
 
+def phase_for_refs(refs: list[dict[str, Any]]) -> str | None:
+    """The failure phase whose inventory is exactly what has been written."""
+
+    written = [str(ref.get("artifactType")) for ref in refs]
+    for phase, inventory in FAILURE_INVENTORIES.items():
+        expected = [artifact_type for artifact_type, _name in inventory[:-1]]
+        if written == expected:
+            return phase
+    return None
+
+
+def remove_partial_run(out_dir: pathlib.Path, run_started_at: str) -> None:
+    """Delete a run directory this invocation created and cannot seal."""
+
+    if out_dir.name.startswith(run_stamp(run_started_at)) and out_dir.is_dir():
+        shutil.rmtree(out_dir, ignore_errors=True)
+
+
 def write_failure(
     *,
     out_dir: pathlib.Path,
@@ -1251,12 +1641,34 @@ def write_failure(
 def load_primary_cell(
     *,
     explicit: pathlib.Path | None,
-    records_root: pathlib.Path,
     slug: str,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Return the published primary cell and its custody provenance."""
+    """Return the published primary cell and its custody provenance.
 
-    path = explicit or discover_primary_cell(records_root, slug)
+    The published catalog decides which run is this target's primary cell.
+    An explicit --primary-cell is a local convenience (a scratch records
+    root, a slug the catalog does not carry); when the catalog does bind the
+    slug, the explicit path must be that same file, so an operator can never
+    quietly feed the lane a different run's evidence.
+    """
+
+    catalog_path = catalog_primary_cell(slug)
+    if explicit is None:
+        if catalog_path is None:
+            raise SystemOneInputError(
+                "no published catalog cell binds a recorded run for "
+                f"{slug}; pass --primary-cell to name the primary cell"
+            )
+        path = catalog_path
+    else:
+        path = explicit
+        if catalog_path is not None and not _same_file(path, catalog_path):
+            raise SystemOneInputError(
+                f"--primary-cell is not the published primary cell for {slug}: "
+                f"{repo_relative(path)} != {repo_relative(catalog_path)}"
+            )
+    if not path.is_file():
+        raise SystemOneInputError(f"primary cell is not a file: {path}")
     payload = load_json(path, "primary cell")
     if isinstance(payload, list):
         cells = payload
@@ -1286,64 +1698,183 @@ def load_primary_cell(
     return cell, provenance
 
 
-def discover_primary_cell(records_root: pathlib.Path, slug: str) -> pathlib.Path:
-    """Find the newest successful analyst run that published this slug.
+def _same_file(left: pathlib.Path, right: pathlib.Path) -> bool:
+    try:
+        return left.resolve() == right.resolve()
+    except OSError:  # pragma: no cover - resolve only fails on broken links
+        return False
 
-    The published catalog is generated from these recorded runs, so the run
-    that produced the catalog cell is the primary cell's custody home; the
-    evaluated catalog module itself carries no manifest to bind.
 
-    A run may be written outside records/ (``--records-root``), so the search
-    covers the write root and the repository's own records tree.
+# The catalog the site publishes.  Generated modules carry the cells as JSON
+# array literals annotated ForecastCell[]; the hand-written modules build
+# their cells from prediction series and carry no recorded run, so they name
+# no primary cell and are skipped.
+CATALOG_DIR = "site/src/data/forecast-examples"
+CATALOG_ARRAY_RE = re.compile(r":\s*ForecastCell\[\]\s*=\s*\[")
+RECORD_RUN_RE = re.compile(r"^records/thesis-analyst/\d{4}-\d{2}-\d{2}/[^/]+$")
+_CATALOG_CACHE: dict[str, dict[str, str]] = {}
+
+
+def _json_literal(text: str, start: int) -> str | None:
+    """The bracket-balanced literal that begins at text[start]."""
+
+    depth = 0
+    in_string = False
+    escaped = False
+    for index in range(start, len(text)):
+        character = text[index]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == '"':
+                in_string = False
+            continue
+        if character == '"':
+            in_string = True
+        elif character in "[{":
+            depth += 1
+        elif character in "]}":
+            depth -= 1
+            if depth == 0:
+                return text[start : index + 1]
+    return None
+
+
+def _without_trailing_commas(text: str) -> str:
+    """Formatter trailing commas are TypeScript, not JSON; drop them."""
+
+    out: list[str] = []
+    index = 0
+    length = len(text)
+    in_string = False
+    escaped = False
+    while index < length:
+        character = text[index]
+        if in_string:
+            out.append(character)
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == '"':
+                in_string = False
+            index += 1
+            continue
+        if character == '"':
+            in_string = True
+            out.append(character)
+            index += 1
+            continue
+        if character == ",":
+            ahead = index + 1
+            while ahead < length and text[ahead] in " \t\r\n":
+                ahead += 1
+            if ahead < length and text[ahead] in "]}":
+                index += 1
+                continue
+        out.append(character)
+        index += 1
+    return "".join(out)
+
+
+def catalog_run_directories(root: pathlib.Path | None = None) -> dict[str, str]:
+    """Map every published catalog slug to the run directory it cites.
+
+    The site publishes one cell per slug, and a generated cell carries its
+    own activity log: every artifact path is inside the recorded run that
+    produced it.  That run, not the newest run in the records tree, is this
+    target's primary cell; comparison-lane runs for the same slug live beside
+    it and must never be mistaken for it.
     """
 
-    search_roots: list[pathlib.Path] = []
-    for root in (records_root, ROOT / "records"):
-        analyst_root = root / "thesis-analyst"
-        if analyst_root.is_dir() and not any(
-            analyst_root.samefile(seen) for seen in search_roots
-        ):
-            search_roots.append(analyst_root)
-    candidates: list[tuple[str, pathlib.Path]] = []
-    manifests = [
-        manifest_path
-        for analyst_root in search_roots
-        for manifest_path in sorted(analyst_root.glob("*/*/manifest.json"))
-    ]
-    for manifest_path in manifests:
-        try:
-            manifest = json.loads(manifest_path.read_text())
-        except (OSError, json.JSONDecodeError, UnicodeDecodeError):
-            continue
-        if not isinstance(manifest, dict):
-            continue
-        if manifest.get("runMode") not in (None, "analyst"):
-            continue
-        if manifest.get("schemaVersion") != "thesis_analyst_run_manifest_v1":
-            continue
-        if manifest.get("ok") is not True:
-            continue
-        target = manifest.get("targetContext")
-        if not isinstance(target, dict) or target.get("catalogSlug") != slug:
-            continue
-        cells_path = manifest_path.parent / "cells.with_activity.json"
-        if not cells_path.is_file():
-            continue
-        candidates.append((str(manifest.get("runStartedAt") or ""), cells_path))
-    if not candidates:
-        raise SystemOneInputError(
-            f"no published primary cell found for {slug} under "
-            + ", ".join(str(root) for root in search_roots or [records_root])
-        )
-    candidates.sort()
-    return candidates[-1][1]
+    base = root or ROOT
+    key = str(base.resolve()) if base.exists() else str(base)
+    cached = _CATALOG_CACHE.get(key)
+    if cached is not None:
+        return cached
+    directories: dict[str, str] = {}
+    catalog_dir = base / CATALOG_DIR
+    if catalog_dir.is_dir():
+        for module in sorted(catalog_dir.glob("*.ts")):
+            try:
+                text = module.read_text()
+            except (OSError, UnicodeDecodeError):
+                continue
+            for match in CATALOG_ARRAY_RE.finditer(text):
+                literal = _json_literal(text, match.end() - 1)
+                if literal is None:
+                    continue
+                try:
+                    cells = json.loads(_without_trailing_commas(literal))
+                except json.JSONDecodeError:
+                    continue
+                if not isinstance(cells, list):
+                    continue
+                for cell in cells:
+                    if not isinstance(cell, dict):
+                        continue
+                    slug = cell.get("slug")
+                    run_dir = _cell_run_directory(cell)
+                    if not isinstance(slug, str) or run_dir is None:
+                        continue
+                    if directories.get(slug) not in (None, run_dir):
+                        # Two published cells for one slug cannot both be the
+                        # primary cell; refuse rather than pick one.
+                        directories[slug] = ""
+                        continue
+                    directories[slug] = run_dir
+    _CATALOG_CACHE[key] = directories
+    return directories
+
+
+def _cell_run_directory(cell: dict[str, Any]) -> str | None:
+    """The one recorded run directory a published cell's activity log cites."""
+
+    activity = (cell.get("predictionRun") or {}).get("activityLog")
+    if not isinstance(activity, list) or not activity:
+        return None
+    directories = set()
+    for artifact in activity:
+        if not isinstance(artifact, dict):
+            return None
+        path = artifact.get("path")
+        if not isinstance(path, str) or not path.startswith("records/"):
+            return None
+        directory = path.rsplit("/", 1)[0]
+        if not RECORD_RUN_RE.fullmatch(directory):
+            return None
+        directories.add(directory)
+    if len(directories) != 1:
+        return None
+    return directories.pop()
+
+
+def catalog_primary_cell(
+    slug: str, root: pathlib.Path | None = None
+) -> pathlib.Path | None:
+    """The published primary cell file for this slug, or None."""
+
+    base = root or ROOT
+    run_dir = catalog_run_directories(base).get(slug)
+    if not run_dir:
+        return None
+    return base / run_dir / "cells.with_activity.json"
 
 
 # --- runner -----------------------------------------------------------------
 
 
 def preflight_backend(backend: str, provider: str | None) -> None:
-    if backend == "typesafe" and not os.environ.get(TYPESAFE_KEY_ENV):
+    """Refuse a backend we cannot reach before any run directory exists.
+
+    The SDKs strip whitespace out of a key and then raise from their own
+    constructors, so a blank key counts as missing here rather than as a
+    backend failure sealed halfway through a run.
+    """
+
+    if backend == "typesafe" and not os.environ.get(TYPESAFE_KEY_ENV, "").strip():
         raise SystemOneInputError(
             f"the typesafe backend requires {TYPESAFE_KEY_ENV} in the environment"
         )
@@ -1354,7 +1885,7 @@ def preflight_backend(backend: str, provider: str | None) -> None:
                 f"unsupported adapter provider: {provider!r}; "
                 f"known providers are {sorted(PROVIDER_KEY_ENV)}"
             )
-        if not os.environ.get(env_name):
+        if not os.environ.get(env_name, "").strip():
             raise SystemOneInputError(
                 f"the adapter backend with provider {provider} requires "
                 f"{env_name} in the environment"
@@ -1368,8 +1899,16 @@ def agent_block(
     model: str | None,
     response: dict[str, Any] | None,
 ) -> dict[str, Any]:
+    """The manifest agent block.
+
+    ``model`` is what the run asked for; the block records what answered.
+    A typesafe run that never received a response has no answering model, and
+    it records null rather than the backend name, so a failed run can never
+    be tallied as a model that spoke.
+    """
+
     if backend == "typesafe":
-        resolved = str(response.get("model")) if response else (model or "typesafe")
+        resolved = str(response.get("model")) if response else model
     elif backend == "adapter":
         resolved = f"{provider}/{model}"
     else:
@@ -1379,7 +1918,7 @@ def agent_block(
         "model": resolved,
         "agentVersion": AGENT_VERSION,
         "promptHash": canonical_sha256(LADDER_POLICY),
-        "toolPolicyHash": canonical_sha256(BACKEND_POLICY),
+        "toolPolicyHash": canonical_sha256(backend_policy(backend)),
         "backend": backend,
         "provider": provider,
     }
@@ -1404,13 +1943,19 @@ def run_forecast(
     slug = target.get("catalogSlug")
     if not isinstance(slug, str) or not slug:
         raise SystemOneInputError("target has no catalogSlug")
-    if backend == "response_file" and response_file is None:
-        raise SystemOneInputError("the response_file backend requires --response-file")
+    if backend == "response_file":
+        if response_file is None:
+            raise SystemOneInputError(
+                "the response_file backend requires --response-file"
+            )
+        # Read and shape-check the replay before the run directory exists, so
+        # an unreadable file is a refused input and never a half-written run.
+        call_response_file(response_file)
     preflight_backend(backend, provider)
 
     run_started_at = run_at or utc_now()
     primary_cell, primary_provenance = load_primary_cell(
-        explicit=primary_cell_path, records_root=records_root, slug=slug
+        explicit=primary_cell_path, slug=slug
     )
     out_dir = (
         records_root
@@ -1425,14 +1970,13 @@ def run_forecast(
     agent = agent_block(backend=backend, provider=provider, model=model, response=None)
     refs: list[dict[str, Any]] = []
 
-    ledger_observations = ledger_matches(
-        target, read_ledger(ledger_path), run_started_at
-    )
+    ledger = ledger_selection(target, read_ledger(ledger_path), run_started_at)
+    ledger_observations = ledger["rows"]
     state = build_state(
         target=target,
         primary_cell=primary_cell,
         primary_provenance=primary_provenance,
-        ledger_observations=ledger_observations,
+        ledger=ledger,
         run_started_at=run_started_at,
     )
     refs.append(
@@ -1472,6 +2016,29 @@ def run_forecast(
             detail=exc.detail,
         )
         return manifest, out_dir / "manifest.json"
+    except Exception as exc:  # noqa: BLE001 - class name only, never the text
+        # Anything the phases did not anticipate still leaves a sealed,
+        # custody-verifiable record when the artifacts written so far are
+        # exactly one phase inventory.  When they are not, there is no honest
+        # inventory to seal, so the partial directory is removed and the run
+        # reports a refused input: nothing was recorded.
+        phase = phase_for_refs(refs)
+        if phase is None:
+            remove_partial_run(out_dir, run_started_at)
+            raise SystemOneInputError(
+                f"{type(exc).__name__} before the run could be sealed"
+            ) from exc
+        manifest = write_failure(
+            out_dir=out_dir,
+            target=target,
+            agent=agent,
+            run_started_at=run_started_at,
+            refs=refs,
+            phase=phase,
+            message=f"{type(exc).__name__} in the {phase} phase",
+            detail={"exception": type(exc).__name__},
+        )
+        return manifest, out_dir / "manifest.json"
 
 
 def _run_sealed(
@@ -1498,29 +2065,11 @@ def _run_sealed(
         thresholds=ladder["thresholds"],
         precision=ladder["precision"],
     )
-    questions = {
-        "schemaVersion": QUESTIONS_SCHEMA,
-        "questionType": "noul",
-        "questionTemplate": QUESTION_TEMPLATE,
-        "monotonization": MONOTONIZATION,
-        **{
-            key: ladder[key]
-            for key in (
-                "ladderBasis",
-                "center",
-                "scale",
-                "scaleMethod",
-                "sigma",
-                "precision",
-                "observationCount",
-                "thresholds",
-            )
-        },
-        "ledgerSourceRecordIds": [
-            row.get("sourceRecordId") for row in ledger_observations
-        ],
-        "questions": payloads,
-    }
+    questions = build_questions(
+        ladder=ladder,
+        payloads=payloads,
+        ledger_observations=ledger_observations,
+    )
     violations = redaction_violations(primary_cell, [state, questions])
     if violations:
         raise SystemOneRunError(
@@ -1560,20 +2109,24 @@ def _run_sealed(
     response: dict[str, Any] | None = None
     failure: SystemOneRunError | None = None
     try:
-        if backend == "mock":
-            response = call_mock(payloads=payloads, ladder=ladder)
-        elif backend == "response_file":
-            assert response_file is not None
-            response = call_response_file(response_file)
-        elif backend == "typesafe":
-            response = call_typesafe(state=state, payloads=payloads, model=model)
-        else:
-            response = call_adapter(
-                state=state,
-                payloads=payloads,
-                provider=str(provider),
-                model=str(model),
-            )
+        # Anything the call raises is a backend-phase failure, sealed with
+        # the command below, so an unanticipated exception still leaves a
+        # custody-verifiable record instead of a traceback.
+        with backend_phase("backend call"):
+            if backend == "mock":
+                response = call_mock(payloads=payloads, ladder=ladder)
+            elif backend == "response_file":
+                assert response_file is not None
+                response = call_response_file(response_file)
+            elif backend == "typesafe":
+                response = call_typesafe(state=state, payloads=payloads, model=model)
+            else:
+                response = call_adapter(
+                    state=state,
+                    payloads=payloads,
+                    provider=str(provider),
+                    model=str(model),
+                )
     except SystemOneRunError as exc:
         failure = exc
     latency_ms = int(round((time.monotonic() - started) * 1000))

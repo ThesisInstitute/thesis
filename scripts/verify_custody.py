@@ -75,15 +75,19 @@ SYSTEM_ONE_FAILURE_INVENTORIES = {
         ("error", "error.json"),
     ],
 }
+# The cell field, and the target fields that may name its expected value.
+# A trusted selection target spells the scoring unit targetUnit; a
+# registration snapshot spells the same unit unit, so the unit binding must
+# read either or it silently checks nothing.
 SYSTEM_ONE_RESOLVER_FIELDS = (
-    ("slug", "catalogSlug"),
-    ("country", "country"),
-    ("unit", "targetUnit"),
-    ("resolutionDate", "resolutionDate"),
-    ("resolutionSource", "resolutionSource"),
-    ("resolutionSourceUrl", "resolutionSourceUrl"),
-    ("resolutionRule", "resolutionRule"),
-    ("dataPointId", "dataPointId"),
+    ("slug", ("catalogSlug",)),
+    ("country", ("country",)),
+    ("unit", ("targetUnit", "unit")),
+    ("resolutionDate", ("resolutionDate",)),
+    ("resolutionSource", ("resolutionSource",)),
+    ("resolutionSourceUrl", ("resolutionSourceUrl",)),
+    ("resolutionRule", ("resolutionRule",)),
+    ("dataPointId", ("dataPointId",)),
 )
 REGISTRATION_BINDING_FIELDS = (
     "registrationCommit",
@@ -2286,7 +2290,15 @@ def _verify_system_one_v2(
     backend = agent.get("backend")
     if backend not in SYSTEM_ONE_BACKENDS:
         raise CustodyError(f"system_one manifest has invalid backend: {backend!r}")
-    if not isinstance(agent.get("model"), str) or not agent["model"]:
+    model = agent.get("model")
+    if model is None:
+        # A typesafe run that failed before the service answered has no
+        # answering model to name, and naming the backend instead would tally
+        # a failure against a model that never spoke. Only a failed run may
+        # leave it null.
+        if manifest.get("ok") is not False:
+            raise CustodyError("system_one manifest agent lacks a model string")
+    elif not isinstance(model, str) or not model:
         raise CustodyError("system_one manifest agent lacks a model string")
 
     target = manifest.get("targetContext")
@@ -2369,9 +2381,16 @@ def _verify_system_one_v2(
     if not isinstance(cells, list) or len(cells) != 1 or not isinstance(cells[0], dict):
         raise CustodyError("system_one cells payload must contain exactly one cell")
     cell = cells[0]
-    for cell_field, target_field in SYSTEM_ONE_RESOLVER_FIELDS:
-        expected_value = target.get(target_field)
-        if expected_value not in (None, "") and cell.get(cell_field) != expected_value:
+    for cell_field, target_fields in SYSTEM_ONE_RESOLVER_FIELDS:
+        expected_value = next(
+            (
+                target[field]
+                for field in target_fields
+                if target.get(field) not in (None, "")
+            ),
+            None,
+        )
+        if expected_value is not None and cell.get(cell_field) != expected_value:
             raise CustodyError(
                 f"system_one cell {cell_field} differs from the trusted target"
             )
