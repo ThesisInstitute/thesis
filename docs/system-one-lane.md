@@ -3,14 +3,14 @@
 `scripts/run_system_one_forecast.py` forecasts one already-published Thesis
 target with a System One model: a model that answers named typed questions
 about a fixed state and returns probabilities without generating text. The
-lane turns a target into 15 yes/no questions of the form "the first print
-will be at or below t", records the request and the raw response verbatim,
-monotonizes the answers into a CDF, and seals the run as a complete v2
-custody inventory under run mode `system_one`.
+lane turns a target into a ladder of yes/no questions of the form "the first
+print will be at or below t", records the request and the raw response
+verbatim, monotonizes the answers into a CDF, and seals the run as a complete
+v2 custody inventory under run mode `system_one`.
 
 Only the `typesafe` backend is a System One model. The `adapter` backend
 emulates the same interface over a general LLM, and the emulation is not the
-thing: it sends all 15 questions in one structured-output request and the
+thing: it sends every question in one structured-output request and the
 model may reason before it answers. Every backend therefore carries its own
 hashed policy, its own cell heading, and its own method sentence, so no
 record claims isolation it did not get.
@@ -119,7 +119,7 @@ out.
 
 ## Ladder construction
 
-Fifteen strictly increasing thresholds, on one of two bases:
+Up to fifteen strictly increasing thresholds, on one of two bases:
 
 - `ledger_dispersion` when at least 3 same-series ledger observations
   matched. This is the basis to prefer: the rows are official observations,
@@ -171,8 +171,9 @@ forecast.
 
 ## Elicitation
 
-One `system_one` call carries 15 Noul questions named `rung_01` through
-`rung_15`, each with instructions of the form:
+One `system_one` call carries one Noul question per surviving rung, named
+`rung_01` upward: fifteen when every rung survives rounding, as few as five
+when rounding merges neighbours. Each has instructions of the form:
 
 ```
 The official first print of {title} for {period} will be at or below {value}.
@@ -193,7 +194,7 @@ On the `typesafe` backend every question is answered independently and in
 isolation, which TypeSafe states and this repository records as a vendor
 statement rather than a verified mechanism. On the `adapter` backend it is
 not true at all: `system-one-adapter==0.1.3` serializes the state once and
-sends all 15 questions in a single provider request (read from
+sends every question in a single provider request (read from
 `_client.py` `_prepare_evaluation` and `providers/openai.py`
 `_responses_request_kwargs` on 2026-09-16), so the answers are drawn
 together and the provider's default reasoning applies. Either way the raw
@@ -245,7 +246,7 @@ rungs.
 | Backend | Needs | Notes |
 | --- | --- | --- |
 | `typesafe` | `TYPESAFE_API_KEY`, the `system-one` extra | The real System One model through `typesafe-sdk==0.6.0`. `--model` is optional; `agent.model` comes back from the response. |
-| `adapter` | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` for the chosen `--provider`, the `system-one` extra | The interface emulated over an LLM by `system-one-adapter==0.1.3` with structured outputs and probability answers: one request carries the state and all 15 questions, and the model may reason before it answers. Defaults: provider `openai`, model `gpt-5.5`. |
+| `adapter` | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` for the chosen `--provider`, the `system-one` extra | The interface emulated over an LLM by `system-one-adapter==0.1.3` with structured outputs and probability answers: one request carries the state and every question, and the model may reason before it answers. Defaults: provider `openai`, model `gpt-5.5`. |
 | `response_file` | `--response-file` | Replays a saved `SystemOneResponse` JSON deterministically. `command.json` records the file's name and sha256. |
 | `mock` | nothing | A deterministic offline ladder for tests and smoke runs: a normal CDF at the ladder's own center and sigma, with a small per-rung tilt derived from the question name. It exercises the pipeline and says nothing about any model. |
 
@@ -410,7 +411,7 @@ reasoning, because there is none to paraphrase:
 - **text**: the method disclosure, per backend. A typesafe run says the model
   answered the rungs independently and in isolation with no tools, no search
   and no chain of thought. An adapter run says it emulates the interface, that
-  one structured-output request carried the state and all 15 questions, that
+  one structured-output request carried the state and every question, that
   the answers are therefore not isolated from one another, and that the model
   may reason internally so its output tokens can include reasoning tokens. A
   mock run says it is a deterministic offline stand-in and not a model, and a

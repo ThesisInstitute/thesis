@@ -243,9 +243,10 @@ target or generator mapping so comparisons render in the catalog unit.
 ### Run the System One lane
 
 `scripts/run_system_one_forecast.py` forecasts one published target with a
-System One model: 15 independent Noul questions of the form "the first print
-will be at or below t", monotonized into a CDF. It is a comparison lane, never
-a headline lane, and custody verifies it under run mode `system_one`. Read
+System One model: one independent Noul question per ladder rung, of the form
+"the first print will be at or below t", monotonized into a CDF. It is a
+comparison lane, never a headline lane, and custody verifies it under run mode
+`system_one`. Read
 [`docs/system-one-lane.md`](docs/system-one-lane.md) before changing the
 runner, its question wording, or its ladder constants; the wording and
 constants are hashed into `promptHash`, so a silent edit makes old and new runs

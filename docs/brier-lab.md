@@ -71,8 +71,9 @@ normalized CRPS is lower than persistence.
 ## System One lane
 
 `thesis.system_one` is a comparison lane: a System One model, or an LLM
-emulating that interface, answers 15 threshold questions on a redacted
-evidence state, and the monotonized ladder becomes the `agent_reported` CDF.
+emulating that interface, answers one threshold question per ladder rung on a
+redacted evidence state, and the monotonized ladder becomes the
+`agent_reported` CDF.
 Like the other comparison lanes (ladder, fast rollouts, median3), its rows
 are projected into the site as comparison runs, so their CRPS appears on cell
 pages and in the log scoreboard at the claimed-time tier only. They earn no
