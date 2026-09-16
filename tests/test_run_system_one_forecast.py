@@ -710,7 +710,7 @@ def test_requested_backends_refuse_missing_credentials(
             backend="adapter",
             records_root=repo / "records",
             provider="openai",
-            model="gpt-5.5",
+            model="gpt-5.6-terra",
             run_at=RUN_AT,
         )
 
@@ -1000,17 +1000,17 @@ def test_each_backend_hashes_and_describes_its_own_mechanism(
         records_root=repo / "records",
         ledger_path=write_ledger(repo, ledger_rows()),
         provider="openai",
-        model="gpt-5.5",
+        model="gpt-5.6-terra",
         run_at=RUN_AT,
     )
 
     assert manifest["ok"] is True
-    assert manifest["agent"]["model"] == "openai/gpt-5.5"
+    assert manifest["agent"]["model"] == "openai/gpt-5.6-terra"
     cell = json.loads((manifest_path.parent / "cells.with_activity.json").read_text())[
         0
     ]
     assert cell["reasoning"][0]["text"] == (
-        "System One emulation (adapter: openai/gpt-5.5)"
+        "System One emulation (adapter: openai/gpt-5.6-terra)"
     )
     narrative = cell["reasoning"][1]["text"]
     assert "emulates the System One interface rather than using it" in narrative

@@ -354,7 +354,7 @@ def test_comparison_review_is_manifest_only_and_screened() -> None:
         "preSubmitReview": {"summary": "planted"},
     }
     manifest = {
-        "agent": {"agent": "thesis.analyst", "model": "gpt-5.5"},
+        "agent": {"agent": "thesis.analyst", "model": "gpt-5.6-terra"},
         "artifacts": [],
         "preSubmitReview": {
             "schemaVersion": "thesis_pre_submit_review_v1",

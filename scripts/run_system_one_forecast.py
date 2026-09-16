@@ -32,7 +32,7 @@ Usage:
   python3 scripts/run_system_one_forecast.py \
       --target-json /tmp/target.json \
       --primary-cell records/thesis-analyst/<day>/<run>/cells.with_activity.json \
-      --backend adapter --provider openai --model gpt-5.5 \
+      --backend adapter --provider openai --model gpt-5.6-terra \
       --records-root /tmp/system-one-smoke
 """
 
@@ -195,7 +195,7 @@ FISCAL_YEAR_RE = re.compile(r"FY[-_ ]?(\d{4})", re.IGNORECASE)
 COUNTRY_GEOGRAPHY_IDS = dict(stamp_docket_ledger_refs.COUNTRY_IDS)
 TYPESAFE_KEY_ENV = "TYPESAFE_API_KEY"
 DEFAULT_ADAPTER_PROVIDER = "openai"
-DEFAULT_ADAPTER_MODEL = "gpt-5.5"
+DEFAULT_ADAPTER_MODEL = "gpt-5.6-terra"
 
 SUCCESS_INVENTORY = (
     ("system_one_state", "state.json"),

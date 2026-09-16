@@ -555,7 +555,7 @@ def fake_system_one_answers(payloads: dict, model: str) -> dict:
 
 
 def system_one_selection_payload(
-    *, backend: str = "adapter", model: str | None = "gpt-5.5"
+    *, backend: str = "adapter", model: str | None = "gpt-5.6-terra"
 ) -> dict:
     value = {
         "schemaVersion": publication.SELECTION_SCHEMA,
@@ -599,7 +599,7 @@ def run_system_one(
     *,
     backend: str = "adapter",
     provider: str | None = "openai",
-    model: str | None = "gpt-5.5",
+    model: str | None = "gpt-5.6-terra",
     answering_model: str | None = None,
     cell: dict | None = None,
     ledger: list[dict] | None = None,
@@ -687,7 +687,7 @@ def write_system_one_suite(
     selection_path: pathlib.Path,
     *,
     backend: str = "adapter",
-    model: str | None = "gpt-5.5",
+    model: str | None = "gpt-5.6-terra",
 ) -> pathlib.Path:
     selection = json.loads(selection_path.read_text())
     suite = {
@@ -720,10 +720,10 @@ def system_one_tree(
     monkeypatch: pytest.MonkeyPatch,
     *,
     request_backend: str = "adapter",
-    request_model: str | None = "gpt-5.5",
+    request_model: str | None = "gpt-5.6-terra",
     run_backend: str = "adapter",
     run_provider: str | None = "openai",
-    run_model: str | None = "gpt-5.5",
+    run_model: str | None = "gpt-5.6-terra",
     answering_model: str | None = None,
     lane_backend: object = FROM_REQUEST,
     lane_model: object = FROM_REQUEST,
@@ -944,7 +944,7 @@ def test_system_one_run_backend_must_equal_the_trusted_request(
         request_model=None,
         run_backend="adapter",
         run_provider="openai",
-        run_model="gpt-5.5",
+        run_model="gpt-5.6-terra",
     )
 
     with pytest.raises(
@@ -958,7 +958,7 @@ def test_system_one_run_model_must_equal_the_trusted_request(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     repo, selection_path = system_one_tree(
-        tmp_path, monkeypatch, request_model="gpt-5.5", run_model="gpt-5.5-luna"
+        tmp_path, monkeypatch, request_model="gpt-5.6-terra", run_model="gpt-5.6-luna"
     )
 
     with pytest.raises(
@@ -1053,7 +1053,7 @@ def test_system_one_lane_backend_must_equal_the_trusted_selection(
 
 @pytest.mark.parametrize(
     ("request_model", "lane_model"),
-    [("gpt-5.5", "gpt-5.5-luna"), ("gpt-5.5", None), (None, "gpt-5.5")],
+    [("gpt-5.6-terra", "gpt-5.6-luna"), ("gpt-5.6-terra", None), (None, "gpt-5.6-terra")],
 )
 def test_system_one_lane_model_must_equal_the_trusted_selection(
     tmp_path: pathlib.Path,
@@ -1065,7 +1065,7 @@ def test_system_one_lane_model_must_equal_the_trusted_selection(
         tmp_path,
         monkeypatch,
         request_model=request_model,
-        run_model=request_model or "gpt-5.5",
+        run_model=request_model or "gpt-5.6-terra",
         lane_model=lane_model,
     )
 
@@ -1170,7 +1170,7 @@ def test_suite_lanes_accept_a_null_system_one_key(tmp_path: pathlib.Path) -> Non
             "records/thesis-analyst/batches/2030-01-10/strategy-123-a1-system-one.json"
         ),
         "backend": "adapter",
-        "model": "gpt-5.5",
+        "model": "gpt-5.6-terra",
     }
     with pytest.raises(
         publication.StrategyPublicationError,
@@ -1309,7 +1309,7 @@ def test_system_one_revalidation_accepts_the_sealed_run(
 
 
 @pytest.mark.parametrize(
-    ("key", "value"), [("backend", "typesafe"), ("model", "gpt-5.5-luna")]
+    ("key", "value"), [("backend", "typesafe"), ("model", "gpt-5.6-luna")]
 )
 def test_system_one_batch_echo_must_be_the_trusted_forecaster(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, key: str, value: str
@@ -1371,11 +1371,11 @@ def test_failed_system_one_run_still_binds_the_trusted_forecaster(
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
-    selection_path = write_system_one_selection(tmp_path, model="gpt-5.5")
+    selection_path = write_system_one_selection(tmp_path, model="gpt-5.6-terra")
     manifest_path = run_system_one(
         repo,
         monkeypatch,
-        model="gpt-5.5-luna",
+        model="gpt-5.6-luna",
         cell=primary_cell(history_count=2),
         ledger=[],
         expect_ok=False,
@@ -1461,7 +1461,7 @@ def test_a_run_that_saw_forged_history_never_publishes(
             for row in trusted_history_rows(cell)
         ],
     )
-    repo, selection_path = system_one_tree(tmp_path, monkeypatch, run_model="gpt-5.5")
+    repo, selection_path = system_one_tree(tmp_path, monkeypatch, run_model="gpt-5.6-terra")
     staged = json.loads(
         repo.joinpath(*SYSTEM_ONE_RUN_PREFIX.parts, "state.json").read_text()
     )
@@ -1490,7 +1490,7 @@ def test_a_forged_ladder_never_publishes(
         }
 
     monkeypatch.setattr(system_one, "build_ladder", shifted)
-    repo, selection_path = system_one_tree(tmp_path, monkeypatch, run_model="gpt-5.5")
+    repo, selection_path = system_one_tree(tmp_path, monkeypatch, run_model="gpt-5.6-terra")
     staged = json.loads(
         repo.joinpath(*SYSTEM_ONE_RUN_PREFIX.parts, "questions.json").read_text()
     )

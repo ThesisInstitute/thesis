@@ -246,7 +246,7 @@ rungs.
 | Backend | Needs | Notes |
 | --- | --- | --- |
 | `typesafe` | `TYPESAFE_API_KEY`, the `system-one` extra | The real System One model through `typesafe-sdk==0.6.0`. `--model` is optional; `agent.model` comes back from the response. |
-| `adapter` | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` for the chosen `--provider`, the `system-one` extra | The interface emulated over an LLM by `system-one-adapter==0.1.3` with structured outputs and probability answers: one request carries the state and every question, and the model may reason before it answers. Defaults: provider `openai`, model `gpt-5.5`. |
+| `adapter` | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` for the chosen `--provider`, the `system-one` extra | The interface emulated over an LLM by `system-one-adapter==0.1.3` with structured outputs and probability answers: one request carries the state and every question, and the model may reason before it answers. Defaults: provider `openai`, model `gpt-5.6-terra`. |
 | `response_file` | `--response-file` | Replays a saved `SystemOneResponse` JSON deterministically. `command.json` records the file's name and sha256. |
 | `mock` | nothing | A deterministic offline ladder for tests and smoke runs: a normal CDF at the ladder's own center and sigma, with a small per-rung tilt derived from the question name. It exercises the pipeline and says nothing about any model. |
 
@@ -315,7 +315,7 @@ OPENAI_API_KEY=... uv run --locked --extra system-one \
   python scripts/run_system_one_forecast.py \
   --target-json /tmp/target.json \
   --ledger-jsonl /tmp/official-observations.jsonl \
-  --backend adapter --provider openai --model gpt-5.5 \
+  --backend adapter --provider openai --model gpt-5.6-terra \
   --records-root /tmp/system-one-smoke
 ```
 
@@ -340,7 +340,7 @@ gh workflow run strategy-docket.yml --ref main \
 ```
 
 `system_one_backend` is `adapter` (default) or `typesafe`.
-`system_one_model` empty means the backend default: `gpt-5.5` for the
+`system_one_model` empty means the backend default: `gpt-5.6-terra` for the
 OpenAI adapter, and the model TypeSafe serves by default for `typesafe`.
 Both are bound into the trusted selection request as `systemOneBackend` and
 `systemOneModel`, the way `ladder_prompt_mode` is bound, so they are never a
@@ -361,7 +361,7 @@ the run rather than reading it:
 
 - the backend, the requested model and the provider must equal the trusted
   request. A null `systemOneModel` means the runner default for that backend
-  (`gpt-5.5` for the adapter), not any model, and an adapter run must name
+  (`gpt-5.6-terra` for the adapter), not any model, and an adapter run must name
   the runner's default provider, `openai`, since a dispatched run never
   chooses one.
 - the primary cell is the one the published catalog binds to the slug, read
@@ -407,7 +407,7 @@ reasoning, because there is none to paraphrase:
 - **heading**: names the method and the backend. "System One threshold
   ladder" only for a typesafe run; otherwise "System One emulation" and the
   backend that produced the answers, for example "System One emulation
-  (adapter: openai/gpt-5.5)".
+  (adapter: openai/gpt-5.6-terra)".
 - **text**: the method disclosure, per backend. A typesafe run says the model
   answered the rungs independently and in isolation with no tools, no search
   and no chain of thought. An adapter run says it emulates the interface, that
