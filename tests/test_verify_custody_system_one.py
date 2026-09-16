@@ -1,0 +1,279 @@
+"""Custody verification for the system_one run mode."""
+
+from __future__ import annotations
+
+import ast
+import json
+import pathlib
+import sys
+
+import pytest
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+import run_system_one_forecast as system_one  # noqa: E402
+import run_thesis_analyst as analyst  # noqa: E402
+import verify_custody  # noqa: E402
+from verify_custody import CustodyError, verify_run  # noqa: E402
+
+from tests.test_run_system_one_forecast import (  # noqa: E402
+    RUN_AT,
+    SLUG,
+    ledger_rows,
+    primary_cell,
+    repo,  # noqa: F401 - pytest fixture
+    system_one_run,
+)
+
+
+def reseal(run_dir: pathlib.Path, mutate=None) -> None:
+    """Rebuild a consistent custody chain after editing a sealed run.
+
+    Tamper tests need runs whose hashes all agree but whose lane contract is
+    wrong, so that the failure they prove comes from the system_one rules
+    rather than from a broken digest.
+    """
+
+    manifest = json.loads((run_dir / "manifest.json").read_text())
+    if mutate is not None:
+        mutate(manifest)
+    refs = [ref for ref in manifest["artifacts"] if ref["artifactType"] != "manifest"]
+    for ref in refs:
+        path = run_dir / pathlib.Path(ref["path"]).name
+        raw = path.read_bytes()
+        ref["sha256"] = analyst.sha256_bytes(raw)
+        ref["bytes"] = len(raw)
+    manifest.pop("custodyRootSha256", None)
+    manifest["artifacts"] = refs
+    system_one.seal(
+        out_dir=run_dir,
+        run_started_at=manifest["runStartedAt"],
+        manifest=manifest,
+        refs=refs,
+    )
+
+
+@pytest.fixture
+def sealed_run(repo: pathlib.Path) -> pathlib.Path:  # noqa: F811
+    _manifest, manifest_path = system_one_run(repo, ledger=ledger_rows())
+    assert verify_run(manifest_path.parent).run_succeeded is True
+    return manifest_path.parent
+
+
+@pytest.fixture
+def failed_run(repo: pathlib.Path) -> pathlib.Path:  # noqa: F811
+    manifest, manifest_path = system_one_run(
+        repo, cell=primary_cell(history_count=2), ledger=None
+    )
+    assert manifest["error"]["phase"] == "state"
+    return manifest_path.parent
+
+
+def test_response_byte_edit_breaks_custody(sealed_run: pathlib.Path):
+    response = sealed_run / "response.json"
+    raw = response.read_text()
+    response.write_text(raw.replace('"noul": 0.', '"noul": 1.', 1))
+    with pytest.raises(CustodyError, match="raw SHA-256 mismatch"):
+        verify_run(sealed_run)
+
+
+def test_unregistered_extra_file_breaks_custody(sealed_run: pathlib.Path):
+    (sealed_run / "notes.txt").write_text("stray\n")
+    with pytest.raises(CustodyError, match="run directory inventory mismatch"):
+        verify_run(sealed_run)
+
+
+def test_registered_extra_artifact_is_not_the_lane_inventory(
+    sealed_run: pathlib.Path,
+):
+    extra = sealed_run / "extra.json"
+    extra.write_text(json.dumps({"stray": True}) + "\n")
+
+    def mutate(manifest: dict) -> None:
+        manifest["artifacts"].insert(
+            -1,
+            {
+                "artifactType": "system_one_state",
+                "path": analyst.repo_relative(extra),
+                "sha256": "0" * 64,
+                "bytes": 0,
+                "createdAt": manifest["runStartedAt"],
+            },
+        )
+
+    reseal(sealed_run, mutate)
+    with pytest.raises(CustodyError, match="not the complete lane inventory"):
+        verify_run(sealed_run)
+
+
+def test_wrong_phase_inventory_is_refused(failed_run: pathlib.Path):
+    error = json.loads((failed_run / "error.json").read_text())
+    error["phase"] = "ladder"
+    (failed_run / "error.json").write_text(json.dumps(error, indent=2) + "\n")
+
+    def mutate(manifest: dict) -> None:
+        manifest["error"] = error
+
+    reseal(failed_run, mutate)
+    with pytest.raises(CustodyError, match="ladder-failure inventory is invalid"):
+        verify_run(failed_run)
+
+
+def test_unknown_failure_phase_is_refused(failed_run: pathlib.Path):
+    error = json.loads((failed_run / "error.json").read_text())
+    error["phase"] = "seal"
+    (failed_run / "error.json").write_text(json.dumps(error, indent=2) + "\n")
+    reseal(failed_run, lambda manifest: manifest.update({"error": error}))
+    with pytest.raises(CustodyError, match="unknown system_one failure phase"):
+        verify_run(failed_run)
+
+
+def test_error_phase_on_a_complete_run_is_refused(sealed_run: pathlib.Path):
+    def mutate(manifest: dict) -> None:
+        manifest["error"] = {"phase": "backend", "message": "forged", "detail": None}
+
+    reseal(sealed_run, mutate)
+    with pytest.raises(CustodyError, match="does not present as failed"):
+        verify_run(sealed_run)
+
+
+def test_command_backend_must_match_the_manifest_agent(sealed_run: pathlib.Path):
+    command = json.loads((sealed_run / "command.json").read_text())
+    command["backend"] = "typesafe"
+    (sealed_run / "command.json").write_text(json.dumps(command, indent=2) + "\n")
+    reseal(sealed_run)
+    with pytest.raises(CustodyError, match="command backend disagrees"):
+        verify_run(sealed_run)
+
+
+def test_unknown_backend_is_refused(sealed_run: pathlib.Path):
+    def mutate(manifest: dict) -> None:
+        manifest["agent"]["backend"] = "smuggled"
+
+    reseal(sealed_run, mutate)
+    with pytest.raises(CustodyError, match="invalid backend"):
+        verify_run(sealed_run)
+
+
+def test_resolver_field_must_equal_the_trusted_target(sealed_run: pathlib.Path):
+    cells_path = sealed_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cells[0]["resolutionSourceUrl"] = "https://elsewhere.example/other"
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_run)
+    with pytest.raises(
+        CustodyError, match="resolutionSourceUrl differs from the trusted target"
+    ):
+        verify_run(sealed_run)
+
+
+def test_non_monotone_ladder_is_refused(sealed_run: pathlib.Path):
+    cells_path = sealed_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    probabilities = cells[0]["thresholdLadder"]["cumulativeProbabilities"]
+    probabilities[5], probabilities[6] = probabilities[6], probabilities[5]
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_run)
+    with pytest.raises(CustodyError, match="cumulative probabilities are not monotone"):
+        verify_run(sealed_run)
+
+
+def test_ladder_must_declare_its_monotonization(sealed_run: pathlib.Path):
+    cells_path = sealed_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cells[0]["thresholdLadder"].pop("monotonization")
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_run)
+    with pytest.raises(CustodyError, match="lacks its monotonization version"):
+        verify_run(sealed_run)
+
+
+def test_cells_path_cannot_point_outside_the_run(
+    sealed_run: pathlib.Path, repo: pathlib.Path  # noqa: F811
+):
+    def mutate(manifest: dict) -> None:
+        manifest["cellsPath"] = (
+            "records/thesis-analyst/2029-12-31/"
+            f"2029-12-31t00-00-00z-primary-{SLUG}/cells.with_activity.json"
+        )
+
+    reseal(sealed_run, mutate)
+    with pytest.raises(
+        CustodyError, match="does not resolve inside run|cellsPath is outside its run"
+    ):
+        verify_run(sealed_run)
+
+
+def test_run_mode_must_agree_between_manifest_and_custody_root(
+    sealed_run: pathlib.Path,
+):
+    custody_path = sealed_run / "custody_root.json"
+    custody = json.loads(custody_path.read_text())
+    custody["runMode"] = "analyst"
+    custody_path.write_text(json.dumps(custody, indent=2) + "\n")
+    with pytest.raises(CustodyError, match="custody run mode mismatch"):
+        verify_run(sealed_run)
+
+
+def test_activity_log_must_expose_the_rooted_prefix(sealed_run: pathlib.Path):
+    cells_path = sealed_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cells[0]["activityLog"] = cells[0]["activityLog"][:-1]
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_run)
+    with pytest.raises(CustodyError, match="complete rooted activity prefix"):
+        verify_run(sealed_run)
+
+
+def test_sealed_at_cannot_precede_the_run_start(sealed_run: pathlib.Path):
+    reseal(
+        sealed_run,
+        lambda manifest: manifest.update({"sealedAt": "2029-01-01T00:00:00Z"}),
+    )
+    with pytest.raises(CustodyError, match="seal time predates"):
+        verify_run(sealed_run)
+
+
+def test_verification_reports_the_lane_as_not_headline_eligible(
+    sealed_run: pathlib.Path,
+):
+    verification = verify_run(sealed_run)
+    assert verification.run_mode == "system_one"
+    assert verification.custody_inventory_version == 2
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is True
+    assert verification.headline_eligible is False
+    assert verification.artifact_count == len(system_one.SUCCESS_INVENTORY)
+    assert RUN_AT[:10] in sealed_run.parent.name
+
+
+def test_custody_verifier_never_imports_the_system_one_sdk():
+    tree = ast.parse((ROOT / "scripts" / "verify_custody.py").read_text())
+    imported: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported |= {alias.name.split(".")[0] for alias in node.names}
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imported.add(node.module.split(".")[0])
+    assert not imported & {"typesafe_sdk", "system_one_adapter", "msgspec"}
+
+
+def test_runner_and_verifier_agree_on_every_inventory():
+    # The verifier must not import the runner (which pulls in the analyst
+    # module), so the two inventories are written twice. They must not drift.
+    assert verify_custody.SYSTEM_ONE_SUCCESS_INVENTORY == [
+        tuple(entry) for entry in system_one.SUCCESS_INVENTORY
+    ]
+    assert set(verify_custody.SYSTEM_ONE_FAILURE_INVENTORIES) == set(
+        system_one.FAILURE_INVENTORIES
+    )
+    for phase, inventory in system_one.FAILURE_INVENTORIES.items():
+        assert verify_custody.SYSTEM_ONE_FAILURE_INVENTORIES[phase] == [
+            tuple(entry) for entry in inventory
+        ]
+    assert verify_custody.SYSTEM_ONE_BACKENDS == set(system_one.BACKENDS)
+    assert verify_custody.SYSTEM_ONE_SCHEMA == system_one.MANIFEST_SCHEMA
+    assert verify_custody.SYSTEM_ONE_PROMPT_MODE == system_one.PROMPT_MODE
+    assert verify_custody.SYSTEM_ONE_AGENT == system_one.AGENT_NAME
+    assert verify_custody.SYSTEM_ONE_MONOTONIZATION == system_one.MONOTONIZATION

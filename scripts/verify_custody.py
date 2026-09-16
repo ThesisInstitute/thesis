@@ -24,6 +24,73 @@ INVENTORY_STATUS_COMPLETE = "complete"
 INVENTORY_STATUS_LEGACY = "legacy-incomplete"
 DERIVED_ENSEMBLE_SCHEMA = "thesis_derived_ensemble_manifest_v1"
 DERIVED_ENSEMBLE_ALGORITHM = "pointwise_median_cdf_v1"
+SYSTEM_ONE_SCHEMA = "thesis_system_one_run_manifest_v1"
+SYSTEM_ONE_PROMPT_MODE = "system_one_noul_ladder"
+SYSTEM_ONE_AGENT = "thesis.system_one"
+SYSTEM_ONE_BACKENDS = {"typesafe", "adapter", "response_file", "mock"}
+SYSTEM_ONE_MONOTONIZATION = "pav_v1"
+SYSTEM_ONE_SUCCESS_INVENTORY = [
+    ("system_one_state", "state.json"),
+    ("system_one_questions", "questions.json"),
+    ("system_one_request", "request.json"),
+    ("system_one_response", "response.json"),
+    ("command", "command.json"),
+    ("normalized_cell", "normalized_cells.json"),
+    ("run_distribution", "distribution.json"),
+    ("validation_report", "validation.json"),
+    ("cells_with_activity", "cells.with_activity.json"),
+]
+# Each failure phase allows exactly the artifacts its stage had written, in
+# the order it wrote them: a state failure never saw the model, a backend
+# failure never saw a response, a ladder failure never built a cell, and a
+# validate failure never sealed one.
+SYSTEM_ONE_FAILURE_INVENTORIES = {
+    "state": [
+        ("system_one_state", "state.json"),
+        ("error", "error.json"),
+    ],
+    "backend": [
+        ("system_one_state", "state.json"),
+        ("system_one_questions", "questions.json"),
+        ("system_one_request", "request.json"),
+        ("command", "command.json"),
+        ("error", "error.json"),
+    ],
+    "ladder": [
+        ("system_one_state", "state.json"),
+        ("system_one_questions", "questions.json"),
+        ("system_one_request", "request.json"),
+        ("system_one_response", "response.json"),
+        ("command", "command.json"),
+        ("error", "error.json"),
+    ],
+    "validate": [
+        ("system_one_state", "state.json"),
+        ("system_one_questions", "questions.json"),
+        ("system_one_request", "request.json"),
+        ("system_one_response", "response.json"),
+        ("command", "command.json"),
+        ("normalized_cell", "normalized_cells.json"),
+        ("run_distribution", "distribution.json"),
+        ("error", "error.json"),
+    ],
+}
+SYSTEM_ONE_RESOLVER_FIELDS = (
+    ("slug", "catalogSlug"),
+    ("country", "country"),
+    ("unit", "targetUnit"),
+    ("resolutionDate", "resolutionDate"),
+    ("resolutionSource", "resolutionSource"),
+    ("resolutionSourceUrl", "resolutionSourceUrl"),
+    ("resolutionRule", "resolutionRule"),
+    ("dataPointId", "dataPointId"),
+)
+REGISTRATION_BINDING_FIELDS = (
+    "registrationCommit",
+    "targetContentHash",
+    "targetRegistrationPath",
+    "registeredAtUtc",
+)
 LEGACY_DERIVED_AT = "2026-07-08T03:03:42Z"
 LEGACY_DERIVED_DIRS = {
     "bls-ppi-final-demand-monthly-change-june-2026-median3-2026-07-08t03-03-42z",
@@ -2183,6 +2250,182 @@ def _verify_derived_ensemble_v2(
         raise CustodyError("derived activity log has a mismatched distribution")
 
 
+def _system_one_command_backend(run_dir: Path, expected: str) -> None:
+    command = _load_object(run_dir / "command.json")
+    backend = command.get("backend")
+    if backend not in SYSTEM_ONE_BACKENDS:
+        raise CustodyError(f"system_one command.json has invalid backend: {backend!r}")
+    if backend != expected:
+        raise CustodyError(
+            "system_one command backend disagrees with the manifest agent: "
+            f"command={backend!r}, agent={expected!r}"
+        )
+
+
+def _verify_system_one_v2(
+    run_dir: Path,
+    manifest: dict[str, Any],
+    manifest_entries: list[dict[str, Any]],
+    entries: list[dict[str, Any]],
+) -> None:
+    """Verify a System One (Jev) threshold-ladder run.
+
+    This is a comparison lane, like derived_ensemble: a verified run never
+    becomes headline-eligible. What custody guarantees here is that the
+    state the model saw, the questions as sent, the raw response, and the
+    sealed cell are one unbroken inventory.
+    """
+
+    if manifest.get("schemaVersion") != SYSTEM_ONE_SCHEMA:
+        raise CustodyError("system_one custody mode has the wrong manifest schema")
+    if manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODE:
+        raise CustodyError("system_one run has the wrong prompt mode")
+    agent = manifest.get("agent")
+    if not isinstance(agent, dict) or agent.get("agent") != SYSTEM_ONE_AGENT:
+        raise CustodyError("system_one run has the wrong agent identity")
+    backend = agent.get("backend")
+    if backend not in SYSTEM_ONE_BACKENDS:
+        raise CustodyError(f"system_one manifest has invalid backend: {backend!r}")
+    if not isinstance(agent.get("model"), str) or not agent["model"]:
+        raise CustodyError("system_one manifest agent lacks a model string")
+
+    target = manifest.get("targetContext")
+    if not isinstance(target, dict):
+        raise CustodyError("system_one run lacks a target context")
+    for field in ("series", "period"):
+        if canonical_bytes(manifest.get(field)) != canonical_bytes(target.get(field)):
+            raise CustodyError("system_one manifest target identity mismatch")
+    for field in REGISTRATION_BINDING_FIELDS:
+        target_value = target.get(field)
+        if target_value not in (None, "") and manifest.get(field) != target_value:
+            raise CustodyError(f"system_one registration binding mismatch: {field}")
+
+    start = _instant(manifest.get("runStartedAt"), "system_one runStartedAt")
+    if manifest.get("createdAt") != manifest.get("runStartedAt"):
+        raise CustodyError("system_one manifest createdAt/runStartedAt mismatch")
+    sealed = _instant(manifest.get("sealedAt"), "system_one sealedAt")
+    if sealed < start:
+        raise CustodyError("system_one seal time predates its run start")
+
+    actual_inventory = [
+        (str(entry["artifactType"]), str(entry["path"])) for entry in entries
+    ]
+    error_obj = manifest.get("error")
+    phase = error_obj.get("phase") if isinstance(error_obj, dict) else None
+    if phase is not None:
+        expected = SYSTEM_ONE_FAILURE_INVENTORIES.get(str(phase))
+        if expected is None:
+            raise CustodyError(f"unknown system_one failure phase: {phase!r}")
+        if not (
+            manifest.get("ok") is False
+            and "validation" in manifest
+            and manifest["validation"] is None
+            and "cellsPath" in manifest
+            and manifest["cellsPath"] is None
+        ):
+            raise CustodyError(
+                "system_one failure phase on a run that does not present as failed"
+            )
+        error_artifact = run_dir / "error.json"
+        if not error_artifact.is_file() or canonical_bytes(
+            json.loads(error_artifact.read_text())
+        ) != canonical_bytes(manifest["error"]):
+            raise CustodyError(
+                f"{phase}-failure error artifact disagrees with the manifest"
+            )
+        if actual_inventory != expected:
+            raise CustodyError(
+                f"system_one {phase}-failure inventory is invalid: "
+                f"{actual_inventory}"
+            )
+        if phase != "state":
+            _system_one_command_backend(run_dir, str(backend))
+        return
+
+    if "error" in manifest and manifest["error"] is not None:
+        raise CustodyError("system_one run carries an error without a failure phase")
+    validation = manifest.get("validation")
+    if not isinstance(validation, dict):
+        raise CustodyError("system_one run is neither failed nor validation-complete")
+    if manifest.get("ok") is True and validation.get("ok") is not True:
+        raise CustodyError("successful system_one run carries a failed validation")
+    if actual_inventory != SYSTEM_ONE_SUCCESS_INVENTORY:
+        raise CustodyError(
+            f"system_one inventory is not the complete lane inventory: "
+            f"{actual_inventory}"
+        )
+    _system_one_command_backend(run_dir, str(backend))
+    if (
+        _manifest_relative(run_dir, str(manifest.get("cellsPath") or ""), legacy=False)
+        != "cells.with_activity.json"
+    ):
+        raise CustodyError("system_one manifest cellsPath is outside its run")
+
+    try:
+        cells = json.loads((run_dir / "cells.with_activity.json").read_bytes())
+        distribution = json.loads((run_dir / "distribution.json").read_bytes())
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise CustodyError(f"invalid system_one JSON artifact: {exc}") from exc
+    if not isinstance(cells, list) or len(cells) != 1 or not isinstance(cells[0], dict):
+        raise CustodyError("system_one cells payload must contain exactly one cell")
+    cell = cells[0]
+    for cell_field, target_field in SYSTEM_ONE_RESOLVER_FIELDS:
+        expected_value = target.get(target_field)
+        if expected_value not in (None, "") and cell.get(cell_field) != expected_value:
+            raise CustodyError(
+                f"system_one cell {cell_field} differs from the trusted target"
+            )
+    for field in REGISTRATION_BINDING_FIELDS:
+        target_value = target.get(field)
+        if target_value not in (None, "") and cell.get(field) != target_value:
+            raise CustodyError(f"system_one cell registration mismatch: {field}")
+    if (
+        cell.get("runStartedAt") != manifest.get("runStartedAt")
+        or cell.get("runAt") != manifest.get("sealedAt")
+        or cell.get("promptMode") != SYSTEM_ONE_PROMPT_MODE
+        or cell.get("model") != agent.get("model")
+    ):
+        raise CustodyError("system_one cell metadata differs from its manifest")
+
+    ladder = cell.get("thresholdLadder")
+    if not isinstance(ladder, dict):
+        raise CustodyError("system_one cell lacks a threshold ladder")
+    thresholds = ladder.get("thresholds")
+    cumulative = ladder.get("cumulativeProbabilities")
+    raw = ladder.get("rawCumulativeProbabilities")
+    if (
+        not isinstance(thresholds, list)
+        or not isinstance(cumulative, list)
+        or not isinstance(raw, list)
+        or len(thresholds) != len(cumulative)
+        or len(thresholds) != len(raw)
+        or len(thresholds) < 3
+    ):
+        raise CustodyError("system_one threshold ladder is malformed")
+    if ladder.get("monotonization") != SYSTEM_ONE_MONOTONIZATION:
+        raise CustodyError("system_one ladder lacks its monotonization version")
+    if any(later <= earlier for earlier, later in zip(thresholds, thresholds[1:])):
+        raise CustodyError("system_one thresholds are not strictly increasing")
+    if any(later < earlier for earlier, later in zip(cumulative, cumulative[1:])):
+        raise CustodyError("system_one cumulative probabilities are not monotone")
+
+    summary = distribution.get("summary") if isinstance(distribution, dict) else None
+    interval = summary.get("interval80") if isinstance(summary, dict) else None
+    if (
+        not isinstance(distribution, dict)
+        or distribution.get("format") != "numeric_cdf_v1"
+        or distribution.get("provenance") != "agent_reported"
+        or not isinstance(interval, dict)
+        or canonical_bytes(summary.get("pointEstimate"))
+        != canonical_bytes(cell.get("pointEstimate"))
+        or canonical_bytes(interval.get("lower")) != canonical_bytes(cell.get("ciLow"))
+        or canonical_bytes(interval.get("upper")) != canonical_bytes(cell.get("ciHigh"))
+    ):
+        raise CustodyError("system_one distribution summary differs from its cell")
+
+    _verify_cells_activity(run_dir, manifest_entries, entries)
+
+
 def _verify_legacy_derived_without_root(
     run_dir: Path, manifest: dict[str, Any]
 ) -> CustodyVerification:
@@ -2324,6 +2567,7 @@ def verify_run(run_dir: Path) -> CustodyVerification:
             "analyst",
             "resolver",
             "derived_ensemble",
+            "system_one",
             "ledger_witness",
             "sba_pdf_witness",
         }:
@@ -2521,6 +2765,10 @@ def verify_run(run_dir: Path) -> CustodyVerification:
             _verify_sba_pdf_witness_v2(run_dir, manifest, normalized_entries)
         elif run_mode == "derived_ensemble":
             _verify_derived_ensemble_v2(run_dir, manifest, normalized_entries, custody)
+        elif run_mode == "system_one":
+            _verify_system_one_v2(
+                run_dir, manifest, manifest_entries, normalized_entries
+            )
         else:
             raise CustodyError(f"unsupported custody run mode: {run_mode}")
 
@@ -2540,6 +2788,7 @@ def verify_run(run_dir: Path) -> CustodyVerification:
                 and manifest["validation"].get("ok") is True
             )
             or (run_mode == "derived_ensemble" and manifest.get("ok") is True)
+            or (run_mode == "system_one" and manifest.get("ok") is True)
             or (run_mode == "sba_pdf_witness" and manifest.get("ok") is True)
         ),
     )
