@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import functools
 import hashlib
+import importlib
 import json
 import pathlib
 import re
@@ -18,6 +20,7 @@ import shutil
 import stat
 import subprocess
 import sys
+from collections.abc import Callable
 from typing import Any
 
 import docket_publication as docket
@@ -55,6 +58,22 @@ REGISTRATION_FIELDS = (
     "targetRegistrationPath",
     "registeredAtUtc",
 )
+SYSTEM_ONE_SUITE = "system_one"
+SYSTEM_ONE_PROMPT_MODE = "system_one_noul_ladder"
+SYSTEM_ONE_RUN_SCHEMA = "thesis_system_one_run_manifest_v1"
+SYSTEM_ONE_AGENT = "thesis.system_one"
+# Only the two lanes that answer with a real model may cross the boundary.
+# The runner's mock and response_file backends exist for tests and replay;
+# a canned answer is never publishable.
+SYSTEM_ONE_BACKENDS = ("adapter", "typesafe")
+SYSTEM_ONE_LANE_FIELDS = {"batchManifest", "backend", "model"}
+SUITE_NAMES = {"ladder", "median3", "both", SYSTEM_ONE_SUITE}
+LEGACY_LANE_FIELDS = {"ladder", "rollouts", "median3"}
+LANE_FIELDS = {"ladder", "rollouts", "median3", "systemOne"}
+LADDER_SUITES = {"ladder", "both"}
+MEDIAN_SUITES = {"median3", "both"}
+# One batch result validated against its lane: (run manifest path, sealed at).
+RunValidator = Callable[[dict[str, Any]], tuple[pathlib.PurePosixPath, str | None]]
 
 
 class StrategyPublicationError(ValueError):
@@ -100,6 +119,20 @@ def _require_claimed_run_window(
         raise StrategyPublicationError(
             f"{label} claimed runAt is outside the witnessed window"
         )
+
+
+def _trusted_module(name: str):
+    """Import a lane module from the trusted checkout, never the bundle.
+
+    A staged bundle is data. Every recomputation the boundary performs runs
+    the reviewed code in this checkout against it.
+    """
+
+    sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        return importlib.import_module(name)
+    finally:
+        sys.path.pop(0)
 
 
 def _suite_path(value: str) -> pathlib.PurePosixPath:
@@ -214,7 +247,12 @@ def _validate_suite_shape(
     selection: dict[str, Any],
     selection_path: pathlib.Path,
     targets_by_slug: dict[str, dict[str, Any]],
-) -> tuple[dict[str, Any] | None, list[dict[str, Any]], list[dict[str, Any]]]:
+) -> tuple[
+    dict[str, Any] | None,
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    dict[str, Any] | None,
+]:
     if suite.get("schemaVersion") != SUITE_SCHEMA:
         raise StrategyPublicationError("unsupported strategy suite schema")
     if suite.get("sourceSha") != selection.get("sourceSha"):
@@ -231,7 +269,7 @@ def _validate_suite_shape(
     invocation = f"strategy-{run_id}-a{run_attempt}"
     requested_suite = (selection.get("request") or {}).get("suite")
     suite_name = suite.get("suite")
-    if suite_name not in {"ladder", "median3", "both"} or suite_name != requested_suite:
+    if suite_name not in SUITE_NAMES or suite_name != requested_suite:
         raise StrategyPublicationError("suite selector differs from trusted request")
     if suite_relative.parent.name != str(suite.get("createdAt") or "")[:10]:
         raise StrategyPublicationError("suite path day differs from createdAt")
@@ -240,11 +278,17 @@ def _validate_suite_shape(
             "suite path differs from the trusted workflow invocation"
         )
     lanes = suite.get("lanes")
-    if not isinstance(lanes, dict) or set(lanes) != {"ladder", "rollouts", "median3"}:
+    if not isinstance(lanes, dict) or set(lanes) not in (
+        LEGACY_LANE_FIELDS,
+        LANE_FIELDS,
+    ):
         raise StrategyPublicationError("suite lanes have an invalid shape")
     ladder = lanes["ladder"]
     rollouts = lanes["rollouts"]
     medians = lanes["median3"]
+    # Suites written before the system one lane existed carry three keys; the
+    # key is written on every suite from now on and is null off that lane.
+    system_one = lanes.get("systemOne")
     if not isinstance(rollouts, list) or not isinstance(medians, list):
         raise StrategyPublicationError("suite rollout and median lanes must be lists")
     expected_ladder_mode = str(
@@ -254,7 +298,7 @@ def _validate_suite_shape(
         raise StrategyPublicationError(
             "trusted selection carries an unsupported ladder prompt mode"
         )
-    if suite_name in {"ladder", "both"}:
+    if suite_name in LADDER_SUITES:
         # The lane may record its promptMode (suite runners do from
         # ladder_v2 on); when recorded it must equal the TRUSTED selection's
         # mode, and a non-default trusted mode requires the recording — a
@@ -281,9 +325,33 @@ def _validate_suite_shape(
         )
     elif ladder is not None:
         raise StrategyPublicationError(
-            "median3-only suite unexpectedly has a ladder lane"
+            f"{suite_name} suite unexpectedly has a ladder lane"
         )
-    if suite_name in {"median3", "both"}:
+    if suite_name == SYSTEM_ONE_SUITE:
+        backend, model = _system_one_request(selection)
+        if (
+            not isinstance(system_one, dict)
+            or set(system_one) != SYSTEM_ONE_LANE_FIELDS
+        ):
+            raise StrategyPublicationError(
+                "system one suite lacks its exact batch manifest, backend and model"
+            )
+        if system_one.get("backend") != backend:
+            raise StrategyPublicationError(
+                "system one lane backend differs from trusted selection"
+            )
+        if canonical_bytes(system_one.get("model")) != canonical_bytes(model):
+            raise StrategyPublicationError(
+                "system one lane model differs from trusted selection"
+            )
+        _require_invocation_batch(
+            system_one["batchManifest"], selection, f"{invocation}-system-one.json"
+        )
+    elif system_one is not None:
+        raise StrategyPublicationError(
+            f"{suite_name} suite unexpectedly has a system one lane"
+        )
+    if suite_name in MEDIAN_SUITES:
         if [row.get("index") for row in rollouts if isinstance(row, dict)] != [1, 2, 3]:
             raise StrategyPublicationError(
                 "median3 suite requires rollout indices 1,2,3"
@@ -319,8 +387,8 @@ def _validate_suite_shape(
             if not row["ok"] and (row["manifestPath"] is not None or not row["error"]):
                 raise StrategyPublicationError("failed median entry lacks its error")
     elif rollouts or medians:
-        raise StrategyPublicationError("ladder-only suite has median3 lane data")
-    return ladder, rollouts, medians
+        raise StrategyPublicationError(f"{suite_name} suite has median3 lane data")
+    return ladder, rollouts, medians, system_one
 
 
 def _require_invocation_batch(
@@ -410,6 +478,102 @@ def _validate_manifest_identity(
             )
 
 
+def _system_one_request(selection: dict[str, Any]) -> tuple[str, str | None]:
+    """The backend and model a system one suite was authorized to use."""
+
+    request = selection.get("request") or {}
+    backend = request.get("systemOneBackend")
+    model = request.get("systemOneModel")
+    if backend not in SYSTEM_ONE_BACKENDS:
+        raise StrategyPublicationError(
+            "trusted selection carries an unsupported system one backend"
+        )
+    if model is not None and (not isinstance(model, str) or not model.strip()):
+        raise StrategyPublicationError(
+            "trusted selection carries an invalid system one model"
+        )
+    return str(backend), model
+
+
+def _require_run_wrapper(
+    manifest: dict[str, Any],
+    manifest_relative: pathlib.PurePosixPath,
+    result: dict[str, Any],
+    *,
+    lower: dt.datetime,
+    upper: dt.datetime,
+    label: str,
+) -> tuple[dt.datetime, dt.datetime]:
+    """The run clock, its directory stamp and its batch wrapper agree."""
+
+    run_start = _instant(manifest.get("runStartedAt"), "runStartedAt")
+    if manifest.get("createdAt") != manifest.get("runStartedAt"):
+        raise StrategyPublicationError("run createdAt/runStartedAt mismatch")
+    path_stamp = manifest_relative.parent.name[:20]
+    try:
+        path_start = dt.datetime.strptime(path_stamp, "%Y-%m-%dt%H-%M-%Sz").replace(
+            tzinfo=dt.timezone.utc
+        )
+    except ValueError as exc:
+        raise StrategyPublicationError(
+            "run directory lacks canonical timestamp"
+        ) from exc
+    result_start = _instant(result.get("startedAt"), "result startedAt")
+    result_finish = _instant(result.get("finishedAt"), "result finishedAt")
+    if not (lower <= result_start <= run_start == path_start <= result_finish <= upper):
+        raise StrategyPublicationError(
+            f"strategy {label} run is outside witnessed window"
+        )
+    return run_start, result_finish
+
+
+def _require_registration_binding(
+    repo: pathlib.Path, manifest: dict[str, Any], target: dict[str, Any]
+) -> None:
+    for field in REGISTRATION_FIELDS:
+        if manifest.get(field) != target.get(field):
+            raise StrategyPublicationError(
+                f"run registration binding mismatch: {field}"
+            )
+    try:
+        # Comparison targets are pre-existing registrations by design; v2
+        # snapshots introduced strictly before the v3 cutover stay eligible.
+        docket.validate_target_registration(
+            repo,
+            target,
+            run_started_at=str(manifest.get("runStartedAt")),
+            require_git_binding=True,
+            allow_pre_cutover_v2=True,
+        )
+    except docket.PublicationError as exc:
+        raise StrategyPublicationError(str(exc)) from exc
+
+
+def _staged_cells(
+    repo: pathlib.Path,
+    manifest: dict[str, Any],
+    manifest_relative: pathlib.PurePosixPath,
+    cells_value: Any,
+    target: dict[str, Any],
+) -> list[dict[str, Any]]:
+    cells_relative = docket.relative_repo_path(str(cells_value))
+    if cells_relative != manifest_relative.parent / "cells.with_activity.json":
+        raise StrategyPublicationError("cells payload is outside its exact run")
+    try:
+        cells = json.loads(_repo_file(repo, cells_relative).read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise StrategyPublicationError(f"invalid staged cells: {exc}") from exc
+    if not isinstance(cells, list) or len(cells) != 1:
+        raise StrategyPublicationError("strategy run must contain exactly one cell")
+    cell = cells[0]
+    if not isinstance(cell, dict):
+        raise StrategyPublicationError("strategy cell must be a JSON object")
+    _resolver_equal(cell, target)
+    if cell.get("runStartedAt") != manifest.get("runStartedAt"):
+        raise StrategyPublicationError("cell start differs from its manifest")
+    return cells
+
+
 def _validate_analyst_result(
     repo: pathlib.Path,
     result: dict[str, Any],
@@ -448,57 +612,18 @@ def _validate_analyst_result(
         )
     if verification.run_succeeded != expected_ok:
         raise StrategyPublicationError("run custody success status differs from batch")
-    run_start = _instant(manifest.get("runStartedAt"), "runStartedAt")
-    if manifest.get("createdAt") != manifest.get("runStartedAt"):
-        raise StrategyPublicationError("run createdAt/runStartedAt mismatch")
-    path_stamp = manifest_relative.parent.name[:20]
-    try:
-        path_start = dt.datetime.strptime(path_stamp, "%Y-%m-%dt%H-%M-%Sz").replace(
-            tzinfo=dt.timezone.utc
-        )
-    except ValueError as exc:
-        raise StrategyPublicationError(
-            "run directory lacks canonical timestamp"
-        ) from exc
-    result_start = _instant(result.get("startedAt"), "result startedAt")
-    result_finish = _instant(result.get("finishedAt"), "result finishedAt")
-    if not (lower <= result_start <= run_start == path_start <= result_finish <= upper):
-        raise StrategyPublicationError(
-            "strategy analyst run is outside witnessed window"
-        )
-    for field in REGISTRATION_FIELDS:
-        if manifest.get(field) != target.get(field):
-            raise StrategyPublicationError(
-                f"run registration binding mismatch: {field}"
-            )
-    try:
-        # Comparison targets are pre-existing registrations by design; v2
-        # snapshots introduced strictly before the v3 cutover stay eligible.
-        docket.validate_target_registration(
-            repo,
-            target,
-            run_started_at=str(manifest.get("runStartedAt")),
-            require_git_binding=True,
-            allow_pre_cutover_v2=True,
-        )
-    except docket.PublicationError as exc:
-        raise StrategyPublicationError(str(exc)) from exc
+    run_start, result_finish = _require_run_wrapper(
+        manifest, manifest_relative, result, lower=lower, upper=upper, label="analyst"
+    )
+    _require_registration_binding(repo, manifest, target)
     cells_value = result.get("cellsPath")
     if manifest.get("cellsPath") != cells_value:
         raise StrategyPublicationError("run cellsPath differs from batch")
     sealed_at: str | None = None
     if cells_value:
-        cells_relative = docket.relative_repo_path(str(cells_value))
-        if cells_relative != manifest_relative.parent / "cells.with_activity.json":
-            raise StrategyPublicationError("cells payload is outside its exact run")
-        cells = json.loads(_repo_file(repo, cells_relative).read_text())
-        if not isinstance(cells, list) or len(cells) != 1:
-            raise StrategyPublicationError("strategy run must contain exactly one cell")
+        cells = _staged_cells(repo, manifest, manifest_relative, cells_value, target)
         cell = cells[0]
-        _resolver_equal(cell, target)
         seal = _instant(cell.get("runAt"), "cell runAt")
-        if cell.get("runStartedAt") != manifest.get("runStartedAt"):
-            raise StrategyPublicationError("cell start differs from its manifest")
         _require_claimed_run_window(
             lower, run_start, seal, min(result_finish, upper), "analyst"
         )
@@ -546,6 +671,428 @@ def _validate_analyst_result(
     return manifest_relative, sealed_at
 
 
+# --- system one lane --------------------------------------------------------
+
+
+def _system_one_command(
+    repo: pathlib.Path,
+    manifest_relative: pathlib.PurePosixPath,
+    manifest: dict[str, Any],
+) -> dict[str, Any] | None:
+    """The run's own sealed record of what it asked for.
+
+    The manifest agent block carries the model that ANSWERED (the identifier
+    the model returned, or provider/model for the adapter). The requested
+    backend and model, the pair the trusted selection authorized, live in
+    command.json, which custody hashes like every other artifact.
+
+    A run that failed while building its state never reached a backend and
+    so has no command; that phase, and only that phase, may omit it.
+    """
+
+    entries = [
+        artifact
+        for artifact in manifest.get("artifacts", [])
+        if isinstance(artifact, dict) and artifact.get("artifactType") == "command"
+    ]
+    if not entries:
+        error = manifest.get("error")
+        if (
+            manifest.get("ok") is not False
+            or not isinstance(error, dict)
+            or error.get("phase") != "state"
+        ):
+            raise StrategyPublicationError("system one run lacks its recorded command")
+        return None
+    if len(entries) != 1:
+        raise StrategyPublicationError("system one run records two commands")
+    relative = docket.relative_repo_path(str(entries[0].get("path") or ""))
+    if relative != manifest_relative.parent / "command.json":
+        raise StrategyPublicationError("system one command is outside its exact run")
+    return _load_object(_repo_file(repo, relative), "system one command")
+
+
+def _requested_system_one_model(
+    agent: dict[str, Any], backend: str, system_one: Any
+) -> str | None:
+    """Read the requested model back out of an agent block with no command.
+
+    Only a state-phase failure lands here. The runner builds that block from
+    the request alone, so it inverts: provider/model for the adapter, and the
+    requested model (or the bare backend name) for typesafe.
+    """
+
+    recorded = agent.get("model")
+    if not isinstance(recorded, str) or not recorded:
+        raise StrategyPublicationError("system one run records an invalid model")
+    if backend != "adapter":
+        return None if recorded == backend else recorded
+    provider, _, requested = recorded.partition("/")
+    if not requested or provider != agent.get("provider"):
+        raise StrategyPublicationError(
+            "system one adapter run does not name its provider and model"
+        )
+    return requested
+
+
+def _require_system_one_agent(
+    manifest: dict[str, Any],
+    command: dict[str, Any] | None,
+    *,
+    backend: str,
+    model: str | None,
+) -> None:
+    agent = manifest.get("agent")
+    if not isinstance(agent, dict) or agent.get("agent") != SYSTEM_ONE_AGENT:
+        raise StrategyPublicationError(
+            f"system one run was not produced by {SYSTEM_ONE_AGENT}"
+        )
+    if agent.get("backend") != backend or (
+        command is not None and command.get("backend") != backend
+    ):
+        raise StrategyPublicationError(
+            "system one run backend differs from the trusted request"
+        )
+    system_one = _trusted_module("run_system_one_forecast")
+    if command is None:
+        provider = agent.get("provider")
+        requested_model = _requested_system_one_model(agent, backend, system_one)
+    else:
+        provider = command.get("provider")
+        requested_model = command.get("model")
+    if requested_model is not None and not isinstance(requested_model, str):
+        raise StrategyPublicationError("system one run records an invalid model")
+    if model is not None and requested_model != model:
+        raise StrategyPublicationError(
+            "system one run model differs from the trusted request"
+        )
+    if backend == "adapter" and provider not in system_one.PROVIDER_KEY_ENV:
+        raise StrategyPublicationError(
+            "system one run names an unsupported adapter provider"
+        )
+    expected = system_one.agent_block(
+        backend=backend,
+        provider=provider,
+        model=requested_model,
+        response=None,
+    )
+    if backend == "typesafe":
+        # A typesafe run records the identifier the model itself returned,
+        # which the request cannot fix in advance; everything else in the
+        # agent block, including the lane's prompt and tool policy hashes,
+        # is reproduced from trusted code.
+        answering = agent.get("model")
+        if not isinstance(answering, str) or not answering.strip():
+            raise StrategyPublicationError("system one run records no answering model")
+        expected["model"] = answering
+    if canonical_bytes(agent) != canonical_bytes(expected):
+        raise StrategyPublicationError(
+            "system one agent block differs from the trusted lane policy"
+        )
+
+
+def _trusted_primary_cell(state: dict[str, Any], slug: str) -> dict[str, Any]:
+    """Re-read the published cell the run redacted, from the trusted checkout.
+
+    The state a System One model sees is built from an allowlist, and the
+    runner proves the redaction at seal time. The boundary proves it again,
+    which means reading the real primary cell rather than the run's own word
+    for it: the path is pinned in the state and the bytes are pinned by the
+    recorded digest.
+    """
+
+    provenance = state.get("primaryCellProvenance")
+    if not isinstance(provenance, dict):
+        raise StrategyPublicationError("system one state cites no primary cell")
+    relative = docket.relative_repo_path(str(provenance.get("cellPath") or ""))
+    manifest_sibling = (relative.parent / "manifest.json").as_posix()
+    if relative.name != "cells.with_activity.json" or not (
+        docket.RUN_MANIFEST_RE.fullmatch(manifest_sibling)
+    ):
+        raise StrategyPublicationError(
+            f"system one primary cell is outside a recorded run: {relative}"
+        )
+    path = _repo_file(ROOT, relative)
+    if path.is_symlink() or not path.is_file():
+        raise StrategyPublicationError(
+            f"system one primary cell is not in the publisher checkout: {relative}"
+        )
+    if _sha256(path) != provenance.get("cellSha256"):
+        raise StrategyPublicationError(
+            "system one primary cell differs from the one the run read"
+        )
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise StrategyPublicationError(
+            f"invalid system one primary cell: {exc}"
+        ) from exc
+    cells = payload if isinstance(payload, list) else [payload]
+    for cell in cells:
+        if isinstance(cell, dict) and cell.get("slug") == slug:
+            return cell
+    raise StrategyPublicationError("system one primary cell has no cell for the target")
+
+
+def _revalidate_system_one_run(
+    repo: pathlib.Path,
+    run_prefix: pathlib.PurePosixPath,
+    manifest: dict[str, Any],
+    cell: dict[str, Any],
+    target: dict[str, Any],
+) -> None:
+    """Recompute the sealed ladder with trusted code.
+
+    Nothing staged is taken on trust: the questions are rebuilt from the
+    recorded state, the ladder is re-derived from the recorded raw response,
+    the forecast is re-interpolated, the distribution is rebuilt, and the
+    lane's own rubric is re-run against the real primary cell.
+    """
+
+    system_one = _trusted_module("run_system_one_forecast")
+
+    def read(name: str) -> Any:
+        path = _repo_file(repo, run_prefix / name)
+        try:
+            return json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            raise StrategyPublicationError(
+                f"invalid system one {name}: {exc}"
+            ) from exc
+
+    state = read("state.json")
+    questions = read("questions.json")
+    request = read("request.json")
+    response = read("response.json")
+    distribution = read("distribution.json")
+    validation = read("validation.json")
+    normalized = read("normalized_cells.json")
+    if not isinstance(state, dict) or not isinstance(questions, dict):
+        raise StrategyPublicationError("system one state and questions must be objects")
+    if not isinstance(normalized, list) or len(normalized) != 1:
+        raise StrategyPublicationError("system one run must normalize exactly one cell")
+    if canonical_bytes(validation) != canonical_bytes(manifest.get("validation")):
+        raise StrategyPublicationError(
+            "sealed validation report differs from the run manifest"
+        )
+
+    staged = {
+        key: value
+        for key, value in cell.items()
+        if key not in {"model", "activityLog"}
+    }
+    if canonical_bytes(staged) != canonical_bytes(normalized[0]):
+        raise StrategyPublicationError(
+            "published cell differs from its normalized record"
+        )
+    if cell.get("promptMode") != SYSTEM_ONE_PROMPT_MODE:
+        raise StrategyPublicationError("published cell prompt mode differs from lane")
+    agent = manifest.get("agent") or {}
+    if cell.get("model") != agent.get("model"):
+        raise StrategyPublicationError(
+            "published cell model differs from the run agent"
+        )
+    declared = {
+        canonical_bytes(artifact)
+        for artifact in manifest.get("artifacts", [])
+        if isinstance(artifact, dict)
+    }
+    activity = cell.get("activityLog")
+    if not isinstance(activity, list) or any(
+        canonical_bytes(row) not in declared for row in activity
+    ):
+        raise StrategyPublicationError(
+            "published activity log is not the run's custody inventory"
+        )
+    if canonical_bytes(request.get("state")) != canonical_bytes(state):
+        raise StrategyPublicationError(
+            "system one request state differs from the sealed state"
+        )
+
+    ladder = cell.get("thresholdLadder")
+    if not isinstance(ladder, dict):
+        raise StrategyPublicationError("published cell carries no threshold ladder")
+    thresholds = ladder.get("thresholds")
+    if canonical_bytes(thresholds) != canonical_bytes(questions.get("thresholds")):
+        raise StrategyPublicationError(
+            "published thresholds differ from the elicited ladder"
+        )
+    precision = questions.get("precision")
+    if type(precision) is not int:
+        raise StrategyPublicationError(
+            "system one questions record no rounding precision"
+        )
+    payloads = questions.get("questions")
+    if canonical_bytes(request.get("questions")) != canonical_bytes(payloads):
+        raise StrategyPublicationError(
+            "system one request questions differ from the sealed ladder"
+        )
+    try:
+        expected_payloads = system_one.question_payloads(
+            contract=state.get("target") or {},
+            thresholds=[float(value) for value in thresholds],
+            precision=precision,
+        )
+        names = list(expected_payloads)
+        raw = [
+            system_one.round_probability(value)
+            for value in system_one.noul_probabilities(response, names)
+        ]
+        monotone = [
+            system_one.round_probability(value)
+            for value in system_one.clamp_unit(system_one.pav_monotone(raw))
+        ]
+        quantiles = system_one.quantiles_from_ladder(
+            [float(value) for value in thresholds], monotone, precision
+        )
+        expected_distribution = system_one.ladder_distribution(cell)
+    except (
+        system_one.SystemOneRunError,
+        ArithmeticError,
+        IndexError,
+        KeyError,
+        TypeError,
+        ValueError,
+    ) as exc:
+        raise StrategyPublicationError(
+            f"system one ladder does not recompute: {exc}"
+        ) from exc
+    if canonical_bytes(payloads) != canonical_bytes(expected_payloads):
+        raise StrategyPublicationError(
+            "elicited questions differ from the trusted ladder template"
+        )
+    raw_published = ladder.get("rawCumulativeProbabilities")
+    if canonical_bytes(raw_published) != canonical_bytes(raw):
+        raise StrategyPublicationError(
+            "published raw ladder differs from the recorded response"
+        )
+    if canonical_bytes(ladder.get("cumulativeProbabilities")) != canonical_bytes(
+        monotone
+    ):
+        raise StrategyPublicationError(
+            "published ladder is not the monotonized response"
+        )
+    if ladder.get("monotonization") != system_one.MONOTONIZATION:
+        raise StrategyPublicationError(
+            "published ladder declares another monotonization"
+        )
+    for field, key in (("ciLow", "q10"), ("pointEstimate", "q50"), ("ciHigh", "q90")):
+        if canonical_bytes(cell.get(field)) != canonical_bytes(quantiles[key]):
+            raise StrategyPublicationError(
+                f"published {field} is not the interpolated ladder"
+            )
+    if canonical_bytes(distribution) != canonical_bytes(expected_distribution):
+        raise StrategyPublicationError(
+            "published distribution is not the ladder distribution"
+        )
+
+    report = system_one.validate_run(
+        cell=normalized[0],
+        target=target,
+        state=state,
+        questions=questions,
+        primary_cell=_trusted_primary_cell(state, str(cell.get("slug") or "")),
+        raw_probabilities=raw,
+        monotone=monotone,
+        distribution=distribution,
+    )
+    if canonical_bytes(report) != canonical_bytes(validation):
+        raise StrategyPublicationError(
+            "trusted validator disagrees with the sealed validation report"
+        )
+
+
+def _validate_system_one_result(
+    repo: pathlib.Path,
+    result: dict[str, Any],
+    *,
+    backend: str,
+    model: str | None,
+    lower: dt.datetime,
+    upper: dt.datetime,
+) -> tuple[pathlib.PurePosixPath, str | None]:
+    target = result["target"]
+    manifest_relative = _run_relative(result.get("manifestPath"))
+    manifest_path = _repo_file(repo, manifest_relative)
+    manifest = _load_object(manifest_path, "system one run manifest")
+    if manifest.get("schemaVersion") != SYSTEM_ONE_RUN_SCHEMA:
+        raise StrategyPublicationError(
+            "system one batch contains a non-system-one manifest"
+        )
+    if manifest.get("runMode") != SYSTEM_ONE_SUITE:
+        raise StrategyPublicationError("system one run declares another run mode")
+    if manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODE:
+        raise StrategyPublicationError(
+            "system one run prompt mode differs from its lane"
+        )
+    if canonical_bytes(manifest.get("targetContext")) != canonical_bytes(target):
+        raise StrategyPublicationError("run targetContext differs from trusted target")
+    # The system one manifest carries the whole trusted target in
+    # targetContext, which is compared byte for byte above; series and period
+    # are the identity fields it also names on its own.
+    _validate_manifest_identity(manifest, target, ("series", "period"))
+    expected_ok = result.get("ok") is True
+    if manifest.get("ok") is not expected_ok:
+        raise StrategyPublicationError("batch and run success status differ")
+    docket.validate_run_file_inventory(repo, manifest_relative, manifest)
+    try:
+        verification = verify_run(manifest_path.parent)
+    except CustodyError as exc:
+        raise StrategyPublicationError(
+            f"run custody verification failed: {exc}"
+        ) from exc
+    if (
+        verification.inventory_status != "complete"
+        or verification.run_mode != SYSTEM_ONE_SUITE
+    ):
+        raise StrategyPublicationError(
+            "new system one run lacks complete v2 custody"
+        )
+    if verification.run_succeeded != expected_ok:
+        raise StrategyPublicationError("run custody success status differs from batch")
+    if verification.headline_eligible:
+        raise StrategyPublicationError(
+            "system one is a comparison lane and may never be headline eligible"
+        )
+    # Custody has now hashed every artifact, so the recorded command is the
+    # one the run actually issued.
+    command = _system_one_command(repo, manifest_relative, manifest)
+    _require_system_one_agent(manifest, command, backend=backend, model=model)
+    run_start, result_finish = _require_run_wrapper(
+        manifest,
+        manifest_relative,
+        result,
+        lower=lower,
+        upper=upper,
+        label="system one",
+    )
+    _require_registration_binding(repo, manifest, target)
+    cells_value = result.get("cellsPath")
+    if manifest.get("cellsPath") != cells_value:
+        raise StrategyPublicationError("run cellsPath differs from batch")
+    sealed_at: str | None = None
+    if cells_value:
+        cells = _staged_cells(repo, manifest, manifest_relative, cells_value, target)
+        cell = cells[0]
+        seal = _instant(cell.get("runAt"), "cell runAt")
+        _require_claimed_run_window(
+            lower, run_start, seal, min(result_finish, upper), "system one"
+        )
+        if seal > result_finish:
+            raise StrategyPublicationError("cell seal is outside its result wrapper")
+        sealed_at = str(cell["runAt"])
+        _revalidate_system_one_run(
+            repo, manifest_relative.parent, manifest, cell, target
+        )
+        if bool((manifest.get("validation") or {}).get("ok")) != expected_ok:
+            raise StrategyPublicationError(
+                "trusted validator disagrees with run status"
+            )
+    elif expected_ok:
+        raise StrategyPublicationError("passing strategy result lacks cells")
+    return manifest_relative, sealed_at
+
+
 def _validate_batch(
     repo: pathlib.Path,
     relative: pathlib.PurePosixPath,
@@ -554,12 +1101,21 @@ def _validate_batch(
     prompt_mode: str,
     lower: dt.datetime,
     upper: dt.datetime,
+    validate_result: RunValidator | None = None,
+    require_recorded: dict[str, Any] | None = None,
 ) -> tuple[dict[str, dict[str, Any]], set[pathlib.PurePosixPath], dt.datetime]:
     batch = _load_object(_repo_file(repo, relative), "strategy batch")
     if batch.get("schemaVersion") != "thesis_batch_manifest_v1":
         raise StrategyPublicationError("unsupported strategy batch schema")
     if batch.get("promptMode") != prompt_mode:
         raise StrategyPublicationError("strategy batch prompt mode differs from lane")
+    # A batch may echo its lane's forecaster; when it does, the echo must be
+    # the trusted one, the same rule the ladder lane applies to promptMode.
+    for key, value in (require_recorded or {}).items():
+        if key in batch and canonical_bytes(batch[key]) != canonical_bytes(value):
+            raise StrategyPublicationError(
+                f"strategy batch {key} differs from its trusted lane"
+            )
     batch_start = _instant(batch.get("startedAt"), "batch startedAt")
     batch_finish = _instant(batch.get("finishedAt"), "batch finishedAt")
     if not (lower <= batch_start <= batch_finish <= upper):
@@ -575,19 +1131,20 @@ def _validate_batch(
         or batch["failed"] != len(results) - passed
     ):
         raise StrategyPublicationError("strategy batch success counters mismatch")
+    validator = validate_result or functools.partial(
+        _validate_analyst_result,
+        repo,
+        prompt_mode=prompt_mode,
+        lower=lower,
+        upper=upper,
+    )
     prefixes: set[pathlib.PurePosixPath] = set()
     for result in results.values():
         result_start = _instant(result.get("startedAt"), "result startedAt")
         result_finish = _instant(result.get("finishedAt"), "result finishedAt")
         if result_start < batch_start or result_finish > batch_finish:
             raise StrategyPublicationError("batch timestamps do not contain a result")
-        manifest_relative, _ = _validate_analyst_result(
-            repo,
-            result,
-            prompt_mode=prompt_mode,
-            lower=lower,
-            upper=upper,
-        )
+        manifest_relative, _ = validator(result)
         prefixes.add(manifest_relative.parent)
     return results, prefixes, batch_finish
 
@@ -750,7 +1307,7 @@ def validate_tree(
         raise StrategyPublicationError("publish validation predates selection witness")
     _validate_source_sha(str(selection["sourceSha"]), exact=exact_source)
     suite = _load_object(_repo_file(repo, suite_relative), "strategy suite")
-    ladder, rollout_lanes, medians = _validate_suite_shape(
+    ladder, rollout_lanes, medians, system_one = _validate_suite_shape(
         suite, suite_relative, selection, selection_path, targets_by_slug
     )
     suite_created = _instant(suite.get("createdAt"), "suite createdAt")
@@ -772,6 +1329,31 @@ def validate_tree(
             prompt_mode=expected_ladder_mode,
             lower=lower,
             upper=upper,
+        )
+        _claim_run_prefixes(prefixes, batch_prefixes)
+        finishes.append(finished)
+    if system_one:
+        backend, model = _system_one_request(selection)
+        relative = _batch_relative(system_one["batchManifest"])
+        if relative in exact:
+            raise StrategyPublicationError("suite references a batch more than once")
+        exact.add(relative)
+        _, batch_prefixes, finished = _validate_batch(
+            repo,
+            relative,
+            targets_by_slug,
+            prompt_mode=SYSTEM_ONE_PROMPT_MODE,
+            lower=lower,
+            upper=upper,
+            validate_result=functools.partial(
+                _validate_system_one_result,
+                repo,
+                backend=backend,
+                model=model,
+                lower=lower,
+                upper=upper,
+            ),
+            require_recorded={"backend": backend, "model": model},
         )
         _claim_run_prefixes(prefixes, batch_prefixes)
         finishes.append(finished)
