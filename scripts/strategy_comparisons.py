@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Publish strategy-lane runs as comparison-run augments.
 
-Three lanes land here, all attached to EXISTING catalog cells so they are
+Four lanes land here, all attached to EXISTING catalog cells so they are
 graded against the same resolutions as the headline runs:
 
 - ladder: reviewed runs elicited as a threshold ladder of binary
@@ -11,6 +11,9 @@ graded against the same resolutions as the headline runs:
   tell the samples apart.
 - median3: derived median-of-rollouts runs from
   scripts/median_rollout_ensemble.py, published with the exact median CDF.
+- system_one: System One runs from scripts/run_system_one_forecast.py, a
+  ladder of independent Noul questions answered with no tools, no search,
+  and no chain of thought; the published CDF is the monotonized ladder.
 
 Everything is emitted into site/src/data/thesis-strategy-comparisons.ts as
 STRATEGY_COMPARISON_RUN_AUGMENTS, merged onto cells alongside the existing
@@ -42,6 +45,20 @@ SUITES_ROOT = ROOT / "records" / "thesis-analyst" / "strategy-suites"
 LEGACY_INDEX_SCHEMA = "thesis_strategy_legacy_index_v1"
 SUITE_SCHEMA = "thesis_strategy_suite_v1"
 
+# Suite manifests written before the System One lane existed carry exactly
+# three lane keys; every suite written from now on also carries systemOne
+# (null when the suite is ladder / median3 / both). Both shapes are trusted
+# records, so the scanner accepts either and nothing else.
+LEGACY_SUITE_LANE_KEYS = frozenset({"ladder", "rollouts", "median3"})
+SUITE_LANE_KEYS = LEGACY_SUITE_LANE_KEYS | {"systemOne"}
+SUITE_SELECTORS = frozenset({"ladder", "median3", "both", "system_one"})
+
+SYSTEM_ONE_AGENT = "thesis.system_one"
+SYSTEM_ONE_RUN_MODE = "system_one"
+SYSTEM_ONE_PROMPT_MODE = "system_one_noul_ladder"
+SYSTEM_ONE_LANE = "system_one"
+SYSTEM_ONE_LABEL = "System One threshold ladder"
+
 sys.path.insert(0, str(SCRIPTS))
 from thesis_records_to_comparisons import (  # noqa: E402
     comparison_run,
@@ -49,6 +66,7 @@ from thesis_records_to_comparisons import (  # noqa: E402
     infer_runtime_model,
     repo_path,
     scaled,
+    slugify,
     unsign_zero,
 )
 
@@ -195,6 +213,23 @@ def build_model_lane_stats(
                 attempted=len(median_rows),
                 passed=sum(1 for row in median_rows if row.get("ok") is True),
             )
+            # The System One lane runs its own model, never the suite's
+            # analyst model, so it is tallied from its own batch alone and
+            # never contributes to suite_model.
+            system_one = lanes.get("systemOne")
+            if isinstance(system_one, dict) and system_one.get("batchManifest"):
+                batch = json.loads(
+                    repo_path(str(system_one["batchManifest"])).read_text()
+                )
+                results = batch.get("results", [])
+                bump(
+                    _batch_model(batch),
+                    SYSTEM_ONE_LANE,
+                    attempted=len(results),
+                    passed=sum(
+                        1 for result in results if result.get("ok") is True
+                    ),
+                )
 
     return [
         {
@@ -362,6 +397,83 @@ def ladder_augments(
         distribution = ladder_distribution(cell, scale)
         if distribution:
             run["predictionDistribution"] = distribution
+        augments.setdefault(slug, []).append(run)
+    return augments
+
+
+def system_one_augments(
+    batch_paths: list[pathlib.Path],
+) -> dict[str, list[dict[str, Any]]]:
+    """Project sealed System One runs as comparison runs.
+
+    The lane is identified by the agent and the sealed run mode, not by the
+    batch it was listed in, so a foreign manifest can never borrow the
+    System One label. Everything the reader sees about the run comes from
+    the manifest: the agent, the backend, the model, and the artifact
+    inventory. The published CDF is the monotonized ladder itself.
+    """
+
+    augments: dict[str, list[dict[str, Any]]] = {}
+    for target, manifest, cell in batch_results(batch_paths):
+        slug = target["catalogSlug"]
+        agent = manifest.get("agent") or {}
+        if (
+            manifest.get("runMode") != SYSTEM_ONE_RUN_MODE
+            or manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODE
+            or agent.get("agent") != SYSTEM_ONE_AGENT
+        ):
+            raise ValueError(
+                f"system one lane holds a non-system-one run for {slug}"
+            )
+        backend = agent.get("backend")
+        model = agent.get("model")
+        if not backend or not model:
+            raise ValueError(
+                f"system one run for {slug} names no backend or model"
+            )
+        artifacts = manifest.get("artifacts") or []
+        if not artifacts:
+            raise ValueError(f"system one run for {slug} has no artifacts")
+        value_scale = target.get("valueScale", 1)
+        target_unit = target.get("targetUnit")
+        scale = effective_scale(cell, value_scale, target_unit)
+        run = comparison_run(cell, manifest, slug, value_scale, target_unit)
+        provider = agent.get("provider")
+        backend_label = f"{backend} ({provider})" if provider else backend
+        run["variantId"] = (
+            f"{slug}-thesis-system-one-{slugify(cell['runAt'])}"
+        )
+        run["label"] = SYSTEM_ONE_LABEL
+        run["description"] = (
+            "System One run: the model answered 15 independent yes/no "
+            "threshold questions about one fixed pre-resolution evidence "
+            "state and returned a probability for each, with no tools, no "
+            "search, and no chain of thought. Backend "
+            f"{backend_label}, model {model}. The published CDF is the "
+            "monotonized ladder itself; the point estimate and the 80% "
+            "interval are interpolated from it."
+            + (
+                " Values converted to the catalog target unit."
+                if scale != 1
+                else ""
+            )
+        )
+        prediction_run = run["predictionRun"]
+        prediction_run["agent"] = SYSTEM_ONE_AGENT
+        prediction_run["model"] = str(model)
+        prediction_run["runLabel"] = SYSTEM_ONE_LABEL
+        prediction_run["runDescription"] = (
+            "Recorded thesis.system_one run promoted from the sealed "
+            "manifest; the request, the raw response, and the ladder are "
+            "in the activity log."
+        )
+        prediction_run["activityLog"] = artifacts
+        distribution = ladder_distribution(cell, scale)
+        if not distribution:
+            raise ValueError(
+                f"system one run for {slug} has no usable threshold ladder"
+            )
+        run["predictionDistribution"] = distribution
         augments.setdefault(slug, []).append(run)
     return augments
 
@@ -605,14 +717,13 @@ def load_suite_waves(
         if suite.get("schemaVersion") != SUITE_SCHEMA:
             raise ValueError(f"unsupported strategy suite manifest: {path}")
         selector = suite.get("suite")
-        if selector not in {"ladder", "median3", "both"}:
+        if selector not in SUITE_SELECTORS:
             raise ValueError(f"invalid suite selector in {path}")
         lanes = suite.get("lanes")
-        if not isinstance(lanes, dict) or set(lanes) != {
-            "ladder",
-            "rollouts",
-            "median3",
-        }:
+        if not isinstance(lanes, dict) or set(lanes) not in (
+            set(LEGACY_SUITE_LANE_KEYS),
+            set(SUITE_LANE_KEYS),
+        ):
             raise ValueError(f"invalid strategy lane inventory in {path}")
         ladder = lanes["ladder"]
         ladder_batches = []
@@ -622,8 +733,10 @@ def load_suite_waves(
             ladder_batches = [pathlib.Path(ladder["batchManifest"])]
         if selector in {"ladder", "both"} and not ladder_batches:
             raise ValueError(f"selected suite lacks its ladder lane in {path}")
-        if selector == "median3" and ladder_batches:
-            raise ValueError(f"median3-only suite has a ladder lane in {path}")
+        if selector in {"median3", "system_one"} and ladder_batches:
+            raise ValueError(
+                f"{selector}-only suite has a ladder lane in {path}"
+            )
         rollout_rows = lanes["rollouts"]
         if not isinstance(rollout_rows, list):
             raise ValueError(f"invalid rollout lanes in {path}")
@@ -638,8 +751,10 @@ def load_suite_waves(
         median_rows = lanes["median3"]
         if not isinstance(median_rows, list):
             raise ValueError(f"invalid median3 lanes in {path}")
-        if selector == "ladder" and median_rows:
-            raise ValueError(f"ladder-only suite has median3 lanes in {path}")
+        if selector in {"ladder", "system_one"} and median_rows:
+            raise ValueError(
+                f"{selector}-only suite has median3 lanes in {path}"
+            )
         median_paths = []
         for row in median_rows:
             if not isinstance(row, dict) or type(row.get("ok")) is not bool:
@@ -650,11 +765,30 @@ def load_suite_waves(
                 median_paths.append(pathlib.Path(row["manifestPath"]))
             elif row.get("manifestPath") is not None or not row.get("error"):
                 raise ValueError(f"failed median3 result is incomplete in {path}")
+        system_one_lane = lanes.get("systemOne")
+        system_one_batches: list[pathlib.Path] = []
+        if system_one_lane is not None:
+            if not isinstance(system_one_lane, dict) or not system_one_lane.get(
+                "batchManifest"
+            ):
+                raise ValueError(f"invalid system one lane in {path}")
+            system_one_batches = [
+                pathlib.Path(str(system_one_lane["batchManifest"]))
+            ]
+        if selector == "system_one" and not system_one_batches:
+            raise ValueError(
+                f"selected suite lacks its system one lane in {path}"
+            )
+        if selector != "system_one" and system_one_batches:
+            raise ValueError(
+                f"{selector} suite carries a system one lane in {path}"
+            )
         waves.append(
             {
                 "ladderBatches": ladder_batches,
                 "rolloutBatches": rollout_batches,
                 "medianManifests": median_paths,
+                "systemOneBatches": system_one_batches,
             }
         )
     return waves
@@ -689,6 +823,7 @@ def all_record_augments(
                 if wave["rolloutBatches"]
                 else {},
                 median_augments(wave["medianManifests"]),
+                system_one_augments(wave["systemOneBatches"]),
             )
         )
     return merge(*wave_augments)
