@@ -70,12 +70,21 @@ normalized CRPS is lower than persistence.
 
 ## System One lane
 
-`thesis.system_one` is a comparison lane whose runs are scored here like any
-other: a System One model answers 15 independent threshold questions on a
-redacted evidence state, and the monotonized ladder becomes the `agent_reported`
-CDF the CRPS pipeline scores against `thesis.analyst` and the persistence
-baseline. See [`docs/system-one-lane.md`](system-one-lane.md) for the evidence
-boundary, the ladder rule, the backends, and what the lane does and does not
+`thesis.system_one` is a comparison lane: a System One model, or an LLM
+emulating that interface, answers 15 threshold questions on a redacted
+evidence state, and the monotonized ladder becomes the `agent_reported` CDF.
+Like the other comparison lanes (ladder, fast rollouts, median3), its rows
+are projected into the site as comparison runs, so their CRPS appears on cell
+pages and in the log scoreboard at the claimed-time tier only. They earn no
+reward: `comparison_run` attaches no `custodyRootSha256`, so
+`classifyPublicationProof` cannot witness them and `rewardEligibilityFor`
+records `excluded_chronology_claimed_only` with a null reward value; and
+custody reports `headline_eligible: false` for every `system_one` run by
+design, which a witnessed root would still fail on. Scoring these lanes for
+reward would take a witnessed comparison tier that does not require headline
+eligibility, which does not exist today. See
+[`docs/system-one-lane.md`](system-one-lane.md) for the evidence boundary,
+the ladder rule, the backends, and what the lane does and does not
 establish.
 
 ## LLM Judges

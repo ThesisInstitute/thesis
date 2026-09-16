@@ -719,14 +719,18 @@ def _requested_system_one_model(
 
     Only a state-phase failure lands here. The runner builds that block from
     the request alone, so it inverts: provider/model for the adapter, and the
-    requested model (or the bare backend name) for typesafe.
+    requested model, or null when the request named none, for typesafe.
     """
 
     recorded = agent.get("model")
+    if backend != "adapter":
+        if recorded is None:
+            return None
+        if not isinstance(recorded, str) or not recorded:
+            raise StrategyPublicationError("system one run records an invalid model")
+        return recorded
     if not isinstance(recorded, str) or not recorded:
         raise StrategyPublicationError("system one run records an invalid model")
-    if backend != "adapter":
-        return None if recorded == backend else recorded
     provider, _, requested = recorded.partition("/")
     if not requested or provider != agent.get("provider"):
         raise StrategyPublicationError(
@@ -762,13 +766,26 @@ def _require_system_one_agent(
         requested_model = command.get("model")
     if requested_model is not None and not isinstance(requested_model, str):
         raise StrategyPublicationError("system one run records an invalid model")
-    if model is not None and requested_model != model:
+    # A null systemOneModel in the trusted request is not "any model": it
+    # means the runner default for that backend, which is exactly what the
+    # suite runner produces, since it passes no --model when the request
+    # carries none. Resolve it before comparing.
+    expected_model = model
+    if expected_model is None and backend == "adapter":
+        expected_model = system_one.DEFAULT_ADAPTER_MODEL
+    if requested_model != expected_model:
         raise StrategyPublicationError(
             "system one run model differs from the trusted request"
         )
-    if backend == "adapter" and provider not in system_one.PROVIDER_KEY_ENV:
+    # The request carries no provider field because a dispatched run never
+    # chooses one: the suite runner passes no --provider, so an adapter run
+    # is the runner default and a typesafe run has none. Bind both.
+    expected_provider = (
+        system_one.DEFAULT_ADAPTER_PROVIDER if backend == "adapter" else None
+    )
+    if provider != expected_provider:
         raise StrategyPublicationError(
-            "system one run names an unsupported adapter provider"
+            "system one run provider differs from the trusted lane default"
         )
     expected = system_one.agent_block(
         backend=backend,
@@ -791,20 +808,25 @@ def _require_system_one_agent(
         )
 
 
-def _trusted_primary_cell(state: dict[str, Any], slug: str) -> dict[str, Any]:
-    """Re-read the published cell the run redacted, from the trusted checkout.
+def _trusted_primary_cell(
+    system_one: Any, slug: str
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """The primary cell the PUBLISHED CATALOG binds to this slug.
 
-    The state a System One model sees is built from an allowlist, and the
-    runner proves the redaction at seal time. The boundary proves it again,
-    which means reading the real primary cell rather than the run's own word
-    for it: the path is pinned in the state and the bytes are pinned by the
-    recorded digest.
+    Which evidence a run was allowed to see is not the generate job's
+    choice. The site publishes one cell per slug and that cell names its own
+    recorded run in its activity log, so the boundary resolves the primary
+    cell the same way the runner does, from the trusted checkout, and then
+    rebuilds the state from it. A run that read any other file, a comparison
+    lane run for the same slug included, cannot match.
     """
 
-    provenance = state.get("primaryCellProvenance")
-    if not isinstance(provenance, dict):
-        raise StrategyPublicationError("system one state cites no primary cell")
-    relative = docket.relative_repo_path(str(provenance.get("cellPath") or ""))
+    path = system_one.catalog_primary_cell(slug, root=ROOT)
+    if path is None:
+        raise StrategyPublicationError(
+            f"the published catalog binds no primary cell for {slug}"
+        )
+    relative = docket.relative_repo_path(path.relative_to(ROOT).as_posix())
     manifest_sibling = (relative.parent / "manifest.json").as_posix()
     if relative.name != "cells.with_activity.json" or not (
         docket.RUN_MANIFEST_RE.fullmatch(manifest_sibling)
@@ -812,26 +834,29 @@ def _trusted_primary_cell(state: dict[str, Any], slug: str) -> dict[str, Any]:
         raise StrategyPublicationError(
             f"system one primary cell is outside a recorded run: {relative}"
         )
-    path = _repo_file(ROOT, relative)
     if path.is_symlink() or not path.is_file():
         raise StrategyPublicationError(
             f"system one primary cell is not in the publisher checkout: {relative}"
         )
-    if _sha256(path) != provenance.get("cellSha256"):
+    manifest = _load_object(
+        _repo_file(ROOT, relative.parent / "manifest.json"),
+        "system one primary run manifest",
+    )
+    if (
+        manifest.get("runMode") not in (None, "analyst")
+        or manifest.get("ok") is not True
+        or (manifest.get("targetContext") or {}).get("catalogSlug") != slug
+    ):
         raise StrategyPublicationError(
-            "system one primary cell differs from the one the run read"
+            "the catalog primary cell is not a successful analyst run for "
+            f"{slug}"
         )
     try:
-        payload = json.loads(path.read_text())
-    except (OSError, json.JSONDecodeError) as exc:
+        return system_one.load_primary_cell(explicit=path, slug=slug)
+    except system_one.SystemOneInputError as exc:
         raise StrategyPublicationError(
             f"invalid system one primary cell: {exc}"
         ) from exc
-    cells = payload if isinstance(payload, list) else [payload]
-    for cell in cells:
-        if isinstance(cell, dict) and cell.get("slug") == slug:
-            return cell
-    raise StrategyPublicationError("system one primary cell has no cell for the target")
 
 
 def _revalidate_system_one_run(
@@ -840,13 +865,17 @@ def _revalidate_system_one_run(
     manifest: dict[str, Any],
     cell: dict[str, Any],
     target: dict[str, Any],
+    ledger_rows: list[dict[str, Any]],
 ) -> None:
-    """Recompute the sealed ladder with trusted code.
+    """Recompute the sealed run with trusted code and trusted evidence.
 
-    Nothing staged is taken on trust: the questions are rebuilt from the
-    recorded state, the ladder is re-derived from the recorded raw response,
-    the forecast is re-interpolated, the distribution is rebuilt, and the
-    lane's own rubric is re-run against the real primary cell.
+    Nothing staged is taken on trust. The evidence state is rebuilt from the
+    trusted target, the primary cell the published catalog binds, and the
+    pinned ledger, and compared byte for byte; the ladder geometry and the
+    questions are rebuilt from that state; the response is re-monotonized,
+    the forecast re-interpolated, the distribution rebuilt, and the lane's
+    own rubric re-run. A forged history value, threshold, or ledger row
+    fails here rather than publishing.
     """
 
     system_one = _trusted_module("run_system_one_forecast")
@@ -869,6 +898,25 @@ def _revalidate_system_one_run(
     normalized = read("normalized_cells.json")
     if not isinstance(state, dict) or not isinstance(questions, dict):
         raise StrategyPublicationError("system one state and questions must be objects")
+    slug = str(cell.get("slug") or "")
+    primary_cell, primary_provenance = _trusted_primary_cell(system_one, slug)
+    run_started_at = str(manifest.get("runStartedAt") or "")
+    try:
+        expected_state = system_one.build_state(
+            target=target,
+            primary_cell=primary_cell,
+            primary_provenance=primary_provenance,
+            ledger=system_one.ledger_selection(target, ledger_rows, run_started_at),
+            run_started_at=run_started_at,
+        )
+    except (ArithmeticError, KeyError, TypeError, ValueError) as exc:
+        raise StrategyPublicationError(
+            f"system one state does not recompute: {exc}"
+        ) from exc
+    if canonical_bytes(state) != canonical_bytes(expected_state):
+        raise StrategyPublicationError(
+            "system one state is not the evidence the trusted inputs produce"
+        )
     if not isinstance(normalized, list) or len(normalized) != 1:
         raise StrategyPublicationError("system one run must normalize exactly one cell")
     if canonical_bytes(validation) != canonical_bytes(manifest.get("validation")):
@@ -912,15 +960,26 @@ def _revalidate_system_one_run(
     ladder = cell.get("thresholdLadder")
     if not isinstance(ladder, dict):
         raise StrategyPublicationError("published cell carries no threshold ladder")
-    thresholds = ladder.get("thresholds")
-    if canonical_bytes(thresholds) != canonical_bytes(questions.get("thresholds")):
-        raise StrategyPublicationError(
-            "published thresholds differ from the elicited ladder"
+    try:
+        expected_ladder = system_one.build_ladder(
+            ledger_observations=expected_state["ledgerObservations"]["rows"],
+            history=system_one.history_rows(primary_cell),
         )
-    precision = questions.get("precision")
-    if type(precision) is not int:
+    except (
+        system_one.SystemOneRunError,
+        ArithmeticError,
+        KeyError,
+        TypeError,
+        ValueError,
+    ) as exc:
         raise StrategyPublicationError(
-            "system one questions record no rounding precision"
+            f"system one ladder does not recompute from the trusted evidence: {exc}"
+        ) from exc
+    thresholds = expected_ladder["thresholds"]
+    precision = expected_ladder["precision"]
+    if canonical_bytes(ladder.get("thresholds")) != canonical_bytes(thresholds):
+        raise StrategyPublicationError(
+            "published thresholds differ from the trusted ladder"
         )
     payloads = questions.get("questions")
     if canonical_bytes(request.get("questions")) != canonical_bytes(payloads):
@@ -929,9 +988,14 @@ def _revalidate_system_one_run(
         )
     try:
         expected_payloads = system_one.question_payloads(
-            contract=state.get("target") or {},
+            contract=expected_state["target"],
             thresholds=[float(value) for value in thresholds],
             precision=precision,
+        )
+        expected_questions = system_one.build_questions(
+            ladder=expected_ladder,
+            payloads=expected_payloads,
+            ledger_observations=expected_state["ledgerObservations"]["rows"],
         )
         names = list(expected_payloads)
         raw = [
@@ -957,7 +1021,7 @@ def _revalidate_system_one_run(
         raise StrategyPublicationError(
             f"system one ladder does not recompute: {exc}"
         ) from exc
-    if canonical_bytes(payloads) != canonical_bytes(expected_payloads):
+    if canonical_bytes(questions) != canonical_bytes(expected_questions):
         raise StrategyPublicationError(
             "elicited questions differ from the trusted ladder template"
         )
@@ -991,7 +1055,7 @@ def _revalidate_system_one_run(
         target=target,
         state=state,
         questions=questions,
-        primary_cell=_trusted_primary_cell(state, str(cell.get("slug") or "")),
+        primary_cell=primary_cell,
         raw_probabilities=raw,
         monotone=monotone,
         distribution=distribution,
@@ -1008,6 +1072,7 @@ def _validate_system_one_result(
     *,
     backend: str,
     model: str | None,
+    ledger_rows: list[dict[str, Any]],
     lower: dt.datetime,
     upper: dt.datetime,
 ) -> tuple[pathlib.PurePosixPath, str | None]:
@@ -1082,7 +1147,7 @@ def _validate_system_one_result(
             raise StrategyPublicationError("cell seal is outside its result wrapper")
         sealed_at = str(cell["runAt"])
         _revalidate_system_one_run(
-            repo, manifest_relative.parent, manifest, cell, target
+            repo, manifest_relative.parent, manifest, cell, target, ledger_rows
         )
         if bool((manifest.get("validation") or {}).get("ok")) != expected_ok:
             raise StrategyPublicationError(
@@ -1300,6 +1365,7 @@ def validate_tree(
     *,
     publish_validated_at: str,
     exact_source: bool,
+    ledger_path: pathlib.Path | None = None,
 ) -> tuple[set[pathlib.PurePosixPath], set[pathlib.PurePosixPath]]:
     selection, targets_by_slug, lower = _validate_selection(selection_path)
     upper = _instant(publish_validated_at, "publishValidatedAtUtc")
@@ -1334,6 +1400,19 @@ def validate_tree(
         finishes.append(finished)
     if system_one:
         backend, model = _system_one_request(selection)
+        # The state a System One run was allowed to see is rebuilt here from
+        # the same pinned ledger the selection witnessed, so publishing one
+        # without that ledger is refused rather than validated on the run's
+        # own word for its evidence.
+        if ledger_path is None:
+            raise StrategyPublicationError(
+                "a system one suite requires the pinned ledger (--ledger-jsonl)"
+            )
+        system_one_module = _trusted_module("run_system_one_forecast")
+        try:
+            ledger_rows = system_one_module.read_ledger(ledger_path)
+        except system_one_module.SystemOneInputError as exc:
+            raise StrategyPublicationError(f"invalid pinned ledger: {exc}") from exc
         relative = _batch_relative(system_one["batchManifest"])
         if relative in exact:
             raise StrategyPublicationError("suite references a batch more than once")
@@ -1350,6 +1429,7 @@ def validate_tree(
                 repo,
                 backend=backend,
                 model=model,
+                ledger_rows=ledger_rows,
                 lower=lower,
                 upper=upper,
             ),
@@ -1459,6 +1539,10 @@ def _assert_append_only(relative: pathlib.PurePosixPath, source: pathlib.Path) -
         )
 
 
+def _ledger_path(value: str | None) -> pathlib.Path | None:
+    return pathlib.Path(value) if value else None
+
+
 def stage(args: argparse.Namespace) -> None:
     suite_relative = _suite_path(args.suite_manifest)
     selection_path = pathlib.Path(args.trusted_selection)
@@ -1473,6 +1557,7 @@ def stage(args: argparse.Namespace) -> None:
         selection_path,
         publish_validated_at=max(now, lower).isoformat().replace("+00:00", "Z"),
         exact_source=True,
+        ledger_path=_ledger_path(getattr(args, "ledger_jsonl", None)),
     )
     paths = _changed_paths(exact, prefixes)
     if not exact.issubset(set(paths)):
@@ -1533,6 +1618,7 @@ def _load_bundle(
     suite_relative: pathlib.PurePosixPath,
     selection_path: pathlib.Path,
     publish_validated_at: str,
+    ledger_path: pathlib.Path | None = None,
 ) -> tuple[pathlib.Path, dict[str, Any]]:
     bundle = bundle.resolve()
     repo = bundle / "repo"
@@ -1603,6 +1689,7 @@ def _load_bundle(
         selection_path,
         publish_validated_at=publish_validated_at,
         exact_source=False,
+        ledger_path=ledger_path,
     )
     if not exact.issubset(expected):
         raise StrategyPublicationError("bundle omits suite or component batch")
@@ -1639,6 +1726,7 @@ def validate(args: argparse.Namespace) -> None:
         suite_relative,
         pathlib.Path(args.trusted_selection),
         args.publish_validated_at_utc,
+        _ledger_path(getattr(args, "ledger_jsonl", None)),
     )
     if args.apply:
         _apply(repo, manifest)
@@ -1654,12 +1742,16 @@ def parse_args() -> argparse.Namespace:
     stage_parser.add_argument("--bundle-dir", required=True)
     stage_parser.add_argument("--suite-manifest", required=True)
     stage_parser.add_argument("--trusted-selection", required=True)
+    # Required for a system one suite: the boundary rebuilds the evidence
+    # state from the pinned ledger rather than trusting the staged one.
+    stage_parser.add_argument("--ledger-jsonl")
     stage_parser.set_defaults(func=stage)
     validate_parser = subparsers.add_parser("validate")
     validate_parser.add_argument("--bundle-dir", required=True)
     validate_parser.add_argument("--suite-manifest", required=True)
     validate_parser.add_argument("--trusted-selection", required=True)
     validate_parser.add_argument("--publish-validated-at-utc", required=True)
+    validate_parser.add_argument("--ledger-jsonl")
     validate_parser.add_argument("--apply", action="store_true")
     validate_parser.set_defaults(func=validate)
     return parser.parse_args()

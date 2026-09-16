@@ -3,17 +3,25 @@
 `scripts/run_system_one_forecast.py` forecasts one already-published Thesis
 target with a System One model: a model that answers named typed questions
 about a fixed state and returns probabilities without generating text. The
-lane turns a target into 15 independent yes/no questions of the form "the
-first print will be at or below t", records the request and the raw response
-verbatim, monotonizes the answers into a CDF, and seals the run as a complete
-v2 custody inventory under run mode `system_one`.
+lane turns a target into 15 yes/no questions of the form "the first print
+will be at or below t", records the request and the raw response verbatim,
+monotonizes the answers into a CDF, and seals the run as a complete v2
+custody inventory under run mode `system_one`.
+
+Only the `typesafe` backend is a System One model. The `adapter` backend
+emulates the same interface over a general LLM, and the emulation is not the
+thing: it sends all 15 questions in one structured-output request and the
+model may reason before it answers. Every backend therefore carries its own
+hashed policy, its own cell heading, and its own method sentence, so no
+record claims isolation it did not get.
 
 This is a comparison lane, not a headline lane. It never creates a target
-registration, never carries the headline forecast for a target, and is scored
-beside `thesis.analyst` and the persistence baseline by the existing CRPS
-reward pipeline described in [`docs/brier-lab.md`](brier-lab.md). Custody
+registration and never carries the headline forecast for a target. Custody
 reports `headline_eligible: false` for every run in it, the same way it does
-for `derived_ensemble`.
+for `derived_ensemble`. Its CRPS is published beside `thesis.analyst` and the
+persistence baseline on cell pages and in the log scoreboard at the
+claimed-time tier; like the other comparison lanes it earns no reward, for
+the reason [`docs/brier-lab.md`](brier-lab.md) records.
 
 Read [`docs/cell-contract.md`](cell-contract.md) for the forecast-cell schema
 and [`docs/thesis-analyst-runner.md`](thesis-analyst-runner.md) for the
@@ -32,13 +40,19 @@ analyst runner whose custody and cell shape this lane mirrors.
 
 `agent.model` is the model that answered: `response.model` for the `typesafe`
 backend, `"<provider>/<model>"` for `adapter`, and the backend name for
-`mock` and `response_file`. `agent.promptHash` is the canonical sha256 of the
-ladder policy (question template, rung count, span, dispersion constants,
-monotonization version, bases) and `agent.toolPolicyHash` the canonical
-sha256 of the backend policy (no tools, no web access, no chain of thought,
-Noul questions only, questions evaluated independently, pre-resolution state
-only, and the redaction list below). Changing the wording or the ladder
-constants changes `promptHash`, so runs under different contracts are
+`mock` and `response_file`. A `typesafe` run that failed before the service
+answered records `null`, not the backend name, so a failure is never tallied
+against a model that never spoke. `agent.promptHash` is the canonical sha256
+of the ladder policy (question template, rung count, span, dispersion
+constants, monotonization version, bases). `agent.toolPolicyHash` is the
+canonical sha256 of the backend policy, which is per backend: the shared part
+is no tools, no web access, Noul questions only, pre-resolution state only,
+and the redaction list below, and the per-backend part is how the answers
+were elicited, whether the questions were isolated from one another, whether
+the backend generates text, and whether a chain of thought is possible.
+`typesafe` and `adapter` therefore hash differently, and so does the same
+lane run through `mock` or `response_file`. Changing the wording or the
+ladder constants changes `promptHash`, so runs under different contracts are
 distinguishable in the record.
 
 ## Evidence boundary
@@ -58,13 +72,23 @@ the first place:
   saying they were reported by that run and are not re-fetched here.
 - `ledgerObservations`: same-series official observations pinned from the
   ledger JSONL passed with `--ledger-jsonl`, carrying
-  `provenance: "official_ledger"`, the match rule that selected them, and the
-  `source_record_id` of each row. The match rule is: `measure.concept` or
-  `measure.source_concept` equals the target's
-  `sourceBinding.sourceSeriesId` or `series`; `measure.unit` equals the
-  registered unit; the observation's period precedes the target period at the
-  same granularity; and `observed_at` falls before the day this run started.
-  Without `--ledger-jsonl` this list is empty.
+  `provenance: "official_ledger"`, the match rule that selected them, a count
+  of the rows the rule rejected, and the `source_record_id` of each row. The
+  match rule is: `measure.concept` or `measure.source_concept` equals the
+  target's `sourceBinding.sourceSeriesId` or `series`; `measure.unit` equals
+  the registered unit; the row's geography is the target country's national
+  geography, using the same country ids
+  `scripts/stamp_docket_ledger_refs.py` binds docket series with; the
+  observation's period precedes the target period at the same granularity,
+  with a numeric ledger period (`{"type": "fiscal_year", "value": 2025}`)
+  read as its decimal string and a docket `FY2026` period read as that
+  fiscal year; and `observed_at` strictly precedes the instant this run
+  started. Geography is part of the key because the ledger holds one row per
+  state as well as the national row for the same concept, and pooling them
+  would silently average a country. When the surviving rows disagree about
+  `entity`, only the lineage of the most recent observation is kept and the
+  rest are counted in `rejectedRows`, so a fallback to the history basis is
+  never silent. Without `--ledger-jsonl` this list is empty.
 - `sourceContext`: the primary cell's URLs as plain strings. No URL is
   fetched by this lane, and the state says so.
 - `redaction`: the list of primary-cell fields that are withheld.
@@ -101,14 +125,26 @@ Fifteen strictly increasing thresholds, on one of two bases:
   matched. This is the basis to prefer: the rows are official observations,
   not agent-reported history.
 - `history_dispersion` when the ledger yields fewer than 3 rows and the
-  primary cell's `historicalContext` has at least 3 numeric rows.
-- Neither: the run fails closed in phase `state` with reason
-  `insufficient_history`, and the sealed failure keeps `state.json` and
-  `error.json`.
+  primary cell's `historicalContext` resolves to at least 3 dated rows of one
+  series.
+- Neither: the run fails closed in phase `state`, and the sealed failure
+  keeps `state.json` and `error.json`. The reason is `insufficient_history`
+  when there are too few rows, `history_period_kinds_differ` or
+  `history_periods_repeat` when the reported history is not one series.
 
-From the chosen rows in period order (ledger rows always sort by period;
-history rows sort by period when every row carries a comparable one, and
-otherwise keep the order the primary cell reported):
+Agent-reported history is not a series just because it is a list. Published
+cells mix a four-week average in with the weekly prints, a CPI row in with
+the real-earnings rows it explains, or a second program in with the target
+program, and read in the reported order those look like successive
+observations. So the history basis dates every row before it uses it: from
+the row's own `period` when it has one, otherwise from its label (month
+names, `YYYY-MM`, quarters, `FY2026`, ISO dates), and rows that name no
+period are dropped rather than reordered into the series. If the dated rows
+disagree about granularity, or if any period repeats, the list is two
+lineages rather than one series and the run refuses the history basis
+outright.
+
+From the chosen rows in period order:
 
 - `center` is the last observation's value.
 - `scale` is the 80th percentile of absolute successive changes, floored at
@@ -153,10 +189,17 @@ The official first print of U.S. natural gas vented and flared for 2025 will
 be at or below 335163 million_cubic_feet.
 ```
 
-Every question is answered independently and in isolation, which is what
-makes the raw answers a set of point probabilities rather than a distribution
-and is why the monotonization step below exists. `Noul` is the only question
-type in v1: no `Choice`, no `Score`.
+On the `typesafe` backend every question is answered independently and in
+isolation, which TypeSafe states and this repository records as a vendor
+statement rather than a verified mechanism. On the `adapter` backend it is
+not true at all: `system-one-adapter==0.1.3` serializes the state once and
+sends all 15 questions in a single provider request (read from
+`_client.py` `_prepare_evaluation` and `providers/openai.py`
+`_responses_request_kwargs` on 2026-09-16), so the answers are drawn
+together and the provider's default reasoning applies. Either way the raw
+answers are a set of point probabilities rather than a distribution, which is
+why the monotonization step below exists. `Noul` is the only question type in
+v1: no `Choice`, no `Score`.
 
 `request.json` records the state, the questions as sent, and the backend,
 provider, and model. `response.json` is the `SystemOneResponse` serialized
@@ -202,12 +245,17 @@ rungs.
 | Backend | Needs | Notes |
 | --- | --- | --- |
 | `typesafe` | `TYPESAFE_API_KEY`, the `system-one` extra | The real System One model through `typesafe-sdk==0.6.0`. `--model` is optional; `agent.model` comes back from the response. |
-| `adapter` | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` for the chosen `--provider`, the `system-one` extra | The same interface emulated over an LLM by `system-one-adapter==0.1.3` with structured outputs and probability answers. Defaults: provider `openai`, model `gpt-5.5`. |
+| `adapter` | `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` for the chosen `--provider`, the `system-one` extra | The interface emulated over an LLM by `system-one-adapter==0.1.3` with structured outputs and probability answers: one request carries the state and all 15 questions, and the model may reason before it answers. Defaults: provider `openai`, model `gpt-5.5`. |
 | `response_file` | `--response-file` | Replays a saved `SystemOneResponse` JSON deterministically. `command.json` records the file's name and sha256. |
 | `mock` | nothing | A deterministic offline ladder for tests and smoke runs: a normal CDF at the ladder's own center and sigma, with a small per-rung tilt derived from the question name. It exercises the pipeline and says nothing about any model. |
 
-A missing key is refused before any run directory exists (exit code 2), so a
-credential mistake never leaves a half-written record. Only `typesafe` and
+A missing or blank key is refused before any run directory exists (exit code
+2), and so is an unreadable or misshapen `--response-file`, so an input
+mistake never leaves a half-written record. Anything a phase did not
+anticipate is sealed as that phase's failure when the artifacts written so
+far are exactly one phase inventory; when they are not, the partial run
+directory is removed and the runner exits 2 with nothing recorded, which is
+what the suite runner documents exit 2 to mean. Only `typesafe` and
 `adapter` import the optional extra, and they import it lazily, so `mock` and
 `response_file` run against the repository's base environment. Install the
 extra with `uv sync --extra system-one` or run with
@@ -236,11 +284,21 @@ python3 scripts/verify_custody.py /tmp/system-one-smoke/thesis-analyst/*/*-syste
 ```
 
 The runner prints the manifest JSON. `--out-manifest PATH` also writes the
-manifest's repository-relative path to a file. With no `--primary-cell`, the
-runner discovers the published primary cell itself: the newest successful
-analyst run for that slug in the write root or the repository's own records
-tree. Pass `--primary-cell <run>/cells.with_activity.json` to pin one.
-`--run-at` fixes the run start and exists for tests.
+manifest's repository-relative path to a file.
+
+With no `--primary-cell`, the runner resolves the primary cell the way the
+site does: it reads the published catalog under
+`site/src/data/forecast-examples`, finds the cell whose `slug` is the
+target's `catalogSlug`, and takes the run directory its `predictionRun`
+activity log cites. That is the run the catalog publishes, which is the
+point: comparison-lane runs for the same target (ladder, ladder_v2, fast
+rollouts) live in the same records tree and are not this target's published
+evidence. A slug the catalog does not bind to a recorded run is refused, with
+`--primary-cell` named as the way to pin one by hand. An explicit
+`--primary-cell` must be that same file whenever the catalog does bind the
+slug, so a local override can add a primary cell the catalog lacks but can
+never quietly swap the one it has. `--run-at` fixes the run start and exists
+for tests.
 
 Add `--ledger-jsonl` to get the `ledger_dispersion` basis. The file is
 `ledger/official_observations.jsonl` from the ledger repository the docket
@@ -293,17 +351,40 @@ The lane writes a batch manifest at
 `records/thesis-analyst/batches/<day>/strategy-<run>-a<attempt>-system-one.json`
 and the suite manifest carries
 `lanes.systemOne: {batchManifest, backend, model}`, null on suites that do
-not run it. Publication verifies custody with run mode `system_one`, checks
-the resolver and registration fields against the trusted target, checks the
-claimed run window against the witnessed select-to-publish window, and
-refuses a backend or model that differs from the trusted request.
+not run it.
+
+Publication verifies custody with run mode `system_one`, checks the resolver
+and registration fields against the trusted target, and checks the claimed
+run window against the witnessed select-to-publish window. It also rebuilds
+the run rather than reading it:
+
+- the backend, the requested model and the provider must equal the trusted
+  request. A null `systemOneModel` means the runner default for that backend
+  (`gpt-5.5` for the adapter), not any model, and an adapter run must name
+  the runner's default provider, `openai`, since a dispatched run never
+  chooses one.
+- the primary cell is the one the published catalog binds to the slug, read
+  from the publisher's own checkout, never the path the run cites.
+- `state.json` is rebuilt from the trusted target, that primary cell and the
+  pinned ledger, and compared byte for byte, so a forged history value,
+  source URL, ledger row or provenance digest fails here. Validation
+  therefore requires the pinned ledger: `stage` and `validate` take
+  `--ledger-jsonl`, and a system one suite without it is refused.
+- the ladder geometry and `questions.json` are rebuilt from that state, so
+  the thresholds, center, scale and precision are recomputed rather than
+  trusted, and then the response is re-monotonized, the forecast
+  re-interpolated, the distribution rebuilt, and the lane's rubric re-run.
+
 `scripts/strategy_comparisons.py` then projects the lane into
-`site/src/data/thesis-strategy-comparisons.ts` as "System One threshold
-ladder" with `predictionRun.agent = "thesis.system_one"`, and `/models`
-grows a System One column as soon as a suite lands. What the site publishes
-and the reward pipeline scores is the monotonized ladder; the raw per-rung
-answers stay in the cell as `rawCumulativeProbabilities` and verbatim in
-`response.json`.
+`site/src/data/thesis-strategy-comparisons.ts` with
+`predictionRun.agent = "thesis.system_one"`, labeled "System One threshold
+ladder" for a typesafe run and "System One emulation (adapter:
+`<provider>/<model>`)" for an adapter run, with the same method sentence the
+cell carries. `/models` grows a System One column as soon as a suite lands,
+tallied per run rather than per batch, so a batch whose runs answered under
+different models is not filed under one. What the site publishes is the
+monotonized ladder; the raw per-rung answers stay in the cell as
+`rawCumulativeProbabilities` and verbatim in `response.json`.
 
 The generate job runs this lane under `uv run --locked --extra system-one`,
 so the SDKs are the versions the lock names, and it installs no codex
@@ -322,10 +403,19 @@ The model writes no text, so every reasoning step is written by the runner
 from what actually happened. Nothing in it is a paraphrase of model
 reasoning, because there is none to paraphrase:
 
-- **heading** "System One threshold ladder": names the method.
-- **text**: the method disclosure. How many independent yes/no questions were
-  asked, on one fixed evidence state, with no tools, no search, and no chain
-  of thought, and what the state contained.
+- **heading**: names the method and the backend. "System One threshold
+  ladder" only for a typesafe run; otherwise "System One emulation" and the
+  backend that produced the answers, for example "System One emulation
+  (adapter: openai/gpt-5.5)".
+- **text**: the method disclosure, per backend. A typesafe run says the model
+  answered the rungs independently and in isolation with no tools, no search
+  and no chain of thought. An adapter run says it emulates the interface, that
+  one structured-output request carried the state and all 15 questions, that
+  the answers are therefore not isolated from one another, and that the model
+  may reason internally so its output tokens can include reasoning tokens. A
+  mock run says it is a deterministic offline stand-in and not a model, and a
+  response_file run says it replays a recorded response. Each then says what
+  the state contained.
 - **tool** `system_one.noul_ladder`: the call carries the backend, provider,
   model, and question count; the result carries the latency and the token
   usage the backend reported.
@@ -370,12 +460,13 @@ Failed runs stay in the record. They are evidence about the lane.
 
 ## Honest limits
 
-- The model uses no tools, performs no search, and produces no chain of
-  thought. Each question is answered in isolation and returns a probability
-  and nothing else. There is no reasoning trace to audit, which is a real
-  loss against the analyst lane: the only auditable objects are the state,
-  the questions, the raw probabilities, and the fixed rule that turns them
-  into a CDF.
+- No backend of this lane uses tools or performs a search. On the typesafe
+  backend each question is answered in isolation and returns a probability
+  and nothing else; on the adapter backend the questions travel together in
+  one request and the provider model may reason first. Either way there is no
+  reasoning trace to audit, which is a real loss against the analyst lane:
+  the only auditable objects are the state, the questions, the raw
+  probabilities, and the fixed rule that turns them into a CDF.
 - TypeSafe describes its training as reinforcement learning for calibrated
   decisions; the reward and the data are undisclosed. That sentence is the
   limit of what this repository says about how the model was built, and it is
@@ -399,7 +490,8 @@ Failed runs stay in the record. They are evidence about the lane.
 - The adapter is an emulation of the interface, not the model. An adapter run
   measures an LLM answering ladder questions under structured output, which
   is a useful control arm and is not a System One result. The manifest keeps
-  them apart by `agent.backend` and `agent.model`.
+  them apart by `agent.backend`, `agent.model` and `agent.toolPolicyHash`,
+  and so do the cell heading, the method sentence and the comparison label.
 - One run is one draw. The lane makes no claim from a single target, and its
   standing is whatever the paired CRPS difference against persistence says
   once enough targets resolve.

@@ -387,7 +387,8 @@ jobs:
           python3 scripts/strategy_publication.py stage \
             --bundle-dir /tmp/strategy-publication \
             --suite-manifest "${{ steps.suite.outputs.suite_manifest }}" \
-            --trusted-selection /tmp/trusted-selection/strategy-targets.json
+            --trusted-selection /tmp/trusted-selection/strategy-targets.json \
+            --ledger-jsonl /tmp/pinned-ledger.jsonl
 
       - name: Upload generated data bundle
         uses: actions/upload-artifact@v7
@@ -582,6 +583,7 @@ jobs:
             --suite-manifest "$SUITE_MANIFEST" \
             --trusted-selection /tmp/trusted-selection/strategy-targets.json \
             --publish-validated-at-utc "$VALIDATED_AT" \
+            --ledger-jsonl /tmp/pinned-ledger.jsonl \
             --apply
           python3 scripts/strategy_targets.py persist \
             --selection /tmp/trusted-selection/strategy-targets.json

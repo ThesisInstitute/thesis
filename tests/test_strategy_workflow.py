@@ -152,3 +152,19 @@ def test_strategy_workflow_publish_counts_the_system_one_lane() -> None:
     run = regenerate["run"]
     assert 'system_one = suite["lanes"].get("systemOne")' in run
     assert 'batches.append(system_one["batchManifest"])' in run
+
+
+def test_strategy_workflow_hands_both_boundaries_the_pinned_ledger() -> None:
+    # The publication boundary rebuilds the System One evidence state from
+    # the pinned ledger, so stage and validate both need the same blob the
+    # generate job forecasts against; without it a system one suite is
+    # refused rather than validated on the run's own word for its evidence.
+    document = workflow_document()
+    stage = named_step(
+        document["jobs"]["generate"], "Stage one exact-scope strategy bundle"
+    )
+    assert "--ledger-jsonl /tmp/pinned-ledger.jsonl" in stage["run"]
+    validate = named_step(
+        document["jobs"]["publish"], "Validate and apply the entire strategy bundle"
+    )
+    assert "--ledger-jsonl /tmp/pinned-ledger.jsonl" in validate["run"]

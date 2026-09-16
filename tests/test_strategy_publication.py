@@ -25,6 +25,7 @@ from tests.test_run_system_one_forecast import (  # noqa: E402
     ledger_rows,
     primary_cell,
     target_context,
+    write_comparison_run,
     write_ledger,
     write_primary_run,
 )
@@ -761,8 +762,23 @@ def system_one_tree(
     return repo, selection_path
 
 
+def system_one_ledger(repo: pathlib.Path) -> pathlib.Path:
+    """The pinned ledger the boundary rebuilds the evidence state from.
+
+    A run that matched no ledger rows still validates against the pin; an
+    empty file stands in for a ledger with nothing for this series.
+    """
+
+    path = repo / "official_observations.jsonl"
+    if not path.exists():
+        path.write_text("")
+    return path
+
+
 def validate_system_one_tree(
-    repo: pathlib.Path, selection_path: pathlib.Path
+    repo: pathlib.Path,
+    selection_path: pathlib.Path,
+    ledger_path: pathlib.Path | None = None,
 ) -> tuple[set, set]:
     return publication.validate_tree(
         repo,
@@ -770,6 +786,9 @@ def validate_system_one_tree(
         selection_path,
         publish_validated_at=PUBLISH_VALIDATED,
         exact_source=True,
+        ledger_path=(
+            system_one_ledger(repo) if ledger_path is None else ledger_path
+        ),
     )
 
 
@@ -830,7 +849,11 @@ def test_system_one_bundle_crosses_the_publication_boundary(
     bundle = write_bundle_for(tmp_path, selection_path, SYSTEM_ONE_SUITE_PATH, files)
 
     bundle_repo, manifest = publication._load_bundle(
-        bundle, SYSTEM_ONE_SUITE_PATH, selection_path, PUBLISH_VALIDATED
+        bundle,
+        SYSTEM_ONE_SUITE_PATH,
+        selection_path,
+        PUBLISH_VALIDATED,
+        system_one_ledger(repo),
     )
 
     assert (bundle_repo / SYSTEM_ONE_BATCH.as_posix()).is_file()
@@ -868,7 +891,11 @@ def test_system_one_bundle_rejects_an_unreferenced_run_directory(
         publication.StrategyPublicationError, match="outside exact scope"
     ):
         publication._load_bundle(
-            bundle, SYSTEM_ONE_SUITE_PATH, selection_path, PUBLISH_VALIDATED
+            bundle,
+            SYSTEM_ONE_SUITE_PATH,
+            selection_path,
+            PUBLISH_VALIDATED,
+            system_one_ledger(repo),
         )
 
 
@@ -937,6 +964,61 @@ def test_system_one_run_model_must_equal_the_trusted_request(
     with pytest.raises(
         publication.StrategyPublicationError,
         match="model differs from the trusted request",
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+def test_a_null_request_model_means_the_runner_default_not_any_model(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A null systemOneModel is what the workflow sends when the operator
+    # leaves the model input empty, and the suite runner then passes no
+    # --model at all. It authorizes the runner default, nothing else.
+    repo, selection_path = system_one_tree(
+        tmp_path,
+        monkeypatch,
+        request_model=None,
+        lane_model=None,
+        run_model="gpt-4o-mini",
+    )
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="model differs from the trusted request",
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+def test_a_null_request_model_accepts_the_runner_default(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo, selection_path = system_one_tree(
+        tmp_path,
+        monkeypatch,
+        request_model=None,
+        lane_model=None,
+        run_model=system_one.DEFAULT_ADAPTER_MODEL,
+    )
+
+    exact, prefixes = validate_system_one_tree(repo, selection_path)
+
+    assert exact == {SYSTEM_ONE_SUITE_PATH, SYSTEM_ONE_BATCH}
+    assert prefixes == {SYSTEM_ONE_RUN_PREFIX}
+
+
+def test_an_adapter_run_must_use_the_lane_default_provider(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The trusted request carries no provider because a dispatched run never
+    # picks one: --provider anthropic is a local-run option only.
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "publication-test-key")
+    repo, selection_path = system_one_tree(
+        tmp_path, monkeypatch, run_provider="anthropic"
+    )
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="provider differs from the trusted lane default",
     ):
         validate_system_one_tree(repo, selection_path)
 
@@ -1033,6 +1115,9 @@ def test_system_one_primary_cell_must_be_in_the_publisher_checkout(
 def test_system_one_primary_cell_digest_is_pinned(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # The boundary rebuilds the whole evidence state from the primary cell
+    # the catalog binds, so a primary cell that changed after the run no
+    # longer reproduces the sealed state.
     repo, selection_path = system_one_tree(tmp_path, monkeypatch)
     primary = (
         repo
@@ -1048,7 +1133,7 @@ def test_system_one_primary_cell_digest_is_pinned(
 
     with pytest.raises(
         publication.StrategyPublicationError,
-        match="primary cell differs from the one the run read",
+        match="state is not the evidence the trusted inputs produce",
     ):
         validate_system_one_tree(repo, selection_path)
 
@@ -1152,7 +1237,7 @@ def restage_system_one_cell(repo: pathlib.Path, cell: dict) -> None:
         ),
         (
             lambda cell: cell["thresholdLadder"]["thresholds"].__setitem__(0, -99.0),
-            "differ from the elicited ladder",
+            "differ from the trusted ladder",
         ),
     ],
 )
@@ -1173,7 +1258,12 @@ def test_system_one_revalidation_recomputes_the_published_ladder(
 
     with pytest.raises(publication.StrategyPublicationError, match=message):
         publication._revalidate_system_one_run(
-            repo, SYSTEM_ONE_RUN_PREFIX, manifest, cell, target_context()
+            repo,
+            SYSTEM_ONE_RUN_PREFIX,
+            manifest,
+            cell,
+            target_context(),
+            ledger_rows(),
         )
 
 
@@ -1189,7 +1279,12 @@ def test_system_one_published_cell_must_be_its_normalized_record(
         match="differs from its normalized record",
     ):
         publication._revalidate_system_one_run(
-            repo, SYSTEM_ONE_RUN_PREFIX, manifest, cell, target_context()
+            repo,
+            SYSTEM_ONE_RUN_PREFIX,
+            manifest,
+            cell,
+            target_context(),
+            ledger_rows(),
         )
 
 
@@ -1200,7 +1295,7 @@ def test_system_one_revalidation_accepts_the_sealed_run(
     manifest, cell = staged_system_one_cell(repo)
 
     publication._revalidate_system_one_run(
-        repo, SYSTEM_ONE_RUN_PREFIX, manifest, cell, target_context()
+        repo, SYSTEM_ONE_RUN_PREFIX, manifest, cell, target_context(), ledger_rows()
     )
 
     ladder = cell["thresholdLadder"]
@@ -1345,3 +1440,163 @@ def test_system_one_command_must_live_in_its_own_run(tmp_path: pathlib.Path) -> 
         publication._system_one_command(
             tmp_path, SYSTEM_ONE_RUN_PREFIX / "manifest.json", manifest
         )
+
+
+# --- the boundary rebuilds the evidence, it does not read it ----------------
+
+
+def test_a_run_that_saw_forged_history_never_publishes(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The generate job is unprivileged: it can write any state it likes into
+    # its own sealed run. The boundary rebuilds the state from the trusted
+    # target, the catalog primary cell and the pinned ledger instead of
+    # reading the one that was staged.
+    trusted_history_rows = system_one.history_rows
+    monkeypatch.setattr(
+        system_one,
+        "history_rows",
+        lambda cell: [
+            {**row, "value": row["value"] + 1000}
+            for row in trusted_history_rows(cell)
+        ],
+    )
+    repo, selection_path = system_one_tree(tmp_path, monkeypatch, run_model="gpt-5.5")
+    staged = json.loads(
+        repo.joinpath(*SYSTEM_ONE_RUN_PREFIX.parts, "state.json").read_text()
+    )
+    assert staged["historicalContext"]["rows"][0]["value"] > 1000
+
+    monkeypatch.setattr(system_one, "history_rows", trusted_history_rows)
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="state is not the evidence the trusted inputs produce",
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+def test_a_forged_ladder_never_publishes(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    trusted_build_ladder = system_one.build_ladder
+
+    def shifted(**kwargs):
+        ladder = trusted_build_ladder(**kwargs)
+        return {
+            **ladder,
+            "center": ladder["center"] + 1000,
+            "thresholds": [value + 1000 for value in ladder["thresholds"]],
+        }
+
+    monkeypatch.setattr(system_one, "build_ladder", shifted)
+    repo, selection_path = system_one_tree(tmp_path, monkeypatch, run_model="gpt-5.5")
+    staged = json.loads(
+        repo.joinpath(*SYSTEM_ONE_RUN_PREFIX.parts, "questions.json").read_text()
+    )
+    assert staged["center"] > 1000
+
+    monkeypatch.setattr(system_one, "build_ladder", trusted_build_ladder)
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="thresholds differ from the trusted ladder",
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+def test_a_run_that_saw_a_forged_ledger_never_publishes(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    forged = [
+        {**row, "value": row["value"] + 1000}
+        for row in ledger_rows()
+    ]
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    selection_path = write_system_one_selection(tmp_path)
+    manifest_path = run_system_one(repo, monkeypatch, ledger=forged)
+    write_system_one_batch(repo, manifest_path)
+    write_system_one_suite(repo, selection_path)
+    monkeypatch.setattr(publication, "_validate_source_sha", lambda *_a, **_k: None)
+    monkeypatch.setattr(
+        publication.docket, "validate_target_registration", lambda *_a, **_k: {}
+    )
+    pinned = write_ledger(tmp_path, ledger_rows())
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="state is not the evidence the trusted inputs produce",
+    ):
+        validate_system_one_tree(repo, selection_path, pinned)
+
+
+def test_a_system_one_suite_without_the_pinned_ledger_is_refused(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo, selection_path = system_one_tree(tmp_path, monkeypatch)
+
+    with pytest.raises(
+        publication.StrategyPublicationError, match="requires the pinned ledger"
+    ):
+        publication.validate_tree(
+            repo,
+            SYSTEM_ONE_SUITE_PATH,
+            selection_path,
+            publish_validated_at=PUBLISH_VALIDATED,
+            exact_source=True,
+        )
+
+
+def test_a_comparison_lane_run_is_not_an_acceptable_primary_cell(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Strategy lanes write runs for the same slug into the same tree. Only
+    # the run the published catalog cites is this target's evidence.
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    selection_path = write_system_one_selection(tmp_path)
+    write_primary_run(repo, primary_cell())
+    comparison = write_comparison_run(repo, primary_cell())
+    trusted_catalog_primary_cell = system_one.catalog_primary_cell
+    monkeypatch.setattr(
+        system_one,
+        "catalog_primary_cell",
+        lambda slug, root=None: comparison / "cells.with_activity.json",
+    )
+    manifest_path = run_system_one(repo, monkeypatch)
+    staged = json.loads(
+        repo.joinpath(*SYSTEM_ONE_RUN_PREFIX.parts, "state.json").read_text()
+    )
+    assert "ladder-v2" in staged["primaryCellProvenance"]["cellPath"]
+    write_system_one_batch(repo, manifest_path)
+    write_system_one_suite(repo, selection_path)
+    monkeypatch.setattr(publication, "_validate_source_sha", lambda *_a, **_k: None)
+    monkeypatch.setattr(
+        publication.docket, "validate_target_registration", lambda *_a, **_k: {}
+    )
+    monkeypatch.setattr(
+        system_one, "catalog_primary_cell", trusted_catalog_primary_cell
+    )
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="state is not the evidence the trusted inputs produce",
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+def test_a_slug_the_catalog_does_not_bind_never_publishes(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo, selection_path = system_one_tree(tmp_path, monkeypatch)
+    (repo / "site" / "src" / "data" / "forecast-examples" / "test-wave.ts").unlink()
+    # The catalog is read once per process; the boundary is a fresh process
+    # in the workflow, so drop what this one cached.
+    system_one._CATALOG_CACHE.clear()
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="catalog binds no primary cell",
+    ):
+        validate_system_one_tree(repo, selection_path)
