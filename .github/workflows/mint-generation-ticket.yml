@@ -16,7 +16,7 @@ on:
         description: "Analyst prompt mode: fast|full|ladder|ladder_v2"
         default: "fast"
       codex_model:
-        description: "Codex model (empty = gpt-5.5)"
+        description: "Codex model (empty = gpt-5.6)"
         default: ""
       codex_reasoning_effort:
         description: "Codex reasoning effort (empty = low)"
@@ -25,7 +25,7 @@ on:
         description: '"true" enables network in a workspace-write sandbox'
         default: "false"
       review_codex_model:
-        description: "Pre-submit review model (empty = gpt-5.5)"
+        description: "Pre-submit review model (empty = gpt-5.6)"
         default: ""
       review_codex_search:
         description: '"true" gives the pre-submit reviewer hosted web search'
@@ -272,9 +272,9 @@ jobs:
           EXPIRES_HOURS: ${{ inputs.expires_hours }}
         run: |
           set -euo pipefail
-          CODEX_MODEL=${CODEX_MODEL:-gpt-5.5}
+          CODEX_MODEL=${CODEX_MODEL:-gpt-5.6}
           CODEX_REASONING_EFFORT=${CODEX_REASONING_EFFORT:-low}
-          REVIEW_CODEX_MODEL=${REVIEW_CODEX_MODEL:-gpt-5.5}
+          REVIEW_CODEX_MODEL=${REVIEW_CODEX_MODEL:-gpt-5.6}
           CODEX_NETWORK=${CODEX_NETWORK:-false}
           REVIEW_CODEX_SEARCH=${REVIEW_CODEX_SEARCH:-false}
           TIMEOUT_SECONDS=${TIMEOUT_SECONDS:-540}

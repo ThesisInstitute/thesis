@@ -132,7 +132,7 @@ def test_api_canary_workflow_is_read_only_and_keeps_failures_as_product() -> Non
         "max-parallel": 1,
         "matrix": {
             "include": [
-                {"model": "gpt-5.5", "effort": "high"},
+                {"model": "gpt-5.6-terra", "effort": "high"},
                 {"model": "gpt-5.6", "effort": "high"},
             ]
         },
@@ -147,7 +147,7 @@ def test_api_canary_workflow_is_read_only_and_keeps_failures_as_product() -> Non
     assert "--codex-reasoning-effort" in source
     assert "--codex-sandbox workspace-write" in source
     assert "--codex-network" in source
-    assert "--pre-submit-review-codex-model gpt-5.5" in source
+    assert "--pre-submit-review-codex-model gpt-5.6" in source
     assert '"${args[@]}"' in source
     assert ") >/dev/null 2>&1 || true" in source
     assert "git worktree add --detach" in source
