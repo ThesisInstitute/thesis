@@ -46,16 +46,19 @@ backend, `"<provider>/<model>"` for `adapter`, and the backend name for
 `mock` and `response_file`. A `typesafe` run that failed before the service
 answered records `null`, not the backend name, so a failure is never tallied
 against a model that never spoke. `agent.promptHash` is the canonical sha256
-of the ladder policy (the elicitation, its question template, rung count,
+of the ladder policy (the elicitation, both question templates, rung count,
 span, dispersion constants, the cumulative rule, bases), so the two
-elicitations hash differently. `agent.toolPolicyHash` is the
+elicitations hash differently, and an edit to either wording changes the hash
+of both. `agent.toolPolicyHash` is the
 canonical sha256 of the backend policy, which is per backend: the shared part
-is no tools, no web access, Noul questions only, pre-resolution state only,
-and the redaction list below, and the per-backend part is how the answers
+is no tools, no web access, the one question type the elicitation asks
+(`Choice` or `Noul`), pre-resolution state only, and the redaction list
+below, and the per-backend part is how the answers
 were elicited, whether the questions were isolated from one another, whether
 the backend generates text, and whether a chain of thought is possible.
-`typesafe` and `adapter` therefore hash differently, and so does the same
-lane run through `mock` or `response_file`. Changing the wording or the
+`typesafe` and `adapter` therefore hash differently, so does the same lane
+run through `mock` or `response_file`, and so do the two elicitations on one
+backend. Changing the wording or the
 ladder constants changes `promptHash`, so runs under different contracts are
 distinguishable in the record.
 
