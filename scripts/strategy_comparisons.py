@@ -11,12 +11,14 @@ graded against the same resolutions as the headline runs:
   tell the samples apart.
 - median3: derived median-of-rollouts runs from
   scripts/median_rollout_ensemble.py, published with the exact median CDF.
-- system_one: System One runs from scripts/run_system_one_forecast.py, a
-  ladder of Noul threshold questions; the published CDF is the monotonized
-  ladder. The lane has two backends and they are not the same mechanism, so
-  the label and the description come from the runner itself: only a typesafe
-  run is a System One run, and an adapter run says it emulates the interface
-  over a named provider model.
+- system_one: System One runs from scripts/run_system_one_forecast.py,
+  asked either as a ladder of Noul threshold questions or as one Choice
+  question over the ranges those rungs cut; the published CDF is the
+  monotonized ladder or the cumulative bin sums. The lane has two backends
+  and two elicitations and they are not the same mechanism, so the label and
+  the description come from the runner itself: only a typesafe run is a
+  System One run, and an adapter run says it emulates the interface over a
+  named provider model.
 
 Everything is emitted into site/src/data/thesis-strategy-comparisons.ts as
 STRATEGY_COMPARISON_RUN_AUGMENTS, merged onto cells alongside the existing
@@ -58,9 +60,16 @@ SUITE_SELECTORS = frozenset({"ladder", "median3", "both", "system_one"})
 
 SYSTEM_ONE_AGENT = "thesis.system_one"
 SYSTEM_ONE_RUN_MODE = "system_one"
-SYSTEM_ONE_PROMPT_MODE = "system_one_noul_ladder"
-SYSTEM_ONE_LANE = "system_one"
-SYSTEM_ONE_LABEL = "System One threshold ladder"
+# A lane is the prompt mode the batch recorded, so the two elicitations are
+# two lanes on /models: they ask the model different things and a single
+# system_one column would pool them.
+SYSTEM_ONE_PROMPT_MODES = {
+    "noul_ladder": "system_one_noul_ladder",
+    "choice_bins": "system_one_choice_bins",
+}
+SYSTEM_ONE_ELICITATION_BY_PROMPT_MODE = {
+    mode: elicitation for elicitation, mode in SYSTEM_ONE_PROMPT_MODES.items()
+}
 
 sys.path.insert(0, str(SCRIPTS))
 import run_system_one_forecast as system_one  # noqa: E402
@@ -237,10 +246,14 @@ def build_model_lane_stats(
                 batch = json.loads(
                     repo_path(str(system_one_lane["batchManifest"])).read_text()
                 )
+                lane = str(
+                    batch.get("promptMode")
+                    or SYSTEM_ONE_PROMPT_MODES["noul_ladder"]
+                )
                 for result in batch.get("results", []):
                     bump(
                         _result_model(result),
-                        SYSTEM_ONE_LANE,
+                        lane,
                         attempted=1,
                         passed=1 if result.get("ok") is True else 0,
                     )
@@ -436,9 +449,12 @@ def system_one_augments(
     for target, manifest, cell in batch_results(batch_paths):
         slug = target["catalogSlug"]
         agent = manifest.get("agent") or {}
+        elicitation = SYSTEM_ONE_ELICITATION_BY_PROMPT_MODE.get(
+            str(manifest.get("promptMode"))
+        )
         if (
             manifest.get("runMode") != SYSTEM_ONE_RUN_MODE
-            or manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODE
+            or elicitation is None
             or agent.get("agent") != SYSTEM_ONE_AGENT
         ):
             raise ValueError(
@@ -458,17 +474,27 @@ def system_one_augments(
         scale = effective_scale(cell, value_scale, target_unit)
         run = comparison_run(cell, manifest, slug, value_scale, target_unit)
         rungs = len((cell.get("thresholdLadder") or {}).get("thresholds") or [])
-        label = system_one.lane_label(str(backend), str(model))
+        label = system_one.lane_label(str(backend), str(model), elicitation)
         run["variantId"] = (
             f"{slug}-thesis-system-one-{slugify(cell['runAt'])}"
         )
         run["label"] = label
         run["description"] = (
             system_one.lane_narrative(
-                backend=str(backend), model=str(model), rungs=rungs
+                backend=str(backend),
+                model=str(model),
+                rungs=rungs,
+                elicitation=elicitation,
             )
-            + " The published CDF is the monotonized ladder itself; the point "
-            "estimate and the 80% interval are interpolated from it."
+            + (
+                " The published CDF is the cumulative bin sums themselves; "
+                "the point estimate and the 80% interval are interpolated "
+                "from it."
+                if elicitation == "choice_bins"
+                else " The published CDF is the monotonized ladder itself; "
+                "the point estimate and the 80% interval are interpolated "
+                "from it."
+            )
             + (
                 " Values converted to the catalog target unit."
                 if scale != 1

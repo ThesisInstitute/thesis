@@ -8,28 +8,32 @@ import {
 } from "@/data/model-lanes";
 
 // The /models table used to filter recorded lanes through a fixed list, so a
-// lane the publisher started writing (system_one, 2026-09) would have been
+// lane the publisher started writing (System One, 2026-09) would have been
 // dropped from the page with no build failure and no empty column to notice.
 // The registry is an ordering plus display names now, and these tests hold it
 // to that: nothing recorded may disappear.
 describe("model lane registry", () => {
-  it("registers the System One lane with a display label", () => {
-    expect(MODEL_LANE_ORDER).toContain("system_one");
-    expect(MODEL_LANE_LABELS.system_one).toBe("System One");
-    expect(modelLaneLabel("system_one")).toBe("System One");
+  it("registers both System One elicitations with display labels", () => {
+    expect(MODEL_LANE_ORDER).toContain("system_one_noul_ladder");
+    expect(MODEL_LANE_ORDER).toContain("system_one_choice_bins");
+    expect(MODEL_LANE_LABELS.system_one_noul_ladder).toBe("System One ladder");
+    expect(MODEL_LANE_LABELS.system_one_choice_bins).toBe("System One bins");
+    expect(modelLaneLabel("system_one_choice_bins")).toBe("System One bins");
   });
 
   it("orders known lanes first and keeps unknown lanes visible", () => {
     const ordered = orderModelLanes([
       "zzz_future_lane",
-      "system_one",
+      "system_one_choice_bins",
+      "system_one_noul_ladder",
       "fast",
       "aaa_future_lane",
     ]);
 
     expect(ordered).toEqual([
       "fast",
-      "system_one",
+      "system_one_noul_ladder",
+      "system_one_choice_bins",
       "aaa_future_lane",
       "zzz_future_lane",
     ]);

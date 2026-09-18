@@ -494,7 +494,7 @@ def test_system_one_projection_carries_the_lane_identity(
     assert prediction_run["agent"] == "thesis.system_one"
     assert prediction_run["model"] == manifest["agent"]["model"] == "mock"
     assert prediction_run["promptMode"] == "system_one_noul_ladder"
-    assert prediction_run["agentVersion"] == "0.1.0"
+    assert prediction_run["agentVersion"] == "0.2.0"
     assert prediction_run["kind"] == "recorded-agent-run"
     # A mock run is not a System One run, and the row says so; only the
     # typesafe backend earns the bare lane label.
@@ -608,7 +608,7 @@ def test_system_one_failures_are_recorded_but_never_published(
     assert strategy.system_one_augments([batch_path]) == {}
     assert strategy.build_model_lane_stats(
         legacy_index=empty_legacy, suites_root=suites_root
-    ) == [{"model": "mock", "lane": "system_one", "attempted": 1, "passed": 0}]
+    ) == [{"model": "mock", "lane": "system_one_noul_ladder", "attempted": 1, "passed": 0}]
 
 
 def test_system_one_suite_reaches_the_published_corpus(
@@ -638,7 +638,7 @@ def test_system_one_suite_reaches_the_published_corpus(
 
     assert strategy.build_model_lane_stats(
         legacy_index=empty_legacy, suites_root=suites_root
-    ) == [{"model": "mock", "lane": "system_one", "attempted": 1, "passed": 1}]
+    ) == [{"model": "mock", "lane": "system_one_noul_ladder", "attempted": 1, "passed": 1}]
 
 
 def test_suite_scanner_binds_the_system_one_lane_to_its_selector(
@@ -759,6 +759,6 @@ def test_system_one_lane_stats_are_tallied_per_run_not_per_batch(
     assert strategy.build_model_lane_stats(
         legacy_index=empty_legacy, suites_root=suites_root
     ) == [
-        {"model": "jev-1-2030-01", "lane": "system_one", "attempted": 1, "passed": 0},
-        {"model": "mock", "lane": "system_one", "attempted": 1, "passed": 1},
+        {"model": "jev-1-2030-01", "lane": "system_one_noul_ladder", "attempted": 1, "passed": 0},
+        {"model": "mock", "lane": "system_one_noul_ladder", "attempted": 1, "passed": 1},
     ]
