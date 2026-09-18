@@ -274,9 +274,20 @@ def test_runner_and_verifier_agree_on_every_inventory():
         ]
     assert verify_custody.SYSTEM_ONE_BACKENDS == set(system_one.BACKENDS)
     assert verify_custody.SYSTEM_ONE_SCHEMA == system_one.MANIFEST_SCHEMA
-    assert verify_custody.SYSTEM_ONE_PROMPT_MODE == system_one.PROMPT_MODE
     assert verify_custody.SYSTEM_ONE_AGENT == system_one.AGENT_NAME
-    assert verify_custody.SYSTEM_ONE_MONOTONIZATION == system_one.MONOTONIZATION
+    # One prompt mode per elicitation, each bound to the derivation it is
+    # allowed to declare. The verifier writes this map out a second time
+    # because it must not import the runner; the two may not drift.
+    assert verify_custody.SYSTEM_ONE_PROMPT_MODES == {
+        system_one.PROMPT_MODES[elicitation]: system_one.MONOTONIZATIONS[elicitation]
+        for elicitation in system_one.ELICITATIONS
+    }
+    assert verify_custody.SYSTEM_ONE_BIN_MONOTONIZATION == (
+        system_one.MONOTONIZATIONS["choice_bins"]
+    )
+    assert verify_custody.SYSTEM_ONE_BIN_SUM_TOLERANCE == (
+        system_one.BIN_SUM_TOLERANCE
+    )
 
 
 def test_a_snapshot_shaped_target_still_binds_the_unit(sealed_run: pathlib.Path):
@@ -309,6 +320,103 @@ def test_a_failed_typesafe_run_may_record_no_answering_model(
     reseal(sealed_run, clear_model)
     with pytest.raises(CustodyError, match="agent lacks a model string"):
         verify_run(sealed_run)
+
+
+@pytest.fixture
+def sealed_bins_run(repo: pathlib.Path) -> pathlib.Path:  # noqa: F811
+    _manifest, manifest_path = system_one_run(
+        repo, ledger=ledger_rows(), elicitation="choice_bins"
+    )
+    assert verify_run(manifest_path.parent).run_succeeded is True
+    return manifest_path.parent
+
+
+def test_custody_accepts_the_bins_prompt_mode(sealed_bins_run: pathlib.Path):
+    manifest = json.loads((sealed_bins_run / "manifest.json").read_text())
+    assert manifest["promptMode"] == "system_one_choice_bins"
+    cell = json.loads((sealed_bins_run / "cells.with_activity.json").read_text())[0]
+    assert cell["thresholdLadder"]["monotonization"] == "cumulative_sum_v1"
+
+    verification = verify_run(sealed_bins_run)
+    assert verification.run_mode == "system_one"
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is True
+    assert verification.headline_eligible is False
+
+
+def test_bins_run_may_not_declare_the_pooled_monotonization(
+    sealed_bins_run: pathlib.Path,
+):
+    cells_path = sealed_bins_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cells[0]["thresholdLadder"]["monotonization"] = "pav_v1"
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_bins_run)
+    with pytest.raises(CustodyError, match="lacks its monotonization version"):
+        verify_run(sealed_bins_run)
+
+
+def test_ladder_run_may_not_declare_the_bin_monotonization(
+    sealed_run: pathlib.Path,
+):
+    cells_path = sealed_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cells[0]["thresholdLadder"]["monotonization"] = "cumulative_sum_v1"
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_run)
+    with pytest.raises(CustodyError, match="lacks its monotonization version"):
+        verify_run(sealed_run)
+
+
+def test_bins_cumulative_vector_must_be_the_running_sum(
+    sealed_bins_run: pathlib.Path,
+):
+    cells_path = sealed_bins_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cumulative = cells[0]["thresholdLadder"]["cumulativeProbabilities"]
+    # Still non-decreasing, still in [0, 1]: only the recomputation catches it.
+    cumulative[7] = min(cumulative[8], cumulative[7] + 0.05)
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_bins_run)
+    with pytest.raises(
+        CustodyError, match="cumulative probabilities are not the bin sums"
+    ):
+        verify_run(sealed_bins_run)
+
+
+def test_bins_masses_must_sum_to_one(sealed_bins_run: pathlib.Path):
+    cells_path = sealed_bins_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    ladder = cells[0]["thresholdLadder"]
+    masses = ladder["binProbabilities"]
+    last = list(masses)[-1]
+    masses[last] = round(masses[last] + 0.2, 10)
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_bins_run)
+    with pytest.raises(CustodyError, match="bin probabilities do not sum to 1"):
+        verify_run(sealed_bins_run)
+
+
+def test_bins_choice_must_be_one_of_the_labels(sealed_bins_run: pathlib.Path):
+    cells_path = sealed_bins_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cells[0]["thresholdLadder"]["choice"] = "somewhere_else"
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_bins_run)
+    with pytest.raises(CustodyError, match="choice is not one of the bin labels"):
+        verify_run(sealed_bins_run)
+
+
+def test_bins_masses_are_required_by_the_declared_derivation(
+    sealed_bins_run: pathlib.Path,
+):
+    cells_path = sealed_bins_run / "cells.with_activity.json"
+    cells = json.loads(cells_path.read_text())
+    cells[0]["thresholdLadder"].pop("binProbabilities")
+    cells_path.write_text(json.dumps(cells, indent=2) + "\n")
+    reseal(sealed_bins_run)
+    with pytest.raises(CustodyError, match="bin probabilities are malformed"):
+        verify_run(sealed_bins_run)
 
 
 def test_a_failed_run_with_no_model_verifies(failed_run: pathlib.Path):

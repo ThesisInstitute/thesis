@@ -1,12 +1,22 @@
 #!/usr/bin/env python3
-"""Forecast one catalog target with a System One model as a Noul ladder.
+"""Forecast one catalog target with a System One model over a threshold ladder.
 
 A System One model answers named typed questions about a state and returns
 calibrated probabilities without generating text.  This runner turns one
-already-published Thesis target into 15 independent yes/no (Noul) questions
-of the form "the first print will be at or below t", records the request and
-the raw response verbatim, monotonizes the answers into a CDF, and seals the
-result as a complete v2 custody inventory under run mode ``system_one``.
+already-published Thesis target into a ladder of 15 thresholds and asks the
+model about it in one of two elicitations, records the request and the raw
+response verbatim, derives a CDF, and seals the result as a complete v2
+custody inventory under run mode ``system_one``.
+
+Elicitations:
+
+* ``noul_ladder``  one independent yes/no (Noul) question per rung, "the
+  first print will be at or below t", pooled into a CDF by pool adjacent
+  violators.  The default for every backend but typesafe.
+* ``choice_bins``  one Choice question over the 16 half-open ranges the same
+  rungs cut, whose masses sum into the CDF directly.  The default for the
+  typesafe backend, where the ladder does not compose (measured 2026-09-17;
+  see docs/system-one-lane.md).
 
 The lane is a comparison lane.  It never carries a headline forecast, and it
 is scored beside thesis.analyst and the persistence baseline by the existing
@@ -32,7 +42,8 @@ Usage:
   python3 scripts/run_system_one_forecast.py \
       --target-json /tmp/target.json \
       --primary-cell records/thesis-analyst/<day>/<run>/cells.with_activity.json \
-      --backend adapter --provider openai --model gpt-5.6-terra \
+      --backend adapter --elicitation choice_bins \
+      --provider openai --model gpt-5.6-terra \
       --records-root /tmp/system-one-smoke
 """
 
@@ -75,11 +86,37 @@ MANIFEST_SCHEMA = "thesis_system_one_run_manifest_v1"
 STATE_SCHEMA = "thesis_system_one_state_v1"
 QUESTIONS_SCHEMA = "thesis_system_one_questions_v1"
 REQUEST_SCHEMA = "thesis_system_one_request_v1"
-PROMPT_MODE = "system_one_noul_ladder"
 AGENT_NAME = "thesis.system_one"
-AGENT_VERSION = "0.1.0"
-MONOTONIZATION = "pav_v1"
+AGENT_VERSION = "0.2.0"
 BACKENDS = ("typesafe", "adapter", "response_file", "mock")
+
+# The two ways the lane asks the same ladder.  noul_ladder sends one yes/no
+# question per rung and pools the answers into a CDF; choice_bins sends one
+# range question over the bins the rungs cut and reads the CDF off the
+# cumulative sums.  Everything downstream of the answers is identical, so the
+# elicitation is pinned at every trust boundary the way ladder_prompt_mode is
+# for the analyst ladder lane: it is in the prompt mode, in the hashed ladder
+# policy, in the hashed backend policy, in command.json, and in the trusted
+# selection request.
+ELICITATIONS = ("noul_ladder", "choice_bins")
+PROMPT_MODES = {
+    "noul_ladder": "system_one_noul_ladder",
+    "choice_bins": "system_one_choice_bins",
+}
+MONOTONIZATIONS = {
+    # Independent per-rung answers are an unordered set, so they are pooled
+    # into the least-squares non-decreasing fit.  Bin masses already sum into
+    # a non-decreasing CDF, so nothing is pooled and the declared version says
+    # exactly that.
+    "noul_ladder": "pav_v1",
+    "choice_bins": "cumulative_sum_v1",
+}
+QUESTION_TYPES = {"noul_ladder": "noul", "choice_bins": "choice"}
+BINS_QUESTION_NAME = "bins"
+# The bin probabilities must be a distribution.  1e-3 is the tolerance a model
+# answering in two-decimal probabilities can meet without being rounded into a
+# refusal, and it is far tighter than any answer this lane would publish.
+BIN_SUM_TOLERANCE = 1e-3
 
 LADDER_RUNG_COUNT = 15
 MIN_LADDER_OBSERVATIONS = 3
@@ -97,6 +134,18 @@ QUESTION_TEMPLATE = (
     "The official first print of {title} for {period} will be at or below "
     "{value}."
 )
+# One Choice question over the bins the same rungs cut.  The wording names the
+# quantity exactly as the Noul template does, states the half-open convention
+# the bins are built with, and asks for the range rather than a threshold.
+BIN_QUESTION_TEMPLATE = (
+    "Which range will the official first print of {title} for {period} fall "
+    "in? Every range includes its upper bound and excludes its lower bound."
+)
+BIN_OPTION_TEMPLATES = {
+    "first": "At or below {upper}.",
+    "middle": "Above {lower} and at or below {upper}.",
+    "last": "Above {lower}.",
+}
 
 # Every forecast-bearing field of the published primary cell.  The state is
 # built from an explicit allowlist rather than by deleting these, so this
@@ -130,7 +179,6 @@ BACKEND_POLICY_BASE = {
     "schemaVersion": "thesis_system_one_backend_policy_v2",
     "tools": [],
     "webAccess": False,
-    "questionTypes": ["noul"],
     "statePreResolutionOnly": True,
     "redactedPrimaryCellFields": list(REDACTED_CELL_FIELDS),
 }
@@ -162,26 +210,70 @@ BACKEND_POLICIES = {
 }
 
 
-def backend_policy(backend: str) -> dict[str, Any]:
-    """The canonical policy JSON hashed into agent.toolPolicyHash."""
+def require_elicitation(elicitation: str) -> str:
+    if elicitation not in ELICITATIONS:
+        raise SystemOneInputError(f"unsupported elicitation: {elicitation!r}")
+    return elicitation
+
+
+def default_elicitation(backend: str) -> str:
+    """The elicitation a backend runs under when none was named.
+
+    The typesafe backend defaults to the bins: measured on the real model
+    2026-09-17, the Noul ladder does not compose into a CDF there, and the
+    same state through one Choice over ranges does.  Every other backend keeps
+    the ladder, so the adapter stays the control arm for the ladder and every
+    existing test keeps its contract.
+    """
+
+    return "choice_bins" if backend == "typesafe" else "noul_ladder"
+
+
+def backend_policy(backend: str, elicitation: str) -> dict[str, Any]:
+    """The canonical policy JSON hashed into agent.toolPolicyHash.
+
+    The question type is part of the policy, not of the ladder: a run that
+    asked one Choice question and a run that asked fifteen Noul questions did
+    not put the same thing in front of the model, so they hash apart.
+    """
 
     if backend not in BACKEND_POLICIES:
         raise SystemOneInputError(f"unsupported backend: {backend!r}")
-    return {**BACKEND_POLICY_BASE, "backend": backend, **BACKEND_POLICIES[backend]}
+    require_elicitation(elicitation)
+    return {
+        **BACKEND_POLICY_BASE,
+        "questionTypes": [QUESTION_TYPES[elicitation]],
+        "backend": backend,
+        **BACKEND_POLICIES[backend],
+    }
 
-LADDER_POLICY = {
-    "schemaVersion": "thesis_system_one_ladder_policy_v1",
-    "questionTemplate": QUESTION_TEMPLATE,
-    "rungCount": LADDER_RUNG_COUNT,
-    "minObservations": MIN_LADDER_OBSERVATIONS,
-    "minDistinctThresholds": MIN_DISTINCT_THRESHOLDS,
-    "spanSigmas": LADDER_SPAN_SIGMAS,
-    "p80ToSigma": P80_TO_SIGMA,
-    "dispersionQuantile": DISPERSION_QUANTILE,
-    "scaleFloor": SCALE_FLOOR,
-    "monotonization": MONOTONIZATION,
-    "bases": ["ledger_dispersion", "history_dispersion"],
-}
+
+def ladder_policy(elicitation: str) -> dict[str, Any]:
+    """The canonical policy JSON hashed into agent.promptHash.
+
+    Both templates are in it whichever mode runs, so editing the bin wording
+    changes the hash of a ladder run too and the two modes can never be
+    compared across a silent wording change.
+    """
+
+    require_elicitation(elicitation)
+    return {
+        "schemaVersion": "thesis_system_one_ladder_policy_v2",
+        "elicitation": elicitation,
+        "questionTemplate": QUESTION_TEMPLATE,
+        "binQuestionTemplate": BIN_QUESTION_TEMPLATE,
+        "binOptionTemplates": dict(BIN_OPTION_TEMPLATES),
+        "rungCount": LADDER_RUNG_COUNT,
+        "minObservations": MIN_LADDER_OBSERVATIONS,
+        "minDistinctThresholds": MIN_DISTINCT_THRESHOLDS,
+        "spanSigmas": LADDER_SPAN_SIGMAS,
+        "p80ToSigma": P80_TO_SIGMA,
+        "dispersionQuantile": DISPERSION_QUANTILE,
+        "scaleFloor": SCALE_FLOOR,
+        "monotonization": MONOTONIZATIONS[elicitation],
+        "binSumTolerance": BIN_SUM_TOLERANCE,
+        "bases": ["ledger_dispersion", "history_dispersion"],
+    }
 
 PROVIDER_KEY_ENV = {
     "openai": "OPENAI_API_KEY",
@@ -996,8 +1088,9 @@ LADDER_QUESTION_FIELDS = (
 def build_questions(
     *,
     ladder: dict[str, Any],
-    payloads: dict[str, dict[str, str]],
+    payloads: dict[str, dict[str, Any]],
     ledger_observations: list[dict[str, Any]],
+    elicitation: str,
 ) -> dict[str, Any]:
     """questions.json: the ladder geometry and the questions as sent.
 
@@ -1006,29 +1099,85 @@ def build_questions(
     of trusting the thresholds the run happened to seal.
     """
 
-    return {
+    require_elicitation(elicitation)
+    thresholds = [float(value) for value in ladder["thresholds"]]
+    precision = int(ladder["precision"])
+    questions = {
         "schemaVersion": QUESTIONS_SCHEMA,
-        "questionType": "noul",
-        "questionTemplate": QUESTION_TEMPLATE,
-        "monotonization": MONOTONIZATION,
+        "elicitation": elicitation,
+        "questionType": QUESTION_TYPES[elicitation],
+        "questionTemplate": (
+            BIN_QUESTION_TEMPLATE
+            if elicitation == "choice_bins"
+            else QUESTION_TEMPLATE
+        ),
+        "monotonization": MONOTONIZATIONS[elicitation],
         **{key: ladder[key] for key in LADDER_QUESTION_FIELDS},
-        "ledgerSourceRecordIds": [
-            row.get("sourceRecordId") for row in ledger_observations
-        ],
-        "questions": payloads,
     }
+    if elicitation == "choice_bins":
+        edges = bin_edges(thresholds, precision)
+        questions["binOptions"] = [edge["label"] for edge in edges]
+        questions["binEdges"] = edges
+    questions["ledgerSourceRecordIds"] = [
+        row.get("sourceRecordId") for row in ledger_observations
+    ]
+    questions["questions"] = payloads
+    return questions
+
+
+def render_threshold(threshold: float, precision: int) -> str:
+    return f"{threshold:.{precision}f}"
+
+
+def bin_labels(thresholds: list[float], precision: int) -> list[str]:
+    """The sixteen option labels the fifteen rungs cut, in order.
+
+    ``up_to_t1`` is X <= t1, ``t_k_to_t_k+1`` is t_k < X <= t_k+1, and
+    ``above_t15`` is X > t15, so the first k+1 options sum to P(X <= t_k) and
+    the whole set is a partition.
+    """
+
+    rendered = [render_threshold(value, precision) for value in thresholds]
+    labels = [f"up_to_{rendered[0]}"]
+    labels.extend(
+        f"{lower}_to_{upper}" for lower, upper in zip(rendered, rendered[1:])
+    )
+    labels.append(f"above_{rendered[-1]}")
+    return labels
+
+
+def bin_edges(thresholds: list[float], precision: int) -> list[dict[str, Any]]:
+    """Each option label with the half-open interval it names."""
+
+    labels = bin_labels(thresholds, precision)
+    edges = [{"label": labels[0], "lower": None, "upper": thresholds[0]}]
+    edges.extend(
+        {"label": label, "lower": lower, "upper": upper}
+        for label, lower, upper in zip(labels[1:], thresholds, thresholds[1:])
+    )
+    edges.append({"label": labels[-1], "lower": thresholds[-1], "upper": None})
+    return edges
 
 
 def question_payloads(
-    *, contract: dict[str, Any], thresholds: list[float], precision: int
-) -> dict[str, dict[str, str]]:
+    *,
+    contract: dict[str, Any],
+    thresholds: list[float],
+    precision: int,
+    elicitation: str,
+) -> dict[str, dict[str, Any]]:
+    require_elicitation(elicitation)
+    if elicitation == "choice_bins":
+        return bin_question_payloads(
+            contract=contract, thresholds=thresholds, precision=precision
+        )
     period = period_phrase(str(contract.get("period") or ""))
     title = question_title(
         str(contract.get("title") or contract.get("catalogSlug") or "the series"),
         period,
     )
     unit = contract.get("unit") or ""
-    payloads: dict[str, dict[str, str]] = {}
+    payloads: dict[str, dict[str, Any]] = {}
     for index, threshold in enumerate(thresholds, start=1):
         payloads[f"rung_{index:02d}"] = {
             "type": "noul",
@@ -1039,6 +1188,47 @@ def question_payloads(
             ),
         }
     return payloads
+
+
+def bin_question_payloads(
+    *, contract: dict[str, Any], thresholds: list[float], precision: int
+) -> dict[str, dict[str, Any]]:
+    """One Choice question whose criteria are the sixteen ranges.
+
+    The option text renders each edge at the ladder's precision with the
+    registered unit, exactly as the Noul template renders a rung, so the two
+    elicitations put the same numbers in front of the model.
+    """
+
+    period = period_phrase(str(contract.get("period") or ""))
+    title = question_title(
+        str(contract.get("title") or contract.get("catalogSlug") or "the series"),
+        period,
+    )
+    unit = contract.get("unit") or ""
+
+    def value_text(threshold: float) -> str:
+        return render_threshold(threshold, precision) + (f" {unit}" if unit else "")
+
+    criteria: dict[str, str] = {}
+    for edge in bin_edges(thresholds, precision):
+        if edge["lower"] is None:
+            template = BIN_OPTION_TEMPLATES["first"]
+        elif edge["upper"] is None:
+            template = BIN_OPTION_TEMPLATES["last"]
+        else:
+            template = BIN_OPTION_TEMPLATES["middle"]
+        criteria[edge["label"]] = template.format(
+            lower=value_text(edge["lower"]) if edge["lower"] is not None else "",
+            upper=value_text(edge["upper"]) if edge["upper"] is not None else "",
+        )
+    return {
+        BINS_QUESTION_NAME: {
+            "type": "choice",
+            "criteria": criteria,
+            "instructions": BIN_QUESTION_TEMPLATE.format(title=title, period=period),
+        }
+    }
 
 
 # --- backends ---------------------------------------------------------------
@@ -1060,10 +1250,33 @@ def mock_probability(name: str, threshold: float, center: float, sigma: float) -
     return min(max(base + tilt, 0.0), 1.0)
 
 
+def normal_cdf(threshold: float, center: float, sigma: float) -> float:
+    z = (threshold - center) / max(sigma, SCALE_FLOOR)
+    return 0.5 * (1.0 + math.erf(z / math.sqrt(2.0)))
+
+
 def call_mock(
-    *, payloads: dict[str, dict[str, str]], ladder: dict[str, Any]
+    *,
+    payloads: dict[str, dict[str, Any]],
+    ladder: dict[str, Any],
+    elicitation: str,
 ) -> dict[str, Any]:
-    answers = {}
+    answers = (
+        mock_bin_answer(payloads=payloads, ladder=ladder)
+        if elicitation == "choice_bins"
+        else mock_noul_answers(payloads=payloads, ladder=ladder)
+    )
+    return {
+        "model": "mock",
+        "usage": {"input_tokens": None, "output_tokens": None},
+        "answers": answers,
+    }
+
+
+def mock_noul_answers(
+    *, payloads: dict[str, dict[str, Any]], ladder: dict[str, Any]
+) -> dict[str, Any]:
+    answers: dict[str, Any] = {}
     for (name, _payload), threshold in zip(payloads.items(), ladder["thresholds"]):
         answers[name] = {
             "type": "noul",
@@ -1073,10 +1286,42 @@ def call_mock(
                 )
             ),
         }
+    return answers
+
+
+def mock_bin_answer(
+    *, payloads: dict[str, dict[str, Any]], ladder: dict[str, Any]
+) -> dict[str, Any]:
+    """The same normal CDF, differenced into bin masses.
+
+    There is no per-question tilt here: the ladder mode tilts each rung so the
+    monotonization has something to correct, and bins have nothing to correct.
+    The confidence is the largest bin mass, which is what a mock can honestly
+    say about its own answer.
+    """
+
+    thresholds = [float(value) for value in ladder["thresholds"]]
+    center = float(ladder["center"])
+    sigma = float(ladder["sigma"])
+    cumulative = [normal_cdf(value, center, sigma) for value in thresholds]
+    masses = [cumulative[0]]
+    masses.extend(
+        upper - lower for lower, upper in zip(cumulative, cumulative[1:])
+    )
+    masses.append(1.0 - cumulative[-1])
+    labels = list((payloads[BINS_QUESTION_NAME] or {}).get("criteria") or {})
+    probabilities = {
+        label: round_probability(min(max(mass, 0.0), 1.0))
+        for label, mass in zip(labels, masses)
+    }
+    choice = max(probabilities, key=probabilities.__getitem__)
     return {
-        "model": "mock",
-        "usage": {"input_tokens": None, "output_tokens": None},
-        "answers": answers,
+        BINS_QUESTION_NAME: {
+            "type": "choice",
+            "choice": choice,
+            "confidence": probabilities[choice],
+            "probabilities": probabilities,
+        }
     }
 
 
@@ -1125,15 +1370,35 @@ def backend_phase(label: str):
         ) from exc
 
 
+def sdk_questions(module, payloads: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Rebuild the SDK question objects from the payloads about to be recorded.
+
+    Both SDKs expose the same two constructors, so one builder serves the
+    typesafe client and the adapter and neither can drift from the other.
+    """
+
+    questions: dict[str, Any] = {}
+    for name, payload in payloads.items():
+        if payload.get("type") == "choice":
+            questions[name] = module.Choice(
+                criteria=dict(payload["criteria"]),
+                instructions=payload["instructions"],
+            )
+        else:
+            questions[name] = module.Noul(instructions=payload["instructions"])
+    return questions
+
+
 def call_typesafe(
     *,
     state: dict[str, Any],
-    payloads: dict[str, dict[str, str]],
+    payloads: dict[str, dict[str, Any]],
     model: str | None,
 ) -> dict[str, Any]:
     try:
         import msgspec
-        from typesafe_sdk import Noul, TypeSafeClient
+        import typesafe_sdk
+        from typesafe_sdk import TypeSafeClient
     except ImportError as exc:  # pragma: no cover - needs the extra absent
         raise SystemOneRunError(
             "backend",
@@ -1142,10 +1407,7 @@ def call_typesafe(
             {"exception": type(exc).__name__},
         ) from exc
     with backend_phase("typesafe setup"):
-        questions = {
-            name: Noul(instructions=payload["instructions"])
-            for name, payload in payloads.items()
-        }
+        questions = sdk_questions(typesafe_sdk, payloads)
         _assert_request_fidelity(msgspec, questions, payloads)
         client = TypeSafeClient(model=model)
     with backend_phase("system_one call"):
@@ -1155,13 +1417,14 @@ def call_typesafe(
 def call_adapter(
     *,
     state: dict[str, Any],
-    payloads: dict[str, dict[str, str]],
+    payloads: dict[str, dict[str, Any]],
     provider: str,
     model: str,
 ) -> dict[str, Any]:
     try:
         import msgspec
-        from system_one_adapter import Noul, SystemOneAdapterClient
+        import system_one_adapter
+        from system_one_adapter import SystemOneAdapterClient
     except ImportError as exc:  # pragma: no cover - needs the extra absent
         raise SystemOneRunError(
             "backend",
@@ -1170,14 +1433,15 @@ def call_adapter(
             {"exception": type(exc).__name__},
         ) from exc
     with backend_phase("adapter setup"):
-        questions = {
-            name: Noul(instructions=payload["instructions"])
-            for name, payload in payloads.items()
-        }
+        questions = sdk_questions(system_one_adapter, payloads)
         _assert_request_fidelity(msgspec, questions, payloads)
         client = SystemOneAdapterClient(
             structured_outputs=True,
             llm_answer_mode="probabilities",
+            # The adapter rescales an LLM's probability vector so it sums to
+            # 1. That is an adapter step, not a model answer, so the cell's
+            # method sentence says it happened on this backend and does not
+            # on typesafe, where the raw vector is published as it came back.
             normalize_probabilities=True,
             provider=provider,
             model=model,
@@ -1199,19 +1463,7 @@ def _assert_request_fidelity(msgspec_module, questions, payloads) -> None:
 
 
 def noul_probabilities(response: dict[str, Any], names: list[str]) -> list[float]:
-    answers = response.get("answers")
-    if not isinstance(answers, dict):
-        raise SystemOneRunError(
-            "ladder", "response has no answers object", {"reason": "no_answers"}
-        )
-    missing = [name for name in names if name not in answers]
-    extra = [name for name in answers if name not in names]
-    if missing or extra:
-        raise SystemOneRunError(
-            "ladder",
-            "response question names do not match the ladder",
-            {"reason": "question_mismatch", "missing": missing, "unexpected": extra},
-        )
+    answers = response_answers(response, names)
     probabilities: list[float] = []
     for name in names:
         answer = answers[name]
@@ -1232,9 +1484,124 @@ def noul_probabilities(response: dict[str, Any], names: list[str]) -> list[float
     return probabilities
 
 
+def response_answers(response: dict[str, Any], names: list[str]) -> dict[str, Any]:
+    """The answers object, with its question names checked against the ask."""
+
+    answers = response.get("answers")
+    if not isinstance(answers, dict):
+        raise SystemOneRunError(
+            "ladder", "response has no answers object", {"reason": "no_answers"}
+        )
+    missing = [name for name in names if name not in answers]
+    extra = [name for name in answers if name not in names]
+    if missing or extra:
+        raise SystemOneRunError(
+            "ladder",
+            "response question names do not match the ladder",
+            {"reason": "question_mismatch", "missing": missing, "unexpected": extra},
+        )
+    return answers
+
+
+def bin_answer(response: dict[str, Any], labels: list[str]) -> dict[str, Any]:
+    """Read the one Choice answer as a distribution over the bin labels.
+
+    Fails closed in the ladder phase when the answer is not a distribution
+    over exactly these options: a missing label, an invented one, a
+    probability outside [0, 1], or a vector that does not sum to 1 within
+    BIN_SUM_TOLERANCE. The raw probabilities the model returned are recorded
+    in error.json either way, because that is the evidence about the model.
+    """
+
+    answers = response_answers(response, [BINS_QUESTION_NAME])
+    answer = answers[BINS_QUESTION_NAME]
+    if not isinstance(answer, dict) or not isinstance(
+        answer.get("probabilities"), dict
+    ):
+        raise SystemOneRunError(
+            "ladder",
+            f"answer {BINS_QUESTION_NAME} is not a Choice answer",
+            {"reason": "not_choice", "question": BINS_QUESTION_NAME},
+        )
+    raw = answer["probabilities"]
+    missing = [label for label in labels if label not in raw]
+    unexpected = [label for label in raw if label not in labels]
+    numeric = {
+        label: float(value)
+        for label, value in raw.items()
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
+    outside = sorted(
+        label for label, value in numeric.items() if not 0.0 <= value <= 1.0
+    )
+    total = sum(numeric.get(label, 0.0) for label in labels)
+    if (
+        missing
+        or unexpected
+        or len(numeric) != len(raw)
+        or outside
+        or abs(total - 1.0) > BIN_SUM_TOLERANCE
+    ):
+        raise SystemOneRunError(
+            "ladder",
+            "bin probabilities are not a distribution over the ladder's ranges",
+            {
+                "reason": "bins_incomplete",
+                "missing": missing,
+                "unexpected": unexpected,
+                "outsideUnitInterval": outside,
+                "sum": round_probability(total),
+                "tolerance": BIN_SUM_TOLERANCE,
+                "probabilities": raw,
+            },
+        )
+    choice = answer.get("choice")
+    if not isinstance(choice, str) or choice not in labels:
+        raise SystemOneRunError(
+            "ladder",
+            "choice is not one of the ladder's ranges",
+            {
+                "reason": "bins_incomplete",
+                "choice": choice,
+                "probabilities": raw,
+            },
+        )
+    confidence = answer.get("confidence")
+    return {
+        "labels": labels,
+        "probabilities": [round_probability(numeric[label]) for label in labels],
+        "choice": choice,
+        "confidence": (
+            round_probability(float(confidence))
+            if isinstance(confidence, (int, float))
+            and not isinstance(confidence, bool)
+            else None
+        ),
+    }
+
+
+def cumulative_from_bins(probabilities: list[float]) -> list[float]:
+    """P(X <= t_k) for each rung: the running sum of the first k+1 options.
+
+    The last option is X above the top rung, so it is mass the ladder carries
+    but no rung names; dropping it is what makes the vector one value per
+    threshold. The sums are non-decreasing because every mass is in [0, 1].
+    """
+
+    cumulative: list[float] = []
+    total = 0.0
+    for value in probabilities[:-1]:
+        total += value
+        cumulative.append(round_probability(total))
+    return cumulative
+
+
 # --- lane identity ----------------------------------------------------------
 
-SYSTEM_ONE_LABEL = "System One threshold ladder"
+SYSTEM_ONE_LABELS = {
+    "noul_ladder": "System One threshold ladder",
+    "choice_bins": "System One bins",
+}
 EVIDENCE_SENTENCE = (
     "The evidence state carries the target contract, the reported historical "
     "prints, and the same-series official observations pinned before this run "
@@ -1254,28 +1621,72 @@ def backend_descriptor(backend: str, model: str | None) -> str:
     return backend
 
 
-def lane_label(backend: str, model: str | None) -> str:
+def lane_label(backend: str, model: str | None, elicitation: str) -> str:
     """The label a reader sees on the cell and in the comparison list.
 
     Only the typesafe backend is a System One run.  Every other backend
     emulates the interface, and the label says which one did it, so a reader
-    never has to infer the mechanism from a footnote.
+    never has to infer the mechanism from a footnote.  The two elicitations
+    are two lanes, not one, so the typesafe label names which one ran.
     """
 
     if backend == "typesafe":
-        return SYSTEM_ONE_LABEL
+        return SYSTEM_ONE_LABELS[require_elicitation(elicitation)]
     return f"System One emulation ({backend_descriptor(backend, model)})"
 
 
-def lane_narrative(*, backend: str, model: str | None, rungs: int) -> str:
-    """What actually happened, stated per backend.
+def lane_narrative(
+    *, backend: str, model: str | None, rungs: int, elicitation: str
+) -> str:
+    """What actually happened, stated per backend and per elicitation.
 
     Verified 2026-09-16 against system-one-adapter 0.1.3 (_client.py
     _prepare_evaluation and providers/openai.py _responses_request_kwargs):
     the adapter serializes the state once and sends every question in one
-    request, with the provider's default reasoning setting.
+    request, with the provider's default reasoning setting.  Read again
+    2026-09-17 for the Choice path (_convert_llm_value_to_typesafe_answer):
+    the adapter rescales the returned probability vector when
+    normalize_probabilities is on, which this lane sets.
     """
 
+    require_elicitation(elicitation)
+    bins = rungs + 1
+    if elicitation == "choice_bins":
+        if backend == "typesafe":
+            return (
+                "A System One model answered one range question about one "
+                f"fixed evidence state: which of the {bins} ranges cut by the "
+                f"{rungs} ladder rungs the first print will fall in. It used "
+                "no tools, no search, and no chain of thought, and it wrote "
+                "no text: the answer is a probability for every range, as the "
+                "model returned them. " + EVIDENCE_SENTENCE
+            )
+        if backend == "adapter":
+            return (
+                "This run emulates the System One interface rather than using "
+                f"it. A general language model ({model}) received the same "
+                f"fixed evidence state and one range question over the {bins} "
+                f"ranges cut by the {rungs} ladder rungs, in one "
+                "structured-output request, and returned a probability for "
+                "every range. The adapter rescaled those probabilities to sum "
+                "to 1, which the typesafe backend's are not, and the model "
+                "may reason internally before it emits them, so its output "
+                "tokens can include reasoning tokens. It used no tools and no "
+                "search. " + EVIDENCE_SENTENCE
+            )
+        if backend == "response_file":
+            return (
+                "This run replays a System One response recorded earlier; no "
+                f"model was called here. The {bins} range probabilities below "
+                "are that recorded response, summed into the cumulative "
+                "ladder and interpolated by this runner. " + EVIDENCE_SENTENCE
+            )
+        return (
+            "This run is a deterministic offline stand-in, not a model: the "
+            f"{bins} range probabilities are computed from the evidence state "
+            "by a fixed formula in the runner so the record can be exercised "
+            "end to end. " + EVIDENCE_SENTENCE
+        )
     if backend == "typesafe":
         return (
             f"A System One model answered {rungs} independent yes/no questions "
@@ -1313,6 +1724,28 @@ def lane_narrative(*, backend: str, model: str | None, rungs: int) -> str:
 # --- cell assembly ----------------------------------------------------------
 
 
+def bin_math_text(
+    *, thresholds: list[float], precision: int, bins: dict[str, Any]
+) -> str:
+    """Every bin as the probability of its own half-open range."""
+
+    parts: list[str] = []
+    for edge, probability in zip(
+        bin_edges([float(value) for value in thresholds], precision),
+        bins["probabilities"],
+    ):
+        lower = edge["lower"]
+        upper = edge["upper"]
+        if lower is None:
+            span = f"X <= {upper:.{precision}f}"
+        elif upper is None:
+            span = f"X > {lower:.{precision}f}"
+        else:
+            span = f"{lower:.{precision}f} < X <= {upper:.{precision}f}"
+        parts.append(f"P({span}) = {probability:.4f}")
+    return ", ".join(parts)
+
+
 def build_cell(
     *,
     target: dict[str, Any],
@@ -1326,13 +1759,55 @@ def build_cell(
     agent: dict[str, Any],
     latency_ms: int,
     usage: dict[str, Any],
+    elicitation: str,
+    question_count: int,
+    bins: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    require_elicitation(elicitation)
     thresholds = ladder["thresholds"]
     precision = ladder["precision"]
     rungs = ", ".join(
         f"P(X <= {threshold:.{precision}f}) = {probability:.4f}"
         for threshold, probability in zip(thresholds, monotone)
     )
+    percentiles = (
+        f"the 10th percentile at {quantiles['q10']}, the median at "
+        f"{quantiles['q50']}, and the 90th percentile at {quantiles['q90']}"
+    )
+    if elicitation == "choice_bins":
+        assert bins is not None
+        threshold_ladder = {
+            "thresholds": thresholds,
+            "cumulativeProbabilities": monotone,
+            "rawCumulativeProbabilities": raw_probabilities,
+            "monotonization": MONOTONIZATIONS[elicitation],
+            "binProbabilities": dict(
+                zip(bins["labels"], bins["probabilities"])
+            ),
+            "choice": bins["choice"],
+            "choiceConfidence": bins["confidence"],
+            "ladderBasis": ladder["ladderBasis"],
+        }
+        math_text = (
+            "Bins: "
+            + bin_math_text(
+                thresholds=thresholds, precision=precision, bins=bins
+            )
+            + f". Cumulative: {rungs}. Summing the bins in order and "
+            f"interpolating the result gives {percentiles}."
+        )
+    else:
+        threshold_ladder = {
+            "thresholds": thresholds,
+            "cumulativeProbabilities": monotone,
+            "rawCumulativeProbabilities": raw_probabilities,
+            "monotonization": MONOTONIZATIONS[elicitation],
+            "ladderBasis": ladder["ladderBasis"],
+        }
+        math_text = (
+            f"Ladder: {rungs}. Interpolating the monotone ladder gives "
+            f"{percentiles}."
+        )
     cell = {
         "slug": target.get("catalogSlug"),
         "country": target.get("country"),
@@ -1354,18 +1829,14 @@ def build_cell(
         "sourceContext": source_context(primary_cell),
         "runStartedAt": run_started_at,
         "runAt": sealed_at,
-        "promptMode": PROMPT_MODE,
-        "thresholdLadder": {
-            "thresholds": thresholds,
-            "cumulativeProbabilities": monotone,
-            "rawCumulativeProbabilities": raw_probabilities,
-            "monotonization": MONOTONIZATION,
-            "ladderBasis": ladder["ladderBasis"],
-        },
+        "promptMode": PROMPT_MODES[elicitation],
+        "thresholdLadder": threshold_ladder,
         "reasoning": [
             {
                 "kind": "heading",
-                "text": lane_label(str(agent.get("backend")), agent.get("model")),
+                "text": lane_label(
+                    str(agent.get("backend")), agent.get("model"), elicitation
+                ),
             },
             {
                 "kind": "text",
@@ -1373,17 +1844,19 @@ def build_cell(
                     backend=str(agent.get("backend")),
                     model=agent.get("model"),
                     rungs=len(thresholds),
+                    elicitation=elicitation,
                 ),
             },
             {
                 "kind": "tool",
-                "tool": "system_one.noul_ladder",
+                "tool": f"system_one.{elicitation}",
                 "call": (
-                    "system_one.noul_ladder({"
+                    f"system_one.{elicitation}({{"
                     f"backend: {agent.get('backend')!r}, "
                     f"provider: {agent.get('provider')!r}, "
                     f"model: {agent.get('model')!r}, "
-                    f"questions: {len(thresholds)}"
+                    f"questionType: {QUESTION_TYPES[elicitation]!r}, "
+                    f"questions: {question_count}"
                     "})"
                 ),
                 "result": (
@@ -1392,15 +1865,7 @@ def build_cell(
                     f"outputTokens: {usage.get('output_tokens')}}}"
                 ),
             },
-            {
-                "kind": "math",
-                "text": (
-                    f"Ladder: {rungs}. Interpolating the monotone ladder gives "
-                    f"the 10th percentile at {quantiles['q10']}, the median at "
-                    f"{quantiles['q50']}, and the 90th percentile at "
-                    f"{quantiles['q90']}."
-                ),
-            },
+            {"kind": "math", "text": math_text},
             {
                 "kind": "forecast",
                 "point": quantiles["q50"],
@@ -1441,9 +1906,12 @@ def validate_run(
     raw_probabilities: list[float],
     monotone: list[float],
     distribution: dict[str, Any] | None,
+    elicitation: str,
 ) -> dict[str, Any]:
+    require_elicitation(elicitation)
     errors: list[str] = []
-    thresholds = list(cell["thresholdLadder"]["thresholds"])
+    ladder = cell["thresholdLadder"]
+    thresholds = list(ladder["thresholds"])
 
     for cell_key, target_key in RESOLVER_CELL_FIELDS:
         expected = target.get(target_key)
@@ -1469,7 +1937,9 @@ def validate_run(
         errors.append("cumulative probabilities are not non-decreasing")
     if len(monotone) != len(thresholds) or len(raw_probabilities) != len(thresholds):
         errors.append("ladder arrays have unequal length")
-    if len(questions.get("questions") or {}) != len(thresholds):
+    if elicitation == "choice_bins":
+        errors.extend(bin_validation_errors(ladder, questions, thresholds))
+    elif len(questions.get("questions") or {}) != len(thresholds):
         errors.append("question count does not match the threshold count")
     if any(
         not isinstance(value, (int, float))
@@ -1501,6 +1971,52 @@ def validate_run(
         ],
         "rubric": "thesis_system_one_validation_v1",
     }
+
+
+def bin_validation_errors(
+    ladder: dict[str, Any],
+    questions: dict[str, Any],
+    thresholds: list[float],
+) -> list[str]:
+    """The bins rubric: the sealed cell must carry a real distribution.
+
+    Everything here is read back off the sealed cell rather than off the
+    runtime values, so the publication boundary re-runs it against the staged
+    record and gets the same report or refuses the run.
+    """
+
+    errors: list[str] = []
+    if len(questions.get("questions") or {}) != 1:
+        errors.append("the bins elicitation must send exactly one question")
+    labels = list(questions.get("binOptions") or [])
+    if len(labels) != len(thresholds) + 1:
+        errors.append("bin option count does not match the threshold count")
+    masses = ladder.get("binProbabilities")
+    if not isinstance(masses, dict) or list(masses) != labels:
+        errors.append("bin probabilities are not the option labels in order")
+        return errors
+    values = list(masses.values())
+    if any(
+        not isinstance(value, (int, float))
+        or isinstance(value, bool)
+        or not 0.0 <= float(value) <= 1.0
+        for value in values
+    ):
+        errors.append("bin probabilities are outside [0, 1]")
+        return errors
+    if abs(sum(float(value) for value in values) - 1.0) > BIN_SUM_TOLERANCE:
+        errors.append("bin probabilities do not sum to 1")
+    expected = cumulative_from_bins([float(value) for value in values])
+    published = [float(value) for value in ladder.get("cumulativeProbabilities")]
+    if any(later < earlier for earlier, later in zip(expected, expected[1:])):
+        errors.append("cumulative bin sums are not non-decreasing")
+    if len(expected) != len(published) or any(
+        abs(left - right) > 1e-9 for left, right in zip(expected, published)
+    ):
+        errors.append("cumulative probabilities are not the bin sums")
+    if ladder.get("choice") not in labels:
+        errors.append("choice is not one of the bin option labels")
+    return errors
 
 
 # --- sealing ----------------------------------------------------------------
@@ -1557,6 +2073,7 @@ def base_manifest(
     agent: dict[str, Any],
     run_started_at: str,
     sealed_at: str,
+    elicitation: str,
 ) -> dict[str, Any]:
     manifest = {
         "schemaVersion": MANIFEST_SCHEMA,
@@ -1566,7 +2083,7 @@ def base_manifest(
         "series": target.get("series"),
         "period": target.get("period"),
         "targetContext": target,
-        "promptMode": PROMPT_MODE,
+        "promptMode": PROMPT_MODES[require_elicitation(elicitation)],
         "agent": agent,
     }
     for field in REGISTRATION_FIELDS:
@@ -1603,6 +2120,7 @@ def write_failure(
     phase: str,
     message: str,
     detail: Any,
+    elicitation: str,
 ) -> dict[str, Any]:
     sealed_at = max(utc_now(), run_started_at)
     error = {"phase": phase, "message": message, "detail": detail}
@@ -1617,6 +2135,7 @@ def write_failure(
         agent=agent,
         run_started_at=run_started_at,
         sealed_at=sealed_at,
+        elicitation=elicitation,
     )
     manifest.update(
         {
@@ -1898,6 +2417,7 @@ def agent_block(
     provider: str | None,
     model: str | None,
     response: dict[str, Any] | None,
+    elicitation: str,
 ) -> dict[str, Any]:
     """The manifest agent block.
 
@@ -1917,8 +2437,8 @@ def agent_block(
         "agent": AGENT_NAME,
         "model": resolved,
         "agentVersion": AGENT_VERSION,
-        "promptHash": canonical_sha256(LADDER_POLICY),
-        "toolPolicyHash": canonical_sha256(backend_policy(backend)),
+        "promptHash": canonical_sha256(ladder_policy(elicitation)),
+        "toolPolicyHash": canonical_sha256(backend_policy(backend, elicitation)),
         "backend": backend,
         "provider": provider,
     }
@@ -1935,11 +2455,13 @@ def run_forecast(
     model: str | None = None,
     response_file: pathlib.Path | None = None,
     run_at: str | None = None,
+    elicitation: str | None = None,
 ) -> tuple[dict[str, Any], pathlib.Path]:
     """Run one target and return (manifest, manifest path)."""
 
     if backend not in BACKENDS:
         raise SystemOneInputError(f"unsupported backend: {backend!r}")
+    elicitation = require_elicitation(elicitation or default_elicitation(backend))
     slug = target.get("catalogSlug")
     if not isinstance(slug, str) or not slug:
         raise SystemOneInputError("target has no catalogSlug")
@@ -1967,7 +2489,13 @@ def run_forecast(
         raise SystemOneInputError(f"run directory already exists: {out_dir}")
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    agent = agent_block(backend=backend, provider=provider, model=model, response=None)
+    agent = agent_block(
+        backend=backend,
+        provider=provider,
+        model=model,
+        response=None,
+        elicitation=elicitation,
+    )
     refs: list[dict[str, Any]] = []
 
     ledger = ledger_selection(target, read_ledger(ledger_path), run_started_at)
@@ -2003,6 +2531,7 @@ def run_forecast(
             response_file=response_file,
             run_started_at=run_started_at,
             agent=agent,
+            elicitation=elicitation,
         )
     except SystemOneRunError as exc:
         manifest = write_failure(
@@ -2014,6 +2543,7 @@ def run_forecast(
             phase=exc.phase,
             message=exc.message,
             detail=exc.detail,
+            elicitation=elicitation,
         )
         return manifest, out_dir / "manifest.json"
     except Exception as exc:  # noqa: BLE001 - class name only, never the text
@@ -2037,6 +2567,7 @@ def run_forecast(
             phase=phase,
             message=f"{type(exc).__name__} in the {phase} phase",
             detail={"exception": type(exc).__name__},
+            elicitation=elicitation,
         )
         return manifest, out_dir / "manifest.json"
 
@@ -2055,6 +2586,7 @@ def _run_sealed(
     response_file: pathlib.Path | None,
     run_started_at: str,
     agent: dict[str, Any],
+    elicitation: str,
 ) -> tuple[dict[str, Any], pathlib.Path]:
     ladder = build_ladder(
         ledger_observations=ledger_observations,
@@ -2064,11 +2596,13 @@ def _run_sealed(
         contract=state["target"],
         thresholds=ladder["thresholds"],
         precision=ladder["precision"],
+        elicitation=elicitation,
     )
     questions = build_questions(
         ladder=ladder,
         payloads=payloads,
         ledger_observations=ledger_observations,
+        elicitation=elicitation,
     )
     violations = redaction_violations(primary_cell, [state, questions])
     if violations:
@@ -2091,6 +2625,7 @@ def _run_sealed(
         "backend": backend,
         "provider": provider,
         "model": model,
+        "elicitation": elicitation,
         "state": state,
         "questions": payloads,
     }
@@ -2114,7 +2649,9 @@ def _run_sealed(
         # custody-verifiable record instead of a traceback.
         with backend_phase("backend call"):
             if backend == "mock":
-                response = call_mock(payloads=payloads, ladder=ladder)
+                response = call_mock(
+                    payloads=payloads, ladder=ladder, elicitation=elicitation
+                )
             elif backend == "response_file":
                 assert response_file is not None
                 response = call_response_file(response_file)
@@ -2146,6 +2683,7 @@ def _run_sealed(
         "backend": backend,
         "provider": provider,
         "model": model,
+        "elicitation": elicitation,
         "startedAt": started_at,
         "finishedAt": finished_at,
         "latencyMs": latency_ms,
@@ -2179,16 +2717,30 @@ def _run_sealed(
     # Mutate in place: run_forecast holds this dict for the failure writer, so
     # a later ladder or validate failure still records the model that answered.
     agent.update(
-        agent_block(backend=backend, provider=provider, model=model, response=response)
+        agent_block(
+            backend=backend,
+            provider=provider,
+            model=model,
+            response=response,
+            elicitation=elicitation,
+        )
     )
     names = list(payloads)
-    raw_probabilities = [
-        round_probability(value) for value in noul_probabilities(response, names)
-    ]
-    monotone = [
-        round_probability(value)
-        for value in clamp_unit(pav_monotone(raw_probabilities))
-    ]
+    bins: dict[str, Any] | None = None
+    if elicitation == "choice_bins":
+        bins = bin_answer(response, list(questions["binOptions"]))
+        # Nothing is pooled: the bin masses are already a distribution, so the
+        # cumulative sums are the CDF and the raw vector is the same vector.
+        monotone = cumulative_from_bins(bins["probabilities"])
+        raw_probabilities = list(monotone)
+    else:
+        raw_probabilities = [
+            round_probability(value) for value in noul_probabilities(response, names)
+        ]
+        monotone = [
+            round_probability(value)
+            for value in clamp_unit(pav_monotone(raw_probabilities))
+        ]
     if monotone[0] > 0.10 or monotone[-1] < 0.90:
         raise SystemOneRunError(
             "ladder",
@@ -2218,6 +2770,9 @@ def _run_sealed(
         agent=agent,
         latency_ms=latency_ms,
         usage=usage,
+        elicitation=elicitation,
+        question_count=len(payloads),
+        bins=bins,
     )
     distribution = ladder_distribution(cell)
     normalized = copy.deepcopy(cell)
@@ -2252,6 +2807,7 @@ def _run_sealed(
             raw_probabilities=raw_probabilities,
             monotone=monotone,
             distribution=distribution,
+            elicitation=elicitation,
         )
     except (ValueError, TypeError, KeyError, OverflowError) as exc:
         raise SystemOneRunError(
@@ -2291,6 +2847,7 @@ def _run_sealed(
         agent=agent,
         run_started_at=run_started_at,
         sealed_at=sealed_at,
+        elicitation=elicitation,
     )
     manifest.update(
         {
@@ -2316,6 +2873,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--primary-cell", type=pathlib.Path)
     parser.add_argument("--ledger-jsonl", type=pathlib.Path)
     parser.add_argument("--backend", choices=list(BACKENDS), required=True)
+    parser.add_argument(
+        "--elicitation",
+        choices=list(ELICITATIONS),
+        help=(
+            "how the ladder is asked; default choice_bins for the typesafe "
+            "backend and noul_ladder for every other backend"
+        ),
+    )
     parser.add_argument("--provider")
     parser.add_argument("--model")
     parser.add_argument("--response-file", type=pathlib.Path)
@@ -2351,6 +2916,7 @@ def main(argv: list[str] | None = None) -> int:
             model=model,
             response_file=args.response_file,
             run_at=args.run_at,
+            elicitation=args.elicitation,
         )
     except SystemOneInputError as exc:
         print(f"system_one: {exc}", file=sys.stderr)

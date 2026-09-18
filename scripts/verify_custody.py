@@ -25,10 +25,19 @@ INVENTORY_STATUS_LEGACY = "legacy-incomplete"
 DERIVED_ENSEMBLE_SCHEMA = "thesis_derived_ensemble_manifest_v1"
 DERIVED_ENSEMBLE_ALGORITHM = "pointwise_median_cdf_v1"
 SYSTEM_ONE_SCHEMA = "thesis_system_one_run_manifest_v1"
-SYSTEM_ONE_PROMPT_MODE = "system_one_noul_ladder"
 SYSTEM_ONE_AGENT = "thesis.system_one"
 SYSTEM_ONE_BACKENDS = {"typesafe", "adapter", "response_file", "mock"}
-SYSTEM_ONE_MONOTONIZATION = "pav_v1"
+# The lane has two elicitations and each declares its own derivation. A run
+# that asked one Choice question over the bins may not claim the pooled fit a
+# Noul ladder needs, and a run that asked fifteen Noul questions may not claim
+# a sum it never computed, so the prompt mode fixes the monotonization.
+SYSTEM_ONE_PROMPT_MODES = {
+    "system_one_noul_ladder": "pav_v1",
+    "system_one_choice_bins": "cumulative_sum_v1",
+}
+SYSTEM_ONE_BIN_MONOTONIZATION = "cumulative_sum_v1"
+# The same tolerance the runner refuses a bin vector outside.
+SYSTEM_ONE_BIN_SUM_TOLERANCE = 1e-3
 SYSTEM_ONE_SUCCESS_INVENTORY = [
     ("system_one_state", "state.json"),
     ("system_one_questions", "questions.json"),
@@ -2266,6 +2275,44 @@ def _system_one_command_backend(run_dir: Path, expected: str) -> None:
         )
 
 
+def _verify_system_one_bins(ladder: dict[str, Any], cumulative: list[Any]) -> None:
+    """The cumulative vector must BE the running sum of the bin masses.
+
+    Under the bins elicitation nothing is pooled, so the published CDF is a
+    pure function of the recorded bin probabilities. Custody recomputes it
+    here rather than reading the cumulative vector as an independent claim,
+    and refuses a vector that the masses do not produce.
+    """
+
+    masses = ladder.get("binProbabilities")
+    if not isinstance(masses, dict) or len(masses) != len(cumulative) + 1:
+        raise CustodyError("system_one bin probabilities are malformed")
+    values: list[float] = []
+    for value in masses.values():
+        if (
+            not isinstance(value, (int, float))
+            or isinstance(value, bool)
+            or not 0.0 <= float(value) <= 1.0
+        ):
+            raise CustodyError("system_one bin probabilities are outside [0, 1]")
+        values.append(float(value))
+    if abs(sum(values) - 1.0) > SYSTEM_ONE_BIN_SUM_TOLERANCE:
+        raise CustodyError("system_one bin probabilities do not sum to 1")
+    if ladder.get("choice") not in masses:
+        raise CustodyError("system_one choice is not one of the bin labels")
+    total = 0.0
+    for value, published in zip(values, cumulative):
+        total += value
+        if (
+            not isinstance(published, (int, float))
+            or isinstance(published, bool)
+            or abs(round(total, 10) - float(published)) > 1e-9
+        ):
+            raise CustodyError(
+                "system_one cumulative probabilities are not the bin sums"
+            )
+
+
 def _verify_system_one_v2(
     run_dir: Path,
     manifest: dict[str, Any],
@@ -2282,7 +2329,8 @@ def _verify_system_one_v2(
 
     if manifest.get("schemaVersion") != SYSTEM_ONE_SCHEMA:
         raise CustodyError("system_one custody mode has the wrong manifest schema")
-    if manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODE:
+    prompt_mode = manifest.get("promptMode")
+    if prompt_mode not in SYSTEM_ONE_PROMPT_MODES:
         raise CustodyError("system_one run has the wrong prompt mode")
     agent = manifest.get("agent")
     if not isinstance(agent, dict) or agent.get("agent") != SYSTEM_ONE_AGENT:
@@ -2401,7 +2449,7 @@ def _verify_system_one_v2(
     if (
         cell.get("runStartedAt") != manifest.get("runStartedAt")
         or cell.get("runAt") != manifest.get("sealedAt")
-        or cell.get("promptMode") != SYSTEM_ONE_PROMPT_MODE
+        or cell.get("promptMode") != prompt_mode
         or cell.get("model") != agent.get("model")
     ):
         raise CustodyError("system_one cell metadata differs from its manifest")
@@ -2421,12 +2469,14 @@ def _verify_system_one_v2(
         or len(thresholds) < 3
     ):
         raise CustodyError("system_one threshold ladder is malformed")
-    if ladder.get("monotonization") != SYSTEM_ONE_MONOTONIZATION:
+    if ladder.get("monotonization") != SYSTEM_ONE_PROMPT_MODES[str(prompt_mode)]:
         raise CustodyError("system_one ladder lacks its monotonization version")
     if any(later <= earlier for earlier, later in zip(thresholds, thresholds[1:])):
         raise CustodyError("system_one thresholds are not strictly increasing")
     if any(later < earlier for earlier, later in zip(cumulative, cumulative[1:])):
         raise CustodyError("system_one cumulative probabilities are not monotone")
+    if ladder.get("monotonization") == SYSTEM_ONE_BIN_MONOTONIZATION:
+        _verify_system_one_bins(ladder, cumulative)
 
     summary = distribution.get("summary") if isinstance(distribution, dict) else None
     interval = summary.get("interval80") if isinstance(summary, dict) else None

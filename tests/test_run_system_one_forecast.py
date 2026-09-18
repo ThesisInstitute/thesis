@@ -276,6 +276,7 @@ def system_one_run(
     run_at: str = RUN_AT,
     response_file: pathlib.Path | None = None,
     primary_cell_path: pathlib.Path | None = None,
+    elicitation: str | None = None,
 ) -> tuple[dict, pathlib.Path]:
     if primary_cell_path is None:
         write_primary_run(repo, cell or primary_cell())
@@ -288,6 +289,7 @@ def system_one_run(
         ledger_path=ledger_path,
         response_file=response_file,
         run_at=run_at,
+        elicitation=elicitation,
     )
 
 
@@ -363,6 +365,7 @@ def test_mock_run_is_custody_verifiable(repo: pathlib.Path):
     assert "deterministic offline stand-in, not a model" in narrative
     assert "no chain of thought" not in narrative
     assert cell["reasoning"][2]["tool"] == "system_one.noul_ladder"
+    assert "questionType: 'noul'" in cell["reasoning"][2]["call"]
     math_text = cell["reasoning"][3]["text"]
     assert math_text.startswith("Ladder: P(X <= ")
     assert "10th percentile" in math_text and "90th percentile" in math_text
@@ -1020,7 +1023,7 @@ def test_each_backend_hashes_and_describes_its_own_mechanism(
     assert "independent yes/no questions" not in narrative
 
     policies = {
-        backend: system_one.backend_policy(backend)
+        backend: system_one.backend_policy(backend, "noul_ladder")
         for backend in system_one.BACKENDS
     }
     assert policies["typesafe"]["questionIsolation"] == (
@@ -1032,7 +1035,11 @@ def test_each_backend_hashes_and_describes_its_own_mechanism(
     assert policies["adapter"]["chainOfThought"] == "provider_default"
     hashes = {
         backend: system_one.agent_block(
-            backend=backend, provider="openai", model="m", response=None
+            backend=backend,
+            provider="openai",
+            model="m",
+            response=None,
+            elicitation="noul_ladder",
         )["toolPolicyHash"]
         for backend in system_one.BACKENDS
     }
@@ -1041,9 +1048,9 @@ def test_each_backend_hashes_and_describes_its_own_mechanism(
 
 def test_typesafe_narrative_is_the_isolated_one():
     narrative = system_one.lane_narrative(
-        backend="typesafe", model="jev-1", rungs=15
+        backend="typesafe", model="jev-1", rungs=15, elicitation="noul_ladder"
     )
-    assert system_one.lane_label("typesafe", "jev-1") == (
+    assert system_one.lane_label("typesafe", "jev-1", "noul_ladder") == (
         "System One threshold ladder"
     )
     assert "15 independent yes/no questions" in narrative
@@ -1072,6 +1079,7 @@ def test_a_typesafe_run_that_never_answered_records_no_model(
         records_root=repo / "records",
         ledger_path=write_ledger(repo, ledger_rows()),
         run_at=RUN_AT,
+        elicitation="noul_ladder",
     )
 
     assert manifest["ok"] is False
@@ -1351,3 +1359,490 @@ def test_an_unsealable_crash_leaves_nothing_behind(
 
     assert calls == ["state.json", "questions.json", "request.json"]
     assert list((repo / "records" / "thesis-analyst" / RUN_AT[:10]).iterdir()) == []
+
+
+# --- the bins elicitation ---------------------------------------------------
+
+
+def bins_ladder(manifest_path: pathlib.Path) -> dict:
+    cell = json.loads((manifest_path.parent / "cells.with_activity.json").read_text())[
+        0
+    ]
+    return cell["thresholdLadder"]
+
+
+# Sixteen masses that sum to 1 and put most of the mass in the middle of the
+# ladder. A spike on one bin is a legal distribution but a degenerate forecast:
+# the 10th, 50th and 90th percentiles all interpolate inside that one bin and
+# round to the same rung, which the validation rubric refuses as
+# "ciLow < pointEstimate < ciHigh does not hold". A real answer is spread, so
+# the fixtures that stand in for one are too.
+SPREAD_BIN_MASSES = [
+    0.02,
+    0.02,
+    0.03,
+    0.05,
+    0.08,
+    0.12,
+    0.18,
+    0.20,
+    0.14,
+    0.08,
+    0.04,
+    0.02,
+    0.01,
+    0.005,
+    0.003,
+    0.002,
+]
+
+
+def spread_bin_answer(labels: list[str]) -> dict:
+    """A Choice answer over exactly these labels, spread across the ladder."""
+
+    assert len(labels) == len(SPREAD_BIN_MASSES)
+    masses = dict(zip(labels, SPREAD_BIN_MASSES))
+    choice = max(masses, key=masses.__getitem__)
+    return {
+        "type": "choice",
+        "choice": choice,
+        "confidence": masses[choice],
+        "probabilities": masses,
+    }
+
+
+def test_mock_bins_run_is_custody_verifiable(repo: pathlib.Path):
+    manifest, manifest_path = system_one_run(
+        repo, ledger=ledger_rows(), elicitation="choice_bins"
+    )
+
+    assert manifest["ok"] is True
+    assert manifest["promptMode"] == "system_one_choice_bins"
+    assert manifest["agent"]["agentVersion"] == "0.2.0"
+
+    verification = verify_run(manifest_path.parent)
+    assert verification.run_mode == "system_one"
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is True
+    assert verification.headline_eligible is False
+
+    questions = json.loads((manifest_path.parent / "questions.json").read_text())
+    assert questions["elicitation"] == "choice_bins"
+    assert questions["questionType"] == "choice"
+    assert list(questions["questions"]) == ["bins"]
+    payload = questions["questions"]["bins"]
+    assert payload["type"] == "choice"
+    thresholds = questions["thresholds"]
+    assert len(questions["binOptions"]) == len(thresholds) + 1
+    assert list(payload["criteria"]) == questions["binOptions"]
+    assert questions["binOptions"][0] == f"up_to_{thresholds[0]:.1f}"
+    assert questions["binOptions"][1] == (
+        f"{thresholds[0]:.1f}_to_{thresholds[1]:.1f}"
+    )
+    assert questions["binOptions"][-1] == f"above_{thresholds[-1]:.1f}"
+    assert questions["binEdges"][0] == {
+        "label": questions["binOptions"][0],
+        "lower": None,
+        "upper": thresholds[0],
+    }
+    assert questions["binEdges"][-1] == {
+        "label": questions["binOptions"][-1],
+        "lower": thresholds[-1],
+        "upper": None,
+    }
+    assert payload["instructions"] == (
+        "Which range will the official first print of Agency test rate for "
+        "2030-01 fall in? Every range includes its upper bound and excludes "
+        "its lower bound."
+    )
+    # Each option renders its edges at the ladder precision with the unit,
+    # exactly as the Noul template renders a rung.
+    assert payload["criteria"][questions["binOptions"][0]] == (
+        f"At or below {thresholds[0]:.1f} percent."
+    )
+    assert payload["criteria"][questions["binOptions"][1]] == (
+        f"Above {thresholds[0]:.1f} percent and at or below "
+        f"{thresholds[1]:.1f} percent."
+    )
+    assert payload["criteria"][questions["binOptions"][-1]] == (
+        f"Above {thresholds[-1]:.1f} percent."
+    )
+
+    ladder = bins_ladder(manifest_path)
+    assert ladder["monotonization"] == "cumulative_sum_v1"
+    assert ladder["cumulativeProbabilities"] == ladder["rawCumulativeProbabilities"]
+    assert list(ladder["binProbabilities"]) == questions["binOptions"]
+    assert ladder["choice"] in questions["binOptions"]
+    assert 0.0 <= ladder["choiceConfidence"] <= 1.0
+    assert sum(ladder["binProbabilities"].values()) == pytest.approx(1.0, abs=1e-3)
+    assert ladder["cumulativeProbabilities"] == system_one.cumulative_from_bins(
+        list(ladder["binProbabilities"].values())
+    )
+
+
+def test_bins_cell_reasoning_names_the_range_question(repo: pathlib.Path):
+    _manifest, manifest_path = system_one_run(
+        repo, ledger=ledger_rows(), elicitation="choice_bins"
+    )
+    cell = json.loads((manifest_path.parent / "cells.with_activity.json").read_text())[
+        0
+    ]
+
+    assert cell["reasoning"][0]["text"] == "System One emulation (mock)"
+    narrative = cell["reasoning"][1]["text"]
+    assert "deterministic offline stand-in, not a model" in narrative
+    assert "16 range probabilities" in narrative
+    tool = cell["reasoning"][2]
+    assert tool["tool"] == "system_one.choice_bins"
+    assert "questionType: 'choice'" in tool["call"]
+    assert "questions: 1" in tool["call"]
+    math_text = cell["reasoning"][3]["text"]
+    assert math_text.startswith("Bins: P(X <= ")
+    assert " < X <= " in math_text
+    assert "P(X > " in math_text
+    assert "Cumulative: P(X <= " in math_text
+    assert "10th percentile" in math_text and "90th percentile" in math_text
+
+
+def test_cumulative_from_bins_on_known_vectors():
+    # Sixteen masses become fifteen cumulative rungs: the last bin is mass
+    # above the top rung and no rung names it.
+    assert system_one.cumulative_from_bins([0.25, 0.25, 0.25, 0.25]) == [
+        0.25,
+        0.5,
+        0.75,
+    ]
+    assert system_one.cumulative_from_bins([1.0, 0.0, 0.0]) == [1.0, 1.0]
+    assert system_one.cumulative_from_bins([0.0, 0.0, 1.0]) == [0.0, 0.0]
+    masses = [0.04, 0.02, 0.85, 0.06, 0.03]
+    assert system_one.cumulative_from_bins(masses) == [0.04, 0.06, 0.91, 0.97]
+    # Sixteen masses, the real cardinality, still land on fifteen rungs.
+    uniform = [1 / 16] * 16
+    cumulative = system_one.cumulative_from_bins(uniform)
+    assert len(cumulative) == 15
+    assert cumulative == sorted(cumulative)
+    assert cumulative[-1] == pytest.approx(15 / 16)
+
+
+def bins_response(repo: pathlib.Path, mutate) -> pathlib.Path:
+    """A replayable bins response, mutated by the caller."""
+
+    _manifest, manifest_path = system_one_run(
+        repo, ledger=ledger_rows(), elicitation="choice_bins"
+    )
+    saved = json.loads((manifest_path.parent / "response.json").read_text())
+    mutate(saved)
+    path = repo / "bins-response.json"
+    path.write_text(json.dumps(saved, indent=2))
+    return path
+
+
+def replay_bins(
+    repo: pathlib.Path, path: pathlib.Path, run_at: str
+) -> tuple[dict, pathlib.Path]:
+    return system_one_run(
+        repo,
+        backend="response_file",
+        ledger=ledger_rows(),
+        response_file=path,
+        run_at=run_at,
+        elicitation="choice_bins",
+    )
+
+
+def test_a_missing_bin_label_fails_closed(repo: pathlib.Path):
+    def drop_one(saved: dict) -> None:
+        probabilities = saved["answers"]["bins"]["probabilities"]
+        probabilities.pop(list(probabilities)[3])
+
+    path = bins_response(repo, drop_one)
+    manifest, failed_path = replay_bins(repo, path, "2030-01-10T18:00:00Z")
+
+    assert manifest["ok"] is False
+    assert manifest["error"]["phase"] == "ladder"
+    detail = manifest["error"]["detail"]
+    assert detail["reason"] == "bins_incomplete"
+    assert len(detail["missing"]) == 1
+    # The raw dict the model returned is the evidence, so it is recorded.
+    assert detail["probabilities"]
+    assert verify_run(failed_path.parent).run_succeeded is False
+
+
+def test_bins_that_do_not_sum_to_one_fail_closed(repo: pathlib.Path):
+    def halve(saved: dict) -> None:
+        answer = saved["answers"]["bins"]
+        answer["probabilities"] = {
+            label: round(value / 2, 10)
+            for label, value in answer["probabilities"].items()
+        }
+
+    path = bins_response(repo, halve)
+    manifest, failed_path = replay_bins(repo, path, "2030-01-10T19:00:00Z")
+
+    assert manifest["error"]["detail"]["reason"] == "bins_incomplete"
+    assert manifest["error"]["detail"]["sum"] == pytest.approx(0.5, abs=1e-3)
+    assert manifest["error"]["detail"]["tolerance"] == 1e-3
+    assert verify_run(failed_path.parent).run_succeeded is False
+
+
+def test_a_choice_outside_the_labels_fails_closed(repo: pathlib.Path):
+    path = bins_response(
+        repo, lambda saved: saved["answers"]["bins"].update({"choice": "elsewhere"})
+    )
+    manifest, failed_path = replay_bins(repo, path, "2030-01-10T20:00:00Z")
+
+    assert manifest["error"]["detail"]["reason"] == "bins_incomplete"
+    assert manifest["error"]["detail"]["choice"] == "elsewhere"
+    assert verify_run(failed_path.parent).run_succeeded is False
+
+
+def test_a_noul_answer_to_the_bins_question_fails_closed(repo: pathlib.Path):
+    path = bins_response(
+        repo,
+        lambda saved: saved.__setitem__(
+            "answers", {"bins": {"type": "noul", "noul": 0.5}}
+        ),
+    )
+    manifest, failed_path = replay_bins(repo, path, "2030-01-10T21:00:00Z")
+
+    assert manifest["error"]["detail"]["reason"] == "not_choice"
+    assert verify_run(failed_path.parent).run_succeeded is False
+
+
+def test_bins_off_the_ladder_fail_closed(repo: pathlib.Path):
+    # The real model's compressed answers: most mass outside the rungs.
+    def flatten(saved: dict) -> None:
+        answer = saved["answers"]["bins"]
+        labels = list(answer["probabilities"])
+        answer["probabilities"] = {
+            label: (0.4 if label == labels[0] else 0.6 if label == labels[-1] else 0.0)
+            for label in labels
+        }
+        answer["choice"] = labels[-1]
+
+    path = bins_response(repo, flatten)
+    manifest, failed_path = replay_bins(repo, path, "2030-01-10T22:00:00Z")
+
+    assert manifest["ok"] is False
+    assert manifest["error"]["phase"] == "ladder"
+    assert manifest["error"]["detail"]["reason"] == "off_ladder_mass"
+    assert manifest["error"]["detail"]["cumulativeProbabilities"][0] == 0.4
+    assert verify_run(failed_path.parent).run_succeeded is False
+
+
+def test_default_elicitation_is_per_backend(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    assert system_one.default_elicitation("typesafe") == "choice_bins"
+    for backend in ("adapter", "mock", "response_file"):
+        assert system_one.default_elicitation(backend) == "noul_ladder"
+
+    # The mock backend takes the ladder when nothing is named.
+    manifest, _path = system_one_run(repo, ledger=ledger_rows())
+    assert manifest["promptMode"] == "system_one_noul_ladder"
+
+    # The typesafe backend takes the bins.
+    monkeypatch.setenv("TYPESAFE_API_KEY", "runner-test-key")
+    sent: dict = {}
+
+    def capture(*, state, payloads, model):
+        sent.update(payloads)
+        labels = list(payloads["bins"]["criteria"])
+        masses = {label: round(1.0 / len(labels), 10) for label in labels}
+        masses[labels[7]] = round(
+            masses[labels[7]] + 1.0 - sum(masses.values()), 10
+        )
+        return {
+            "model": "jev-1.13.0",
+            "usage": {"input_tokens": 4096, "output_tokens": 32},
+            "answers": {
+                "bins": {
+                    "type": "choice",
+                    "choice": labels[7],
+                    "confidence": 0.82,
+                    "probabilities": masses,
+                }
+            },
+        }
+
+    monkeypatch.setattr(system_one, "call_typesafe", capture)
+    manifest, manifest_path = system_one.run_forecast(
+        target=target_context(),
+        backend="typesafe",
+        records_root=repo / "records",
+        ledger_path=write_ledger(repo, ledger_rows()),
+        run_at="2030-01-10T23:00:00Z",
+    )
+
+    assert manifest["ok"] is True
+    assert manifest["promptMode"] == "system_one_choice_bins"
+    assert list(sent) == ["bins"]
+    ladder = bins_ladder(manifest_path)
+    assert ladder["choiceConfidence"] == 0.82
+    assert verify_run(manifest_path.parent).run_succeeded is True
+
+
+def test_the_two_elicitations_hash_apart(repo: pathlib.Path):
+    blocks = {
+        elicitation: system_one.agent_block(
+            backend="typesafe",
+            provider=None,
+            model="jev-1",
+            response=None,
+            elicitation=elicitation,
+        )
+        for elicitation in system_one.ELICITATIONS
+    }
+    ladder = blocks["noul_ladder"]
+    bins = blocks["choice_bins"]
+
+    assert ladder["promptHash"] != bins["promptHash"]
+    assert ladder["toolPolicyHash"] != bins["toolPolicyHash"]
+    assert system_one.backend_policy("typesafe", "noul_ladder")["questionTypes"] == [
+        "noul"
+    ]
+    assert system_one.backend_policy("typesafe", "choice_bins")["questionTypes"] == [
+        "choice"
+    ]
+    # Both templates live in both policies, so editing the bin wording changes
+    # a ladder run's hash too and the modes stay comparable only on purpose.
+    for elicitation in system_one.ELICITATIONS:
+        policy = system_one.ladder_policy(elicitation)
+        assert policy["questionTemplate"] == system_one.QUESTION_TEMPLATE
+        assert policy["binQuestionTemplate"] == system_one.BIN_QUESTION_TEMPLATE
+        assert policy["elicitation"] == elicitation
+
+    with pytest.raises(system_one.SystemOneInputError, match="unsupported elicitation"):
+        system_one.ladder_policy("score_scale")
+
+
+def test_typesafe_bins_label_and_narrative():
+    assert system_one.lane_label("typesafe", "jev-1", "choice_bins") == (
+        "System One bins"
+    )
+    assert system_one.lane_label("typesafe", "jev-1", "noul_ladder") == (
+        "System One threshold ladder"
+    )
+    assert system_one.lane_label("adapter", "openai/gpt-5.6-terra", "choice_bins") == (
+        "System One emulation (adapter: openai/gpt-5.6-terra)"
+    )
+
+    typesafe = system_one.lane_narrative(
+        backend="typesafe", model="jev-1", rungs=15, elicitation="choice_bins"
+    )
+    assert "answered one range question" in typesafe
+    assert "16 ranges cut by the 15 ladder rungs" in typesafe
+    assert "no tools, no search, and no chain of thought" in typesafe
+    assert "rescaled" not in typesafe
+
+    adapter = system_one.lane_narrative(
+        backend="adapter",
+        model="openai/gpt-5.6-terra",
+        rungs=15,
+        elicitation="choice_bins",
+    )
+    assert "emulates the System One interface rather than using it" in adapter
+    # The adapter normalizes the vector and the typesafe backend does not, so
+    # the method sentence says which ran.
+    assert "The adapter rescaled those probabilities to sum to 1" in adapter
+    assert "which the typesafe backend's are not" in adapter
+    assert "no chain of thought" not in adapter
+
+
+def test_the_bins_rubric_is_checked_on_the_sealed_cell(repo: pathlib.Path):
+    _manifest, manifest_path = system_one_run(
+        repo, ledger=ledger_rows(), elicitation="choice_bins"
+    )
+    run_dir = manifest_path.parent
+    cell = json.loads((run_dir / "normalized_cells.json").read_text())[0]
+    questions = json.loads((run_dir / "questions.json").read_text())
+    thresholds = list(cell["thresholdLadder"]["thresholds"])
+
+    assert (
+        system_one.bin_validation_errors(
+            cell["thresholdLadder"], questions, thresholds
+        )
+        == []
+    )
+
+    def rubric(mutate) -> list[str]:
+        ladder = copy.deepcopy(cell["thresholdLadder"])
+        mutate(ladder)
+        return system_one.bin_validation_errors(ladder, questions, thresholds)
+
+    labels = questions["binOptions"]
+    assert "bin probabilities are not the option labels in order" in rubric(
+        lambda ladder: ladder["binProbabilities"].pop(labels[0])
+    )
+    assert "bin probabilities are outside [0, 1]" in rubric(
+        lambda ladder: ladder["binProbabilities"].__setitem__(labels[0], 1.5)
+    )
+    assert "bin probabilities do not sum to 1" in rubric(
+        lambda ladder: ladder["binProbabilities"].__setitem__(labels[-1], 0.9)
+    )
+    assert "cumulative probabilities are not the bin sums" in rubric(
+        lambda ladder: ladder["cumulativeProbabilities"].__setitem__(0, 0.0)
+    )
+    assert "choice is not one of the bin option labels" in rubric(
+        lambda ladder: ladder.__setitem__("choice", "elsewhere")
+    )
+
+
+def test_the_response_file_backend_replays_a_bins_response(repo: pathlib.Path):
+    path = bins_response(repo, lambda saved: None)
+    first, first_path = replay_bins(repo, path, "2030-01-11T00:00:00Z")
+    second, second_path = replay_bins(repo, path, "2030-01-11T01:00:00Z")
+
+    assert first["ok"] is True and second["ok"] is True
+    assert bins_ladder(first_path) == bins_ladder(second_path)
+    assert verify_run(first_path.parent).run_succeeded is True
+    command = json.loads((first_path.parent / "command.json").read_text())
+    assert command["elicitation"] == "choice_bins"
+
+
+def test_the_adapter_sends_a_choice_question_for_bins(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    msgspec = pytest.importorskip("msgspec")
+    adapter_module = pytest.importorskip("system_one_adapter")
+
+    monkeypatch.setenv("OPENAI_API_KEY", "runner-test-key")
+    sent: dict = {}
+
+    def capture(*, state, payloads, provider, model):
+        # The same fidelity assertion the real backends make: the recorded
+        # payload has to re-encode to the SDK objects that would be sent.
+        questions = system_one.sdk_questions(adapter_module, payloads)
+        sent["encoded"] = msgspec.to_builtins(questions)
+        return {
+            "model": model,
+            "usage": {"input_tokens": 2048, "output_tokens": 128},
+            "answers": {
+                "bins": spread_bin_answer(list(payloads["bins"]["criteria"]))
+            },
+        }
+
+    monkeypatch.setattr(system_one, "call_adapter", capture)
+    write_primary_run(repo, primary_cell())
+
+    manifest, manifest_path = system_one.run_forecast(
+        target=target_context(),
+        backend="adapter",
+        records_root=repo / "records",
+        ledger_path=write_ledger(repo, ledger_rows()),
+        provider="openai",
+        model="gpt-5.6-terra",
+        run_at="2030-01-11T02:00:00Z",
+        elicitation="choice_bins",
+    )
+
+    assert manifest["ok"] is True
+    request = json.loads((manifest_path.parent / "request.json").read_text())
+    assert request["elicitation"] == "choice_bins"
+    assert sent["encoded"] == request["questions"]
+    assert sent["encoded"]["bins"]["type"] == "choice"
+    narrative = json.loads(
+        (manifest_path.parent / "cells.with_activity.json").read_text()
+    )[0]["reasoning"][1]["text"]
+    assert "The adapter rescaled those probabilities to sum to 1" in narrative
+    assert verify_run(manifest_path.parent).run_succeeded is True
