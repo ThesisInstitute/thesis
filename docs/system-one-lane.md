@@ -3,10 +3,13 @@
 `scripts/run_system_one_forecast.py` forecasts one already-published Thesis
 target with a System One model: a model that answers named typed questions
 about a fixed state and returns probabilities without generating text. The
-lane turns a target into a ladder of yes/no questions of the form "the first
-print will be at or below t", records the request and the raw response
-verbatim, monotonizes the answers into a CDF, and seals the run as a complete
-v2 custody inventory under run mode `system_one`.
+lane cuts the plausible range of a target into a ladder of thresholds and asks
+the model about it in one of two elicitations: `choice_bins`, one range
+question over the intervals the rungs cut, or `noul_ladder`, one yes/no
+question per rung of the form "the first print will be at or below t". It
+records the request and the raw response verbatim, turns the answers into a
+CDF, and seals the run as a complete v2 custody inventory under run mode
+`system_one`.
 
 Only the `typesafe` backend is a System One model. The `adapter` backend
 emulates the same interface over a general LLM, and the emulation is not the
@@ -32,8 +35,8 @@ analyst runner whose custody and cell shape this lane mirrors.
 | Field | Value |
 | --- | --- |
 | agent | `thesis.system_one` |
-| agentVersion | `0.1.0` |
-| promptMode | `system_one_noul_ladder` |
+| agentVersion | `0.2.0` |
+| promptMode | `system_one_choice_bins` or `system_one_noul_ladder`, one per elicitation |
 | manifest schemaVersion | `thesis_system_one_run_manifest_v1` |
 | custody run mode | `system_one`, inventory version 2 |
 | run directory | `records/thesis-analyst/<YYYY-MM-DD>/<stamp>-system-one-<catalogSlug>/` |
@@ -43,8 +46,9 @@ backend, `"<provider>/<model>"` for `adapter`, and the backend name for
 `mock` and `response_file`. A `typesafe` run that failed before the service
 answered records `null`, not the backend name, so a failure is never tallied
 against a model that never spoke. `agent.promptHash` is the canonical sha256
-of the ladder policy (question template, rung count, span, dispersion
-constants, monotonization version, bases). `agent.toolPolicyHash` is the
+of the ladder policy (the elicitation, its question template, rung count,
+span, dispersion constants, the cumulative rule, bases), so the two
+elicitations hash differently. `agent.toolPolicyHash` is the
 canonical sha256 of the backend policy, which is per backend: the shared part
 is no tools, no web access, Noul questions only, pre-resolution state only,
 and the redaction list below, and the per-backend part is how the answers
@@ -171,6 +175,41 @@ forecast.
 
 ## Elicitation
 
+The lane has two elicitations over the same ladder, selected with
+`--elicitation` and recorded as the run's prompt mode. When the flag is
+omitted the runner uses `choice_bins` on the `typesafe` backend and
+`noul_ladder` on every other backend. The docket always passes a value from
+the trusted selection.
+
+### Choice over bins (`choice_bins`)
+
+One `system_one` call carries one `Choice` question named `bins`. The rungs
+`t1 < ... < tn` cut the line into `n + 1` ranges, and each range is one
+option: `up_to_<t1>` for a print at or below the first rung,
+`<t_k>_to_<t_k+1>` for a print above `t_k` and at or below `t_k+1`, and
+`above_<tn>` for a print above the last rung. Fifteen rungs give sixteen
+options. The instructions are:
+
+```
+Which range will the official first print of {title} for {period} fall in?
+Every range includes its upper bound and excludes its lower bound.
+```
+
+and each option carries its own description, "At or below {upper}.", "Above
+{lower} and at or below {upper}." or "Above {lower}.", with the rung rendered
+at the ladder's precision and the registered unit when the target has one.
+
+The answer is a probability per option. The runner fails closed in phase
+`ladder` with reason `bins_incomplete` when an option is missing, an unknown
+option appears, a probability is outside [0, 1], the vector does not sum to 1
+within 0.001, or the selected choice is not one of the options, and with
+reason `not_choice` when the answer is not a `Choice` answer at all. The raw probabilities are recorded in `error.json`
+either way. The cumulative probability at rung `t_k` is the sum of the first
+`k` options, so the CDF is non-decreasing by construction and no
+monotonization step runs.
+
+### Noul ladder (`noul_ladder`)
+
 One `system_one` call carries one Noul question per surviving rung, named
 `rung_01` upward: fifteen when every rung survives rounding, as few as five
 when rounding merges neighbours. Each has instructions of the form:
@@ -199,8 +238,8 @@ sends every question in a single provider request (read from
 `_responses_request_kwargs` on 2026-09-16), so the answers are drawn
 together and the provider's default reasoning applies. Either way the raw
 answers are a set of point probabilities rather than a distribution, which is
-why the monotonization step below exists. `Noul` is the only question type in
-v1: no `Choice`, no `Score`.
+why the monotonization step below exists. The lane uses `Noul` and `Choice`
+questions only: no `Score`.
 
 `request.json` records the state, the questions as sent, and the backend,
 provider, and model. `response.json` is the `SystemOneResponse` serialized
@@ -235,11 +274,52 @@ The point estimate is the monotone ladder interpolated at cumulative 0.50 and
 `ladder_distribution` then materializes a `numeric_cdf_v1` distribution with
 provenance `agent_reported`, which is what the CRPS pipeline scores.
 
-If the monotone ladder does not reach 0.10 at the first rung or 0.90 at the
+A `choice_bins` run stores the same two contract keys with the cumulative
+sums in both probability vectors, `monotonization: "cumulative_sum_v1"`, and
+three more keys: `binProbabilities` (option label to probability, in option
+order), `choice` (the option the model selected) and `choiceConfidence`. On
+the `adapter` backend the adapter rescales the returned vector to sum to 1
+before the runner sees it (read from `_convert_llm_value_to_typesafe_answer`
+in `system-one-adapter==0.1.3` on 2026-09-17; the lane sets
+`normalize_probabilities`), and the cell's method sentence says so. The
+`typesafe` backend's vector is kept as it came back, rounded to ten decimal
+places like every probability the lane stores.
+
+If the ladder does not reach 0.10 at the first rung or 0.90 at the
 last, the 80% interval is off the ladder and the run fails closed in phase
 `ladder` with reason `off_ladder_mass`, recording the raw and monotone
 probabilities in `error.json`. The lane never extrapolates past its own
 rungs.
+
+## Why bins are the default on the real model
+
+The first `typesafe` runs were local smoke runs on 2026-09-17, written outside
+`records/`, against `jev-1.13.0` on two targets. They are not published
+records; the artifacts are summarized in
+[pull request 248](https://github.com/ThesisInstitute/thesis/pull/248).
+
+- Under `noul_ladder` both runs failed closed with `off_ladder_mass`. On
+  `us-natural-gas-vented-flared-2025` the fifteen raw answers rose from 0.27 at
+  the lowest rung (143,071, three sigma below the last print) to 0.73 at the
+  highest (527,255, three sigma above). On
+  `unemployment-rate-september-2026` the five rungs from 3.9 to 4.3 drew 0.26
+  to 0.59. The answers move in the right direction and are nearly monotone,
+  but they never approach 0 or 1, so a ladder of any practical width cannot
+  bracket an 80% interval.
+- Under `choice_bins` the same model on the same states sealed both runs. Gas:
+  0.35 on 307,721 to 335,163 and 0.44 on 335,163 to 362,605, giving a point of
+  336,410 and an 80% interval of 287,140 to 361,358. Unemployment: 0.28 on 4.0
+  to 4.1 and 0.53 on 4.1 to 4.2, giving 4.1 with an interval of 4.0 to 4.3.
+  Each call took about half a second and 2,300 to 2,500 input tokens.
+- The adapter control (`openai/gpt-5.6-terra`) sealed the gas target under
+  both elicitations: 335,163 with an interval of 252,838 to 417,488 from the
+  Noul ladder, and 343,750 with an interval of 278,783 to 389,613 from the
+  bins.
+
+That is two targets and one draw each. It is enough to choose a default, since
+one elicitation produces a forecast and the other does not, and it is not
+evidence about accuracy. `noul_ladder` stays available for both backends so
+the comparison can be rerun as the model changes.
 
 ## Backends
 
@@ -336,14 +416,17 @@ gh workflow run strategy-docket.yml --ref main \
   -f max_targets=1 \
   -f suite=system_one \
   -f system_one_backend=adapter \
+  -f system_one_elicitation=choice_bins \
   -f system_one_model=
 ```
 
 `system_one_backend` is `adapter` (default) or `typesafe`.
+`system_one_elicitation` is `choice_bins` (default) or `noul_ladder`.
 `system_one_model` empty means the backend default: `gpt-5.6-terra` for the
 OpenAI adapter, and the model TypeSafe serves by default for `typesafe`.
-Both are bound into the trusted selection request as `systemOneBackend` and
-`systemOneModel`, the way `ladder_prompt_mode` is bound, so they are never a
+All three are bound into the trusted selection request as
+`systemOneBackend`, `systemOneElicitation` and `systemOneModel`, the way
+`ladder_prompt_mode` is bound, so they are never a
 generate-job input the unprivileged job can change. The docket accepts only
 `typesafe` and `adapter`: `mock` and `response_file` exist for tests and local
 smoke runs and cannot produce a published record.
@@ -351,16 +434,18 @@ smoke runs and cannot produce a published record.
 The lane writes a batch manifest at
 `records/thesis-analyst/batches/<day>/strategy-<run>-a<attempt>-system-one.json`
 and the suite manifest carries
-`lanes.systemOne: {batchManifest, backend, model}`, null on suites that do
-not run it.
+`lanes.systemOne: {batchManifest, backend, elicitation, model}`, null on
+suites that do not run it. The batch manifest records the elicitation and the
+matching prompt mode.
 
 Publication verifies custody with run mode `system_one`, checks the resolver
 and registration fields against the trusted target, and checks the claimed
 run window against the witnessed select-to-publish window. It also rebuilds
 the run rather than reading it:
 
-- the backend, the requested model and the provider must equal the trusted
-  request. A null `systemOneModel` means the runner default for that backend
+- the backend, the elicitation, the requested model and the provider must
+  equal the trusted request, and the batch and the run must carry the prompt
+  mode that elicitation names. A null `systemOneModel` means the runner default for that backend
   (`gpt-5.6-terra` for the adapter), not any model, and an adapter run must name
   the runner's default provider, `openai`, since a dispatched run never
   chooses one.
@@ -373,15 +458,19 @@ the run rather than reading it:
   `--ledger-jsonl`, and a system one suite without it is refused.
 - the ladder geometry and `questions.json` are rebuilt from that state, so
   the thresholds, center, scale and precision are recomputed rather than
-  trusted, and then the response is re-monotonized, the forecast
-  re-interpolated, the distribution rebuilt, and the lane's rubric re-run.
+  trusted (for `choice_bins` that includes the option labels and their
+  descriptions), and then the cumulative vector is re-derived from the
+  response, the forecast re-interpolated, the distribution rebuilt, and the
+  lane's rubric re-run.
 
 `scripts/strategy_comparisons.py` then projects the lane into
 `site/src/data/thesis-strategy-comparisons.ts` with
-`predictionRun.agent = "thesis.system_one"`, labeled "System One threshold
-ladder" for a typesafe run and "System One emulation (adapter:
+`predictionRun.agent = "thesis.system_one"`, labeled "System One bins" or
+"System One threshold ladder" for a typesafe run by its elicitation, and
+"System One emulation (adapter:
 `<provider>/<model>`)" for an adapter run, with the same method sentence the
-cell carries. `/models` grows a System One column as soon as a suite lands,
+cell carries. `/models` grows a "System One bins" or "System One ladder"
+column, one per elicitation, as soon as a suite lands,
 tallied per run rather than per batch, so a batch whose runs answered under
 different models is not filed under one. What the site publishes is the
 monotonized ladder; the raw per-rung answers stay in the cell as
@@ -483,11 +572,17 @@ Failed runs stay in the record. They are evidence about the lane.
 - The `mock` and `response_file` backends produce no evidence about any
   model. `mock` answers from a normal CDF built out of the same history the
   ladder came from, and `response_file` replays bytes.
-- The `typesafe` backend had never been run when the lane was built
-  (2026-09-16): the model was in early access and the lab had no key.
-  `records/thesis-analyst/*/*-system-one-*` is the authority on what has
-  actually run, and each run's `command.json` and `manifest.json` name the
-  backend and the model that answered.
+- The `typesafe` backend has run only as local smoke runs (2026-09-17, two
+  targets, described above). No `typesafe` run is a published record until
+  the docket dispatches one. `records/thesis-analyst/*/*-system-one-*` is the
+  authority on what has actually run, and each run's `command.json` and
+  `manifest.json` name the backend, the elicitation and the model that
+  answered.
+- A bins forecast is only as fine as its rungs. Within a range the CDF is a
+  straight line, so when most of the mass lands in two adjacent ranges, as it
+  did in both smoke runs, the point and the interval are set largely by where
+  the rungs fall. The rung rule is fixed before the model is asked, so this is
+  a resolution limit rather than a degree of freedom.
 - The adapter is an emulation of the interface, not the model. An adapter run
   measures an LLM answering ladder questions under structured output, which
   is a useful control arm and is not a System One result. The manifest keeps

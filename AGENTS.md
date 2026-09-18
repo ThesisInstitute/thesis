@@ -14,7 +14,7 @@ surfaces, read these in order:
 4. `docs/brier-lab.md` - reward export, splits, and scoring loop.
 5. `agents/thesis-analyst/system.md` - analyst method and honesty rules.
 6. `docs/system-one-lane.md` - the System One comparison lane: evidence
-   boundary, threshold ladder, backends, and limits.
+   boundary, threshold ladder, the two elicitations, backends, and limits.
 
 For UI work, also inspect the existing page/component before editing; preserve
 the utilitarian forecast-lab feel.
@@ -243,8 +243,10 @@ target or generator mapping so comparisons render in the catalog unit.
 ### Run the System One lane
 
 `scripts/run_system_one_forecast.py` forecasts one published target with a
-System One model: one independent Noul question per ladder rung, of the form
-"the first print will be at or below t", monotonized into a CDF. It is a
+System One model over a fixed ladder of thresholds, in one of two
+elicitations: `choice_bins`, one range question over the intervals the rungs
+cut, summed into a CDF, or `noul_ladder`, one yes/no question per rung of the
+form "the first print will be at or below t", monotonized into a CDF. It is a
 comparison lane, never a headline lane, and custody verifies it under run mode
 `system_one`. Read
 [`docs/system-one-lane.md`](docs/system-one-lane.md) before changing the
@@ -261,8 +263,15 @@ gh workflow run strategy-docket.yml --ref main \
   -f max_targets=1 \
   -f suite=system_one \
   -f system_one_backend=adapter \
+  -f system_one_elicitation=choice_bins \
   -f system_one_model=
 ```
+
+`system_one_elicitation` is `choice_bins` (default) or `noul_ladder`, and it
+is pinned in the trusted selection like the backend and the model. Locally,
+`--elicitation` defaults to `choice_bins` on `typesafe` and `noul_ladder` on
+every other backend, because the real model's yes/no answers did not bracket
+an 80% interval in the first smoke runs (see the lane doc).
 
 Run one target locally with `--backend mock` (no key, deterministic, says
 nothing about any model) or `--backend adapter` (spends provider credit)
