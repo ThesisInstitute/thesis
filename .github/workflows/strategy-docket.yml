@@ -46,6 +46,14 @@ on:
         options:
           - adapter
           - typesafe
+      system_one_elicitation:
+        description: "System One elicitation contract"
+        type: choice
+        required: false
+        default: choice_bins
+        options:
+          - choice_bins
+          - noul_ladder
       system_one_model:
         description: "System One model (empty = backend default)"
         required: false
@@ -131,6 +139,7 @@ jobs:
           SUITE: ${{ inputs.suite }}
           LADDER_PROMPT_MODE: ${{ inputs.ladder_prompt_mode || 'ladder' }}
           SYSTEM_ONE_BACKEND: ${{ inputs.system_one_backend || 'adapter' }}
+          SYSTEM_ONE_ELICITATION: ${{ inputs.system_one_elicitation || 'choice_bins' }}
           SYSTEM_ONE_MODEL: ${{ inputs.system_one_model }}
         run: |
           set -euo pipefail
@@ -142,6 +151,7 @@ jobs:
             --suite "$SUITE"
             --ladder-prompt-mode "$LADDER_PROMPT_MODE"
             --system-one-backend "$SYSTEM_ONE_BACKEND"
+            --system-one-elicitation "$SYSTEM_ONE_ELICITATION"
             --system-one-model "$SYSTEM_ONE_MODEL"
             --selected-at-utc "$SELECTED_AT"
             --source-sha "$(git rev-parse HEAD)"

@@ -48,6 +48,16 @@ SUITES = {"ladder", "median3", "both", "system_one"}
 # and model are trusted request fields, never generate-job inputs.
 SYSTEM_ONE_BACKENDS = {"typesafe", "adapter"}
 DEFAULT_SYSTEM_ONE_BACKEND = "adapter"
+# The lane's elicitation is trusted request state too, for the same reason the
+# backend and the model are: it decides what the model is asked, so the
+# unprivileged generate job may not choose it.  Omitting it means the runner
+# default for the trusted backend, and the selection records the resolved
+# value rather than the omission.
+SYSTEM_ONE_ELICITATIONS = {"noul_ladder", "choice_bins"}
+DEFAULT_SYSTEM_ONE_ELICITATIONS = {
+    "typesafe": "choice_bins",
+    "adapter": "noul_ladder",
+}
 # A model name reaches the runner as one argv element.  Refusing anything
 # outside this charset keeps a leading dash (or a path) from being read as
 # another runner flag.
@@ -515,6 +525,19 @@ def selection_hash(payload: dict[str, Any]) -> str:
     return canonical_sha256(value)
 
 
+def resolve_system_one_elicitation(backend: str, value: Any) -> str:
+    """The elicitation a system_one suite runs under, resolved per backend."""
+
+    if value in (None, ""):
+        resolved = DEFAULT_SYSTEM_ONE_ELICITATIONS.get(backend)
+        if resolved is None:
+            raise StrategyTargetError(f"unsupported system_one backend: {backend!r}")
+        return resolved
+    if value not in SYSTEM_ONE_ELICITATIONS:
+        raise StrategyTargetError(f"unsupported system_one elicitation: {value!r}")
+    return str(value)
+
+
 def normalize_system_one_model(value: Any) -> str | None:
     """Empty means the runner default for the trusted backend."""
 
@@ -538,6 +561,7 @@ def select_targets(
     ladder_prompt_mode: str = "ladder",
     system_one_backend: str = DEFAULT_SYSTEM_ONE_BACKEND,
     system_one_model: str | None = None,
+    system_one_elicitation: str | None = None,
     ledger_path: pathlib.Path,
     ledger_repository: str,
     ledger_branch: str,
@@ -561,6 +585,9 @@ def select_targets(
         raise StrategyTargetError(
             f"unsupported system_one backend: {system_one_backend!r}"
         )
+    system_one_elicitation = resolve_system_one_elicitation(
+        system_one_backend, system_one_elicitation
+    )
     if type(max_targets) is not int or max_targets < 0:
         raise StrategyTargetError("maxTargets must be a nonnegative integer")
     if len(requested_slugs) > max_targets:
@@ -672,6 +699,7 @@ def select_targets(
             **(
                 {
                     "systemOneBackend": system_one_backend,
+                    "systemOneElicitation": system_one_elicitation,
                     "systemOneModel": system_one_model,
                 }
                 if suite == "system_one"
@@ -786,6 +814,7 @@ def verify_selection(
             request.get("systemOneBackend") or DEFAULT_SYSTEM_ONE_BACKEND
         ),
         system_one_model=request.get("systemOneModel"),
+        system_one_elicitation=request.get("systemOneElicitation"),
         ledger_path=ledger_path,
         ledger_repository=str(evidence.get("repository") or ""),
         ledger_branch=str(evidence.get("branch") or ""),
@@ -859,6 +888,12 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="empty means the runner default for the backend",
     )
+    select.add_argument(
+        "--system-one-elicitation",
+        choices=["", *sorted(SYSTEM_ONE_ELICITATIONS)],
+        default="",
+        help="empty means the runner default for the backend",
+    )
     select.add_argument("--selected-at-utc", required=True)
     select.add_argument("--checked-at-utc")
     select.add_argument("--source-sha", required=True)
@@ -922,6 +957,7 @@ def main() -> int:
                 ladder_prompt_mode=args.ladder_prompt_mode,
                 system_one_backend=args.system_one_backend,
                 system_one_model=args.system_one_model,
+                system_one_elicitation=args.system_one_elicitation,
                 ledger_path=args.ledger_jsonl,
                 ledger_repository=args.ledger_repository,
                 ledger_branch=args.ledger_branch,

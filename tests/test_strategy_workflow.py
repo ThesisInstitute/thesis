@@ -99,6 +99,11 @@ def test_strategy_workflow_dispatches_the_system_one_forecaster() -> None:
     assert inputs["suite"]["options"] == ["ladder", "median3", "both", "system_one"]
     assert inputs["system_one_backend"]["options"] == ["adapter", "typesafe"]
     assert inputs["system_one_backend"]["default"] == "adapter"
+    assert inputs["system_one_elicitation"]["options"] == [
+        "choice_bins",
+        "noul_ladder",
+    ]
+    assert inputs["system_one_elicitation"]["default"] == "choice_bins"
     assert inputs["system_one_model"]["default"] == ""
 
     provisional = named_step(
@@ -110,6 +115,13 @@ def test_strategy_workflow_dispatches_the_system_one_forecaster() -> None:
     )
     assert provisional["env"]["SYSTEM_ONE_MODEL"] == "${{ inputs.system_one_model }}"
     assert '--system-one-backend "$SYSTEM_ONE_BACKEND"' in provisional["run"]
+    assert (
+        provisional["env"]["SYSTEM_ONE_ELICITATION"]
+        == "${{ inputs.system_one_elicitation || 'choice_bins' }}"
+    )
+    assert (
+        '--system-one-elicitation "$SYSTEM_ONE_ELICITATION"' in provisional["run"]
+    )
     assert '--system-one-model "$SYSTEM_ONE_MODEL"' in provisional["run"]
 
 

@@ -59,14 +59,19 @@ REGISTRATION_FIELDS = (
     "registeredAtUtc",
 )
 SYSTEM_ONE_SUITE = "system_one"
-SYSTEM_ONE_PROMPT_MODE = "system_one_noul_ladder"
+# One prompt mode per elicitation; the trusted request picks which, so the
+# boundary never reads the run's own word for what it asked.
+SYSTEM_ONE_PROMPT_MODES = {
+    "noul_ladder": "system_one_noul_ladder",
+    "choice_bins": "system_one_choice_bins",
+}
 SYSTEM_ONE_RUN_SCHEMA = "thesis_system_one_run_manifest_v1"
 SYSTEM_ONE_AGENT = "thesis.system_one"
 # Only the two lanes that answer with a real model may cross the boundary.
 # The runner's mock and response_file backends exist for tests and replay;
 # a canned answer is never publishable.
 SYSTEM_ONE_BACKENDS = ("adapter", "typesafe")
-SYSTEM_ONE_LANE_FIELDS = {"batchManifest", "backend", "model"}
+SYSTEM_ONE_LANE_FIELDS = {"batchManifest", "backend", "elicitation", "model"}
 SUITE_NAMES = {"ladder", "median3", "both", SYSTEM_ONE_SUITE}
 LEGACY_LANE_FIELDS = {"ladder", "rollouts", "median3"}
 LANE_FIELDS = {"ladder", "rollouts", "median3", "systemOne"}
@@ -328,17 +333,22 @@ def _validate_suite_shape(
             f"{suite_name} suite unexpectedly has a ladder lane"
         )
     if suite_name == SYSTEM_ONE_SUITE:
-        backend, model = _system_one_request(selection)
+        backend, model, elicitation = _system_one_request(selection)
         if (
             not isinstance(system_one, dict)
             or set(system_one) != SYSTEM_ONE_LANE_FIELDS
         ):
             raise StrategyPublicationError(
-                "system one suite lacks its exact batch manifest, backend and model"
+                "system one suite lacks its exact batch manifest, backend, "
+                "elicitation and model"
             )
         if system_one.get("backend") != backend:
             raise StrategyPublicationError(
                 "system one lane backend differs from trusted selection"
+            )
+        if system_one.get("elicitation") != elicitation:
+            raise StrategyPublicationError(
+                "system one lane elicitation differs from trusted selection"
             )
         if canonical_bytes(system_one.get("model")) != canonical_bytes(model):
             raise StrategyPublicationError(
@@ -478,8 +488,10 @@ def _validate_manifest_identity(
             )
 
 
-def _system_one_request(selection: dict[str, Any]) -> tuple[str, str | None]:
-    """The backend and model a system one suite was authorized to use."""
+def _system_one_request(
+    selection: dict[str, Any],
+) -> tuple[str, str | None, str]:
+    """The backend, model and elicitation a system one suite may use."""
 
     request = selection.get("request") or {}
     backend = request.get("systemOneBackend")
@@ -492,7 +504,16 @@ def _system_one_request(selection: dict[str, Any]) -> tuple[str, str | None]:
         raise StrategyPublicationError(
             "trusted selection carries an invalid system one model"
         )
-    return str(backend), model
+    targets_module = _trusted_module("strategy_targets")
+    try:
+        elicitation = targets_module.resolve_system_one_elicitation(
+            str(backend), request.get("systemOneElicitation")
+        )
+    except ValueError as exc:
+        raise StrategyPublicationError(
+            "trusted selection carries an unsupported system one elicitation"
+        ) from exc
+    return str(backend), model, elicitation
 
 
 def _require_run_wrapper(
@@ -745,6 +766,7 @@ def _require_system_one_agent(
     *,
     backend: str,
     model: str | None,
+    elicitation: str,
 ) -> None:
     agent = manifest.get("agent")
     if not isinstance(agent, dict) or agent.get("agent") != SYSTEM_ONE_AGENT:
@@ -756,6 +778,14 @@ def _require_system_one_agent(
     ):
         raise StrategyPublicationError(
             "system one run backend differs from the trusted request"
+        )
+    # The elicitation the run asked under is in its own sealed command, which
+    # custody has hashed. A state-phase failure never reached a backend and so
+    # has no command; its prompt mode, checked against the trusted request by
+    # the caller, is the only claim it makes.
+    if command is not None and command.get("elicitation") != elicitation:
+        raise StrategyPublicationError(
+            "system one run elicitation differs from the trusted request"
         )
     system_one = _trusted_module("run_system_one_forecast")
     if command is None:
@@ -792,6 +822,7 @@ def _require_system_one_agent(
         provider=provider,
         model=requested_model,
         response=None,
+        elicitation=elicitation,
     )
     if backend == "typesafe":
         # A typesafe run records the identifier the model itself returned,
@@ -866,6 +897,7 @@ def _revalidate_system_one_run(
     cell: dict[str, Any],
     target: dict[str, Any],
     ledger_rows: list[dict[str, Any]],
+    elicitation: str = "noul_ladder",
 ) -> None:
     """Recompute the sealed run with trusted code and trusted evidence.
 
@@ -933,7 +965,7 @@ def _revalidate_system_one_run(
         raise StrategyPublicationError(
             "published cell differs from its normalized record"
         )
-    if cell.get("promptMode") != SYSTEM_ONE_PROMPT_MODE:
+    if cell.get("promptMode") != SYSTEM_ONE_PROMPT_MODES[elicitation]:
         raise StrategyPublicationError("published cell prompt mode differs from lane")
     agent = manifest.get("agent") or {}
     if cell.get("model") != agent.get("model"):
@@ -991,21 +1023,38 @@ def _revalidate_system_one_run(
             contract=expected_state["target"],
             thresholds=[float(value) for value in thresholds],
             precision=precision,
+            elicitation=elicitation,
         )
         expected_questions = system_one.build_questions(
             ladder=expected_ladder,
             payloads=expected_payloads,
             ledger_observations=expected_state["ledgerObservations"]["rows"],
+            elicitation=elicitation,
         )
-        names = list(expected_payloads)
-        raw = [
-            system_one.round_probability(value)
-            for value in system_one.noul_probabilities(response, names)
-        ]
-        monotone = [
-            system_one.round_probability(value)
-            for value in system_one.clamp_unit(system_one.pav_monotone(raw))
-        ]
+        if elicitation == "choice_bins":
+            # Nothing is pooled here, so the whole CDF is a function of the
+            # bin masses in the recorded response: read them back through the
+            # trusted reader and sum them again rather than trusting either
+            # vector the run sealed.
+            bins = system_one.bin_answer(
+                response, list(expected_questions["binOptions"])
+            )
+            monotone = system_one.cumulative_from_bins(bins["probabilities"])
+            raw = list(monotone)
+            expected_bins = dict(zip(bins["labels"], bins["probabilities"]))
+        else:
+            bins = None
+            expected_bins = None
+            raw = [
+                system_one.round_probability(value)
+                for value in system_one.noul_probabilities(
+                    response, list(expected_payloads)
+                )
+            ]
+            monotone = [
+                system_one.round_probability(value)
+                for value in system_one.clamp_unit(system_one.pav_monotone(raw))
+            ]
         quantiles = system_one.quantiles_from_ladder(
             [float(value) for value in thresholds], monotone, precision
         )
@@ -1036,9 +1085,26 @@ def _revalidate_system_one_run(
         raise StrategyPublicationError(
             "published ladder is not the monotonized response"
         )
-    if ladder.get("monotonization") != system_one.MONOTONIZATION:
+    if ladder.get("monotonization") != system_one.MONOTONIZATIONS[elicitation]:
         raise StrategyPublicationError(
             "published ladder declares another monotonization"
+        )
+    if expected_bins is not None:
+        if canonical_bytes(ladder.get("binProbabilities")) != canonical_bytes(
+            expected_bins
+        ):
+            raise StrategyPublicationError(
+                "published bin probabilities differ from the recorded response"
+            )
+        if ladder.get("choice") != bins["choice"] or canonical_bytes(
+            ladder.get("choiceConfidence")
+        ) != canonical_bytes(bins["confidence"]):
+            raise StrategyPublicationError(
+                "published choice differs from the recorded response"
+            )
+    elif "binProbabilities" in ladder:
+        raise StrategyPublicationError(
+            "a ladder run published bin probabilities it never elicited"
         )
     for field, key in (("ciLow", "q10"), ("pointEstimate", "q50"), ("ciHigh", "q90")):
         if canonical_bytes(cell.get(field)) != canonical_bytes(quantiles[key]):
@@ -1059,6 +1125,7 @@ def _revalidate_system_one_run(
         raw_probabilities=raw,
         monotone=monotone,
         distribution=distribution,
+        elicitation=elicitation,
     )
     if canonical_bytes(report) != canonical_bytes(validation):
         raise StrategyPublicationError(
@@ -1072,6 +1139,7 @@ def _validate_system_one_result(
     *,
     backend: str,
     model: str | None,
+    elicitation: str,
     ledger_rows: list[dict[str, Any]],
     lower: dt.datetime,
     upper: dt.datetime,
@@ -1086,7 +1154,7 @@ def _validate_system_one_result(
         )
     if manifest.get("runMode") != SYSTEM_ONE_SUITE:
         raise StrategyPublicationError("system one run declares another run mode")
-    if manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODE:
+    if manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODES[elicitation]:
         raise StrategyPublicationError(
             "system one run prompt mode differs from its lane"
         )
@@ -1122,7 +1190,13 @@ def _validate_system_one_result(
     # Custody has now hashed every artifact, so the recorded command is the
     # one the run actually issued.
     command = _system_one_command(repo, manifest_relative, manifest)
-    _require_system_one_agent(manifest, command, backend=backend, model=model)
+    _require_system_one_agent(
+        manifest,
+        command,
+        backend=backend,
+        model=model,
+        elicitation=elicitation,
+    )
     run_start, result_finish = _require_run_wrapper(
         manifest,
         manifest_relative,
@@ -1147,7 +1221,13 @@ def _validate_system_one_result(
             raise StrategyPublicationError("cell seal is outside its result wrapper")
         sealed_at = str(cell["runAt"])
         _revalidate_system_one_run(
-            repo, manifest_relative.parent, manifest, cell, target, ledger_rows
+            repo,
+            manifest_relative.parent,
+            manifest,
+            cell,
+            target,
+            ledger_rows,
+            elicitation,
         )
         if bool((manifest.get("validation") or {}).get("ok")) != expected_ok:
             raise StrategyPublicationError(
@@ -1399,7 +1479,7 @@ def validate_tree(
         _claim_run_prefixes(prefixes, batch_prefixes)
         finishes.append(finished)
     if system_one:
-        backend, model = _system_one_request(selection)
+        backend, model, elicitation = _system_one_request(selection)
         # The state a System One run was allowed to see is rebuilt here from
         # the same pinned ledger the selection witnessed, so publishing one
         # without that ledger is refused rather than validated on the run's
@@ -1421,7 +1501,7 @@ def validate_tree(
             repo,
             relative,
             targets_by_slug,
-            prompt_mode=SYSTEM_ONE_PROMPT_MODE,
+            prompt_mode=SYSTEM_ONE_PROMPT_MODES[elicitation],
             lower=lower,
             upper=upper,
             validate_result=functools.partial(
@@ -1429,11 +1509,16 @@ def validate_tree(
                 repo,
                 backend=backend,
                 model=model,
+                elicitation=elicitation,
                 ledger_rows=ledger_rows,
                 lower=lower,
                 upper=upper,
             ),
-            require_recorded={"backend": backend, "model": model},
+            require_recorded={
+                "backend": backend,
+                "elicitation": elicitation,
+                "model": model,
+            },
         )
         _claim_run_prefixes(prefixes, batch_prefixes)
         finishes.append(finished)

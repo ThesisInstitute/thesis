@@ -20,6 +20,7 @@ from strategy_targets import (
     SYSTEM_ONE_BACKENDS,
     load_object,
     normalize_system_one_model,
+    resolve_system_one_elicitation,
     utc_now,
 )
 
@@ -30,7 +31,11 @@ DERIVE_MEDIAN = ROOT / "scripts" / "median_rollout_ensemble.py"
 SUITE_SCHEMA = "thesis_strategy_suite_v1"
 BATCH_SCHEMA = "thesis_batch_manifest_v1"
 SYSTEM_ONE_RUN_MODE = "system_one"
-SYSTEM_ONE_PROMPT_MODE = "system_one_noul_ladder"
+# One prompt mode per elicitation, the same map the runner and custody use.
+SYSTEM_ONE_PROMPT_MODES = {
+    "noul_ladder": "system_one_noul_ladder",
+    "choice_bins": "system_one_choice_bins",
+}
 # The runner exits 2 when it refuses its inputs before writing anything:
 # a missing backend key, an unpublished primary cell, a malformed target.
 # Nothing was recorded, so that is a lane misconfiguration, not a forecast
@@ -123,6 +128,7 @@ def system_one_result(
     target: dict[str, Any],
     backend: str,
     model: str | None,
+    elicitation: str,
     ledger_path: pathlib.Path | None,
     timeout_seconds: int,
     temp_root: pathlib.Path,
@@ -142,6 +148,10 @@ def system_one_result(
         str(target_path),
         "--backend",
         backend,
+        # The elicitation is never left to the runner's own default here: the
+        # trusted selection resolved it, so the lane passes it explicitly.
+        "--elicitation",
+        elicitation,
         "--out-manifest",
         str(pointer_path),
     ]
@@ -196,7 +206,7 @@ def system_one_result(
         )
     if (
         manifest.get("runMode") != SYSTEM_ONE_RUN_MODE
-        or manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODE
+        or manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODES[elicitation]
     ):
         raise StrategySuiteError(
             f"system_one runner sealed a foreign run mode for {slug}"
@@ -227,6 +237,7 @@ def run_system_one_batch(
     output_path: pathlib.Path,
     backend: str,
     model: str | None,
+    elicitation: str,
     ledger_path: pathlib.Path | None,
     timeout_seconds: int,
 ) -> dict[str, Any]:
@@ -242,6 +253,7 @@ def run_system_one_batch(
                     target=target,
                     backend=backend,
                     model=model,
+                    elicitation=elicitation,
                     ledger_path=ledger_path,
                     timeout_seconds=timeout_seconds,
                     temp_root=temp_root,
@@ -253,8 +265,9 @@ def run_system_one_batch(
         "schemaVersion": BATCH_SCHEMA,
         "startedAt": started_at,
         "finishedAt": finished_at,
-        "promptMode": SYSTEM_ONE_PROMPT_MODE,
+        "promptMode": SYSTEM_ONE_PROMPT_MODES[elicitation],
         "backend": backend,
+        "elicitation": elicitation,
         "model": model,
         "timeoutSeconds": timeout_seconds,
         "targets": len(results),
@@ -473,6 +486,9 @@ def run_suite(
             raise StrategySuiteError(f"unsupported system_one backend: {backend!r}")
         try:
             system_one_model = normalize_system_one_model(request.get("systemOneModel"))
+            elicitation = resolve_system_one_elicitation(
+                backend, request.get("systemOneElicitation")
+            )
         except ValueError as exc:
             raise StrategySuiteError(str(exc)) from exc
         path = batch_path(day, run_id, run_attempt, "system-one")
@@ -481,12 +497,14 @@ def run_suite(
             output_path=path,
             backend=backend,
             model=system_one_model,
+            elicitation=elicitation,
             ledger_path=ledger_path,
             timeout_seconds=timeout_seconds,
         )
         lanes["systemOne"] = {
             "batchManifest": repo_relative(path),
             "backend": backend,
+            "elicitation": elicitation,
             "model": system_one_model,
         }
 

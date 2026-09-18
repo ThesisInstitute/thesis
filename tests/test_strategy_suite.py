@@ -214,7 +214,7 @@ cells.write_text("[]\\n")
 manifest = {
     "schemaVersion": "thesis_system_one_run_manifest_v1",
     "runMode": "system_one",
-    "promptMode": "system_one_noul_ladder",
+    "promptMode": "system_one_" + (option("--elicitation") or "noul_ladder"),
     "targetContext": target,
     "ok": ok,
     "cellsPath": cells.as_posix() if ok else None,
@@ -254,6 +254,7 @@ def test_system_one_batch_runs_the_runner_once_per_target(
         output_path=output,
         backend="adapter",
         model=None,
+        elicitation="noul_ladder",
         ledger_path=ledger,
         timeout_seconds=120,
     )
@@ -321,6 +322,7 @@ def test_system_one_batch_passes_the_trusted_model_and_fails_on_refusal(
         output_path=tmp_path / "batch.json",
         backend="typesafe",
         model="jev-1",
+        elicitation="choice_bins",
         ledger_path=None,
         timeout_seconds=120,
     )
@@ -337,6 +339,7 @@ def test_system_one_batch_passes_the_trusted_model_and_fails_on_refusal(
             output_path=tmp_path / "refused.json",
             backend="typesafe",
             model=None,
+            elicitation="choice_bins",
             ledger_path=None,
             timeout_seconds=120,
         )
@@ -350,6 +353,7 @@ def test_system_one_batch_passes_the_trusted_model_and_fails_on_refusal(
             output_path=tmp_path / "crashed.json",
             backend="adapter",
             model=None,
+            elicitation="noul_ladder",
             ledger_path=None,
             timeout_seconds=120,
         )
@@ -365,6 +369,7 @@ def test_system_one_batch_passes_the_trusted_model_and_fails_on_refusal(
             output_path=tmp_path / "escaped.json",
             backend="adapter",
             model=None,
+            elicitation="noul_ladder",
             ledger_path=None,
             timeout_seconds=120,
         )
@@ -453,6 +458,7 @@ def test_suite_runner_emits_the_system_one_lane(tmp_path, monkeypatch) -> None:
         "systemOne": {
             "batchManifest": "records/fixture/system-one.json",
             "backend": "typesafe",
+            "elicitation": "choice_bins",
             "model": "jev-1",
         },
     }
@@ -559,6 +565,7 @@ def test_system_one_lane_drives_the_real_runner_to_sealed_custody(
         output_path=tmp_path / "records" / "batch.json",
         backend="mock",
         model=None,
+        elicitation="noul_ladder",
         ledger_path=None,
         timeout_seconds=300,
     )

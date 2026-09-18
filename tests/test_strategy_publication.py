@@ -28,6 +28,7 @@ from tests.test_run_system_one_forecast import (  # noqa: E402
     write_comparison_run,
     write_ledger,
     write_primary_run,
+    spread_bin_answer,
 )
 
 SUITE = pathlib.PurePosixPath(
@@ -544,19 +545,30 @@ RAW_NOULS = [
 
 
 def fake_system_one_answers(payloads: dict, model: str) -> dict:
+    """Answer whatever was asked: one Noul per rung, or one Choice over bins."""
+
+    answers: dict = {}
+    nouls = iter(RAW_NOULS)
+    for name, payload in payloads.items():
+        if payload.get("type") == "choice":
+            answers[name] = spread_bin_answer(list(payload["criteria"]))
+        else:
+            answers[name] = {"type": "noul", "noul": next(nouls)}
     return {
         "model": model,
         "usage": {"input_tokens": 1024, "output_tokens": 96},
-        "answers": {
-            name: {"type": "noul", "noul": value}
-            for name, value in zip(payloads, RAW_NOULS)
-        },
+        "answers": answers,
     }
 
 
 def system_one_selection_payload(
-    *, backend: str = "adapter", model: str | None = "gpt-5.6-terra"
+    *,
+    backend: str = "adapter",
+    model: str | None = "gpt-5.6-terra",
+    elicitation: str | None = None,
 ) -> dict:
+    # A minted selection always records the resolved elicitation, never the
+    # omission, so the fixture resolves it the way select_targets does.
     value = {
         "schemaVersion": publication.SELECTION_SCHEMA,
         "sourceSha": "c" * 40,
@@ -577,6 +589,9 @@ def system_one_selection_payload(
             "maxTargets": 1,
             "suite": "system_one",
             "systemOneBackend": backend,
+            "systemOneElicitation": system_one.default_elicitation(backend)
+            if elicitation is None
+            else elicitation,
             "systemOneModel": model,
         },
         "localResolutionEvidence": {},
@@ -604,6 +619,7 @@ def run_system_one(
     cell: dict | None = None,
     ledger: list[dict] | None = None,
     expect_ok: bool = True,
+    elicitation: str | None = None,
 ) -> pathlib.Path:
     """Produce one sealed system one run inside repo and return its manifest."""
 
@@ -642,6 +658,7 @@ def run_system_one(
         provider=provider,
         model=model,
         run_at=RUN_AT,
+        elicitation=elicitation,
     )
     assert manifest["ok"] is expect_ok, manifest.get("error")
     return manifest_path
@@ -652,6 +669,7 @@ def write_system_one_batch(
     manifest_path: pathlib.Path,
     *,
     manifest_override: str | None = None,
+    prompt_mode: str | None = None,
 ) -> pathlib.Path:
     relative = pathlib.PurePosixPath(manifest_path.relative_to(repo).as_posix())
     manifest = json.loads(manifest_path.read_text())
@@ -670,7 +688,7 @@ def write_system_one_batch(
         "schemaVersion": "thesis_batch_manifest_v1",
         "startedAt": BATCH_STARTED,
         "finishedAt": BATCH_FINISHED,
-        "promptMode": publication.SYSTEM_ONE_PROMPT_MODE,
+        "promptMode": prompt_mode or manifest["promptMode"],
         "targets": 1,
         "ok": 1 if ok else 0,
         "failed": 0 if ok else 1,
@@ -688,8 +706,11 @@ def write_system_one_suite(
     *,
     backend: str = "adapter",
     model: str | None = "gpt-5.6-terra",
+    elicitation: str | None = None,
 ) -> pathlib.Path:
     selection = json.loads(selection_path.read_text())
+    if elicitation is None:
+        elicitation = system_one.default_elicitation(str(backend))
     suite = {
         "schemaVersion": publication.SUITE_SCHEMA,
         "sourceSha": selection["sourceSha"],
@@ -705,6 +726,7 @@ def write_system_one_suite(
             "systemOne": {
                 "batchManifest": SYSTEM_ONE_BATCH.as_posix(),
                 "backend": backend,
+                "elicitation": elicitation,
                 "model": model,
             },
         },
@@ -727,10 +749,20 @@ def system_one_tree(
     answering_model: str | None = None,
     lane_backend: object = FROM_REQUEST,
     lane_model: object = FROM_REQUEST,
+    request_elicitation: str | None = None,
+    run_elicitation: object = FROM_REQUEST,
+    lane_elicitation: object = FROM_REQUEST,
+    batch_prompt_mode: str | None = None,
     manifest_override: str | None = None,
     git: bool = False,
 ) -> tuple[pathlib.Path, pathlib.Path]:
     """Build a complete system one suite; return (repo, selection path)."""
+
+    trusted_elicitation = (
+        system_one.default_elicitation(request_backend)
+        if request_elicitation is None
+        else request_elicitation
+    )
 
     repo = tmp_path / "repo"
     if git:
@@ -738,7 +770,10 @@ def system_one_tree(
     else:
         repo.mkdir()
     selection_path = write_system_one_selection(
-        tmp_path, backend=request_backend, model=request_model
+        tmp_path,
+        backend=request_backend,
+        model=request_model,
+        elicitation=trusted_elicitation,
     )
     manifest_path = run_system_one(
         repo,
@@ -747,13 +782,32 @@ def system_one_tree(
         provider=run_provider,
         model=run_model,
         answering_model=answering_model,
+        # The run asks under the TRUSTED elicitation even when a test makes
+        # its backend or model differ, so that test fails on its own field.
+        elicitation=(
+            trusted_elicitation
+            if run_elicitation is FROM_REQUEST
+            else str(run_elicitation)
+        ),
     )
-    write_system_one_batch(repo, manifest_path, manifest_override=manifest_override)
+    write_system_one_batch(
+        repo,
+        manifest_path,
+        manifest_override=manifest_override,
+        prompt_mode=batch_prompt_mode,
+    )
     write_system_one_suite(
         repo,
         selection_path,
         backend=request_backend if lane_backend is FROM_REQUEST else lane_backend,
         model=request_model if lane_model is FROM_REQUEST else lane_model,
+        # The lane echoes the TRUSTED elicitation, so a test that tampers with
+        # the lane backend or model still fails on that field and no other.
+        elicitation=(
+            trusted_elicitation
+            if lane_elicitation is FROM_REQUEST
+            else str(lane_elicitation)
+        ),
     )
     monkeypatch.setattr(publication, "_validate_source_sha", lambda *_a, **_k: None)
     monkeypatch.setattr(
@@ -930,6 +984,134 @@ def test_system_one_lane_rejects_a_run_from_another_lane(
 
     with pytest.raises(
         publication.StrategyPublicationError, match="non-system-one manifest"
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+@pytest.mark.parametrize(
+    ("backend", "provider", "model", "elicitation"),
+    [
+        # The workflow's own defaults: the adapter control asked under bins.
+        ("adapter", "openai", "gpt-5.6-terra", "choice_bins"),
+        ("adapter", "openai", "gpt-5.6-terra", "noul_ladder"),
+        ("typesafe", None, "jev-1", "choice_bins"),
+        ("typesafe", None, "jev-1", "noul_ladder"),
+    ],
+)
+def test_every_backend_crosses_the_boundary_under_either_elicitation(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    backend: str,
+    provider: str | None,
+    model: str,
+    elicitation: str,
+) -> None:
+    repo, selection_path = system_one_tree(
+        tmp_path,
+        monkeypatch,
+        request_backend=backend,
+        request_model=model,
+        run_backend=backend,
+        run_provider=provider,
+        run_model=model,
+        request_elicitation=elicitation,
+    )
+
+    exact, prefixes = validate_system_one_tree(repo, selection_path)
+
+    assert exact == {SYSTEM_ONE_SUITE_PATH, SYSTEM_ONE_BATCH}
+    assert prefixes == {SYSTEM_ONE_RUN_PREFIX}
+    manifest = json.loads(
+        repo.joinpath(*SYSTEM_ONE_RUN_PREFIX.parts, "manifest.json").read_text()
+    )
+    assert manifest["promptMode"] == "system_one_" + elicitation
+
+
+@pytest.mark.parametrize(
+    ("request_elicitation", "run_elicitation"),
+    [("choice_bins", "noul_ladder"), ("noul_ladder", "choice_bins")],
+)
+def test_system_one_run_elicitation_must_equal_the_trusted_request(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    request_elicitation: str,
+    run_elicitation: str,
+) -> None:
+    # The generate job is unprivileged: a run that asked the other question
+    # is refused even though it is a well-formed, custody-valid run.
+    repo, selection_path = system_one_tree(
+        tmp_path,
+        monkeypatch,
+        request_elicitation=request_elicitation,
+        run_elicitation=run_elicitation,
+    )
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="batch prompt mode differs from lane",
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+@pytest.mark.parametrize(
+    ("request_elicitation", "run_elicitation"),
+    [("choice_bins", "noul_ladder"), ("noul_ladder", "choice_bins")],
+)
+def test_a_batch_cannot_vouch_for_a_run_that_asked_the_other_question(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    request_elicitation: str,
+    run_elicitation: str,
+) -> None:
+    # The batch is written by the same unprivileged job as the run, so a batch
+    # that echoes the trusted prompt mode proves nothing: the run's own sealed
+    # manifest and command still have to match the trusted request.
+    repo, selection_path = system_one_tree(
+        tmp_path,
+        monkeypatch,
+        request_elicitation=request_elicitation,
+        run_elicitation=run_elicitation,
+        batch_prompt_mode="system_one_" + request_elicitation,
+    )
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="run prompt mode differs from its lane",
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+def test_system_one_lane_elicitation_must_equal_the_trusted_selection(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo, selection_path = system_one_tree(
+        tmp_path,
+        monkeypatch,
+        request_elicitation="choice_bins",
+        lane_elicitation="noul_ladder",
+    )
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="lane elicitation differs from trusted selection",
+    ):
+        validate_system_one_tree(repo, selection_path)
+
+
+def test_a_selection_with_an_unknown_elicitation_is_refused(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo, selection_path = system_one_tree(
+        tmp_path,
+        monkeypatch,
+        request_elicitation="score_ladder",
+        run_elicitation="choice_bins",
+        lane_elicitation="choice_bins",
+    )
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="unsupported system one elicitation",
     ):
         validate_system_one_tree(repo, selection_path)
 
