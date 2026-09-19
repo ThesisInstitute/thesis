@@ -6,6 +6,10 @@ import { BackToBill } from "@/components/BackToBill";
 import { Header } from "@/components/Header";
 import { ForecastRuntime } from "@/components/ForecastRuntime";
 import {
+  overdueNotice,
+  RESOLUTION_STATUS_META,
+} from "@/data/resolution-status";
+import {
   FORECAST_CELLS,
   TYPE_LABEL,
   TYPE_DESCRIPTION,
@@ -68,6 +72,11 @@ export default async function ForecastDetailPage({
   const forecast = withResolvedOutcome(forecastDefinition, ledger);
   const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
   const resolvedScore = scoreResolvedForecast(forecast, ledger);
+  const overdue = overdueNotice({
+    slug: forecast.slug,
+    status: forecast.resolvedOutcome ? "resolved" : "pending",
+    resolutionDate: forecast.resolutionDate,
+  });
 
   return (
     <div>
@@ -108,6 +117,32 @@ export default async function ForecastDetailPage({
               conditional on:{" "}
               <span className="font-medium">{forecast.conditionalOn}</span>
             </p>
+          )}
+          {overdue && (
+            <section
+              aria-label="Why this forecast has not resolved"
+              className="mt-5 max-w-[820px] rounded-md border bg-[var(--theme-bg-surface)] px-4 py-3"
+              style={{ borderColor: "var(--theme-border)" }}
+            >
+              <p className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
+                Overdue · was due {formatFullDate(overdue.since)}
+              </p>
+              <p className="mt-2 text-[0.92rem] leading-[1.6] text-[var(--theme-text)]">
+                {overdue.reason}
+              </p>
+              {overdue.detail && (
+                <p className="mt-1 [font-family:var(--font-mono)] text-[0.72rem] leading-[1.5] text-[var(--theme-text-muted)]">
+                  resolver: {overdue.detail}
+                </p>
+              )}
+              <p className="mt-2 [font-family:var(--font-mono)] text-[0.66rem] text-[var(--theme-text-dim)]">
+                {overdue.code} · resolver status as of{" "}
+                {formatFullDate(RESOLUTION_STATUS_META.asOf)}
+                {RESOLUTION_STATUS_META.runCompleted
+                  ? ""
+                  : " · the last resolver run did not complete"}
+              </p>
+            </section>
           )}
         </header>
 
@@ -170,6 +205,21 @@ function RelatedForecasts({
       </div>
     </section>
   );
+}
+
+function formatFullDate(iso: string): string {
+  // Same rule as formatShortDate: read the calendar date as written.
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!match) return iso;
+  const d = new Date(
+    Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])),
+  );
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 function formatShortDate(iso: string): string {
