@@ -23,8 +23,9 @@ shows the labeled catalog example without calling the API.
 
 The current archives contain the final forecast event, not the original full
 stream of tool activity. The page discloses this and links to the archived
-result. The recorder workflow continues to call the endpoints below; a site
-rebuild picks up newly committed results. Build from the full repository with
+result. The recorder workflow continues to call the endpoints below. Its
+snapshot commits trigger the normal site deployment to publish newly saved
+results. Build from the full repository with
 `records/` available alongside `site/` (including files outside Vercel's root
 directory), as with the existing build-time bill artifacts.
 
