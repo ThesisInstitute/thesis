@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { FORECAST_CELLS } from "@/data/forecast-cells";
 import { MODEL_LANE_STATS } from "@/data/model-lane-stats.generated";
+import { modelLaneLabel, orderModelLanes } from "@/data/model-lanes";
 import {
   hasVerifiedClaimedChronology,
   loadPolicyEngineLedger,
@@ -14,15 +15,6 @@ export const metadata: Metadata = {
   title: "Models — Thesis Institute",
   description:
     "Model-by-model comparison under identical elicitation contracts: trace-rubric compliance by lane now, resolved accuracy as targets print.",
-};
-
-const LANE_ORDER = ["fast", "ladder", "ladder_v2", "median3"] as const;
-
-const LANE_LABELS: Record<string, string> = {
-  fast: "Fast",
-  ladder: "Ladder",
-  ladder_v2: "Ladder v2",
-  median3: "Median-of-3",
 };
 
 interface ModelAccuracyRow {
@@ -46,9 +38,7 @@ export default async function ModelsPage() {
   const models = Array.from(
     new Set(MODEL_LANE_STATS.map((row) => row.model)),
   ).sort();
-  const lanes = LANE_ORDER.filter((lane) =>
-    MODEL_LANE_STATS.some((row) => row.lane === lane),
-  );
+  const lanes = orderModelLanes(MODEL_LANE_STATS.map((row) => row.lane));
   const statFor = (model: string, lane: string) =>
     MODEL_LANE_STATS.find((row) => row.model === model && row.lane === lane);
 
@@ -121,8 +111,11 @@ export default async function ModelsPage() {
             until the identifier migration). Fast and Ladder demand the
             parametric width derivation (&ldquo;sigma = X&rdquo;, 1.28·sigma);
             Ladder v2 is the pre-registered quantile-native contract (rungs
-            plus interpolated 10th/90th percentiles stated literally).
-            Failed runs stay in the record as immutable run manifests.
+            plus interpolated 10th/90th percentiles stated literally). System
+            One is scored against its own sealed rubric instead: a strictly
+            increasing ladder, a monotone CDF, and resolver fields equal to
+            the registered target. Failed runs stay in the record as
+            immutable run manifests.
           </p>
           <div
             className="mt-5 overflow-x-auto rounded-[14px] border"
@@ -140,7 +133,7 @@ export default async function ModelsPage() {
                       key={lane}
                       className="px-4 py-3 text-right font-normal"
                     >
-                      {LANE_LABELS[lane] ?? lane}
+                      {modelLaneLabel(lane)}
                     </th>
                   ))}
                 </tr>

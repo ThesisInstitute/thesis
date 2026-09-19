@@ -11,6 +11,18 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import strategy_comparisons as strategy  # noqa: E402
+import thesis_records_to_comparisons as records_to_comparisons  # noqa: E402
+
+from tests.test_run_system_one_forecast import (  # noqa: E402
+    SLUG,
+    ledger_rows,
+    repo,  # noqa: F401 - pytest fixture
+    system_one_run,
+    target_context,
+)
+
+# The System One lane's fixture target, named for this module's readers.
+SYSTEM_ONE_SLUG = SLUG
 
 
 def run(variant_id: str, run_at: str = "2030-01-01T00:00:00Z") -> dict:
@@ -342,7 +354,7 @@ def test_comparison_review_is_manifest_only_and_screened() -> None:
         "preSubmitReview": {"summary": "planted"},
     }
     manifest = {
-        "agent": {"agent": "thesis.analyst", "model": "gpt-5.5"},
+        "agent": {"agent": "thesis.analyst", "model": "gpt-5.6-terra"},
         "artifacts": [],
         "preSubmitReview": {
             "schemaVersion": "thesis_pre_submit_review_v1",
@@ -370,3 +382,383 @@ def test_comparison_review_is_manifest_only_and_screened() -> None:
     bare = comparison_run(cell, {"agent": manifest["agent"], "artifacts": []},
                           "fixture-target", 1)["predictionRun"]
     assert "preSubmitReview" not in bare
+
+
+# --- system one lane --------------------------------------------------------
+
+
+def write_system_one_batch(
+    repo_root: pathlib.Path,
+    manifest: dict,
+    manifest_path: pathlib.Path,
+    *,
+    ok: bool = True,
+) -> pathlib.Path:
+    """The batch manifest scripts/run_strategy_suite.py writes for the lane."""
+
+    batch_path = (
+        repo_root
+        / "records"
+        / "thesis-analyst"
+        / "batches"
+        / "2030-01-10"
+        / "strategy-1-a1-system-one.json"
+    )
+    batch_path.parent.mkdir(parents=True, exist_ok=True)
+    batch_path.write_text(
+        json.dumps(
+            {
+                "schemaVersion": "thesis_batch_manifest_v1",
+                "promptMode": "system_one_noul_ladder",
+                "results": [
+                    {
+                        "target": target_context(),
+                        "startedAt": manifest["runStartedAt"],
+                        "finishedAt": manifest["sealedAt"],
+                        "ok": ok,
+                        "manifestPath": manifest_path.relative_to(
+                            repo_root
+                        ).as_posix(),
+                        "cellsPath": manifest["cellsPath"],
+                        "error": None,
+                    }
+                ],
+            },
+            indent=2,
+        )
+    )
+    return batch_path
+
+
+def write_system_one_suite(
+    repo_root: pathlib.Path, batch_path: pathlib.Path
+) -> pathlib.Path:
+    suites_root = repo_root / "records" / "thesis-analyst" / "strategy-suites"
+    path = suites_root / "2030-01-10" / "strategy-1-a1.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schemaVersion": strategy.SUITE_SCHEMA,
+                "sourceSha": "a" * 40,
+                "selectionPath": "records/selection.json",
+                "selectionSha256": "b" * 64,
+                "selectionSetHash": "c" * 64,
+                "suite": "system_one",
+                "createdAt": "2030-01-10T12:00:00Z",
+                "lanes": {
+                    "ladder": None,
+                    "rollouts": [],
+                    "median3": [],
+                    "systemOne": {
+                        "batchManifest": batch_path.relative_to(
+                            repo_root
+                        ).as_posix(),
+                        "backend": "mock",
+                        "model": "mock",
+                    },
+                },
+            },
+            indent=2,
+        )
+    )
+    return suites_root
+
+
+@pytest.fixture
+def system_one_batch(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch  # noqa: F811
+) -> tuple[pathlib.Path, pathlib.Path, dict]:
+    """A sealed System One run, its batch manifest, and the repo it lives in."""
+
+    manifest, manifest_path = system_one_run(repo, ledger=ledger_rows())
+    assert manifest["ok"] is True
+    batch_path = write_system_one_batch(repo, manifest, manifest_path)
+    # The projection resolves record paths against the repository root; point
+    # it at the fixture checkout so no test ever reads the real records tree.
+    monkeypatch.setattr(records_to_comparisons, "ROOT", repo)
+    return batch_path, manifest_path, manifest
+
+
+def test_system_one_projection_carries_the_lane_identity(
+    system_one_batch: tuple[pathlib.Path, pathlib.Path, dict],
+) -> None:
+    batch_path, manifest_path, manifest = system_one_batch
+
+    augments = strategy.system_one_augments([batch_path])
+
+    assert list(augments) == [SYSTEM_ONE_SLUG]
+    run = augments[SYSTEM_ONE_SLUG][0]
+    prediction_run = run["predictionRun"]
+
+    assert prediction_run["agent"] == "thesis.system_one"
+    assert prediction_run["model"] == manifest["agent"]["model"] == "mock"
+    assert prediction_run["promptMode"] == "system_one_noul_ladder"
+    assert prediction_run["agentVersion"] == "0.2.0"
+    assert prediction_run["kind"] == "recorded-agent-run"
+    # A mock run is not a System One run, and the row says so; only the
+    # typesafe backend earns the bare lane label.
+    assert run["label"] == "System One emulation (mock)"
+    assert prediction_run["runLabel"] == "System One emulation (mock)"
+
+    # The variant id and the copy are the lane's own: no analyst identity is
+    # borrowed by a run the analyst never made.
+    assert run["variantId"].startswith(f"{SYSTEM_ONE_SLUG}-thesis-system-one-")
+    assert "thesis-analyst" not in run["variantId"]
+    assert "thesis.analyst" not in json.dumps(run)
+    assert "Codex" not in run["description"]
+    assert "deterministic offline stand-in, not a model" in run["description"]
+    assert "no chain of thought" not in run["description"]
+    assert "monotonized ladder itself" in run["description"]
+    assert "sealed" in prediction_run["runDescription"]
+
+    # The activity log is the sealed inventory, not the cell's own claim.
+    assert prediction_run["activityLog"] == manifest["artifacts"]
+    assert {ref["artifactType"] for ref in prediction_run["activityLog"]} >= {
+        "system_one_state",
+        "system_one_questions",
+        "system_one_request",
+        "system_one_response",
+        "manifest",
+    }
+
+    cell = json.loads(
+        (manifest_path.parent / "cells.with_activity.json").read_text()
+    )[0]
+    assert run["pointEstimate"] == cell["pointEstimate"]
+    assert run["ciLow"] == cell["ciLow"]
+    assert run["ciHigh"] == cell["ciHigh"]
+    assert run["reasoning"] == cell["reasoning"]
+
+
+def test_system_one_projection_materializes_the_ladder_cdf(
+    system_one_batch: tuple[pathlib.Path, pathlib.Path, dict],
+) -> None:
+    batch_path, manifest_path, _manifest = system_one_batch
+
+    run = strategy.system_one_augments([batch_path])[SYSTEM_ONE_SLUG][0]
+    distribution = run["predictionDistribution"]
+    cell = json.loads(
+        (manifest_path.parent / "cells.with_activity.json").read_text()
+    )[0]
+
+    assert distribution["format"] == "numeric_cdf_v1"
+    assert distribution["provenance"] == "agent_reported"
+    assert distribution["pointCount"] == strategy.POINT_COUNT
+    assert len(distribution["points"]) == strategy.POINT_COUNT
+    probabilities = [point["probability"] for point in distribution["points"]]
+    assert probabilities == sorted(probabilities)
+    assert probabilities[0] == 0.0
+    assert probabilities[-1] == 1.0
+    values = [point["value"] for point in distribution["points"]]
+    assert values == sorted(values)
+    assert distribution["support"]["lower"] <= cell["thresholdLadder"]["thresholds"][0]
+    assert distribution["support"]["upper"] >= cell["thresholdLadder"]["thresholds"][-1]
+    assert distribution["summary"]["pointEstimate"] == cell["pointEstimate"]
+    assert distribution["summary"]["interval80"] == {
+        "lower": cell["ciLow"],
+        "upper": cell["ciHigh"],
+    }
+
+    # The published CDF is the monotonized ladder: every rung's cumulative
+    # probability is reproduced by the interpolated curve.
+    ladder = cell["thresholdLadder"]
+    for threshold, probability in zip(
+        ladder["thresholds"], ladder["cumulativeProbabilities"]
+    ):
+        nearest = min(
+            distribution["points"], key=lambda p: abs(p["value"] - threshold)
+        )
+        assert nearest["probability"] == pytest.approx(probability, abs=5e-3)
+
+
+def test_system_one_projection_refuses_a_foreign_run(
+    system_one_batch: tuple[pathlib.Path, pathlib.Path, dict],
+) -> None:
+    # A batch listed as the System One lane cannot launder another agent's
+    # run into the lane's label: the manifest itself has to say system_one.
+    batch_path, manifest_path, manifest = system_one_batch
+    manifest["agent"]["agent"] = "thesis.analyst"
+    manifest_path.write_text(json.dumps(manifest, indent=2))
+    with pytest.raises(ValueError, match="non-system-one run"):
+        strategy.system_one_augments([batch_path])
+
+    manifest["agent"]["agent"] = "thesis.system_one"
+    manifest["runMode"] = "analyst"
+    manifest_path.write_text(json.dumps(manifest, indent=2))
+    with pytest.raises(ValueError, match="non-system-one run"):
+        strategy.system_one_augments([batch_path])
+
+
+def test_system_one_failures_are_recorded_but_never_published(
+    repo: pathlib.Path,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # A failed run still seals a manifest and still counts as attempted in
+    # the lane stats; it must not reach a published comparison row.
+    manifest, manifest_path = system_one_run(repo, ledger=ledger_rows())
+    batch_path = write_system_one_batch(repo, manifest, manifest_path, ok=False)
+    monkeypatch.setattr(records_to_comparisons, "ROOT", repo)
+    suites_root = write_system_one_suite(repo, batch_path)
+    empty_legacy = repo / "legacy.json"
+    empty_legacy.write_text(
+        json.dumps({"schemaVersion": strategy.LEGACY_INDEX_SCHEMA, "waves": []})
+    )
+
+    assert strategy.system_one_augments([batch_path]) == {}
+    assert strategy.build_model_lane_stats(
+        legacy_index=empty_legacy, suites_root=suites_root
+    ) == [{"model": "mock", "lane": "system_one_noul_ladder", "attempted": 1, "passed": 0}]
+
+
+def test_system_one_suite_reaches_the_published_corpus(
+    system_one_batch: tuple[pathlib.Path, pathlib.Path, dict],
+    tmp_path: pathlib.Path,
+) -> None:
+    batch_path, _manifest_path, _manifest = system_one_batch
+    repo_root = batch_path.parents[4]
+    suites_root = write_system_one_suite(repo_root, batch_path)
+    empty_legacy = tmp_path / "legacy.json"
+    empty_legacy.write_text(
+        json.dumps({"schemaVersion": strategy.LEGACY_INDEX_SCHEMA, "waves": []})
+    )
+
+    waves = strategy.load_suite_waves(suites_root)
+    assert [path.name for path in waves[0]["systemOneBatches"]] == [
+        batch_path.name
+    ]
+
+    augments = strategy.all_record_augments(
+        legacy_index=empty_legacy, suites_root=suites_root
+    )
+    assert list(augments) == [SYSTEM_ONE_SLUG]
+    assert augments[SYSTEM_ONE_SLUG][0]["predictionRun"]["agent"] == (
+        "thesis.system_one"
+    )
+
+    assert strategy.build_model_lane_stats(
+        legacy_index=empty_legacy, suites_root=suites_root
+    ) == [{"model": "mock", "lane": "system_one_noul_ladder", "attempted": 1, "passed": 1}]
+
+
+def test_suite_scanner_binds_the_system_one_lane_to_its_selector(
+    system_one_batch: tuple[pathlib.Path, pathlib.Path, dict],
+) -> None:
+    batch_path, _manifest_path, _manifest = system_one_batch
+    repo_root = batch_path.parents[4]
+    suites_root = write_system_one_suite(repo_root, batch_path)
+    path = suites_root / "2030-01-10" / "strategy-1-a1.json"
+    payload = json.loads(path.read_text())
+
+    # A ladder suite may not smuggle a System One batch through the lane key.
+    ladder_suite = json.loads(json.dumps(payload))
+    ladder_suite["suite"] = "ladder"
+    ladder_suite["lanes"]["ladder"] = {"batchManifest": "records/ladder.json"}
+    path.write_text(json.dumps(ladder_suite))
+    with pytest.raises(ValueError, match="carries a system one lane"):
+        strategy.load_suite_waves(suites_root)
+
+    # A system_one suite has to carry the lane it claims to be.
+    missing = json.loads(json.dumps(payload))
+    missing["lanes"]["systemOne"] = None
+    path.write_text(json.dumps(missing))
+    with pytest.raises(ValueError, match="lacks its system one lane"):
+        strategy.load_suite_waves(suites_root)
+
+    # ... and it may not carry the analyst lanes.
+    with_ladder = json.loads(json.dumps(payload))
+    with_ladder["lanes"]["ladder"] = {"batchManifest": "records/ladder.json"}
+    path.write_text(json.dumps(with_ladder))
+    with pytest.raises(ValueError, match="system_one-only suite has a ladder"):
+        strategy.load_suite_waves(suites_root)
+
+    with_median = json.loads(json.dumps(payload))
+    with_median["lanes"]["median3"] = [
+        {
+            "catalogSlug": SYSTEM_ONE_SLUG,
+            "ok": False,
+            "manifestPath": None,
+            "error": "constituent failure",
+        }
+    ]
+    path.write_text(json.dumps(with_median))
+    with pytest.raises(
+        ValueError, match="system_one-only suite has median3 lanes"
+    ):
+        strategy.load_suite_waves(suites_root)
+
+    # An unknown lane key is still refused outright.
+    unknown = json.loads(json.dumps(payload))
+    unknown["lanes"]["somethingElse"] = None
+    path.write_text(json.dumps(unknown))
+    with pytest.raises(ValueError, match="invalid strategy lane inventory"):
+        strategy.load_suite_waves(suites_root)
+
+
+def test_legacy_lane_inventory_without_the_system_one_key_still_loads(
+    tmp_path: pathlib.Path,
+) -> None:
+    # Every suite committed before the lane existed carries three lane keys.
+    root = tmp_path / "strategy-suites"
+    path = root / "2030-01-01" / "strategy-9-a1.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schemaVersion": strategy.SUITE_SCHEMA,
+                "suite": "ladder",
+                "lanes": {
+                    "ladder": {"batchManifest": "records/ladder.json"},
+                    "rollouts": [],
+                    "median3": [],
+                },
+            }
+        )
+    )
+
+    waves = strategy.load_suite_waves(root)
+    assert waves[0]["systemOneBatches"] == []
+
+
+def test_system_one_lane_stats_are_tallied_per_run_not_per_batch(
+    repo: pathlib.Path,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+) -> None:
+    # A typesafe batch learns each model name from the response it got, so
+    # one batch can hold more than one, and a run that failed before any
+    # response names none. Filing the batch under its first result's model
+    # tallied the rest under a model that never answered them.
+    first_manifest, first_path = system_one_run(repo, ledger=ledger_rows())
+    second_manifest, second_path = system_one_run(
+        repo, ledger=ledger_rows(), run_at="2030-01-10T13:00:00Z"
+    )
+    second_manifest["agent"]["model"] = "jev-1-2030-01"
+    second_path.write_text(json.dumps(second_manifest, indent=2))
+    batch_path = write_system_one_batch(repo, first_manifest, first_path)
+    batch = json.loads(batch_path.read_text())
+    batch["results"].append(
+        {
+            "target": target_context(),
+            "startedAt": second_manifest["runStartedAt"],
+            "finishedAt": second_manifest["sealedAt"],
+            "ok": False,
+            "manifestPath": second_path.relative_to(repo).as_posix(),
+            "cellsPath": second_manifest["cellsPath"],
+            "error": "sealed failure",
+        }
+    )
+    batch_path.write_text(json.dumps(batch, indent=2))
+    monkeypatch.setattr(records_to_comparisons, "ROOT", repo)
+    suites_root = write_system_one_suite(repo, batch_path)
+    empty_legacy = tmp_path / "legacy.json"
+    empty_legacy.write_text(
+        json.dumps({"schemaVersion": strategy.LEGACY_INDEX_SCHEMA, "waves": []})
+    )
+
+    assert strategy.build_model_lane_stats(
+        legacy_index=empty_legacy, suites_root=suites_root
+    ) == [
+        {"model": "jev-1-2030-01", "lane": "system_one_noul_ladder", "attempted": 1, "passed": 0},
+        {"model": "mock", "lane": "system_one_noul_ladder", "attempted": 1, "passed": 1},
+    ]

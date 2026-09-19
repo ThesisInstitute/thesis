@@ -73,6 +73,16 @@ experiments = [
 mcp = [
     "mcp[cli]>=1.26.0",
 ]
+system-one = [
+    # TypeSafe "System One" (Jev) forecaster lane. Exact-pinned like
+    # receipt and sigstore: a bump must pass the full suite at the new pin
+    # before it lands. scripts/run_system_one_forecast.py imports both
+    # packages lazily, so the mock and response_file backends run without
+    # this extra installed, and scripts/verify_custody.py never imports
+    # either one.
+    "typesafe-sdk==0.6.0",
+    "system-one-adapter[openai,anthropic]==0.1.3",
+]
 bills = [
     "httpx>=0.27",
     "pypdf>=5.1",

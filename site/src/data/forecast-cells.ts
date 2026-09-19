@@ -207,7 +207,17 @@ export type PredictionRunActivityArtifactType =
   // Derived-ensemble runs (scripts/median_rollout_ensemble.py) reference
   // their inputs and exact output distribution as first-class artifacts.
   | "constituent_manifest"
-  | "derived_distribution";
+  | "derived_distribution"
+  // System One runs (scripts/run_system_one_forecast.py) record the exact
+  // evidence state the model saw, the typed questions, the request as sent,
+  // and the raw response, so the elicitation is auditable end to end.
+  | "system_one_state"
+  | "system_one_questions"
+  | "system_one_request"
+  | "system_one_response"
+  // Sealed failures keep a phase inventory whose last artifact says what
+  // went wrong; a failed run is a record, not a gap.
+  | "error";
 
 export interface PredictionRunActivityArtifact {
   artifactType: PredictionRunActivityArtifactType;

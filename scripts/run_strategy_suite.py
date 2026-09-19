@@ -13,12 +13,34 @@ import sys
 import tempfile
 from typing import Any
 
-from strategy_targets import SELECTION_SCHEMA, SUITES, load_object, utc_now
+from strategy_targets import (
+    DEFAULT_SYSTEM_ONE_BACKEND,
+    SELECTION_SCHEMA,
+    SUITES,
+    SYSTEM_ONE_BACKENDS,
+    load_object,
+    normalize_system_one_model,
+    resolve_system_one_elicitation,
+    utc_now,
+)
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUN_BATCH = ROOT / "scripts" / "run_thesis_batch.py"
+RUN_SYSTEM_ONE = ROOT / "scripts" / "run_system_one_forecast.py"
 DERIVE_MEDIAN = ROOT / "scripts" / "median_rollout_ensemble.py"
 SUITE_SCHEMA = "thesis_strategy_suite_v1"
+BATCH_SCHEMA = "thesis_batch_manifest_v1"
+SYSTEM_ONE_RUN_MODE = "system_one"
+# One prompt mode per elicitation, the same map the runner and custody use.
+SYSTEM_ONE_PROMPT_MODES = {
+    "noul_ladder": "system_one_noul_ladder",
+    "choice_bins": "system_one_choice_bins",
+}
+# The runner exits 2 when it refuses its inputs before writing anything:
+# a missing backend key, an unpublished primary cell, a malformed target.
+# Nothing was recorded, so that is a lane misconfiguration, not a forecast
+# failure, and it fails the suite instead of masquerading as one.
+SYSTEM_ONE_REFUSED = 2
 
 
 class StrategySuiteError(ValueError):
@@ -98,6 +120,162 @@ def run_batch(
     batch = load_object(output_path, "strategy batch")
     if batch.get("schemaVersion") != "thesis_batch_manifest_v1":
         raise StrategySuiteError(f"unsupported batch schema: {output_path}")
+    return batch
+
+
+def system_one_result(
+    *,
+    target: dict[str, Any],
+    backend: str,
+    model: str | None,
+    elicitation: str,
+    ledger_path: pathlib.Path | None,
+    timeout_seconds: int,
+    temp_root: pathlib.Path,
+) -> dict[str, Any]:
+    """Forecast one target with the System One runner in its own process."""
+
+    slug = str(target.get("catalogSlug") or "")
+    if not slug:
+        raise StrategySuiteError("system_one target has no catalogSlug")
+    target_path = temp_root / f"{slug}-target.json"
+    write_json(target_path, target)
+    pointer_path = temp_root / f"{slug}-manifest.txt"
+    command = [
+        sys.executable,
+        str(RUN_SYSTEM_ONE),
+        "--target-json",
+        str(target_path),
+        "--backend",
+        backend,
+        # The elicitation is never left to the runner's own default here: the
+        # trusted selection resolved it, so the lane passes it explicitly.
+        "--elicitation",
+        elicitation,
+        "--out-manifest",
+        str(pointer_path),
+    ]
+    # An empty model means the runner default for the trusted backend.
+    if model:
+        command.extend(["--model", model])
+    if ledger_path is not None:
+        command.extend(["--ledger-jsonl", str(ledger_path)])
+    started_at = utc_now()
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout_seconds,
+        )
+        return_code: int | None = completed.returncode
+        failure = completed.stderr.strip()[-500:]
+    except subprocess.TimeoutExpired:
+        return_code = None
+        failure = f"system_one runner exceeded {timeout_seconds}s"
+    finished_at = utc_now()
+    if return_code == SYSTEM_ONE_REFUSED:
+        raise StrategySuiteError(f"system_one runner refused {slug}: {failure}")
+    manifest_relative = (
+        pointer_path.read_text().strip() if pointer_path.is_file() else ""
+    )
+    if not manifest_relative:
+        # Every recorded failure is sealed with its own phase inventory, so
+        # no manifest means the process died (timeout, crash).  The
+        # publication boundary refuses a result without a run anyway; fail
+        # here, where the reason is still legible.
+        raise StrategySuiteError(
+            f"system_one runner sealed no manifest for {slug}: {failure}"
+        )
+    if not (
+        manifest_relative.startswith("records/thesis-analyst/")
+        and manifest_relative.endswith("/manifest.json")
+        and ".." not in manifest_relative.split("/")
+    ):
+        raise StrategySuiteError(
+            "system_one run manifest is outside the records tree: "
+            f"{manifest_relative}"
+        )
+    manifest = load_object(ROOT / manifest_relative, "system_one run manifest")
+    recorded = (manifest.get("targetContext") or {}).get("catalogSlug")
+    if recorded != slug:
+        raise StrategySuiteError(
+            f"system_one manifest target mismatch: {slug} != {recorded}"
+        )
+    if (
+        manifest.get("runMode") != SYSTEM_ONE_RUN_MODE
+        or manifest.get("promptMode") != SYSTEM_ONE_PROMPT_MODES[elicitation]
+    ):
+        raise StrategySuiteError(
+            f"system_one runner sealed a foreign run mode for {slug}"
+        )
+    ok = return_code == 0 and manifest.get("ok") is True
+    error: str | None = None
+    if not ok:
+        sealed = manifest.get("error") or {}
+        error = (
+            f"{sealed.get('phase')}: {sealed.get('message')}"
+            if sealed
+            else failure or f"system_one runner exited {return_code}"
+        )
+    return {
+        "target": target,
+        "startedAt": started_at,
+        "finishedAt": finished_at,
+        "ok": ok,
+        "manifestPath": manifest_relative,
+        "cellsPath": manifest.get("cellsPath"),
+        "error": error,
+    }
+
+
+def run_system_one_batch(
+    *,
+    targets: list[dict[str, Any]],
+    output_path: pathlib.Path,
+    backend: str,
+    model: str | None,
+    elicitation: str,
+    ledger_path: pathlib.Path | None,
+    timeout_seconds: int,
+) -> dict[str, Any]:
+    """Run every selected target through the System One lane, once each."""
+
+    started_at = utc_now()
+    results: list[dict[str, Any]] = []
+    with tempfile.TemporaryDirectory(prefix="thesis-strategy-system-one-") as temp:
+        temp_root = pathlib.Path(temp)
+        for target in sorted(targets, key=lambda row: str(row.get("catalogSlug"))):
+            results.append(
+                system_one_result(
+                    target=target,
+                    backend=backend,
+                    model=model,
+                    elicitation=elicitation,
+                    ledger_path=ledger_path,
+                    timeout_seconds=timeout_seconds,
+                    temp_root=temp_root,
+                )
+            )
+    finished_at = utc_now()
+    passed = sum(1 for result in results if result["ok"] is True)
+    batch = {
+        "schemaVersion": BATCH_SCHEMA,
+        "startedAt": started_at,
+        "finishedAt": finished_at,
+        "promptMode": SYSTEM_ONE_PROMPT_MODES[elicitation],
+        "backend": backend,
+        "elicitation": elicitation,
+        "model": model,
+        "timeoutSeconds": timeout_seconds,
+        "targets": len(results),
+        "ok": passed,
+        "failed": len(results) - passed,
+        "results": results,
+    }
+    write_json(output_path, batch)
     return batch
 
 
@@ -216,6 +394,7 @@ def run_suite(
     output_path: pathlib.Path | None,
     model: str,
     timeout_seconds: int,
+    ledger_path: pathlib.Path | None = None,
 ) -> dict[str, Any]:
     selection = load_object(selection_path, "strategy selection")
     if selection.get("schemaVersion") != SELECTION_SCHEMA:
@@ -257,7 +436,15 @@ def run_suite(
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
         raise StrategySuiteError("selection has no canonical selectedAtUtc")
 
-    lanes: dict[str, Any] = {"ladder": None, "rollouts": [], "median3": []}
+    lanes: dict[str, Any] = {
+        "ladder": None,
+        "rollouts": [],
+        "median3": [],
+        # Written on every suite from the System One lane on, so the
+        # publication boundary can tell a suite that ran no System One
+        # lane from one whose lane is missing.
+        "systemOne": None,
+    }
     if suite in {"ladder", "both"}:
         path = batch_path(day, run_id, run_attempt, "ladder")
         run_batch(
@@ -291,6 +478,36 @@ def run_suite(
             )
         lanes["median3"] = derive_medians(targets, rollout_payloads)
 
+    if suite == "system_one":
+        # The forecaster is TRUSTED selection state, never a generate-job
+        # input, exactly like the ladder lane's elicitation contract.
+        backend = str(request.get("systemOneBackend") or DEFAULT_SYSTEM_ONE_BACKEND)
+        if backend not in SYSTEM_ONE_BACKENDS:
+            raise StrategySuiteError(f"unsupported system_one backend: {backend!r}")
+        try:
+            system_one_model = normalize_system_one_model(request.get("systemOneModel"))
+            elicitation = resolve_system_one_elicitation(
+                backend, request.get("systemOneElicitation")
+            )
+        except ValueError as exc:
+            raise StrategySuiteError(str(exc)) from exc
+        path = batch_path(day, run_id, run_attempt, "system-one")
+        run_system_one_batch(
+            targets=targets,
+            output_path=path,
+            backend=backend,
+            model=system_one_model,
+            elicitation=elicitation,
+            ledger_path=ledger_path,
+            timeout_seconds=timeout_seconds,
+        )
+        lanes["systemOne"] = {
+            "batchManifest": repo_relative(path),
+            "backend": backend,
+            "elicitation": elicitation,
+            "model": system_one_model,
+        }
+
     created_at = utc_now()
     expected_output = suite_path(created_at[:10], run_id, run_attempt)
     output_path = output_path or expected_output
@@ -321,6 +538,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out", type=pathlib.Path)
     parser.add_argument("--model", default="gpt-5.5")
     parser.add_argument("--timeout-seconds", type=int, default=540)
+    parser.add_argument(
+        "--ledger-jsonl",
+        type=pathlib.Path,
+        help=(
+            "pinned official observations for the System One evidence "
+            "state; ignored by the codex lanes"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -334,6 +559,7 @@ def main() -> int:
             output_path=args.out,
             model=args.model,
             timeout_seconds=args.timeout_seconds,
+            ledger_path=args.ledger_jsonl,
         )
     except (StrategySuiteError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"STRATEGY SUITE BLOCKED: {exc}", file=sys.stderr)
@@ -344,6 +570,7 @@ def main() -> int:
                 "suite": payload["suite"],
                 "selectionSetHash": payload["selectionSetHash"],
                 "median3": sum(1 for row in payload["lanes"]["median3"] if row["ok"]),
+                "systemOne": (payload["lanes"]["systemOne"] or {}).get("batchManifest"),
             },
             sort_keys=True,
         )

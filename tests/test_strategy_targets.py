@@ -309,3 +309,123 @@ def test_selection_binds_ladder_prompt_mode_sparsely(
             ledger_repository_commit="a" * 40,
             ledger_blob_sha="b" * 40,
         )
+
+
+def system_one_selection(
+    ledger: pathlib.Path,
+    *,
+    run_id: int,
+    suite: str = "system_one",
+    backend: str = "adapter",
+    model: str = "",
+    elicitation: str | None = None,
+) -> dict:
+    return select_targets(
+        root=ROOT,
+        source_sha=head(),
+        selected_at_utc="2026-07-10T07:00:00Z",
+        checked_at_utc="2026-07-10T07:00:00Z",
+        workflow={"repository": "example/thesis", "runId": run_id, "runAttempt": 1},
+        requested_slugs=[OPEN_SLUG],
+        auto_select=False,
+        max_targets=1,
+        suite=suite,
+        system_one_backend=backend,
+        system_one_model=model,
+        system_one_elicitation=elicitation,
+        ledger_path=ledger,
+        ledger_repository="PolicyEngine/chronicle",
+        ledger_branch="codex/thesis-ledger-facts",
+        ledger_logical_path="ledger/official_observations.jsonl",
+        ledger_repository_commit="a" * 40,
+        ledger_blob_sha="b" * 40,
+    )
+
+
+def test_selection_binds_the_system_one_forecaster_sparsely(
+    tmp_path: pathlib.Path,
+) -> None:
+    ledger = empty_ledger(tmp_path)
+
+    # Codex suites never bind a System One forecaster, so every selection
+    # minted before this lane still re-verifies byte-identically.
+    codex = system_one_selection(ledger, run_id=130, suite="both", backend="typesafe")
+    assert "systemOneBackend" not in codex["request"]
+    assert "systemOneElicitation" not in codex["request"]
+    assert "systemOneModel" not in codex["request"]
+
+    lane = system_one_selection(ledger, run_id=131, backend="typesafe", model="jev-1")
+    assert lane["request"]["suite"] == "system_one"
+    assert lane["request"]["systemOneBackend"] == "typesafe"
+    assert lane["request"]["systemOneModel"] == "jev-1"
+    assert lane["selectionSetHash"] == selection_hash(lane)
+
+    # The trusted verify path replays the forecaster from the request alone.
+    stamped = stamp_artifact(
+        lane,
+        artifact_id=470,
+        artifact_name="strategy-selection-probe-131-1",
+        artifact_digest="e" * 64,
+        artifact_created_at_utc="2026-07-10T07:01:00Z",
+    )
+    verify_selection(stamped, root=ROOT, ledger_path=ledger)
+
+    # An empty model is recorded as null: the runner default for the backend.
+    default_model = system_one_selection(ledger, run_id=132)
+    assert default_model["request"]["systemOneBackend"] == "adapter"
+    assert default_model["request"]["systemOneModel"] is None
+    assert default_model["selectionSetHash"] == selection_hash(default_model)
+
+    with pytest.raises(StrategyTargetError, match="system_one backend"):
+        system_one_selection(ledger, run_id=133, backend="openai")
+
+    # The model reaches the runner as one argv element; anything that could
+    # be read as another flag is refused at selection time.
+    with pytest.raises(StrategyTargetError, match="system_one model"):
+        system_one_selection(ledger, run_id=134, model="--records-root")
+
+    # Swapping the forecaster after the fact breaks the selection hash.
+    # The canonical replay itself reads the forecaster back out of the
+    # request, exactly as it does for ladderPromptMode, so the hash and
+    # the GitHub artifact witness are what bind it.
+    tampered = json.loads(json.dumps(stamped))
+    tampered["request"]["systemOneModel"] = "jev-2"
+    with pytest.raises(StrategyTargetError, match="selectionSetHash mismatch"):
+        verify_selection(tampered, root=ROOT, ledger_path=ledger)
+
+
+def test_selection_pins_the_system_one_elicitation(tmp_path: pathlib.Path) -> None:
+    ledger = empty_ledger(tmp_path)
+
+    # An omitted elicitation is recorded as the resolved default for the
+    # trusted backend, never as the omission, so the generate job reads a
+    # decision rather than making one.
+    real_model = system_one_selection(ledger, run_id=140, backend="typesafe")
+    assert real_model["request"]["systemOneElicitation"] == "choice_bins"
+    control = system_one_selection(ledger, run_id=141, backend="adapter", elicitation="")
+    assert control["request"]["systemOneElicitation"] == "noul_ladder"
+
+    # Either elicitation may be asked of either backend.
+    pinned = system_one_selection(
+        ledger, run_id=142, backend="adapter", elicitation="choice_bins"
+    )
+    assert pinned["request"]["systemOneElicitation"] == "choice_bins"
+    assert pinned["selectionSetHash"] == selection_hash(pinned)
+
+    with pytest.raises(StrategyTargetError, match="system_one elicitation"):
+        system_one_selection(ledger, run_id=143, elicitation="score_ladder")
+
+    # The trusted verify path replays the elicitation from the request, and
+    # swapping it after the fact breaks the selection hash.
+    stamped = stamp_artifact(
+        pinned,
+        artifact_id=471,
+        artifact_name="strategy-selection-probe-142-1",
+        artifact_digest="f" * 64,
+        artifact_created_at_utc="2026-07-10T07:01:00Z",
+    )
+    verify_selection(stamped, root=ROOT, ledger_path=ledger)
+    tampered = json.loads(json.dumps(stamped))
+    tampered["request"]["systemOneElicitation"] = "noul_ladder"
+    with pytest.raises(StrategyTargetError, match="selectionSetHash mismatch"):
+        verify_selection(tampered, root=ROOT, ledger_path=ledger)

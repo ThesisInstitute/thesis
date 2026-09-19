@@ -70,3 +70,113 @@ def test_strategy_workflow_pins_tools_and_witnesses_run_window() -> None:
     assert "--publish-validated-at-utc" in source
     assert "record-forecasts.yml" in source
     assert "for attempt in 1 2 3; do" in source
+
+
+def workflow_document() -> dict:
+    import yaml  # a hard dependency here: structure, not substrings
+
+    document = yaml.safe_load(WORKFLOW.read_text())
+    return document
+
+
+def dispatch_inputs(document: dict) -> dict:
+    # PyYAML reads the bare `on:` key as the boolean True (YAML 1.1).
+    triggers = document.get("on", document.get(True))
+    return triggers["workflow_dispatch"]["inputs"]
+
+
+def named_step(job: dict, name: str) -> dict:
+    for entry in job["steps"]:
+        if entry.get("name") == name:
+            return entry
+    raise AssertionError(f"workflow job has no step named {name!r}")
+
+
+def test_strategy_workflow_dispatches_the_system_one_forecaster() -> None:
+    document = workflow_document()
+    inputs = dispatch_inputs(document)
+
+    assert inputs["suite"]["options"] == ["ladder", "median3", "both", "system_one"]
+    assert inputs["system_one_backend"]["options"] == ["adapter", "typesafe"]
+    assert inputs["system_one_backend"]["default"] == "adapter"
+    assert inputs["system_one_elicitation"]["options"] == [
+        "choice_bins",
+        "noul_ladder",
+    ]
+    assert inputs["system_one_elicitation"]["default"] == "choice_bins"
+    assert inputs["system_one_model"]["default"] == ""
+
+    provisional = named_step(
+        document["jobs"]["select"], "Resolve comparison targets with trusted code"
+    )
+    assert (
+        provisional["env"]["SYSTEM_ONE_BACKEND"]
+        == "${{ inputs.system_one_backend || 'adapter' }}"
+    )
+    assert provisional["env"]["SYSTEM_ONE_MODEL"] == "${{ inputs.system_one_model }}"
+    assert '--system-one-backend "$SYSTEM_ONE_BACKEND"' in provisional["run"]
+    assert (
+        provisional["env"]["SYSTEM_ONE_ELICITATION"]
+        == "${{ inputs.system_one_elicitation || 'choice_bins' }}"
+    )
+    assert (
+        '--system-one-elicitation "$SYSTEM_ONE_ELICITATION"' in provisional["run"]
+    )
+    assert '--system-one-model "$SYSTEM_ONE_MODEL"' in provisional["run"]
+
+
+def test_strategy_workflow_runs_system_one_without_the_codex_toolchain() -> None:
+    document = workflow_document()
+    generate = document["jobs"]["generate"]
+
+    assert generate["env"] == {
+        "OPENAI_API_KEY": "${{ secrets.OPENAI_API_KEY }}",
+        "ANTHROPIC_API_KEY": "${{ secrets.ANTHROPIC_API_KEY }}",
+        "TYPESAFE_API_KEY": "${{ secrets.TYPESAFE_API_KEY }}",
+    }
+    uses = [step.get("uses") for step in generate["steps"]]
+    assert "astral-sh/setup-uv@v5" in uses
+
+    # The suite comes from the TRUSTED selection, never from the dispatch
+    # input, and the codex steps are skipped when it is the System One lane.
+    invocation = named_step(generate, "Resolve the trusted invocation identity")
+    assert 'suite = (selection.get("request") or {}).get("suite")' in invocation["run"]
+    assert 'print(f"suite={suite}")' in invocation["run"]
+    skipped = "${{ steps.invocation.outputs.suite != 'system_one' }}"
+    for name in ("Enable the agent sandbox", "Install codex CLI", "Authenticate codex"):
+        assert named_step(generate, name)["if"] == skipped
+
+    suite_step = named_step(generate, "Run the selected strategy suite")
+    assert suite_step["env"]["SUITE"] == "${{ steps.invocation.outputs.suite }}"
+    run = suite_step["run"]
+    assert "uv run --locked --extra system-one" in run
+    assert "python scripts/run_strategy_suite.py" in run
+    assert "python3 scripts/run_strategy_suite.py" in run
+    assert "--ledger-jsonl /tmp/pinned-ledger.jsonl" in run
+
+
+def test_strategy_workflow_publish_counts_the_system_one_lane() -> None:
+    document = workflow_document()
+    regenerate = named_step(
+        document["jobs"]["publish"],
+        "Verify custody and regenerate all strategy comparisons",
+    )
+    run = regenerate["run"]
+    assert 'system_one = suite["lanes"].get("systemOne")' in run
+    assert 'batches.append(system_one["batchManifest"])' in run
+
+
+def test_strategy_workflow_hands_both_boundaries_the_pinned_ledger() -> None:
+    # The publication boundary rebuilds the System One evidence state from
+    # the pinned ledger, so stage and validate both need the same blob the
+    # generate job forecasts against; without it a system one suite is
+    # refused rather than validated on the run's own word for its evidence.
+    document = workflow_document()
+    stage = named_step(
+        document["jobs"]["generate"], "Stage one exact-scope strategy bundle"
+    )
+    assert "--ledger-jsonl /tmp/pinned-ledger.jsonl" in stage["run"]
+    validate = named_step(
+        document["jobs"]["publish"], "Validate and apply the entire strategy bundle"
+    )
+    assert "--ledger-jsonl /tmp/pinned-ledger.jsonl" in validate["run"]
