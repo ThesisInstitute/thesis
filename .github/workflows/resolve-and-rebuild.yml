@@ -27,7 +27,11 @@ jobs:
     # had appended five observations to the ledger, so the site went on
     # showing them as pending. The next run heals that (the ledger head no
     # longer equals records/resolutions/latest.json, so needs_publish is 1),
-    # but only if it gets that far. Leave real headroom.
+    # but only if it gets that far. Leave real headroom. A run that takes
+    # longer than the 37 minutes before the recorder's 14:17 slot can now
+    # overlap it, and that day's snapshot would then predate the fresh
+    # resolutions. The next snapshot picks them up; a cancelled run loses
+    # the publish outright, so the longer cap is the better trade.
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
