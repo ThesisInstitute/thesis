@@ -5,7 +5,9 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import {
   ForecastRuntime,
   STREAM_WATCHDOG_MS,
@@ -61,8 +63,108 @@ describe("ForecastRuntime stream watchdog", () => {
 
   afterEach(() => {
     cleanup();
+    window.history.replaceState({}, "", "/");
     vi.unstubAllGlobals();
     vi.useRealTimers();
+  });
+
+  it("does not present the static estimate while a live forecast is pending", () => {
+    // The server render must also avoid flashing the catalog's 13.1% seed.
+    expect(
+      renderToString(<ForecastRuntime forecast={liveForecast} />),
+    ).toContain("live forecast pending");
+    render(<ForecastRuntime forecast={liveForecast} />);
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+
+    expect(estimate).toHaveAttribute("aria-busy", "true");
+    expect(estimate).not.toHaveTextContent("13.1%");
+    expect(within(estimate).queryByRole("img")).toBeNull();
+
+    act(() => {
+      FakeEventSource.instances[0].emit("step", {
+        kind: "text",
+        text: "Checking the Census inputs.",
+      });
+    });
+    expect(within(estimate).getByText("live forecast pending")).toBeTruthy();
+    expect(estimate).not.toHaveTextContent("13.1%");
+
+    act(() => {
+      FakeEventSource.instances[0].emit("forecast", {
+        pointEstimate: 13.0,
+        ciLow: 11.9,
+        ciHigh: 14.3,
+        confidence: 0.8,
+        source: "census_calibration_fallback",
+      });
+      FakeEventSource.instances[0].emit("done", {});
+    });
+
+    expect(estimate).toHaveAttribute("aria-busy", "false");
+    expect(estimate).toHaveTextContent("live forecast · 80% CI");
+    expect(estimate).toHaveTextContent("13.0%");
+    expect(estimate).toHaveTextContent("11.9%");
+    expect(estimate).toHaveTextContent("14.3%");
+    expect(estimate).not.toHaveTextContent("13.1%");
+    expect(within(estimate).getByRole("img")).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("13.0%"),
+    );
+    expect(
+      screen.getByText("calibrated forecast · 80% CI").parentElement,
+    ).toHaveTextContent("13.0%");
+  });
+
+  it("does not substitute the static estimate for an empty live completion", () => {
+    render(<ForecastRuntime forecast={liveForecast} />);
+    act(() => {
+      FakeEventSource.instances[0].emit("done", {});
+    });
+
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+    expect(estimate).toHaveTextContent("live forecast unavailable");
+    expect(estimate).not.toHaveTextContent("13.1%");
+    expect(estimate).toHaveAttribute("aria-busy", "false");
+  });
+
+  it("does not pair a failed partial live trace with the static estimate", () => {
+    render(<ForecastRuntime forecast={liveForecast} />);
+    act(() => {
+      FakeEventSource.instances[0].emit("step", {
+        kind: "text",
+        text: "Checking the Census inputs.",
+      });
+      FakeEventSource.instances[0].emit("failure", {
+        message: "Lookup failed.",
+      });
+    });
+
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+    expect(estimate).toHaveTextContent("live forecast unavailable");
+    expect(estimate).not.toHaveTextContent("13.1%");
+    expect(screen.getByText("Checking the Census inputs.")).toBeTruthy();
+  });
+
+  it("shows the labeled static estimate for an explicit mock replay", () => {
+    window.history.replaceState({}, "", "/?mock=1");
+    render(<ForecastRuntime forecast={liveForecast} />);
+
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+    expect(estimate).toHaveTextContent("static prototype forecast · 80% CI");
+    expect(estimate).toHaveTextContent("13.1%");
+    expect(FakeEventSource.instances).toHaveLength(0);
+  });
+
+  it("shows recorded estimates immediately for cells without a live stream", () => {
+    const recorded = FORECAST_CELLS.find(
+      (cell) => !LIVE_FORECAST_SLUGS.has(cell.slug) && cell.predictionRun,
+    )!;
+    render(<ForecastRuntime forecast={recorded} />);
+
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+    expect(estimate).toHaveTextContent("current forecast · 80% CI");
+    expect(estimate).toHaveAttribute("aria-busy", "false");
+    expect(FakeEventSource.instances).toHaveLength(0);
   });
 
   it("falls back to the static trace when the stream stays silent", () => {
@@ -75,6 +177,9 @@ describe("ForecastRuntime stream watchdog", () => {
 
     expect(FakeEventSource.instances[0].closed).toBe(true);
     expect(screen.getByText(/replaying the static mock trace/i)).toBeTruthy();
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+    expect(estimate).toHaveTextContent("static prototype forecast · 80% CI");
+    expect(estimate).toHaveTextContent("13.1%");
   });
 
   it("keeps the live stream once events arrive", () => {
@@ -103,6 +208,9 @@ describe("ForecastRuntime stream watchdog", () => {
 
     expect(FakeEventSource.instances[0].closed).toBe(true);
     expect(screen.getByText(/replaying the static mock trace/i)).toBeTruthy();
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+    expect(estimate).toHaveTextContent("static prototype forecast · 80% CI");
+    expect(estimate).toHaveTextContent("13.1%");
   });
 
   it("renders target-level runs across agents, packs, and updates", () => {

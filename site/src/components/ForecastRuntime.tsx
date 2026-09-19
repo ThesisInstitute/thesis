@@ -201,12 +201,24 @@ export function ForecastRuntime({
     };
   }, [forecastCell.slug, supportsLive]);
 
-  const displayedForecast = liveForecast ?? {
-    pointEstimate: forecastCell.pointEstimate,
-    ciLow: forecastCell.ciLow,
-    ciHigh: forecastCell.ciHigh,
-    confidence: 0.8 as const,
-  };
+  // Only pair the catalog estimate with its static trace. A live run has
+  // its own result, which is unknown until the forecast event arrives.
+  const showsStaticForecast =
+    !supportsLive ||
+    mode === "mock" ||
+    (mode === "fallback" && liveSteps.length === 0);
+  const displayedForecast =
+    liveForecast ??
+    (showsStaticForecast
+      ? {
+          pointEstimate: forecastCell.pointEstimate,
+          ciLow: forecastCell.ciLow,
+          ciHigh: forecastCell.ciHigh,
+          confidence: 0.8 as const,
+        }
+      : null);
+  const isForecastPending =
+    !displayedForecast && (mode === "connecting" || mode === "live");
   const drivers =
     liveForecast?.drivers && liveForecast.drivers.length > 0
       ? liveForecast.drivers
@@ -221,62 +233,92 @@ export function ForecastRuntime({
           className="rounded-xl border bg-[var(--theme-bg-elevated)] p-6"
           style={{ borderColor: "var(--theme-border)" }}
         >
-          <div className="mb-4 flex items-baseline justify-between gap-4">
-            <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-              {isLiveForecast ? "live forecast" : "current forecast"} · 80% CI
-            </span>
-            <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-accent)]">
-              {formatValue(displayedForecast.pointEstimate, forecastCell.unit)}
-            </span>
-          </div>
-          <ForecastViz
-            point={displayedForecast.pointEstimate}
-            ciLow={displayedForecast.ciLow}
-            ciHigh={displayedForecast.ciHigh}
-            unit={forecastCell.unit}
-            history={forecastCell.historicalContext}
-            size="full"
-          />
-          {forecastCell.historicalContext.length > 0 && (
-            <div
-              className="mt-6 border-t pt-5"
-              style={{ borderColor: "var(--theme-border)" }}
-            >
-              <div className="mb-3 flex items-baseline justify-between gap-4">
-                <h2 className="[font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-                  Trend
-                </h2>
-                <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  history + forecast
-                </span>
-              </div>
-              <ForecastTrend
+          <div
+            role="region"
+            aria-label="Forecast estimate"
+            aria-busy={isForecastPending}
+          >
+            <div className="mb-4 flex items-baseline justify-between gap-4">
+              <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
+                {isLiveForecast
+                  ? "live forecast · 80% CI"
+                  : isForecastPending
+                    ? "live forecast pending"
+                    : !displayedForecast
+                      ? "live forecast unavailable"
+                      : supportsLive
+                        ? "static prototype forecast · 80% CI"
+                        : "current forecast · 80% CI"}
+              </span>
+              <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-accent)]">
+                {displayedForecast
+                  ? formatValue(
+                      displayedForecast.pointEstimate,
+                      forecastCell.unit,
+                    )
+                  : "—"}
+              </span>
+            </div>
+            {displayedForecast ? (
+              <ForecastViz
                 point={displayedForecast.pointEstimate}
                 ciLow={displayedForecast.ciLow}
                 ciHigh={displayedForecast.ciHigh}
                 unit={forecastCell.unit}
                 history={forecastCell.historicalContext}
-                targetLabel={targetPeriodLabel(forecastCell)}
-                actual={
-                  forecastCell.resolvedOutcome
-                    ? {
-                        label: "actual",
-                        value: forecastCell.resolvedOutcome.value,
-                      }
-                    : undefined
-                }
+                size="full"
               />
-            </div>
-          )}
-          <p className="mt-4 [font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-            {forecastSourceLabel(
-              forecastCell,
-              supportsLive,
-              mode,
-              statusLabel,
-              liveForecast,
+            ) : (
+              <p
+                className="flex h-32 items-center text-[0.85rem] leading-[1.6] text-[var(--theme-text-muted)]"
+                role="status"
+              >
+                {isForecastPending
+                  ? "The estimate and interval will appear when this run finishes."
+                  : "This run ended without a forecast estimate."}
+              </p>
             )}
-          </p>
+            {displayedForecast && forecastCell.historicalContext.length > 0 && (
+              <div
+                className="mt-6 border-t pt-5"
+                style={{ borderColor: "var(--theme-border)" }}
+              >
+                <div className="mb-3 flex items-baseline justify-between gap-4">
+                  <h2 className="[font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
+                    Trend
+                  </h2>
+                  <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
+                    history + forecast
+                  </span>
+                </div>
+                <ForecastTrend
+                  point={displayedForecast.pointEstimate}
+                  ciLow={displayedForecast.ciLow}
+                  ciHigh={displayedForecast.ciHigh}
+                  unit={forecastCell.unit}
+                  history={forecastCell.historicalContext}
+                  targetLabel={targetPeriodLabel(forecastCell)}
+                  actual={
+                    forecastCell.resolvedOutcome
+                      ? {
+                          label: "actual",
+                          value: forecastCell.resolvedOutcome.value,
+                        }
+                      : undefined
+                  }
+                />
+              </div>
+            )}
+            <p className="mt-4 [font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
+              {forecastSourceLabel(
+                forecastCell,
+                supportsLive,
+                mode,
+                statusLabel,
+                liveForecast,
+              )}
+            </p>
+          </div>
           {forecastCell.resolvedOutcome && (
             <ResolvedOutcomePanel
               forecast={forecastCell}
