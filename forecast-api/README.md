@@ -12,8 +12,22 @@ bun install
 bun run dev -- --hostname 127.0.0.1 --port 3002
 ```
 
-The static site reads from `http://127.0.0.1:3002` on local hosts unless
-`NEXT_PUBLIC_THESIS_API_BASE_URL` is set.
+Forecast detail pages replay saved results instead of starting an API request
+on each visit. At build time, `site/src/lib/saved-forecast.ts` reads the newest
+valid indexed recorder result for each API target from `records/`, verifying
+the compressed and uncompressed bytes against the snapshot's hashes. The
+initial HTML contains that result's estimate and interval; playback uses its
+own saved explanation, assumptions, and caveats. A failed or malformed newer
+snapshot falls back to the last valid one. With no usable archive, the page
+shows the labeled catalog example without calling the API.
+
+The current archives contain the final forecast event, not the original full
+stream of tool activity. The page discloses this and links to the archived
+result. The recorder workflow continues to call the endpoints below. Its
+snapshot commits trigger the normal site deployment to publish newly saved
+results. Build from the full repository with
+`records/` available alongside `site/` (including files outside Vercel's root
+directory), as with the existing build-time bill artifacts.
 
 AI Gateway is optional locally. Without `AI_GATEWAY_API_KEY`,
 `VERCEL_OIDC_TOKEN`, or a Vercel runtime, live endpoints still stream public

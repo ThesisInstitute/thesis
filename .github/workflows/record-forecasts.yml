@@ -260,7 +260,9 @@ jobs:
             echo "nothing new to commit"
             committed=0
           else
-            git commit -m "Record forecast surfaces $(date -u +%F) [skip ci]"
+            # Saved forecast pages read these archives at build time, so this
+            # commit must trigger the normal site deployment.
+            git commit -m "Record forecast surfaces $(date -u +%F)"
             committed=1
           fi
           git push origin main

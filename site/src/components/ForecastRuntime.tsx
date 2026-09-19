@@ -1,218 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { AgentReasoning } from "@/components/AgentReasoning";
 import { classifyTraceProvenance } from "@/data/trace-provenance";
 import { ForecastTrend, ForecastViz } from "@/components/ForecastViz";
 import {
-  LIVE_FORECAST_SLUGS,
   formatValue,
   getForecastRunEntries,
-  getForecastRuntimeKind,
   getResolutionResult,
   type ForecastCell,
   type ForecastRunEntry,
-  type PredictionDistribution,
   type PredictionPackReference,
   type ReasoningStep,
 } from "@/data/forecast-cells";
 import type { ResolvedForecastScore } from "@/data/thesis-log";
-
-type RuntimeMode = "mock" | "connecting" | "live" | "complete" | "fallback";
-
-// How long the stream may stay completely silent before the page gives up on
-// the live API and replays the static trace. A hung connection never fires
-// onerror, so without this a stuck socket pins the UI on "connecting" forever.
-export const STREAM_WATCHDOG_MS = 10_000;
-
-interface RuntimeForecast {
-  pointEstimate: number;
-  ciLow: number;
-  ciHigh: number;
-  confidence: 0.8;
-  distribution?: PredictionDistribution;
-  source?:
-    | "ai_gateway"
-    | "deterministic_fallback"
-    | "calibration_fallback"
-    | "census_calibration_fallback";
-  model?: string;
-  generatedAt?: string;
-  drivers?: string[];
-}
-
-interface ActiveTool {
-  tool: string;
-  call: string;
-}
+import type { SavedForecastRun } from "@/lib/saved-forecast";
 
 interface ForecastRuntimeProps {
   forecast: ForecastCell;
   resolvedScore?: ResolvedForecastScore;
+  savedForecast?: SavedForecastRun | null;
 }
 
 export function ForecastRuntime({
   forecast: forecastCell,
   resolvedScore,
+  savedForecast,
 }: ForecastRuntimeProps) {
-  const supportsLive = LIVE_FORECAST_SLUGS.has(forecastCell.slug);
-  const runtimeKind = getForecastRuntimeKind(forecastCell);
-  const [mode, setMode] = useState<RuntimeMode>(
-    supportsLive ? "connecting" : "mock",
+  // The estimate and explanation are one saved result. Replaying it never
+  // starts another calculation or replaces the estimate after hydration.
+  const displayedForecast = savedForecast?.forecast ?? forecastCell;
+  const drivers = savedForecast?.forecast.drivers ?? forecastCell.drivers;
+  const recordedRuns = getForecastRunEntries(forecastCell).map((run) =>
+    savedForecast && run.isPrimary
+      ? { ...run, label: "Catalog forecast" }
+      : run,
   );
-  const [statusLabel, setStatusLabel] = useState(
-    supportsLive
-      ? "opening live stream"
-      : runtimeKind === "agent-run"
-        ? "recorded agent run"
-        : "mock replay",
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [activeTool, setActiveTool] = useState<ActiveTool | null>(null);
-  const [liveSteps, setLiveSteps] = useState<ReasoningStep[]>([]);
-  const [liveForecast, setLiveForecast] = useState<RuntimeForecast | null>(
-    null,
-  );
-
-  useEffect(() => {
-    if (!supportsLive) return;
-    if (new URLSearchParams(window.location.search).get("mock") === "1") {
-      setMode("mock");
-      setStatusLabel("mock replay");
-      return;
-    }
-
-    let completed = false;
-    let sawStream = false;
-    const source = new EventSource(
-      `${resolveApiBase()}/forecasts/${forecastCell.slug}/stream`,
-    );
-
-    setMode("connecting");
-    setStatusLabel("connecting to live API");
-    setError(null);
-    setLiveSteps([]);
-    setActiveTool(null);
-
-    const watchdog = window.setTimeout(() => {
-      if (sawStream || completed) return;
-      source.close();
-      setError(
-        "The live forecast API did not respond in time. Replaying the static reasoning trace.",
-      );
-      setStatusLabel("mock fallback");
-      setMode("fallback");
-    }, STREAM_WATCHDOG_MS);
-
-    source.addEventListener("status", (event) => {
-      sawStream = true;
-      const data = parseEventData<{ label?: string; state?: string }>(event);
-      if (!data) return;
-      setStatusLabel(data.label ?? "live stream running");
-      if (data.state !== "complete") setMode("live");
-    });
-
-    source.addEventListener("step", (event) => {
-      sawStream = true;
-      const step = parseEventData<ReasoningStep>(event);
-      if (!step || !isReasoningStep(step)) return;
-      setLiveSteps((prev) => [...prev, step]);
-      setMode("live");
-    });
-
-    source.addEventListener("tool_start", (event) => {
-      sawStream = true;
-      const data = parseEventData<ActiveTool>(event);
-      if (!data) return;
-      setActiveTool(data);
-      setStatusLabel(`${data.tool} running`);
-      setMode("live");
-    });
-
-    source.addEventListener("tool_result", (event) => {
-      sawStream = true;
-      const data = parseEventData<ActiveTool & { result: string }>(event);
-      if (!data) return;
-      setActiveTool(null);
-      setLiveSteps((prev) => [
-        ...prev,
-        {
-          kind: "tool",
-          tool: data.tool,
-          call: data.call,
-          result: data.result,
-        },
-      ]);
-      setStatusLabel(`${data.tool} complete`);
-      setMode("live");
-    });
-
-    source.addEventListener("forecast", (event) => {
-      sawStream = true;
-      const forecast = parseEventData<RuntimeForecast>(event);
-      if (!forecast) return;
-      setLiveForecast(forecast);
-      setLiveSteps((prev) => [
-        ...prev,
-        {
-          kind: "forecast",
-          point: forecast.pointEstimate,
-          ciLow: forecast.ciLow,
-          ciHigh: forecast.ciHigh,
-        },
-      ]);
-      setStatusLabel(
-        forecast.source === "ai_gateway"
-          ? "AI Gateway forecast complete"
-          : "fallback forecast complete",
-      );
-      setMode("complete");
-    });
-
-    source.addEventListener("failure", (event) => {
-      sawStream = true;
-      const data = parseEventData<{ message?: string }>(event);
-      setError(data?.message ?? "Live forecast failed.");
-      setStatusLabel("live API failed");
-      setMode("fallback");
-      source.close();
-    });
-
-    source.addEventListener("done", () => {
-      sawStream = true;
-      completed = true;
-      setMode("complete");
-      source.close();
-    });
-
-    source.onerror = () => {
-      if (completed) return;
-      window.clearTimeout(watchdog);
-      setError("Could not connect to the live forecast API.");
-      setStatusLabel("mock fallback");
-      setMode("fallback");
-      source.close();
-    };
-
-    return () => {
-      completed = true;
-      window.clearTimeout(watchdog);
-      source.close();
-    };
-  }, [forecastCell.slug, supportsLive]);
-
-  const displayedForecast = liveForecast ?? {
-    pointEstimate: forecastCell.pointEstimate,
-    ciLow: forecastCell.ciLow,
-    ciHigh: forecastCell.ciHigh,
-    confidence: 0.8 as const,
-  };
-  const drivers =
-    liveForecast?.drivers && liveForecast.drivers.length > 0
-      ? liveForecast.drivers
-      : forecastCell.drivers;
-  const isLiveForecast = Boolean(liveForecast);
-  const recordedRuns = getForecastRunEntries(forecastCell);
+  const isRecorded = Boolean(savedForecast || forecastCell.predictionRun);
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_1fr]">
@@ -221,69 +45,82 @@ export function ForecastRuntime({
           className="rounded-xl border bg-[var(--theme-bg-elevated)] p-6"
           style={{ borderColor: "var(--theme-border)" }}
         >
-          <div className="mb-4 flex items-baseline justify-between gap-4">
-            <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-              {isLiveForecast ? "live forecast" : "current forecast"} · 80% CI
-            </span>
-            <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-accent)]">
-              {formatValue(displayedForecast.pointEstimate, forecastCell.unit)}
-            </span>
-          </div>
-          <ForecastViz
-            point={displayedForecast.pointEstimate}
-            ciLow={displayedForecast.ciLow}
-            ciHigh={displayedForecast.ciHigh}
-            unit={forecastCell.unit}
-            history={forecastCell.historicalContext}
-            size="full"
-          />
-          {forecastCell.historicalContext.length > 0 && (
-            <div
-              className="mt-6 border-t pt-5"
-              style={{ borderColor: "var(--theme-border)" }}
-            >
-              <div className="mb-3 flex items-baseline justify-between gap-4">
-                <h2 className="[font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-                  Trend
-                </h2>
-                <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  history + forecast
-                </span>
-              </div>
-              <ForecastTrend
-                point={displayedForecast.pointEstimate}
-                ciLow={displayedForecast.ciLow}
-                ciHigh={displayedForecast.ciHigh}
-                unit={forecastCell.unit}
-                history={forecastCell.historicalContext}
-                targetLabel={targetPeriodLabel(forecastCell)}
-                actual={
-                  forecastCell.resolvedOutcome
-                    ? {
-                        label: "actual",
-                        value: forecastCell.resolvedOutcome.value,
-                      }
-                    : undefined
-                }
-              />
+          <div role="region" aria-label="Forecast estimate">
+            <div className="mb-4 flex items-baseline justify-between gap-4">
+              <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
+                {savedForecast
+                  ? "latest saved forecast"
+                  : forecastCell.predictionRun
+                    ? "current forecast"
+                    : "static prototype forecast"}{" "}
+                · 80% CI
+              </span>
+              <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-accent)]">
+                {formatValue(
+                  displayedForecast.pointEstimate,
+                  forecastCell.unit,
+                )}
+              </span>
             </div>
-          )}
-          <p className="mt-4 [font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-            {forecastSourceLabel(
-              forecastCell,
-              supportsLive,
-              mode,
-              statusLabel,
-              liveForecast,
+            <ForecastViz
+              point={displayedForecast.pointEstimate}
+              ciLow={displayedForecast.ciLow}
+              ciHigh={displayedForecast.ciHigh}
+              unit={forecastCell.unit}
+              history={forecastCell.historicalContext}
+              size="full"
+            />
+            {forecastCell.historicalContext.length > 0 && (
+              <div
+                className="mt-6 border-t pt-5"
+                style={{ borderColor: "var(--theme-border)" }}
+              >
+                <div className="mb-3 flex items-baseline justify-between gap-4">
+                  <h2 className="[font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
+                    Trend
+                  </h2>
+                  <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
+                    history + forecast
+                  </span>
+                </div>
+                <ForecastTrend
+                  point={displayedForecast.pointEstimate}
+                  ciLow={displayedForecast.ciLow}
+                  ciHigh={displayedForecast.ciHigh}
+                  unit={forecastCell.unit}
+                  history={forecastCell.historicalContext}
+                  targetLabel={targetPeriodLabel(forecastCell)}
+                  actual={
+                    forecastCell.resolvedOutcome
+                      ? {
+                          label: "actual",
+                          value: forecastCell.resolvedOutcome.value,
+                        }
+                      : undefined
+                  }
+                />
+              </div>
             )}
-          </p>
+            <p className="mt-4 [font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
+              {savedForecast
+                ? savedForecastSource(savedForecast)
+                : forecastCell.predictionRun
+                  ? `${forecastCell.predictionRun.agent} · ${forecastCell.predictionRun.runAt}`
+                  : "static prototype estimate · seeded forecast value"}
+            </p>
+          </div>
           {forecastCell.resolvedOutcome && (
             <ResolvedOutcomePanel
               forecast={forecastCell}
               score={resolvedScore}
+              catalogForecast={Boolean(savedForecast)}
             />
           )}
-          <ThesisLogRecordPanel forecast={forecastCell} />
+          {savedForecast ? (
+            <SavedForecastRecordPanel savedForecast={savedForecast} />
+          ) : (
+            <ThesisLogRecordPanel forecast={forecastCell} />
+          )}
           <RunComparisonPanel runs={recordedRuns} unit={forecastCell.unit} />
         </div>
 
@@ -383,30 +220,31 @@ export function ForecastRuntime({
       <section className="min-w-0">
         <div className="mb-3 flex items-center justify-between gap-4">
           <h2 className="[font-family:var(--font-display)] text-[1rem] font-semibold tracking-[-0.01em]">
-            Analyst agent · reasoning trace
+            {savedForecast
+              ? "Saved forecast · explanation"
+              : "Analyst agent · reasoning trace"}
           </h2>
           <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-            {reasoningStatusLabel(supportsLive, mode, liveSteps, forecastCell)}
+            {isRecorded ? "recorded replay" : "static prototype"}
           </span>
         </div>
         <TraceStatusBanner
           forecast={forecastCell}
-          liveForecast={liveForecast}
-          mode={mode}
-          supportsLive={supportsLive}
+          savedForecast={savedForecast}
         />
-        <ReasoningSurface
-          activeTool={activeTool}
-          error={error}
-          forecast={forecastCell}
-          mode={mode}
-          statusLabel={statusLabel}
-          steps={liveSteps}
-          supportsLive={supportsLive}
+        <AgentReasoning
+          key={savedForecast?.artifactPath ?? forecastCell.slug}
+          steps={savedForecast?.reasoning ?? forecastCell.reasoning}
+          unit={forecastCell.unit}
+          provenance={
+            savedForecast
+              ? "activity_backed"
+              : classifyTraceProvenance(forecastCell)
+          }
         />
         <p className="mt-3 text-[0.76rem] leading-[1.55] text-[var(--theme-text-dim)]">
-          {supportsLive
-            ? liveModeDescription(forecastCell.slug)
+          {savedForecast
+            ? "This saved API result includes the forecast explanation, assumptions, and caveats. The original streamed tool activity was not archived. Replaying this explanation does not run a new forecast."
             : forecastCell.predictionRun
               ? "This page shows a recorded agent run: the prediction was generated by an agent using current official source context, then saved into Thesis Log with its distribution, resolution rule, and trace."
               : "The route, resolution rule, and catalog entry are live. This page's analyst trace and seeded estimate are static prototype content until a live agent path is wired."}
@@ -419,9 +257,11 @@ export function ForecastRuntime({
 function ResolvedOutcomePanel({
   forecast,
   score,
+  catalogForecast = false,
 }: {
   forecast: ForecastCell;
   score?: ResolvedForecastScore;
+  catalogForecast?: boolean;
 }) {
   const outcome = forecast.resolvedOutcome;
   if (!outcome) return null;
@@ -436,7 +276,7 @@ function ResolvedOutcomePanel({
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-          resolved outcome
+          {catalogForecast ? "Catalog forecast outcome" : "resolved outcome"}
         </span>
         <span
           className={`rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em] ${
@@ -504,6 +344,64 @@ function ResolvedOutcomePanel({
       )}
     </div>
   );
+}
+
+function savedForecastSource({ forecast }: SavedForecastRun): string {
+  switch (forecast.source) {
+    case "ai_gateway":
+      return `generated by ${forecast.model ?? "AI Gateway"}`;
+    case "deterministic_fallback":
+      return "BLS inputs · deterministic fallback";
+    case "calibration_fallback":
+      return "PolicyEngine inputs · calibration fallback";
+    case "census_calibration_fallback":
+      return "Census + PolicyEngine inputs · calibration fallback";
+    default:
+      return "saved API forecast";
+  }
+}
+
+function SavedForecastRecordPanel({
+  savedForecast,
+}: {
+  savedForecast: SavedForecastRun;
+}) {
+  return (
+    <div
+      className="mt-5 rounded-lg border bg-[var(--theme-bg-surface)] p-4"
+      style={{ borderColor: "var(--theme-border)" }}
+    >
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
+          Saved result
+        </span>
+        <a
+          className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--color-accent)] no-underline hover:no-underline"
+          href={`https://github.com/ThesisInstitute/thesis/blob/main/${savedForecast.artifactPath}`}
+        >
+          Archived result →
+        </a>
+      </div>
+      <dl className="grid grid-cols-1 gap-x-5 gap-y-2 [font-family:var(--font-body)] text-[0.82rem] sm:grid-cols-[120px_minmax(0,1fr)]">
+        <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
+          Generated
+        </dt>
+        <dd>{formatRecordedTime(savedForecast.forecast.generatedAt)}</dd>
+      </dl>
+    </div>
+  );
+}
+
+function formatRecordedTime(iso: string): string {
+  return new Date(iso).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
+  });
 }
 
 function ThesisLogRecordPanel({ forecast }: { forecast: ForecastCell }) {
@@ -1230,16 +1128,28 @@ function formatCompactNumber(value: number): string {
 
 function TraceStatusBanner({
   forecast,
-  liveForecast,
-  mode,
-  supportsLive,
+  savedForecast,
 }: {
   forecast: ForecastCell;
-  liveForecast: RuntimeForecast | null;
-  mode: RuntimeMode;
-  supportsLive: boolean;
+  savedForecast?: SavedForecastRun | null;
 }) {
-  const status = traceStatus(mode, supportsLive, liveForecast, forecast);
+  const status = savedForecast
+    ? {
+        label: "Saved forecast",
+        recorded: true,
+        body: "The estimate and explanation come from the same completed run. Playback does not change the forecast.",
+      }
+    : forecast.predictionRun
+      ? {
+          label: "Recorded agent run",
+          recorded: true,
+          body: "The reasoning below was generated by an agent using official source context and saved in Thesis Log as this prediction's trace.",
+        }
+      : {
+          label: "Static prototype",
+          recorded: false,
+          body: "No completed API result is available in this build. The estimate and explanation below are the saved prototype example.",
+        };
 
   return (
     <div
@@ -1248,11 +1158,9 @@ function TraceStatusBanner({
     >
       <span
         className={`mr-2 inline-block rounded-full border px-2 py-[1px] [font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.1em] ${
-          status.tone === "live"
+          status.recorded
             ? "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)]"
-            : status.tone === "fallback"
-              ? "border-[#F2DCAF] bg-[#FFF4DD] text-[#7A5C20]"
-              : "border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] text-[var(--theme-text-dim)]"
+            : "border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] text-[var(--theme-text-dim)]"
         }`}
       >
         {status.label}
@@ -1329,411 +1237,6 @@ function SeriesMetadataPanel({ forecast }: { forecast: ForecastCell }) {
       </dl>
     </div>
   );
-}
-
-function ReasoningSurface({
-  activeTool,
-  error,
-  forecast,
-  mode,
-  statusLabel,
-  steps,
-  supportsLive,
-}: {
-  activeTool: ActiveTool | null;
-  error: string | null;
-  forecast: ForecastCell;
-  mode: RuntimeMode;
-  statusLabel: string;
-  steps: ReasoningStep[];
-  supportsLive: boolean;
-}) {
-  const shouldReplayMock =
-    !supportsLive ||
-    mode === "mock" ||
-    (mode === "fallback" && steps.length === 0);
-
-  if (shouldReplayMock) {
-    return (
-      <>
-        {error && (
-          <div
-            className="mb-3 rounded-md border bg-[var(--theme-bg-elevated)] px-4 py-3 text-[0.78rem] leading-[1.5] text-[var(--theme-text-muted)]"
-            style={{ borderColor: "var(--theme-border)" }}
-          >
-            {error} Replaying the static reasoning trace.
-          </div>
-        )}
-        <AgentReasoning
-          steps={forecast.reasoning}
-          unit={forecast.unit}
-          provenance={classifyTraceProvenance(forecast)}
-        />
-      </>
-    );
-  }
-
-  return (
-    <LiveReasoningTimeline
-      activeTool={activeTool}
-      complete={mode === "complete"}
-      error={error}
-      statusLabel={statusLabel}
-      steps={steps}
-      unit={forecast.unit}
-    />
-  );
-}
-
-function LiveReasoningTimeline({
-  activeTool,
-  complete,
-  error,
-  statusLabel,
-  steps,
-  unit,
-}: {
-  activeTool: ActiveTool | null;
-  complete: boolean;
-  error: string | null;
-  statusLabel: string;
-  steps: ReasoningStep[];
-  unit: ForecastCell["unit"];
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-  }, [steps.length, activeTool]);
-
-  return (
-    <div
-      className="rounded-xl border bg-[var(--theme-bg-elevated)]"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <header
-        className="flex items-center justify-between gap-3 border-b px-5 py-3"
-        style={{ borderColor: "var(--theme-border)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            {!complete && !error && (
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-accent)] opacity-60" />
-            )}
-            <span
-              className="relative inline-flex h-2 w-2 rounded-full"
-              style={{
-                backgroundColor: complete
-                  ? "var(--color-horizon-500)"
-                  : "var(--color-accent)",
-              }}
-            />
-          </span>
-          <span className="[font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.12em] text-[var(--theme-text-muted)]">
-            {complete ? "analysis complete" : statusLabel}
-          </span>
-        </div>
-      </header>
-      <div
-        ref={containerRef}
-        className="max-h-[640px] overflow-y-auto px-5 py-5"
-      >
-        {steps.length === 0 && !activeTool && (
-          <p className="my-3 text-[0.93rem] leading-[1.65] text-[var(--theme-text-muted)]">
-            Opening live analyst stream…
-          </p>
-        )}
-        {steps.map((step, index) => (
-          <LiveStep key={index} step={step} unit={unit} />
-        ))}
-        {activeTool && (
-          <ToolBlock call={activeTool.call} running tool={activeTool.tool} />
-        )}
-        {error && (
-          <p className="mt-4 text-[0.78rem] leading-[1.5] text-[var(--theme-text-muted)]">
-            {error}
-          </p>
-        )}
-        {complete && (
-          <div className="mt-6 [font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-            — end of analyst stream —
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function LiveStep({
-  step,
-  unit,
-}: {
-  step: ReasoningStep;
-  unit: ForecastCell["unit"];
-}) {
-  switch (step.kind) {
-    case "heading":
-      return (
-        <h4 className="mt-6 first:mt-0 mb-2 [font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em] text-[var(--theme-text)]">
-          <span className="mr-2 text-[var(--color-accent)]">§</span>
-          {step.text}
-        </h4>
-      );
-    case "text":
-      return (
-        <p className="my-3 text-[0.93rem] leading-[1.65] text-[var(--theme-text)]">
-          {step.text}
-        </p>
-      );
-    case "math":
-      return (
-        <p
-          className="my-3 rounded-md border bg-[var(--theme-bg-surface)] px-4 py-2 [font-family:var(--font-mono)] text-[0.78rem] leading-[1.7] text-[var(--theme-text)]"
-          style={{ borderColor: "var(--theme-border)" }}
-        >
-          {step.text}
-        </p>
-      );
-    case "tool":
-      return (
-        <ToolBlock
-          call={step.call}
-          result={step.result}
-          tool={step.tool ?? "policyengine.simulate"}
-        />
-      );
-    case "forecast":
-      return (
-        <div className="mt-6 rounded-xl border border-[var(--color-accent)] bg-[var(--color-accent-subtle)] p-5">
-          <div className="mb-2 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--color-rose-700)]">
-            calibrated forecast · 80% CI
-          </div>
-          <div className="flex flex-wrap items-baseline gap-4">
-            <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-rose-700)]">
-              {formatValue(step.point, unit)}
-            </span>
-            <span className="[font-family:var(--font-mono)] text-[0.85rem] text-[var(--color-rose-700)]">
-              [{formatValue(step.ciLow, unit)} ·{" "}
-              {formatValue(step.ciHigh, unit)}]
-            </span>
-          </div>
-        </div>
-      );
-  }
-}
-
-function ToolBlock({
-  call,
-  result,
-  running = false,
-  tool,
-}: {
-  call: string;
-  result?: string;
-  running?: boolean;
-  tool: string;
-}) {
-  return (
-    <div className="my-3">
-      <div
-        className="flex items-center justify-between rounded-t-md border-x border-t bg-[#0F1A24] px-4 py-2 text-[#9FB6C6] [font-family:var(--font-mono)] text-[0.7rem]"
-        style={{ borderColor: "var(--color-ink-border)" }}
-      >
-        <span className="text-[#5E97C8]">▸ {tool}</span>
-        <span className="text-[#9DB1BF]">
-          {running ? "running…" : "complete"}
-        </span>
-      </div>
-      <pre
-        className="overflow-x-auto border-x bg-[#0F1A24] px-4 py-3 text-[#E8F0F5] [font-family:var(--font-mono)] text-[0.78rem] leading-[1.55]"
-        style={{ borderColor: "var(--color-ink-border)" }}
-      >
-        <code>{call}</code>
-      </pre>
-      {running ? (
-        <div
-          className="flex items-center gap-2 rounded-b-md border-x border-b bg-[#172633] px-4 py-3 [font-family:var(--font-mono)] text-[0.72rem] text-[#9DB1BF]"
-          style={{ borderColor: "var(--color-ink-border)" }}
-        >
-          <Spinner />
-          <span>running live data lookup…</span>
-        </div>
-      ) : (
-        <pre
-          className="overflow-x-auto rounded-b-md border-x border-b bg-[#172633] px-4 py-3 text-[#9FC4E6] [font-family:var(--font-mono)] text-[0.75rem] leading-[1.55]"
-          style={{ borderColor: "var(--color-ink-border)" }}
-        >
-          <code>
-            <span className="text-[#E7A6C8]">↳ </span>
-            {result}
-          </code>
-        </pre>
-      )}
-    </div>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      className="animate-spin"
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeOpacity="0.25"
-        strokeWidth="3"
-      />
-      <path
-        d="M12 2a10 10 0 0 1 10 10"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="3"
-      />
-    </svg>
-  );
-}
-
-function resolveApiBase() {
-  const configured = (
-    process.env.NEXT_PUBLIC_THESIS_API_BASE_URL ??
-    process.env.NEXT_PUBLIC_BRIER_API_BASE_URL
-  )?.replace(/\/$/, "");
-  if (configured) return configured;
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  ) {
-    return "http://127.0.0.1:3002";
-  }
-  return "https://api.thesisinstitute.org";
-}
-
-function parseEventData<T>(event: Event) {
-  try {
-    return JSON.parse((event as MessageEvent<string>).data) as T;
-  } catch {
-    return null;
-  }
-}
-
-function isReasoningStep(step: ReasoningStep): step is ReasoningStep {
-  return (
-    step.kind === "heading" ||
-    step.kind === "text" ||
-    step.kind === "math" ||
-    step.kind === "tool" ||
-    step.kind === "forecast"
-  );
-}
-
-function forecastSourceLabel(
-  forecastCell: ForecastCell,
-  supportsLive: boolean,
-  mode: RuntimeMode,
-  statusLabel: string,
-  forecast: RuntimeForecast | null,
-) {
-  if (!supportsLive && forecastCell.predictionRun) {
-    return `${forecastCell.predictionRun.agent} · ${forecastCell.predictionRun.runAt}`;
-  }
-  if (!supportsLive) return "static prototype estimate · seeded forecast value";
-  if (forecast?.source === "ai_gateway") {
-    return `generated by ${forecast.model ?? "AI Gateway"}`;
-  }
-  if (forecast?.source === "deterministic_fallback") {
-    return "live BLS data · deterministic fallback";
-  }
-  if (forecast?.source === "calibration_fallback") {
-    return "live PolicyEngine data · calibration fallback";
-  }
-  if (forecast?.source === "census_calibration_fallback") {
-    return "live Census + PolicyEngine inputs · calibration fallback";
-  }
-  if (mode === "fallback") return "static mock · live API unavailable";
-  return statusLabel;
-}
-
-function reasoningStatusLabel(
-  supportsLive: boolean,
-  mode: RuntimeMode,
-  steps: ReasoningStep[],
-  forecast: ForecastCell,
-) {
-  if (!supportsLive && forecast.predictionRun) return "recorded agent run";
-  if (!supportsLive || mode === "mock") return "static mock";
-  if (mode === "complete") return `${steps.length} live steps`;
-  if (mode === "fallback") return "static fallback";
-  return "streaming";
-}
-
-function traceStatus(
-  mode: RuntimeMode,
-  supportsLive: boolean,
-  forecast: RuntimeForecast | null,
-  forecastCell: ForecastCell,
-) {
-  if (!supportsLive && forecastCell.predictionRun) {
-    return {
-      label: "Recorded agent run",
-      tone: "live" as const,
-      body: "The reasoning below was generated by an agent using current official source context and saved in Thesis Log as this prediction's trace.",
-    };
-  }
-  if (!supportsLive) {
-    return {
-      label: "Static mock trace",
-      tone: "mock" as const,
-      body: "The reasoning below is prewritten prototype content; the page, catalog entry, and resolution rule are live.",
-    };
-  }
-  if (mode === "fallback") {
-    return {
-      label: "Fallback static trace",
-      tone: "fallback" as const,
-      body: "This cell has live API wiring, but the stream is unavailable, so the prototype is replaying the static mock trace.",
-    };
-  }
-  if (mode === "mock") {
-    return {
-      label: "Static mock trace",
-      tone: "mock" as const,
-      body: "This cell can use the live API path, but this view is replaying the prewritten trace.",
-    };
-  }
-  if (forecast) {
-    return {
-      label: "Live run",
-      tone: "live" as const,
-      body: "This run streamed through the live API and updated the forecast value on the page.",
-    };
-  }
-  return {
-    label: "Live API path",
-    tone: "live" as const,
-    body: "This cell is opening a server-sent reasoning stream. If the API is unavailable, the page falls back to the static mock trace.",
-  };
-}
-
-function liveModeDescription(slug: string) {
-  if (slug === "spm-child-poverty-2025") {
-    return "Live mode checks public Census release/SPM pages, verifies the PolicyEngine current-law policy, applies an explicit child-poverty calibration prior, and calls the forecast model when AI Gateway credentials are available. If the API fails, the page replays the static trace.";
-  }
-  if (slug === "ctc-expansion-cost-ty2026") {
-    return "Live mode queries the PolicyEngine policy and economy APIs, applies an explicit calibration prior, and calls the forecast model when AI Gateway credentials are available. If the API fails, the page replays the static trace.";
-  }
-  if (slug === "ctc-current-law-outlays-ty2026") {
-    return "Live mode queries the PolicyEngine current-law policy, applies an explicit CTC outlay calibration prior, and streams the adjustment path. If the API fails, the page replays the static trace.";
-  }
-  return "Live mode queries BLS CPI-U data, computes an audit-ready data summary, and calls the forecast model when AI Gateway credentials are available. If the API fails, the page replays the static trace.";
 }
 
 // Read the calendar date written in an ISO string (the Y/M/D before any time

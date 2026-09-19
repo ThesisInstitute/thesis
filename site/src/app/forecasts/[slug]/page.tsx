@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { BackToBill } from "@/components/BackToBill";
 import { Header } from "@/components/Header";
 import { ForecastRuntime } from "@/components/ForecastRuntime";
+import { loadLatestSavedForecast } from "@/lib/saved-forecast";
 import {
   FORECAST_CELLS,
   TYPE_LABEL,
@@ -68,6 +69,7 @@ export default async function ForecastDetailPage({
   const forecast = withResolvedOutcome(forecastDefinition, ledger);
   const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
   const resolvedScore = scoreResolvedForecast(forecast, ledger);
+  const savedForecast = loadLatestSavedForecast(slug);
 
   return (
     <div>
@@ -111,7 +113,11 @@ export default async function ForecastDetailPage({
           )}
         </header>
 
-        <ForecastRuntime forecast={forecast} resolvedScore={resolvedScore} />
+        <ForecastRuntime
+          forecast={forecast}
+          resolvedScore={resolvedScore}
+          savedForecast={savedForecast}
+        />
 
         {/* Related forecasts */}
         <RelatedForecasts

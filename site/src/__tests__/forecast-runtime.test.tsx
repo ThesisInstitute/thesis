@@ -5,104 +5,148 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from "@testing-library/react";
-import {
-  ForecastRuntime,
-  STREAM_WATCHDOG_MS,
-} from "@/components/ForecastRuntime";
+import { renderToString } from "react-dom/server";
+import { ForecastRuntime } from "@/components/ForecastRuntime";
 import { LIVE_FORECAST_SLUGS, FORECAST_CELLS } from "@/data/forecast-cells";
+import type { SavedForecastRun } from "@/lib/saved-forecast";
 
-type Listener = (event: MessageEvent) => void;
-
-class FakeEventSource {
-  static instances: FakeEventSource[] = [];
-  static CONNECTING = 0;
-  static OPEN = 1;
-  static CLOSED = 2;
-  url: string;
-  closed = false;
-  onerror: (() => void) | null = null;
-  onopen: (() => void) | null = null;
-  private listeners = new Map<string, Listener[]>();
-
-  constructor(url: string) {
-    this.url = url;
-    FakeEventSource.instances.push(this);
-  }
-
-  addEventListener(type: string, listener: Listener) {
-    this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener]);
-  }
-
-  close() {
-    this.closed = true;
-  }
-
-  emit(type: string, data: unknown) {
-    for (const listener of this.listeners.get(type) ?? []) {
-      listener({ data: JSON.stringify(data) } as MessageEvent);
-    }
-  }
-}
-
-const liveForecast = FORECAST_CELLS.find((m) =>
-  LIVE_FORECAST_SLUGS.has(m.slug),
+const spmForecast = FORECAST_CELLS.find(
+  (cell) => cell.slug === "spm-child-poverty-2025",
 )!;
 const cpiForecast = FORECAST_CELLS.find(
-  (forecast) => forecast.slug === "cpi-u-annual-2026",
+  (cell) => cell.slug === "cpi-u-annual-2026",
 )!;
+const openStream = vi.fn();
+const savedForecast: SavedForecastRun = {
+  forecast: {
+    pointEstimate: 13.0,
+    ciLow: 11.9,
+    ciHigh: 14.3,
+    confidence: 0.8,
+    source: "census_calibration_fallback",
+    generatedAt: "2026-09-19T14:18:00Z",
+    drivers: ["Saved run driver"],
+  },
+  reasoning: [
+    { kind: "heading", text: "Saved explanation" },
+    {
+      kind: "text",
+      text: "The saved run uses a current-law calibration prior.",
+    },
+    { kind: "forecast", point: 13.0, ciLow: 11.9, ciHigh: 14.3 },
+  ],
+  recordedAt: "2026-09-19T14:20:00Z",
+  artifactPath:
+    "records/2026-09-19/bodies-example/live/spm-child-poverty-2025.json.gz",
+};
 
-describe("ForecastRuntime stream watchdog", () => {
+describe("ForecastRuntime saved replay", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.stubGlobal("EventSource", FakeEventSource);
-    FakeEventSource.instances = [];
+    openStream.mockClear();
+    vi.stubGlobal("EventSource", openStream);
   });
 
   afterEach(() => {
     cleanup();
+    window.history.replaceState({}, "", "/");
     vi.unstubAllGlobals();
     vi.useRealTimers();
   });
 
-  it("falls back to the static trace when the stream stays silent", () => {
-    render(<ForecastRuntime forecast={liveForecast} />);
-    expect(FakeEventSource.instances).toHaveLength(1);
-
-    act(() => {
-      vi.advanceTimersByTime(STREAM_WATCHDOG_MS + 50);
+  it("server-renders the saved estimate and hydrates without starting a new forecast", () => {
+    const element = (
+      <ForecastRuntime forecast={spmForecast} savedForecast={savedForecast} />
+    );
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(element);
+    document.body.appendChild(container);
+    const estimate = within(container).getByRole("region", {
+      name: "Forecast estimate",
     });
+    expect(estimate).toHaveTextContent("latest saved forecast · 80% CI");
+    expect(estimate).toHaveTextContent("13.0%");
+    expect(estimate).toHaveTextContent("11.9%");
+    expect(estimate).toHaveTextContent("14.3%");
+    expect(estimate).not.toHaveTextContent("13.1%");
+    expect(estimate).not.toHaveTextContent("pending");
+    expect(within(estimate).getByRole("img")).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("13.0%"),
+    );
 
-    expect(FakeEventSource.instances[0].closed).toBe(true);
-    expect(screen.getByText(/replaying the static mock trace/i)).toBeTruthy();
+    render(element, { container, hydrate: true });
+    expect(estimate).toHaveTextContent("13.0%");
+    expect(openStream).not.toHaveBeenCalled();
   });
 
-  it("keeps the live stream once events arrive", () => {
-    render(<ForecastRuntime forecast={liveForecast} />);
-
+  it("keeps the saved estimate through playback, skip, and replay", () => {
+    render(
+      <ForecastRuntime forecast={spmForecast} savedForecast={savedForecast} />,
+    );
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+    const initialEstimate = estimate.textContent;
     act(() => {
-      FakeEventSource.instances[0].emit("step", {
-        kind: "heading",
-        text: "Identifying the question",
-      });
+      vi.advanceTimersByTime(500);
     });
+    expect(estimate.textContent).toBe(initialEstimate);
+    fireEvent.click(screen.getByRole("button", { name: "skip" }));
+    expect(
+      screen.getByText("The saved run uses a current-law calibration prior."),
+    ).toBeTruthy();
+    expect(screen.getByText("— end of recorded trace —")).toBeTruthy();
+    expect(estimate.textContent).toBe(initialEstimate);
+    fireEvent.click(screen.getByRole("button", { name: "replay" }));
     act(() => {
-      vi.advanceTimersByTime(STREAM_WATCHDOG_MS + 50);
+      vi.advanceTimersByTime(500);
     });
-
-    expect(FakeEventSource.instances[0].closed).toBe(false);
-    expect(screen.getByText("Identifying the question")).toBeTruthy();
+    expect(estimate.textContent).toBe(initialEstimate);
+    expect(openStream).not.toHaveBeenCalled();
   });
 
-  it("still falls back immediately on connection errors", () => {
-    render(<ForecastRuntime forecast={liveForecast} />);
+  it("shows saved provenance, drivers, and an archive link without relabeling catalog runs", () => {
+    render(
+      <ForecastRuntime forecast={spmForecast} savedForecast={savedForecast} />,
+    );
+    expect(screen.getByText("Saved run driver")).toBeTruthy();
+    expect(
+      screen.getByText("Census + PolicyEngine inputs · calibration fallback"),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Archived result →" }),
+    ).toHaveAttribute(
+      "href",
+      `https://github.com/ThesisInstitute/thesis/blob/main/${savedForecast.artifactPath}`,
+    );
+    expect(screen.getByText("Catalog forecast")).toBeTruthy();
+    expect(screen.queryByText("Headline")).toBeNull();
+    expect(
+      screen.getByText(/original streamed tool activity was not archived/),
+    ).toBeTruthy();
+  });
 
-    act(() => {
-      FakeEventSource.instances[0].onerror?.();
-    });
+  it("shows the labeled catalog estimate immediately when no saved API result is available", () => {
+    render(<ForecastRuntime forecast={spmForecast} savedForecast={null} />);
+    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
+    expect(estimate).toHaveTextContent("static prototype forecast · 80% CI");
+    expect(estimate).toHaveTextContent("13.1%");
+    expect(
+      screen.getByText(/No completed API result is available/),
+    ).toBeTruthy();
+    expect(openStream).not.toHaveBeenCalled();
+  });
 
-    expect(FakeEventSource.instances[0].closed).toBe(true);
-    expect(screen.getByText(/replaying the static mock trace/i)).toBeTruthy();
+  it("shows recorded catalog estimates immediately for cells without an API archive", () => {
+    const recorded = FORECAST_CELLS.find(
+      (cell) => !LIVE_FORECAST_SLUGS.has(cell.slug) && cell.predictionRun,
+    )!;
+    render(<ForecastRuntime forecast={recorded} />);
+    expect(
+      screen.getByRole("region", { name: "Forecast estimate" }),
+    ).toHaveTextContent("current forecast · 80% CI");
+    expect(openStream).not.toHaveBeenCalled();
   });
 
   it("renders target-level runs across agents, packs, and updates", () => {
