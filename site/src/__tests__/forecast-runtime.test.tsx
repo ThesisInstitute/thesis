@@ -70,9 +70,15 @@ describe("ForecastRuntime stream watchdog", () => {
 
   it("does not present the static estimate while a live forecast is pending", () => {
     // The server render must also avoid flashing the catalog's 13.1% seed.
-    expect(
-      renderToString(<ForecastRuntime forecast={liveForecast} />),
-    ).toContain("live forecast pending");
+    const serverMarkup = document.createElement("div");
+    serverMarkup.innerHTML = renderToString(
+      <ForecastRuntime forecast={liveForecast} />,
+    );
+    const serverEstimate = within(serverMarkup).getByRole("region", {
+      name: "Forecast estimate",
+    });
+    expect(serverEstimate).toHaveTextContent("live forecast pending");
+    expect(serverEstimate).not.toHaveTextContent("13.1%");
     render(<ForecastRuntime forecast={liveForecast} />);
     const estimate = screen.getByRole("region", { name: "Forecast estimate" });
 
@@ -143,7 +149,33 @@ describe("ForecastRuntime stream watchdog", () => {
     expect(estimate).toHaveTextContent("live forecast unavailable");
     expect(estimate).not.toHaveTextContent("13.1%");
     expect(screen.getByText("Checking the Census inputs.")).toBeTruthy();
+    expect(screen.getByText("Incomplete live run")).toBeTruthy();
+    expect(screen.queryByText("Fallback static trace")).toBeNull();
+    expect(estimate).toHaveTextContent("live run interrupted · partial trace");
   });
+
+  it.each([
+    ["status", { label: "Starting the run" }],
+    ["tool_start", { tool: "census.lookup", call: "census.lookup()" }],
+  ])(
+    "labels the static replay after a %s event fails before returning any trace",
+    (event, data) => {
+      render(<ForecastRuntime forecast={liveForecast} />);
+      act(() => {
+        FakeEventSource.instances[0].emit(event, data);
+        FakeEventSource.instances[0].emit("failure", {
+          message: "Lookup failed.",
+        });
+      });
+
+      const estimate = screen.getByRole("region", {
+        name: "Forecast estimate",
+      });
+      expect(estimate).toHaveTextContent("static prototype forecast · 80% CI");
+      expect(estimate).toHaveTextContent("13.1%");
+      expect(screen.getByText("Fallback static trace")).toBeTruthy();
+    },
+  );
 
   it("shows the labeled static estimate for an explicit mock replay", () => {
     window.history.replaceState({}, "", "/?mock=1");

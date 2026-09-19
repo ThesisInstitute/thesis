@@ -316,6 +316,7 @@ export function ForecastRuntime({
                 mode,
                 statusLabel,
                 liveForecast,
+                liveSteps.length > 0,
               )}
             </p>
           </div>
@@ -436,6 +437,7 @@ export function ForecastRuntime({
           liveForecast={liveForecast}
           mode={mode}
           supportsLive={supportsLive}
+          hasLiveSteps={liveSteps.length > 0}
         />
         <ReasoningSurface
           activeTool={activeTool}
@@ -1275,13 +1277,21 @@ function TraceStatusBanner({
   liveForecast,
   mode,
   supportsLive,
+  hasLiveSteps,
 }: {
   forecast: ForecastCell;
   liveForecast: RuntimeForecast | null;
   mode: RuntimeMode;
   supportsLive: boolean;
+  hasLiveSteps: boolean;
 }) {
-  const status = traceStatus(mode, supportsLive, liveForecast, forecast);
+  const status = traceStatus(
+    mode,
+    supportsLive,
+    liveForecast,
+    forecast,
+    hasLiveSteps,
+  );
 
   return (
     <div
@@ -1683,6 +1693,7 @@ function forecastSourceLabel(
   mode: RuntimeMode,
   statusLabel: string,
   forecast: RuntimeForecast | null,
+  hasLiveSteps: boolean,
 ) {
   if (!supportsLive && forecastCell.predictionRun) {
     return `${forecastCell.predictionRun.agent} · ${forecastCell.predictionRun.runAt}`;
@@ -1700,7 +1711,11 @@ function forecastSourceLabel(
   if (forecast?.source === "census_calibration_fallback") {
     return "live Census + PolicyEngine inputs · calibration fallback";
   }
-  if (mode === "fallback") return "static mock · live API unavailable";
+  if (mode === "fallback") {
+    return hasLiveSteps
+      ? "live run interrupted · partial trace"
+      : "static mock · live API unavailable";
+  }
   return statusLabel;
 }
 
@@ -1713,7 +1728,9 @@ function reasoningStatusLabel(
   if (!supportsLive && forecast.predictionRun) return "recorded agent run";
   if (!supportsLive || mode === "mock") return "static mock";
   if (mode === "complete") return `${steps.length} live steps`;
-  if (mode === "fallback") return "static fallback";
+  if (mode === "fallback") {
+    return steps.length > 0 ? "incomplete live run" : "static fallback";
+  }
   return "streaming";
 }
 
@@ -1722,6 +1739,7 @@ function traceStatus(
   supportsLive: boolean,
   forecast: RuntimeForecast | null,
   forecastCell: ForecastCell,
+  hasLiveSteps: boolean,
 ) {
   if (!supportsLive && forecastCell.predictionRun) {
     return {
@@ -1738,6 +1756,13 @@ function traceStatus(
     };
   }
   if (mode === "fallback") {
+    if (hasLiveSteps) {
+      return {
+        label: "Incomplete live run",
+        tone: "fallback" as const,
+        body: "The live run stopped before completing. Its partial reasoning trace is shown below.",
+      };
+    }
     return {
       label: "Fallback static trace",
       tone: "fallback" as const,
