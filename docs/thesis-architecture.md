@@ -507,6 +507,10 @@ each certificate chain at its own `genTime`. One invalid claimed token rejects
 the complete marker even when another token verifies. Downloaded certificate
 sidecars, if retained for archival context, are never trust input.
 
+When a TSA replaces its responder certificate, follow
+[`docs/tsa-signer-rotation.md`](tsa-signer-rotation.md): it covers the ledger
+release chain's pinned signer set and this record-chain bundle.
+
 A future TSA bundle must first be approved in verifier code and then introduced
 by a snapshot witnessed under an already active bundle. During a transition,
 new-authority attempts are recorded as non-authorizing supplemental outcomes;
