@@ -30,18 +30,24 @@ import ledger_release_chain as chain  # noqa: E402
 from ledger_release_chain import PinnedSigner, ReleaseChainError  # noqa: E402
 
 TSA_FIXTURE = ROOT / "tests" / "fixtures" / "release_tsa"
-OTHER = PinnedSigner(label="some other responder", certificate_sha256="a" * 64,
-                     spki_sha256="b" * 64)
+OTHER = PinnedSigner(
+    label="some other responder", certificate_sha256="a" * 64, spki_sha256="b" * 64
+)
 
 
 def _identity(certificate: pathlib.Path) -> tuple[str, str]:
     der = subprocess.check_output(
-        ["openssl", "x509", "-in", str(certificate), "-outform", "DER"])
+        ["openssl", "x509", "-in", str(certificate), "-outform", "DER"]
+    )
     public_pem = subprocess.check_output(
-        ["openssl", "x509", "-in", str(certificate), "-pubkey", "-noout"])
+        ["openssl", "x509", "-in", str(certificate), "-pubkey", "-noout"]
+    )
     spki = subprocess.run(
         ["openssl", "pkey", "-pubin", "-outform", "DER"],
-        input=public_pem, check=True, capture_output=True).stdout
+        input=public_pem,
+        check=True,
+        capture_output=True,
+    ).stdout
     return hashlib.sha256(der).hexdigest(), hashlib.sha256(spki).hexdigest()
 
 
@@ -53,16 +59,45 @@ def receipt(tmp_path, monkeypatch):
     manifest = tmp_path / "manifest.json"
     manifest.write_text('{"test":"manifest"}\n')
     request = tmp_path / "request.tsq"
-    subprocess.run(["openssl", "ts", "-query", "-data", str(manifest), "-sha256",
-                    "-cert", "-out", str(request)], check=True, capture_output=True)
+    subprocess.run(
+        [
+            "openssl",
+            "ts",
+            "-query",
+            "-data",
+            str(manifest),
+            "-sha256",
+            "-cert",
+            "-out",
+            str(request),
+        ],
+        check=True,
+        capture_output=True,
+    )
     out = tmp_path / "0001-0123456789abcdef.digicert.tsr"
-    subprocess.run(["openssl", "ts", "-reply", "-config", "openssl-ts.cnf",
-                    "-queryfile", str(request), "-out", str(out)],
-                   cwd=tsa / "digicert", check=True, capture_output=True)
+    subprocess.run(
+        [
+            "openssl",
+            "ts",
+            "-reply",
+            "-config",
+            "openssl-ts.cnf",
+            "-queryfile",
+            str(request),
+            "-out",
+            str(out),
+        ],
+        cwd=tsa / "digicert",
+        check=True,
+        capture_output=True,
+    )
     anchor = tsa / "anchors" / "digicert-trusted-root-g4.pem"
     certificate_sha256, spki_sha256 = _identity(tsa / "digicert" / "signer.pem")
-    real = PinnedSigner(label="fixture digicert responder",
-                        certificate_sha256=certificate_sha256, spki_sha256=spki_sha256)
+    real = PinnedSigner(
+        label="fixture digicert responder",
+        certificate_sha256=certificate_sha256,
+        spki_sha256=spki_sha256,
+    )
 
     def verify(*signers: PinnedSigner):
         spec = chain.AnchorSpec(
@@ -73,8 +108,12 @@ def receipt(tmp_path, monkeypatch):
         )
         monkeypatch.setitem(chain.ANCHORS, "digicert", spec)
         return chain.verify_receipt(
-            hashlib.sha256(manifest.read_bytes()).hexdigest(), out, "digicert",
-            anchor_dir=anchor.parent, enforce_production_pins=True)
+            hashlib.sha256(manifest.read_bytes()).hexdigest(),
+            out,
+            "digicert",
+            anchor_dir=anchor.parent,
+            enforce_production_pins=True,
+        )
 
     return real, verify
 
@@ -138,8 +177,9 @@ def test_production_pins_are_well_formed():
 def test_digicert_keeps_the_responder_that_signed_the_existing_journal():
     """Releases 0000-0020 carry the first entry; dropping it would make the
     whole journal unverifiable. The 2026 responder is appended after it."""
-    pairs = [(s.certificate_sha256, s.spki_sha256)
-             for s in chain.ANCHORS["digicert"].signers]
+    pairs = [
+        (s.certificate_sha256, s.spki_sha256) for s in chain.ANCHORS["digicert"].signers
+    ]
     assert pairs[0] == (
         "4aa03fa22cd75c84c55c938f828e676b9caecab33fe36d269aa334f146110a33",
         "7abda95ed7301ac94bded350babc319903d0b4f16c4e7e39346dba5f9e992b72",
@@ -148,3 +188,50 @@ def test_digicert_keeps_the_responder_that_signed_the_existing_journal():
         "2da09da7f4131f9fe72db6c5e6e9c9656755af043f1ea742cc0d2120e141ebfc",
         "753596b60a629061144cbd312017bbfb77510eac20b7eadc5fafb7cabe142fd5",
     ) in pairs
+
+
+@pytest.mark.parametrize(
+    "hostile",
+    [
+        "subject=CN=TSA##[set-output name=proof]injected",
+        "subject=CN=x\n::error file=a::owned",
+        "subject=CN=x\r\n##[add-mask]secret",
+        "subject=CN=%0A::warning::x",
+    ],
+)
+def test_an_untrusted_subject_cannot_issue_workflow_commands(hostile):
+    """The subject is printed exactly when the certificate is NOT trusted,
+    into a log the Actions runner scans for `##[...]` and `::...::`."""
+    safe = chain._log_safe(hostile)
+    for token in ("#", "[", "]", ":", "%", "\n", "\r"):
+        assert token not in safe
+    assert safe.startswith("subject=CN=")
+
+
+def test_an_ordinary_subject_survives_sanitizing():
+    real = (
+        "subject=CN=DigiCert SHA256 RSA4096 Timestamp Responder 2026 1,"
+        "O=DigiCert\\, Inc.,C=US"
+    )
+    assert chain._log_safe(real) == real
+    assert len(chain._log_safe("subject=CN=" + "A" * 1000)) == 200
+
+
+def test_a_failed_subject_lookup_does_not_mask_the_refusal(receipt, monkeypatch):
+    """If the subject cannot be read, the pin refusal must still be the
+    error that surfaces."""
+    real, verify = receipt
+    original = chain._openssl_binary
+
+    def flaky(arguments, **kwargs):
+        if "-subject" in arguments:
+            raise PermissionError("openssl not executable")
+        return original(arguments, **kwargs)
+
+    monkeypatch.setattr(chain, "_openssl_binary", flaky)
+    with pytest.raises(ReleaseChainError) as refusal:
+        verify(OTHER)
+    message = str(refusal.value)
+    assert "signer certificate is not pinned" in message
+    assert real.certificate_sha256 in message
+    assert "subject unavailable" in message

@@ -754,6 +754,23 @@ def verify_producer_signature(
     )
 
 
+_LOG_SAFE_RE = re.compile(r"[^A-Za-z0-9 =,.()/_+@'\\-]")
+
+
+def _log_safe(text: str, *, limit: int = 200) -> str:
+    """Certificate text made safe to print into a GitHub Actions log.
+
+    A certificate's subject is chosen by whoever obtained it, and this
+    verifier prints it precisely when it does NOT trust the certificate.
+    The Actions runner treats `##[command]` anywhere in a line, and
+    `::command::` at the start of one, as instructions. Everything outside
+    a small allowlist becomes "?", which removes "#", "[", "]", ":", "%"
+    and line breaks; an ordinary distinguished name survives intact apart
+    from the "subject=" colon-free prefix it already has.
+    """
+    return _LOG_SAFE_RE.sub("?", text.strip())[:limit]
+
+
 def _verify_production_signer(
     receipt: pathlib.Path,
     anchor: pathlib.Path,
@@ -832,15 +849,26 @@ def _verify_production_signer(
     # Name what was seen. The bare hash in this message is what let the
     # 2026-09 DigiCert rotation be matched against a fresh receipt; the
     # subject says at a glance whether it is a rotation or something else.
-    subject = (
-        _openssl_binary(
-            ["x509", "-in", str(signer), "-noout", "-subject", "-nameopt", "RFC2253"],
-            environment=environment,
-            label=f"signer subject for {receipt.name}",
+    # It is a convenience only: if it cannot be read, the refusal below
+    # must still be the error that surfaces, not an OpenSSL failure.
+    try:
+        subject = _log_safe(
+            _openssl_binary(
+                [
+                    "x509",
+                    "-in",
+                    str(signer),
+                    "-noout",
+                    "-subject",
+                    "-nameopt",
+                    "RFC2253",
+                ],
+                environment=environment,
+                label=f"signer subject for {receipt.name}",
+            ).decode("utf-8", "replace")
         )
-        .decode("utf-8", "replace")
-        .strip()
-    )
+    except (ReleaseChainError, OSError):
+        subject = "subject unavailable"
     if any(s.certificate_sha256 == certificate_sha256 for s in spec.signers):
         raise ReleaseChainError(
             f"RFC 3161 signer SPKI is not pinned for {receipt.name}: {spki_sha256}"
