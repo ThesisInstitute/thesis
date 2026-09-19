@@ -21,7 +21,14 @@ concurrency: resolve-pending
 jobs:
   resolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Successful runs took 1-11 minutes through August 2026 and the resolve
+    # step alone 14-17 minutes by mid-September as the pending set grew. At
+    # 30 minutes the 2026-09-03 run was cancelled in the pin step, after it
+    # had appended five observations to the ledger, so the site went on
+    # showing them as pending. The next run heals that (the ledger head no
+    # longer equals records/resolutions/latest.json, so needs_publish is 1),
+    # but only if it gets that far. Leave real headroom.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
         with:
@@ -63,7 +70,10 @@ jobs:
           # Stream resolver output while capturing it: command substitution
           # swallowed stdout whenever the resolver failed, hiding which
           # cells resolved or deferred before the failure.
-          python3 scripts/resolve_pending.py 2>&1 | tee /tmp/resolve-out.log
+          # -u: through the pipe Python block-buffers stdout, so every line
+          # carried the timestamp of the flush, not of the event, and a run
+          # that died mid-buffer lost its last lines.
+          python3 -u scripts/resolve_pending.py 2>&1 | tee /tmp/resolve-out.log
           if grep -q "^appended" /tmp/resolve-out.log; then
             echo "appended=1" >> "$GITHUB_OUTPUT"
           else
