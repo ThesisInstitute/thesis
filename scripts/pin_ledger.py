@@ -43,6 +43,7 @@ import subprocess
 import sys
 import tempfile
 import urllib.request
+from collections.abc import Collection
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote
@@ -648,6 +649,15 @@ def _require_inventory_head_witnesses_state(
         )
 
 
+@dataclass(frozen=True)
+class _WalkedState:
+    """What the pin walk recorded about one commit it admitted."""
+
+    lines: list[str]
+    raw: bytes
+    inventory: dict[str, str]
+
+
 def _compare_commits(base: str, head: str) -> list[dict[str, Any]]:
     """Every commit base..head, paginated past GitHub's 250-commit page cap."""
     first = _api(f"compare/{base}...{head}?per_page=100&page=1")
@@ -704,20 +714,32 @@ def _compare_commits(base: str, head: str) -> list[dict[str, Any]]:
 def _require_walk_parent(
     commit_payload: Any,
     commit_sha: str,
-    expected_parent: str,
-    visited: set[str],
-) -> bool:
-    """Admit a commit into the pin walk; True when it is a merge commit.
+    walked: Collection[str],
+) -> list[str]:
+    """Admit a commit into the pin walk and return its parents, first first.
 
-    Ledger appends stay strictly linear: a single-parent commit must
-    continue the walk exactly. A multi-parent commit is traversable only
-    when the walk predecessor is among its parents and every other parent
-    was already walked (or is the pinned base), so a merge can reconcile
-    branch-internal history — a gate-class PR merged with a merge commit —
-    but can never splice in unwalked foreign history. The caller enforces
-    the companion content rule: a merge must leave the ledger bytes
-    exactly as its walk predecessor left them; appends arrive only on
-    single-parent commits.
+    The walk covers every commit GitHub's compare endpoint lists between
+    the pinned commit and the branch head, taken parents first (see
+    `_parents_first`). A commit is admissible only when every one of its
+    parents is
+    the pinned commit or was itself walked. That closure is what makes the
+    walk complete: from the head, every path back reaches the pin through
+    commits that were each checked, so nothing can be spliced in from
+    outside and nothing between can be skipped. A parent that is missing
+    from ``walked`` is an omitted commit, a reordered listing, or history
+    that does not descend from the pin; all three refuse.
+
+    Until 2026-09 this demanded more than closure: a single-parent commit
+    had to name the *previous list entry* as its parent. That holds for a
+    linear branch and for one side branch. It fails as soon as two pull
+    requests fork from the same commit, because the listing interleaves
+    them and the second branch's first commit follows a commit that is not
+    its parent. PolicyEngine/chronicle merged five such pull requests into
+    the ledger branch from 2026-09-04, and the pin refused to advance
+    ("skips or reorders a parent at e5c4a1fa5e0e") although every parent
+    in that range is the pin or a walked commit and only one commit, the
+    resolver's own append, touches the ledger. The caller compares each
+    commit with its real parents, so the content rules lose nothing.
     """
     if type(commit_payload) is not dict or commit_payload.get("sha") != commit_sha:
         raise PinError(f"commit response does not describe requested SHA {commit_sha}")
@@ -731,27 +753,58 @@ def _require_walk_parent(
             f"commit {commit_sha[:12]} is not on a linear single-parent history"
         )
     parent_shas = [str(parent.get("sha")) for parent in parents]
-    if len(parents) == 1:
-        if parent_shas[0] != expected_parent:
-            raise PinError(
-                f"commit history skips or reorders a parent at {commit_sha[:12]}: "
-                f"expected {expected_parent[:12]}, found {parent_shas[0][:12]}"
-            )
-        return False
-    if expected_parent not in parent_shas:
+    if len(set(parent_shas)) != len(parent_shas):
+        raise PinError(f"commit {commit_sha[:12]} lists a parent twice")
+    strangers = [sha for sha in parent_shas if sha not in walked]
+    if strangers and len(parent_shas) == 1:
         raise PinError(
-            f"merge commit {commit_sha[:12]} does not continue the walk from "
-            f"{expected_parent[:12]}"
+            f"commit history skips or reorders a parent at {commit_sha[:12]}: "
+            f"parent {strangers[0][:12]} is neither the pinned commit nor a "
+            "walked commit"
         )
-    strangers = [
-        sha for sha in parent_shas if sha != expected_parent and sha not in visited
-    ]
     if strangers:
         raise PinError(
             f"merge commit {commit_sha[:12]} pulls in unwalked history "
             f"({strangers[0][:12]}); refusing to advance the pin"
         )
-    return True
+    return parent_shas
+
+
+def _parents_first(
+    commits: list[dict[str, Any]],
+    payloads: dict[str, Any],
+    pin_sha: str,
+) -> list[dict[str, Any]]:
+    """Order the listed commits so every commit follows all of its parents.
+
+    The walk judges a commit against its parents' recorded state, so they
+    must come first. The compare listing usually obliges, but this does not
+    lean on it: commits made within one second of each other tie on date,
+    and a listing sorted by date can then put a child ahead of its parent.
+    The order is derived from the commits' own parent links instead, and
+    ties keep their listed position so the result is deterministic.
+
+    Nothing is admitted here. A commit whose parents can never all be
+    satisfied (a parent outside the pin and the listing) is left in listed
+    order at the end, where `_require_walk_parent` refuses it by name.
+    """
+    done = {pin_sha}
+    remaining = list(commits)
+    ordered: list[dict[str, Any]] = []
+    while remaining:
+        for index, commit in enumerate(remaining):
+            payload = payloads.get(str(commit["sha"]))
+            parents = payload.get("parents") if type(payload) is dict else None
+            if type(parents) is list and all(
+                type(parent) is dict and str(parent.get("sha")) in done
+                for parent in parents
+            ):
+                break
+        else:
+            return ordered + remaining
+        ordered.append(remaining.pop(index))
+        done.add(str(commit["sha"]))
+    return ordered
 
 
 def _lines(raw: bytes) -> list[str]:
@@ -1888,25 +1941,32 @@ def refresh(*, require_catalog: bool = False) -> None:
     commits = _compare_commits(pin["sha"], head_sha)
 
     rows = list(availability["rows"])
-    previous_lines = old_lines
-    previous_raw = old_raw
-    expected_parent = pin["sha"]
-    visited: set[str] = {pin["sha"]}
+    # State of every walked commit, keyed by SHA, so each commit is judged
+    # against its own parents rather than against whichever commit happens
+    # to precede it in the listing.
+    walked: dict[str, _WalkedState] = {
+        pin["sha"]: _WalkedState(old_lines, old_raw, previous_inventory)
+    }
+    attributed_lines = len(old_lines)
     # The registry ratchet must hold across the CROSSED commits too, not
     # just the two endpoints: a declaration committed and then removed
     # between refreshes would otherwise advance the pin straight over the
     # downgrade. Once a declaration is seen the flag latches and no
     # further catalog fetches are needed.
     declared_seen = _declares_registry(old_catalog)
-    for commit in commits:
+    payloads = {
+        str(commit["sha"]): (
+            head if str(commit["sha"]) == head_sha else _api(f"commits/{commit['sha']}")
+        )
+        for commit in commits
+    }
+    for commit in _parents_first(commits, payloads, pin["sha"]):
         commit_sha = str(commit["sha"])
-        commit_payload = (
-            head if commit_sha == head_sha else _api(f"commits/{commit_sha}")
-        )
-        is_merge = _require_walk_parent(
-            commit_payload, commit_sha, expected_parent, visited
-        )
-        visited.add(commit_sha)
+        commit_payload = payloads[commit_sha]
+        parent_shas = _require_walk_parent(commit_payload, commit_sha, walked)
+        if commit_sha in walked:
+            raise PinError(f"commit {commit_sha[:12]} is listed twice in the walk")
+        parent_states = [walked[sha] for sha in parent_shas]
         raw = _jsonl_at(commit_sha)
         if not declared_seen and _declares_registry(
             _remote_catalog_at_commit(
@@ -1918,19 +1978,37 @@ def refresh(*, require_catalog: bool = False) -> None:
         ):
             declared_seen = True
         lines = _lines(raw)
-        if is_merge and raw != previous_raw:
-            raise PinError(
-                f"merge commit {commit_sha[:12]} changes ledger bytes; "
-                "appends must arrive on single-parent commits"
-            )
-        if lines != previous_lines:
+        # Line-for-line extension of EVERY parent: a rewrite, truncation or
+        # rewrite-then-restore shows up at the commit that made it, on
+        # whichever branch that was.
+        for parent_sha, parent in zip(parent_shas, parent_states, strict=True):
             _require_extension(
-                previous_lines,
+                parent.lines,
                 lines,
-                label=f"commit {commit_sha[:12]}",
+                label=f"commit {commit_sha[:12]} (against parent {parent_sha[:12]})",
             )
+        if len(parent_states) > 1:
+            # A merge reconciles; it never contributes ledger bytes of its
+            # own. Its ledger must be byte-identical to one parent's (the
+            # most advanced one), having already extended the rest above.
+            if all(raw != parent.raw for parent in parent_states):
+                raise PinError(
+                    f"merge commit {commit_sha[:12]} changes ledger bytes; "
+                    "appends must arrive on single-parent commits"
+                )
+        elif len(lines) > len(parent_states[0].lines):
+            # Appends are linear among themselves: each one continues the
+            # latest accepted state, so every ledger line is attributed to
+            # exactly one commit, in index order.
+            if len(parent_states[0].lines) != attributed_lines:
+                raise PinError(
+                    f"commit {commit_sha[:12]} appends to a ledger state "
+                    f"({len(parent_states[0].lines)} rows) that is not the "
+                    f"latest accepted one ({attributed_lines} rows); refusing "
+                    "parallel append lines"
+                )
             accepted_at = _utc_instant(str(commit["commit"]["committer"]["date"]))
-            for index in range(len(previous_lines), len(lines)):
+            for index in range(attributed_lines, len(lines)):
                 rows.append(
                     _row(
                         index,
@@ -1940,18 +2018,20 @@ def refresh(*, require_catalog: bool = False) -> None:
                         "append_derived",
                     )
                 )
+            attributed_lines = len(lines)
         inventory, immutable_prefix = _remote_release_inventory_at_commit(
             commit_sha,
             commit_payload,
             raw,
             require_complete_siblings=False,
         )
-        _require_inventory_progress(
-            previous_inventory,
-            inventory,
-            final_inventory,
-            label=f"commit {commit_sha[:12]}",
-        )
+        for parent_sha, parent in zip(parent_shas, parent_states, strict=True):
+            _require_inventory_progress(
+                parent.inventory,
+                inventory,
+                final_inventory,
+                label=f"commit {commit_sha[:12]} (against parent {parent_sha[:12]})",
+            )
         _require_inventory_head_witnesses_state(
             inventory,
             release_state.verification,
@@ -1959,14 +2039,18 @@ def refresh(*, require_catalog: bool = False) -> None:
             immutable_prefix,
             label=f"commit {commit_sha[:12]}",
         )
-        previous_inventory = inventory
-        expected_parent = commit_sha
-        previous_lines = lines
-        previous_raw = raw
+        walked[commit_sha] = _WalkedState(lines, raw, inventory)
 
-    if head_raw != previous_raw or _lines(head_raw) != previous_lines:
+    # _compare_commits guarantees the listing ends at the head, so the head
+    # was walked and everything it descends from was walked before it.
+    head_state = walked[head_sha]
+    if head_raw != head_state.raw or _lines(head_raw) != head_state.lines:
         raise PinError("branch head bytes disagree with its own commit history")
-    if previous_inventory != final_inventory:
+    if attributed_lines != len(head_state.lines):
+        raise PinError(
+            "branch head carries ledger rows that no walked append accounts for"
+        )
+    if head_state.inventory != final_inventory:
         raise PinError("branch history does not end at the verified release inventory")
     _validate_catalog_and_registry(
         head_catalog,
