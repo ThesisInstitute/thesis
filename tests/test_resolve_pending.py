@@ -3851,6 +3851,89 @@ def test_current_native_executor_requires_exact_registry_series_spec_pair() -> N
     assert resolve_pending.intl_execution_spec(borrowed, spec) is None
 
 
+def _routed_intl_spec(ref: str) -> dict:
+    """The spec exactly as the resolver's router hands it to the main loop."""
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": "routed-target",
+                "resolutionDate": "2026-09-14",
+            }
+        ],
+        "resolutionLinks": [
+            {
+                "status": "pending",
+                "targetFactRef": ref,
+                "forecastSlug": "routed-target",
+            }
+        ],
+    }
+    ((got_ref, kind, spec, *_rest),) = resolve_pending.pending_adapter_refs(log)
+    assert (got_ref, kind) == (ref, "intl")
+    return spec
+
+
+def _current_intl_registration(series: str) -> dict:
+    spec = resolve_pending.INTL_REGISTRY_ADAPTERS[series]
+    binding = {
+        **json.loads(json.dumps(resolve_pending.intl_binding_template(spec))),
+        "allowedHosts": list(spec["allowed_hosts"]),
+        "expectedReleaseWindow": {"start": "2026-09-14", "end": "2026-09-14"},
+    }
+    return {
+        "targetContentHash": "0" * 64,
+        "contract": {"series": series, "sourceBinding": binding},
+    }
+
+
+def test_routed_international_spec_reaches_its_native_executor() -> None:
+    """The router copies the adapter (`{**spec, "period_type": ...,
+    "target_series": stem}`), so an identity test against the registry
+    refused every registered international target: both StatCan CPI cells
+    of summer 2026 printed "BINDING/ADAPTER MISMATCH (refusing, registry
+    drift?): ... — " with no mismatch named, and their first-print windows
+    closed unresolved. The direct-spec tests above could not see it."""
+    ref = "statcan.cpi.allitems.yoy.2026_08.first_print"
+    routed = _routed_intl_spec(ref)
+    canonical = resolve_pending.INTL_REGISTRY_ADAPTERS["statcan.cpi.allitems.yoy"]
+    assert routed is not canonical  # the router hands over a copy
+    assert resolve_pending.intl_registry_origin(routed) is canonical
+
+    registration = _current_intl_registration("statcan.cpi.allitems.yoy")
+    binding = registration["contract"]["sourceBinding"]
+    assert resolve_pending.intl_binding_mismatches(routed, binding) == []
+    execution = resolve_pending.intl_execution_spec(registration, routed)
+    assert execution is not None
+    assert execution["target_series"] == "statcan.cpi.allitems.yoy"
+
+
+def test_routed_spec_still_cannot_borrow_another_series_contract() -> None:
+    """What the identity test was for: the parser that runs must be the
+    canonical one for the series the immutable contract names."""
+    routed = _routed_intl_spec("statcan.cpi.allitems.yoy.2026_08.first_print")
+    borrowed = _current_intl_registration("statcan.cpi.allitems.yoy")
+    borrowed["contract"]["series"] = "statcan.gdp_by_industry.monthly_growth"
+    assert resolve_pending.intl_execution_spec(borrowed, routed) is None
+    unknown = _current_intl_registration("statcan.cpi.allitems.yoy")
+    unknown["contract"]["series"] = "unrelated.other.series"
+    assert resolve_pending.intl_execution_spec(unknown, routed) is None
+
+
+def test_altered_routed_spec_has_no_origin() -> None:
+    routed = _routed_intl_spec("statcan.cpi.allitems.yoy.2026_08.first_print")
+    registration = _current_intl_registration("statcan.cpi.allitems.yoy")
+    for tampered in (
+        {**routed, "series_id": "v00000000"},  # a different vector
+        {**routed, "extra_transform": "anything"},  # an added key
+        {k: v for k, v in routed.items() if k != "allowed_hosts"},  # a dropped key
+        {**routed, "target_series": "abs.cpi.all_groups.yoy"},  # another stem
+        {**routed, "target_series": "not.an.adapter"},
+    ):
+        assert resolve_pending.intl_registry_origin(tampered) is None
+        assert resolve_pending.intl_execution_spec(registration, tampered) is None
+
+
 def test_existing_legacy_international_targets_fail_closed_except_reviewed_one() -> (
     None
 ):
@@ -4891,6 +4974,54 @@ def test_main_ssa_hearings_leg_refuses_because_the_source_has_no_national_row(
     assert "SOURCE PUBLISHES NO NATIONAL AGGREGATE (refusing)" in out
     assert "RPTG_PRD_ENDT 06/26/2026, 165 hearing-office rows" in out
     assert "nothing new to record" in out
+
+
+def test_main_survives_a_refused_wayback_refetch_and_resolves_the_rest(
+    monkeypatch, capsys
+) -> None:
+    """2026-09-01, 09-02 and 09-06: web.archive.org refused one connection
+    and the uncaught URLError ended the run, so nothing resolved that day
+    was appended. The hearings target must defer and the run must go on."""
+    import urllib.error
+
+    hearings = "ssa.hearings.average_processing_time_days.2026-06.first_print"
+    other = "ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print"
+    _fetched, _envelopes, pages = _install_aging_main(monkeypatch, [hearings, other])
+    archived = (AGING_FIXTURES / "ho_workload_2026-06-26.xml").read_bytes()
+    (workload_url,) = [url for url, body in pages.items() if body == archived]
+    # The live file has rolled on to July, so June survives only in Wayback.
+    pages[workload_url] = archived.replace(b"06/26/2026", b"07/31/2026")
+    snapshot_capture = (
+        AGING_FIXTURES / "stat_snapshot_2026-06.wayback-20260711204033.html"
+    ).read_bytes()
+    capture_reads = {"workload": 0}
+
+    def fake_wayback(url: str) -> bytes:
+        if "cdx/search" in url:
+            if "stat_snapshot/2026-06.html" in url:
+                return (AGING_FIXTURES / "cdx_stat_snapshot_2026-06.json").read_bytes()
+            if workload_url.split("://", 1)[1] in url:
+                return (
+                    b'[["timestamp","statuscode","digest","length"],'
+                    b'["20260701120000","200","AAAA","1000"]]'
+                )
+            return b"[]"
+        if url.endswith(workload_url):
+            capture_reads["workload"] += 1
+            if capture_reads["workload"] == 1:
+                return archived  # the corroboration's own guarded read
+            raise urllib.error.URLError(ConnectionRefusedError(111, "refused"))
+        return snapshot_capture
+
+    monkeypatch.setattr(resolve_pending, "ssa_wayback_fetch", fake_wayback)
+
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert capture_reads["workload"] == 2
+    assert f"  WAYBACK FETCH FAILED (deferring): {hearings}" in out
+    assert "::warning title=Resolver source unreachable::" in out
+    assert f"  resolve {other} -> 7006.0 thousands" in out
+    assert "dry-run: would append 1 row(s)" in out
 
 
 def test_main_ssa_official_leg_treats_a_missing_engine_as_fatal(

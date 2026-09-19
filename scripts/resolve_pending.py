@@ -5884,6 +5884,39 @@ def intl_binding_mismatches(spec: dict[str, Any], binding: dict[str, Any]) -> li
     return mismatches
 
 
+_INTL_ROUTING_KEYS = frozenset({"period_type", "target_series"})
+
+
+def intl_registry_origin(spec: dict[str, Any]) -> dict[str, Any] | None:
+    """The canonical adapter object that ``spec`` is, or was routed from.
+
+    ``pending_adapter_refs`` does not hand the main loop the adapter object
+    itself. It hands it ``{**adapter, "period_type": ..., "target_series":
+    stem}``, so an identity test against the registry can never pass on a
+    routed spec. That refused every registered international target with an
+    empty mismatch list ("registry drift? — ") from the day the identity
+    test was added; the direct-call tests passed the registry object and
+    never saw it.
+
+    A routed copy is traced back through the stem the router recorded, and
+    is accepted only if it still equals that adapter on every key the
+    adapter defines and adds nothing but the two routing keys. A copy that
+    was altered on the way therefore has no origin.
+    """
+    if any(spec is known for known in INTL_ADAPTER_CANDIDATES.values()):
+        return spec
+    if any(spec is known for known in INTL_REGISTRY_ADAPTERS.values()):
+        return spec
+    origin = INTL_ADAPTERS.get(str(spec.get("target_series")))
+    if origin is None:
+        return None
+    if any(key not in spec or spec[key] != value for key, value in origin.items()):
+        return None
+    if not set(spec) - set(origin) <= _INTL_ROUTING_KEYS:
+        return None
+    return origin
+
+
 def intl_execution_spec(
     registration: dict[str, Any], spec: dict[str, Any]
 ) -> dict[str, Any] | None:
@@ -5904,7 +5937,7 @@ def intl_execution_spec(
     # parser spec. Otherwise an unrelated target could borrow a valid binding
     # and be resolved by the wrong series implementation.
     registry_spec = INTL_REGISTRY_ADAPTERS.get(str(contract.get("series")))
-    if registry_spec is not spec:
+    if registry_spec is None or registry_spec is not intl_registry_origin(spec):
         return None
     if not intl_binding_mismatches(spec, binding):
         return {**spec, "target_series": contract.get("series")}
@@ -14023,9 +14056,28 @@ def main() -> int:
                             f"(status {witnessed.get('status')})"
                         )
                         continue
-                    body = ssa_official_pages.wayback_capture_body(
-                        corroborating["timestamp"], url, ssa_wayback_fetch
-                    )
+                    # The corroboration above already fetched this capture
+                    # inside its own best-effort guard. This second fetch had
+                    # none, so one refused connection to web.archive.org
+                    # ended the whole run before anything it had resolved
+                    # was appended (2026-09-01, 09-02 and 09-06). Transport
+                    # failures defer this target; the run goes on.
+                    try:
+                        body = ssa_official_pages.wayback_capture_body(
+                            corroborating["timestamp"], url, ssa_wayback_fetch
+                        )
+                    except (OSError, EOFError, http.client.HTTPException) as exc:
+                        print(
+                            f"  WAYBACK FETCH FAILED (deferring): {ref} — capture "
+                            f"{corroborating['timestamp']} could not be re-read: "
+                            f"{type(exc).__name__}: {str(exc)[:200]}"
+                        )
+                        print(
+                            "::warning title=Resolver source unreachable::"
+                            f"{ref} deferred: web.archive.org capture "
+                            f"{corroborating['timestamp']} could not be re-read"
+                        )
+                        continue
                     workload = ssa_official_pages.oho_workload_file(body)
                     witnessed["resolvedFrom"] = {
                         "timestamp": corroborating["timestamp"],
