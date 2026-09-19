@@ -79,12 +79,36 @@ TIME_STAMP_RE = re.compile(
 
 
 @dataclass(frozen=True)
+class PinnedSigner:
+    """One TSA responder certificate this verifier accepts.
+
+    The certificate hash and the SPKI hash are pinned as a pair. A receipt
+    must match both halves of the same entry: a certificate from one entry
+    with the key of another is a certificate nobody reviewed.
+    """
+
+    label: str
+    certificate_sha256: str
+    spki_sha256: str
+
+
+@dataclass(frozen=True)
 class AnchorSpec:
     filename: str
     pem_sha256: str
     policy_oid: str
-    signer_certificate_sha256: str
-    signer_spki_sha256: str
+    # Every responder certificate accepted under this root, oldest first.
+    # TSAs replace their responder certificate about once a year, and the
+    # releases already in the journal stay signed by the old one, so the
+    # pin is a reviewed set rather than a single certificate. Membership
+    # is the whole rule: `openssl cms -verify -attime <genTime>` has
+    # already required the certificate to chain to the pinned root and to
+    # be valid at the signed time, so an entry cannot vouch for a receipt
+    # from outside its own validity period. No ordering across releases
+    # is imposed, because a TSA may serve two responders during a
+    # changeover. Adding an entry is a trust decision; see
+    # docs/tsa-signer-rotation.md for the check to run first.
+    signers: tuple[PinnedSigner, ...]
 
 
 ANCHORS = {
@@ -92,22 +116,50 @@ ANCHORS = {
         filename="freetsa-root-2016.pem",
         pem_sha256=("2151b61137ffa86bf664691ba67e7da0b19f98c758e3d228d5d8ebf27e044438"),
         policy_oid="1.2.3.4.1",
-        signer_certificate_sha256=(
-            "32e841a95cc1164101ffde41298ef2fc75c1c4372ef095e88a6bbd47dfb191fc"
-        ),
-        signer_spki_sha256=(
-            "fa02bd555e3e483d62b4e70be6218692068d2b0b0a7525db58dcbf2901cdb072"
+        signers=(
+            PinnedSigner(
+                label="www.freetsa.org",
+                certificate_sha256=(
+                    "32e841a95cc1164101ffde41298ef2fc75c1c4372ef095e88a6bbd47dfb191fc"
+                ),
+                spki_sha256=(
+                    "fa02bd555e3e483d62b4e70be6218692068d2b0b0a7525db58dcbf2901cdb072"
+                ),
+            ),
         ),
     ),
     "digicert": AnchorSpec(
         filename="digicert-trusted-root-g4.pem",
         pem_sha256=("ce7d6b44f5d510391be98c8d76b18709400a30cd87659bfebe1c6f97ff5181ee"),
         policy_oid="2.16.840.1.114412.7.1",
-        signer_certificate_sha256=(
-            "4aa03fa22cd75c84c55c938f828e676b9caecab33fe36d269aa334f146110a33"
-        ),
-        signer_spki_sha256=(
-            "7abda95ed7301ac94bded350babc319903d0b4f16c4e7e39346dba5f9e992b72"
+        signers=(
+            # Signed ledger releases 0001-0020 (through 2026-09-03).
+            PinnedSigner(
+                label="DigiCert timestamp responder in service through 2026-09-03",
+                certificate_sha256=(
+                    "4aa03fa22cd75c84c55c938f828e676b9caecab33fe36d269aa334f146110a33"
+                ),
+                spki_sha256=(
+                    "7abda95ed7301ac94bded350babc319903d0b4f16c4e7e39346dba5f9e992b72"
+                ),
+            ),
+            # Served by timestamp.digicert.com from 2026-09-09 at the
+            # latest: serial 084FDC334F7E454EDBC30F8FF9921835, valid
+            # 2026-08-05 to 2037-11-04, EKU critical timeStamping, issued
+            # by "DigiCert Trusted G4 TimeStamping RSA4096 SHA256 2025
+            # CA1", which chains to the pinned Trusted Root G4. Hashes
+            # taken from a receipt requested on 2026-09-19; they equal the
+            # certificate hash the resolver refused on ten consecutive
+            # daily runs.
+            PinnedSigner(
+                label="DigiCert SHA256 RSA4096 Timestamp Responder 2026 1",
+                certificate_sha256=(
+                    "2da09da7f4131f9fe72db6c5e6e9c9656755af043f1ea742cc0d2120e141ebfc"
+                ),
+                spki_sha256=(
+                    "753596b60a629061144cbd312017bbfb77510eac20b7eadc5fafb7cabe142fd5"
+                ),
+            ),
         ),
     ),
 }
@@ -771,15 +823,34 @@ def _verify_production_signer(
     )
     certificate_sha256 = sha256_bytes(certificate_der)
     spki_sha256 = sha256_bytes(public_key_der)
-    if certificate_sha256 != spec.signer_certificate_sha256:
-        raise ReleaseChainError(
-            f"RFC 3161 signer certificate is not pinned for {receipt.name}: "
-            f"{certificate_sha256}"
+    if any(
+        signer.certificate_sha256 == certificate_sha256
+        and signer.spki_sha256 == spki_sha256
+        for signer in spec.signers
+    ):
+        return
+    # Name what was seen. The bare hash in this message is what let the
+    # 2026-09 DigiCert rotation be matched against a fresh receipt; the
+    # subject says at a glance whether it is a rotation or something else.
+    subject = (
+        _openssl_binary(
+            ["x509", "-in", str(signer), "-noout", "-subject", "-nameopt", "RFC2253"],
+            environment=environment,
+            label=f"signer subject for {receipt.name}",
         )
-    if spki_sha256 != spec.signer_spki_sha256:
+        .decode("utf-8", "replace")
+        .strip()
+    )
+    if any(s.certificate_sha256 == certificate_sha256 for s in spec.signers):
         raise ReleaseChainError(
             f"RFC 3161 signer SPKI is not pinned for {receipt.name}: {spki_sha256}"
+            f" ({subject})"
         )
+    raise ReleaseChainError(
+        f"RFC 3161 signer certificate is not pinned for {receipt.name}: "
+        f"{certificate_sha256} (SPKI {spki_sha256}; {subject}). If the TSA "
+        "replaced its responder certificate, follow docs/tsa-signer-rotation.md"
+    )
 
 
 def verify_receipt(
