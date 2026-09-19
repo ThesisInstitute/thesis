@@ -19,7 +19,7 @@ jobs:
       max-parallel: 1
       matrix:
         include:
-          - model: gpt-5.5
+          - model: gpt-5.6-terra
             effort: high
           - model: gpt-5.6
             effort: high
@@ -84,7 +84,7 @@ jobs:
               --codex-reasoning-effort "$CODEX_REASONING_EFFORT"
               --codex-sandbox workspace-write
               --codex-network
-              --pre-submit-review-codex-model gpt-5.5
+              --pre-submit-review-codex-model gpt-5.6
               --timeout-seconds 540
             )
             if [ -n "$CONDITIONAL" ]; then
