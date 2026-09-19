@@ -1,0 +1,844 @@
+{
+  "schemaVersion": "thesis_resolution_status_v1",
+  "asOf": "2026-09-19",
+  "run": {
+    "logAvailable": true,
+    "completed": false,
+    "error": "ledger_release_chain.ReleaseChainError  RFC 3161 signer certificate is not pinned for 0021-35d15fca4e02417c.digicert.tsr  2da09da7f4131f9fe72db6c5e6e9c9656755af043f1ea742cc0d2120e141ebfc"
+  },
+  "targets": {
+    "fns.wic.total_participation.2026-04.first_print": {
+      "forecastSlug": "wic-participation-april-2026",
+      "resolutionDate": "2026-07-11",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "treasury.mts.dod_military_programs_gross_outlays.june_2026.first_print": {
+      "forecastSlug": "us-defense-dod-military-outlays-june-2026",
+      "resolutionDate": "2026-07-13",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "treasury.mts.monthly_deficit.june_2026.first_print": {
+      "forecastSlug": "us-mts-deficit-june-2026",
+      "resolutionDate": "2026-07-13",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bls.real_earnings.avg_hourly_mom.2026-06.first_print": {
+      "forecastSlug": "us-real-avg-hourly-earnings-mom-june-2026",
+      "resolutionDate": "2026-07-14",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "ons.labour.claimant_count.2026_06.first_print": {
+      "forecastSlug": "uk-claimant-count-june-2026",
+      "resolutionDate": "2026-07-14",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "bls.wp.WPSFD4.2026-06.first_print": {
+      "forecastSlug": "bls-ppi-final-demand-monthly-change-june-2026",
+      "resolutionDate": "2026-07-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "census.marts.adv44x72.monthly_change.2026-06.first_print": {
+      "forecastSlug": "census-marts-adv44x72-monthly-change-june-2026",
+      "resolutionDate": "2026-07-16",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "ons.iop.manufacturing_cvmsa_index.2026-05.first_print": {
+      "forecastSlug": "uk-manufacturing-output-index-may-2026",
+      "resolutionDate": "2026-07-16",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "ons.ios.total_services_cvmsa_index.2026-05.first_print": {
+      "forecastSlug": "uk-index-of-services-may-2026",
+      "resolutionDate": "2026-07-16",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "ons.outputintheconstructionindustryallworksummary.total_construction_output_mom_sa.2026-05.first_print": {
+      "forecastSlug": "uk-construction-output-growth-may-2026",
+      "resolutionDate": "2026-07-16",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "eurostat.construction.production_index.2026_05.first_print": {
+      "forecastSlug": "euro-area-construction-production-index-may-2026",
+      "resolutionDate": "2026-07-20",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "nbb.consumer_confidence.indicator.2026-07.first_print": {
+      "forecastSlug": "belgium-consumer-confidence-july-2026",
+      "resolutionDate": "2026-07-20",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "ons.cpi.annual_rate.june_2026.first_print": {
+      "forecastSlug": "ons-cpi-annual-rate-june-2026",
+      "resolutionDate": "2026-07-21",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "ons.hmrc.paye_payrolled_employees.june_2026.first_print": {
+      "forecastSlug": "ons-hmrc-paye-payrolled-employees-june-2026",
+      "resolutionDate": "2026-07-21",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "ons.pusf.j5ii.public_sector_net_borrowing_ex_banks.june_2026.first_print": {
+      "forecastSlug": "ons-pusf-j5ii-public-sector-net-borrowing-ex-banks-june-2026",
+      "resolutionDate": "2026-07-21",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "census.new_residential_sales.new_single_family_houses_sold_saar.2026_06.first_print": {
+      "forecastSlug": "us-new-home-sales-saar-june-2026",
+      "resolutionDate": "2026-07-24",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "nbb.business_barometer.overall.2026-07.first_print": {
+      "forecastSlug": "belgium-nbb-business-barometer-july-2026",
+      "resolutionDate": "2026-07-24",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "census.m3.defense_capital_goods.inventories.2026_06.first_print": {
+      "forecastSlug": "us-defense-capital-goods-inventories-june-2026",
+      "resolutionDate": "2026-07-27",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "abs.cpi.all_groups_annual_rate.australia.june_2026.first_print": {
+      "forecastSlug": "abs-cpi-all-groups-annual-rate-australia-june-2026",
+      "resolutionDate": "2026-07-29",
+      "state": "refused",
+      "code": "BINDING_MISMATCH",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "detail": "adapter"
+    },
+    "bea.pce_price_index.monthly_change.june_2026.first_print": {
+      "forecastSlug": "bea-pce-price-index-monthly-change-june-2026",
+      "resolutionDate": "2026-07-29",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bea.personal_current_taxes.level.june_2026.first_print": {
+      "forecastSlug": "bea-personal-current-taxes-level-june-2026",
+      "resolutionDate": "2026-07-29",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bls.bed.private_gross_job_gains.opening_establishments.2025_q4.first_print": {
+      "forecastSlug": "bls-bed-opening-establishment-gross-job-gains-q4-2025",
+      "resolutionDate": "2026-07-29",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "abs.building_approvals.total_dwellings_mom.australia.june_2026.first_print": {
+      "forecastSlug": "abs-building-approvals-total-dwellings-mom-australia-june-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "bea.disposable_personal_income.level.june_2026.first_print": {
+      "forecastSlug": "bea-disposable-personal-income-level-june-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bea.government_social_benefits.level.june_2026.first_print": {
+      "forecastSlug": "bea-government-social-benefits-level-june-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bea.government_social_benefits.medicaid.june_2026.first_print": {
+      "forecastSlug": "bea-government-social-benefits-medicaid-june-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bea.government_social_benefits.medicare.june_2026.first_print": {
+      "forecastSlug": "bea-government-social-benefits-medicare-june-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bea.pce.core_mom.june_2026.first_print": {
+      "forecastSlug": "bea-pce-core-mom-june-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "eurostat.une_rt_m.unemployment_rate.belgium.2026_06.first_print": {
+      "forecastSlug": "belgium-unemployment-rate-june-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "eurostat.unemployment_rate.euro_area.june_2026.first_print": {
+      "forecastSlug": "euro-area-unemployment-rate-june-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "nbb.gdp.flash_qoq.2026_q2.first_print": {
+      "forecastSlug": "belgium-gdp-flash-q2-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "statbel.cpi.headline_yoy.2026-07.first_print": {
+      "forecastSlug": "belgium-cpi-annual-rate-july-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "statbel.health_index.yoy.2026-07.first_print": {
+      "forecastSlug": "belgium-health-index-annual-rate-july-2026",
+      "resolutionDate": "2026-07-30",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bea.government_social_benefits.social_security.june_2026.first_print": {
+      "forecastSlug": "bea-government-social-benefits-social-security-june-2026",
+      "resolutionDate": "2026-07-31",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "cms.medicaid_chip.total_enrollment.march_2026.fixed_vintage": {
+      "forecastSlug": "medicaid-chip-enrollment-march-2026",
+      "resolutionDate": "2026-07-31",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "ssa.hearings.average_processing_time_days.2026-06.first_print": {
+      "forecastSlug": "ssa-hearings-average-processing-time-june-2026",
+      "resolutionDate": "2026-07-31",
+      "state": "refused",
+      "code": "SOURCE_DOES_NOT_PUBLISH_FIGURE",
+      "reason": "The registered source does not publish the figure this forecast names, so it cannot resolve mechanically.",
+      "detail": "the workload XML (RPTG_PRD_ENDT 06/26/2026, 165 hearing-office rows) publishes no national aggregate row  SSA's data dictionary defines DSPN_AVGPT per hearing office only  the cell's resolver names a figure its bound source does not print, "
+    },
+    "statjp.cpi.tokyo_all_items_annual_rate.july_2026.preliminary": {
+      "forecastSlug": "japan-tokyo-cpi-annual-rate-july-2026-prelim",
+      "resolutionDate": "2026-07-31",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "usda.fns.snap.participation.march_2026.fixed_vintage": {
+      "forecastSlug": "snap-participation-march-2026",
+      "resolutionDate": "2026-07-31",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "usda.fns.wic.total_participants.march_2026.fixed_vintage": {
+      "forecastSlug": "wic-total-participation-march-2026",
+      "resolutionDate": "2026-07-31",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bea.trade.goods_services_deficit.2026_06.first_print": {
+      "forecastSlug": "us-goods-services-trade-deficit-june-2026",
+      "resolutionDate": "2026-08-04",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bls.jolts.quits_rate.2026-06.first_print": {
+      "forecastSlug": "jolts-quits-rate-june-2026",
+      "resolutionDate": "2026-08-04",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bls.cps.employed_people_by_occupation.production.july_2026.first_print": {
+      "forecastSlug": "cps-production-employment-july-2026",
+      "resolutionDate": "2026-08-06",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.employed_people_by_occupation.transportation_material_moving.july_2026.first_print": {
+      "forecastSlug": "cps-transport-material-moving-employment-july-2026",
+      "resolutionDate": "2026-08-06",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.productivity.nonfarm_qoq_prelim.2026-Q2.first_print": {
+      "forecastSlug": "us-nonfarm-productivity-q2-2026-prelim",
+      "resolutionDate": "2026-08-06",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bls.ces.total_nonfarm.payroll_employment.change.sa.2026-07.first_print": {
+      "forecastSlug": "nonfarm-payrolls-july-2026",
+      "resolutionDate": "2026-08-07",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bls.cps.employed_people_by_occupation.business_financial_operations.july_2026.first_print": {
+      "forecastSlug": "cps-business-financial-employment-july-2026",
+      "resolutionDate": "2026-08-07",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.employed_people_by_occupation.computer_mathematical.july_2026.first_print": {
+      "forecastSlug": "cps-computer-math-employment-july-2026",
+      "resolutionDate": "2026-08-07",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.employed_people_by_occupation.healthcare_support.july_2026.first_print": {
+      "forecastSlug": "cps-healthcare-support-employment-july-2026",
+      "resolutionDate": "2026-08-07",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.employed_people_by_occupation.office_administrative_support.july_2026.first_print": {
+      "forecastSlug": "cps-office-admin-employment-july-2026",
+      "resolutionDate": "2026-08-07",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.telework_share.2026-07.first_print": {
+      "forecastSlug": "us-telework-rate-july-2026",
+      "resolutionDate": "2026-08-07",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bls.real_earnings.avg_hourly_mom.2026-07.first_print": {
+      "forecastSlug": "us-real-avg-hourly-earnings-mom-july-2026",
+      "resolutionDate": "2026-08-12",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "bls.wp.WPSFD4.2026-07.first_print": {
+      "forecastSlug": "bls-ppi-final-demand-monthly-change-july-2026",
+      "resolutionDate": "2026-08-13",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_SERIES_NOT_COVERED",
+      "reason": "No resolver covers this series, although its registration names a resolver family.",
+      "detail": "registered adapter alfred-fred"
+    },
+    "ons.trade.total_goods_services_balance.2026_06.first_print": {
+      "forecastSlug": "uk-total-trade-balance-june-2026",
+      "resolutionDate": "2026-08-13",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "fns.wic.total_participation.2026-05.first_print": {
+      "forecastSlug": "wic-participation-may-2026",
+      "resolutionDate": "2026-08-14",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "statcan.cpi.allitems.yoy.2026_07.first_print": {
+      "forecastSlug": "canada-cpi-annual-rate-july-2026",
+      "resolutionDate": "2026-08-17",
+      "state": "refused",
+      "code": "BINDING_MISMATCH_UNEXPLAINED",
+      "reason": "The resolver refused this target as a binding mismatch but named no field that differs."
+    },
+    "treasury.mts.monthly_deficit.july_2026.first_print": {
+      "forecastSlug": "us-mts-deficit-july-2026",
+      "resolutionDate": "2026-08-17",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "ons.labour.unemployment_rate.april_to_june_2026.first_print": {
+      "forecastSlug": "uk-unemployment-rate-apr-jun-2026",
+      "resolutionDate": "2026-08-18",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "ons.ppi.output_manufactured_products_index.2026_07.first_print": {
+      "forecastSlug": "uk-ppi-output-manufactured-products-index-july-2026",
+      "resolutionDate": "2026-08-19",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "abs.labour.employment_change.australia.july_2026.first_print": {
+      "forecastSlug": "abs-labour-employment-change-australia-july-2026",
+      "resolutionDate": "2026-08-20",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "abs.labour.unemployment_rate.australia.july_2026.first_print": {
+      "forecastSlug": "australia-unemployment-rate-july-2026",
+      "resolutionDate": "2026-08-20",
+      "state": "refused",
+      "code": "BINDING_MISMATCH",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "detail": "adapter, field, sourceUrl, table, transform"
+    },
+    "statcan.employment_insurance.regular_beneficiaries.canada.june_2026.first_print": {
+      "forecastSlug": "canada-ei-regular-beneficiaries-june-2026",
+      "resolutionDate": "2026-08-20",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "nbb.consumer_confidence.indicator.2026-08.first_print": {
+      "forecastSlug": "belgium-consumer-confidence-august-2026",
+      "resolutionDate": "2026-08-21",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "abs.cpi.all_groups.yoy.2026-07.first_print": {
+      "forecastSlug": "australia-cpi-annual-rate-july-2026",
+      "resolutionDate": "2026-08-26",
+      "state": "refused",
+      "code": "BINDING_MISMATCH",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "detail": "adapter, field, sourceSeriesId, sourceUrl, table, transform, allowedHosts"
+    },
+    "us.bea.core_pce.mom_sa.2026-07": {
+      "forecastSlug": "us-core-pce-mom-july-2026",
+      "resolutionDate": "2026-08-26",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bls.qcew.aircraft_manufacturing.establishments.2026_q1.first_print": {
+      "forecastSlug": "us-qcew-aircraft-manufacturing-establishments-q1-2026",
+      "resolutionDate": "2026-08-28",
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The first official print was not captured inside its registered window. Later figures may be revised, so the resolver will not score against them.",
+      "detail": "registered release day was 2026-08-28"
+    },
+    "nbb.business_barometer.overall.2026-08.first_print": {
+      "forecastSlug": "belgium-nbb-business-barometer-august-2026",
+      "resolutionDate": "2026-08-28",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "statcan.36-10-0434-01.all_industries.month_to_month_percent_change.2026-06.first_print": {
+      "forecastSlug": "canada-monthly-gdp-growth-june-2026",
+      "resolutionDate": "2026-08-28",
+      "state": "refused",
+      "code": "BINDING_MISMATCH",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "detail": "adapter, field, sourceSeriesId, sourceUrl, table, transform"
+    },
+    "co.dor.individual_income_tax.net_collections.2026_07.first_print": {
+      "forecastSlug": "colorado-income-tax-collections-july-2026",
+      "resolutionDate": "2026-08-31",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "usda.fns.snap.persons.april_2026": {
+      "forecastSlug": "snap-participation-april-2026",
+      "resolutionDate": "2026-08-31",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bls.jolts.hires_rate.2026_07.first_print": {
+      "forecastSlug": "jolts-hires-rate-july-2026",
+      "resolutionDate": "2026-09-01",
+      "state": "recorded_awaiting_publish",
+      "code": "RECORDED_AWAITING_PUBLISH",
+      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
+    },
+    "bls.jolts.job_openings.july_2026.first_print": {
+      "forecastSlug": "jolts-openings-july-2026",
+      "resolutionDate": "2026-09-01",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bls.jolts.quits_rate.2026-07.first_print": {
+      "forecastSlug": "jolts-quits-rate-july-2026",
+      "resolutionDate": "2026-09-01",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "census.construction_spending.total_mom.2026_07.first_print": {
+      "forecastSlug": "us-construction-spending-mom-july-2026",
+      "resolutionDate": "2026-09-01",
+      "state": "recorded_awaiting_publish",
+      "code": "RECORDED_AWAITING_PUBLISH",
+      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
+    },
+    "eurostat.une_rt_m.unemployment_rate.belgium.2026_07.first_print": {
+      "forecastSlug": "belgium-unemployment-rate-july-2026",
+      "resolutionDate": "2026-09-01",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "eurostat.unemployment_rate.euro_area.july_2026.first_print": {
+      "forecastSlug": "euro-area-unemployment-rate-july-2026",
+      "resolutionDate": "2026-09-01",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "us.dol.initial_claims.sa.week_2026-08-22": {
+      "forecastSlug": "initial-claims-week-2026-08-22",
+      "resolutionDate": "2026-09-02",
+      "state": "recorded_awaiting_publish",
+      "code": "RECORDED_AWAITING_PUBLISH",
+      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
+    },
+    "bea.trade.goods_services_deficit.2026_07.first_print": {
+      "forecastSlug": "us-goods-services-trade-deficit-july-2026",
+      "resolutionDate": "2026-09-03",
+      "state": "recorded_awaiting_publish",
+      "code": "RECORDED_AWAITING_PUBLISH",
+      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
+    },
+    "dol.eta.continued_claims.sa.week_2026-08-22.first_print": {
+      "forecastSlug": "continued-claims-week-2026-08-22",
+      "resolutionDate": "2026-09-03",
+      "state": "recorded_awaiting_publish",
+      "code": "RECORDED_AWAITING_PUBLISH",
+      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
+    },
+    "statbel.cpi.headline_yoy.2026-08.first_print": {
+      "forecastSlug": "belgium-cpi-annual-rate-august-2026",
+      "resolutionDate": "2026-09-03",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "statbel.health_index.yoy.2026-08.first_print": {
+      "forecastSlug": "belgium-health-index-annual-rate-august-2026",
+      "resolutionDate": "2026-09-03",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "bls.ces.total_nonfarm.payroll_employment.change.sa.2026-08.first_print": {
+      "forecastSlug": "nonfarm-payrolls-august-2026",
+      "resolutionDate": "2026-09-04",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print": {
+      "forecastSlug": "cps-computer-math-employment-august-2026",
+      "resolutionDate": "2026-09-04",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
+      "forecastSlug": "cps-healthcare-support-employment-august-2026",
+      "resolutionDate": "2026-09-04",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.telework_share.2026-08.first_print": {
+      "forecastSlug": "us-telework-rate-august-2026",
+      "resolutionDate": "2026-09-04",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "bls.cps.unemployment_rate.august_2026.first_print": {
+      "forecastSlug": "unemployment-rate-august-2026",
+      "resolutionDate": "2026-09-04",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "statjp.cpi.tokyo_all_items_annual_rate.august_2026.preliminary": {
+      "forecastSlug": "japan-tokyo-cpi-annual-rate-august-2026-prelim",
+      "resolutionDate": "2026-09-04",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "census.spm.poverty_rate_65_plus.2025.first_print": {
+      "forecastSlug": "spm-senior-poverty-2025",
+      "resolutionDate": "2026-09-08",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "fed.g19.consumer_credit_nonrevolving_annual_rate.2026_07.first_print": {
+      "forecastSlug": "us-nonrevolving-consumer-credit-annual-rate-july-2026",
+      "resolutionDate": "2026-09-08",
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+    },
+    "fed.g19.consumer_credit_revolving_annual_rate.2026_07.first_print": {
+      "forecastSlug": "us-revolving-consumer-credit-annual-rate-july-2026",
+      "resolutionDate": "2026-09-08",
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+    },
+    "fed.g19.consumer_credit_total_annual_rate.2026_07.first_print": {
+      "forecastSlug": "us-consumer-credit-annual-rate-july-2026",
+      "resolutionDate": "2026-09-08",
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+    },
+    "bls.ecec.private_total_compensation.hourly_cost.2026_q2.first_print": {
+      "forecastSlug": "bls-ecec-private-total-compensation-hourly-cost-q2-2026",
+      "resolutionDate": "2026-09-09",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "bls.cps.employed_people_by_occupation.production.august_2026.first_print": {
+      "forecastSlug": "cps-production-employment-august-2026",
+      "resolutionDate": "2026-09-10",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print": {
+      "forecastSlug": "cps-transport-material-moving-employment-august-2026",
+      "resolutionDate": "2026-09-10",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "census.acs.broadband_subscription_65_plus.share.2025.first_print": {
+      "forecastSlug": "broadband-subscription-65-plus-2025",
+      "resolutionDate": "2026-09-10",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "bls.cpi.u.core_mom.august_2026.first_print": {
+      "forecastSlug": "us-core-cpi-mom-august-2026",
+      "resolutionDate": "2026-09-11",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bls.cpi.u.headline_mom.august_2026.first_print": {
+      "forecastSlug": "us-cpi-u-mom-august-2026",
+      "resolutionDate": "2026-09-11",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print": {
+      "forecastSlug": "cps-business-financial-employment-august-2026",
+      "resolutionDate": "2026-09-11",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
+      "forecastSlug": "cps-office-admin-employment-august-2026",
+      "resolutionDate": "2026-09-11",
+      "state": "refused",
+      "code": "UNIT_MISMATCH",
+      "reason": "The forecast is registered in one unit and the official source publishes another. The resolver does not convert between them.",
+      "detail": "cell='millions' adapter='thousands'"
+    },
+    "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
+      "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
+      "resolutionDate": "2026-09-11",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "ons.production.total_index.2026_07.first_print": {
+      "forecastSlug": "uk-production-output-index-july-2026",
+      "resolutionDate": "2026-09-11",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "us.dol.initial_claims.sa.week_2026-08-29": {
+      "forecastSlug": "initial-claims-week-2026-08-29",
+      "resolutionDate": "2026-09-11",
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+    },
+    "dol.eta.continued_claims.sa.week_2026-08-29.first_print": {
+      "forecastSlug": "continued-claims-week-2026-08-29",
+      "resolutionDate": "2026-09-12",
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+    },
+    "statcan.cpi.allitems.yoy.2026_08.first_print": {
+      "forecastSlug": "canada-cpi-annual-rate-august-2026",
+      "resolutionDate": "2026-09-14",
+      "state": "refused",
+      "code": "BINDING_MISMATCH_UNEXPLAINED",
+      "reason": "The resolver refused this target as a binding mismatch but named no field that differs."
+    },
+    "census.asec.direct_purchase_coverage_rate.2025": {
+      "forecastSlug": "direct-purchase-health-coverage-rate-2025",
+      "resolutionDate": "2026-09-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "census.asec.median_household_income.2025": {
+      "forecastSlug": "median-household-income-2025",
+      "resolutionDate": "2026-09-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "census.official_poverty_rate.2025": {
+      "forecastSlug": "official-poverty-rate-2025",
+      "resolutionDate": "2026-09-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "census.spm.all_people_poverty_rate.2025": {
+      "forecastSlug": "spm-poverty-rate-2025",
+      "resolutionDate": "2026-09-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "census.spm.child_poverty_rate.2025": {
+      "forecastSlug": "spm-child-poverty-2025",
+      "resolutionDate": "2026-09-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "co.hcpf.medicaid.total_caseload.2026-08.first_print": {
+      "forecastSlug": "colorado-medicaid-caseload-august-2026",
+      "resolutionDate": "2026-09-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_UNREGISTERED",
+      "reason": "No resolver covers this series. The forecast predates target registration."
+    },
+    "ons.earnings.regular_pay_yoy.2026_07.first_print": {
+      "forecastSlug": "uk-regular-pay-growth-may-jul-2026",
+      "resolutionDate": "2026-09-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "ons.labour.vacancies_total.2026_07.first_print": {
+      "forecastSlug": "uk-vacancies-may-jul-2026",
+      "resolutionDate": "2026-09-15",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "ons.pipr.uk_private_rent_yoy.2026_08.first_print": {
+      "forecastSlug": "uk-private-rent-annual-rate-august-2026",
+      "resolutionDate": "2026-09-16",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "ons.ppi.input_prices_yoy.2026_08.first_print": {
+      "forecastSlug": "uk-ppi-input-prices-annual-rate-august-2026",
+      "resolutionDate": "2026-09-16",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "ons.uk_hpi.annual_change.2026_07.first_print": {
+      "forecastSlug": "uk-house-price-index-annual-rate-july-2026",
+      "resolutionDate": "2026-09-16",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "statcan.employment_insurance.regular_beneficiaries.canada.july_2026.first_print": {
+      "forecastSlug": "canada-ei-regular-beneficiaries-july-2026",
+      "resolutionDate": "2026-09-17",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    },
+    "fns.wic.total_participation.2026-06.first_print": {
+      "forecastSlug": "wic-participation-june-2026",
+      "resolutionDate": "2026-09-18",
+      "state": "no_executor",
+      "code": "NO_EXECUTOR_GENERIC_URL",
+      "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
+    }
+  },
+  "generatedAtUtc": "2026-09-19T17:21:37Z",
+  "workflowRun": "35372945335"
+}

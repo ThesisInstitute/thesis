@@ -6,6 +6,7 @@ import {
   type ForecastCellType,
 } from "./forecast-cells";
 import { publisherForCell, type PublisherInfo } from "./forecast-publishers";
+import { overdueNotice, shortReason } from "./resolution-status";
 
 /** The only catalog fields allowed across the /forecasts page boundary. */
 export interface ForecastListingItem {
@@ -21,12 +22,22 @@ export interface ForecastListingItem {
   country: CountryCode;
   type: ForecastCellType;
   publisher: PublisherInfo | null;
+  /** Set only while the forecast is pending past its resolution date: the
+   * first sentence of why it has not resolved, as the resolver last
+   * reported it. The full reason is on the forecast's own page; this list
+   * crosses to the client, so it stays one sentence. */
+  overdue: { since: string; reason: string } | null;
 }
 
 export function buildForecastListing(
   forecasts: ForecastCell[],
 ): ForecastListingItem[] {
-  return forecasts.map((forecast) => ({
+  return forecasts.map((forecast) => buildListingItem(forecast));
+}
+
+function buildListingItem(forecast: ForecastCell): ForecastListingItem {
+  const status = forecast.resolvedOutcome ? "resolved" : "pending";
+  return {
     slug: forecast.slug,
     title: forecast.title,
     point: {
@@ -44,11 +55,26 @@ export function buildForecastListing(
       },
     },
     resolutionDate: forecast.resolutionDate,
-    status: forecast.resolvedOutcome ? "resolved" : "pending",
+    status,
     country: getForecastCountry(forecast),
     type: forecast.type,
     publisher: publisherForCell(forecast),
-  }));
+    overdue: compactOverdue(forecast, status),
+  };
+}
+
+function compactOverdue(
+  forecast: ForecastCell,
+  status: "pending" | "resolved",
+): ForecastListingItem["overdue"] {
+  const notice = overdueNotice({
+    slug: forecast.slug,
+    status,
+    resolutionDate: forecast.resolutionDate,
+  });
+  return notice
+    ? { since: notice.since, reason: shortReason(notice.reason) }
+    : null;
 }
 
 /** Deterministic facet filters over the listing. Every field is derived

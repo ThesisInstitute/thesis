@@ -5,6 +5,10 @@ import { EXPIRED_UNFORECAST_REGISTRATIONS } from "@/data/expired-unforecast-regi
 import { Header } from "@/components/Header";
 import { FORECAST_CELLS, formatValue } from "@/data/forecast-cells";
 import {
+  OVERDUE_TARGET_COUNT,
+  RESOLUTION_STATUS_META,
+} from "@/data/resolution-status";
+import {
   buildPredictionSpecs,
   buildRecordedPredictionRunRecords,
 } from "@/data/prediction-specs";
@@ -105,6 +109,11 @@ export default async function CalibrationPage() {
   // the tier named right on the card, and flips to witnessed automatically
   // once witnessed scores exist.
   const witnessedLive = scores.length > 0;
+  // `unresolvedRuns` counts forecast RUNS, several per target (agents,
+  // prompt modes, strategies), so it is larger than the number of pending
+  // forecasts on the home page. Say the unit, and say how many targets
+  // are past their date: each of those explains itself on its own page.
+  const awaitingResolution = `${rewardExport.counts.unresolvedRuns.toLocaleString()} forecast runs awaiting resolution (${OVERDUE_TARGET_COUNT.toLocaleString()} targets are past their resolution date as of ${RESOLUTION_STATUS_META.asOf}; each says why on its page)`;
 
   const leaderboard = [...rewardExport.leaderboard].sort((left, right) => {
     if (left.pairedCrpsRatioGeomean === null) return 1;
@@ -193,10 +202,10 @@ export default async function CalibrationPage() {
               detail: witnessedLive
                 ? `witness-verified; ${claimedOnlyCount.toLocaleString()} claimed-time-only and ${(
                     provisionalCount + violatedCount
-                  ).toLocaleString()} unverified or violated excluded, ${rewardExport.counts.unresolvedRuns.toLocaleString()} awaiting resolution`
+                  ).toLocaleString()} unverified or violated excluded, ${awaitingResolution}`
                 : `witness-verified: 0 — the official headline fills as custody-v2 cells resolve (first eligible prints land July 23). ${(
                     provisionalCount + violatedCount
-                  ).toLocaleString()} unverified or violated excluded, ${rewardExport.counts.unresolvedRuns.toLocaleString()} awaiting resolution, ${EXPIRED_UNFORECAST_REGISTRATIONS.length} registrations expired unforecast.`,
+                  ).toLocaleString()} unverified or violated excluded, ${awaitingResolution}, ${EXPIRED_UNFORECAST_REGISTRATIONS.length} registrations expired unforecast.`,
             },
             {
               label: "80% interval coverage",

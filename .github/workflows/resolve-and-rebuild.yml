@@ -270,6 +270,46 @@ jobs:
         with:
           commit: ${{ steps.deployed_ledger.outputs.pushed_sha }}
 
+      - name: Publish why each overdue forecast has not resolved
+        # Runs whatever happened above: a failed run is exactly when the
+        # pending list most needs an explanation. It never fails the job,
+        # and it commits only the status file, on a clean copy of main, so
+        # nothing else in this job's tree (pin, records, marker) rides
+        # along and the attested marker push above is left alone. The file
+        # is outside records/**, so the push needs no attestation; it does
+        # touch site/, so Vercel rebuilds and the reasons reach the page.
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [ -f /tmp/resolve-out.log ] || : > /tmp/resolve-out.log
+          git fetch origin main
+          git worktree add --detach /tmp/status-tree origin/main
+          python3 scripts/resolution_status.py \
+            --resolver-log /tmp/resolve-out.log \
+            --workflow-run "${GITHUB_RUN_ID}" \
+            --out /tmp/status-tree/site/src/data/resolution-status.json
+          cd /tmp/status-tree
+          if [ -z "$(git status --porcelain -- site/src/data/resolution-status.json)" ]; then
+            echo "overdue backlog unchanged; nothing to publish"
+            exit 0
+          fi
+          git config user.name "thesis-resolver"
+          git config user.email "recorder@thesisinstitute.org"
+          git add -- site/src/data/resolution-status.json
+          git commit -m "Resolution status $(date -u +%F)"
+          auth_helper="!f() { echo username=x-access-token; echo \"password=\$GH_TOKEN\"; }; f"
+          for attempt in 1 2 3; do
+            if git -c credential.helper= -c credential.helper="$auth_helper" \
+                push origin HEAD:main; then
+              exit 0
+            fi
+            git pull --rebase origin main
+          done
+          echo "::warning::resolution status was not published (push raced three times)"
+
       - name: Alert on failure
         if: failure()
         env:

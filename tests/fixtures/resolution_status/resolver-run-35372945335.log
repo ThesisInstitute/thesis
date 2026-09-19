@@ -1,0 +1,125 @@
+  release 2026-10-08 not reached: us.dol.initial_claims.sa.week_2026-09-19
+  release 2026-10-09 not reached: dol.eta.continued_claims.sa.week_2026-09-19.first_print
+  release 2026-09-29 not reached: us.dol.initial_claims.sa.week_2026-09-12
+  release 2026-09-30 not reached: dol.eta.continued_claims.sa.week_2026-09-12.first_print
+  release 2026-09-20 not reached: us.dol.initial_claims.sa.week_2026-09-05
+  release 2026-09-21 not reached: dol.eta.continued_claims.sa.week_2026-09-05.first_print
+  resolve us.dol.initial_claims.sa.week_2026-08-29 -> 207.0 thousands
+  resolve dol.eta.continued_claims.sa.week_2026-08-29.first_print -> 1.774 millions
+  already recorded: us.dol.initial_claims.sa.week_2026-08-22
+  already recorded: dol.eta.continued_claims.sa.week_2026-08-22.first_print
+  release 2027-01-15 not reached: bls.cpi.u.annual_pct_change.2026
+  release 2027-01-09 not reached: bls.lns11300000.2026-12
+  release 2026-10-14 not reached: bls.cps.employed_people_by_occupation.transportation_material_moving.september_2026.first_print
+  release 2026-10-08 not reached: bls.cps.employed_people_by_occupation.computer_mathematical.september_2026.first_print
+  release 2026-10-08 not reached: bls.cps.employed_people_by_occupation.healthcare_support.september_2026.first_print
+  release 2026-10-14 not reached: bls.cps.employed_people_by_occupation.production.september_2026.first_print
+  release 2026-10-15 not reached: bls.cps.employed_people_by_occupation.business_financial_operations.september_2026.first_print
+  release 2026-10-15 not reached: bls.cps.employed_people_by_occupation.office_administrative_support.september_2026.first_print
+  release 2026-10-19 not reached: statcan.cpi.allitems.yoy.2026_09.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a ssa_official family): ssa.ssi.total_recipients.2026-09.first_print
+  release 2026-11-30 not reached: statcan.gdp_by_industry.monthly_growth.2026_09.first_print
+  release 2026-10-02 not reached: bls.cps.unemployment_rate.september_2026.first_print
+  release 2026-10-14 not reached: bls.cpi.u.headline_mom.september_2026.first_print
+  release 2026-10-14 not reached: bls.cpi.u.core_mom.september_2026.first_print
+  release 2026-10-29 not reached: us.bea.core_pce.mom_sa.2026-09
+  release 2026-11-03 not reached: bls.jolts.job_openings.september_2026.first_print
+  release 2026-10-29 not reached: bea.private_nonresidential_fixed_investment.2026_q3.first_print
+  release 2026-10-29 not reached: bea.research_and_development_fixed_investment.2026_q3.first_print
+  RELEASE WINDOW NOT OPEN (deferring): usda.fsa.crp.enrolled_acres_total.2027_09.first_print.ceiling_27_million_source_recovered_2026_08_13 — opens 2027-12-01
+  RELEASE WINDOW NOT OPEN (deferring): usda.fsa.crp.enrolled_acres_total.2027_09.first_print.no_fy2027_31_ceiling_source_recovered_2026_08_13 — opens 2027-12-01
+  RELEASE WINDOW NOT OPEN (deferring): eia.ng.vented_flared.us.annual.2025.first_print — opens 2026-10-01
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted — opens 2027-10-15
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print cell='millions' adapter='thousands'
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa — opens 2027-10-15
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.production.august_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print cell='millions' adapter='thousands'
+  release 2026-09-24 not reached: bea.ita.personal_transfer_payments.2026_q2.first_print
+  BINDING/ADAPTER MISMATCH (refusing, registry drift?): statcan.cpi.allitems.yoy.2026_08.first_print — 
+  release 2026-09-24 not reached: abs.labour.unemployment_rate.2026_08.first_print
+  release 2026-09-30 not reached: abs.cpi.all_groups.yoy.2026_08.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a ssa_official family): ssa.ssi.total_recipients.2026-08.first_print
+  release 2026-10-30 not reached: statcan.gdp_by_industry.monthly_growth.2026_08.first_print
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot — opens 2026-10-15
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cps.unemployment_rate.august_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cpi.u.headline_mom.august_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cpi.u.core_mom.august_2026.first_print
+  release 2026-09-30 not reached: us.bea.core_pce.mom_sa.2026-08
+  release 2026-10-05 not reached: bls.jolts.job_openings.august_2026.first_print
+  RELEASE WINDOW NOT OPEN (deferring): sba.disaster.loan_program.charge_off_amount.2026.first_print — opens 2026-10-01
+  RELEASE WINDOW NOT OPEN (deferring): sba.disaster.loan_program.charge_off_rate_upb.2026.first_print — opens 2026-10-01
+  RELEASE WINDOW NOT OPEN (deferring): sba.disaster.loan_program.post_charge_off_recovery.2026.first_print — opens 2026-10-01
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot — opens 2026-10-15
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot — opens 2026-10-15
+  RELEASE WINDOW NOT OPEN (deferring): census.spm.child_poverty_rate.2027.first_print.threshold_one_dollar — opens 2028-08-01
+  RELEASE WINDOW NOT OPEN (deferring): census.spm.child_poverty_rate.2027.first_print.current_law — opens 2028-08-01
+  RELEASE WINDOW NOT OPEN (deferring): irs.actc.total_claims.2027.first_print.threshold_one_dollar — opens 2029-01-01
+  RELEASE WINDOW NOT OPEN (deferring): irs.actc.total_claims.2027.first_print.current_law — opens 2029-01-01
+  already recorded: bls.jolts.hires_rate.2026_07.first_print
+  release 2026-10-30 not reached: bls.eci.private_wages_salaries_qoq.2026_q3.first_print
+  release 2026-11-05 not reached: bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print
+  already recorded: census.construction_spending.total_mom.2026_07.first_print
+  resolve fed.g19.consumer_credit_total_annual_rate.2026_07.first_print -> 4.2 percent_growth
+  resolve fed.g19.consumer_credit_revolving_annual_rate.2026_07.first_print -> 2.5 percent_growth
+  resolve fed.g19.consumer_credit_nonrevolving_annual_rate.2026_07.first_print -> 4.8 percent_growth
+  BINDING/ADAPTER MISMATCH (refusing, registry drift?): statcan.cpi.allitems.yoy.2026_07.first_print — 
+  already recorded: bea.trade.goods_services_deficit.2026_07.first_print
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.production.july_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.transportation_material_moving.july_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.business_financial_operations.july_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.computer_mathematical.july_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.healthcare_support.july_2026.first_print cell='millions' adapter='thousands'
+  UNIT MISMATCH (refusing): bls.cps.employed_people_by_occupation.office_administrative_support.july_2026.first_print cell='millions' adapter='thousands'
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.pce_price_index.monthly_change.june_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.personal_current_taxes.level.june_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.government_social_benefits.medicaid.june_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.government_social_benefits.medicare.june_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.pce.core_mom.june_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.government_social_benefits.social_security.june_2026.first_print
+  BINDING/ADAPTER MISMATCH (refusing, registry drift?): abs.cpi.all_groups_annual_rate.australia.june_2026.first_print — adapter
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.government_social_benefits.level.june_2026.first_print
+  release 2026-09-29 not reached: statcan.36-10-0434-01.all_industries.month_to_month_percent_change.2026-07.first_print
+  BINDING/ADAPTER MISMATCH (refusing, registry drift?): abs.labour.unemployment_rate.australia.july_2026.first_print — adapter, field, sourceUrl, table, transform
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.disposable_personal_income.level.june_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): census.new_residential_sales.new_single_family_houses_sold_saar.2026_06.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bea.trade.goods_services_deficit.2026_06.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): us.bea.core_pce.mom_sa.2026-07
+  BINDING/ADAPTER MISMATCH (refusing, registry drift?): abs.cpi.all_groups.yoy.2026-07.first_print — adapter, field, sourceSeriesId, sourceUrl, table, transform, allowedHosts
+  BINDING/ADAPTER MISMATCH (refusing, registry drift?): statcan.36-10-0434-01.all_industries.month_to_month_percent_change.2026-06.first_print — adapter, field, sourceSeriesId, sourceUrl, table, transform
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.jolts.job_openings.july_2026.first_print
+  SOURCE PUBLISHES NO NATIONAL AGGREGATE (refusing): ssa.hearings.average_processing_time_days.2026-06.first_print — the workload XML (RPTG_PRD_ENDT 06/26/2026, 165 hearing-office rows) publishes no national aggregate row; SSA's data dictionary defines DSPN_AVGPT per hearing office only; the cell's resolver names a figure its bound source does not print, so it cannot resolve mechanically
+  FIRST-PRINT WINDOW MISSED (refusing): bls.qcew.aircraft_manufacturing.establishments.2026_q1.first_print — registered release day was 2026-08-28
+Traceback (most recent call last):
+  File "/home/runner/work/thesis/thesis/scripts/resolve_pending.py", line 14664, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/runner/work/thesis/thesis/scripts/resolve_pending.py", line 14639, in main
+    merged_sha = propose_ledger_append(
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/thesis/thesis/scripts/resolve_pending.py", line 12198, in propose_ledger_append
+    release_files = _prepare_release_files(
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/thesis/thesis/scripts/resolve_pending.py", line 11577, in _prepare_release_files
+    verify_release_chain(
+  File "/home/runner/work/thesis/thesis/scripts/ledger_release_chain.py", line 1147, in verify_release_chain
+    receipt_times = verify_release_receipts(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/thesis/thesis/scripts/ledger_release_chain.py", line 915, in verify_release_receipts
+    tsa: verify_receipt(
+         ^^^^^^^^^^^^^^^
+  File "/home/runner/work/thesis/thesis/scripts/ledger_release_chain.py", line 886, in verify_receipt
+    _verify_production_signer(
+  File "/home/runner/work/thesis/thesis/scripts/ledger_release_chain.py", line 775, in _verify_production_signer
+    raise ReleaseChainError(
+ledger_release_chain.ReleaseChainError: RFC 3161 signer certificate is not pinned for 0021-35d15fca4e02417c.digicert.tsr: 2da09da7f4131f9fe72db6c5e6e9c9656755af043f1ea742cc0d2120e141ebfc
