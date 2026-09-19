@@ -770,6 +770,50 @@ def _require_walk_parent(
     return parent_shas
 
 
+def _require_listing_is_head_ancestry(
+    commits: list[dict[str, Any]],
+    payloads: dict[str, Any],
+    pin_sha: str,
+    head_sha: str,
+) -> None:
+    """Refuse a listing that holds anything but the head's own ancestry.
+
+    The parent rule in `_require_walk_parent` proves one direction: every
+    commit the head descends from, back to the pin, was walked. This
+    proves the other: every walked commit is one the head descends from.
+    The old linear walk had both at once, because each entry had to
+    continue its predecessor, so the whole listing was a single path to
+    the head. Without this, a listing of [A, H] with A and H both children
+    of the pin would walk A although it is no part of the pinned history,
+    and A could take part in the registry ratchet.
+
+    Parents are followed back from the head through the per-commit
+    payloads and the walk stops at the pin. A parent that is missing from
+    the listing is left for `_require_walk_parent` to refuse by name.
+    """
+    listed = {str(commit["sha"]) for commit in commits}
+    reachable: set[str] = set()
+    pending = [head_sha]
+    while pending:
+        sha = pending.pop()
+        if sha == pin_sha or sha in reachable or sha not in listed:
+            continue
+        reachable.add(sha)
+        payload = payloads.get(sha)
+        parents = payload.get("parents") if type(payload) is dict else None
+        if type(parents) is list:
+            pending.extend(
+                str(parent.get("sha")) for parent in parents if type(parent) is dict
+            )
+    strays = sorted(listed - reachable)
+    if strays:
+        raise PinError(
+            f"compare listing holds {len(strays)} commit(s) the branch head does "
+            f"not descend from (first: {strays[0][:12]}); refusing to walk "
+            "history outside the pinned branch"
+        )
+
+
 def _parents_first(
     commits: list[dict[str, Any]],
     payloads: dict[str, Any],
@@ -782,7 +826,11 @@ def _parents_first(
     lean on it: commits made within one second of each other tie on date,
     and a listing sorted by date can then put a child ahead of its parent.
     The order is derived from the commits' own parent links instead, and
-    ties keep their listed position so the result is deterministic.
+    ties keep their listed position. That makes the parent, ledger and
+    release-inventory checks independent of listing order. The registry
+    latch in `refresh` stops fetching catalogs once a declaration is seen,
+    as it always has, so which sibling's catalog gets read still follows
+    the order here.
 
     Nothing is admitted here. A commit whose parents can never all be
     satisfied (a parent outside the pin and the listing) is left in listed
@@ -1960,6 +2008,7 @@ def refresh(*, require_catalog: bool = False) -> None:
         )
         for commit in commits
     }
+    _require_listing_is_head_ancestry(commits, payloads, pin["sha"], head_sha)
     for commit in _parents_first(commits, payloads, pin["sha"]):
         commit_sha = str(commit["sha"])
         commit_payload = payloads[commit_sha]

@@ -2188,6 +2188,46 @@ def test_refresh_walks_two_pull_requests_forked_from_one_commit(
     assert json.loads(pin_path.read_text())["sha"] == head
 
 
+def test_refresh_refuses_a_listed_commit_the_head_does_not_descend_from(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    """Closure runs from the head back to the pin. The listing must not
+    hold anything else: with P─A and P─H listed as [A, H], A is no part of
+    the pinned history, yet every parent it names was walked. The old
+    linear walk refused H here (its parent is P, not A)."""
+    repo = release_repo.repo
+    mainline = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    fork = release_repo.head
+    stray = _side_branch(repo, "never-merged", fork, {"docs/stray.md": "stray\n"})
+    _git(repo, "checkout", "-q", mainline)
+    (repo / "docs").mkdir(exist_ok=True)
+    (repo / "docs" / "mainline.md").write_text("mainline\n")
+    _commit(repo, "mainline moves on without it")
+    _prepare_refresh(monkeypatch, tmp_path, release_repo)
+    honest_api = pin_ledger._api
+
+    def api_with_a_stray(path: str) -> Any:
+        payload = honest_api(path)
+        if path.startswith("compare/"):
+            payload = dict(payload)
+            payload["commits"] = [
+                {
+                    "sha": stray,
+                    "commit": {"committer": {"date": _commit_time(repo, stray)}},
+                },
+                *payload["commits"],
+            ]
+            payload["total_commits"] = len(payload["commits"])
+        return payload
+
+    monkeypatch.setattr(pin_ledger, "_api", api_with_a_stray)
+
+    with pytest.raises(pin_ledger.PinError, match="does not descend from"):
+        pin_ledger.refresh()
+
+
 def test_refresh_refuses_a_side_branch_that_rewrites_the_ledger(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: pathlib.Path,
