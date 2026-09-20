@@ -9,18 +9,24 @@ import {
 } from "@/data/thesis-target-architecture-runtime";
 
 export const dynamic = "force-static";
+export const dynamicParams = false;
 
-interface TargetChunkRouteContext {
-  params: Promise<{}>;
+// Standard dynamic segments expose params to Next's static generator; the
+// .json extension is part of each generated value, preserving published URLs.
+export async function generateStaticParams() {
+  const manifest = await loadTargetArchitectureManifest();
+  return manifest.tables.flatMap(({ table, chunks }) => [
+    { table, chunk: "manifest.json" },
+    ...chunks.map(({ index }) => ({ table, chunk: `${index}.json` })),
+  ]);
 }
 
-// Serves /forecasts/targets/{table}/{index}.json (a row chunk) and
-// /forecasts/targets/{table}/manifest.json (the per-table manifest). One
-// route for both: the suffixed dynamic segment [chunk].json outranks a
-// literal manifest.json sibling in routing, and the previous [table].json
-// shape never matched requests at all — locally or on Vercel.
-export async function GET(request: Request, _context: TargetChunkRouteContext) {
-  const { table, chunk } = getTableAndChunkFromPath(request.url);
+interface TargetChunkRouteContext {
+  params: Promise<{ table: string; chunk: string }>;
+}
+
+export async function GET(_request: Request, context: TargetChunkRouteContext) {
+  const { table, chunk } = await context.params;
   if (!isTargetArchitectureTableKey(table)) {
     return Response.json(
       {
@@ -36,13 +42,15 @@ export async function GET(request: Request, _context: TargetChunkRouteContext) {
     loadTargetArchitectureManifest(),
   ]);
 
-  if (chunk === "manifest") {
+  if (chunk === "manifest.json") {
     return Response.json(
       buildTargetArchitectureTableExport(projection, table, manifest),
     );
   }
 
-  const chunkIndex = Number(chunk);
+  const chunkIndex = /^(0|[1-9]\d*)\.json$/.test(chunk)
+    ? Number(chunk.slice(0, -5))
+    : NaN;
   if (!Number.isInteger(chunkIndex) || chunkIndex < 0) {
     return Response.json(
       {
@@ -71,16 +79,4 @@ export async function GET(request: Request, _context: TargetChunkRouteContext) {
   return Response.json(
     buildTargetArchitectureChunkExport(projection, table, chunkIndex, manifest),
   );
-}
-
-// Suffixed dynamic segments expose no route params, so the segments come
-// from the URL. Strip .json repeatedly: behind the app-host rewrite Vercel
-// reconstructs the handler URL with the suffix doubled (…/0.json.json)
-// while next start passes it singly — stripping once 404'd every chunk in
-// production.
-function getTableAndChunkFromPath(url: string) {
-  const segments = new URL(url).pathname.split("/").filter(Boolean);
-  const chunk = segments.at(-1)?.replace(/(\.json)+$/, "") ?? "";
-  const table = segments.at(-2) ?? "";
-  return { table, chunk };
 }

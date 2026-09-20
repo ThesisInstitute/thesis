@@ -1,7 +1,7 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/Header";
-import { FORECAST_CELLS } from "@/data/forecast-cells";
 import { MODEL_LANE_STATS } from "@/data/model-lane-stats.generated";
 import {
   hasVerifiedClaimedChronology,
@@ -40,7 +40,7 @@ function formatShare(passed: number, attempted: number): string {
 
 export default async function ModelsPage() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
   const scores = scoreResolvedForecasts(forecasts, ledger);
 
   const models = Array.from(
@@ -99,10 +99,9 @@ export default async function ModelsPage() {
           Every model runs the same registered targets under the same prompt
           contract, validator, and pipeline; every run is recorded whether it
           passes or fails. This page compares models on two separable axes:
-          whether their traces satisfy the elicitation contract they were
-          given, and — as targets resolve against official prints — how
-          accurate their forecasts are. Compliance is not accuracy; read the
-          tables separately.
+          whether their traces satisfy the elicitation contract they were given,
+          and — as targets resolve against official prints — how accurate their
+          forecasts are. Compliance is not accuracy; read the tables separately.
         </p>
 
         <section className="mt-12">
@@ -120,9 +119,9 @@ export default async function ModelsPage() {
             recorded protocol-lane manifests (strategy lanes in the records
             until the identifier migration). Fast and Ladder demand the
             parametric width derivation (&ldquo;sigma = X&rdquo;, 1.28·sigma);
-            Ladder v2 is the pre-registered quantile-native contract (rungs
-            plus interpolated 10th/90th percentiles stated literally).
-            Failed runs stay in the record as immutable run manifests.
+            Ladder v2 is the pre-registered quantile-native contract (rungs plus
+            interpolated 10th/90th percentiles stated literally). Failed runs
+            stay in the record as immutable run manifests.
           </p>
           <div
             className="mt-5 overflow-x-auto rounded-[14px] border"
@@ -136,10 +135,7 @@ export default async function ModelsPage() {
                 >
                   <th className="px-4 py-3 text-left font-normal">Model</th>
                   {lanes.map((lane) => (
-                    <th
-                      key={lane}
-                      className="px-4 py-3 text-right font-normal"
-                    >
+                    <th key={lane} className="px-4 py-3 text-right font-normal">
                       {LANE_LABELS[lane] ?? lane}
                     </th>
                   ))}
@@ -279,8 +275,7 @@ export default async function ModelsPage() {
           >
             The gpt-5.6 comparison waves published on 2026-07-10 resolve from
             mid-July onward; per-model paired CRPS ratios against the
-            persistence baseline appear on Calibration as those targets
-            print.
+            persistence baseline appear on Calibration as those targets print.
           </p>
         </section>
       </main>

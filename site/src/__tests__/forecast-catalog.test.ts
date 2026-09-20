@@ -44,6 +44,11 @@ import { buildStrategyLabReport } from "@/data/strategy-lab";
 import { buildTimeSeriesPriorAdjustmentReport } from "@/data/time-series-priors";
 import { sha256Hex } from "@/data/canonical-json";
 import {
+  getPublishedForecast,
+  getPublishedForecasts,
+  verifyForecastRun,
+} from "@/lib/forecast-publication";
+import {
   assertValidTargetArchitectureProjection,
   buildTargetArchitectureProjection,
   validateTargetArchitectureProjection,
@@ -325,9 +330,8 @@ describe("forecast catalog", () => {
         exportPayload.counts.scoredViolatedChronology,
     );
     expect(
-      logData.scores.filter(
-        (score) => score.chronology === "witness_verified",
-      ).length,
+      logData.scores.filter((score) => score.chronology === "witness_verified")
+        .length,
     ).toBe(exportPayload.counts.scored);
     expect(
       logData.scores.filter(
@@ -415,13 +419,14 @@ describe("forecast catalog", () => {
   });
 
   it("exports a Brier reward dataset for agent training and evaluation", () => {
-    const specs = buildPredictionSpecs(resolvedForecastCells);
-    const runs = buildRecordedPredictionRunRecords(
-      resolvedForecastCells,
-      specs,
+    const published = withResolvedOutcomes(
+      getPublishedForecasts(),
+      policyEngineLedger,
     );
+    const specs = buildPredictionSpecs(published);
+    const runs = buildRecordedPredictionRunRecords(published, specs);
     const exportPayload = buildBrierRewardExport({
-      forecasts: resolvedForecastCells,
+      forecasts: published,
       specs,
       runs,
       ledger: policyEngineLedger,
@@ -437,13 +442,21 @@ describe("forecast catalog", () => {
     const scoredRow = exportPayload.rewardRows.find(
       (row) => row.reward.value !== null,
     );
-    // Run IDs now end in a forecast-output digest, so match on the stable
-    // slug/timestamp/variant prefix rather than the full ID.
-    const liveRun = exportPayload.rewardRows.find((row) =>
-      row.runId.startsWith(
-        "run.uk-unemployment-rate-oct-dec-2026.2026-06-16T10-20-43Z.thesis-analyst-live-2026-06-16",
-      ),
+    const liveRun = exportPayload.rewardRows.find(
+      (row) => row.provenance.activityArtifactCount > 0,
     );
+    expect(liveRun).toBeDefined();
+    const eligibleIds = new Set(published.map((forecast) => forecast.slug));
+    expect(
+      exportPayload.rewardRows.every((row) =>
+        eligibleIds.has(row.predictionId),
+      ),
+    ).toBe(true);
+    expect(
+      exportPayload.rewardRows.some(
+        (row) => row.predictionId === "spm-child-poverty-2025",
+      ),
+    ).toBe(false);
 
     expect(exportPayload.schemaVersion).toBe("brier_reward_export_v2");
     expect(exportPayload.mission.objective).toBe("maximize_forecast_accuracy");
@@ -501,20 +514,13 @@ describe("forecast catalog", () => {
       );
       expect(scoredRow.transformVersion).toMatch(/_v1$/);
     }
-    const liveCell = FORECAST_CELLS.find(
-      (cell) => cell.slug === "uk-unemployment-rate-oct-dec-2026",
+    const liveCell = published.find(
+      (cell) => cell.slug === liveRun!.predictionId,
+    )!;
+    expect(liveRun!.split).toBe(
+      getBrierEvalSplit(liveCell, Boolean(liveCell.resolvedOutcome)),
     );
-    const liveResolved = policyEngineLedger.some(
-      (entry) =>
-        entry.kind === "observation_recorded" &&
-        entry.dataPointId === liveCell?.dataPointId,
-    );
-    // Split mirrors resolution state — pinning "unresolved" broke the day
-    // a pinned cell resolved.
-    expect(liveRun?.split).toBe(
-      liveCell ? getBrierEvalSplit(liveCell, liveResolved) : "unresolved",
-    );
-    expect(liveRun?.provenance.activityArtifactCount).toBe(8);
+    expect(liveRun!.provenance.activityArtifactCount).toBeGreaterThan(0);
     expect(exportPayload.leaderboard.length).toBeGreaterThan(0);
   });
 
@@ -1121,8 +1127,7 @@ describe("forecast catalog", () => {
     const expected = [
       {
         slug: "jolts-hires-rate-june-2026",
-        agent:
-          "github:PavelMakarchuk::Claude Fable 5 (pavel onboarding agent)",
+        agent: "github:PavelMakarchuk::Claude Fable 5 (pavel onboarding agent)",
         model: "Claude Fable 5 (pavel onboarding agent)",
         runAt: "2026-07-31T14:00:26Z",
         pointEstimate: 3.3,
@@ -2035,7 +2040,9 @@ describe("forecast catalog", () => {
     // changes every time a resolution lands, and pinning specific slugs
     // broke the suite the day those cells finally resolved.
     const queue = buildResolutionQueue(FORECAST_CELLS, policyEngineLedger);
-    const cellsBySlug = new Map(FORECAST_CELLS.map((cell) => [cell.slug, cell]));
+    const cellsBySlug = new Map(
+      FORECAST_CELLS.map((cell) => [cell.slug, cell]),
+    );
     expect(queue.length).toBeGreaterThan(0);
     let carried = 0;
     for (const entry of queue) {
@@ -2336,7 +2343,7 @@ describe("forecast catalog", () => {
     }
   });
 
-  it("records official outcomes for resolved labor-market predictions", () => {
+  it("retains official outcomes while excluding unverified forecast scores", () => {
     const forecastsBySlug = new Map(
       resolvedForecastCells.map((forecast) => [forecast.slug, forecast]),
     );
@@ -2434,12 +2441,22 @@ describe("forecast catalog", () => {
       resolvedForecastCells,
       policyEngineLedger,
     );
-    expect(scores.length).toBeGreaterThanOrEqual(resolvedPredictions.length);
+    expect(scores.length).toBeGreaterThan(0);
+    const publishedSlugs = new Set(
+      getPublishedForecasts().map((forecast) => forecast.slug),
+    );
+    expect(
+      scores.every((score) => publishedSlugs.has(score.forecastSlug)),
+    ).toBe(true);
 
     for (const expected of resolvedPredictions) {
       const score = scores.find(
         (entry) => entry.forecastSlug === expected.slug,
       );
+      if (!publishedSlugs.has(expected.slug)) {
+        expect(score).toBeUndefined();
+        continue;
+      }
       expect(score?.dataPointId).toBe(expected.dataPointId);
       expect(score?.ledgerFactRef).toBe(expected.dataPointId);
       expect(score?.runId).toMatch(/^run\./);
@@ -2471,17 +2488,47 @@ describe("forecast catalog", () => {
 });
 
 describe("conditional groups", () => {
-  it("resolves every group's cells from the catalog", async () => {
+  it("preserves raw target definitions and publishes only available verified arms", async () => {
     const { CONDITIONAL_GROUPS, getConditionalGroup } =
       await import("@/data/conditional-groups");
     for (const group of CONDITIONAL_GROUPS) {
-      const resolved = getConditionalGroup(group.slug);
-      expect(resolved, group.slug).toBeTruthy();
-      if (resolved!.falseArm) {
-        expect(resolved!.trueArm.unit).toBe(resolved!.falseArm.unit);
+      const trueDefinition = FORECAST_CELLS.find(
+        (cell) => cell.slug === group.trueArmSlug,
+      );
+      const falseDefinition = group.falseArmSlug
+        ? FORECAST_CELLS.find((cell) => cell.slug === group.falseArmSlug)
+        : undefined;
+      expect(trueDefinition, group.slug).toBeDefined();
+      if (group.falseArmSlug) {
+        expect(falseDefinition, group.slug).toBeDefined();
+        expect(trueDefinition!.unit).toBe(falseDefinition!.unit);
       }
-      if (group.probabilitySlug) expect(resolved!.probability).toBeTruthy();
-      if (group.unconditionalSlug) expect(resolved!.unconditional).toBeTruthy();
+      const trueArm = getPublishedForecast(group.trueArmSlug);
+      const falseArm = group.falseArmSlug
+        ? getPublishedForecast(group.falseArmSlug)
+        : undefined;
+      const resolved = getConditionalGroup(group.slug);
+      if (!trueArm || (group.falseArmSlug && !falseArm)) {
+        expect(resolved, group.slug).toBeUndefined();
+        continue;
+      }
+      expect(resolved?.trueArm).toEqual(trueArm);
+      expect(resolved?.falseArm).toEqual(falseArm);
+      for (const cell of [trueArm, falseArm].filter(
+        (cell): cell is ForecastCell => Boolean(cell),
+      )) {
+        expect(
+          verifyForecastRun(cell, getForecastRunEntries(cell)[0]).eligible,
+        ).toBe(true);
+      }
+      if (group.probabilitySlug)
+        expect(resolved?.probability).toEqual(
+          getPublishedForecast(group.probabilitySlug),
+        );
+      if (group.unconditionalSlug)
+        expect(resolved?.unconditional).toEqual(
+          getPublishedForecast(group.unconditionalSlug),
+        );
     }
   });
 });

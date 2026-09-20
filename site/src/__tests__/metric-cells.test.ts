@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FORECAST_CELLS } from "@/data/forecast-cells";
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import { cellsForSeries, resolveMetricCell } from "@/lib/metric-cells";
 
 describe("resolveMetricCell (live metric → cell join)", () => {
@@ -14,35 +15,44 @@ describe("resolveMetricCell (live metric → cell join)", () => {
     expect(resolveMetricCell("usda.fsa.no_such_series")).toBeNull();
   });
 
-  it("joins the SPM child poverty hint to a live cell", () => {
-    const match = resolveMetricCell("census.spm.child_poverty_rate");
-    expect(match).not.toBeNull();
-    expect(match!.slug).toMatch(/spm-child-poverty/);
-    expect(match!.pointLabel).toBeTruthy();
-    expect(match!.ciLabel).toContain("–");
+  it("does not turn withdrawn SPM and ACTC prototypes into live metric estimates", () => {
+    for (const hint of [
+      "census.spm.child_poverty_rate",
+      "irs.soi.additional_child_tax_credit_returns",
+    ]) {
+      expect(
+        FORECAST_CELLS.some((cell) => cell.dataPointId?.startsWith(hint)),
+      ).toBe(true);
+      expect(cellsForSeries(hint)).toEqual([]);
+      expect(resolveMetricCell(hint)).toBeNull();
+    }
   });
 
-  it("joins the ACTC hint to the ty2026 cell", () => {
-    const match = resolveMetricCell(
-      "irs.soi.additional_child_tax_credit_returns",
-    );
+  it("joins a verified initial-claims forecast with its actual displayed values", () => {
+    const match = resolveMetricCell("us.dol.initial_claims", "2026-08-01");
     expect(match).not.toBeNull();
-    expect(match!.resolutionDate).toBeTruthy();
+    const published = getPublishedForecasts().find(
+      (cell) => cell.slug === match!.slug,
+    );
+    expect(published).toBeDefined();
+    expect(match!.point).toBe(published!.pointEstimate);
+    expect(match!.ciLow).toBe(published!.ciLow);
+    expect(match!.ciHigh).toBe(published!.ciHigh);
   });
 
   it("picks the nearest unresolved period and counts the rest", () => {
-    const match = resolveMetricCell("census.spm.child_poverty_rate", "2026-07-31");
+    const match = resolveMetricCell("us.dol.initial_claims", "2026-08-01");
     expect(match).not.toBeNull();
-    // 2025-2028 cells exist; the chosen one resolves on/after today.
-    expect(match!.resolutionDate >= "2026-07-31").toBe(true);
+    // Real archived weekly claims runs supply multiple eligible periods.
+    expect(match!.resolutionDate >= "2026-08-01").toBe(true);
     expect(match!.moreCount).toBeGreaterThan(0);
   });
 
   it("falls back to the latest cell when the series is fully resolved", () => {
-    const match = resolveMetricCell("census.spm.child_poverty_rate", "2099-01-01");
+    const match = resolveMetricCell("us.dol.initial_claims", "2099-01-01");
     expect(match).not.toBeNull();
     expect(match!.resolutionDate <= "2099-01-01").toBe(true);
-    const selectedCell = FORECAST_CELLS.find(
+    const selectedCell = getPublishedForecasts().find(
       (cell) => cell.slug === match!.slug,
     );
     expect(selectedCell?.type).not.toBe("conditional");
@@ -62,13 +72,14 @@ describe("conditional arms never satisfy unconditional metric hints", () => {
     expect(raw.some((cell) => cell.type !== "conditional")).toBe(true);
 
     const matches = cellsForSeries(series);
-    expect(matches.length).toBeGreaterThan(0);
-    expect(matches.every((cell) => cell.type !== "conditional")).toBe(true);
-
-    const match = resolveMetricCell(series);
-    expect(match).not.toBeNull();
+    expect(matches).toEqual([]);
+    expect(resolveMetricCell(series)).toBeNull();
+    // The surviving conditional arms cannot resurrect a withdrawn unconditional forecast.
     expect(
-      FORECAST_CELLS.find((cell) => cell.slug === match?.slug)?.type,
-    ).not.toBe("conditional");
+      getPublishedForecasts().some(
+        (cell) =>
+          cell.type === "conditional" && cell.dataPointId?.startsWith(series),
+      ),
+    ).toBe(true);
   });
 });

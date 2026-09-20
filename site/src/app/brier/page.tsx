@@ -1,7 +1,7 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/Header";
-import { FORECAST_CELLS } from "@/data/forecast-cells";
 import {
   buildPredictionSpecs,
   buildRecordedPredictionRunRecords,
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 
 export default async function BrierLabPage() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
   const specs = buildPredictionSpecs(forecasts);
   const runs = buildRecordedPredictionRunRecords(forecasts, specs);
   const rewardExport = buildBrierRewardExport({

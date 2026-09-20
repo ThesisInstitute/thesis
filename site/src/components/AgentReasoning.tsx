@@ -1,17 +1,19 @@
-import type { ReasoningStep, Unit } from "@/data/forecast-cells";
-import { formatValue } from "@/data/forecast-cells";
+import type { ReasoningStep, Unit } from "@/data/forecast-display";
+import { formatValue } from "@/data/forecast-display";
 import type { TraceProvenance } from "@/data/trace-provenance";
 
 interface AgentReasoningProps {
   steps: ReasoningStep[];
   unit: Unit;
   provenance?: TraceProvenance;
+  reconstructedBaseline?: boolean;
 }
 
 export function AgentReasoning({
   steps,
   unit,
   provenance = "activity_backed",
+  reconstructedBaseline = false,
 }: AgentReasoningProps) {
   return (
     <article
@@ -53,6 +55,7 @@ export function AgentReasoning({
           step={step}
           unit={unit}
           provenance={provenance}
+          reconstructedBaseline={reconstructedBaseline}
         />
       ))}
     </article>
@@ -63,10 +66,12 @@ function RenderedStep({
   step,
   unit,
   provenance,
+  reconstructedBaseline,
 }: {
   step: ReasoningStep;
   unit: Unit;
   provenance: TraceProvenance;
+  reconstructedBaseline: boolean;
 }) {
   switch (step.kind) {
     case "heading":
@@ -96,9 +101,9 @@ function RenderedStep({
       const illustrative = provenance === "illustrative";
       const label = illustrative
         ? "illustrative step"
-        : tool === "agent.run"
-          ? "recorded agent run"
-          : "recorded source check";
+        : reconstructedBaseline
+          ? "Baseline calculation"
+          : "Reported tool use";
       return (
         <div className="my-3">
           <div
@@ -109,7 +114,11 @@ function RenderedStep({
               ▸ {label}: {tool}
             </span>
             <span className="text-[#9DB1BF]">
-              {illustrative ? "authored, not executed" : "recorded"}
+              {illustrative
+                ? "authored, not executed"
+                : reconstructedBaseline
+                  ? "reconstructed"
+                  : "model report"}
             </span>
           </div>
           <pre

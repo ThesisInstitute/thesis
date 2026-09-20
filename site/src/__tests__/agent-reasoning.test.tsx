@@ -47,6 +47,8 @@ describe("AgentReasoning static report", () => {
     expect(codeBlocks).toHaveLength(2);
     expect(codeBlocks[0].textContent).toBe(call);
     expect(codeBlocks[1].textContent).toContain(result);
+    expect(report.getByText("▸ Reported tool use: census.lookup")).toBeTruthy();
+    expect(report.queryByText(/recorded source check/)).toBeNull();
     expect(report.getByText("13.0%")).toBeTruthy();
     expect(report.getByText("[11.9% · 14.3%]")).toBeTruthy();
     expect(

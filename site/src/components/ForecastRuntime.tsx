@@ -11,87 +11,52 @@ import {
   type ForecastCell,
   type ForecastRunEntry,
   type PredictionPackReference,
-} from "@/data/forecast-cells";
+} from "@/data/forecast-display";
 import type { ResolvedForecastScore } from "@/data/thesis-log";
-import type { SavedForecastRun } from "@/lib/saved-forecast";
 import { prepareReportContent } from "@/lib/report-content";
+import { canPlotReportHistory } from "@/lib/report-history";
 
 interface ForecastRuntimeProps {
   forecast: ForecastCell;
   resolvedScore?: ResolvedForecastScore;
   runScores?: Record<string, ResolvedForecastScore>;
-  savedForecast?: SavedForecastRun | null;
 }
 
-interface ReportRun extends Omit<ForecastRunEntry, "predictionDistribution"> {
-  predictionDistribution?: ForecastRunEntry["predictionDistribution"];
-  archive?: SavedForecastRun;
-}
+type ReportRun = ForecastRunEntry;
 
-function reportRuns(
-  forecast: ForecastCell,
-  saved?: SavedForecastRun | null,
-): ReportRun[] {
-  const catalog = getForecastRunEntries(forecast).map((run) => ({
-    ...run,
-    label:
-      run.label === "Headline"
-        ? run.predictionRun
-          ? "Original forecast"
-          : "Prototype estimate"
-        : run.label,
-  }));
-  if (!saved) return catalog;
-  return [
-    {
-      variantId: `archive:${saved.artifactPath}`,
-      label:
-        saved.forecast.source === "ai_gateway"
-          ? "API model forecast"
-          : saved.forecast.source === "deterministic_fallback"
-            ? "Deterministic estimate"
-            : saved.forecast.source?.includes("calibration")
-              ? "Calibration estimate"
-              : "API forecast",
-      isPrimary: false,
-      pointEstimate: saved.forecast.pointEstimate,
-      ciLow: saved.forecast.ciLow,
-      ciHigh: saved.forecast.ciHigh,
-      confidence: saved.forecast.confidence,
-      drivers: saved.forecast.drivers,
-      predictionDistribution: saved.forecast.distribution,
-      reasoning: saved.reasoning,
-      archive: saved,
-    },
-    ...catalog,
-  ];
+function reportRuns(forecast: ForecastCell): ReportRun[] {
+  return getForecastRunEntries(forecast)
+    .filter((run) => classifyTraceProvenance(run) === "activity_backed")
+    .map((run) => ({
+      ...run,
+      label: run.label === "Headline" ? "Original forecast" : run.label,
+    }));
 }
 
 function runTime(run: ReportRun) {
-  return run.archive?.forecast.generatedAt ?? run.predictionRun?.runAt;
+  return run.predictionRun?.runAt;
 }
 
 function runMethod(run: ReportRun) {
-  if (run.archive) {
-    const { source, model } = run.archive.forecast;
-    if (source === "ai_gateway") return model ?? "AI model";
-    if (source === "deterministic_fallback") return "Deterministic estimate";
-    if (source?.includes("calibration")) return "Calibration estimate";
-    return "API forecast";
-  }
-  return run.predictionRun?.model ?? "Prototype estimate";
+  return run.predictionRun?.model;
+}
+
+function isReconstructedBaseline(run: ReportRun) {
+  return (
+    run.variantId === "time-series-prior" &&
+    run.predictionRun?.model === "persistence.last_print"
+  );
 }
 
 export function ForecastRuntime({
   forecast: forecastCell,
   resolvedScore,
   runScores,
-  savedForecast,
 }: ForecastRuntimeProps) {
-  const runs = reportRuns(forecastCell, savedForecast);
+  const runs = reportRuns(forecastCell);
   const [selection, setSelection] = useState({
     slug: forecastCell.slug,
-    id: runs[0].variantId,
+    id: runs[0]?.variantId ?? "",
   });
   const selected =
     (selection.slug === forecastCell.slug &&
@@ -99,6 +64,10 @@ export function ForecastRuntime({
     runs[0];
   const selectRun = (id: string) =>
     setSelection({ slug: forecastCell.slug, id });
+  if (!selected) return <p>No forecast available.</p>;
+  const history = canPlotReportHistory(selected.historicalContext ?? [])
+    ? selected.historicalContext!
+    : [];
   const report = prepareReportContent(selected.reasoning);
   const selectedForecast: ForecastCell = {
     ...forecastCell,
@@ -110,20 +79,28 @@ export function ForecastRuntime({
     reasoning: selected.reasoning,
     predictionRun: selected.predictionRun,
     predictionDistribution: selected.predictionDistribution,
+    historicalContext: history,
     comparisonRuns: undefined,
   };
-  // Recorder API snapshots are not registered catalog runs and cannot inherit
-  // their scores. Every other selection gets only its own score.
-  const score = selected.archive
-    ? undefined
-    : (runScores?.[selected.variantId] ??
-      (selected.isPrimary ? resolvedScore : undefined));
+  const score =
+    runScores?.[selected.variantId] ??
+    (selected.isPrimary ? resolvedScore : undefined);
   const generatedAt = runTime(selected);
-  const isPrototype = !selected.archive && !selected.predictionRun;
-  const sourceHref = selected.archive
-    ? `https://github.com/ThesisInstitute/thesis/blob/main/${selected.archive.artifactPath}`
+  const manifest = selected.predictionRun?.activityLog?.find(
+    (artifact) => artifact.artifactType === "manifest",
+  );
+  const normalizedArtifact = selected.predictionRun?.activityLog?.find(
+    (artifact) => artifact.artifactType === "normalized_cell",
+  );
+  // The publication gate also verifies manifests committed through custody
+  // roots; those modern manifests may not be repeated in the artifact list.
+  const manifestPath =
+    manifest?.path ??
+    normalizedArtifact?.path.replace(/\/[^/]+$/, "/manifest.json");
+  const sourceHref = manifestPath
+    ? `https://github.com/ThesisInstitute/thesis/blob/main/${manifestPath}`
     : "/log";
-  const catalogRuns = getForecastRunEntries(forecastCell);
+  const catalogRuns = runs;
   const pointProjection = isPointProjection(selected, forecastCell.unit);
 
   return (
@@ -135,7 +112,7 @@ export function ForecastRuntime({
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
             <p className="mb-2 text-sm text-[var(--theme-text-muted)]">
-              {isPrototype ? "Prototype estimate" : "Forecast"}
+              Forecast
             </p>
             <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3">
               <span className="[font-family:var(--font-display)] text-[clamp(2.75rem,7vw,4.5rem)] leading-none tracking-[-0.035em] text-[var(--color-accent)]">
@@ -190,7 +167,7 @@ export function ForecastRuntime({
             className="text-[var(--color-accent)] hover:underline"
             href={sourceHref}
           >
-            {selected.archive ? "Source record" : "Thesis Log"} ↗
+            {manifestPath ? "Run record" : "Thesis Log"} ↗
           </a>
         </div>
         {report.modelUnavailable && (
@@ -198,25 +175,19 @@ export function ForecastRuntime({
             role="note"
             className="mt-5 border-l-2 border-[#B17B39] pl-3 text-sm leading-relaxed text-[var(--theme-text)]"
           >
-            {selected.archive?.forecast.source?.endsWith("fallback")
-              ? "The model was unavailable. This estimate uses a fixed formula."
-              : "The model request failed during this run. See run details for the original diagnostic."}
+            A model request failed during this run. See run details for the
+            original diagnostic.
           </p>
         )}
-        {isPrototype && (
-          <p className="mt-4 text-sm text-[var(--theme-text-muted)]">
-            This is an illustrative prototype, not a completed model run.
-          </p>
-        )}
-        {(!pointProjection || forecastCell.historicalContext.length > 0) && (
+        {(!pointProjection || history.length > 0) && (
           <div className="mt-8" aria-label="Forecast chart">
-            {forecastCell.historicalContext.length > 0 ? (
+            {history.length > 0 ? (
               <ForecastTrend
                 point={selected.pointEstimate}
                 ciLow={selected.ciLow}
                 ciHigh={selected.ciHigh}
                 unit={forecastCell.unit}
-                history={forecastCell.historicalContext}
+                history={history}
                 targetLabel={targetPeriodLabel(forecastCell)}
                 showInterval={!pointProjection}
                 actual={
@@ -234,11 +205,12 @@ export function ForecastRuntime({
                 ciLow={selected.ciLow}
                 ciHigh={selected.ciHigh}
                 unit={forecastCell.unit}
+                distribution={selected.predictionDistribution}
               />
             )}
           </div>
         )}
-        {!pointProjection && (
+        {!pointProjection && history.length > 0 && (
           <details className="mt-5 border-t border-[var(--theme-border)] pt-4">
             <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
               Probability distribution
@@ -255,11 +227,7 @@ export function ForecastRuntime({
           </details>
         )}
         {forecastCell.resolvedOutcome && (
-          <ResolvedOutcomePanel
-            forecast={selectedForecast}
-            score={score}
-            unscoredArchive={Boolean(selected.archive)}
-          />
+          <ResolvedOutcomePanel forecast={selectedForecast} score={score} />
         )}
       </section>
 
@@ -273,11 +241,8 @@ export function ForecastRuntime({
         <AgentReasoning
           steps={report.steps.filter((step) => step.kind !== "forecast")}
           unit={forecastCell.unit}
-          provenance={
-            selected.archive
-              ? "activity_backed"
-              : classifyTraceProvenance(selected)
-          }
+          provenance={classifyTraceProvenance(selected)}
+          reconstructedBaseline={isReconstructedBaseline(selected)}
         />
         {selected.drivers.length > 0 && (
           <div className="mt-8">
@@ -290,12 +255,6 @@ export function ForecastRuntime({
               ))}
             </ul>
           </div>
-        )}
-        {selected.archive && (
-          <p className="mt-6 text-sm leading-relaxed text-[var(--theme-text-muted)]">
-            The source record includes this explanation and its caveats.
-            Original streamed tool activity was not archived.
-          </p>
         )}
       </section>
 
@@ -420,9 +379,7 @@ function RunHistory({
       (Date.parse(runTime(b) ?? "") || 0) - (Date.parse(runTime(a) ?? "") || 0),
   );
   const hasScores = ordered.some(
-    (run) =>
-      !run.archive &&
-      (runScores?.[run.variantId] || (run.isPrimary && primaryScore)),
+    (run) => runScores?.[run.variantId] || (run.isPrimary && primaryScore),
   );
   return (
     <section
@@ -467,10 +424,9 @@ function RunHistory({
           <tbody>
             {ordered.map((run) => {
               const selected = run.variantId === selectedId;
-              const score = run.archive
-                ? undefined
-                : (runScores?.[run.variantId] ??
-                  (run.isPrimary ? primaryScore : undefined));
+              const score =
+                runScores?.[run.variantId] ??
+                (run.isPrimary ? primaryScore : undefined);
               return (
                 <tr
                   key={run.variantId}
@@ -538,6 +494,11 @@ function RunDetails({
         Run details{diagnostics.length ? " and diagnostics" : ""}
       </summary>
       <div className="mt-5 space-y-5 text-sm leading-relaxed">
+        <p>
+          {isReconstructedBaseline(run)
+            ? "This baseline is reconstructed from pre-cutoff ledger observations. It is a comparison calculation, not an AI forecast."
+            : "The analysis is the model’s written report. Tool-use descriptions in that report are model claims; the activity artifacts contain the execution record."}
+        </p>
         {run.description && <p>{run.description}</p>}
         {metadata && (
           <p>
@@ -553,7 +514,6 @@ function RunDetails({
             is not required.
           </p>
         )}
-        {run.archive && <p>This API result is not a scored catalog run.</p>}
         {run.packSet && (
           <p>
             Pack set: {run.packSet.label} · {run.packSet.mode}
@@ -594,15 +554,14 @@ function RunDetails({
         )}
         <details>
           <summary className="cursor-pointer text-[var(--theme-text-muted)]">
-            {run.archive ? "Original explanation" : "Complete original trace"}
+            Complete original trace
           </summary>
           <div className="mt-5">
             <AgentReasoning
               steps={run.reasoning}
               unit={unit}
-              provenance={
-                run.archive ? "activity_backed" : classifyTraceProvenance(run)
-              }
+              provenance={classifyTraceProvenance(run)}
+              reconstructedBaseline={isReconstructedBaseline(run)}
             />
           </div>
         </details>
@@ -634,11 +593,9 @@ function PackDetails({ runs }: { runs: ForecastRunEntry[] }) {
 function ResolvedOutcomePanel({
   forecast,
   score,
-  unscoredArchive = false,
 }: {
   forecast: ForecastCell;
   score?: ResolvedForecastScore;
-  unscoredArchive?: boolean;
 }) {
   const outcome = forecast.resolvedOutcome;
   if (!outcome) return null;
@@ -710,11 +667,6 @@ function ResolvedOutcomePanel({
           )}
         </dd>
       </dl>
-      {unscoredArchive && (
-        <p className="mt-3 text-sm text-[var(--theme-text-muted)]">
-          This API result is not a scored catalog run.
-        </p>
-      )}
       {outcome.note && (
         <p className="mt-3 text-[0.78rem] leading-[1.55] text-[var(--theme-text-muted)]">
           {outcome.note}

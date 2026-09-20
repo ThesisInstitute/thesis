@@ -5,7 +5,10 @@ import { Suspense } from "react";
 import { BackToBill } from "@/components/BackToBill";
 import { Header } from "@/components/Header";
 import { ForecastRuntime } from "@/components/ForecastRuntime";
-import { loadLatestSavedForecast } from "@/lib/saved-forecast";
+import {
+  getPublishedForecast,
+  getPublishedForecasts,
+} from "@/lib/forecast-publication";
 import {
   FORECAST_CELLS,
   TYPE_LABEL,
@@ -19,7 +22,6 @@ import {
   scoreResolvedForecast,
   scoreResolvedForecastRun,
   withResolvedOutcome,
-  withResolvedOutcomes,
 } from "@/data/thesis-log";
 
 export function generateStaticParams() {
@@ -56,12 +58,14 @@ export default async function ForecastDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const forecastDefinition = getForecastCell(slug);
-  if (!forecastDefinition) notFound();
+  const target = getForecastCell(slug);
+  if (!target) notFound();
+  const forecastDefinition = getPublishedForecast(slug);
+  if (!forecastDefinition) return <UnavailableForecast title={target.title} />;
 
   const ledger = await loadPolicyEngineLedger();
   const forecast = withResolvedOutcome(forecastDefinition, ledger);
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = getPublishedForecasts();
   const resolvedScore = scoreResolvedForecast(forecast, ledger);
   const runScores = Object.fromEntries(
     getForecastRunEntries(forecast).flatMap((run) => {
@@ -69,7 +73,6 @@ export default async function ForecastDetailPage({
       return score ? [[run.variantId, score]] : [];
     }),
   );
-  const savedForecast = loadLatestSavedForecast(slug);
 
   return (
     <div>
@@ -113,7 +116,6 @@ export default async function ForecastDetailPage({
           forecast={forecast}
           resolvedScore={resolvedScore}
           runScores={runScores}
-          savedForecast={savedForecast}
         />
 
         {/* Related forecasts */}
@@ -122,6 +124,41 @@ export default async function ForecastDetailPage({
           currentType={forecast.type}
           forecasts={forecasts}
         />
+      </main>
+    </div>
+  );
+}
+
+function UnavailableForecast({ title }: { title: string }) {
+  return (
+    <div>
+      <Header activePage="forecasts" />
+      <main className="mx-auto max-w-[960px] px-8 py-12 max-md:px-5">
+        <Link
+          href="/"
+          className="text-sm text-[var(--theme-text-muted)] hover:underline"
+        >
+          ← All forecasts
+        </Link>
+        <h1 className="mt-10 [font-family:var(--font-display)] text-3xl font-light">
+          {title}
+        </h1>
+        <section className="mt-8 border-y border-[var(--theme-border)] py-8">
+          <h2 className="[font-family:var(--font-display)] text-xl">
+            No forecast available
+          </h2>
+          <p className="mt-3 max-w-[65ch] text-[var(--theme-text-muted)] leading-relaxed">
+            This target does not currently have a forecast supported by
+            complete, successful run records. Prototype estimates and failed
+            runs have been withdrawn from the forecast catalog.
+          </p>
+          <Link
+            href="/"
+            className="mt-5 inline-block text-[var(--color-accent)] hover:underline"
+          >
+            Browse available forecasts →
+          </Link>
+        </section>
       </main>
     </div>
   );

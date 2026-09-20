@@ -1,4 +1,4 @@
-import { formatValue, type Unit } from "@/data/forecast-cells";
+import { formatValue, type Unit } from "@/data/forecast-display";
 import type { PredictionDistribution } from "@/data/prediction-distribution";
 
 type HistoricalPoint = { label: string; value: number };

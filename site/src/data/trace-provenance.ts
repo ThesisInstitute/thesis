@@ -1,10 +1,10 @@
 import frozen from "./trace-provenance-frozen.json";
 
 /**
- * Trace provenance classes for published reasoning traces.
+ * Legacy structural labels for reasoning records, not publication eligibility.
  *
- * - "activity_backed": every step derives from archived run activity in the
- *   public records (the June 28, 2026 custody regime onward).
+ * - "activity_backed": metadata references activity artifacts. This classifier
+ *   does not open artifacts or prove that narrated tool calls were executed.
  * - "recorded_run": a real agent research run from before on-repo activity
  *   archives existed — honest process, weaker receipts.
  * - "illustrative": the trace was AUTHORED from source context when the
@@ -15,8 +15,8 @@ import frozen from "./trace-provenance-frozen.json";
  * shrink-only: a cell may leave it by being regenerated through the real
  * pipeline, and no new cell may ever join it — the trace-provenance test
  * fails the build on any cell that is neither activity-backed nor frozen,
- * which is the standing assertion that the site only logs real tool calls
- * from here on.
+ * Publication separately requires the server-side forecast-publication gate;
+ * this frozen registry alone cannot authenticate a forecast or its tool claims.
  */
 export type TraceProvenance =
   | "activity_backed"

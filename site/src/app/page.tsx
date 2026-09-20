@@ -1,15 +1,12 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { loadBills } from "@/data/bills";
-import { FORECAST_CELLS, formatValue } from "@/data/forecast-cells";
+import { formatValue } from "@/data/forecast-cells";
 
-const featuredForecasts = FORECAST_CELLS.filter((forecast) =>
-  [
-    "spm-child-poverty-2025",
-    "ctc-current-law-outlays-ty2026",
-    "cpi-u-annual-2026",
-  ].includes(forecast.slug),
-);
+const featuredForecasts = getPublishedForecasts()
+  .filter((forecast) => forecast.type === "data")
+  .slice(0, 3);
 
 const stackItems = [
   {

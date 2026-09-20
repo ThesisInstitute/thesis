@@ -4,7 +4,7 @@ import {
   type CountryCode,
   type ForecastCell,
   type ForecastCellType,
-} from "./forecast-cells";
+} from "./forecast-display";
 import { publisherForCell, type PublisherInfo } from "./forecast-publishers";
 
 /** The only catalog fields allowed across the /forecasts page boundary. */

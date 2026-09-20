@@ -1,4 +1,4 @@
-import { FORECAST_CELLS } from "./forecast-cells";
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import { buildTargetArchitectureManifest } from "./thesis-target-architecture-export";
 import { buildTargetArchitectureProjection } from "./thesis-target-architecture";
 import { loadPolicyEngineLedger, withResolvedOutcomes } from "./thesis-log";
@@ -31,7 +31,7 @@ export function resetTargetArchitectureProjectionCache() {
 async function buildTargetArchitectureProjectionOnce() {
   const ledger = await loadPolicyEngineLedger();
   return buildTargetArchitectureProjection(
-    withResolvedOutcomes(FORECAST_CELLS, ledger),
+    withResolvedOutcomes(getPublishedForecasts(), ledger),
     ledger,
   );
 }

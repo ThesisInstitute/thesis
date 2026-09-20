@@ -1,9 +1,10 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CalibrationPlot } from "@/components/CalibrationPlot";
 import { EXPIRED_UNFORECAST_REGISTRATIONS } from "@/data/expired-unforecast-registrations";
 import { Header } from "@/components/Header";
-import { FORECAST_CELLS, formatValue } from "@/data/forecast-cells";
+import { formatValue } from "@/data/forecast-cells";
 import {
   buildPredictionSpecs,
   buildRecordedPredictionRunRecords,
@@ -38,7 +39,7 @@ function formatCoverage(value: number | null): string {
 
 export default async function CalibrationPage() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
   const specs = buildPredictionSpecs(forecasts);
   const runs = buildRecordedPredictionRunRecords(forecasts, specs);
   const rewardExport = buildBrierRewardExport({
@@ -160,26 +161,24 @@ export default async function CalibrationPage() {
         >
           Scoring methodology v5 (2026-07-10): headline numbers count only
           witness-verified scores. A run enters the headline when its sealed
-          custody root was externally witnessed — an RFC 3161 timestamp in
-          the{" "}
+          custody root was externally witnessed — an RFC 3161 timestamp in the{" "}
           <a href="https://github.com/ThesisInstitute/thesis/blob/main/records/witnessed-timeline.json">
             witnessed chronology
           </a>{" "}
-          extracted from the public record chain — before the observation,
-          its custody inventory is complete and headline-eligible, and its
-          recorded run time precedes the observation (sub-day ordering
-          trusted only for explicit UTC-offset timestamps). A claimed
-          timestamp alone never enters the headline: scores whose chronology
-          rests on claimed times stay published in{" "}
-          <a href="/log.json">log.json</a>, flagged claimed-time-verified,
-          outside the official numbers, alongside unverified and violated
-          legacy runs. CRPS is normalized only by same-series ledger
-          dispersion frozen at target registration; scores without three
-          pre-cutoff ledger observations publish raw CRPS and stay out of
-          normalized means and rewards. The agent-versus-persistence headline
-          is a per-target RAW CRPS ratio against the paired ledger baseline,
-          which needs no scale at all — nothing a forecast authors can move
-          its denominator.
+          extracted from the public record chain — before the observation, its
+          custody inventory is complete and headline-eligible, and its recorded
+          run time precedes the observation (sub-day ordering trusted only for
+          explicit UTC-offset timestamps). A claimed timestamp alone never
+          enters the headline: scores whose chronology rests on claimed times
+          stay published in <a href="/log.json">log.json</a>, flagged
+          claimed-time-verified, outside the official numbers, alongside
+          unverified and violated legacy runs. CRPS is normalized only by
+          same-series ledger dispersion frozen at target registration; scores
+          without three pre-cutoff ledger observations publish raw CRPS and stay
+          out of normalized means and rewards. The agent-versus-persistence
+          headline is a per-target RAW CRPS ratio against the paired ledger
+          baseline, which needs no scale at all — nothing a forecast authors can
+          move its denominator.
         </p>
 
         <section className="mt-10 grid grid-cols-4 gap-4 max-md:grid-cols-2">
@@ -323,10 +322,9 @@ export default async function CalibrationPage() {
             Scores whose runs predate the witnessed custody chain: their
             recorded timestamps order them before their outcomes, but no
             independent timestamp proves it, so they sit one tier below the
-            headline — published and flagged in{" "}
-            <a href="/log.json">log.json</a>, never deleted. The headline
-            starts at zero by construction and fills as custody-v2 runs
-            resolve against official prints.
+            headline — published and flagged in <a href="/log.json">log.json</a>
+            , never deleted. The headline starts at zero by construction and
+            fills as custody-v2 runs resolve against official prints.
           </p>
         </section>
 
@@ -342,16 +340,15 @@ export default async function CalibrationPage() {
             style={{ color: "var(--theme-text-muted)" }}
           >
             Each score records the forecast distribution evaluated at the
-            official print (its probability integral transform), so coverage
-            is checkable at every stated interval, not just the elicited 80%.
-            A calibrated forecaster tracks the diagonal: above it means
-            intervals are too wide, below it too narrow. The PIT histograms
-            show the same thing distributionally — a calibrated forecaster
-            fills each bin equally; a U shape is overconfidence, a central
-            hump underconfidence. The curve reads coverage off each
-            forecast&apos;s materialized distribution, while the headline 80%
-            stat counts stated interval endpoints directly, so the two can
-            differ by a few scores.
+            official print (its probability integral transform), so coverage is
+            checkable at every stated interval, not just the elicited 80%. A
+            calibrated forecaster tracks the diagonal: above it means intervals
+            are too wide, below it too narrow. The PIT histograms show the same
+            thing distributionally — a calibrated forecaster fills each bin
+            equally; a U shape is overconfidence, a central hump
+            underconfidence. The curve reads coverage off each forecast&apos;s
+            materialized distribution, while the headline 80% stat counts stated
+            interval endpoints directly, so the two can differ by a few scores.
           </p>
           <div
             className="mt-5 rounded-[14px] border p-6"
@@ -365,9 +362,7 @@ export default async function CalibrationPage() {
                 (score) => score.probabilityIntegralTransform,
               )}
               claimedPits={allScores
-                .filter(
-                  (score) => score.chronology === "claimed_time_verified",
-                )
+                .filter((score) => score.chronology === "claimed_time_verified")
                 .map((score) => score.probabilityIntegralTransform)}
             />
           </div>
@@ -390,9 +385,9 @@ export default async function CalibrationPage() {
             forecasts every target as its last official print with a
             realized-volatility interval — an agent earns its place by beating
             it. Forecaster rows score here only when witness-verified; the
-            deterministic baseline is a replayable function of pre-cutoff
-            ledger data and needs no witness of its own. Rows with few scored
-            runs are noisy; read them accordingly.
+            deterministic baseline is a replayable function of pre-cutoff ledger
+            data and needs no witness of its own. Rows with few scored runs are
+            noisy; read them accordingly.
           </p>
           <div
             className="mt-5 overflow-x-auto rounded-[14px] border"
@@ -404,7 +399,9 @@ export default async function CalibrationPage() {
                   className="[font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em]"
                   style={{ color: "var(--theme-text-muted)" }}
                 >
-                  <th className="px-4 py-3 text-left font-normal">Forecaster</th>
+                  <th className="px-4 py-3 text-left font-normal">
+                    Forecaster
+                  </th>
                   <th className="px-4 py-3 text-right font-normal">
                     Scored / total runs
                   </th>
@@ -595,9 +592,9 @@ export default async function CalibrationPage() {
             style={{ color: "var(--theme-text-muted)" }}
           >
             Both published chronology tiers appear here. Only rows marked
-            witnessed — custody root externally witnessed before the
-            observation — count toward the headline numbers above; claimed
-            rows rest on recorded timestamps alone.
+            witnessed — custody root externally witnessed before the observation
+            — count toward the headline numbers above; claimed rows rest on
+            recorded timestamps alone.
           </p>
           <div
             className="mt-5 overflow-x-auto rounded-[14px] border"

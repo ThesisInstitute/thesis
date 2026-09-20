@@ -8,7 +8,6 @@ import { optionsResponse } from "@/lib/cors";
 import {
   formatSpmChildPovertySummary,
   policySnapshotFromPolicy,
-  serializeSpmCalibrationToolResult,
   SPM_CHILD_POVERTY_2025_SLUG,
   SPM_TARGET_YEAR,
   unavailablePolicySnapshot,
@@ -35,7 +34,6 @@ import {
   serializeEconomyToolResult,
   serializePolicyToolResult,
 } from "@/lib/policyengine";
-import { buildNumericCdfFromInterval } from "@/lib/prediction-distribution";
 import { createSseResponse, pause, type SendEvent } from "@/lib/sse";
 
 export const runtime = "nodejs";
@@ -63,8 +61,10 @@ export async function GET(
   }
 
   if (slug === CTC_CURRENT_LAW_OUTLAYS_SLUG) {
-    return createSseResponse(request, async (send) => {
-      await streamCtcCurrentLawOutlaysForecast(send);
+    return createSseResponse(request, async () => {
+      throw new Error(
+        "No forecast is available for current-law CTC outlays: the absolute outlay calculation is not implemented.",
+      );
     });
   }
 
@@ -87,7 +87,7 @@ async function streamSpmChildPovertyForecast(send: SendEvent) {
   });
   await sendStep(send, {
     kind: "text",
-    text: "This stream forecasts the calendar-year 2025 Supplemental Poverty Measure child poverty rate that Census is expected to publish in the September 2026 income and poverty release. The live run verifies the PolicyEngine current-law policy, runs the public data-point processor for the Census target, and applies an explicit calibration fallback before the forecast step.",
+    text: "This stream forecasts the calendar-year 2025 Supplemental Poverty Measure child poverty rate that Census is expected to publish in the September 2026 income and poverty release. The live run checks the PolicyEngine current-law policy and Census pages. Historical values and the calibration prior are stored inputs, not a fresh microsimulation.",
   });
 
   const policyCall = `policyengine.policy.get({ id: ${CURRENT_LAW_POLICY_ID} })`;
@@ -110,10 +110,7 @@ async function streamSpmChildPovertyForecast(send: SendEvent) {
       return policySnapshotFromPolicy(policy);
     })
     .catch((error: unknown) => {
-      const snapshot = unavailablePolicySnapshot(
-        CURRENT_LAW_POLICY_ID,
-        error,
-      );
+      const snapshot = unavailablePolicySnapshot(CURRENT_LAW_POLICY_ID, error);
       send("tool_result", {
         tool: "policyengine.policy",
         call: policyCall,
@@ -157,30 +154,14 @@ async function streamSpmChildPovertyForecast(send: SendEvent) {
     text: formatSpmChildPovertySummary(dataset.summary),
   });
 
-  const calibrationCall =
-    'brier.calibration.lookup({ domain: "poverty_forecasts", outcome: "spm_child_poverty_rate", targetYear: 2025 })';
-  send("status", {
-    state: "tool_running",
-    label: "Looking up SPM calibration prior",
-  });
-  send("tool_start", {
-    tool: "brier.calibration",
-    call: calibrationCall,
-  });
-  send("tool_result", {
-    tool: "brier.calibration",
-    call: calibrationCall,
-    result: serializeSpmCalibrationToolResult(dataset),
-  });
-
   await sendStep(send, {
     kind: "heading",
-    text: "Calibration adjustment",
+    text: "Stored calibration prior",
   });
   await sendStep(send, {
     kind: "math",
     text: [
-      "point = ",
+      "Stored prior = ",
       `${dataset.summary.calibration.policyEngineWeight.toFixed(2)} × ${dataset.summary.policyEnginePriorPct.toFixed(1)}% + `,
       `${dataset.summary.calibration.postExpansionHistoryWeight.toFixed(2)} × ${dataset.summary.postExpansionAveragePct.toFixed(1)}% + `,
       `${dataset.summary.calibration.latestPublishedWeight.toFixed(2)} × ${dataset.summary.latestHistoricalChildPovertyRatePct.toFixed(1)}% `,
@@ -190,7 +171,7 @@ async function streamSpmChildPovertyForecast(send: SendEvent) {
   });
   await sendStep(send, {
     kind: "text",
-    text: "The adjustment layer is deliberately explicit: PolicyEngine supplies law and population structure, Census supplies the resolution target and recent history, and the forecast optimizes for accuracy against the eventual Census publication rather than copying either input mechanically.",
+    text: "These weights and the PolicyEngine poverty seed are stored prototype assumptions. The live policy check does not run a poverty simulation, and the calibration prior is not a completed forecast.",
   });
 
   send("status", {
@@ -229,10 +210,7 @@ async function streamSpmChildPovertyForecast(send: SendEvent) {
   send("forecast", forecast);
   send("status", {
     state: "complete",
-    label:
-      forecast.source === "ai_gateway"
-        ? "AI Gateway forecast complete"
-        : "Calibration fallback complete",
+    label: "AI Gateway forecast complete",
   });
   send("done", { ok: true });
 }
@@ -317,129 +295,7 @@ async function streamCpiForecast(send: SendEvent) {
   send("forecast", forecast);
   send("status", {
     state: "complete",
-    label:
-      forecast.source === "ai_gateway"
-        ? "AI Gateway forecast complete"
-        : "Fallback forecast complete",
-  });
-  send("done", { ok: true });
-}
-
-async function streamCtcCurrentLawOutlaysForecast(send: SendEvent) {
-  await sendStep(send, {
-    kind: "heading",
-    text: "Identifying the question",
-  });
-  await sendStep(send, {
-    kind: "text",
-    text: "This stream forecasts tax-year 2026 Child Tax Credit outlays under current law. The live call verifies the PolicyEngine current-law policy object; the outlay estimate uses a prototype calibration fallback until an absolute CTC-outlay economy result is available through the public API.",
-  });
-
-  const policyCall = `policyengine.policy.get({ id: ${CURRENT_LAW_POLICY_ID} })`;
-  send("status", {
-    state: "tool_running",
-    label: "Querying PolicyEngine current law",
-  });
-  send("tool_start", {
-    tool: "policyengine.policy",
-    call: policyCall,
-  });
-
-  const policy = await fetchPolicy(CURRENT_LAW_POLICY_ID);
-  send("tool_result", {
-    tool: "policyengine.policy",
-    call: policyCall,
-    result: serializePolicyToolResult(policy),
-  });
-
-  await sendStep(send, {
-    kind: "heading",
-    text: "Calibration fallback",
-  });
-  await sendStep(send, {
-    kind: "text",
-    text: "Absolute CTC outlays need a variable-specific population total, not a reform-vs-baseline delta. For this prototype, the live stream treats the public PolicyEngine policy object as the law input and applies a stored calibration fallback for the CTC outlay target.",
-  });
-
-  const calibrationCall =
-    'brier.calibration.lookup({ domain: "policyengine_budget_scores", policy_area: "ctc", outcome: "current_law_outlays" })';
-  send("status", {
-    state: "tool_running",
-    label: "Looking up CTC outlay calibration",
-  });
-  send("tool_start", {
-    tool: "brier.calibration",
-    call: calibrationCall,
-  });
-
-  const rawEstimate = 58.8;
-  const ratio = 1.02;
-  const additive = 0.5;
-  const pointEstimate = 60.5;
-  const ciLow = 52.0;
-  const ciHigh = 70.0;
-  send("tool_result", {
-    tool: "brier.calibration",
-    call: calibrationCall,
-    result: JSON.stringify(
-      {
-        rawEstimateUsdBillions: rawEstimate,
-        rawEstimateSource:
-          "prototype PolicyEngine current-law microsimulation seed",
-        rawToFinalRatio: ratio,
-        additiveUsdBillions: additive,
-        target: "IRS/Treasury CTC outlay table",
-      },
-      null,
-      2,
-    ),
-  });
-
-  await sendStep(send, {
-    kind: "math",
-    text: `calibrated outlays = $${rawEstimate.toFixed(1)}B × ${ratio.toFixed(2)} + $${additive.toFixed(1)}B = $${pointEstimate.toFixed(1)}B`,
-  });
-  await sendStep(send, {
-    kind: "text",
-    text: "The AI should update this estimate as soon as real calibration observations accumulate: compare PolicyEngine CTC totals with IRS/Treasury tables, learn the residual by credit type and tax year, and let that residual move both the point estimate and interval width.",
-  });
-
-  send("forecast", {
-    pointEstimate,
-    ciLow,
-    ciHigh,
-    confidence: 0.8,
-    distribution: buildNumericCdfFromInterval({
-      pointEstimate,
-      ciLow,
-      ciHigh,
-    }),
-    publicTrace: [
-      `PolicyEngine current law policy ${policy.id} loaded successfully with API version ${policy.api_version}.`,
-      "The current live public API path does not yet expose an absolute CTC outlay total, so the stream uses the calibrated current-law fallback.",
-      "The adjustment layer is explicit and replaceable once CTC outlay calibration records are available.",
-    ],
-    assumptions: [
-      "The public PolicyEngine current-law object reflects the operative policy baseline for this prototype.",
-      "IRS/Treasury CTC outlay classification will be close to recent pre-expansion tax-year reporting.",
-      "Tax-year timing differences are wider than the central current-law policy uncertainty.",
-    ],
-    dataCaveats: [
-      "This stream verifies the policy object live but does not yet fetch an absolute CTC outlay result from PolicyEngine.",
-      "The outlay calibration fallback is a prototype prior, not an observed backtest table.",
-    ],
-    drivers: [
-      "Qualifying-child population",
-      "Refundability cap",
-      "Filing and take-up behavior",
-      "IRS/Treasury reporting classification",
-    ],
-    source: "calibration_fallback",
-    generatedAt: new Date().toISOString(),
-  });
-  send("status", {
-    state: "complete",
-    label: "Calibration fallback complete",
+    label: "AI Gateway forecast complete",
   });
   send("done", { ok: true });
 }
@@ -494,33 +350,17 @@ async function streamCtcExpansionForecast(send: SendEvent) {
     text: formatCtcExpansionSummary(dataset.summary),
   });
 
-  const calibrationCall =
-    'brier.calibration.lookup({ domain: "policyengine_budget_scores", policy_area: "ctc", outcome: "federal_budget_cost" })';
-  send("status", {
-    state: "tool_running",
-    label: "Looking up calibration prior",
-  });
-  send("tool_start", {
-    tool: "brier.calibration",
-    call: calibrationCall,
-  });
-  send("tool_result", {
-    tool: "brier.calibration",
-    call: calibrationCall,
-    result: JSON.stringify(dataset.calibration, null, 2),
-  });
-
   await sendStep(send, {
     kind: "heading",
-    text: "Calibration adjustment",
+    text: "Stored calibration prior",
   });
   await sendStep(send, {
     kind: "math",
-    text: `calibrated cost = raw_or_prior × ${dataset.calibration.rawToFinalRatio.toFixed(2)} + $${dataset.calibration.additiveUsdBillions.toFixed(1)}B = $${dataset.summary.calibratedPointEstimateUsdBillions.toFixed(1)}B`,
+    text: `Stored prior = raw_or_prior × ${dataset.calibration.rawToFinalRatio.toFixed(2)} + $${dataset.calibration.additiveUsdBillions.toFixed(1)}B = $${dataset.summary.calibratedPointEstimateUsdBillions.toFixed(1)}B`,
   });
   await sendStep(send, {
     kind: "text",
-    text: "The point estimate starts from PolicyEngine because it encodes the law and population model. The calibration layer exists because the target is the most accurate public forecast, not loyalty to any one simulator: it can learn systematic score differences by policy area, variable, population, and time horizon.",
+    text: "The adjustment weights are stored prototype assumptions, not an observed backtest. When no economy result is available, this input uses a stored prior rather than a fresh simulation. Only a successful model response produces a forecast.",
   });
 
   send("status", {
@@ -559,10 +399,7 @@ async function streamCtcExpansionForecast(send: SendEvent) {
   send("forecast", forecast);
   send("status", {
     state: "complete",
-    label:
-      forecast.source === "ai_gateway"
-        ? "AI Gateway forecast complete"
-        : "Calibration fallback complete",
+    label: "AI Gateway forecast complete",
   });
   send("done", { ok: true });
 }
