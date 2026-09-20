@@ -1722,7 +1722,7 @@ def parse_codex_jsonl(stdout_text: str, stderr_text: str) -> dict[str, Any]:
     for stream_name, text in (("stdout", stdout_text), ("stderr", stderr_text)):
         # Newline-only splitting: str.splitlines() also breaks on U+0085,
         # U+2028, U+2029 and ASCII separators that JSON leaves unescaped
-        # inside strings, which turned one MCP completion event into two
+        # inside strings, which turned one MCP completion event into
         # non-JSON fragments and dropped it from the archived event stream
         # (see verify_custody._tool_evidence_events).
         for line in text.split("\n"):

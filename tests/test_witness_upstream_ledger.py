@@ -21,9 +21,13 @@ from canonical_json import canonical_bytes  # noqa: E402
 from verify_custody import CustodyError, verify_run  # noqa: E402
 
 
-def _jsonl_bytes(rows: list[dict]) -> bytes:
+def _jsonl_bytes(rows: list[dict], *, ensure_ascii: bool = True) -> bytes:
     return b"".join(
-        json.dumps(row, separators=(",", ":")).encode() + b"\n" for row in rows
+        json.dumps(row, separators=(",", ":"), ensure_ascii=ensure_ascii).encode(
+            "utf-8"
+        )
+        + b"\n"
+        for row in rows
     )
 
 
@@ -392,15 +396,23 @@ def _v2_witness_run(
     return run_dir, source_files
 
 
-def _witness_run(tmp_path: pathlib.Path, monkeypatch) -> pathlib.Path:
+def _witness_run(
+    tmp_path: pathlib.Path,
+    monkeypatch,
+    *,
+    rows: list[dict] | None = None,
+    ensure_ascii: bool = True,
+) -> pathlib.Path:
     monkeypatch.setattr(wul, "ROOT", tmp_path)
     run_dir = tmp_path / "records" / "2030-01-01" / "run-ledger-witness"
     run_dir.mkdir(parents=True)
     jsonl_raw = _jsonl_bytes(
-        [
+        rows
+        or [
             {"source_record_id": "series.a.2030", "value": 1},
             {"source_record_id": "series.b.2030", "value": 2},
-        ]
+        ],
+        ensure_ascii=ensure_ascii,
     )
     branch_url = (
         "https://raw.githubusercontent.com/PolicyEngine/chronicle/"
@@ -517,6 +529,48 @@ def _pin_for_witness(tmp_path: pathlib.Path, run_dir: pathlib.Path) -> pathlib.P
     path = tmp_path / "ledger-pin.json"
     path.write_text(json.dumps(pin, indent=2) + "\n")
     return path
+
+
+def test_jsonl_line_count_splits_on_newlines_only() -> None:
+    # A row containing U+0085 or U+2028 (which non-ASCII JSON writers leave
+    # unescaped inside strings) must count as one line, matching
+    # pin_ledger._lines and the custody verifier; str.splitlines() would
+    # count four lines here and the witnessed lineCount would disagree with
+    # the pinned one.
+    raw = (
+        '{"source_record_id": "a", "title": "x\u0085y\u2028z"}\n'
+        '{"source_record_id": "b"}\n'
+    ).encode("utf-8")
+    assert len(raw.decode("utf-8").splitlines()) == 4
+
+    result = wul._validate_jsonl(raw)
+
+    assert result["lineCount"] == 2
+    assert result["sourceRecordIdCount"] == 2
+
+
+def test_witness_run_verifies_rows_with_unicode_line_separators(
+    tmp_path, monkeypatch
+) -> None:
+    # The upstream ledger is written by a non-ASCII JSON writer; a row whose
+    # text carries U+0085 or U+2028 is still one line for both the witness
+    # writer and the custody verifier's lineCount check.
+    run_dir = _witness_run(
+        tmp_path,
+        monkeypatch,
+        rows=[
+            {"source_record_id": "series.a.2030", "value": 1, "note": "x\u0085y\u2028z"},
+            {"source_record_id": "series.b.2030", "value": 2},
+        ],
+        ensure_ascii=False,
+    )
+    manifest = json.loads((run_dir / "manifest.json").read_text())
+    assert manifest["jsonl"]["lineCount"] == 2
+
+    result = verify_run(run_dir)
+
+    assert result.run_mode == "ledger_witness"
+    assert result.inventory_status == "complete"
 
 
 def test_witness_run_seals_and_verifies(tmp_path, monkeypatch) -> None:
