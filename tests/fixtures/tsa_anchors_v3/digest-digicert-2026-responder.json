@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "thesis_record_snapshot_v2",
+  "snapshotKind": "test_fixture",
+  "runId": "digicert-2026-responder",
+  "recordedAt": "2026-09-19T18:36:13Z",
+  "note": "Fixture only, never part of records/. A real DigiCert RFC 3161 token over these exact bytes pins the responder that tsa-anchors-v3 admits."
+}

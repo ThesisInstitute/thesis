@@ -37,6 +37,18 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      # Only workflows write records/**, so a TSA trust bundle approved in
+      # verifier code reaches records/trust here and nowhere else. The script
+      # copies a staged bundle only when its bytes equal the code pin. The
+      # snapshot minted below names it in trustBundleUpdates and is witnessed
+      # under the bundle that is already active, so the file, the snapshot and
+      # the witness land in the same attested push. It is a no-op once every
+      # approved bundle is published. See docs/tsa-trust-bundle-rotation.md.
+      - name: Publish code-approved TSA trust bundles
+        run: |
+          uv run --locked --extra custody python scripts/publish_trust_bundles.py \
+            --records records
+
       - name: Fetch and attest published forecast surfaces
         id: snapshot
         env:
