@@ -50,6 +50,11 @@ CODEX_STAGE_INVENTORY = {
     "codex_last_message.txt": "codex_last_message",
     "codex_trace.json": "codex_trace",
 }
+TOOL_EVIDENCE_STAGE_INVENTORY = {
+    "tool_evidence.json": "tool_evidence",
+    "tool_evidence_verification.json": "tool_evidence_verification",
+}
+TOOL_EVIDENCE_SERVER = "thesis_tool_evidence"
 REVIEWED_STAGE_INVENTORY = {
     "pre_submit_review_prompt.md": "review_prompt",
     "revision_prompt.md": "revision_prompt",
@@ -396,12 +401,194 @@ def _prefixed(inventory: dict[str, str], prefix: str) -> dict[str, str]:
     }
 
 
+def _tool_evidence_events(run_dir: Path, prefix: str) -> list[dict[str, Any]]:
+    """Read only tool events from native stdout, never model-authored text."""
+    path = run_dir / f"{prefix}codex_stdout.jsonl"
+    if not path.is_file():
+        return []
+    events = []
+    try:
+        lines = path.read_text().splitlines()
+    except (OSError, UnicodeDecodeError) as exc:
+        raise CustodyError(f"invalid Codex tool event stream: {path.name}") from exc
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        item = event.get("item")
+        if (
+            isinstance(item, dict)
+            and item.get("type") == "mcp_tool_call"
+            and item.get("server") == TOOL_EVIDENCE_SERVER
+        ):
+            events.append(event)
+    return events
+
+
+def verify_tool_evidence_stage(
+    run_dir: Path,
+    entries: list[dict[str, Any]],
+    *,
+    prefix: str,
+    command: dict[str, Any],
+    run_succeeded: bool,
+) -> set[str]:
+    """Verify rooted capture and replay artifacts without executing stored code.
+
+    Historical stages omit the declaration. Once a stage advertises capture,
+    both artifacts and the native event bindings become required. Failed
+    capture remains auditable only as an explicitly failed invocation/run.
+    """
+    required = _prefixed(TOOL_EVIDENCE_STAGE_INVENTORY, prefix)
+    paths = {str(entry["path"]) for entry in entries}
+    events = _tool_evidence_events(run_dir, prefix)
+    argv = command.get("argv", [])
+    configured = any(
+        isinstance(value, str)
+        and value.startswith(f"mcp_servers.{TOOL_EVIDENCE_SERVER}.")
+        for value in (argv if isinstance(argv, list) else [])
+    )
+    if "toolEvidence" not in command:
+        if paths.intersection(required) or events or configured:
+            raise CustodyError(f"{prefix}command.json has undeclared tool evidence")
+        return set()
+    expected_declaration = {
+        "schemaVersion": "thesis_tool_evidence_v1",
+        "artifact": f"{prefix}tool_evidence.json",
+        "verificationArtifact": f"{prefix}tool_evidence_verification.json",
+    }
+    if command.get("backend") != "codex" or canonical_bytes(
+        command["toolEvidence"]
+    ) != canonical_bytes(expected_declaration):
+        raise CustodyError(
+            f"{prefix}command.json has invalid tool evidence declaration"
+        )
+    if not configured:
+        raise CustodyError(
+            f"{prefix}command.json declares tool evidence without its MCP server"
+        )
+    _required(entries, required)
+    evidence_path = run_dir / f"{prefix}tool_evidence.json"
+    evidence = _load_object(evidence_path)
+    report = _load_object(run_dir / f"{prefix}tool_evidence_verification.json")
+    from tool_evidence import (
+        REDACTED_URL,
+        captured_arguments,
+        terminal_call,
+        verify_evidence,
+    )
+
+    replay = verify_evidence(evidence)
+    replay["evidenceSha256"] = _sha256(evidence_path.read_bytes())
+    if canonical_bytes(report) != canonical_bytes(replay):
+        raise CustodyError(
+            f"{prefix}tool evidence verification differs from trusted replay"
+        )
+    failed_stage = (
+        not run_succeeded
+        and type(command.get("returnCode")) is int
+        and command["returnCode"] != 0
+    )
+    if replay.get("valid") is not True:
+        if not failed_stage:
+            raise CustodyError(
+                f"{prefix}tool evidence failed verification on a successful stage"
+            )
+        return set(required)
+
+    calls = {call["callId"]: call for call in evidence["calls"]}
+    matched: set[str] = set()
+    native_ids: set[str] = set()
+    completed_ids: set[str] = set()
+    for event in events:
+        native_id = event["item"].get("id")
+        if not isinstance(native_id, str) or not native_id:
+            raise CustodyError(f"{prefix}tool evidence event lacks its native call ID")
+        native_ids.add(native_id)
+        if event.get("type") != "item.completed":
+            continue
+        if native_id in completed_ids:
+            raise CustodyError(
+                f"{prefix}tool evidence repeats a native completion event"
+            )
+        completed_ids.add(native_id)
+        item = event["item"]
+        result = item.get("result")
+        structured = (
+            result.get("structured_content", result.get("structuredContent"))
+            if isinstance(result, dict)
+            else None
+        )
+        call_id = structured.get("callId") if isinstance(structured, dict) else None
+        call = calls.get(call_id) if isinstance(call_id, str) else None
+        if call is None or call_id in matched:
+            raise CustodyError(
+                f"{prefix}tool evidence has an unknown or repeated event call ID"
+            )
+        expected_result = terminal_call(call)
+        native_arguments = item.get("arguments")
+        if (
+            call["status"] == "failed"
+            and call["tool"] == "fetch_source"
+            and call["arguments"] == {"url": REDACTED_URL}
+            and isinstance(native_arguments, dict)
+        ):
+            # Unsafe requests are deliberately redacted by the recorder. Only
+            # the same deterministic rejection may replace exact argument
+            # matching; a successful/public request cannot borrow this escape.
+            native_arguments = captured_arguments(call["tool"], native_arguments)
+        content = result.get("content")
+        try:
+            text_result = (
+                json.loads(content[0]["text"])
+                if isinstance(content, list)
+                and len(content) == 1
+                and isinstance(content[0], dict)
+                and content[0].get("type") == "text"
+                else None
+            )
+        except (KeyError, TypeError, ValueError):
+            text_result = None
+        if (
+            item.get("tool") != call["tool"]
+            or item.get("status")
+            not in (
+                {"completed"}
+                if call["status"] == "succeeded"
+                else {"completed", "failed"}
+            )
+            or canonical_bytes(native_arguments) != canonical_bytes(call["arguments"])
+            or canonical_bytes(structured) != canonical_bytes(expected_result)
+            or canonical_bytes(text_result) != canonical_bytes(expected_result)
+            or any(
+                key in result and result[key] is not (call["status"] == "failed")
+                for key in ("isError", "is_error")
+            )
+        ):
+            raise CustodyError(
+                f"{prefix}tool evidence call {call_id} differs from its native event"
+            )
+        matched.add(call_id)
+    if not failed_stage and matched != set(calls):
+        raise CustodyError(
+            f"{prefix}tool evidence calls lack native completion events: "
+            + ", ".join(sorted(set(calls) - matched))
+        )
+    if not failed_stage and native_ids != completed_ids:
+        raise CustodyError(f"{prefix}tool evidence has incomplete native calls")
+    return set(required)
+
+
 def _require_invocation_stage(
     run_dir: Path,
     entries: list[dict[str, Any]],
     *,
     prefix: str,
     stdout_artifact_type: str,
+    run_succeeded: bool = True,
 ) -> set[str]:
     base = {
         f"{prefix}command.json": "command",
@@ -411,9 +598,17 @@ def _require_invocation_stage(
     _required(entries, base)
     codex = _prefixed(CODEX_STAGE_INVENTORY, prefix)
     paths = {str(entry["path"]) for entry in entries}
+    command = _load_object(run_dir / f"{prefix}command.json")
+    evidence_paths = verify_tool_evidence_stage(
+        run_dir,
+        entries,
+        prefix=prefix,
+        command=command,
+        run_succeeded=run_succeeded,
+    )
     if _command_backend(run_dir, prefix) == "codex":
         _required(entries, codex)
-        return {*base, *codex}
+        return {*base, *codex, *evidence_paths}
     unexpected_codex = sorted(paths & set(codex))
     if unexpected_codex:
         raise CustodyError(
@@ -434,6 +629,7 @@ def _verify_invocation_stages(
         "stdout.txt",
         "stderr.txt",
         *CODEX_STAGE_INVENTORY,
+        *TOOL_EVIDENCE_STAGE_INVENTORY,
     }
 
     def has_stage(prefix: str) -> bool:
@@ -448,6 +644,15 @@ def _verify_invocation_stages(
         raise CustodyError("reviewed inventory has reviewer stage without draft")
     if has_draft and has_final and not has_review:
         raise CustodyError("reviewed inventory has final stage without reviewer")
+    evidence_modes = {
+        "toolEvidence" in command
+        for prefix in ("draft_", "pre_submit_review_", "")
+        if has_stage(prefix)
+        for command in [_load_object(run_dir / f"{prefix}command.json")]
+        if command.get("backend") == "codex"
+    }
+    if len(evidence_modes) > 1:
+        raise CustodyError("tool evidence capture was downgraded between native stages")
     allowed: set[str] = set()
     if has_draft:
         allowed.update(
@@ -456,6 +661,7 @@ def _verify_invocation_stages(
                 entries,
                 prefix="draft_",
                 stdout_artifact_type="draft_forecast",
+                run_succeeded=manifest.get("ok") is True,
             )
         )
     if has_review:
@@ -467,6 +673,7 @@ def _verify_invocation_stages(
                 entries,
                 prefix="pre_submit_review_",
                 stdout_artifact_type="pre_submit_review",
+                run_succeeded=manifest.get("ok") is True,
             )
         )
     if has_final:
@@ -476,6 +683,7 @@ def _verify_invocation_stages(
                 entries,
                 prefix="",
                 stdout_artifact_type="stdout",
+                run_succeeded=manifest.get("ok") is True,
             )
         )
     if has_review and has_final:
@@ -545,9 +753,7 @@ def _verify_analyst_v2(
     if manifest.get("schemaVersion") != "thesis_analyst_run_manifest_v1":
         raise CustodyError("analyst custody mode has the wrong manifest schema")
     error_obj = manifest.get("error")
-    declared_phase = (
-        error_obj.get("phase") if isinstance(error_obj, dict) else None
-    )
+    declared_phase = error_obj.get("phase") if isinstance(error_obj, dict) else None
     presents_as_failed = (
         manifest.get("ok") is False
         and "validation" in manifest
@@ -565,16 +771,13 @@ def _verify_analyst_v2(
         # manifest under canonical encoding (Python == treats true and 1
         # as equal).
         if not presents_as_failed:
-            raise CustodyError(
-                "failure phase on a run that does not present as failed"
-            )
+            raise CustodyError("failure phase on a run that does not present as failed")
         error_artifact = run_dir / "error.json"
         if not error_artifact.is_file() or canonical_bytes(
             json.loads(error_artifact.read_text())
         ) != canonical_bytes(manifest["error"]):
             raise CustodyError(
-                f"{declared_phase}-failure error artifact disagrees with "
-                "the manifest"
+                f"{declared_phase}-failure error artifact disagrees with the manifest"
             )
     parse_failed = declared_phase == "parse"
     if parse_failed:
@@ -639,8 +842,7 @@ def _verify_analyst_v2(
         present = {str(entry["path"]) for entry in entries}
         if forbidden & present:
             raise CustodyError(
-                f"{phase}-failure inventory contains artifacts from later "
-                "stages"
+                f"{phase}-failure inventory contains artifacts from later stages"
             )
         allowed = {
             *required,

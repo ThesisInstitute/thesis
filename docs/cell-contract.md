@@ -197,6 +197,11 @@ prints are required exactly as this section demands for every other
 target, and old-methodology history stops being admissible.
 
 `activityLog` is added by `scripts/run_thesis_analyst.py`, not by the model.
+Native Codex stages add `tool_evidence` and `tool_evidence_verification`
+artifacts as described in [`tool-evidence.md`](tool-evidence.md). Their call IDs
+are assigned by the recorder; the model may cite them but cannot manufacture
+receipts by emitting a reasoning step. Reasoning `tool` blocks remain the
+model's account of its work, separate from the captured tool evidence.
 It preserves the full run envelope behind the curated public trace: prompt,
 command metadata, stdout/stderr, raw response, parsed/normalized cells,
 model-candidate JSON, and validation report. When pre-submit review is enabled,

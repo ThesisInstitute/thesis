@@ -190,6 +190,8 @@ export type PredictionRunActivityArtifactType =
   | "codex_events_jsonl"
   | "codex_last_message"
   | "codex_trace"
+  | "tool_evidence"
+  | "tool_evidence_verification"
   | "draft_forecast"
   | "review_prompt"
   | "pre_submit_review"

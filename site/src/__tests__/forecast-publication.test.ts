@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import {
   filterPublishedForecasts,
   verifyForecastRun,
+  loadForecastToolEvidence,
 } from "@/lib/forecast-publication";
 import {
   getForecastRunEntries,
@@ -407,5 +408,98 @@ describe("forecast publication archive gate", () => {
       filterPublishedForecasts([published], { repositoryRoot: f.root })[0]
         .normalizationCutoffRunAt,
     ).toBeNull();
+  });
+});
+
+describe("tool evidence archive publication boundary", () => {
+  function attachEvidence(f: ReturnType<typeof fixture>) {
+    const content = JSON.stringify({
+      schemaVersion: "thesis_tool_evidence_v1",
+      captureMethod: "thesis-controlled-tools-v1",
+      calls: [],
+    });
+    f.values.set("tool_evidence.json", { type: "tool_evidence", content });
+    f.values.set("tool_evidence_verification.json", {
+      type: "tool_evidence_verification",
+      content: JSON.stringify({
+        schemaVersion: "thesis_tool_evidence_verification_v1",
+        captureMethod: "thesis-controlled-tools-v1",
+        evidenceSha256: createHash("sha256").update(content).digest("hex"),
+        valid: true,
+        errors: [],
+        callCount: 0,
+        succeededCount: 0,
+        failedCount: 0,
+        checks: [],
+      }),
+    });
+    f.values.get("command.json")!.content = JSON.stringify({
+      ...f.command,
+      backend: "codex",
+      argv: [
+        ...f.command.argv,
+        "-c",
+        'mcp_servers.thesis_tool_evidence.command="python"',
+      ],
+      toolEvidence: {
+        schemaVersion: "thesis_tool_evidence_v1",
+        artifact: "tool_evidence.json",
+        verificationArtifact: "tool_evidence_verification.json",
+      },
+    });
+    f.seal(true);
+  }
+  function load(f: ReturnType<typeof fixture>) {
+    return Object.values(
+      loadForecastToolEvidence(f.forecast, { repositoryRoot: f.root }),
+    )[0];
+  }
+  it("loads only artifacts bound through the run manifest and custody root", () => {
+    const f = fixture();
+    attachEvidence(f);
+    expect(load(f)).toMatchObject({
+      status: "available",
+      artifacts: [{ stage: "forecast", calls: [] }],
+    });
+    fs.writeFileSync(path.join(f.root, f.directory, "custody_root.json"), "{}");
+    expect(load(f)).toEqual({ status: "invalid" });
+  });
+  it("never interprets model-authored evidence fields as captured responses", () => {
+    const f = fixture();
+    Object.assign(f.forecast, {
+      toolEvidence: { calls: [{ tool: "fetch_source" }] },
+    });
+    expect(load(f)).toEqual({ status: "missing" });
+  });
+  it("withholds altered or missing evidence bytes", () => {
+    const f = fixture();
+    attachEvidence(f);
+    fs.appendFileSync(
+      path.join(f.root, f.directory, "tool_evidence.json"),
+      " ",
+    );
+    expect(load(f)).toEqual({ status: "invalid" });
+    f.seal(true);
+    fs.unlinkSync(path.join(f.root, f.directory, "tool_evidence.json"));
+    expect(load(f)).toEqual({ status: "invalid" });
+  });
+  it("withholds an evidence artifact with no replay report commitment", () => {
+    const f = fixture();
+    attachEvidence(f);
+    f.values.delete("tool_evidence_verification.json");
+    f.seal(true);
+    expect(load(f)).toEqual({ status: "invalid" });
+  });
+  it("withholds an evidence artifact with a replay report for other bytes", () => {
+    const f = fixture();
+    attachEvidence(f);
+    const report = JSON.parse(
+      f.values.get("tool_evidence_verification.json")!.content,
+    );
+    report.evidenceSha256 = "0".repeat(64);
+    f.values.get("tool_evidence_verification.json")!.content =
+      JSON.stringify(report);
+    f.seal(true);
+    expect(load(f)).toEqual({ status: "invalid" });
   });
 });

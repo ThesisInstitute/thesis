@@ -9,6 +9,11 @@ import {
   type ForecastRunEntry,
   type PredictionRunActivityArtifact,
 } from "@/data/forecast-cells";
+import type {
+  ForecastToolEvidence,
+  ForecastToolEvidenceByVariant,
+} from "@/data/tool-evidence";
+import { readCapturedToolCalls } from "@/lib/tool-evidence";
 import { canonicalStringify, sha256Hex } from "@/data/canonical-json";
 import {
   buildNumericCdfFromInterval,
@@ -32,6 +37,7 @@ export interface ForecastRunVerification {
 }
 interface VerifiedRun extends ForecastRunVerification {
   cell?: Json;
+  archive?: { root: string; refs: Artifact[] };
 }
 
 const fileCache = new Map<
@@ -621,6 +627,7 @@ function verifyRun(
       eligible: true,
       reason: "Archived output and successful model execution verified",
       cell,
+      archive: { root, refs: manifestRefs },
     };
   } catch (error) {
     return failure(
@@ -636,6 +643,102 @@ export function verifyForecastRun(
 ): ForecastRunVerification {
   const { eligible, reason } = verifyRun(forecast, run, options);
   return { eligible, reason };
+}
+
+/** Only verified archive artifacts may populate the public evidence view. */
+export function loadForecastToolEvidence(
+  forecast: ForecastCell,
+  options: VerificationOptions = {},
+): ForecastToolEvidenceByVariant {
+  return Object.fromEntries(
+    getForecastRunEntries(forecast).map((run) => {
+      const verification = verifyRun(forecast, run, options);
+      let evidence: ForecastToolEvidence;
+      if (!verification.eligible || !verification.archive) {
+        evidence = { status: "invalid" };
+      } else {
+        const { root, refs } = verification.archive;
+        const artifacts = refs.filter(
+          (ref) => ref.artifactType === "tool_evidence",
+        );
+        const reports = refs.filter(
+          (ref) => ref.artifactType === "tool_evidence_verification",
+        );
+        if (!artifacts.length && !reports.length) {
+          evidence = { status: "missing" };
+        } else {
+          try {
+            requireCondition(
+              artifacts.length === reports.length,
+              "Missing evidence or replay report",
+            );
+            evidence = {
+              status: "available",
+              artifacts: artifacts.map((ref) => {
+                const filename = path.posix.basename(ref.path);
+                requireCondition(
+                  [
+                    "tool_evidence.json",
+                    "draft_tool_evidence.json",
+                    "pre_submit_review_tool_evidence.json",
+                  ].includes(filename),
+                  "Unsupported evidence stage",
+                );
+                const verificationPath = ref.path.replace(
+                  /tool_evidence\.json$/,
+                  "tool_evidence_verification.json",
+                );
+                const report = reports.find(
+                  (candidate) => candidate.path === verificationPath,
+                );
+                requireCondition(report, "Missing bound tool replay report");
+                const prefix = filename.slice(0, -"tool_evidence.json".length);
+                const directory = path.posix.dirname(ref.path);
+                const commandRef = refs.find(
+                  (candidate) =>
+                    candidate.artifactType === "command" &&
+                    candidate.path === `${directory}/${prefix}command.json`,
+                );
+                const stdoutRef = refs.find(
+                  (candidate) =>
+                    candidate.artifactType === "codex_stdout_jsonl" &&
+                    candidate.path ===
+                      `${directory}/${prefix}codex_stdout.jsonl`,
+                );
+                requireCondition(
+                  commandRef && stdoutRef,
+                  "Missing stage command or native tool events",
+                );
+                return {
+                  stage:
+                    filename === "tool_evidence.json"
+                      ? "forecast"
+                      : filename === "draft_tool_evidence.json"
+                        ? "draft"
+                        : "review",
+                  artifactPath: ref.path,
+                  artifactSha256: ref.sha256,
+                  verificationPath,
+                  calls: readCapturedToolCalls(
+                    readArtifact(ref.path, root).text,
+                    readArtifact(report.path, root).text,
+                    {
+                      prefix,
+                      command: jsonArtifact(commandRef.path, root),
+                      stdout: readArtifact(stdoutRef.path, root).text,
+                    },
+                  ),
+                };
+              }),
+            };
+          } catch {
+            evidence = { status: "invalid" };
+          }
+        }
+      }
+      return [run.variantId, evidence];
+    }),
+  );
 }
 
 export function filterPublishedForecasts(

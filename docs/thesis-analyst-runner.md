@@ -267,6 +267,12 @@ panel, or fallback-prior intervals and label `intervalMethod` accordingly.
 
 ## Activity artifacts
 
+Native Codex stages also use the repository-owned evidence MCP server. See
+[`tool-evidence.md`](tool-evidence.md) for captured source bodies, replayable
+JSON extraction and arithmetic, artifact binding, and the limits of these
+checks. Hosted search and model-authored tool summaries are not full response
+capture.
+
 Every run writes a directory under `records/thesis-analyst/YYYY-MM-DD/` with:
 
 - `prompt.md`
@@ -276,6 +282,8 @@ Every run writes a directory under `records/thesis-analyst/YYYY-MM-DD/` with:
   `codex_last_message.txt`, and `codex_trace.json` when `--codex-model` or
   `--pre-submit-review-codex-model` is used
 - `raw_response.txt`
+- `tool_evidence.json` and `tool_evidence_verification.json` for native Codex
+  runs (also draft/reviewer-prefixed copies when those stages run)
 - `draft_stdout.txt`, `pre_submit_review_stdout.txt`, and `revision_prompt.md`
   when pre-submit review is enabled
 - `parsed_cells.json`

@@ -13,6 +13,8 @@ import {
   type PredictionPackReference,
 } from "@/data/forecast-display";
 import type { ResolvedForecastScore } from "@/data/thesis-log";
+import { ToolEvidence } from "@/components/ToolEvidence";
+import type { ForecastToolEvidenceByVariant } from "@/data/tool-evidence";
 import { prepareReportContent } from "@/lib/report-content";
 import { canPlotReportHistory } from "@/lib/report-history";
 
@@ -20,6 +22,7 @@ interface ForecastRuntimeProps {
   forecast: ForecastCell;
   resolvedScore?: ResolvedForecastScore;
   runScores?: Record<string, ResolvedForecastScore>;
+  toolEvidence?: ForecastToolEvidenceByVariant;
 }
 
 type ReportRun = ForecastRunEntry;
@@ -52,6 +55,7 @@ export function ForecastRuntime({
   forecast: forecastCell,
   resolvedScore,
   runScores,
+  toolEvidence,
 }: ForecastRuntimeProps) {
   const runs = reportRuns(forecastCell);
   const [selection, setSelection] = useState({
@@ -257,6 +261,11 @@ export function ForecastRuntime({
           </div>
         )}
       </section>
+
+      <ToolEvidence
+        key={`evidence-${selected.variantId}`}
+        evidence={toolEvidence?.[selected.variantId]}
+      />
 
       <section
         aria-labelledby="evidence-heading"

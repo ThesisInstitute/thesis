@@ -117,6 +117,43 @@ describe("ForecastRuntime published report", () => {
     expect(openStream).not.toHaveBeenCalled();
   });
 
+  it("switches captured evidence with the selected forecast version", () => {
+    render(
+      <ForecastRuntime
+        forecast={report}
+        toolEvidence={{
+          "recorded-a": {
+            status: "available",
+            artifacts: [
+              {
+                stage: "forecast",
+                artifactPath: "records/thesis-analyst/a/tool_evidence.json",
+                artifactSha256: "a".repeat(64),
+                verificationPath:
+                  "records/thesis-analyst/a/tool_evidence_verification.json",
+                calls: [],
+              },
+            ],
+          },
+          "recorded-b": { status: "missing" },
+        }}
+      />,
+    );
+    const evidence = () =>
+      screen.getByRole("region", { name: "Tool evidence" });
+    expect(evidence()).toHaveTextContent("Archive integrity checked");
+    expect(analysis()).toHaveTextContent("Reported tool use");
+    chooseRun("recorded-b");
+    expect(evidence()).toHaveTextContent("no captured tool responses");
+    expect(
+      within(evidence()).queryByRole("link", { name: "Raw evidence ↗" }),
+    ).toBeNull();
+    chooseRun("recorded-a");
+    expect(
+      within(evidence()).getByRole("link", { name: "Raw evidence ↗" }),
+    ).toHaveAttribute("href", expect.stringContaining("/a/tool_evidence.json"));
+  });
+
   it("keeps visible data aligned with the selected immutable run identity", () => {
     render(<ForecastRuntime forecast={report} />);
     chooseRun("recorded-b");

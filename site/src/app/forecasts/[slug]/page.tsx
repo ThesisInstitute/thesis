@@ -8,6 +8,7 @@ import { ForecastRuntime } from "@/components/ForecastRuntime";
 import {
   getPublishedForecast,
   getPublishedForecasts,
+  loadForecastToolEvidence,
 } from "@/lib/forecast-publication";
 import {
   FORECAST_CELLS,
@@ -116,6 +117,7 @@ export default async function ForecastDetailPage({
           forecast={forecast}
           resolvedScore={resolvedScore}
           runScores={runScores}
+          toolEvidence={loadForecastToolEvidence(forecastDefinition)}
         />
 
         {/* Related forecasts */}
