@@ -406,6 +406,27 @@ def test_selector_refuses_published_date_that_contradicts_a_bound(
         _published(slug, "2026-09-21T00:00:00Z")
 
 
+def test_selector_fails_closed_on_the_publisher_projection_check(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # The selector runs the publisher's registration projection itself so an
+    # ineligible target is refused in the free select job; its RegistrationError
+    # surfaces as the selector's own error type with the message intact.
+    import strategy_targets as module
+
+    def refuse(contract, target, *, label):
+        raise register_targets.RegistrationError(
+            f"target registration contract mismatch for resolutionDate: {label}"
+        )
+
+    monkeypatch.setattr(module, "validate_target_resolution_projection", refuse)
+    with pytest.raises(
+        StrategyTargetError,
+        match="contract mismatch for resolutionDate: records/targets/",
+    ):
+        _published("unemployment-rate-september-2026", "2026-09-21T00:00:00Z")
+
+
 def test_published_resolution_date_requires_the_published_field() -> None:
     with pytest.raises(StrategyTargetError, match="lacks publishedResolutionDate"):
         published_resolution_date({"catalogSlug": "x", "resolutionDate": "2030-01-01"})
