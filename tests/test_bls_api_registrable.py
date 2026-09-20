@@ -638,6 +638,90 @@ def test_resolver_never_fetches_for_a_registrable_ref_with_no_registration(
     assert ref in out and "nothing new to record" in out
 
 
+REAL_EARNINGS = "bls.real_earnings.avg_hourly_mom"
+# August 2026 is the latest, still-preliminary month in the capture, and BLS
+# released it on 2026-09-11.
+REAL_EARNINGS_RUN = {
+    "series": REAL_EARNINGS,
+    "period": "2026-08",
+    "release": "2026-09-11",
+}
+
+
+def test_resolver_captures_real_earnings_inside_the_bound(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ref, out = _run_main(
+        monkeypatch, capsys, now="2026-09-18T13:40:00Z", **REAL_EARNINGS_RUN
+    )
+    assert f"resolve {ref} -> -0.1 percent" in out
+    assert "dry-run: would append 1 row(s)" in out
+
+
+def test_resolver_refuses_past_the_bound_without_spending_a_request(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ref, out = _run_main(
+        monkeypatch,
+        capsys,
+        now="2026-09-19T13:40:00Z",
+        fetch_allowed=False,
+        **REAL_EARNINGS_RUN,
+    )
+    assert f"FIRST-PRINT WINDOW MISSED (refusing): {ref}" in out
+    assert "after the 7-day bound that ended 2026-09-18" in out
+    assert "nothing new to record" in out
+
+
+def test_resolver_refuses_an_unregistered_bounded_cell_without_a_request(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        now="2026-09-12T13:40:00Z",
+        registered=False,
+        fetch_allowed=False,
+        **REAL_EARNINGS_RUN,
+    )
+    assert "no registered bls-api binding" in out
+    assert "nothing new to record" in out
+
+
+def test_a_bounded_series_is_attempted_from_its_registered_release_day(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # The forecast's resolutionDate is analyst-written. Were it to decide the
+    # first attempt, a date past the bound would make the target unresolvable.
+    ref, out = _run_main(
+        monkeypatch,
+        capsys,
+        now="2026-09-12T13:40:00Z",
+        forecast_resolution_date="2099-01-01",
+        **REAL_EARNINGS_RUN,
+    )
+    assert "not reached" not in out
+    assert f"resolve {ref} -> -0.1 percent" in out
+
+
+def test_real_earnings_still_requires_the_preliminary_footnote() -> None:
+    assert _gate(REAL_EARNINGS) == "latest_preliminary"
+    spec = resolve_pending.BLS_API_ADAPTERS[REAL_EARNINGS]
+    assert spec["capture_within_days"] == 7
+    assert "Employment Situation" not in spec["evidence_notes"]
+
+
+def test_gate_refuses_a_resolution_date_the_bound_could_never_reach() -> None:
+    contract = _contract(REAL_EARNINGS)
+    assert _refusal(contract) is None
+    contract["resolutionDate"] = "2030-02-15"
+    assert _refusal(contract) is None
+    contract["resolutionDate"] = "2030-02-16"
+    assert "after the 7-day capture bound that ends 2030-02-15" in (
+        _refusal(contract) or ""
+    )
+
+
 # --- routing ----------------------------------------------------------------
 
 

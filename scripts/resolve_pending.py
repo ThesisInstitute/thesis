@@ -2525,11 +2525,14 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
     # one-month percent moves between releases (June 2026 printed +0.8, then
     # +0.7, then +0.6). So "latest and still preliminary" is not enough here:
     # the next Employment Situation could revise the latest row while it is
-    # still latest and still flagged. ``capture_within_days`` closes that: the
+    # still latest and still flagged. ``capture_within_days`` narrows that: the
     # month is captured only within that many days of the REGISTERED release
-    # day. On BLS's 2026 schedules the shortest interval from a Real Earnings
-    # release to the next Employment Situation is 21 days (2026-02-13 to
-    # 2026-03-06, and 2026-09-11 to 2026-10-02), so 7 days cannot reach one.
+    # day. On BLS's 2026 schedule pages as read on 2026-09-20, the shortest
+    # interval from a Real Earnings release to the next Employment Situation is
+    # 21 days (2026-02-13 to 2026-03-06, and 2026-09-11 to 2026-10-02). The
+    # resolver reads no schedule: if BLS moves an Employment Situation to
+    # within 7 days after a registered Real Earnings day, this bound does not
+    # see it. That residual risk is recorded in docs/anchor-verifications.md.
     "bls.real_earnings.avg_hourly_mom": {
         "series_id": "CES0500000013",
         "period_type": "month",
@@ -2607,8 +2610,7 @@ BLS_API_ADAPTERS["bls.real_earnings.avg_hourly_mom"]["evidence_notes"] = (
     "1982-1984 dollar levels served by {source_url} (BLS Public Data API v2, "
     "current estimates only). At capture {period} was still the series' latest "
     "published month, still carried BLS's preliminary footnote, and the capture "
-    "fell within 7 days of the registered Real Earnings release day, before any "
-    "later Employment Situation could revise the earnings underneath it."
+    "fell within 7 days of the registered Real Earnings release day."
 )
 for _spec in BLS_API_ADAPTERS.values():
     if "evidence_notes" in _spec:
@@ -8044,6 +8046,18 @@ def bls_spec_anchor_mismatches(
     return problems
 
 
+def bls_registered_release_day(binding: Mapping[str, Any]) -> dt.date | None:
+    """The one official release day a ``bls-api`` binding registers."""
+    if binding.get("adapter") != BLS_API_BINDING_ADAPTER:
+        return None
+    window = binding.get("expectedReleaseWindow")
+    start = window.get("start") if isinstance(window, Mapping) else None
+    try:
+        return dt.date.fromisoformat(str(start)) if start else None
+    except ValueError:
+        return None
+
+
 def bls_capture_bound_refusal(
     spec: Mapping[str, Any], binding: Mapping[str, Any], capture_day: dt.date
 ) -> str | None:
@@ -13427,6 +13441,21 @@ def _plan_bls_api(
             "the BLS API executor starts capturing on one official release "
             f"day; expectedReleaseWindow {window!r} is not a one-day window"
         )
+    days = spec.get("capture_within_days")
+    resolution_date = registration["contract"].get("resolutionDate")
+    if days is not None and resolution_date:
+        try:
+            last_day = dt.date.fromisoformat(str(window["start"])) + dt.timedelta(
+                days=int(days)
+            )
+            too_late = dt.date.fromisoformat(str(resolution_date)) > last_day
+        except ValueError:
+            return "the contract's resolutionDate or release day is not a date"
+        if too_late:
+            return (
+                f"resolutionDate {resolution_date} is after the {days}-day capture "
+                f"bound that ends {last_day}; the executor could never resolve it"
+            )
     return None
 
 
@@ -13882,6 +13911,17 @@ def main() -> int:
             continue
         release_day = dt.date.fromisoformat(source_vintage)
         registration = loop_contracts.get(ref)
+        if kind == "bls_api" and spec.get("capture_within_days") is not None:
+            # The forecast's resolutionDate is analyst-written. A capture
+            # bound is measured from the registered official release day, so
+            # that day, not a later forecast date, decides when this series
+            # is first attempted; otherwise the bound could close before the
+            # first attempt.
+            registered_day = bls_registered_release_day(
+                ((registration or {}).get("contract") or {}).get("sourceBinding") or {}
+            )
+            if registered_day is not None:
+                release_day = registered_day
         resolution_date_basis, basis_refusal = effective_resolution_date_basis(
             ref, registration, spec
         )
@@ -14372,6 +14412,17 @@ def main() -> int:
                         f"bls-api binding or seven-key registry drift): {ref}"
                     )
                     continue
+            # The bound needs no fetched data, so it is judged before a keyless
+            # request is spent (25 a day per address), and again below on the
+            # response's own retrieval day.
+            bound_refusal = bls_capture_bound_refusal(
+                spec, registered_binding, dt.date.fromisoformat(utc_now()[:10])
+            )
+            if bound_refusal:
+                print(
+                    f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {bound_refusal}"
+                )
+                continue
             bls_key = (
                 series_id,
                 spec["anchor_start_year"],
