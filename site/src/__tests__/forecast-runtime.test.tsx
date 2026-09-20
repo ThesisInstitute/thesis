@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  act,
   cleanup,
   fireEvent,
   render,
@@ -42,9 +41,8 @@ const savedForecast: SavedForecastRun = {
     "records/2026-09-19/bodies-example/live/spm-child-poverty-2025.json.gz",
 };
 
-describe("ForecastRuntime saved replay", () => {
+describe("ForecastRuntime saved report", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
     openStream.mockClear();
     vi.stubGlobal("EventSource", openStream);
   });
@@ -53,10 +51,9 @@ describe("ForecastRuntime saved replay", () => {
     cleanup();
     window.history.replaceState({}, "", "/");
     vi.unstubAllGlobals();
-    vi.useRealTimers();
   });
 
-  it("server-renders the saved estimate and hydrates without starting a new forecast", () => {
+  it("server-renders the complete saved report and hydrates without starting a new forecast", () => {
     const element = (
       <ForecastRuntime forecast={spmForecast} savedForecast={savedForecast} />
     );
@@ -76,33 +73,39 @@ describe("ForecastRuntime saved replay", () => {
       "aria-label",
       expect.stringContaining("13.0%"),
     );
+    expect(
+      within(container).getByRole("heading", { name: "Forecast report" }),
+    ).toBeTruthy();
+    expect(within(container).getByText("saved report")).toBeTruthy();
+    expect(
+      within(container).getByText(
+        "The saved run uses a current-law calibration prior.",
+      ),
+    ).toBeTruthy();
+    expect(
+      within(container).getByText("calibrated forecast · 80% CI").parentElement,
+    ).toHaveTextContent("13.0%");
+    expect(
+      within(container).queryByRole("button", {
+        name: /^(pause|resume|skip|replay)$/i,
+      }),
+    ).toBeNull();
 
     render(element, { container, hydrate: true });
     expect(estimate).toHaveTextContent("13.0%");
-    expect(openStream).not.toHaveBeenCalled();
-  });
-
-  it("keeps the saved estimate through playback, skip, and replay", () => {
-    render(
-      <ForecastRuntime forecast={spmForecast} savedForecast={savedForecast} />,
-    );
-    const estimate = screen.getByRole("region", { name: "Forecast estimate" });
-    const initialEstimate = estimate.textContent;
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
-    expect(estimate.textContent).toBe(initialEstimate);
-    fireEvent.click(screen.getByRole("button", { name: "skip" }));
     expect(
-      screen.getByText("The saved run uses a current-law calibration prior."),
+      within(container).getByText(
+        "The saved run uses a current-law calibration prior.",
+      ),
     ).toBeTruthy();
-    expect(screen.getByText("— end of recorded trace —")).toBeTruthy();
-    expect(estimate.textContent).toBe(initialEstimate);
-    fireEvent.click(screen.getByRole("button", { name: "replay" }));
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
-    expect(estimate.textContent).toBe(initialEstimate);
+    expect(
+      within(container).getByText("calibrated forecast · 80% CI").parentElement,
+    ).toHaveTextContent("13.0%");
+    expect(
+      within(container).queryByRole("button", {
+        name: /^(pause|resume|skip|replay)$/i,
+      }),
+    ).toBeNull();
     expect(openStream).not.toHaveBeenCalled();
   });
 
@@ -125,6 +128,9 @@ describe("ForecastRuntime saved replay", () => {
     expect(
       screen.getByText(/original streamed tool activity was not archived/),
     ).toBeTruthy();
+    expect(
+      screen.getByText(/Viewing this report does not run a new forecast\./),
+    ).toBeTruthy();
   });
 
   it("shows the labeled catalog estimate immediately when no saved API result is available", () => {
@@ -135,6 +141,16 @@ describe("ForecastRuntime saved replay", () => {
     expect(
       screen.getByText(/No completed API result is available/),
     ).toBeTruthy();
+    expect(screen.getByText("static prototype")).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: /Near-term Census target/ }),
+    ).toBeTruthy();
+    expect(
+      screen.getByText("calibrated forecast · 80% CI").parentElement,
+    ).toHaveTextContent("13.1%");
+    expect(
+      screen.queryByRole("button", { name: /^(pause|resume|skip|replay)$/i }),
+    ).toBeNull();
     expect(openStream).not.toHaveBeenCalled();
   });
 

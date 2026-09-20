@@ -12,14 +12,16 @@ bun install
 bun run dev -- --hostname 127.0.0.1 --port 3002
 ```
 
-Forecast detail pages replay saved results instead of starting an API request
+Forecast detail pages display saved reports instead of starting an API request
 on each visit. At build time, `site/src/lib/saved-forecast.ts` reads the newest
 valid indexed recorder result for each API target from `records/`, verifying
 the compressed and uncompressed bytes against the snapshot's hashes. The
-initial HTML contains that result's estimate and interval; playback uses its
-own saved explanation, assumptions, and caveats. A failed or malformed newer
-snapshot falls back to the last valid one. With no usable archive, the page
-shows the labeled catalog example without calling the API.
+initial HTML contains that result's estimate, interval, and complete saved
+explanation, assumptions, and caveats. Report text and any available code
+blocks appear immediately, without playback controls or a typewriter animation.
+A failed or malformed newer snapshot falls back to the last valid one. With
+no usable archive, the page shows the labeled catalog example without calling
+the API.
 
 The current archives contain the final forecast event, not the original full
 stream of tool activity. The page discloses this and links to the archived
