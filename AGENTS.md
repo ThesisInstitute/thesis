@@ -60,6 +60,36 @@ deadline. A bounded target must set `resolutionDate` to its window's end and
 require the attested replay to contain a successful structured exact-URL fetch
 event for the registered announcement; never infer a day from cadence.
 
+### Register only what the resolver can execute
+
+A registration is a public promise to score a forecast against one number, so
+`scripts/register_targets.py` refuses to write a NEW registration unless
+`resolve_pending.execution_plan_refusal` finds an executable plan for that
+exact contract. The check runs the contract's `dataPointId` through the
+resolver's own routers, then the main loop's date-independent refusals in its
+order: resolution-date basis, emitted unit, registered adapter, and the routed
+family's own predicates (full binding template, verified anchors). It makes no
+network request and reads no records: whether the print exists yet is a
+runtime question; whether any code could ever read it is not.
+
+- `generic-url` names a page, not an executor, and is always refused; no
+  adapter-routed resolver leg accepts it. A seed with no adapter still binds
+  to it, so a docket series needs a `sourceBinding` template for an admitted
+  adapter before it can mint targets. The two weekly claims series are the
+  exception: `register_targets.SERIES_BINDINGS` binds them to ALFRED in code.
+- The roller drops such candidates before the cap, and prospect validation
+  rejects such proposals, with the same verdict.
+- A resolver family the router names must appear in either
+  `EXECUTION_PLAN_FAMILY_CHECKS` or `EXECUTION_PLAN_UNREGISTRABLE_FAMILIES`.
+  A family in neither refuses every new registration, and a test fails.
+- Existing snapshots are never re-judged: retries reuse them, and what happens
+  to already-published targets with no executor is a disposition decision, not
+  a registration one. The run-time exceptions for two reviewed legacy contracts
+  (one ABS content hash, the legacy QCEW binding) do not admit new ones.
+- Nothing in `waivers.json` waives this, and it has no grandfather set. The
+  way through is admission: adapter or family reuse, anchors verified from
+  official prints per `docs/anchor-verifications.md`, docket template, tests.
+
 ## Common Tasks
 
 ### Add Or Run Forecasts
