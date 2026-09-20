@@ -415,3 +415,63 @@ def test_native_event_lines_with_unicode_line_separators_still_bind(
         "tool_evidence.json",
         "tool_evidence_verification.json",
     }
+
+
+def test_native_tool_events_filters_by_server_and_splits_on_newlines_only() -> None:
+    ours = {
+        "type": "item.completed",
+        "item": {
+            "id": "item_9",
+            "type": "mcp_tool_call",
+            "server": custody.TOOL_EVIDENCE_SERVER,
+            "tool": "fetch_source",
+            "result": {"content": [{"type": "text", "text": "%PDF\u0085\u2028x"}]},
+        },
+    }
+    other = {
+        "type": "item.completed",
+        "item": {"id": "b", "type": "mcp_tool_call", "server": "other_server"},
+    }
+    stream = (
+        "not json\n"
+        + json.dumps(ours, ensure_ascii=False)
+        + "\n"
+        + json.dumps(other)
+        + "\n"
+        + json.dumps({"type": "turn.completed", "usage": {}})
+        + "\n"
+    )
+    assert evidence.native_tool_events(stream) == [ours]
+    assert evidence.native_tool_events(stream, "other_server") == [other]
+
+
+def test_bind_native_events_reports_orphaned_and_incomplete_calls(
+    tmp_path: pathlib.Path,
+) -> None:
+    write_stage(tmp_path)
+    payload = json.loads((tmp_path / "tool_evidence.json").read_text())
+    events = [event_for(payload["calls"][0])]
+
+    assert evidence.bind_native_events(payload, events) == {"call-0001"}
+
+    with pytest.raises(
+        evidence.EvidenceError,
+        match="tool evidence calls lack native completion events: call-0001",
+    ):
+        evidence.bind_native_events(payload, [])
+    # A failed invocation may keep an incomplete stream without promotion.
+    assert evidence.bind_native_events(payload, [], failed_stage=True) == set()
+
+    started = {
+        "type": "item.started",
+        "item": {
+            "id": "mcp-extra",
+            "type": "mcp_tool_call",
+            "server": custody.TOOL_EVIDENCE_SERVER,
+            "tool": "calculate",
+        },
+    }
+    with pytest.raises(
+        evidence.EvidenceError, match="tool evidence has incomplete native calls"
+    ):
+        evidence.bind_native_events(payload, events + [started])

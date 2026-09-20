@@ -60,8 +60,12 @@ successful HTTPS retry remains auditable. The runner separately redacts URL
 credentials from native logs before sealing them; evidence sanitization alone
 would not remove a secret from the model platform's original event stream.
 
-`scripts/verify_custody.py` recomputes the report and checks captured calls
-against recorded MCP completion events. The attested publisher also checks
+When the stage ends, the runner also binds every recorded call to exactly one
+native MCP completion event in the redacted stream it archives; a stage whose
+stream does not account for a recorded call fails as one run instead of
+blocking a whole docket publication. `scripts/verify_custody.py` recomputes
+the report and repeats that binding from the archived stream, using the same
+function, so the publication claim does not depend on the runner. The attested publisher also checks
 the exact repository-owned server configuration. Changing a body, call result,
 dependency, replay verdict, or artifact reference fails verification. A failed
 stage may preserve an incomplete event stream without being promoted as a

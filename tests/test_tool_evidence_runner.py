@@ -20,6 +20,7 @@ from tests.test_thesis_analyst_runner import (  # noqa: E402
     review_test_cell,
     write_fake_codex,
 )
+from tests.test_tool_evidence_custody import event_for  # noqa: E402
 
 
 def test_tool_configuration_is_closed_and_review_does_not_fetch(tmp_path):
@@ -176,3 +177,51 @@ def test_native_stage_calls_real_mcp_and_seals_replay(tmp_path):
     manifest = json.loads((out_dir / "manifest.json").read_text())
     types = {ref["artifactType"] for ref in manifest["artifacts"]}
     assert {"tool_evidence", "tool_evidence_verification"} <= types
+
+
+@pytest.mark.parametrize("bound", [True, False])
+def test_stage_binds_recorded_calls_to_native_events_before_sealing(
+    tmp_path, monkeypatch, bound
+):
+    """A recorded call without its native completion event fails the stage at
+    generation time, from the same redacted stream the publisher will bind
+    against, instead of surfacing as a docket-wide publication failure."""
+    import tool_evidence as evidence
+
+    def fake_stage(**kwargs):
+        recorder = evidence.EvidenceRecorder(kwargs["evidence_output"])
+        call = recorder.call(
+            "calculate",
+            {"expression": "base + delta", "inputs": {"base": 1.5, "delta": 0.5}},
+        )
+        stream = json.dumps(event_for(call)) + "\n" if bound else ""
+        return {
+            "returnCode": 0,
+            "stderr": "",
+            "codexStdoutRaw": stream,
+            "codexTrace": {"effectiveReturnCode": 0, "lastError": None},
+        }
+
+    monkeypatch.setattr(runner, "_run_codex_agent_command", fake_stage)
+    result = runner.run_codex_agent_command(
+        prompt="test",
+        timeout_seconds=5,
+        model="test",
+        out_dir=tmp_path,
+        prefix="",
+        search=True,
+        sandbox="read-only",
+        reasoning_effort=None,
+    )
+    assert result["toolEvidenceVerification"]["valid"] is True
+    if bound:
+        assert result["returnCode"] == 0
+        assert result["codexTrace"]["effectiveReturnCode"] == 0
+    else:
+        assert result["returnCode"] == 1
+        assert result["codexTrace"]["effectiveReturnCode"] == 1
+        assert result["codexTrace"]["lastError"] == (
+            "Tool evidence native binding failed: tool evidence calls lack "
+            "native completion events: call-0001"
+        )
+        assert result["stderr"].endswith("native completion events: call-0001.")

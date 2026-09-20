@@ -29,6 +29,7 @@ from collections.abc import Callable
 from typing import Any
 
 import announcement_fetch_mcp as transport
+from canonical_json import canonical_bytes
 
 SCHEMA_VERSION = "thesis_tool_evidence_v1"
 CAPTURE_METHOD = "thesis-controlled-tools-v1"
@@ -659,6 +660,135 @@ def load_evidence(path: str | pathlib.Path) -> dict[str, Any]:
 def terminal_call(call: dict[str, Any]) -> dict[str, Any]:
     """Exact MCP structuredContent projection used to bind native tool events."""
     return {key: value for key, value in call.items() if key != "response"}
+
+
+MCP_SERVER_NAME = "thesis_tool_evidence"
+
+
+def native_tool_events(
+    stream_text: str, server: str = MCP_SERVER_NAME
+) -> list[dict[str, Any]]:
+    """Return the native MCP tool-call events for ``server`` from a Codex
+    JSONL stream.
+
+    Only newline characters delimit the stream. str.splitlines() also breaks
+    on U+0085, U+2028, U+2029 and the ASCII separators VT/FF/FS/GS/RS, which
+    JSON leaves unescaped inside strings; a fetched PDF excerpt carrying
+    U+0085 once fragmented a completion event and orphaned its evidence call
+    (roll-docket run 35526068252, draft call-0009).
+    """
+    events: list[dict[str, Any]] = []
+    for line in stream_text.split("\n"):
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        item = event.get("item")
+        if (
+            isinstance(item, dict)
+            and item.get("type") == "mcp_tool_call"
+            and item.get("server") == server
+        ):
+            events.append(event)
+    return events
+
+
+def bind_native_events(
+    evidence: dict[str, Any],
+    events: list[dict[str, Any]],
+    *,
+    failed_stage: bool = False,
+) -> set[str]:
+    """Bind every recorded call to exactly one native MCP completion event.
+
+    The runner applies this when a stage ends, from the exact redacted stream
+    it archives, and the custody verifier repeats it at publication from the
+    archived file, so the two checks cannot drift. ``failed_stage`` relaxes
+    only the completeness requirements: a failed invocation may preserve an
+    incomplete event stream without being promoted as a successful run.
+    Raises ``EvidenceError`` with the wording the verifier reports.
+    """
+    calls = {call["callId"]: call for call in evidence["calls"]}
+    matched: set[str] = set()
+    native_ids: set[str] = set()
+    completed_ids: set[str] = set()
+    for event in events:
+        item = event.get("item") if isinstance(event, dict) else None
+        native_id = item.get("id") if isinstance(item, dict) else None
+        if not isinstance(native_id, str) or not native_id:
+            raise EvidenceError("tool evidence event lacks its native call ID")
+        native_ids.add(native_id)
+        if event.get("type") != "item.completed":
+            continue
+        if native_id in completed_ids:
+            raise EvidenceError("tool evidence repeats a native completion event")
+        completed_ids.add(native_id)
+        result = item.get("result")
+        structured = (
+            result.get("structured_content", result.get("structuredContent"))
+            if isinstance(result, dict)
+            else None
+        )
+        call_id = structured.get("callId") if isinstance(structured, dict) else None
+        call = calls.get(call_id) if isinstance(call_id, str) else None
+        if call is None or call_id in matched:
+            raise EvidenceError(
+                "tool evidence has an unknown or repeated event call ID"
+            )
+        expected_result = terminal_call(call)
+        native_arguments = item.get("arguments")
+        if (
+            call["status"] == "failed"
+            and call["tool"] == "fetch_source"
+            and call["arguments"] == {"url": REDACTED_URL}
+            and isinstance(native_arguments, dict)
+        ):
+            # Unsafe requests are deliberately redacted by the recorder. Only
+            # the same deterministic rejection may replace exact argument
+            # matching; a successful/public request cannot borrow this escape.
+            native_arguments = captured_arguments(call["tool"], native_arguments)
+        content = result.get("content") if isinstance(result, dict) else None
+        try:
+            text_result = (
+                json.loads(content[0]["text"])
+                if isinstance(content, list)
+                and len(content) == 1
+                and isinstance(content[0], dict)
+                and content[0].get("type") == "text"
+                else None
+            )
+        except (KeyError, TypeError, ValueError):
+            text_result = None
+        if (
+            item.get("tool") != call["tool"]
+            or item.get("status")
+            not in (
+                {"completed"}
+                if call["status"] == "succeeded"
+                else {"completed", "failed"}
+            )
+            or canonical_bytes(native_arguments) != canonical_bytes(call["arguments"])
+            or canonical_bytes(structured) != canonical_bytes(expected_result)
+            or canonical_bytes(text_result) != canonical_bytes(expected_result)
+            or any(
+                key in result and result[key] is not (call["status"] == "failed")
+                for key in ("isError", "is_error")
+            )
+        ):
+            raise EvidenceError(
+                f"tool evidence call {call_id} differs from its native event"
+            )
+        matched.add(call_id)
+    if not failed_stage and matched != set(calls):
+        raise EvidenceError(
+            "tool evidence calls lack native completion events: "
+            + ", ".join(sorted(set(calls) - matched))
+        )
+    if not failed_stage and native_ids != completed_ids:
+        raise EvidenceError("tool evidence has incomplete native calls")
+    return matched
 
 
 class EvidenceRecorder:
