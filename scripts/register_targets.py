@@ -1912,6 +1912,47 @@ def _plan_registration(
     }
 
 
+def execution_plan_refusal(registration: dict[str, Any]) -> str | None:
+    """Why the resolver could never execute this contract, or None.
+
+    The resolver owns the answer (``resolve_pending.execution_plan_refusal``):
+    it routes the contract through its own router and family admission
+    predicates. Imported on use because ``resolve_pending`` imports this
+    module.
+    """
+
+    import resolve_pending
+
+    return resolve_pending.execution_plan_refusal(registration)
+
+
+def require_execution_plan(registration: dict[str, Any]) -> None:
+    """Refuse to write a NEW registration the resolver could never execute.
+
+    A registration is a public promise to score a forecast against one
+    number. Until 2026-09-19 the only admission test was that a binding
+    could be constructed, and a seed without an adapter binds to
+    ``generic-url``, which no resolver leg executes; 67 of the 116 forecasts
+    then overdue had been registered that way. An existing snapshot is
+    immutable and is never re-judged here: what happens to those targets is a
+    disposition, not a registration, decision. Nothing in ``waivers.json``
+    waives this check; it has no grandfather set.
+    """
+
+    if registration["existing"]:
+        return
+    refusal = execution_plan_refusal(registration)
+    if refusal:
+        contract = registration["contract"]
+        raise RegistrationError(
+            f"{contract['catalogSlug']} has no executable resolution plan: "
+            f"{refusal}. Admit a resolver adapter for "
+            f"{contract['series']} (adapter or reuse of a family, anchors "
+            "verified from official prints, docket template) before "
+            "registering a target for it"
+        )
+
+
 def rebuild_registered_target(
     snapshot: dict[str, Any],
     *,
@@ -2009,6 +2050,21 @@ def register(
         raise RegistrationError("targets file must contain an object-list 'targets'")
     if not targets:
         return []
+    registered_at_utc = registered_at_utc or utc_now()
+    registered_at = parse_utc_instant(registered_at_utc)
+    if registered_at.date() != registration_date:
+        raise RegistrationError(
+            "registration date must match registeredAtUtc date: "
+            f"{registration_date} != {registered_at.date()}"
+        )
+    ledger_pin = load_ledger_pin_binding()
+
+    def plan(contract: dict[str, Any]) -> dict[str, Any]:
+        return _plan_registration(
+            contract, registration_date, registered_at_utc, ledger_pin
+        )
+
+    planned: dict[int, dict[str, Any]] = {}
     if skip_unbindable:
         # A docket roll should register every bindable target rather than
         # abort the whole wave on the first series that cannot yet be bound
@@ -2018,12 +2074,27 @@ def register(
         bindable: list[dict[str, Any]] = []
         skipped_conditional_keys: set[tuple[str, str]] = set()
         for target in targets:
+            refusal: RegistrationError | None = None
             try:
-                build_contract(target, registration_date)
+                contract = build_contract(target, registration_date)
             except RegistrationError as exc:
+                refusal = exc
+            else:
+                # Snapshot-integrity errors from planning (a non-canonical
+                # snapshot, a hash collision) are never "unbindable": they
+                # propagate and abort the whole run, as they always have.
+                planned[id(target)] = plan(contract)
+                try:
+                    # Bindable means the resolver can execute it, not merely
+                    # that a binding could be written down.
+                    require_execution_plan(planned[id(target)])
+                except RegistrationError as exc:
+                    refusal = exc
+            if refusal is not None:
                 print(
                     "skipping unbindable target "
-                    f"{target.get('catalogSlug', target.get('series', '?'))}: {exc}",
+                    f"{target.get('catalogSlug', target.get('series', '?'))}: "
+                    f"{refusal}",
                     file=sys.stderr,
                 )
                 if target.get("conditional") is not None:
@@ -2061,26 +2132,16 @@ def register(
             raise RegistrationError("no bindable targets in this roll")
         targets = bindable
         payload["targets"] = targets
-    registered_at_utc = registered_at_utc or utc_now()
-    registered_at = parse_utc_instant(registered_at_utc)
-    if registered_at.date() != registration_date:
-        raise RegistrationError(
-            "registration date must match registeredAtUtc date: "
-            f"{registration_date} != {registered_at.date()}"
-        )
-    contracts = [build_contract(target, registration_date) for target in targets]
-    ids = [contract["dataPointId"] for contract in contracts]
-    slugs = [contract["catalogSlug"] for contract in contracts]
+    registrations = [
+        planned.get(id(target)) or plan(build_contract(target, registration_date))
+        for target in targets
+    ]
+    ids = [registration["contract"]["dataPointId"] for registration in registrations]
+    slugs = [registration["contract"]["catalogSlug"] for registration in registrations]
     if len(ids) != len(set(ids)):
         raise RegistrationError("registration contains duplicate dataPointIds")
     if len(slugs) != len(set(slugs)):
         raise RegistrationError("registration contains duplicate catalogSlugs")
-
-    ledger_pin = load_ledger_pin_binding()
-    registrations = [
-        _plan_registration(contract, registration_date, registered_at_utc, ledger_pin)
-        for contract in contracts
-    ]
     if reuse_existing_only:
         unregistered = sorted(
             registration["contract"]["catalogSlug"]
@@ -2097,6 +2158,11 @@ def register(
         generated_source = render_generated_targets(
             registrations, allow_published=True, allow_supersede=True
         )
+
+    # Last check before anything is written, after --reuse-existing-only has
+    # had its say: every NEW snapshot needs an executable resolution plan.
+    for registration in registrations:
+        require_execution_plan(registration)
 
     for registration in registrations:
         if not registration["existing"]:
