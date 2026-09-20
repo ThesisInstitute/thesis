@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "thesis_sba_pdf_witness_run_v1",
+  "retrievedAt": "2026-09-20T16:45:06Z",
+  "source": {
+    "entryUrl": "https://www.sba.gov/document/report-small-business-administration-loan-program-performance",
+    "allowedHosts": [
+      "legacy.sba.gov",
+      "www.sba.gov"
+    ],
+    "requiredSeries": [
+      "sba.disaster.loan_program.charge_off_amount",
+      "sba.disaster.loan_program.charge_off_rate_upb",
+      "sba.disaster.loan_program.post_charge_off_recovery"
+    ],
+    "parserContract": "scripts/sba_loan_performance.py:SBA_REPORT_SPECS:v3"
+  },
+  "outcome": "unchanged",
+  "ok": true,
+  "fetchEventPath": "fetch_event.json",
+  "bundle": {
+    "label": "FY25Q3",
+    "fiscalYear": 2025,
+    "quarter": 3,
+    "assetUrl": "https://legacy.sba.gov/sites/default/files/2025-09/WebsiteReports_FY25Q3.zip",
+    "rawSha256": "51d5571d03d028d5efd4b8b9c8d7984f55285d36202eb8f67afe8a3476bb1242",
+    "rawBytes": 1296419,
+    "periodCoverage": {
+      "periodType": "fiscal_year",
+      "displayedFiscalYears": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "possibleCompletedFiscalYears": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ]
+    },
+    "reportAsOf": "2025-06-30",
+    "parserContract": "scripts/sba_loan_performance.py:SBA_REPORT_SPECS:v3"
+  },
+  "previousCompleteCapture": {
+    "runDirectory": "records/2026-08-08/20260808T050910Z-sba-pdf-witness",
+    "custodyRootPath": "records/2026-08-08/20260808T050910Z-sba-pdf-witness/custody_root.json",
+    "custodyRootSha256": "ee3b732af904621efff835f8e0056d3a3f02fda8f9d62cb4e142e1f1de64e4a8",
+    "bundleSha256": "51d5571d03d028d5efd4b8b9c8d7984f55285d36202eb8f67afe8a3476bb1242",
+    "bundleBytes": 1296419,
+    "bundleLabel": "FY25Q3",
+    "reportAsOf": "2025-06-30"
+  },
+  "failure": null,
+  "custodyInventoryVersion": 2,
+  "runMode": "sba_pdf_witness",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "fetch_event",
+      "path": "records/2026-09-20/20260920T164506Z-sba-pdf-witness/fetch_event.json",
+      "sha256": "b311a48eaa413279363c81f4cdaaf889a983f2aac573659b3212d21cb62264c9",
+      "bytes": 2243,
+      "createdAt": "2026-09-20T16:45:06Z",
+      "canonicalJsonSha256": "963484c341d2580e4f5d1dc58b3311a278ad2023f251ef29f3f855411687800a"
+    },
+    {
+      "artifactType": "landing_archive",
+      "path": "records/2026-09-20/20260920T164506Z-sba-pdf-witness/upstream/landing-page.html.gz",
+      "sha256": "3be41f925ad48297646b3f53944fa8a0cbe8bc83998d637f1a7a77b8e27b7488",
+      "bytes": 7800,
+      "createdAt": "2026-09-20T16:45:06Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/2026-09-20/20260920T164506Z-sba-pdf-witness/manifest.json",
+      "sha256": "ba9907e2fb1650a1eb464baaad5cf541f697524a9a5cf7d022ee23d71879eddc",
+      "bytes": 2301,
+      "createdAt": "2026-09-20T16:45:06Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "988d984a630ca6fb0bc5a46969816e5fe2fd867e352ee2016a2a9dfa2c7ae974"
+}
