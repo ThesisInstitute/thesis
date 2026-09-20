@@ -57,6 +57,7 @@ SOURCE_ADAPTERS = {
     "alfred-fred",
     "bea-ita-itable",
     "bea-release",
+    "bls-api",
     "bls-qcew",
     "census-spm-annual-report",
     "eia-dnav-xls",
@@ -75,6 +76,7 @@ SOURCE_ADAPTERS = {
 SOURCE_ADAPTER_ALLOWED_HOSTS = {
     "bea-ita-itable": {"apps.bea.gov", "www.bea.gov"},
     "bea-release": {"apps.bea.gov", "www.bea.gov"},
+    "bls-api": {"api.bls.gov"},
     "bls-qcew": {"data.bls.gov", "www.bls.gov"},
     "census-spm-annual-report": {"www.census.gov", "www2.census.gov"},
     "eia-dnav-xls": {"www.eia.gov"},
@@ -91,8 +93,19 @@ CALENDAR_GATED_SOURCE_ADAPTERS = NATIVE_INTL_SOURCE_ADAPTERS | {
     "alfred-fred",
     "bea-ita-itable",
     "bea-release",
+    "bls-api",
     "bls-qcew",
 }
+# Adapters whose new registrations take the docket's canonical series as their
+# dataPointId stem instead of editing the previous target's id. The resolver
+# routes by that stem and the appended fact's concept is derived from the id,
+# so an inherited alias (the payroll series' previous targets are
+# ``bls.ces.total_nonfarm.payroll_employment.change.sa...`` under the docket
+# series ``bls.ces.nonfarm_payrolls.change``) would never reach its executor.
+CANONICAL_ID_SOURCE_ADAPTERS = NATIVE_INTL_SOURCE_ADAPTERS | {"bls-api"}
+# Adapters whose allowedHosts are exactly the hosts their executor fetches.
+# A previous forecast's research links must not widen that custody boundary.
+EXECUTOR_HOSTS_ONLY_SOURCE_ADAPTERS = {"bea-ita-itable", "bls-api"}
 RELEASE_POLICIES = {"first_print", "advance_vintage", "registered_query_snapshot"}
 RESOLUTION_DATE_BASES = {"release-calendar", "resolve-by-bound"}
 DEFAULT_RESOLUTION_DATE_BASIS = "release-calendar"
@@ -585,7 +598,7 @@ def derive_data_point_id(
     seed_adapter = (
         seed_binding.get("adapter") if isinstance(seed_binding, dict) else None
     )
-    if seed_adapter in NATIVE_INTL_SOURCE_ADAPTERS:
+    if seed_adapter in CANONICAL_ID_SOURCE_ADAPTERS:
         # Do not perpetuate a legacy descriptive alias from the previous
         # target. New native registrations use the docket's canonical series
         # as their id stem, so the resolver, target contract, and site scoring
@@ -728,7 +741,7 @@ def derive_source_binding(
     # forecast's research links must not widen that custody boundary; the
     # official Table 5.1 landing page is:
     # https://apps.bea.gov/iTable/?ReqID=62&step=6&isuri=1&tablelist=62&product=1
-    if previous and adapter != "bea-ita-itable":
+    if previous and adapter not in EXECUTOR_HOSTS_ONLY_SOURCE_ADAPTERS:
         prior_url = previous.get("resolutionSourceUrl")
         if prior_url:
             allowed_hosts.add(_host(str(prior_url)))
