@@ -1012,6 +1012,13 @@ def test_all_native_docket_series_commit_official_calendar_dates() -> None:
     assert {entry["series"] for entry in native_entries} == {
         "abs.cpi.all_groups.yoy",
         "abs.labour.unemployment_rate",
+        # Table A-19 rolls from BLS's Employment Situation schedule.
+        "bls.cps.employed_people_by_occupation.business_financial_operations",
+        "bls.cps.employed_people_by_occupation.computer_mathematical",
+        "bls.cps.employed_people_by_occupation.healthcare_support",
+        "bls.cps.employed_people_by_occupation.office_administrative_support",
+        "bls.cps.employed_people_by_occupation.production",
+        "bls.cps.employed_people_by_occupation.transportation_material_moving",
         "bls.qcew.child_day_care_services.annual_avg_employment",
         "eurostat.hicp.flash.yoy",
         "statcan.cpi.allitems.yoy",

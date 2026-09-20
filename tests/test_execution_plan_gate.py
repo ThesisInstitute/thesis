@@ -328,23 +328,55 @@ def test_reviewed_legacy_exceptions_are_not_inherited_by_new_contracts(
     ), "the existing run-time exception must keep working"
 
 
-def test_a19_cannot_take_new_registrations_under_any_adapter(
+def test_a19_takes_new_registrations_only_under_its_own_adapter(
     registered: dict[str, dict],
 ) -> None:
+    # A-19 left EXECUTION_PLAN_UNREGISTRABLE_FAMILIES when it gained the
+    # ``bls-cps-a19`` adapter. This was
+    # ``test_a19_cannot_take_new_registrations_under_any_adapter``; what it
+    # guarded still holds for every name but that one. The full admission
+    # matrix is tests/test_a19_registrable_adapter.py.
+    assert "a19" in resolve_pending.EXECUTION_PLAN_FAMILY_CHECKS
+    assert "a19" not in resolve_pending.EXECUTION_PLAN_UNREGISTRABLE_FAMILIES
     ref = next(
         ref for ref in sorted(registered) if ref.startswith(resolve_pending.A19_STEM)
     )
-    contract = copy.deepcopy(registered[ref]["contract"])
-    assert "generic-url" in (_refusal(contract) or "")
-    contract["sourceBinding"]["adapter"] = "alfred-fred"
-    contract["unit"] = "thousands"
-    # Whichever refusal comes first: the family has no admission predicate,
-    # and (once A-19 gains a FAMILY_ADAPTERS entry) ALFRED is not its adapter.
-    refusal = _refusal(contract) or ""
-    assert (
-        "no registration-time admission predicate" in refusal
-        or "is not one the a19 family resolves" in refusal
+    existing = copy.deepcopy(registered[ref]["contract"])
+    # The contracts on disk name generic-url and could not be registered again.
+    assert "generic-url" in (_refusal(existing) or "")
+    # No other family's adapter may borrow the A-19 route.
+    borrowed = copy.deepcopy(existing)
+    borrowed["sourceBinding"]["adapter"] = "alfred-fred"
+    assert "differs in adapter" in (_refusal(borrowed) or "")
+    # The right name is not enough. These contracts registered a window
+    # inferred from cadence, for a month the committed calendar does not date.
+    renamed = copy.deepcopy(existing)
+    renamed["sourceBinding"]["adapter"] = resolve_pending.A19_BINDING_ADAPTER
+    assert "does not date" in (_refusal(renamed) or "")
+
+    # What IS admitted: the docket template, for a month BLS's schedule dates,
+    # with the window registration derives from that date.
+    entry = next(
+        item
+        for item in json.loads((ROOT / "scripts" / "docket_series.json").read_text())[
+            "series"
+        ]
+        if item["series"] == existing["series"]
     )
+    period = min(entry["releaseDates"])
+    target = {
+        "series": entry["series"],
+        "period": period,
+        "catalogSlug": roll_docket.format_slug(entry["slug"], period, "monthly"),
+        **roll_docket.target_extras_for_period(entry, period),
+    }
+    release_day = dt.date.fromisoformat(entry["releaseDates"][period])
+    contract = register_targets.build_contract(
+        target, release_day - dt.timedelta(days=20)
+    )
+    assert contract["sourceBinding"]["adapter"] == "bls-cps-a19"
+    assert _refusal(contract) is None
+    assert _refusal(json.loads(canonical_bytes(contract))) is None
 
 
 def test_unregistrable_family_refuses_whatever_the_adapter(

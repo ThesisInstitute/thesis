@@ -258,11 +258,24 @@ def test_registered_contract_that_is_not_this_table_refuses(mutate, named) -> No
 
 
 def test_a19_is_a_constrained_family() -> None:
-    assert resolve_pending.FAMILY_ADAPTERS["a19"] == {"generic-url"}
+    # The family's one adapter is the registrable ``bls-cps-a19``. The
+    # contracts registered before it existed name generic-url, which is
+    # deliberately NOT a family adapter, so the registration gate can never
+    # mistake it for one; main() resolves them through the legacy exception
+    # (tests/test_a19_registrable_adapter.py) once a19_execution_spec has
+    # pinned every other field.
+    assert resolve_pending.FAMILY_ADAPTERS["a19"] == {"bls-cps-a19"}
     drifted = registration()
     drifted["contract"]["sourceBinding"]["adapter"] = "alfred-fred"
     assert resolve_pending.binding_adapter_mismatch("a19", drifted) == "alfred-fred"
-    assert resolve_pending.binding_adapter_mismatch("a19", registration()) is None
+    assert (
+        resolve_pending.binding_adapter_mismatch("a19", registration())
+        == resolve_pending.A19_LEGACY_BINDING_ADAPTER
+        == "generic-url"
+    )
+    admitted = registration()
+    admitted["contract"]["sourceBinding"]["adapter"] = "bls-cps-a19"
+    assert resolve_pending.binding_adapter_mismatch("a19", admitted) is None
 
 
 def test_every_registered_a19_contract_on_disk_selects_millions() -> None:

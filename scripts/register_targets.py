@@ -57,6 +57,7 @@ SOURCE_ADAPTERS = {
     "alfred-fred",
     "bea-ita-itable",
     "bea-release",
+    "bls-cps-a19",
     "bls-qcew",
     "census-spm-annual-report",
     "eia-dnav-xls",
@@ -80,6 +81,16 @@ SOURCE_ADAPTER_ALLOWED_HOSTS = {
     "eia-dnav-xls": {"www.eia.gov"},
     "sba-loan-program-performance-pdf": {"legacy.sba.gov", "www.sba.gov"},
 }
+# Adapters whose executor authenticates exactly its reviewed hosts. A rolled
+# target otherwise inherits every host its predecessor's run fetched, and an
+# analyst's research links must not widen a custody boundary. For A-19 the
+# widening is not hypothetical: five of the six September 2026 occupation
+# cells cite a host other than www.bls.gov (FRED, ALFRED, the Internet
+# Archive, api.bls.gov, data.bls.gov), the A-19 executor pins allowedHosts to
+# BLS's host alone, and an October target carrying those hosts would be
+# refused by the execution-plan gate, so the series would stop minting without
+# anyone deciding it should.
+CUSTODY_PINNED_HOST_ADAPTERS = frozenset({"bea-ita-itable", "bls-cps-a19"})
 NATIVE_INTL_SOURCE_ADAPTERS = {
     "abs-data-api",
     "abs-release-page",
@@ -91,8 +102,26 @@ CALENDAR_GATED_SOURCE_ADAPTERS = NATIVE_INTL_SOURCE_ADAPTERS | {
     "alfred-fred",
     "bea-ita-itable",
     "bea-release",
+    "bls-cps-a19",
     "bls-qcew",
 }
+# Days after the official release day on which a calendar-gated adapter may
+# still take first-print custody. An adapter not listed keeps the exact
+# one-day window. The start is always the agency's own published date, never
+# inferred from cadence; only the end moves, by a reviewed constant.
+#
+# ``bls-cps-a19`` reads an Internet Archive capture of a page BLS overwrites
+# monthly, and the executor tests the CAPTURE's date against this window. The
+# Archive seldom captures that page unprompted, so the capture the resolver
+# itself requests is the working path, and a one-day window would give that
+# request a single attempt; from November to March it lands ten minutes after
+# the 08:30 ET release (13:30 UTC against a 13:40 UTC cron). Seven days is the
+# margin the docket's registered-query snapshots commit. The evidence, and why
+# a later capture still reads the first print, are in
+# docs/anchor-verifications.md, "Why the window is not one day". A
+# registration's window is immutable, so a change here affects new targets
+# only.
+CALENDAR_CAPTURE_MARGIN_DAYS: dict[str, int] = {"bls-cps-a19": 7}
 RELEASE_POLICIES = {"first_print", "advance_vintage", "registered_query_snapshot"}
 RESOLUTION_DATE_BASES = {"release-calendar", "resolve-by-bound"}
 DEFAULT_RESOLUTION_DATE_BASIS = "release-calendar"
@@ -134,6 +163,22 @@ def is_calendar_gated_source(adapter: Any, series: Any) -> bool:
     """
 
     return adapter in CALENDAR_GATED_SOURCE_ADAPTERS and series not in SERIES_BINDINGS
+
+
+def calendar_release_window(adapter: Any, release_day: dt.date) -> dict[str, str]:
+    """The window a calendar-gated target registers for an official release day.
+
+    One day for every adapter except those with a reviewed capture margin
+    (``CALENDAR_CAPTURE_MARGIN_DAYS``). Registration derives the window with
+    this function and the bind step re-derives it from the committed docket
+    calendar, so the two cannot disagree about a margin.
+    """
+
+    margin = CALENDAR_CAPTURE_MARGIN_DAYS.get(str(adapter), 0)
+    return {
+        "start": release_day.isoformat(),
+        "end": (release_day + dt.timedelta(days=margin)).isoformat(),
+    }
 
 
 class RegistrationError(ValueError):
@@ -512,6 +557,8 @@ def expected_release_window(
         start, end = _iso_date(str(supplied["start"])), _iso_date(str(supplied["end"]))
     elif target.get("expectedReleaseDate"):
         start = end = _iso_date(str(target["expectedReleaseDate"]))
+        if is_calendar_gated_source(adapter, target.get("series")):
+            end = _iso_date(calendar_release_window(adapter, start)["end"])
     elif previous and previous.get("resolutionDate"):
         prior = _iso_date(str(previous["resolutionDate"]))
         period = str(target["period"])
@@ -728,7 +775,8 @@ def derive_source_binding(
     # forecast's research links must not widen that custody boundary; the
     # official Table 5.1 landing page is:
     # https://apps.bea.gov/iTable/?ReqID=62&step=6&isuri=1&tablelist=62&product=1
-    if previous and adapter != "bea-ita-itable":
+    # The A-19 executor likewise pins BLS's host alone.
+    if previous and adapter not in CUSTODY_PINNED_HOST_ADAPTERS:
         prior_url = previous.get("resolutionSourceUrl")
         if prior_url:
             allowed_hosts.add(_host(str(prior_url)))
@@ -1222,7 +1270,14 @@ def validate_committed_calendar_contract(
             "committed dated docket entry lacks the target period's "
             "release date or calendar URL"
         )
-    expected_window = {"start": release_date, "end": release_date}
+    release_day = _iso_date(release_date)
+    if release_day.isoformat() != release_date:
+        # The window is compared as canonical YYYY-MM-DD strings, as it was
+        # when it was the docket string itself; keep refusing "20261106".
+        raise RegistrationError(
+            "committed docket release date is not a canonical ISO date"
+        )
+    expected_window = calendar_release_window(adapter, release_day)
     if binding.get("expectedReleaseWindow") != expected_window:
         raise RegistrationError(
             "target release window disagrees with the committed docket calendar"

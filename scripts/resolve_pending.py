@@ -94,6 +94,7 @@ from pin_ledger import PinError, _validate_catalog_binding
 from register_targets import (
     LEGACY_BOUNDED_CONDITIONAL_IDS,
     RegistrationError,
+    calendar_release_window,
     registration_content_hash,
 )
 from sba_loan_performance import (
@@ -2086,6 +2087,16 @@ def bea_ita_release_snapshot_envelope(
 # current-month header is checked against the target period before any row is
 # read (a19_snapshot_period); a pin to the wrong capture refuses.
 A19_SOURCE_URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
+# The adapter a NEW A-19 registration binds. The 18 contracts registered before
+# it existed (July to September 2026) name ``generic-url``; they stay
+# executable at run time through the legacy exception in main(), exactly as
+# the legacy QCEW binding does, and that name admits no new registration.
+A19_BINDING_ADAPTER = "bls-cps-a19"
+A19_LEGACY_BINDING_ADAPTER = "generic-url"
+# BLS's Employment Situation schedule: the one calendar authority a dated A-19
+# target may cite. It answers non-browser clients with HTTP 403, like the
+# table itself; docs/anchor-verifications.md links the archived copy read.
+A19_RELEASE_CALENDAR_URL = "https://www.bls.gov/schedule/news_release/empsit.htm"
 A19_SNAPSHOT_URLS: dict[str, str] = {
     "2026-06": f"https://web.archive.org/web/20260710110509/{A19_SOURCE_URL}",
     "2026-07": f"https://web.archive.org/web/20260819191418/{A19_SOURCE_URL}",
@@ -7803,6 +7814,14 @@ def a19_execution_spec(
     reviewed unit contracts, with ``valueScale`` and ``transform`` agreeing;
     then the spec emits the registered unit. The release window is the one
     free field, and the capture is judged against it.
+
+    Two adapter names carry that binding: ``bls-cps-a19``, and the
+    ``generic-url`` of the contracts registered before it existed. This
+    function is the run-time judgment and treats them alike. Which of them may
+    be REGISTERED is ``execution_plan_refusal``'s question, and it admits only
+    the first. The window's width is likewise a registration-time question
+    (``_plan_a19``): a registration is immutable, so judging its window here
+    against today's margin would strand a target if the margin ever changed.
     """
 
     if not registration:
@@ -7814,9 +7833,9 @@ def a19_execution_spec(
     problems = []
     if not isinstance(binding, dict) or set(binding) != A19_BINDING_KEYS:
         return None, "sourceBinding keys"
-    # The only adapter an A-19 contract has ever been registered under. It
-    # names no executor, which is why every other field is pinned here.
-    if binding.get("adapter") != "generic-url":
+    # The legacy name says nothing about an executor, which is why every other
+    # field is pinned here; the new name is held to the same pins.
+    if binding.get("adapter") not in (A19_BINDING_ADAPTER, A19_LEGACY_BINDING_ADAPTER):
         problems.append("adapter")
     if binding.get("allowedHosts") != [urlparse(A19_SOURCE_URL).hostname]:
         problems.append("allowedHosts")
@@ -11342,6 +11361,7 @@ def pending_adapter_refs(
                     "concept_authority": "bls",
                     "source_concept": A19_ROW_LABELS[occupation],
                     "a19_row": occupation,
+                    "legacy_binding_adapter": A19_LEGACY_BINDING_ADAPTER,
                     "evidence_notes": (
                         "Value for {period} read from {source_url}, an "
                         "Internet Archive capture of BLS Table A-19 whose "
@@ -13156,9 +13176,11 @@ FAMILY_ADAPTERS = {
     # must never be resolved by a series-stem family that happens to share
     # the series name — the 2026-07-25 new-home-sales collision, where a
     # 2026-07-10 generic-url registration met a newly added ALFRED stem.
-    # A-19 has no adapter of its own: its registrations are generic-url
-    # contracts that a19_execution_spec pins field by field.
-    "a19": {"generic-url"},
+    # A-19 registrations made before ``bls-cps-a19`` existed name generic-url.
+    # They are not listed here, so they cannot look like a family adapter to
+    # the registration gate; main() resolves them through the same legacy
+    # exception QCEW has, after a19_execution_spec pins every other field.
+    "a19": {A19_BINDING_ADAPTER},
     "alfred": {"alfred-fred"},
     "bea_release": {"bea-release", "bea-ita-itable"},
     "bls_api": {"bls-api"},
@@ -13207,9 +13229,9 @@ def binding_adapter_mismatch(
 # dataPointId through the same router and then applies the main loop's
 # date-independent refusals in its order: resolution-date basis, emitted unit,
 # registered adapter, then the family's own predicates. It never touches the
-# network and never reads ``records/`` (the QCEW predicate reads the committed
-# docket calendar): whether the print exists yet, or the window is open, is a
-# runtime question. Whether any code could ever read it is not.
+# network and never reads ``records/`` (the QCEW and A-19 predicates read the
+# committed docket calendar): whether the print exists yet, or the window is
+# open, is a runtime question. Whether any code could ever read it is not.
 # ---------------------------------------------------------------------------
 
 NO_EXECUTOR_ADAPTER = "generic-url"
@@ -13222,6 +13244,96 @@ def _plan_binding_refusal(matches: bool, family: str) -> str | None:
         f"the registered sourceBinding is not the reviewed {family} template "
         "the executor authenticates before it reads anything"
     )
+
+
+def a19_committed_release_day(
+    series: str,
+    period: str,
+    docket_entries: list[Mapping[str, Any]] | None = None,
+) -> dt.date | None:
+    """BLS's release day for an A-19 month, from the committed docket calendar.
+
+    None unless exactly one docket entry owns ``series``, cites BLS's
+    Employment Situation schedule as its calendar, and dates ``period``. Like
+    the QCEW calendar authority it reads the committed registry, never
+    ``records/`` and never the network.
+    """
+
+    if docket_entries is None:
+        try:
+            payload = json.loads((ROOT / "scripts" / "docket_series.json").read_text())
+        except (OSError, json.JSONDecodeError):
+            return None
+        loaded = payload.get("series") if isinstance(payload, dict) else None
+        if not isinstance(loaded, list):
+            return None
+        docket_entries = loaded
+    matches = [
+        entry
+        for entry in docket_entries
+        if isinstance(entry, Mapping) and entry.get("series") == series
+    ]
+    if len(matches) != 1:
+        return None
+    entry = matches[0]
+    release_dates = entry.get("releaseDates")
+    if entry.get("releaseCalendarUrl") != A19_RELEASE_CALENDAR_URL or not isinstance(
+        release_dates, Mapping
+    ):
+        return None
+    value = release_dates.get(period)
+    try:
+        release_day = dt.date.fromisoformat(value) if isinstance(value, str) else None
+    except ValueError:
+        return None
+    # Canonical YYYY-MM-DD only, as registration compares the window.
+    return release_day if release_day and release_day.isoformat() == value else None
+
+
+def _plan_a19(
+    registration: Mapping[str, Any],
+    spec: Mapping[str, Any],
+    period: str,
+    *_: Any,
+    docket_entries: list[Mapping[str, Any]] | None = None,
+) -> str | None:
+    contract = registration["contract"]
+    binding = contract["sourceBinding"]
+    # execution_plan_refusal has already refused generic-url; say so here too,
+    # so this predicate admits one name whatever order it is reached in.
+    if binding.get("adapter") != A19_BINDING_ADAPTER:
+        return (
+            f"a new A-19 registration must bind {A19_BINDING_ADAPTER!r}, not "
+            f"{binding.get('adapter')!r}"
+        )
+    _, drifted = a19_execution_spec(dict(spec), registration)
+    if drifted:
+        return (
+            "the registered sourceBinding is not the reviewed Table A-19 "
+            f"template the executor authenticates (differs in {drifted})"
+        )
+    # The executor takes the earliest Internet Archive capture dated inside
+    # the window whose header prints the month. A window that does not start
+    # on BLS's release day can close before the print exists: the six July
+    # 2026 cells registered 2026-07-29 to 2026-08-06 for a 2026-08-07 release
+    # and can never resolve. So the window must be exactly the committed
+    # calendar's release day plus the reviewed capture margin.
+    release_day = a19_committed_release_day(
+        str(contract.get("series")), period, docket_entries
+    )
+    if release_day is None:
+        return (
+            f"the committed docket does not date {period} for "
+            f"{contract.get('series')} from BLS's Employment Situation schedule "
+            f"({A19_RELEASE_CALENDAR_URL})"
+        )
+    expected = calendar_release_window(A19_BINDING_ADAPTER, release_day)
+    if binding.get("expectedReleaseWindow") != expected:
+        return (
+            f"expectedReleaseWindow {binding.get('expectedReleaseWindow')!r} is "
+            f"not BLS's release day plus the reviewed capture margin, {expected!r}"
+        )
+    return None
 
 
 def _plan_alfred(
@@ -13370,6 +13482,7 @@ def _plan_usaspending(
 # family missing here refuses every new registration, so adding a family to
 # the router without deciding its admission predicate fails closed.
 EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
+    "a19": _plan_a19,
     "alfred": _plan_alfred,
     "bea_release": _plan_bea_release,
     "census_spm": _plan_census_spm,
@@ -13383,12 +13496,14 @@ EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
 }
 # Families that resolve only cells that predate bindings. BLS API, SSA and
 # VA MMWR name adapters ``register_targets.SOURCE_ADAPTERS`` does not offer;
-# A-19 and CMS provider data have no binding adapter at all, so a target for
-# them could only be registered as ``generic-url``. Moving a family out of
-# this set means giving it a registrable adapter, a full-binding predicate
-# above, and a first-print acquisition that needs no per-period hand pin.
+# CMS provider data has no binding adapter at all, so a target for it could
+# only be registered as ``generic-url``. Moving a family out of this set means
+# giving it a registrable adapter, a full-binding predicate above, and a
+# first-print acquisition that needs no per-period hand pin. A-19 left it that
+# way: ``bls-cps-a19``, ``_plan_a19``, and a capture found through the
+# Internet Archive's index inside a window dated from BLS's own schedule.
 EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
-    {"a19", "bls_api", "cms_provider_data", "ssa_official", "va_mmwr"}
+    {"bls_api", "cms_provider_data", "ssa_official", "va_mmwr"}
 )
 _CLAIMS_PLAN = {
     "initial": ("ICSA", "thousands"),
@@ -13478,6 +13593,18 @@ def execution_plan_refusal(registration: Mapping[str, Any]) -> str | None:
     _, basis_refusal = effective_resolution_date_basis(ref, registration, spec)
     if basis_refusal:
         return f"resolution-date basis mismatch: {basis_refusal}"
+    if kind == "a19":
+        # The main loop lets the registration select the A-19 unit contract
+        # before it compares units (the table prints thousands; the docket
+        # registers millions). Judge in that order, or every millions
+        # contract is refused for a unit the executor does emit.
+        a19_spec, drifted = a19_execution_spec(spec, registration)
+        if a19_spec is None:
+            return (
+                "the registered sourceBinding is not the reviewed Table A-19 "
+                f"template the executor authenticates (differs in {drifted})"
+            )
+        spec = a19_spec
     if not adapter_unit_matches(spec, forecast):
         return (
             f"the {kind} executor emits {spec['unit']!r}; the contract registers "
@@ -13768,6 +13895,11 @@ def main() -> int:
             ) or {}
             if qcew_binding_matches_spec(legacy_binding, spec, period, release_day):
                 mismatched = None
+        if kind == "a19" and mismatched == spec.get("legacy_binding_adapter"):
+            # a19_execution_spec, above, has already authenticated every
+            # other field of this contract, so the legacy name is the only
+            # thing that differs from a bls-cps-a19 registration.
+            mismatched = None
         if mismatched:
             print(
                 f"  BINDING/ADAPTER MISMATCH (skipping, registered "

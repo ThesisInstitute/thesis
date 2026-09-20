@@ -2087,11 +2087,16 @@
    "series": "bls.cps.employed_people_by_occupation.business_financial_operations",
    "cadence": "monthly",
    "slug": "cps-business-financial-employment-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "releaseDates": {
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04"
+   },
    "extras": {
     "valueScale": 0.001,
     "targetUnit": "millions",
     "sourceBinding": {
-     "adapter": "generic-url",
+     "adapter": "bls-cps-a19",
      "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
      "sourceSeriesId": "bls.cps.employed_people_by_occupation.business_financial_operations",
      "field": "Business and financial operations occupations",
@@ -2112,11 +2117,16 @@
    "series": "bls.cps.employed_people_by_occupation.computer_mathematical",
    "cadence": "monthly",
    "slug": "cps-computer-math-employment-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "releaseDates": {
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04"
+   },
    "extras": {
     "valueScale": 0.001,
     "targetUnit": "millions",
     "sourceBinding": {
-     "adapter": "generic-url",
+     "adapter": "bls-cps-a19",
      "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
      "sourceSeriesId": "bls.cps.employed_people_by_occupation.computer_mathematical",
      "field": "Computer and mathematical occupations",
@@ -2137,11 +2147,16 @@
    "series": "bls.cps.employed_people_by_occupation.healthcare_support",
    "cadence": "monthly",
    "slug": "cps-healthcare-support-employment-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "releaseDates": {
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04"
+   },
    "extras": {
     "valueScale": 0.001,
     "targetUnit": "millions",
     "sourceBinding": {
-     "adapter": "generic-url",
+     "adapter": "bls-cps-a19",
      "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
      "sourceSeriesId": "bls.cps.employed_people_by_occupation.healthcare_support",
      "field": "Healthcare support occupations",
@@ -2162,11 +2177,16 @@
    "series": "bls.cps.employed_people_by_occupation.office_administrative_support",
    "cadence": "monthly",
    "slug": "cps-office-admin-employment-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "releaseDates": {
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04"
+   },
    "extras": {
     "valueScale": 0.001,
     "targetUnit": "millions",
     "sourceBinding": {
-     "adapter": "generic-url",
+     "adapter": "bls-cps-a19",
      "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
      "sourceSeriesId": "bls.cps.employed_people_by_occupation.office_administrative_support",
      "field": "Office and administrative support occupations",
@@ -2187,11 +2207,16 @@
    "series": "bls.cps.employed_people_by_occupation.production",
    "cadence": "monthly",
    "slug": "cps-production-employment-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "releaseDates": {
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04"
+   },
    "extras": {
     "valueScale": 0.001,
     "targetUnit": "millions",
     "sourceBinding": {
-     "adapter": "generic-url",
+     "adapter": "bls-cps-a19",
      "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
      "sourceSeriesId": "bls.cps.employed_people_by_occupation.production",
      "field": "Production occupations",
@@ -2212,11 +2237,16 @@
    "series": "bls.cps.employed_people_by_occupation.transportation_material_moving",
    "cadence": "monthly",
    "slug": "cps-transport-material-moving-employment-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "releaseDates": {
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04"
+   },
    "extras": {
     "valueScale": 0.001,
     "targetUnit": "millions",
     "sourceBinding": {
-     "adapter": "generic-url",
+     "adapter": "bls-cps-a19",
      "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
      "sourceSeriesId": "bls.cps.employed_people_by_occupation.transportation_material_moving",
      "field": "Transportation and material moving occupations",
