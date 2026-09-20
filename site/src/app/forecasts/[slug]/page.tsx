@@ -6,18 +6,23 @@ import { BackToBill } from "@/components/BackToBill";
 import { Header } from "@/components/Header";
 import { ForecastRuntime } from "@/components/ForecastRuntime";
 import {
+  getPublishedForecast,
+  getPublishedForecasts,
+  loadForecastToolEvidence,
+} from "@/lib/forecast-publication";
+import {
   FORECAST_CELLS,
   TYPE_LABEL,
-  TYPE_DESCRIPTION,
   formatValue,
   getForecastCell,
+  getForecastRunEntries,
   type ForecastCell,
 } from "@/data/forecast-cells";
 import {
   loadPolicyEngineLedger,
   scoreResolvedForecast,
+  scoreResolvedForecastRun,
   withResolvedOutcome,
-  withResolvedOutcomes,
 } from "@/data/thesis-log";
 
 export function generateStaticParams() {
@@ -48,70 +53,72 @@ export async function generateMetadata({
   };
 }
 
-const typeBadgeClass: Record<ForecastCell["type"], string> = {
-  data: "bg-[var(--color-mist-100)] text-[var(--color-horizon-700)] border-[var(--color-mist-200)]",
-  policy:
-    "bg-[var(--color-accent-subtle)] text-[var(--color-rose-700)] border-[var(--color-rose-100)]",
-  conditional: "bg-[#FFF4DD] text-[#7A5C20] border-[#F2DCAF]",
-};
-
 export default async function ForecastDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const forecastDefinition = getForecastCell(slug);
-  if (!forecastDefinition) notFound();
+  const target = getForecastCell(slug);
+  if (!target) notFound();
+  const forecastDefinition = getPublishedForecast(slug);
+  if (!forecastDefinition) return <UnavailableForecast title={target.title} />;
 
   const ledger = await loadPolicyEngineLedger();
   const forecast = withResolvedOutcome(forecastDefinition, ledger);
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = getPublishedForecasts();
   const resolvedScore = scoreResolvedForecast(forecast, ledger);
+  const runScores = Object.fromEntries(
+    getForecastRunEntries(forecast).flatMap((run) => {
+      const score = scoreResolvedForecastRun(forecast, run, ledger);
+      return score ? [[run.variantId, score]] : [];
+    }),
+  );
 
   return (
     <div>
       <Header activePage="forecasts" />
-      <main className="mx-auto max-w-[1100px] px-8 pb-32 pt-10 max-md:px-5">
-        <nav className="mb-6 [font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.12em] text-[var(--theme-text-muted)]">
+      <main className="mx-auto max-w-[960px] px-8 pb-24 pt-8 max-md:px-5">
+        <nav
+          aria-label="Forecast navigation"
+          className="mb-8 text-[0.85rem] text-[var(--theme-text-muted)]"
+        >
           <Link
             href="/"
             className="text-[var(--theme-text-muted)] hover:text-[var(--color-accent)] no-underline"
           >
-            ← all forecasts
+            ← All forecasts
           </Link>
           <Suspense fallback={null}>
             <BackToBill />
           </Suspense>
         </nav>
 
-        {/* Hero */}
-        <header className="mb-10">
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <span
-              className={`inline-block rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em] ${typeBadgeClass[forecast.type]}`}
-            >
-              {TYPE_LABEL[forecast.type]}
-            </span>
-            <span className="[font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-              {TYPE_DESCRIPTION[forecast.type]}
-            </span>
-          </div>
-          <h1 className="[font-family:var(--font-display)] text-[clamp(1.7rem,3.5vw,2.4rem)] font-light leading-[1.2] tracking-[-0.02em] text-[var(--theme-text)] mb-5">
+        <header className="mb-9">
+          <p className="mb-3 text-[0.85rem] text-[var(--theme-text-muted)]">
+            {TYPE_LABEL[forecast.type]}
+          </p>
+          <h1 className="mb-4 [font-family:var(--font-display)] text-[clamp(1.8rem,4vw,2.7rem)] font-light leading-[1.15] tracking-[-0.025em] text-[var(--theme-text)]">
             {forecast.title}
           </h1>
-          <p className="max-w-[820px] text-[1rem] leading-[1.65] text-[var(--theme-text-muted)]">
+          <p className="max-w-[760px] text-[1rem] leading-[1.65] text-[var(--theme-text-muted)]">
             {forecast.question}
           </p>
           {forecast.conditionalOn && (
-            <p className="mt-4 inline-block rounded-md border border-[#F2DCAF] bg-[#FFF4DD] px-3 py-2 [font-family:var(--font-mono)] text-[0.72rem] text-[#7A5C20]">
-              conditional on:{" "}
+            <p className="mt-4 border-l-2 border-[var(--color-accent)] pl-3 text-[0.9rem] leading-relaxed text-[var(--theme-text-muted)]">
+              Conditional on:{" "}
               <span className="font-medium">{forecast.conditionalOn}</span>
             </p>
           )}
         </header>
 
-        <ForecastRuntime forecast={forecast} resolvedScore={resolvedScore} />
+        <ForecastRuntime
+          key={forecast.slug}
+          forecast={forecast}
+          resolvedScore={resolvedScore}
+          runScores={runScores}
+          toolEvidence={loadForecastToolEvidence(forecastDefinition)}
+        />
 
         {/* Related forecasts */}
         <RelatedForecasts
@@ -119,6 +126,41 @@ export default async function ForecastDetailPage({
           currentType={forecast.type}
           forecasts={forecasts}
         />
+      </main>
+    </div>
+  );
+}
+
+function UnavailableForecast({ title }: { title: string }) {
+  return (
+    <div>
+      <Header activePage="forecasts" />
+      <main className="mx-auto max-w-[960px] px-8 py-12 max-md:px-5">
+        <Link
+          href="/"
+          className="text-sm text-[var(--theme-text-muted)] hover:underline"
+        >
+          ← All forecasts
+        </Link>
+        <h1 className="mt-10 [font-family:var(--font-display)] text-3xl font-light">
+          {title}
+        </h1>
+        <section className="mt-8 border-y border-[var(--theme-border)] py-8">
+          <h2 className="[font-family:var(--font-display)] text-xl">
+            No forecast available
+          </h2>
+          <p className="mt-3 max-w-[65ch] text-[var(--theme-text-muted)] leading-relaxed">
+            This target does not currently have a forecast supported by
+            complete, successful run records. Prototype estimates and failed
+            runs have been withdrawn from the forecast catalog.
+          </p>
+          <Link
+            href="/"
+            className="mt-5 inline-block text-[var(--color-accent)] hover:underline"
+          >
+            Browse available forecasts →
+          </Link>
+        </section>
       </main>
     </div>
   );
@@ -142,32 +184,34 @@ function RelatedForecasts({
   if (related.length === 0) return null;
   return (
     <section
-      className="mt-20 border-t pt-10"
+      className="mt-16 border-t pt-8"
       style={{ borderColor: "var(--theme-border)" }}
     >
-      <h2 className="[font-family:var(--font-display)] text-[1.1rem] font-semibold tracking-[-0.01em] mb-5">
+      <h2 className="mb-5 [font-family:var(--font-display)] text-[1.3rem] font-semibold tracking-[-0.01em]">
         More {TYPE_LABEL[currentType].toLowerCase()} forecasts
       </h2>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <ul className="divide-y divide-[var(--theme-border)]">
         {related.map((forecast) => (
-          <Link
-            key={forecast.slug}
-            href={`/${forecast.slug}`}
-            className="rounded-xl border bg-[var(--theme-bg-elevated)] p-5 no-underline transition-colors hover:no-underline"
-            style={{ borderColor: "var(--theme-border)" }}
-          >
-            <div className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)] mb-2">
-              resolves {formatShortDate(forecast.resolutionDate)}
-            </div>
-            <div className="[font-family:var(--font-display)] text-[0.95rem] font-semibold leading-[1.3] text-[var(--theme-text)] mb-3">
-              {forecast.title}
-            </div>
-            <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[var(--color-accent)]">
-              {formatValue(forecast.pointEstimate, forecast.unit)}
-            </div>
-          </Link>
+          <li key={forecast.slug}>
+            <Link
+              href={`/${forecast.slug}`}
+              className="group flex items-baseline justify-between gap-6 py-4 no-underline hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
+            >
+              <div>
+                <div className="text-[0.95rem] leading-[1.45] text-[var(--theme-text)] group-hover:text-[var(--color-accent)]">
+                  {forecast.title}
+                </div>
+                <div className="mt-1 text-[0.8rem] text-[var(--theme-text-muted)]">
+                  Resolves {formatShortDate(forecast.resolutionDate)}
+                </div>
+              </div>
+              <div className="shrink-0 [font-family:var(--font-display)] text-[1.1rem] tabular-nums text-[var(--theme-text)]">
+                {formatValue(forecast.pointEstimate, forecast.unit)}
+              </div>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

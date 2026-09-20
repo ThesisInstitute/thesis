@@ -23,6 +23,7 @@ export function createSseResponse(
           message:
             error instanceof Error ? error.message : "Forecast stream failed.",
         });
+        send("done", { ok: false });
       } finally {
         controller.close();
       }

@@ -1,8 +1,5 @@
-import {
-  FORECAST_CELLS,
-  formatValue,
-  type ForecastCell,
-} from "@/data/forecast-cells";
+import { getPublishedForecasts } from "@/lib/forecast-publication";
+import { formatValue, type ForecastCell } from "@/data/forecast-cells";
 
 /**
  * The live join from a candidate metric to registered forecast cells —
@@ -72,7 +69,7 @@ export function resolveMetricCell(
 
 export function cellsForSeries(seriesHint: string): ForecastCell[] {
   if (!isConfidentHint(seriesHint)) return [];
-  return FORECAST_CELLS.filter(
+  return getPublishedForecasts().filter(
     (cell) =>
       cell.type !== "conditional" && cell.dataPointId?.startsWith(seriesHint),
   );

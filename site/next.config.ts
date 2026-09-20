@@ -1,10 +1,18 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const CANONICAL_HOST = "thesisinstitute.org";
 const APP_HOST = "app.thesisinstitute.org";
 const LEGACY_HOSTS = ["www.thesisinstitute.org"];
 
 const nextConfig: NextConfig = {
+  // Keep the site and its sibling build inputs inside Turbopack’s root.
+  // Next synchronizes turbopack.root to outputFileTracingRoot.
+  outputFileTracingRoot: path.resolve(__dirname, ".."),
+  // Archive verification runs while prerendering. Its filesystem reads must
+  // not package the complete public archive into each deployment function.
+  // Next resolves exclusion values relative to this site directory.
+  outputFileTracingExcludes: { "/*": ["../records/**"] },
   async redirects() {
     return [
       // /about retired in the ledger migration; its successor is /thesis.

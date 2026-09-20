@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildScoreId,
   classifyScoreChronology,
@@ -40,6 +40,24 @@ import {
   registeredTargetSeriesIdentity,
 } from "@/data/time-series-priors";
 import { WITNESSED_CUSTODY_ROOTS } from "@/data/witnessed-timeline";
+
+// These fixtures test chronology, resolution contracts, and proper-score math after execution verification.
+// The production verification boundary is exercised without mocks in
+// published-scoring-gate.test.ts and forecast-publication.test.ts.
+vi.mock("@/lib/forecast-publication", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/forecast-publication")>();
+  return {
+    ...actual,
+    verifyForecastRun: () => ({
+      eligible: true,
+      reason: "Downstream scoring fixture",
+    }),
+    filterPublishedForecasts: (
+      forecasts: import("@/data/forecast-cells").ForecastCell[],
+    ) => forecasts,
+  };
+});
 
 // The two scoring-integrity invariants: a score enters the headline only
 // when its run provably predates the observation, and its CRPS denominator
@@ -636,17 +654,11 @@ describe("chronology parser is host-timezone independent (X4 residual)", () => {
     // Same written day, no offset on the run time: sub-day order is
     // unknowable without trusting the build host's timezone.
     expect(
-      classifyScoreChronology(
-        "2026-07-01T02:00:00",
-        "2026-07-01T12:30:00Z",
-      ),
+      classifyScoreChronology("2026-07-01T02:00:00", "2026-07-01T12:30:00Z"),
     ).toBe("unverified");
     // Strictly earlier written day still verifies at the claimed tier.
     expect(
-      classifyScoreChronology(
-        "2026-06-30T23:00:00",
-        "2026-07-01T12:30:00Z",
-      ),
+      classifyScoreChronology("2026-06-30T23:00:00", "2026-07-01T12:30:00Z"),
     ).toBe("claimed_time_verified");
   });
 
@@ -1252,9 +1264,7 @@ describe("contract-bound resolution (fail closed past the quarantine)", () => {
       boundFact({ sourceBindingProjection: undefined }),
     ]);
     expect(evaluation.exclusion?.reason).toBe("contract_violation");
-    expect(evaluation.exclusion?.detail).toContain(
-      "source-binding projection",
-    );
+    expect(evaluation.exclusion?.detail).toContain("source-binding projection");
   });
 
   it("rejects a projection that contradicts the registered binding", () => {
@@ -1340,7 +1350,10 @@ describe("contract-bound resolution (fail closed past the quarantine)", () => {
 describe("Supabase projection compatibility (N10)", () => {
   it("emits only sources the migration CHECK admits, with matching null shape", async () => {
     const migration = readFileSync(
-      join(__dirname, "../../supabase/migrations/20260709_ledger_normalization_scale.sql"),
+      join(
+        __dirname,
+        "../../supabase/migrations/20260709_ledger_normalization_scale.sql",
+      ),
       "utf8",
     );
     expect(migration).toContain("'ledger_dispersion'");

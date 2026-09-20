@@ -1,4 +1,4 @@
-import { FORECAST_CELLS } from "@/data/forecast-cells";
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import {
   buildPredictionSpecs,
   buildRecordedPredictionRunRecords,
@@ -13,7 +13,7 @@ export const dynamic = "force-static";
 
 export async function GET() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
   const specs = buildPredictionSpecs(forecasts);
   const runs = buildRecordedPredictionRunRecords(forecasts, specs);
 

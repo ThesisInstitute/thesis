@@ -82,6 +82,27 @@ ANNOUNCEMENT_MCP_TOOL = "fetch_official_announcement"
 ANNOUNCEMENT_MCP_SCRIPT = SCRIPTS / "announcement_fetch_mcp.py"
 ANNOUNCEMENT_MCP_STARTUP_TIMEOUT_SECONDS = 10
 ANNOUNCEMENT_MCP_TOOL_TIMEOUT_SECONDS = 30
+TOOL_EVIDENCE_MCP_SERVER = "thesis_tool_evidence"
+TOOL_EVIDENCE_MCP_TOOLS = ("fetch_source", "extract_json", "calculate")
+TOOL_EVIDENCE_MCP_STARTUP_TIMEOUT_SECONDS = 10
+TOOL_EVIDENCE_MCP_TOOL_TIMEOUT_SECONDS = 45
+TOOL_EVIDENCE_NOTE = """
+# Captured tool evidence
+Use the thesis_tool_evidence MCP tools for source reads and calculations.
+fetch_source saves the complete public HTTPS response and returns its call ID,
+hash, and a bounded excerpt. extract_json selects a JSON Pointer from a prior
+fetch_source response. calculate evaluates bounded arithmetic, with named inputs
+that can refer to earlier extraction/calculation results by {"callId":"call-0001"}.
+Use these tools for the base rate and interval arithmetic, and cite the returned
+call IDs in your trace. Keep supplied assumptions and judgment adjustments
+explicit. An extraction or calculation replay verifies the operation on its
+inputs; it does not independently verify those assumptions or the source's truth.
+Tool calls outside this channel, including hosted web search and shell commands,
+do not preserve full response receipts here. Say when evidence was not captured.
+Never manufacture a tool receipt or describe model-authored text as captured
+output. Failed calls remain in the record. Only public, unauthenticated HTTPS
+sources are supported; do not send credentials or private URLs to these tools.
+"""
 
 
 def utc_now() -> str:
@@ -461,6 +482,24 @@ def build_prompt(series: str, period: str, conditional: str | None) -> tuple[str
 
 
 def build_run_prompt(
+    series: str,
+    period: str,
+    conditional: str | None,
+    mode: str,
+    target_context: dict[str, Any] | None = None,
+    ticket: dict[str, str] | None = None,
+    network_tools: bool = False,
+    tool_evidence: bool = False,
+) -> tuple[str, dict]:
+    prompt, meta = _build_run_prompt(
+        series, period, conditional, mode, target_context, ticket, network_tools
+    )
+    if tool_evidence:
+        prompt = f"{prompt}\n{TOOL_EVIDENCE_NOTE}"
+    return prompt, meta
+
+
+def _build_run_prompt(
     series: str,
     period: str,
     conditional: str | None,
@@ -1395,6 +1434,14 @@ def redact_text(text: str) -> str:
     """Redact credential values from plain text (idempotent)."""
     if not text:
         return text
+    from tool_evidence import REDACTED_URL, url_contains_credentials
+
+    text = re.sub(
+        r"https?://[^\s\"'<>\\]+",
+        lambda match: REDACTED_URL if url_contains_credentials(match[0]) else match[0],
+        text,
+        flags=re.IGNORECASE,
+    )
     text = ENV_SECRET_ASSIGNMENT_RE.sub(rf"\1={REDACTED_PLACEHOLDER}", text)
     text = JSON_SECRET_FIELD_RE.sub(rf'"\1": "{REDACTED_PLACEHOLDER}"', text)
     return SECRET_TOKEN_RE.sub(REDACTED_PLACEHOLDER, text)
@@ -1402,6 +1449,12 @@ def redact_text(text: str) -> str:
 
 def redact_json_value(value: Any) -> Any:
     if isinstance(value, str):
+        from tool_evidence import REDACTED_URL, url_contains_credentials
+
+        if re.match(r"https?://", value, re.IGNORECASE) and url_contains_credentials(
+            value
+        ):
+            return REDACTED_URL
         return redact_text(value)
     if isinstance(value, list):
         return [redact_json_value(item) for item in value]
@@ -1704,6 +1757,36 @@ def parse_codex_jsonl(stdout_text: str, stderr_text: str) -> dict[str, Any]:
     }
 
 
+def tool_evidence_mcp_config(
+    output_path: pathlib.PurePath,
+    *,
+    checkout_root: pathlib.PurePath = ROOT,
+    python_executable: str = sys.executable,
+    allow_fetch: bool = True,
+) -> list[str]:
+    """Configure only the trusted recorder; signing keys never enter this stage."""
+    server = f"mcp_servers.{TOOL_EVIDENCE_MCP_SERVER}"
+    names = list(TOOL_EVIDENCE_MCP_TOOLS)
+    args = [
+        str(checkout_root / "scripts/tool_evidence_mcp.py"),
+        "--output",
+        str(output_path),
+    ]
+    if not allow_fetch:
+        args.append("--no-fetch")
+        names.remove("fetch_source")
+    return [
+        f"{server}.command=" + json.dumps(python_executable),
+        f"{server}.args=" + json.dumps(args, separators=(",", ":")),
+        f"{server}.cwd=" + json.dumps(str(checkout_root)),
+        f"{server}.required=true",
+        f"{server}.enabled_tools=" + json.dumps(names, separators=(",", ":")),
+        f"{server}.startup_timeout_sec={TOOL_EVIDENCE_MCP_STARTUP_TIMEOUT_SECONDS}",
+        f"{server}.tool_timeout_sec={TOOL_EVIDENCE_MCP_TOOL_TIMEOUT_SECONDS}",
+        *[f'{server}.tools.{name}.approval_mode="approve"' for name in names],
+    ]
+
+
 def announcement_mcp_config(
     announcement_url: str,
     *,
@@ -1875,6 +1958,77 @@ def run_codex_agent_command(
     network: bool = False,
     announcement_url: str | None = None,
 ) -> dict[str, Any]:
+    """Record controlled tool traffic outside the agent's writable checkout."""
+    from tool_evidence import _strict_json, empty_evidence, verify_evidence
+
+    with tempfile.TemporaryDirectory(prefix="thesis-tool-evidence-") as spool:
+        output = pathlib.Path(spool) / "tool_evidence.json"
+        output.write_text(json.dumps(empty_evidence()) + "\n")
+        result = _run_codex_agent_command(
+            prompt=prompt,
+            timeout_seconds=timeout_seconds,
+            model=model,
+            out_dir=out_dir,
+            prefix=prefix,
+            search=search,
+            sandbox=sandbox,
+            reasoning_effort=reasoning_effort,
+            network=network,
+            announcement_url=announcement_url,
+            evidence_output=output,
+        )
+        try:
+            if (
+                output.is_symlink()
+                or not output.is_file()
+                or output.stat().st_size > 64 * 1024 * 1024
+            ):
+                raise ValueError("missing, unsafe, or oversized capture file")
+            raw = output.read_bytes()
+            payload = _strict_json(raw)
+            if not isinstance(payload, dict):
+                raise ValueError("capture must be a JSON object")
+            # The custody canonicalizer cannot represent non-finite values.
+            canonical_bytes(payload)
+        except (OSError, ValueError, TypeError, OverflowError, RecursionError):
+            payload = {
+                **empty_evidence(),
+                "captureError": "Capture file was missing, unsafe, or invalid JSON",
+            }
+            raw = (json.dumps(payload) + "\n").encode()
+        report = {**verify_evidence(payload), "evidenceSha256": sha256_bytes(raw)}
+        result["toolEvidence"] = {
+            "schemaVersion": "thesis_tool_evidence_v1",
+            "artifact": f"{prefix}tool_evidence.json",
+            "verificationArtifact": f"{prefix}tool_evidence_verification.json",
+        }
+        result["toolEvidenceRaw"] = raw
+        result["toolEvidenceVerification"] = report
+        if not report["valid"]:
+            result["returnCode"] = 1
+            result["stderr"] = (
+                str(result.get("stderr", "")) + "\nTool evidence verification failed."
+            )
+            if isinstance(result.get("codexTrace"), dict):
+                result["codexTrace"]["effectiveReturnCode"] = 1
+                result["codexTrace"]["lastError"] = "Tool evidence verification failed"
+        return result
+
+
+def _run_codex_agent_command(
+    *,
+    prompt: str,
+    timeout_seconds: int,
+    model: str,
+    out_dir: pathlib.Path,
+    prefix: str,
+    search: bool,
+    sandbox: str,
+    reasoning_effort: str | None,
+    network: bool = False,
+    announcement_url: str | None = None,
+    evidence_output: pathlib.Path,
+) -> dict[str, Any]:
     """Run a prompt through Codex CLI/ChatGPT auth and retain the full trace."""
     out_dir.mkdir(parents=True, exist_ok=True)
     last_message_file = out_dir / f"{prefix}codex_last_message.txt"
@@ -1899,6 +2053,10 @@ def run_codex_agent_command(
         cmd.extend(["-c", f'reasoning_effort="{reasoning_effort}"'])
     if network:
         cmd.extend(["-c", "sandbox_workspace_write.network_access=true"])
+    for config in tool_evidence_mcp_config(
+        evidence_output, allow_fetch=search or network
+    ):
+        cmd.extend(["-c", config])
     if announcement_url is not None:
         for config in announcement_mcp_config(announcement_url):
             cmd.extend(["-c", config])
@@ -2136,6 +2294,11 @@ def append_command_artifacts(
                         else {}
                     ),
                     **(
+                        {"toolEvidence": command_result["toolEvidence"]}
+                        if "toolEvidence" in command_result
+                        else {}
+                    ),
+                    **(
                         {"timeoutSeconds": command_result["timeoutSeconds"]}
                         if "timeoutSeconds" in command_result
                         else {}
@@ -2160,6 +2323,25 @@ def append_command_artifacts(
             created_at,
         )
     )
+    if "toolEvidence" in command_result:
+        refs.append(
+            write_artifact(
+                out_dir,
+                "tool_evidence",
+                f"{prefix}tool_evidence.json",
+                command_result["toolEvidenceRaw"],
+                created_at,
+            )
+        )
+        refs.append(
+            write_artifact(
+                out_dir,
+                "tool_evidence_verification",
+                f"{prefix}tool_evidence_verification.json",
+                json.dumps(command_result["toolEvidenceVerification"], indent=2) + "\n",
+                created_at,
+            )
+        )
     if command_result.get("codexStdoutRaw") is not None:
         refs.append(
             write_artifact(
@@ -3612,6 +3794,7 @@ def main() -> int:
         target_context,
         ticket=generation_ticket,
         network_tools=bool(args.codex_network),
+        tool_evidence=bool(args.codex_model),
     )
     if args.print_prompt:
         print(prompt)

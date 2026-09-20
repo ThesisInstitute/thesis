@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { sha256Hex } from "@/data/canonical-json";
 import {
   FORECAST_CELLS,
@@ -22,6 +22,24 @@ import {
   scoreResolvedForecastRun,
   type ObservationRecordedLedgerEntry,
 } from "@/data/thesis-log";
+
+// These fixtures test content addressing and score identities after execution verification.
+// The production verification boundary is exercised without mocks in
+// published-scoring-gate.test.ts and forecast-publication.test.ts.
+vi.mock("@/lib/forecast-publication", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/forecast-publication")>();
+  return {
+    ...actual,
+    verifyForecastRun: () => ({
+      eligible: true,
+      reason: "Downstream scoring fixture",
+    }),
+    filterPublishedForecasts: (
+      forecasts: import("@/data/forecast-cells").ForecastCell[],
+    ) => forecasts,
+  };
+});
 
 const FULL_DIGEST = /^[0-9a-f]{64}$/;
 

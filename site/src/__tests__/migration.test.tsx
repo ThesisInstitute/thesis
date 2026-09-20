@@ -26,15 +26,21 @@ import ForecastLedgerPage from "../app/forecasts/ledger/page";
 import { GET as getForecastLedgerJson } from "../app/forecasts/ledger.json/route";
 import ForecastLogPage from "../app/forecasts/log/page";
 import { GET as getForecastLogJson } from "../app/forecasts/log.json/route";
-import { GET as getThesisLogChunkJson } from "../app/log/[collection]/[chunk].json/route";
+import { GET as getThesisLogChunkJson } from "../app/log/[collection]/[chunk]/route";
 import ForecastsPage from "../app/forecasts/page";
-import { GET as getForecastTargetChunkJson } from "../app/forecasts/targets/[table]/[chunk].json/route";
-import { GET as getForecastTargetTableJson } from "../app/forecasts/targets/[table]/[chunk].json/route";
+import { GET as getForecastTargetChunkJson } from "../app/forecasts/targets/[table]/[chunk]/route";
+import { GET as getForecastTargetTableJson } from "../app/forecasts/targets/[table]/[chunk]/route";
 import { GET as getForecastTargetsJson } from "../app/forecasts/targets.json/route";
 import TargetArchitecturePage from "../app/forecasts/targets/page";
 import ThesisPage from "../app/thesis/page";
 import { ForecastRuntime } from "../components/ForecastRuntime";
-import { FORECAST_CELLS, getForecastCell } from "../data/forecast-cells";
+import { FORECAST_CELLS, getResolutionResult } from "../data/forecast-cells";
+import {
+  getPublishedForecasts,
+  verifyForecastRun,
+} from "../lib/forecast-publication";
+import { getForecastRunEntries } from "../data/forecast-display";
+import ForecastDetailPage from "../app/forecasts/[slug]/page";
 import { resolveMetricCell } from "../lib/metric-cells";
 import { buildTargetArchitectureProjection } from "../data/thesis-target-architecture";
 import {
@@ -46,7 +52,6 @@ import { buildTargetArchitectureBackfillSql } from "../data/thesis-target-archit
 import {
   loadPolicyEngineLedger,
   scoreResolvedForecast,
-  withResolvedOutcome,
   withResolvedOutcomes,
 } from "../data/thesis-log";
 
@@ -98,12 +103,15 @@ describe("Next.js migration", () => {
         // (which the pending state also shows).
         const card = screen.getByText(eiaMatch.title).closest("a");
         expect(card).not.toBeNull();
-        expect(within(card as HTMLElement).getByText("Current forecast"))
-          .toBeInTheDocument();
-        expect(within(card as HTMLElement).getByText(eiaMatch.pointLabel))
-          .toBeInTheDocument();
-        expect(within(card as HTMLElement).getByText(eiaMatch.ciLabel))
-          .toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText("Current forecast"),
+        ).toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText(eiaMatch.pointLabel),
+        ).toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText(eiaMatch.ciLabel),
+        ).toBeInTheDocument();
       } else {
         expect(
           screen.getByText(
@@ -195,17 +203,26 @@ describe("Next.js migration", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders public forecast examples without opening the app shell", () => {
+    it("renders verified forecast examples without withdrawn prototype values", () => {
       render(<HomePage />);
-      expect(
-        screen.getAllByText("SPM child poverty rate, 2025").length,
-      ).toBeGreaterThan(0);
-      expect(
-        screen.getAllByText("CTC outlays under current law, TY2026").length,
-      ).toBeGreaterThan(0);
-      expect(
-        screen.getAllByText("CPI-U annual average inflation, 2026").length,
-      ).toBeGreaterThan(0);
+      const examples = getPublishedForecasts()
+        .filter((cell) => cell.type === "data")
+        .slice(0, 3);
+      expect(examples).toHaveLength(3);
+      for (const forecast of examples) {
+        expect(screen.getAllByText(forecast.title).length).toBeGreaterThan(0);
+        expect(
+          verifyForecastRun(forecast, getForecastRunEntries(forecast)[0])
+            .eligible,
+        ).toBe(true);
+      }
+      for (const title of [
+        "SPM child poverty rate, 2025",
+        "CTC outlays under current law, TY2026",
+        "CPI-U annual average inflation, 2026",
+      ]) {
+        expect(screen.queryByText(title)).not.toBeInTheDocument();
+      }
       expect(screen.getAllByText(/resolves/i).length).toBeGreaterThan(0);
     });
 
@@ -315,34 +332,67 @@ describe("Next.js migration", () => {
 
   describe("Forecast runtime", () => {
     it("renders resolved prediction scores from the Thesis Log", async () => {
-      HTMLElement.prototype.scrollTo = vi.fn();
-      const forecast = getForecastCell("nonfarm-payrolls-may-2026");
-      expect(forecast).toBeTruthy();
       const ledger = await loadPolicyEngineLedger();
-      const resolvedForecast = withResolvedOutcome(forecast!, ledger);
-      const resolvedScore = scoreResolvedForecast(resolvedForecast, ledger);
+      const resolvedForecast = withResolvedOutcomes(
+        getPublishedForecasts(),
+        ledger,
+      ).find(
+        (forecast) =>
+          forecast.resolvedOutcome && scoreResolvedForecast(forecast, ledger),
+      );
+      expect(resolvedForecast).toBeDefined();
+      const resolvedScore = scoreResolvedForecast(resolvedForecast!, ledger);
+      expect(resolvedScore).toBeDefined();
 
       render(
         <ForecastRuntime
-          forecast={resolvedForecast}
+          forecast={resolvedForecast!}
           resolvedScore={resolvedScore}
         />,
       );
 
-      expect(screen.getByText("resolved outcome")).toBeInTheDocument();
-      expect(screen.getByText("inside 80% interval")).toBeInTheDocument();
-      expect(screen.getByText("recorded in Thesis Log")).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Open log →" })).toHaveAttribute(
+      expect(screen.getByText("Observed outcome")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          `${getResolutionResult(resolvedForecast!)} 80% interval`,
+        ),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Run record ↗" }),
+      ).toHaveAttribute(
         "href",
-        "/log",
+        expect.stringContaining("records/thesis-analyst/"),
       );
       expect(screen.getByText("cdf score")).toBeInTheDocument();
-      expect(screen.getByText(/CRPS/)).toBeInTheDocument();
-      expect(screen.getByText(/PIT/)).toBeInTheDocument();
+      expect(screen.getByText(/^CRPS .*PIT/)).toBeInTheDocument();
     }, 60_000);
   });
 
   describe("Forecast pages", () => {
+    it("renders withdrawn SPM as unavailable without estimates or a reasoning trace", async () => {
+      const { container } = render(
+        await ForecastDetailPage({
+          params: Promise.resolve({ slug: "spm-child-poverty-2025" }),
+        }),
+      );
+      expect(
+        screen.getByRole("heading", { name: "No forecast available" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "SPM child poverty rate, 2025" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("region", { name: "Forecast estimate" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("article", { name: "Forecast report content" }),
+      ).not.toBeInTheDocument();
+      expect(container.querySelector("pre")).toBeNull();
+      expect(container.textContent).not.toMatch(
+        /13\.[01]%|policyengine\.simulate|census\.lookup/,
+      );
+    });
+
     it("links from the forecast browser to the log and ledger", async () => {
       render(await ForecastsPage());
       expect(
@@ -351,6 +401,20 @@ describe("Next.js migration", () => {
       expect(
         screen.getByRole("link", { name: "View facts ledger →" }),
       ).toHaveAttribute("href", "/ledger");
+      const catalogPaths = new Set(
+        FORECAST_CELLS.map((cell) => `/${cell.slug}`),
+      );
+      const visibleForecastPaths = new Set(
+        screen
+          .getAllByRole("link")
+          .map((link) => link.getAttribute("href"))
+          .filter((href): href is string =>
+            Boolean(href && catalogPaths.has(href)),
+          ),
+      );
+      expect(visibleForecastPaths).toEqual(
+        new Set(getPublishedForecasts().map((cell) => `/${cell.slug}`)),
+      );
     }, 60_000);
 
     it("renders the Thesis Log tables", async () => {
@@ -378,15 +442,16 @@ describe("Next.js migration", () => {
       expect(screen.getAllByText("CRPS").length).toBeGreaterThan(0);
       expect(screen.getByText("PIT")).toBeInTheDocument();
       expect(screen.getAllByText("201 points").length).toBeGreaterThan(0);
-      const payrollLinks = screen.getAllByRole("link", {
-        name: "Nonfarm payrolls, May 2026",
+      expect(
+        screen.queryByRole("link", { name: "Nonfarm payrolls, May 2026" }),
+      ).not.toBeInTheDocument();
+      const available = getPublishedForecasts()[0];
+      const publishedLinks = screen.getAllByRole("link", {
+        name: available.title,
       });
-      // The May payrolls score is legacy (seeded run time), so it appears
-      // in resolutions but no longer in the chronology-verified scores table.
-      expect(payrollLinks.length).toBeGreaterThanOrEqual(1);
-      for (const link of payrollLinks) {
-        expect(link).toHaveAttribute("href", "/nonfarm-payrolls-may-2026");
-      }
+      expect(publishedLinks.length).toBeGreaterThan(0);
+      for (const link of publishedLinks)
+        expect(link).toHaveAttribute("href", `/${available.slug}`);
     }, 60_000);
 
     it("renders the facts-only ledger tables", async () => {
@@ -448,7 +513,12 @@ describe("Next.js migration", () => {
       const reference = body.collections.runs.chunks[0];
       const chunkResponse = await getThesisLogChunkJson(
         new Request(`http://test.local${reference.url}`),
-        { params: Promise.resolve({}) },
+        {
+          params: Promise.resolve({
+            collection: "runs",
+            chunk: `${reference.index}.json`,
+          }),
+        },
       );
       const chunk = await chunkResponse.json();
       expect(chunk.schemaVersion).toBe("thesis_log_chunk_v1");
@@ -521,7 +591,7 @@ describe("Next.js migration", () => {
           "http://test.local/forecasts/targets/targets/manifest.json",
         ),
         {
-          params: Promise.resolve({}),
+          params: Promise.resolve({ table: "targets", chunk: "manifest.json" }),
         },
       );
       const tableBody = await tableResponse.json();
@@ -544,7 +614,10 @@ describe("Next.js migration", () => {
           "http://test.local/forecasts/targets/forecastDistributions/manifest.json",
         ),
         {
-          params: Promise.resolve({}),
+          params: Promise.resolve({
+            table: "forecastDistributions",
+            chunk: "manifest.json",
+          }),
         },
       );
       const distributionTableBody = await distributionTableResponse.json();
@@ -566,7 +639,10 @@ describe("Next.js migration", () => {
           "http://test.local/forecasts/targets/forecastDistributions/0.json",
         ),
         {
-          params: Promise.resolve({}),
+          params: Promise.resolve({
+            table: "forecastDistributions",
+            chunk: "0.json",
+          }),
         },
       );
       const chunkBody = await chunkResponse.json();
@@ -589,7 +665,7 @@ describe("Next.js migration", () => {
     it("builds the clean target-architecture projection rows", async () => {
       const ledger = await loadPolicyEngineLedger();
       const projection = buildTargetArchitectureProjection(
-        withResolvedOutcomes(FORECAST_CELLS, ledger),
+        withResolvedOutcomes(getPublishedForecasts(), ledger),
         ledger,
       );
 
@@ -642,12 +718,18 @@ describe("Next.js migration", () => {
             candidate.provenance.forecastRunId,
         ),
       ).toBe(true);
+      const archivedArtifactIds = new Set(
+        projection.artifactRefs.map((artifact) => artifact.artifactRefId),
+      );
+      for (const candidate of projection.baselineCandidates) {
+        if (candidate.artifactRefId)
+          expect(archivedArtifactIds.has(candidate.artifactRefId)).toBe(true);
+      }
       expect(
-        projection.baselineCandidates.some(
-          (candidate: { artifactRefId?: string }) =>
-            candidate.artifactRefId?.startsWith("artifact.generated_baseline."),
+        projection.baselineCandidates.some((candidate) =>
+          candidate.artifactRefId?.startsWith("artifact.generated_baseline."),
         ),
-      ).toBe(true);
+      ).toBe(false);
       expect(projection.toolCalls[0].runId).toMatch(/^run\./);
       expect(projection.reviewRuns[0].reviewRunId).toMatch(/^review\./);
       expect(projection.judgeRuns[0].judgeRunId).toMatch(/^judge\./);
@@ -665,7 +747,10 @@ describe("Next.js migration", () => {
 
     it("generates a full SQL backfill for the target schema", async () => {
       const ledger = await loadPolicyEngineLedger();
-      const sampleForecasts = withResolvedOutcomes(FORECAST_CELLS, ledger)
+      const sampleForecasts = withResolvedOutcomes(
+        getPublishedForecasts(),
+        ledger,
+      )
         .filter((forecast) => forecast.dataPointId)
         .slice(0, 3);
       const backfill = buildTargetArchitectureBackfillSql({
