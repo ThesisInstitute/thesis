@@ -144,6 +144,26 @@
    "series": "bls.real_earnings.avg_hourly_mom",
    "cadence": "monthly",
    "slug": "us-real-avg-hourly-earnings-mom-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/realer.htm",
+   "releaseDates": {
+    "2026-10": "2026-11-10",
+    "2026-11": "2026-12-10"
+   },
+   "extras": {
+    "targetUnit": "percent",
+    "sourceBinding": {
+     "adapter": "bls-api",
+     "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0500000013",
+     "sourceSeriesId": "CES0500000013",
+     "field": "value",
+     "table": "Real average hourly earnings for all employees on private nonfarm payrolls, constant 1982-1984 dollars, seasonally adjusted (Real Earnings news release, Table A-1)",
+     "transform": {
+      "operation": "percent_change_previous_period",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
    "ledger": {
     "uuid": "2e3a7126-41fd-4d88-99b6-cf4f2057c277",
     "concept": "bls.real_earnings.avg_hourly_mom"

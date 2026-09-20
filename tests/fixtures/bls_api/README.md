@@ -1,6 +1,6 @@
 # BLS Public Data API captures
 
-Six unmodified responses from the keyless BLS Public Data API v2, fetched with
+Seven unmodified responses from the keyless BLS Public Data API v2, fetched with
 `curl` on 2026-09-20 (UTC) using the exact single-series GET the resolver
 issues (`BLS_API_URL` in `scripts/resolve_pending.py`). Every response returned
 HTTP 200 with `"status": "REQUEST_SUCCEEDED"`.
@@ -13,6 +13,7 @@ HTTP 200 with `"status": "REQUEST_SUCCEEDED"`.
 | `JTS000000000000000JOL-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL?startyear=2026&endyear=2026` | 2026-09-20T20:58:26Z | 830 | `5dea3ebccdaa2bafd965272a8843d04035df48ee69bafcab817a797e00a0e0b0` |
 | `JTS000000000000000QUR-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2026&endyear=2026` | 2026-09-20T20:58:28Z | 823 | `4aea5ae03362fe9f36160ac62574f1eccfbcdea65f777c9949f8157a022cdf71` |
 | `CES0000000001-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001?startyear=2026&endyear=2026` | 2026-09-20T20:58:30Z | 893 | `d0c8d0236ccc51b4bcc7e0dbb3dba73cb6fd834446d722301b43a399cbe0afd3` |
+| `CES0500000013-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/CES0500000013?startyear=2026&endyear=2026` | 2026-09-20T21:14:57Z | 886 | `b66521b06729e3c295ee6d60f8aac796a9dafa370ca36e4828980e8d2e9fdca7` |
 
 The headline CPI capture starts in 2025 on purpose. It contains BLS's real
 October 2025 gap row (`"value": "-"`, footnote code `X`), which the tests use

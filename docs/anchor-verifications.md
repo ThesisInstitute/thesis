@@ -847,7 +847,7 @@ release family would need its own HTML table parser.
 | `bls.jolts.job_openings` | `JTS000000000000000JOL` | latest month only | A | `latest_preliminary` |
 | `bls.jolts.quits_rate` | `JTS000000000000000QUR` | latest month only | A | `latest_preliminary` |
 | `bls.ces.nonfarm_payrolls.change` | `CES0000000001` | latest two months | A, derived difference | `latest_preliminary` |
-| `bls.real_earnings.avg_hourly_mom` | `CES0500000013` | latest two months | not admitted | see below |
+| `bls.real_earnings.avg_hourly_mom` | `CES0500000013` | latest two months | A, derived percent | `latest_preliminary` plus a 7-day capture bound |
 | `bls.productivity.nonfarm_qoq_prelim` | `PRS85006092` | none | not admitted | see below |
 
 ## Why the gate, not an anchor, carries first-print custody
@@ -929,6 +929,33 @@ and if the date is late by more than a release cycle the month is no longer
 the latest and the target is refused as a missed window. It never resolves to
 a revised value.
 
+## Real earnings: why the footnote gate needs a capture bound
+
+Real Earnings is published with the CPI, about a week after the Employment
+Situation that revises the earnings underneath it. Its one-month percent moves
+between releases while the latest row stays latest and flagged: June 2026
+printed +0.8 (release of 2026-07-14), +0.7 (2026-08-12) and +0.6 (2026-09-11).
+Whether the API revises the latest row on an Employment Situation day, before
+the next Real Earnings release, could not be observed on 2026-09-20, so the
+adapter does not assume it does not.
+
+`capture_within_days: 7` bounds the capture to 7 days from the registered
+release day (`bls_capture_bound_refusal`). On BLS's 2026 Real Earnings and
+Employment Situation schedule pages, the shortest interval from a Real Earnings
+release to the next Employment Situation is 21 days (2026-02-13 to 2026-03-06,
+and 2026-09-11 to 2026-10-02), so a 7-day bound cannot reach one. The bound is
+measured from a registered release day, so this spec resolves only a target
+that registers the `bls-api` binding. The cost is operational: a resolver
+outage longer than 7 days after a release loses that print, and the refusal
+says so rather than recording a possibly revised value.
+
+The arithmetic was tested separately from the gate. Across seven archived
+releases (2026-03-11 through 2026-09-11), all 28 published one-month percents
+in Tables A-1 and A-2 equal the percent computed from that same release's
+printed two-decimal dollar levels, rounded to one decimal. As with CPI, that
+is empirical: no BLS sentence was found stating which precision the published
+percent is computed from.
+
 ## How the CPI percent is derived, and the open gap
 
 The value is `round(100 * (index / prior month's index - 1), 1)` on the
@@ -984,6 +1011,9 @@ second time and returned identical bytes.
 | `bls.jolts.quits_rate` | 2026-04 | 1.9 | Table 4, JOLTS release of 2026-09-01 |
 | | 2026-05 | 2.0 | same table |
 | | 2026-06 | 2.0 | same table |
+| `bls.real_earnings.avg_hourly_mom` | 2026-04 | -0.5 | Table A-1 percent-change row, `Apr. 2026`, Real Earnings release of 2026-07-14 (third estimate) |
+| | 2026-05 | -0.2 | same row, `May 2026`, release of 2026-08-12 (third estimate; first print was -0.1) |
+| | 2026-06 | 0.6 | same row, `June 2026`, release of 2026-09-11 (third estimate; first print was +0.8) |
 | `bls.ces.nonfarm_payrolls.change` | 2026-04 | 148 | "April was revised down by 31,000, from +179,000 to +148,000", 2026-07-02 (third estimate) |
 | | 2026-05 | 63 | "May was revised down by 66,000, from +129,000 to +63,000", 2026-08-07 (third estimate) |
 | | 2026-06 | 31 | "June was revised up by 11,000, from +20,000 to +31,000", 2026-09-04 (third estimate) |
@@ -996,7 +1026,8 @@ The same captures also reproduce the month that was latest on 2026-09-20,
 which is a genuine first print, against its own release: unemployment 4.1
 ("unchanged at 4.1 percent"), payrolls +162 ("increased by 162,000 in
 August"), headline CPI 0.4, core CPI 0.3, openings 7.271 and quits rate 1.9
-(Tables 1 and 4, `July 2026(p)`).
+(Tables 1 and 4, `July 2026(p)`), and real earnings -0.1 ("decreased 0.1
+percent from July to August, seasonally adjusted").
 
 | Release page | Bytes | SHA-256 |
 |---|---:|---|
@@ -1010,6 +1041,9 @@ August"), headline CPI 0.4, core CPI 0.3, openings 7.271 and quits rate 1.9
 | [`jolts_06302026.htm`](https://www.bls.gov/news.release/archives/jolts_06302026.htm) | 752,023 | `79ad299ec645796dbc2a961a6d37a743aac80975476921aaff8bf73535b86483` |
 | [`jolts_08042026.htm`](https://www.bls.gov/news.release/archives/jolts_08042026.htm) | 752,278 | `e5e4aac65e338bad17ffc7ba80740575eb3cde770dfbc16a0dc929b922e5d0a8` |
 | [`jolts_09012026.htm`](https://www.bls.gov/news.release/archives/jolts_09012026.htm) (USDL-26-1432) | 752,399 | `78ce44264dc7e95fde56200f82233f2b053413c5ee1fa7b34221f9d99e7f2d74` |
+| [`realer_07142026.htm`](https://www.bls.gov/news.release/archives/realer_07142026.htm) | 76,628 | `a25f154e28412c2f3cb9dbe284842e3b4060b50190c61289ae7af222340003a2` |
+| [`realer_08122026.htm`](https://www.bls.gov/news.release/archives/realer_08122026.htm) | 76,495 | `69e110fdeb48b553d7cc3f9634cb26b650ccf052b4e97efb62ba90ffd4d39db9` |
+| [`realer_09112026.htm`](https://www.bls.gov/news.release/archives/realer_09112026.htm) | 76,640 | `aa11a8c8377c0035275c1722d16260ff2c754c9b5fbe15a45936c5aa81e15275` |
 
 Run-time anchor tolerance is separate from admission. The resolver re-verifies
 the anchors from every live response. It allows 0.1 on the one-decimal rates
@@ -1041,6 +1075,7 @@ pages, read 2026-09-20. No date is inferred from cadence.
 | Employment Situation | https://www.bls.gov/schedule/news_release/empsit.htm | 55,578 | `8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04 | payroll change (the unemployment rate is lineage-blocked) |
 | Consumer Price Index | https://www.bls.gov/schedule/news_release/cpi.htm | 55,572 | `36b83ba3723ac4e1d96431214b22f22bb4240718dab1ec2b6289fef9e7829580` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10 | nothing yet (both CPI series are lineage-blocked) |
 | JOLTS | https://www.bls.gov/schedule/news_release/jolts.htm | 55,620 | `b7f2ded2873b885c72548e4f269755f65a1df5409e34709ded85518e41d29bc9` | 2026-10 → 2026-12-01 | job openings, quits rate |
+| Real Earnings | https://www.bls.gov/schedule/news_release/realer.htm | 55,556 | `62319c0e9f286df49ae8434dbecbcfc652bcaaec4b790ad818cbb396c339d857` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10 | real earnings, October 2026 only (see the capture-bound subsection) |
 
 The schedule also lists September 2026 (and, for JOLTS, August 2026). Those
 periods are deliberately absent from the docket. Each already holds an
@@ -1073,25 +1108,17 @@ reviewed edit.
 
 ## Not admitted
 
-**`bls.real_earnings.avg_hourly_mom`.** The arithmetic holds: across seven
-archived Real Earnings releases (2026-03-11 through 2026-09-11), all 28
-published one-month percents in Tables A-1 and A-2 equal the percent computed
-from that release's own printed two-decimal dollar levels. The gate does not
-hold yet. Real Earnings is published about a week after the Employment
-Situation that revises the underlying earnings, and June 2026 printed +0.8,
-then +0.7, then +0.6 in three successive releases. Between the next Employment
-Situation and the next Real Earnings release the latest row might be revised
-while still latest and still flagged `P`. That could not be observed on
-2026-09-20. Admission needs either a date-bounded gate whose end is the next
-Employment Situation date from the official schedule, or Route B.
-
 **`bls.productivity.nonfarm_qoq_prelim`.** BLS schedules a preliminary and a
 revised release for every quarter (second quarter 2026: 2026-08-06 and
 2026-09-03, https://www.bls.gov/schedule/news_release/prod2.htm). The API row
 for the latest quarter carries no footnote, so the API alone cannot tell the
 preliminary print from the revised one. The monthly parser also skips `Q01` to
-`Q04` periods. Admission needs the same date-bounded gate, ending the day
-before the scheduled revised release, plus quarterly row parsing, or Route B.
+`Q04` periods. Admission needs a capture bound like the real earnings one,
+ending before the scheduled revised release, plus quarterly row parsing, or
+Route B. It would also mint nothing today: the third quarter of 2026 already
+holds an immutable `generic-url` registration, and BLS's schedule page lists no
+later quarter, so there is no official date to commit for any registrable
+period.
 
-Both series stay in `waivers.json` `templateless_docket_series` and keep
+The series stays in `waivers.json` `templateless_docket_series` and keeps
 minting nothing under the execution-plan gate.

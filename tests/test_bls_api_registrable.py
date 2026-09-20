@@ -68,6 +68,12 @@ CAPTURES = {
         "2026-08",
         162.0,
     ),
+    "bls.real_earnings.avg_hourly_mom": (
+        "CES0500000013-2026-2026.json",
+        "b66521b06729e3c295ee6d60f8aac796a9dafa370ca36e4828980e8d2e9fdca7",
+        "2026-08",
+        -0.1,
+    ),
 }
 REGISTRABLE = sorted(CAPTURES)
 # Chronicle holds two observed lineages for each of these concepts, and a
@@ -224,6 +230,73 @@ def test_legacy_specs_keep_the_served_level_anchor_check() -> None:
         3193.3,
         None,
     )
+
+
+# --- capture bound ----------------------------------------------------------
+
+
+def _bound(binding: dict, day: str) -> str | None:
+    spec = resolve_pending.BLS_API_ADAPTERS["bls.real_earnings.avg_hourly_mom"]
+    return resolve_pending.bls_capture_bound_refusal(
+        spec, binding, dt.date.fromisoformat(day)
+    )
+
+
+def test_real_earnings_is_captured_only_near_its_registered_release_day() -> None:
+    # Real Earnings moves between releases while its latest row stays latest
+    # and flagged, so the footnote gate alone cannot bound it.
+    binding = {
+        "adapter": "bls-api",
+        "expectedReleaseWindow": {"start": "2026-11-10", "end": "2026-11-10"},
+    }
+    assert _bound(binding, "2026-11-10") is None
+    assert _bound(binding, "2026-11-17") is None
+    assert "after the 7-day bound that ended 2026-11-17" in (
+        _bound(binding, "2026-11-18") or ""
+    )
+    # The next Employment Situation (2026-12-04) is far outside the bound.
+    assert _bound(binding, "2026-12-04") is not None
+
+
+def test_a_bounded_series_needs_a_registered_release_day() -> None:
+    for binding in (
+        {},
+        {"adapter": "generic-url", "expectedReleaseWindow": {"start": "2026-11-10"}},
+        {"adapter": "bls-api"},
+        {"adapter": "bls-api", "expectedReleaseWindow": {"start": ""}},
+    ):
+        assert "registers none" in (_bound(binding, "2026-11-10") or "")
+    garbled = {"adapter": "bls-api", "expectedReleaseWindow": {"start": "soon"}}
+    assert "is not a date" in (_bound(garbled, "2026-11-10") or "")
+
+
+def test_series_without_a_bound_are_never_refused_by_it() -> None:
+    for series in REGISTRABLE:
+        spec = resolve_pending.BLS_API_ADAPTERS[series]
+        if "capture_within_days" in spec:
+            continue
+        assert (
+            resolve_pending.bls_capture_bound_refusal(spec, {}, dt.date(2099, 1, 1))
+            is None
+        )
+    bounded = [
+        s
+        for s in resolve_pending.BLS_API_ADAPTERS.values()
+        if "capture_within_days" in s
+    ]
+    assert [s["series_id"] for s in bounded] == ["CES0500000013"]
+
+
+def test_real_earnings_first_print_and_its_later_revisions() -> None:
+    # BLS printed June 2026 as +0.8 (2026-07-14), +0.7 (2026-08-12) and +0.6
+    # (2026-09-11). The capture of 2026-09-20 serves the last of those.
+    spec = resolve_pending.BLS_API_ADAPTERS["bls.real_earnings.avg_hourly_mom"]
+    rows = _rows("bls.real_earnings.avg_hourly_mom")
+    assert resolve_pending.bls_transformed_value(rows, spec, "2026-06") == (0.6, None)
+    assert [p for p, s in sorted(rows.items()) if s["preliminary"]] == [
+        "2026-07",
+        "2026-08",
+    ]
 
 
 # --- registration ---------------------------------------------------------

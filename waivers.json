@@ -19,7 +19,6 @@
         "bls.cps.telework_share",
         "bls.cps.unemployment_rate",
         "bls.productivity.nonfarm_qoq_prelim",
-        "bls.real_earnings.avg_hourly_mom",
         "dol.eta.continued_claims.sa",
         "eurostat.unemployment_rate.belgium",
         "fns.wic.total_participation",
