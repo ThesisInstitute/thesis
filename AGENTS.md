@@ -84,11 +84,21 @@ runtime question; whether any code could ever read it is not.
   A family in neither refuses every new registration, and a test fails.
 - Existing snapshots are never re-judged: retries reuse them, and what happens
   to already-published targets with no executor is a disposition decision, not
-  a registration one. The run-time exceptions for two reviewed legacy contracts
-  (one ABS content hash, the legacy QCEW binding) do not admit new ones.
+  a registration one. The run-time exceptions for three reviewed legacy
+  contracts (one ABS content hash, the legacy QCEW binding, and the Table A-19
+  contracts registered as `generic-url` before `bls-cps-a19` existed) do not
+  admit new ones.
 - Nothing in `waivers.json` waives this, and it has no grandfather set. The
   way through is admission: adapter or family reuse, anchors verified from
   official prints per `docs/anchor-verifications.md`, docket template, tests.
+- A calendar-gated adapter registers the agency's published release day as an
+  exact one-day window. The one reviewed exception is a capture margin
+  (`register_targets.CALENDAR_CAPTURE_MARGIN_DAYS`): the window still starts on
+  the agency's date and ends a fixed number of days later. It is for an
+  executor that reads a third party's dated capture of a page the agency
+  overwrites, and it needs a written argument that a later capture still reads
+  the first print (`docs/anchor-verifications.md`, "Why the window is not one
+  day"). It is not a way to guess a date from cadence.
 
 ## Common Tasks
 

@@ -794,10 +794,13 @@ carries. The registration selects one of two reviewed unit contracts
 refuses.
 
 Registered contract: a registered cell executes only if its binding is exactly
-the reviewed one (adapter `generic-url`, this page, this table string, this
-row, this series, host `www.bls.gov`, `first_print`), as the other reviewed
-exceptions are pinned (the ABS content hash, QCEW, SBA, IRS). The release
-window is the one free field. `FAMILY_ADAPTERS["a19"]` is `{"generic-url"}`.
+the reviewed one (this page, this table string, this row, this series, host
+`www.bls.gov`, `first_print`), as the other reviewed exceptions are pinned (the
+ABS content hash, QCEW, SBA, IRS). Two adapter names carry that binding:
+`bls-cps-a19`, and the `generic-url` of the 18 contracts registered before it
+existed. At run time the release window is the one free field. Which name a
+NEW registration may use, and what window it must register, is the section
+"Registrable adapter `bls-cps-a19`" below.
 
 Which capture: a registered target resolves only from a capture dated inside
 its registered `expectedReleaseWindow`, and from the earliest such capture
@@ -816,9 +819,11 @@ instant, after that month was published and before the next month replaced
 it. It does not claim the bytes served at the moment of release. For a
 registered cell the fact's `observed_at` is the capture's date, not the
 forecast's `resolutionDate` (which for these contracts is the window's end).
-Nothing here asserts a BLS revision policy for this table; one comparison made
+This custody claim does not rest on a BLS revision policy; one comparison made
 in review (two captures 18 days apart, both printing September 2025, with
-identical tables) is an instance, not a policy.
+identical tables) is an instance, not a policy. What BLS itself says about
+revising these estimates, and how far that bears on the release window, is
+under "Why the window is not one day" below.
 
 The twelve overdue cells. The six August 2026 cells (windows 2026-09-02/03 to
 2026-09-10/11) are satisfied by the release-day capture, 2026-09-04 17:00 UTC,
@@ -841,3 +846,155 @@ to capture the page, once per run, and defers. The six September 2026 cells
 register three different windows (2026-09-30 to 10-08, 10-06 to 10-14, 10-07
 to 10-15) around a 2026-10-02 release, so four of them can only resolve from a
 capture taken four or more days after the release.
+
+## Registrable adapter `bls-cps-a19`
+
+Status: **ADMITTED for new registrations** (2026-09-20). The anchors, fixtures
+and executor are the ones above; this section is what a NEW target must
+register and why.
+
+A new registration binds adapter `bls-cps-a19` with the exact template the
+executor already pins: `https://www.bls.gov/web/empsit/cpseea19.htm`, the table
+string, the row label as `field`, the docket series as `sourceSeriesId`,
+`multiply 0.001` into `millions`, `first_print`, and `allowedHosts` of
+`www.bls.gov` alone. The six docket entries carry that template.
+`resolve_pending._plan_a19` is the family's admission predicate, so `a19` moved
+from `EXECUTION_PLAN_UNREGISTRABLE_FAMILIES` to `EXECUTION_PLAN_FAMILY_CHECKS`.
+
+The 18 contracts registered before the adapter existed (July, August and
+September 2026, six rows each) name `generic-url`. They stay executable at run
+time through a legacy exception in `resolve_pending.main`, the same pattern
+the legacy QCEW binding uses, and only after `a19_execution_spec` has
+authenticated every other field. `FAMILY_ADAPTERS["a19"]` is `{"bls-cps-a19"}`:
+`generic-url` is deliberately not a family adapter, the gate refuses it before
+any family is consulted, and none of the 18 could be registered again. This
+section decides nothing about them.
+
+### Release calendar
+
+The calendar authority is BLS's [Schedule of Releases for the Employment
+Situation](https://www.bls.gov/schedule/news_release/empsit.htm), read live in
+a browser on 2026-09-20 (it answers non-browser clients with HTTP 403, like the
+table). It lists, each at 08:30 AM:
+
+| Reference month | Release date | Docket `releaseDates` |
+|---|---|---|
+| September 2026 | Oct. 02, 2026 | not dated: the six September targets are already registered |
+| October 2026 | Nov. 06, 2026 | `"2026-10": "2026-11-06"` |
+| November 2026 | Dec. 04, 2026 | `"2026-11": "2026-12-04"` |
+
+The schedule ends at November 2026. The docket therefore dates two months, and
+the roller skips a month the schedule does not date rather than inferring one
+from cadence; December 2026 rolls when BLS publishes its 2027 schedule and the
+date is committed here. The [archived copy of
+2026-07-31](https://web.archive.org/web/20260731041428/https://www.bls.gov/schedule/news_release/empsit.htm)
+cited above is a second route for a reader whose client BLS refuses. The
+Archive answered every read from the verifying session with HTTP 429, so the
+October and November dates were checked on the live page only.
+
+`_plan_a19` reads the committed docket, as the QCEW predicate does: it admits
+a contract only if exactly one docket entry owns the series, cites this
+calendar URL, and dates the target month, and only if the registered window is
+that date plus the margin below. The six July 2026 cells registered a window
+inferred from cadence that closed the day before BLS published. This check is
+the one that would have refused them at registration.
+
+### Why the window is not one day
+
+Every other calendar-gated adapter registers an exact one-day window. This one
+registers BLS's release day through seven days later
+(`register_targets.CALENDAR_CAPTURE_MARGIN_DAYS`), for example 2026-11-06 to
+2026-11-13. The start is always BLS's published date; only the end moves, by a
+reviewed constant, and the bind step re-derives the window with the function
+registration used (`calendar_release_window`).
+
+The executor tests the CAPTURE's date against the window, so a capture dated
+inside it must exist. Four observations say one day is too fragile:
+
+1. The Archive rarely captures this page by itself. Its index, read on
+   2026-09-20 for 2025-01-01 to 2026-09-20, holds 27 captures with HTTP 200 and
+   one with HTTP 403. Of the three months verified above, only August has a
+   capture on its release day. June's first capture after the 2026-07-02
+   release is 2026-07-10, eight days later; July's first after 2026-08-07 is
+   2026-08-19, twelve days later. Neither would fall inside the seven-day
+   margin either. The capture the resolver itself requests is the working
+   path, and the margin exists to give that request more than one attempt.
+2. With one day there is one attempt. The resolver runs daily at 13:40 UTC
+   (`resolve-and-rebuild.yml`). 08:30 ET is 12:30 UTC on 2026-10-02, but 13:30
+   UTC on 2026-11-06 and 2026-12-04 after daylight time ends, so from November
+   to March the release-day run starts ten minutes after the release. A capture
+   that still serves the previous month is passed over by the header check, and
+   a one-day window has no second day on which to ask again.
+3. The request can fail. The index row for 2026-02-22 is a capture in which
+   bls.gov served the Archive HTTP 403. On 2026-09-20 the Archive answered
+   seven consecutive reads from the verifying session with HTTP 429.
+4. A run that finds no capture printing the month asks again on each day the
+   window is open, and a later run reads the result. One day allows one
+   request; the margin allows eight.
+
+`tests/test_a19_registrable_adapter.py` runs this case through `main()`: a
+release-day capture that still prints September, a capture three days later
+that prints October. The margin window resolves from the second; the same
+Archive under a one-day window ends in `FIRST-PRINT WINDOW MISSED`.
+
+A later capture still reads the first print because of how BLS publishes, not
+because of the window's width:
+
+- BLS replaces the page with each Employment Situation, and the resolver
+  refuses a capture whose current-month header is not the target month. A
+  capture that prints October as its current month was taken while October was
+  the latest published month.
+- BLS's [seasonal adjustment methodology
+  page](https://www.bls.gov/cps/seasonal-adjustment-methodology.htm) (footer
+  "Last Modified Date: January 14, 2026", read 2026-09-20) says "BLS policy is
+  to not revise previous months' official seasonally adjusted CPS estimates as
+  new data become available during the year," with revisions introduced at the
+  end of each year, and that "the original sample data normally are not
+  revised." That page uses "original" for data before seasonal adjustment,
+  which is what Table A-19, not seasonally adjusted, prints.
+- The routine event that does change levels is the annual population control
+  update. BLS's [note on the January 2026
+  update](https://www.bls.gov/cps/methods/population-controls/experimental-series-accounting-for-january-2026-population-control-effects.htm)
+  (footer "Last modified date: April 10, 2026", read 2026-09-20) says "Official
+  CPS estimates for December 2025 and earlier months have not been revised, in
+  accordance with usual practice."
+- The same note records an exception, and it is the reason "normally" above is
+  not "never": the 2026 update was delayed by the 2025 federal shutdown and
+  "was implemented with the publication of February estimates in March. All
+  CPS data for January were revised at that time." January 2026 levels were
+  revised after their first print. They were revised with the NEXT release,
+  when this page stopped printing January as its current month, so the header
+  check excludes the revised figures whatever the window's width.
+- Among captures inside the window the resolver takes the earliest that prints
+  the month.
+
+What this does not prove. No capture is the bytes served at 08:30. If BLS
+reissued a month's table between the release and the first capture, that
+capture would be read as the print; a one-day window has the same exposure for
+the hours between release and capture, and BLS's statements above are about
+practice, not a guarantee. The argument also needs the window to close before
+the next Employment Situation. Releases are not reliably four weeks apart (the
+same schedule put November 2025 on 2025-12-16 and December 2025 on 2026-01-09,
+24 days), so a test checks the margin against the committed dates rather than
+assuming a gap.
+
+Why seven days: it is the margin the twelve registered-query snapshot entries
+in the docket already commit (start plus seven days, for example 2026-10-15 to
+2026-10-22), it gives eight daily requests, and it is far inside the shortest
+gap above. A registration's window
+is immutable, so changing the constant affects new targets only; for that
+reason the run-time executor does not re-check a registered window's width.
+
+### Custody hosts
+
+A rolled target normally inherits every host its predecessor's run fetched.
+Five of the six September 2026 occupation cells cite a host other than
+`www.bls.gov`: `fred.stlouisfed.org` in three, `alfred.stlouisfed.org` in one,
+`web.archive.org` in two, and `api.bls.gov` or `data.bls.gov` in two.
+Inherited into `allowedHosts`, those hosts would fail the executor's pin on
+`www.bls.gov`, the gate would refuse those five October contracts, and the
+series would stop minting. `bls-cps-a19` therefore joins
+`bea-ita-itable` in `register_targets.CUSTODY_PINNED_HOST_ADAPTERS`: an
+analyst's research links do not widen the custody boundary, and FRED is never
+inside it. The Archive is the transport that kept BLS's bytes, not a source:
+the fact names BLS's page and keeps the capture as evidence.
