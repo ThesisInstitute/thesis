@@ -9,14 +9,15 @@ import { loadLatestSavedForecast } from "@/lib/saved-forecast";
 import {
   FORECAST_CELLS,
   TYPE_LABEL,
-  TYPE_DESCRIPTION,
   formatValue,
   getForecastCell,
+  getForecastRunEntries,
   type ForecastCell,
 } from "@/data/forecast-cells";
 import {
   loadPolicyEngineLedger,
   scoreResolvedForecast,
+  scoreResolvedForecastRun,
   withResolvedOutcome,
   withResolvedOutcomes,
 } from "@/data/thesis-log";
@@ -49,13 +50,6 @@ export async function generateMetadata({
   };
 }
 
-const typeBadgeClass: Record<ForecastCell["type"], string> = {
-  data: "bg-[var(--color-mist-100)] text-[var(--color-horizon-700)] border-[var(--color-mist-200)]",
-  policy:
-    "bg-[var(--color-accent-subtle)] text-[var(--color-rose-700)] border-[var(--color-rose-100)]",
-  conditional: "bg-[#FFF4DD] text-[#7A5C20] border-[#F2DCAF]",
-};
-
 export default async function ForecastDetailPage({
   params,
 }: {
@@ -69,53 +63,56 @@ export default async function ForecastDetailPage({
   const forecast = withResolvedOutcome(forecastDefinition, ledger);
   const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
   const resolvedScore = scoreResolvedForecast(forecast, ledger);
+  const runScores = Object.fromEntries(
+    getForecastRunEntries(forecast).flatMap((run) => {
+      const score = scoreResolvedForecastRun(forecast, run, ledger);
+      return score ? [[run.variantId, score]] : [];
+    }),
+  );
   const savedForecast = loadLatestSavedForecast(slug);
 
   return (
     <div>
       <Header activePage="forecasts" />
-      <main className="mx-auto max-w-[1100px] px-8 pb-32 pt-10 max-md:px-5">
-        <nav className="mb-6 [font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.12em] text-[var(--theme-text-muted)]">
+      <main className="mx-auto max-w-[960px] px-8 pb-24 pt-8 max-md:px-5">
+        <nav
+          aria-label="Forecast navigation"
+          className="mb-8 text-[0.85rem] text-[var(--theme-text-muted)]"
+        >
           <Link
             href="/"
             className="text-[var(--theme-text-muted)] hover:text-[var(--color-accent)] no-underline"
           >
-            ← all forecasts
+            ← All forecasts
           </Link>
           <Suspense fallback={null}>
             <BackToBill />
           </Suspense>
         </nav>
 
-        {/* Hero */}
-        <header className="mb-10">
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <span
-              className={`inline-block rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em] ${typeBadgeClass[forecast.type]}`}
-            >
-              {TYPE_LABEL[forecast.type]}
-            </span>
-            <span className="[font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-              {TYPE_DESCRIPTION[forecast.type]}
-            </span>
-          </div>
-          <h1 className="[font-family:var(--font-display)] text-[clamp(1.7rem,3.5vw,2.4rem)] font-light leading-[1.2] tracking-[-0.02em] text-[var(--theme-text)] mb-5">
+        <header className="mb-9">
+          <p className="mb-3 text-[0.85rem] text-[var(--theme-text-muted)]">
+            {TYPE_LABEL[forecast.type]}
+          </p>
+          <h1 className="mb-4 [font-family:var(--font-display)] text-[clamp(1.8rem,4vw,2.7rem)] font-light leading-[1.15] tracking-[-0.025em] text-[var(--theme-text)]">
             {forecast.title}
           </h1>
-          <p className="max-w-[820px] text-[1rem] leading-[1.65] text-[var(--theme-text-muted)]">
+          <p className="max-w-[760px] text-[1rem] leading-[1.65] text-[var(--theme-text-muted)]">
             {forecast.question}
           </p>
           {forecast.conditionalOn && (
-            <p className="mt-4 inline-block rounded-md border border-[#F2DCAF] bg-[#FFF4DD] px-3 py-2 [font-family:var(--font-mono)] text-[0.72rem] text-[#7A5C20]">
-              conditional on:{" "}
+            <p className="mt-4 border-l-2 border-[var(--color-accent)] pl-3 text-[0.9rem] leading-relaxed text-[var(--theme-text-muted)]">
+              Conditional on:{" "}
               <span className="font-medium">{forecast.conditionalOn}</span>
             </p>
           )}
         </header>
 
         <ForecastRuntime
+          key={forecast.slug}
           forecast={forecast}
           resolvedScore={resolvedScore}
+          runScores={runScores}
           savedForecast={savedForecast}
         />
 
@@ -148,32 +145,34 @@ function RelatedForecasts({
   if (related.length === 0) return null;
   return (
     <section
-      className="mt-20 border-t pt-10"
+      className="mt-16 border-t pt-8"
       style={{ borderColor: "var(--theme-border)" }}
     >
-      <h2 className="[font-family:var(--font-display)] text-[1.1rem] font-semibold tracking-[-0.01em] mb-5">
+      <h2 className="mb-5 [font-family:var(--font-display)] text-[1.3rem] font-semibold tracking-[-0.01em]">
         More {TYPE_LABEL[currentType].toLowerCase()} forecasts
       </h2>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <ul className="divide-y divide-[var(--theme-border)]">
         {related.map((forecast) => (
-          <Link
-            key={forecast.slug}
-            href={`/${forecast.slug}`}
-            className="rounded-xl border bg-[var(--theme-bg-elevated)] p-5 no-underline transition-colors hover:no-underline"
-            style={{ borderColor: "var(--theme-border)" }}
-          >
-            <div className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)] mb-2">
-              resolves {formatShortDate(forecast.resolutionDate)}
-            </div>
-            <div className="[font-family:var(--font-display)] text-[0.95rem] font-semibold leading-[1.3] text-[var(--theme-text)] mb-3">
-              {forecast.title}
-            </div>
-            <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[var(--color-accent)]">
-              {formatValue(forecast.pointEstimate, forecast.unit)}
-            </div>
-          </Link>
+          <li key={forecast.slug}>
+            <Link
+              href={`/${forecast.slug}`}
+              className="group flex items-baseline justify-between gap-6 py-4 no-underline hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
+            >
+              <div>
+                <div className="text-[0.95rem] leading-[1.45] text-[var(--theme-text)] group-hover:text-[var(--color-accent)]">
+                  {forecast.title}
+                </div>
+                <div className="mt-1 text-[0.8rem] text-[var(--theme-text-muted)]">
+                  Resolves {formatShortDate(forecast.resolutionDate)}
+                </div>
+              </div>
+              <div className="shrink-0 [font-family:var(--font-display)] text-[1.1rem] tabular-nums text-[var(--theme-text)]">
+                {formatValue(forecast.pointEstimate, forecast.unit)}
+              </div>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

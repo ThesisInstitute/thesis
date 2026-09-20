@@ -98,12 +98,15 @@ describe("Next.js migration", () => {
         // (which the pending state also shows).
         const card = screen.getByText(eiaMatch.title).closest("a");
         expect(card).not.toBeNull();
-        expect(within(card as HTMLElement).getByText("Current forecast"))
-          .toBeInTheDocument();
-        expect(within(card as HTMLElement).getByText(eiaMatch.pointLabel))
-          .toBeInTheDocument();
-        expect(within(card as HTMLElement).getByText(eiaMatch.ciLabel))
-          .toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText("Current forecast"),
+        ).toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText(eiaMatch.pointLabel),
+        ).toBeInTheDocument();
+        expect(
+          within(card as HTMLElement).getByText(eiaMatch.ciLabel),
+        ).toBeInTheDocument();
       } else {
         expect(
           screen.getByText(
@@ -329,13 +332,11 @@ describe("Next.js migration", () => {
         />,
       );
 
-      expect(screen.getByText("resolved outcome")).toBeInTheDocument();
+      expect(screen.getByText("Observed outcome")).toBeInTheDocument();
       expect(screen.getByText("inside 80% interval")).toBeInTheDocument();
-      expect(screen.getByText("recorded in Thesis Log")).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "Open log →" })).toHaveAttribute(
-        "href",
-        "/log",
-      );
+      expect(
+        screen.getByRole("link", { name: "Thesis Log ↗" }),
+      ).toHaveAttribute("href", "/log");
       expect(screen.getByText("cdf score")).toBeInTheDocument();
       expect(screen.getByText(/CRPS/)).toBeInTheDocument();
       expect(screen.getByText(/PIT/)).toBeInTheDocument();

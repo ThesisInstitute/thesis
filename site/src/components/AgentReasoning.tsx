@@ -16,8 +16,7 @@ export function AgentReasoning({
   return (
     <article
       aria-label="Forecast report content"
-      className="rounded-xl border bg-[var(--theme-bg-elevated)] px-5 py-5"
-      style={{ borderColor: "var(--theme-border)" }}
+      className="min-w-0 text-[var(--theme-text)]"
     >
       {provenance === "illustrative" && (
         <div

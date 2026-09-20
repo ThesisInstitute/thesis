@@ -11,297 +11,683 @@ import {
   type ForecastCell,
   type ForecastRunEntry,
   type PredictionPackReference,
-  type ReasoningStep,
 } from "@/data/forecast-cells";
 import type { ResolvedForecastScore } from "@/data/thesis-log";
 import type { SavedForecastRun } from "@/lib/saved-forecast";
+import { prepareReportContent } from "@/lib/report-content";
 
 interface ForecastRuntimeProps {
   forecast: ForecastCell;
   resolvedScore?: ResolvedForecastScore;
+  runScores?: Record<string, ResolvedForecastScore>;
   savedForecast?: SavedForecastRun | null;
+}
+
+interface ReportRun extends Omit<ForecastRunEntry, "predictionDistribution"> {
+  predictionDistribution?: ForecastRunEntry["predictionDistribution"];
+  archive?: SavedForecastRun;
+}
+
+function reportRuns(
+  forecast: ForecastCell,
+  saved?: SavedForecastRun | null,
+): ReportRun[] {
+  const catalog = getForecastRunEntries(forecast).map((run) => ({
+    ...run,
+    label:
+      run.label === "Headline"
+        ? run.predictionRun
+          ? "Original forecast"
+          : "Prototype estimate"
+        : run.label,
+  }));
+  if (!saved) return catalog;
+  return [
+    {
+      variantId: `archive:${saved.artifactPath}`,
+      label:
+        saved.forecast.source === "ai_gateway"
+          ? "API model forecast"
+          : saved.forecast.source === "deterministic_fallback"
+            ? "Deterministic estimate"
+            : saved.forecast.source?.includes("calibration")
+              ? "Calibration estimate"
+              : "API forecast",
+      isPrimary: false,
+      pointEstimate: saved.forecast.pointEstimate,
+      ciLow: saved.forecast.ciLow,
+      ciHigh: saved.forecast.ciHigh,
+      confidence: saved.forecast.confidence,
+      drivers: saved.forecast.drivers,
+      predictionDistribution: saved.forecast.distribution,
+      reasoning: saved.reasoning,
+      archive: saved,
+    },
+    ...catalog,
+  ];
+}
+
+function runTime(run: ReportRun) {
+  return run.archive?.forecast.generatedAt ?? run.predictionRun?.runAt;
+}
+
+function runMethod(run: ReportRun) {
+  if (run.archive) {
+    const { source, model } = run.archive.forecast;
+    if (source === "ai_gateway") return model ?? "AI model";
+    if (source === "deterministic_fallback") return "Deterministic estimate";
+    if (source?.includes("calibration")) return "Calibration estimate";
+    return "API forecast";
+  }
+  return run.predictionRun?.model ?? "Prototype estimate";
 }
 
 export function ForecastRuntime({
   forecast: forecastCell,
   resolvedScore,
+  runScores,
   savedForecast,
 }: ForecastRuntimeProps) {
-  // The estimate and explanation are one saved result. Viewing it never
-  // starts another calculation or replaces the estimate after hydration.
-  const displayedForecast = savedForecast?.forecast ?? forecastCell;
-  const drivers = savedForecast?.forecast.drivers ?? forecastCell.drivers;
-  const recordedRuns = getForecastRunEntries(forecastCell).map((run) =>
-    savedForecast && run.isPrimary
-      ? { ...run, label: "Catalog forecast" }
-      : run,
-  );
+  const runs = reportRuns(forecastCell, savedForecast);
+  const [selection, setSelection] = useState({
+    slug: forecastCell.slug,
+    id: runs[0].variantId,
+  });
+  const selected =
+    (selection.slug === forecastCell.slug &&
+      runs.find((run) => run.variantId === selection.id)) ||
+    runs[0];
+  const selectRun = (id: string) =>
+    setSelection({ slug: forecastCell.slug, id });
+  const report = prepareReportContent(selected.reasoning);
+  const selectedForecast: ForecastCell = {
+    ...forecastCell,
+    pointEstimate: selected.pointEstimate,
+    ciLow: selected.ciLow,
+    ciHigh: selected.ciHigh,
+    confidence: selected.confidence,
+    drivers: selected.drivers,
+    reasoning: selected.reasoning,
+    predictionRun: selected.predictionRun,
+    predictionDistribution: selected.predictionDistribution,
+    comparisonRuns: undefined,
+  };
+  // Recorder API snapshots are not registered catalog runs and cannot inherit
+  // their scores. Every other selection gets only its own score.
+  const score = selected.archive
+    ? undefined
+    : (runScores?.[selected.variantId] ??
+      (selected.isPrimary ? resolvedScore : undefined));
+  const generatedAt = runTime(selected);
+  const isPrototype = !selected.archive && !selected.predictionRun;
+  const sourceHref = selected.archive
+    ? `https://github.com/ThesisInstitute/thesis/blob/main/${selected.archive.artifactPath}`
+    : "/log";
+  const catalogRuns = getForecastRunEntries(forecastCell);
+  const pointProjection = isPointProjection(selected, forecastCell.unit);
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_1fr]">
-      <section className="min-w-0">
-        <div
-          className="rounded-xl border bg-[var(--theme-bg-elevated)] p-6"
-          style={{ borderColor: "var(--theme-border)" }}
-        >
-          <div role="region" aria-label="Forecast estimate">
-            <div className="mb-4 flex items-baseline justify-between gap-4">
-              <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-                {savedForecast
-                  ? "forecast"
-                  : forecastCell.predictionRun
-                    ? "current forecast"
-                    : "static prototype forecast"}{" "}
-                · 80% CI
-              </span>
-              <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-accent)]">
-                {formatValue(
-                  displayedForecast.pointEstimate,
-                  forecastCell.unit,
-                )}
-              </span>
-            </div>
-            <ForecastViz
-              point={displayedForecast.pointEstimate}
-              ciLow={displayedForecast.ciLow}
-              ciHigh={displayedForecast.ciHigh}
-              unit={forecastCell.unit}
-              history={forecastCell.historicalContext}
-              size="full"
-            />
-            {forecastCell.historicalContext.length > 0 && (
-              <div
-                className="mt-6 border-t pt-5"
-                style={{ borderColor: "var(--theme-border)" }}
-              >
-                <div className="mb-3 flex items-baseline justify-between gap-4">
-                  <h2 className="[font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-                    Trend
-                  </h2>
-                  <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                    history + forecast
-                  </span>
-                </div>
-                <ForecastTrend
-                  point={displayedForecast.pointEstimate}
-                  ciLow={displayedForecast.ciLow}
-                  ciHigh={displayedForecast.ciHigh}
-                  unit={forecastCell.unit}
-                  history={forecastCell.historicalContext}
-                  targetLabel={targetPeriodLabel(forecastCell)}
-                  actual={
-                    forecastCell.resolvedOutcome
-                      ? {
-                          label: "actual",
-                          value: forecastCell.resolvedOutcome.value,
-                        }
-                      : undefined
-                  }
-                />
-              </div>
-            )}
-            <p className="mt-4 [font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              {savedForecast
-                ? savedForecastSource(savedForecast)
-                : forecastCell.predictionRun
-                  ? `${forecastCell.predictionRun.agent} · ${forecastCell.predictionRun.runAt}`
-                  : "static prototype estimate · seeded forecast value"}
+    <div className="space-y-12">
+      <section
+        aria-label="Forecast estimate"
+        className="border-y border-[var(--theme-border)] py-7"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div>
+            <p className="mb-2 text-sm text-[var(--theme-text-muted)]">
+              {isPrototype ? "Prototype estimate" : "Forecast"}
             </p>
-          </div>
-          {forecastCell.resolvedOutcome && (
-            <ResolvedOutcomePanel
-              forecast={forecastCell}
-              score={resolvedScore}
-              catalogForecast={Boolean(savedForecast)}
-            />
-          )}
-          {savedForecast ? (
-            <SavedForecastRecordPanel savedForecast={savedForecast} />
-          ) : (
-            <ThesisLogRecordPanel forecast={forecastCell} />
-          )}
-          <RunComparisonPanel runs={recordedRuns} unit={forecastCell.unit} />
-        </div>
-
-        <div
-          className="mt-6 rounded-xl border bg-[var(--theme-bg-elevated)] p-6"
-          style={{ borderColor: "var(--theme-border)" }}
-        >
-          <h2 className="mb-3 [font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-            Key drivers
-          </h2>
-          <ul className="grid grid-cols-1 gap-2 [font-family:var(--font-body)] text-[0.88rem] text-[var(--theme-text)] sm:grid-cols-2">
-            {drivers.map((driver) => (
-              <li key={driver} className="flex items-start gap-2 leading-[1.5]">
-                <span className="mt-[6px] inline-block h-1 w-2 shrink-0 bg-[var(--color-accent)]" />
-                <span>{driver}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div
-          className="mt-6 rounded-xl border bg-[var(--theme-bg-elevated)] p-6"
-          style={{ borderColor: "var(--theme-border)" }}
-        >
-          <h2 className="mb-4 [font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-            Resolution
-          </h2>
-          <dl className="grid grid-cols-1 gap-x-5 gap-y-3 [font-family:var(--font-body)] text-[0.86rem] sm:grid-cols-[120px_minmax(0,1fr)]">
-            <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              source
-            </dt>
-            <dd className="min-w-0 break-words text-[var(--theme-text)]">
-              {forecastCell.resolutionSourceUrl ? (
-                <a
-                  className="text-[var(--theme-text)] no-underline hover:text-[var(--color-accent)] hover:no-underline"
-                  href={forecastCell.resolutionSourceUrl}
-                >
-                  {forecastCell.resolutionSource}
-                </a>
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3">
+              <span className="[font-family:var(--font-display)] text-[clamp(2.75rem,7vw,4.5rem)] leading-none tracking-[-0.035em] text-[var(--color-accent)]">
+                {formatValue(selected.pointEstimate, forecastCell.unit)}
+              </span>
+              {pointProjection ? (
+                <p className="text-sm text-[var(--theme-text-muted)]">
+                  Point projection
+                </p>
               ) : (
-                forecastCell.resolutionSource
+                <div className="text-[var(--theme-text)]">
+                  <div className="text-lg tabular-nums">
+                    {formatValue(selected.ciLow, forecastCell.unit)}–
+                    {formatValue(selected.ciHigh, forecastCell.unit)}
+                  </div>
+                  <div className="mt-1 text-sm text-[var(--theme-text-muted)]">
+                    80% prediction interval
+                  </div>
+                </div>
               )}
-            </dd>
-            <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              {forecastCell.resolvedOutcome ? "resolved" : "expected"}
-            </dt>
-            <dd className="min-w-0 break-words text-[var(--theme-text)]">
-              {formatFullDate(
-                forecastCell.resolvedOutcome?.resolvedAt ??
-                  forecastCell.resolutionDate,
-              )}
-            </dd>
-            {forecastCell.resolvedOutcome && (
-              <>
-                <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  actual
-                </dt>
-                <dd className="min-w-0 break-words text-[var(--theme-text)]">
-                  {formatValue(
-                    forecastCell.resolvedOutcome.value,
-                    forecastCell.unit,
-                  )}
-                </dd>
-              </>
-            )}
-            <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              rule
-            </dt>
-            <dd className="min-w-0 break-words leading-[1.55] text-[var(--theme-text)]">
-              {forecastCell.resolutionRule}
-            </dd>
-            {forecastCell.dataPointId && (
-              <>
-                <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  Data point
-                </dt>
-                <dd className="min-w-0 break-all [font-family:var(--font-mono)] text-[0.78rem] leading-[1.55] text-[var(--color-horizon-700)]">
-                  {forecastCell.dataPointId}
-                </dd>
-              </>
-            )}
-            {forecastCell.policyParameter && (
-              <>
-                <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  Policy parameter
-                </dt>
-                <dd className="min-w-0 break-all [font-family:var(--font-mono)] text-[0.78rem] leading-[1.55] text-[var(--color-rose-700)]">
-                  {forecastCell.policyParameter}
-                </dd>
-              </>
-            )}
-          </dl>
+            </div>
+          </div>
+          {runs.length > 1 && (
+            <label className="flex max-w-full flex-col gap-2 text-sm text-[var(--theme-text-muted)]">
+              Forecast version
+              <select
+                aria-label="Forecast version"
+                className="max-w-full rounded-md border border-[var(--theme-border-strong)] bg-[var(--theme-bg)] px-3 py-2 text-sm text-[var(--theme-text)] sm:max-w-[300px]"
+                value={selected.variantId}
+                onChange={(event) => selectRun(event.target.value)}
+              >
+                {runs.map((run) => (
+                  <option key={run.variantId} value={run.variantId}>
+                    {run.label}
+                    {runTime(run)
+                      ? ` · ${formatShortFullDate(runTime(run)!)}`
+                      : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
-        {forecastCell.series && <SeriesMetadataPanel forecast={forecastCell} />}
+        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[var(--theme-text-muted)]">
+          <span>{runMethod(selected)}</span>
+          {generatedAt && (
+            <time dateTime={generatedAt}>
+              {formatRecordedTime(generatedAt)}
+            </time>
+          )}
+          <a
+            className="text-[var(--color-accent)] hover:underline"
+            href={sourceHref}
+          >
+            {selected.archive ? "Source record" : "Thesis Log"} ↗
+          </a>
+        </div>
+        {report.modelUnavailable && (
+          <p
+            role="note"
+            className="mt-5 border-l-2 border-[#B17B39] pl-3 text-sm leading-relaxed text-[var(--theme-text)]"
+          >
+            {selected.archive?.forecast.source?.endsWith("fallback")
+              ? "The model was unavailable. This estimate uses a fixed formula."
+              : "The model request failed during this run. See run details for the original diagnostic."}
+          </p>
+        )}
+        {isPrototype && (
+          <p className="mt-4 text-sm text-[var(--theme-text-muted)]">
+            This is an illustrative prototype, not a completed model run.
+          </p>
+        )}
+        {(!pointProjection || forecastCell.historicalContext.length > 0) && (
+          <div className="mt-8" aria-label="Forecast chart">
+            {forecastCell.historicalContext.length > 0 ? (
+              <ForecastTrend
+                point={selected.pointEstimate}
+                ciLow={selected.ciLow}
+                ciHigh={selected.ciHigh}
+                unit={forecastCell.unit}
+                history={forecastCell.historicalContext}
+                targetLabel={targetPeriodLabel(forecastCell)}
+                showInterval={!pointProjection}
+                actual={
+                  forecastCell.resolvedOutcome
+                    ? {
+                        label: "actual",
+                        value: forecastCell.resolvedOutcome.value,
+                      }
+                    : undefined
+                }
+              />
+            ) : (
+              <ForecastViz
+                point={selected.pointEstimate}
+                ciLow={selected.ciLow}
+                ciHigh={selected.ciHigh}
+                unit={forecastCell.unit}
+              />
+            )}
+          </div>
+        )}
+        {!pointProjection && (
+          <details className="mt-5 border-t border-[var(--theme-border)] pt-4">
+            <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
+              Probability distribution
+            </summary>
+            <div className="mt-5">
+              <ForecastViz
+                point={selected.pointEstimate}
+                ciLow={selected.ciLow}
+                ciHigh={selected.ciHigh}
+                unit={forecastCell.unit}
+                distribution={selected.predictionDistribution}
+              />
+            </div>
+          </details>
+        )}
+        {forecastCell.resolvedOutcome && (
+          <ResolvedOutcomePanel
+            forecast={selectedForecast}
+            score={score}
+            unscoredArchive={Boolean(selected.archive)}
+          />
+        )}
       </section>
 
-      <section className="min-w-0">
-        <h2 className="mb-3 [font-family:var(--font-display)] text-[1rem] font-semibold tracking-[-0.01em]">
+      <section aria-labelledby="analysis-heading" className="max-w-[75ch]">
+        <h2
+          id="analysis-heading"
+          className="mb-5 [font-family:var(--font-display)] text-2xl font-semibold"
+        >
           Analysis
         </h2>
-        {!savedForecast && <TraceStatusBanner forecast={forecastCell} />}
         <AgentReasoning
-          key={savedForecast?.artifactPath ?? forecastCell.slug}
-          steps={savedForecast?.reasoning ?? forecastCell.reasoning}
+          steps={report.steps.filter((step) => step.kind !== "forecast")}
           unit={forecastCell.unit}
           provenance={
-            savedForecast
+            selected.archive
               ? "activity_backed"
-              : classifyTraceProvenance(forecastCell)
+              : classifyTraceProvenance(selected)
           }
         />
-        <p className="mt-3 text-[0.76rem] leading-[1.55] text-[var(--theme-text-dim)]">
-          {savedForecast
-            ? "The source record includes the explanation, assumptions, and caveats. The original streamed tool activity was not archived."
-            : forecastCell.predictionRun
-              ? "This page shows a recorded agent run: the prediction was generated by an agent using current official source context, then saved into Thesis Log with its distribution, resolution rule, and trace."
-              : "The route, resolution rule, and catalog entry are live. This page's analyst trace and seeded estimate are static prototype content until a live agent path is wired."}
-        </p>
+        {selected.drivers.length > 0 && (
+          <div className="mt-8">
+            <h3 className="mb-3 [font-family:var(--font-display)] text-lg font-semibold">
+              Key drivers
+            </h3>
+            <ul className="list-disc space-y-2 pl-5 text-[0.94rem] leading-relaxed text-[var(--theme-text)]">
+              {selected.drivers.map((driver) => (
+                <li key={driver}>{driver}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {selected.archive && (
+          <p className="mt-6 text-sm leading-relaxed text-[var(--theme-text-muted)]">
+            The source record includes this explanation and its caveats.
+            Original streamed tool activity was not archived.
+          </p>
+        )}
       </section>
+
+      <section
+        aria-labelledby="evidence-heading"
+        className="border-t border-[var(--theme-border)] pt-7"
+      >
+        <h2
+          id="evidence-heading"
+          className="mb-5 [font-family:var(--font-display)] text-2xl font-semibold"
+        >
+          Sources and resolution
+        </h2>
+        <dl className="grid gap-x-6 gap-y-3 text-[0.94rem] leading-relaxed sm:grid-cols-[150px_minmax(0,1fr)]">
+          <dt className="text-[var(--theme-text-muted)]">Official source</dt>
+          <dd>
+            {forecastCell.resolutionSourceUrl ? (
+              <a
+                className="text-[var(--color-accent)] hover:underline"
+                href={forecastCell.resolutionSourceUrl}
+              >
+                {forecastCell.resolutionSource}
+              </a>
+            ) : (
+              forecastCell.resolutionSource
+            )}
+          </dd>
+          <dt className="text-[var(--theme-text-muted)]">
+            {forecastCell.resolvedOutcome ? "Resolved" : "Resolution date"}
+          </dt>
+          <dd>
+            {formatFullDate(
+              forecastCell.resolvedOutcome?.resolvedAt ??
+                forecastCell.resolutionDate,
+            )}
+            {!forecastCell.resolvedOutcome && (
+              <span className="ml-2 text-sm text-[var(--theme-text-muted)]">
+                · outcome not recorded
+              </span>
+            )}
+          </dd>
+          <dt className="text-[var(--theme-text-muted)]">Resolution rule</dt>
+          <dd>{forecastCell.resolutionRule}</dd>
+        </dl>
+      </section>
+
+      <RunHistory
+        runs={runs}
+        selectedId={selected.variantId}
+        onSelect={selectRun}
+        unit={forecastCell.unit}
+        runScores={runScores}
+        primaryScore={resolvedScore}
+      />
+
+      <RunDetails
+        key={selected.variantId}
+        run={selected}
+        diagnostics={report.diagnostics}
+        unit={forecastCell.unit}
+      />
+      {catalogRuns.some((run) => run.packSet?.packs.length) && (
+        <PackDetails runs={catalogRuns} />
+      )}
+      {(forecastCell.series ||
+        forecastCell.dataPointId ||
+        forecastCell.policyParameter) && (
+        <details className="border-t border-[var(--theme-border)] pt-5">
+          <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
+            Target metadata
+          </summary>
+          <div className="mt-4 space-y-3 text-sm text-[var(--theme-text-muted)]">
+            {forecastCell.dataPointId && (
+              <p>
+                Data point:{" "}
+                <code className="break-all">{forecastCell.dataPointId}</code>
+              </p>
+            )}
+            {forecastCell.policyParameter && (
+              <p>
+                Policy parameter:{" "}
+                <code className="break-all">
+                  {forecastCell.policyParameter}
+                </code>
+              </p>
+            )}
+            {forecastCell.series && (
+              <SeriesMetadataPanel forecast={selectedForecast} />
+            )}
+          </div>
+        </details>
+      )}
     </div>
+  );
+}
+
+function isPointProjection(
+  run: Pick<ReportRun, "ciLow" | "ciHigh">,
+  unit: ForecastCell["unit"],
+) {
+  return formatValue(run.ciLow, unit) === formatValue(run.ciHigh, unit);
+}
+
+function RunHistory({
+  runs,
+  selectedId,
+  onSelect,
+  unit,
+  runScores,
+  primaryScore,
+}: {
+  runs: ReportRun[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  unit: ForecastCell["unit"];
+  runScores?: Record<string, ResolvedForecastScore>;
+  primaryScore?: ResolvedForecastScore;
+}) {
+  if (runs.length <= 1) return null;
+  const ordered = [...runs].sort(
+    (a, b) =>
+      (Date.parse(runTime(b) ?? "") || 0) - (Date.parse(runTime(a) ?? "") || 0),
+  );
+  const hasScores = ordered.some(
+    (run) =>
+      !run.archive &&
+      (runScores?.[run.variantId] || (run.isPrimary && primaryScore)),
+  );
+  return (
+    <section
+      aria-labelledby="history-heading"
+      className="border-t border-[var(--theme-border)] pt-7"
+    >
+      <h2
+        id="history-heading"
+        className="mb-2 [font-family:var(--font-display)] text-2xl font-semibold"
+      >
+        Forecast history
+      </h2>
+      <p className="mb-5 text-sm text-[var(--theme-text-muted)]">
+        Select a version to read its estimate and analysis.
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-left text-sm">
+          <caption className="sr-only">
+            Forecast versions, estimates, and intervals
+          </caption>
+          <thead className="border-b border-[var(--theme-border-strong)] text-[var(--theme-text-muted)]">
+            <tr>
+              <th scope="col" className="py-3 pr-4 font-normal">
+                Version
+              </th>
+              <th scope="col" className="px-3 py-3 font-normal">
+                Date
+              </th>
+              <th scope="col" className="px-3 py-3 font-normal">
+                Estimate
+              </th>
+              <th scope="col" className="py-3 pl-3 font-normal">
+                80% interval
+              </th>
+              {hasScores && (
+                <th scope="col" className="py-3 pl-3 font-normal">
+                  CRPS
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {ordered.map((run) => {
+              const selected = run.variantId === selectedId;
+              const score = run.archive
+                ? undefined
+                : (runScores?.[run.variantId] ??
+                  (run.isPrimary ? primaryScore : undefined));
+              return (
+                <tr
+                  key={run.variantId}
+                  data-forecast-run={run.variantId}
+                  className={`border-b border-[var(--theme-border)] ${selected ? "bg-[var(--theme-bg-surface)]" : ""}`}
+                >
+                  <th scope="row" className="py-4 pr-4 font-normal">
+                    <button
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => onSelect(run.variantId)}
+                      className="text-left font-medium text-[var(--color-accent)] hover:underline"
+                    >
+                      {run.label}
+                    </button>
+                    <span className="mt-1 block text-xs text-[var(--theme-text-muted)]">
+                      {runMethod(run)}
+                      {selected ? " · selected" : ""}
+                    </span>
+                  </th>
+                  <td className="whitespace-nowrap px-3 py-4 text-[var(--theme-text-muted)]">
+                    {runTime(run)
+                      ? formatShortFullDate(runTime(run)!)
+                      : "Undated"}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 font-medium tabular-nums">
+                    {formatValue(run.pointEstimate, unit)}
+                  </td>
+                  <td className="whitespace-nowrap py-4 pl-3 tabular-nums text-[var(--theme-text-muted)]">
+                    {isPointProjection(run, unit)
+                      ? "Point projection"
+                      : `${formatValue(run.ciLow, unit)}–${formatValue(run.ciHigh, unit)}`}
+                  </td>
+                  {hasScores && (
+                    <td className="py-4 pl-3 tabular-nums">
+                      {score ? formatCompactNumber(score.crps) : "—"}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function RunDetails({
+  run,
+  diagnostics,
+  unit,
+}: {
+  run: ReportRun;
+  diagnostics: string[];
+  unit: ForecastCell["unit"];
+}) {
+  const metadata = run.predictionRun;
+  return (
+    <details
+      id="run-details"
+      className="border-t border-[var(--theme-border)] pt-5"
+    >
+      <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
+        Run details{diagnostics.length ? " and diagnostics" : ""}
+      </summary>
+      <div className="mt-5 space-y-5 text-sm leading-relaxed">
+        {run.description && <p>{run.description}</p>}
+        {metadata && (
+          <p>
+            {metadata.agent} · {metadata.model}
+            {metadata.promptMode ? ` · ${metadata.promptMode}` : ""}
+            {metadata.agentVersion ? ` · v${metadata.agentVersion}` : ""}
+          </p>
+        )}
+        {run.externalSubmission && (
+          <p>
+            External submission by {run.externalSubmission.challenger};
+            self-declared {run.externalSubmission.systemType}. A reasoning trace
+            is not required.
+          </p>
+        )}
+        {run.archive && <p>This API result is not a scored catalog run.</p>}
+        {run.packSet && (
+          <p>
+            Pack set: {run.packSet.label} · {run.packSet.mode}
+          </p>
+        )}
+        {diagnostics.length > 0 && (
+          <div>
+            <h3 className="mb-3 font-medium">Original diagnostics</h3>
+            {diagnostics.map((text, index) => (
+              <pre
+                key={index}
+                className="my-3 whitespace-pre-wrap break-words rounded-md bg-[var(--theme-bg-surface)] p-4 text-xs"
+              >
+                <code>{text}</code>
+              </pre>
+            ))}
+          </div>
+        )}
+        {metadata?.preSubmitReview && (
+          <PreSubmitReviewTrace review={metadata.preSubmitReview} />
+        )}
+        {Boolean(metadata?.activityLog?.length) && (
+          <div>
+            <h3 className="mb-3 font-medium">Activity artifacts</h3>
+            <ul className="space-y-2">
+              {metadata!.activityLog!.map((artifact) => (
+                <li key={artifact.path}>
+                  <a
+                    className="break-all text-[var(--color-accent)] hover:underline"
+                    href={`https://github.com/ThesisInstitute/thesis/blob/main/${artifact.path}`}
+                  >
+                    {artifact.artifactType}: {artifact.path}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <details>
+          <summary className="cursor-pointer text-[var(--theme-text-muted)]">
+            {run.archive ? "Original explanation" : "Complete original trace"}
+          </summary>
+          <div className="mt-5">
+            <AgentReasoning
+              steps={run.reasoning}
+              unit={unit}
+              provenance={
+                run.archive ? "activity_backed" : classifyTraceProvenance(run)
+              }
+            />
+          </div>
+        </details>
+      </div>
+    </details>
+  );
+}
+
+function PackDetails({ runs }: { runs: ForecastRunEntry[] }) {
+  const packs = buildUniquePacks(runs);
+  const [selection, setSelection] = useState(packs[0]?.key ?? "");
+  if (!packs.length) return null;
+  return (
+    <details className="border-t border-[var(--theme-border)] pt-5">
+      <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
+        Forecasting packs
+      </summary>
+      <div className="mt-5">
+        <PackVisualizer
+          packs={packs}
+          selectedPackKey={selection}
+          onSelectPack={setSelection}
+        />
+      </div>
+    </details>
   );
 }
 
 function ResolvedOutcomePanel({
   forecast,
   score,
-  catalogForecast = false,
+  unscoredArchive = false,
 }: {
   forecast: ForecastCell;
   score?: ResolvedForecastScore;
-  catalogForecast?: boolean;
+  unscoredArchive?: boolean;
 }) {
   const outcome = forecast.resolvedOutcome;
   if (!outcome) return null;
   const result = getResolutionResult(forecast);
+  const pointProjection = isPointProjection(forecast, forecast.unit);
   const resultLabel =
     result === "inside" ? "inside 80% interval" : "outside 80% interval";
 
   return (
     <div
-      className="mt-5 rounded-lg border bg-[var(--theme-bg-surface)] p-4"
+      className="mt-7 border-t pt-5"
       style={{ borderColor: "var(--theme-border)" }}
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-          {catalogForecast ? "Catalog forecast outcome" : "resolved outcome"}
+        <span className="[font-family:var(--font-display)] text-lg font-semibold">
+          Observed outcome
         </span>
-        <span
-          className={`rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em] ${
-            result === "inside"
-              ? "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)]"
-              : "border-[#F2DCAF] bg-[#FFF4DD] text-[#7A5C20]"
-          }`}
-        >
-          {resultLabel}
-        </span>
+        {!pointProjection && (
+          <span
+            className={`rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em] ${
+              result === "inside"
+                ? "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)]"
+                : "border-[#F2DCAF] bg-[#FFF4DD] text-[#7A5C20]"
+            }`}
+          >
+            {resultLabel}
+          </span>
+        )}
       </div>
       <dl className="grid grid-cols-1 gap-x-5 gap-y-2 [font-family:var(--font-body)] text-[0.84rem] sm:grid-cols-[120px_minmax(0,1fr)]">
-        <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          actual
-        </dt>
+        <dt className="text-sm text-[var(--theme-text-muted)]">actual</dt>
         <dd className="text-[var(--theme-text)]">
           {formatValue(outcome.value, forecast.unit)}
         </dd>
-        <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          forecast
-        </dt>
+        <dt className="text-sm text-[var(--theme-text-muted)]">forecast</dt>
         <dd className="text-[var(--theme-text)]">
-          {formatValue(forecast.pointEstimate, forecast.unit)} with 80% CI [
-          {formatValue(forecast.ciLow, forecast.unit)},{" "}
-          {formatValue(forecast.ciHigh, forecast.unit)}]
+          {formatValue(forecast.pointEstimate, forecast.unit)}
+          {pointProjection
+            ? " · point projection"
+            : ` with 80% interval [${formatValue(forecast.ciLow, forecast.unit)}, ${formatValue(forecast.ciHigh, forecast.unit)}]`}
         </dd>
         {score && (
           <>
-            <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              error
-            </dt>
+            <dt className="text-sm text-[var(--theme-text-muted)]">error</dt>
             <dd className="text-[var(--theme-text)]">
               {formatSignedValue(score.signedError, forecast.unit)} · absolute{" "}
               {formatValue(score.absoluteError, forecast.unit)}
             </dd>
-            <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
+            <dt className="text-sm text-[var(--theme-text-muted)]">
               cdf score
             </dt>
             <dd className="text-[var(--theme-text)]">
@@ -310,9 +696,7 @@ function ResolvedOutcomePanel({
             </dd>
           </>
         )}
-        <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          source
-        </dt>
+        <dt className="text-sm text-[var(--theme-text-muted)]">source</dt>
         <dd className="min-w-0 break-words text-[var(--theme-text)]">
           {outcome.sourceUrl ? (
             <a
@@ -326,52 +710,16 @@ function ResolvedOutcomePanel({
           )}
         </dd>
       </dl>
+      {unscoredArchive && (
+        <p className="mt-3 text-sm text-[var(--theme-text-muted)]">
+          This API result is not a scored catalog run.
+        </p>
+      )}
       {outcome.note && (
         <p className="mt-3 text-[0.78rem] leading-[1.55] text-[var(--theme-text-muted)]">
           {outcome.note}
         </p>
       )}
-    </div>
-  );
-}
-
-function savedForecastSource({ forecast }: SavedForecastRun): string {
-  switch (forecast.source) {
-    case "ai_gateway":
-      return `generated by ${forecast.model ?? "AI Gateway"}`;
-    case "deterministic_fallback":
-      return "BLS inputs · deterministic fallback";
-    case "calibration_fallback":
-      return "PolicyEngine inputs · calibration fallback";
-    case "census_calibration_fallback":
-      return "Census + PolicyEngine inputs · calibration fallback";
-    default:
-      return "API forecast";
-  }
-}
-
-function SavedForecastRecordPanel({
-  savedForecast,
-}: {
-  savedForecast: SavedForecastRun;
-}) {
-  return (
-    <div
-      className="mt-5 flex flex-wrap items-baseline justify-between gap-3 border-t pt-4"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <p className="text-[0.76rem] text-[var(--theme-text-muted)]">
-        Generated{" "}
-        <time dateTime={savedForecast.forecast.generatedAt}>
-          {formatRecordedTime(savedForecast.forecast.generatedAt)}
-        </time>
-      </p>
-      <a
-        className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--color-accent)] no-underline hover:no-underline"
-        href={`https://github.com/ThesisInstitute/thesis/blob/main/${savedForecast.artifactPath}`}
-      >
-        Source record →
-      </a>
     </div>
   );
 }
@@ -386,313 +734,6 @@ function formatRecordedTime(iso: string): string {
     timeZone: "UTC",
     timeZoneName: "short",
   });
-}
-
-function ThesisLogRecordPanel({ forecast }: { forecast: ForecastCell }) {
-  const distribution = forecast.predictionDistribution;
-  const run = forecast.predictionRun;
-  const runs = getForecastRunEntries(forecast);
-  if (!distribution && !run && !forecast.dataPointId) return null;
-
-  return (
-    <div
-      className="mt-5 rounded-lg border bg-[var(--theme-bg-surface)] p-4"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-          recorded in Thesis Log
-        </span>
-        <a
-          className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--color-accent)] no-underline hover:no-underline"
-          href="/log"
-        >
-          Open log →
-        </a>
-      </div>
-      <dl className="grid grid-cols-1 gap-x-5 gap-y-2 [font-family:var(--font-body)] text-[0.82rem] sm:grid-cols-[120px_minmax(0,1fr)]">
-        <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          record
-        </dt>
-        <dd className="text-[var(--theme-text)]">
-          {run?.runAt ? formatFullDate(run.runAt) : "prototype seed"}
-        </dd>
-        <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          agent
-        </dt>
-        <dd className="text-[var(--theme-text)]">
-          {run?.agent ?? "prototype seed"}
-        </dd>
-        <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          distribution
-        </dt>
-        <dd className="text-[var(--theme-text)]">
-          {runs.length > 1
-            ? `${runs.length} runs · ${distribution?.pointCount ?? 201} CDF points each`
-            : distribution
-              ? `${distribution.pointCount} CDF points`
-              : "not recorded"}
-        </dd>
-        {run?.model && (
-          <>
-            <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              model
-            </dt>
-            <dd className="text-[var(--theme-text)]">{run.model}</dd>
-          </>
-        )}
-        {forecast.dataPointId && (
-          <>
-            <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              ledger fact
-            </dt>
-            <dd className="min-w-0 break-all [font-family:var(--font-mono)] text-[0.76rem] text-[var(--color-horizon-700)]">
-              <a
-                className="text-[var(--color-horizon-700)] no-underline hover:text-[var(--color-accent)] hover:no-underline"
-                href="/ledger"
-              >
-                {forecast.dataPointId}
-              </a>
-            </dd>
-          </>
-        )}
-      </dl>
-    </div>
-  );
-}
-
-function RunComparisonPanel({
-  runs,
-  unit,
-}: {
-  runs: ForecastRunEntry[];
-  unit: ForecastCell["unit"];
-}) {
-  const displayRuns = [...runs].sort(compareRunsByRecordedTime);
-  const packs = buildUniquePacks(displayRuns);
-  const [selectedPackKey, setSelectedPackKey] = useState<string | null>(null);
-
-  if (runs.length <= 1) return null;
-  const baseline =
-    displayRuns.find((run) => run.packSet?.mode === "none") ?? displayRuns[0];
-  const domain = buildRunDomain(displayRuns);
-  const agentOrdinals = buildAgentOrdinals(displayRuns);
-  const agentCount = new Set(displayRuns.map(getRunAgentLabel)).size;
-  const modelCount = new Set(displayRuns.map(getRunModelLabel)).size;
-  const packSetCount = new Set(
-    displayRuns.map((run) => run.packSet?.packSetId ?? "unreported"),
-  ).size;
-  const reviewedCount = displayRuns.filter(
-    (run) => run.predictionRun?.preSubmitReview?.status === "completed",
-  ).length;
-  const activePackKey =
-    packs.find((pack) => pack.key === selectedPackKey)?.key ??
-    packs[0]?.key ??
-    null;
-
-  return (
-    <div
-      className="mt-5 border-t pt-5"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="[font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-          Forecast runs
-        </h2>
-        <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          same target · agents, packs, updates
-        </span>
-      </div>
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <RunStat label="runs" value={displayRuns.length} />
-        <RunStat label="agents" value={agentCount} />
-        <RunStat label="models" value={modelCount} />
-        <RunStat label="pack sets" value={packSetCount} />
-        <RunStat label="reviewed" value={reviewedCount} />
-      </div>
-      {packs.length > 0 && activePackKey && (
-        <PackVisualizer
-          onSelectPack={setSelectedPackKey}
-          packs={packs}
-          selectedPackKey={activePackKey}
-        />
-      )}
-      <div className="space-y-3">
-        {displayRuns.map((run) => (
-          <ForecastRunLane
-            agentOrdinal={agentOrdinals.get(run.variantId)}
-            baseline={baseline}
-            domain={domain}
-            key={run.variantId}
-            onSelectPack={setSelectedPackKey}
-            run={run}
-            selectedPackKey={activePackKey}
-            unit={unit}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function RunStat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="border-y border-[var(--theme-border)] py-3">
-      <div className="[font-family:var(--font-display)] text-[1.55rem] font-semibold leading-none text-[var(--theme-text)]">
-        {value}
-      </div>
-      <div className="mt-1 [font-family:var(--font-mono)] text-[0.56rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function ForecastRunLane({
-  agentOrdinal,
-  baseline,
-  domain,
-  onSelectPack,
-  run,
-  selectedPackKey,
-  unit,
-}: {
-  agentOrdinal?: { count: number; index: number };
-  baseline: ForecastRunEntry;
-  domain: { lower: number; upper: number };
-  onSelectPack: (packKey: string) => void;
-  run: ForecastRunEntry;
-  selectedPackKey: string | null;
-  unit: ForecastCell["unit"];
-}) {
-  const intervalLeft = runScalePosition(run.ciLow, domain);
-  const intervalRight = runScalePosition(run.ciHigh, domain);
-  const point = runScalePosition(run.pointEstimate, domain);
-  const delta = run.pointEstimate - baseline.pointEstimate;
-  const agentLabel = getRunAgentLabel(run);
-  const modelLabel = getRunModelLabel(run);
-  const ciLowLabel = formatValue(run.ciLow, unit).replace(/^\+/, "");
-  const ciHighLabel = formatValue(run.ciHigh, unit).replace(/^\+/, "");
-  // A point projection (e.g. a published BLS point estimate) carries a
-  // negligible display interval, so its bounds round to the same value.
-  // Render it as a point rather than a nonsensical "80% X to X" band.
-  const isPointProjection = ciLowLabel === ciHighLabel;
-  const pointLabel = formatValue(run.pointEstimate, unit).replace(/^\+/, "");
-
-  return (
-    <div
-      className="border-y border-[var(--theme-border)] py-4"
-      data-forecast-run={run.variantId}
-    >
-      <div className="grid grid-cols-[minmax(0,0.58fr)_minmax(0,1fr)_minmax(5.5rem,auto)] gap-4 max-md:grid-cols-1">
-        <div className="min-w-0">
-          <div className="font-medium leading-[1.35] text-[var(--theme-text)]">
-            {run.label}
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-2 [font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.08em] text-[var(--theme-text-dim)]">
-            <span>{agentLabel}</span>
-            <span>{modelLabel}</span>
-            <span>{formatRunRecordedAt(run)}</span>
-            {run.externalSubmission && (
-              <span
-                className="rounded-full border border-[#A94E80] px-2 py-[1px] text-[#A94E80]"
-                title={`Open-challenge submission by ${run.externalSubmission.challenger} (self-declared ${run.externalSubmission.systemType}). Shows the submission record; a reasoning trace is not required.`}
-              >
-                external · {run.externalSubmission.systemType}
-              </span>
-            )}
-            {agentOrdinal && agentOrdinal.count > 1 && (
-              <span className="rounded-full border border-[var(--theme-border)] px-2 py-[1px]">
-                update {agentOrdinal.index}/{agentOrdinal.count}
-              </span>
-            )}
-            {run.predictionRun?.preSubmitReview && (
-              <span className="rounded-full border border-[var(--theme-border)] px-2 py-[1px]">
-                review{" "}
-                {run.predictionRun.preSubmitReview.status.replace(/_/g, " ")}
-              </span>
-            )}
-          </div>
-          {run.description && (
-            <p className="mt-2 text-[0.74rem] leading-[1.45] text-[var(--theme-text-muted)]">
-              {run.description}
-            </p>
-          )}
-          <div className="mt-3">
-            <PackSetSummary
-              onSelectPack={onSelectPack}
-              run={run}
-              selectedPackKey={selectedPackKey}
-            />
-          </div>
-        </div>
-
-        <div className="min-w-0">
-          <div className="relative h-10">
-            <div className="absolute left-0 right-0 top-[18px] h-[2px] bg-[var(--theme-border)]" />
-            {!isPointProjection && (
-              <div
-                className="absolute top-[14px] h-[10px] rounded-full bg-[var(--color-horizon-300)]"
-                style={{
-                  left: `${intervalLeft}%`,
-                  width: `${Math.max(intervalRight - intervalLeft, 1)}%`,
-                }}
-              />
-            )}
-            <div
-              className="absolute top-[9px] h-5 w-5 -translate-x-1/2 rounded-full border-2 border-white bg-[var(--color-accent)] shadow-sm"
-              style={{ left: `${point}%` }}
-            />
-          </div>
-          <div className="mt-1 flex items-center justify-between [font-family:var(--font-mono)] text-[0.58rem] text-[var(--theme-text-dim)]">
-            <span>{formatValue(domain.lower, unit)}</span>
-            <span>
-              {isPointProjection
-                ? `point ${pointLabel}`
-                : `80% ${ciLowLabel} to ${ciHighLabel}`}
-            </span>
-            <span>{formatValue(domain.upper, unit)}</span>
-          </div>
-          <RunTraceDetails run={run} unit={unit} />
-        </div>
-
-        <div className="text-right max-md:text-left">
-          <div className="[font-family:var(--font-display)] text-[1.75rem] font-semibold leading-none text-[var(--color-accent)]">
-            {formatValue(run.pointEstimate, unit)}
-          </div>
-          <div className="mt-2 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.08em] text-[var(--theme-text-dim)]">
-            {run === baseline ? "baseline" : formatSignedValue(delta, unit)}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RunTraceDetails({
-  run,
-  unit,
-}: {
-  run: ForecastRunEntry;
-  unit: ForecastCell["unit"];
-}) {
-  return (
-    <details className="mt-3 border-t border-[var(--theme-border)] pt-3">
-      <summary className="[font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-        {run.externalSubmission
-          ? "submission record (no reasoning trace required)"
-          : "public trace"}
-      </summary>
-      <div className="mt-3 space-y-2">
-        {run.predictionRun?.preSubmitReview && (
-          <PreSubmitReviewTrace review={run.predictionRun.preSubmitReview} />
-        )}
-        {run.reasoning.map((step, index) => (
-          <RunTraceStep key={index} step={step} unit={unit} />
-        ))}
-      </div>
-    </details>
-  );
 }
 
 function PreSubmitReviewTrace({
@@ -715,7 +756,7 @@ function PreSubmitReviewTrace({
       </p>
       {review.findings.length > 0 && (
         <ul className="mt-2 space-y-1">
-          {review.findings.slice(0, 3).map((finding) => (
+          {review.findings.map((finding) => (
             <li
               className="text-[0.72rem] leading-[1.45] text-[var(--theme-text-muted)]"
               key={finding.findingId}
@@ -730,7 +771,7 @@ function PreSubmitReviewTrace({
       )}
       {review.dispositions.length > 0 && (
         <div className="mt-2 space-y-1">
-          {review.dispositions.slice(0, 3).map((disposition) => (
+          {review.dispositions.map((disposition) => (
             <p
               className="text-[0.72rem] leading-[1.45] text-[var(--theme-text-muted)]"
               key={disposition.findingId}
@@ -747,133 +788,8 @@ function PreSubmitReviewTrace({
   );
 }
 
-function RunTraceStep({
-  step,
-  unit,
-}: {
-  step: ReasoningStep;
-  unit: ForecastCell["unit"];
-}) {
-  if (step.kind === "heading") {
-    return (
-      <div className="[font-family:var(--font-display)] text-[0.82rem] font-semibold text-[var(--theme-text)]">
-        {step.text}
-      </div>
-    );
-  }
-  if (step.kind === "text") {
-    return (
-      <p className="text-[0.75rem] leading-[1.55] text-[var(--theme-text-muted)]">
-        {step.text}
-      </p>
-    );
-  }
-  if (step.kind === "math") {
-    return (
-      <p className="break-words [font-family:var(--font-mono)] text-[0.68rem] leading-[1.55] text-[var(--theme-text)]">
-        {step.text}
-      </p>
-    );
-  }
-  if (step.kind === "tool") {
-    return (
-      <div className="break-words [font-family:var(--font-mono)] text-[0.66rem] leading-[1.55] text-[var(--theme-text-dim)]">
-        <div>
-          <span className="text-[var(--color-accent)]">
-            {step.tool ?? "policyengine.simulate"}
-          </span>{" "}
-          {step.call}
-        </div>
-        {step.result && (
-          <div className="mt-1 border-l border-[var(--theme-border)] pl-3 text-[var(--theme-text)]">
-            <span className="text-[var(--theme-text-dim)]">result </span>
-            {step.result}
-          </div>
-        )}
-      </div>
-    );
-  }
-  const stepLow = formatValue(step.ciLow, unit).replace(/^\+/, "");
-  const stepHigh = formatValue(step.ciHigh, unit).replace(/^\+/, "");
-  return (
-    <div className="[font-family:var(--font-mono)] text-[0.7rem] text-[var(--theme-text)]">
-      {stepLow === stepHigh
-        ? `forecast ${formatValue(step.point, unit)} · point`
-        : `forecast ${formatValue(step.point, unit)} · 80% [${stepLow}, ${stepHigh}]`}
-    </div>
-  );
-}
-
-function compareRunsByRecordedTime(
-  left: ForecastRunEntry,
-  right: ForecastRunEntry,
-) {
-  const leftTime = parseRunTime(left);
-  const rightTime = parseRunTime(right);
-  if (leftTime !== rightTime) return leftTime - rightTime;
-  return left.label.localeCompare(right.label);
-}
-
-function parseRunTime(run: ForecastRunEntry) {
-  const value = run.predictionRun?.runAt;
-  if (!value) return 0;
-  const parsed = Date.parse(value);
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
-
-function buildRunDomain(runs: ForecastRunEntry[]) {
-  const lower = Math.min(...runs.map((run) => run.ciLow));
-  const upper = Math.max(...runs.map((run) => run.ciHigh));
-  const spread = Math.max(upper - lower, 0.1);
-  return {
-    lower: lower - spread * 0.08,
-    upper: upper + spread * 0.08,
-  };
-}
-
-function runScalePosition(
-  value: number,
-  domain: { lower: number; upper: number },
-) {
-  const width = domain.upper - domain.lower;
-  if (width <= 0) return 50;
-  return Math.max(0, Math.min(100, ((value - domain.lower) / width) * 100));
-}
-
-function buildAgentOrdinals(runs: ForecastRunEntry[]) {
-  const totals = new Map<string, number>();
-  const seen = new Map<string, number>();
-  const ordinals = new Map<string, { count: number; index: number }>();
-
-  for (const run of runs) {
-    const agent = getRunAgentLabel(run);
-    totals.set(agent, (totals.get(agent) ?? 0) + 1);
-  }
-  for (const run of runs) {
-    const agent = getRunAgentLabel(run);
-    const next = (seen.get(agent) ?? 0) + 1;
-    seen.set(agent, next);
-    ordinals.set(run.variantId, {
-      count: totals.get(agent) ?? 1,
-      index: next,
-    });
-  }
-
-  return ordinals;
-}
-
 function getRunAgentLabel(run: ForecastRunEntry) {
   return run.predictionRun?.agent ?? "prototype seed";
-}
-
-function getRunModelLabel(run: ForecastRunEntry) {
-  return run.predictionRun?.model ?? "unreported model";
-}
-
-function formatRunRecordedAt(run: ForecastRunEntry) {
-  const value = run.predictionRun?.runAt;
-  if (!value) return "seed";
-  return formatShortFullDate(value);
 }
 
 interface PackVisualizerEntry {
@@ -1000,63 +916,6 @@ function PackVisualizer({
   );
 }
 
-function PackSetSummary({
-  onSelectPack,
-  run,
-  selectedPackKey,
-}: {
-  onSelectPack: (packKey: string) => void;
-  run: ForecastRunEntry;
-  selectedPackKey: string | null;
-}) {
-  const packSet = run.packSet;
-  if (!packSet) {
-    return (
-      <span className="[font-family:var(--font-mono)] text-[0.66rem] text-[var(--theme-text-dim)]">
-        unreported
-      </span>
-    );
-  }
-  if (packSet.packs.length === 0) {
-    return (
-      <span className="inline-flex rounded-full border border-[var(--theme-border)] px-2 py-[2px] [font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.08em] text-[var(--theme-text-dim)]">
-        {packSet.label}
-      </span>
-    );
-  }
-
-  return (
-    <div>
-      <div className="mb-2 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.08em] text-[var(--theme-text)]">
-        {packSet.label}
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {packSet.packs.map((pack) => {
-          const key = buildPackKey(pack);
-          const isSelected = key === selectedPackKey;
-          return (
-            <button
-              aria-pressed={isSelected}
-              className={`inline-flex rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.56rem] uppercase tracking-[0.06em] transition-colors ${
-                isSelected
-                  ? "border-[var(--color-accent)] bg-[var(--color-horizon-100)] text-[var(--theme-text)]"
-                  : "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)] hover:border-[var(--color-accent)]"
-              }`}
-              data-pack-key={key}
-              key={key}
-              onClick={() => onSelectPack(key)}
-              title={pack.summary}
-              type="button"
-            >
-              {pack.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function buildUniquePacks(runs: ForecastRunEntry[]): PackVisualizerEntry[] {
   const entries = new Map<
     string,
@@ -1108,38 +967,6 @@ function formatCompactNumber(value: number): string {
   if (Math.abs(value) >= 10) return value.toFixed(1);
   if (Math.abs(value) >= 1) return value.toFixed(2);
   return value.toPrecision(2);
-}
-
-function TraceStatusBanner({ forecast }: { forecast: ForecastCell }) {
-  const status = forecast.predictionRun
-    ? {
-        label: "Recorded agent run",
-        recorded: true,
-        body: "The reasoning below was generated by an agent using official source context and saved in Thesis Log as this prediction's trace.",
-      }
-    : {
-        label: "Static prototype",
-        recorded: false,
-        body: "No completed API result is available in this build. The estimate and explanation below are a prototype example.",
-      };
-
-  return (
-    <div
-      className="mb-3 rounded-md border bg-[var(--theme-bg-surface)] px-4 py-3 text-[0.78rem] leading-[1.5]"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <span
-        className={`mr-2 inline-block rounded-full border px-2 py-[1px] [font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.1em] ${
-          status.recorded
-            ? "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)]"
-            : "border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] text-[var(--theme-text-dim)]"
-        }`}
-      >
-        {status.label}
-      </span>
-      <span className="text-[var(--theme-text-muted)]">{status.body}</span>
-    </div>
-  );
 }
 
 function SeriesMetadataPanel({ forecast }: { forecast: ForecastCell }) {
@@ -1256,6 +1083,8 @@ function targetPeriodLabel(cell: ForecastCell): string {
   if (schoolYear) return `SY ${schoolYear[1]}-${schoolYear[2]}`;
   const fiscalYear = /fy[_ -]?(\d{4})/i.exec(cell.dataPointId ?? "");
   if (fiscalYear) return `FY ${fiscalYear[1]}`;
+  const calendarYear = /\.(\d{4})$/.exec(cell.dataPointId ?? "");
+  if (calendarYear) return calendarYear[1];
   return formatShortDate(
     cell.resolvedOutcome?.resolvedAt ?? cell.resolutionDate,
   );
