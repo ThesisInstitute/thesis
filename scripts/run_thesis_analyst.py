@@ -1964,7 +1964,14 @@ def run_codex_agent_command(
     announcement_url: str | None = None,
 ) -> dict[str, Any]:
     """Record controlled tool traffic outside the agent's writable checkout."""
-    from tool_evidence import _strict_json, empty_evidence, verify_evidence
+    from tool_evidence import (
+        EvidenceError,
+        _strict_json,
+        bind_native_events,
+        empty_evidence,
+        native_tool_events,
+        verify_evidence,
+    )
 
     with tempfile.TemporaryDirectory(prefix="thesis-tool-evidence-") as spool:
         output = pathlib.Path(spool) / "tool_evidence.json"
@@ -2009,14 +2016,31 @@ def run_codex_agent_command(
         }
         result["toolEvidenceRaw"] = raw
         result["toolEvidenceVerification"] = report
-        if not report["valid"]:
-            result["returnCode"] = 1
-            result["stderr"] = (
-                str(result.get("stderr", "")) + "\nTool evidence verification failed."
+        binding_error: str | None = None
+        if report["valid"] and result.get("returnCode") == 0:
+            # Bind now, from the exact redacted stream that will be archived,
+            # so a stage whose native events do not account for every
+            # recorded call fails as one run instead of blocking a whole
+            # docket publication. The publisher repeats the same check from
+            # the archived file (verify_custody.verify_tool_evidence_stage).
+            try:
+                bind_native_events(
+                    payload,
+                    native_tool_events(str(result.get("codexStdoutRaw") or "")),
+                )
+            except EvidenceError as exc:
+                binding_error = str(exc)
+        if not report["valid"] or binding_error:
+            failure = (
+                "Tool evidence verification failed"
+                if not report["valid"]
+                else f"Tool evidence native binding failed: {binding_error}"
             )
+            result["returnCode"] = 1
+            result["stderr"] = str(result.get("stderr", "")) + f"\n{failure}."
             if isinstance(result.get("codexTrace"), dict):
                 result["codexTrace"]["effectiveReturnCode"] = 1
-                result["codexTrace"]["lastError"] = "Tool evidence verification failed"
+                result["codexTrace"]["lastError"] = failure
         return result
 
 

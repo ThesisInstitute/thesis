@@ -403,35 +403,18 @@ def _prefixed(inventory: dict[str, str], prefix: str) -> dict[str, str]:
 
 def _tool_evidence_events(run_dir: Path, prefix: str) -> list[dict[str, Any]]:
     """Read only tool events from native stdout, never model-authored text."""
+    from tool_evidence import native_tool_events
+
     path = run_dir / f"{prefix}codex_stdout.jsonl"
     if not path.is_file():
         return []
-    events = []
     try:
-        # Split on newline characters only. str.splitlines() also breaks on
-        # U+0085, U+2028, U+2029 and the ASCII separators VT/FF/FS/GS/RS,
-        # which JSON leaves unescaped inside strings: a fetched PDF excerpt
-        # carrying U+0085 fragmented one completion event into unparseable
-        # pieces and orphaned its evidence call (roll-docket run
-        # 35526068252, draft call-0009).
-        lines = path.read_text(encoding="utf-8").split("\n")
+        text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         raise CustodyError(f"invalid Codex tool event stream: {path.name}") from exc
-    for line in lines:
-        try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if not isinstance(event, dict):
-            continue
-        item = event.get("item")
-        if (
-            isinstance(item, dict)
-            and item.get("type") == "mcp_tool_call"
-            and item.get("server") == TOOL_EVIDENCE_SERVER
-        ):
-            events.append(event)
-    return events
+    # Newline-only splitting and the server filter live with the recorder so
+    # the runner's generation-time binding reads the stream identically.
+    return native_tool_events(text, TOOL_EVIDENCE_SERVER)
 
 
 def verify_tool_evidence_stage(
@@ -480,12 +463,7 @@ def verify_tool_evidence_stage(
     evidence_path = run_dir / f"{prefix}tool_evidence.json"
     evidence = _load_object(evidence_path)
     report = _load_object(run_dir / f"{prefix}tool_evidence_verification.json")
-    from tool_evidence import (
-        REDACTED_URL,
-        captured_arguments,
-        terminal_call,
-        verify_evidence,
-    )
+    from tool_evidence import EvidenceError, bind_native_events, verify_evidence
 
     replay = verify_evidence(evidence)
     replay["evidenceSha256"] = _sha256(evidence_path.read_bytes())
@@ -505,86 +483,13 @@ def verify_tool_evidence_stage(
             )
         return set(required)
 
-    calls = {call["callId"]: call for call in evidence["calls"]}
-    matched: set[str] = set()
-    native_ids: set[str] = set()
-    completed_ids: set[str] = set()
-    for event in events:
-        native_id = event["item"].get("id")
-        if not isinstance(native_id, str) or not native_id:
-            raise CustodyError(f"{prefix}tool evidence event lacks its native call ID")
-        native_ids.add(native_id)
-        if event.get("type") != "item.completed":
-            continue
-        if native_id in completed_ids:
-            raise CustodyError(
-                f"{prefix}tool evidence repeats a native completion event"
-            )
-        completed_ids.add(native_id)
-        item = event["item"]
-        result = item.get("result")
-        structured = (
-            result.get("structured_content", result.get("structuredContent"))
-            if isinstance(result, dict)
-            else None
-        )
-        call_id = structured.get("callId") if isinstance(structured, dict) else None
-        call = calls.get(call_id) if isinstance(call_id, str) else None
-        if call is None or call_id in matched:
-            raise CustodyError(
-                f"{prefix}tool evidence has an unknown or repeated event call ID"
-            )
-        expected_result = terminal_call(call)
-        native_arguments = item.get("arguments")
-        if (
-            call["status"] == "failed"
-            and call["tool"] == "fetch_source"
-            and call["arguments"] == {"url": REDACTED_URL}
-            and isinstance(native_arguments, dict)
-        ):
-            # Unsafe requests are deliberately redacted by the recorder. Only
-            # the same deterministic rejection may replace exact argument
-            # matching; a successful/public request cannot borrow this escape.
-            native_arguments = captured_arguments(call["tool"], native_arguments)
-        content = result.get("content")
-        try:
-            text_result = (
-                json.loads(content[0]["text"])
-                if isinstance(content, list)
-                and len(content) == 1
-                and isinstance(content[0], dict)
-                and content[0].get("type") == "text"
-                else None
-            )
-        except (KeyError, TypeError, ValueError):
-            text_result = None
-        if (
-            item.get("tool") != call["tool"]
-            or item.get("status")
-            not in (
-                {"completed"}
-                if call["status"] == "succeeded"
-                else {"completed", "failed"}
-            )
-            or canonical_bytes(native_arguments) != canonical_bytes(call["arguments"])
-            or canonical_bytes(structured) != canonical_bytes(expected_result)
-            or canonical_bytes(text_result) != canonical_bytes(expected_result)
-            or any(
-                key in result and result[key] is not (call["status"] == "failed")
-                for key in ("isError", "is_error")
-            )
-        ):
-            raise CustodyError(
-                f"{prefix}tool evidence call {call_id} differs from its native event"
-            )
-        matched.add(call_id)
-    if not failed_stage and matched != set(calls):
-        raise CustodyError(
-            f"{prefix}tool evidence calls lack native completion events: "
-            + ", ".join(sorted(set(calls) - matched))
-        )
-    if not failed_stage and native_ids != completed_ids:
-        raise CustodyError(f"{prefix}tool evidence has incomplete native calls")
+    # The runner already bound this stage from the identical redacted stream
+    # before sealing; repeating it here from the archived file is what makes
+    # the publication claim independent of the runner.
+    try:
+        bind_native_events(evidence, events, failed_stage=failed_stage)
+    except EvidenceError as exc:
+        raise CustodyError(f"{prefix}{exc}") from exc
     return set(required)
 
 
