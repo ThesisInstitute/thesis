@@ -109,10 +109,13 @@ def test_adapter_is_offered_wherever_a_registration_passes() -> None:
     assert ADAPTER in register_targets.CALENDAR_GATED_SOURCE_ADAPTERS
     assert ADAPTER in roll_docket.OFFICIAL_CALENDAR_ADAPTERS
     assert resolve_pending.FAMILY_ADAPTERS["a19"] == {ADAPTER}
-    # The prospect miner's allowlist is a separate literal.
-    template = a19_entries()[0]["extras"]["sourceBinding"]
-    assert set(template) == prospect_targets.SOURCE_BINDING_FIELDS
-    assert prospect_targets._source_binding_errors(template) == []
+    # The prospect miner's allowlist is a separate literal, and it accepts a
+    # transform only as exactly {"operation", "factor"}; a later proposal
+    # carries each template as its previousTarget binding.
+    for entry in a19_entries():
+        template = entry["extras"]["sourceBinding"]
+        assert set(template) == prospect_targets.SOURCE_BINDING_FIELDS
+        assert prospect_targets._source_binding_errors(template) == []
     assert prospect_targets._source_binding_errors(
         {**template, "adapter": "bls-cps-a20"}
     ) == ["bad previousTarget source adapter"]
@@ -194,10 +197,51 @@ def test_committed_release_dates_are_plausible_and_leave_room_for_the_margin() -
             assert release_day > month_end, (entry["series"], period)
         # The window must close before the next Employment Situation replaces
         # the page. Releases are NOT reliably four weeks apart (BLS's schedule
-        # put November 2025 on 2025-12-16 and December on 2026-01-09, 24 days),
-        # so this is checked against the committed dates, not assumed.
+        # has 2026-02-11 then 2026-03-06, 23 days), so this is checked against
+        # the committed dates, not assumed.
         for (_, release_day), (_, following) in zip(dated, dated[1:]):
             assert release_day + dt.timedelta(days=MARGIN) < following
+
+
+# BLS's "Schedule of Releases for the Employment Situation", every row of the
+# page as read on 2026-09-20 (docs/anchor-verifications.md). Past rows are
+# history and do not change; the last row was the end of the schedule that day.
+BLS_EMPSIT_SCHEDULE_READ_2026_09_20 = {
+    "2025-11": "2025-12-16",
+    "2025-12": "2026-01-09",
+    "2026-01": "2026-02-11",
+    "2026-02": "2026-03-06",
+    "2026-03": "2026-04-03",
+    "2026-04": "2026-05-08",
+    "2026-05": "2026-06-05",
+    "2026-06": "2026-07-02",
+    "2026-07": "2026-08-07",
+    "2026-08": "2026-09-04",
+    "2026-09": "2026-10-02",
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04",
+}
+
+
+def test_margin_is_far_inside_the_shortest_gap_bls_has_scheduled() -> None:
+    # The committed docket can only ever compare a month with the ones dated
+    # after it, and the newest month has no successor to compare with. What
+    # protects that month is how far apart BLS schedules these releases.
+    days = [
+        dt.date.fromisoformat(value)
+        for _, value in sorted(BLS_EMPSIT_SCHEDULE_READ_2026_09_20.items())
+    ]
+    gaps = [(later - earlier).days for earlier, later in zip(days, days[1:])]
+    # 2026-02-11 to 2026-03-06, after the delayed January release: not the
+    # four weeks one might assume.
+    assert min(gaps) == 23
+    assert MARGIN + 1 < min(gaps)
+    # The docket's dates are a second hand copy of the same page. Where the
+    # two overlap they must agree, so editing one prompts a look at the other.
+    for entry in a19_entries():
+        for period, value in entry["releaseDates"].items():
+            if period in BLS_EMPSIT_SCHEDULE_READ_2026_09_20:
+                assert value == BLS_EMPSIT_SCHEDULE_READ_2026_09_20[period]
 
 
 @pytest.mark.parametrize(("entry", "period"), DATED)
@@ -224,6 +268,65 @@ def test_rolled_target_registers_release_day_plus_margin_and_is_admitted(
     assert refusal(contract) is None
     assert roll_docket.roll_execution_plan_refusal(target) is None
     register_targets.validate_committed_calendar_contract(contract, target, entry)
+
+
+@pytest.mark.parametrize(
+    "entry", a19_entries(), ids=lambda e: e["series"].rsplit(".", 1)[1]
+)
+def test_the_next_month_rolls_from_the_registered_september_contract(
+    entry: dict,
+) -> None:
+    # The real roll: each series steps from its registered September 2026
+    # contract, which names generic-url and a month-name id.
+    contracts = resolve_pending.registration_contracts()
+    previous = next(
+        reg["contract"]
+        for reg in contracts.values()
+        if reg["contract"]["series"] == entry["series"]
+        and reg["contract"]["period"] == "2026-09"
+    )
+    assert previous["sourceBinding"]["adapter"] == "generic-url"
+    period = min(entry["releaseDates"])
+    contract = built(
+        entry,
+        period,
+        {
+            "country": previous["country"],
+            "unit": previous["unit"],
+            "dataPointId": previous["dataPointId"],
+            "period": previous["period"],
+            "resolutionDate": "2026-10-02",
+            "resolutionSourceUrl": previous["sourceBinding"]["sourceUrl"],
+        },
+    )
+    # The ledger append requires the record id to start with the contract's
+    # series, and the id must route back to this family for this month.
+    month = dt.date.fromisoformat(f"{period}-01").strftime("%B").lower()
+    assert contract["dataPointId"] == (
+        f"{entry['series']}.{month}_{period[:4]}.first_print"
+    )
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": "slug",
+                "resolutionDate": entry["releaseDates"][period],
+                "unit": contract["unit"],
+            }
+        ],
+        "resolutionLinks": [
+            {
+                "status": "pending",
+                "targetFactRef": contract["dataPointId"],
+                "forecastSlug": "slug",
+            }
+        ],
+    }
+    ((_, kind, _, _, routed_period, *_),) = resolve_pending.pending_adapter_refs(log)
+    assert (kind, routed_period) == ("a19", period)
+    # The new contract takes the adapter from the docket, not its predecessor.
+    assert contract["sourceBinding"]["adapter"] == ADAPTER
+    assert refusal(contract) is None
 
 
 def test_roller_never_infers_a_date_the_schedule_does_not_give() -> None:
@@ -441,6 +544,45 @@ def test_gate_selects_the_unit_contract_before_it_compares_units(
     assert refusal(contract) is None
 
 
+def test_gate_refuses_a_contract_whose_period_is_not_the_month_its_id_routes_to(
+    contract: dict,
+) -> None:
+    # The executor reads the month the dataPointId routes to. A contract that
+    # says another dated month would otherwise be judged against the wrong row
+    # of the calendar, or against none.
+    entry = next(e for e in a19_entries() if e["series"] == contract["series"])
+    other = max(entry["releaseDates"])
+    assert other != contract["period"]
+    contract["period"] = other
+    assert "is not the month its dataPointId routes to" in (refusal(contract) or "")
+
+
+def _plan(contract: dict, **kwargs: object) -> str | None:
+    """``_plan_a19`` itself, as a later caller might reach it."""
+
+    return resolve_pending._plan_a19(
+        {"contract": contract, "targetContentHash": None},
+        routed_spec(contract["dataPointId"], contract["unit"]),
+        contract["period"],
+        **kwargs,
+    )
+
+
+def test_the_predicate_stands_alone_if_it_is_reached_another_way(
+    contract: dict,
+) -> None:
+    # execution_plan_refusal refuses generic-url and a drifted binding before
+    # it consults any family, so through the gate these two checks never fire.
+    # They are what keeps the predicate safe if that order ever changes.
+    assert _plan(contract) is None
+    legacy = copy.deepcopy(contract)
+    legacy["sourceBinding"]["adapter"] = "generic-url"
+    assert "must bind 'bls-cps-a19', not 'generic-url'" in (_plan(legacy) or "")
+    drifted = copy.deepcopy(contract)
+    drifted["sourceBinding"]["table"] = "Table A-13"
+    assert "differs in table" in (_plan(drifted) or "")
+
+
 @pytest.mark.parametrize(
     ("rewrite", "why"),
     [
@@ -605,6 +747,33 @@ def test_main_resolves_from_the_earliest_capture_inside_the_margin(
     assert not any("/save/" in call for call in calls)
 
 
+def test_a_requested_capture_is_read_by_a_later_run_even_after_the_window_closes(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # The window judges the CAPTURE's date, not the day the resolver runs. A
+    # run never reads the capture it has just asked for, so the run that
+    # resolves is a later one, and it may come after the window has closed.
+    # This is also all a one-day window can ever do: one request on the day,
+    # read the next morning, with nothing to fall back on if it fails.
+    reg = october(("2026-11-06", "2026-11-06"))
+    output, calls = run_main(monkeypatch, capsys, [reg], today="2026-11-06", archive={})
+    assert resolve_pending.A19_CAPTURE_REQUESTED in output
+    assert "nothing new to record" in output
+
+    archive = {"20261106150000": fixture("2026-08").replace("Aug.", "Oct.")}
+    output, calls = run_main(
+        monkeypatch,
+        capsys,
+        [reg],
+        today="2026-11-07",
+        archive=archive,
+        index=cdx(("20261106150000", "200")),
+    )
+    assert f"resolve {reg['contract']['dataPointId']} -> 7.716 millions" in output
+    assert '"observed_at": "2026-11-06"' in output
+    assert not any("/save/" in call for call in calls)
+
+
 def test_a_one_day_window_would_have_lost_the_same_target(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -666,3 +835,30 @@ def test_a_capture_after_the_margin_is_never_custody(
     )
     assert "A-19 FIRST-PRINT WINDOW MISSED (refusing)" in output
     assert identity_url("20261114120000") not in calls
+
+
+def test_a_release_bls_delays_past_the_margin_fails_closed(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # A registered window is immutable. If BLS publishes October later than it
+    # had scheduled (it delayed a release by a month in the 2025 shutdown),
+    # every capture inside the window still prints September. The header check
+    # passes each one over, so the target is missed; it is never resolved to
+    # the previous month's number.
+    september = fixture("2026-08").replace("Aug.", "Sept.")
+    archive = {
+        "20261106140000": september,
+        "20261110140000": september,
+        "20261121140000": fixture("2026-08").replace("Aug.", "Oct."),
+    }
+    output, calls = run_main(
+        monkeypatch,
+        capsys,
+        [october()],
+        today="2026-11-25",
+        archive=archive,
+        index=cdx(("20261106140000", "200"), ("20261110140000", "200")),
+    )
+    assert "A-19 FIRST-PRINT WINDOW MISSED (refusing): none of the 2" in output
+    assert "nothing new to record" in output
+    assert identity_url("20261121140000") not in calls

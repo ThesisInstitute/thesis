@@ -944,14 +944,17 @@ because of the window's width:
   refuses a capture whose current-month header is not the target month. A
   capture that prints October as its current month was taken while October was
   the latest published month.
-- BLS's [seasonal adjustment methodology
+- Table A-19 is not seasonally adjusted, so what matters is what BLS says of
+  the unadjusted estimates. Its [seasonal adjustment methodology
   page](https://www.bls.gov/cps/seasonal-adjustment-methodology.htm) (footer
-  "Last Modified Date: January 14, 2026", read 2026-09-20) says "BLS policy is
-  to not revise previous months' official seasonally adjusted CPS estimates as
-  new data become available during the year," with revisions introduced at the
-  end of each year, and that "the original sample data normally are not
-  revised." That page uses "original" for data before seasonal adjustment,
-  which is what Table A-19, not seasonally adjusted, prints.
+  "Last Modified Date: January 14, 2026", read 2026-09-20) says "the original
+  sample data normally are not revised." It calls the data before adjustment
+  "original" throughout ("Prior adjustments are adjustments made to the
+  original data prior to seasonal adjustment"). BLS offers the sentence as its
+  reason for not revising seasonally adjusted estimates month by month. The
+  better-known sentence on that page, that BLS policy is not to revise previous
+  months' official seasonally adjusted estimates during the year, is about
+  adjusted series and is not relied on here.
 - The routine event that does change levels is the annual population control
   update. BLS's [note on the January 2026
   update](https://www.bls.gov/cps/methods/population-controls/experimental-series-accounting-for-january-2026-population-control-effects.htm)
@@ -964,26 +967,55 @@ because of the window's width:
   CPS data for January were revised at that time." January 2026 levels were
   revised after their first print. They were revised with the NEXT release,
   when this page stopped printing January as its current month, so the header
-  check excludes the revised figures whatever the window's width.
+  check excludes the revised figures whatever the window's width. That is one
+  documented case, not a rule that BLS revises only at a release.
 - Among captures inside the window the resolver takes the earliest that prints
   the month.
 
 What this does not prove. No capture is the bytes served at 08:30. If BLS
-reissued a month's table between the release and the first capture, that
-capture would be read as the print; a one-day window has the same exposure for
-the hours between release and capture, and BLS's statements above are about
-practice, not a guarantee. The argument also needs the window to close before
-the next Employment Situation. Releases are not reliably four weeks apart (the
-same schedule put November 2025 on 2025-12-16 and December 2025 on 2026-01-09,
-24 days), so a test checks the margin against the committed dates rather than
-assuming a gap.
+reissued a month's table under the same header between the release and the
+first capture, that capture would be read as the print, and the header check
+cannot see it. A one-day window has the same kind of exposure over a shorter
+interval: hours, against as many as eight days here. That is what the margin
+costs, and BLS's statements above are about practice, not a guarantee. The
+argument also needs the window to close before the next Employment Situation.
+Releases are not reliably four weeks apart: the shortest gap in BLS's schedule
+as read is 23 days (2026-02-11 to 2026-03-06, after the delayed January
+release). A test holds the margin against that gap and against the committed
+dates rather than assuming one.
 
-Why seven days: it is the margin the twelve registered-query snapshot entries
-in the docket already commit (start plus seven days, for example 2026-10-15 to
-2026-10-22), it gives eight daily requests, and it is far inside the shortest
-gap above. A registration's window
-is immutable, so changing the constant affects new targets only; for that
-reason the run-time executor does not re-check a registered window's width.
+If BLS moves a release, or the committed date is wrong. A registered window is
+immutable, and the docket's date is a hand copy of BLS's schedule: no code
+checks it against BLS at run time. The two directions fail differently.
+
+- Later than committed, by more than the margin: every capture inside the
+  window still prints the previous month. The header check passes each one
+  over and the target ends in `FIRST-PRINT WINDOW MISSED`; it is never resolved
+  to the previous month's number (a test runs this case through `main()`).
+  BLS's population control note above records such a delay, of a month, in the
+  2025 shutdown. Every calendar-gated registration has this exposure, and the
+  margin narrows it: a one-day window is lost to a delay of a single day, this
+  one to a delay of more than seven.
+- Earlier than committed: the page already prints the month when the window
+  opens, so the target resolves, from a capture as late as seven days after
+  the committed date. The value is still read under the month's own header,
+  and the fact's `observed_at` records the capture's date, but custody begins
+  later after the true release than the window suggests, and nothing reports
+  it. A one-day window would more often end such a case in a visible miss. The
+  control is review of the docket date. A test also keeps a second transcription
+  of the schedule as read on 2026-09-20 and requires the docket to agree with
+  it, so a wrong date needs two wrong copies.
+
+Why seven days. A run never reads the capture it has just requested; a later
+run does. One day therefore allows one request, read the next morning, with
+nothing to fall back on if it fails. Seven days after the release day allows
+eight daily requests and is far inside the 23-day gap above. Seven is also the
+retry margin the docket's twelve registered-query snapshot entries commit
+(start plus seven days, for example 2026-10-15 to 2026-10-22); that is this
+repository's convention for a retry margin, not evidence about the Archive. A
+registration's window is immutable, so changing the constant affects new
+targets only; for that reason the run-time executor does not re-check a
+registered window's width.
 
 ### Custody hosts
 

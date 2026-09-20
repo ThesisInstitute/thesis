@@ -2089,13 +2089,14 @@ def bea_ita_release_snapshot_envelope(
 A19_SOURCE_URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
 # The adapter a NEW A-19 registration binds. The 18 contracts registered before
 # it existed (July to September 2026) name ``generic-url``; they stay
-# executable at run time through the legacy exception in main(), exactly as
-# the legacy QCEW binding does, and that name admits no new registration.
+# executable at run time through a legacy exception in main(), and that name
+# admits no new registration.
 A19_BINDING_ADAPTER = "bls-cps-a19"
 A19_LEGACY_BINDING_ADAPTER = "generic-url"
 # BLS's Employment Situation schedule: the one calendar authority a dated A-19
 # target may cite. It answers non-browser clients with HTTP 403, like the
-# table itself; docs/anchor-verifications.md links the archived copy read.
+# table itself; docs/anchor-verifications.md records the dates and how they
+# were read.
 A19_RELEASE_CALENDAR_URL = "https://www.bls.gov/schedule/news_release/empsit.htm"
 A19_SNAPSHOT_URLS: dict[str, str] = {
     "2026-06": f"https://web.archive.org/web/20260710110509/{A19_SOURCE_URL}",
@@ -13178,8 +13179,8 @@ FAMILY_ADAPTERS = {
     # 2026-07-10 generic-url registration met a newly added ALFRED stem.
     # A-19 registrations made before ``bls-cps-a19`` existed name generic-url.
     # They are not listed here, so they cannot look like a family adapter to
-    # the registration gate; main() resolves them through the same legacy
-    # exception QCEW has, after a19_execution_spec pins every other field.
+    # the registration gate; main() forgives that one name for this family,
+    # after a19_execution_spec has pinned every other field.
     "a19": {A19_BINDING_ADAPTER},
     "alfred": {"alfred-fred"},
     "bea_release": {"bea-release", "bea-ita-itable"},
@@ -13311,6 +13312,14 @@ def _plan_a19(
         return (
             "the registered sourceBinding is not the reviewed Table A-19 "
             f"template the executor authenticates (differs in {drifted})"
+        )
+    # ``period`` is the month the dataPointId routes to, which is the month
+    # the executor will read. A contract that says another month would be
+    # dated from the wrong row of the calendar.
+    if contract.get("period") != period:
+        return (
+            f"contract period {contract.get('period')!r} is not the month its "
+            f"dataPointId routes to, {period!r}"
         )
     # The executor takes the earliest Internet Archive capture dated inside
     # the window whose header prints the month. A window that does not start
@@ -13896,9 +13905,11 @@ def main() -> int:
             if qcew_binding_matches_spec(legacy_binding, spec, period, release_day):
                 mismatched = None
         if kind == "a19" and mismatched == spec.get("legacy_binding_adapter"):
-            # a19_execution_spec, above, has already authenticated every
-            # other field of this contract, so the legacy name is the only
-            # thing that differs from a bls-cps-a19 registration.
+            # Unlike the QCEW branch above, nothing is re-verified here:
+            # a19_execution_spec has already authenticated every other field
+            # of this contract and admits only these two adapter names, so
+            # the legacy name is all that can differ from a bls-cps-a19
+            # registration. The comparison states which name is forgiven.
             mismatched = None
         if mismatched:
             print(

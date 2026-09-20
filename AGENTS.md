@@ -84,21 +84,27 @@ runtime question; whether any code could ever read it is not.
   A family in neither refuses every new registration, and a test fails.
 - Existing snapshots are never re-judged: retries reuse them, and what happens
   to already-published targets with no executor is a disposition decision, not
-  a registration one. The run-time exceptions for three reviewed legacy
-  contracts (one ABS content hash, the legacy QCEW binding, and the Table A-19
-  contracts registered as `generic-url` before `bls-cps-a19` existed) do not
-  admit new ones.
+  a registration one. Three reviewed run-time legacy exceptions (one ABS
+  content hash, the legacy QCEW binding, and the 18 Table A-19 contracts
+  registered as `generic-url` before `bls-cps-a19` existed) do not admit new
+  registrations.
 - Nothing in `waivers.json` waives this, and it has no grandfather set. The
   way through is admission: adapter or family reuse, anchors verified from
   official prints per `docs/anchor-verifications.md`, docket template, tests.
-- A calendar-gated adapter registers the agency's published release day as an
-  exact one-day window. The one reviewed exception is a capture margin
+- A calendar-gated adapter registers the release day committed in the docket
+  from the agency's calendar as an exact one-day window. The one reviewed
+  exception is a capture margin
   (`register_targets.CALENDAR_CAPTURE_MARGIN_DAYS`): the window still starts on
-  the agency's date and ends a fixed number of days later. It is for an
+  that committed date and ends a fixed number of days later. It is for an
   executor that reads a third party's dated capture of a page the agency
   overwrites, and it needs a written argument that a later capture still reads
-  the first print (`docs/anchor-verifications.md`, "Why the window is not one
-  day"). It is not a way to guess a date from cadence.
+  the first print, with what the margin costs (`docs/anchor-verifications.md`,
+  "Why the window is not one day"). It is not a way to guess a date from
+  cadence. No code checks a committed date against the agency, so the date is
+  only as good as its review. A margin adapter's executor judges the capture
+  against the registered window and does not re-derive that window at run time
+  (QCEW's executor does re-derive its one-day window), because a registration
+  outlives any later change to the margin.
 
 ## Common Tasks
 

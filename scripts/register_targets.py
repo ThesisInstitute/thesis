@@ -556,9 +556,8 @@ def expected_release_window(
     if has_explicit_window:
         start, end = _iso_date(str(supplied["start"])), _iso_date(str(supplied["end"]))
     elif target.get("expectedReleaseDate"):
-        start = end = _iso_date(str(target["expectedReleaseDate"]))
-        if is_calendar_gated_source(adapter, target.get("series")):
-            end = _iso_date(calendar_release_window(adapter, start)["end"])
+        start = _iso_date(str(target["expectedReleaseDate"]))
+        end = _iso_date(calendar_release_window(adapter, start)["end"])
     elif previous and previous.get("resolutionDate"):
         prior = _iso_date(str(previous["resolutionDate"]))
         period = str(target["period"])
@@ -869,8 +868,8 @@ def build_contract(
                 "recurring seedPeriod must exactly match the target period"
             )
         # This marker is part of the immutable registration content hash. It
-        # makes the privileged bind step reauthenticate the seed's one-day
-        # release window and calendar against the committed docket after any
+        # makes the privileged bind step reauthenticate the seed's release
+        # window and calendar against the committed docket after any
         # register-job rebase.
         contract["seedPeriod"] = seed_period
     return contract
