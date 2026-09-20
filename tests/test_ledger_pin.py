@@ -218,8 +218,13 @@ def _test_anchor_specs(tsa: pathlib.Path) -> dict[str, ledger_release_chain.Anch
             filename=filename,
             pem_sha256=hashlib.sha256(anchor.read_bytes()).hexdigest(),
             policy_oid=policy_oid,
-            signer_certificate_sha256=hashlib.sha256(certificate_der).hexdigest(),
-            signer_spki_sha256=_spki_sha256(signer_public_key),
+            signers=(
+                ledger_release_chain.PinnedSigner(
+                    label=f"fixture {signer} responder",
+                    certificate_sha256=hashlib.sha256(certificate_der).hexdigest(),
+                    spki_sha256=_spki_sha256(signer_public_key),
+                ),
+            ),
         )
     return result
 
