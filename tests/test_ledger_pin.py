@@ -736,7 +736,6 @@ def test_refresh_parent_chain_cannot_skip_an_omitted_commit() -> None:
         pin_ledger._require_walk_parent(
             {"sha": "c" * 40, "parents": [{"sha": "d" * 40}]},
             "c" * 40,
-            "b" * 40,
             {"b" * 40},
         )
 
@@ -2092,42 +2091,213 @@ def test_registration_without_a_pin_file_fails_closed(monkeypatch, tmp_path) -> 
         register_targets.load_ledger_pin_binding()
 
 
-def test_walk_parent_admits_branch_internal_merge_only() -> None:
+def test_walk_parent_requires_every_parent_to_be_walked() -> None:
     from pin_ledger import PinError, _require_walk_parent
 
     def payload(sha, parents):
         return {"sha": sha, "parents": [{"sha": parent} for parent in parents]}
 
-    base, side, merge = "a" * 40, "b" * 40, "c" * 40
+    base, side, other, merge = "a" * 40, "b" * 40, "f" * 40, "c" * 40
 
-    # Single-parent commits keep the exact-chain rule.
-    assert _require_walk_parent(payload(side, [base]), side, base, {base}) is False
+    # A single-parent commit continues from the pin or from any walked
+    # commit. Two pull requests forking from one commit are listed
+    # interleaved, so the second branch's first commit follows a commit
+    # that is not its parent; its parent was still walked.
+    assert _require_walk_parent(payload(side, [base]), side, {base}) == [base]
+    assert _require_walk_parent(payload(other, [base]), other, {base, side}) == [base]
     with pytest.raises(PinError, match="skips or reorders"):
-        _require_walk_parent(payload(side, ["d" * 40]), side, base, {base})
+        _require_walk_parent(payload(side, ["d" * 40]), side, {base})
 
-    # The real 2026-07-18 diamond: side branch forked from the pin, merged
-    # back while the walk predecessor is the side commit. Both parents are
-    # walked, so the merge is traversable.
-    assert (
-        _require_walk_parent(payload(merge, [base, side]), merge, side, {base, side})
-        is True
-    )
+    # The 2026-07-18 diamond: side branch forked from the pin and merged
+    # back. Parents come back first-parent first.
+    assert _require_walk_parent(payload(merge, [base, side]), merge, {base, side}) == [
+        base,
+        side,
+    ]
 
-    # A merge whose other parent was never walked splices foreign history.
+    # A merge with any parent that was never walked splices foreign history,
+    # whichever position that parent is in.
     with pytest.raises(PinError, match="unwalked history"):
-        _require_walk_parent(
-            payload(merge, ["e" * 40, side]), merge, side, {base, side}
-        )
+        _require_walk_parent(payload(merge, ["e" * 40, side]), merge, {base, side})
+    with pytest.raises(PinError, match="unwalked history"):
+        _require_walk_parent(payload(merge, [base, "e" * 40]), merge, {base, side})
 
-    # A merge that does not continue the walk predecessor is rejected too.
-    with pytest.raises(PinError, match="does not continue the walk"):
-        _require_walk_parent(
-            payload(merge, [base, "e" * 40]), merge, side, {base, side}
-        )
+    with pytest.raises(PinError, match="lists a parent twice"):
+        _require_walk_parent(payload(merge, [side, side]), merge, {base, side})
 
     # No parents at all is never traversable.
     with pytest.raises(PinError, match="linear single-parent"):
-        _require_walk_parent(payload(merge, []), merge, side, {base, side})
+        _require_walk_parent(payload(merge, []), merge, {base, side})
+
+
+def _side_branch(
+    repo: pathlib.Path, name: str, fork: str, files: dict[str, str]
+) -> str:
+    """A pull-request branch forked at `fork`, one commit per file."""
+    _git(repo, "checkout", "-q", "-b", name, fork)
+    for path, text in files.items():
+        target = repo / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text)
+        _commit(repo, f"{name}: {path}")
+    return _git(repo, "rev-parse", "HEAD")
+
+
+def _merge(repo: pathlib.Path, into: str, branch: str) -> str:
+    _git(repo, "checkout", "-q", into)
+    _git(
+        repo,
+        "merge",
+        "-q",
+        "--no-ff",
+        "-m",
+        f"Merge pull request from {branch}",
+        branch,
+    )
+    return _git(repo, "rev-parse", "HEAD")
+
+
+def test_refresh_walks_two_pull_requests_forked_from_one_commit(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    """The shape that stopped the pin from 2026-09-04: PolicyEngine/chronicle
+    merged several pull requests, forked from the same ledger commit, into
+    the ledger branch with merge commits. None of them touches the ledger.
+    The old walk refused at the second branch's first commit ("skips or
+    reorders a parent") because the commit before it in the listing belongs
+    to the first branch."""
+    repo = release_repo.repo
+    mainline = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    fork = release_repo.head
+    _side_branch(repo, "pr-one", fork, {"docs/one.md": "one\n", "docs/one-b.md": "b\n"})
+    _side_branch(repo, "pr-two", fork, {"docs/two.md": "two\n"})
+    _merge(repo, mainline, "pr-one")
+    head = _merge(repo, mainline, "pr-two")
+    # The second branch really does follow a commit that is not its parent.
+    listing = _git(repo, "rev-list", "--reverse", f"{fork}..{head}").splitlines()
+    parents = {
+        sha: _git(repo, "rev-list", "--parents", "-n", "1", sha).split()[1:]
+        for sha in listing
+    }
+    assert any(
+        len(parents[sha]) == 1 and index and parents[sha][0] != listing[index - 1]
+        for index, sha in enumerate(listing)
+    )
+
+    pin_path, _availability, _generated, _requests = _prepare_refresh(
+        monkeypatch, tmp_path, release_repo
+    )
+    pin_ledger.refresh()
+    assert json.loads(pin_path.read_text())["sha"] == head
+
+
+def test_refresh_refuses_a_listed_commit_the_head_does_not_descend_from(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    """Closure runs from the head back to the pin. The listing must not
+    hold anything else: with P─A and P─H listed as [A, H], A is no part of
+    the pinned history, yet every parent it names was walked. The old
+    linear walk refused H here (its parent is P, not A)."""
+    repo = release_repo.repo
+    mainline = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    fork = release_repo.head
+    stray = _side_branch(repo, "never-merged", fork, {"docs/stray.md": "stray\n"})
+    _git(repo, "checkout", "-q", mainline)
+    (repo / "docs").mkdir(exist_ok=True)
+    (repo / "docs" / "mainline.md").write_text("mainline\n")
+    _commit(repo, "mainline moves on without it")
+    _prepare_refresh(monkeypatch, tmp_path, release_repo)
+    honest_api = pin_ledger._api
+
+    def api_with_a_stray(path: str) -> Any:
+        payload = honest_api(path)
+        if path.startswith("compare/"):
+            payload = dict(payload)
+            payload["commits"] = [
+                {
+                    "sha": stray,
+                    "commit": {"committer": {"date": _commit_time(repo, stray)}},
+                },
+                *payload["commits"],
+            ]
+            payload["total_commits"] = len(payload["commits"])
+        return payload
+
+    monkeypatch.setattr(pin_ledger, "_api", api_with_a_stray)
+
+    with pytest.raises(pin_ledger.PinError, match="does not descend from"):
+        pin_ledger.refresh()
+
+
+def test_refresh_refuses_a_side_branch_that_rewrites_the_ledger(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    """Admitting side branches must not admit what they might carry. A
+    branch that rewrites a ledger line and restores it before merging
+    leaves the head clean; the rewrite is still caught at its own commit,
+    against its own parent."""
+    repo = release_repo.repo
+    mainline = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    ledger = repo / pin_ledger.LEDGER_JSONL_PATH
+    original = ledger.read_bytes()
+    _git(repo, "checkout", "-q", "-b", "pr-rewrite", release_repo.head)
+    ledger.write_bytes(original.replace(b"row-1", b"row-X", 1))
+    assert ledger.read_bytes() != original
+    _commit(repo, "rewrite a ledger line")
+    ledger.write_bytes(original)
+    _commit(repo, "restore it")
+    _merge(repo, mainline, "pr-rewrite")
+    pin_path, availability_path, generated_path, _requests = _prepare_refresh(
+        monkeypatch, tmp_path, release_repo
+    )
+    before = {p: p.read_bytes() for p in (pin_path, availability_path, generated_path)}
+
+    with pytest.raises(pin_ledger.PinError, match="rewrites ledger line|unwitnessed"):
+        pin_ledger.refresh()
+    assert {p: p.read_bytes() for p in before} == before
+
+
+def test_refresh_refuses_a_merge_that_adds_ledger_bytes_of_its_own(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    """A merge reconciles branches; it never carries an append. Here the
+    smuggled row is even witnessed by a proper release afterwards, so the
+    head verifies and only the walk can object, at the merge itself."""
+    repo = release_repo.repo
+    mainline = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    ledger = repo / pin_ledger.LEDGER_JSONL_PATH
+    previous_ledger = ledger.read_bytes()
+    previous_manifest = next(
+        (repo / "releases/manifests").glob("0002-*.json")
+    ).read_bytes()
+    _side_branch(repo, "pr-docs", release_repo.head, {"docs/x.md": "x\n"})
+    _git(repo, "checkout", "-q", mainline)
+    _git(repo, "merge", "-q", "--no-ff", "--no-commit", "pr-docs")
+    ledger.write_bytes(previous_ledger + _row_bytes("row-smuggled"))
+    _commit(repo, "Merge pull request with an extra row")
+    _write_release(
+        repo,
+        release_repo.tsa,
+        index=3,
+        previous_manifest=previous_manifest,
+        previous_ledger=previous_ledger,
+        producer_key=release_repo.tsa / "producer-ed25519-key.pem",
+    )
+    _commit(repo, "release that witnesses the smuggled row")
+    _prepare_refresh(monkeypatch, tmp_path, release_repo)
+
+    with pytest.raises(
+        pin_ledger.PinError, match="merge commit .* changes ledger bytes"
+    ):
+        pin_ledger.refresh()
 
 
 def test_rebuild_from_history_carries_the_ratchet(
