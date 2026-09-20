@@ -408,7 +408,13 @@ def _tool_evidence_events(run_dir: Path, prefix: str) -> list[dict[str, Any]]:
         return []
     events = []
     try:
-        lines = path.read_text().splitlines()
+        # Split on newline characters only. str.splitlines() also breaks on
+        # U+0085, U+2028, U+2029 and the ASCII separators VT/FF/FS/GS/RS,
+        # which JSON leaves unescaped inside strings: a fetched PDF excerpt
+        # carrying U+0085 fragmented one completion event into two
+        # unparseable pieces and orphaned its evidence call (roll-docket
+        # run 35526068252, draft call-0009).
+        lines = path.read_text(encoding="utf-8").split("\n")
     except (OSError, UnicodeDecodeError) as exc:
         raise CustodyError(f"invalid Codex tool event stream: {path.name}") from exc
     for line in lines:
