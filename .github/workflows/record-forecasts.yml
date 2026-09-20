@@ -289,6 +289,38 @@ jobs:
         with:
           commit: ${{ steps.snapshot_push.outputs.pushed_sha }}
 
+      # One available anchor is enough to witness a snapshot, so a TSA that
+      # stops verifying never fails this workflow. Keep one issue open while
+      # any anchor is unavailable and close it when all of them witness again.
+      # Best effort: the snapshot is already pushed and attested, so a failed
+      # notice must not mark the recording as failed. It retries every run.
+      - name: Report degraded witnessing
+        if: steps.snapshot_push.outputs.committed == '1'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -uo pipefail
+          title="Record witness degraded"
+          status=0
+          report=$(python3 scripts/witness_health.py \
+            --digest "${{ steps.snapshot.outputs.digest }}") || status=$?
+          echo "$report"
+          if [ "$status" -ne 0 ] && [ "$status" -ne 3 ]; then
+            exit "$status"
+          fi
+          existing=$(gh issue list --state open --search "\"$title\" in:title" \
+            --json number,title \
+            --jq "[.[] | select(.title == \"$title\")][0].number // empty")
+          if [ "$status" -eq 3 ] && [ -z "$existing" ]; then
+            gh issue create --title "$title" \
+              --body "$report"$'\n\n'"Recorder run: $RUN_URL"
+          elif [ "$status" -eq 0 ] && [ -n "$existing" ]; then
+            gh issue close "$existing" --comment "$report Recorder run: $RUN_URL"
+          fi
+
       # A silent failure is a missing recorder invocation. File an issue so a
       # broken scheduled run surfaces the same day.
       - name: Alert on failure
