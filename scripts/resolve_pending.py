@@ -2077,11 +2077,19 @@ def bea_ita_release_snapshot_envelope(
 # captured right after the Employment Situation release. The three rows
 # that DO have FRED mirrors (office/admin, production, transport) were
 # cross-checked against ALFRED at the release vintage and matched exactly.
+#
+# Every pin is a capture taken between the Employment Situation that first
+# printed the month and the next one (BLS schedule, archived 2026-07-31:
+# https://web.archive.org/web/20260731041428/https://www.bls.gov/schedule/news_release/empsit.htm
+# — June printed 2026-07-02, July 2026-08-07, August 2026-09-04, September
+# 2026-10-02). The page is overwritten each month, so the capture's own
+# current-month header is checked against the target period before any row is
+# read (a19_snapshot_period); a pin to the wrong capture refuses.
+A19_SOURCE_URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
 A19_SNAPSHOT_URLS: dict[str, str] = {
-    "2026-06": (
-        "https://web.archive.org/web/20260710110509/"
-        "https://www.bls.gov/web/empsit/cpseea19.htm"
-    ),
+    "2026-06": f"https://web.archive.org/web/20260710110509/{A19_SOURCE_URL}",
+    "2026-07": f"https://web.archive.org/web/20260819191418/{A19_SOURCE_URL}",
+    "2026-08": f"https://web.archive.org/web/20260904170006/{A19_SOURCE_URL}",
 }
 A19_ROW_LABELS: dict[str, str] = {
     "business_financial_operations": "Business and financial operations occupations",
@@ -7474,6 +7482,369 @@ def a19_values_from_html(html: str) -> dict[str, float]:
     return out
 
 
+_A19_HEADER_MONTHS = {
+    "jan.": 1,
+    "feb.": 2,
+    "mar.": 3,
+    "apr.": 4,
+    "may": 5,
+    "june": 6,
+    "july": 7,
+    "aug.": 8,
+    "sept.": 9,
+    "oct.": 10,
+    "nov.": 11,
+    "dec.": 12,
+}
+
+
+def a19_snapshot_period(html: str) -> str | None:
+    """The data month (YYYY-MM) a Table A-19 page prints, from its headers.
+
+    Every column group is headed by the same month a year apart
+    ("July<br/>2025", "July<br/>2026"); the later one is the print. Any other
+    shape returns None: this page is overwritten monthly, and a value read
+    from a capture of a different month must never be recorded. Ten of the
+    twelve labels below were read off real captures on 2026-09-20 ("May" and
+    "Oct." were not reachable then); an unknown label returns None.
+    """
+
+    cells = {
+        (month.lower(), int(year))
+        for month, year in re.findall(
+            r"<th\b[^>]*>\s*([A-Za-z]+\.?)\s*<br\s*/?>\s*(\d{4})\s*</th>",
+            html,
+            flags=re.IGNORECASE,
+        )
+    }
+    months = {month for month, _ in cells}
+    years = sorted(year for _, year in cells)
+    if len(cells) != 2 or len(months) != 1 or years[1] - years[0] != 1:
+        return None
+    number = _A19_HEADER_MONTHS.get(months.pop())
+    return None if number is None else f"{years[1]}-{number:02d}"
+
+
+def a19_capture(snapshot_url: str) -> tuple[dt.datetime, str] | None:
+    """(capture instant, archived publisher URL) of a pinned Wayback URL."""
+
+    match = re.fullmatch(
+        r"https://web\.archive\.org/web/(\d{14})/(https://.+)", snapshot_url
+    )
+    if not match:
+        return None
+    try:
+        captured = dt.datetime.strptime(match.group(1), "%Y%m%d%H%M%S").replace(
+            tzinfo=dt.timezone.utc
+        )
+    except ValueError:
+        return None
+    return captured, match.group(2)
+
+
+WAYBACK_CDX_URL = (
+    "https://web.archive.org/cdx/search/cdx?url={url}&from={start}&to={end}"
+    "&output=json&fl=timestamp,statuscode&filter=statuscode:200"
+)
+WAYBACK_SAVE_URL = "https://web.archive.org/save/{url}"
+A19_MAX_WINDOW_CAPTURES = 16
+A19_CAPTURE_REQUESTED = "asked the Internet Archive to capture the page"
+_WAYBACK_READ_ERRORS = (OSError, EOFError, http.client.HTTPException)
+
+
+class A19CaptureError(ValueError):
+    """The Archive did not serve the exact capture that was asked for."""
+
+
+def _wayback_read(url: str) -> tuple[bytes, str]:
+    """(body, final URL after redirects) for one Internet Archive request."""
+
+    request = urllib.request.Request(url, headers={"User-Agent": INTL_USER_AGENT})
+    with urllib.request.urlopen(request, timeout=120) as response:
+        return response.read(), response.geturl()
+
+
+def a19_read_capture(
+    capture_url: str, read: Callable[[str], tuple[bytes, str]] = _wayback_read
+) -> bytes:
+    """BLS's own bytes for exactly one capture of the A-19 page.
+
+    Asked for a timestamp it holds no capture of, the Archive answers with
+    the nearest capture and rewrites the path (observed 2026-09-20: a request
+    for 20260901000000 returned the 20260904170006 capture with HTTP 200). A
+    window check on the requested timestamp would then judge a date nothing
+    served, so the final URL must name the same timestamp and page. The
+    ``id_`` form returns the response the Archive stored, without its replay
+    toolbar or link rewriting, so the hash recorded for the fact is one
+    anybody can reproduce; the Archive passes BLS's gzip encoding through.
+    """
+
+    capture = a19_capture(capture_url)
+    if capture is None or capture[1] != A19_SOURCE_URL:
+        raise A19CaptureError(f"not a capture of {A19_SOURCE_URL}: {capture_url}")
+    stamp = f"{capture[0]:%Y%m%d%H%M%S}"
+    raw, final_url = read(f"https://web.archive.org/web/{stamp}id_/{A19_SOURCE_URL}")
+    served = re.fullmatch(
+        r"https?://web\.archive\.org/web/(\d{14})(?:id_)?/(https://.+)", final_url
+    )
+    if not served or served.groups() != (stamp, A19_SOURCE_URL):
+        raise A19CaptureError(
+            f"asked the Archive for capture {stamp} and was served {final_url}"
+        )
+    if raw[:2] == b"\x1f\x8b":
+        try:
+            raw = gzip.decompress(raw)
+        except (OSError, EOFError) as exc:
+            raise A19CaptureError(f"capture {stamp} is not valid gzip") from exc
+    return raw
+
+
+def a19_window_captures(
+    window: Mapping[str, Any],
+    read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+) -> list[str]:
+    """Internet Archive captures of the A-19 page dated inside ``window``.
+
+    Oldest first, as capture URLs. The Archive's own index supplies the
+    timestamps, so a registered target needs no per-period hand pin. A body
+    that is not the index's list-of-rows shape raises ValueError.
+    """
+
+    start = dt.date.fromisoformat(str(window["start"]))
+    end = dt.date.fromisoformat(str(window["end"]))
+    body, _ = read(
+        WAYBACK_CDX_URL.format(
+            url=urllib.parse.quote(A19_SOURCE_URL, safe=""),
+            start=f"{start:%Y%m%d}000000",
+            end=f"{end:%Y%m%d}235959",
+        )
+    )
+    index = json.loads(body.decode() or "[]")
+    if not isinstance(index, list) or not all(isinstance(row, list) for row in index):
+        raise ValueError("the Archive index is not a list of rows")
+    captures = []
+    for row in index[1:]:
+        if (
+            len(row) != 2
+            or row[1] != "200"
+            or not isinstance(row[0], str)
+            or not re.fullmatch(r"\d{14}", row[0])
+        ):
+            continue
+        url = f"https://web.archive.org/web/{row[0]}/{A19_SOURCE_URL}"
+        capture = a19_capture(url)
+        if capture and start <= capture[0].date() <= end:
+            captures.append(url)
+    return sorted(set(captures))
+
+
+def a19_registered_capture(
+    period: str,
+    window: Any,
+    today: dt.date,
+    read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+    *,
+    request_capture: bool = True,
+) -> tuple[str | None, bytes | None, str]:
+    """(capture URL, BLS bytes, verdict) for a registered A-19 target.
+
+    Takes the EARLIEST capture dated inside the registered window whose
+    current-month header is ``period``. With none, and the window still open,
+    it asks the Archive to capture the page and defers: a later run finds that
+    capture. The verdict is the line to print when nothing resolves.
+    ``FIRST-PRINT WINDOW MISSED`` is reserved for one finding: the window is
+    closed, the whole index for it was read, and no capture in it prints the
+    month. A capped scan or a failed read says so instead.
+    """
+
+    state = snapshot_window_state(today, window)
+    if state == "invalid":
+        return None, None, "NO REGISTERED RELEASE WINDOW (refusing)"
+    if state == "pending":
+        return None, None, f"release window opens {window['start']} (deferring)"
+    try:
+        captures = a19_window_captures(window, read)
+    except (*_WAYBACK_READ_ERRORS, ValueError) as exc:
+        return (
+            None,
+            None,
+            (
+                f"WAYBACK INDEX FETCH FAILED (deferring): {type(exc).__name__}: "
+                f"{str(exc)[:200]}"
+            ),
+        )
+    unread = []
+    for url in captures[:A19_MAX_WINDOW_CAPTURES]:
+        try:
+            raw = a19_read_capture(url, read)
+        except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
+            unread.append(f"{url} ({type(exc).__name__})")
+            continue
+        if a19_snapshot_period(raw.decode(errors="replace")) == period:
+            return url, raw, ""
+    if unread:
+        return (
+            None,
+            None,
+            (
+                f"CAPTURE READ FAILED (deferring): {len(unread)} of "
+                f"{len(captures)} capture(s) inside {window!r} could not be "
+                f"read: {'; '.join(unread)[:300]}"
+            ),
+        )
+    if len(captures) > A19_MAX_WINDOW_CAPTURES:
+        return (
+            None,
+            None,
+            (
+                f"CAPTURE SCAN LIMIT REACHED (refusing): the first "
+                f"{A19_MAX_WINDOW_CAPTURES} of {len(captures)} captures inside "
+                f"{window!r} do not print {period}"
+            ),
+        )
+    if state == "missed":
+        return (
+            None,
+            None,
+            (
+                "FIRST-PRINT WINDOW MISSED (refusing): none of the "
+                f"{len(captures)} Internet Archive capture(s) dated inside the "
+                f"registered window {window!r} prints {period}"
+            ),
+        )
+    if not request_capture:
+        return (
+            None,
+            None,
+            (
+                f"no capture inside the registered window prints {period} yet "
+                "(deferring)"
+            ),
+        )
+    try:
+        read(WAYBACK_SAVE_URL.format(url=A19_SOURCE_URL))
+        requested = A19_CAPTURE_REQUESTED
+    except _WAYBACK_READ_ERRORS as exc:
+        requested = f"the capture request failed ({type(exc).__name__})"
+    return (
+        None,
+        None,
+        (
+            f"no capture inside the registered window prints {period} yet; "
+            f"{requested} (deferring)"
+        ),
+    )
+
+
+def a19_fact(
+    ref: str,
+    spec: dict[str, Any],
+    period_type: str,
+    period: str,
+    value: float,
+    release_day: dt.date,
+    capture_url: str,
+    source_file: str,
+) -> dict:
+    """A-19 ledger fact: BLS is the source, the Archive capture the evidence.
+
+    bls.gov refuses non-browser fetches and overwrites this page monthly, so
+    the Internet Archive is the transport that kept the month's bytes. The
+    fact names the publisher's page as its source, which is what a registered
+    contract's allowedHosts constrains, and keeps the exact capture as its
+    evidence URL. Callers have checked that the capture archives that page.
+    """
+
+    row = generic_fact(
+        ref, spec, period_type, period, value, release_day, capture_url, source_file
+    )
+    row["source"]["url"] = A19_SOURCE_URL
+    return row
+
+
+A19_REGISTERED_TABLE = (
+    "CPS Employment Situation Table A-19, employed persons by occupation, not "
+    "seasonally adjusted (thousands)"
+)
+A19_BINDING_KEYS = frozenset(
+    {
+        "adapter",
+        "allowedHosts",
+        "expectedReleaseWindow",
+        "field",
+        "releasePolicy",
+        "sourceSeriesId",
+        "sourceUrl",
+        "table",
+        "transform",
+    }
+)
+
+
+# What a registered A-19 contract may ask of the table. BLS prints thousands;
+# the docket registers these cells in millions with an explicit x0.001
+# transform. Like every other adapter, the executor emits the unit its spec
+# declares and the refusal ladder compares that with the forecast: the
+# registration selects the spec, it is never a free-form multiplier.
+A19_REGISTERED_SCALES: dict[str, tuple[float, int]] = {
+    "thousands": (1.0, 0),
+    "millions": (0.001, 3),
+}
+
+
+def a19_execution_spec(
+    spec: dict[str, Any], registration: Mapping[str, Any] | None
+) -> tuple[dict[str, Any] | None, str | None]:
+    """(spec to execute, refusal) for an A-19 cell.
+
+    A cell that predates registration keeps the table's own thousands. A
+    registered cell must carry exactly the reviewed binding (this page, this
+    table, this row, this series, BLS's host, first print) and one of the two
+    reviewed unit contracts, with ``valueScale`` and ``transform`` agreeing;
+    then the spec emits the registered unit. The release window is the one
+    free field, and the capture is judged against it.
+    """
+
+    if not registration:
+        return spec, None
+    contract = registration.get("contract") or {}
+    binding = contract.get("sourceBinding") or {}
+    unit = contract.get("unit")
+    scale = A19_REGISTERED_SCALES.get(str(unit))
+    problems = []
+    if not isinstance(binding, dict) or set(binding) != A19_BINDING_KEYS:
+        return None, "sourceBinding keys"
+    # The only adapter an A-19 contract has ever been registered under. It
+    # names no executor, which is why every other field is pinned here.
+    if binding.get("adapter") != "generic-url":
+        problems.append("adapter")
+    if binding.get("allowedHosts") != [urlparse(A19_SOURCE_URL).hostname]:
+        problems.append("allowedHosts")
+    if binding.get("table") != A19_REGISTERED_TABLE:
+        problems.append("table")
+    series = f"{A19_STEM}.{spec['a19_row']}"
+    if contract.get("series") != series or binding.get("sourceSeriesId") != series:
+        problems.append("series")
+    if binding.get("sourceUrl") != A19_SOURCE_URL:
+        problems.append("sourceUrl")
+    if binding.get("field") != spec["source_concept"]:
+        problems.append("field")
+    if binding.get("releasePolicy") != "first_print":
+        problems.append("releasePolicy")
+    if scale is None:
+        problems.append("unit")
+    else:
+        factor, _ = scale
+        if binding.get("transform") != {"operation": "multiply", "factor": factor}:
+            problems.append("transform")
+        if contract.get("valueScale") != factor:
+            problems.append("valueScale")
+    if problems:
+        return None, ", ".join(problems)
+    factor, digits = scale
+    return {**spec, "unit": unit, "scale": factor, "round": digits}, None
+
+
 def bls_rows_from_payload(raw: bytes, series_id: str) -> dict[str, dict[str, Any]]:
     """Monthly rows keyed YYYY-MM with the latest/preliminary markers the
     temporal first-print gate needs. Only a successful response for exactly
@@ -10971,6 +11342,15 @@ def pending_adapter_refs(
                     "concept_authority": "bls",
                     "source_concept": A19_ROW_LABELS[occupation],
                     "a19_row": occupation,
+                    "evidence_notes": (
+                        "Value for {period} read from {source_url}, an "
+                        "Internet Archive capture of BLS Table A-19 whose "
+                        "current-month column is {period}: BLS overwrites the "
+                        "table with each Employment Situation, so the capture "
+                        "was taken after {period} was published and before "
+                        "the next month replaced it. This does not claim the "
+                        "bytes BLS served at the moment of release."
+                    ),
                 }
                 out.append(
                     (ref, "a19", spec, parsed[0], parsed[1], release_date, forecast)
@@ -12776,6 +13156,9 @@ FAMILY_ADAPTERS = {
     # must never be resolved by a series-stem family that happens to share
     # the series name — the 2026-07-25 new-home-sales collision, where a
     # 2026-07-10 generic-url registration met a newly added ALFRED stem.
+    # A-19 has no adapter of its own: its registrations are generic-url
+    # contracts that a19_execution_spec pins field by field.
+    "a19": {"generic-url"},
     "alfred": {"alfred-fred"},
     "bea_release": {"bea-release", "bea-ita-itable"},
     "bls_api": {"bls-api"},
@@ -13291,6 +13674,8 @@ def main() -> int:
     ] = {}
     qcew_contracts: dict[str, dict[str, Any]] | None = None
     a19_cache: dict[str, tuple[dict[str, float], bytes | None, str, str]] = {}
+    a19_discovered: dict[str, tuple[str | None, bytes | None, str]] = {}
+    a19_capture_requested = False
     intl_cache: dict[Any, tuple] = {}
     # International requests are checked against the immutable registered
     # contract before any network call. Existing registrations whose source
@@ -13346,14 +13731,29 @@ def main() -> int:
         is_edition_page = (
             kind == "ssa_official" and spec.get("release_evidence") == "edition_page"
         )
+        # A registered A-19 cell's custody must be captured while its window
+        # is open, and its resolutionDate is the window's END: gating on that
+        # date would leave one attempt, on the last day. The leg defers on its
+        # own until the window opens.
+        is_a19_window = kind == "a19" and registration is not None
         if (
             release_day > today
             and resolution_date_basis == DEFAULT_RESOLUTION_DATE_BASIS
             and not is_registered_query_snapshot
             and not is_edition_page
+            and not is_a19_window
         ):
             print(f"  release {release_day} not reached: {ref}")
             continue
+        if kind == "a19":
+            a19_spec, a19_refusal = a19_execution_spec(spec, registration)
+            if a19_spec is None:
+                print(
+                    "  BINDING/ADAPTER MISMATCH (refusing, registered A-19 "
+                    f"contract differs in {a19_refusal}): {ref}"
+                )
+                continue
+            spec = a19_spec
         unit = (forecast or {}).get("unit")
         if not adapter_unit_matches(spec, forecast):
             print(
@@ -14850,28 +15250,84 @@ def main() -> int:
             source_file = "registered query snapshot (USAspending API v2)"
             extension = "json"
         else:
+            utc_today = dt.date.fromisoformat(utc_now()[:10])
+            window = source_binding.get("expectedReleaseWindow")
             snapshot_url = A19_SNAPSHOT_URLS.get(period)
+            pinned = a19_capture(snapshot_url) if snapshot_url else None
+            if registration and not (
+                pinned and snapshot_window_state(pinned[0].date(), window) == "open"
+            ):
+                # The capture is a registered cell's custody, so it must be
+                # dated inside the window the contract registered; a pin
+                # outside it is evidence for a ruling, never a source. Cells
+                # of one month can register different windows, so discovery
+                # is per (month, window). One capture request per run.
+                discovery_key = f"{period}@{canonical_sha256(window)}"
+                if discovery_key not in a19_discovered:
+                    a19_discovered[discovery_key] = a19_registered_capture(
+                        period,
+                        window,
+                        utc_today,
+                        request_capture=not a19_capture_requested,
+                    )
+                    if A19_CAPTURE_REQUESTED in a19_discovered[discovery_key][2]:
+                        a19_capture_requested = True
+                snapshot_url, discovered_raw, verdict = a19_discovered[discovery_key]
+                if not snapshot_url or discovered_raw is None:
+                    print(f"  A-19 {verdict}: {ref}")
+                    continue
+                a19_cache.setdefault(
+                    snapshot_url,
+                    (
+                        a19_values_from_html(discovered_raw.decode(errors="replace")),
+                        discovered_raw,
+                        snapshot_url,
+                        utc_now(),
+                    ),
+                )
             if not snapshot_url:
                 print(f"  no A-19 snapshot registered for {period}: {ref}")
                 continue
-            if period not in a19_cache:
+            capture = a19_capture(snapshot_url)
+            if capture is None or capture[1] != A19_SOURCE_URL:
+                print(f"  A-19 SNAPSHOT PIN INVALID (refusing): {ref} — {snapshot_url}")
+                continue
+            if snapshot_url not in a19_cache:
                 retrieved_at = utc_now()
                 try:
-                    with urllib.request.urlopen(snapshot_url, timeout=120) as r:
-                        raw_html = r.read()
-                    a19_cache[period] = (
-                        a19_values_from_html(raw_html.decode()),
+                    raw_html = a19_read_capture(snapshot_url)
+                    a19_cache[snapshot_url] = (
+                        a19_values_from_html(raw_html.decode(errors="replace")),
                         raw_html,
                         snapshot_url,
                         retrieved_at,
                     )
-                except urllib.error.HTTPError as exc:
-                    print(f"  A-19 snapshot fetch failed ({exc}): {ref}")
-                    a19_cache[period] = ({}, None, snapshot_url, retrieved_at)
-            values, raw, source_url, retrieved_at = a19_cache[period]
+                except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
+                    print(
+                        f"  A-19 snapshot fetch failed (deferring): {ref} — "
+                        f"{type(exc).__name__}: {str(exc)[:200]}"
+                    )
+                    a19_cache[snapshot_url] = ({}, None, snapshot_url, retrieved_at)
+            values, raw, source_url, retrieved_at = a19_cache[snapshot_url]
+            if raw is None:
+                continue
+            printed = a19_snapshot_period(raw.decode(errors="replace"))
+            if printed != period:
+                print(
+                    f"  A-19 SNAPSHOT PERIOD MISMATCH (refusing): {ref} — "
+                    f"the capture prints {printed}, not {period}"
+                )
+                continue
             value = values.get(spec["a19_row"])
+            if value is not None and "scale" in spec:
+                value = round(value * spec["scale"], spec["round"]) + 0.0
+            if registration:
+                # The publisher's date this row can vouch for is the day the
+                # Archive saw the page, not the forecast's resolutionDate,
+                # which for these contracts is the window's end.
+                release_day = capture[0].date()
             series_id = f"cpseea19-{spec['a19_row']}"
-            source_file = "cpseea19.htm (Wayback snapshot)"
+            source_file = f"cpseea19.htm (Wayback capture {capture[0]:%Y%m%d%H%M%S})"
             extension = "html"
         if value is None or raw is None:
             print(f"  not yet published: {ref}")
@@ -14892,6 +15348,17 @@ def main() -> int:
         elif kind == "qcew":
             assert qcew_row is not None
             row = qcew_row
+        elif kind == "a19":
+            row = a19_fact(
+                ref,
+                spec,
+                period_type,
+                period,
+                value,
+                release_day,
+                source_url,
+                source_file,
+            )
         else:
             row = generic_fact(
                 ref,
