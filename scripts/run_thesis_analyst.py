@@ -575,6 +575,7 @@ def format_target_context(target_context: dict[str, Any] | None) -> str:
         "targetUnit",
         "dataPointId",
         "resolutionDate",
+        "publishedResolutionDate",
         "resolutionDateBasis",
         "expectedReleaseWindow",
         "resolutionSource",
@@ -607,6 +608,22 @@ def format_target_context(target_context: dict[str, Any] | None) -> str:
         value = target_context.get(key)
         if value not in (None, ""):
             lines.append(f"- {key}: {json.dumps(value, sort_keys=True)}")
+    published_date = target_context.get("publishedResolutionDate")
+    if target_context.get("comparisonTarget") is True and published_date not in (
+        None,
+        "",
+    ):
+        lines += [
+            "",
+            "# Comparison target contract (machine checked)",
+            "This run is a strategy comparison against an already published "
+            "forecast. The sealed cell's resolutionDate, resolutionSource, "
+            "resolutionSourceUrl and resolutionRule are pinned to that "
+            "forecast's published resolver; publishedResolutionDate "
+            f"{json.dumps(published_date)} is its resolver date. Still verify "
+            "the official release schedule this run and state any discrepancy "
+            "in reasoning rather than changing the target.",
+        ]
     if target_context.get("resolutionDateBasis") == "resolve-by-bound":
         bound = target_context.get("resolutionDate")
         announcement_url = (target_context.get("sourceBinding") or {}).get("sourceUrl")
@@ -2706,6 +2723,11 @@ def pin_comparison_contract(
         ("resolutionRule", "resolutionRule"),
     ):
         value = target_context.get(context_key)
+        if cell_key == "resolutionDate" and value in (None, ""):
+            # A release-calendar registration binds no resolutionDate, so the
+            # comparison context carries the published forecast's resolver
+            # date separately (strategy_targets.published_target).
+            value = target_context.get("publishedResolutionDate")
         if value not in (None, ""):
             cell[cell_key] = value
 
@@ -2975,6 +2997,16 @@ def target_context_validation_errors(
             errors.append(
                 f"{cell_key} {actual!r} does not match target context "
                 f"{context_key} {expected!r}"
+            )
+    published_date = target_context.get("publishedResolutionDate")
+    if target_context.get("comparisonTarget") is True and published_date not in (
+        None,
+        "",
+    ):
+        if not canonical_equal(cell.get("resolutionDate"), published_date):
+            errors.append(
+                f"resolutionDate {cell.get('resolutionDate')!r} does not match "
+                f"the published comparison resolver date {published_date!r}"
             )
     binding = target_context.get("sourceBinding")
     if isinstance(binding, dict) and binding.get("sourceUrl"):

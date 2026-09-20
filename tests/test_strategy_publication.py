@@ -41,7 +41,9 @@ def target() -> dict:
             "sourceUrl": "https://agency.example/rate",
             "allowedHosts": ["agency.example"],
         },
-        "resolutionDate": "2030-02-15",
+        # A release-calendar registration binds no resolutionDate; the
+        # published forecast's resolver date rides separately.
+        "publishedResolutionDate": "2030-02-15",
         "resolutionSource": "Agency",
         "resolutionSourceUrl": "https://agency.example/rate",
         "resolutionRule": "Use the first official print only.",
@@ -400,7 +402,8 @@ def test_cell_resolver_equality_does_not_require_resolution_policy():
         "country": trusted["country"],
         "dataPointId": trusted["dataPointId"],
         "unit": trusted["targetUnit"],
-        "resolutionDate": trusted["resolutionDate"],
+        # Comparison cells are graded against the published resolver date.
+        "resolutionDate": trusted["publishedResolutionDate"],
         "resolutionSource": trusted["resolutionSource"],
         "resolutionSourceUrl": trusted["resolutionSourceUrl"],
         "resolutionRule": trusted["resolutionRule"],
@@ -408,8 +411,32 @@ def test_cell_resolver_equality_does_not_require_resolution_policy():
     }
     publication._resolver_equal(cell, trusted)
     cell["resolutionDate"] = "2030-02-16"
-    with pytest.raises(publication.StrategyPublicationError, match="resolutionDate"):
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="resolutionDate differs from trusted target field "
+        "publishedResolutionDate",
+    ):
         publication._resolver_equal(cell, trusted)
+
+
+def test_selection_requires_published_resolution_date(tmp_path: pathlib.Path):
+    # The pre-2026-09-20 selection shape stored the published date under
+    # resolutionDate, which the publisher's registration projection rejects
+    # for release-calendar contracts. The trusted selection must now carry
+    # publishedResolutionDate; a legacy-shaped target is not silently accepted.
+    legacy = selection_payload()
+    legacy_target = legacy["targets"][0]
+    legacy_target["resolutionDate"] = legacy_target.pop("publishedResolutionDate")
+    legacy.pop("selectionSetHash")
+    legacy["selectionSetHash"] = canonical_sha256(legacy)
+    path = tmp_path / "legacy-selection.json"
+    path.write_text(json.dumps(legacy, indent=2) + "\n")
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="lacks publishedResolutionDate",
+    ):
+        publication._validate_selection(path)
 
 
 def test_ladder_lane_prompt_mode_binds_to_trusted_selection(

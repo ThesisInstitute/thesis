@@ -43,7 +43,11 @@ RESOLVER_FIELDS = (
     "country",
     "dataPointId",
     "targetUnit",
-    "resolutionDate",
+    # The published forecast's resolver date. A trusted target never stores
+    # it as `resolutionDate`: that key must mirror the registered contract
+    # with the snapshot's exact presence, and release-calendar contracts omit
+    # it (see strategy_targets.published_target).
+    "publishedResolutionDate",
     "resolutionSource",
     "resolutionSourceUrl",
     "resolutionRule",
@@ -380,7 +384,13 @@ def _target_map(
 
 
 def _resolver_equal(cell: dict[str, Any], target: dict[str, Any]) -> None:
-    cell_keys = {"catalogSlug": "slug", "targetUnit": "unit"}
+    cell_keys = {
+        "catalogSlug": "slug",
+        "targetUnit": "unit",
+        # Comparison cells are graded against the published forecast's
+        # resolver, so their resolutionDate must equal its published date.
+        "publishedResolutionDate": "resolutionDate",
+    }
     for field in RESOLVER_FIELDS:
         # resolutionPolicy is target-architecture metadata; forecast cells carry
         # the substantive rule/source/date but do not duplicate this field.
@@ -389,7 +399,8 @@ def _resolver_equal(cell: dict[str, Any], target: dict[str, Any]) -> None:
         cell_field = cell_keys.get(field, field)
         if canonical_bytes(cell.get(cell_field)) != canonical_bytes(target.get(field)):
             raise StrategyPublicationError(
-                f"cell resolver differs from trusted target field {field}"
+                f"cell resolver {cell_field} differs from trusted target "
+                f"field {field}"
             )
     for field in REGISTRATION_FIELDS:
         if canonical_bytes(cell.get(field)) != canonical_bytes(target.get(field)):
