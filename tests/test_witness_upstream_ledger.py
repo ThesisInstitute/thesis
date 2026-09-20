@@ -559,7 +559,11 @@ def test_witness_run_verifies_rows_with_unicode_line_separators(
         tmp_path,
         monkeypatch,
         rows=[
-            {"source_record_id": "series.a.2030", "value": 1, "note": "x\u0085y\u2028z"},
+            {
+                "source_record_id": "series.a.2030",
+                "value": 1,
+                "note": "x\u0085y\u2028z",
+            },
             {"source_record_id": "series.b.2030", "value": 2},
         ],
         ensure_ascii=False,
