@@ -205,7 +205,7 @@ function parseSavedRun(
 
   const reasoning: ReasoningStep[] = [];
   for (const [heading, paragraphs] of [
-    ["Saved forecast explanation", payload.publicTrace],
+    ["Explanation", payload.publicTrace],
     ["Assumptions", payload.assumptions ?? []],
     ["Data caveats", payload.dataCaveats ?? []],
   ] as [string, string[]][]) {

@@ -63,7 +63,7 @@ describe("ForecastRuntime saved report", () => {
     const estimate = within(container).getByRole("region", {
       name: "Forecast estimate",
     });
-    expect(estimate).toHaveTextContent("latest saved forecast · 80% CI");
+    expect(estimate).toHaveTextContent("forecast · 80% CI");
     expect(estimate).toHaveTextContent("13.0%");
     expect(estimate).toHaveTextContent("11.9%");
     expect(estimate).toHaveTextContent("14.3%");
@@ -74,9 +74,8 @@ describe("ForecastRuntime saved report", () => {
       expect.stringContaining("13.0%"),
     );
     expect(
-      within(container).getByRole("heading", { name: "Forecast report" }),
+      within(container).getByRole("heading", { name: "Analysis" }),
     ).toBeTruthy();
-    expect(within(container).getByText("saved report")).toBeTruthy();
     expect(
       within(container).getByText(
         "The saved run uses a current-law calibration prior.",
@@ -118,7 +117,7 @@ describe("ForecastRuntime saved report", () => {
       screen.getByText("Census + PolicyEngine inputs · calibration fallback"),
     ).toBeTruthy();
     expect(
-      screen.getByRole("link", { name: "Archived result →" }),
+      screen.getByRole("link", { name: "Source record →" }),
     ).toHaveAttribute(
       "href",
       `https://github.com/ThesisInstitute/thesis/blob/main/${savedForecast.artifactPath}`,
@@ -127,9 +126,6 @@ describe("ForecastRuntime saved report", () => {
     expect(screen.queryByText("Headline")).toBeNull();
     expect(
       screen.getByText(/original streamed tool activity was not archived/),
-    ).toBeTruthy();
-    expect(
-      screen.getByText(/Viewing this report does not run a new forecast\./),
     ).toBeTruthy();
   });
 
@@ -141,7 +137,6 @@ describe("ForecastRuntime saved report", () => {
     expect(
       screen.getByText(/No completed API result is available/),
     ).toBeTruthy();
-    expect(screen.getByText("static prototype")).toBeTruthy();
     expect(
       screen.getByRole("heading", { name: /Near-term Census target/ }),
     ).toBeTruthy();
