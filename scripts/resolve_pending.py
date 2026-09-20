@@ -2322,8 +2322,13 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
     # first BLS API specs a NEW registration may bind: each carries a
     # ``binding_transform``, which is what ``bls_api_binding_template`` turns
     # into the reviewed seven-key sourceBinding and what the registration-time
-    # execution-plan gate requires. The older specs above have none, so they
-    # keep resolving only the cells that predate bindings.
+    # execution-plan gate requires. Its shape is the prospector's
+    # (``prospect_targets._transform_errors``): exactly ``operation`` and
+    # ``factor``, from that function's operation vocabulary, because a later
+    # proposal carries this binding as its ``previousTarget.sourceBinding``.
+    # Rounding is the executor's (``round``), as for the StatCan growth series.
+    # The older specs above have no ``binding_transform``, so they keep
+    # resolving only the cells that predate bindings.
     #
     # The keyless API answers ``calculations`` with "Calculations have been
     # disabled for this request" (probed 2026-09-20), so month-over-month
@@ -2390,7 +2395,7 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
         },
         "binding_transform": {
             "operation": "percent_change_previous_period",
-            "round": 1,
+            "factor": 1,
         },
     },
     "bls.cpi.u.core_mom": {
@@ -2420,7 +2425,7 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
         },
         "binding_transform": {
             "operation": "percent_change_previous_period",
-            "round": 1,
+            "factor": 1,
         },
     },
     "bls.jolts.job_openings": {
@@ -2492,7 +2497,10 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
             "2026-05": 63.0,
             "2026-06": 31.0,
         },
-        "binding_transform": {"operation": "difference_previous_period"},
+        "binding_transform": {
+            "operation": "difference_previous_period",
+            "factor": 1,
+        },
     },
 }
 for _spec in BLS_API_ADAPTERS.values():

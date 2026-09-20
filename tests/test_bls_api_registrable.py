@@ -294,7 +294,10 @@ def test_the_appended_fact_would_bind_to_the_registered_contract() -> None:
         {"contract": contract}, row, b"{}"
     )
     assert projection["series"] == series
-    assert projection["transform"] == {"operation": "difference_previous_period"}
+    assert projection["transform"] == {
+        "operation": "difference_previous_period",
+        "factor": 1,
+    }
 
 
 @pytest.mark.parametrize(
@@ -430,6 +433,17 @@ def test_docket_templates_are_the_executor_templates() -> None:
         assert entry["releaseCalendarUrl"].startswith(
             "https://www.bls.gov/schedule/news_release/"
         )
+
+
+def test_docket_templates_pass_the_prospector_binding_schema() -> None:
+    # A later proposal for the series carries this binding as its
+    # previousTarget.sourceBinding, and the prospector accepts only its own
+    # adapter list and an exact {operation, factor} transform.
+    import prospect_targets
+
+    for entry in _bls_api_docket_entries():
+        binding = entry["extras"]["sourceBinding"]
+        assert prospect_targets._source_binding_errors(binding) == []
 
 
 def test_docket_calendar_never_covers_an_already_registered_period() -> None:

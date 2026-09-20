@@ -46,7 +46,7 @@
      "table": "Consumer Price Index for All Urban Consumers, US city average, all items, seasonally adjusted (CPI news release, Table A)",
      "transform": {
       "operation": "percent_change_previous_period",
-      "round": 1
+      "factor": 1
      },
      "releasePolicy": "first_print"
     }
@@ -75,7 +75,7 @@
      "table": "Consumer Price Index for All Urban Consumers, US city average, all items less food and energy, seasonally adjusted (CPI news release, Table A)",
      "transform": {
       "operation": "percent_change_previous_period",
-      "round": 1
+      "factor": 1
      },
      "releasePolicy": "first_print"
     }
@@ -103,7 +103,8 @@
      "field": "value",
      "table": "Current Employment Statistics, all employees, total nonfarm, seasonally adjusted (Employment Situation, Table B-1)",
      "transform": {
-      "operation": "difference_previous_period"
+      "operation": "difference_previous_period",
+      "factor": 1
      },
      "releasePolicy": "first_print"
     }
