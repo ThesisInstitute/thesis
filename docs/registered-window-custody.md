@@ -59,7 +59,12 @@ The run is sequential. It waits 20 seconds between capture requests and 5
 seconds between index reads, avoids asking for one host twice in a row when
 another host is waiting, makes at most 3 attempts per request with backoff
 (30, 90, 180 seconds, or the server's `Retry-After` capped at 300), and stops
-asking after 90 minutes. The daily cap is 20 URLs. The pending population on
+asking after 90 minutes, a quarter of which is held back for the index
+reads. After four HTTP 429 answers in a row from the save endpoint it stops
+asking that endpoint for the rest of the run and reports each remaining URL
+as not asked; the index endpoint has its own count. A client that is told to
+slow down and keeps asking is not polite, and the second pass is the retry.
+The daily cap is 20 URLs. The pending population on
 2026-09-20 was 48 targets on 25 URLs and 12 hosts; its busiest day is
 2026-09-30 with 15 URLs on 10 hosts, so the cap does not bind. If it ever
 does, the windows that close soonest are kept and every dropped URL is
@@ -184,7 +189,7 @@ Per URL, one verdict about the run's day:
 | `CAPTURED_NOT_AS_PAGE` | The index lists today's capture only with a status other than 200. |
 | `SAVE_NOT_YET_INDEXED` | The save request returned; the index does not list the capture yet. |
 | `SAVE_FAILED` | Every attempt failed (the text carries the status, such as HTTP 520 or 429) and the index lists nothing today. |
-| `INDEX_UNREAD` | The index could not be read. This is a failure to look, not a finding of absence, and it never counts as a custody gap. |
+| `INDEX_UNREAD` | The index could not be read. This is a failure to look, not a finding of absence. The report then carries no capture count for that URL, and it never counts as a custody gap. |
 | `NO_CAPTURE_TODAY` | No save was requested (audit, or a window that closed during the run) and the index lists nothing today. |
 
 Per target, the report gives the count of HTTP 200 captures inside its own

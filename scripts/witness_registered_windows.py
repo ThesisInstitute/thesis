@@ -83,6 +83,10 @@ DEFAULT_ATTEMPTS = 3
 DEFAULT_SAVE_PAUSE = 20.0
 DEFAULT_INDEX_PAUSE = 5.0
 DEFAULT_DEADLINE_MINUTES = 90.0
+# After this many HTTP 429 answers in a row from one Archive endpoint, the run
+# stops asking that endpoint. A client that is told to slow down and keeps
+# asking is not polite, and the second daily pass is the retry.
+RATE_LIMIT_BREAKER = 4
 # Share of the time budget kept for reading the index after the captures.
 INDEX_SHARE = 0.25
 MAX_RETRY_AFTER = 300.0
@@ -163,6 +167,18 @@ def http_fetch(url: str, timeout: float) -> Response:
         raise FetchError(f"{type(exc).__name__}: {str(exc)[:200]}") from exc
 
 
+def _collapse(failures: Sequence[str]) -> list[str]:
+    """Identical consecutive failures as one line with a count."""
+
+    out: list[tuple[str, int]] = []
+    for text in failures:
+        if out and out[-1][0] == text:
+            out[-1] = (text, out[-1][1] + 1)
+        else:
+            out.append((text, 1))
+    return [text if n == 1 else f"{text} (x{n})" for text, n in out]
+
+
 @dataclass
 class Transport:
     """Bounded, paced requests. Every failure comes back as a value."""
@@ -177,9 +193,16 @@ class Transport:
     # phase holds some back so the index is still read after a slow Archive.
     hold_back: float = 0.0
     started: float = field(init=False)
+    # Consecutive HTTP 429 answers per endpoint ("save", "cdx").
+    rate_limited: dict[str, int] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.started = self.clock()
+
+    @staticmethod
+    def _endpoint(url: str) -> str:
+        path = urllib.parse.urlsplit(url).path
+        return "save" if path.startswith("/save/") else "cdx"
 
     def remaining(self) -> float:
         spent = self.clock() - self.started
@@ -195,7 +218,15 @@ class Transport:
         failures: list[str] = []
         status: int | None = None
         made = 0
+        endpoint = self._endpoint(url)
         for attempt in range(1, max(1, self.attempts) + 1):
+            if self.rate_limited.get(endpoint, 0) >= RATE_LIMIT_BREAKER:
+                failures.append(
+                    f"not asked: the Archive answered HTTP 429 to the last "
+                    f"{RATE_LIMIT_BREAKER} {endpoint} requests of this run"
+                )
+                status = 429
+                break
             if self.remaining() <= 0:
                 failures.append("time budget exhausted before the attempt")
                 break
@@ -205,6 +236,8 @@ class Transport:
             except FetchError as exc:
                 failures.append(exc.detail)
                 status = exc.status
+                streak = self.rate_limited.get(endpoint, 0)
+                self.rate_limited[endpoint] = streak + 1 if exc.status == 429 else 0
                 wait = exc.retry_after
                 if wait is None:
                     wait = BACKOFF_SECONDS[min(attempt, len(BACKOFF_SECONDS)) - 1]
@@ -218,17 +251,18 @@ class Transport:
             except Exception as exc:  # noqa: BLE001 - an injected fetcher's bug is one failure
                 failures.append(f"{type(exc).__name__}: {str(exc)[:200]}")
                 break
+            self.rate_limited[endpoint] = 0
             return response, {
                 "ok": True,
                 "attempts": attempt,
                 "httpStatus": response.status,
-                "earlierFailures": failures,
+                "earlierFailures": _collapse(failures),
             }
         return None, {
             "ok": False,
             "attempts": made,
             "httpStatus": status,
-            "failures": failures,
+            "failures": _collapse(failures),
         }
 
 
@@ -910,7 +944,12 @@ def confirm_url(
         )
         entry["index"] = index
         rows = index.get("captures") or []
-        entry["registrations"] = [_window_custody(t, rows, upto) for t in plan.targets]
+        if index.get("ok"):
+            # Counts come only from an index that was read. An unread index
+            # leaves the rows without counts, so no report can print "0".
+            entry["registrations"] = [
+                _window_custody(t, rows, upto) for t in plan.targets
+            ]
         named = (entry.get("save") or {}).get("reportedCapture")
         # A page that redirects is stored under the URL it redirected to, so
         # the registered URL's index shows a 3xx row and no page. Say where
@@ -1047,7 +1086,8 @@ def closed_window_report(
         entry["index"] = index
         rows = index.get("captures") or []
         entry["registrations"] = [
-            _window_custody(t, rows, t.window_end) for t in plan.targets
+            _window_custody(t, rows, t.window_end) if index.get("ok") else t.as_json()
+            for t in plan.targets
         ]
     except Exception as exc:  # noqa: BLE001
         entry["index"] = {

@@ -1026,3 +1026,84 @@ def test_a_slow_archive_cannot_spend_the_time_the_index_reads_need() -> None:
     assert now["t"] == 750.0  # a quarter of the budget is left for the index
     assert all(e["index"]["ok"] for e in report["openWindows"])
     assert [e["verdict"]["code"] for e in report["openWindows"]] == ["CAPTURED"] * 4
+
+
+# ---------------------------------------------------------------------------
+# Regressions found by the first live run (2026-09-20)
+
+
+def test_an_unread_index_never_prints_a_count_or_a_missing_capture() -> None:
+    # The Archive answered HTTP 429 to everything. The first report printed
+    # "0 HTTP 200 capture(s)" and "WINDOW CLOSED WITHOUT A CAPTURE" beside
+    # "INDEX UNREAD": a failure to look, presented as a finding of absence.
+    def fetch(url: str, timeout: float) -> witness.Response:
+        raise witness.FetchError("HTTP 429: Too Many Requests", status=429)
+
+    targets = [
+        make_target("open", A19, "2026-09-16", "2026-09-21"),
+        make_target("closed", SNAP, "2026-09-08", "2026-09-16"),
+    ]
+    report = run(targets, fetch)
+    text = witness.render_text(report)
+    markdown = witness.render_markdown(report)
+    assert "INDEX_UNREAD" in text and "INDEX UNREAD" in text
+    assert "WITHOUT A CAPTURE" not in text
+    assert "capture(s) in window" not in text
+    assert "CUSTODY GAP" not in text
+    assert "| index unread |" in markdown
+    for entry in report["openWindows"] + report["closedWindows"]:
+        assert entry["index"]["ok"] is False
+        for row in entry["registrations"]:
+            assert "http200CapturesInWindow" not in row
+    assert report["custodyGaps"] == {
+        "closingWithoutCapture": [],
+        "closingAwaitingIndex": [],
+        "closedWithoutCapture": [],
+    }
+
+
+def test_a_rate_limited_endpoint_is_left_alone_for_the_rest_of_the_run() -> None:
+    asked: list[str] = []
+
+    def fetch(url: str, timeout: float) -> witness.Response:
+        asked.append(url)
+        if "/save/" in url:
+            raise witness.FetchError("HTTP 429: Too Many Requests", status=429)
+        return witness.Response(200, url, {}, b"[]")
+
+    targets = [
+        make_target(
+            f"t{i}", f"https://host{i}.example.gov/p", "2026-09-16", "2026-09-24"
+        )
+        for i in range(6)
+    ]
+    report = run(targets, fetch)
+    saves = [u for u in asked if "/save/" in u]
+    assert len(saves) == witness.RATE_LIMIT_BREAKER
+    # The index is a separate endpoint and is still read for every URL.
+    assert len([u for u in asked if "/cdx/" in u]) == 6
+    texts = [e["verdict"]["text"] for e in report["openWindows"]]
+    # The first URL spends three attempts, the second trips the breaker on
+    # its first, and neither it nor the four after it is asked again.
+    assert sum("not asked: the Archive answered HTTP 429" in t for t in texts) == 5
+    assert all(e["verdict"]["code"] == "SAVE_FAILED" for e in report["openWindows"])
+
+
+def test_one_success_clears_a_rate_limit_streak() -> None:
+    answers = iter([429, 429, 429, 200, 429, 429, 429, 200])
+
+    def fetch(url: str, timeout: float) -> witness.Response:
+        if next(answers) == 429:
+            raise witness.FetchError("HTTP 429", status=429, retry_after=1.0)
+        return witness.Response(200, url, {}, b"")
+
+    carrier = transport(fetch, attempts=4)
+    first, _ = carrier.get("https://web.archive.org/save/a", 10.0)
+    second, outcome = carrier.get("https://web.archive.org/save/b", 10.0)
+    assert first is not None and second is not None
+    assert outcome["earlierFailures"] == ["HTTP 429 (x3)"]
+
+
+def test_repeated_failures_are_reported_once_with_a_count() -> None:
+    assert witness._collapse(["a", "a", "a", "b", "a"]) == ["a (x3)", "b", "a"]
+    assert witness._collapse([]) == []
