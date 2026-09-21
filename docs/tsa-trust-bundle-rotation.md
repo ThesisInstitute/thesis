@@ -35,7 +35,9 @@ bundle trusts. What is missing is the review.
 The step "Report degraded witnessing" in `.github/workflows/record-forecasts.yml`
 runs `scripts/witness_health.py` after every recorder push. It opens one issue
 titled "Record witness degraded" while any anchor is unavailable and closes it
-on the first run where every anchor witnesses. DigiCert moved
+on the first run where every anchor witnesses. The same issue reports a
+snapshot that no anchor witnessed, and a pending bundle's new anchor that was
+asked for a token and did not produce a verified one. DigiCert moved
 `timestamp.digicert.com` to a new responder between the 2026-09-03 and
 2026-09-04 recorder runs. Before this step existed, nothing reported it, and
 the records carried one token instead of two until `tsa-anchors-v3`.
@@ -117,7 +119,12 @@ bundle activates can be signed by a retired key. Listing both responders would
 only widen what the chain accepts from then on.
 
 Write the file as canonical JSON with the same trailing newline as the earlier
-bundles. The verifier rejects any other byte layout.
+bundles. The verifier accepts canonical JSON with or without that newline and
+nothing else. The exact bytes are then fixed by the `sha256` and `size` in the
+code pin.
+
+Run this from the repository root with
+`uv run --locked --extra custody python`.
 
 ```python
 import copy, hashlib, json, sys
@@ -126,7 +133,10 @@ from pathlib import Path
 from canonical_json import canonical_bytes, canonical_sha256
 import verify_record_chain as rc
 
-old = json.loads(Path("records/trust/tsa-anchors-v3.json").read_text())
+# Until the recorder publishes a bundle it exists only as the staged copy.
+published = Path("records/trust/tsa-anchors-v3.json")
+staged = Path("scripts/staged_trust_bundles/tsa-anchors-v3.json")
+old = json.loads((published if published.is_file() else staged).read_text())
 new = copy.deepcopy(old)
 new["bundleId"] = "tsa-anchors-v4"
 anchor = next(a for a in new["anchors"] if a["id"] == "digicert-trusted-root-g4")
@@ -163,6 +173,18 @@ writes `records/trust/`. It carries:
 A pin change is a trust decision. Get an independent review before opening the
 pull request, and do not merge your own.
 
+That review is the only gate. The publishing step below is unconditional on
+purpose: once a pull request that changes the code pin and the staged bytes is
+merged, the next recorder run publishes the bundle under a workflow
+attestation, with no dispatch input and no second party. The step cannot
+publish bytes that differ from the merged pin, but it cannot tell a reviewed
+merge from an unreviewed one. `AGENTS.md` names required review or CODEOWNERS
+on the workflows and provenance scripts as the containment for this class and
+as a repository-settings decision. `scripts/verify_record_chain.py`,
+`scripts/publish_trust_bundles.py` and `scripts/staged_trust_bundles/` belong
+in that set. Until the repository has it, treat a merge that touches them as
+the ceremony.
+
 ## How the bundle reaches the chain
 
 Nothing else is needed after the merge. The next recorder run does this, in
@@ -190,6 +212,14 @@ marker is `unavailable` and the bundle stays pending. The next snapshot with an
 available witness under the old bundle activates it. No snapshot can authorize
 the bundle its own token is verified under.
 
+A rotation transition therefore carries no proof in the chain that the new pin
+admits the token the TSA serves today. The proof is outside it: the real-token
+test in the pull request, which verifies a receipt fetched from the live
+endpoint under the new bundle and refuses it under the old one, and then the
+second recorder run. If the pin is wrong, the new bundle still activates, its rotated anchor never witnesses,
+the "Record witness degraded" issue stays open, and the repair is another
+bundle.
+
 A bundle that adds an authority differs in step 3. An anchor ID that no active
 bundle contains is asked for a token too, and the marker records the result
 under `supplementalOutcomes` with role `pending_trust_bundle`. A supplemental
@@ -202,14 +232,20 @@ marker that lists one.
 Check the two recorder runs that follow.
 
 ```sh
-git pull && python3 scripts/verify_record_chain.py records
+git pull && uv run --locked --extra custody python scripts/verify_record_chain.py records
 ```
+
+Use the `uv` form. Producer signing is active, so a bare `python3` without the
+`custody` extra stops with "CHAIN BROKEN: producer signing is active but the
+receipt package is not installed". That message is about the local
+environment, not the chain.
 
 - First run: `records/trust/tsa-anchors-vN.json` exists and is byte-identical
   to the staged copy. The snapshot lists the bundle in `trustBundleUpdates`.
   Its marker names the old bundle. The verifier prints the new bundle among
   the active ones.
 - Second run: the marker names the new bundle and every anchor is `available`.
+  If the rotated anchor is still `unavailable` here, the new pin is wrong.
 
 The staged copy stays in the repository so a fresh clone can compare it with
 the published file.

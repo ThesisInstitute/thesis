@@ -15,6 +15,9 @@ import witness_health  # noqa: E402
 # Real, immutable markers on either side of DigiCert's responder rotation.
 BOTH_WITNESSED = ROOT / "records/2026-09-03/digest-33786852779-1.json"
 DIGICERT_REFUSED = ROOT / "records/2026-09-18/digest-35372147258-1.json"
+# The v1 -> v2 transition snapshot: DigiCert was a new authority then, so its
+# marker carries a real supplemental outcome for the pending bundle.
+V2_TRANSITION = ROOT / "records/2026-07-10/digest-29110005611-1.json"
 
 
 def _marker(digest: pathlib.Path) -> dict:
@@ -49,6 +52,58 @@ def test_an_outage_is_reported_without_claiming_a_rotation() -> None:
     assert degraded is True
     assert "timed out" in text
     assert "replaced its responder certificate" not in text
+
+
+def test_a_snapshot_no_anchor_witnessed_is_reported_as_unwitnessed() -> None:
+    marker = _marker(DIGICERT_REFUSED)
+    marker["status"] = "unavailable"
+    marker["reason"] = "all active-bundle TSA requests or verifications failed"
+    for outcome in marker["anchorOutcomes"]:
+        outcome["status"] = "unavailable"
+        outcome.setdefault("reason", "timestamp request failed: timed out")
+    degraded, text = witness_health.report(DIGICERT_REFUSED, marker)
+    assert degraded is True
+    assert text.startswith("No TSA anchor witnessed")
+    assert "no external time proof" in text
+    assert "stays pending" in text
+    assert "of 2 TSA anchors did not witness" not in text
+
+
+def test_a_verified_probe_of_a_pending_bundle_is_healthy() -> None:
+    marker = _marker(V2_TRANSITION)
+    assert [outcome["status"] for outcome in marker["supplementalOutcomes"]] == [
+        "available"
+    ]
+    degraded, text = witness_health.report(V2_TRANSITION, marker)
+    assert degraded is False
+    assert text.startswith("All 1 TSA anchors witnessed")
+
+
+def test_a_failed_probe_of_a_pending_bundle_is_reported() -> None:
+    marker = _marker(V2_TRANSITION)
+    probe = marker["supplementalOutcomes"][0]
+    marker["supplementalOutcomes"][0] = {
+        "role": probe["role"],
+        "status": "unavailable",
+        "tsa": probe["tsa"],
+        "tsaAnchorId": probe["tsaAnchorId"],
+        "trustBundleId": probe["trustBundleId"],
+        "reason": "timestamp request failed: timed out",
+    }
+    degraded, text = witness_health.report(V2_TRANSITION, marker)
+    assert degraded is True
+    assert text.startswith("All 1 TSA anchors witnessed")
+    assert "did not produce a verified token" in text
+    assert "`digicert-trusted-root-g4`" in text
+    assert "under `tsa-anchors-v2`" in text
+    assert "does not stop the bundle activating" in text
+
+
+def test_supplemental_outcomes_must_be_a_list() -> None:
+    marker = _marker(BOTH_WITNESSED)
+    marker["supplementalOutcomes"] = {"not": "a list"}
+    with pytest.raises(ValueError, match="supplementalOutcomes is not a list"):
+        witness_health.report(BOTH_WITNESSED, marker)
 
 
 def test_a_marker_without_outcomes_is_an_error_not_a_clean_bill() -> None:
@@ -97,6 +152,11 @@ def test_recorder_workflow_reports_degraded_witnessing_after_the_push() -> None:
     assert workflow.index("uses: ./.github/actions/attest-records-push") < start
     step = workflow[start : workflow.index("- name: Alert on failure")]
     assert "python3 scripts/witness_health.py" in step
+    # The digest path reaches the script through env, not by interpolating an
+    # expression into the shell body.
+    assert "DIGEST: ${{ steps.snapshot.outputs.digest }}" in step
+    assert '--digest "$DIGEST"' in step
+    assert "${{" not in step.split("run: |", 1)[1]
     # A failed notice must never turn a pushed, attested recording red.
     assert "continue-on-error: true" in step
     assert "steps.snapshot_push.outputs.committed == '1'" in step

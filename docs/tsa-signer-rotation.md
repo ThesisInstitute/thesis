@@ -123,5 +123,6 @@ bundle for this rotation. `docs/tsa-trust-bundle-rotation.md` is the procedure:
 approve the bundle in verifier code, stage its bytes, and let the recorder
 workflow publish it and introduce it with a snapshot witnessed under the bundle
 that is already active. The recorder also keeps an issue open while any anchor
-is unavailable, so the next rotation is reported on the day it happens.
+is unavailable, so the next rotation is reported by the first recorder run
+after it happens.
 Pinning a responder in `ledger_release_chain.py` does not do any of this.
