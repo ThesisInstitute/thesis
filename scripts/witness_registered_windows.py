@@ -41,8 +41,10 @@ import datetime as dt
 import json
 import os
 import pathlib
+import queue
 import re
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -80,6 +82,12 @@ DEFAULT_LOOKBACK_DAYS = 7
 DEFAULT_SAVE_TIMEOUT = 150.0
 DEFAULT_INDEX_TIMEOUT = 90.0
 DEFAULT_ATTEMPTS = 3
+# The index is read again by the next run, so it earns fewer retries.
+INDEX_ATTEMPTS = 2
+# No capture is requested this close to the UTC date change: the request can
+# take minutes, and a capture dated the next day is outside a window that
+# ends today.
+MIDNIGHT_MARGIN = dt.timedelta(minutes=10)
 DEFAULT_SAVE_PAUSE = 20.0
 DEFAULT_INDEX_PAUSE = 5.0
 DEFAULT_DEADLINE_MINUTES = 90.0
@@ -141,17 +149,22 @@ def _one_line(raw: bytes, limit: int = 160) -> str:
     return re.sub(r"\s+", " ", text).strip()[:limit]
 
 
-def http_fetch(url: str, timeout: float) -> Response:
-    """GET ``url`` with the witness User-Agent. Raises only FetchError."""
+def _http_fetch_blocking(url: str, timeout: float) -> Response:
+    """One GET. ``timeout`` bounds each socket operation, not the request."""
 
     request = urllib.request.Request(url, headers={"User-Agent": WITNESS_USER_AGENT})
+    # A save response is the archived page itself. Nothing in it is read, so
+    # its body is left on the wire; only the status, URL and headers matter.
+    wanted = (
+        0 if urllib.parse.urlsplit(url).path.startswith("/save/") else MAX_BODY_BYTES
+    )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return Response(
                 status=int(response.status),
                 final_url=str(response.geturl()),
                 headers={k.lower(): v for k, v in response.headers.items()},
-                body=response.read(MAX_BODY_BYTES),
+                body=response.read(wanted) if wanted else b"",
             )
     except urllib.error.HTTPError as exc:
         try:
@@ -165,6 +178,37 @@ def http_fetch(url: str, timeout: float) -> Response:
         ) from exc
     except Exception as exc:  # noqa: BLE001 - every transport fault is one outcome
         raise FetchError(f"{type(exc).__name__}: {str(exc)[:200]}") from exc
+
+
+def http_fetch(url: str, timeout: float) -> Response:
+    """GET ``url`` within ``timeout`` seconds in all. Raises only FetchError.
+
+    A socket timeout bounds one blocking operation, so a server that trickles
+    bytes, or a chain of slow redirects, can hold a request open far past it.
+    The request therefore runs on a daemon thread and is abandoned at the
+    deadline: the run's time budget is a wall-clock promise.
+    """
+
+    box: queue.Queue[tuple[str, Any]] = queue.Queue(maxsize=1)
+
+    def work() -> None:
+        try:
+            box.put(("ok", _http_fetch_blocking(url, timeout)))
+        except FetchError as exc:
+            box.put(("error", exc))
+        except BaseException as exc:  # noqa: BLE001 - never die silently off-thread
+            box.put(("error", FetchError(f"{type(exc).__name__}: {str(exc)[:200]}")))
+
+    threading.Thread(target=work, daemon=True, name="witness-fetch").start()
+    try:
+        kind, value = box.get(timeout=timeout)
+    except queue.Empty:
+        raise FetchError(
+            f"no complete response within {timeout:.0f}s; the request was abandoned"
+        ) from None
+    if kind == "error":
+        raise value
+    return value
 
 
 def _collapse(failures: Sequence[str]) -> list[str]:
@@ -186,7 +230,7 @@ class Transport:
     fetch: Fetcher = http_fetch
     sleep: Callable[[float], None] = time.sleep
     clock: Callable[[], float] = time.monotonic
-    today: Callable[[], dt.date] = lambda: dt.datetime.now(dt.timezone.utc).date()
+    now: Callable[[], dt.datetime] = lambda: dt.datetime.now(dt.timezone.utc)
     attempts: int = DEFAULT_ATTEMPTS
     deadline_seconds: float = DEFAULT_DEADLINE_MINUTES * 60
     # Seconds of the budget the current phase may not spend. The capture
@@ -195,9 +239,18 @@ class Transport:
     started: float = field(init=False)
     # Consecutive HTTP 429 answers per endpoint ("save", "cdx").
     rate_limited: dict[str, int] = field(default_factory=dict)
+    # Why this phase makes no further requests, once that is decided.
+    stopped: str | None = None
 
     def __post_init__(self) -> None:
         self.started = self.clock()
+
+    def today(self) -> dt.date:
+        return self.now().astimezone(dt.timezone.utc).date()
+
+    def begin_phase(self, hold_back: float) -> None:
+        self.hold_back = hold_back
+        self.stopped = None
 
     @staticmethod
     def _endpoint(url: str) -> str:
@@ -209,17 +262,45 @@ class Transport:
         return self.deadline_seconds - self.hold_back - spent
 
     def pause(self, seconds: float) -> None:
-        if seconds > 0 and self.remaining() > seconds:
-            self.sleep(seconds)
+        """Wait between requests. Spacing is never skipped to save time: when
+        the budget cannot fit the wait, the phase stops asking instead."""
 
-    def get(self, url: str, timeout: float) -> tuple[Response | None, dict[str, Any]]:
-        """(response, outcome). ``response`` is None when every attempt failed."""
+        if seconds <= 0:
+            return
+        if self.remaining() <= seconds:
+            self.stopped = (
+                "time budget exhausted: no room for the pause between requests"
+            )
+            return
+        self.sleep(seconds)
+
+    def get(
+        self,
+        url: str,
+        timeout: float,
+        *,
+        attempts: int | None = None,
+        guard: Callable[[], str | None] | None = None,
+    ) -> tuple[Response | None, dict[str, Any]]:
+        """(response, outcome). ``response`` is None when every attempt failed.
+
+        ``guard`` runs immediately before every attempt, retries included, and
+        returns the reason the request may no longer leave, or None.
+        """
 
         failures: list[str] = []
         status: int | None = None
         made = 0
         endpoint = self._endpoint(url)
-        for attempt in range(1, max(1, self.attempts) + 1):
+        limit = max(1, self.attempts if attempts is None else attempts)
+        for attempt in range(1, limit + 1):
+            if self.stopped:
+                failures.append(f"not asked: {self.stopped}")
+                break
+            refusal = guard() if guard is not None else None
+            if refusal:
+                failures.append(f"not asked: {refusal}")
+                break
             if self.rate_limited.get(endpoint, 0) >= RATE_LIMIT_BREAKER:
                 failures.append(
                     f"not asked: the Archive answered HTTP 429 to the last "
@@ -242,10 +323,10 @@ class Transport:
                 if wait is None:
                     wait = BACKOFF_SECONDS[min(attempt, len(BACKOFF_SECONDS)) - 1]
                 wait = min(wait, MAX_RETRY_AFTER)
-                if attempt < self.attempts and self.remaining() > wait + timeout:
+                if attempt < limit and self.remaining() > wait + timeout:
                     self.sleep(wait)
                     continue
-                if attempt < self.attempts:
+                if attempt < limit:
                     failures.append("no time left in the budget for another attempt")
                 break
             except Exception as exc:  # noqa: BLE001 - an injected fetcher's bug is one failure
@@ -683,15 +764,15 @@ def known_limits(url: str) -> list[str]:
         notes.append(
             "ssa.gov refused Save Page Now with HTTP 520 on every attempt on "
             "2026-08-23 (docs/anchor-verifications.md, SSA official pages). "
-            "Expect the save to fail; a capture in the index would come from "
-            "the Archive's own crawl."
+            "Expect the save to fail. The index is still read."
         )
     if host == "bls.gov" or host.endswith(".bls.gov"):
         notes.append(
             "bls.gov answers non-browser clients with HTTP 403, but the "
-            "Archive's crawler has stored HTTP 200 captures of this host "
+            "Archive's index lists HTTP 200 captures of this host "
             "(cpseea19.htm: 20260710110509, 20260819191418, 20260904170006). "
-            "A capture with a status other than 200 is not custody of the page."
+            "Only an HTTP 200 capture, or a revisit tied to one by digest, "
+            "counts as custody of the page."
         )
     api_like = (
         host.startswith(("api.", "data.api."))
@@ -729,31 +810,97 @@ def cdx_url(url: str, start: dt.date, end: dt.date) -> str:
     return f"{WAYBACK_CDX_ENDPOINT}?{query}"
 
 
-def parse_cdx(body: bytes, start: dt.date, end: dt.date) -> list[dict[str, str]]:
-    """Index rows dated inside [start, end], oldest first. Raises ValueError."""
+INDEX_READ_ONLY = "index read only"
+REQUIRED_CDX_FIELDS = ("timestamp", "original", "statuscode", "digest")
+
+
+def page_key(url: Any) -> tuple[str, str, str, str] | None:
+    """Identity of a URL for matching an index row to a registered page.
+
+    Exact on scheme, path and query. The host is compared without case and
+    without a default port, and an empty path is "/". Nothing looser: a row
+    for another scheme, host, path or query string is not this page.
+    """
+
+    if not isinstance(url, str):
+        return None
+    try:
+        parts = urllib.parse.urlsplit(url.strip())
+        host = (parts.hostname or "").lower()
+        port = parts.port
+    except ValueError:
+        return None
+    scheme = parts.scheme.lower()
+    if not scheme or not host:
+        return None
+    if port is not None and port != {"http": 80, "https": 443}.get(scheme):
+        host = f"{host}:{port}"
+    return scheme, host, parts.path or "/", parts.query
+
+
+def parse_cdx(
+    body: bytes, start: dt.date, end: dt.date, url: str
+) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    """(rows for ``url``, rows for some other URL), dated inside [start, end].
+
+    Oldest first. Raises ValueError when the body is not an index listing
+    with the fields that identify a capture: a row that cannot be tied to
+    the registered URL is neither custody nor absence.
+
+    Each row for ``url`` gets a ``kind``: "page" for HTTP 200; "revisit" for a
+    ``warc/revisit`` row whose digest equals that of an HTTP 200 row of the
+    same URL in this same listing (the Archive stored a pointer to bytes it
+    holds as a page); "other" for everything else.
+    """
 
     text = body.decode("utf-8", errors="replace").strip()
     payload = json.loads(text or "[]")
     if not isinstance(payload, list) or not all(isinstance(r, list) for r in payload):
         raise ValueError("the Archive index is not a list of rows")
     if not payload:
-        return []
+        return [], []
     header, *rows = payload
-    if "timestamp" not in header or "statuscode" not in header:
-        raise ValueError(f"the Archive index header is {header!r}")
-    captures: list[dict[str, str]] = []
+    missing = [name for name in REQUIRED_CDX_FIELDS if name not in header]
+    if missing:
+        raise ValueError(f"the Archive index header lacks {missing}: {header!r}")
+    wanted = page_key(url)
+    mine: list[dict[str, str]] = []
+    others: list[dict[str, str]] = []
     for row in rows:
+        if len(row) != len(header):
+            raise ValueError(f"an Archive index row has {len(row)} fields: {row!r}")
         record = {str(k): str(v) for k, v in zip(header, row)}
-        stamp = record.get("timestamp", "")
+        stamp = record["timestamp"]
         if not re.fullmatch(r"\d{14}", stamp):
-            continue
+            raise ValueError(f"an Archive index row has timestamp {stamp!r}")
         try:
             day = dt.datetime.strptime(stamp, "%Y%m%d%H%M%S").date()
-        except ValueError:
+        except ValueError as exc:
+            raise ValueError(f"an Archive index row has timestamp {stamp!r}") from exc
+        if not start <= day <= end:
             continue
-        if start <= day <= end:
-            captures.append(record)
-    return sorted(captures, key=lambda r: r["timestamp"])
+        if wanted is not None and page_key(record["original"]) == wanted:
+            mine.append(record)
+        else:
+            others.append(record)
+    mine.sort(key=lambda r: r["timestamp"])
+    others.sort(key=lambda r: r["timestamp"])
+    page_digests = {
+        r["digest"]
+        for r in mine
+        if r["statuscode"] == "200" and r["digest"] not in ("", "-")
+    }
+    for record in mine:
+        if record["statuscode"] == "200":
+            record["kind"] = "page"
+        elif (
+            record.get("mimetype") == "warc/revisit"
+            and record["digest"] in page_digests
+        ):
+            record["kind"] = "revisit"
+        else:
+            record["kind"] = "other"
+    return mine, others
 
 
 def capture_iso(timestamp: str) -> str:
@@ -767,7 +914,9 @@ def capture_link(timestamp: str, url: str) -> str:
 
 
 def _is_page_capture(record: Mapping[str, str]) -> bool:
-    return record.get("statuscode") == "200"
+    """A dated capture of the page: HTTP 200, or a revisit tied to one."""
+
+    return record.get("kind") in ("page", "revisit")
 
 
 def reported_capture(response: Response) -> tuple[str, str] | None:
@@ -789,7 +938,9 @@ def reported_capture(response: Response) -> tuple[str, str] | None:
 def read_index(
     transport: Transport, url: str, start: dt.date, end: dt.date, timeout: float
 ) -> dict[str, Any]:
-    response, outcome = transport.get(cdx_url(url, start, end), timeout)
+    response, outcome = transport.get(
+        cdx_url(url, start, end), timeout, attempts=INDEX_ATTEMPTS
+    )
     result: dict[str, Any] = {
         "queried": {"url": url, "from": start.isoformat(), "to": end.isoformat()},
         "request": outcome,
@@ -799,13 +950,17 @@ def read_index(
         result["failure"] = "; ".join(outcome.get("failures") or ["no response"])
         return result
     try:
-        rows = parse_cdx(response.body, start, end)
-    except (ValueError, TypeError) as exc:
+        rows, others = parse_cdx(response.body, start, end, url)
+    except (ValueError, TypeError, KeyError) as exc:
         result["ok"] = False
         result["failure"] = f"index unreadable: {type(exc).__name__}: {str(exc)[:160]}"
         return result
     result["ok"] = True
     result["captures"] = rows
+    if others:
+        # Listed, never counted: the index answered with rows for a URL that
+        # is not the registered one.
+        result["rowsForOtherUrls"] = others
     return result
 
 
@@ -823,11 +978,34 @@ def _window_custody(
     ]
     return {
         **target.as_json(),
-        "http200CapturesInWindow": len(inside),
+        "pageCapturesInWindow": len(inside),
+        "http200InWindow": sum(1 for r in inside if r.get("kind") == "page"),
+        "revisitsInWindow": sum(1 for r in inside if r.get("kind") == "revisit"),
         "firstCaptureInWindow": capture_iso(inside[0]["timestamp"]) if inside else None,
         "lastCaptureInWindow": capture_iso(inside[-1]["timestamp"]) if inside else None,
         "distinctDigestsInWindow": len({r.get("digest") for r in inside}),
     }
+
+
+def window_refusal(plan: UrlPlan, run_day: dt.date, now: dt.datetime) -> str | None:
+    """Why no capture of this URL may be requested at ``now``, or None.
+
+    One registered window must contain the run's date, the UTC date at
+    ``now``, and the UTC date ``MIDNIGHT_MARGIN`` later. The margin covers the
+    minutes a capture can take: a request that leaves at 23:59 can be dated
+    the next day.
+    """
+
+    now = now.astimezone(dt.timezone.utc)
+    days = {run_day, now.date(), (now + MIDNIGHT_MARGIN).date()}
+    for target in plan.targets:
+        if all(target.window_state(day) == "open" for day in days):
+            return None
+    minutes = int(MIDNIGHT_MARGIN.total_seconds() // 60)
+    return (
+        f"no registered window contains {now:%Y-%m-%d %H:%M} UTC with the "
+        f"{minutes}-minute margin before the date changes"
+    )
 
 
 def witness_url(
@@ -865,22 +1043,21 @@ def witness_url(
             + ", ".join(off_list)
         )
     if not save:
-        entry["save"] = {"requested": False, "why": "index read only"}
+        entry["save"] = {"requested": False, "why": INDEX_READ_ONLY}
         return entry
-    # The invariant this whole script exists to keep. ``select`` already
-    # filtered on the run's date; this re-checks on the UTC date at the moment
-    # the request leaves, so a run that crosses midnight cannot ask for a
-    # capture dated after a window's last day.
+
+    # The invariant this whole script exists to keep. ``select`` filtered on
+    # the run's date. This guard runs again immediately before every save
+    # attempt, retries and the second-pass index read included, on the clock
+    # at that moment.
+    def guard() -> str | None:
+        return window_refusal(plan, today, transport.now())
+
+    refusal = guard()
+    if refusal:
+        entry["save"] = {"requested": False, "why": refusal}
+        return entry
     moment = transport.today()
-    if not all(
-        any(t.window_state(day) == "open" for t in plan.targets)
-        for day in (today, moment)
-    ):
-        entry["save"] = {
-            "requested": False,
-            "why": f"no registered window contains {moment.isoformat()}",
-        }
-        return entry
     try:
         if skip_since is not None:
             floor = f"{moment:%Y%m%d}{skip_since:%H%M}00"
@@ -896,15 +1073,20 @@ def witness_url(
                 entry["save"] = {
                     "requested": False,
                     "why": (
-                        "the index already lists an HTTP 200 capture at "
+                        "the index already lists a capture of the page at "
                         f"{capture_iso(held[-1]['timestamp'])}, after the "
                         f"{skip_since:%H:%M} UTC floor of this pass"
                     ),
                 }
                 return entry
         target_url = save_template.format(url=plan.source_url)
-        response, outcome = transport.get(target_url, save_timeout)
-        record: dict[str, Any] = {"requested": True, **outcome}
+        response, outcome = transport.get(target_url, save_timeout, guard=guard)
+        record: dict[str, Any] = {
+            "requested": outcome.get("attempts", 0) > 0,
+            **outcome,
+        }
+        if not record["requested"]:
+            record["why"] = "; ".join(outcome.get("failures") or ["not asked"])
         if response is not None:
             named = reported_capture(response)
             if named:
@@ -951,14 +1133,14 @@ def confirm_url(
                 _window_custody(t, rows, upto) for t in plan.targets
             ]
         named = (entry.get("save") or {}).get("reportedCapture")
-        # A page that redirects is stored under the URL it redirected to, so
-        # the registered URL's index shows a 3xx row and no page. Say where
-        # the page went; whether that URL is the registered source is not
-        # this script's call.
+        # When the save response names an archived URL other than the
+        # registered one, read that URL's index too and say where the capture
+        # went. Whether that URL is the registered source is not this script's
+        # call, and the capture counts for nothing here.
         if (
             index.get("ok")
             and named
-            and named["archivedUrl"] != plan.source_url
+            and page_key(named["archivedUrl"]) != page_key(plan.source_url)
             and not any(_is_page_capture(r) and _since(r, today) for r in rows)
         ):
             transport.pause(index_pause)
@@ -1010,7 +1192,13 @@ def _verdict(entry: Mapping[str, Any], today: dt.date) -> dict[str, Any]:
             "link": capture_link(stamp, entry["sourceUrl"]),
             "digest": pages[-1].get("digest"),
             "text": (
-                f"the index lists an HTTP 200 capture at {capture_iso(stamp)}; {phrase}"
+                "the index lists "
+                + (
+                    "an HTTP 200 capture"
+                    if pages[-1].get("kind") == "page"
+                    else "a revisit capture, tied by digest to an HTTP 200 capture,"
+                )
+                + f" at {capture_iso(stamp)}; {phrase}"
             ),
         }
     redirect = entry.get("redirectTargetIndex") or {}
@@ -1057,6 +1245,13 @@ def _verdict(entry: Mapping[str, Any], today: dt.date) -> dict[str, Any]:
     if save.get("requested"):
         return {
             "code": "SAVE_FAILED",
+            "text": f"{phrase}; the index lists no capture today",
+        }
+    if save.get("why") != INDEX_READ_ONLY:
+        # A capture run that could not ask: rate-limit breaker, time budget,
+        # or the window guard. Distinct from a request that was made and failed.
+        return {
+            "code": "NOT_ASKED",
             "text": f"{phrase}; the index lists no capture today",
         }
     return {
@@ -1115,15 +1310,34 @@ class Options:
     skip_since: dt.time | None = None
 
 
+def _named_capture_qualifies(
+    named: Mapping[str, Any] | None, source_url: str, row: Mapping[str, Any]
+) -> bool:
+    """The save named a capture of this URL dated inside this registration."""
+
+    if not named or page_key(named.get("archivedUrl")) != page_key(source_url):
+        return False
+    try:
+        day = dt.datetime.strptime(str(named["timestamp"]), "%Y%m%d%H%M%S").date()
+        window = row["expectedReleaseWindow"]
+        start = dt.date.fromisoformat(window["start"])
+        end = dt.date.fromisoformat(window["end"])
+    except (KeyError, TypeError, ValueError):
+        return False
+    return start <= day <= end
+
+
 def custody_gaps(
     report: Mapping[str, Any], today: dt.date
 ) -> dict[str, list[dict[str, Any]]]:
-    """Windows about to close, or just closed, with no HTTP 200 capture.
+    """Windows about to close, or just closed, with no capture of the page.
 
     Only counted where the index was read: an unread index is a failure to
     look, reported as such, not a finding that nothing is there. A window on
-    its last two days whose save named a capture the index does not list yet
-    is kept apart, because index lag is the likelier explanation.
+    its last two days is kept apart as awaiting the index only when the save
+    named a capture of the registered URL dated inside that very window. A
+    capture of a redirect target is custody of another URL and excuses
+    nothing; the gap row carries its link so a reader can judge.
     """
 
     gaps: dict[str, list[dict[str, Any]]] = {
@@ -1134,25 +1348,26 @@ def custody_gaps(
     for entry in report.get("openWindows") or []:
         if not (entry.get("index") or {}).get("ok"):
             continue
-        code = (entry.get("verdict") or {}).get("code")
-        if code == "CAPTURED_UNDER_REDIRECT_TARGET":
-            continue
+        verdict = entry.get("verdict") or {}
         named = (entry.get("save") or {}).get("reportedCapture")
         for row in entry.get("registrations") or []:
             end = dt.date.fromisoformat(row["expectedReleaseWindow"]["end"])
-            if row.get("http200CapturesInWindow") != 0 or (end - today).days > 1:
+            if row.get("pageCapturesInWindow") != 0 or (end - today).days > 1:
                 continue
-            key = (
-                "closingAwaitingIndex"
-                if code == "SAVE_NOT_YET_INDEXED" and named
-                else "closingWithoutCapture"
+            gap = {"sourceUrl": entry["sourceUrl"], **row}
+            if verdict.get("code") == "CAPTURED_UNDER_REDIRECT_TARGET":
+                gap["redirectTargetCapture"] = verdict.get("link")
+            awaiting = verdict.get("code") == "SAVE_NOT_YET_INDEXED"
+            awaiting = awaiting and _named_capture_qualifies(
+                named, entry["sourceUrl"], row
             )
-            gaps[key].append({"sourceUrl": entry["sourceUrl"], **row})
+            key = "closingAwaitingIndex" if awaiting else "closingWithoutCapture"
+            gaps[key].append(gap)
     for entry in report.get("closedWindows") or []:
         if not (entry.get("index") or {}).get("ok"):
             continue
         for row in entry.get("registrations") or []:
-            if row.get("http200CapturesInWindow") == 0:
+            if row.get("pageCapturesInWindow") == 0:
                 gaps["closedWithoutCapture"].append(
                     {"sourceUrl": entry["sourceUrl"], **row}
                 )
@@ -1172,9 +1387,11 @@ def run(
     """One witness run over already-loaded state. Never raises for a URL."""
 
     audit = options.mode == "audit"
+    # An audit is retrospective: a target that has since left the pending set
+    # still had a window, and its custody is still a fact worth reading.
     selection = select(
         targets,
-        pending,
+        None if audit else pending,
         today,
         max_urls=len(targets) + 1 if audit else options.max_urls,
         lookback_days=None if audit else options.lookback_days,
@@ -1185,7 +1402,14 @@ def run(
         "mode": options.mode,
         "todayUtc": today.isoformat(),
         **(preamble or {}),
-        "pendingStateKnown": selection.pending_known,
+        "pendingStateKnown": pending is not None,
+        "pendingFilter": (
+            "ignored (audit)"
+            if audit
+            else "applied"
+            if pending is not None
+            else "unknown, so not applied"
+        ),
         "counts": {
             "noPlanTargets": len(_dedupe(targets)),
             "openUrls": len(selection.open_plans),
@@ -1228,7 +1452,7 @@ def run(
         return report
 
     entries: list[tuple[dict[str, Any], UrlPlan]] = []
-    transport.hold_back = 0.0 if audit else transport.deadline_seconds * INDEX_SHARE
+    transport.begin_phase(0.0 if audit else transport.deadline_seconds * INDEX_SHARE)
     for position, plan in enumerate(selection.open_plans):
         if position and not audit:
             transport.pause(options.save_pause)
@@ -1245,7 +1469,7 @@ def run(
         entries.append((entry, plan))
     # Index reads come after every save, which gives the index the longest
     # head start this run can offer.
-    transport.hold_back = 0.0
+    transport.begin_phase(0.0)
     for position, (entry, plan) in enumerate(entries):
         if position:
             transport.pause(options.index_pause)
@@ -1293,9 +1517,9 @@ def render_text(report: Mapping[str, Any]) -> str:
         for row in entry.get("registrations") or []:
             window = row["expectedReleaseWindow"]
             custody = (
-                f"; {row['http200CapturesInWindow']} HTTP 200 capture(s) in window"
+                f"; {row['pageCapturesInWindow']} capture(s) of the page in window"
                 f" so far, {row['distinctDigestsInWindow']} distinct digest(s)"
-                if "http200CapturesInWindow" in row
+                if "pageCapturesInWindow" in row
                 else ""
             )
             lines.append(
@@ -1324,15 +1548,16 @@ def render_text(report: Mapping[str, Any]) -> str:
             lines.append(f"    INDEX UNREAD: {index.get('failure')}")
         for row in entry.get("registrations") or []:
             window = row["expectedReleaseWindow"]
-            if "http200CapturesInWindow" not in row:
+            if "pageCapturesInWindow" not in row:
                 span = f"{window['start']}..{window['end']}"
                 lines.append(f"    {row['dataPointId']}  window {span}")
                 continue
-            count = row["http200CapturesInWindow"]
+            count = row["pageCapturesInWindow"]
             lines.append(
                 f"    {row['dataPointId']}  window {window['start']}..{window['end']}: "
                 + (
-                    f"{count} HTTP 200 capture(s), first {row['firstCaptureInWindow']}"
+                    f"{count} capture(s) of the page, "
+                    f"first {row['firstCaptureInWindow']}"
                     if count
                     else "WINDOW CLOSED WITHOUT A CAPTURE"
                 )
@@ -1341,7 +1566,7 @@ def render_text(report: Mapping[str, Any]) -> str:
     for row in gaps.get("closingWithoutCapture") or []:
         lines.append(
             f"  CUSTODY GAP: {row['dataPointId']} closes "
-            f"{row['expectedReleaseWindow']['end']} with no HTTP 200 capture of "
+            f"{row['expectedReleaseWindow']['end']} with no capture of the page at "
             f"{row['sourceUrl']}"
         )
     return "\n".join(lines) + "\n"
@@ -1393,7 +1618,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "",
             "### Windows already closed (index read only)",
             "",
-            "| Target | Window | HTTP 200 captures inside |",
+            "| Target | Window | Captures of the page inside |",
             "|---|---|---:|",
         ]
     for entry in closed:
@@ -1403,7 +1628,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             count = (
                 "index unread"
                 if index is not None and not index.get("ok")
-                else row.get("http200CapturesInWindow", "not read (dry run)")
+                else row.get("pageCapturesInWindow", "not read (dry run)")
             )
             span = f"{window['start']}..{window['end']}"
             out.append(f"| {row['dataPointId']} | {span} | {count} |")
@@ -1422,7 +1647,15 @@ def _refuse_records_path(path: pathlib.Path | None, repo_root: pathlib.Path) -> 
         return
     resolved = path.resolve()
     records = (repo_root / "records").resolve()
-    if resolved == records or records in resolved.parents:
+    inside = resolved == records or records in resolved.parents
+    # Spelling is not identity: on a case-insensitive filesystem RECORDS/ is
+    # records/. Compare every existing ancestor with the directory itself.
+    for ancestor in (resolved, *resolved.parents):
+        try:
+            inside = inside or (ancestor.exists() and ancestor.samefile(records))
+        except OSError:
+            continue
+    if inside:
         raise SystemExit(
             f"refusing to write {path}: this witness writes nothing under records/"
         )
@@ -1465,6 +1698,7 @@ def main(
     fetch: Fetcher | None = None,
     sleep: Callable[[float], None] | None = None,
     log_loader: Callable[[], Mapping[str, Any]] | None = None,
+    now: Callable[[], dt.datetime] | None = None,
 ) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     mode = parser.add_mutually_exclusive_group()
@@ -1531,7 +1765,8 @@ def main(
     _refuse_records_path(args.report, ROOT)
     _refuse_records_path(args.summary, ROOT)
 
-    today = args.date or dt.datetime.now(dt.timezone.utc).date()
+    utc_now = now or (lambda: dt.datetime.now(dt.timezone.utc))
+    today = args.date or utc_now().astimezone(dt.timezone.utc).date()
     notes: list[str] = []
     resolver, resolver_failure = _load_resolver()
     if resolver_failure:
@@ -1566,6 +1801,7 @@ def main(
     transport = Transport(
         fetch=fetch or http_fetch,
         sleep=sleep or time.sleep,
+        now=utc_now,
         attempts=args.attempts,
         deadline_seconds=args.deadline_minutes * 60,
     )

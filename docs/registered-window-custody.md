@@ -41,44 +41,69 @@ Twice a day (19:40 and 22:10 UTC) the workflow:
    `thesis-witness/1.0 (+https://app.thesisinstitute.org)`.
 4. Reads the Archive's CDX index for the same URL, from the earliest open
    window's start to today, and reports each capture it lists: timestamp,
-   HTTP status, content digest, length.
+   archived URL, HTTP status, content digest, length. A row counts only if
+   its archived URL is the registered one (see "What counts as a capture").
 5. Reads the index once more, with no capture request, for windows that
    closed in the last seven days. A window that ended without a capture is
    then known the same week, not when someone looks months later.
 
 The second pass exists because the Archive fails in bursts that outlast one
-run's retries. On 2026-09-20 its index answered one client with HTTP 429 and
-no `Retry-After` header for more than ten minutes, then recovered. The
-second pass leaves alone any URL the index already shows captured since
-19:30 UTC that day. A capture from earlier in the day does not count,
-because it may predate that day's release.
+run's retries. On 2026-09-20 it answered one client with HTTP 429 and no
+`Retry-After` header for more than ten minutes, on both the index and the
+save endpoint, and later the same evening answered every save request with
+HTTP 500. The second pass leaves alone any URL the index already shows
+captured since 19:30 UTC that day. A capture from earlier in the day does
+not count, because it may predate that day's release. If the index does not
+yet list the first pass's capture, the second pass asks again, so a URL can
+be captured twice in a day.
 
 ### Rate
 
-The run is sequential. It waits 20 seconds between capture requests and 5
-seconds between index reads, avoids asking for one host twice in a row when
-another host is waiting, makes at most 3 attempts per request with backoff
-(30, 90, 180 seconds, or the server's `Retry-After` capped at 300), and stops
-asking after 90 minutes, a quarter of which is held back for the index
-reads. After four HTTP 429 answers in a row from the save endpoint it stops
-asking that endpoint for the rest of the run and reports each remaining URL
-as not asked; the index endpoint has its own count. A client that is told to
-slow down and keeps asking is not polite, and the second pass is the retry.
-The daily cap is 20 URLs. The pending population on
-2026-09-20 was 48 targets on 25 URLs and 12 hosts; its busiest day is
-2026-09-30 with 15 URLs on 10 hosts, so the cap does not bind. If it ever
-does, the windows that close soonest are kept and every dropped URL is
-named in the report. `tests/test_witness_registered_windows.py` fails if the
-committed registrations ever exceed the cap.
+The run is sequential. Between two capture requests it waits 20 seconds, and
+between two index reads 5 seconds. It never skips a wait to save time: when
+the time budget cannot fit the next wait, that phase stops asking and
+reports each remaining URL as `NOT_ASKED`. It avoids asking for one host
+twice in a row when another host is waiting.
+
+A capture request gets at most 3 attempts and an index read at most 2, with
+backoff of 30, 90 and 180 seconds, or the server's `Retry-After` capped at
+300. After four HTTP 429 answers in a row from the save endpoint, the run
+stops asking that endpoint and reports each remaining URL as `NOT_ASKED`;
+the index endpoint has its own count. A client that is told to slow down
+and keeps asking is not polite, and the second pass is the retry.
+
+The budget is 90 minutes of wall clock, a quarter of it held back for the
+index reads. Every request runs under an absolute deadline and is abandoned
+when it passes, because a socket timeout bounds one read, not a request that
+trickles.
+
+The cap is 20 URLs per pass. It is a cap on URLs, not on requests. At the
+cap, with every request failing on something other than 429, the first pass
+makes at most 60 capture attempts and 120 index-read attempts (open
+windows, closed windows and redirect targets, two attempts each), and the
+second pass 160, because it also reads the index before asking. The pending population on 2026-09-20 was 48
+targets on 25 URLs and 12 hosts; its busiest day is 2026-09-30 with 15 URLs
+on 10 hosts, so the cap does not bind. If it ever does, the windows that
+close soonest are kept and every dropped URL is named in the report.
+`tests/test_witness_registered_windows.py` fails if the committed
+registrations ever put more than 20 URLs in an open window on one day.
 
 ### The invariant
 
 No capture is requested outside a registered window. The selection filters
-on the run's UTC date, and the last step before each request re-checks the
-UTC date at that moment. A run that crosses midnight therefore refuses a
-target whose window ended the day before. Closed windows are read from the
-index and never saved. `--date` plans another day and is accepted only with
+on the run's UTC date. A guard then runs immediately before every capture
+attempt, retries included, and after the second pass's index read: one
+registered window for that URL must contain the run's date, the UTC date at
+that moment, and the UTC date ten minutes later. The ten minutes are there
+because a capture takes time, and a request that leaves at 23:59 can be
+dated the next day. A run that crosses midnight therefore stops asking for a
+URL whose last window ended that day. Closed windows are read from the index
+and never saved. `--date` plans another day and is accepted only with
 `--dry-run`.
+
+What the guard cannot promise is the Archive's own timing: it dates the
+capture, not the request. A capture dated outside a window is simply not
+counted for that window.
 
 ## Where the evidence lives
 
@@ -87,11 +112,14 @@ In the Internet Archive's index, and nowhere in this repository.
 - The value of this custody is that a third party holds the bytes and the
   date. A manifest committed by Thesis would restate the Archive's index. It
   would add our claim about the evidence, and no evidence.
-- The record is re-derivable from the registration alone. The `sourceUrl`
+- The captures are re-derivable from the registration alone. The `sourceUrl`
   and the window give the index query. `--audit` runs that query for every
-  no-plan target whose window has started, open or closed, and requests no
-  capture. So nothing is lost when workflow logs and the 90-day report
-  artifact expire.
+  target that has no executable plan under the rule in force when it runs,
+  pending or not, whose window has started, and requests no capture. What is
+  not re-derivable is the run's own history: which requests failed and how,
+  what was retried, what the cap dropped. That lives in the workflow log and
+  the 90-day report artifact and expires with them. It is operational
+  history, not custody, and losing it changes no fact about any window.
 - `records/**` belongs to the allowlisted attesting workflows
   (AGENTS.md, "Records provenance"). A committed manifest would need a new
   daily writer with `contents: write` and `id-token: write` on that
@@ -145,38 +173,65 @@ skip a URL.
 
 - **ssa.gov.** Save Page Now failed with HTTP 520 "Job failed" on every
   attempt on 2026-08-23 (`docs/anchor-verifications.md`, "SSA official
-  pages"). Expect `SAVE_FAILED` for an ssa.gov URL. The Archive's own crawl
-  does sometimes reach the host (one SSA page has a 2026-07-11 capture), so
-  the index read still matters. A window on its last two days with no
-  capture turns the run red and opens an issue; for ssa.gov that alert may
-  have no remedy, and that is then a fact for the ruling.
+  pages"). Expect `SAVE_FAILED` for an ssa.gov URL. The index is still read,
+  and the Archive does hold some captures of the host: that same section
+  records a 2026-07-11 capture of one SSA page. A window on its last two
+  days with no capture turns the run red and opens an issue; for ssa.gov
+  that alert may have no remedy, and that is then a fact for the ruling.
 - **bls.gov.** The host answers non-browser clients with HTTP 403, but the
-  Archive's crawler does get the page: the index lists HTTP 200 captures of
+  index lists HTTP 200 captures of
   `https://www.bls.gov/web/empsit/cpseea19.htm` at 20260710110509,
-  20260819191418 and 20260904170006 (read 2026-09-20). Only an HTTP 200
-  capture counts. A capture with another status is listed as
-  `CAPTURED_NOT_AS_PAGE` and is not custody.
-- **Status other than 200.** An index row counts toward custody only when
-  its status field is exactly `200`. A row with any other value, numeric or
-  not, stays in the JSON report and is not counted. The counts can therefore
-  understate what the Archive holds. They cannot overstate it.
+  20260819191418 and 20260904170006 (read through this script on
+  2026-09-20).
 - **API URLs.** Several registrations bind an API query (Statistics Canada
   WDS, the ABS Data API, Eurostat SDMX). A capture of one holds a single
   response to that exact query string at one instant. It is a payload, not
-  a release, and it carries no release date of its own.
-- **Redirects.** A page that redirects is stored under the URL it
-  redirected to, and the registered URL's index row is a 3xx. When the save
-  response names a different archived URL, the witness reads that URL's
-  index too and reports `CAPTURED_UNDER_REDIRECT_TARGET`. Whether that URL
-  is the registered source is not the witness's call, so it does not count
-  the capture toward the registered URL.
-- **Index lag.** A new capture can take time to appear in the index. The
-  verdict `SAVE_NOT_YET_INDEXED` says the save request returned and what
-  capture time it named; the next run re-reads the whole window. A window
-  on its last two days in that state is listed as awaiting the index, and
-  does not raise the alert.
-- **One capture a day.** A page that changes twice in a day is seen once
-  by this job, late in the UTC day.
+  a release.
+- **The save response is a weak signal, in both directions.** On 2026-09-20
+  two real runs asked for four URLs. The first was answered HTTP 429 on
+  every request and the second HTTP 500 on every request, yet the index
+  later listed HTTP 200 captures of two of the four URLs stamped within a
+  minute of those requests (Treasury at 21:08:16 and 23:31:05, the ABS API
+  at 23:32:07), and none of the other two. So a failed response does not
+  show that no capture was made, and only the index shows that one was.
+- **Index lag.** The ABS capture above was stamped 23:32:07 and was not in
+  the index when the run read it about four minutes later; it was there the
+  next day. The verdict `SAVE_NOT_YET_INDEXED` says what the save request
+  returned, and the next run re-reads the whole window. A window on its
+  last two days is listed as awaiting the index, and raises no alert, only
+  when the save response named a capture of the registered URL dated inside
+  that same window.
+- **Redirects.** When the save response names an archived URL other than
+  the registered one, the witness reads that URL's index too and reports
+  `CAPTURED_UNDER_REDIRECT_TARGET`. That is custody of another URL. Whether
+  that URL is the registered source is not the witness's call, so the
+  capture counts for nothing and a closing window still raises the alert,
+  with the other URL's capture linked beside it.
+- **One or two captures a day.** Both passes run late in the UTC day. A
+  page that changes more than once in a day is not seen each time.
+
+### What counts as a capture
+
+A row of the index counts toward a target's window only if all of these
+hold. Everything else stays in the JSON report, uncounted.
+
+- Its archived URL is the registered `sourceUrl`: same scheme, path and
+  query string exactly; same host, compared without case and without a
+  default port; an empty path equals `/`. Rows for any other URL are listed
+  under `rowsForOtherUrls`. A listing that lacks the columns that identify
+  a capture (timestamp, archived URL, status, digest) is treated as an
+  unread index, not as custody and not as absence.
+- Its timestamp, in UTC, falls inside that target's own window.
+- Its status is `200`, or it is a `warc/revisit` row whose digest equals
+  the digest of an HTTP 200 row of the same URL in the same listing. The
+  Archive's CDX documentation describes `warc/revisit` as a duplicate that
+  resolves to an original capture, and the index does list such rows with
+  status `-`: the Treasury page's window holds two
+  (`tests/fixtures/wayback/cdx_fiscaldata_mts_2026-09.json`). One has the
+  digest of the page's HTTP 200 captures and counts. The other matches no
+  page in the listing and does not. This rule can understate what the
+  Archive holds. A 403 or 3xx row never counts, and is reported as
+  `CAPTURED_NOT_AS_PAGE` when it is all the index has for the day.
 
 ## Reading the output
 
@@ -184,16 +239,18 @@ Per URL, one verdict about the run's day:
 
 | Verdict | Meaning |
 |---|---|
-| `CAPTURED` | The index lists an HTTP 200 capture dated today. The text says what the save request did; the capture may be the Archive's own. |
-| `CAPTURED_UNDER_REDIRECT_TARGET` | No HTTP 200 capture of the registered URL today; one of the URL it redirected to. |
-| `CAPTURED_NOT_AS_PAGE` | The index lists today's capture only with a status other than 200. |
-| `SAVE_NOT_YET_INDEXED` | The save request returned; the index does not list the capture yet. |
-| `SAVE_FAILED` | Every attempt failed (the text carries the status, such as HTTP 520 or 429) and the index lists nothing today. |
+| `CAPTURED` | The index lists a capture of the page dated today (HTTP 200, or a revisit tied to one by digest). The text also says what the save request did, which may be that it failed. |
+| `CAPTURED_UNDER_REDIRECT_TARGET` | No capture of the registered URL today; one of the URL the save response named instead. Not custody of the registered URL. |
+| `CAPTURED_NOT_AS_PAGE` | The index lists today's capture only with a status that does not count. |
+| `SAVE_NOT_YET_INDEXED` | The save request returned; the index does not list a capture yet. |
+| `SAVE_FAILED` | Every attempt failed (the text carries the status, such as HTTP 520, 500 or 429) and the index lists nothing today. |
+| `NOT_ASKED` | A capture run did not ask: the rate-limit breaker was open, the time budget was spent, or no registered window contained the moment. The text says which. |
 | `INDEX_UNREAD` | The index could not be read. This is a failure to look, not a finding of absence. The report then carries no capture count for that URL, and it never counts as a custody gap. |
-| `NO_CAPTURE_TODAY` | No save was requested (audit, or a window that closed during the run) and the index lists nothing today. |
+| `NO_CAPTURE_TODAY` | An audit, which requests nothing, found nothing dated today. |
 
-Per target, the report gives the count of HTTP 200 captures inside its own
-window so far, the first and last of them, and the number of distinct
+Per target, the report gives the count of captures of the page inside its
+own window so far (`pageCapturesInWindow`, split into `http200InWindow` and
+`revisitsInWindow`), the first and last of them, and the number of distinct
 digests. `custodyGaps` lists windows on their last two days with no capture
 (`closingWithoutCapture`, which turns the run red), the same but awaiting
 the index (`closingAwaitingIndex`), and windows that closed in the lookback

@@ -117,13 +117,17 @@ def saved(
     return witness.Response(200, final, {}, b"<html>archived</html>")
 
 
+def at(day: dt.date, hour: int = 19, minute: int = 45) -> dt.datetime:
+    return dt.datetime.combine(day, dt.time(hour, minute), tzinfo=dt.timezone.utc)
+
+
 def transport(fetch: Callable[..., Any], **kwargs: Any) -> witness.Transport:
     sleeps: list[float] = []
     built = witness.Transport(
         fetch=fetch,
         sleep=sleeps.append,
         clock=lambda: 0.0,
-        today=kwargs.pop("today", lambda: TODAY),
+        now=kwargs.pop("now", lambda: at(TODAY)),
         **kwargs,
     )
     built.sleeps = sleeps  # type: ignore[attr-defined]
@@ -144,7 +148,7 @@ def run(
         targets=targets,
         pending=refs,  # type: ignore[arg-type]
         today=today,
-        transport=transport(fetch, today=lambda: today),
+        transport=transport(fetch, now=lambda: at(today)),
         options=witness.Options(mode=mode, **options),
     )
 
@@ -311,7 +315,7 @@ def test_a_run_crossing_midnight_asks_for_no_capture_dated_too_late() -> None:
         targets=[closing],
         pending={"treasury.mts"},
         today=TODAY,
-        transport=transport(archive, today=lambda: TODAY + dt.timedelta(days=1)),
+        transport=transport(archive, now=lambda: at(TODAY + dt.timedelta(days=1))),
         options=witness.Options(),
     )
     assert archive.saves == []
@@ -340,7 +344,7 @@ def test_closed_windows_are_read_from_the_index_and_never_saved() -> None:
         }
     ]
     row = report["closedWindows"][0]["registrations"][0]
-    assert row["http200CapturesInWindow"] == 0
+    assert row["pageCapturesInWindow"] == 0
     assert report["custodyGaps"]["closedWithoutCapture"][0]["dataPointId"] == "bls.cpi"
     assert "WINDOW CLOSED WITHOUT A CAPTURE" in witness.render_text(report)
 
@@ -492,7 +496,7 @@ def test_an_exhausted_time_budget_stops_asking_and_says_so() -> None:
         fetch=fetch,
         sleep=lambda seconds: None,
         clock=lambda: now["t"],
-        today=lambda: TODAY,
+        now=lambda: at(TODAY),
         attempts=3,
         deadline_seconds=600.0,
     )
@@ -541,7 +545,7 @@ def test_a_capture_the_index_lists_today_is_reported_with_its_timestamp() -> Non
         entry["verdict"]["link"] == f"https://web.archive.org/web/20260920194501/{A19}"
     )
     row = entry["registrations"][0]
-    assert row["http200CapturesInWindow"] == 2
+    assert row["pageCapturesInWindow"] == 2
     assert row["firstCaptureInWindow"] == "2026-09-17T03:15:00Z"
     assert row["distinctDigestsInWindow"] == 2
 
@@ -568,13 +572,13 @@ def test_a_refused_capture_is_listed_but_is_not_custody() -> None:
     entry = report["openWindows"][0]
     assert entry["verdict"]["code"] == "CAPTURED_NOT_AS_PAGE"
     assert "403" in entry["verdict"]["text"]
-    assert entry["registrations"][0]["http200CapturesInWindow"] == 0
+    assert entry["registrations"][0]["pageCapturesInWindow"] == 0
     assert len(report["custodyGaps"]["closingWithoutCapture"]) == 1
 
 
 def test_captures_outside_the_window_never_count_toward_it() -> None:
     target = make_target("bls.a19", A19, "2026-09-16", "2026-09-24")
-    rows = witness.parse_cdx(
+    rows, others = witness.parse_cdx(
         cdx_body(
             ("20260915235959", "200"),
             ("20260916000000", "200"),
@@ -582,23 +586,113 @@ def test_captures_outside_the_window_never_count_toward_it() -> None:
         ),
         target.window_start,
         target.window_end,
+        A19,
     )
     assert [r["timestamp"] for r in rows] == ["20260916000000"]
+    assert others == []
 
 
-def test_the_recorded_archive_index_fixture_parses() -> None:
-    fixture = (
+MTS = "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/"
+MTS_FIXTURE = (
+    ROOT / "tests" / "fixtures" / "wayback" / "cdx_fiscaldata_mts_2026-09.json"
+)
+
+
+def test_the_recorded_archive_listing_parses_and_revisits_need_a_matching_page() -> (
+    None
+):
+    # Real rows, read 2026-09-21. Two revisit rows carry status "-". One has
+    # the digest of the later HTTP 200 rows; the other matches nothing here.
+    rows, others = witness.parse_cdx(
+        MTS_FIXTURE.read_bytes(), dt.date(2026, 9, 13), dt.date(2026, 9, 21), MTS
+    )
+    assert others == []
+    assert [(r["timestamp"], r["statuscode"], r["kind"]) for r in rows] == [
+        ("20260916151753", "-", "other"),
+        ("20260919232205", "-", "revisit"),
+        ("20260920210816", "200", "page"),
+        ("20260920233105", "200", "page"),
+    ]
+    target = make_target("treasury.mts", MTS, "2026-09-13", "2026-09-21")
+    custody = witness._window_custody(target, rows, dt.date(2026, 9, 21))
+    assert custody["pageCapturesInWindow"] == 3
+    assert custody["http200InWindow"] == 2
+    assert custody["revisitsInWindow"] == 1
+    assert custody["firstCaptureInWindow"] == "2026-09-19T23:22:05Z"
+    assert custody["distinctDigestsInWindow"] == 1
+
+
+def test_a_revisit_with_no_page_of_its_digest_in_the_listing_is_not_custody() -> None:
+    target = make_target("treasury.mts", MTS, "2026-09-13", "2026-09-17")
+    rows, _ = witness.parse_cdx(
+        MTS_FIXTURE.read_bytes(), target.window_start, target.window_end, MTS
+    )
+    assert [r["kind"] for r in rows] == ["other"]
+    custody = witness._window_custody(target, rows, target.window_end)
+    assert custody["pageCapturesInWindow"] == 0
+
+
+def test_a_listing_that_cannot_identify_its_url_is_unreadable_not_custody() -> None:
+    # Finding from review: an HTTP 200 row for some other URL, or a listing
+    # with no ``original`` column at all, used to count as a capture and
+    # suppress the second pass's save.
+    ssa_fixture = (
         ROOT / "tests" / "fixtures" / "ssa_official" / "cdx_stat_snapshot_2026-06.json"
     )
-    rows = witness.parse_cdx(
-        fixture.read_bytes(), dt.date(2026, 7, 1), dt.date(2026, 8, 31)
+    with pytest.raises(ValueError, match="lacks"):
+        witness.parse_cdx(
+            ssa_fixture.read_bytes(), dt.date(2026, 7, 1), dt.date(2026, 8, 31), SSA
+        )
+    target = make_target("bls.a19", A19, "2026-09-16", "2026-09-21")
+    two_columns = json.dumps(
+        [["timestamp", "statuscode"], ["20260920194501", "200"]]
+    ).encode()
+    archive = FakeArchive(index=lambda url, query: two_columns)
+    report = run([target], archive, skip_since=dt.time(19, 30))
+    entry = report["openWindows"][0]
+    assert archive.saves == [A19]
+    assert entry["verdict"]["code"] == "INDEX_UNREAD"
+    assert "pageCapturesInWindow" not in entry["registrations"][0]
+
+
+def test_a_row_for_another_url_never_counts_and_never_suppresses_a_save() -> None:
+    target = make_target("bls.a19", A19, "2026-09-16", "2026-09-21")
+    elsewhere = cdx_body(("20260920194501", "200"), url="https://example.org/other")
+    archive = FakeArchive(
+        save=lambda original: witness.Response(
+            200, "https://web.archive.org/", {}, b""
+        ),
+        index=lambda url, query: elsewhere,
     )
-    assert [r["timestamp"] for r in rows] == [
-        "20260711204033",
-        "20260802032502",
-        "20260806225812",
-    ]
-    assert all(witness._is_page_capture(r) for r in rows)
+    report = run([target], archive, skip_since=dt.time(19, 30))
+    entry = report["openWindows"][0]
+    assert archive.saves == [A19]
+    assert entry["verdict"]["code"] == "SAVE_NOT_YET_INDEXED"
+    assert entry["registrations"][0]["pageCapturesInWindow"] == 0
+    assert len(entry["index"]["rowsForOtherUrls"]) == 1
+    assert [
+        g["dataPointId"] for g in report["custodyGaps"]["closingWithoutCapture"]
+    ] == ["bls.a19"]
+
+
+@pytest.mark.parametrize(
+    ("registered", "row_url", "same"),
+    [
+        (A19, A19, True),
+        (A19, "https://WWW.BLS.GOV:443/web/empsit/cpseea19.htm", True),
+        (A19, "http://www.bls.gov/web/empsit/cpseea19.htm", False),
+        (A19, "https://bls.gov/web/empsit/cpseea19.htm", False),
+        (A19, "https://www.bls.gov/web/empsit/cpseea19.htm?x=1", False),
+        (MTS, MTS.rstrip("/"), False),
+        ("https://www.nbb.be", "https://www.nbb.be/", True),
+        (A19, "https://www.bls.gov:99999/web/empsit/cpseea19.htm", False),
+        (A19, None, False),
+    ],
+)
+def test_a_row_is_this_page_only_under_a_strict_url_identity(
+    registered: str, row_url: Any, same: bool
+) -> None:
+    assert (witness.page_key(registered) == witness.page_key(row_url)) is same
 
 
 def test_a_redirecting_page_is_reported_under_the_url_it_went_to() -> None:
@@ -619,8 +713,12 @@ def test_a_redirecting_page_is_reported_under_the_url_it_went_to() -> None:
     entry = report["openWindows"][0]
     assert entry["verdict"]["code"] == "CAPTURED_UNDER_REDIRECT_TARGET"
     assert landed in entry["verdict"]["text"]
-    assert entry["registrations"][0]["http200CapturesInWindow"] == 0
-    assert report["custodyGaps"]["closingWithoutCapture"] == []
+    assert entry["registrations"][0]["pageCapturesInWindow"] == 0
+    # Custody of the URL it redirected to is custody of another URL. The
+    # registered window is still closing with nothing, and the alert says so.
+    gap = report["custodyGaps"]["closingWithoutCapture"]
+    assert [g["dataPointId"] for g in gap] == ["bea.core_pce"]
+    assert gap[0]["redirectTargetCapture"].endswith(landed)
 
 
 def test_a_window_on_its_last_days_waiting_on_the_index_is_kept_apart() -> None:
@@ -681,13 +779,19 @@ def test_the_daily_cap_keeps_the_windows_that_close_first_and_names_the_rest() -
 
 
 def test_the_known_population_fits_under_the_default_cap() -> None:
-    no_plan, _ = witness.plan_predicate(None)
+    # The count of open URLs can only rise on a day some window opens, so
+    # checking every window's first day covers every day there is, with no
+    # horizon to expire. The predicate is whichever one the script would use.
+    resolver, _ = witness._load_resolver()
+    no_plan, _ = witness.plan_predicate(resolver)
     targets, _ = witness.scan_registrations(ROOT / "records" / "targets", no_plan, None)
-    day = dt.date(2026, 9, 20)
-    while day <= dt.date(2027, 3, 1):
+    assert targets
+    for day in sorted({t.window_start for t in targets}):
         selection = witness.select(targets, None, day)
-        assert selection.dropped_open == [], day
-        day += dt.timedelta(days=1)
+        assert selection.dropped_open == [], (
+            f"{len(selection.open_plans) + len(selection.dropped_open)} URLs are "
+            f"open on {day}: over the daily cap of {witness.DEFAULT_MAX_URLS}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -953,6 +1057,7 @@ def test_cli_capture_run_reports_a_capture(
         log_loader=lambda: {
             "resolutionLinks": [{"status": "pending", "targetFactRef": "keep"}]
         },
+        now=lambda: at(today),
     )
     assert code == 0
     assert archive.saves == [A19]
@@ -999,13 +1104,16 @@ def test_a_slow_archive_cannot_spend_the_time_the_index_reads_need() -> None:
         if "/save/" in url:
             now["t"] += timeout  # the Archive hangs for the whole timeout
             raise witness.FetchError("TimeoutError: timed out")
-        return witness.Response(200, url, {}, cdx_body(("20260920194501", "200")))
+        asked = dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query))["url"]
+        return witness.Response(
+            200, url, {}, cdx_body(("20260920194501", "200"), url=asked)
+        )
 
     carrier = witness.Transport(
         fetch=fetch,
         sleep=lambda seconds: None,
         clock=lambda: now["t"],
-        today=lambda: TODAY,
+        now=lambda: at(TODAY),
         attempts=1,
         deadline_seconds=1000.0,
     )
@@ -1054,7 +1162,7 @@ def test_an_unread_index_never_prints_a_count_or_a_missing_capture() -> None:
     for entry in report["openWindows"] + report["closedWindows"]:
         assert entry["index"]["ok"] is False
         for row in entry["registrations"]:
-            assert "http200CapturesInWindow" not in row
+            assert "pageCapturesInWindow" not in row
     assert report["custodyGaps"] == {
         "closingWithoutCapture": [],
         "closingAwaitingIndex": [],
@@ -1086,7 +1194,10 @@ def test_a_rate_limited_endpoint_is_left_alone_for_the_rest_of_the_run() -> None
     # The first URL spends three attempts, the second trips the breaker on
     # its first, and neither it nor the four after it is asked again.
     assert sum("not asked: the Archive answered HTTP 429" in t for t in texts) == 5
-    assert all(e["verdict"]["code"] == "SAVE_FAILED" for e in report["openWindows"])
+    codes = [e["verdict"]["code"] for e in report["openWindows"]]
+    # Two URLs were asked and refused; four never left, and say so.
+    assert codes == ["SAVE_FAILED", "SAVE_FAILED"] + ["NOT_ASKED"] * 4
+    assert report["openWindows"][-1]["save"]["requested"] is False
 
 
 def test_one_success_clears_a_rate_limit_streak() -> None:
@@ -1107,3 +1218,244 @@ def test_one_success_clears_a_rate_limit_streak() -> None:
 def test_repeated_failures_are_reported_once_with_a_count() -> None:
     assert witness._collapse(["a", "a", "a", "b", "a"]) == ["a (x3)", "b", "a"]
     assert witness._collapse([]) == []
+
+
+# ---------------------------------------------------------------------------
+# Findings of the independent review (2026-09-21)
+
+
+class MovingClock:
+    """A UTC clock that a fake fetcher or sleep can push forward."""
+
+    def __init__(self, start: dt.datetime) -> None:
+        self.value = start
+
+    def __call__(self) -> dt.datetime:
+        return self.value
+
+    def advance(self, seconds: float) -> None:
+        self.value += dt.timedelta(seconds=seconds)
+
+
+def test_a_retry_cannot_leave_after_the_window_has_closed() -> None:
+    # The date guard used to run once, before the first attempt. A failed
+    # save at 23:40 then retried after its backoff, on the next UTC day.
+    clock = MovingClock(at(TODAY, 23, 40))
+    target = make_target("treasury.mts", MTS, "2026-09-13", "2026-09-20")
+    asked: list[dt.datetime] = []
+
+    def fetch(url: str, timeout: float) -> witness.Response:
+        if "/save/" in url:
+            asked.append(clock())
+            raise witness.FetchError("HTTP 500: Wayback Machine", status=500)
+        return witness.Response(200, url, {}, b"[]")
+
+    carrier = witness.Transport(
+        fetch=fetch,
+        sleep=lambda seconds: clock.advance(seconds * 60),  # backoff crosses midnight
+        clock=lambda: 0.0,
+        now=clock,
+    )
+    report = witness.run(
+        targets=[target],
+        pending={"treasury.mts"},
+        today=TODAY,
+        transport=carrier,
+        options=witness.Options(),
+    )
+    assert asked == [at(TODAY, 23, 40)]
+    save = report["openWindows"][0]["save"]
+    assert save["attempts"] == 1
+    assert any(
+        "not asked: no registered window contains" in f for f in save["failures"]
+    )
+
+
+def test_the_second_pass_index_read_cannot_carry_a_save_past_the_window() -> None:
+    clock = MovingClock(at(TODAY, 23, 40))
+    target = make_target("treasury.mts", MTS, "2026-09-13", "2026-09-20")
+    saves: list[str] = []
+
+    def fetch(url: str, timeout: float) -> witness.Response:
+        if "/save/" in url:
+            saves.append(url)
+            return saved(MTS, "20260921000010")
+        clock.advance(30 * 60)  # a slow index read: it is now 00:10 on the 21st
+        return witness.Response(200, url, {}, b"[]")
+
+    carrier = witness.Transport(
+        fetch=fetch, sleep=lambda seconds: None, clock=lambda: 0.0, now=clock
+    )
+    report = witness.run(
+        targets=[target],
+        pending={"treasury.mts"},
+        today=TODAY,
+        transport=carrier,
+        options=witness.Options(skip_since=dt.time(19, 30)),
+    )
+    assert saves == []
+    entry = report["openWindows"][0]
+    assert entry["save"]["requested"] is False
+    assert entry["verdict"]["code"] == "NOT_ASKED"
+
+
+@pytest.mark.parametrize(
+    ("hour", "minute", "asked"),
+    [(23, 49, True), (23, 50, False), (23, 59, False)],
+)
+def test_no_capture_is_requested_in_the_last_minutes_of_a_window_s_last_day(
+    hour: int, minute: int, asked: bool
+) -> None:
+    target = make_target("treasury.mts", MTS, "2026-09-13", "2026-09-20")
+    archive = FakeArchive()
+    witness.run(
+        targets=[target],
+        pending={"treasury.mts"},
+        today=TODAY,
+        transport=transport(archive, now=lambda: at(TODAY, hour, minute)),
+        options=witness.Options(),
+    )
+    assert (archive.saves == [MTS]) is asked
+
+
+def test_a_later_window_on_the_same_page_still_permits_a_late_request() -> None:
+    closing = make_target("fns.snap.may", SNAP, "2026-09-10", "2026-09-20")
+    open_tomorrow = make_target("fns.snap.june", SNAP, "2026-09-18", "2026-09-26")
+    archive = FakeArchive()
+    witness.run(
+        targets=[closing, open_tomorrow],
+        pending={"fns.snap.may", "fns.snap.june"},
+        today=TODAY,
+        transport=transport(archive, now=lambda: at(TODAY, 23, 58)),
+        options=witness.Options(),
+    )
+    assert archive.saves == [SNAP]
+
+
+def test_a_named_capture_excuses_a_closing_window_only_if_it_is_inside_it() -> None:
+    # Review finding: a save naming an August capture, or a capture of some
+    # other URL, put a one-day window into "awaiting the index" and silenced
+    # the alert.
+    target = make_target(
+        "ons.ppi", "https://www.ons.gov.uk/x", "2026-09-20", "2026-09-20"
+    )
+    for stamp, archived in (
+        ("20260801120000", None),  # right URL, outside the window
+        ("20260920194501", "https://example.org/other"),  # wrong URL
+    ):
+        archive = FakeArchive(
+            save=lambda original, s=stamp, a=archived: saved(original, s, archived=a)
+        )
+        gaps = run([target], archive)["custodyGaps"]
+        assert [g["dataPointId"] for g in gaps["closingWithoutCapture"]] == ["ons.ppi"]
+        assert gaps["closingAwaitingIndex"] == []
+    inside = run([target], FakeArchive())["custodyGaps"]
+    assert [g["dataPointId"] for g in inside["closingAwaitingIndex"]] == ["ons.ppi"]
+
+
+def test_a_request_is_abandoned_at_its_deadline_however_the_server_behaves(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # A socket timeout bounds one blocking operation. A server that trickles
+    # bytes can hold urlopen far past it, and the time budget with it.
+    import threading
+    import time as real_time
+
+    release = threading.Event()
+
+    def trickle(url: str, timeout: float) -> witness.Response:
+        release.wait(30)
+        return witness.Response(200, url, {}, b"")
+
+    monkeypatch.setattr(witness, "_http_fetch_blocking", trickle)
+    started = real_time.monotonic()
+    with pytest.raises(witness.FetchError, match="abandoned"):
+        witness.http_fetch("https://web.archive.org/save/x", 0.2)
+    assert real_time.monotonic() - started < 5
+    release.set()
+
+
+def test_http_fetch_hands_back_the_blocking_result_and_its_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        witness,
+        "_http_fetch_blocking",
+        lambda url, timeout: witness.Response(200, url, {}, b"[]"),
+    )
+    assert witness.http_fetch("https://web.archive.org/cdx/search/cdx", 5).body == b"[]"
+
+    def refuse(url: str, timeout: float) -> witness.Response:
+        raise witness.FetchError("HTTP 520: Job failed", status=520)
+
+    monkeypatch.setattr(witness, "_http_fetch_blocking", refuse)
+    with pytest.raises(witness.FetchError) as caught:
+        witness.http_fetch("https://web.archive.org/save/x", 5)
+    assert caught.value.status == 520
+
+
+def test_the_records_guard_judges_the_directory_not_its_spelling(
+    tmp_path: pathlib.Path,
+) -> None:
+    repo = tmp_path / "repo"
+    (repo / "records" / "targets").mkdir(parents=True)
+    (tmp_path / "link").symlink_to(repo / "records")
+    for bad in (
+        repo / "records" / "x.json",
+        repo / "scripts" / ".." / "records" / "deep" / "x.json",
+        tmp_path / "link" / "x.json",
+    ):
+        with pytest.raises(SystemExit):
+            witness._refuse_records_path(bad, repo)
+    if (repo / "RECORDS").exists():  # a case-insensitive filesystem
+        with pytest.raises(SystemExit):
+            witness._refuse_records_path(repo / "RECORDS" / "x.json", repo)
+    witness._refuse_records_path(repo / "reports" / "x.json", repo)
+    witness._refuse_records_path(None, repo)
+
+
+def test_an_audit_reads_windows_whose_forecasts_are_no_longer_pending() -> None:
+    resolved_since = make_target("bls.cpi", A19, "2026-07-01", "2026-07-09")
+    archive = FakeArchive()
+    report = run([resolved_since], archive, pending=set(), mode="audit")
+    assert [q["url"] for q in archive.index_reads] == [A19]
+    assert archive.saves == []
+    assert report["pendingFilter"] == "ignored (audit)"
+
+
+def test_the_pause_between_requests_is_never_skipped_to_save_time() -> None:
+    now = {"t": 0.0}
+    asked: list[str] = []
+
+    def fetch(url: str, timeout: float) -> witness.Response:
+        asked.append(url)
+        now["t"] += 100.0
+        if "/save/" in url:
+            return saved(url.split("/save/", 1)[1], "20260920194501")
+        return witness.Response(200, url, {}, b"[]")
+
+    carrier = witness.Transport(
+        fetch=fetch,
+        sleep=lambda seconds: now.__setitem__("t", now["t"] + seconds),
+        clock=lambda: now["t"],
+        now=lambda: at(TODAY),
+        deadline_seconds=400.0,  # 300 for captures: one request, then no room
+    )
+    targets = [
+        make_target(
+            f"t{i}", f"https://host{i}.example.gov/p", "2026-09-16", "2026-09-24"
+        )
+        for i in range(3)
+    ]
+    report = witness.run(
+        targets=targets,
+        pending={t.data_point_id for t in targets},
+        today=TODAY,
+        transport=carrier,
+        options=witness.Options(save_pause=250.0, index_pause=1.0),
+    )
+    assert len([u for u in asked if "/save/" in u]) == 1
+    whys = [e["save"].get("why", "") for e in report["openWindows"][1:]]
+    assert all("no room for the pause between requests" in why for why in whys)
+    # The index phase gets its own budget and still reads all three.
+    assert len([u for u in asked if "/cdx/" in u]) == 3
