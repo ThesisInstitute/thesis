@@ -12,7 +12,7 @@ const BILLS_DIR = path.join(REPO_ROOT, "bills");
 const billSlugs = new Set(
   fs
     .readdirSync(BILLS_DIR)
-    .filter((name) => name.endsWith(".json"))
+    .filter((name) => name.endsWith(".json") && !name.endsWith(".mapped.json"))
     .flatMap((name) => {
       const artifact = JSON.parse(
         fs.readFileSync(path.join(BILLS_DIR, name), "utf8"),

@@ -48,7 +48,8 @@ def load_registered_series(docket_path: pathlib.Path) -> list[str]:
             raise MappingError(
                 f"docket series entry {index} must have a nonempty series"
             )
-        registered.append(concept.strip())
+        if concept.strip() not in registered:
+            registered.append(concept.strip())
     return registered
 
 
@@ -112,16 +113,17 @@ def load_catalog_series(catalog_path: pathlib.Path) -> list[dict]:
     return series
 
 
+def registered_match_candidates(hint: str, registered: Sequence[str]) -> list[str]:
+    """Exact identity wins; preserve every distinct descendant for review."""
+    if hint in registered:
+        return [hint]
+    return sorted({concept for concept in registered if concept.startswith(f"{hint}.")})
+
+
 def match_registered_series(hint: str, registered: Sequence[str]) -> str | None:
-    """Return the exact or first dot-descendant registry match for ``hint``."""
-    for concept in registered:
-        if concept == hint:
-            return concept
-    prefix = f"{hint}."
-    for concept in registered:
-        if concept.startswith(prefix):
-            return concept
-    return None
+    """Return only an exact or unambiguous dot-descendant registry match."""
+    candidates = registered_match_candidates(hint, registered)
+    return candidates[0] if len(candidates) == 1 else None
 
 
 def catalog_match_candidates(hint: str, catalog: Sequence[dict]) -> list[dict]:
@@ -164,7 +166,7 @@ def resolve_catalog_series(
         and entry["geography"].get("level") == "country"
         and entry["geography"].get("id") == "0100000US"
     ]
-    if len(national) == 1:
+    if len(national) == 1 and len({entry["concept"] for entry in candidates}) == 1:
         return national[0], candidates
     return None, candidates
 
@@ -252,8 +254,19 @@ def map_artifact(
                 )
             hint = raw_hint.strip() if isinstance(raw_hint, str) else ""
             match = match_registered_series(hint, registered) if hint else None
+            registered_candidates = (
+                registered_match_candidates(hint, registered) if hint else []
+            )
             catalog_match, catalog_candidates = (
                 resolve_catalog_series(hint, catalog) if hint else (None, [])
+            )
+            canonical_candidates = (
+                registered_match_candidates(catalog_match["concept"], registered)
+                if catalog_match is not None
+                else []
+            )
+            catalog_registered_match = (
+                canonical_candidates[0] if len(canonical_candidates) == 1 else None
             )
 
             metric.pop("matched_series", None)
@@ -262,7 +275,14 @@ def map_artifact(
                 metric["registry"] = "reachable"
                 metric["matched_series"] = match
                 summary["reachable"] += 1
-            elif catalog_match is not None:
+            elif (
+                catalog_registered_match is not None and len(registered_candidates) <= 1
+            ):
+                metric["registry"] = "reachable"
+                metric["matched_series"] = catalog_registered_match
+                metric["ledger_uuid"] = catalog_match["uuid"]
+                summary["reachable"] += 1
+            elif catalog_match is not None and len(registered_candidates) <= 1:
                 metric["registry"] = "ledger"
                 metric["matched_series"] = catalog_match["concept"]
                 metric["ledger_uuid"] = catalog_match["uuid"]
@@ -270,7 +290,13 @@ def map_artifact(
             elif hint:
                 metric["registry"] = "not-yet"
                 summary["notYet"] += 1
-                if catalog_candidates:
+                if len(registered_candidates) > 1:
+                    note = (
+                        f"Ambiguous docket match for {hint!r}; candidates: "
+                        + ", ".join(registered_candidates)
+                        + ". A curator must select the exact outcome series."
+                    )
+                elif catalog_candidates:
                     candidate_uuids = ", ".join(
                         entry["uuid"] for entry in catalog_candidates
                     )

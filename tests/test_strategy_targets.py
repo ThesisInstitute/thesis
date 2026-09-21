@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 import json
 import pathlib
 import subprocess
@@ -29,6 +30,7 @@ from strategy_targets import (  # noqa: E402
 
 OPEN_SLUG = "australia-cpi-annual-rate-july-2026"
 OPEN_DATA_POINT = "abs.cpi.all_groups.yoy.2026-07.first_print"
+ACTC_SLUG = "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar"
 
 
 def head() -> str:
@@ -100,6 +102,9 @@ def test_selector_resolves_one_published_v2_target_and_replays(
     assert payload["localResolutionEvidence"]["resolvedDataPointIds"] == []
     assert payload["ledgerEvidence"]["resolvedDataPointIds"] == []
     assert payload["selectionSetHash"] == selection_hash(payload)
+    assert "billSelection" not in payload
+    assert "billSlug" not in payload["request"]
+    assert "billSeries" not in payload["request"]
 
     stamped = stamp_artifact(
         payload,
@@ -433,4 +438,225 @@ def test_published_resolution_date_requires_the_published_field() -> None:
     with pytest.raises(StrategyTargetError, match="invalid publishedResolutionDate"):
         published_resolution_date(
             {"catalogSlug": "x", "publishedResolutionDate": "2030-13-01"}
+        )
+
+
+def bill_selection(tmp_path: pathlib.Path, **overrides) -> dict:
+    options = dict(
+        root=ROOT,
+        source_sha=head(),
+        selected_at_utc="2026-09-21T19:00:00Z",
+        workflow={"repository": "example/thesis", "runId": 999, "runAttempt": 1},
+        requested_slugs=[],
+        auto_select=False,
+        max_targets=2,
+        suite="ladder",
+        bill_slug="s3596-119",
+        bill_series="irs.actc.total_claims",
+        ledger_path=empty_ledger(tmp_path),
+        ledger_repository="PolicyEngine/chronicle",
+        ledger_branch="codex/thesis-ledger-facts",
+        ledger_logical_path="ledger/official_observations.jsonl",
+        ledger_repository_commit="a" * 40,
+        ledger_blob_sha="b" * 40,
+    )
+    options.update(overrides)
+    return select_targets(**options)
+
+
+@pytest.fixture
+def recorded_bill_conditions(monkeypatch: pytest.MonkeyPatch) -> None:
+    # No subprocess needed in selector tests; bill-plan tests separately cover
+    # the trusted registry loader and its exact status/text/deadline checks.
+    import bill_forecast_plan as plan
+
+    reviewed = plan.build_bill_selection(ROOT, "s3596-119", "irs.actc.total_claims")
+    monkeypatch.setattr(
+        plan,
+        "load_conditions",
+        lambda root: [
+            {
+                "conditionId": arm["conditionId"],
+                "status": "open",
+                "resolvesBy": pair["conditionDeadline"],
+                "matchStrings": [arm["conditional"]],
+            }
+            for pair in reviewed["pairs"]
+            for arm in pair["arms"]
+        ],
+    )
+
+
+def test_bill_selection_preserves_full_context_and_reverifies(
+    tmp_path: pathlib.Path,
+    recorded_bill_conditions: None,
+) -> None:
+    import strategy_targets as module
+
+    payload = bill_selection(tmp_path)
+    assert len(payload["targets"]) == 2
+    assert payload["request"]["catalogSlugs"] == []
+    assert payload["request"]["billSlug"] == "s3596-119"
+    entry = next(
+        row
+        for row in json.loads((ROOT / "scripts/docket_series.json").read_text())[
+            "series"
+        ]
+        if row.get("series") == "irs.actc.total_claims" and row.get("period") == "2027"
+    )
+    registrations = registrations_by_slug(ROOT)
+    for target in payload["targets"]:
+        registration = registrations[target["catalogSlug"]][0]
+        contract = registration["contract"]
+        assert target["anchors"] == entry["extras"]["anchors"]
+        assert target["conditional"] == contract["conditional"]
+        assert target["conditionDeadline"] == contract["conditionDeadline"]
+        assert target["resolutionDate"] == "2029-12-31"
+        assert target["resolutionDateBasis"] == "resolve-by-bound"
+        context = module.conditional_comparison_context(ROOT, target)
+        register_targets.require_conditional_docket_template(
+            contract,
+            [entry],
+            target["registeredAtUtc"],
+            batch_target=context,
+        )
+        # Exercise the real privileged publisher contract/ancestry validation,
+        # including the narrow pre-basis IRS registration compatibility.
+        docket_publication.validate_target_registration(
+            ROOT,
+            context,
+            run_started_at="2026-09-21T19:01:00Z",
+            require_git_binding=True,
+            allow_pre_cutover_v2=True,
+        )
+    verify_selection(payload, root=ROOT, ledger_path=empty_ledger(tmp_path))
+    ensure_open(
+        payload,
+        root=ROOT,
+        ledger_path=empty_ledger(tmp_path),
+        checked_at_utc="2026-09-22T00:00:00Z",
+    )
+
+
+@pytest.mark.parametrize(
+    "overrides, message",
+    [
+        ({"max_targets": 1}, "atomically"),
+        ({"requested_slugs": [ACTC_SLUG]}, "without catalog slugs"),
+        ({"auto_select": True}, "without catalog slugs"),
+        ({"suite": "both"}, "ladder suite"),
+        ({"bill_slug": ""}, "billSeries requires"),
+    ],
+)
+def test_bill_selection_rejects_partial_or_mixed_requests(
+    tmp_path: pathlib.Path,
+    recorded_bill_conditions: None,
+    overrides: dict,
+    message: str,
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        bill_selection(tmp_path, **overrides)
+
+
+def test_conditional_slugs_remain_ineligible_without_bill_plan() -> None:
+    with pytest.raises(
+        StrategyTargetError, match="conditional targets are not selectable"
+    ):
+        _published(ACTC_SLUG, "2026-09-21T19:00:00Z")
+
+
+def test_bill_selection_rejects_missing_sibling(
+    tmp_path: pathlib.Path,
+    recorded_bill_conditions: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import strategy_targets as module
+
+    original = module.registrations_by_slug
+
+    def missing(root):
+        rows = original(root)
+        rows.pop(ACTC_SLUG)
+        return rows
+
+    monkeypatch.setattr(module, "registrations_by_slug", missing)
+    with pytest.raises(StrategyTargetError, match="unique published registration"):
+        bill_selection(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "mutation, message",
+    [
+        ("sibling", "missing a registered conditional sibling"),
+        ("premise", "differs from reviewed conditional premise"),
+        ("window", "differs from reviewed source release window"),
+    ],
+)
+def test_latest_bill_gate_rejects_changed_selection_context(
+    tmp_path: pathlib.Path,
+    recorded_bill_conditions: None,
+    mutation: str,
+    message: str,
+) -> None:
+    payload = bill_selection(tmp_path)
+    if mutation == "sibling":
+        payload["targets"].pop()
+    elif mutation == "premise":
+        payload["targets"][0]["conditional"] += " altered"
+    else:
+        payload["targets"][0]["sourceBinding"]["expectedReleaseWindow"][
+            "start"
+        ] = "2030-01-01"
+    with pytest.raises(StrategyTargetError, match=message):
+        ensure_open(
+            payload,
+            root=ROOT,
+            ledger_path=empty_ledger(tmp_path),
+            checked_at_utc="2026-09-22T00:00:00Z",
+        )
+
+
+def test_conditional_deadline_and_source_start_close_before_resolver_bound() -> None:
+    from strategy_targets import require_conditional_open
+
+    target = {
+        "conditional": "premise",
+        "catalogSlug": "example",
+        "conditionDeadline": "2030-01-01",
+        "sourceBinding": {
+            "expectedReleaseWindow": {"start": "2030-02-01", "end": "2030-12-31"}
+        },
+    }
+    with pytest.raises(StrategyTargetError, match="condition deadline"):
+        require_conditional_open(
+            target, dt.datetime(2030, 1, 1, tzinfo=dt.timezone.utc)
+        )
+    target["conditionDeadline"] = "2030-12-01"
+    with pytest.raises(StrategyTargetError, match="source release window"):
+        require_conditional_open(
+            target, dt.datetime(2030, 2, 1, tzinfo=dt.timezone.utc)
+        )
+
+
+@pytest.mark.parametrize("mutation", ["anchors", "unknown"])
+def test_publisher_projection_keeps_unknown_and_mutated_prompt_context(
+    tmp_path: pathlib.Path,
+    recorded_bill_conditions: None,
+    mutation: str,
+) -> None:
+    from strategy_targets import conditional_comparison_context
+
+    payload = bill_selection(tmp_path)
+    target = payload["targets"][0]
+    if mutation == "anchors":
+        target["anchors"]["2023"] = -1
+    else:
+        target["inventedPromptContext"] = "unreviewed"
+    context = conditional_comparison_context(ROOT, target)
+    with pytest.raises(docket_publication.PublicationError, match="run context"):
+        docket_publication.validate_target_registration(
+            ROOT,
+            context,
+            run_started_at="2026-09-21T19:01:00Z",
+            require_git_binding=True,
         )

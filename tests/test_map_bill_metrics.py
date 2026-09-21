@@ -776,3 +776,77 @@ def test_existing_request_for_colliding_concept_is_not_overwritten(
 
     assert existing_path.read_bytes() == existing_bytes
     assert not bill_path.with_suffix(".mapped.json").exists()
+
+
+def test_ambiguous_docket_descendants_remain_unresolved() -> None:
+    registered = ["agency.outcome.a", "agency.outcome.b"]
+    assert (
+        map_bill_metrics.match_registered_series("agency.outcome", registered) is None
+    )
+    assert (
+        map_bill_metrics.match_registered_series(
+            "agency.outcome", [*registered, "agency.outcome"]
+        )
+        == "agency.outcome"
+    )
+    artifact = {
+        "provisions": [
+            {"metrics": [{"text": "Outcome", "series_hint": "agency.outcome"}]}
+        ]
+    }
+    mapped, proposals = map_bill_metrics.map_artifact(
+        artifact,
+        registered,
+        [catalog_row("agency.outcome", "uuid")],
+        proposed_from="bill",
+    )
+    assert mapped["provisions"][0]["metrics"][0]["registry"] == "not-yet"
+    assert "Ambiguous docket" in proposals[0]["note"]
+
+
+def test_national_preference_cannot_choose_among_different_concepts() -> None:
+    catalog = [
+        catalog_row("agency.water.clean", "clean"),
+        catalog_row(
+            "agency.water.access",
+            "access",
+            geography={"id": "state", "level": "state"},
+        ),
+    ]
+    match, candidates = map_bill_metrics.resolve_catalog_series("agency.water", catalog)
+    assert match is None
+    assert len(candidates) == 2
+
+
+def test_catalog_alias_resolves_to_admitted_canonical_series() -> None:
+    artifact = {
+        "provisions": [{"metrics": [{"text": "Outcome", "series_hint": "WATER"}]}]
+    }
+    mapped, proposals = map_bill_metrics.map_artifact(
+        artifact,
+        ["agency.water.safe", "agency.water.safe"],
+        [catalog_row("agency.water.safe", "water-uuid", aliases=["WATER"])],
+        proposed_from="bill",
+    )
+    assert mapped["provisions"][0]["metrics"][0] == {
+        "text": "Outcome",
+        "series_hint": "WATER",
+        "registry": "reachable",
+        "matched_series": "agency.water.safe",
+        "ledger_uuid": "water-uuid",
+    }
+    assert proposals == []
+
+
+def test_docket_duplicate_periods_are_one_series_identity(tmp_path) -> None:
+    docket = tmp_path / "docket.json"
+    write_json(
+        docket,
+        {
+            "series": [
+                {"series": "agency.water.safe", "period": "2025"},
+                {"series": "agency.water.safe", "period": "2026"},
+            ]
+        },
+    )
+    assert map_bill_metrics.load_registered_series(docket) == ["agency.water.safe"]
