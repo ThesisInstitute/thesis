@@ -70,3 +70,14 @@ def test_strategy_workflow_pins_tools_and_witnesses_run_window() -> None:
     assert "--publish-validated-at-utc" in source
     assert "record-forecasts.yml" in source
     assert "for attempt in 1 2 3; do" in source
+
+
+def test_final_push_rechecks_deadlines_after_potentially_slow_builds() -> None:
+    publish = job_block(WORKFLOW.read_text(), "publish", None)
+    push_loop = publish[publish.index("- name: Rebase, reverify, and push") :]
+    build = push_loop.index("bun run build")
+    push = push_loop.index('push origin main; then')
+    before_push = push_loop[build:push]
+    assert 'gh api "repos/$LEDGER_REPOSITORY/commits/$LEDGER_BRANCH"' in before_push
+    assert 'scripts/strategy_targets.py ensure-open' in before_push
+    assert '--checked-at-utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"' in before_push
