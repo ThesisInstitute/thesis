@@ -102,10 +102,18 @@ CALENDAR_GATED_SOURCE_ADAPTERS = NATIVE_INTL_SOURCE_ADAPTERS | {
 # so an inherited alias (the payroll series' previous targets are
 # ``bls.ces.total_nonfarm.payroll_employment.change.sa...`` under the docket
 # series ``bls.ces.nonfarm_payrolls.change``) would never reach its executor.
+#
+# Changing a series' id grammar retires the roller's id-based guard against
+# re-registering a period: ``roll_docket`` intersects derived ids with the
+# registered ones, and a canonical ``2026_09`` id never equals an existing
+# ``2026-09`` or ``september_2026`` one. For ``bls-api`` the replacement is
+# period-level: the docket commits no release date for a period that already
+# holds a registration, the roller skips a calendar-gated period with no date,
+# and tests/test_bls_api_registrable.py enforces the first of those.
 CANONICAL_ID_SOURCE_ADAPTERS = NATIVE_INTL_SOURCE_ADAPTERS | {"bls-api"}
 # Adapters whose allowedHosts are exactly the hosts their executor fetches.
 # A previous forecast's research links must not widen that custody boundary.
-EXECUTOR_HOSTS_ONLY_SOURCE_ADAPTERS = {"bea-ita-itable", "bls-api"}
+CUSTODY_PINNED_HOST_ADAPTERS = frozenset({"bea-ita-itable", "bls-api"})
 RELEASE_POLICIES = {"first_print", "advance_vintage", "registered_query_snapshot"}
 RESOLUTION_DATE_BASES = {"release-calendar", "resolve-by-bound"}
 DEFAULT_RESOLUTION_DATE_BASIS = "release-calendar"
@@ -741,7 +749,7 @@ def derive_source_binding(
     # forecast's research links must not widen that custody boundary; the
     # official Table 5.1 landing page is:
     # https://apps.bea.gov/iTable/?ReqID=62&step=6&isuri=1&tablelist=62&product=1
-    if previous and adapter not in EXECUTOR_HOSTS_ONLY_SOURCE_ADAPTERS:
+    if previous and adapter not in CUSTODY_PINNED_HOST_ADAPTERS:
         prior_url = previous.get("resolutionSourceUrl")
         if prior_url:
             allowed_hosts.add(_host(str(prior_url)))

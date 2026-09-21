@@ -1,8 +1,11 @@
-"""The six registrable BLS Public Data API docket series.
+"""The registrable BLS Public Data API specs and their docket entries.
 
 Fixture bytes are official keyless API responses captured 2026-09-20 (see
 ``tests/fixtures/bls_api/README.md``). They prove the parser, the transforms
 and the binding; they are never resolution evidence.
+
+Six specs are registrable. Three have docket templates. The other three wait
+on a Chronicle lineage decision (``LINEAGE_BLOCKED`` below).
 """
 
 from __future__ import annotations
@@ -67,6 +70,16 @@ CAPTURES = {
     ),
 }
 REGISTRABLE = sorted(CAPTURES)
+# Chronicle holds two observed lineages for each of these concepts, and a
+# declared BLS series id appears in neither, so the docket-to-Ledger
+# containment gate cannot re-derive the pin. They get a docket template only
+# after Chronicle resolves the duplicate (docs/anchor-verifications.md).
+LINEAGE_BLOCKED = {
+    "bls.cps.unemployment_rate",
+    "bls.cpi.u.headline_mom",
+    "bls.cpi.u.core_mom",
+}
+DOCKETED = sorted(set(REGISTRABLE) - LINEAGE_BLOCKED)
 
 
 def _rows(series: str) -> dict[str, dict]:
@@ -216,7 +229,9 @@ def test_legacy_specs_keep_the_served_level_anchor_check() -> None:
 # --- registration ---------------------------------------------------------
 
 
-def _target(series: str, *, period: str = "2030-01") -> dict:
+def _target(
+    series: str, *, period: str = "2030-01", release: str = "2030-02-08"
+) -> dict:
     spec = resolve_pending.BLS_API_ADAPTERS[series]
     return {
         "series": series,
@@ -225,7 +240,7 @@ def _target(series: str, *, period: str = "2030-01") -> dict:
         "targetUnit": spec["unit"],
         "valueScale": spec.get("scale", 1),
         "sourceBinding": resolve_pending.bls_api_binding_template(spec),
-        "expectedReleaseDate": "2030-02-08",
+        "expectedReleaseDate": release,
         "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
         "previousTarget": {
             "period": "2029-12",
@@ -362,6 +377,175 @@ def test_too_few_anchors_refuse_admission(monkeypatch: pytest.MonkeyPatch) -> No
     assert "fewer than three verified anchors" in (_refusal(_contract(series)) or "")
 
 
+def test_binding_without_hosts_is_not_the_reviewed_template() -> None:
+    # source_binding_projection checks the appended fact's host only when the
+    # registration lists hosts, so the run-time predicate must require them.
+    series = "bls.jolts.quits_rate"
+    spec = resolve_pending.BLS_API_ADAPTERS[series]
+    binding = _contract(series)["sourceBinding"]
+    assert resolve_pending.bls_api_binding_matches_spec(binding, spec)
+    hostless = {k: v for k, v in binding.items() if k != "allowedHosts"}
+    assert not resolve_pending.bls_api_binding_matches_spec(hostless, spec)
+    assert not resolve_pending.bls_api_binding_matches_spec(
+        {**binding, "allowedHosts": []}, spec
+    )
+
+
+def test_gate_refuses_an_id_that_routes_to_another_month() -> None:
+    contract = _contract("bls.jolts.quits_rate")
+    contract["period"] = "2030-02"
+    assert "routes to 2030-01 but the contract's period is '2030-02'" in (
+        _refusal(contract) or ""
+    )
+
+
+def test_bls_api_is_calendar_gated_in_both_modules() -> None:
+    # Dropping either membership silently stops requiring an official date.
+    adapter = resolve_pending.BLS_API_BINDING_ADAPTER
+    assert adapter in register_targets.CALENDAR_GATED_SOURCE_ADAPTERS
+    assert adapter in roll_docket.OFFICIAL_CALENDAR_ADAPTERS
+    assert adapter in roll_docket.CALENDAR_GATED_SOURCE_ADAPTERS
+    assert adapter in register_targets.CUSTODY_PINNED_HOST_ADAPTERS
+    assert adapter in register_targets.CANONICAL_ID_SOURCE_ADAPTERS
+    with pytest.raises(register_targets.RegistrationError, match="releaseCalendarUrl"):
+        target = _target("bls.jolts.quits_rate")
+        del target["releaseCalendarUrl"]
+        register_targets.build_contract(target, dt.date(2030, 1, 2))
+
+
+def test_an_exact_half_rounds_by_one_rule_not_by_float_noise() -> None:
+    spec = resolve_pending.BLS_API_ADAPTERS["bls.cpi.u.headline_mom"]
+
+    def pct(prior: float, current: float) -> float | None:
+        rows = {
+            "2030-01": {"value": prior, "latest": False, "preliminary": False},
+            "2030-02": {"value": current, "latest": True, "preliminary": False},
+        }
+        return resolve_pending.bls_transformed_value(rows, spec, "2030-02")[0]
+
+    # Exactly +0.25 and +0.75: binary float ``round`` gave 0.2 and 0.8.
+    assert pct(320.000, 320.800) == 0.3
+    assert pct(320.000, 322.400) == 0.8
+    assert pct(320.000, 319.200) == -0.3
+    # Not ties: unchanged by the rule.
+    assert pct(332.813, 334.131) == 0.4
+
+
+def test_the_unemployment_note_does_not_claim_cps_is_never_revised() -> None:
+    note = resolve_pending.BLS_API_ADAPTERS["bls.cps.unemployment_rate"][
+        "evidence_notes"
+    ]
+    assert "January 2026" in note and "population-control" in note
+    # The committed capture carries BLS's own footnote saying so.
+    raw = json.loads((FIXTURES / CAPTURES["bls.cps.unemployment_rate"][0]).read_text())
+    january = next(
+        row
+        for row in raw["Results"]["series"][0]["data"]
+        if row["year"] == "2026" and row["period"] == "M01"
+    )
+    assert "revised to incorporate updated population controls" in json.dumps(january)
+
+
+# --- the resolver's own loop ---------------------------------------------------
+
+
+def _run_main(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    *,
+    series: str,
+    period: str,
+    release: str,
+    now: str,
+    forecast_resolution_date: str | None = None,
+    registered: bool = True,
+    fetch_allowed: bool = True,
+) -> tuple[str, str]:
+    """Drive ``main()`` over one pending reference; returns (ref, stdout)."""
+    spec = resolve_pending.BLS_API_ADAPTERS[series]
+    contract = register_targets.build_contract(
+        _target(series, period=period, release=release), dt.date(2026, 1, 2)
+    )
+    ref = contract["dataPointId"]
+    registrations = (
+        {ref: {"targetContentHash": "a" * 64, "contract": contract}}
+        if registered
+        else {}
+    )
+    raw = (FIXTURES / CAPTURES[series][0]).read_bytes()
+    rows = resolve_pending.bls_rows_from_payload(raw, spec["series_id"])
+
+    def fetch(series_id: str, start: int, end: int):
+        if not fetch_allowed:
+            raise AssertionError("a keyless BLS request was spent on a refused ref")
+        url = resolve_pending.BLS_API_URL.format(series=series_id, start=start, end=end)
+        return rows, raw, url, now
+
+    resolution_date = forecast_resolution_date or release
+    forecast = {"resolutionDate": resolution_date, "unit": spec["unit"]}
+    monkeypatch.setattr(
+        resolve_pending,
+        "load_thesis_log",
+        lambda _url: {"entries": [], "resolutionLinks": []},
+    )
+    monkeypatch.setattr(resolve_pending, "pending_claims_refs", lambda _log: [])
+    monkeypatch.setattr(
+        resolve_pending,
+        "pending_adapter_refs",
+        lambda _log: [
+            (ref, "bls_api", spec, "month", period, resolution_date, forecast)
+        ],
+    )
+    monkeypatch.setattr(
+        resolve_pending, "ledger_state", lambda *_args: ("", "blob", "b" * 40)
+    )
+    monkeypatch.setattr(
+        resolve_pending, "registration_contracts", lambda: registrations
+    )
+    monkeypatch.setattr(resolve_pending, "utc_now", lambda: now)
+    monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+    assert resolve_pending.main() == 0
+    return ref, capsys.readouterr().out
+
+
+def test_resolver_captures_a_registered_first_print(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # July 2026 is the latest, still-preliminary month in the capture; BLS
+    # released it on 2026-09-01 at 10:00 ET, after the 13:40 UTC run, so the
+    # first capture is the next day's.
+    ref, out = _run_main(
+        monkeypatch,
+        capsys,
+        series="bls.jolts.quits_rate",
+        period="2026-07",
+        release="2026-09-01",
+        now="2026-09-02T13:40:00Z",
+    )
+    assert f"resolve {ref} -> 1.9 percent" in out
+    assert "dry-run: would append 1 row(s)" in out
+
+
+def test_resolver_never_fetches_for_a_registrable_ref_with_no_registration(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Only this family claims the stem, so before it became registrable such a
+    # reference reached no family at all. It must not now resolve contract-free.
+    ref, out = _run_main(
+        monkeypatch,
+        capsys,
+        series="bls.jolts.quits_rate",
+        period="2026-07",
+        release="2026-09-01",
+        now="2026-09-02T13:40:00Z",
+        registered=False,
+        fetch_allowed=False,
+    )
+    assert "BINDING/ADAPTER MISMATCH (refusing, no registered bls-api binding" in out
+    assert ref in out and "nothing new to record" in out
+
+
 # --- routing ----------------------------------------------------------------
 
 
@@ -423,7 +607,7 @@ def _bls_api_docket_entries() -> list[dict]:
 
 def test_docket_templates_are_the_executor_templates() -> None:
     entries = _bls_api_docket_entries()
-    assert sorted(entry["series"] for entry in entries) == REGISTRABLE
+    assert sorted(entry["series"] for entry in entries) == DOCKETED
     for entry in entries:
         spec = resolve_pending.BLS_API_ADAPTERS[entry["series"]]
         extras = entry["extras"]
@@ -433,6 +617,41 @@ def test_docket_templates_are_the_executor_templates() -> None:
         assert entry["releaseCalendarUrl"].startswith(
             "https://www.bls.gov/schedule/news_release/"
         )
+
+
+def test_lineage_blocked_series_stay_templateless_until_chronicle_is_fixed() -> None:
+    registry = json.loads((ROOT / "scripts" / "docket_series.json").read_text())
+    entries = {entry["series"]: entry for entry in registry["series"]}
+    waived = json.loads((ROOT / "waivers.json").read_text())["waivers"][
+        "templateless_docket_series"
+    ]["members"]
+    catalog = json.loads(
+        (ROOT / "tests" / "fixtures" / "ledger_series_catalog.json").read_text()
+    )["series"]
+    for series in sorted(LINEAGE_BLOCKED):
+        assert "sourceBinding" not in (entries[series].get("extras") or {})
+        assert series in waived
+        lineages = [
+            row
+            for row in catalog
+            if row.get("concept") == series and row.get("status") != "docket-only"
+        ]
+        series_id = resolve_pending.BLS_API_ADAPTERS[series]["series_id"]
+        # This is the blocking condition itself. When Chronicle merges the
+        # duplicate, or a lineage gains the BLS id, this assertion fails: that
+        # is the signal to give the series its docket template.
+        assert len(lineages) > 1, series
+        assert not any(
+            series_id in (row.get("source_concepts") or []) for row in lineages
+        ), series
+        # The pinned lineage is not the one a default-entity fact would join.
+        pinned = entries[series]["ledger"]["uuid"]
+        default_entity = [
+            row["uuid"]
+            for row in lineages
+            if (row.get("entity") or {}).get("name") == "economy"
+        ]
+        assert default_entity and pinned not in default_entity, series
 
 
 def test_docket_templates_pass_the_prospector_binding_schema() -> None:
@@ -465,11 +684,11 @@ def test_roller_rolls_only_a_period_with_an_official_date(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     entry = next(
-        e for e in _bls_api_docket_entries() if e["series"] == "bls.cpi.u.core_mom"
+        e for e in _bls_api_docket_entries() if e["series"] == "bls.jolts.quits_rate"
     )
     assert roll_docket.target_extras_for_period(entry, "2026-09") is None
     assert "no valid explicit official release date" in capsys.readouterr().err
     extras = roll_docket.target_extras_for_period(entry, "2026-10")
     assert extras is not None
-    assert extras["expectedReleaseDate"] == "2026-11-10"
+    assert extras["expectedReleaseDate"] == "2026-12-01"
     assert extras["releaseCalendarUrl"] == entry["releaseCalendarUrl"]

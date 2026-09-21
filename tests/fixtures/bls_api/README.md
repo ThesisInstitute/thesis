@@ -37,5 +37,5 @@ openings printed 7,359 and are served as 7,182). They are never resolution
 evidence. A resolution re-fetches the live response, re-verifies the anchors
 from it, and captures a month only while the first-print gate still holds.
 Release-text verification of every anchor is in
-`docs/anchor-verifications.md`, "BLS Public Data API: registrable docket
-series".
+`docs/anchor-verifications.md`, "Anchor verifications — BLS registrable docket
+series (2026-09-20)".

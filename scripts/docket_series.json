@@ -31,26 +31,6 @@
    "series": "bls.cpi.u.headline_mom",
    "cadence": "monthly",
    "slug": "us-cpi-u-mom-{month}-{year}",
-   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
-   "releaseDates": {
-    "2026-10": "2026-11-10",
-    "2026-11": "2026-12-10"
-   },
-   "extras": {
-    "targetUnit": "percent_growth",
-    "sourceBinding": {
-     "adapter": "bls-api",
-     "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0",
-     "sourceSeriesId": "CUSR0000SA0",
-     "field": "value",
-     "table": "Consumer Price Index for All Urban Consumers, US city average, all items, seasonally adjusted (CPI news release, Table A)",
-     "transform": {
-      "operation": "percent_change_previous_period",
-      "factor": 1
-     },
-     "releasePolicy": "first_print"
-    }
-   },
    "ledger": {
     "uuid": "3e796803-a194-4c83-9dc9-27cc870ff08e",
     "concept": "bls.cpi.u.headline_mom"
@@ -60,26 +40,6 @@
    "series": "bls.cpi.u.core_mom",
    "cadence": "monthly",
    "slug": "us-core-cpi-mom-{month}-{year}",
-   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
-   "releaseDates": {
-    "2026-10": "2026-11-10",
-    "2026-11": "2026-12-10"
-   },
-   "extras": {
-    "targetUnit": "percent_growth",
-    "sourceBinding": {
-     "adapter": "bls-api",
-     "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E",
-     "sourceSeriesId": "CUSR0000SA0L1E",
-     "field": "value",
-     "table": "Consumer Price Index for All Urban Consumers, US city average, all items less food and energy, seasonally adjusted (CPI news release, Table A)",
-     "transform": {
-      "operation": "percent_change_previous_period",
-      "factor": 1
-     },
-     "releasePolicy": "first_print"
-    }
-   },
    "ledger": {
     "uuid": "d85c3c7f-874b-4caa-bfad-1ec7a473c293",
     "concept": "bls.cpi.u.core_mom"
@@ -118,26 +78,6 @@
    "series": "bls.cps.unemployment_rate",
    "cadence": "monthly",
    "slug": "unemployment-rate-{month}-{year}",
-   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
-   "releaseDates": {
-    "2026-10": "2026-11-06",
-    "2026-11": "2026-12-04"
-   },
-   "extras": {
-    "targetUnit": "percent",
-    "sourceBinding": {
-     "adapter": "bls-api",
-     "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNS14000000",
-     "sourceSeriesId": "LNS14000000",
-     "field": "value",
-     "table": "Current Population Survey, unemployment rate, 16 years and over, seasonally adjusted (Employment Situation, Table A-1)",
-     "transform": {
-      "operation": "multiply",
-      "factor": 1
-     },
-     "releasePolicy": "first_print"
-    }
-   },
    "ledger": {
     "uuid": "8dbbd54f-4bfd-4735-ad0d-5b55b8bb4ec5",
     "concept": "bls.cps.unemployment_rate"
