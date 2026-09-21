@@ -60,6 +60,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
+import zlib
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from decimal import Decimal
@@ -2075,8 +2076,8 @@ def bea_ita_release_snapshot_envelope(
 # immutable Wayback Machine snapshot of the cells' OWN bound source page
 # (bls.gov blocks non-browser fetches; web.archive.org serves the exact
 # bytes and independently timestamps them). One snapshot per data month,
-# captured right after the Employment Situation release. The three rows
-# that DO have FRED mirrors (office/admin, production, transport) were
+# captured between that month's Employment Situation release and the next.
+# The three rows that DO have FRED mirrors (office/admin, production, transport) were
 # cross-checked against ALFRED at the release vintage and matched exactly.
 #
 # Every pin is a capture taken between the Employment Situation that first
@@ -7521,20 +7522,25 @@ def a19_snapshot_period(html: str) -> str | None:
     None.
     """
 
-    cells = {
+    cells = [
         (month.lower(), int(year))
         for month, year in re.findall(
             r"<th\b[^>]*>\s*([A-Za-z]+\.?)\s*<br\s*/?>\s*(\d{4})\s*</th>",
             html,
             flags=re.IGNORECASE,
         )
-    }
-    months = {month for month, _ in cells}
-    years = sorted(year for _, year in cells)
-    if len(cells) != 2 or len(months) != 1 or years[1] - years[0] != 1:
+    ]
+    if len(cells) < 2 or len(cells) % 2:
         return None
-    number = _A19_HEADER_MONTHS.get(months.pop())
-    return None if number is None else f"{years[1]}-{number:02d}"
+    (month, earlier), (_, later) = cells[0], cells[1]
+    # a19_values_from_html reads the SECOND number after a row label, so the
+    # headers must run year-ago then current, in every column group.
+    if later - earlier != 1 or cells != [(month, earlier), (month, later)] * (
+        len(cells) // 2
+    ):
+        return None
+    number = _A19_HEADER_MONTHS.get(month)
+    return None if number is None else f"{later}-{number:02d}"
 
 
 def a19_capture(snapshot_url: str) -> tuple[dt.datetime, str] | None:
@@ -7606,7 +7612,7 @@ def a19_read_capture(
     if raw[:2] == b"\x1f\x8b":
         try:
             raw = gzip.decompress(raw)
-        except (OSError, EOFError) as exc:
+        except (OSError, EOFError, zlib.error) as exc:
             raise A19CaptureError(f"capture {stamp} is not valid gzip") from exc
     return raw
 
@@ -7632,16 +7638,23 @@ def a19_window_captures(
         )
     )
     index = json.loads(body.decode() or "[]")
-    if not isinstance(index, list) or not all(isinstance(row, list) for row in index):
-        raise ValueError("the Archive index is not a list of rows")
+    # An empty list is an empty index. Anything else must be exactly the
+    # requested shape: a malformed or partial answer is an index failure, never
+    # evidence that the window holds no capture.
+    if not isinstance(index, list) or (
+        index and index[0] != ["timestamp", "statuscode"]
+    ):
+        raise ValueError("the Archive index is not the requested table")
     captures = []
     for row in index[1:]:
         if (
-            len(row) != 2
-            or row[1] != "200"
-            or not isinstance(row[0], str)
+            not isinstance(row, list)
+            or len(row) != 2
+            or not all(isinstance(cell, str) for cell in row)
             or not re.fullmatch(r"\d{14}", row[0])
         ):
+            raise ValueError(f"malformed Archive index row {row!r}")
+        if row[1] != "200":
             continue
         url = f"https://web.archive.org/web/{row[0]}/{A19_SOURCE_URL}"
         capture = a19_capture(url)
@@ -7661,7 +7674,9 @@ def a19_registered_capture(
     """(capture URL, BLS bytes, verdict) for a registered A-19 target.
 
     Takes the EARLIEST capture dated inside the registered window whose
-    current-month header is ``period``. With none, and the window still open,
+    current-month header is ``period``, walking the index in order and
+    deferring at the first capture it cannot read. With none, and the window
+    still open,
     it asks the Archive to capture the page and defers: a later run finds that
     capture. The verdict is the line to print when nothing resolves.
     ``FIRST-PRINT WINDOW MISSED`` is reserved for one finding: the window is
@@ -7685,25 +7700,23 @@ def a19_registered_capture(
                 f"{str(exc)[:200]}"
             ),
         )
-    unread = []
     for url in captures[:A19_MAX_WINDOW_CAPTURES]:
         try:
             raw = a19_read_capture(url, read)
         except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
-            unread.append(f"{url} ({type(exc).__name__})")
-            continue
+            # Stop here: a later capture that prints the month is the
+            # earliest one only if this one is known not to.
+            return (
+                None,
+                None,
+                (
+                    f"CAPTURE READ FAILED (deferring): {url} could not be read "
+                    f"({type(exc).__name__}: {str(exc)[:160]}), and an unread "
+                    "earlier capture cannot be skipped"
+                ),
+            )
         if a19_snapshot_period(raw.decode(errors="replace")) == period:
             return url, raw, ""
-    if unread:
-        return (
-            None,
-            None,
-            (
-                f"CAPTURE READ FAILED (deferring): {len(unread)} of "
-                f"{len(captures)} capture(s) inside {window!r} could not be "
-                f"read: {'; '.join(unread)[:300]}"
-            ),
-        )
     if len(captures) > A19_MAX_WINDOW_CAPTURES:
         return (
             None,
@@ -7779,6 +7792,10 @@ def a19_fact(
         ref, spec, period_type, period, value, release_day, capture_url, source_file
     )
     row["source"]["url"] = A19_SOURCE_URL
+    row["source"]["extraction_method"] = (
+        "Automated read of an Internet Archive capture of the BLS page by "
+        "scripts/resolve_pending.py (anchor-verified adapter)"
+    )
     return row
 
 
@@ -15421,16 +15438,14 @@ def main() -> int:
         else:
             utc_today = dt.date.fromisoformat(utc_now()[:10])
             window = source_binding.get("expectedReleaseWindow")
-            snapshot_url = A19_SNAPSHOT_URLS.get(period)
-            pinned = a19_capture(snapshot_url) if snapshot_url else None
-            if registration and not (
-                pinned and snapshot_window_state(pinned[0].date(), window) == "open"
-            ):
-                # The capture is a registered cell's custody, so it must be
-                # dated inside the window the contract registered; a pin
-                # outside it is evidence for a ruling, never a source. Cells
-                # of one month can register different windows, so discovery
-                # is per (month, window). One capture request per run.
+            if registration:
+                # A registered cell's custody is the EARLIEST capture dated
+                # inside the window its contract registered, so it always
+                # comes from the Archive's index, walked in order; a hand pin
+                # could name a later capture, or one outside the window.
+                # Nothing is requested before the window opens. Cells of one
+                # month can register different windows, so discovery is per
+                # (month, window). One capture request per run.
                 discovery_key = f"{period}@{canonical_sha256(window)}"
                 if discovery_key not in a19_discovered:
                     a19_discovered[discovery_key] = a19_registered_capture(
@@ -15454,6 +15469,10 @@ def main() -> int:
                         utc_now(),
                     ),
                 )
+            else:
+                # Cells that predate registration have no window; they keep
+                # the reviewed per-month pins.
+                snapshot_url = A19_SNAPSHOT_URLS.get(period)
             if not snapshot_url:
                 print(f"  no A-19 snapshot registered for {period}: {ref}")
                 continue
