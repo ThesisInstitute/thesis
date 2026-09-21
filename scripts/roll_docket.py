@@ -990,10 +990,10 @@ def select_capped_targets(
 def roll_execution_plan_refusal(target: dict) -> str | None:
     """Why registration would refuse this candidate for lack of an executor.
 
-    A target whose contract cannot even be built is left to registration's
-    own ``--skip-unbindable`` report, which names the binding error. A verdict
-    the resolver cannot reach is a refusal here, as it is in prospect
-    validation: an unjudged candidate must not take a cap slot.
+    A target whose contract cannot even be built returns None and keeps its
+    cap slot, as it always has: registration's ``--skip-unbindable`` report
+    names the binding error. A contract that builds but that the resolver
+    cannot judge is a refusal here, as it is in prospect validation.
     """
 
     try:

@@ -113,9 +113,7 @@ def _git(*args: str) -> str:
     ).stdout
 
 
-def test_no_tree_that_had_the_gate_registered_a_target_without_an_executor(
-    registered: dict[str, dict],
-) -> None:
+def test_no_tree_that_had_the_gate_registered_a_target_without_an_executor() -> None:
     """The gate is the only writer of snapshots; this trips if that stops.
 
     Self-anchoring, like the records-provenance epoch: a registration commit
@@ -124,11 +122,6 @@ def test_no_tree_that_had_the_gate_registered_a_target_without_an_executor(
     strategy. No id is ever allowlisted.
     """
 
-    unexecutable = {
-        ref
-        for ref, registration in registered.items()
-        if resolve_pending.execution_plan_refusal(registration)
-    }
     try:
         if _git("rev-parse", "--is-shallow-repository").strip() != "false":
             pytest.skip("needs full history (CI checks out fetch-depth 0)")
@@ -151,22 +144,28 @@ def test_no_tree_that_had_the_gate_registered_a_target_without_an_executor(
         if line.startswith("commit "):
             commit = line.split()[1]
             continue
-        if not line.startswith("records/targets/") or not (ROOT / line).exists():
+        if not re.fullmatch(r"records/targets/[^/]+\.json", line):
             continue
-        for contract in json.loads((ROOT / line).read_text())["targets"]:
-            if contract["dataPointId"] not in unexecutable:
-                continue
-            if commit not in gated:
-                gated[commit] = (
-                    subprocess.run(
-                        ["git", "cat-file", "-e", f"{commit}:{GATE_MARKER}"],
-                        cwd=ROOT,
-                        capture_output=True,
-                    ).returncode
-                    == 0
+        if commit not in gated:
+            gated[commit] = (
+                subprocess.run(
+                    ["git", "cat-file", "-e", f"{commit}:{GATE_MARKER}"],
+                    cwd=ROOT,
+                    capture_output=True,
+                ).returncode
+                == 0
+            )
+        if not gated[commit]:
+            continue
+        # The bytes that commit wrote, not today's worktree: a snapshot later
+        # deleted, or an id another snapshot also registers, is still judged.
+        snapshot = json.loads(_git("show", f"{commit}:{line}"))
+        for contract in snapshot["targets"]:
+            refusal = _refusal(contract)
+            if refusal:
+                late.append(
+                    f"{commit[:12]} {line} {contract['dataPointId']}: {refusal}"
                 )
-            if gated[commit]:
-                late.append(f"{commit[:12]} {line} {contract['dataPointId']}")
     assert not late, "registered without an executable plan:\n" + "\n".join(late)
 
 
@@ -602,6 +601,26 @@ def test_reuse_existing_only_keeps_its_own_refusal_for_an_unregistered_target(
     ):
         _register(targets_path, reuse_existing_only=True)
     assert not (tmp_path / "records").exists()
+
+
+def test_a_contract_the_resolver_cannot_judge_is_refused_not_a_traceback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def explode(registration: dict) -> str | None:
+        raise TypeError("unhashable type: 'list'")
+
+    monkeypatch.setattr(register_targets, "execution_plan_refusal", explode)
+    registration = {
+        "existing": False,
+        "contract": {"catalogSlug": "slug", "series": "agency.test.rate"},
+    }
+    with pytest.raises(
+        register_targets.RegistrationError,
+        match="the resolver could not judge the contract: unhashable",
+    ):
+        register_targets.require_execution_plan(registration)
+    # An existing snapshot is never judged at all.
+    register_targets.require_execution_plan({**registration, "existing": True})
 
 
 def test_an_existing_generic_registration_is_reused_not_rejudged(
