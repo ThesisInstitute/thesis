@@ -7504,9 +7504,9 @@ def a19_snapshot_period(html: str) -> str | None:
     Every column group is headed by the same month a year apart
     ("July<br/>2025", "July<br/>2026"); the later one is the print. Any other
     shape returns None: this page is overwritten monthly, and a value read
-    from a capture of a different month must never be recorded. Ten of the
-    twelve labels below were read off real captures on 2026-09-20 ("May" and
-    "Oct." were not reachable then); an unknown label returns None.
+    from a capture of a different month must never be recorded. The labels
+    below are the ones BLS prints on this table; an unknown label returns
+    None.
     """
 
     cells = {
@@ -7721,11 +7721,19 @@ def a19_registered_capture(
                 "(deferring)"
             ),
         )
+    # An error from the save endpoint does not mean no capture was made: on
+    # 2026-09-21 three requests were each answered HTTP 500 and the index then
+    # held a new capture (20260921154639) that read back through
+    # a19_read_capture. So a failed request still counts as this run's one
+    # request, and the verdict does not say the capture failed.
     try:
         read(WAYBACK_SAVE_URL.format(url=A19_SOURCE_URL))
         requested = A19_CAPTURE_REQUESTED
     except _WAYBACK_READ_ERRORS as exc:
-        requested = f"the capture request failed ({type(exc).__name__})"
+        requested = (
+            f"{A19_CAPTURE_REQUESTED}; the request returned "
+            f"{type(exc).__name__}, outcome unknown"
+        )
     return (
         None,
         None,
