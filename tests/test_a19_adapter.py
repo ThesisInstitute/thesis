@@ -501,6 +501,28 @@ def test_discovery_asks_for_a_capture_while_the_window_is_open() -> None:
     assert quiet.endswith("(deferring)")
 
 
+def test_a_failed_save_request_still_counts_as_the_runs_request() -> None:
+    # 2026-09-21: three save requests were answered HTTP 500 and a capture
+    # appeared in the index anyway. The verdict must not call that a failure,
+    # and the run must not ask again for its other windows.
+    saves: list[str] = []
+
+    def read(url: str) -> tuple[bytes, str]:
+        if url.startswith("https://web.archive.org/cdx/"):
+            return cdx(), url
+        saves.append(url)
+        raise urllib.error.HTTPError(url, 500, "Internal Server Error", None, None)
+
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 3), read
+    )
+    assert (url, raw) == (None, None)
+    assert resolve_pending.A19_CAPTURE_REQUESTED in verdict
+    assert "outcome unknown" in verdict and "failed" not in verdict
+    assert verdict.endswith("(deferring)")
+    assert len(saves) == 1
+
+
 def test_window_missed_means_the_whole_index_was_read_and_nothing_prints_it() -> None:
     calls: list[str] = []
     july_window = {"start": "2026-07-29", "end": "2026-08-06"}
@@ -589,6 +611,7 @@ def run_main(
     index: bytes = b"[]",
     served_as: dict[str, str] | None = None,
     resolution_dates: dict[str, str] | None = None,
+    save_status: int | None = None,
 ) -> tuple[str, list[str]]:
     """Run the resolver dry against a stand-in Archive.
 
@@ -633,6 +656,8 @@ def run_main(
         if url.startswith("https://web.archive.org/cdx/"):
             return _Response(index, url)
         if url.startswith("https://web.archive.org/save/"):
+            if save_status is not None:
+                raise urllib.error.HTTPError(url, save_status, "error", None, None)
             return _Response(b"saved", url)
         for stamp, html in pages.items():
             if url == identity_url(stamp):
@@ -745,6 +770,19 @@ def test_main_asks_for_one_capture_per_run_while_windows_are_open(
     assert output.count(resolve_pending.A19_CAPTURE_REQUESTED) == 1
     assert len([call for call in calls if "/save/" in call]) == 1
     assert "nothing new to record" in output
+
+    # The same when the save endpoint answers 500: still one request.
+    output, calls = run_main(
+        monkeypatch,
+        capsys,
+        [first, second],
+        today="2026-10-02",
+        archive={},
+        save_status=500,
+    )
+    assert output.count(resolve_pending.A19_CAPTURE_REQUESTED) == 1
+    assert "outcome unknown" in output
+    assert len([call for call in calls if "/save/" in call]) == 1
 
 
 def test_main_refuses_a_pin_the_archive_answers_with_another_capture(

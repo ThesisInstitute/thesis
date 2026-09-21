@@ -819,11 +819,14 @@ instant, after that month was published and before the next month replaced
 it. It does not claim the bytes served at the moment of release. For a
 registered cell the fact's `observed_at` is the capture's date, not the
 forecast's `resolutionDate` (which for these contracts is the window's end).
-This custody claim does not rest on a BLS revision policy; one comparison made
-in review (two captures 18 days apart, both printing September 2025, with
-identical tables) is an instance, not a policy. What BLS itself says about
-revising these estimates, and how far that bears on the release window, is
-under "Why the window is not one day" below.
+This custody claim does not rest on a BLS revision policy. Two comparisons
+exist: in review, two captures 18 days apart that both print September 2025
+had identical tables; and the capture of 2026-09-21 15:46 UTC is byte-identical
+to the pinned 2026-09-04 17:00 UTC capture (both 104,872 bytes, SHA-256
+`de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915`, read through
+`a19_read_capture`). Those are instances, not a policy. What BLS itself says
+about revising these estimates, and how far that bears on the release window,
+is under "Why the window is not one day" below.
 
 The twelve overdue cells. The six August 2026 cells (windows 2026-09-02/03 to
 2026-09-10/11) are satisfied by the release-day capture, 2026-09-04 17:00 UTC,
@@ -842,7 +845,10 @@ Without a usable pin, a registered target looks up the Archive's index for
 captures dated inside its window. From the day the window opens (not the
 forecast's `resolutionDate`, which would leave a single attempt on the last
 day), each daily run that finds no capture printing the month asks the Archive
-to capture the page, once per run, and defers. The six September 2026 cells
+to capture the page, once per run, and defers. An error from the save endpoint
+still counts as that run's request and is reported as "outcome unknown": on
+2026-09-21 three save requests were answered HTTP 500, and the index then held
+a new capture, which read back through the resolver's own reader. The six September 2026 cells
 register three different windows (2026-09-30 to 10-08, 10-06 to 10-14, 10-07
 to 10-15) around a 2026-10-02 release, so four of them can only resolve from a
 capture taken four or more days after the release.
@@ -924,8 +930,8 @@ proven on 2026-09-21, with the resolver's own code and User-Agent:
   Archive's index then held one new capture,
   [`20260921154639`](https://web.archive.org/web/20260921154639/https://www.bls.gov/web/empsit/cpseea19.htm),
   HTTP 200. A failed request is therefore not evidence that no capture was
-  made, and the resolver's log line for it ("the capture request failed") can
-  be wrong in that direction.
+  made, which is why the resolver reports one as "outcome unknown" and still
+  counts it as that run's single request.
 - `a19_registered_capture`, as the next day's run would call it, returned that
   capture: 104,872 bytes, SHA-256
   `de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915`, header
