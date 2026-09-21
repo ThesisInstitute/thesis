@@ -112,16 +112,18 @@ CALENDAR_GATED_SOURCE_ADAPTERS = NATIVE_INTL_SOURCE_ADAPTERS | {
 #
 # ``bls-cps-a19`` reads an Internet Archive capture of a page BLS overwrites
 # monthly, and the executor tests the CAPTURE's date against this window. The
-# Archive seldom captures that page unprompted, so the capture the resolver
-# itself requests is the working path, and a one-day window would give that
-# request a single attempt; from November to March it lands ten minutes after
-# the 08:30 ET release (13:30 UTC against a 13:40 UTC cron). Seven days is the
-# margin the docket's registered-query snapshots commit. The evidence, and why
-# a later capture still reads the first print, are in
-# docs/anchor-verifications.md, "Why the window is not one day". A
-# registration's window is immutable, so a change here affects new targets
-# only.
-CALENDAR_CAPTURE_MARGIN_DAYS: dict[str, int] = {"bls-cps-a19": 7}
+# resolver asks the Archive for a capture on each day the window is open, and
+# a later run reads it. That path is proven (docs/anchor-verifications.md
+# records one such capture read back) but the Archive fails often, and when it
+# does the fallback is a capture nobody asked for: over the ten months to
+# 2026-09, one fell on the release day, three within 7 days, seven within 14.
+# Fourteen is the widest whole-week margin that still closes more than a week
+# before the next release could replace the page: the shortest gap BLS has
+# scheduled is 23 days. Width never changes WHICH print is read (the header
+# check, then the earliest capture); it only adds chances where the
+# alternative is a target lost for good. A registration's window is immutable,
+# so a change here affects new targets only.
+CALENDAR_CAPTURE_MARGIN_DAYS: dict[str, int] = {"bls-cps-a19": 14}
 RELEASE_POLICIES = {"first_print", "advance_vintage", "registered_query_snapshot"}
 RESOLUTION_DATE_BASES = {"release-calendar", "resolve-by-bound"}
 DEFAULT_RESOLUTION_DATE_BASIS = "release-calendar"

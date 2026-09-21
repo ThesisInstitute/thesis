@@ -896,46 +896,80 @@ October and November dates were checked on the live page only.
 a contract only if exactly one docket entry owns the series, cites this
 calendar URL, and dates the target month, and only if the registered window is
 that date plus the margin below. The six July 2026 cells registered a window
-inferred from cadence that closed the day before BLS published. This check is
-the one that would have refused them at registration.
+inferred from cadence, 2026-07-29 to 2026-08-06, that closed the day before BLS
+published. Dated from the schedule, July's window would have opened on
+2026-08-07, and that registered window would have been refused.
 
 ### Why the window is not one day
 
 Every other calendar-gated adapter registers an exact one-day window. This one
-registers BLS's release day through seven days later
+registers BLS's release day through fourteen days later
 (`register_targets.CALENDAR_CAPTURE_MARGIN_DAYS`), for example 2026-11-06 to
-2026-11-13. The start is always BLS's published date; only the end moves, by a
+2026-11-20. The start is always BLS's published date; only the end moves, by a
 reviewed constant, and the bind step re-derives the window with the function
 registration used (`calendar_release_window`).
 
 The executor tests the CAPTURE's date against the window, so a capture dated
-inside it must exist. Four observations say one day is too fragile:
+inside it must exist. There are two ways one comes to exist, and neither is
+dependable enough for one day.
 
-1. The Archive rarely captures this page by itself. Its index, read on
-   2026-09-20 for 2025-01-01 to 2026-09-20, holds 27 captures with HTTP 200 and
-   one with HTTP 403. Of the three months verified above, only August has a
-   capture on its release day. June's first capture after the 2026-07-02
-   release is 2026-07-10, eight days later; July's first after 2026-08-07 is
-   2026-08-19, twelve days later. Neither would fall inside the seven-day
-   margin either. The capture the resolver itself requests is the working
-   path, and the margin exists to give that request more than one attempt.
-2. With one day there is one attempt. The resolver runs daily at 13:40 UTC
-   (`resolve-and-rebuild.yml`). 08:30 ET is 12:30 UTC on 2026-10-02, but 13:30
-   UTC on 2026-11-06 and 2026-12-04 after daylight time ends, so from November
-   to March the release-day run starts ten minutes after the release. A capture
-   that still serves the previous month is passed over by the header check, and
-   a one-day window has no second day on which to ask again.
-3. The request can fail. The index row for 2026-02-22 is a capture in which
-   bls.gov served the Archive HTTP 403. On 2026-09-20 the Archive answered
-   seven consecutive reads from the verifying session with HTTP 429.
-4. A run that finds no capture printing the month asks again on each day the
-   window is open, and a later run reads the result. One day allows one
-   request; the margin allows eight.
+The capture the resolver requests. A run that finds no capture printing the
+month asks the Archive for one on each day the window is open, and a later run
+reads it; a run never reads the capture it has just requested. The path was
+proven on 2026-09-21, with the resolver's own code and User-Agent:
 
-`tests/test_a19_registrable_adapter.py` runs this case through `main()`: a
-release-day capture that still prints September, a capture three days later
-that prints October. The margin window resolves from the second; the same
-Archive under a one-day window ends in `FIRST-PRINT WINDOW MISSED`.
+- Three requests for `https://web.archive.org/save/<page>` between 15:45 and
+  15:53 UTC, the first through `_wayback_read` and the others by curl with the
+  same User-Agent, were each answered HTTP 500 after about six seconds. The
+  Archive's index then held one new capture,
+  [`20260921154639`](https://web.archive.org/web/20260921154639/https://www.bls.gov/web/empsit/cpseea19.htm),
+  HTTP 200. A failed request is therefore not evidence that no capture was
+  made, and the resolver's log line for it ("the capture request failed") can
+  be wrong in that direction.
+- `a19_registered_capture`, as the next day's run would call it, returned that
+  capture: 104,872 bytes, SHA-256
+  `de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915`, header
+  2026-08, and the six rows equal to the anchors above.
+- The same afternoon the Archive answered other requests from the verifying
+  session with HTTP 429, answered one index read with HTTP 503, and then
+  served its index as "Internet Archive services are temporarily offline"
+  (HTTP 503). Each such failure costs a day, and a one-day window has one.
+- The resolver runs daily at 13:40 UTC (`resolve-and-rebuild.yml`). 08:30 ET
+  is 12:30 UTC on 2026-10-02, but 13:30 UTC on 2026-11-06 and 2026-12-04 after
+  daylight time ends, so from November to March the release-day run starts ten
+  minutes after the release. A capture that still serves the previous month is
+  passed over by the header check, and a one-day window has no second day on
+  which to ask again.
+
+The capture nobody asked for. When the requests fail, what remains is the
+Archive's own crawling, and it seldom visits this page: its index, read on
+2026-09-20 for 2025-01-01 to 2026-09-20, holds 27 captures with HTTP 200 and
+one in which bls.gov served the Archive HTTP 403 (2026-02-22). For each data
+month in BLS's schedule as read, the first HTTP 200 capture dated between that
+month's release and the next (from 14:00 UTC on a release day). The headers of
+the last four were read; the others are placed by date alone:
+
+| Data month | Released | First capture | Days after release |
+|---|---|---|---:|
+| 2025-11 | 2025-12-16 | 2025-12-20 | 4 |
+| 2025-12 | 2026-01-09 | none before the next release | |
+| 2026-01 | 2026-02-11 | 2026-02-15 | 4 |
+| 2026-02 | 2026-03-06 | none before the next release | |
+| 2026-03 | 2026-04-03 | 2026-05-02 | 29 |
+| 2026-04 | 2026-05-08 | 2026-05-16 | 8 |
+| 2026-05 | 2026-06-05 | 2026-06-13 | 8 |
+| 2026-06 | 2026-07-02 | 2026-07-10 | 8 |
+| 2026-07 | 2026-08-07 | 2026-08-19 | 12 |
+| 2026-08 | 2026-09-04 | 2026-09-04 | 0 |
+
+So a window of one day holds such a capture for 1 month of 10, of seven days
+for 3, of ten days for 6, of fourteen days for 7, and no window short of the
+next release for more than 8. Three consecutive months sit at eight days.
+
+`tests/test_a19_registrable_adapter.py` runs the ten-minute case through
+`main()`: a release-day capture that still prints September, a capture three
+days later that prints October. The margin window resolves from the second; the
+same Archive under a one-day window ends in `FIRST-PRINT WINDOW MISSED`.
 
 A later capture still reads the first print because of how BLS publishes, not
 because of the window's width:
@@ -976,8 +1010,13 @@ What this does not prove. No capture is the bytes served at 08:30. If BLS
 reissued a month's table under the same header between the release and the
 first capture, that capture would be read as the print, and the header check
 cannot see it. A one-day window has the same kind of exposure over a shorter
-interval: hours, against as many as eight days here. That is what the margin
-costs, and BLS's statements above are about practice, not a guarantee. The
+interval: hours, against as many as fifteen days here. That is what the margin
+costs, and BLS's statements above are about practice, not a guarantee. Two
+instances bear on it, and they are instances, not a policy: the capture of
+2026-09-21 above is byte for byte the release-day capture of 2026-09-04 (the
+same SHA-256), seventeen days on; and the comparison noted earlier found two
+captures eighteen days apart, both printing September 2025, with identical
+tables. The
 argument also needs the window to close before the next Employment Situation.
 Releases are not reliably four weeks apart: the shortest gap in BLS's schedule
 as read is 23 days (2026-02-11 to 2026-03-06, after the delayed January
@@ -995,10 +1034,10 @@ checks it against BLS at run time. The two directions fail differently.
   BLS's population control note above records such a delay, of a month, in the
   2025 shutdown. Every calendar-gated registration has this exposure, and the
   margin narrows it: a one-day window is lost to a delay of a single day, this
-  one to a delay of more than seven.
+  one to a delay of more than fourteen.
 - Earlier than committed: the page already prints the month when the window
-  opens, so the target resolves, from a capture as late as seven days after
-  the committed date. The value is still read under the month's own header,
+  opens, so the target resolves, from a capture as late as fourteen days
+  after the committed date. The value is still read under the month's own header,
   and the fact's `observed_at` records the capture's date, but custody begins
   later after the true release than the window suggests, and nothing reports
   it. A one-day window would more often end such a case in a visible miss. The
@@ -1006,16 +1045,30 @@ checks it against BLS at run time. The two directions fail differently.
   of the schedule as read on 2026-09-20 and requires the docket to agree with
   it, so a wrong date needs two wrong copies.
 
-Why seven days. A run never reads the capture it has just requested; a later
-run does. One day therefore allows one request, read the next morning, with
-nothing to fall back on if it fails. Seven days after the release day allows
-eight daily requests and is far inside the 23-day gap above. Seven is also the
-retry margin the docket's twelve registered-query snapshot entries commit
-(start plus seven days, for example 2026-10-15 to 2026-10-22); that is this
-repository's convention for a retry margin, not evidence about the Archive. A
-registration's window is immutable, so changing the constant affects new
-targets only; for that reason the run-time executor does not re-check a
-registered window's width.
+Why fourteen days. Width does not decide which print is read: the header check
+confines a capture to the month, and the earliest capture in the window wins.
+A wider window therefore only adds chances in cases that would otherwise be
+lost for good, at the cost stated above. The bound is the next release, which
+replaces the page. The shortest gap in BLS's schedule as read is 23 days, so
+fourteen is the widest whole-week margin that still closes more than a week
+before the next release could arrive; a test holds the constant to that. Within
+the bound, fourteen allows fifteen daily requests, and it is the narrowest
+whole-week width that takes in the eight-day and twelve-day captures in the
+table above; seven days misses the eight-day ones by a day, three months
+running. A registration's window is
+immutable, so changing the constant affects new targets only; for that reason
+the run-time executor does not re-check a registered window's width.
+
+Month labels. The header parser maps BLS's twelve labels to months. "Oct." and
+"May" had not been read from a capture, and October is the first month this
+adapter resolves. Both were read on 2026-09-21 through `a19_read_capture`, from
+captures of [2023-11-30](https://web.archive.org/web/20231130070442/https://www.bls.gov/web/empsit/cpseea19.htm)
+("Oct. 2022 / Oct. 2023") and
+[2026-06-13](https://web.archive.org/web/20260613101041/https://www.bls.gov/web/empsit/cpseea19.htm)
+("May 2025 / May 2026"); the parser reads the month and all six rows from
+each. Their table elements are fixtures (`tests/fixtures/a19/README.md` has the
+hashes), and a test ties the October pages the `main()` tests synthesise to the
+spelling the real capture prints.
 
 ### Custody hosts
 

@@ -17,6 +17,7 @@ import copy
 import datetime as dt
 import json
 import pathlib
+import re
 import sys
 
 import pytest
@@ -142,7 +143,7 @@ def test_a19_left_the_unregistrable_set_for_a_predicate() -> None:
 
 def test_only_a_listed_adapter_gets_a_capture_margin() -> None:
     day = dt.date(2026, 11, 6)
-    assert register_targets.CALENDAR_CAPTURE_MARGIN_DAYS == {ADAPTER: 7}
+    assert register_targets.CALENDAR_CAPTURE_MARGIN_DAYS == {ADAPTER: 14}
     for adapter in register_targets.CALENDAR_GATED_SOURCE_ADAPTERS - {ADAPTER}:
         assert register_targets.calendar_release_window(adapter, day) == {
             "start": "2026-11-06",
@@ -150,7 +151,7 @@ def test_only_a_listed_adapter_gets_a_capture_margin() -> None:
         }, adapter
     assert register_targets.calendar_release_window(ADAPTER, day) == {
         "start": "2026-11-06",
-        "end": "2026-11-13",
+        "end": "2026-11-20",
     }
     # A margin is only meaningful on the calendar-gated path.
     assert set(register_targets.CALENDAR_CAPTURE_MARGIN_DAYS) <= set(
@@ -235,7 +236,9 @@ def test_margin_is_far_inside_the_shortest_gap_bls_has_scheduled() -> None:
     # 2026-02-11 to 2026-03-06, after the delayed January release: not the
     # four weeks one might assume.
     assert min(gaps) == 23
-    assert MARGIN + 1 < min(gaps)
+    # The window must close more than a week before the next release could
+    # replace the page, even at the shortest gap BLS has scheduled.
+    assert MARGIN + 7 < min(gaps)
     # The docket's dates are a second hand copy of the same page. Where the
     # two overlap they must agree, so editing one prompts a look at the other.
     for entry in a19_entries():
@@ -396,7 +399,9 @@ def test_bind_step_rederives_the_margin_and_keeps_every_other_adapter_one_day() 
     noncanonical["releaseDates"][period] = entry["releaseDates"][period].replace(
         "-", ""
     )
-    with pytest.raises(RegistrationError, match="canonical ISO date"):
+    # 3.11+ parses "20261106" and the canonical check refuses it; on 3.10
+    # fromisoformat refuses it first. Either way the docket date is refused.
+    with pytest.raises(RegistrationError, match="canonical ISO date|invalid ISO date"):
         register_targets.validate_committed_calendar_contract(
             contract, target, noncanonical
         )
@@ -535,7 +540,10 @@ def test_gate_selects_the_unit_contract_before_it_compares_units(
 ) -> None:
     # The table prints thousands and the router's spec says so. Compared with
     # a millions contract before the registration selects the scale, every
-    # docket contract would be refused for a unit the executor does emit.
+    # docket contract would be refused for a unit the executor does emit. Once
+    # the registration has selected the scale the gate's unit comparison cannot
+    # fail for A-19 (its forecast unit is the contract's own), so this proves
+    # the order, not the comparison; A19_REGISTERED_SCALES decides the unit.
     assert routed_spec(contract["dataPointId"], "millions")["unit"] == "thousands"
     assert contract["unit"] == "millions" and refusal(contract) is None
     # The other reviewed unit contract is admitted too; nothing else is.
@@ -555,6 +563,30 @@ def test_gate_refuses_a_contract_whose_period_is_not_the_month_its_id_routes_to(
     assert other != contract["period"]
     contract["period"] = other
     assert "is not the month its dataPointId routes to" in (refusal(contract) or "")
+
+
+def test_gate_refuses_an_a19_contract_on_the_resolve_by_bound_basis() -> None:
+    # registration accepts this contract: an explicit window that happens to
+    # equal the margin window, with resolutionDate at its end. main() would
+    # refuse it the day after the window closes, before the A-19 leg could read
+    # a capture requested on the last day.
+    entry = next(e for e in a19_entries() if e["series"].endswith(".production"))
+    period = min(entry["releaseDates"])
+    window = register_targets.calendar_release_window(
+        ADAPTER, dt.date.fromisoformat(entry["releaseDates"][period])
+    )
+    target = {
+        **rolled_target(entry, period),
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionDate": window["end"],
+        "expectedReleaseWindow": window,
+    }
+    bounded = register_targets.build_contract(
+        target, dt.date.fromisoformat(window["start"]) - dt.timedelta(days=20)
+    )
+    assert bounded["resolutionDateBasis"] == "resolve-by-bound"
+    assert bounded["sourceBinding"]["expectedReleaseWindow"] == window
+    assert "resolves on the 'release-calendar' basis" in (refusal(bounded) or "")
 
 
 def _plan(contract: dict, **kwargs: object) -> str | None:
@@ -673,22 +705,24 @@ def test_main_resolves_a_legacy_and_a_new_contract_to_the_same_print(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     legacy = registration()
-    admitted = registration(
+    renamed = registration(
         dataPointId=(
             f"{resolve_pending.A19_STEM}.healthcare_support.august_2026.first_print"
         ),
         catalogSlug="cps-healthcare-support-employment-august-2026",
         series=f"{resolve_pending.A19_STEM}.healthcare_support",
     )
-    admitted["contract"]["sourceBinding"].update(
+    # August's cadence window under the new adapter NAME: not a contract the
+    # gate would register, only proof that main() executes the name.
+    renamed["contract"]["sourceBinding"].update(
         adapter=ADAPTER,
         field="Healthcare support occupations",
         sourceSeriesId=f"{resolve_pending.A19_STEM}.healthcare_support",
     )
-    output, _ = run_main(monkeypatch, capsys, [legacy, admitted])
+    output, _ = run_main(monkeypatch, capsys, [legacy, renamed])
     assert "BINDING/ADAPTER MISMATCH" not in output
     assert f"resolve {legacy['contract']['dataPointId']} -> 7.716 millions" in output
-    assert f"resolve {admitted['contract']['dataPointId']} -> 5.709 millions" in output
+    assert f"resolve {renamed['contract']['dataPointId']} -> 5.709 millions" in output
     assert "dry-run: would append 2 row(s)" in output
 
 
@@ -702,9 +736,74 @@ def test_main_still_refuses_another_familys_adapter_on_an_a19_id(
     assert "nothing new to record" in output
 
 
+# -- the month labels the new adapter will meet first -------------------------
+
+# Real captures, read 2026-09-21 through the resolver's own reader
+# (a19_read_capture, the Archive's stored ``id_`` response) and kept as their
+# table element (tests/fixtures/a19/README.md). October is the first month
+# ``bls-cps-a19`` resolves, and "Oct." and "May" were the two header labels no
+# capture had confirmed. Values are the printed current-month thousands.
+REAL_LABEL_CAPTURES = {
+    "2023-10": (
+        "20231130070442",
+        "Oct.",
+        {
+            "business_financial_operations": 9855.0,
+            "computer_mathematical": 6763.0,
+            "healthcare_support": 5159.0,
+            "office_administrative_support": 15665.0,
+            "production": 8072.0,
+            "transportation_material_moving": 11668.0,
+        },
+    ),
+    "2026-05": (
+        "20260613101041",
+        "May",
+        {
+            "business_financial_operations": 10033.0,
+            "computer_mathematical": 6903.0,
+            "healthcare_support": 5786.0,
+            "office_administrative_support": 16335.0,
+            "production": 7912.0,
+            "transportation_material_moving": 12120.0,
+        },
+    ),
+}
+
+
+def real_capture(period: str) -> str:
+    stamp = REAL_LABEL_CAPTURES[period][0]
+    return (
+        ROOT
+        / "tests"
+        / "fixtures"
+        / "a19"
+        / f"cpseea19-{period}-wayback-{stamp}.table.html"
+    ).read_text()
+
+
+@pytest.mark.parametrize("period", sorted(REAL_LABEL_CAPTURES))
+def test_a_real_capture_prints_the_label_and_the_six_rows(period: str) -> None:
+    _, label, printed = REAL_LABEL_CAPTURES[period]
+    table = real_capture(period)
+    assert f">{label}<br" in table
+    assert resolve_pending.a19_snapshot_period(table) == period
+    assert resolve_pending.a19_values_from_html(table) == printed
+
+
+def test_the_synthetic_october_pages_spell_the_month_as_bls_does() -> None:
+    # The main() tests below build an October page by relabelling August's.
+    # On their own they would only assert the parser's table against itself;
+    # this ties that spelling to what a real October capture prints.
+    header = re.compile(r"<th\b[^>]*>\s*([A-Za-z]+\.?)\s*<br")
+    real = set(header.findall(real_capture("2023-10")))
+    synthetic = set(header.findall(fixture("2026-08").replace("Aug.", "Oct.")))
+    assert real == synthetic == {"Oct."}
+
+
 # -- why the window is not one day --------------------------------------------
 
-OCTOBER = ("2026-11-06", "2026-11-13")
+OCTOBER = ("2026-11-06", "2026-11-20")
 
 
 def october(window: tuple[str, str] = OCTOBER) -> dict:
@@ -801,8 +900,9 @@ def test_a_one_day_window_would_have_lost_the_same_target(
     [
         ("2026-11-05", False),  # the window has not opened
         ("2026-11-06", True),
-        ("2026-11-13", True),  # its last day
-        ("2026-11-14", False),  # closed: nothing left to ask for
+        ("2026-11-13", True),
+        ("2026-11-20", True),  # its last day
+        ("2026-11-21", False),  # closed: nothing left to ask for
     ],
 )
 def test_main_asks_for_a_capture_on_each_day_the_margin_window_is_open(
@@ -815,26 +915,26 @@ def test_main_asks_for_a_capture_on_each_day_the_margin_window_is_open(
     assert any("/save/" in call for call in calls) is asks
     assert (resolve_pending.A19_CAPTURE_REQUESTED in output) is asks
     assert "nothing new to record" in output
-    if today == "2026-11-14":
+    if today == "2026-11-21":
         assert "A-19 FIRST-PRINT WINDOW MISSED (refusing)" in output
 
 
 def test_a_capture_after_the_margin_is_never_custody(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    late = {"20261114120000": fixture("2026-08").replace("Aug.", "Oct.")}
+    late = {"20261121120000": fixture("2026-08").replace("Aug.", "Oct.")}
     output, calls = run_main(
         monkeypatch,
         capsys,
         [october()],
-        today="2026-11-20",
+        today="2026-11-27",
         archive=late,
         # The index is asked only for the window, but an Archive that answered
         # with a later row must still not be believed.
-        index=cdx(("20261114120000", "200")),
+        index=cdx(("20261121120000", "200")),
     )
     assert "A-19 FIRST-PRINT WINDOW MISSED (refusing)" in output
-    assert identity_url("20261114120000") not in calls
+    assert identity_url("20261121120000") not in calls
 
 
 def test_a_release_bls_delays_past_the_margin_fails_closed(

@@ -13228,8 +13228,9 @@ def binding_adapter_mismatch(
 # question the main loop asks after the forecast is already public: would
 # this exact contract reach an admitted executor? It routes the contract's
 # dataPointId through the same router and then applies the main loop's
-# date-independent refusals in its order: resolution-date basis, emitted unit,
-# registered adapter, then the family's own predicates. It never touches the
+# date-independent refusals in its order: resolution-date basis, (for A-19,
+# the registration's choice of unit contract,) emitted unit, registered
+# adapter, then the family's own predicates. It never touches the
 # network and never reads ``records/`` (the QCEW and A-19 predicates read the
 # committed docket calendar): whether the print exists yet, or the window is
 # open, is a runtime question. Whether any code could ever read it is not.
@@ -13312,6 +13313,16 @@ def _plan_a19(
         return (
             "the registered sourceBinding is not the reviewed Table A-19 "
             f"template the executor authenticates (differs in {drifted})"
+        )
+    # The A-19 leg reads a capture found by a LATER run than the one that
+    # requested it, so it must be able to run after the window has closed. A
+    # resolve-by-bound contract cannot: main() refuses it as soon as its window
+    # ends, before this leg is reached, and the last day's capture is lost.
+    basis = contract.get("resolutionDateBasis", DEFAULT_RESOLUTION_DATE_BASIS)
+    if basis != DEFAULT_RESOLUTION_DATE_BASIS:
+        return (
+            f"an A-19 target resolves on the {DEFAULT_RESOLUTION_DATE_BASIS!r} "
+            f"basis; the contract registers {basis!r}"
         )
     # ``period`` is the month the dataPointId routes to, which is the month
     # the executor will read. A contract that says another month would be
@@ -13606,7 +13617,10 @@ def execution_plan_refusal(registration: Mapping[str, Any]) -> str | None:
         # The main loop lets the registration select the A-19 unit contract
         # before it compares units (the table prints thousands; the docket
         # registers millions). Judge in that order, or every millions
-        # contract is refused for a unit the executor does emit.
+        # contract is refused for a unit the executor does emit. Here the
+        # forecast's unit IS the contract's, so after this step the comparison
+        # below cannot fail for A-19: what decides the unit is
+        # A19_REGISTERED_SCALES with the transform and valueScale pins.
         a19_spec, drifted = a19_execution_spec(spec, registration)
         if a19_spec is None:
             return (

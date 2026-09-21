@@ -67,8 +67,9 @@ A registration is a public promise to score a forecast against one number, so
 `resolve_pending.execution_plan_refusal` finds an executable plan for that
 exact contract. The check runs the contract's `dataPointId` through the
 resolver's own routers, then the main loop's date-independent refusals in its
-order: resolution-date basis, emitted unit, registered adapter, and the routed
-family's own predicates (full binding template, verified anchors). It makes no
+order: resolution-date basis, (for Table A-19, the registration's choice of unit
+contract,) emitted unit, registered adapter, and the routed family's own
+predicates (full binding template, verified anchors). It makes no
 network request and reads no records: whether the print exists yet is a
 runtime question; whether any code could ever read it is not.
 
