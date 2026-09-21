@@ -827,6 +827,12 @@ def test_catalog_alias_resolves_to_admitted_canonical_series() -> None:
         ["agency.water.safe", "agency.water.safe"],
         [catalog_row("agency.water.safe", "water-uuid", aliases=["WATER"])],
         proposed_from="bill",
+        docket_entries=[
+            {
+                "series": "agency.water.safe",
+                "ledger": {"uuid": "water-uuid", "concept": "agency.water.safe"},
+            }
+        ],
     )
     assert mapped["provisions"][0]["metrics"][0] == {
         "text": "Outcome",
@@ -850,3 +856,84 @@ def test_docket_duplicate_periods_are_one_series_identity(tmp_path) -> None:
         },
     )
     assert map_bill_metrics.load_registered_series(docket) == ["agency.water.safe"]
+
+
+@pytest.mark.parametrize(
+    "concept,uuid,geography",
+    [
+        (
+            "agency.water.safe",
+            "state-water-uuid",
+            {"level": "state", "id": "0400000US06"},
+        ),
+        ("agency.water", "parent-water-uuid", {"level": "country", "id": "0100000US"}),
+    ],
+)
+def test_catalog_alias_cannot_promote_wrong_geography_or_parent_identity(
+    tmp_path,
+    concept,
+    uuid,
+    geography,
+) -> None:
+    bill = tmp_path / "bill.json"
+    docket = tmp_path / "docket.json"
+    catalog = tmp_path / "catalog.json"
+    write_json(
+        bill,
+        {
+            "bill": {"slug": "water"},
+            "provisions": [
+                {"metrics": [{"text": "Water", "series_hint": "WATER_ALIAS"}]}
+            ],
+        },
+    )
+    write_json(
+        docket,
+        {
+            "series": [
+                {
+                    "series": "agency.water.safe",
+                    "ledger": {
+                        "uuid": "national-water-uuid",
+                        "concept": "agency.water.safe",
+                    },
+                }
+            ]
+        },
+    )
+    write_json(
+        catalog,
+        {
+            "series": [
+                catalog_row(
+                    concept,
+                    uuid,
+                    aliases=["WATER_ALIAS"],
+                    geography=geography,
+                )
+            ]
+        },
+    )
+    mapped_path, requests = map_bill_metrics.map_bill_metrics(
+        bill,
+        docket,
+        catalog,
+        drafts_dir=tmp_path / "drafts",
+    )
+    metric = json.loads(mapped_path.read_text())["provisions"][0]["metrics"][0]
+    assert metric["registry"] == "not-yet"
+    assert "matched_series" not in metric
+    assert "ledger_uuid" not in metric
+    assert len(requests) == 1
+    assert "does not exactly match" in json.loads(requests[0].read_text())["note"]
+
+
+def test_alias_requires_reviewed_identity_even_for_a_known_concept() -> None:
+    mapped, proposals = map_bill_metrics.map_artifact(
+        {"provisions": [{"metrics": [{"text": "Water", "series_hint": "WATER"}]}]},
+        ["agency.water.safe"],
+        [catalog_row("agency.water.safe", "water-uuid", aliases=["WATER"])],
+        proposed_from="bill",
+    )
+    assert mapped["provisions"][0]["metrics"][0]["registry"] == "not-yet"
+    assert len(proposals) == 1

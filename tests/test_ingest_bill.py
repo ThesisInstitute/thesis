@@ -65,6 +65,7 @@ def artifact(identity: dict, hint: str = "agency.water.safe") -> dict:
 
 @pytest.fixture
 def inputs(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> SimpleNamespace:
+    monkeypatch.setattr(ingest_bill, "source_checkout_sha", lambda: "b" * 40)
     monkeypatch.setattr(
         ingest_bill, "DRAFT_ROOT", tmp_path / "drafts" / "bill-ingestion"
     )
@@ -148,6 +149,7 @@ def manifest_at(run_dir: pathlib.Path) -> dict:
 def test_success_preserves_provenance_mapping_and_closed_execution(inputs, monkeypatch):
     monkeypatch.setenv("GH_TOKEN", "do-not-inherit")
     monkeypatch.setenv("OPENAI_API_KEY", "do-not-inherit")
+    monkeypatch.setenv("GITHUB_SHA", "c" * 40)
     original_text = inputs.text_path.read_bytes()
     original_meta = inputs.meta_path.read_bytes()
 
@@ -169,6 +171,8 @@ def test_success_preserves_provenance_mapping_and_closed_execution(inputs, monke
     assert manifest["status"] == "proposed"
     assert manifest["proposalOnly"] is True
     assert manifest["trust"] == "unreviewed-agent-proposal"
+    assert manifest["workflow"]["sourceGitSha"] == "b" * 40
+    assert manifest["workflow"]["triggerGitSha"] == "c" * 40
     assert manifest["source"]["textSha256"] == hashlib.sha256(original_text).hexdigest()
     assert manifest["source"]["metaSha256"] == hashlib.sha256(original_meta).hexdigest()
     assert manifest["catalog"]["commit"] == "a" * 40
@@ -469,3 +473,65 @@ def test_fetcher_reuses_axiom_then_congress_without_source_writes(inputs, monkey
 def test_untrusted_source_urls_are_refused(url):
     with pytest.raises(ingest_bill.IngestionError):
         ingest_bill.official_url(url)
+
+
+def test_source_commit_reads_actual_checkout_not_dispatch_event(monkeypatch):
+    monkeypatch.setenv("GITHUB_SHA", "a" * 40)
+    monkeypatch.setenv("GH_TOKEN", "do-not-inherit")
+
+    def git(command, **kwargs):
+        assert command == ["git", "rev-parse", "HEAD"]
+        assert kwargs["cwd"] == ingest_bill.ROOT
+        assert kwargs["shell"] is False
+        assert "GH_TOKEN" not in kwargs["env"]
+        return SimpleNamespace(stdout="b" * 40 + "\n")
+
+    monkeypatch.setattr(ingest_bill.subprocess, "run", git)
+    assert ingest_bill.source_checkout_sha() == "b" * 40
+
+
+def test_catalog_alias_identity_mismatch_remains_open_work(inputs):
+    write_json(
+        inputs.docket,
+        {
+            "series": [
+                {
+                    "series": "agency.water.safe",
+                    "ledger": {
+                        "uuid": "different-geography",
+                        "concept": "agency.water.safe",
+                    },
+                }
+            ]
+        },
+    )
+    run_dir = ingest_bill.run_ingestion(
+        inputs, command_runner=responder(hint="SAFE_WATER")
+    )
+    assert manifest_at(run_dir)["status"] == "proposed"
+    requests = json.loads((run_dir / "ingestion-requests.json").read_text())
+    assert requests[0]["stage"] == "disambiguate-series"
+    assert requests[0]["status"] == "open"
+    assert requests[0]["mapping"]["matchedSeries"] is None
+
+
+def test_catalog_alias_exact_reviewed_identity_is_admitted(inputs):
+    write_json(
+        inputs.docket,
+        {
+            "series": [
+                {
+                    "series": "agency.water.safe",
+                    "ledger": {"uuid": "water-uuid", "concept": "agency.water.safe"},
+                }
+            ]
+        },
+    )
+    run_dir = ingest_bill.run_ingestion(
+        inputs, command_runner=responder(hint="SAFE_WATER")
+    )
+    assert manifest_at(run_dir)["status"] == "proposed"
+    assert json.loads((run_dir / "ingestion-requests.json").read_text()) == []
+    decisions = json.loads((run_dir / "mapping.json").read_text())
+    assert decisions[0]["stage"] == "admitted"
+    assert decisions[0]["ledgerUuid"] == "water-uuid"

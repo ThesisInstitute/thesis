@@ -3,11 +3,13 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  getBill,
   loadBillDocket,
   loadBills,
   metricRegistryStatus,
   type BillDocketSeries,
   type BillMetric,
+  type ReviewedBillSeriesAlias,
 } from "@/data/bills";
 
 const docket: BillDocketSeries[] = [
@@ -155,6 +157,92 @@ describe("bill metric docket mapping", () => {
       series: admitted!.series,
       ledger: admitted!.ledger,
     });
+  });
+
+  it("resolves S3596's reviewed legacy ACTC hint to its admitted Chronicle identity", () => {
+    const legacy = getBill("s3596-119")?.provisions
+      .flatMap((provision) => provision.metrics)
+      .find((candidate) =>
+        candidate.series_hint === "irs.soi.additional_child_tax_credit_returns",
+      );
+    expect(legacy).toBeDefined();
+    expect(metricRegistryStatus(legacy!)).toMatchObject({
+      status: "reachable",
+      series: "irs.actc.total_claims",
+      ledger: {
+        uuid: "23396038-b31d-43cd-be08-4aa9fe916b56",
+        concept: "irs.actc.total_claims",
+      },
+    });
+  });
+});
+
+describe("reviewed bill series aliases", () => {
+  const alias: ReviewedBillSeriesAlias = {
+    hint: "legacy.outcome.rate",
+    series: "agency.outcome.rate",
+    ledgerUuid: "admitted-uuid",
+  };
+  const legacy = metric({ series_hint: alias.hint });
+
+  it("accepts repeated reviews only when canonical series and UUID agree", () => {
+    expect(metricRegistryStatus(legacy, docket, [alias, { ...alias }])).toMatchObject({
+      status: "reachable",
+      series: alias.series,
+      ledger: docket[0].ledger,
+    });
+  });
+
+  it.each([
+    { series: "agency.outcome.count" },
+    { ledgerUuid: "another-uuid" },
+  ])("refuses conflicting reviewed aliases (%j)", (conflict) => {
+    const result = metricRegistryStatus(legacy, docket, [alias, { ...alias, ...conflict }]);
+    expect(result.status).toBe("ambiguous");
+    expect(result.series).toBeUndefined();
+    expect(result.ledger).toBeUndefined();
+  });
+
+  it.each([
+    undefined,
+    { uuid: "wrong-uuid", concept: alias.series },
+    { uuid: alias.ledgerUuid, concept: "another.concept" },
+  ])("requires the current docket to confirm the entire Chronicle identity (%j)", (ledger) => {
+    const result = metricRegistryStatus(
+      legacy,
+      [{ series: alias.series, ledger }],
+      [alias],
+    );
+    expect(result.status).toBe("ambiguous");
+    expect(result.series).toBeUndefined();
+    expect(result.ledger).toBeUndefined();
+  });
+
+  it("keeps a reviewed alias open if its canonical series leaves the docket", () => {
+    const result = metricRegistryStatus(legacy, [], [alias]);
+    expect(result.status).toBe("not-yet");
+    expect(result.note).toContain("absent from the current docket");
+  });
+
+  it("refuses an alias that conflicts with a current exact docket identity", () => {
+    const result = metricRegistryStatus(
+      legacy,
+      [...docket, { series: alias.hint }],
+      [alias],
+    );
+    expect(result.status).toBe("ambiguous");
+    expect(result.candidates).toEqual([alias.series, alias.hint]);
+  });
+
+  it("does not recognize proposed or partial aliases", () => {
+    expect(metricRegistryStatus(legacy, docket, []).status).toBe("not-yet");
+    expect(
+      metricRegistryStatus(
+        metric({ series_hint: "legacy.outcome" }),
+        docket,
+        [alias],
+      ).status,
+    ).toBe("not-yet");
   });
 });
 

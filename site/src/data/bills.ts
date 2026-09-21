@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { MetricStance } from "@/lib/stances";
 import ledgerPin from "@/data/ledger-pin.json";
+import reviewedBillBindings from "../../../scripts/bill_forecast_bindings.json";
 
 // bill.json artifacts live at the repo root (bills/<slug>.json), written
 // by scripts/ingest_bill.py — the site reads them at build time. Vercel
@@ -170,6 +171,24 @@ export interface BillDocketSeries {
   ledger?: { uuid: string; concept: string };
 }
 
+export interface ReviewedBillSeriesAlias {
+  hint: string;
+  series: string;
+  ledgerUuid: string;
+}
+
+// These named identities were reviewed with the bill's conditional bindings.
+// They resolve metric names only; they do not authorize a new conditional pair.
+const REVIEWED_BILL_SERIES_ALIASES: ReviewedBillSeriesAlias[] = Object.values(
+  reviewedBillBindings.bills,
+).flatMap((bill) =>
+  bill.pairs.flatMap((pair) =>
+    pair.seriesHints
+      .filter((hint) => hint !== pair.series)
+      .map((hint) => ({ hint, series: pair.series, ledgerUuid: pair.ledgerUuid })),
+  ),
+);
+
 export interface MetricRegistryMapping {
   status: RegistryStatus;
   live: true;
@@ -198,11 +217,13 @@ export function loadBillDocket(): BillDocketSeries[] {
 /**
  * Admission is computed from the current docket, never from an analysis-day
  * badge, a proposal's matched_series/ledger_uuid, or the existence of a forecast.
- * Prefer an exact identity; a dot-descendant is usable only when unambiguous.
+ * Reviewed aliases must retain their exact canonical series and Chronicle UUID.
+ * Otherwise prefer an exact identity; a dot-descendant must be unambiguous.
  */
 export function metricRegistryStatus(
   metric: BillMetric,
   docket: readonly BillDocketSeries[] = loadBillDocket(),
+  reviewedAliases: readonly ReviewedBillSeriesAlias[] = REVIEWED_BILL_SERIES_ALIASES,
 ): MetricRegistryMapping {
   const hint = metric.series_hint?.trim();
   if (!hint) {
@@ -214,6 +235,55 @@ export function metricRegistryStatus(
   }
 
   const exact = docket.filter((row) => row.series === hint);
+  const aliases = [
+    ...new Map(
+      reviewedAliases
+        .filter((row) => row.hint === hint)
+        .map((row) => [JSON.stringify([row.series, row.ledgerUuid]), row]),
+    ).values(),
+  ];
+  if (aliases.length > 0) {
+    const alias = aliases[0];
+    const concepts = [...new Set(aliases.map((row) => row.series))].sort();
+    if (aliases.length !== 1 || exact.some((row) => row.series !== alias.series)) {
+      return {
+        status: "ambiguous",
+        live: true,
+        note: "Mapping work: reviewed aliases or current docket entries assign conflicting identities to this hint. Review its exact series and Chronicle UUID.",
+        candidates: [...new Set([...concepts, ...exact.map((row) => row.series)])].sort(),
+      };
+    }
+    const admitted = docket.filter((row) => row.series === alias.series);
+    if (admitted.length === 0) {
+      return {
+        status: "not-yet",
+        live: true,
+        note: "Admission work: the reviewed alias names a canonical series that is absent from the current docket. Review its admission before registration.",
+        candidates: concepts,
+      };
+    }
+    if (
+      !alias.ledgerUuid.trim() ||
+      admitted.some(
+        (row) => row.ledger?.uuid !== alias.ledgerUuid ||
+          row.ledger?.concept !== alias.series,
+      )
+    ) {
+      return {
+        status: "ambiguous",
+        live: true,
+        note: "Mapping work: the reviewed alias and current docket disagree on the Chronicle identity. Resolve the series and UUID before registration.",
+        candidates: concepts,
+      };
+    }
+    return {
+      status: "reachable",
+      live: true,
+      note: "Reviewed alias maps to the admitted docket series. A bill-specific conditional pair requires separate preregistration.",
+      series: alias.series,
+      ledger: admitted[0].ledger,
+    };
+  }
   const matchingRows =
     exact.length > 0
       ? exact

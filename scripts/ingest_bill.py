@@ -298,9 +298,18 @@ def validate_artifact(
     return artifact
 
 
-def map_proposal(artifact: dict, registered: list[str], catalog: list[dict]) -> tuple:
+def map_proposal(
+    artifact: dict,
+    registered: list[str],
+    catalog: list[dict],
+    docket_entries: Sequence[dict] = (),
+) -> tuple:
     mapped, _ = mapper.map_artifact(
-        copy.deepcopy(artifact), registered, catalog, proposed_from=artifact["slug"]
+        copy.deepcopy(artifact),
+        registered,
+        catalog,
+        proposed_from=artifact["slug"],
+        docket_entries=docket_entries,
     )
     decisions, requests = [], []
     for pi, provision in enumerate(mapped["provisions"]):
@@ -342,6 +351,11 @@ def map_proposal(artifact: dict, registered: list[str], catalog: list[dict]) -> 
                 "ledgerUuid": metric.get("ledger_uuid"),
                 "docketCandidates": docket_candidates,
                 "canonicalDocketCandidates": canonical_candidates,
+                "canonicalDocketIdentities": [
+                    entry
+                    for entry in docket_entries
+                    if entry["series"] in canonical_candidates
+                ],
                 "catalogCandidates": catalog_candidates,
             }
             decisions.append(decision)
@@ -401,6 +415,28 @@ def codex_command(workdir: pathlib.Path, schema_path: pathlib.Path) -> list[str]
     ]
 
 
+def source_checkout_sha() -> str:
+    """Bind the checked-out code, independently of the dispatch event's SHA."""
+    completed = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        env={
+            key: os.environ[key]
+            for key in ("PATH", "LANG", "LC_ALL")
+            if key in os.environ
+        },
+        text=True,
+        capture_output=True,
+        check=True,
+        shell=False,
+        timeout=30,
+    )
+    sha = completed.stdout.strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        raise IngestionError("checkout HEAD is not a full git commit SHA")
+    return sha
+
+
 def run_ingestion(
     args: argparse.Namespace,
     *,
@@ -429,7 +465,7 @@ def run_ingestion(
             "repository": os.environ.get("GITHUB_REPOSITORY"),
             "runId": os.environ.get("GITHUB_RUN_ID"),
             "runAttempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
-            "sourceGitSha": os.environ.get("GITHUB_SHA"),
+            "triggerGitSha": os.environ.get("GITHUB_SHA"),
             "ref": os.environ.get("GITHUB_REF"),
         },
     }
@@ -450,6 +486,7 @@ def run_ingestion(
         write_text(name, "")
     write_json("command.json", {"status": "not-started"})
     try:
+        manifest["workflow"]["sourceGitSha"] = source_checkout_sha()
         if not re.fullmatch(r"[0-9a-f]{40}", args.catalog_commit):
             raise IngestionError("--catalog-commit must be a full lowercase commit SHA")
         catalog_bytes = read_bytes(args.catalog, MAX_JSON_BYTES)
@@ -461,6 +498,7 @@ def run_ingestion(
         (run_dir / "docket.json").write_bytes(docket_bytes)
         catalog = mapper.load_catalog_series(run_dir / "catalog.json")
         registered = mapper.load_registered_series(run_dir / "docket.json")
+        docket_entries = mapper.load_docket_entries(run_dir / "docket.json")
         manifest["catalog"] = {
             "repository": "PolicyEngine/chronicle",
             "commit": args.catalog_commit,
@@ -609,7 +647,9 @@ def run_ingestion(
         raw = (run_dir / "raw_response.txt").read_text(encoding="utf-8")
         artifact = validate_artifact(strict_json(raw), text, identity, schema)
         write_json("bill.json", artifact)
-        mapped, decisions, requests = map_proposal(artifact, registered, catalog)
+        mapped, decisions, requests = map_proposal(
+            artifact, registered, catalog, docket_entries
+        )
         write_json("bill.mapped.json", mapped)
         write_json("mapping.json", decisions)
         write_json("ingestion-requests.json", requests)
