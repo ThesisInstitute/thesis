@@ -146,8 +146,7 @@
    "slug": "us-real-avg-hourly-earnings-mom-{month}-{year}",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/realer.htm",
    "releaseDates": {
-    "2026-10": "2026-11-10",
-    "2026-11": "2026-12-10"
+    "2026-10": "2026-11-10"
    },
    "extras": {
     "targetUnit": "percent",

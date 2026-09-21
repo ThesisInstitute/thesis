@@ -15,6 +15,11 @@ HTTP 200 with `"status": "REQUEST_SUCCEEDED"`.
 | `CES0000000001-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001?startyear=2026&endyear=2026` | 2026-09-20T20:58:30Z | 893 | `d0c8d0236ccc51b4bcc7e0dbb3dba73cb6fd834446d722301b43a399cbe0afd3` |
 | `CES0500000013-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/CES0500000013?startyear=2026&endyear=2026` | 2026-09-20T21:14:57Z | 886 | `b66521b06729e3c295ee6d60f8aac796a9dafa370ca36e4828980e8d2e9fdca7` |
 
+`release-schedules-2026-09-20.json` is different in kind. It is a transcription
+of BLS's Employment Situation and Real Earnings schedule rows as read in a
+browser that day, with the SHA-256 of each page body, kept so a test can
+compute release intervals. It is never a source for a docket date.
+
 The headline CPI capture starts in 2025 on purpose. It contains BLS's real
 October 2025 gap row (`"value": "-"`, footnote code `X`), which the tests use
 to prove that a one-month change is refused across an unpublished month.

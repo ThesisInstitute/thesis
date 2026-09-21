@@ -4,7 +4,7 @@ Fixture bytes are official keyless API responses captured 2026-09-20 (see
 ``tests/fixtures/bls_api/README.md``). They prove the parser, the transforms
 and the binding; they are never resolution evidence.
 
-Six specs are registrable. Three have docket templates. The other three wait
+Seven specs are registrable. Four have docket templates. The other three wait
 on a Chronicle lineage decision (``LINEAGE_BLOCKED`` below).
 """
 
@@ -702,6 +702,42 @@ def test_a_bounded_series_is_attempted_from_its_registered_release_day(
     )
     assert "not reached" not in out
     assert f"resolve {ref} -> -0.1 percent" in out
+
+
+def test_the_capture_bound_stays_inside_bls_own_schedule() -> None:
+    # The bound is safe only while no Employment Situation falls inside it.
+    # Computed from BLS's schedule rows, not asserted from a reading.
+    schedule = json.loads((FIXTURES / "release-schedules-2026-09-20.json").read_text())
+    employment = sorted(
+        dt.date.fromisoformat(day)
+        for day in schedule["employment_situation"]["releaseDates"].values()
+    )
+    bound = resolve_pending.BLS_API_ADAPTERS[REAL_EARNINGS]["capture_within_days"]
+
+    def days_to_next_employment_situation(release: dt.date) -> int | None:
+        later = [day for day in employment if day > release]
+        return (later[0] - release).days if later else None
+
+    gaps = {
+        period: days_to_next_employment_situation(dt.date.fromisoformat(day))
+        for period, day in schedule["real_earnings"]["releaseDates"].items()
+    }
+    known = {period: gap for period, gap in gaps.items() if gap is not None}
+    assert min(known.values()) == 21
+    assert sorted(p for p, gap in known.items() if gap == 21) == ["2026-01", "2026-08"]
+    assert all(gap > bound for gap in known.values())
+
+    # Every committed docket date must be one whose FOLLOWING Employment
+    # Situation BLS has already scheduled; otherwise the bound is unverified.
+    entry = next(e for e in _bls_api_docket_entries() if e["series"] == REAL_EARNINGS)
+    assert entry["releaseDates"] == {"2026-10": "2026-11-10"}
+    for period, day in entry["releaseDates"].items():
+        assert schedule["real_earnings"]["releaseDates"][period] == day
+        gap = days_to_next_employment_situation(dt.date.fromisoformat(day))
+        assert gap is not None and gap > bound, period
+    # November 2026 data (2026-12-10) is on BLS's schedule, but the Employment
+    # Situation after it is not, so it is not committed yet.
+    assert gaps["2026-11"] is None
 
 
 def test_real_earnings_still_requires_the_preliminary_footnote() -> None:
