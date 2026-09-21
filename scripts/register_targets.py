@@ -1997,7 +1997,13 @@ def require_execution_plan(registration: dict[str, Any]) -> None:
 
     if registration["existing"]:
         return
-    refusal = execution_plan_refusal(registration)
+    try:
+        refusal = execution_plan_refusal(registration)
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:
+        # Fail closed, and as a RegistrationError of THIS module: when the
+        # script runs as __main__, resolve_pending imports a second copy of
+        # it, whose exception class main()'s handler would not catch.
+        refusal = f"the resolver could not judge the contract: {exc}"
     if refusal:
         contract = registration["contract"]
         raise RegistrationError(

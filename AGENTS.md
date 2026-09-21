@@ -73,11 +73,21 @@ predicates (full binding template, verified anchors). It makes no
 network request and reads no records: whether the print exists yet is a
 runtime question; whether any code could ever read it is not.
 
-- `generic-url` names a page, not an executor, and is always refused; no
-  adapter-routed resolver leg accepts it. A seed with no adapter still binds
-  to it, so a docket series needs a `sourceBinding` template for an admitted
-  adapter before it can mint targets. The two weekly claims series are the
-  exception: `register_targets.SERIES_BINDINGS` binds them to ALFRED in code.
+- `generic-url` names a page, not an executor, and is always refused,
+  whatever the main loop would do with it: the weekly claims, A-19 and CMS
+  provider-data legs would execute such a contract today, and the gate
+  refuses it anyway, on purpose. A seed with no adapter
+  still binds to `generic-url`, so a docket series needs a `sourceBinding`
+  template for an admitted adapter before it can mint targets. The two weekly
+  claims series are the exception: `register_targets.SERIES_BINDINGS` binds
+  them to ALFRED in code.
+- The gate is stricter than the main loop in two more places, also on purpose:
+  `allowedHosts` must be a list of hosts for every family, and an ALFRED
+  contract's `sourceSeriesId` must be the series its stem's executor reads
+  (the ALFRED leg itself never reads the binding).
+- A refused series stays on the docket and mints nothing. Each roll prints one
+  `skip …: no executable resolution plan` line for it and carries on; nothing
+  fails. When this landed, 30 of the 94 docket series were in that state.
 - The roller drops such candidates before the cap, and prospect validation
   rejects such proposals, with the same verdict.
 - A resolver family the router names must appear in either

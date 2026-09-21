@@ -13359,6 +13359,10 @@ def _plan_a19(
 def _plan_alfred(
     registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
 ) -> str | None:
+    # Stricter than the main loop: the ALFRED leg keys its fetch on the
+    # stem's spec and never reads the binding, so it would resolve a contract
+    # that names another series. A new contract must name the series it will
+    # be scored against. Every ALFRED docket template already does.
     binding = registration["contract"]["sourceBinding"]
     if binding.get("sourceSeriesId") != spec["fred"]:
         return (
