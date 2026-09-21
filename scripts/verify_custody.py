@@ -408,7 +408,13 @@ def _tool_evidence_events(run_dir: Path, prefix: str) -> list[dict[str, Any]]:
         return []
     events = []
     try:
-        lines = path.read_text().splitlines()
+        # Split on newline characters only. str.splitlines() also breaks on
+        # U+0085, U+2028, U+2029 and the ASCII separators VT/FF/FS/GS/RS,
+        # which JSON leaves unescaped inside strings: a fetched PDF excerpt
+        # carrying U+0085 fragmented one completion event into unparseable
+        # pieces and orphaned its evidence call (roll-docket run
+        # 35526068252, draft call-0009).
+        lines = path.read_text(encoding="utf-8").split("\n")
     except (OSError, UnicodeDecodeError) as exc:
         raise CustodyError(f"invalid Codex tool event stream: {path.name}") from exc
     for line in lines:
@@ -1467,7 +1473,12 @@ def _verify_ledger_witness_v2(
                 )
         if record.get("role") == "official_observations_jsonl":
             observations_witnessed = True
-            lines = [line for line in raw.decode("utf-8").splitlines() if line.strip()]
+            # Newline-only splitting, matching pin_ledger._lines and the
+            # witness writer: an observation row containing U+0085 or U+2028
+            # must count as one line on both sides of the commitment.
+            lines = [
+                line for line in raw.decode("utf-8").split("\n") if line.strip()
+            ]
             if type(jsonl_claim.get("bytes")) is not int or jsonl_claim["bytes"] < 0:
                 raise CustodyError(
                     "ledger witness jsonl bytes must be a non-negative integer"

@@ -2373,6 +2373,34 @@ def test_parse_codex_jsonl_exposes_the_last_assistant_message() -> None:
     assert parsed["lastAssistantText"] == "final"
 
 
+def test_parse_codex_jsonl_splits_on_newlines_only() -> None:
+    # Codex leaves U+0085 and friends unescaped inside JSON strings, and
+    # str.splitlines() breaks on them: the draft call-0009 completion event of
+    # roll-docket run 35526068252 became two non-JSON fragments, vanished from
+    # codex_events.jsonl, and the publisher refused the run.
+    completed = {
+        "type": "item.completed",
+        "item": {
+            "id": "item_9",
+            "type": "mcp_tool_call",
+            "server": "thesis_tool_evidence",
+            "tool": "fetch_source",
+            "status": "completed",
+            "result": {
+                "content": [{"type": "text", "text": "%PDF\u0085\u2028\u2029x"}]
+            },
+        },
+    }
+    raw = json.dumps(completed, ensure_ascii=False) + "\n"
+    assert len(raw.splitlines()) == 4
+
+    parsed = analyst_runner.parse_codex_jsonl(raw, "")
+
+    assert parsed["events"] == [completed]
+    assert parsed["nonJsonStderr"] == ""
+    assert parsed["eventsJsonl"] == json.dumps(completed) + "\n"
+
+
 def test_ticket_codex_stream_binding_refuses_o_file_only_success() -> None:
     result = {
         "backend": "codex",
