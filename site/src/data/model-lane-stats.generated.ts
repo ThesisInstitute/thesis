@@ -18,8 +18,8 @@ export const MODEL_LANE_STATS: ModelLaneStat[] = [
   {
     "model": "gpt-5.5",
     "lane": "ladder",
-    "attempted": 14,
-    "passed": 14
+    "attempted": 16,
+    "passed": 16
   },
   {
     "model": "gpt-5.5",

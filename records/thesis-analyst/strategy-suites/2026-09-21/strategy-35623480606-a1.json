@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-09-21T16:15:26Z",
+  "lanes": {
+    "ladder": {
+      "batchManifest": "records/thesis-analyst/batches/2026-09-21/strategy-35623480606-a1-ladder.json",
+      "promptMode": "ladder"
+    },
+    "median3": [],
+    "rollouts": []
+  },
+  "schemaVersion": "thesis_strategy_suite_v1",
+  "selectionPath": "records/thesis-analyst/strategy-selections/2026-09-21/strategy-35623480606-a1.json",
+  "selectionSetHash": "24b19058f008c87a202c2269d82a784e03eb638855531a7b8a4c28cb5a0e8a37",
+  "selectionSha256": "7c42a59360a5e36778e4dbb7512b873b9bbd24743333a82e4a40743c293b732f",
+  "sourceSha": "72e7bd49fed8a8bbdf29e2a65e80611f3e291e4d",
+  "suite": "ladder"
+}
