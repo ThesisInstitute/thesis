@@ -7470,19 +7470,6 @@ def sba_pdf_fact(
     }
 
 
-def a19_values_from_html(html: str) -> dict[str, float]:
-    """June-style A-19 parse: each row label followed by year-ago then
-    current-month totals; the CURRENT month (second number) is the print."""
-    text = re.sub(r"<[^>]+>", "|", html)
-    text = re.sub(r"[\s|]+", " ", text)
-    out: dict[str, float] = {}
-    for key, label in A19_ROW_LABELS.items():
-        m = re.search(re.escape(label) + r"\s+([0-9,]+)\s+([0-9,]+)", text)
-        if m:
-            out[key] = float(m.group(2).replace(",", ""))
-    return out
-
-
 _A19_HEADER_MONTHS = {
     "jan.": 1,
     "feb.": 2,
@@ -7497,38 +7484,127 @@ _A19_HEADER_MONTHS = {
     "nov.": 11,
     "dec.": 12,
 }
+_A19_COLUMN_GROUP = ("Total", "16 years and over")
+
+
+class _A19TableParser(HTMLParser):
+    """Collect Table A-19's header cells by id and its data cells by ``headers``."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.header_text: dict[str, str] = {}
+        self.duplicate_ids: set[str] = set()
+        self.cells: list[tuple[tuple[str, ...], str]] = []
+        self._tag: str | None = None
+        self._attrs: dict[str, str] = {}
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in ("th", "td"):
+            self._tag = tag
+            self._attrs = {name: value or "" for name, value in attrs}
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._tag is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag != self._tag:
+            return
+        text = " ".join(" ".join(self._text).split())
+        if tag == "th" and self._attrs.get("id"):
+            if self._attrs["id"] in self.header_text:
+                self.duplicate_ids.add(self._attrs["id"])
+            self.header_text[self._attrs["id"]] = text
+        elif tag == "td" and self._attrs.get("headers"):
+            self.cells.append((tuple(self._attrs["headers"].split()), text))
+        self._tag = None
+
+
+def _a19_header_month(text: str) -> tuple[int, int] | None:
+    match = re.fullmatch(r"([A-Za-z]+\.?) (\d{4})", text)
+    month = _A19_HEADER_MONTHS.get(match.group(1).lower()) if match else None
+    return (int(match.group(2)), month) if match and month else None
+
+
+def a19_table(html: str) -> tuple[str, dict[str, float]] | None:
+    """(data month, thousands by occupation) the page prints, or None.
+
+    BLS marks up the table accessibly: every data cell's ``headers``
+    attribute names the ids of its row header and of its three column headers
+    (group, age, month). Each value is therefore found by WHAT it is headed
+    by, never by position: the occupation's row, "Total", "16 years and
+    over", and the later of exactly two same-month headings one year apart.
+    All six occupations must agree on the month. Anything else (a missing
+    row, an unknown month label, a third dated column, a non-numeric cell, a
+    reused id, a page that is not this table) returns None: the page is
+    overwritten monthly, and a value from a capture that cannot be
+    identified must never be recorded.
+    """
+
+    parser = _A19TableParser()
+    try:
+        parser.feed(html)
+        parser.close()
+    except (AssertionError, ValueError):
+        return None
+    if parser.duplicate_ids:
+        return None
+    ids_by_text: dict[str, list[str]] = {}
+    for header_id, text in parser.header_text.items():
+        ids_by_text.setdefault(text, []).append(header_id)
+    values: dict[str, float] = {}
+    months: set[tuple[int, int]] = set()
+    for key, label in A19_ROW_LABELS.items():
+        row_ids = ids_by_text.get(label, [])
+        if len(row_ids) != 1:
+            return None
+        dated: list[tuple[tuple[int, int], str]] = []
+        for header_ids, text in parser.cells:
+            if row_ids[0] not in header_ids:
+                continue
+            columns = [
+                parser.header_text.get(header_id)
+                for header_id in header_ids
+                if header_id != row_ids[0]
+            ]
+            if None in columns:
+                return None
+            if not all(part in columns for part in _A19_COLUMN_GROUP):
+                continue
+            stamps = [stamp for stamp in map(_a19_header_month, columns) if stamp]
+            if len(columns) != 3 or len(stamps) != 1:
+                return None
+            dated.append((stamps[0], text))
+        dated.sort()
+        if len(dated) != 2:
+            return None
+        ((year_ago, month_ago), _), ((year, month), printed) = dated
+        if (year - year_ago, month) != (1, month_ago):
+            return None
+        if not re.fullmatch(r"\d{1,3}(,\d{3})*", printed):
+            return None
+        values[key] = float(printed.replace(",", ""))
+        months.add((year, month))
+    if len(months) != 1:
+        return None
+    ((year, month),) = months
+    return f"{year}-{month:02d}", values
+
+
+def a19_values_from_html(html: str) -> dict[str, float]:
+    """Thousands by occupation for the month the page prints ({} if unidentified)."""
+
+    table = a19_table(html)
+    return table[1] if table else {}
 
 
 def a19_snapshot_period(html: str) -> str | None:
-    """The data month (YYYY-MM) a Table A-19 page prints, from its headers.
+    """The data month (YYYY-MM) the page prints (None if unidentified)."""
 
-    Every column group is headed by the same month a year apart
-    ("July<br/>2025", "July<br/>2026"); the later one is the print. Any other
-    shape returns None: this page is overwritten monthly, and a value read
-    from a capture of a different month must never be recorded. The labels
-    below are the ones BLS prints on this table; an unknown label returns
-    None.
-    """
-
-    cells = [
-        (month.lower(), int(year))
-        for month, year in re.findall(
-            r"<th\b[^>]*>\s*([A-Za-z]+\.?)\s*<br\s*/?>\s*(\d{4})\s*</th>",
-            html,
-            flags=re.IGNORECASE,
-        )
-    ]
-    if len(cells) < 2 or len(cells) % 2:
-        return None
-    (month, earlier), (_, later) = cells[0], cells[1]
-    # a19_values_from_html reads the SECOND number after a row label, so the
-    # headers must run year-ago then current, in every column group.
-    if later - earlier != 1 or cells != [(month, earlier), (month, later)] * (
-        len(cells) // 2
-    ):
-        return None
-    number = _A19_HEADER_MONTHS.get(month)
-    return None if number is None else f"{later}-{number:02d}"
+    table = a19_table(html)
+    return table[0] if table else None
 
 
 def a19_capture(snapshot_url: str) -> tuple[dt.datetime, str] | None:
@@ -7591,7 +7667,7 @@ def a19_read_capture(
     stamp = f"{capture[0]:%Y%m%d%H%M%S}"
     raw, final_url = read(f"https://web.archive.org/web/{stamp}id_/{A19_SOURCE_URL}")
     served = re.fullmatch(
-        r"https?://web\.archive\.org/web/(\d{14})(?:id_)?/(https://.+)", final_url
+        r"https?://web\.archive\.org/web/(\d{14})id_/(https://.+)", final_url
     )
     if not served or served.groups() != (stamp, A19_SOURCE_URL):
         raise A19CaptureError(
@@ -7625,10 +7701,11 @@ def a19_window_captures(
             end=f"{end:%Y%m%d}235959",
         )
     )
-    index = json.loads(body.decode() or "[]")
-    # An empty list is an empty index. Anything else must be exactly the
-    # requested shape: a malformed or partial answer is an index failure, never
-    # evidence that the window holds no capture.
+    index = json.loads(body.decode())
+    # The JSON list ``[]`` is an empty index. Anything else must be exactly the
+    # requested shape: an empty body, a malformed row, an impossible timestamp
+    # or a non-numeric status is an index failure, never evidence that the
+    # window holds no capture.
     if not isinstance(index, list) or (
         index and index[0] != ["timestamp", "statuscode"]
     ):
@@ -7640,13 +7717,14 @@ def a19_window_captures(
             or len(row) != 2
             or not all(isinstance(cell, str) for cell in row)
             or not re.fullmatch(r"\d{14}", row[0])
+            or not re.fullmatch(r"\d{3}", row[1])
         ):
             raise ValueError(f"malformed Archive index row {row!r}")
-        if row[1] != "200":
-            continue
         url = f"https://web.archive.org/web/{row[0]}/{A19_SOURCE_URL}"
         capture = a19_capture(url)
-        if capture and start <= capture[0].date() <= end:
+        if capture is None:
+            raise ValueError(f"impossible Archive index timestamp {row[0]!r}")
+        if row[1] == "200" and start <= capture[0].date() <= end:
             captures.append(url)
     return sorted(set(captures))
 
@@ -7663,7 +7741,8 @@ def a19_registered_capture(
 
     Takes the EARLIEST capture dated inside the registered window whose
     current-month header is ``period``, walking the index in order and
-    deferring at the first capture it cannot read. With none, and the window
+    deferring at the first capture it cannot read or cannot identify; only a
+    capture identified as another month is passed over. With none, and the window
     still open,
     it asks the Archive to capture the page and defers: a later run finds that
     capture. The verdict is the line to print when nothing resolves.
@@ -7703,7 +7782,20 @@ def a19_registered_capture(
                     "earlier capture cannot be skipped"
                 ),
             )
-        if a19_snapshot_period(raw.decode(errors="replace")) == period:
+        printed = a19_snapshot_period(raw.decode(errors="replace"))
+        if printed is None:
+            # Not "a different month": an error page, a changed layout or an
+            # empty body says nothing about what the page printed.
+            return (
+                None,
+                None,
+                (
+                    f"CAPTURE UNIDENTIFIED (deferring): {url} does not parse as "
+                    "Table A-19, and an unidentified earlier capture cannot be "
+                    "skipped"
+                ),
+            )
+        if printed == period:
             return url, raw, ""
     if len(captures) > A19_MAX_WINDOW_CAPTURES:
         return (
@@ -14986,15 +15078,15 @@ def main() -> int:
                 if not snapshot_url or discovered_raw is None:
                     print(f"  A-19 {verdict}: {ref}")
                     continue
-                a19_cache.setdefault(
-                    snapshot_url,
-                    (
+                if a19_cache.get(snapshot_url, (None, None))[1] is None:
+                    # Also replaces a failed fetch of the same capture by an
+                    # unregistered cell earlier in this run.
+                    a19_cache[snapshot_url] = (
                         a19_values_from_html(discovered_raw.decode(errors="replace")),
                         discovered_raw,
                         snapshot_url,
                         utc_now(),
-                    ),
-                )
+                    )
             else:
                 # Cells that predate registration have no window; they keep
                 # the reviewed per-month pins.

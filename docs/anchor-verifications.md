@@ -805,9 +805,19 @@ whose header names the target month. It always takes that capture from the
 Archive's index, walked in order; hand pins serve only cells that predate
 registration. If a capture in the window cannot be read, the run defers there:
 a later capture is the earliest one only if the unread one is known not to
-print the month. The header check also binds the column: headers must run
-year-ago then current in every column group, because the parser reads the
-second number after each row label. The resolver asks the Archive for the
+print the month. The same holds for a capture that does not parse as this
+table (an error page, a changed layout): it is unidentified, not "another
+month", and the run defers there too. Only a capture identified as a different
+month is passed over.
+
+How a value is read: BLS marks the table up accessibly, so every data cell's
+`headers` attribute names the ids of its row header and its three column
+headers. `a19_table` finds each value by what it is headed by (the occupation's
+row, "Total", "16 years and over", and the later of exactly two same-month
+headings one year apart), never by its position, and all six occupations must
+agree on the month. A page that cannot be identified that way yields nothing.
+It reads the three fixtures and the full 125,026-byte page the resolver
+archived on 2026-07-10 to the same values. The resolver asks the Archive for the
 capture's stored response (`/web/<timestamp>id_/<url>`), so the hash recorded
 with the fact covers BLS's bytes and anyone can reproduce it; the Archive
 passes BLS's gzip through and the resolver decompresses it. Asked for a
@@ -836,9 +846,12 @@ registered 2026-07-29 to 2026-08-06, which closed the day before BLS published
 July. No capture of the July table can be dated inside that window, so they
 refuse with `FIRST-PRINT WINDOW MISSED` and await a disposition ruling. That
 refusal is reserved for one finding: the window is closed, the whole index for
-it was read, and nothing in it prints the month. A capped scan, a failed read,
-or an index answer that is not exactly the requested table reports itself
-instead. The 2026-07 pin is kept as custody evidence for
+it was read, and nothing in it prints the month. A capped scan, a failed or
+unidentified read, or an index answer that is not exactly the requested table
+(an empty body, a malformed row, an impossible timestamp) reports itself
+instead. What the Archive's index returns for a window that truly holds no
+capture has not been observed; the code takes the JSON list `[]` as empty and
+treats an empty body as a failure, which defers. The 2026-07 pin is kept as custody evidence for
 the ruling and is never read for a registered cell, because it is dated
 outside the window. August resolving and July refusing say nothing about any
 other `generic-url` registration.

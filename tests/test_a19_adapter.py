@@ -183,6 +183,52 @@ def test_capture_url_fails_closed(url: str) -> None:
     assert resolve_pending.a19_capture(url) is None
 
 
+def test_a_value_is_found_by_its_headers_not_its_position() -> None:
+    html = fixture("2026-08")
+    assert resolve_pending.a19_table(html) == ("2026-08", ANCHORS["2026-08"])
+    # Markup around a label does not hide it.
+    wrapped = html.replace("Aug.<br/>", "<span>Aug.</span><br/>")
+    assert resolve_pending.a19_table(wrapped) == ("2026-08", ANCHORS["2026-08"])
+    # Relabel the Total pair so the 2026 heading sits over the FIRST column:
+    # the value read is the one headed 2026 (7,482), not the second number.
+    relabeled = html.replace("Aug.<br/>2025", "<span>Aug.</span><br/>2026", 1).replace(
+        "Aug.<br/>2026", "<span>Aug.</span><br/>2025", 1
+    )
+    period, values = resolve_pending.a19_table(relabeled)
+    assert (period, values["production"]) == ("2026-08", 7482.0)
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        lambda html: "",
+        lambda html: "<html><body>503 Service Unavailable</body></html>",
+        # One occupation row missing.
+        lambda html: html.replace("Production occupations", "Crafts"),
+        # A third dated column under Total / 16 years and over.
+        lambda html: html.replace(
+            'id="cps_eande_m19.h.3.4">Aug.', 'id="cps_eande_m19.h.3.4">Sept.', 1
+        ).replace(
+            "cps_eande_m19.h.1.4 cps_eande_m19.h.2.4 cps_eande_m19.h.3.4",
+            "cps_eande_m19.h.1.2 cps_eande_m19.h.2.2 cps_eande_m19.h.3.4",
+        ),
+        # A printed cell that is not a number.
+        lambda html: html.replace(">7,716<", ">(1)<", 1),
+        # Two headings a year apart but different months.
+        lambda html: html.replace("Aug.<br/>2025", "July<br/>2025", 1),
+        # A reused header id.
+        lambda html: html.replace(
+            'id="cps_eande_m19.h.3.3"', 'id="cps_eande_m19.h.3.2"', 1
+        ),
+    ],
+)
+def test_a_page_that_cannot_be_identified_yields_nothing(damage) -> None:
+    html = damage(fixture("2026-08"))
+    assert resolve_pending.a19_table(html) is None
+    assert resolve_pending.a19_snapshot_period(html) is None
+    assert resolve_pending.a19_values_from_html(html) == {}
+
+
 # -- the registered unit selects the spec -------------------------------------
 
 
@@ -384,17 +430,20 @@ def test_read_capture_refuses_the_nearest_capture_substitution() -> None:
 
     with pytest.raises(resolve_pending.A19CaptureError, match="was served"):
         resolve_pending.a19_read_capture(replay_url("20260901000000"), read)
-    # The toolbar form of the same capture, and http, are the same capture.
+    # The same stamp over plain http is the same stored response.
     assert (
         resolve_pending.a19_read_capture(
             capture_url("2026-08"),
-            lambda url: (
-                b"x",
-                served.replace("id_", "").replace("https://web", "http://web"),
-            ),
+            lambda url: (b"x", served.replace("https://web", "http://web")),
         )
         == b"x"
     )
+    # The replay form of the same stamp is NOT: its body carries the
+    # Archive's toolbar and rewritten links, and the hash must cover BLS's.
+    with pytest.raises(resolve_pending.A19CaptureError, match="was served"):
+        resolve_pending.a19_read_capture(
+            capture_url("2026-08"), lambda url: (b"x", capture_url("2026-08"))
+        )
 
 
 # -- discovery inside the registered window -----------------------------------
@@ -431,6 +480,10 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         b'[["20260904170006","200"]]',
         b'[["timestamp","statuscode"],["2026090417","200"]]',
         b'[["timestamp","statuscode"],[20260904170006,"200"]]',
+        # An empty body, an impossible date and a non-numeric status.
+        b"",
+        b'[["timestamp","statuscode"],["20260900170006","200"]]',
+        b'[["timestamp","statuscode"],["20260904170006","blocked"]]',
     ],
 )
 def test_a_malformed_index_defers_and_never_escapes(body: bytes) -> None:
@@ -442,8 +495,12 @@ def test_a_malformed_index_defers_and_never_escapes(body: bytes) -> None:
     assert verdict.startswith("WAYBACK INDEX FETCH FAILED (deferring)")
 
 
-def test_an_empty_index_body_is_an_empty_index() -> None:
-    assert resolve_pending.a19_window_captures(WINDOW, reader(b"", {}, [])) == []
+def test_only_the_json_empty_list_is_an_empty_index() -> None:
+    assert resolve_pending.a19_window_captures(WINDOW, reader(b"[]", {}, [])) == []
+    header_only = b'[["timestamp","statuscode"]]'
+    assert (
+        resolve_pending.a19_window_captures(WINDOW, reader(header_only, {}, [])) == []
+    )
 
 
 def test_discovery_takes_the_earliest_capture_that_prints_the_month() -> None:
@@ -552,6 +609,29 @@ def test_an_unread_earlier_capture_defers_instead_of_being_skipped() -> None:
     assert identity_url("20260905050505") not in calls
 
 
+def test_an_unidentified_earlier_capture_defers_instead_of_being_skipped() -> None:
+    # An error page is not "a different month". Skipping it would let a later
+    # capture stand in for the earliest, or leave a closed window "missed".
+    index = cdx(("20260904170006", "200"), ("20260905050505", "200"))
+    for body in ("", "<html><body>Archive error</body></html>", "\udcff"):
+        calls: list[str] = []
+        pages = {"20260904170006": body, "20260905050505": fixture("2026-08")}
+
+        def read(url: str, pages=pages, calls=calls) -> tuple[bytes, str]:
+            calls.append(url)
+            if url.startswith("https://web.archive.org/cdx/"):
+                return index, url
+            stamp = url.split("/web/")[1][:14]
+            return pages[stamp].encode(errors="surrogateescape"), url
+
+        url, raw, verdict = resolve_pending.a19_registered_capture(
+            "2026-08", WINDOW, dt.date(2026, 9, 20), read
+        )
+        assert (url, raw) == (None, None)
+        assert verdict.startswith("CAPTURE UNIDENTIFIED (deferring)")
+        assert identity_url("20260905050505") not in calls
+
+
 def test_a_corrupt_gzip_capture_defers_and_never_escapes() -> None:
     corrupt = bytes.fromhex("1f8b0800000000000000") + b"\x07" + b"\x00" * 8
 
@@ -633,6 +713,8 @@ def run_main(
     served_as: dict[str, str] | None = None,
     resolution_dates: dict[str, str] | None = None,
     save_status: int | None = None,
+    unregistered_first: list[tuple[str, str, str]] | None = None,
+    fail_first_read_of: str | None = None,
 ) -> tuple[str, list[str]]:
     """Run the resolver dry against a stand-in Archive.
 
@@ -656,6 +738,20 @@ def run_main(
 
     contracts = {reg["contract"]["dataPointId"]: reg for reg in registrations}
     log = {"entries": [], "resolutionLinks": []}
+    for ref, unit, resolution_date in unregistered_first or []:
+        log["entries"].append(
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": ref,
+                "resolutionDate": resolution_date,
+                "unit": unit,
+                "pointEstimate": 7700,
+            }
+        )
+        log["resolutionLinks"].append(
+            {"status": "pending", "targetFactRef": ref, "forecastSlug": ref}
+        )
+    failed: set[str] = set()
     for ref, reg in contracts.items():
         slug = reg["contract"]["catalogSlug"]
         window = reg["contract"]["sourceBinding"]["expectedReleaseWindow"]
@@ -684,6 +780,9 @@ def run_main(
             return _Response(b"saved", url)
         for stamp, html in pages.items():
             if url == identity_url(stamp):
+                if stamp == fail_first_read_of and stamp not in failed:
+                    failed.add(stamp)
+                    raise urllib.error.HTTPError(url, 503, "offline", None, None)
                 final = identity_url((served_as or {}).get(stamp, stamp))
                 return _Response(html.encode(), final)
         raise urllib.error.HTTPError(url, 404, "no capture", None, None)
@@ -893,6 +992,31 @@ def test_main_refuses_a_pin_whose_capture_prints_another_month(
     assert "A-19 SNAPSHOT PERIOD MISMATCH (refusing)" in output
     assert "the capture prints 2026-07, not 2026-06" in output
     assert "nothing new to record" in output
+
+
+def test_a_failed_pin_fetch_does_not_poison_a_registered_cells_discovery(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # An unregistered August cell fails to fetch the pinned capture; a
+    # registered August cell then discovers and reads the same capture. The
+    # verified bytes must replace the failed cache entry, not be discarded.
+    august = registration()
+    output, _ = run_main(
+        monkeypatch,
+        capsys,
+        [august],
+        unregistered_first=[
+            (
+                f"{SERIES.replace('production', 'healthcare_support')}"
+                ".august_2026.first_print",
+                "thousands",
+                "2026-09-04",
+            )
+        ],
+        fail_first_read_of=CAPTURES["2026-08"],
+    )
+    assert "A-19 snapshot fetch failed (deferring)" in output
+    assert f"resolve {august['contract']['dataPointId']} -> 7.716 millions" in output
 
 
 def test_main_refuses_a_registered_contract_with_a_drifted_transform(
