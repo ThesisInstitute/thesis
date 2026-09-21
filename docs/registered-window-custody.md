@@ -65,9 +65,11 @@ the time budget cannot fit the next wait, that phase stops asking and
 reports each remaining URL as `NOT_ASKED`. It avoids asking for one host
 twice in a row when another host is waiting.
 
-A capture request gets at most 3 attempts and an index read at most 2, with
-backoff of 30, 90 and 180 seconds, or the server's `Retry-After` capped at
-300. After four HTTP 429 answers in a row from the save endpoint, the run
+An index read gets at most 2 attempts. A capture request gets at most 3,
+and is asked again only when the Archive did not take it: a transport fault
+or HTTP 429. Any other HTTP answer ends the attempts for that URL in that
+pass (see "The save response is a weak signal"). Backoff is 30, 90 and 180
+seconds, or the server's `Retry-After` capped at 300. After four HTTP 429 answers in a row from the save endpoint, the run
 stops asking that endpoint and reports each remaining URL as `NOT_ASKED`;
 the index endpoint has its own count. A client that is told to slow down
 and keeps asking is not polite, and the second pass is the retry.
@@ -187,22 +189,33 @@ skip a URL.
   WDS, the ABS Data API, Eurostat SDMX). A capture of one holds a single
   response to that exact query string at one instant. It is a payload, not
   a release.
-- **The save response is a weak signal, in both directions.** On 2026-09-20
-  two real runs asked for four URLs. The first was answered HTTP 429 on
-  every request and the second HTTP 500 on every request, yet the index
-  later listed HTTP 200 captures of two of the four URLs stamped within a
-  minute of those requests (Treasury at 21:08:16 and 23:31:05, the ABS API
-  at 23:32:07), and none of the other two. So a failed response does not
-  show that no capture was made, and only the index shows that one was.
-- **Index lag.** The ABS capture above was stamped 23:32:07 and was not in
-  the index when the run read it about four minutes later; it was there the
+- **The save response is a weak signal, in both directions.** Three real
+  runs from one machine, on 2026-09-20 and 2026-09-21, asked for the same
+  four URLs. The first was answered HTTP 429 on every request. The other
+  two were answered HTTP 500, with the Wayback Machine's own page as the
+  body, on every save request. Yet the index lists HTTP 200 captures
+  stamped within a minute of some of those requests: the Treasury page at
+  2026-09-20 21:08:16 and 23:31:05, and the ABS API at 2026-09-20 23:32:07
+  and 2026-09-21 15:57:07. The Statistics Canada URL has no capture at all,
+  and nbb.be was captured with HTTP 204, which does not count. So a failed
+  response does not show that no capture was made, and only the index shows
+  that one was. This is why a save that got an HTTP answer is not asked
+  again in the same pass, and why every verdict rests on the index. Whether
+  a GitHub runner is answered the same way is not known until the workflow
+  has run. The Archive also offers an authenticated capture API; it needs
+  an account key as a repository secret and was not evaluated here.
+- **Index lag.** The ABS capture stamped 2026-09-20 23:32:07 was not in the
+  index when that run read it about four minutes later; it was there the
   next day. The verdict `SAVE_NOT_YET_INDEXED` says what the save request
   returned, and the next run re-reads the whole window. A window on its
   last two days is listed as awaiting the index, and raises no alert, only
   when the save response named a capture of the registered URL dated inside
   that same window.
-- **Redirects.** When the save response names an archived URL other than
-  the registered one, the witness reads that URL's index too and reports
+- **Redirects.** A registered URL can redirect. The index then lists it
+  with a 3xx status, which does not count: on 2026-09-21 all five rows for
+  `https://www.fns.usda.gov/pd/wic-program` inside its closed window were
+  HTTP 301. When the save response names an archived URL other than the
+  registered one, the witness reads that URL's index too and reports
   `CAPTURED_UNDER_REDIRECT_TARGET`. That is custody of another URL. Whether
   that URL is the registered source is not the witness's call, so the
   capture counts for nothing and a closing window still raises the alert,

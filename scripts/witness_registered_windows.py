@@ -281,11 +281,14 @@ class Transport:
         *,
         attempts: int | None = None,
         guard: Callable[[], str | None] | None = None,
+        retry: Callable[[int | None], bool] | None = None,
     ) -> tuple[Response | None, dict[str, Any]]:
         """(response, outcome). ``response`` is None when every attempt failed.
 
         ``guard`` runs immediately before every attempt, retries included, and
-        returns the reason the request may no longer leave, or None.
+        returns the reason the request may no longer leave, or None. ``retry``
+        says whether a failure with that HTTP status (None for a transport
+        fault) is worth another attempt; by default every failure is.
         """
 
         failures: list[str] = []
@@ -323,6 +326,8 @@ class Transport:
                 if wait is None:
                     wait = BACKOFF_SECONDS[min(attempt, len(BACKOFF_SECONDS)) - 1]
                 wait = min(wait, MAX_RETRY_AFTER)
+                if retry is not None and not retry(exc.status):
+                    break
                 if attempt < limit and self.remaining() > wait + timeout:
                     self.sleep(wait)
                     continue
@@ -987,6 +992,20 @@ def _window_custody(
     }
 
 
+def _retry_a_save(status: int | None) -> bool:
+    """Ask again only when the Archive did not take the request.
+
+    Three real runs (2026-09-20 and 2026-09-21) were answered HTTP 500 on
+    every save request, and the index later listed captures stamped within a
+    minute of some of them. An HTTP answer other than 429 therefore does not
+    show that no capture was made, and asking again at once risks a second
+    capture of the same page. The second daily pass is the retry: by then the
+    index can say whether the first request worked.
+    """
+
+    return status is None or status == 429
+
+
 def window_refusal(plan: UrlPlan, run_day: dt.date, now: dt.datetime) -> str | None:
     """Why no capture of this URL may be requested at ``now``, or None.
 
@@ -1080,7 +1099,9 @@ def witness_url(
                 }
                 return entry
         target_url = save_template.format(url=plan.source_url)
-        response, outcome = transport.get(target_url, save_timeout, guard=guard)
+        response, outcome = transport.get(
+            target_url, save_timeout, guard=guard, retry=_retry_a_save
+        )
         record: dict[str, Any] = {
             "requested": outcome.get("attempts", 0) > 0,
             **outcome,

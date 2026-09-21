@@ -411,7 +411,9 @@ def test_a_refused_save_is_reported_and_the_next_url_still_runs() -> None:
     archive = FakeArchive(save=save)
     report = run(targets, archive)
     by_url = {e["sourceUrl"]: e for e in report["openWindows"]}
-    assert archive.saves.count(SSA) == witness.DEFAULT_ATTEMPTS
+    # HTTP 520 is an answer: the Archive took the request. One attempt, and
+    # the second daily pass is the retry.
+    assert archive.saves.count(SSA) == 1
     assert archive.saves.count(SNAP) == 1
     assert by_url[SSA]["verdict"]["code"] == "SAVE_FAILED"
     assert "HTTP 520: Job failed" in by_url[SSA]["verdict"]["text"]
@@ -1247,7 +1249,7 @@ def test_a_retry_cannot_leave_after_the_window_has_closed() -> None:
     def fetch(url: str, timeout: float) -> witness.Response:
         if "/save/" in url:
             asked.append(clock())
-            raise witness.FetchError("HTTP 500: Wayback Machine", status=500)
+            raise witness.FetchError("URLError: connection reset")
         return witness.Response(200, url, {}, b"[]")
 
     carrier = witness.Transport(
@@ -1459,3 +1461,35 @@ def test_the_pause_between_requests_is_never_skipped_to_save_time() -> None:
     assert all("no room for the pause between requests" in why for why in whys)
     # The index phase gets its own budget and still reads all three.
     assert len([u for u in asked if "/cdx/" in u]) == 3
+
+
+@pytest.mark.parametrize(
+    ("status", "attempts"),
+    [(500, 1), (520, 1), (403, 1), (429, 3), (None, 3)],
+)
+def test_a_save_is_asked_again_only_when_the_archive_did_not_take_it(
+    status: int | None, attempts: int
+) -> None:
+    # Three live runs were answered HTTP 500 on every save, and the index
+    # later listed captures made at those moments. An answer is not retried.
+    def save(original: str) -> witness.Response:
+        raise witness.FetchError(f"HTTP {status}", status=status)
+
+    target = make_target("bls.a19", A19, "2026-09-16", "2026-09-24")
+    archive = FakeArchive(save=save)
+    report = run([target], archive)
+    assert len(archive.saves) == attempts
+    assert report["openWindows"][0]["save"]["attempts"] == attempts
+
+
+def test_an_index_read_is_retried_whatever_the_failure() -> None:
+    calls: list[str] = []
+
+    def fetch(url: str, timeout: float) -> witness.Response:
+        calls.append(url)
+        raise witness.FetchError("HTTP 500", status=500)
+
+    carrier = transport(fetch)
+    index = witness.read_index(carrier, A19, TODAY, TODAY, 10.0)
+    assert index["ok"] is False
+    assert len(calls) == witness.INDEX_ATTEMPTS
