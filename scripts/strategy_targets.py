@@ -33,8 +33,10 @@ from register_targets import (
     REGISTRATION_SCHEMA,
     V2_REGISTRATION_SCHEMA,
     V3_REGISTRATION_CUTOVER_COMMIT,
+    RegistrationError,
     parse_utc_instant,
     registration_content_hash,
+    validate_target_resolution_projection,
 )
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -377,6 +379,7 @@ def published_target(
         raise StrategyTargetError(
             f"published target lacks final resolver fields for {slug}: {missing}"
         )
+    published_date = block_value(block, "resolutionDate")
     target = {
         "series": contract["series"],
         "period": contract["period"],
@@ -386,7 +389,15 @@ def published_target(
         "targetUnit": contract["unit"],
         "valueScale": contract["valueScale"],
         "sourceBinding": contract["sourceBinding"],
-        "resolutionDate": block_value(block, "resolutionDate"),
+        # The published forecast's resolver date. Comparison cells are graded
+        # against it, and selection orders and gates open targets by it. It
+        # is deliberately NOT stored as `resolutionDate`: the publisher
+        # requires a batch target to carry the registered contract's date
+        # fields with exactly the snapshot's presence and value, and a
+        # release-calendar contract omits resolutionDate. Copying the
+        # published date into `resolutionDate` is what blocked the
+        # 2026-09-20 strategy runs (35524670779, 35525381224).
+        "publishedResolutionDate": published_date,
         "resolutionSource": block_value(block, "resolutionSource"),
         "resolutionSourceUrl": block_value(block, "resolutionSourceUrl"),
         "resolutionRule": block_value(block, "resolutionRule"),
@@ -397,9 +408,49 @@ def published_target(
         "registrationCommit": commit,
         "comparisonTarget": True,
     }
+    # Project the registered contract's date-basis semantics exactly as the
+    # docket lane's target context does (register_targets
+    # ._target_registration_fields): resolutionDateBasis, resolutionDate and
+    # the top-level expectedReleaseWindow appear iff the snapshot binds them.
     if "resolutionDateBasis" in contract:
         target["resolutionDateBasis"] = contract["resolutionDateBasis"]
+    if "resolutionDate" in contract:
+        if published_date != contract["resolutionDate"]:
+            raise StrategyTargetError(
+                f"published ledger entry differs from registration for {slug}: "
+                "resolutionDate"
+            )
+        target["resolutionDate"] = contract["resolutionDate"]
+    binding = contract.get("sourceBinding")
+    if isinstance(binding, dict) and "expectedReleaseWindow" in binding:
+        target["expectedReleaseWindow"] = binding["expectedReleaseWindow"]
+    # Fail at selection time with the publisher's own projection check, so a
+    # target the publisher would reject never reaches the paid generate job.
+    try:
+        validate_target_resolution_projection(
+            contract, target, label=registration["relative"]
+        )
+    except RegistrationError as exc:
+        raise StrategyTargetError(str(exc)) from exc
     return target
+
+
+def published_resolution_date(target: dict[str, Any]) -> dt.date:
+    """The published forecast's resolver date that orders and gates a target."""
+
+    value = target.get("publishedResolutionDate")
+    if not isinstance(value, str) or not value:
+        raise StrategyTargetError(
+            "comparison target lacks publishedResolutionDate: "
+            f"{target.get('catalogSlug')}"
+        )
+    try:
+        return dt.date.fromisoformat(value)
+    except ValueError as exc:
+        raise StrategyTargetError(
+            f"invalid publishedResolutionDate {value!r} for "
+            f"{target.get('catalogSlug')}"
+        ) from exc
 
 
 def load_local_resolution_evidence(
@@ -572,7 +623,7 @@ def select_targets(
                 source_sha,
                 selected_at,
             )
-            release_day = dt.date.fromisoformat(str(target["resolutionDate"]))
+            release_day = published_resolution_date(target)
             if release_day <= selected_at.date():
                 raise StrategyTargetError(
                     f"target is on or past its official release day: {slug}"
@@ -604,7 +655,10 @@ def select_targets(
                 for slug, target in candidates.items()
                 if slug not in set(requested_slugs)
             ),
-            key=lambda target: (target["resolutionDate"], target["catalogSlug"]),
+            key=lambda target: (
+                target["publishedResolutionDate"],
+                target["catalogSlug"],
+            ),
         )
         selected.extend(remaining[: max_targets - len(selected)])
     selected.sort(key=lambda target: target["catalogSlug"])
@@ -780,7 +834,7 @@ def ensure_open(
             raise StrategyTargetError(
                 f"target became resolved in the official ledger: {slug}"
             )
-        release_day = dt.date.fromisoformat(str(target.get("resolutionDate") or ""))
+        release_day = published_resolution_date(target)
         if release_day <= checked.date():
             raise StrategyTargetError(
                 f"target reached its official release day before generation: {slug}"

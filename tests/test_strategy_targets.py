@@ -10,10 +10,15 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import docket_publication  # noqa: E402
+import register_targets  # noqa: E402
 from generate_ledger_targets import generated_entry_for  # noqa: E402
 from strategy_targets import (  # noqa: E402
+    GENERATED_TARGETS_RELATIVE,
     StrategyTargetError,
     ensure_open,
+    published_resolution_date,
+    published_target,
     registrations_by_slug,
     select_targets,
     selection_hash,
@@ -77,10 +82,21 @@ def test_selector_resolves_one_published_v2_target_and_replays(
     assert payload["targets"][0]["registrationCommit"] == (
         "f2738042716881427217caa9c3c13aa4ca8783e5"
     )
-    assert payload["targets"][0]["resolutionDate"] == "2026-08-26"
-    assert payload["targets"][0]["targetRegistrationPath"].startswith(
-        "records/targets/"
+    target = payload["targets"][0]
+    # The published forecast's resolver date rides separately; the trusted
+    # target mirrors the registration's date fields with exact presence, and
+    # this v2 release-calendar contract binds no resolutionDate.
+    assert target["publishedResolutionDate"] == "2026-08-26"
+    assert "resolutionDate" not in target
+    assert "resolutionDateBasis" not in target
+    assert target["expectedReleaseWindow"] == {
+        "start": "2026-08-25",
+        "end": "2026-09-02",
+    }
+    assert target["expectedReleaseWindow"] == (
+        target["sourceBinding"]["expectedReleaseWindow"]
     )
+    assert target["targetRegistrationPath"].startswith("records/targets/")
     assert payload["localResolutionEvidence"]["resolvedDataPointIds"] == []
     assert payload["ledgerEvidence"]["resolvedDataPointIds"] == []
     assert payload["selectionSetHash"] == selection_hash(payload)
@@ -308,4 +324,113 @@ def test_selection_binds_ladder_prompt_mode_sparsely(
             ledger_logical_path="ledger/official_observations.jsonl",
             ledger_repository_commit="a" * 40,
             ledger_blob_sha="b" * 40,
+        )
+
+
+def _published(slug: str, selected_at: str) -> dict:
+    import datetime as dt
+
+    generated = ROOT.joinpath(*GENERATED_TARGETS_RELATIVE.parts).read_text()
+    return published_target(
+        ROOT,
+        slug,
+        registrations_by_slug(ROOT),
+        generated,
+        head(),
+        dt.datetime.fromisoformat(selected_at.replace("Z", "+00:00")),
+    )
+
+
+@pytest.mark.parametrize(
+    ("slug", "registration_kind"),
+    [
+        # v3 release-calendar contract: no resolutionDate in the snapshot.
+        # Actions run 35524670779 (2026-09-20) was blocked on exactly this
+        # target because the selector copied the published date into
+        # resolutionDate.
+        ("unemployment-rate-september-2026", "release-calendar"),
+        # v3 resolve-by-bound contract: resolutionDate is the registered
+        # bound. Actions run 35525381224 was blocked on this one because the
+        # target lacked the top-level expectedReleaseWindow.
+        ("us-natural-gas-vented-flared-2025", "resolve-by-bound"),
+    ],
+)
+def test_selected_target_passes_publisher_registration_projection(
+    slug: str, registration_kind: str
+) -> None:
+    target = _published(slug, "2026-09-21T00:00:00Z")
+    registration = registrations_by_slug(ROOT)[slug][0]
+    contract = registration["contract"]
+
+    assert target["comparisonTarget"] is True
+    assert target["publishedResolutionDate"]
+    assert published_resolution_date(target).isoformat() == (
+        target["publishedResolutionDate"]
+    )
+    assert target["expectedReleaseWindow"] == (
+        contract["sourceBinding"]["expectedReleaseWindow"]
+    )
+    if registration_kind == "release-calendar":
+        assert "resolutionDate" not in contract
+        assert "resolutionDate" not in target
+        assert "resolutionDateBasis" not in target
+    else:
+        assert contract["resolutionDateBasis"] == "resolve-by-bound"
+        assert target["resolutionDateBasis"] == "resolve-by-bound"
+        assert target["resolutionDate"] == contract["resolutionDate"]
+        assert target["publishedResolutionDate"] == contract["resolutionDate"]
+
+    # The exact checks the strategy publisher applies to a batch target.
+    register_targets.validate_target_resolution_projection(
+        contract, target, label=registration["relative"]
+    )
+    docket_publication.validate_target_registration(ROOT, target)
+
+
+def test_selector_refuses_published_date_that_contradicts_a_bound(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import strategy_targets as module
+
+    slug = "us-natural-gas-vented-flared-2025"
+    original = module.block_value
+
+    def contradicting(block: str, key: str):
+        value = original(block, key)
+        if key == "resolutionDate" and value == "2026-10-31":
+            return "2026-10-30"
+        return value
+
+    monkeypatch.setattr(module, "block_value", contradicting)
+    with pytest.raises(StrategyTargetError, match="resolutionDate"):
+        _published(slug, "2026-09-21T00:00:00Z")
+
+
+def test_selector_fails_closed_on_the_publisher_projection_check(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # The selector runs the publisher's registration projection itself so an
+    # ineligible target is refused in the free select job; its RegistrationError
+    # surfaces as the selector's own error type with the message intact.
+    import strategy_targets as module
+
+    def refuse(contract, target, *, label):
+        raise register_targets.RegistrationError(
+            f"target registration contract mismatch for resolutionDate: {label}"
+        )
+
+    monkeypatch.setattr(module, "validate_target_resolution_projection", refuse)
+    with pytest.raises(
+        StrategyTargetError,
+        match="contract mismatch for resolutionDate: records/targets/",
+    ):
+        _published("unemployment-rate-september-2026", "2026-09-21T00:00:00Z")
+
+
+def test_published_resolution_date_requires_the_published_field() -> None:
+    with pytest.raises(StrategyTargetError, match="lacks publishedResolutionDate"):
+        published_resolution_date({"catalogSlug": "x", "resolutionDate": "2030-01-01"})
+    with pytest.raises(StrategyTargetError, match="invalid publishedResolutionDate"):
+        published_resolution_date(
+            {"catalogSlug": "x", "publishedResolutionDate": "2030-13-01"}
         )
