@@ -801,7 +801,13 @@ window is the one free field. `FAMILY_ADAPTERS["a19"]` is `{"generic-url"}`.
 
 Which capture: a registered target resolves only from a capture dated inside
 its registered `expectedReleaseWindow`, and from the earliest such capture
-whose header names the target month. The resolver asks the Archive for the
+whose header names the target month. It always takes that capture from the
+Archive's index, walked in order; hand pins serve only cells that predate
+registration. If a capture in the window cannot be read, the run defers there:
+a later capture is the earliest one only if the unread one is known not to
+print the month. The header check also binds the column: headers must run
+year-ago then current in every column group, because the parser reads the
+second number after each row label. The resolver asks the Archive for the
 capture's stored response (`/web/<timestamp>id_/<url>`), so the hash recorded
 with the fact covers BLS's bytes and anyone can reproduce it; the Archive
 passes BLS's gzip through and the resolver decompresses it. Asked for a
@@ -830,14 +836,15 @@ registered 2026-07-29 to 2026-08-06, which closed the day before BLS published
 July. No capture of the July table can be dated inside that window, so they
 refuse with `FIRST-PRINT WINDOW MISSED` and await a disposition ruling. That
 refusal is reserved for one finding: the window is closed, the whole index for
-it was read, and nothing in it prints the month. A capped scan or a failed
-read reports itself instead. The 2026-07 pin is kept as custody evidence for
+it was read, and nothing in it prints the month. A capped scan, a failed read,
+or an index answer that is not exactly the requested table reports itself
+instead. The 2026-07 pin is kept as custody evidence for
 the ruling and is never read for a registered cell, because it is dated
 outside the window. August resolving and July refusing say nothing about any
 other `generic-url` registration.
 
-Without a usable pin, a registered target looks up the Archive's index for
-captures dated inside its window. From the day the window opens (not the
+A registered target looks up the Archive's index for captures dated inside its
+window, and makes no request before the window opens. From the day it opens (not the
 forecast's `resolutionDate`, which would leave a single attempt on the last
 day), each daily run that finds no capture printing the month asks the Archive
 to capture the page, once per run, and defers. An error from the save endpoint

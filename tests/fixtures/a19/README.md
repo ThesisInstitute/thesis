@@ -4,7 +4,7 @@ The `<table>` element of three Internet Archive captures of
 `https://www.bls.gov/web/empsit/cpseea19.htm`, fetched 2026-09-20 from the
 replay URLs below. bls.gov answers non-browser clients with HTTP 403, and BLS
 overwrites this page with each Employment Situation, so the Archive's captures
-are the only retrievable copies of a past month's table.
+are the copies of a past month's table this resolver can retrieve.
 
 | Data month | Capture (UTC) | Replay URL | Full replay response |
 |---|---|---|---|

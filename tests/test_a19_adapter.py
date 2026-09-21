@@ -156,6 +156,13 @@ def test_every_pin_archives_the_bound_page_and_matches_its_fixture() -> None:
         "<th>July<br/>2024</th><th>July<br/>2026</th>",
         # A month label BLS does not print.
         "<th>Julio<br/>2025</th><th>Julio<br/>2026</th>",
+        # Current year first: the parser reads the second number after a row
+        # label, which would then be the year-ago column.
+        "<th>July<br/>2026</th><th>July<br/>2025</th>",
+        # An odd header count, or one column group out of order.
+        "<th>July<br/>2025</th><th>July<br/>2026</th><th>July<br/>2025</th>",
+        "<th>July<br/>2025</th><th>July<br/>2026</th>"
+        "<th>July<br/>2026</th><th>July<br/>2025</th>",
     ],
 )
 def test_capture_period_fails_closed(html: str) -> None:
@@ -296,6 +303,8 @@ def test_fact_passes_the_registered_host_check_and_keeps_the_capture() -> None:
         "cpseea19.htm (Wayback capture 20260904170006)",
     )
     assert row["source"]["url"] == resolve_pending.A19_SOURCE_URL
+    assert "first-print" not in row["source"]["extraction_method"]
+    assert "Internet Archive capture" in row["source"]["extraction_method"]
     assert row["measure"]["concept_evidence_url"] == capture_url("2026-08")
     assert capture_url("2026-08") in row["measure"]["concept_evidence_notes"]
     assert row["measure"]["unit"] == "millions" and row["value"] == 7.716
@@ -402,7 +411,6 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         ("20260904170006", "200"),  # listed twice
         ("20260905000000", "403"),
         ("20260911000000", "200"),  # after the window
-        ("2026090417", "200"),  # malformed
     )
     captures = resolve_pending.a19_window_captures(WINDOW, reader(index, {}, calls))
     assert captures == [replay_url("20260904170006"), replay_url("20260910235959")]
@@ -417,6 +425,12 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         b"null",
         b'[["timestamp","statuscode"], 5, null]',
         b"<html>429 Too Many Requests</html>",
+        # Row-level damage must not read as "the window holds no capture".
+        b'[["timestamp","statuscode"],["20260904170006"]]',
+        b'[["error","blocked"]]',
+        b'[["20260904170006","200"]]',
+        b'[["timestamp","statuscode"],["2026090417","200"]]',
+        b'[["timestamp","statuscode"],[20260904170006,"200"]]',
     ],
 )
 def test_a_malformed_index_defers_and_never_escapes(body: bytes) -> None:
@@ -523,16 +537,36 @@ def test_window_missed_means_the_whole_index_was_read_and_nothing_prints_it() ->
     assert not any("/save/" in call for call in calls)
 
 
-def test_an_unreadable_capture_is_not_reported_as_a_missed_window() -> None:
+def test_an_unread_earlier_capture_defers_instead_of_being_skipped() -> None:
+    # The first capture 404s and the second prints August. Taking the second
+    # would break "earliest": the unread one may print August too.
     calls: list[str] = []
     index = cdx(("20260904170006", "200"), ("20260905050505", "200"))
-    pages = {"20260905050505": fixture("2026-07")}  # the first one 404s
+    pages = {"20260905050505": fixture("2026-08")}
     url, raw, verdict = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
     )
     assert (url, raw) == (None, None)
-    assert verdict.startswith("CAPTURE READ FAILED (deferring): 1 of 2")
-    assert "WINDOW MISSED" not in verdict
+    assert verdict.startswith("CAPTURE READ FAILED (deferring)")
+    assert "20260904170006" in verdict and "WINDOW MISSED" not in verdict
+    assert identity_url("20260905050505") not in calls
+
+
+def test_a_corrupt_gzip_capture_defers_and_never_escapes() -> None:
+    corrupt = bytes.fromhex("1f8b0800000000000000") + b"\x07" + b"\x00" * 8
+
+    def read(url: str) -> tuple[bytes, str]:
+        if url.startswith("https://web.archive.org/cdx/"):
+            return cdx(("20260904170006", "200")), url
+        return corrupt, url
+
+    with pytest.raises(resolve_pending.A19CaptureError, match="not valid gzip"):
+        resolve_pending.a19_read_capture(capture_url("2026-08"), read)
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), read
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("CAPTURE READ FAILED (deferring)")
 
 
 def test_a_capped_scan_is_not_reported_as_a_missed_window(
@@ -611,6 +645,8 @@ def run_main(
         if archive is not None
         else {stamp: fixture(period) for period, stamp in CAPTURES.items()}
     )
+    if index == b"[]":
+        index = cdx(*[(stamp, "200") for stamp in sorted(pages)])
     year, month, day = (int(part) for part in today.split("-"))
 
     class FixedDate(dt.date):
@@ -687,6 +723,27 @@ def test_main_resolves_august_in_millions_and_refuses_the_july_window(
     # The publisher date the row vouches for is the capture's, not the
     # forecast's resolutionDate (the window's end, 2026-09-10).
     assert '"observed_at": "2026-09-04"' in output
+
+
+def test_main_takes_the_earliest_capture_even_when_a_pin_names_a_later_one(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # An earlier in-window capture that already prints August exists. A
+    # registered cell never reads the pin; it walks the index in order.
+    earlier = "20260904130000"
+    archive = {earlier: fixture("2026-08"), CAPTURES["2026-08"]: fixture("2026-08")}
+    output, calls = run_main(monkeypatch, capsys, [registration()], archive=archive)
+    assert "-> 7.716 millions" in output
+    assert identity_url(earlier) in calls
+    assert identity_url(CAPTURES["2026-08"]) not in calls
+
+
+def test_main_does_no_archive_io_before_a_registered_window_opens(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    output, calls = run_main(monkeypatch, capsys, [registration()], today="2026-09-01")
+    assert "release window opens 2026-09-02 (deferring)" in output
+    assert calls == []
 
 
 def test_main_discovers_a_capture_for_a_month_with_no_pin(
@@ -772,20 +829,18 @@ def test_main_asks_for_one_capture_per_run_while_windows_are_open(
     assert len([call for call in calls if "/save/" in call]) == 1
 
 
-def test_main_refuses_a_pin_the_archive_answers_with_another_capture(
+def test_main_defers_when_the_archive_answers_with_another_capture(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    pins = dict(resolve_pending.A19_SNAPSHOT_URLS)
-    pins["2026-08"] = replay_url("20260905000000")  # inside the window, no capture
-    monkeypatch.setattr(resolve_pending, "A19_SNAPSHOT_URLS", pins)
+    listed = "20260905000000"
     output, _ = run_main(
         monkeypatch,
         capsys,
         [registration()],
-        archive={"20260905000000": fixture("2026-08")},
-        served_as={"20260905000000": CAPTURES["2026-08"]},
+        archive={listed: fixture("2026-08")},
+        served_as={listed: CAPTURES["2026-08"]},
     )
-    assert "A-19 snapshot fetch failed (deferring)" in output
+    assert "A-19 CAPTURE READ FAILED (deferring)" in output
     assert "was served" in output
     assert "nothing new to record" in output
 
@@ -793,19 +848,50 @@ def test_main_refuses_a_pin_the_archive_answers_with_another_capture(
 def test_main_refuses_a_pin_whose_capture_prints_another_month(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    # Pins serve only cells that predate registration. A wrong pin (the June
+    # key pointing at the July table) must refuse, not record July as June.
+    ref = f"{SERIES}.june_2026.first_print"
     pins = dict(resolve_pending.A19_SNAPSHOT_URLS)
-    # A wrong pin: the August key pointing at a capture inside August's window
-    # that is really the July table.
-    pins["2026-08"] = replay_url("20260903010101")
+    pins["2026-06"] = replay_url(CAPTURES["2026-07"])
     monkeypatch.setattr(resolve_pending, "A19_SNAPSHOT_URLS", pins)
-    output, _ = run_main(
-        monkeypatch,
-        capsys,
-        [registration()],
-        archive={"20260903010101": fixture("2026-07")},
+
+    class FixedDate(dt.date):
+        @classmethod
+        def today(cls) -> "FixedDate":
+            return cls(2026, 9, 20)
+
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": "june",
+                "resolutionDate": "2026-07-02",
+                "unit": "thousands",
+                "pointEstimate": 7700,
+            }
+        ],
+        "resolutionLinks": [
+            {"status": "pending", "targetFactRef": ref, "forecastSlug": "june"}
+        ],
+    }
+
+    def fake_urlopen(request, timeout: int = 120):
+        url = request.full_url
+        assert url == identity_url(CAPTURES["2026-07"])
+        return _Response(fixture("2026-07").encode(), url)
+
+    monkeypatch.setattr(resolve_pending.dt, "date", FixedDate)
+    monkeypatch.setattr(resolve_pending, "load_thesis_log", lambda _url: log)
+    monkeypatch.setattr(
+        resolve_pending, "ledger_state", lambda *_args: ("", "blob", "b" * 40)
     )
+    monkeypatch.setattr(resolve_pending, "registration_contracts", lambda: {})
+    monkeypatch.setattr(resolve_pending.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+    assert resolve_pending.main() == 0
+    output = capsys.readouterr().out
     assert "A-19 SNAPSHOT PERIOD MISMATCH (refusing)" in output
-    assert "the capture prints 2026-07, not 2026-08" in output
+    assert "the capture prints 2026-07, not 2026-06" in output
     assert "nothing new to record" in output
 
 
