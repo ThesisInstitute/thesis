@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import pathlib
@@ -153,18 +154,16 @@ def _http_fetch_blocking(url: str, timeout: float) -> Response:
     """One GET. ``timeout`` bounds each socket operation, not the request."""
 
     request = urllib.request.Request(url, headers={"User-Agent": WITNESS_USER_AGENT})
-    # A save response is the archived page itself. Nothing in it is read, so
-    # its body is left on the wire; only the status, URL and headers matter.
-    wanted = (
-        0 if urllib.parse.urlsplit(url).path.startswith("/save/") else MAX_BODY_BYTES
-    )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return Response(
                 status=int(response.status),
                 final_url=str(response.geturl()),
                 headers={k.lower(): v for k, v in response.headers.items()},
-                body=response.read(wanted) if wanted else b"",
+                # A save response is the archived page. Nothing in it is used,
+                # but it is read like any client would read it, and not cut
+                # off: what closing early does to a capture is not known.
+                body=response.read(MAX_BODY_BYTES),
             )
     except urllib.error.HTTPError as exc:
         try:
@@ -204,11 +203,19 @@ def http_fetch(url: str, timeout: float) -> Response:
         kind, value = box.get(timeout=timeout)
     except queue.Empty:
         raise FetchError(
-            f"no complete response within {timeout:.0f}s; the request was abandoned"
+            f"no complete response within {timeout:.3g}s; the request was abandoned"
         ) from None
     if kind == "error":
         raise value
     return value
+
+
+def _utc(moment: dt.datetime) -> dt.datetime:
+    """``moment`` in UTC. A naive value is taken as UTC, never as local time."""
+
+    if moment.tzinfo is None:
+        return moment.replace(tzinfo=dt.timezone.utc)
+    return moment.astimezone(dt.timezone.utc)
 
 
 def _collapse(failures: Sequence[str]) -> list[str]:
@@ -246,7 +253,7 @@ class Transport:
         self.started = self.clock()
 
     def today(self) -> dt.date:
-        return self.now().astimezone(dt.timezone.utc).date()
+        return _utc(self.now()).date()
 
     def begin_phase(self, hold_back: float) -> None:
         self.hold_back = hold_back
@@ -1015,7 +1022,7 @@ def window_refusal(plan: UrlPlan, run_day: dt.date, now: dt.datetime) -> str | N
     the next day.
     """
 
-    now = now.astimezone(dt.timezone.utc)
+    now = _utc(now)
     days = {run_day, now.date(), (now + MIDNIGHT_MARGIN).date()}
     for target in plan.targets:
         if all(target.window_state(day) == "open" for day in days):
@@ -1091,6 +1098,7 @@ def witness_url(
             if held:
                 entry["save"] = {
                     "requested": False,
+                    "alreadyCaptured": capture_iso(held[-1]["timestamp"]),
                     "why": (
                         "the index already lists a capture of the page at "
                         f"{capture_iso(held[-1]['timestamp'])}, after the "
@@ -1268,6 +1276,19 @@ def _verdict(entry: Mapping[str, Any], today: dt.date) -> dict[str, Any]:
             "code": "SAVE_FAILED",
             "text": f"{phrase}; the index lists no capture today",
         }
+    if save.get("alreadyCaptured"):
+        # The second pass's healthy path, when the confirming read disagrees
+        # with the read that justified the skip (the index is not always
+        # consistent from one request to the next). Not a failure to ask.
+        return {
+            "code": "ALREADY_CAPTURED",
+            "capturedAt": save["alreadyCaptured"],
+            "text": (
+                "this pass's first index read listed a capture of the page at "
+                f"{save['alreadyCaptured']}, so no save was requested; the "
+                "confirming read did not list it"
+            ),
+        }
     if save.get("why") != INDEX_READ_ONLY:
         # A capture run that could not ask: rate-limit breaker, time budget,
         # or the window guard. Distinct from a request that was made and failed.
@@ -1363,11 +1384,25 @@ def custody_gaps(
 
     gaps: dict[str, list[dict[str, Any]]] = {
         "closingWithoutCapture": [],
+        "closingIndexUnread": [],
         "closingAwaitingIndex": [],
         "closedWithoutCapture": [],
     }
     for entry in report.get("openWindows") or []:
         if not (entry.get("index") or {}).get("ok"):
+            # Not a finding of absence, and not nothing either: on a window's
+            # last two days, nobody knows whether custody exists, and tomorrow
+            # may be too late to make it. That needs a person today.
+            for row in entry.get("registrations") or []:
+                end = dt.date.fromisoformat(row["expectedReleaseWindow"]["end"])
+                if (end - today).days <= 1:
+                    gaps["closingIndexUnread"].append(
+                        {
+                            "sourceUrl": entry["sourceUrl"],
+                            "indexFailure": (entry.get("index") or {}).get("failure"),
+                            **row,
+                        }
+                    )
             continue
         verdict = entry.get("verdict") or {}
         named = (entry.get("save") or {}).get("reportedCapture")
@@ -1393,6 +1428,79 @@ def custody_gaps(
                     {"sourceUrl": entry["sourceUrl"], **row}
                 )
     return gaps
+
+
+def _marker(*parts: str) -> str:
+    """A short token an issue search can find again: one alert, one marker."""
+
+    digest = hashlib.sha256("\x1f".join(parts).encode()).hexdigest()[:16]
+    return f"witness-alert-{digest}"
+
+
+def alerts(
+    gaps: Mapping[str, Sequence[Mapping[str, Any]]], today: dt.date
+) -> list[dict[str, str]]:
+    """What a person should hear about, each with a marker for de-duplication.
+
+    A closing window can still be acted on, so its marker carries the date
+    and it is raised again each day. A window that closed with nothing cannot
+    be repaired; it is raised once, whenever a run first manages to read the
+    index for it, and its marker never changes.
+    """
+
+    out: list[dict[str, str]] = []
+    for row in gaps.get("closingWithoutCapture") or []:
+        end = row["expectedReleaseWindow"]["end"]
+        other = row.get("redirectTargetCapture")
+        out.append(
+            {
+                "kind": "closingWithoutCapture",
+                "marker": _marker(
+                    "closing", row["dataPointId"], row["sourceUrl"], today.isoformat()
+                ),
+                "text": (
+                    f"`{row['dataPointId']}`: window ends {end} and the index "
+                    f"lists no capture of {row['sourceUrl']} inside it"
+                    + (f" (a capture of another URL exists: {other})" if other else "")
+                ),
+            }
+        )
+    for row in gaps.get("closingIndexUnread") or []:
+        end = row["expectedReleaseWindow"]["end"]
+        out.append(
+            {
+                "kind": "closingIndexUnread",
+                "marker": _marker(
+                    "unread", row["dataPointId"], row["sourceUrl"], today.isoformat()
+                ),
+                "text": (
+                    f"`{row['dataPointId']}`: window ends {end} and the index "
+                    f"for {row['sourceUrl']} could not be read, so whether any "
+                    "capture exists is unknown"
+                ),
+            }
+        )
+    for row in gaps.get("closedWithoutCapture") or []:
+        window = row["expectedReleaseWindow"]
+        out.append(
+            {
+                "kind": "closedWithoutCapture",
+                "marker": _marker(
+                    "closed",
+                    row["dataPointId"],
+                    row["sourceUrl"],
+                    window["start"],
+                    window["end"],
+                ),
+                "text": (
+                    f"`{row['dataPointId']}`: window {window['start']}.."
+                    f"{window['end']} closed and the index lists no capture of "
+                    f"{row['sourceUrl']} "
+                    "inside it. Nothing can repair this; it is a fact for the ruling"
+                ),
+            }
+        )
+    return out
 
 
 def run(
@@ -1503,12 +1611,14 @@ def run(
             index_pause=options.index_pause,
         )
         report["openWindows"].append(entry)
-    for plan in selection.closed_plans:
-        transport.pause(options.index_pause)
+    for position, plan in enumerate(selection.closed_plans):
+        if position or entries:
+            transport.pause(options.index_pause)
         report["closedWindows"].append(
             closed_window_report(plan, transport, index_timeout=options.index_timeout)
         )
     report["custodyGaps"] = custody_gaps(report, today)
+    report["alerts"] = alerts(report["custodyGaps"], today)
     return report
 
 
@@ -1583,13 +1693,8 @@ def render_text(report: Mapping[str, Any]) -> str:
                     else "WINDOW CLOSED WITHOUT A CAPTURE"
                 )
             )
-    gaps = report.get("custodyGaps") or {}
-    for row in gaps.get("closingWithoutCapture") or []:
-        lines.append(
-            f"  CUSTODY GAP: {row['dataPointId']} closes "
-            f"{row['expectedReleaseWindow']['end']} with no capture of the page at "
-            f"{row['sourceUrl']}"
-        )
+    for alert in report.get("alerts") or []:
+        lines.append(f"  ALERT ({alert['kind']}): {alert['text']}")
     return "\n".join(lines) + "\n"
 
 
@@ -1787,7 +1892,7 @@ def main(
     _refuse_records_path(args.summary, ROOT)
 
     utc_now = now or (lambda: dt.datetime.now(dt.timezone.utc))
-    today = args.date or utc_now().astimezone(dt.timezone.utc).date()
+    today = args.date or _utc(utc_now()).date()
     notes: list[str] = []
     resolver, resolver_failure = _load_resolver()
     if resolver_failure:

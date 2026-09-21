@@ -79,16 +79,25 @@ def test_the_report_leaves_the_checkout_and_inputs_are_not_interpolated() -> Non
     )
 
 
-def test_a_window_closing_without_a_capture_reddens_the_run() -> None:
+def test_a_new_custody_alert_reddens_the_run_and_lands_in_an_issue() -> None:
     steps = _workflow()["jobs"]["witness"]["steps"]
     names = [s.get("name") for s in steps]
-    flag = names.index("Flag a window closing without a capture")
+    flag = names.index("Flag custody alerts nobody has been told about")
     alert = names.index("Alert on failure")
     keep = names.index("Keep the run's report")
     assert keep < flag < alert
-    assert ".custodyGaps.closingWithoutCapture" in steps[flag]["run"]
-    assert "exit 1" in steps[flag]["run"]
+    script = steps[flag]["run"]
+    # Every alert kind travels through one list, so a new kind cannot be
+    # forgotten here: the unread-index case once left the run green.
+    assert "(.alerts // [])[] | [.marker, .text] | @tsv" in script
+    assert "custodyGaps" not in script
+    assert "exit 1" in script
     assert "if" not in steps[flag]
+    assert 'gh issue list --state all --search "\\"$marker\\""' in script
+    assert "|| echo 0" in script  # a failed search raises the alert
+    assert "${{" not in script
     assert steps[alert]["if"] == "failure()"
     assert steps[keep]["if"].startswith("always()")
     assert "gh issue create" in steps[alert]["run"]
+    assert "gh issue comment" in steps[alert]["run"]
+    assert "new-alerts.md" in steps[alert]["run"]

@@ -1159,17 +1159,21 @@ def test_an_unread_index_never_prints_a_count_or_a_missing_capture() -> None:
     assert "INDEX_UNREAD" in text and "INDEX UNREAD" in text
     assert "WITHOUT A CAPTURE" not in text
     assert "capture(s) in window" not in text
-    assert "CUSTODY GAP" not in text
+    assert "closingWithoutCapture" not in text
     assert "| index unread |" in markdown
     for entry in report["openWindows"] + report["closedWindows"]:
         assert entry["index"]["ok"] is False
         for row in entry["registrations"]:
             assert "pageCapturesInWindow" not in row
-    assert report["custodyGaps"] == {
-        "closingWithoutCapture": [],
-        "closingAwaitingIndex": [],
-        "closedWithoutCapture": [],
-    }
+    gaps = report["custodyGaps"]
+    assert gaps["closingWithoutCapture"] == []
+    assert gaps["closingAwaitingIndex"] == []
+    assert gaps["closedWithoutCapture"] == []
+    # Round-two review: an unread index on a window's last two days used to
+    # leave the run green. It is not absence, and it is not nothing.
+    assert [g["dataPointId"] for g in gaps["closingIndexUnread"]] == ["open"]
+    assert [a["kind"] for a in report["alerts"]] == ["closingIndexUnread"]
+    assert "could not be read, so whether any capture exists is unknown" in text
 
 
 def test_a_rate_limited_endpoint_is_left_alone_for_the_rest_of_the_run() -> None:
@@ -1409,9 +1413,15 @@ def test_the_records_guard_judges_the_directory_not_its_spelling(
     ):
         with pytest.raises(SystemExit):
             witness._refuse_records_path(bad, repo)
-    if (repo / "RECORDS").exists():  # a case-insensitive filesystem
+    # Another spelling of the same directory. A case-insensitive filesystem
+    # supplies RECORDS/ by itself; elsewhere (CI runs on Linux) a second name
+    # is made here, so the identity check is exercised on every host.
+    alias = repo / "RECORDS"
+    if not alias.exists():
+        alias.symlink_to(repo / "records", target_is_directory=True)
+    for spelled in (alias / "x.json", alias / "new" / "deep" / "x.json"):
         with pytest.raises(SystemExit):
-            witness._refuse_records_path(repo / "RECORDS" / "x.json", repo)
+            witness._refuse_records_path(spelled, repo)
     witness._refuse_records_path(repo / "reports" / "x.json", repo)
     witness._refuse_records_path(None, repo)
 
@@ -1493,3 +1503,97 @@ def test_an_index_read_is_retried_whatever_the_failure() -> None:
     index = witness.read_index(carrier, A19, TODAY, TODAY, 10.0)
     assert index["ok"] is False
     assert len(calls) == witness.INDEX_ATTEMPTS
+
+
+# ---------------------------------------------------------------------------
+# Findings of the second review round (2026-09-21)
+
+
+def test_the_bls_note_quotes_captures_the_committed_listing_holds() -> None:
+    fixture = (
+        ROOT / "tests" / "fixtures" / "wayback" / "cdx_bls_cpseea19_2026-07_09.json"
+    )
+    rows, others = witness.parse_cdx(
+        fixture.read_bytes(), dt.date(2026, 7, 10), dt.date(2026, 9, 4), A19
+    )
+    assert others == []
+    assert [r["kind"] for r in rows] == ["page"] * 3
+    note = next(n for n in witness.known_limits(A19) if "HTTP 403" in n)
+    for row in rows:
+        assert row["timestamp"] in note
+
+
+def test_a_closing_window_is_raised_each_day_and_a_closed_one_only_once() -> None:
+    closing = {
+        "dataPointId": "treasury.mts",
+        "sourceUrl": MTS,
+        "expectedReleaseWindow": {"start": "2026-09-13", "end": "2026-09-21"},
+    }
+    gaps = {
+        "closingWithoutCapture": [closing],
+        "closingIndexUnread": [closing],
+        "closedWithoutCapture": [closing],
+    }
+    first = {a["kind"]: a["marker"] for a in witness.alerts(gaps, TODAY)}
+    second = {
+        a["kind"]: a["marker"]
+        for a in witness.alerts(gaps, TODAY + dt.timedelta(days=1))
+    }
+    assert len(set(first.values())) == 3
+    assert first["closingWithoutCapture"] != second["closingWithoutCapture"]
+    assert first["closingIndexUnread"] != second["closingIndexUnread"]
+    assert first["closedWithoutCapture"] == second["closedWithoutCapture"]
+    assert all(m.startswith("witness-alert-") and m.isascii() for m in first.values())
+
+
+def test_a_window_closed_with_nothing_becomes_an_alert_when_the_index_is_read() -> None:
+    closed = make_target("bls.realer", A19, "2026-09-08", "2026-09-16")
+    report = run([closed], FakeArchive())
+    assert [a["kind"] for a in report["alerts"]] == ["closedWithoutCapture"]
+    assert "Nothing can repair this" in report["alerts"][0]["text"]
+    assert "ALERT (closedWithoutCapture)" in witness.render_text(report)
+    # An unread index is not that finding, and says nothing about a closed window.
+    unread = run([closed], FakeArchive(index=lambda url, query: b"<html>429</html>"))
+    assert unread["alerts"] == []
+
+
+def test_a_second_pass_skip_the_confirming_read_contradicts_has_its_own_verdict() -> (
+    None
+):
+    target = make_target("bls.a19", A19, "2026-09-16", "2026-09-24")
+    answers = iter([cdx_body(("20260920200000", "200")), b"[]"])
+    archive = FakeArchive(index=lambda url, query: next(answers))
+    entry = run([target], archive, skip_since=dt.time(19, 30))["openWindows"][0]
+    assert archive.saves == []
+    assert entry["verdict"]["code"] == "ALREADY_CAPTURED"
+    assert "2026-09-20T20:00:00Z" in entry["verdict"]["text"]
+    assert "no capture today" not in entry["verdict"]["text"]
+
+
+def test_a_clock_without_a_zone_is_read_as_utc_not_as_local_time() -> None:
+    target = make_target("treasury.mts", MTS, "2026-09-13", "2026-09-20")
+    plan = witness._group([target])[0]
+    naive = dt.datetime(2026, 9, 20, 23, 0)
+    assert witness.window_refusal(plan, TODAY, naive) is None
+    assert witness.window_refusal(plan, TODAY, naive.replace(hour=23, minute=55))
+    carrier = transport(no_network, now=lambda: naive)
+    assert carrier.today() == TODAY
+
+
+def test_the_records_guard_holds_where_resolving_a_path_does_not_fold_its_spelling(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # On a case-insensitive filesystem ``resolve()`` keeps the spelling it was
+    # given, so RECORDS/x.json does not look like a child of records/. CI runs
+    # on Linux, where that cannot happen by itself; this reproduces it with a
+    # second name for the directory and a ``resolve`` that folds nothing, so
+    # the identity check is what has to catch it.
+    repo = tmp_path / "repo"
+    (repo / "records").mkdir(parents=True)
+    alias = repo / "RECORDS"
+    if not alias.exists():
+        alias.symlink_to(repo / "records", target_is_directory=True)
+    monkeypatch.setattr(pathlib.Path, "resolve", lambda self, strict=False: self)
+    with pytest.raises(SystemExit, match="writes nothing under records"):
+        witness._refuse_records_path(alias / "deep" / "x.json", repo)
+    witness._refuse_records_path(repo / "reports" / "x.json", repo)

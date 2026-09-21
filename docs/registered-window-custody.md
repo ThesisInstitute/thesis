@@ -38,14 +38,16 @@ Twice a day (19:40 and 22:10 UTC) the workflow:
      UTC calendar days, both inclusive. The Archive's timestamps are UTC too.
 3. Asks the Internet Archive to capture each distinct `sourceUrl` once:
    `GET https://web.archive.org/save/<url>`, with the User-Agent
-   `thesis-witness/1.0 (+https://app.thesisinstitute.org)`.
+   `Mozilla/5.0 (compatible; thesis-witness/1.0; +https://app.thesisinstitute.org)`.
 4. Reads the Archive's CDX index for the same URL, from the earliest open
    window's start to today, and reports each capture it lists: timestamp,
    archived URL, HTTP status, content digest, length. A row counts only if
    its archived URL is the registered one (see "What counts as a capture").
 5. Reads the index once more, with no capture request, for windows that
-   closed in the last seven days. A window that ended without a capture is
-   then known the same week, not when someone looks months later.
+   closed in the last seven days. A window the index shows closed with no
+   capture becomes an alert (see "Alerts"). If the index cannot be read on
+   any of those seven days, the window leaves the lookback unexamined, and
+   only `--audit` will read it.
 
 The second pass exists because the Archive fails in bursts that outlast one
 run's retries. On 2026-09-20 it answered one client with HTTP 429 and no
@@ -184,7 +186,8 @@ skip a URL.
   index lists HTTP 200 captures of
   `https://www.bls.gov/web/empsit/cpseea19.htm` at 20260710110509,
   20260819191418 and 20260904170006 (read through this script on
-  2026-09-20).
+  2026-09-20; the rows are
+  `tests/fixtures/wayback/cdx_bls_cpseea19_2026-07_09.json`).
 - **API URLs.** Several registrations bind an API query (Statistics Canada
   WDS, the ABS Data API, Eurostat SDMX). A capture of one holds a single
   response to that exact query string at one instant. It is a payload, not
@@ -202,8 +205,7 @@ skip a URL.
   that one was. This is why a save that got an HTTP answer is not asked
   again in the same pass, and why every verdict rests on the index. Whether
   a GitHub runner is answered the same way is not known until the workflow
-  has run. The Archive also offers an authenticated capture API; it needs
-  an account key as a repository secret and was not evaluated here.
+  has run.
 - **Index lag.** The ABS capture stamped 2026-09-20 23:32:07 was not in the
   index when that run read it about four minutes later; it was there the
   next day. The verdict `SAVE_NOT_YET_INDEXED` says what the save request
@@ -231,18 +233,27 @@ hold. Everything else stays in the JSON report, uncounted.
 - Its archived URL is the registered `sourceUrl`: same scheme, path and
   query string exactly; same host, compared without case and without a
   default port; an empty path equals `/`. Rows for any other URL are listed
-  under `rowsForOtherUrls`. A listing that lacks the columns that identify
+  under `rowsForOtherUrls`. They do occur: on 2026-09-21 the index answered
+  a query for `https://www.bls.gov/news.release/cpi.nr0.htm` with 48 rows
+  for that URL and 3 for its `http://` spelling. If a publisher ever serves
+  a page over `http://` only, its captures will sit in that list, uncounted,
+  until someone decides the two spellings are one source. A listing that lacks the columns that identify
   a capture (timestamp, archived URL, status, digest) is treated as an
   unread index, not as custody and not as absence.
 - Its timestamp, in UTC, falls inside that target's own window.
 - Its status is `200`, or it is a `warc/revisit` row whose digest equals
   the digest of an HTTP 200 row of the same URL in the same listing. The
-  Archive's CDX documentation describes `warc/revisit` as a duplicate that
-  resolves to an original capture, and the index does list such rows with
-  status `-`: the Treasury page's window holds two
+  rule rests on the digest alone: the index says the URL's payload at that
+  time had digest D, and it lists an HTTP 200 capture of the same URL with
+  digest D. The index does list such rows with status `-`: the Treasury
+  page's window holds two
   (`tests/fixtures/wayback/cdx_fiscaldata_mts_2026-09.json`). One has the
   digest of the page's HTTP 200 captures and counts. The other matches no
-  page in the listing and does not. This rule can understate what the
+  page in the listing and does not. The CDX server's
+  [README](https://github.com/internetarchive/wayback/blob/master/wayback-cdx-server/README.md)
+  (read 2026-09-21) says of these rows only that "the `warc/revisit`
+  mimetype in duplicates > 0 will automatically be resolved to the mimetype
+  of the original, if found"; nothing here depends on more than that. This rule can understate what the
   Archive holds. A 403 or 3xx row never counts, and is reported as
   `CAPTURED_NOT_AS_PAGE` when it is all the index has for the day.
 
@@ -258,16 +269,35 @@ Per URL, one verdict about the run's day:
 | `SAVE_NOT_YET_INDEXED` | The save request returned; the index does not list a capture yet. |
 | `SAVE_FAILED` | Every attempt failed (the text carries the status, such as HTTP 520, 500 or 429) and the index lists nothing today. |
 | `NOT_ASKED` | A capture run did not ask: the rate-limit breaker was open, the time budget was spent, or no registered window contained the moment. The text says which. |
+| `ALREADY_CAPTURED` | Second pass only. Its first index read listed a capture since 19:30, so it asked for nothing, and its confirming read then did not list that capture. Two reads of the index can disagree. |
 | `INDEX_UNREAD` | The index could not be read. This is a failure to look, not a finding of absence. The report then carries no capture count for that URL, and it never counts as a custody gap. |
 | `NO_CAPTURE_TODAY` | An audit, which requests nothing, found nothing dated today. |
 
 Per target, the report gives the count of captures of the page inside its
 own window so far (`pageCapturesInWindow`, split into `http200InWindow` and
 `revisitsInWindow`), the first and last of them, and the number of distinct
-digests. `custodyGaps` lists windows on their last two days with no capture
-(`closingWithoutCapture`, which turns the run red), the same but awaiting
-the index (`closingAwaitingIndex`), and windows that closed in the lookback
-with none (`closedWithoutCapture`).
+digests.
+
+### Alerts
+
+`custodyGaps` sorts what the index read found, and `alerts` lists what a
+person should hear about. The workflow turns red and writes an issue for
+each alert nobody has been told about yet.
+
+| Bucket | When | Alert |
+|---|---|---|
+| `closingWithoutCapture` | The window ends today or tomorrow and the index, which was read, lists no capture of the page inside it. | Each day. Someone can still act. |
+| `closingIndexUnread` | The window ends today or tomorrow and the index could not be read. Whether custody exists is unknown, and tomorrow may be too late to make it. | Each day. |
+| `closingAwaitingIndex` | As the first, but the save response named a capture of the registered URL dated inside this window, so index lag is the likelier cause. | None. |
+| `closedWithoutCapture` | The window closed within the lookback and the index, which was read, lists no capture inside it. | Once. Nothing can repair it; it is a fact for the ruling. |
+
+Each alert carries a marker such as `witness-alert-0123456789abcdef`. The
+workflow searches the repository's issues and comments for the marker and
+raises only alerts it does not find, then writes them, markers included,
+into the day's issue. A closing window's marker includes the date, so it is
+raised again the next day. A closed window's marker does not, so it is
+raised once however many runs see it. If the search fails, the alert is
+raised: better twice than never.
 
 The script exits 0 whatever the per-URL outcomes are, because they are
 findings. It exits 1 only when it could not read the registrations at all.
