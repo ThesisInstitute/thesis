@@ -13322,6 +13322,19 @@ def _plan_bls_api(
     )
     if refusal:
         return refusal
+    # main() refuses a resolve-by-bound target the day after its registered
+    # window closes. This executor's window is one day and its capture is
+    # bounded by the first-print gate instead: JOLTS publishes at 10:00 ET,
+    # after the daily 13:40 UTC run, so a bounded contract could never resolve.
+    basis = registration["contract"].get(
+        "resolutionDateBasis", DEFAULT_RESOLUTION_DATE_BASIS
+    )
+    if basis != DEFAULT_RESOLUTION_DATE_BASIS:
+        return (
+            f"the BLS API executor resolves only the {DEFAULT_RESOLUTION_DATE_BASIS!r} "
+            f"basis; a {basis!r} contract closes with its one-day window, before "
+            "the API can be relied on to serve the print"
+        )
     # The API serves current estimates only, so the capture has to start on
     # the day BLS's own schedule names; a cadence-inferred span could open
     # before the print exists or after the next release has replaced it.

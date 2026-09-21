@@ -391,6 +391,25 @@ def test_binding_without_hosts_is_not_the_reviewed_template() -> None:
     )
 
 
+def test_gate_refuses_a_bounded_basis_the_executor_could_not_run() -> None:
+    # main() refuses a resolve-by-bound target once its registered window
+    # closes, and this family's window is one day. JOLTS publishes after the
+    # daily run, so such a contract could never resolve.
+    target = _target("bls.jolts.quits_rate")
+    target.update(
+        resolutionDateBasis="resolve-by-bound",
+        resolutionDate="2030-02-08",
+        expectedReleaseWindow={"start": "2030-02-08", "end": "2030-02-08"},
+    )
+    bounded = register_targets.build_contract(target, dt.date(2030, 1, 2))
+    assert bounded["resolutionDateBasis"] == "resolve-by-bound"
+    assert "resolves only the 'release-calendar' basis" in (_refusal(bounded) or "")
+    # An explicit default basis is the same contract semantics and is admitted.
+    explicit = _contract("bls.jolts.quits_rate")
+    explicit["resolutionDateBasis"] = "release-calendar"
+    assert _refusal(explicit) is None
+
+
 def test_gate_refuses_an_id_that_routes_to_another_month() -> None:
     contract = _contract("bls.jolts.quits_rate")
     contract["period"] = "2030-02"
