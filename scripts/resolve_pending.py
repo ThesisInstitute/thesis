@@ -7511,29 +7511,52 @@ class _A19TableParser(HTMLParser):
         self._tag: str | None = None
         self._attrs: dict[str, str] = {}
         self._text: list[str] = []
+        self._depth = 0
+        self._cell_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag in ("th", "td"):
-            # A cell inside a cell is not this table's markup; the outer
-            # cell's text would otherwise be lost without an error.
-            self.nested = self.nested or self._tag is not None
+        if tag == "table":
+            self._depth += 1
+        elif tag in ("th", "td"):
+            if self._tag is not None:
+                if self._depth > self._cell_depth:
+                    # A cell inside a cell (a table nested in a cell) is not
+                    # this table's markup; the outer cell's text would
+                    # otherwise be lost without an error.
+                    self.nested = True
+                else:
+                    # A closing tag is optional in HTML: a new cell in the
+                    # same table closes the open one.
+                    self._close_cell()
             self._tag = tag
             self._attrs = {name: value or "" for name, value in attrs}
             self._text = []
+            self._cell_depth = self._depth
+        elif tag == "tr" and self._tag is not None and self._depth == self._cell_depth:
+            self._close_cell()
 
     def handle_data(self, data: str) -> None:
         if self._tag is not None:
             self._text.append(data)
 
     def handle_endtag(self, tag: str) -> None:
-        if tag != self._tag:
-            return
+        if tag == "table":
+            if self._tag is not None and self._depth == self._cell_depth:
+                self._close_cell()
+            self._depth = max(0, self._depth - 1)
+        elif tag == "tr":
+            if self._tag is not None and self._depth == self._cell_depth:
+                self._close_cell()
+        elif tag == self._tag and self._depth == self._cell_depth:
+            self._close_cell()
+
+    def _close_cell(self) -> None:
         text = " ".join(" ".join(self._text).split())
-        if tag == "th" and self._attrs.get("id"):
+        if self._tag == "th" and self._attrs.get("id"):
             if self._attrs["id"] in self.header_text:
                 self.duplicate_ids.add(self._attrs["id"])
             self.header_text[self._attrs["id"]] = text
-        elif tag == "td" and self._attrs.get("headers"):
+        elif self._tag == "td" and self._attrs.get("headers"):
             self.cells.append((tuple(self._attrs["headers"].split()), text))
         self._tag = None
 
@@ -7666,22 +7689,27 @@ class A19Index:
     """What the Archive's index lists for one registered window."""
 
     captures: list[str]
-    """HTTP 200 captures of exactly the bound URL, oldest first."""
+    """Readable captures of exactly the bound URL, oldest first: stored as
+    HTTP 200, or as a revisit (status ``-``: bytes identical to an earlier
+    capture), which the Archive replays like any other."""
     listed: int
-    """Every row dated inside the window, usable or not."""
+    """Every row dated inside the window, readable or not."""
     other_status: int
-    """Rows for the bound URL whose stored status is not 200."""
+    """Rows for the bound URL whose stored status is neither 200 nor ``-``."""
     other_form: int
-    """Rows stored under another form of the URL (scheme, host)."""
+    """Rows stored under another form of the URL (scheme, host); not read."""
+    revisits: int
+    """How many of ``captures`` are revisit rows."""
 
     def describe(self, window: Any) -> str:
         text = (
             f"{self.listed} capture(s) dated inside the registered window "
-            f"{window!r}, {len(self.captures)} of them HTTP 200 for this exact URL"
+            f"{window!r}, {len(self.captures)} of them readable for this exact URL"
         )
         detail = [
             f"{count} {label}"
             for count, label in (
+                (self.revisits, "stored as revisits of an earlier capture"),
                 (self.other_status, "with another status"),
                 (self.other_form, "under another form of the URL"),
             )
@@ -7768,11 +7796,11 @@ def a19_window_captures(
             or not all(isinstance(cell, str) for cell in row)
             or not re.fullmatch(r"\d{14}", row[0])
             or not row[1]
-            or not re.fullmatch(r"\d{3}", row[2])
+            or not re.fullmatch(r"\d{3}|-", row[2])
         ):
             raise ValueError(f"malformed Archive index row {row!r}")
         rows.add((row[0], row[1], row[2]))
-    result = A19Index(captures=[], listed=0, other_status=0, other_form=0)
+    result = A19Index(captures=[], listed=0, other_status=0, other_form=0, revisits=0)
     for stamp, original, status in sorted(rows):
         url = f"https://web.archive.org/web/{stamp}/{A19_SOURCE_URL}"
         capture = a19_capture(url)
@@ -7783,10 +7811,11 @@ def a19_window_captures(
         result.listed += 1
         if original != A19_SOURCE_URL:
             result.other_form += 1
-        elif status != "200":
-            result.other_status += 1
-        else:
+        elif status == "200" or status == "-":
             result.captures.append(url)
+            result.revisits += status == "-"
+        else:
+            result.other_status += 1
     return result
 
 
@@ -7871,13 +7900,28 @@ def a19_registered_capture(
                 f"{window!r} do not print {period}"
             ),
         )
+    if state == "missed" and index.other_form:
+        # Rows under another form of the URL are captures of this page the
+        # Archive folded under one key; they were not read, so the month may
+        # be there. Unknown is not "missed".
+        return (
+            None,
+            None,
+            (
+                "NO USABLE CAPTURE IN WINDOW (deferring): the Archive's index "
+                f"lists {index.describe(window)}; the {index.other_form} stored "
+                "under another form of the URL were not read, so whether the "
+                f"window holds {period} is unknown"
+            ),
+        )
     if state == "missed":
         return (
             None,
             None,
             (
                 "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists "
-                f"{index.describe(window)}, and none of those prints {period}"
+                f"{index.describe(window)}; all {len(captures)} readable "
+                f"capture(s) were read and none prints {period}"
             ),
         )
     if not request_capture:

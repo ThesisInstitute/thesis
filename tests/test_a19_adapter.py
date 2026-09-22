@@ -165,9 +165,30 @@ def test_the_full_page_the_resolver_archived_in_july_reads_the_same() -> None:
             "*/responses/cpseea19-production-*.html.gz"
         )
     )
-    html = gzip.decompress(archived.read_bytes()).decode(errors="replace")
-    assert len(html.encode()) > 100_000
+    raw = gzip.decompress(archived.read_bytes())
+    assert len(raw) == 125_026  # the figure docs/anchor-verifications.md cites
+    html = raw.decode(errors="replace")
     assert resolve_pending.a19_table(html) == ("2026-06", ANCHORS["2026-06"])
+
+
+def test_implicitly_closed_cells_parse_and_only_a_nested_cell_refuses() -> None:
+    html = fixture("2026-08")
+    expected = ("2026-08", ANCHORS["2026-08"])
+    # HTML lets </td> and </th> be omitted: the next cell or row closes them.
+    assert resolve_pending.a19_table(html.replace("</td>", "")) == expected
+    assert resolve_pending.a19_table(html.replace("</th>", "")) == expected
+    # A sloppy table elsewhere on the page is not this table's business.
+    assert (
+        resolve_pending.a19_table("<table><tr><td>a<tr><td>b</table>" + html)
+        == expected
+    )
+    # A table nested in a cell with rows but no cells loses no text.
+    assert (
+        resolve_pending.a19_table(
+            html.replace(">7,716<", "><table><tr></tr></table>7,716<", 1)
+        )
+        == expected
+    )
 
 
 def test_a_value_is_found_by_its_headers_not_its_position() -> None:
@@ -213,9 +234,13 @@ def test_a_value_is_found_by_its_headers_not_its_position() -> None:
         lambda html: html.replace("Aug.<br/>", "Agosto<br/>"),
         # The Total current heading without its year.
         lambda html: html.replace("Aug.<br/>2026", "Aug.", 1),
-        # A cell inside a cell: the outer cell's text would be lost.
+        # A cell inside a cell: the old parser read the inner 999 as the
+        # production value and lost the outer cell without an error.
         lambda html: html.replace(
-            ">7,716<", "><table><tr><td>999</td></tr></table>7,716<", 1
+            ">7,716<",
+            '><table><tr><td headers="cps_eande_m19.r.6.1 cps_eande_m19.h.1.2 '
+            'cps_eande_m19.h.2.2 cps_eande_m19.h.3.3">999</td></tr></table>7,716<',
+            1,
         ),
         # Not a table at all.
         lambda html: "<th>Aug.<br/>2025</th><th>Aug.<br/>2026</th>",
@@ -477,14 +502,21 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         ("20260904170006", "200"),
         ("20260904170006", "200"),  # listed twice
         ("20260905000000", "403"),
+        ("20260907000000", "-"),  # a revisit: bytes identical to an earlier one
         ("20260911000000", "200"),  # after the window
     )
     index = resolve_pending.a19_window_captures(WINDOW, reader(index, {}, calls))
     assert index.captures == [
         replay_url("20260904170006"),
+        replay_url("20260907000000"),
         replay_url("20260910235959"),
     ]
-    assert (index.listed, index.other_status, index.other_form) == (3, 1, 0)
+    assert (index.listed, index.other_status, index.other_form, index.revisits) == (
+        4,
+        1,
+        0,
+        1,
+    )
     assert "from=20260902000000" in calls[0] and "to=20260910235959" in calls[0]
     assert "fl=timestamp,original,statuscode" in calls[0]
     assert "filter=" not in calls[0]
@@ -501,9 +533,49 @@ def test_a_capture_stored_under_another_form_of_the_url_is_counted_not_used() ->
     assert (index.listed, index.other_status, index.other_form) == (3, 0, 2)
     assert index.describe(WINDOW).endswith(
         "3 capture(s) dated inside the registered window "
-        f"{WINDOW!r}, 1 of them HTTP 200 for this exact URL "
+        f"{WINDOW!r}, 1 of them readable for this exact URL "
         "(2 under another form of the URL)"
     )
+
+
+def test_a_closed_window_with_unread_captures_under_another_form_defers() -> None:
+    calls: list[str] = []
+    index = cdx(
+        ("20260904170006", "200", "http://www.bls.gov/web/empsit/cpseea19.htm"),
+        ("20260905000000", "200"),
+    )
+    pages = {"20260905000000": fixture("2026-07")}
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("NO USABLE CAPTURE IN WINDOW (deferring)")
+    assert "1 stored under another form of the URL were not read" in verdict
+    assert "WINDOW MISSED" not in verdict
+    assert identity_url("20260904170006") not in calls
+
+
+def test_a_closed_window_whose_only_rows_are_403s_is_missed() -> None:
+    # A stored 403 holds no table; nothing readable, nothing unknown.
+    index = cdx(("20260904170006", "403"), ("20260905000000", "403"))
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, {}, [])
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("FIRST-PRINT WINDOW MISSED (refusing)")
+    assert "0 of them readable for this exact URL (2 with another status)" in verdict
+    assert "all 0 readable capture(s) were read" in verdict
+
+
+def test_a_revisit_row_is_read_like_any_capture() -> None:
+    calls: list[str] = []
+    index = cdx(("20260904170006", "-"))
+    pages = {"20260904170006": fixture("2026-08")}
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
+    )
+    assert (url, verdict) == (capture_url("2026-08"), "")
+    assert resolve_pending.a19_values_from_html(raw.decode()) == ANCHORS["2026-08"]
 
 
 def test_window_missed_reports_what_the_index_listed_but_could_not_use() -> None:
@@ -521,7 +593,8 @@ def test_window_missed_reports_what_the_index_listed_but_could_not_use() -> None
         "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 2 "
         "capture(s) dated inside the registered window"
     )
-    assert "1 of them HTTP 200 for this exact URL (1 with another status)" in verdict
+    assert "1 of them readable for this exact URL (1 with another status)" in verdict
+    assert "all 1 readable capture(s) were read and none prints 2026-08" in verdict
     assert identity_url("20260904170006") not in calls
 
 
@@ -660,7 +733,7 @@ def test_window_missed_means_the_whole_index_was_read_and_nothing_prints_it() ->
         "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 1 "
         "capture(s) dated inside the registered window"
     )
-    assert "1 of them HTTP 200 for this exact URL, and none of those prints" in verdict
+    assert "; all 1 readable capture(s) were read and none prints 2026-07" in verdict
     assert not any("/save/" in call for call in calls)
 
 

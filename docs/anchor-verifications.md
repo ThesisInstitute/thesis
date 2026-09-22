@@ -818,7 +818,9 @@ How a value is read: BLS marks the table up accessibly, so every data cell's
 headers. `a19_table` finds each value by what it is headed by (the occupation's
 row, "Total", "16 years and over", and the later of exactly two same-month
 headings one year apart), never by its position, and all six occupations must
-agree on the month. A page that cannot be identified that way yields nothing.
+agree on the month. A cell's closing tag may be omitted, as HTML allows; a
+table nested inside a cell makes the page unidentifiable. A page that cannot
+be identified that way yields nothing.
 It reads the three fixtures and the full 125,026-byte page the resolver
 archived on 2026-07-10 to the same values. The resolver asks the Archive for the
 capture's stored response (`/web/<timestamp>id_/<url>`), so the hash recorded
@@ -860,9 +862,13 @@ and nothing is recorded. The refusal is reserved for one finding: the window
 is closed, every usable capture in it was read, and each prints another
 month. The index is queried for every status and for the stored form of the
 URL, and the refusal reports what it listed: a capture the Archive stored as a
-403 (bls.gov's answer to non-browser clients) or under another form of the URL
-is counted and named, not used, because "no capture" and "no usable capture"
-are different findings. A capped scan, a failed or unidentified read, or an
+403 (bls.gov's answer to non-browser clients) is counted and named, not read,
+because "no capture" and "no usable capture" are different findings. A row the
+Archive stores as a revisit (status `-`: bytes identical to an earlier capture)
+is read like any capture. A row stored under another form of the URL (the
+index folds scheme and host under one key) is counted but not read, and since
+it might print the month, a closed window with such rows defers with `NO
+USABLE CAPTURE IN WINDOW` rather than refusing. A capped scan, a failed or unidentified read, or an
 index answer that is not exactly the requested table (an empty body, a
 malformed row, an impossible timestamp) reports itself instead. The 2026-07 pin is kept as custody evidence for
 the ruling and is never read for a registered cell, because it is dated
