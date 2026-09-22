@@ -109,8 +109,8 @@ is recorded as `unavailable` for that anchor. One available anchor is enough
 for the snapshot to count as witnessed, so a rotation does not stop the
 recorder. It does quietly halve the witnessing.
 
-That is the state as of 2026-09-19. `tsa-anchors-v2` lists only DigiCert's
-previous responder. Every witness marker from 2026-09-04 onward (for example
+`tsa-anchors-v2` lists only DigiCert's previous responder. Every marker
+witnessed under v2 from 2026-09-04 onward (for example
 `records/2026-09-18/digest-35372147258-1.witness.json`) has the DigiCert
 anchor `unavailable` with reason "RFC 3161 token signer is not pinned", naming
 the same certificate, SPKI and serial as the 2026 responder above. Markers up
@@ -118,9 +118,11 @@ to 2026-09-03 carry DigiCert tokens from the previous responder. The records
 therefore date the rotation to between those two days, independently of the
 resolver's failures.
 
-Restoring two-TSA witnessing means a new bundle. `docs/thesis-architecture.md`
-gives the order: approve the bundle in verifier code first, then introduce it
-with a snapshot witnessed under the bundle that is already active. Trust
-bundles live under `records/trust/`, which only the allowlisted workflows may
-write, so the second step is a workflow change, not a commit from a branch.
+Restoring two-TSA witnessing means a new bundle, and `tsa-anchors-v3` is that
+bundle for this rotation. `docs/tsa-trust-bundle-rotation.md` is the procedure:
+approve the bundle in verifier code, stage its bytes, and let the recorder
+workflow publish it and introduce it with a snapshot witnessed under the bundle
+that is already active. The recorder also keeps an issue open while any anchor
+is unavailable, so the next rotation is reported by the first recorder run
+after it happens.
 Pinning a responder in `ledger_release_chain.py` does not do any of this.
