@@ -2373,6 +2373,34 @@ def test_parse_codex_jsonl_exposes_the_last_assistant_message() -> None:
     assert parsed["lastAssistantText"] == "final"
 
 
+def test_parse_codex_jsonl_splits_on_newlines_only() -> None:
+    # Codex leaves U+0085 and friends unescaped inside JSON strings, and
+    # str.splitlines() breaks on them: the draft call-0009 completion event of
+    # roll-docket run 35526068252 became two non-JSON fragments, vanished from
+    # codex_events.jsonl, and the publisher refused the run.
+    completed = {
+        "type": "item.completed",
+        "item": {
+            "id": "item_9",
+            "type": "mcp_tool_call",
+            "server": "thesis_tool_evidence",
+            "tool": "fetch_source",
+            "status": "completed",
+            "result": {
+                "content": [{"type": "text", "text": "%PDF\u0085\u2028\u2029x"}]
+            },
+        },
+    }
+    raw = json.dumps(completed, ensure_ascii=False) + "\n"
+    assert len(raw.splitlines()) == 4
+
+    parsed = analyst_runner.parse_codex_jsonl(raw, "")
+
+    assert parsed["events"] == [completed]
+    assert parsed["nonJsonStderr"] == ""
+    assert parsed["eventsJsonl"] == json.dumps(completed) + "\n"
+
+
 def test_ticket_codex_stream_binding_refuses_o_file_only_success() -> None:
     result = {
         "backend": "codex",
@@ -2956,6 +2984,83 @@ def test_pin_comparison_contract_pins_resolver_but_not_units() -> None:
     pin_comparison_contract(unpinned, {**context, "comparisonTarget": False})
     pin_comparison_contract(unpinned, None)
     assert unpinned == {"slug": "model-slug", "resolutionRule": "model words"}
+
+
+def test_pin_comparison_contract_uses_published_resolution_date() -> None:
+    # A release-calendar registration binds no resolutionDate, so the trusted
+    # comparison context carries the published forecast's resolver date as
+    # publishedResolutionDate (the 2026-09-20 strategy runs were rejected
+    # when the selector copied it into resolutionDate instead).
+    from run_thesis_analyst import (
+        pin_comparison_contract,
+        target_context_validation_errors,
+    )
+
+    context = {
+        "comparisonTarget": True,
+        "catalogSlug": "unemployment-rate-september-2026",
+        "country": "US",
+        "publishedResolutionDate": "2026-10-02",
+        "expectedReleaseWindow": {"start": "2026-09-30", "end": "2026-10-08"},
+        "resolutionSource": "BLS",
+        "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+        "resolutionRule": "First print only.",
+        "sourceBinding": {
+            "adapter": "generic-url",
+            "sourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+            "allowedHosts": ["www.bls.gov"],
+        },
+    }
+    cell = {
+        "slug": "model-slug",
+        "country": "US",
+        "resolutionDate": "2026-10-03",
+        "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+        "resolutionRule": "Model words.",
+    }
+    assert any(
+        "published comparison resolver date" in error
+        for error in target_context_validation_errors(cell, context)
+    )
+    pin_comparison_contract(cell, context)
+    assert cell["resolutionDate"] == "2026-10-02"
+    assert not [
+        error
+        for error in target_context_validation_errors(cell, context)
+        if "resolutionDate" in error
+    ]
+
+    # A bounded registration still pins the registered bound, and the
+    # published date (equal by selection-time construction) does not
+    # contradict it.
+    bounded = {
+        **context,
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionDate": "2026-10-31",
+        "publishedResolutionDate": "2026-10-31",
+    }
+    cell = {"slug": "model-slug", "resolutionDate": "2026-10-15"}
+    pin_comparison_contract(cell, bounded)
+    assert cell["resolutionDate"] == "2026-10-31"
+
+
+def test_format_target_context_explains_comparison_contract() -> None:
+    block = analyst_runner.format_target_context(
+        {
+            "comparisonTarget": True,
+            "catalogSlug": "unemployment-rate-september-2026",
+            "publishedResolutionDate": "2026-10-02",
+            "expectedReleaseWindow": {"start": "2026-09-30", "end": "2026-10-08"},
+        }
+    )
+    assert '- publishedResolutionDate: "2026-10-02"' in block
+    assert "# Comparison target contract (machine checked)" in block
+    assert "pinned to that forecast's published resolver" in block
+
+    plain = analyst_runner.format_target_context(
+        {"catalogSlug": "x", "publishedResolutionDate": "2026-10-02"}
+    )
+    assert "Comparison target contract" not in plain
 
 
 def _find_negative_zeros(value, path="$"):

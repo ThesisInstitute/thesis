@@ -7,6 +7,7 @@ import stat
 import subprocess
 import sys
 from collections.abc import Mapping
+from types import SimpleNamespace
 
 import pytest
 
@@ -41,7 +42,9 @@ def target() -> dict:
             "sourceUrl": "https://agency.example/rate",
             "allowedHosts": ["agency.example"],
         },
-        "resolutionDate": "2030-02-15",
+        # A release-calendar registration binds no resolutionDate; the
+        # published forecast's resolver date rides separately.
+        "publishedResolutionDate": "2030-02-15",
         "resolutionSource": "Agency",
         "resolutionSourceUrl": "https://agency.example/rate",
         "resolutionRule": "Use the first official print only.",
@@ -400,7 +403,8 @@ def test_cell_resolver_equality_does_not_require_resolution_policy():
         "country": trusted["country"],
         "dataPointId": trusted["dataPointId"],
         "unit": trusted["targetUnit"],
-        "resolutionDate": trusted["resolutionDate"],
+        # Comparison cells are graded against the published resolver date.
+        "resolutionDate": trusted["publishedResolutionDate"],
         "resolutionSource": trusted["resolutionSource"],
         "resolutionSourceUrl": trusted["resolutionSourceUrl"],
         "resolutionRule": trusted["resolutionRule"],
@@ -408,8 +412,168 @@ def test_cell_resolver_equality_does_not_require_resolution_policy():
     }
     publication._resolver_equal(cell, trusted)
     cell["resolutionDate"] = "2030-02-16"
-    with pytest.raises(publication.StrategyPublicationError, match="resolutionDate"):
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="resolutionDate differs from trusted target field "
+        "publishedResolutionDate",
+    ):
         publication._resolver_equal(cell, trusted)
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("conditionalOn", None),
+        ("conditionalOn", "Different legal premise"),
+        ("type", "data"),
+        ("type", None),
+    ],
+)
+def test_conditional_comparison_requires_exact_cell_premise_and_type(field, value):
+    trusted = {
+        **target(),
+        "conditional": "The reviewed provision is enacted by the deadline.",
+    }
+    cell = {
+        **{
+            key: trusted[key]
+            for key in publication.RESOLVER_FIELDS
+            if key
+            not in {
+                "catalogSlug",
+                "targetUnit",
+                "publishedResolutionDate",
+                "resolutionPolicy",
+            }
+        },
+        **{key: trusted[key] for key in publication.REGISTRATION_FIELDS},
+        "slug": trusted["catalogSlug"],
+        "unit": trusted["targetUnit"],
+        "resolutionDate": trusted["publishedResolutionDate"],
+        "conditionalOn": trusted["conditional"],
+        "type": "conditional",
+    }
+    publication._resolver_equal(cell, trusted)
+    cell[field] = value
+    with pytest.raises(publication.StrategyPublicationError, match="conditional"):
+        publication._resolver_equal(cell, trusted)
+
+
+def test_publication_refuses_unreviewed_conditional_selection(tmp_path: pathlib.Path):
+    selection = selection_payload()
+    selection["targets"][0]["conditional"] = "Model-supplied legal premise"
+    selection.pop("selectionSetHash")
+    selection["selectionSetHash"] = canonical_sha256(selection)
+    path = tmp_path / "selection.json"
+    path.write_text(json.dumps(selection))
+    with pytest.raises(
+        publication.StrategyPublicationError, match="reviewed bill selection"
+    ):
+        publication._validate_selection(path)
+
+
+def test_failed_wrong_premise_is_archived_but_cannot_claim_success(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import run_thesis_analyst
+
+    trusted = {**target(), "conditional": "The exact registered legal premise."}
+    manifest_relative = RUN_PREFIX / "manifest.json"
+    cells_relative = RUN_PREFIX / "cells.with_activity.json"
+    manifest_path = tmp_path.joinpath(*manifest_relative.parts)
+    manifest_path.parent.mkdir(parents=True)
+    cells = [
+        {
+            "conditionalOn": "A different premise",
+            "type": "conditional",
+            "runAt": "2030-01-10T12:02:00Z",
+            "runStartedAt": "2030-01-10T12:01:00Z",
+        }
+    ]
+    tmp_path.joinpath(*cells_relative.parts).write_text(json.dumps(cells))
+    manifest = {
+        "schemaVersion": "thesis_analyst_run_manifest_v1",
+        "promptMode": "ladder",
+        "targetContext": trusted,
+        "series": trusted["series"],
+        "period": trusted["period"],
+        "conditional": trusted["conditional"],
+        "ok": False,
+        "createdAt": "2030-01-10T12:01:00Z",
+        "runStartedAt": "2030-01-10T12:01:00Z",
+        "cellsPath": cells_relative.as_posix(),
+        **{field: trusted[field] for field in publication.REGISTRATION_FIELDS},
+    }
+    manifest_path.write_text(json.dumps(manifest))
+    result = {
+        "target": trusted,
+        "manifestPath": manifest_relative.as_posix(),
+        "ok": False,
+        "cellsPath": cells_relative.as_posix(),
+        "startedAt": "2030-01-10T12:01:00Z",
+        "finishedAt": "2030-01-10T12:03:00Z",
+    }
+    monkeypatch.setattr(
+        publication.docket, "validate_run_file_inventory", lambda *_: None
+    )
+    monkeypatch.setattr(
+        publication.docket, "validate_target_registration", lambda *_a, **_k: None
+    )
+    monkeypatch.setattr(
+        publication, "conditional_comparison_context", lambda _root, value: value
+    )
+    monkeypatch.setattr(
+        publication,
+        "verify_run",
+        lambda _path: SimpleNamespace(
+            inventory_status="complete",
+            run_mode="analyst",
+            run_succeeded=manifest["ok"],
+        ),
+    )
+    validations = []
+
+    def validate_failed(value, **kwargs):
+        validations.append((value, kwargs["target_context"]))
+        return {"ok": False}
+
+    monkeypatch.setattr(run_thesis_analyst, "validate_cells", validate_failed)
+    kwargs = dict(
+        prompt_mode="ladder",
+        lower=publication._instant("2030-01-10T12:00:00Z", "lower"),
+        upper=publication._instant("2030-01-10T12:04:00Z", "upper"),
+    )
+    assert publication._validate_analyst_result(tmp_path, result, **kwargs) == (
+        manifest_relative,
+        "2030-01-10T12:02:00Z",
+    )
+    assert validations == [(cells, trusted)]
+    # Neither the wrapper nor custody can relabel failed output as successful.
+    manifest["ok"] = result["ok"] = True
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(publication.StrategyPublicationError, match="conditionalOn"):
+        publication._validate_analyst_result(tmp_path, result, **kwargs)
+
+
+def test_selection_requires_published_resolution_date(tmp_path: pathlib.Path):
+    # The pre-2026-09-20 selection shape stored the published date under
+    # resolutionDate, which the publisher's registration projection rejects
+    # for release-calendar contracts. The trusted selection must now carry
+    # publishedResolutionDate; a legacy-shaped target is not silently accepted.
+    legacy = selection_payload()
+    legacy_target = legacy["targets"][0]
+    legacy_target["resolutionDate"] = legacy_target.pop("publishedResolutionDate")
+    legacy.pop("selectionSetHash")
+    legacy["selectionSetHash"] = canonical_sha256(legacy)
+    path = tmp_path / "legacy-selection.json"
+    path.write_text(json.dumps(legacy, indent=2) + "\n")
+
+    with pytest.raises(
+        publication.StrategyPublicationError,
+        match="lacks publishedResolutionDate",
+    ):
+        publication._validate_selection(path)
 
 
 def test_ladder_lane_prompt_mode_binds_to_trusted_selection(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import copy
 import hashlib
 import json
@@ -46,8 +47,13 @@ def write_stage(
     expression: str = "base + delta",
     tool: str = "calculate",
     arguments: dict[str, Any] | None = None,
+    fetcher: Any = None,
+    ensure_ascii: bool = True,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    recorder = evidence.EvidenceRecorder(run_dir / f"{prefix}tool_evidence.json")
+    recorder = evidence.EvidenceRecorder(
+        run_dir / f"{prefix}tool_evidence.json",
+        **({"fetcher": fetcher} if fetcher is not None else {}),
+    )
     call = recorder.call(
         tool,
         arguments
@@ -81,7 +87,8 @@ def write_stage(
     }
     (run_dir / f"{prefix}command.json").write_text(json.dumps(command))
     (run_dir / f"{prefix}codex_stdout.jsonl").write_text(
-        json.dumps(event_for(call)) + "\n"
+        json.dumps(event_for(call), ensure_ascii=ensure_ascii) + "\n",
+        encoding="utf-8",
     )
     return command, [
         {"path": f"{prefix}{name}", "artifactType": artifact_type}
@@ -368,3 +375,43 @@ def test_receipt_custody_roots_evidence_and_replay_report(
     (tmp_path / "tool_evidence.json").write_text("{}")
     with pytest.raises(custody.CustodyError, match="raw SHA-256 mismatch"):
         custody.verify_run(tmp_path)
+
+
+def test_native_event_lines_with_unicode_line_separators_still_bind(
+    tmp_path: pathlib.Path,
+) -> None:
+    # Codex writes JSON events with non-ASCII characters unescaped. A fetched
+    # PDF excerpt carried U+0085 (NEL), which str.splitlines() treats as a
+    # line break, so the verifier fragmented the completion event into two
+    # unparseable pieces and reported "calls lack native completion events"
+    # for a call whose event was present (roll-docket run 35526068252, draft
+    # call-0009). Only newline characters delimit the JSONL stream.
+    body = "line one\u0085line two\u2028line three\u2029\x0b\x0c\x1c%PDF".encode(
+        "utf-8"
+    )
+    response = {
+        "url": "https://example.gov/report.pdf",
+        "status": 200,
+        "headers": [["content-type", "application/pdf"]],
+        "bodyBase64": base64.b64encode(body).decode("ascii"),
+        "sha256": hashlib.sha256(body).hexdigest(),
+        "bytes": len(body),
+    }
+    command, entries = write_stage(
+        tmp_path,
+        tool="fetch_source",
+        arguments={"url": response["url"]},
+        fetcher=lambda _url: response,
+        ensure_ascii=False,
+    )
+    payload = json.loads((tmp_path / "tool_evidence.json").read_text())
+    assert payload["calls"][0]["status"] == "succeeded"
+    assert "\u0085" in payload["calls"][0]["result"]["excerpt"]
+    stream = (tmp_path / "codex_stdout.jsonl").read_text(encoding="utf-8")
+    assert stream.count("\n") == 1
+    assert len(stream.splitlines()) > 1  # the trap this test guards against
+
+    assert check(tmp_path, command, entries) == {
+        "tool_evidence.json",
+        "tool_evidence_verification.json",
+    }

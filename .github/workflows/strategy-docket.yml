@@ -7,6 +7,14 @@ on:
         description: "Comma/newline-separated published catalog slugs"
         required: false
         default: ""
+      bill_slug:
+        description: "Reviewed bill slug (selects both conditional arms; ladder only)"
+        required: false
+        default: ""
+      bill_series:
+        description: "One reviewed outcome series for bill_slug (empty = all reviewed pairs)"
+        required: false
+        default: ""
       auto_select:
         description: "Fill remaining capacity with nearest open published targets"
         type: boolean
@@ -64,6 +72,7 @@ jobs:
       selection_artifact: ${{ steps.metadata.outputs.selection_artifact }}
     steps:
       - uses: astral-sh/setup-uv@v5
+      - uses: oven-sh/setup-bun@v2
       - uses: actions/checkout@v5
         with:
           ref: main
@@ -114,6 +123,8 @@ jobs:
         env:
           AUTO_SELECT: ${{ inputs.auto_select }}
           CATALOG_SLUGS: ${{ inputs.catalog_slugs }}
+          BILL_SLUG: ${{ inputs.bill_slug }}
+          BILL_SERIES: ${{ inputs.bill_series }}
           MAX_TARGETS: ${{ inputs.max_targets }}
           SUITE: ${{ inputs.suite }}
           LADDER_PROMPT_MODE: ${{ inputs.ladder_prompt_mode || 'ladder' }}
@@ -123,6 +134,8 @@ jobs:
           args=(
             python3 scripts/strategy_targets.py select
             --catalog-slugs "$CATALOG_SLUGS"
+            --bill-slug "$BILL_SLUG"
+            --bill-series "$BILL_SERIES"
             --max-targets "$MAX_TARGETS"
             --suite "$SUITE"
             --ladder-prompt-mode "$LADDER_PROMPT_MODE"
@@ -222,6 +235,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - uses: oven-sh/setup-bun@v2
+
       - name: Download the trusted strategy selection
         uses: actions/download-artifact@v8
         with:
@@ -310,8 +325,6 @@ jobs:
           print(f"run_attempt={run_attempt}")
           print(f"publication_artifact=strategy-docket-{run_id}-{run_attempt}")
           PY
-
-      - uses: oven-sh/setup-bun@v2
 
       - name: Enable the agent sandbox
         uses: ./.github/actions/enable-agent-sandbox
@@ -559,6 +572,11 @@ jobs:
           if python3 - <<'PY'
           import json
           import os
+          import pathlib
+          import sys
+
+          sys.path.insert(0, "scripts")
+          from strategy_comparisons import batch_results
 
           suite = json.load(open(os.environ["SUITE_MANIFEST"]))
           batches = []
@@ -567,9 +585,7 @@ jobs:
               batches.append(ladder["batchManifest"])
           batches.extend(row["batchManifest"] for row in suite["lanes"]["rollouts"])
           passing = any(
-              result.get("ok") is True
-              for path in batches
-              for result in json.load(open(path))["results"]
+              batch_results([pathlib.Path(path) for path in batches])
           ) or any(row["ok"] is True for row in suite["lanes"]["median3"])
           raise SystemExit(0 if passing else 1)
           PY
@@ -668,6 +684,17 @@ jobs:
               echo "nothing of ours survived the rebase; refusing a no-op push" >&2
               exit 1
             fi
+            # Builds and complete custody checks can cross a UTC boundary.
+            # Refresh absence evidence and close-state checks at the push edge.
+            gh_fetch /tmp/latest-ledger-sha \
+              gh api "repos/$LEDGER_REPOSITORY/commits/$LEDGER_BRANCH" --jq .sha
+            gh_fetch /tmp/latest-ledger.jsonl \
+              gh api -H "Accept: application/vnd.github.raw+json" \
+              "repos/$LEDGER_REPOSITORY/contents/$LEDGER_PATH?ref=$(cat /tmp/latest-ledger-sha)"
+            python3 scripts/strategy_targets.py ensure-open \
+              --selection /tmp/trusted-selection/strategy-targets.json \
+              --ledger-jsonl /tmp/latest-ledger.jsonl \
+              --checked-at-utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             LOCAL=$(git rev-parse HEAD)
             if git -c credential.helper= -c credential.helper="$auth_helper" push origin main; then
               REMOTE=$(git ls-remote origin refs/heads/main | awk '{print $1}')

@@ -41,6 +41,14 @@ function stanceTitle(stance: StanceFold): string {
   }
 }
 
+export interface MetricRegistryView {
+  note: string;
+  series?: string;
+  candidates?: string[];
+  analysisSnapshot?: string;
+  chronicle?: { uuid: string; concept: string; href: string };
+}
+
 /**
  * Candidate-metric card with the long sourcing note clamped to a few
  * lines; the full text is a click away instead of a wall by default.
@@ -53,6 +61,7 @@ export function MetricCard({
   rationale,
   stance,
   forecast,
+  registry,
 }: {
   kind: string;
   text: string;
@@ -60,6 +69,7 @@ export function MetricCard({
   badgeClass: string;
   rationale?: string;
   stance?: StanceFold | null;
+  registry?: MetricRegistryView;
   forecast?: {
     slug: string;
     href?: string;
@@ -107,6 +117,48 @@ export function MetricCard({
         >
           {expanded ? "Less ↑" : "Full sourcing ↓"}
         </button>
+      )}
+      {registry && (
+        <div className="mt-3 text-[0.78rem] leading-[1.6] text-[var(--theme-text-muted)]">
+          <p className="m-0">{registry.note}</p>
+          {registry.series && (
+            <p className="mb-0 mt-1 break-words">
+              Current docket series: <code>{registry.series}</code>
+            </p>
+          )}
+          {registry.candidates && registry.candidates.length > 0 && (
+            <p className="mb-0 mt-1 break-words">
+              Candidate series: <code>{registry.candidates.join(", ")}</code>
+            </p>
+          )}
+          {registry.chronicle && (
+            <p className="mb-0 mt-2 break-words">
+              <a
+                href={registry.chronicle.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-accent)] hover:underline"
+              >
+                Chronicle catalog ↗
+              </a>
+              <br />
+              Current docket identity: <code>{registry.chronicle.concept}</code>
+              <br />
+              UUID: <code>{registry.chronicle.uuid}</code>
+            </p>
+          )}
+          {registry.analysisSnapshot && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-[var(--theme-text-dim)]">
+                Analysis-day registry status
+              </summary>
+              <p className="mb-0 mt-1">
+                {registry.analysisSnapshot}. Historical assessment; the badge
+                above is recomputed from the docket at site build time.
+              </p>
+            </details>
+          )}
+        </div>
       )}
       {forecast && (
         <a

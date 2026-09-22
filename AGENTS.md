@@ -348,6 +348,12 @@ Resolution and scoring code should preserve these invariants:
 
 ### Bills end to end — series ingestion is part of the pipeline
 
+The remote extraction, Chronicle mapping, reviewed bill binding and paired
+comparison workflow is documented in `docs/bill-pipeline.md`. Use
+`ingest-bill.yml` for proposal extraction and `strategy-docket.yml`'s reviewed
+`bill_slug` mode for fresh comparisons of already-published conditional pairs.
+Never mint duplicate registrations merely to re-exercise an existing pair.
+
 Founder rule (2026-08-03): a bill metric whose official series is not yet
 admitted is a **worklist item, never a stopping point**. "End to end" for
 the bills lane means: extraction → metrics → series mapping → **if no

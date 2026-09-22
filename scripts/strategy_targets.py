@@ -27,14 +27,17 @@ from canonical_json import canonical_bytes, canonical_sha256
 from generate_ledger_targets import (
     block_value,
     generated_entry_blocks,
-    generated_entry_for,
 )
 from register_targets import (
     REGISTRATION_SCHEMA,
     V2_REGISTRATION_SCHEMA,
     V3_REGISTRATION_CUTOVER_COMMIT,
+    RegistrationError,
+    matching_docket_templates,
     parse_utc_instant,
     registration_content_hash,
+    require_conditional_docket_template,
+    validate_target_resolution_projection,
 )
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -52,6 +55,14 @@ REGISTRATION_RE = re.compile(
 UTC_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 MAX_ARTIFACT_LAG = dt.timedelta(minutes=15)
 MAX_REGISTRATION_COMMIT_LAG = dt.timedelta(minutes=15)
+COMPARISON_CONTEXT_FIELDS = {
+    "comparisonTarget",
+    "publishedResolutionDate",
+    "resolutionSource",
+    "resolutionSourceUrl",
+    "resolutionRule",
+    "resolutionPolicy",
+}
 
 
 class StrategyTargetError(ValueError):
@@ -299,6 +310,176 @@ def introducing_commit(
     return commit
 
 
+def _conditional_template(root: pathlib.Path, target: dict[str, Any]) -> dict[str, Any]:
+    entries = load_object(root / "scripts/docket_series.json", "docket registry")
+    matches = matching_docket_templates(target, entries.get("series", []))
+    if len(matches) != 1:
+        raise StrategyTargetError(
+            "conditional comparison requires one committed docket entry"
+        )
+    return matches[0]
+
+
+def conditional_comparison_context(
+    root: pathlib.Path, target: dict[str, Any]
+) -> dict[str, Any]:
+    """Remove only comparison metadata absent from the trusted docket context.
+
+    The ordinary registration validator remains strict about every committed
+    prompt input (including anchors and date semantics) and unknown additions.
+    Published resolver metadata is checked separately against the selection.
+    """
+    if target.get("conditional") is None:
+        return target
+    template = _conditional_template(root, target)
+    extras = template.get("extras") or {}
+    return {
+        key: value
+        for key, value in target.items()
+        if key not in COMPARISON_CONTEXT_FIELDS or key in extras
+    }
+
+
+def _registered_conditional_context(
+    root: pathlib.Path, contract: dict[str, Any], registered_at: str
+) -> dict[str, Any]:
+    entry = _conditional_template(root, contract)
+    require_conditional_docket_template(contract, [entry], registered_at)
+    pair = entry["conditionalPair"]
+    arm = next(
+        arm for arm in pair["arms"] if arm["catalogSlug"] == contract["catalogSlug"]
+    )
+    context = {
+        **entry["extras"],
+        "series": entry["series"],
+        "period": entry["period"],
+        **{
+            key: arm[key]
+            for key in ("catalogSlug", "dataPointId", "conditional", "conditionId")
+        },
+        "conditionDeadline": pair["conditionDeadline"],
+        "sourceBinding": contract["sourceBinding"],
+    }
+    require_conditional_docket_template(
+        contract, [entry], registered_at, batch_target=context
+    )
+    return context
+
+
+def require_conditional_open(target: dict[str, Any], checked: dt.datetime) -> None:
+    """Close both premises before the deadline or first possible source print."""
+    if target.get("conditional") is None:
+        return
+    binding = target.get("sourceBinding") or {}
+    window = binding.get("expectedReleaseWindow") or {}
+    for label, value in (
+        ("condition deadline", target.get("conditionDeadline")),
+        ("source release window", window.get("start")),
+    ):
+        try:
+            boundary = dt.date.fromisoformat(str(value))
+        except ValueError as exc:
+            raise StrategyTargetError(
+                f"conditional target lacks a valid {label}"
+            ) from exc
+        if checked.date() >= boundary:
+            raise StrategyTargetError(
+                f"conditional target reached its {label}: {target.get('catalogSlug')}"
+            )
+
+
+def require_bill_target_set(selection: dict[str, Any]) -> None:
+    """The reviewed bill selection authorizes whole sibling pairs only."""
+    request = selection.get("request") or {}
+    plan = selection.get("billSelection")
+    targets = selection.get("targets") or []
+    if not request.get("billSlug"):
+        if plan is not None or any(
+            target.get("conditional") is not None for target in targets
+        ):
+            raise StrategyTargetError(
+                "conditional comparisons require a reviewed bill selection"
+            )
+        return
+    if (
+        not isinstance(plan, dict)
+        or plan.get("billSlug") != request["billSlug"]
+        or plan.get("series", "") != request.get("billSeries", "")
+        or request.get("catalogSlugs")
+        or request.get("autoSelect") is not False
+        or request.get("suite") != "ladder"
+    ):
+        raise StrategyTargetError("invalid conditional bill selection request")
+    pairs = plan.get("pairs")
+    if not isinstance(pairs, list) or not pairs:
+        raise StrategyTargetError("bill selection has no conditional pairs")
+    expected = []
+    by_slug = {target.get("catalogSlug"): target for target in targets}
+    for pair in pairs:
+        slugs = pair.get("catalogSlugs") if isinstance(pair, dict) else None
+        if not isinstance(slugs, list) or len(slugs) != 2 or len(set(slugs)) != 2:
+            raise StrategyTargetError(
+                "bill selection requires two distinct sibling targets"
+            )
+        siblings = [by_slug.get(slug) for slug in slugs]
+        if any(
+            not target
+            or not target.get("conditional")
+            or not target.get("conditionId")
+            or target.get("series") != pair.get("series")
+            or target.get("period") != pair.get("period")
+            for target in siblings
+        ):
+            raise StrategyTargetError(
+                "bill selection is missing a registered conditional sibling"
+            )
+        if any(
+            len({target.get(key) for target in siblings}) != 2
+            for key in ("conditional", "conditionId", "dataPointId")
+        ):
+            raise StrategyTargetError(
+                "bill selection conditional siblings are not distinct"
+            )
+        arms = pair.get("arms")
+        if not isinstance(arms, list) or len(arms) != 2:
+            raise StrategyTargetError(
+                "bill selection is missing reviewed conditional premises"
+            )
+        for target in siblings:
+            matching = [
+                arm for arm in arms if arm.get("catalogSlug") == target["catalogSlug"]
+            ]
+            if (
+                len(matching) != 1
+                or any(
+                    target.get(key) != matching[0].get(key)
+                    for key in ("dataPointId", "conditional", "conditionId")
+                )
+                or target.get("conditionDeadline") != pair.get("conditionDeadline")
+            ):
+                raise StrategyTargetError(
+                    "bill selection target differs from reviewed conditional premise"
+                )
+            if canonical_bytes(
+                (target.get("sourceBinding") or {}).get("expectedReleaseWindow")
+            ) != canonical_bytes(pair.get("expectedReleaseWindow")):
+                raise StrategyTargetError(
+                    "bill selection target differs from reviewed source release window"
+                )
+        expected.extend(slugs)
+    if (
+        len(set(expected)) != len(expected)
+        or len(by_slug) != len(targets)
+        or sorted(expected) != sorted(by_slug)
+        or sorted(expected) != sorted(plan.get("catalogSlugs") or [])
+        or type(request.get("maxTargets")) is not int
+        or len(expected) > request["maxTargets"]
+    ):
+        raise StrategyTargetError(
+            "bill selection target set is not an atomic set of reviewed pairs"
+        )
+
+
 def published_target(
     root: pathlib.Path,
     slug: str,
@@ -306,27 +487,45 @@ def published_target(
     generated_source: str,
     head: str,
     selection_started_at: dt.datetime,
+    *,
+    allow_conditional: bool = False,
 ) -> dict[str, Any]:
-    candidates = registrations.get(slug, [])
+    blocks = [match.group(0) for match in generated_entry_blocks(generated_source)]
+    matching_blocks = [
+        block for block in blocks if block_value(block, "catalogSlug") == slug
+    ]
+    if len(matching_blocks) != 1:
+        raise StrategyTargetError(
+            f"target must have one unique generated ledger entry: {slug}"
+        )
+    block = matching_blocks[0]
+    data_point_id = block_value(block, "dataPointId")
+    if sum(block_value(row, "dataPointId") == data_point_id for row in blocks) != 1:
+        raise StrategyTargetError(
+            f"target must have one unique generated ledger entry: {slug}"
+        )
+    if block_value(block, "registrationState") != "published":
+        raise StrategyTargetError(f"target is not published: {slug}")
+    # Failed and superseded registrations remain immutable records. The
+    # published ledger entry identifies the one registration this comparison
+    # extends; neither the first nor the newest snapshot for a slug has that
+    # authority. Keep exact uniqueness after binding hash, instant and identity.
+    candidates = [
+        row
+        for row in registrations.get(slug, [])
+        if row["contract"].get("dataPointId") == data_point_id
+        and row["targetContentHash"] == block_value(block, "targetContentHash")
+        and row["snapshot"].get("registeredAtUtc") == block_value(block, "registeredAt")
+    ]
     if len(candidates) != 1:
         raise StrategyTargetError(
             f"target is not backed by one unique published registration: {slug}"
         )
     registration = candidates[0]
     contract = registration["contract"]
-    match = generated_entry_for(generated_source, str(contract["dataPointId"]))
-    if match is None:
-        raise StrategyTargetError(
-            f"published target has no generated ledger entry: {slug}"
-        )
-    block = match.group(0)
-    if block_value(block, "registrationState") != "published":
-        raise StrategyTargetError(f"target is not published: {slug}")
-    if contract.get("conditional") is not None:
-        # Strategy suites elicit unconditional forecasts; selecting a
-        # conditional arm would run a prompt without its registered
-        # legal-state premise and the publisher would rightly reject the
-        # batch afterwards. Refuse at selection time instead.
+    if contract.get("conditional") is not None and not allow_conditional:
+        # A free-form catalog slug cannot authorize a conditional arm. The
+        # reviewed bill plan selects and authenticates both siblings together.
         raise StrategyTargetError(
             f"conditional targets are not selectable for strategy "
             f"comparisons: {slug}"
@@ -377,6 +576,7 @@ def published_target(
         raise StrategyTargetError(
             f"published target lacks final resolver fields for {slug}: {missing}"
         )
+    published_date = block_value(block, "resolutionDate")
     target = {
         "series": contract["series"],
         "period": contract["period"],
@@ -386,7 +586,15 @@ def published_target(
         "targetUnit": contract["unit"],
         "valueScale": contract["valueScale"],
         "sourceBinding": contract["sourceBinding"],
-        "resolutionDate": block_value(block, "resolutionDate"),
+        # The published forecast's resolver date. Comparison cells are graded
+        # against it, and selection orders and gates open targets by it. It
+        # is deliberately NOT stored as `resolutionDate`: the publisher
+        # requires a batch target to carry the registered contract's date
+        # fields with exactly the snapshot's presence and value, and a
+        # release-calendar contract omits resolutionDate. Copying the
+        # published date into `resolutionDate` is what blocked the
+        # 2026-09-20 strategy runs (35524670779, 35525381224).
+        "publishedResolutionDate": published_date,
         "resolutionSource": block_value(block, "resolutionSource"),
         "resolutionSourceUrl": block_value(block, "resolutionSourceUrl"),
         "resolutionRule": block_value(block, "resolutionRule"),
@@ -397,9 +605,69 @@ def published_target(
         "registrationCommit": commit,
         "comparisonTarget": True,
     }
+    # Project the registered contract's date-basis semantics exactly as the
+    # docket lane's target context does (register_targets
+    # ._target_registration_fields): resolutionDateBasis, resolutionDate and
+    # the top-level expectedReleaseWindow appear iff the snapshot binds them.
     if "resolutionDateBasis" in contract:
         target["resolutionDateBasis"] = contract["resolutionDateBasis"]
+    if "resolutionDate" in contract:
+        if published_date != contract["resolutionDate"]:
+            raise StrategyTargetError(
+                f"published ledger entry differs from registration for {slug}: "
+                "resolutionDate"
+            )
+        target["resolutionDate"] = contract["resolutionDate"]
+    binding = contract.get("sourceBinding")
+    if isinstance(binding, dict) and "expectedReleaseWindow" in binding:
+        target["expectedReleaseWindow"] = binding["expectedReleaseWindow"]
+    if contract.get("conditional") is not None:
+        try:
+            context = _registered_conditional_context(
+                root, contract, registration["snapshot"]["registeredAtUtc"]
+            )
+        except RegistrationError as exc:
+            raise StrategyTargetError(str(exc)) from exc
+        for key in COMPARISON_CONTEXT_FIELDS & context.keys():
+            if canonical_bytes(context[key]) != canonical_bytes(target.get(key)):
+                raise StrategyTargetError(
+                    f"published conditional resolver differs from docket: {key}"
+                )
+        # Keep all reviewed prompt context, including legacy IRS bounded dates
+        # whose immutable registrations precede the explicit basis property.
+        target = {**target, **context}
+        if target.get("resolutionDate") not in (None, published_date):
+            raise StrategyTargetError(
+                "conditional docket and published resolver dates differ"
+            )
+        require_conditional_open(target, selection_started_at)
+    # Fail at selection time with the publisher's own projection check, so a
+    # target the publisher would reject never reaches the paid generate job.
+    try:
+        validate_target_resolution_projection(
+            contract, target, label=registration["relative"]
+        )
+    except RegistrationError as exc:
+        raise StrategyTargetError(str(exc)) from exc
     return target
+
+
+def published_resolution_date(target: dict[str, Any]) -> dt.date:
+    """The published forecast's resolver date that orders and gates a target."""
+
+    value = target.get("publishedResolutionDate")
+    if not isinstance(value, str) or not value:
+        raise StrategyTargetError(
+            "comparison target lacks publishedResolutionDate: "
+            f"{target.get('catalogSlug')}"
+        )
+    try:
+        return dt.date.fromisoformat(value)
+    except ValueError as exc:
+        raise StrategyTargetError(
+            f"invalid publishedResolutionDate {value!r} for "
+            f"{target.get('catalogSlug')}"
+        ) from exc
 
 
 def load_local_resolution_evidence(
@@ -525,6 +793,8 @@ def select_targets(
     ledger_repository_commit: str,
     ledger_blob_sha: str,
     checked_at_utc: str | None = None,
+    bill_slug: str = "",
+    bill_series: str = "",
 ) -> dict[str, Any]:
     source_sha = resolve_commit(root, source_sha)
     selected_at = parse_utc(selected_at_utc, "selectedAtUtc")
@@ -541,9 +811,29 @@ def select_targets(
     if len(requested_slugs) > max_targets:
         raise StrategyTargetError("explicit catalog slugs exceed maxTargets")
 
+    bill_selection = None
+    selected_slugs = requested_slugs
+    if bill_series and not bill_slug:
+        raise StrategyTargetError("billSeries requires billSlug")
+    if bill_slug:
+        if requested_slugs or auto_select or suite != "ladder":
+            raise StrategyTargetError(
+                "bill selection requires ladder suite without catalog slugs "
+                "or auto-selection"
+            )
+        from bill_forecast_plan import build_bill_selection, require_open_bill_selection
+
+        bill_selection = build_bill_selection(root, bill_slug, bill_series)
+        require_open_bill_selection(root, bill_selection, selected_at)
+        selected_slugs = list(bill_selection["catalogSlugs"])
+        if not selected_slugs or len(selected_slugs) > max_targets:
+            raise StrategyTargetError(
+                "maxTargets cannot fit all reviewed bill siblings atomically"
+            )
+
     generated_source = root.joinpath(*GENERATED_TARGETS_RELATIVE.parts).read_text()
     known_slugs = known_catalog_slugs(generated_source)
-    unknown = sorted(set(requested_slugs) - known_slugs)
+    unknown = sorted(set(selected_slugs) - known_slugs)
     if unknown:
         raise StrategyTargetError(f"unknown catalog slug(s): {', '.join(unknown)}")
     registrations = registrations_by_slug(root)
@@ -571,8 +861,9 @@ def select_targets(
                 generated_source,
                 source_sha,
                 selected_at,
+                allow_conditional=bill_selection is not None and slug in selected_slugs,
             )
-            release_day = dt.date.fromisoformat(str(target["resolutionDate"]))
+            release_day = published_resolution_date(target)
             if release_day <= selected_at.date():
                 raise StrategyTargetError(
                     f"target is on or past its official release day: {slug}"
@@ -591,7 +882,7 @@ def select_targets(
             failures[slug] = str(exc)
 
     selected: list[dict[str, Any]] = []
-    for slug in requested_slugs:
+    for slug in selected_slugs:
         if slug not in candidates:
             raise StrategyTargetError(
                 failures.get(slug, f"target is not eligible: {slug}")
@@ -604,7 +895,10 @@ def select_targets(
                 for slug, target in candidates.items()
                 if slug not in set(requested_slugs)
             ),
-            key=lambda target: (target["resolutionDate"], target["catalogSlug"]),
+            key=lambda target: (
+                target["publishedResolutionDate"],
+                target["catalogSlug"],
+            ),
         )
         selected.extend(remaining[: max_targets - len(selected)])
     selected.sort(key=lambda target: target["catalogSlug"])
@@ -640,11 +934,22 @@ def select_targets(
                 if ladder_prompt_mode != "ladder"
                 else {}
             ),
+            **(
+                {
+                    "billSlug": bill_slug,
+                    **({"billSeries": bill_series} if bill_series else {}),
+                }
+                if bill_slug
+                else {}
+            ),
         },
         "localResolutionEvidence": local_evidence,
         "ledgerEvidence": ledger_evidence,
         "targets": selected,
     }
+    if bill_selection is not None:
+        payload["billSelection"] = bill_selection
+        require_bill_target_set(payload)
     payload["selectionSetHash"] = selection_hash(payload)
     return payload
 
@@ -752,6 +1057,8 @@ def verify_selection(
         ledger_repository_commit=str(evidence.get("repositoryCommit") or ""),
         ledger_blob_sha=str(evidence.get("blobSha") or ""),
         checked_at_utc=str(evidence.get("checkedAtUtc") or ""),
+        bill_slug=str(request.get("billSlug") or ""),
+        bill_series=str(request.get("billSeries") or ""),
     )
     if canonical_bytes(expected) != canonical_bytes(selection):
         raise StrategyTargetError("selection differs from trusted canonical resolution")
@@ -765,11 +1072,17 @@ def ensure_open(
     checked_at_utc: str,
 ) -> None:
     checked = parse_utc(checked_at_utc, "checkedAtUtc")
+    require_bill_target_set(selection)
+    if selection.get("billSelection") is not None:
+        from bill_forecast_plan import require_open_bill_selection
+
+        require_open_bill_selection(root, selection["billSelection"], checked)
     _local_evidence, locally_resolved = load_local_resolution_evidence(
         root, checked_at_utc
     )
     ledger_resolved = ledger_data_point_ids(ledger_path)
     for target in selection.get("targets") or []:
+        require_conditional_open(target, checked)
         data_point_id = str(target.get("dataPointId") or "")
         slug = str(target.get("catalogSlug") or "")
         if data_point_id in locally_resolved:
@@ -780,7 +1093,7 @@ def ensure_open(
             raise StrategyTargetError(
                 f"target became resolved in the official ledger: {slug}"
             )
-        release_day = dt.date.fromisoformat(str(target.get("resolutionDate") or ""))
+        release_day = published_resolution_date(target)
         if release_day <= checked.date():
             raise StrategyTargetError(
                 f"target reached its official release day before generation: {slug}"
@@ -801,6 +1114,8 @@ def parse_args() -> argparse.Namespace:
     select.add_argument("--catalog-slug", action="append", default=[])
     select.add_argument("--catalog-slugs", action="append", default=[])
     select.add_argument("--auto-select", action="store_true")
+    select.add_argument("--bill-slug", default="")
+    select.add_argument("--bill-series", default="")
     select.add_argument("--max-targets", type=int, required=True)
     select.add_argument("--suite", choices=sorted(SUITES), required=True)
     select.add_argument(
@@ -869,6 +1184,8 @@ def main() -> int:
                 max_targets=args.max_targets,
                 suite=args.suite,
                 ladder_prompt_mode=args.ladder_prompt_mode,
+                bill_slug=args.bill_slug,
+                bill_series=args.bill_series,
                 ledger_path=args.ledger_jsonl,
                 ledger_repository=args.ledger_repository,
                 ledger_branch=args.ledger_branch,

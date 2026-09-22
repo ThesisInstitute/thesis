@@ -20,6 +20,63 @@ def run(variant_id: str, run_at: str = "2030-01-01T00:00:00Z") -> dict:
     }
 
 
+@pytest.mark.parametrize(
+    "sibling_state, expected",
+    [
+        ("complete", ["arm-0", "arm-1"]),
+        ("failed", []),
+        ("missing", []),
+        ("empty", []),
+        ("duplicate-condition", []),
+    ],
+)
+def test_conditional_comparisons_publish_only_complete_pairs(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sibling_state: str,
+    expected: list[str],
+) -> None:
+    rows = []
+    for index in range(2):
+        manifest = tmp_path / f"manifest-{index}.json"
+        cells = tmp_path / f"cells-{index}.json"
+        manifest.write_text(json.dumps({"ok": True}))
+        cells.write_text(json.dumps([{"slug": f"arm-{index}"}]))
+        rows.append(
+            {
+                "ok": True,
+                "manifestPath": str(manifest),
+                "cellsPath": str(cells),
+                "target": {
+                    "catalogSlug": f"arm-{index}",
+                    "dataPointId": f"id-{index}",
+                    "series": "agency.metric",
+                    "period": "2030",
+                    "conditional": f"premise-{index}",
+                    "conditionId": f"condition-{index}",
+                },
+            }
+        )
+    if sibling_state == "failed":
+        rows[1]["ok"] = False
+        rows[1]["cellsPath"] = None
+    elif sibling_state == "missing":
+        rows.pop()
+    elif sibling_state == "empty":
+        pathlib.Path(rows[1]["cellsPath"]).write_text("[]")
+    elif sibling_state == "duplicate-condition":
+        rows[1]["target"]["conditionId"] = rows[0]["target"]["conditionId"]
+    batch = tmp_path / "batch.json"
+    batch.write_text(json.dumps({"results": rows}))
+    monkeypatch.setattr(strategy, "repo_path", pathlib.Path)
+    assert [
+        target["catalogSlug"] for target, _, _ in strategy.batch_results([batch])
+    ] == expected
+    # Suppression does not erase either the failed attempt or its successful
+    # sibling from the immutable batch archive.
+    assert json.loads(batch.read_text())["results"] == rows
+
+
 def test_all_record_regeneration_is_byte_identical(
     tmp_path: pathlib.Path,
 ) -> None:

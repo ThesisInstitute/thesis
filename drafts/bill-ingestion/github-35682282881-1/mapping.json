@@ -1,0 +1,162 @@
+[
+  {
+    "provisionIndex": 0,
+    "metricIndex": 0,
+    "seriesHint": "irs.actc.total_credit_amount",
+    "registry": "reachable",
+    "stage": "admitted",
+    "matchedSeries": "irs.actc.total_credit_amount",
+    "ledgerUuid": null,
+    "docketCandidates": [
+      "irs.actc.total_credit_amount"
+    ],
+    "canonicalDocketCandidates": [
+      "irs.actc.total_credit_amount"
+    ],
+    "canonicalDocketIdentities": [
+      {
+        "series": "irs.actc.total_credit_amount",
+        "ledger": {
+          "uuid": "05d4b329-d6c0-4050-ab25-f1a1deddf465",
+          "concept": "irs.actc.total_credit_amount"
+        }
+      }
+    ],
+    "catalogCandidates": [
+      {
+        "uuid": "05d4b329-d6c0-4050-ab25-f1a1deddf465",
+        "concept": "irs.actc.total_credit_amount",
+        "aliases": [],
+        "geography": {
+          "level": "country",
+          "id": "0100000US",
+          "name": "United States"
+        },
+        "entity": null,
+        "source_concepts": []
+      }
+    ]
+  },
+  {
+    "provisionIndex": 0,
+    "metricIndex": 1,
+    "seriesHint": "irs.actc.total_claims",
+    "registry": "reachable",
+    "stage": "admitted",
+    "matchedSeries": "irs.actc.total_claims",
+    "ledgerUuid": null,
+    "docketCandidates": [
+      "irs.actc.total_claims"
+    ],
+    "canonicalDocketCandidates": [
+      "irs.actc.total_claims"
+    ],
+    "canonicalDocketIdentities": [
+      {
+        "series": "irs.actc.total_claims",
+        "ledger": {
+          "uuid": "23396038-b31d-43cd-be08-4aa9fe916b56",
+          "concept": "irs.actc.total_claims"
+        }
+      }
+    ],
+    "catalogCandidates": [
+      {
+        "uuid": "23396038-b31d-43cd-be08-4aa9fe916b56",
+        "concept": "irs.actc.total_claims",
+        "aliases": [],
+        "geography": {
+          "level": "country",
+          "id": "0100000US",
+          "name": "United States"
+        },
+        "entity": null,
+        "source_concepts": []
+      }
+    ]
+  },
+  {
+    "provisionIndex": 0,
+    "metricIndex": 2,
+    "seriesHint": "census.spm.child_poverty_rate",
+    "registry": "reachable",
+    "stage": "admitted",
+    "matchedSeries": "census.spm.child_poverty_rate",
+    "ledgerUuid": null,
+    "docketCandidates": [
+      "census.spm.child_poverty_rate"
+    ],
+    "canonicalDocketCandidates": [
+      "census.spm.child_poverty_rate"
+    ],
+    "canonicalDocketIdentities": [
+      {
+        "series": "census.spm.child_poverty_rate",
+        "ledger": {
+          "uuid": "37841d30-5bd6-42a0-aea7-fc7b6d32dbcc",
+          "concept": "census.spm.child_poverty_rate"
+        }
+      }
+    ],
+    "catalogCandidates": [
+      {
+        "uuid": "37841d30-5bd6-42a0-aea7-fc7b6d32dbcc",
+        "concept": "census.spm.child_poverty_rate",
+        "aliases": [],
+        "geography": {
+          "level": "country",
+          "id": "0100000US",
+          "name": "United States"
+        },
+        "entity": null,
+        "source_concepts": []
+      }
+    ]
+  },
+  {
+    "provisionIndex": 0,
+    "metricIndex": 3,
+    "seriesHint": "treasury.mts.monthly_deficit",
+    "registry": "reachable",
+    "stage": "admitted",
+    "matchedSeries": "treasury.mts.monthly_deficit",
+    "ledgerUuid": null,
+    "docketCandidates": [
+      "treasury.mts.monthly_deficit"
+    ],
+    "canonicalDocketCandidates": [
+      "treasury.mts.monthly_deficit"
+    ],
+    "canonicalDocketIdentities": [
+      {
+        "series": "treasury.mts.monthly_deficit",
+        "ledger": {
+          "uuid": "f471eabf-fcff-449b-bac7-60a8561b063b",
+          "concept": "treasury.mts.monthly_deficit"
+        }
+      }
+    ],
+    "catalogCandidates": [
+      {
+        "uuid": "f471eabf-fcff-449b-bac7-60a8561b063b",
+        "concept": "treasury.mts.monthly_deficit",
+        "aliases": [
+          "treasury.mts.monthly_deficit.may_2026"
+        ],
+        "geography": {
+          "level": "country",
+          "id": "0100000US",
+          "vintage": "current",
+          "name": "United States"
+        },
+        "entity": {
+          "name": "government",
+          "role": "federal_budget_balance"
+        },
+        "source_concepts": [
+          "treasury.mts.monthly_deficit.may_2026"
+        ]
+      }
+    ]
+  }
+]

@@ -2,6 +2,7 @@ import {
   getConditionalGroup,
   type ResolvedConditionalGroup,
 } from "./conditional-groups";
+import reviewedBillBindings from "../../../scripts/bill_forecast_bindings.json";
 
 /**
  * Links bill analyses (bills/<slug>.json) to registered conditional
@@ -35,16 +36,13 @@ export const BILL_FORECAST_LINKS: BillForecastLink[] = [
     metricLabel: "CRP enrolled acres (Sep 2027)",
     groupSlug: "crp-enrolled-acres-sep2027-ceiling-27m",
   },
-  {
-    billSlug: "s3596-119",
-    metricLabel: "ACTC total claims (TY2027)",
-    groupSlug: "actc-claims-ty2027-threshold-one-dollar",
-  },
-  {
-    billSlug: "s3596-119",
-    metricLabel: "Child SPM poverty (CY2027)",
-    groupSlug: "spm-child-poverty-cy2027-threshold-one-dollar",
-  },
+  ...Object.entries(reviewedBillBindings.bills).flatMap(([billSlug, bill]) =>
+    bill.pairs.map(({ metricLabel, groupSlug }) => ({
+      billSlug,
+      metricLabel,
+      groupSlug,
+    })),
+  ),
 ];
 
 /**
