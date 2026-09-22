@@ -959,6 +959,10 @@ def test_a_release_bls_delays_past_the_margin_fails_closed(
         archive=archive,
         index=cdx(("20261106140000", "200"), ("20261110140000", "200")),
     )
-    assert "A-19 FIRST-PRINT WINDOW MISSED (refusing): none of the 2" in output
+    assert (
+        "A-19 FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 2 "
+        "capture(s) dated inside the registered window" in output
+    )
+    assert "and none of those prints 2026-10" in output
     assert "nothing new to record" in output
     assert identity_url("20261121140000") not in calls
