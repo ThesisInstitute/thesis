@@ -10863,16 +10863,22 @@ def pending_claims_refs(log: dict) -> list[tuple[str, str, str, str]]:
 
 def pending_adapter_refs(
     log: dict,
+    registrations: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[tuple[str, str, dict[str, Any], str, str, str, dict[str, Any]]]:
     """(ref, kind, spec, period_type, period, release_date, forecast_entry)
-    for pending cells covered by the generic adapters."""
+    for pending cells covered by the generic adapters.
+
+    ``registrations`` replaces the on-disk registration lookup. The
+    registration-time execution-plan gate passes the one contract it is
+    judging, which is not on disk yet.
+    """
     forecasts = {
         entry["forecastSlug"]: entry
         for entry in log.get("entries", [])
         if entry.get("kind") == "prediction_recorded" and entry.get("forecastSlug")
     }
     out = []
-    sba_registrations: dict[str, dict[str, Any]] | None = None
+    sba_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
     for link in log["resolutionLinks"]:
         if link.get("status") != "pending":
             continue
@@ -12800,6 +12806,317 @@ def binding_adapter_mismatch(
     if allowed is None:
         return None
     return None if adapter in allowed else str(adapter)
+
+
+# ---------------------------------------------------------------------------
+# Registration-time execution plan
+#
+# ``register_targets.py`` used to accept any target whose binding it could
+# construct, and a seed with no adapter defaults to ``generic-url``: a page
+# address, which no adapter-routed leg of the main loop accepts
+# (docs/lanes/2026-08-03-series-ingestion-wave1.md). ``roll_docket.py`` steps
+# from the latest PUBLISHED period, so such a series kept minting targets that
+# could never resolve: 67 of the 116 forecasts overdue on 2026-09-19.
+#
+# ``execution_plan_refusal`` asks, before a NEW registration is written, the
+# question the main loop asks after the forecast is already public: would
+# this exact contract reach an admitted executor? It routes the contract's
+# dataPointId through the same router and then applies the main loop's
+# date-independent refusals in its order: resolution-date basis, emitted unit,
+# registered adapter, then the family's own predicates. It never touches the
+# network and never reads ``records/`` (the QCEW predicate reads the committed
+# docket calendar): whether the print exists yet, or the window is open, is a
+# runtime question. Whether any code could ever read it is not.
+# ---------------------------------------------------------------------------
+
+NO_EXECUTOR_ADAPTER = "generic-url"
+
+
+def _plan_binding_refusal(matches: bool, family: str) -> str | None:
+    if matches:
+        return None
+    return (
+        f"the registered sourceBinding is not the reviewed {family} template "
+        "the executor authenticates before it reads anything"
+    )
+
+
+def _plan_alfred(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    # Stricter than the main loop: the ALFRED leg keys its fetch on the
+    # stem's spec and never reads the binding, so it would resolve a contract
+    # that names another series. A new contract must name the series it will
+    # be scored against. Every ALFRED docket template already does.
+    binding = registration["contract"]["sourceBinding"]
+    if binding.get("sourceSeriesId") != spec["fred"]:
+        return (
+            f"sourceBinding.sourceSeriesId {binding.get('sourceSeriesId')!r} is "
+            f"not the ALFRED series {spec['fred']!r} this stem's executor reads"
+        )
+    return None
+
+
+def _plan_bea_release(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        bea_release_binding_matches_spec(binding, spec), "BEA release"
+    )
+    if refusal:
+        return refusal
+    window = binding.get("expectedReleaseWindow") or {}
+    if not window.get("start") or window.get("start") != window.get("end"):
+        return (
+            "the BEA executor captures only on one registered release day; "
+            f"expectedReleaseWindow {window!r} is not a one-day window"
+        )
+    return None
+
+
+def _plan_census_spm(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if census_spm_verified_anchors(spec) is None:
+        return (
+            "the Census SPM adapter is deliberately unarmed until the six "
+            "revised-methodology anchors are verified "
+            "(docs/anchor-verifications.md)"
+        )
+    return _plan_binding_refusal(
+        census_spm_binding_matches_spec(
+            registration["contract"]["sourceBinding"], spec
+        ),
+        "Census SPM",
+    )
+
+
+def _plan_eia_dnav(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if eia_dnav_verified_anchors(spec) is None:
+        return "the EIA dnav adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        eia_dnav_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "EIA dnav",
+    )
+
+
+def _plan_fsa_crp(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if fsa_crp_verified_anchors(spec) is None:
+        return "the FSA CRP adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        fsa_crp_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "FSA CRP",
+    )
+
+
+def _plan_intl(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    # The router hands out a copy carrying two routing keys; the admission
+    # check is defined on the canonical adapter object, so judge that.
+    canonical = INTL_ADAPTERS.get(str(spec.get("target_series")))
+    if canonical is None or intl_execution_spec(dict(registration), canonical) is None:
+        mismatches = intl_binding_mismatches(
+            spec, registration["contract"]["sourceBinding"]
+        )
+        return (
+            "the registered contract is not the admitted international "
+            "adapter's exact registry template"
+            + (f" (differs in {', '.join(mismatches)})" if mismatches else "")
+        )
+    return None
+
+
+def _plan_irs_soi_pub1304(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if irs_soi_pub1304_verified_anchors(spec) is None:
+        return "the IRS SOI adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        irs_soi_pub1304_binding_matches_spec(
+            registration["contract"]["sourceBinding"], spec
+        ),
+        "IRS SOI Publication 1304",
+    )
+
+
+def _plan_qcew(
+    registration: Mapping[str, Any],
+    spec: Mapping[str, Any],
+    period: str,
+    release_day: dt.date,
+) -> str | None:
+    if not qcew_adapter_verified(dict(spec)):
+        return "the QCEW adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        qcew_registration_matches_spec(
+            registration["contract"]["sourceBinding"], spec, period, release_day
+        ),
+        "QCEW",
+    )
+
+
+def _plan_sba_pdf(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    return _plan_binding_refusal(
+        sba_pdf_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "SBA PDF",
+    )
+
+
+def _plan_usaspending(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], period: str, *_: Any
+) -> str | None:
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        usaspending_binding_matches_spec(binding, spec), "USAspending"
+    )
+    if refusal:
+        return refusal
+    host = urllib.parse.urlparse(
+        spec["url_template"].format(fiscal_year=period)
+    ).hostname
+    if host not in (binding.get("allowedHosts") or []):
+        return f"the USAspending executor's host {host!r} is not in allowedHosts"
+    return None
+
+
+# One entry per family the router can name AND a registration can bind. A
+# family missing here refuses every new registration, so adding a family to
+# the router without deciding its admission predicate fails closed.
+EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
+    "alfred": _plan_alfred,
+    "bea_release": _plan_bea_release,
+    "census_spm": _plan_census_spm,
+    "eia_dnav": _plan_eia_dnav,
+    "fsa_crp": _plan_fsa_crp,
+    "intl": _plan_intl,
+    "irs_soi_pub1304": _plan_irs_soi_pub1304,
+    "qcew": _plan_qcew,
+    "sba_pdf": _plan_sba_pdf,
+    "usaspending": _plan_usaspending,
+}
+# Families that resolve only cells that predate bindings. BLS API, SSA and
+# VA MMWR name adapters ``register_targets.SOURCE_ADAPTERS`` does not offer;
+# A-19 and CMS provider data have no binding adapter at all, so a target for
+# them could only be registered as ``generic-url``. Moving a family out of
+# this set means giving it a registrable adapter, a full-binding predicate
+# above, and a first-print acquisition that needs no per-period hand pin.
+EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
+    {"a19", "bls_api", "cms_provider_data", "ssa_official", "va_mmwr"}
+)
+_CLAIMS_PLAN = {
+    "initial": ("ICSA", "thousands"),
+    "continued": ("CCSA", "millions"),
+}
+
+
+def execution_plan_refusal(registration: Mapping[str, Any]) -> str | None:
+    """Why the resolver could never execute this contract, or None if it can.
+
+    ``registration`` is ``{"contract": ..., "targetContentHash": ...}``, the
+    shape ``registration_contracts`` returns. The answer is about the code
+    in this file as committed: it is offline and independent of the date.
+    """
+
+    contract = registration.get("contract")
+    binding = contract.get("sourceBinding") if isinstance(contract, dict) else None
+    if not isinstance(contract, dict) or not isinstance(binding, dict):
+        return "registration has no contract sourceBinding"
+    ref = contract.get("dataPointId")
+    window = binding.get("expectedReleaseWindow")
+    if not isinstance(ref, str) or not ref:
+        return "contract has no dataPointId"
+    if not isinstance(window, dict):
+        return "contract has no dated expectedReleaseWindow"
+    # Stricter than the main loop for the ALFRED and claims legs, which never
+    # read allowedHosts: registration always writes a sorted host list, and a
+    # contract without one is malformed whichever leg would take it.
+    hosts = binding.get("allowedHosts")
+    if not isinstance(hosts, list) or not all(isinstance(h, str) for h in hosts):
+        return "sourceBinding.allowedHosts is not a list of hosts"
+    try:
+        release_day = dt.date.fromisoformat(
+            str(contract.get("resolutionDate") or window.get("end"))
+        )
+    except ValueError:
+        return "contract has no dated expectedReleaseWindow"
+    adapter = binding.get("adapter")
+    if adapter == NO_EXECUTOR_ADAPTER:
+        # Stricter than the main loop in one place, on purpose: the weekly
+        # claims leg routes by reference id and never reads the binding, so
+        # it would resolve a generic-url claims target. Registration cannot
+        # produce one (SERIES_BINDINGS forces alfred-fred), and a contract
+        # that names no executor is refused whatever would happen to it.
+        return (
+            f"sourceBinding.adapter is {NO_EXECUTOR_ADAPTER!r}: it names a page, "
+            "not an executor, and no adapter-routed resolver leg accepts it"
+        )
+
+    # One pending link, routed by the routers the main loop uses, so this
+    # gate cannot drift from them.
+    slug = str(contract.get("catalogSlug") or ref)
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": slug,
+                "resolutionDate": release_day.isoformat(),
+                "unit": contract.get("unit"),
+            }
+        ],
+        "resolutionLinks": [
+            {"status": "pending", "targetFactRef": ref, "forecastSlug": slug}
+        ],
+    }
+    claims = pending_claims_refs(log)
+    if claims:
+        fred_id, unit = _CLAIMS_PLAN[claims[0][2]]
+        if adapter != "alfred-fred" or binding.get("sourceSeriesId") != fred_id:
+            return (
+                f"the weekly claims executor reads ALFRED {fred_id}; the binding "
+                f"names adapter {adapter!r}, series "
+                f"{binding.get('sourceSeriesId')!r}"
+            )
+        if contract.get("unit") != unit:
+            return (
+                f"the weekly claims executor emits {unit!r}; the contract "
+                f"registers {contract.get('unit')!r}"
+            )
+        return None
+    routes = pending_adapter_refs(log, registrations={ref: registration})
+    if not routes:
+        return f"no resolver family routes dataPointId {ref!r}"
+    _, kind, spec, _, period, _, forecast = routes[0]
+    # The main loop's first refusal: a bounded family executes only a
+    # contract that registers its resolve-by-bound basis, and the reverse.
+    _, basis_refusal = effective_resolution_date_basis(ref, registration, spec)
+    if basis_refusal:
+        return f"resolution-date basis mismatch: {basis_refusal}"
+    if not adapter_unit_matches(spec, forecast):
+        return (
+            f"the {kind} executor emits {spec['unit']!r}; the contract registers "
+            f"{contract.get('unit')!r}"
+        )
+    mismatched = binding_adapter_mismatch(kind, dict(registration))
+    if mismatched:
+        return (
+            f"registered adapter {mismatched!r} is not one the {kind} family "
+            f"resolves ({sorted(FAMILY_ADAPTERS[kind])})"
+        )
+    check = EXECUTION_PLAN_FAMILY_CHECKS.get(kind)
+    if check is None:
+        return (
+            f"the {kind} family has no registration-time admission predicate, "
+            "so it cannot accept new registrations"
+        )
+    return check(registration, spec, period, release_day)
 
 
 def resolution_run_dir(retrieved_at: str) -> pathlib.Path:

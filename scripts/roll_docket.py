@@ -40,7 +40,11 @@ from ingest_challenge_submissions import (
     expired_unforecast_registrations,
     load_registered_targets,
 )
-from register_targets import derive_data_point_id
+from register_targets import (
+    build_contract,
+    derive_data_point_id,
+    execution_plan_refusal,
+)
 from thesis_log_client import load_thesis_log
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -983,6 +987,25 @@ def select_capped_targets(
     return targets, dropped
 
 
+def roll_execution_plan_refusal(target: dict) -> str | None:
+    """Why registration would refuse this candidate for lack of an executor.
+
+    A target whose contract cannot even be built returns None and keeps its
+    cap slot, as it always has: registration's ``--skip-unbindable`` report
+    names the binding error. A contract that builds but that the resolver
+    cannot judge is a refusal here, as it is in prospect validation.
+    """
+
+    try:
+        contract = build_contract(target, dt.date.today())
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return None
+    try:
+        return execution_plan_refusal({"contract": contract, "targetContentHash": None})
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:
+        return f"the resolver could not judge the contract: {exc}"
+
+
 def append_roll_candidate(
     candidates: list[tuple[int, str, dict | list[dict]]],
     priority: int,
@@ -1016,7 +1039,31 @@ def append_roll_candidate(
         else sorted(registered_data_point_ids.intersection(target_ids))
     )
     if not expired_in_unit and not registered_in_unit:
-        candidates.append((priority, sort_key, unit))
+        # A series the resolver cannot execute must not spend the cap, and
+        # must not mint another target: the cursor steps from the latest
+        # PUBLISHED period, so nothing else stops it. An id that is already
+        # registered is an existing contract and is not re-judged.
+        unexecutable = [
+            (target, refusal)
+            for target, data_point_id in zip(group, target_ids)
+            if data_point_id not in registered_data_point_ids
+            and (refusal := roll_execution_plan_refusal(target)) is not None
+        ]
+        if not unexecutable:
+            candidates.append((priority, sort_key, unit))
+            return
+        for target, refusal in unexecutable:
+            print(
+                f"  skip {target.get('catalogSlug', '?')}: no executable "
+                f"resolution plan — {refusal}"
+            )
+        for target in group:
+            if all(target is not refused for refused, _ in unexecutable):
+                print(
+                    f"  skip {target.get('catalogSlug', '?')}: conditional "
+                    "pair-mate has no executable resolution plan; refusing to "
+                    "split the pair"
+                )
         return
 
     for target, data_point_id in zip(group, target_ids):

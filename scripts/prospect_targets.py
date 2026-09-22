@@ -28,6 +28,7 @@ from register_targets import (
     REGISTRATION_SCHEMA,
     RegistrationError,
     build_contract,
+    execution_plan_refusal,
     parse_utc_instant,
     registration_content_hash,
 )
@@ -637,10 +638,12 @@ def _verify_retry_snapshot(
 
 def _validate_existing_registration(
     root: pathlib.Path, contract: dict[str, Any]
-) -> None:
+) -> bool:
+    """Whether this exact contract is already a current, retryable registration."""
+
     targets_root = root / "records" / "targets"
     if not targets_root.exists():
-        return
+        return False
     related: list[tuple[pathlib.Path, dict[str, Any], dict[str, Any]]] = []
     for path in sorted(targets_root.glob("*.json")):
         try:
@@ -679,7 +682,7 @@ def _validate_existing_registration(
         _verify_retry_snapshot(
             root, exact_current[0][0], exact_current[0][1], contract
         )
-        return
+        return True
     if any(
         snapshot.get("schemaVersion") in LEGACY_REGISTRATION_SCHEMAS
         and canonical_bytes(row) == canonical_bytes(contract)
@@ -695,6 +698,7 @@ def _validate_existing_registration(
         raise ProspectValidationError(
             "target was already attempted or conflicts with an existing registration"
         )
+    return False
 
 
 def validate_proposals(
@@ -757,10 +761,25 @@ def validate_proposals(
                 row_errors.append("duplicate series/period")
             if data_point_id in seen_ids:
                 row_errors.append("duplicate dataPointId")
+            already_registered = False
             try:
-                _validate_existing_registration(root, contract)
+                already_registered = _validate_existing_registration(root, contract)
             except ProspectValidationError as exc:
                 row_errors.append(str(exc))
+            # Bindable is not resolvable: a proposal becomes a registration,
+            # so it needs the same executable plan registration demands. The
+            # retry of an existing registration is not a new one. The
+            # post-commit replay sees the snapshot it just wrote and takes
+            # that branch, so both passes accept the same set.
+            if not row_errors and not already_registered:
+                try:
+                    refusal = execution_plan_refusal(
+                        {"contract": contract, "targetContentHash": None}
+                    )
+                except (AttributeError, KeyError, TypeError, ValueError) as exc:
+                    refusal = f"the resolver could not judge the contract: {exc}"
+                if refusal:
+                    row_errors.append(f"no executable resolution plan: {refusal}")
         if row_errors:
             slug = target.get("catalogSlug", "?") if isinstance(target, dict) else "?"
             detail = f"proposal {index} ({slug}): {'; '.join(row_errors)}"
