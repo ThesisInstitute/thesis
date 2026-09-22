@@ -332,17 +332,26 @@ def test_selection_binds_ladder_prompt_mode_sparsely(
         )
 
 
-def _published(slug: str, selected_at: str) -> dict:
+def _published(
+    slug: str,
+    selected_at: str,
+    *,
+    allow_conditional: bool = False,
+    registrations: dict | None = None,
+    generated: str | None = None,
+) -> dict:
     import datetime as dt
 
-    generated = ROOT.joinpath(*GENERATED_TARGETS_RELATIVE.parts).read_text()
+    if generated is None:
+        generated = ROOT.joinpath(*GENERATED_TARGETS_RELATIVE.parts).read_text()
     return published_target(
         ROOT,
         slug,
-        registrations_by_slug(ROOT),
+        registrations if registrations is not None else registrations_by_slug(ROOT),
         generated,
         head(),
         dt.datetime.fromisoformat(selected_at.replace("Z", "+00:00")),
+        allow_conditional=allow_conditional,
     )
 
 
@@ -506,7 +515,11 @@ def test_bill_selection_preserves_full_context_and_reverifies(
     )
     registrations = registrations_by_slug(ROOT)
     for target in payload["targets"]:
-        registration = registrations[target["catalogSlug"]][0]
+        registration = next(
+            row
+            for row in registrations[target["catalogSlug"]]
+            if row["relative"] == target["targetRegistrationPath"]
+        )
         contract = registration["contract"]
         assert target["anchors"] == entry["extras"]["anchors"]
         assert target["conditional"] == contract["conditional"]
@@ -563,6 +576,121 @@ def test_conditional_slugs_remain_ineligible_without_bill_plan() -> None:
         StrategyTargetError, match="conditional targets are not selectable"
     ):
         _published(ACTC_SLUG, "2026-09-21T19:00:00Z")
+
+
+@pytest.mark.parametrize(
+    "slug, published_hash",
+    [
+        (
+            ACTC_SLUG,
+            "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+        ),
+        (
+            "additional-child-tax-credit-total-claims-ty2027-current-law",
+            "b92e9752beaf38a9e2e735c5066e7c741e29436546e7fab2c8d0568f05355909",
+        ),
+    ],
+)
+def test_published_actc_binding_selects_exact_historical_registration(
+    slug: str, published_hash: str
+) -> None:
+    registrations = registrations_by_slug(ROOT)
+    original_paths = [row["relative"] for row in registrations[slug]]
+    # Both August 3 attempts are real, canonical v3 registrations. The
+    # published forecast binds the later ledger pin, regardless of hash order.
+    assert len(original_paths) == 2
+    target = _published(
+        slug,
+        "2026-09-21T19:00:00Z",
+        allow_conditional=True,
+        registrations=registrations,
+    )
+    assert target["targetContentHash"] == published_hash
+    assert target["targetRegistrationPath"] == (
+        f"records/targets/2026-08-03-{published_hash}.json"
+    )
+    assert target["registeredAtUtc"] == "2026-08-03T20:13:09Z"
+    assert target["registrationCommit"] == "a4f59c018641c8d772975263735424cb5d46bb25"
+    assert [row["relative"] for row in registrations[slug]] == original_paths
+
+
+@pytest.mark.parametrize("mutation", ["missing", "duplicate"])
+def test_selector_requires_exactly_one_published_registration_match(
+    mutation: str,
+) -> None:
+    registrations = registrations_by_slug(ROOT)
+    rows = registrations[ACTC_SLUG]
+    published = next(
+        row
+        for row in rows
+        if row["targetContentHash"]
+        == "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6"
+    )
+    if mutation == "missing":
+        rows.remove(published)
+    else:
+        rows.append(dict(published))
+    with pytest.raises(StrategyTargetError, match="unique published registration"):
+        _published(
+            ACTC_SLUG,
+            "2026-09-21T19:00:00Z",
+            allow_conditional=True,
+            registrations=registrations,
+        )
+
+
+@pytest.mark.parametrize(
+    "key, value, message",
+    [
+        ("targetContentHash", "0" * 64, "unique published registration"),
+        ("registeredAt", "2026-08-03T20:13:10Z", "unique published registration"),
+        ("dataPointId", "unregistered.actc", "unique published registration"),
+        ("unit", "count", "differs from registration.*unit"),
+    ],
+)
+def test_published_registration_binding_does_not_relax_contract_checks(
+    key: str, value: str, message: str
+) -> None:
+    from generate_ledger_targets import block_value
+
+    generated = ROOT.joinpath(*GENERATED_TARGETS_RELATIVE.parts).read_text()
+    block = generated_entry_for(
+        generated, "irs.actc.total_claims.2027.first_print.threshold_one_dollar"
+    ).group(0)
+    mutated = block.replace(
+        f"    {key}: {json.dumps(block_value(block, key))},",
+        f"    {key}: {json.dumps(value)},",
+    )
+    assert mutated != block
+    with pytest.raises(StrategyTargetError, match=message):
+        _published(
+            ACTC_SLUG,
+            "2026-09-21T19:00:00Z",
+            allow_conditional=True,
+            generated=generated.replace(block, mutated),
+        )
+
+
+@pytest.mark.parametrize("duplicate_slug", [False, True])
+def test_selector_rejects_ambiguous_generated_publication(
+    duplicate_slug: bool,
+) -> None:
+    generated = ROOT.joinpath(*GENERATED_TARGETS_RELATIVE.parts).read_text()
+    block = generated_entry_for(
+        generated, "irs.actc.total_claims.2027.first_print.threshold_one_dollar"
+    ).group(0)
+    duplicate = block
+    if not duplicate_slug:
+        # A different slug cannot publish a second binding for the same
+        # data-point identity either.
+        duplicate = block.replace(ACTC_SLUG, "different-actc-slug")
+    with pytest.raises(StrategyTargetError, match="unique generated ledger entry"):
+        _published(
+            ACTC_SLUG,
+            "2026-09-21T19:00:00Z",
+            allow_conditional=True,
+            generated=generated + "\n" + duplicate + "\n",
+        )
 
 
 def test_bill_selection_rejects_missing_sibling(

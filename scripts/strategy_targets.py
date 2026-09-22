@@ -27,7 +27,6 @@ from canonical_json import canonical_bytes, canonical_sha256
 from generate_ledger_targets import (
     block_value,
     generated_entry_blocks,
-    generated_entry_for,
 )
 from register_targets import (
     REGISTRATION_SCHEMA,
@@ -491,21 +490,39 @@ def published_target(
     *,
     allow_conditional: bool = False,
 ) -> dict[str, Any]:
-    candidates = registrations.get(slug, [])
+    blocks = [match.group(0) for match in generated_entry_blocks(generated_source)]
+    matching_blocks = [
+        block for block in blocks if block_value(block, "catalogSlug") == slug
+    ]
+    if len(matching_blocks) != 1:
+        raise StrategyTargetError(
+            f"target must have one unique generated ledger entry: {slug}"
+        )
+    block = matching_blocks[0]
+    data_point_id = block_value(block, "dataPointId")
+    if sum(block_value(row, "dataPointId") == data_point_id for row in blocks) != 1:
+        raise StrategyTargetError(
+            f"target must have one unique generated ledger entry: {slug}"
+        )
+    if block_value(block, "registrationState") != "published":
+        raise StrategyTargetError(f"target is not published: {slug}")
+    # Failed and superseded registrations remain immutable records. The
+    # published ledger entry identifies the one registration this comparison
+    # extends; neither the first nor the newest snapshot for a slug has that
+    # authority. Keep exact uniqueness after binding hash, instant and identity.
+    candidates = [
+        row
+        for row in registrations.get(slug, [])
+        if row["contract"].get("dataPointId") == data_point_id
+        and row["targetContentHash"] == block_value(block, "targetContentHash")
+        and row["snapshot"].get("registeredAtUtc") == block_value(block, "registeredAt")
+    ]
     if len(candidates) != 1:
         raise StrategyTargetError(
             f"target is not backed by one unique published registration: {slug}"
         )
     registration = candidates[0]
     contract = registration["contract"]
-    match = generated_entry_for(generated_source, str(contract["dataPointId"]))
-    if match is None:
-        raise StrategyTargetError(
-            f"published target has no generated ledger entry: {slug}"
-        )
-    block = match.group(0)
-    if block_value(block, "registrationState") != "published":
-        raise StrategyTargetError(f"target is not published: {slug}")
     if contract.get("conditional") is not None and not allow_conditional:
         # A free-form catalog slug cannot authorize a conditional arm. The
         # reviewed bill plan selects and authenticates both siblings together.
