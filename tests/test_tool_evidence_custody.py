@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import run_thesis_analyst as analyst  # noqa: E402
 import tool_evidence as evidence  # noqa: E402
+import tool_evidence_mcp as mcp  # noqa: E402
 import verify_custody as custody  # noqa: E402
 
 CREATED = "2030-01-01T00:00:00Z"
@@ -87,7 +88,9 @@ def write_stage(
     }
     (run_dir / f"{prefix}command.json").write_text(json.dumps(command))
     (run_dir / f"{prefix}codex_stdout.jsonl").write_text(
-        json.dumps(event_for(call), ensure_ascii=ensure_ascii) + "\n",
+        analyst.redact_stream_text(
+            json.dumps(event_for(call), ensure_ascii=ensure_ascii) + "\n"
+        ),
         encoding="utf-8",
     )
     return command, [
@@ -135,6 +138,288 @@ def test_failed_tool_is_preserved_as_a_failed_tool(tmp_path: pathlib.Path) -> No
 
 
 @pytest.mark.parametrize(
+    "source_text",
+    [
+        "count=1711.9\nCENSUS_API_KEY=planted-fixture-value",
+        '{"count":1711.9,"api_key":"planted-fixture-value"}',
+        "count=1711.9\nhttps://example.gov/?api_key=planted-fixture-value",
+        "count=1711.9\nghp_" + "PlantedFixtureValue",
+        "[" * 600 + r'{"api\u005fkey":"planted-fixture-value"}' + "]" * 600,
+        r'{"api\u005fkey":"planted-fixture-value",',
+        '{"api_key":"planted-fixture-value',
+        '{"api_key":"planted-fixture-value","api_key":"[REDACTED]"}',
+        r'{"api\u005fkey":"planted-fixture-value","api_key":"[REDACTED]"}',
+        '{"count":1e400,"api_key":"planted-fixture-value"}',
+    ],
+)
+def test_source_presentation_redaction_keeps_raw_capture_and_native_binding(
+    tmp_path: pathlib.Path, source_text: str
+) -> None:
+    # Synthetic sources exercise the known asymmetric-redaction bug. The failed
+    # ACTC run did not retain its native bytes, so this is not an incident replay.
+    body = source_text.encode()
+    response = {
+        "url": "https://example.gov/series.json",
+        "status": 200,
+        "headers": [["content-type", "application/json"]],
+        "bodyBase64": base64.b64encode(body).decode("ascii"),
+        "sha256": hashlib.sha256(body).hexdigest(),
+        "bytes": len(body),
+    }
+    command, entries = write_stage(
+        tmp_path,
+        tool="fetch_source",
+        arguments={"url": response["url"]},
+        fetcher=lambda _url: response,
+    )
+    capture = json.loads((tmp_path / "tool_evidence.json").read_text())
+    call = capture["calls"][0]
+    assert call["result"]["excerpt"] == source_text
+    assert call["response"] == response
+    assert base64.b64decode(call["response"]["bodyBase64"]) == body
+    assert evidence.verify_evidence(capture)["valid"]
+    native = (tmp_path / "codex_stdout.jsonl").read_text()
+    result = json.loads(native)["item"]["result"]
+    terminal = result["structured_content"]
+    assert terminal["result"]["excerpt"] != source_text
+    assert "planted-fixture-value" not in native
+    assert "PlantedFixtureValue" not in native
+    assert json.loads(result["content"][0]["text"]) == terminal
+    assert analyst.redact_stream_text(native) == native
+    check(tmp_path, command, entries)
+
+
+def test_benign_truncated_json_keeps_historical_terminal_projection(
+    tmp_path: pathlib.Path,
+) -> None:
+    body = b'{"history":[' + b"1711.9," * 1500 + b"0]}"
+    command, entries = write_stage(
+        tmp_path,
+        tool="fetch_source",
+        arguments={"url": "https://example.gov/series.json"},
+        fetcher=lambda url: {
+            "url": url,
+            "status": 200,
+            "headers": [["content-type", "application/json"]],
+            "bodyBase64": base64.b64encode(body).decode("ascii"),
+            "sha256": hashlib.sha256(body).hexdigest(),
+            "bytes": len(body),
+        },
+    )
+    capture = json.loads((tmp_path / "tool_evidence.json").read_text())
+    call = capture["calls"][0]
+    assert call["result"]["excerptTruncated"] is True
+    assert evidence.terminal_call(call) == {
+        key: value for key, value in call.items() if key != "response"
+    }
+    check(tmp_path, command, entries)
+
+
+def test_deep_structured_result_has_an_idempotent_bounded_presentation() -> None:
+    nested: Any = {"api_key": "planted-fixture-value"}
+    for _ in range(600):
+        nested = [nested]
+    call = {
+        "callId": "call-0002",
+        "tool": "extract_json",
+        "terminalProjectionVersion": evidence.TERMINAL_PROJECTION_VERSION,
+        "arguments": {"sourceCallId": "call-0001", "pointer": ""},
+        "status": "succeeded",
+        "result": {"value": nested},
+    }
+    terminal = evidence.terminal_call(call)
+    assert terminal["callId"] == call["callId"]
+    assert terminal["result"] == evidence.REDACTED_JSON
+    assert call["result"]["value"] is nested
+    stream = json.dumps(event_for(call)) + "\n"
+    assert analyst.redact_stream_text(stream) == stream
+    result = json.loads(stream)["item"]["result"]
+    assert json.loads(result["content"][0]["text"]) == result["structured_content"]
+    shaped = evidence.redact_json_value(nested)
+    for _ in range(600):
+        shaped = shaped[0]
+    assert shaped == {"api_key": "[REDACTED]"}
+    legacy_call = dict(call)
+    legacy_call.pop("terminalProjectionVersion")
+    assert evidence.terminal_call(legacy_call)["result"] is call["result"]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        b"[" * 100 + b"1" + b"]" * 100,
+        b'{"history":[' + b"1711.9," * 1500 + b"0]}",
+    ],
+)
+def test_legacy_deep_and_truncated_excerpts_keep_the_exact_native_projection(
+    tmp_path: pathlib.Path, body: bytes
+) -> None:
+    command, entries = write_stage(
+        tmp_path,
+        tool="fetch_source",
+        arguments={"url": "https://example.gov/series.json"},
+        fetcher=lambda url: {
+            "url": url,
+            "status": 200,
+            "headers": [["content-type", "application/json"]],
+            "bodyBase64": base64.b64encode(body).decode("ascii"),
+            "sha256": hashlib.sha256(body).hexdigest(),
+            "bytes": len(body),
+        },
+    )
+    evidence_path = tmp_path / "tool_evidence.json"
+    payload = json.loads(evidence_path.read_text())
+    call = payload["calls"][0]
+    call.pop("terminalProjectionVersion")
+    evidence_path.write_text(json.dumps(payload))
+    report = evidence.verify_evidence(payload)
+    report["evidenceSha256"] = hashlib.sha256(evidence_path.read_bytes()).hexdigest()
+    (tmp_path / "tool_evidence_verification.json").write_text(json.dumps(report))
+    legacy_terminal = {key: value for key, value in call.items() if key != "response"}
+    assert evidence.terminal_call(call) == legacy_terminal
+    # Historical native bytes are already archived; do not process them with
+    # today's sanitizer before replaying their old presentation contract.
+    (tmp_path / "codex_stdout.jsonl").write_text(json.dumps(event_for(call)) + "\n")
+    check(tmp_path, command, entries)
+
+
+@pytest.mark.parametrize("version", [None, False, True, 0, 2, 1.0, "1"])
+def test_unknown_or_noninteger_terminal_projection_version_is_refused(
+    tmp_path: pathlib.Path, version: Any
+) -> None:
+    write_stage(tmp_path)
+    payload = json.loads((tmp_path / "tool_evidence.json").read_text())
+    payload["calls"][0]["terminalProjectionVersion"] = version
+    report = evidence.verify_evidence(payload)
+    assert report["valid"] is False
+    assert "unsupported terminal projection version" in report["errors"][0]
+    with pytest.raises(evidence.EvidenceError, match="terminal projection version"):
+        evidence.terminal_call(payload["calls"][0])
+
+
+def test_terminal_projection_version_cannot_be_removed_from_captured_call(
+    tmp_path: pathlib.Path,
+) -> None:
+    command, entries = write_stage(tmp_path)
+    evidence_path = tmp_path / "tool_evidence.json"
+    payload = json.loads(evidence_path.read_text())
+    payload["calls"][0].pop("terminalProjectionVersion")
+    evidence_path.write_text(json.dumps(payload))
+    report = evidence.verify_evidence(payload)
+    assert report["valid"] is True  # The native event must bind the producer version.
+    report["evidenceSha256"] = hashlib.sha256(evidence_path.read_bytes()).hexdigest()
+    (tmp_path / "tool_evidence_verification.json").write_text(json.dumps(report))
+    with pytest.raises(
+        custody.CustodyError,
+        match=r"differs from its native event \(structuredContent, content\)",
+    ):
+        check(tmp_path, command, entries)
+
+
+def test_mcp_text_and_structured_extraction_share_the_same_safe_projection(
+    tmp_path: pathlib.Path,
+) -> None:
+    source = {
+        "api_key": "planted-fixture-value",
+        "note": "CENSUS_API_KEY=another-fixture-value",
+        "observations": [1711.9, 1716.8],
+    }
+    body = json.dumps(source).encode()
+    recorder = evidence.EvidenceRecorder(
+        tmp_path / "evidence.json",
+        fetcher=lambda url: {
+            "url": url,
+            "status": 200,
+            "headers": [["content-type", "application/json"]],
+            "bodyBase64": base64.b64encode(body).decode("ascii"),
+            "sha256": hashlib.sha256(body).hexdigest(),
+            "bytes": len(body),
+        },
+    )
+    recorder.call("fetch_source", {"url": "https://example.gov/series.json"})
+    reply = mcp.handle_request(
+        {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/call",
+            "params": {
+                "name": "extract_json",
+                "arguments": {"sourceCallId": "call-0001", "pointer": ""},
+            },
+        },
+        recorder,
+    )
+    call = recorder.payload["calls"][1]
+    assert call["result"]["value"] == source
+    assert evidence.verify_evidence(recorder.payload)["valid"]
+    native = event_for(call)
+    native["item"]["result"] = reply["result"]
+    stream = json.dumps(native) + "\n"
+    assert analyst.redact_stream_text(stream) == stream
+    result = reply["result"]
+    assert json.loads(result["content"][0]["text"]) == result["structuredContent"]
+    assert result["structuredContent"]["result"]["value"] == {
+        "api_key": "[REDACTED]",
+        "note": "CENSUS_API_KEY=[REDACTED]",
+        "observations": [1711.9, 1716.8],
+    }
+
+
+def test_failed_call_error_uses_the_same_bound_presentation(
+    tmp_path: pathlib.Path,
+) -> None:
+    error = "public source diagnostic CENSUS_API_KEY=planted-fixture-value"
+
+    def failed_fetch(_url: str) -> None:
+        raise evidence.EvidenceError(error)
+
+    command, entries = write_stage(
+        tmp_path,
+        tool="fetch_source",
+        arguments={"url": "https://example.gov/series.json"},
+        fetcher=failed_fetch,
+    )
+    capture = json.loads((tmp_path / "tool_evidence.json").read_text())
+    assert capture["calls"][0]["status"] == "failed"
+    assert capture["calls"][0]["error"] == error
+    stream = (tmp_path / "codex_stdout.jsonl").read_text()
+    assert "planted-fixture-value" not in stream
+    native = json.loads(stream)["item"]["result"]
+    assert native["is_error"] is True
+    assert json.loads(native["content"][0]["text"]) == native["structured_content"]
+    check(tmp_path, command, entries)
+
+
+def test_credential_shaped_numeric_input_names_keep_exact_argument_binding(
+    tmp_path: pathlib.Path,
+) -> None:
+    arguments = {"expression": "token + secret", "inputs": {"token": 1, "secret": 2}}
+    command, entries = write_stage(tmp_path, arguments=arguments)
+    native = json.loads((tmp_path / "codex_stdout.jsonl").read_text())["item"]
+    assert native["arguments"] == arguments
+    check(tmp_path, command, entries)
+
+
+def test_redacted_arguments_do_not_gain_the_result_presentation_exception(
+    tmp_path: pathlib.Path,
+) -> None:
+    # Arguments retain exact identity; presentation redaction is not permission
+    # to accept an arbitrary different input, including on a failed call.
+    command, entries = write_stage(
+        tmp_path,
+        arguments={
+            "expression": "x",
+            "inputs": {"x": "ghp_" + "PlantedFixtureValue"},
+        },
+    )
+    with pytest.raises(
+        custody.CustodyError, match=r"differs from its native event \(arguments\)"
+    ) as caught:
+        check(tmp_path, command, entries)
+    assert "PlantedFixtureValue" not in str(caught.value)
+
+
+@pytest.mark.parametrize(
     "arguments",
     [
         {"url": "http://example.gov/data.json"},
@@ -155,7 +440,9 @@ def test_rejected_fetch_binds_original_native_arguments_through_redaction(
 
     event["item"]["arguments"] = {"url": "https://example.gov/data.json"}
     events_path.write_text(json.dumps(event) + "\n")
-    with pytest.raises(custody.CustodyError, match="differs from its native event"):
+    with pytest.raises(
+        custody.CustodyError, match=r"differs from its native event \(arguments\)"
+    ):
         check(tmp_path, command, entries)
 
 
@@ -250,7 +537,10 @@ def test_native_event_must_agree_with_captured_call(
     else:
         item["result"]["is_error"] = True
     events_path.write_text(json.dumps(event) + "\n")
-    with pytest.raises(custody.CustodyError, match="differs from its native event"):
+    field = {"result": "structuredContent", "error": "isError"}.get(failure, failure)
+    with pytest.raises(
+        custody.CustodyError, match=rf"differs from its native event \({field}\)"
+    ):
         check(tmp_path, command, entries)
 
 

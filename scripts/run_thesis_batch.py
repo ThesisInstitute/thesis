@@ -35,6 +35,7 @@ DEFAULT_CODEX_MODEL = "gpt-5.5"
 TICKET_CONFLICT_FLAGS = (
     "--target",
     "--targets-file",
+    "--strategy-ledger-jsonl",
     "--max-targets",
     "--skip",
     "--max-failures",
@@ -407,6 +408,17 @@ def run_one(
                 ticket_context["nonce"],
             ]
         )
+    elif target.get("resolutionDateBasis") == "resolve-by-bound" and getattr(
+        args, "strategy_ledger_jsonl", None
+    ):
+        argv.extend(
+            [
+                "--strategy-selection",
+                str(args.targets_file),
+                "--strategy-ledger-jsonl",
+                str(args.strategy_ledger_jsonl),
+            ]
+        )
     if target.get("conditional"):
         argv.extend(["--conditional", target["conditional"]])
     if command:
@@ -515,6 +527,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--ticket")
     parser.add_argument("--target", action="append", type=parse_target)
     parser.add_argument("--targets-file")
+    parser.add_argument("--strategy-ledger-jsonl", type=pathlib.Path)
     parser.add_argument("--max-targets", type=int)
     parser.add_argument("--skip", type=int, default=0)
     parser.add_argument(
@@ -576,13 +589,15 @@ def main(
         out = (
             ticket_batch_path(repo_root, started_at, ticket)
             if ticket is not None
-            else pathlib.Path(args.out)
-            if args.out
-            else repo_root
-            / "records"
-            / "thesis-analyst"
-            / "batches"
-            / f"{slug_time(started_at)}.json"
+            else (
+                pathlib.Path(args.out)
+                if args.out
+                else repo_root
+                / "records"
+                / "thesis-analyst"
+                / "batches"
+                / f"{slug_time(started_at)}.json"
+            )
         )
     except (BatchRunError, TicketError, OSError) as exc:
         print(f"batch run refused: {exc}", file=sys.stderr)

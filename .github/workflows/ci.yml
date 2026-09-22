@@ -104,16 +104,30 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Install package with all extras
         run: uv sync --all-extras
+      - name: Check analyst runner lint
+        run: |
+          uv run ruff check scripts/run_thesis_analyst.py \
+            scripts/thesis_records_to_comparisons.py \
+            tests/test_thesis_analyst_runner.py \
+            tests/test_thesis_analyst_env_hygiene.py
       - name: Verify bill extraction, mapping and paired publication
         run: |
           uv run pytest -q \
+            tests/test_archive_strategy_attempt.py \
             tests/test_bill_forecast_plan.py \
             tests/test_ingest_bill.py \
             tests/test_map_bill_metrics.py \
             tests/test_strategy_targets.py \
+            tests/test_strategy_generation.py \
+            tests/test_strategy_suite.py \
             tests/test_strategy_publication.py \
             tests/test_strategy_comparisons.py \
-            tests/test_strategy_workflow.py
+            tests/test_strategy_workflow.py \
+            tests/test_tool_evidence.py \
+            tests/test_tool_evidence_custody.py \
+            tests/test_tool_evidence_runner.py \
+            tests/test_thesis_analyst_runner.py \
+            tests/test_thesis_analyst_env_hygiene.py
 
   wave-reproducibility:
     runs-on: ubuntu-latest

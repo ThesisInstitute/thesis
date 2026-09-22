@@ -451,6 +451,7 @@ def _validate_analyst_result(
     prompt_mode: str,
     lower: dt.datetime,
     upper: dt.datetime,
+    strategy_source_sha: str | None = None,
 ) -> tuple[pathlib.PurePosixPath, str | None]:
     target = result["target"]
     manifest_relative = _run_relative(result.get("manifestPath"))
@@ -463,6 +464,15 @@ def _validate_analyst_result(
     if canonical_bytes(manifest.get("targetContext")) != canonical_bytes(target):
         raise StrategyPublicationError("run targetContext differs from trusted target")
     _validate_manifest_identity(manifest, target, ("series", "period", "conditional"))
+    bounded_strategy = target.get("resolutionDateBasis") == "resolve-by-bound"
+    if bounded_strategy and (
+        not target.get("conditional")
+        or not strategy_source_sha
+        or manifest.get("checkoutSha") != strategy_source_sha
+    ):
+        raise StrategyPublicationError(
+            "bounded strategy run lacks its exact selected checkout and conditional target"
+        )
     expected_ok = result.get("ok") is True
     if manifest.get("ok") is not expected_ok:
         raise StrategyPublicationError("batch and run success status differ")
@@ -565,6 +575,9 @@ def _validate_analyst_result(
             # The staged bundle is data, not authority and may not even be a
             # Git checkout. Read reviewed authorization from trusted code.
             history_registry_root=ROOT,
+            trusted_strategy_target=target if bounded_strategy else None,
+            strategy_run_dir=manifest_path.parent,
+            strategy_run_relative=manifest_relative.parent,
         )
         if bool(report.get("ok")) != expected_ok:
             raise StrategyPublicationError(
@@ -593,6 +606,7 @@ def _validate_batch(
     prompt_mode: str,
     lower: dt.datetime,
     upper: dt.datetime,
+    strategy_source_sha: str | None = None,
 ) -> tuple[dict[str, dict[str, Any]], set[pathlib.PurePosixPath], dt.datetime]:
     batch = _load_object(_repo_file(repo, relative), "strategy batch")
     if batch.get("schemaVersion") != "thesis_batch_manifest_v1":
@@ -626,6 +640,7 @@ def _validate_batch(
             prompt_mode=prompt_mode,
             lower=lower,
             upper=upper,
+            strategy_source_sha=strategy_source_sha,
         )
         prefixes.add(manifest_relative.parent)
     return results, prefixes, batch_finish
@@ -820,6 +835,7 @@ def validate_tree(
             prompt_mode=expected_ladder_mode,
             lower=lower,
             upper=upper,
+            strategy_source_sha=selection["sourceSha"],
         )
         _claim_run_prefixes(prefixes, batch_prefixes)
         finishes.append(finished)
@@ -836,6 +852,7 @@ def validate_tree(
             prompt_mode="fast",
             lower=lower,
             upper=upper,
+            strategy_source_sha=selection["sourceSha"],
         )
         rollout_results[lane["index"]] = results
         _claim_run_prefixes(prefixes, batch_prefixes)

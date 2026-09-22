@@ -254,13 +254,11 @@ def test_suite_shape_rejects_batch_from_another_invocation(
     selection_path = write_selection(tmp_path)
     selection = json.loads(selection_path.read_text())
     suite = suite_payload(selection_path)
-    suite["lanes"]["ladder"]["batchManifest"] = (
-        "records/thesis-analyst/batches/2030-01-10/strategy-999-a1-ladder.json"
-    )
+    suite["lanes"]["ladder"][
+        "batchManifest"
+    ] = "records/thesis-analyst/batches/2030-01-10/strategy-999-a1-ladder.json"
 
-    with pytest.raises(
-        publication.StrategyPublicationError, match="trusted lane"
-    ):
+    with pytest.raises(publication.StrategyPublicationError, match="trusted lane"):
         publication._validate_suite_shape(
             suite,
             SUITE,
@@ -472,13 +470,55 @@ def test_publication_refuses_unreviewed_conditional_selection(tmp_path: pathlib.
         publication._validate_selection(path)
 
 
+@pytest.mark.parametrize("checkout", [None, "d" * 40])
+def test_bounded_strategy_publisher_requires_exact_selected_checkout(
+    tmp_path, checkout
+):
+    trusted = {
+        **target(),
+        "conditional": "The reviewed premise holds.",
+        "resolutionDateBasis": "resolve-by-bound",
+    }
+    relative = RUN_PREFIX / "manifest.json"
+    path = tmp_path.joinpath(*relative.parts)
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schemaVersion": "thesis_analyst_run_manifest_v1",
+                "promptMode": "ladder",
+                "targetContext": trusted,
+                "series": trusted["series"],
+                "period": trusted["period"],
+                "conditional": trusted["conditional"],
+                "checkoutSha": checkout,
+            }
+        )
+    )
+    with pytest.raises(
+        publication.StrategyPublicationError, match="exact selected checkout"
+    ):
+        publication._validate_analyst_result(
+            tmp_path,
+            {"target": trusted, "manifestPath": relative.as_posix()},
+            prompt_mode="ladder",
+            lower=publication._instant("2030-01-10T12:00:00Z", "lower"),
+            upper=publication._instant("2030-01-10T12:04:00Z", "upper"),
+            strategy_source_sha="c" * 40,
+        )
+
+
+@pytest.mark.parametrize("bounded", [False, True])
 def test_failed_wrong_premise_is_archived_but_cannot_claim_success(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
+    bounded: bool,
 ) -> None:
     import run_thesis_analyst
 
     trusted = {**target(), "conditional": "The exact registered legal premise."}
+    if bounded:
+        trusted["resolutionDateBasis"] = "resolve-by-bound"
     manifest_relative = RUN_PREFIX / "manifest.json"
     cells_relative = RUN_PREFIX / "cells.with_activity.json"
     manifest_path = tmp_path.joinpath(*manifest_relative.parts)
@@ -499,6 +539,7 @@ def test_failed_wrong_premise_is_archived_but_cannot_claim_success(
         "series": trusted["series"],
         "period": trusted["period"],
         "conditional": trusted["conditional"],
+        "checkoutSha": "c" * 40,
         "ok": False,
         "createdAt": "2030-01-10T12:01:00Z",
         "runStartedAt": "2030-01-10T12:01:00Z",
@@ -536,6 +577,9 @@ def test_failed_wrong_premise_is_archived_but_cannot_claim_success(
 
     def validate_failed(value, **kwargs):
         validations.append((value, kwargs["target_context"]))
+        assert kwargs["trusted_strategy_target"] == (trusted if bounded else None)
+        assert kwargs["strategy_run_dir"] == manifest_path.parent
+        assert kwargs["strategy_run_relative"] == manifest_relative.parent
         return {"ok": False}
 
     monkeypatch.setattr(run_thesis_analyst, "validate_cells", validate_failed)
@@ -543,6 +587,7 @@ def test_failed_wrong_premise_is_archived_but_cannot_claim_success(
         prompt_mode="ladder",
         lower=publication._instant("2030-01-10T12:00:00Z", "lower"),
         upper=publication._instant("2030-01-10T12:04:00Z", "upper"),
+        strategy_source_sha="c" * 40,
     )
     assert publication._validate_analyst_result(tmp_path, result, **kwargs) == (
         manifest_relative,
@@ -586,9 +631,7 @@ def test_ladder_lane_prompt_mode_binds_to_trusted_selection(
     # A recorded lane mode that matches the trusted default passes shape.
     suite = suite_payload(selection_path)
     suite["lanes"]["ladder"]["promptMode"] = "ladder"
-    publication._validate_suite_shape(
-        suite, SUITE, selection, selection_path, slug_map
-    )
+    publication._validate_suite_shape(suite, SUITE, selection, selection_path, slug_map)
 
     # A recorded mode differing from the trusted selection fails closed.
     suite = suite_payload(selection_path)
@@ -611,16 +654,12 @@ def test_ladder_lane_prompt_mode_binds_to_trusted_selection(
         publication.StrategyPublicationError,
         match="does not record the trusted non-default prompt mode",
     ):
-        publication._validate_suite_shape(
-            suite, SUITE, v2_selection, v2_path, slug_map
-        )
+        publication._validate_suite_shape(suite, SUITE, v2_selection, v2_path, slug_map)
 
     # ...and passes once it does.
     suite = suite_payload(v2_path)
     suite["lanes"]["ladder"]["promptMode"] = "ladder_v2"
-    publication._validate_suite_shape(
-        suite, SUITE, v2_selection, v2_path, slug_map
-    )
+    publication._validate_suite_shape(suite, SUITE, v2_selection, v2_path, slug_map)
 
     # Unexpected extra lane keys stay rejected.
     suite = suite_payload(selection_path)

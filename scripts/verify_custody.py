@@ -558,24 +558,31 @@ def verify_tool_evidence_stage(
             )
         except (KeyError, TypeError, ValueError):
             text_result = None
-        if (
-            item.get("tool") != call["tool"]
-            or item.get("status")
-            not in (
+        agreements = {
+            "tool": item.get("tool") == call["tool"],
+            "status": item.get("status")
+            in (
                 {"completed"}
                 if call["status"] == "succeeded"
                 else {"completed", "failed"}
-            )
-            or canonical_bytes(native_arguments) != canonical_bytes(call["arguments"])
-            or canonical_bytes(structured) != canonical_bytes(expected_result)
-            or canonical_bytes(text_result) != canonical_bytes(expected_result)
-            or any(
+            ),
+            "arguments": canonical_bytes(native_arguments)
+            == canonical_bytes(call["arguments"]),
+            "structuredContent": canonical_bytes(structured)
+            == canonical_bytes(expected_result),
+            "content": canonical_bytes(text_result) == canonical_bytes(expected_result),
+            "isError": not any(
                 key in result and result[key] is not (call["status"] == "failed")
                 for key in ("isError", "is_error")
-            )
-        ):
+            ),
+        }
+        mismatches = [field for field, agrees in agreements.items() if not agrees]
+        if mismatches:
+            # Field names are useful even if a failed run's artifacts were not
+            # uploaded. Never echo source values or native argument contents.
             raise CustodyError(
                 f"{prefix}tool evidence call {call_id} differs from its native event"
+                f" ({', '.join(mismatches)})"
             )
         matched.add(call_id)
     if not failed_stage and matched != set(calls):

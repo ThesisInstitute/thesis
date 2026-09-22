@@ -59,6 +59,16 @@ same deterministic argument projection, so a rejected HTTP URL followed by a
 successful HTTPS retry remains auditable. The runner separately redacts URL
 credentials from native logs before sealing them; evidence sanitization alone
 would not remove a secret from the model platform's original event stream.
+The MCP terminal presentation applies that same redaction before replying, so
+its text JSON and structured result remain identical after native-log hygiene.
+New calls bind `terminalProjectionVersion: 1` in both the capture and native
+result. Calls without that field retain the original exact presentation for
+historical custody replay; unknown versions are refused. Excessively nested
+JSON uses a bounded presentation marker without changing captured source data.
+Complete source bytes and replayable results remain unchanged in the capture;
+custody compares the exact deterministic presentation, without accepting other
+result differences. Arguments still require exact identity except for the
+existing rejected-URL projection. Mismatch diagnostics list field names only.
 
 `scripts/verify_custody.py` recomputes the report and checks captured calls
 against recorded MCP completion events. The attested publisher also checks

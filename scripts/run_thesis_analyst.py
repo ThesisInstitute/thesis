@@ -60,6 +60,19 @@ from history_floor import (
     history_floor_requires_authorization,
     reviewed_history_floor_authorization,
 )
+from tool_evidence import (
+    ENV_SECRET_ASSIGNMENT_RE as ENV_SECRET_ASSIGNMENT_RE,
+)
+from tool_evidence import (
+    JSON_SECRET_FIELD_RE as JSON_SECRET_FIELD_RE,
+)
+from tool_evidence import (
+    REDACTED_PLACEHOLDER as REDACTED_PLACEHOLDER,
+)
+from tool_evidence import (
+    SECRET_TOKEN_RE as SECRET_TOKEN_RE,
+)
+from tool_evidence import redact_json_value, redact_text
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 AGENT_ROOT = ROOT / "agents" / "thesis-analyst"
@@ -608,6 +621,15 @@ def format_target_context(target_context: dict[str, Any] | None) -> str:
         value = target_context.get(key)
         if value not in (None, ""):
             lines.append(f"- {key}: {json.dumps(value, sort_keys=True)}")
+    if target_context.get("anchors"):
+        lines += [
+            "",
+            "Reviewed anchors are cross-checks, not the full historical reference "
+            "class or a history-floor waiver. Fetch at least six distinct "
+            "canonical official prints when available, including earlier "
+            "years if the recent table exposes fewer. Do not count an anchor "
+            "as a fetched print without its official source.",
+        ]
     published_date = target_context.get("publishedResolutionDate")
     if target_context.get("comparisonTarget") is True and published_date not in (
         None,
@@ -1403,37 +1425,6 @@ AGENT_ENV_ALLOWLIST = (
     "CODEX_HOME",
 )
 
-REDACTED_PLACEHOLDER = "[REDACTED]"
-
-# `NAME=value` lines for credential-shaped env var names: the incident shape.
-ENV_SECRET_ASSIGNMENT_RE = re.compile(
-    r"([A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)=\S+"
-)
-
-# `"name": "value"` JSON fields with credential-shaped names — catches an
-# agent cat-ing auth/config files (auth.json and friends) into its trace.
-JSON_SECRET_FIELD_RE = re.compile(
-    r"\"([A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)\"\s*:\s*\"[^\"]*\"",
-    re.IGNORECASE,
-)
-
-# Well-known credential token formats (the incident list plus legacy
-# OpenAI `sk-` keys, which auth.json can hold under API-key login).
-SECRET_TOKEN_RE = re.compile(
-    "|".join(
-        [
-            r"sk-(?:ant|proj|or)-[A-Za-z0-9_-]+",  # Anthropic/OpenAI/OpenRouter
-            r"sk-[A-Za-z0-9]{20,}",  # legacy OpenAI secret keys
-            r"ghp_[A-Za-z0-9]+",  # GitHub classic PAT
-            r"github_pat_[A-Za-z0-9_]+",  # GitHub fine-grained PAT
-            r"xox[bp]-[A-Za-z0-9-]+",  # Slack bot/user tokens
-            r"AIza[A-Za-z0-9_-]+",  # Google API keys
-            r"eyJhbGciOi[A-Za-z0-9_.=-]+",  # JWTs (Supabase service keys, ...)
-            r"AKIA[A-Z0-9]+",  # AWS access key ids
-        ]
-    )
-)
-
 
 def agent_subprocess_env(
     overrides: dict[str, str] | None = None,
@@ -1445,44 +1436,6 @@ def agent_subprocess_env(
     if overrides:
         env.update(overrides)
     return env
-
-
-def redact_text(text: str) -> str:
-    """Redact credential values from plain text (idempotent)."""
-    if not text:
-        return text
-    from tool_evidence import REDACTED_URL, url_contains_credentials
-
-    text = re.sub(
-        r"https?://[^\s\"'<>\\]+",
-        lambda match: REDACTED_URL if url_contains_credentials(match[0]) else match[0],
-        text,
-        flags=re.IGNORECASE,
-    )
-    text = ENV_SECRET_ASSIGNMENT_RE.sub(rf"\1={REDACTED_PLACEHOLDER}", text)
-    text = JSON_SECRET_FIELD_RE.sub(rf'"\1": "{REDACTED_PLACEHOLDER}"', text)
-    return SECRET_TOKEN_RE.sub(REDACTED_PLACEHOLDER, text)
-
-
-def redact_json_value(value: Any) -> Any:
-    if isinstance(value, str):
-        from tool_evidence import REDACTED_URL, url_contains_credentials
-
-        if re.match(r"https?://", value, re.IGNORECASE) and url_contains_credentials(
-            value
-        ):
-            return REDACTED_URL
-        return redact_text(value)
-    if isinstance(value, list):
-        return [redact_json_value(item) for item in value]
-    if isinstance(value, dict):
-        return {
-            (redact_text(key) if isinstance(key, str) else key): (
-                redact_json_value(item)
-            )
-            for key, item in value.items()
-        }
-    return value
 
 
 def redact_stream_line(line: str) -> str:
@@ -2909,6 +2862,9 @@ def validate_cells(
     series: Any = None,
     target_period: Any = None,
     history_registry_root: pathlib.Path | None = None,
+    trusted_strategy_target: dict[str, Any] | None = None,
+    strategy_run_dir: pathlib.Path | None = None,
+    strategy_run_relative: pathlib.PurePosixPath | None = None,
 ) -> dict[str, Any]:
     sys.path.insert(0, str(SCRIPTS))
     try:
@@ -2926,6 +2882,16 @@ def validate_cells(
     ok = True
     trusted_history_authorization = None
     authorization_error = None
+    strategy_errors: list[str] = []
+    if trusted_strategy_target is not None:
+        from strategy_generation import bounded_strategy_evidence_errors
+
+        if strategy_run_dir is None or strategy_run_relative is None:
+            strategy_errors = ["bounded strategy lacks native run evidence"]
+        else:
+            strategy_errors = bounded_strategy_evidence_errors(
+                strategy_run_dir, strategy_run_relative, trusted_strategy_target
+            )
     if any(history_floor_requires_authorization(cell, agent_version) for cell in cells):
         try:
             trusted_history_authorization = reviewed_history_floor_authorization(
@@ -2944,7 +2910,9 @@ def validate_cells(
             generation_ticket=generation_ticket,
             agent_version=agent_version,
             trusted_history_authorization=trusted_history_authorization,
+            trusted_strategy_target=trusted_strategy_target,
         )
+        errors.extend(strategy_errors)
         if allow_existing_slug:
             errors = [error for error in errors if "slug collides" not in error]
         if authorization_error:
@@ -3615,6 +3583,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--period", required=True)
     parser.add_argument("--conditional")
     parser.add_argument("--target-context-json")
+    parser.add_argument("--strategy-selection", type=pathlib.Path)
+    parser.add_argument("--strategy-ledger-jsonl", type=pathlib.Path)
     parser.add_argument("--ticket-id")
     parser.add_argument("--ticket-path")
     parser.add_argument("--ticket-nonce")
@@ -3741,6 +3711,52 @@ def parse_target_context(value: str | None) -> dict[str, Any] | None:
     return parsed
 
 
+def parse_strategy_generation_context(
+    args: argparse.Namespace,
+    target: dict[str, Any] | None,
+    *,
+    run_started_at: str,
+    generation_ticket: dict[str, str] | None,
+) -> dict[str, Any] | None:
+    selection_path = getattr(args, "strategy_selection", None)
+    ledger_path = getattr(args, "strategy_ledger_jsonl", None)
+    if selection_path is None and ledger_path is None:
+        return None
+    if selection_path is None or ledger_path is None:
+        raise SystemExit("bounded strategy requires both selection and pinned ledger")
+    if (
+        generation_ticket is not None
+        or not isinstance(target, dict)
+        or args.command is not None
+        or args.response_file is not None
+        or args.mock_cell
+        or args.pre_submit_review_command is not None
+        or not args.codex_model
+        or not args.pre_submit_review_codex_model
+        or args.prompt_mode not in {"ladder", "ladder_v2"}
+        or args.codex_sandbox != "read-only"
+        or args.codex_network
+        or args.no_codex_search
+        or args.codex_reasoning_effort != "low"
+    ):
+        raise SystemExit(
+            "bounded strategy requires the reviewed native Codex ladder lane"
+        )
+    from strategy_generation import authenticate_strategy_target
+
+    try:
+        return authenticate_strategy_target(
+            root=ROOT,
+            selection_path=selection_path,
+            ledger_path=ledger_path,
+            target=target,
+            run_started_at=run_started_at,
+            prompt_mode=args.prompt_mode,
+        )
+    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+        raise SystemExit(f"bounded strategy authentication failed: {exc}") from exc
+
+
 def run_forecaster(
     args: argparse.Namespace,
     *,
@@ -3818,9 +3834,15 @@ def main() -> int:
     run_at = utc_now()
     checkout_sha = workspace_checkout_sha()
     target_context = parse_target_context(args.target_context_json)
+    trusted_strategy_target = parse_strategy_generation_context(
+        args,
+        target_context,
+        run_started_at=run_at,
+        generation_ticket=generation_ticket,
+    )
     announcement_url = (
         target_announcement_url(target_context)
-        if generation_ticket is not None
+        if generation_ticket is not None or trusted_strategy_target is not None
         else None
     )
     prompt, meta = build_run_prompt(
@@ -3889,7 +3911,7 @@ def main() -> int:
 
     def collect_hygiene(stage_result: dict[str, Any]) -> dict[str, Any]:
         nonlocal hygiene_guarded
-        if generation_ticket is not None:
+        if generation_ticket is not None or trusted_strategy_target is not None:
             stage_result = enforce_ticket_codex_stream_binding(stage_result)
         if "workspaceMutations" in stage_result:
             hygiene_guarded = True
@@ -4268,6 +4290,9 @@ def main() -> int:
             checkout_sha=checkout_sha,
             series=args.series,
             target_period=args.period,
+            trusted_strategy_target=trusted_strategy_target,
+            strategy_run_dir=out_dir,
+            strategy_run_relative=pathlib.PurePosixPath(repo_relative(out_dir)),
         )
     except (
         ValueError,
@@ -4322,7 +4347,8 @@ def main() -> int:
         refs,
         runtime_meta,
         pre_submit_review,
-        force_model=generation_ticket is not None,
+        force_model=generation_ticket is not None
+        or trusted_strategy_target is not None,
     )
     cells_path = out_dir / "cells.with_activity.json"
     cells_path.write_text(json.dumps(cells_with_activity, indent=2) + "\n")

@@ -51,7 +51,10 @@ def test_strategy_workflow_reuses_trusted_attempt_on_failed_job_reruns() -> None
     assert "name: ${{ steps.invocation.outputs.publication_artifact }}" in publish
     assert "RUN_ATTEMPT: ${{ steps.invocation.outputs.run_attempt }}" in publish
     assert "GITHUB_RUN_ATTEMPT" not in generate
-    assert "github.run_attempt" not in generate
+    diagnostic_start = generate.index("Archive the strategy attempt for diagnosis")
+    diagnostic_end = generate.index("Stage one exact-scope strategy bundle")
+    authoritative_generation = generate[:diagnostic_start] + generate[diagnostic_end:]
+    assert "github.run_attempt" not in authoritative_generation
     assert "github.run_attempt" not in publish
 
 
@@ -81,3 +84,30 @@ def test_final_push_rechecks_deadlines_after_potentially_slow_builds() -> None:
     assert 'gh api "repos/$LEDGER_REPOSITORY/commits/$LEDGER_BRANCH"' in before_push
     assert 'scripts/strategy_targets.py ensure-open' in before_push
     assert '--checked-at-utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"' in before_push
+
+
+def test_strategy_generation_uses_the_attested_checkout_interpreter() -> None:
+    generate = job_block(WORKFLOW.read_text(), "generate", "publish")
+    prepare = generate.index("uv sync --locked --extra custody")
+    run = generate.index(".venv/bin/python scripts/run_strategy_suite.py")
+    assert prepare < run
+    assert "python3 scripts/run_strategy_suite.py" not in generate
+    assert "--selection-ledger-jsonl /tmp/pinned-ledger.jsonl" in generate
+
+
+def test_diagnostic_attempt_upload_precedes_custody_staging_and_is_not_published() -> None:
+    source = WORKFLOW.read_text()
+    generate = job_block(source, "generate", "publish")
+    publish = job_block(source, "publish", None)
+    archive = generate.index("Archive the strategy attempt for diagnosis")
+    upload = generate.index("Upload the diagnostic attempt independently of publication")
+    stage = generate.index("Stage one exact-scope strategy bundle")
+    assert archive < upload < stage
+    for block in (generate[archive:upload], generate[upload:stage]):
+        assert "always()" in block
+        assert "steps.suite.outcome != 'skipped'" in block
+    assert "strategy-attempt-" not in publish
+    assert "strategy-attempt-diagnostic" not in publish
+    assert "-execution-${{ github.run_attempt }}" in generate[upload:stage]
+    assert "include-hidden-files: true" in generate[upload:stage]
+    assert "overwrite: true" not in generate[upload:stage]
