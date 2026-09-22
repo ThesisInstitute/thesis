@@ -2,9 +2,9 @@
   "schemaVersion": "thesis_bill_forecast_bindings_v1",
   "bills": {
     "s3596-119": {
-      "artifactSha256": "4965161e2b8e4659ff348ae03f9702f002c6808abedcc5ebcf8fb673a589622f",
-      "sourceTextSha256": "f4ba370356f81df89dace5e75f1bde59704191340b571158a258d6c9bed8b65a",
-      "sourceUrl": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.htm",
+      "artifactSha256": "9ed0283aee4a7b9030b7fd3bc7bc73594bdb411f40c79db2759a9ae1b45aedb4",
+      "sourceTextSha256": "c45170c8e73d94d2d9b542135dc9e0abba2361fb0d9658422788fc3e3d865352",
+      "sourceUrl": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml",
       "pairs": [
         {
           "series": "irs.actc.total_claims",

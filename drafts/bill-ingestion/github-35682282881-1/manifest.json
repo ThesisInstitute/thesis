@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "thesis_bill_ingestion_v1",
+  "runId": "github-35682282881-1",
+  "status": "proposed",
+  "proposalOnly": true,
+  "slug": "s3596-119",
+  "startedAt": "2026-09-22T03:12:45+00:00",
+  "model": "gpt-5.5",
+  "trust": "unreviewed-agent-proposal",
+  "error": null,
+  "workflow": {
+    "repository": "ThesisInstitute/thesis",
+    "runId": "35682282881",
+    "runAttempt": "1",
+    "triggerGitSha": "5261d708edc0b43847cc25bbdc10dfae710409b6",
+    "ref": "refs/heads/main",
+    "sourceGitSha": "5261d708edc0b43847cc25bbdc10dfae710409b6"
+  },
+  "catalog": {
+    "repository": "PolicyEngine/chronicle",
+    "commit": "3dd95a0dd7eb48b84ce56a84e02742c4b76c4c0c",
+    "sha256": "43b1d77de97aeb3bf4a211d749ed204b630e27c0fccf20a28f116285af132bbb",
+    "bytes": 204238
+  },
+  "docket": {
+    "sha256": "481c235c32faf0109e6ea98f197cbeff0702f8ef61c8ec1d42719c9eedcf35ea",
+    "bytes": 89163
+  },
+  "source": {
+    "textSha256": "c45170c8e73d94d2d9b542135dc9e0abba2361fb0d9658422788fc3e3d865352",
+    "metaSha256": "8daac454ca1a28fae4a42503c318e31c66eced986cc51aa9bd0d2f86b25a118b",
+    "sourceUrl": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml",
+    "resolvedVia": "congress.gov-api",
+    "originalBytesSha256": "fc2cc14fa86b484ba0664cc1cfe7b92fa69279fe416aa745a1daebcda18fada3"
+  },
+  "returnCode": 0,
+  "openIngestionRequests": 0,
+  "finishedAt": "2026-09-22T03:13:09+00:00",
+  "artifacts": [
+    {
+      "path": "bill.json",
+      "sha256": "400484afe85ca827f4612914a91c12730e6393a7482321e911f4d94ab0aefbd5",
+      "bytes": 7699
+    },
+    {
+      "path": "bill.mapped.json",
+      "sha256": "ac814c483ac7d60f52f5d0f3b262a14a0cd3f36b5701a5695f0aa59ea32cd681",
+      "bytes": 8165
+    },
+    {
+      "path": "catalog.json",
+      "sha256": "43b1d77de97aeb3bf4a211d749ed204b630e27c0fccf20a28f116285af132bbb",
+      "bytes": 204238
+    },
+    {
+      "path": "command.json",
+      "sha256": "761068e975f1575166dbefbfe73936ec2a3779aa72e0e6fc38f90943310eca03",
+      "bytes": 755
+    },
+    {
+      "path": "docket.json",
+      "sha256": "481c235c32faf0109e6ea98f197cbeff0702f8ef61c8ec1d42719c9eedcf35ea",
+      "bytes": 89163
+    },
+    {
+      "path": "fetch.log",
+      "sha256": "61b9fe3fb3901570930caf15390b983f9ecc9a9052e695e465814c4303e792eb",
+      "bytes": 51
+    },
+    {
+      "path": "ingestion-requests.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "bytes": 3
+    },
+    {
+      "path": "mapping.json",
+      "sha256": "a00fd08fe239f60426fc90cae1467119345a1f5aba6398df8190dc66920feb17",
+      "bytes": 4169
+    },
+    {
+      "path": "output.schema.json",
+      "sha256": "aab17e544353c9f1a3fa0fe23c772f13dfb10ee6124c9cc3763d8bcc47550fdb",
+      "bytes": 3659
+    },
+    {
+      "path": "prompt.md",
+      "sha256": "c08824020a4e999da20fe429f53895ddcfcfc853b6ff1a66b6ed65dd254b2905",
+      "bytes": 83895
+    },
+    {
+      "path": "raw_response.txt",
+      "sha256": "12eda89408db6952b052424ece24aac43a30685e4baae73971a64e6ba73ac67b",
+      "bytes": 6047
+    },
+    {
+      "path": "source.bin",
+      "sha256": "fc2cc14fa86b484ba0664cc1cfe7b92fa69279fe416aa745a1daebcda18fada3",
+      "bytes": 2928
+    },
+    {
+      "path": "source.meta.json",
+      "sha256": "8daac454ca1a28fae4a42503c318e31c66eced986cc51aa9bd0d2f86b25a118b",
+      "bytes": 509
+    },
+    {
+      "path": "source.txt",
+      "sha256": "c45170c8e73d94d2d9b542135dc9e0abba2361fb0d9658422788fc3e3d865352",
+      "bytes": 1108
+    },
+    {
+      "path": "stderr.txt",
+      "sha256": "fe9c5edcf729ad1a093a606e1877c049c2a5576be05f02ed658c59481167c96f",
+      "bytes": 210
+    },
+    {
+      "path": "stdout.txt",
+      "sha256": "e8a5496483c9ac1a5bae56d59ebd892f63881ab60190c6111bae7364a530121b",
+      "bytes": 6664
+    },
+    {
+      "path": "system.md",
+      "sha256": "015421cb3c68836b969fa4d73cc370d113c5d08f501ad6759b8edecf5730ce55",
+      "bytes": 3585
+    },
+    {
+      "path": "validation.json",
+      "sha256": "b9d085322295af1db35dcd1d8939e7d32655b97dceb9c4209c51494b667bded3",
+      "bytes": 63
+    }
+  ]
+}

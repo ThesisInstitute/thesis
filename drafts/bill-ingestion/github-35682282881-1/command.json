@@ -1,0 +1,37 @@
+{
+  "argv": [
+    "codex",
+    "exec",
+    "--json",
+    "--ignore-user-config",
+    "--skip-git-repo-check",
+    "--disable",
+    "shell_tool",
+    "-c",
+    "web_search=\"disabled\"",
+    "-c",
+    "model_reasoning_effort=\"high\"",
+    "-m",
+    "gpt-5.5",
+    "--output-schema",
+    "/tmp/thesis-bill-extraction-8oglmu_7/output.schema.json",
+    "-o",
+    "/tmp/thesis-bill-extraction-8oglmu_7/last-message.json",
+    "-s",
+    "read-only",
+    "-C",
+    "/tmp/thesis-bill-extraction-8oglmu_7",
+    "-"
+  ],
+  "stdin": "prompt.md",
+  "cwd": "/tmp/thesis-bill-extraction-8oglmu_7",
+  "environmentKeys": [
+    "CODEX_HOME",
+    "HOME",
+    "LANG",
+    "PATH"
+  ],
+  "timeoutSeconds": 1200,
+  "shell": false,
+  "tools": "shell and web search disabled"
+}

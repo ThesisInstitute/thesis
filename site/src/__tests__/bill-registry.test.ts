@@ -160,13 +160,29 @@ describe("bill metric docket mapping", () => {
   });
 
   it("resolves S3596's reviewed legacy ACTC hint to its admitted Chronicle identity", () => {
-    const legacy = getBill("s3596-119")?.provisions
+    // Historical July analysis used this alias. Keep testing the committed
+    // alias review even when the promoted analysis uses the canonical name.
+    const legacy = metric({
+      series_hint: "irs.soi.additional_child_tax_credit_returns",
+    });
+    expect(metricRegistryStatus(legacy)).toMatchObject({
+      status: "reachable",
+      series: "irs.actc.total_claims",
+      ledger: {
+        uuid: "23396038-b31d-43cd-be08-4aa9fe916b56",
+        concept: "irs.actc.total_claims",
+      },
+    });
+  });
+
+  it("resolves the promoted S3596 ACTC metric to its reviewed Chronicle identity", () => {
+    const canonical = getBill("s3596-119")?.provisions
       .flatMap((provision) => provision.metrics)
       .find((candidate) =>
-        candidate.series_hint === "irs.soi.additional_child_tax_credit_returns",
+        candidate.series_hint === "irs.actc.total_claims",
       );
-    expect(legacy).toBeDefined();
-    expect(metricRegistryStatus(legacy!)).toMatchObject({
+    expect(canonical).toBeDefined();
+    expect(metricRegistryStatus(canonical!)).toMatchObject({
       status: "reachable",
       series: "irs.actc.total_claims",
       ledger: {
