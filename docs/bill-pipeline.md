@@ -34,6 +34,15 @@ a reviewed PR, retaining the source/provenance and attempt link. Do not copy
 the `.mapped.json` into the bill index; it is a proposal annotated with the
 mapping snapshot. Bill pages recompute admission against the current docket.
 
+When XML extraction flattens section headings, promotion can retain a reviewed
+`bills/raw/<slug>.sections.json` with `sourceTextSha256` and a `sections` map
+from section numbers to complete, exact source substrings. The site uses it
+only if the existing text parser finds no section, the source-byte hash matches,
+and every supplied span remains verbatim. Review establishes section boundaries;
+these checks prevent stale source versions or edited excerpts from displaying.
+Archive the original extraction unchanged and record every promotion edit in
+`bills/provenance/<slug>/`, including retained historical compute evidence.
+
 Every outcome without an admitted series produces an explicit open request:
 identify the precise official series; ingest witnessed first prints into
 Chronicle; implement or reuse a resolvable adapter; independently verify

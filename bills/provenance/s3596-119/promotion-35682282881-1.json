@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "thesis_bill_promotion_v1",
+  "billSlug": "s3596-119",
+  "reviewedAt": "2026-09-22T03:16:26.463700+00:00",
+  "workflowUrl": "https://github.com/ThesisInstitute/thesis/actions/runs/35682282881",
+  "workflowRunId": 35682282881,
+  "workflowRunAttempt": 1,
+  "artifactId": 10674583791,
+  "artifactArchiveDigest": "sha256:0cd427576b6c36dc8ba91768cfd060c76fbeb56ca721c905be513087e2f051ee",
+  "archivedManifest": "drafts/bill-ingestion/github-35682282881-1/manifest.json",
+  "archivedManifestSha256": "528381eb310800cc4d99566bbc79f57953252ff60cd49326aed2a130cef88a24",
+  "sourceCommit": "5261d708edc0b43847cc25bbdc10dfae710409b6",
+  "chronicleCommit": "3dd95a0dd7eb48b84ce56a84e02742c4b76c4c0c",
+  "originalDraftSha256": "400484afe85ca827f4612914a91c12730e6393a7482321e911f4d94ab0aefbd5",
+  "previousBill": {
+    "commit": "5261d708edc0b43847cc25bbdc10dfae710409b6",
+    "path": "bills/s3596-119.json",
+    "sha256": "4965161e2b8e4659ff348ae03f9702f002c6808abedcc5ebcf8fb673a589622f"
+  },
+  "promotedBill": {
+    "path": "bills/s3596-119.json",
+    "sha256": "9ed0283aee4a7b9030b7fd3bc7bc73594bdb411f40c79db2759a9ae1b45aedb4"
+  },
+  "sourceTextSha256": "c45170c8e73d94d2d9b542135dc9e0abba2361fb0d9658422788fc3e3d865352",
+  "sourceUrl": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml",
+  "independentArtifactReview": {
+    "reviewer": "bill_pipeline_audit",
+    "result": "approved-with-recorded-corrections"
+  },
+  "selectedArtifactHashesVerified": true,
+  "changes": [
+    "Title identifies quoted Section 2; exact quote unchanged.",
+    "Restore reviewed statutory context and clarify operative $2,500 baseline, literal $3,000 amendment and repeal of section 24(h)(6).",
+    "Keep separate dollar and claim-count outcomes; specify registered claims measure as returns in millions. No new dollar pair.",
+    "Reject broad Treasury deficit as a measure of this provision; preserve original proposal unchanged.",
+    "Restore low-earner take-up measurement gap and explicit open admission work.",
+    "Align outcome periods and conditional sketches with unchanged reviewed TY2027/CY2027 non-exhaustive contracts and lab-committed release bounds.",
+    "Preserve historical compute object exactly once, including uncertified pairing caveat. No PolicyEngine rerun.",
+    "Keep pages=0 as unknown for XML; no inferred pagination.",
+    "Retain historical Axiom enrichment with separate provenance; no new Axiom run.",
+    "Promoted raw sidecar names actual destination files; archived source metadata unchanged.",
+    "Preserve Section 2 expansion using a reviewed complete XML section span bound to the exact raw text hash and exact substring; source bytes unchanged."
+  ],
+  "legalContextSources": [
+    "https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section24&num=0&edition=prelim",
+    "https://www.irs.gov/pub/irs-irbs/irb26-38.pdf"
+  ],
+  "legalContextReviewDate": "2026-09-21",
+  "rejectedMetrics": [
+    {
+      "originalMetricIndex": 3,
+      "seriesHint": "treasury.mts.monthly_deficit",
+      "reason": "Aggregate federal deficit is dominated by unrelated policy and economic changes; it is context, not a sufficiently specific outcome of this provision."
+    }
+  ],
+  "admissionWork": [
+    {
+      "metricIndex": 3,
+      "status": "open",
+      "seriesHint": "",
+      "request": "Identify an official repeatable ACTC claims measure for earnings below the operative threshold; review precise subgroup scope, Chronicle first-print history, resolver, anchors and docket admission. No adjacent context-series substitution.",
+      "currentLimitation": "No official series separates ACTC claims by earnings band at the threshold margin in a timely publication; SOI tabulations by AGI band are the closest proxy and lag by about two years."
+    }
+  ],
+  "retainedComputeSha256": "3bb029419f9589bcfde5bc77b446f29c817a096068a403a6a97fce3084c422a0",
+  "sectionSpans": {
+    "path": "bills/raw/s3596-119.sections.json",
+    "sha256": "560b52220b3ec558968f57bcbdeead431ddfdc7473cd57c0e3e3114a872a3548",
+    "source": "Section 2 in archived Congress XML; independently reviewed exact complete quote."
+  }
+}

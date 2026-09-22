@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MCG25B67-MN1-86-KXG"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3596 IS: Stronger Start for Working Families Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-01-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress>
+ <session>2d Session</session><legis-num>S. 3596</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260108" legis-day="20260107">January 8 (legislative day, January 7), 2026</action-date><action-desc><sponsor name-id="S388">Ms. Hassan</sponsor> (for herself and <cosponsor name-id="S391">Mr. Young</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Internal Revenue Code of 1986 to modify the earned income threshold for the refundable child tax credit.</official-title></form><legis-body><section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Stronger Start for Working Families Act</short-title></quote>.</text></section><section commented="no" display-inline="no-display-inline" id="idf2a24ae3af664016a9d726a353443462"><enum>2.</enum><header>Earned income threshold for refundable child tax credit</header><subsection commented="no" display-inline="no-display-inline" id="id2d00a98e01d848b9ad7cdbe7b1c41152"><enum>(a)</enum><header>In general</header><text><external-xref legal-doc="usc" parsable-cite="usc/26/24">Section 24(d)(1)(B)(i)</external-xref> of the Internal Revenue Code of 1986 is amended by striking <quote>$3,000</quote> and inserting <quote>$1</quote>.</text></subsection><subsection commented="no" display-inline="no-display-inline" id="ide81c43433a004079bb647179489131e8"><enum>(b)</enum><header>Conforming amendment</header><text>Section 24(h) of such Code is amended by striking paragraph (6).</text></subsection><subsection commented="no" display-inline="no-display-inline" id="id4e67d66f697e40039670b55eeeb231e4"><enum>(c)</enum><header>Effective date</header><text>The amendments made by this section shall apply to taxable years beginning after December 31, 2025.</text></subsection></section></legis-body></bill>
+
