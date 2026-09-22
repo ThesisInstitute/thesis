@@ -751,3 +751,135 @@ published figure). The adapter reads the witnessed file, authenticates the
 reporting period, and refuses with `SOURCE PUBLISHES NO NATIONAL AGGREGATE`
 rather than computing a derived national statistic the resolver never
 defined.
+
+---
+
+# BLS CPS Table A-19 employed persons by occupation
+
+Status: **VERIFIED from Internet Archive captures** (2026-09-20). The six
+`bls.cps.employed_people_by_occupation.*` cells bind
+`https://www.bls.gov/web/empsit/cpseea19.htm`, which BLS overwrites with each
+Employment Situation and which answers non-browser clients with HTTP 403. The
+Internet Archive's captures are therefore the custody: the Archive timestamps
+each one independently, and the resolver checks the capture's own
+current-month column header against the target month before reading a row
+(`a19_snapshot_period`), so a capture of any other month refuses.
+
+BLS's release schedule, [archived 2026-07-31](https://web.archive.org/web/20260731041428/https://www.bls.gov/schedule/news_release/empsit.htm),
+gives the Employment Situation dates: June 2026 on 2026-07-02, July on
+2026-08-07, August on 2026-09-04, September on 2026-10-02. Each capture below
+falls between its month's release and the next, and its header names that
+month. Values are the printed "Total, 16 years and over" current-month cells,
+in thousands, not seasonally adjusted.
+
+| Row | 2026-06 @ [2026-07-10](https://web.archive.org/web/20260710110509/https://www.bls.gov/web/empsit/cpseea19.htm) | 2026-07 @ [2026-08-19](https://web.archive.org/web/20260819191418/https://www.bls.gov/web/empsit/cpseea19.htm) | 2026-08 @ [2026-09-04](https://web.archive.org/web/20260904170006/https://www.bls.gov/web/empsit/cpseea19.htm) |
+|---|---:|---:|---:|
+| Business and financial operations occupations | 9,720 | 9,835 | 10,167 |
+| Computer and mathematical occupations | 6,950 | 6,924 | 7,010 |
+| Healthcare support occupations | 5,691 | 5,797 | 5,709 |
+| Office and administrative support occupations | 16,184 | 16,457 | 16,154 |
+| Production occupations | 7,759 | 8,121 | 7,716 |
+| Transportation and material moving occupations | 12,010 | 12,223 | 12,011 |
+
+The June column equals the six observations the ledger already records from
+the same capture. `tests/fixtures/a19/` holds each capture's table element and
+`tests/test_a19_adapter.py` reproduces all 18 cells from them.
+
+Unit contract: BLS prints thousands. Cells that predate registration stay in
+thousands. The docket registers these series in `millions` with
+`valueScale: 0.001` and transform `multiply 0.001`; for such a contract the
+executor emits millions, rounded to the three decimals the printed integer
+carries. The registration selects one of two reviewed unit contracts
+(`A19_REGISTERED_SCALES`); any other unit, scale, row, page or release policy
+refuses.
+
+Registered contract: a registered cell executes only if its binding is exactly
+the reviewed one (adapter `generic-url`, this page, this table string, this
+row, this series, host `www.bls.gov`, `first_print`), as the other reviewed
+exceptions are pinned (the ABS content hash, QCEW, SBA, IRS). The release
+window is the one free field. `FAMILY_ADAPTERS["a19"]` is `{"generic-url"}`.
+
+Which capture: a registered target resolves only from a capture dated inside
+its registered `expectedReleaseWindow`, and from the earliest such capture
+whose header names the target month. It always takes that capture from the
+Archive's index, walked in order; hand pins serve only cells that predate
+registration. If a capture in the window cannot be read, the run defers there:
+a later capture is the earliest one only if the unread one is known not to
+print the month. The same holds for a capture that does not parse as this
+table (an error page, a changed layout): it is unidentified, not "another
+month", and the run defers there too. Only a capture identified as a different
+month is passed over.
+
+How a value is read: BLS marks the table up accessibly, so every data cell's
+`headers` attribute names the ids of its row header and its three column
+headers. `a19_table` finds each value by what it is headed by (the occupation's
+row, "Total", "16 years and over", and the later of exactly two same-month
+headings one year apart), never by its position, and all six occupations must
+agree on the month. A cell's closing tag may be omitted, as HTML allows; a
+table nested inside a cell makes the page unidentifiable. A page that cannot
+be identified that way yields nothing.
+It reads the three fixtures and the full 125,026-byte page the resolver
+archived on 2026-07-10 to the same values. The resolver asks the Archive for the
+capture's stored response (`/web/<timestamp>id_/<url>`), so the hash recorded
+with the fact covers BLS's bytes and anyone can reproduce it; the Archive
+passes BLS's gzip through and the resolver decompresses it. Asked for a
+timestamp it holds no capture of, the Archive answers HTTP 200 with the
+nearest capture and rewrites the path (seen 2026-09-20: `20260901000000`
+returned the `20260904170006` capture). The resolver therefore requires the
+final URL to name the timestamp it asked for and refuses otherwise, so the
+window is judged on the capture that was actually served.
+
+What the row claims: the value BLS's page showed for the month at the capture
+instant, after that month was published and before the next month replaced
+it. It does not claim the bytes served at the moment of release. For a
+registered cell the fact's `observed_at` is the capture's date, not the
+forecast's `resolutionDate` (which for these contracts is the window's end).
+Nothing here asserts a BLS revision policy for this table. Two comparisons
+exist: in review, two captures 18 days apart that both print September 2025
+had identical tables; and the capture of 2026-09-21 15:46 UTC is byte-identical
+to the pinned 2026-09-04 17:00 UTC capture (both 104,872 bytes, SHA-256
+`de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915`, read through
+`a19_read_capture`). Those are instances, not a policy.
+
+The twelve overdue cells. The six August 2026 cells (windows 2026-09-02/03 to
+2026-09-10/11) are satisfied by the release-day capture, 2026-09-04 17:00 UTC,
+four and a half hours after the 08:30 ET release. The six July 2026 cells
+registered 2026-07-29 to 2026-08-06, which closed the day before BLS published
+July. No capture of the July table can be dated inside that window, so they
+refuse with `FIRST-PRINT WINDOW MISSED` and await a disposition ruling, if the
+Archive's index answers the query for that window with the JSON list `[]`.
+What the index returns for a window that truly holds no capture has not been
+observed (the Archive was offline or unreachable when it was tried on
+2026-09-21 and 2026-09-22); an empty body is treated as an index failure and
+defers, so until that answer is observed the July cells may print
+`WAYBACK INDEX FETCH FAILED (deferring)` instead. Either way nothing resolves
+and nothing is recorded. The refusal is reserved for one finding: the window
+is closed, every usable capture in it was read, and each prints another
+month. The index is queried for every status and for the stored form of the
+URL, and the refusal reports what it listed: a capture the Archive stored as a
+403 (bls.gov's answer to non-browser clients) is counted and named, not read,
+because "no capture" and "no usable capture" are different findings. A row the
+Archive stores as a revisit (status `-`: bytes identical to an earlier capture)
+is read like any capture. A row stored under another form of the URL (the
+index folds scheme and host under one key) is counted but not read, and since
+it might print the month, a closed window with such rows defers with `NO
+USABLE CAPTURE IN WINDOW` rather than refusing. A capped scan, a failed or unidentified read, or an
+index answer that is not exactly the requested table (an empty body, a
+malformed row, an impossible timestamp) reports itself instead. The 2026-07 pin is kept as custody evidence for
+the ruling and is never read for a registered cell, because it is dated
+outside the window. August resolving and July refusing say nothing about any
+other `generic-url` registration.
+
+A registered target looks up the Archive's index for captures dated inside its
+window, and makes no request before the window opens. From the day it opens (not the
+forecast's `resolutionDate`, which would leave a single attempt on the last
+day), each daily run that reads every usable capture in the window and
+identifies each as another month asks the Archive to capture the page, once
+per run, and defers; an index failure, an unreadable or unidentified capture,
+or a capped scan reports itself and asks for nothing. An error from the save endpoint
+still counts as that run's request and is reported as "outcome unknown": on
+2026-09-21 three save requests were answered HTTP 500, and the index then held
+a new capture, which read back through the resolver's own reader. The six September 2026 cells
+register three different windows (2026-09-30 to 10-08, 10-06 to 10-14, 10-07
+to 10-15) around a 2026-10-02 release, so four of them can only resolve from a
+capture taken four or more days after the release.

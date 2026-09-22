@@ -568,15 +568,23 @@ def test_value_plausibility_gate_blocks_scale_blunders() -> None:
 
 
 def test_a19_parse_reads_current_month_column() -> None:
+    # The real June 2026 table: each value is found by its headers (row,
+    # "Total", "16 years and over", the later of two June headings), not by
+    # its position. tests/test_a19_adapter.py covers the parser in depth.
     html = (
-        "<table><tr><td>Healthcare support occupations</td>"
-        "<td>5,950</td><td>5,691</td></tr>"
-        "<tr><td>Production occupations</td><td>7,938</td><td>7,759</td></tr>"
-        "</table>"
-    )
+        ROOT / "tests/fixtures/a19/cpseea19-2026-06-wayback-20260710110509.table.html"
+    ).read_text()
     values = resolve_pending.a19_values_from_html(html)
     assert values["healthcare_support"] == 5691.0
     assert values["production"] == 7759.0
+    # A bare row of numbers names no month and no column: nothing is read.
+    assert (
+        resolve_pending.a19_values_from_html(
+            "<table><tr><td>Production occupations</td><td>7,938</td>"
+            "<td>7,759</td></tr></table>"
+        )
+        == {}
+    )
 
 
 def test_pending_adapter_refs_maps_and_gates_units() -> None:
