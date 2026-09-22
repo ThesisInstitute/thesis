@@ -42,3 +42,10 @@ Their headers read "Oct. 2022 / Oct. 2023" and "May 2025 / May 2026", and the
 parser reads all six rows from each. They are label and parser evidence only:
 neither month is a registered target, and the 2023 capture predates every
 registration.
+
+BLS served the 2023 page with CRLF line endings (612 carriage returns in the
+stored response, 483 of them inside the table); the 2026 tables are LF-only.
+The 2023 fixture keeps its carriage returns, as "verbatim" requires, so
+`git diff --check` reports every line of it as trailing whitespace. That is the
+file's provenance, not a defect, and `.gitattributes` keeps every fixture here
+from being rewritten at checkout.

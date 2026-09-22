@@ -18,3 +18,9 @@ tests/fixtures/qcew/*.csv binary
 tests/fixtures/eia_dnav/*.html binary
 tests/fixtures/eia_dnav/*.xls binary
 tests/fixtures/eia_dnav/api-no-key.json binary
+
+# BLS Table A-19 fixtures are the table element of Internet Archive captures,
+# byte-for-byte as BLS served them. The 2023 capture has CRLF line endings and
+# the 2026 captures LF; preserve both so the documented stored-response
+# digests remain reproducible.
+tests/fixtures/a19/*.html binary
