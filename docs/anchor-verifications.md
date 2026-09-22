@@ -844,14 +844,22 @@ The twelve overdue cells. The six August 2026 cells (windows 2026-09-02/03 to
 four and a half hours after the 08:30 ET release. The six July 2026 cells
 registered 2026-07-29 to 2026-08-06, which closed the day before BLS published
 July. No capture of the July table can be dated inside that window, so they
-refuse with `FIRST-PRINT WINDOW MISSED` and await a disposition ruling. That
-refusal is reserved for one finding: the window is closed, the whole index for
-it was read, and nothing in it prints the month. A capped scan, a failed or
-unidentified read, or an index answer that is not exactly the requested table
-(an empty body, a malformed row, an impossible timestamp) reports itself
-instead. What the Archive's index returns for a window that truly holds no
-capture has not been observed; the code takes the JSON list `[]` as empty and
-treats an empty body as a failure, which defers. The 2026-07 pin is kept as custody evidence for
+refuse with `FIRST-PRINT WINDOW MISSED` and await a disposition ruling, if the
+Archive's index answers the query for that window with the JSON list `[]`.
+What the index returns for a window that truly holds no capture has not been
+observed (the Archive was offline or unreachable when it was tried on
+2026-09-21 and 2026-09-22); an empty body is treated as an index failure and
+defers, so until that answer is observed the July cells may print
+`WAYBACK INDEX FETCH FAILED (deferring)` instead. Either way nothing resolves
+and nothing is recorded. The refusal is reserved for one finding: the window
+is closed, every usable capture in it was read, and each prints another
+month. The index is queried for every status and for the stored form of the
+URL, and the refusal reports what it listed: a capture the Archive stored as a
+403 (bls.gov's answer to non-browser clients) or under another form of the URL
+is counted and named, not used, because "no capture" and "no usable capture"
+are different findings. A capped scan, a failed or unidentified read, or an
+index answer that is not exactly the requested table (an empty body, a
+malformed row, an impossible timestamp) reports itself instead. The 2026-07 pin is kept as custody evidence for
 the ruling and is never read for a registered cell, because it is dated
 outside the window. August resolving and July refusing say nothing about any
 other `generic-url` registration.
@@ -859,8 +867,10 @@ other `generic-url` registration.
 A registered target looks up the Archive's index for captures dated inside its
 window, and makes no request before the window opens. From the day it opens (not the
 forecast's `resolutionDate`, which would leave a single attempt on the last
-day), each daily run that finds no capture printing the month asks the Archive
-to capture the page, once per run, and defers. An error from the save endpoint
+day), each daily run that reads every usable capture in the window and
+identifies each as another month asks the Archive to capture the page, once
+per run, and defers; an index failure, an unreadable or unidentified capture,
+or a capped scan reports itself and asks for nothing. An error from the save endpoint
 still counts as that run's request and is reported as "outcome unknown": on
 2026-09-21 three save requests were answered HTTP 500, and the index then held
 a new capture, which read back through the resolver's own reader. The six September 2026 cells
