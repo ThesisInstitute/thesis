@@ -459,6 +459,50 @@ else
     echo "FAIL 47b comparator ref left behind"; fail=$((fail+1))
 fi
 
+# ---- 48-51: a branch that merged main forward, then merged a side branch
+# lagging main's records: the second merge's records tree is main's, but
+# its same-tree parent is a branch commit main does not contain. Hit
+# 2026-09-22 (thesis#270 merging #269). The content is published, through
+# the commit that last set it, so the merge is exempt; a tree that merely
+# EQUALS main's, set by an unpublished commit, still is not.
+git clone -q "$S/origin.git" "$S/dev21" 2>/dev/null
+git -C "$S/dev21" checkout -qb fwd "$INIT"
+commit_file "$S/dev21" src/o.txt o "src on fwd"
+git -C "$S/dev21" merge -q --no-edit origin/main            # forward merge
+FWD=$(git -C "$S/dev21" rev-parse fwd)
+git -C "$S/dev21" checkout -qb lag "$INIT"
+commit_file "$S/dev21" src/p.txt p "src on lag (records lag main)"
+git -C "$S/dev21" checkout -q fwd
+git -C "$S/dev21" merge -q --no-edit lag                    # side merge
+FWD2=$(git -C "$S/dev21" rev-parse fwd)
+if [ "$(git -C "$S/dev21" rev-parse "$FWD2:records")" != \
+    "$(git -C "$S/dev21" rev-parse "$MTIP:records")" ]; then
+    echo "FAIL 48 fixture: side merge did not keep main's records tree"; fail=$((fail+1))
+fi
+hook "$S/dev21" origin "refs/heads/fwd $FWD2 refs/heads/fwd $FWD"
+check "48 side merge after a forward merge allowed (existing ref)" 0 $rc
+hook "$S/dev21" origin "refs/heads/fwd $FWD2 refs/heads/fwd $ZERO40"
+check "49 side merge after a forward merge allowed (new ref)" 0 $rc
+# the same shape with the branch's OWN records commit underneath: the
+# side merge is TREESAME to that parent, whose content was never published
+git -C "$S/dev21" checkout -qb own "$FWD"
+commit_file "$S/dev21" records/own.txt own "records on own"
+git -C "$S/dev21" merge -q --no-edit lag
+hook "$S/dev21" origin "refs/heads/own $(git -C "$S/dev21" rev-parse own) refs/heads/own $ZERO40"
+check "50 side merge over an unpublished records commit blocks" 1 $rc "$S/err" "records/own.txt"
+# a records tree that merely equals main's, set by an unpublished commit
+git -C "$S/dev21" checkout -qb replica "$INIT"
+git -C "$S/dev21" checkout -q "$MTIP" -- records
+git -C "$S/dev21" commit -qm "re-create main's records by hand"
+REPLICA=$(git -C "$S/dev21" rev-parse replica)
+if [ "$(git -C "$S/dev21" rev-parse "$REPLICA:records")" != \
+    "$(git -C "$S/dev21" rev-parse "$MTIP:records")" ]; then
+    echo "FAIL 51 fixture: replica does not match main's records tree"; fail=$((fail+1))
+fi
+git -C "$S/dev21" merge -q --no-edit lag
+hook "$S/dev21" origin "refs/heads/replica $(git -C "$S/dev21" rev-parse replica) refs/heads/replica $ZERO40"
+check "51 merge over a hand-made copy of main's records blocks" 1 $rc "$S/err" "re-create main's records by hand"
+
 echo
 echo "== $pass passed, $fail failed =="
 exit $((fail > 0))

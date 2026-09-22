@@ -419,7 +419,10 @@ is judged on the branch's own contribution against the main of the
 destination that push is actually landing in — fetched at push time and
 pinned to an immutable id, so no remote name, URL spelling, or stale
 local ref decides it — and a branch rebased over main's attested
-recorder commits therefore does not trip it. Pushes the guard cannot
+recorder commits therefore does not trip it, nor does a branch that
+merged main forward and then merges a side branch lagging main's
+records (the merge carries main's records tree through a parent main
+does not yet contain). Pushes the guard cannot
 verify (no comparator at the destination, unwalkable history, a shallow
 clone) fail closed.
 It prints the offending commits and can be overridden deliberately with
