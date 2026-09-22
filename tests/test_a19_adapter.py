@@ -144,32 +144,6 @@ def test_every_pin_archives_the_bound_page_and_matches_its_fixture() -> None:
 
 
 @pytest.mark.parametrize(
-    "html",
-    [
-        "",
-        "<table><tr><th>Occupation</th></tr></table>",
-        # One header only: not the year-apart pair the table prints.
-        "<th>July<br/>2026</th>",
-        # Two different months: a page in transition, or not this table.
-        "<th>July<br/>2025</th><th>Aug.<br/>2026</th>",
-        # Same month, two years apart.
-        "<th>July<br/>2024</th><th>July<br/>2026</th>",
-        # A month label BLS does not print.
-        "<th>Julio<br/>2025</th><th>Julio<br/>2026</th>",
-        # Current year first: the parser reads the second number after a row
-        # label, which would then be the year-ago column.
-        "<th>July<br/>2026</th><th>July<br/>2025</th>",
-        # An odd header count, or one column group out of order.
-        "<th>July<br/>2025</th><th>July<br/>2026</th><th>July<br/>2025</th>",
-        "<th>July<br/>2025</th><th>July<br/>2026</th>"
-        "<th>July<br/>2026</th><th>July<br/>2025</th>",
-    ],
-)
-def test_capture_period_fails_closed(html: str) -> None:
-    assert resolve_pending.a19_snapshot_period(html) is None
-
-
-@pytest.mark.parametrize(
     "url",
     [
         "https://www.bls.gov/web/empsit/cpseea19.htm",
@@ -181,6 +155,19 @@ def test_capture_period_fails_closed(html: str) -> None:
 )
 def test_capture_url_fails_closed(url: str) -> None:
     assert resolve_pending.a19_capture(url) is None
+
+
+def test_the_full_page_the_resolver_archived_in_july_reads_the_same() -> None:
+    # The fixtures are table elements; this is the whole page, Archive
+    # toolbar and all, as the resolver archived it on 2026-07-10.
+    archived = next(
+        (ROOT / "records" / "resolutions" / "2026-07-10").glob(
+            "*/responses/cpseea19-production-*.html.gz"
+        )
+    )
+    html = gzip.decompress(archived.read_bytes()).decode(errors="replace")
+    assert len(html.encode()) > 100_000
+    assert resolve_pending.a19_table(html) == ("2026-06", ANCHORS["2026-06"])
 
 
 def test_a_value_is_found_by_its_headers_not_its_position() -> None:
@@ -220,6 +207,18 @@ def test_a_value_is_found_by_its_headers_not_its_position() -> None:
         lambda html: html.replace(
             'id="cps_eande_m19.h.3.3"', 'id="cps_eande_m19.h.3.2"', 1
         ),
+        # Same month, two years apart (the Total year-ago heading).
+        lambda html: html.replace("Aug.<br/>2025", "Aug.<br/>2024", 1),
+        # A month label BLS does not print.
+        lambda html: html.replace("Aug.<br/>", "Agosto<br/>"),
+        # The Total current heading without its year.
+        lambda html: html.replace("Aug.<br/>2026", "Aug.", 1),
+        # A cell inside a cell: the outer cell's text would be lost.
+        lambda html: html.replace(
+            ">7,716<", "><table><tr><td>999</td></tr></table>7,716<", 1
+        ),
+        # Not a table at all.
+        lambda html: "<th>Aug.<br/>2025</th><th>Aug.<br/>2026</th>",
     ],
 )
 def test_a_page_that_cannot_be_identified_yields_nothing(damage) -> None:
@@ -375,9 +374,15 @@ def replay_url(stamp: str) -> str:
     return f"https://web.archive.org/web/{stamp}/{resolve_pending.A19_SOURCE_URL}"
 
 
-def cdx(*rows: tuple[str, str]) -> bytes:
+URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
+HEADER = ["timestamp", "original", "statuscode"]
+
+
+def cdx(*rows: tuple[str, ...]) -> bytes:
+    """An index body: rows are (stamp, status) or (stamp, status, original)."""
+
     return json.dumps(
-        [["timestamp", "statuscode"], *[list(row) for row in rows]]
+        [HEADER, *[[row[0], row[2] if len(row) > 2 else URL, row[1]] for row in rows]]
     ).encode()
 
 
@@ -461,9 +466,50 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         ("20260905000000", "403"),
         ("20260911000000", "200"),  # after the window
     )
-    captures = resolve_pending.a19_window_captures(WINDOW, reader(index, {}, calls))
-    assert captures == [replay_url("20260904170006"), replay_url("20260910235959")]
+    index = resolve_pending.a19_window_captures(WINDOW, reader(index, {}, calls))
+    assert index.captures == [
+        replay_url("20260904170006"),
+        replay_url("20260910235959"),
+    ]
+    assert (index.listed, index.other_status, index.other_form) == (3, 1, 0)
     assert "from=20260902000000" in calls[0] and "to=20260910235959" in calls[0]
+    assert "fl=timestamp,original,statuscode" in calls[0]
+    assert "filter=" not in calls[0]
+
+
+def test_a_capture_stored_under_another_form_of_the_url_is_counted_not_used() -> None:
+    index = cdx(
+        ("20260904170006", "200", "http://www.bls.gov/web/empsit/cpseea19.htm"),
+        ("20260905000000", "200", "https://bls.gov/web/empsit/cpseea19.htm"),
+        ("20260906000000", "200"),
+    )
+    index = resolve_pending.a19_window_captures(WINDOW, reader(index, {}, []))
+    assert index.captures == [replay_url("20260906000000")]
+    assert (index.listed, index.other_status, index.other_form) == (3, 0, 2)
+    assert index.describe(WINDOW).endswith(
+        "3 capture(s) dated inside the registered window "
+        f"{WINDOW!r}, 1 of them HTTP 200 for this exact URL "
+        "(2 under another form of the URL)"
+    )
+
+
+def test_window_missed_reports_what_the_index_listed_but_could_not_use() -> None:
+    # bls.gov answers non-browser clients with 403, so an Archive crawl can
+    # be stored as one. "No capture" and "no usable capture" are different
+    # findings, and the ruling on a closed window rests on the difference.
+    calls: list[str] = []
+    index = cdx(("20260904170006", "403"), ("20260905000000", "200"))
+    pages = {"20260905000000": fixture("2026-07")}
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith(
+        "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 2 "
+        "capture(s) dated inside the registered window"
+    )
+    assert "1 of them HTTP 200 for this exact URL (1 with another status)" in verdict
+    assert identity_url("20260904170006") not in calls
 
 
 @pytest.mark.parametrize(
@@ -472,18 +518,21 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         b'{"error":"Blocked Site Error"}',
         b"429",
         b"null",
-        b'[["timestamp","statuscode"], 5, null]',
+        b'[["timestamp","original","statuscode"], 5, null]',
         b"<html>429 Too Many Requests</html>",
-        # Row-level damage must not read as "the window holds no capture".
-        b'[["timestamp","statuscode"],["20260904170006"]]',
+        # A table that is not the one requested.
+        b'[["timestamp","statuscode"],["20260904170006","200"]]',
         b'[["error","blocked"]]',
-        b'[["20260904170006","200"]]',
-        b'[["timestamp","statuscode"],["2026090417","200"]]',
-        b'[["timestamp","statuscode"],[20260904170006,"200"]]',
+        b'[["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
+        # Row-level damage must not read as "the window holds no capture".
+        b'[["timestamp","original","statuscode"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm"]]',
+        b'[["timestamp","original","statuscode"],["2026090417","https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
+        b'[["timestamp","original","statuscode"],[20260904170006,"https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
+        b'[["timestamp","original","statuscode"],["20260904170006","","200"]]',
         # An empty body, an impossible date and a non-numeric status.
         b"",
-        b'[["timestamp","statuscode"],["20260900170006","200"]]',
-        b'[["timestamp","statuscode"],["20260904170006","blocked"]]',
+        b'[["timestamp","original","statuscode"],["20260900170006","https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
+        b'[["timestamp","original","statuscode"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","blocked"]]',
     ],
 )
 def test_a_malformed_index_defers_and_never_escapes(body: bytes) -> None:
@@ -496,10 +545,14 @@ def test_a_malformed_index_defers_and_never_escapes(body: bytes) -> None:
 
 
 def test_only_the_json_empty_list_is_an_empty_index() -> None:
-    assert resolve_pending.a19_window_captures(WINDOW, reader(b"[]", {}, [])) == []
-    header_only = b'[["timestamp","statuscode"]]'
+    empty = resolve_pending.a19_window_captures(WINDOW, reader(b"[]", {}, []))
+    assert (empty.captures, empty.listed) == ([], 0)
+    header_only = json.dumps([HEADER]).encode()
     assert (
-        resolve_pending.a19_window_captures(WINDOW, reader(header_only, {}, [])) == []
+        resolve_pending.a19_window_captures(
+            WINDOW, reader(header_only, {}, [])
+        ).captures
+        == []
     )
 
 
@@ -590,7 +643,11 @@ def test_window_missed_means_the_whole_index_was_read_and_nothing_prints_it() ->
         "2026-07", july_window, dt.date(2026, 9, 20), reader(index, pages, calls)
     )
     assert (url, raw) == (None, None)
-    assert verdict.startswith("FIRST-PRINT WINDOW MISSED (refusing): none of the 1")
+    assert verdict.startswith(
+        "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 1 "
+        "capture(s) dated inside the registered window"
+    )
+    assert "1 of them HTTP 200 for this exact URL, and none of those prints" in verdict
     assert not any("/save/" in call for call in calls)
 
 
@@ -813,8 +870,8 @@ def test_main_resolves_august_in_millions_and_refuses_the_july_window(
     assert f"resolve {august['contract']['dataPointId']} -> 7.716 millions" in output
     assert "UNIT MISMATCH" not in output
     assert (
-        "A-19 FIRST-PRINT WINDOW MISSED (refusing): none of the 0 Internet "
-        "Archive capture(s) dated inside the registered window" in output
+        "A-19 FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 0 "
+        "capture(s) dated inside the registered window" in output
     )
     assert july["contract"]["dataPointId"] in output
     assert "dry-run: would append 1 row(s)" in output
@@ -1017,6 +1074,28 @@ def test_a_failed_pin_fetch_does_not_poison_a_registered_cells_discovery(
     )
     assert "A-19 snapshot fetch failed (deferring)" in output
     assert f"resolve {august['contract']['dataPointId']} -> 7.716 millions" in output
+
+
+def test_a_capture_shared_by_a_pin_cell_and_a_registered_cell_is_read_once(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    august = registration()
+    output, calls = run_main(
+        monkeypatch,
+        capsys,
+        [august],
+        unregistered_first=[
+            (
+                f"{SERIES.replace('production', 'healthcare_support')}"
+                ".august_2026.first_print",
+                "thousands",
+                "2026-09-04",
+            )
+        ],
+    )
+    assert "-> 5709.0 thousands" in output
+    assert f"resolve {august['contract']['dataPointId']} -> 7.716 millions" in output
+    assert calls.count(identity_url(CAPTURES["2026-08"])) == 1
 
 
 def test_main_refuses_a_registered_contract_with_a_drifted_transform(

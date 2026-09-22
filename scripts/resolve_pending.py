@@ -7494,6 +7494,7 @@ class _A19TableParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.header_text: dict[str, str] = {}
         self.duplicate_ids: set[str] = set()
+        self.nested = False
         self.cells: list[tuple[tuple[str, ...], str]] = []
         self._tag: str | None = None
         self._attrs: dict[str, str] = {}
@@ -7501,6 +7502,9 @@ class _A19TableParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         if tag in ("th", "td"):
+            # A cell inside a cell is not this table's markup; the outer
+            # cell's text would otherwise be lost without an error.
+            self.nested = self.nested or self._tag is not None
             self._tag = tag
             self._attrs = {name: value or "" for name, value in attrs}
             self._text = []
@@ -7538,7 +7542,8 @@ def a19_table(html: str) -> tuple[str, dict[str, float]] | None:
     over", and the later of exactly two same-month headings one year apart.
     All six occupations must agree on the month. Anything else (a missing
     row, an unknown month label, a third dated column, a non-numeric cell, a
-    reused id, a page that is not this table) returns None: the page is
+    reused id, a cell inside a cell, a page that is not this table) returns
+    None: the page is
     overwritten monthly, and a value from a capture that cannot be
     identified must never be recorded.
     """
@@ -7549,7 +7554,7 @@ def a19_table(html: str) -> tuple[str, dict[str, float]] | None:
         parser.close()
     except (AssertionError, ValueError):
         return None
-    if parser.duplicate_ids:
+    if parser.duplicate_ids or parser.nested:
         return None
     ids_by_text: dict[str, list[str]] = {}
     for header_id, text in parser.header_text.items():
@@ -7624,10 +7629,16 @@ def a19_capture(snapshot_url: str) -> tuple[dt.datetime, str] | None:
     return captured, match.group(2)
 
 
+# Every status and the stored URL form, so the index can be reported in
+# full: a capture the Archive recorded as a 403 (bls.gov's answer to
+# non-browser clients) or under another form of the URL is not a capture
+# this resolver can use, but "no capture" and "no usable capture" are
+# different findings.
 WAYBACK_CDX_URL = (
     "https://web.archive.org/cdx/search/cdx?url={url}&from={start}&to={end}"
-    "&output=json&fl=timestamp,statuscode&filter=statuscode:200"
+    "&output=json&fl=timestamp,original,statuscode"
 )
+_WAYBACK_CDX_HEADER = ["timestamp", "original", "statuscode"]
 WAYBACK_SAVE_URL = "https://web.archive.org/save/{url}"
 A19_MAX_WINDOW_CAPTURES = 16
 A19_CAPTURE_REQUESTED = "asked the Internet Archive to capture the page"
@@ -7636,6 +7647,35 @@ _WAYBACK_READ_ERRORS = (OSError, EOFError, http.client.HTTPException)
 
 class A19CaptureError(ValueError):
     """The Archive did not serve the exact capture that was asked for."""
+
+
+@dataclass
+class A19Index:
+    """What the Archive's index lists for one registered window."""
+
+    captures: list[str]
+    """HTTP 200 captures of exactly the bound URL, oldest first."""
+    listed: int
+    """Every row dated inside the window, usable or not."""
+    other_status: int
+    """Rows for the bound URL whose stored status is not 200."""
+    other_form: int
+    """Rows stored under another form of the URL (scheme, host)."""
+
+    def describe(self, window: Any) -> str:
+        text = (
+            f"{self.listed} capture(s) dated inside the registered window "
+            f"{window!r}, {len(self.captures)} of them HTTP 200 for this exact URL"
+        )
+        detail = [
+            f"{count} {label}"
+            for count, label in (
+                (self.other_status, "with another status"),
+                (self.other_form, "under another form of the URL"),
+            )
+            if count
+        ]
+        return text + (f" ({', '.join(detail)})" if detail else "")
 
 
 def _wayback_read(url: str) -> tuple[bytes, str]:
@@ -7684,12 +7724,12 @@ def a19_read_capture(
 def a19_window_captures(
     window: Mapping[str, Any],
     read: Callable[[str], tuple[bytes, str]] = _wayback_read,
-) -> list[str]:
+) -> A19Index:
     """Internet Archive captures of the A-19 page dated inside ``window``.
 
-    Oldest first, as capture URLs. The Archive's own index supplies the
-    timestamps, so a registered target needs no per-period hand pin. A body
-    that is not the index's list-of-rows shape raises ValueError.
+    The Archive's own index supplies the timestamps, so a registered target
+    needs no per-period hand pin. A body that is not the index's requested
+    table raises ValueError.
     """
 
     start = dt.date.fromisoformat(str(window["start"]))
@@ -7706,27 +7746,36 @@ def a19_window_captures(
     # requested shape: an empty body, a malformed row, an impossible timestamp
     # or a non-numeric status is an index failure, never evidence that the
     # window holds no capture.
-    if not isinstance(index, list) or (
-        index and index[0] != ["timestamp", "statuscode"]
-    ):
+    if not isinstance(index, list) or (index and index[0] != _WAYBACK_CDX_HEADER):
         raise ValueError("the Archive index is not the requested table")
-    captures = []
+    rows: set[tuple[str, str, str]] = set()
     for row in index[1:]:
         if (
             not isinstance(row, list)
-            or len(row) != 2
+            or len(row) != 3
             or not all(isinstance(cell, str) for cell in row)
             or not re.fullmatch(r"\d{14}", row[0])
-            or not re.fullmatch(r"\d{3}", row[1])
+            or not row[1]
+            or not re.fullmatch(r"\d{3}", row[2])
         ):
             raise ValueError(f"malformed Archive index row {row!r}")
-        url = f"https://web.archive.org/web/{row[0]}/{A19_SOURCE_URL}"
+        rows.add((row[0], row[1], row[2]))
+    result = A19Index(captures=[], listed=0, other_status=0, other_form=0)
+    for stamp, original, status in sorted(rows):
+        url = f"https://web.archive.org/web/{stamp}/{A19_SOURCE_URL}"
         capture = a19_capture(url)
         if capture is None:
-            raise ValueError(f"impossible Archive index timestamp {row[0]!r}")
-        if row[1] == "200" and start <= capture[0].date() <= end:
-            captures.append(url)
-    return sorted(set(captures))
+            raise ValueError(f"impossible Archive index timestamp {stamp!r}")
+        if not start <= capture[0].date() <= end:
+            continue
+        result.listed += 1
+        if original != A19_SOURCE_URL:
+            result.other_form += 1
+        elif status != "200":
+            result.other_status += 1
+        else:
+            result.captures.append(url)
+    return result
 
 
 def a19_registered_capture(
@@ -7739,16 +7788,18 @@ def a19_registered_capture(
 ) -> tuple[str | None, bytes | None, str]:
     """(capture URL, BLS bytes, verdict) for a registered A-19 target.
 
-    Takes the EARLIEST capture dated inside the registered window whose
-    current-month header is ``period``, walking the index in order and
+    Takes the EARLIEST usable capture dated inside the registered window
+    whose current-month header is ``period``, walking the index in order and
     deferring at the first capture it cannot read or cannot identify; only a
-    capture identified as another month is passed over. With none, and the window
-    still open,
-    it asks the Archive to capture the page and defers: a later run finds that
-    capture. The verdict is the line to print when nothing resolves.
-    ``FIRST-PRINT WINDOW MISSED`` is reserved for one finding: the window is
-    closed, the whole index for it was read, and no capture in it prints the
-    month. A capped scan or a failed read says so instead.
+    capture identified as another month is passed over. The verdict is the
+    line to print when nothing resolves. ``FIRST-PRINT WINDOW MISSED`` is
+    reserved for one finding: the window is closed, every usable capture in
+    it was read, and each prints another month. An index failure, an
+    unreadable or unidentified capture, or a capped scan reports itself
+    instead and asks for nothing. Only when the window is still open, every
+    usable capture was read and each prints another month, and
+    ``request_capture`` is set (once per run) does it ask the Archive to
+    capture the page, and defer: a later run finds that capture.
     """
 
     state = snapshot_window_state(today, window)
@@ -7757,7 +7808,7 @@ def a19_registered_capture(
     if state == "pending":
         return None, None, f"release window opens {window['start']} (deferring)"
     try:
-        captures = a19_window_captures(window, read)
+        index = a19_window_captures(window, read)
     except (*_WAYBACK_READ_ERRORS, ValueError) as exc:
         return (
             None,
@@ -7767,6 +7818,7 @@ def a19_registered_capture(
                 f"{str(exc)[:200]}"
             ),
         )
+    captures = index.captures
     for url in captures[:A19_MAX_WINDOW_CAPTURES]:
         try:
             raw = a19_read_capture(url, read)
@@ -7812,9 +7864,8 @@ def a19_registered_capture(
             None,
             None,
             (
-                "FIRST-PRINT WINDOW MISSED (refusing): none of the "
-                f"{len(captures)} Internet Archive capture(s) dated inside the "
-                f"registered window {window!r} prints {period}"
+                "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists "
+                f"{index.describe(window)}, and none of those prints {period}"
             ),
         )
     if not request_capture:
@@ -13480,6 +13531,17 @@ def main() -> int:
     a19_cache: dict[str, tuple[dict[str, float], bytes | None, str, str]] = {}
     a19_discovered: dict[str, tuple[str | None, bytes | None, str]] = {}
     a19_capture_requested = False
+    a19_reads: dict[str, tuple[bytes, str]] = {}
+
+    def a19_wayback_read(url: str) -> tuple[bytes, str]:
+        # One read per stored capture per run, whether a pin or discovery
+        # asks; index queries and capture requests are never memoised.
+        if "id_/" not in url:
+            return _wayback_read(url)
+        if url not in a19_reads:
+            a19_reads[url] = _wayback_read(url)
+        return a19_reads[url]
+
     intl_cache: dict[Any, tuple] = {}
     # International requests are checked against the immutable registered
     # contract before any network call. Existing registrations whose source
@@ -15070,6 +15132,7 @@ def main() -> int:
                         period,
                         window,
                         utc_today,
+                        a19_wayback_read,
                         request_capture=not a19_capture_requested,
                     )
                     if A19_CAPTURE_REQUESTED in a19_discovered[discovery_key][2]:
@@ -15101,7 +15164,7 @@ def main() -> int:
             if snapshot_url not in a19_cache:
                 retrieved_at = utc_now()
                 try:
-                    raw_html = a19_read_capture(snapshot_url)
+                    raw_html = a19_read_capture(snapshot_url, a19_wayback_read)
                     a19_cache[snapshot_url] = (
                         a19_values_from_html(raw_html.decode(errors="replace")),
                         raw_html,
