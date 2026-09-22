@@ -14,9 +14,11 @@ import {
   getPendingConditionals,
 } from "@/data/bill-forecasts";
 import {
+  CHRONICLE_CATALOG_URL,
   REGISTRY_LABEL,
   getBill,
   loadBillMeta,
+  loadBillDocket,
   loadBills,
   metricRegistryStatus,
   type RegistryStatus,
@@ -147,7 +149,7 @@ function buildForecastViews(billSlug: string): BillForecastView[] {
 const registryBadgeClass: Record<RegistryStatus, string> = {
   reachable: "bg-[#E8F4EA] text-[#1F6B33] border-[#BFDEC7]",
   "not-yet": "bg-[#FFF4DD] text-[#7A5C20] border-[#F2DCAF]",
-  "no-series": "bg-[var(--color-mist-100)] text-[var(--theme-text-muted)] border-[var(--color-mist-200)]",
+  ambiguous: "bg-[#FFF4DD] text-[#7A5C20] border-[#F2DCAF]",
   unknown: "bg-transparent text-[var(--theme-text-dim)] border-[var(--theme-border)]",
 };
 
@@ -162,6 +164,7 @@ export default async function BillDetailPage({
   const forecastViews = buildForecastViews(slug);
   const pendingConditionals = getPendingConditionals(slug);
   const rawMeta = loadBillMeta(slug);
+  const docket = loadBillDocket();
   // Unconditional cells on the bill's candidate series — the series
   // forecast regardless of this bill, deduped across provisions, each
   // carrying which provision/metric makes the series a candidate.
@@ -171,7 +174,8 @@ export default async function BillDetailPage({
   >();
   for (const provision of entry.provisions) {
     for (const metric of provision.metrics) {
-      const cell = resolveMetricCell(metric.series_hint);
+      const mapping = metricRegistryStatus(metric, docket);
+      const cell = resolveMetricCell(mapping.series);
       if (!cell) continue;
       const source = `${provision.title} · ${metric.kind}`;
       const existing = cellSources.get(cell.slug) ?? { cell, from: [] };
@@ -195,11 +199,12 @@ export default async function BillDetailPage({
     .flatMap((billSlug) => getBillContextSeriesLinks(billSlug))
     .map((link) => ({ link, cell: resolveMetricCell(link.seriesConcept) }));
   const computeRows = entry.provisions.flatMap((p) => p.compute ?? []);
-  // Honest empty-state inputs: how many candidate metrics the analysis
-  // found, and how many name an admitted series (series_hints are verified
-  // against the docket registry at promotion, so a hint means reachable).
+  // Hints and proposal annotations are not evidence of docket admission.
   const allMetrics = entry.provisions.flatMap((p) => p.metrics);
-  const hintedMetrics = allMetrics.filter((m) => m.series_hint);
+  const admittedMetrics = allMetrics.filter(
+    (metric) => metricRegistryStatus(metric, docket).status === "reachable",
+  );
+  const remainingMetrics = allMetrics.length - admittedMetrics.length;
 
   return (
     <div>
@@ -246,6 +251,20 @@ export default async function BillDetailPage({
           </div>
         </header>
 
+        <section aria-label="Metric mapping progress" className="mb-8">
+          <p className="m-0 text-[0.9rem] leading-[1.6] text-[var(--theme-text-muted)]">
+            {admittedMetrics.length} of {allMetrics.length} candidate outcome
+            metrics map to the current docket at site build time.
+            {remainingMetrics > 0 && (
+              <>
+                {" "}{remainingMetrics} remain on the mapping and admission worklist,
+                with next steps shown on each metric below.
+              </>
+            )}
+            {" "}Series admission and published forecasts are tracked separately.
+          </p>
+        </section>
+
         <section className="mb-14">
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <span className="inline-block rounded-full border border-[#D8C7EE] bg-[#F4EDFC] px-2 py-[2px] [font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em] text-[#5B3E86]">
@@ -289,7 +308,7 @@ export default async function BillDetailPage({
 
           {forecastViews.length === 0 && pendingConditionals.length === 0 && (
             <div className="rounded-xl border border-dashed border-[var(--theme-border)] px-6 py-5 text-[0.9rem] leading-[1.6] text-[var(--theme-text-muted)]">
-              {hintedMetrics.length === 0 ? (
+              {admittedMetrics.length === 0 ? (
                 <>
                   The analysis found {allMetrics.length} candidate outcome{" "}
                   {allMetrics.length === 1 ? "metric" : "metrics"} for this
@@ -302,7 +321,7 @@ export default async function BillDetailPage({
                 </>
               ) : (
                 <>
-                  {hintedMetrics.length} of {allMetrics.length} candidate{" "}
+                  {admittedMetrics.length} of {allMetrics.length} candidate{" "}
                   metrics map to admitted series, but no enacted-vs-baseline
                   pair is registered for this bill yet. Pairs are registered
                   only through the privileged path; when one lands, both arms
@@ -553,18 +572,24 @@ export default async function BillDetailPage({
                     effects={provision.effects}
                     barriers={provision.barriers}
                     metrics={provision.metrics.map((metric) => {
-                      const liveCell = resolveMetricCell(metric.series_hint);
-                      // A registered cell on the series is the docket's
-                      // own answer: reachable — live join supersedes any
-                      // stored badge.
-                      const status = liveCell
-                        ? "reachable"
-                        : metricRegistryStatus(metric).status;
+                      const mapping = metricRegistryStatus(metric, docket);
+                      const liveCell = resolveMetricCell(mapping.series);
                       return {
                         kind: metric.kind,
                         text: stripRegistryNote(metric.text),
-                        badgeLabel: REGISTRY_LABEL[status],
-                        badgeClass: registryBadgeClass[status],
+                        badgeLabel: REGISTRY_LABEL[mapping.status],
+                        badgeClass: registryBadgeClass[mapping.status],
+                        registry: {
+                          note: mapping.note,
+                          series: mapping.series,
+                          candidates: mapping.candidates,
+                          analysisSnapshot: metric.registry
+                            ? `${metric.registry} (${entry.bill.analysisDate})`
+                            : undefined,
+                          chronicle: mapping.ledger
+                            ? { ...mapping.ledger, href: CHRONICLE_CATALOG_URL }
+                            : undefined,
+                        },
                         rationale: metric.rationale,
                         stances: metric.stances,
                         forecast: liveCell

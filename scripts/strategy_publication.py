@@ -23,6 +23,12 @@ from typing import Any
 import docket_publication as docket
 import median_rollout_ensemble as median_builder
 from canonical_json import canonical_bytes, canonical_sha256
+from strategy_targets import (
+    StrategyTargetError,
+    conditional_comparison_context,
+    require_bill_target_set,
+    require_conditional_open,
+)
 from verify_custody import CustodyError, verify_run
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -186,6 +192,10 @@ def _validate_selection(
             raise StrategyPublicationError(
                 f"trusted comparison target {slug} lacks {', '.join(missing)}"
             )
+    try:
+        require_bill_target_set(selection)
+    except StrategyTargetError as exc:
+        raise StrategyPublicationError(str(exc)) from exc
     return selection, targets_by_slug, artifact_at
 
 
@@ -384,6 +394,19 @@ def _target_map(
 
 
 def _resolver_equal(cell: dict[str, Any], target: dict[str, Any]) -> None:
+    premise = target.get("conditional")
+    if canonical_bytes(cell.get("conditionalOn")) != canonical_bytes(premise):
+        raise StrategyPublicationError(
+            "cell conditionalOn differs from trusted target premise"
+        )
+    if premise is not None and cell.get("type") != "conditional":
+        raise StrategyPublicationError(
+            "conditional comparison cell must have type conditional"
+        )
+    if premise is None and cell.get("type") == "conditional":
+        raise StrategyPublicationError(
+            "unconditional comparison cannot carry conditional type"
+        )
     cell_keys = {
         "catalogSlug": "slug",
         "targetUnit": "unit",
@@ -487,12 +510,12 @@ def _validate_analyst_result(
         # snapshots introduced strictly before the v3 cutover stay eligible.
         docket.validate_target_registration(
             repo,
-            target,
+            conditional_comparison_context(ROOT, target),
             run_started_at=str(manifest.get("runStartedAt")),
             require_git_binding=True,
             allow_pre_cutover_v2=True,
         )
-    except docket.PublicationError as exc:
+    except (docket.PublicationError, StrategyTargetError) as exc:
         raise StrategyPublicationError(str(exc)) from exc
     cells_value = result.get("cellsPath")
     if manifest.get("cellsPath") != cells_value:
@@ -506,7 +529,12 @@ def _validate_analyst_result(
         if not isinstance(cells, list) or len(cells) != 1:
             raise StrategyPublicationError("strategy run must contain exactly one cell")
         cell = cells[0]
-        _resolver_equal(cell, target)
+        if expected_ok:
+            _resolver_equal(cell, target)
+        # A failed model response may itself violate the target premise or
+        # resolver. Preserve that failure under the authenticated run context;
+        # below, the trusted validator must reproduce its failed status, and
+        # failed results never become comparison augments.
         seal = _instant(cell.get("runAt"), "cell runAt")
         if cell.get("runStartedAt") != manifest.get("runStartedAt"):
             raise StrategyPublicationError("cell start differs from its manifest")
@@ -759,6 +787,15 @@ def validate_tree(
     upper = _instant(publish_validated_at, "publishValidatedAtUtc")
     if upper < lower:
         raise StrategyPublicationError("publish validation predates selection witness")
+    if selection.get("billSelection") is not None:
+        from bill_forecast_plan import require_open_bill_selection
+
+        try:
+            require_open_bill_selection(ROOT, selection["billSelection"], upper)
+            for target in targets_by_slug.values():
+                require_conditional_open(target, upper)
+        except ValueError as exc:
+            raise StrategyPublicationError(str(exc)) from exc
     _validate_source_sha(str(selection["sourceSha"]), exact=exact_source)
     suite = _load_object(_repo_file(repo, suite_relative), "strategy suite")
     ladder, rollout_lanes, medians = _validate_suite_shape(

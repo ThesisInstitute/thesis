@@ -90,6 +90,31 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -q
 
+  # Give the bill extraction and paired-publication boundary fast feedback
+  # while the complete Python suite continues to verify the entire archive.
+  bill-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+      - uses: oven-sh/setup-bun@v2
+      - name: Install package with all extras
+        run: uv sync --all-extras
+      - name: Verify bill extraction, mapping and paired publication
+        run: |
+          uv run pytest -q \
+            tests/test_bill_forecast_plan.py \
+            tests/test_ingest_bill.py \
+            tests/test_map_bill_metrics.py \
+            tests/test_strategy_targets.py \
+            tests/test_strategy_publication.py \
+            tests/test_strategy_comparisons.py \
+            tests/test_strategy_workflow.py
+
   wave-reproducibility:
     runs-on: ubuntu-latest
     steps:
@@ -125,7 +150,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       [build-and-test, forecast-api, python-tests, wave-reproducibility,
-       packaged-smoke, hook-guard]
+       packaged-smoke, hook-guard, bill-pipeline]
     if: failure() && github.ref == 'refs/heads/main'
     permissions:
       issues: write
