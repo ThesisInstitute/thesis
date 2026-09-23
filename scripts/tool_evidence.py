@@ -821,7 +821,8 @@ def verify_evidence(payload: Any) -> dict[str, Any]:
             }
             if not isinstance(call, dict) or not required <= call.keys():
                 raise EvidenceError("invalid call envelope")
-            if set(call) - required - {"response", "error", "terminalProjectionVersion"}:
+            optional = {"response", "error", "terminalProjectionVersion"}
+            if set(call) - required - optional:
                 raise EvidenceError("unknown call fields")
             if "terminalProjectionVersion" in call and (
                 type(call["terminalProjectionVersion"]) is not int

@@ -38,6 +38,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Provision custody replay runtime
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+
       - uses: oven-sh/setup-bun@v2
 
       - name: Fetch and unpack content-addressed bundle
@@ -411,6 +416,7 @@ jobs:
               exit 1
             fi
             git pull --rebase origin main
+            uv sync --locked --extra custody
 
             # The candidate now contains its own batch, so its ticket is
             # necessarily consumed. Reverify with newly fetched trusted code

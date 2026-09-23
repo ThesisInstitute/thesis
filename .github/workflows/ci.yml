@@ -156,7 +156,7 @@ jobs:
         run: uv run --locked --extra custody python scripts/verify_record_chain.py records
 
       - name: Regenerate newest custody-era wave
-        run: python3 scripts/verify_wave_reproducibility.py
+        run: uv run --locked --extra custody python scripts/verify_wave_reproducibility.py
 
   # The red-main alarm lives in its own job so it covers EVERY job above
   # (the in-step variant sat mid-job in build-and-test: it missed failures

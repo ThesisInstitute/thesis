@@ -79,6 +79,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Prepare the locked custody interpreter
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+
       - name: Verify the local publication witnesses
         run: |
           set -euo pipefail
@@ -338,7 +343,9 @@ jobs:
       - uses: astral-sh/setup-uv@v5
 
       - name: Prepare the verified generation interpreter
-        run: uv sync --locked --extra custody
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Run the selected strategy suite
         id: suite
@@ -426,6 +433,12 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         if: needs.select.result == 'success' && needs.select.outputs.count != '0' && needs.generate.result == 'success'
+
+      - name: Prepare the locked custody interpreter
+        if: needs.select.result == 'success' && needs.select.outputs.count != '0' && needs.generate.result == 'success'
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Download the trusted strategy selection independently
         if: needs.select.result == 'success' && needs.select.outputs.count != '0' && needs.generate.result == 'success'
@@ -679,6 +692,7 @@ jobs:
             echo "strategy publication push attempt $attempt"
             test -z "$(git status --porcelain)"
             git pull --rebase origin main
+            uv sync --locked --extra custody
             git merge-base --is-ancestor "$SOURCE_SHA" HEAD
             gh_fetch /tmp/latest-ledger-sha \
               gh api "repos/$LEDGER_REPOSITORY/commits/$LEDGER_BRANCH" --jq .sha
