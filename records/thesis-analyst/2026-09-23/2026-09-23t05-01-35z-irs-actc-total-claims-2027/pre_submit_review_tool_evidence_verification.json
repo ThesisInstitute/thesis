@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "thesis_tool_evidence_verification_v1",
+  "captureMethod": "thesis-controlled-tools-v1",
+  "valid": true,
+  "errors": [],
+  "callCount": 0,
+  "succeededCount": 0,
+  "failedCount": 0,
+  "checks": [],
+  "evidenceCanonicalSha256": "bf4701cf0ea32686a5997294acfa7eff153b20ada762498559037512bc2b4deb",
+  "evidenceSha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f"
+}

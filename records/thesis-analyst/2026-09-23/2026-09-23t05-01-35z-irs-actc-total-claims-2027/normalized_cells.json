@@ -1,0 +1,1018 @@
+[
+  {
+    "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+    "country": "US",
+    "type": "conditional",
+    "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+    "title": "ACTC total claims TY2027 with $1 threshold",
+    "question": "What will IRS SOI Publication 1304 Table 3.3 first print report for tax year 2027, all returns total row, number of returns under refundable child tax credit or additional child tax credit, if the earned-income threshold is no more than $1?",
+    "unit": "millions",
+    "pointEstimate": 21.611111,
+    "ciLow": 16.3,
+    "ciHigh": 32.125,
+    "confidence": 0.8,
+    "resolutionDate": "2029-12-31",
+    "resolutionSource": "IRS Statistics of Income, Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+    "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "resolutionRule": "If the condition in conditionalOn is satisfied, resolve from the first IRS publication of tax-year 2027 Publication 1304 Table 3.3: the 'All returns, total' row and 'Number of returns' subcolumn under 'Refundable child tax credit or additional child tax credit.' The series is annual and not seasonally adjusted. The adapter returns the published whole-return count; multiply it by 0.000001 to express it in millions. Later revisions are irrelevant. The registered official-source release window is 2029-01-01 through 2029-12-31, with resolutionDate set to its verified by-date endpoint, 2029-12-31. If the stated legislative condition is not satisfied by 2027-12-31, mark this conditional forecast unresolved.",
+    "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+    "historicalContext": [
+      {
+        "label": "2018",
+        "value": 18.52836,
+        "period": {
+          "type": "year",
+          "value": "2018"
+        }
+      },
+      {
+        "label": "2019",
+        "value": 19.011027,
+        "period": {
+          "type": "year",
+          "value": "2019"
+        }
+      },
+      {
+        "label": "2020",
+        "value": 19.119249,
+        "period": {
+          "type": "year",
+          "value": "2020"
+        }
+      },
+      {
+        "label": "2021",
+        "value": 37.771612,
+        "period": {
+          "type": "year",
+          "value": "2021"
+        }
+      },
+      {
+        "label": "2022",
+        "value": 18.076696,
+        "period": {
+          "type": "year",
+          "value": "2022"
+        }
+      },
+      {
+        "label": "2023",
+        "value": 17.626084,
+        "period": {
+          "type": "year",
+          "value": "2023"
+        }
+      }
+    ],
+    "drivers": [
+      "Recent current-law ACTC claimant counts cluster around 17.6 to 19.1 million",
+      "TY2021 ARPA full-refundability regime shows an upper reference point at 37.771612 million",
+      "A $1 earned-income threshold mechanically helps very-low-earnings families but is weaker than full refundability",
+      "Population and filing growth by TY2027 modestly lift the current-law base",
+      "Interval is derived from the threshold ladder and checked against realized dispersion"
+    ],
+    "sourceContext": [
+      "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+      "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+      "https://www.irs.gov/pub/irs-prior/p1304--2020.pdf",
+      "https://www.irs.gov/pub/irs-prior/p1304--2021.pdf"
+    ],
+    "runAt": "2026-09-23T05:05:02Z",
+    "thresholdLadder": {
+      "thresholds": [
+        14,
+        16,
+        17.5,
+        18.5,
+        19.5,
+        20.5,
+        21.5,
+        22.5,
+        24,
+        26,
+        28.5,
+        31.5,
+        34,
+        38
+      ],
+      "cumulativeProbabilities": [
+        0.04,
+        0.09,
+        0.14,
+        0.22,
+        0.31,
+        0.4,
+        0.49,
+        0.58,
+        0.67,
+        0.76,
+        0.84,
+        0.89,
+        0.93,
+        0.98
+      ]
+    },
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "ACTC total claims TY2027 with $1 threshold"
+      },
+      {
+        "kind": "text",
+        "text": "Framing and exact resolver: this conditional cell keeps the registered resolve-by-bound date 2029-12-31 and the IRS Publication 1304 Table 3.3 first-print rule. The target variant is annual, not seasonally adjusted, all returns total row, number of returns under refundable child tax credit or additional child tax credit, transformed from whole returns to millions."
+      },
+      {
+        "kind": "tool",
+        "tool": "thesis_announcement_fetch.fetch_official_announcement",
+        "call": "Fetched exact registered officialAnnouncementUrl https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304.",
+        "result": "Structured fetch returned status 200, 153837 response bytes, contentType text/html, and responseSha256 1177f06ca6188df3562231a0de84faeceb79a0c1ec7664b31c3204a5eb314656. The page authenticates the Publication 1304 methodology/product identity, not a specific TY2027 release day, so I do not infer a date from cadence and keep the Thesis lab-committed outer bound of 2029-12-31."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched IRS Publication 1304 Table 3.3 official workbooks for TY2018 and TY2019 with thesis_tool_evidence receipts call-0002 and call-0003; cross-checked the exact Table 3.3 rows in IRS prior Publication 1304 PDFs for tax years 2018 and 2019.",
+        "result": "Fetched official values: TY2018 additional child credit refundable portion all-returns total was 18,528,360 returns, or 18.528360 million; TY2019 additional child tax credit refundable portion all-returns total was 19,011,027 returns, or 19.011027 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched IRS Publication 1304 Table 3.3 workbooks for TY2020 and TY2021 with evidence receipts call-0004 and call-0007, matching the reviewed adapter anchor hashes and parser identity for irs.actc.total_claims.",
+        "result": "Fetched official adapter values: TY2020 was 19,119,249 returns, or 19.119249 million; TY2021 was 37,771,612 returns, or 37.771612 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched IRS Publication 1304 Table 3.3 workbooks for TY2022 and TY2023 with evidence receipts call-0005 and call-0006, matching the same all-returns total row and same subcolumn variant.",
+        "result": "Fetched official adapter values: TY2022 was 18,076,696 returns, or 18.076696 million; TY2023 was 17,626,084 returns, or 17.626084 million."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate / reference class: the admissible current official series history is TY2018-TY2023 on the same Publication 1304 Table 3.3 variant. The non-ARPA years sit tightly around 17.6 to 19.1 million, while TY2021 under ARPA full refundability reached 37.771612 million. The announced conditional is a $1 earned-income threshold, not automatic full refundability, so TY2021 is an upper regime reference rather than the central base rate."
+      },
+      {
+        "kind": "math",
+        "text": "Ladder: P(X <= 14) = 0.04; P(X <= 16) = 0.09; P(X <= 17.5) = 0.14; P(X <= 18.5) = 0.22; P(X <= 19.5) = 0.31; P(X <= 20.5) = 0.40; P(X <= 21.5) = 0.49; P(X <= 22.5) = 0.58; P(X <= 24) = 0.67; P(X <= 26) = 0.76; P(X <= 28.5) = 0.84; P(X <= 31.5) = 0.89; P(X <= 34) = 0.93; P(X <= 38) = 0.98. Linear interpolation gives the 10th percentile 16.300000 from call-0011, median 21.611111 from call-0012, and 90th percentile 32.125000 from call-0013."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior = recent non-ARPA level near 18.0 million; historical sample = 18.528360, 19.011027, 19.119249, 37.771612, 18.076696, 17.626084; adjustment components = judgmental policy-mechanism updates of +1.0 million for population and filing growth by TY2027, +2.5 million for families with very low earnings newly crossing the refundability threshold, and asymmetric upside for broader child-credit legislation bundled with the threshold. A formal trend or ARIMA-style prior is ruled out because the six-print history is dominated by statutory regime changes, so the operative prior is non-ARPA persistence plus stated policy adjustments. For the annual flow series I used the values themselves: sigma = 7.899 from call-0009, so 80% half-width check = 1.28*sigma = 10.111 from call-0010. The ladder-implied 80% width is 15.825 from call-0014, a 7.913 half-width, about 0.78x the 1.28*sigma check because TY2021 full refundability is more generous than the stated $1-threshold mechanism."
+      },
+      {
+        "kind": "text",
+        "text": "Policy mechanism: lowering IRC \u00a724(d)(1)(B)(i)'s earned-income threshold from the current-law threshold to no more than $1 mainly adds families with positive but very low earnings and increases marginal ACTC eligibility for some low earners. It does not by itself imply the TY2021 ARPA combination of full refundability, larger maximum credit, age-17 eligibility, and advance payment administration."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk is that enacted legislation paired with the $1 threshold also expands the refundable amount or child eligibility, which would land above the interval toward the TY2021 ARPA print. Downside risk is that take-up, qualifying-child counts, or very-low-earnings filing behavior remain close to current law, which would land near or below the lower interval. A materially different IRS Table 3.3 concept label or unresolved condition would be outside the interval as a scoring-state issue rather than a numeric miss."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the blocking resolver critique by preserving the structured thesis_announcement_fetch.fetch_official_announcement event for the exact registered URL and keeping resolutionDate at 2029-12-31. Accepted the model-prior warning by ruling out a formal trend prior, and accepted the update warning by labeling the +1.0 million and +2.5 million updates as judgmental policy-mechanism components rather than sourced estimates."
+      },
+      {
+        "kind": "forecast",
+        "point": 21.611111,
+        "ciLow": 16.3,
+        "ciHigh": 32.125
+      }
+    ],
+    "agentReportedRunAt": "2026-09-23T05:04:43Z",
+    "runStartedAt": "2026-09-23T05:01:35Z",
+    "promptMode": "ladder",
+    "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+    "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+    "targetRegistrationPath": "records/targets/2026-08-03-6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6.json",
+    "registeredAtUtc": "2026-08-03T20:13:09Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 8.3333335,
+        "upper": 47.8958335
+      },
+      "points": [
+        {
+          "value": 8.3333335,
+          "probability": 0.0
+        },
+        {
+          "value": 8.531146,
+          "probability": 0.0013963236
+        },
+        {
+          "value": 8.7289585,
+          "probability": 0.0027926471
+        },
+        {
+          "value": 8.926771,
+          "probability": 0.0041889707
+        },
+        {
+          "value": 9.1245835,
+          "probability": 0.0055852943
+        },
+        {
+          "value": 9.322396,
+          "probability": 0.0069816179
+        },
+        {
+          "value": 9.5202085,
+          "probability": 0.0083779414
+        },
+        {
+          "value": 9.718021,
+          "probability": 0.009774265
+        },
+        {
+          "value": 9.9158335,
+          "probability": 0.0111705886
+        },
+        {
+          "value": 10.113646,
+          "probability": 0.0125669121
+        },
+        {
+          "value": 10.3114585,
+          "probability": 0.0139632357
+        },
+        {
+          "value": 10.509271,
+          "probability": 0.0153595593
+        },
+        {
+          "value": 10.7070835,
+          "probability": 0.0167558828
+        },
+        {
+          "value": 10.904896,
+          "probability": 0.0181522064
+        },
+        {
+          "value": 11.1027085,
+          "probability": 0.01954853
+        },
+        {
+          "value": 11.300521,
+          "probability": 0.0209448536
+        },
+        {
+          "value": 11.4983335,
+          "probability": 0.0223411771
+        },
+        {
+          "value": 11.696146,
+          "probability": 0.0237375007
+        },
+        {
+          "value": 11.8939585,
+          "probability": 0.0251338243
+        },
+        {
+          "value": 12.091771,
+          "probability": 0.0265301478
+        },
+        {
+          "value": 12.2895835,
+          "probability": 0.0279264714
+        },
+        {
+          "value": 12.487396,
+          "probability": 0.029322795
+        },
+        {
+          "value": 12.6852085,
+          "probability": 0.0307191186
+        },
+        {
+          "value": 12.883021,
+          "probability": 0.0321154421
+        },
+        {
+          "value": 13.0808335,
+          "probability": 0.0335117657
+        },
+        {
+          "value": 13.278646,
+          "probability": 0.0349080893
+        },
+        {
+          "value": 13.4764585,
+          "probability": 0.0363044128
+        },
+        {
+          "value": 13.674271,
+          "probability": 0.0377007364
+        },
+        {
+          "value": 13.8720835,
+          "probability": 0.03909706
+        },
+        {
+          "value": 14.069896,
+          "probability": 0.0417474
+        },
+        {
+          "value": 14.2677085,
+          "probability": 0.0466927125
+        },
+        {
+          "value": 14.465521,
+          "probability": 0.051638025
+        },
+        {
+          "value": 14.6633335,
+          "probability": 0.0565833375
+        },
+        {
+          "value": 14.861146,
+          "probability": 0.06152865
+        },
+        {
+          "value": 15.0589585,
+          "probability": 0.0664739625
+        },
+        {
+          "value": 15.256771,
+          "probability": 0.071419275
+        },
+        {
+          "value": 15.4545835,
+          "probability": 0.0763645875
+        },
+        {
+          "value": 15.652396,
+          "probability": 0.0813099
+        },
+        {
+          "value": 15.8502085,
+          "probability": 0.0862552125
+        },
+        {
+          "value": 16.048021,
+          "probability": 0.0916007
+        },
+        {
+          "value": 16.2458335,
+          "probability": 0.09819445
+        },
+        {
+          "value": 16.443646,
+          "probability": 0.1047882
+        },
+        {
+          "value": 16.6414585,
+          "probability": 0.11138195
+        },
+        {
+          "value": 16.839271,
+          "probability": 0.1179757
+        },
+        {
+          "value": 17.0370835,
+          "probability": 0.12456945
+        },
+        {
+          "value": 17.234896,
+          "probability": 0.1311632
+        },
+        {
+          "value": 17.4327085,
+          "probability": 0.13775695
+        },
+        {
+          "value": 17.630521,
+          "probability": 0.15044168
+        },
+        {
+          "value": 17.8283335,
+          "probability": 0.16626668
+        },
+        {
+          "value": 18.026146,
+          "probability": 0.18209168
+        },
+        {
+          "value": 18.2239585,
+          "probability": 0.19791668
+        },
+        {
+          "value": 18.421771,
+          "probability": 0.21374168
+        },
+        {
+          "value": 18.6195835,
+          "probability": 0.230762515
+        },
+        {
+          "value": 18.817396,
+          "probability": 0.24856564
+        },
+        {
+          "value": 19.0152085,
+          "probability": 0.266368765
+        },
+        {
+          "value": 19.213021,
+          "probability": 0.28417189
+        },
+        {
+          "value": 19.4108335,
+          "probability": 0.301975015
+        },
+        {
+          "value": 19.608646,
+          "probability": 0.31977814
+        },
+        {
+          "value": 19.8064585,
+          "probability": 0.337581265
+        },
+        {
+          "value": 20.004271,
+          "probability": 0.35538439
+        },
+        {
+          "value": 20.2020835,
+          "probability": 0.373187515
+        },
+        {
+          "value": 20.399896,
+          "probability": 0.39099064
+        },
+        {
+          "value": 20.5977085,
+          "probability": 0.408793765
+        },
+        {
+          "value": 20.795521,
+          "probability": 0.42659689
+        },
+        {
+          "value": 20.9933335,
+          "probability": 0.444400015
+        },
+        {
+          "value": 21.191146,
+          "probability": 0.46220314
+        },
+        {
+          "value": 21.3889585,
+          "probability": 0.480006265
+        },
+        {
+          "value": 21.586771,
+          "probability": 0.49780939
+        },
+        {
+          "value": 21.7845835,
+          "probability": 0.515612515
+        },
+        {
+          "value": 21.982396,
+          "probability": 0.53341564
+        },
+        {
+          "value": 22.1802085,
+          "probability": 0.551218765
+        },
+        {
+          "value": 22.378021,
+          "probability": 0.56902189
+        },
+        {
+          "value": 22.5758335,
+          "probability": 0.58455001
+        },
+        {
+          "value": 22.773646,
+          "probability": 0.59641876
+        },
+        {
+          "value": 22.9714585,
+          "probability": 0.60828751
+        },
+        {
+          "value": 23.169271,
+          "probability": 0.62015626
+        },
+        {
+          "value": 23.3670835,
+          "probability": 0.63202501
+        },
+        {
+          "value": 23.564896,
+          "probability": 0.64389376
+        },
+        {
+          "value": 23.7627085,
+          "probability": 0.65576251
+        },
+        {
+          "value": 23.960521,
+          "probability": 0.66763126
+        },
+        {
+          "value": 24.1583335,
+          "probability": 0.6771250075
+        },
+        {
+          "value": 24.356146,
+          "probability": 0.68602657
+        },
+        {
+          "value": 24.5539585,
+          "probability": 0.6949281325
+        },
+        {
+          "value": 24.751771,
+          "probability": 0.703829695
+        },
+        {
+          "value": 24.9495835,
+          "probability": 0.7127312575
+        },
+        {
+          "value": 25.147396,
+          "probability": 0.72163282
+        },
+        {
+          "value": 25.3452085,
+          "probability": 0.7305343825
+        },
+        {
+          "value": 25.543021,
+          "probability": 0.739435945
+        },
+        {
+          "value": 25.7408335,
+          "probability": 0.7483375075
+        },
+        {
+          "value": 25.938646,
+          "probability": 0.75723907
+        },
+        {
+          "value": 26.1364585,
+          "probability": 0.764366672
+        },
+        {
+          "value": 26.334271,
+          "probability": 0.770696672
+        },
+        {
+          "value": 26.5320835,
+          "probability": 0.777026672
+        },
+        {
+          "value": 26.729896,
+          "probability": 0.783356672
+        },
+        {
+          "value": 26.9277085,
+          "probability": 0.789686672
+        },
+        {
+          "value": 27.125521,
+          "probability": 0.796016672
+        },
+        {
+          "value": 27.3233335,
+          "probability": 0.802346672
+        },
+        {
+          "value": 27.521146,
+          "probability": 0.808676672
+        },
+        {
+          "value": 27.7189585,
+          "probability": 0.815006672
+        },
+        {
+          "value": 27.916771,
+          "probability": 0.821336672
+        },
+        {
+          "value": 28.1145835,
+          "probability": 0.827666672
+        },
+        {
+          "value": 28.312396,
+          "probability": 0.833996672
+        },
+        {
+          "value": 28.5102085,
+          "probability": 0.8401701417
+        },
+        {
+          "value": 28.708021,
+          "probability": 0.8434670167
+        },
+        {
+          "value": 28.9058335,
+          "probability": 0.8467638917
+        },
+        {
+          "value": 29.103646,
+          "probability": 0.8500607667
+        },
+        {
+          "value": 29.3014585,
+          "probability": 0.8533576417
+        },
+        {
+          "value": 29.499271,
+          "probability": 0.8566545167
+        },
+        {
+          "value": 29.6970835,
+          "probability": 0.8599513917
+        },
+        {
+          "value": 29.894896,
+          "probability": 0.8632482667
+        },
+        {
+          "value": 30.0927085,
+          "probability": 0.8665451417
+        },
+        {
+          "value": 30.290521,
+          "probability": 0.8698420167
+        },
+        {
+          "value": 30.4883335,
+          "probability": 0.8731388917
+        },
+        {
+          "value": 30.686146,
+          "probability": 0.8764357667
+        },
+        {
+          "value": 30.8839585,
+          "probability": 0.8797326417
+        },
+        {
+          "value": 31.081771,
+          "probability": 0.8830295167
+        },
+        {
+          "value": 31.2795835,
+          "probability": 0.8863263917
+        },
+        {
+          "value": 31.477396,
+          "probability": 0.8896232667
+        },
+        {
+          "value": 31.6752085,
+          "probability": 0.892803336
+        },
+        {
+          "value": 31.873021,
+          "probability": 0.895968336
+        },
+        {
+          "value": 32.0708335,
+          "probability": 0.899133336
+        },
+        {
+          "value": 32.268646,
+          "probability": 0.902298336
+        },
+        {
+          "value": 32.4664585,
+          "probability": 0.905463336
+        },
+        {
+          "value": 32.664271,
+          "probability": 0.908628336
+        },
+        {
+          "value": 32.8620835,
+          "probability": 0.911793336
+        },
+        {
+          "value": 33.059896,
+          "probability": 0.914958336
+        },
+        {
+          "value": 33.2577085,
+          "probability": 0.918123336
+        },
+        {
+          "value": 33.455521,
+          "probability": 0.921288336
+        },
+        {
+          "value": 33.6533335,
+          "probability": 0.924453336
+        },
+        {
+          "value": 33.851146,
+          "probability": 0.927618336
+        },
+        {
+          "value": 34.0489585,
+          "probability": 0.9306119812
+        },
+        {
+          "value": 34.246771,
+          "probability": 0.9330846375
+        },
+        {
+          "value": 34.4445835,
+          "probability": 0.9355572938
+        },
+        {
+          "value": 34.642396,
+          "probability": 0.93802995
+        },
+        {
+          "value": 34.8402085,
+          "probability": 0.9405026062
+        },
+        {
+          "value": 35.038021,
+          "probability": 0.9429752625
+        },
+        {
+          "value": 35.2358335,
+          "probability": 0.9454479188
+        },
+        {
+          "value": 35.433646,
+          "probability": 0.947920575
+        },
+        {
+          "value": 35.6314585,
+          "probability": 0.9503932312
+        },
+        {
+          "value": 35.829271,
+          "probability": 0.9528658875
+        },
+        {
+          "value": 36.0270835,
+          "probability": 0.9553385437
+        },
+        {
+          "value": 36.224896,
+          "probability": 0.9578112
+        },
+        {
+          "value": 36.4227085,
+          "probability": 0.9602838563
+        },
+        {
+          "value": 36.620521,
+          "probability": 0.9627565125
+        },
+        {
+          "value": 36.8183335,
+          "probability": 0.9652291687
+        },
+        {
+          "value": 37.016146,
+          "probability": 0.967701825
+        },
+        {
+          "value": 37.2139585,
+          "probability": 0.9701744812
+        },
+        {
+          "value": 37.411771,
+          "probability": 0.9726471375
+        },
+        {
+          "value": 37.6095835,
+          "probability": 0.9751197938
+        },
+        {
+          "value": 37.807396,
+          "probability": 0.97759245
+        },
+        {
+          "value": 38.0052085,
+          "probability": 0.9800105267
+        },
+        {
+          "value": 38.203021,
+          "probability": 0.9804103161
+        },
+        {
+          "value": 38.4008335,
+          "probability": 0.9808101056
+        },
+        {
+          "value": 38.598646,
+          "probability": 0.9812098951
+        },
+        {
+          "value": 38.7964585,
+          "probability": 0.9816096845
+        },
+        {
+          "value": 38.994271,
+          "probability": 0.982009474
+        },
+        {
+          "value": 39.1920835,
+          "probability": 0.9824092635
+        },
+        {
+          "value": 39.389896,
+          "probability": 0.9828090529
+        },
+        {
+          "value": 39.5877085,
+          "probability": 0.9832088424
+        },
+        {
+          "value": 39.785521,
+          "probability": 0.9836086319
+        },
+        {
+          "value": 39.9833335,
+          "probability": 0.9840084213
+        },
+        {
+          "value": 40.181146,
+          "probability": 0.9844082108
+        },
+        {
+          "value": 40.3789585,
+          "probability": 0.9848080003
+        },
+        {
+          "value": 40.576771,
+          "probability": 0.9852077897
+        },
+        {
+          "value": 40.7745835,
+          "probability": 0.9856075792
+        },
+        {
+          "value": 40.972396,
+          "probability": 0.9860073687
+        },
+        {
+          "value": 41.1702085,
+          "probability": 0.9864071581
+        },
+        {
+          "value": 41.368021,
+          "probability": 0.9868069476
+        },
+        {
+          "value": 41.5658335,
+          "probability": 0.9872067371
+        },
+        {
+          "value": 41.763646,
+          "probability": 0.9876065265
+        },
+        {
+          "value": 41.9614585,
+          "probability": 0.988006316
+        },
+        {
+          "value": 42.159271,
+          "probability": 0.9884061055
+        },
+        {
+          "value": 42.3570835,
+          "probability": 0.9888058949
+        },
+        {
+          "value": 42.554896,
+          "probability": 0.9892056844
+        },
+        {
+          "value": 42.7527085,
+          "probability": 0.9896054739
+        },
+        {
+          "value": 42.950521,
+          "probability": 0.9900052633
+        },
+        {
+          "value": 43.1483335,
+          "probability": 0.9904050528
+        },
+        {
+          "value": 43.346146,
+          "probability": 0.9908048423
+        },
+        {
+          "value": 43.5439585,
+          "probability": 0.9912046317
+        },
+        {
+          "value": 43.741771,
+          "probability": 0.9916044212
+        },
+        {
+          "value": 43.9395835,
+          "probability": 0.9920042107
+        },
+        {
+          "value": 44.137396,
+          "probability": 0.9924040001
+        },
+        {
+          "value": 44.3352085,
+          "probability": 0.9928037896
+        },
+        {
+          "value": 44.533021,
+          "probability": 0.9932035791
+        },
+        {
+          "value": 44.7308335,
+          "probability": 0.9936033685
+        },
+        {
+          "value": 44.928646,
+          "probability": 0.994003158
+        },
+        {
+          "value": 45.1264585,
+          "probability": 0.9944029475
+        },
+        {
+          "value": 45.324271,
+          "probability": 0.9948027369
+        },
+        {
+          "value": 45.5220835,
+          "probability": 0.9952025264
+        },
+        {
+          "value": 45.719896,
+          "probability": 0.9956023159
+        },
+        {
+          "value": 45.9177085,
+          "probability": 0.9960021053
+        },
+        {
+          "value": 46.115521,
+          "probability": 0.9964018948
+        },
+        {
+          "value": 46.3133335,
+          "probability": 0.9968016843
+        },
+        {
+          "value": 46.511146,
+          "probability": 0.9972014737
+        },
+        {
+          "value": 46.7089585,
+          "probability": 0.9976012632
+        },
+        {
+          "value": 46.906771,
+          "probability": 0.9980010527
+        },
+        {
+          "value": 47.1045835,
+          "probability": 0.9984008421
+        },
+        {
+          "value": 47.302396,
+          "probability": 0.9988006316
+        },
+        {
+          "value": 47.5002085,
+          "probability": 0.9992004211
+        },
+        {
+          "value": 47.698021,
+          "probability": 0.9996002105
+        },
+        {
+          "value": 47.8958335,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 21.611111,
+        "median": 21.611111,
+        "interval80": {
+          "lower": 16.3,
+          "upper": 32.125
+        }
+      },
+      "provenance": "agent_reported",
+      "transformVersion": "agent_cdf_v1"
+    }
+  }
+]

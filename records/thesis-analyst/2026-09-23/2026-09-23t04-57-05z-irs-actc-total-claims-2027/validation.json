@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+      "ok": false,
+      "errors": [
+        "historicalContext has 4 distinct canonical prints; at least 6 are mandatory unless the sealed checkout's reviewed docket authorizes this exact series and target period"
+      ]
+    }
+  ]
+}
