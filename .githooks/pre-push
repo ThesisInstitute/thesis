@@ -141,24 +141,35 @@ epoch_of() { # epoch_of <commit>
 # commit is in scope and reachable from the comparator, the content is
 # published, whatever unpublished src-only or no-op-merge commits sit
 # between it and the parent.
-# The TREESAME edge is followed with the pusher's diff config neutralised
+# No parent may vouch for a rollback: a merge that keeps this parent's
+# records over another parent whose records were set LATER on the
+# comparator's history (the kept state's setter is an ancestor of the
+# discarded state's setter, and that setter is published). The discarded
+# parent itself need not be published — an unpublished descendant of newer
+# main carries main's records all the same — and a parent carrying an OLDER
+# published state (an honest forward merge, a side branch main has since
+# absorbed) is not rolled back by keeping the newer one.
+# The TREESAME edges are followed with the pusher's diff config neutralised
 # (log.follow only applies to a single file, and records/ holds no
 # submodule, but neither may decide which commit comes back).
+records_setter() { # records_setter <commit>
+    git -c log.follow=false -c diff.ignoreSubmodules=none log \
+        --format=%H -n 1 "$1" -- records/ 2>/dev/null
+}
 parent_may_exempt() { # parent_may_exempt <parent> <base> <epoch> <merge>
     [ -n "$3" ] || return 1
     git merge-base --is-ancestor "$1" "$3" 2>/dev/null && return 1
-    # Carrying this parent's records over another parent the comparator
-    # already contains with DIFFERENT records rolls a published state
-    # back; no parent may vouch for that.
+    setter=$(records_setter "$1")
+    [ -n "$setter" ] || return 1
     mtree=$(records_tree "$4")
     for q in $(git rev-parse "$4^@" 2>/dev/null); do
         [ "$(records_tree "$q")" = "$mtree" ] && continue
-        git merge-base --is-ancestor "$q" "$2" 2>/dev/null && return 1
+        qsetter=$(records_setter "$q")
+        [ -n "$qsetter" ] || continue
+        git merge-base --is-ancestor "$qsetter" "$2" 2>/dev/null || continue
+        git merge-base --is-ancestor "$setter" "$qsetter" 2>/dev/null && return 1
     done
     git merge-base --is-ancestor "$1" "$2" 2>/dev/null && return 0
-    setter=$(git -c log.follow=false -c diff.ignoreSubmodules=none log \
-        --format=%H -n 1 "$1" -- records/ 2>/dev/null)
-    [ -n "$setter" ] || return 1
     git merge-base --is-ancestor "$setter" "$3" 2>/dev/null && return 1
     git merge-base --is-ancestor "$setter" "$2" 2>/dev/null
 }

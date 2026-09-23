@@ -15,7 +15,10 @@
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HOOK="$ROOT/.githooks/pre-push"
-S="$(mktemp -d "${TMPDIR:-/tmp}/prepush-guard-test.XXXXXX")"
+S="$(mktemp -d "${TMPDIR:-/tmp}/prepush-guard-test.XXXXXX")" || {
+    echo "mktemp failed; no fixtures, no result" >&2
+    exit 2
+}
 trap 'rm -rf "$S"' EXIT
 ZERO40=0000000000000000000000000000000000000000
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
@@ -532,6 +535,65 @@ check "53 literal stale published parent over main blocks" 1 $rc "$S/err" "liter
 git -C "$S/dev22" merge -q --no-edit origin/main
 hook "$S/dev22" origin "refs/heads/roll $(git -C "$S/dev22" rev-parse roll) refs/heads/roll $ZERO40"
 check "54 an honest forward merge on the same branch still allowed" 0 $rc
+
+# ---- 55-59: rollbacks reached through UNPUBLISHED parents, and honest
+# merges that keep the NEWER of two published states (2026-09-22 review
+# of #280, F1 and F2). A parent that is a src-only child of the newer main
+# carries main's records without being published itself; keeping an older
+# published state over it is the same rollback as 52/53 and must block,
+# also as an octopus and under a later merge. A merge that keeps the newer
+# state over a parent carrying an older published one is not a rollback,
+# whether the older parent is a stale main commit or a lagging side branch
+# main has since absorbed.
+git clone -q "$S/origin.git" "$S/dev23" 2>/dev/null
+git -C "$S/dev23" checkout -qb wrap "$MTIP"                  # older published state
+commit_file "$S/dev23" src/r.txt r "src on wrap"
+P=$(git -C "$S/dev23" rev-parse wrap)
+git -C "$S/dev23" checkout -qb newer "$MTIP2"                # child of newer main
+commit_file "$S/dev23" src/s.txt s "src on newer"
+Q=$(git -C "$S/dev23" rev-parse newer)
+git -C "$S/dev23" checkout -qb newer2 "$MTIP2"
+commit_file "$S/dev23" src/t.txt t "src on newer2"
+Q2=$(git -C "$S/dev23" rev-parse newer2)
+git -C "$S/dev23" checkout -qb lag2 "$INIT"
+commit_file "$S/dev23" src/u.txt u "src on lag2 (records lag main)"
+L=$(git -C "$S/dev23" rev-parse lag2)
+WRAP=$(git -C "$S/dev23" commit-tree "$P^{tree}" -p "$P" -p "$Q" \
+    -m "wrapped rollback over an unpublished child of main")
+hook "$S/dev23" origin "refs/heads/wrap $WRAP refs/heads/wrap $ZERO40"
+check "55 rollback over an unpublished child of newer main blocks" 1 $rc "$S/err" "wrapped rollback"
+OCTO=$(git -C "$S/dev23" commit-tree "$P^{tree}" -p "$P" -p "$Q" -p "$Q2" \
+    -m "octopus rollback over two unpublished children of main")
+hook "$S/dev23" origin "refs/heads/wrap $OCTO refs/heads/wrap $ZERO40"
+check "56 octopus rollback over unpublished children blocks" 1 $rc "$S/err" "octopus rollback"
+ABOVE=$(git -C "$S/dev23" commit-tree "$P^{tree}" -p "$WRAP" -p "$L" \
+    -m "side merge above the wrapped rollback")
+hook "$S/dev23" origin "refs/heads/wrap $ABOVE refs/heads/wrap $ZERO40"
+check "57 a later merge does not launder the wrapped rollback" 1 $rc "$S/err" "wrapped rollback"
+GOOD=$(git -C "$S/dev23" commit-tree "$MTIP2^{tree}" -p "$MTIP" -p "$MTIP2" \
+    -m "honest no-ff merge of newer main from an older main commit")
+hook "$S/dev23" origin "refs/heads/wrap $GOOD refs/heads/wrap $ZERO40"
+check "58 keeping the newer published state over an older one allowed" 0 $rc
+git -C "$S/dev23" checkout -qb side "$INIT"
+commit_file "$S/dev23" src/v.txt v "src on side"
+git -C "$S/dev23" merge -q --no-edit origin/main            # forward merge
+git -C "$S/dev23" merge -q --no-edit lag2                   # side merge
+SIDE=$(git -C "$S/dev23" rev-parse side)
+if [ "$(git -C "$S/dev23" rev-parse "$SIDE:records")" != \
+    "$(git -C "$S/dev23" rev-parse "$MTIP2:records")" ]; then
+    echo "FAIL 59 fixture: side merge did not keep main's records tree"; fail=$((fail+1))
+fi
+hook "$S/dev23" origin "refs/heads/side $SIDE refs/heads/side $ZERO40"
+check "59 side merge of a lagging branch allowed" 0 $rc
+git -C "$S/dev23" checkout -q -B main origin/main
+git -C "$S/dev23" merge -q --no-edit lag2                   # main absorbs the side branch
+git -C "$S/dev23" push -q origin main
+if [ "$(git -C "$S/dev23" rev-parse "origin/main:records")" != \
+    "$(git -C "$S/dev23" rev-parse "$MTIP2:records")" ]; then
+    echo "FAIL 59b fixture: absorbing the side branch changed main's records"; fail=$((fail+1))
+fi
+hook "$S/dev23" origin "refs/heads/side $SIDE refs/heads/side $ZERO40"
+check "59b still allowed once main has absorbed the side branch" 0 $rc
 
 echo
 echo "== $pass passed, $fail failed =="
