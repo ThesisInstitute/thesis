@@ -115,3 +115,27 @@ security principal. Receipt protects published artifact custody and identity;
 it does not prove model authorship, source truth, completeness of all tool
 activity, or correctness of judgment. Stronger execution claims require an
 isolated trusted recorder or externally attested execution environment.
+
+## Publication secret scanning
+
+The publication and diagnostic-archive scanners inspect complete captured HTTP
+bodies as decoded bytes. A binary body's base64 representation can coincidentally
+match a credential pattern. A fresh diagnostic fetch of the public IRS
+`22in33ar.xls` workbook reproduced this for a response hash recorded in strategy
+attempt 35808962969. That attempt remains failed; three evidence files omitted
+by its diagnostic secret scan cannot be reconstructed.
+
+The scanner uses this interpretation only for a strict UTF-8, duplicate-free,
+recognized evidence envelope that passes the existing complete offline replay.
+Canonical base64, body length, SHA-256, response identity, and resource bounds
+must all verify. Only the exact response `bodyBase64` string spans are excluded
+from text scanning. The unchanged surrounding bytes, all other decoded JSON
+strings and keys, and every decoded response body are scanned with the existing
+credential patterns. Arbitrary base64 receives no exemption; malformed recognized
+envelopes block publication. This read-only scanning view never rewrites evidence,
+native events, replay results, or custody commitments.
+
+JSON-object candidates above the evidence artifact-size limit are also refused
+before parsing, including ordinary JSON objects whose type cannot be safely
+established within that bound. Escaped or late metadata cannot turn an oversized
+capture into an unscanned response body.

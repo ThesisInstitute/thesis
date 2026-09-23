@@ -107,6 +107,8 @@ jobs:
       - name: Check analyst runner lint
         run: |
           uv run ruff check scripts/run_thesis_analyst.py \
+            scripts/evidence_secret_scan.py \
+            tests/test_evidence_secret_scan.py \
             scripts/thesis_records_to_comparisons.py \
             tests/test_thesis_analyst_runner.py \
             tests/test_thesis_analyst_env_hygiene.py
@@ -114,6 +116,7 @@ jobs:
         run: |
           uv run pytest -q \
             tests/test_archive_strategy_attempt.py \
+            tests/test_evidence_secret_scan.py \
             tests/test_bill_forecast_plan.py \
             tests/test_ingest_bill.py \
             tests/test_map_bill_metrics.py \
