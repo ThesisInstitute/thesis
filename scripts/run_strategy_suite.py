@@ -69,6 +69,7 @@ def run_batch(
     model: str,
     timeout_seconds: int,
     reviewed: bool,
+    selection_ledger_path: pathlib.Path | None = None,
 ) -> dict[str, Any]:
     command = [
         sys.executable,
@@ -86,6 +87,8 @@ def run_batch(
         "--out",
         str(output_path),
     ]
+    if selection_ledger_path is not None:
+        command.extend(["--strategy-ledger-jsonl", str(selection_ledger_path)])
     if reviewed:
         command.extend(["--pre-submit-review-codex-model", model])
     else:
@@ -140,8 +143,7 @@ def derive_medians(
             slug = str(target["catalogSlug"])
             results = [index.get(slug) for index in indexes]
             if any(
-                result is None or result.get("ok") is not True
-                for result in results
+                result is None or result.get("ok") is not True for result in results
             ):
                 derivations.append(
                     {
@@ -216,6 +218,7 @@ def run_suite(
     output_path: pathlib.Path | None,
     model: str,
     timeout_seconds: int,
+    selection_ledger_path: pathlib.Path | None = None,
 ) -> dict[str, Any]:
     selection = load_object(selection_path, "strategy selection")
     if selection.get("schemaVersion") != SELECTION_SCHEMA:
@@ -236,6 +239,13 @@ def run_suite(
         isinstance(target, dict) for target in targets
     ):
         raise StrategySuiteError("strategy selection targets must be an object list")
+    if any(
+        target.get("resolutionDateBasis") == "resolve-by-bound" for target in targets
+    ):
+        if selection_ledger_path is None:
+            raise StrategySuiteError(
+                "bounded strategy requires its pinned selection ledger"
+            )
     if (
         type(run_id) is not int
         or run_id < 1
@@ -267,6 +277,7 @@ def run_suite(
             model=model,
             timeout_seconds=timeout_seconds,
             reviewed=True,
+            selection_ledger_path=selection_ledger_path,
         )
         lanes["ladder"] = {
             "batchManifest": repo_relative(path),
@@ -284,6 +295,7 @@ def run_suite(
                 model=model,
                 timeout_seconds=timeout_seconds,
                 reviewed=False,
+                selection_ledger_path=selection_ledger_path,
             )
             rollout_payloads.append(payload)
             lanes["rollouts"].append(
@@ -316,6 +328,7 @@ def run_suite(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--selection", type=pathlib.Path, required=True)
+    parser.add_argument("--selection-ledger-jsonl", type=pathlib.Path)
     parser.add_argument("--run-id", type=int, required=True)
     parser.add_argument("--run-attempt", type=int, required=True)
     parser.add_argument("--out", type=pathlib.Path)
@@ -334,6 +347,7 @@ def main() -> int:
             output_path=args.out,
             model=args.model,
             timeout_seconds=args.timeout_seconds,
+            selection_ledger_path=args.selection_ledger_jsonl,
         )
     except (StrategySuiteError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"STRATEGY SUITE BLOCKED: {exc}", file=sys.stderr)

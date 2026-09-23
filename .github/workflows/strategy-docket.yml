@@ -335,14 +335,20 @@ jobs:
       - name: Authenticate codex
         run: printenv OPENAI_API_KEY | codex login --with-api-key
 
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Prepare the verified generation interpreter
+        run: uv sync --locked --extra custody
+
       - name: Run the selected strategy suite
         id: suite
         env:
           CODEX_MODEL: ${{ github.event.inputs.codex_model || 'gpt-5.5' }}
         run: |
           set -euo pipefail
-          python3 scripts/run_strategy_suite.py \
+          .venv/bin/python scripts/run_strategy_suite.py \
             --selection /tmp/trusted-selection/strategy-targets.json \
+            --selection-ledger-jsonl /tmp/pinned-ledger.jsonl \
             --model "$CODEX_MODEL" \
             --run-id "${{ steps.invocation.outputs.run_id }}" \
             --run-attempt "${{ steps.invocation.outputs.run_attempt }}"
@@ -351,6 +357,28 @@ jobs:
             -print -quit)
           test -n "$SUITE_MANIFEST"
           echo "suite_manifest=$SUITE_MANIFEST" >> "$GITHUB_OUTPUT"
+
+      # Preserve failed/invalid traces before strict custody staging can reject
+      # them. This diagnostic artifact is never a publisher input.
+      - name: Archive the strategy attempt for diagnosis
+        if: ${{ always() && steps.invocation.outcome == 'success' && steps.suite.outcome != 'skipped' }}
+        run: |
+          python3 scripts/archive_strategy_attempt.py \
+            --selection /tmp/trusted-selection/strategy-targets.json \
+            --run-id "${{ steps.invocation.outputs.run_id }}" \
+            --run-attempt "${{ steps.invocation.outputs.run_attempt }}" \
+            --execution-attempt "${{ github.run_attempt }}" \
+            --out /tmp/strategy-attempt-diagnostic
+
+      - name: Upload the diagnostic attempt independently of publication
+        if: ${{ always() && steps.invocation.outcome == 'success' && steps.suite.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: strategy-attempt-${{ steps.invocation.outputs.run_id }}-${{ steps.invocation.outputs.run_attempt }}-execution-${{ github.run_attempt }}
+          path: /tmp/strategy-attempt-diagnostic/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
 
       - name: Stage one exact-scope strategy bundle
         run: |

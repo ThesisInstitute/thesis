@@ -217,6 +217,7 @@ def validate(
     generation_ticket: dict | None = None,
     agent_version: object = None,
     trusted_history_authorization: dict | None = None,
+    trusted_strategy_target: dict | None = None,
 ) -> list[str]:
     if target_context is None:
         carried_context = cell.get(SEALED_TARGET_CONTEXT_KEY)
@@ -341,7 +342,23 @@ def validate(
     if basis not in {"release-calendar", "resolve-by-bound"}:
         errs.append(f"unsupported target resolutionDateBasis {basis!r}")
     if basis == "resolve-by-bound":
-        if not valid_generation_ticket_context(generation_ticket):
+        # This argument is supplied only by the trusted strategy runner or
+        # publisher after authenticating the complete selection. Never read
+        # strategy authority from the model cell or its carried metadata.
+        from canonical_json import canonical_bytes
+
+        strategy_authorized = (
+            isinstance(trusted_strategy_target, dict)
+            and isinstance(target_context, dict)
+            and trusted_strategy_target.get("comparisonTarget") is True
+            and bool(trusted_strategy_target.get("conditional"))
+            and canonical_bytes(trusted_strategy_target)
+            == canonical_bytes(target_context)
+        )
+        if (
+            not valid_generation_ticket_context(generation_ticket)
+            and not strategy_authorized
+        ):
             errs.append("resolve-by-bound target requires generation ticket context")
         source_binding = target_context.get("sourceBinding")
         window = (

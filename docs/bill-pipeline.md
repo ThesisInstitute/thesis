@@ -84,6 +84,17 @@ dispatch; the condition registry is a recorded state, not a live bill tracker.
 Enactment tests are provision-based, so checking only whether a named vehicle
 became law is insufficient.
 
+Bounded conditional comparisons use the authenticated CI strategy selection,
+without creating an operator generation ticket. The native runner reconstructs
+that selection against its exact checkout and pinned ledger, matches the complete
+target and reviewed ladder mode, and checks the witnessed start and open-state
+boundaries. Ordinary bounded operator runs still require generation tickets.
+The suite runs with the checkout's `.venv` interpreter. Generation and trusted
+publication both require a successful native announcement MCP fetch of the exact
+registered URL before a draft or final forecast response; a citation, redirect,
+failed fetch or reviewer-only fetch cannot satisfy this requirement. Reviewed
+anchors do not replace the minimum six distinct canonical historical prints.
+
 The standard analyst runner captures source bytes and replayable calculations,
 binds native MCP calls to its transcript, and seals the complete artifact
 inventory. The trusted publisher checks cells against each arm's exact premise
@@ -96,6 +107,20 @@ fetches and replays, native event custody, visible report/raw/replay links, and
 the recorder snapshot's `artifactCommitments.custodyRoots` linking to both run
 manifests. Full-chain verification runs remotely; selected Receipt signatures
 use the existing pinned key and `thesis-record-snapshot/v1` plus NUL domain.
+
+The generation job uploads a separate
+`strategy-attempt-<run>-<trusted-attempt>-execution-<execution-attempt>`
+diagnostic archive before custody staging, even when the suite fails. It retains
+the checkout's analyst-record delta and a hash inventory without requiring valid
+cells or custody. Symlinks, executables and possible secrets are omitted with an
+explicit reason. This archive is marked non-publishable, has a separate schema
+and directory layout, and is never consumed by the privileged publisher. Strict
+staging and publication checks still decide whether an attempted run can enter
+the public records. Archive the available failed evidence unchanged outside
+`records/` when preparing a reviewed repair; do not reconstruct missing traces.
+Execution attempts have distinct artifact names so a failed-job rerun cannot
+overwrite or collide with a prior attempt's evidence. The original trusted
+selection attempt remains the generation and publication identity.
 
 A conditional difference is a model forecast under two stated legal premises.
 It is not an observed causal estimate, and non-exhaustive policy pairs may both

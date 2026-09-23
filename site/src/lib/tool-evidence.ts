@@ -2,6 +2,10 @@ import { createHash } from "node:crypto";
 import { isIP } from "node:net";
 import { canonicalStringify } from "@/data/canonical-json";
 import type { CapturedToolCall } from "@/data/tool-evidence";
+import {
+  capturedTerminalProjection,
+  requireTerminalProjectionVersions,
+} from "@/lib/tool-evidence-terminal";
 
 type Json = Record<string, any>;
 const RESPONSE_PREVIEW_BYTES = 64 * 1024;
@@ -192,6 +196,7 @@ export function readCapturedToolCalls(
       evidence.calls.length <= 128,
     "Unsupported tool evidence",
   );
+  requireTerminalProjectionVersions(evidenceText);
   requireValue(
     object(verification) &&
       verification.schemaVersion === "thesis_tool_evidence_verification_v1" &&
@@ -256,7 +261,7 @@ export function readCapturedToolCalls(
       call && !matched.has(call.callId),
       "Unknown or duplicate native tool completion",
     );
-    const { response: _response, ...terminal } = call;
+    const terminal = capturedTerminalProjection(call);
     const content = item.result?.content;
     const textResult =
       Array.isArray(content) &&

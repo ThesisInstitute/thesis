@@ -1282,9 +1282,8 @@ def test_generation_ticket_refuses_non_codex_executable_override() -> None:
 
 def test_ticket_manifest_binding_requires_exact_canonical_context() -> None:
     ticket = generation_ticket_context()
-    assert (
-        generation_tickets.ticket_record_path(ticket["ticketId"]).as_posix()
-        == (ticket["ticketPath"])
+    assert generation_tickets.ticket_record_path(ticket["ticketId"]).as_posix() == (
+        ticket["ticketPath"]
     )
     assert generation_tickets.ticket_manifest_binding(ticket) == {
         "ticketId": ticket["ticketId"],
@@ -4181,6 +4180,72 @@ def test_calendar_target_context_does_not_require_announcement_tool_fetch() -> N
         )
         == []
     )
+
+
+def test_bounded_strategy_authority_is_explicit_and_keeps_history_floor(
+    tmp_path, monkeypatch
+) -> None:
+    import strategy_generation
+
+    announcement = "https://www.census.gov/newsroom/spm-announcement.html"
+    context = {
+        "comparisonTarget": True,
+        "conditional": "The reviewed provision is enacted by 2027-12-31.",
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionDate": "2027-12-31",
+        "sourceBinding": {
+            "sourceUrl": announcement,
+            "allowedHosts": ["www.census.gov"],
+            "expectedReleaseWindow": {"start": "2027-09-01", "end": "2027-12-31"},
+        },
+    }
+    cell = review_test_cell(point=5.1, ci_low=4.7, ci_high=5.8)
+    cell.update(
+        type="conditional",
+        conditionalOn=context["conditional"],
+        resolutionDate=context["resolutionDate"],
+        resolutionSourceUrl=announcement,
+        runStartedAt="2026-06-17T11:55:00Z",
+        comparisonTarget=True,
+        trusted_strategy_target=context,
+    )
+    cell["sourceContext"][0] = announcement
+    kwargs = dict(allow_existing_slug=True, target_context=context)
+    # Neither the selected-looking target nor a model-planted authority field
+    # can opt into the CI exception.
+    report = analyst_runner.validate_cells([cell], **kwargs)
+    assert (
+        "resolve-by-bound target requires generation ticket context"
+        in report["cells"][0]["errors"]
+    )
+    evidence_errors = []
+    monkeypatch.setattr(
+        strategy_generation,
+        "bounded_strategy_evidence_errors",
+        lambda *_a: evidence_errors,
+    )
+    trusted = dict(
+        **kwargs,
+        trusted_strategy_target=context,
+        strategy_run_dir=tmp_path,
+        strategy_run_relative=Path("records/thesis-analyst/fixture"),
+    )
+    assert analyst_runner.validate_cells([cell], **trusted)["ok"]
+    evidence_errors.append("missing authenticated announcement fetch")
+    assert not analyst_runner.validate_cells([cell], **trusted)["ok"]
+    evidence_errors.clear()
+    wrong = {**context, "conditional": "A different premise"}
+    report = analyst_runner.validate_cells(
+        [cell], **{**trusted, "trusted_strategy_target": wrong}
+    )
+    assert (
+        "resolve-by-bound target requires generation ticket context"
+        in report["cells"][0]["errors"]
+    )
+    cell["historicalContext"] = cell["historicalContext"][:4]
+    report = analyst_runner.validate_cells([cell], **trusted)
+    assert not report["ok"]
+    assert any("at least 6" in error for error in report["cells"][0]["errors"])
 
 
 def test_normalizer_refuses_schema_incomplete_drafts_with_diagnostics(
