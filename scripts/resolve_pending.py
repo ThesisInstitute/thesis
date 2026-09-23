@@ -7487,66 +7487,97 @@ _A19_HEADER_MONTHS = {
 _A19_COLUMN_GROUP = ("Total", "16 years and over")
 
 
+_A19_TABLE_ID = "cps_eande_m19"
+
+
 class _A19TableParser(HTMLParser):
-    """Collect Table A-19's header cells by id and its data cells by ``headers``."""
+    """Collect Table A-19's header cells by id and its data cells by ``headers``.
+
+    Only the table whose id is ``cps_eande_m19``, and anything nested inside
+    it, is read: the rest of the page, including any table that wraps this
+    one, is ignored, so page chrome can neither supply a value nor make the
+    table unidentifiable. Inside it, a cell's closing tag may be omitted, as
+    HTML allows; the next cell, the next row or the end of the table closes
+    it. Anything that would split or lose a cell's text without an error
+    marks the page malformed: a cell that opens while a recorded cell of an
+    enclosing table is still open, text inside the table but outside any
+    cell or caption, or a cell that names this table's ids outside it.
+    """
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.header_text: dict[str, str] = {}
         self.duplicate_ids: set[str] = set()
-        self.nested = False
+        self.malformed = False
         self.cells: list[tuple[tuple[str, ...], str]] = []
-        self._tag: str | None = None
-        self._attrs: dict[str, str] = {}
-        self._text: list[str] = []
-        self._depth = 0
-        self._cell_depth = 0
+        # One frame per open <table>: [scoped, open cell or None, in caption].
+        # An open cell is [tag, attrs, text parts, recorded].
+        self._frames: list[list[Any]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = {name: value or "" for name, value in attrs}
+        frame = self._frames[-1] if self._frames else None
+        scoped = bool(frame and frame[0])
         if tag == "table":
-            self._depth += 1
+            self._frames.append(
+                [scoped or values.get("id") == _A19_TABLE_ID, None, False]
+            )
         elif tag in ("th", "td"):
-            if self._tag is not None:
-                if self._depth > self._cell_depth:
-                    # A cell inside a cell (a table nested in a cell) is not
-                    # this table's markup; the outer cell's text would
-                    # otherwise be lost without an error.
-                    self.nested = True
-                else:
-                    # A closing tag is optional in HTML: a new cell in the
-                    # same table closes the open one.
-                    self._close_cell()
-            self._tag = tag
-            self._attrs = {name: value or "" for name, value in attrs}
-            self._text = []
-            self._cell_depth = self._depth
-        elif tag == "tr" and self._tag is not None and self._depth == self._cell_depth:
-            self._close_cell()
+            recorded = bool(values.get("headers") if tag == "td" else values.get("id"))
+            if not scoped:
+                named = f"{values.get('headers', '')} {values.get('id', '')}"
+                if f"{_A19_TABLE_ID}." in named:
+                    self.malformed = True
+                return
+            if frame[1] is not None:
+                self._close_cell(frame)
+            if any(
+                outer[0] and outer[1] is not None and outer[1][3]
+                for outer in self._frames[:-1]
+            ):
+                self.malformed = True
+            frame[1] = [tag, values, [], recorded]
+        elif tag == "tr" and scoped and frame[1] is not None:
+            self._close_cell(frame)
+        elif tag == "caption" and scoped:
+            frame[2] = True
 
     def handle_data(self, data: str) -> None:
-        if self._tag is not None:
-            self._text.append(data)
+        frame = self._frames[-1] if self._frames else None
+        if frame is None or not frame[0]:
+            return
+        if frame[1] is not None:
+            frame[1][2].append(data)
+        elif not frame[2] and data.strip():
+            self.malformed = True
 
     def handle_endtag(self, tag: str) -> None:
+        frame = self._frames[-1] if self._frames else None
+        if frame is None:
+            return
         if tag == "table":
-            if self._tag is not None and self._depth == self._cell_depth:
-                self._close_cell()
-            self._depth = max(0, self._depth - 1)
-        elif tag == "tr":
-            if self._tag is not None and self._depth == self._cell_depth:
-                self._close_cell()
-        elif tag == self._tag and self._depth == self._cell_depth:
-            self._close_cell()
+            if frame[0] and frame[1] is not None:
+                self._close_cell(frame)
+            self._frames.pop()
+        elif not frame[0]:
+            return
+        elif tag == "tr" and frame[1] is not None:
+            self._close_cell(frame)
+        elif tag in ("td", "th") and frame[1] is not None and frame[1][0] == tag:
+            self._close_cell(frame)
+        elif tag == "caption":
+            frame[2] = False
 
-    def _close_cell(self) -> None:
-        text = " ".join(" ".join(self._text).split())
-        if self._tag == "th" and self._attrs.get("id"):
-            if self._attrs["id"] in self.header_text:
-                self.duplicate_ids.add(self._attrs["id"])
-            self.header_text[self._attrs["id"]] = text
-        elif self._tag == "td" and self._attrs.get("headers"):
-            self.cells.append((tuple(self._attrs["headers"].split()), text))
-        self._tag = None
+    def _close_cell(self, frame: list[Any]) -> None:
+        tag, values, parts, _ = frame[1]
+        frame[1] = None
+        text = " ".join(" ".join(parts).split())
+        if tag == "th" and values.get("id"):
+            if values["id"] in self.header_text:
+                self.duplicate_ids.add(values["id"])
+            self.header_text[values["id"]] = text
+        elif tag == "td" and values.get("headers"):
+            self.cells.append((tuple(values["headers"].split()), text))
 
 
 def _a19_header_month(text: str) -> tuple[int, int] | None:
@@ -7565,8 +7596,8 @@ def a19_table(html: str) -> tuple[str, dict[str, float]] | None:
     over", and the later of exactly two same-month headings one year apart.
     All six occupations must agree on the month. Anything else (a missing
     row, an unknown month label, a third dated column, a non-numeric cell, a
-    reused id, a cell inside a cell, a page that is not this table) returns
-    None: the page is
+    reused id, a malformed table, a page without this table) returns None:
+    the page is
     overwritten monthly, and a value from a capture that cannot be
     identified must never be recorded.
     """
@@ -7577,7 +7608,7 @@ def a19_table(html: str) -> tuple[str, dict[str, float]] | None:
         parser.close()
     except (AssertionError, ValueError):
         return None
-    if parser.duplicate_ids or parser.nested:
+    if parser.duplicate_ids or parser.malformed:
         return None
     ids_by_text: dict[str, list[str]] = {}
     for header_id, text in parser.header_text.items():
@@ -7659,9 +7690,9 @@ def a19_capture(snapshot_url: str) -> tuple[dt.datetime, str] | None:
 # different findings.
 WAYBACK_CDX_URL = (
     "https://web.archive.org/cdx/search/cdx?url={url}&from={start}&to={end}"
-    "&output=json&fl=timestamp,original,statuscode"
+    "&output=json&fl=timestamp,original,statuscode,digest"
 )
-_WAYBACK_CDX_HEADER = ["timestamp", "original", "statuscode"]
+_WAYBACK_CDX_HEADER = ["timestamp", "original", "statuscode", "digest"]
 WAYBACK_SAVE_URL = "https://web.archive.org/save/{url}"
 A19_MAX_WINDOW_CAPTURES = 16
 A19_CAPTURE_REQUESTED = "asked the Internet Archive to capture the page"
@@ -7674,36 +7705,43 @@ class A19CaptureError(ValueError):
 
 @dataclass
 class A19Index:
-    """What the Archive's index lists for one registered window."""
+    """What the Archive's index lists for one registered window.
+
+    Every count is disjoint: ``listed == len(captures) + len(revisits) +
+    other_status + other_form``.
+    """
 
     captures: list[str]
-    """Readable captures of exactly the bound URL, oldest first: stored as
-    HTTP 200, or as a revisit (status ``-``: bytes identical to an earlier
-    capture), which the Archive replays like any other."""
+    """HTTP 200 captures of exactly the bound URL, oldest first."""
+    digests: dict[str, str]
+    """The index's digest for each capture in ``captures``."""
+    revisits: list[tuple[str, str]]
+    """(stamp, digest) of rows for the bound URL with status ``-``. They are
+    not read: a row stored without a status may not replay at its own
+    timestamp. One whose digest equals that of a capture that was read is
+    accounted for by that capture."""
     listed: int
-    """Every row dated inside the window, readable or not."""
+    """Every row dated inside the window."""
     other_status: int
-    """Rows for the bound URL whose stored status is neither 200 nor ``-``."""
+    """Rows for the bound URL whose status is neither 200 nor ``-``."""
     other_form: int
     """Rows stored under another form of the URL (scheme, host); not read."""
-    revisits: int
-    """How many of ``captures`` are revisit rows."""
 
     def describe(self, window: Any) -> str:
         text = (
             f"{self.listed} capture(s) dated inside the registered window "
-            f"{window!r}, {len(self.captures)} of them readable for this exact URL"
+            f"{window!r}, {len(self.captures)} of them HTTP 200 for this exact URL"
         )
         detail = [
             f"{count} {label}"
             for count, label in (
-                (self.revisits, "stored as revisits of an earlier capture"),
+                (len(self.revisits), "without a status"),
                 (self.other_status, "with another status"),
                 (self.other_form, "under another form of the URL"),
             )
             if count
         ]
-        return text + (f" ({', '.join(detail)})" if detail else "")
+        return text + (f"; {', '.join(detail)}" if detail else "")
 
 
 def _wayback_read(url: str) -> tuple[bytes, str]:
@@ -7770,26 +7808,34 @@ def a19_window_captures(
         )
     )
     index = json.loads(body.decode())
-    # The JSON list ``[]`` is an empty index. Anything else must be exactly the
-    # requested shape: an empty body, a malformed row, an impossible timestamp
-    # or a non-numeric status is an index failure, never evidence that the
-    # window holds no capture.
+    # The JSON list ``[]`` is an empty index (observed 2026-09-22 for a
+    # window with no capture). Anything else must be exactly the requested
+    # shape: an empty body, a malformed row, an impossible timestamp or a
+    # non-numeric status is an index failure, never evidence that the window
+    # holds no capture.
     if not isinstance(index, list) or (index and index[0] != _WAYBACK_CDX_HEADER):
         raise ValueError("the Archive index is not the requested table")
-    rows: set[tuple[str, str, str]] = set()
+    # One row per (stamp, stored URL); a stamp listed both with a status and
+    # without one is the capture with the status.
+    rows: dict[tuple[str, str], tuple[str, str]] = {}
     for row in index[1:]:
         if (
             not isinstance(row, list)
-            or len(row) != 3
+            or len(row) != 4
             or not all(isinstance(cell, str) for cell in row)
             or not re.fullmatch(r"\d{14}", row[0])
             or not row[1]
             or not re.fullmatch(r"\d{3}|-", row[2])
+            or not row[3]
         ):
             raise ValueError(f"malformed Archive index row {row!r}")
-        rows.add((row[0], row[1], row[2]))
-    result = A19Index(captures=[], listed=0, other_status=0, other_form=0, revisits=0)
-    for stamp, original, status in sorted(rows):
+        key = (row[0], row[1])
+        if key not in rows or rows[key][0] == "-":
+            rows[key] = (row[2], row[3])
+    result = A19Index(
+        captures=[], digests={}, revisits=[], listed=0, other_status=0, other_form=0
+    )
+    for (stamp, original), (status, digest) in sorted(rows.items()):
         url = f"https://web.archive.org/web/{stamp}/{A19_SOURCE_URL}"
         capture = a19_capture(url)
         if capture is None:
@@ -7799,9 +7845,11 @@ def a19_window_captures(
         result.listed += 1
         if original != A19_SOURCE_URL:
             result.other_form += 1
-        elif status == "200" or status == "-":
+        elif status == "200":
             result.captures.append(url)
-            result.revisits += status == "-"
+            result.digests[url] = digest
+        elif status == "-":
+            result.revisits.append((stamp, digest))
         else:
             result.other_status += 1
     return result
@@ -7817,18 +7865,21 @@ def a19_registered_capture(
 ) -> tuple[str | None, bytes | None, str]:
     """(capture URL, BLS bytes, verdict) for a registered A-19 target.
 
-    Takes the EARLIEST usable capture dated inside the registered window
-    whose current-month header is ``period``, walking the index in order and
+    Takes the EARLIEST capture dated inside the registered window whose
+    current-month header is ``period``, walking the index in order and
     deferring at the first capture it cannot read or cannot identify; only a
-    capture identified as another month is passed over. The verdict is the
-    line to print when nothing resolves. ``FIRST-PRINT WINDOW MISSED`` is
-    reserved for one finding: the window is closed, every usable capture in
-    it was read, and each prints another month. An index failure, an
-    unreadable or unidentified capture, or a capped scan reports itself
-    instead and asks for nothing. Only when the window is still open, every
-    usable capture was read and each prints another month, and
-    ``request_capture`` is set (once per run) does it ask the Archive to
-    capture the page, and defer: a later run finds that capture.
+    capture identified as another month is passed over. A row without a
+    status is not read; it is accounted for only by a read capture with the
+    same digest, and an earlier one that is not accounted for defers the
+    result. The verdict is the line to print when nothing resolves.
+    ``FIRST-PRINT WINDOW MISSED`` is reserved for one finding: the window is
+    closed, every row in it is accounted for, and each prints another month.
+    Rows that were not read and are not accounted for make the outcome
+    unknown, which defers. An index failure, an unreadable or unidentified
+    capture, or a capped scan reports itself and asks for nothing. Only when
+    the window is still open, every HTTP 200 capture was read and each prints
+    another month, and ``request_capture`` is set (once per run) does it ask
+    the Archive to capture the page, and defer.
     """
 
     state = snapshot_window_state(today, window)
@@ -7848,6 +7899,7 @@ def a19_registered_capture(
             ),
         )
     captures = index.captures
+    other_month: set[str] = set()
     for url in captures[:A19_MAX_WINDOW_CAPTURES]:
         try:
             raw = a19_read_capture(url, read)
@@ -7877,7 +7929,22 @@ def a19_registered_capture(
                 ),
             )
         if printed == period:
+            stamp = url.split("/web/")[1][:14]
+            known = other_month | {index.digests[url]}
+            earlier = [s for s, d in index.revisits if s < stamp and d not in known]
+            if earlier:
+                return (
+                    None,
+                    None,
+                    (
+                        f"EARLIER ROW UNREAD (deferring): {url} prints {period}, "
+                        f"but {len(earlier)} earlier row(s) without a status "
+                        f"({', '.join(earlier[:3])}) carry a digest no read "
+                        "capture accounts for, so it may not be the earliest"
+                    ),
+                )
             return url, raw, ""
+        other_month.add(index.digests[url])
     if len(captures) > A19_MAX_WINDOW_CAPTURES:
         return (
             None,
@@ -7888,18 +7955,27 @@ def a19_registered_capture(
                 f"{window!r} do not print {period}"
             ),
         )
-    if state == "missed" and index.other_form:
-        # Rows under another form of the URL are captures of this page the
-        # Archive folded under one key; they were not read, so the month may
-        # be there. Unknown is not "missed".
+    unaccounted = index.other_form + sum(
+        1 for _, digest in index.revisits if digest not in other_month
+    )
+    read_note = (
+        f"all {len(captures)} HTTP 200 capture(s) were read and none prints {period}"
+    )
+    if unaccounted:
+        read_note += (
+            f"; {unaccounted} other row(s) were not read and no read capture "
+            "accounts for them"
+        )
+    if state == "missed" and unaccounted:
+        # A row stored under another form of the URL, or without a status,
+        # may be a capture of this page that prints the month. Unknown is
+        # not "missed".
         return (
             None,
             None,
             (
-                "NO USABLE CAPTURE IN WINDOW (deferring): the Archive's index "
-                f"lists {index.describe(window)}; the {index.other_form} stored "
-                "under another form of the URL were not read, so whether the "
-                f"window holds {period} is unknown"
+                "WINDOW OUTCOME UNKNOWN (deferring): the Archive's index lists "
+                f"{index.describe(window)}; {read_note}"
             ),
         )
     if state == "missed":
@@ -7908,8 +7984,7 @@ def a19_registered_capture(
             None,
             (
                 "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists "
-                f"{index.describe(window)}; all {len(captures)} readable "
-                f"capture(s) were read and none prints {period}"
+                f"{index.describe(window)}; {read_note}"
             ),
         )
     if not request_capture:
@@ -7917,8 +7992,9 @@ def a19_registered_capture(
             None,
             None,
             (
-                f"no capture inside the registered window prints {period} yet "
-                "(deferring)"
+                f"no capture inside the registered window prints {period} yet: "
+                f"the Archive's index lists {index.describe(window)}; "
+                f"{read_note} (deferring)"
             ),
         )
     # An error from the save endpoint does not mean no capture was made: on
@@ -7938,7 +8014,8 @@ def a19_registered_capture(
         None,
         None,
         (
-            f"no capture inside the registered window prints {period} yet; "
+            f"no capture inside the registered window prints {period} yet: "
+            f"the Archive's index lists {index.describe(window)}; {read_note}; "
             f"{requested} (deferring)"
         ),
     )

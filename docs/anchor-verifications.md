@@ -812,12 +812,18 @@ month is passed over.
 
 How a value is read: BLS marks the table up accessibly, so every data cell's
 `headers` attribute names the ids of its row header and its three column
-headers. `a19_table` finds each value by what it is headed by (the occupation's
-row, "Total", "16 years and over", and the later of exactly two same-month
-headings one year apart), never by its position, and all six occupations must
-agree on the month. A cell's closing tag may be omitted, as HTML allows; a
-table nested inside a cell makes the page unidentifiable. A page that cannot
-be identified that way yields nothing.
+headers. `a19_table` reads only the table whose id is `cps_eande_m19` and
+finds each value by what it is headed by (the occupation's row, "Total", "16
+years and over", and the later of exactly two same-month headings one year
+apart), never by its position, and all six occupations must agree on the
+month. Other tables on the page, and any table the A-19 table sits inside, are
+not read, so their ids and labels cannot collide with it. Inside the A-19
+table a cell's closing tag may be omitted, as HTML allows; a new cell, row or
+table end closes it. A cell opening while a recorded cell of the table is
+still open (a table nested in a value cell), text sitting in the table outside
+any cell or caption, or a cell that names this table's ids from outside it
+makes the page unidentifiable. A page that cannot be identified that way
+yields nothing.
 It reads the three fixtures and the full 125,026-byte page the resolver
 archived on 2026-07-10 to the same values. The resolver asks the Archive for the
 capture's stored response (`/web/<timestamp>id_/<url>`), so the hash recorded
@@ -836,36 +842,58 @@ registered cell the fact's `observed_at` is the capture's date, not the
 forecast's `resolutionDate` (which for these contracts is the window's end).
 Nothing here asserts a BLS revision policy for this table. Two comparisons
 exist: in review, two captures 18 days apart that both print September 2025
-had identical tables; and the capture of 2026-09-21 15:46 UTC is byte-identical
+had identical tables; and the capture of 2026-09-21 15:46 UTC was byte-identical
 to the pinned 2026-09-04 17:00 UTC capture (both 104,872 bytes, SHA-256
 `de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915`, read through
 `a19_read_capture`). Those are instances, not a policy.
+
+A capture can leave the index. By 2026-09-22 the 2026-09-21 capture was no
+longer listed, and its stored-response URL redirected to the 2026-09-04
+capture, which the resolver's final-URL check refuses. A resolved row does not
+depend on the capture staying listed: the fact records the capture URL and the
+SHA-256 of the bytes it read, and the resolver archives those bytes, so the
+row stays checkable against its own archive after the Archive changes its
+index.
 
 The twelve overdue cells. The six August 2026 cells (windows 2026-09-02/03 to
 2026-09-10/11) are satisfied by the release-day capture, 2026-09-04 17:00 UTC,
 four and a half hours after the 08:30 ET release. The six July 2026 cells
 registered 2026-07-29 to 2026-08-06, which closed the day before BLS published
 July. No capture of the July table can be dated inside that window, so they
-refuse with `FIRST-PRINT WINDOW MISSED` and await a disposition ruling, if the
-Archive's index answers the query for that window with the JSON list `[]`.
-What the index returns for a window that truly holds no capture has not been
-observed (the Archive was offline or unreachable when it was tried on
-2026-09-21 and 2026-09-22); an empty body is treated as an index failure and
-defers, so until that answer is observed the July cells may print
-`WAYBACK INDEX FETCH FAILED (deferring)` instead. Either way nothing resolves
-and nothing is recorded. The refusal is reserved for one finding: the window
-is closed, every usable capture in it was read, and each prints another
-month. The index is queried for every status and for the stored form of the
-URL, and the refusal reports what it listed: a capture the Archive stored as a
-403 (bls.gov's answer to non-browser clients) is counted and named, not read,
-because "no capture" and "no usable capture" are different findings. A row the
-Archive stores as a revisit (status `-`: bytes identical to an earlier capture)
-is read like any capture. A row stored under another form of the URL (the
-index folds scheme and host under one key) is counted but not read, and since
-it might print the month, a closed window with such rows defers with `NO
-USABLE CAPTURE IN WINDOW` rather than refusing. A capped scan, a failed or unidentified read, or an
-index answer that is not exactly the requested table (an empty body, a
-malformed row, an impossible timestamp) reports itself instead. The 2026-07 pin is kept as custody evidence for
+refuse with `FIRST-PRINT WINDOW MISSED` and await a disposition ruling. On
+2026-09-22 the index answered the query for that window (2026-07-29 to
+2026-08-06, every status, every form of the URL) with HTTP 200 and the JSON
+list `[]`, which the resolver reads as an empty index. An empty body is still
+treated as an index failure and defers. Nothing resolves and nothing is
+recorded. The refusal is reserved for one finding: the window is closed,
+every HTTP 200 capture of this exact URL in it was read, each prints another
+month, and every other row listed in the window is accounted for. The index
+is queried for every status and for the stored form of the URL, and each
+verdict reports what it listed, in disjoint counts: HTTP 200 captures of this
+exact URL, rows without a status, rows with another status, and rows under
+another form of the URL. A capture the Archive stored as a 403 (bls.gov's
+answer to non-browser clients) holds no table; it is counted and named, not
+read, because "no capture" and "no usable capture" are different findings.
+The same timestamp listed twice (once with a status, once without) counts
+once, with its status.
+
+Rows without a status (`-`) are counted, not read. Nothing the index returns
+shows that such a row replays at its own timestamp, and if it does not, the
+read fails and the window could never advance. None has been listed for this
+URL as of 2026-09-22. Each row carries the index's content digest, and a row
+without a status whose digest equals that of a capture the resolver read, and
+found printing another month, is treated as those same bytes and accounted
+for. An unaccounted row dated
+before the chosen capture holds the resolution back (`EARLIER ROW UNREAD
+(deferring)`), because it might be an earlier print of the month; a later one
+does not matter. A row stored under another form of the URL (the index folds
+scheme and host under one key) is never read and never accounted for. A
+closed window with any unaccounted row defers with `WINDOW OUTCOME UNKNOWN`
+rather than refusing: a capture was read, but the outcome is not known. A
+capped scan, a failed or unidentified read, or an index answer that is not
+exactly the requested table (an empty body, a malformed row, an impossible
+timestamp, a status that is neither three digits nor `-`) reports itself
+instead. The 2026-07 pin is kept as custody evidence for
 the ruling and is never read for a registered cell, because it is dated
 outside the window. August resolving and July refusing say nothing about any
 other `generic-url` registration.
@@ -873,9 +901,9 @@ other `generic-url` registration.
 A registered target looks up the Archive's index for captures dated inside its
 window, and makes no request before the window opens. From the day it opens (not the
 forecast's `resolutionDate`, which would leave a single attempt on the last
-day), each daily run that reads every usable capture in the window and
+day), each daily run that reads every HTTP 200 capture in the window and
 identifies each as another month asks the Archive to capture the page, once
-per run, and defers; an index failure, an unreadable or unidentified capture,
+per run, and defers, reporting what the index listed and what was read; an index failure, an unreadable or unidentified capture,
 or a capped scan reports itself and asks for nothing. An error from the save endpoint
 still counts as that run's request and is reported as "outcome unknown": on
 2026-09-21 three save requests were answered HTTP 500, and the index then held

@@ -191,6 +191,26 @@ def test_implicitly_closed_cells_parse_and_only_a_nested_cell_refuses() -> None:
     )
 
 
+def test_only_the_a19_table_is_read() -> None:
+    html = fixture("2026-08")
+    expected = ("2026-08", ANCHORS["2026-08"])
+    # Wrapped in a layout table's cell, as a site template might do.
+    wrapped = "<table><tr><td>layout" + html + "</td></tr></table>"
+    assert resolve_pending.a19_table(wrapped) == expected
+    # Another table on the page with a reused id, a same-named row header,
+    # and a table nested in a cell: none of it is this table's business.
+    chrome = (
+        '<table><tr><th id="x">Production occupations</th><th id="x">y</th></tr>'
+        "<tr><td><table><tr><td>z</td></tr></table></td></tr></table>"
+    )
+    assert resolve_pending.a19_table(chrome + html) == expected
+    # Without the table's id nothing is read.
+    assert (
+        resolve_pending.a19_table(html.replace('id="cps_eande_m19"', 'id="x"', 1))
+        is None
+    )
+
+
 def test_a_value_is_found_by_its_headers_not_its_position() -> None:
     html = fixture("2026-08")
     assert resolve_pending.a19_table(html) == ("2026-08", ANCHORS["2026-08"])
@@ -244,6 +264,14 @@ def test_a_value_is_found_by_its_headers_not_its_position() -> None:
         ),
         # Not a table at all.
         lambda html: "<th>Aug.<br/>2025</th><th>Aug.<br/>2026</th>",
+        # A row start mid-value closes the cell early: "7" of "7,716" would be
+        # read, and the rest would sit in the table outside any cell.
+        lambda html: html.replace(">7,716<", ">7<tr><td>x</td></tr>,716<", 1),
+        # The same through a table end: the later cells of this table then
+        # sit outside it.
+        lambda html: html.replace(
+            ">7,716<", ">7<table/><tr><td>x</td></tr></table>,716<", 1
+        ),
     ],
 )
 def test_a_page_that_cannot_be_identified_yields_nothing(damage) -> None:
@@ -400,14 +428,28 @@ def replay_url(stamp: str) -> str:
 
 
 URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
-HEADER = ["timestamp", "original", "statuscode"]
+HEADER = ["timestamp", "original", "statuscode", "digest"]
 
 
 def cdx(*rows: tuple[str, ...]) -> bytes:
-    """An index body: rows are (stamp, status) or (stamp, status, original)."""
+    """An index body: rows are (stamp, status[, original[, digest]]).
+
+    The digest defaults to one per stamp, i.e. every capture's bytes differ.
+    """
 
     return json.dumps(
-        [HEADER, *[[row[0], row[2] if len(row) > 2 else URL, row[1]] for row in rows]]
+        [
+            HEADER,
+            *[
+                [
+                    row[0],
+                    row[2] if len(row) > 2 and row[2] else URL,
+                    row[1],
+                    row[3] if len(row) > 3 else f"D{row[0]}",
+                ]
+                for row in rows
+            ],
+        ]
     ).encode()
 
 
@@ -488,24 +530,32 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         ("20260819191418", "200"),  # before the window
         ("20260904170006", "200"),
         ("20260904170006", "200"),  # listed twice
+        ("20260904170006", "-"),  # and once more without a status
         ("20260905000000", "403"),
-        ("20260907000000", "-"),  # a revisit: bytes identical to an earlier one
+        ("20260907000000", "-", "", "DX"),  # a row without a status
         ("20260911000000", "200"),  # after the window
     )
     index = resolve_pending.a19_window_captures(WINDOW, reader(index, {}, calls))
     assert index.captures == [
         replay_url("20260904170006"),
-        replay_url("20260907000000"),
         replay_url("20260910235959"),
     ]
-    assert (index.listed, index.other_status, index.other_form, index.revisits) == (
-        4,
-        1,
-        0,
-        1,
+    assert index.revisits == [("20260907000000", "DX")]
+    assert (index.listed, index.other_status, index.other_form) == (4, 1, 0)
+    # The counts are disjoint and add up.
+    assert index.listed == (
+        len(index.captures)
+        + len(index.revisits)
+        + index.other_status
+        + index.other_form
+    )
+    assert index.describe(WINDOW).endswith(
+        "4 capture(s) dated inside the registered window "
+        f"{WINDOW!r}, 2 of them HTTP 200 for this exact URL; "
+        "1 without a status, 1 with another status"
     )
     assert "from=20260902000000" in calls[0] and "to=20260910235959" in calls[0]
-    assert "fl=timestamp,original,statuscode" in calls[0]
+    assert "fl=timestamp,original,statuscode,digest" in calls[0]
     assert "filter=" not in calls[0]
 
 
@@ -520,8 +570,8 @@ def test_a_capture_stored_under_another_form_of_the_url_is_counted_not_used() ->
     assert (index.listed, index.other_status, index.other_form) == (3, 0, 2)
     assert index.describe(WINDOW).endswith(
         "3 capture(s) dated inside the registered window "
-        f"{WINDOW!r}, 1 of them readable for this exact URL "
-        "(2 under another form of the URL)"
+        f"{WINDOW!r}, 1 of them HTTP 200 for this exact URL; "
+        "2 under another form of the URL"
     )
 
 
@@ -536,8 +586,14 @@ def test_a_closed_window_with_unread_captures_under_another_form_defers() -> Non
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
     )
     assert (url, raw) == (None, None)
-    assert verdict.startswith("NO USABLE CAPTURE IN WINDOW (deferring)")
-    assert "1 stored under another form of the URL were not read" in verdict
+    # The name says what is true: a capture WAS read; the outcome is unknown
+    # because one row was not.
+    assert verdict.startswith("WINDOW OUTCOME UNKNOWN (deferring)")
+    assert "1 of them HTTP 200 for this exact URL; 1 under another form" in verdict
+    assert "all 1 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
+    assert "1 other row(s) were not read and no read capture accounts for them" in (
+        verdict
+    )
     assert "WINDOW MISSED" not in verdict
     assert identity_url("20260904170006") not in calls
 
@@ -550,19 +606,70 @@ def test_a_closed_window_whose_only_rows_are_403s_is_missed() -> None:
     )
     assert (url, raw) == (None, None)
     assert verdict.startswith("FIRST-PRINT WINDOW MISSED (refusing)")
-    assert "0 of them readable for this exact URL (2 with another status)" in verdict
-    assert "all 0 readable capture(s) were read" in verdict
+    assert "0 of them HTTP 200 for this exact URL; 2 with another status" in verdict
+    assert "all 0 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
 
 
-def test_a_revisit_row_is_read_like_any_capture() -> None:
+def test_a_row_without_a_status_is_accounted_for_by_its_digest() -> None:
+    # Rows without a status are never read (they may not replay at their own
+    # timestamp). One that shares a digest with a capture that WAS read and
+    # printed another month cannot print this one.
     calls: list[str] = []
-    index = cdx(("20260904170006", "-"))
-    pages = {"20260904170006": fixture("2026-08")}
+    index = cdx(
+        ("20260903010101", "200", "", "JULY"),
+        ("20260903120000", "-", "", "JULY"),
+        ("20260904170006", "200", "", "AUG"),
+    )
+    pages = {
+        "20260903010101": fixture("2026-07"),
+        CAPTURES["2026-08"]: fixture("2026-08"),
+    }
     url, raw, verdict = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
     )
     assert (url, verdict) == (capture_url("2026-08"), "")
-    assert resolve_pending.a19_values_from_html(raw.decode()) == ANCHORS["2026-08"]
+    assert identity_url("20260903120000") not in calls
+    # A later row without a status never holds a resolution back.
+    calls.clear()
+    index = cdx(("20260904170006", "200", "", "AUG"), ("20260906000000", "-", "", "Z"))
+    url, _, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
+    )
+    assert (url, verdict) == (capture_url("2026-08"), "")
+
+
+def test_an_earlier_unaccounted_row_without_a_status_defers() -> None:
+    calls: list[str] = []
+    index = cdx(
+        ("20260903120000", "-", "", "UNKNOWN"),
+        ("20260904170006", "200", "", "AUG"),
+    )
+    pages = {CAPTURES["2026-08"]: fixture("2026-08")}
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("EARLIER ROW UNREAD (deferring)")
+    assert "20260903120000" in verdict
+    # The same row with the chosen capture's digest is the same bytes.
+    index = cdx(
+        ("20260903120000", "-", "", "AUG"), ("20260904170006", "200", "", "AUG")
+    )
+    url, _, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
+    )
+    assert (url, verdict) == (capture_url("2026-08"), "")
+
+
+def test_a_closed_window_with_an_unaccounted_row_without_a_status_is_unknown() -> None:
+    index = cdx(("20260903120000", "-", "", "UNKNOWN"), ("20260905000000", "200"))
+    pages = {"20260905000000": fixture("2026-07")}
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("WINDOW OUTCOME UNKNOWN (deferring)")
+    assert "1 without a status" in verdict
 
 
 def test_window_missed_reports_what_the_index_listed_but_could_not_use() -> None:
@@ -580,8 +687,8 @@ def test_window_missed_reports_what_the_index_listed_but_could_not_use() -> None
         "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 2 "
         "capture(s) dated inside the registered window"
     )
-    assert "1 of them readable for this exact URL (1 with another status)" in verdict
-    assert "all 1 readable capture(s) were read and none prints 2026-08" in verdict
+    assert "1 of them HTTP 200 for this exact URL; 1 with another status" in verdict
+    assert "all 1 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
     assert identity_url("20260904170006") not in calls
 
 
@@ -669,6 +776,8 @@ def test_discovery_asks_for_a_capture_while_the_window_is_open() -> None:
     assert (url, raw) == (None, None)
     assert resolve_pending.A19_CAPTURE_REQUESTED in verdict
     assert verdict.endswith("(deferring)")
+    assert "the Archive's index lists 1 capture(s)" in verdict
+    assert "all 1 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
     assert [call for call in calls if "/save/" in call] == [
         f"https://web.archive.org/save/{resolve_pending.A19_SOURCE_URL}"
     ]
@@ -720,7 +829,7 @@ def test_window_missed_means_the_whole_index_was_read_and_nothing_prints_it() ->
         "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 1 "
         "capture(s) dated inside the registered window"
     )
-    assert "; all 1 readable capture(s) were read and none prints 2026-07" in verdict
+    assert "; all 1 HTTP 200 capture(s) were read and none prints 2026-07" in verdict
     assert not any("/save/" in call for call in calls)
 
 

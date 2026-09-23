@@ -19,5 +19,8 @@ element, verbatim. They are parser and identity evidence. The resolver does
 not read the replay form: it fetches the capture's stored response
 (`/web/<timestamp>id_/<url>`), which is BLS's own bytes, and archives that.
 
-The Archive's index listed exactly these three HTTP 200 captures of the page between
-2026-07-01 and 2026-09-19 (CDX query, 2026-09-19).
+On 2026-09-19 a CDX query for the page between 2026-07-01 and 2026-09-19,
+filtered to HTTP 200, listed exactly these three captures. That query was
+filtered; it says nothing about rows with other statuses in that span. The
+resolver's own queries are unfiltered and report every row
+(`a19_window_captures`).
