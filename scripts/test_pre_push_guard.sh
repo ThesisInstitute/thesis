@@ -298,9 +298,10 @@ STALE=$(git -C "$S/dev10" rev-parse stale)
 SWAP=$(git -C "$S/dev10" commit-tree "$STALE^{tree}" -p "$MTIP" -p "$STALE" \
     -m "fast-forward merge carrying the stale records tree")
 hook "$S/dev10" origin "refs/heads/main $SWAP refs/heads/main $MTIP"
-# blocked by the in-scope-parent rule before content closure is reached:
-# the stale parent was never published, so it cannot exempt the merge
-check "30 stale-parent swap merge on main blocks (unpublished parent)" 1 $rc "$S/err" "carrying the stale records tree"
+# blocked as a rollback before content closure is reached: the merge
+# carries the stale parent's records over destination main, a published
+# parent with different records, so no parent may vouch for it
+check "30 stale-parent swap merge on main blocks (rollback)" 1 $rc "$S/err" "carrying the stale records tree"
 # two exempt merges: both vouched by ALREADY-PUBLISHED parents, adding
 # then removing a record so the endpoints agree (sol round-4 HIGH 1 — the
 # earlier fixture used an unpublished carrier and never exercised this)
@@ -487,9 +488,10 @@ check "49 side merge after a forward merge allowed (new ref)" 0 $rc
 # side merge is TREESAME to that parent, whose content was never published
 git -C "$S/dev21" checkout -qb own "$FWD"
 commit_file "$S/dev21" records/own.txt own "records on own"
-git -C "$S/dev21" merge -q --no-edit lag
+git -C "$S/dev21" merge -q --no-edit -m "side merge over own records" lag
 hook "$S/dev21" origin "refs/heads/own $(git -C "$S/dev21" rev-parse own) refs/heads/own $ZERO40"
 check "50 side merge over an unpublished records commit blocks" 1 $rc "$S/err" "records/own.txt"
+check "50b the side merge itself is named, not only the records commit" 1 $rc "$S/err" "side merge over own records"
 # a records tree that merely equals main's, set by an unpublished commit
 git -C "$S/dev21" checkout -qb replica "$INIT"
 git -C "$S/dev21" checkout -q "$MTIP" -- records
@@ -499,9 +501,37 @@ if [ "$(git -C "$S/dev21" rev-parse "$REPLICA:records")" != \
     "$(git -C "$S/dev21" rev-parse "$MTIP:records")" ]; then
     echo "FAIL 51 fixture: replica does not match main's records tree"; fail=$((fail+1))
 fi
-git -C "$S/dev21" merge -q --no-edit lag
+git -C "$S/dev21" merge -q --no-edit -m "side merge over the hand-made copy" lag
 hook "$S/dev21" origin "refs/heads/replica $(git -C "$S/dev21" rev-parse replica) refs/heads/replica $ZERO40"
 check "51 merge over a hand-made copy of main's records blocks" 1 $rc "$S/err" "re-create main's records by hand"
+check "51b that merge is named too (its parent's setter is unpublished)" 1 $rc "$S/err" "side merge over the hand-made copy"
+
+# ---- 52-53: a rollback of a PUBLISHED records state on a branch push.
+# Main has two post-epoch records states; a branch off the older one
+# carries it over the newer main (`git merge -s ours main`, or a literal
+# stale parent). Content closure never sees a branch push, and the GitHub
+# merge button would then delete the newer records from main. The
+# published-setter relaxation must not admit the first shape, and the
+# second was a pre-existing hole (the old hook exempted it).
+commit_file "$S/seed" records/r3.txt r3 "attested record 3"
+git -C "$S/seed" push -q origin main
+MTIP2=$(git -C "$S/seed" rev-parse HEAD)
+git clone -q "$S/origin.git" "$S/dev22" 2>/dev/null
+git -C "$S/dev22" checkout -qb roll "$MTIP"                  # older post-epoch state
+commit_file "$S/dev22" src/q.txt q "src on roll"
+ROLL=$(git -C "$S/dev22" rev-parse roll)
+OURS=$(git -C "$S/dev22" commit-tree "$ROLL^{tree}" -p "$ROLL" -p "$MTIP2" \
+    -m "merge main, discarding records/r3.txt")
+hook "$S/dev22" origin "refs/heads/roll $OURS refs/heads/roll $ZERO40"
+check "52 ours-style merge discarding main's newer records blocks" 1 $rc "$S/err" "discarding records/r3.txt"
+LIT=$(git -C "$S/dev22" commit-tree "$MTIP^{tree}" -p "$MTIP2" -p "$MTIP" \
+    -m "literal stale parent carried over main")
+hook "$S/dev22" origin "refs/heads/roll $LIT refs/heads/roll $ZERO40"
+check "53 literal stale published parent over main blocks" 1 $rc "$S/err" "literal stale parent carried over main"
+# the same branch merging main forward properly is still a no-op
+git -C "$S/dev22" merge -q --no-edit origin/main
+hook "$S/dev22" origin "refs/heads/roll $(git -C "$S/dev22" rev-parse roll) refs/heads/roll $ZERO40"
+check "54 an honest forward merge on the same branch still allowed" 0 $rc
 
 echo
 echo "== $pass passed, $fail failed =="

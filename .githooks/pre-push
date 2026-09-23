@@ -27,10 +27,14 @@
 #     merge a side branch that lags main's records (the merge's records
 #     tree is main's, carried by a parent main does not yet contain; hit
 #     2026-09-22). A records tree merely EQUAL to main's, set by an
-#     unpublished commit, still cannot vouch. An ancient records state
-#     resurrected through a pre-epoch parent is what the epoch test
-#     refuses. No resolvable epoch means no exemption at all — never a
-#     weaker one.
+#     unpublished commit, still cannot vouch. And no parent, published or
+#     not, may vouch for a merge that carries its records over ANOTHER
+#     parent the comparator already contains with different records: that
+#     is a rollback of a published state, not a no-op (`git merge -s ours
+#     main` on a branch), and closure never sees a branch push. An ancient
+#     records state resurrected through a pre-epoch parent is what the
+#     epoch test refuses. No resolvable epoch means no exemption at all —
+#     never a weaker one.
 #   - enforce_range_content_closure: if nothing in the range needs
 #     attestation yet the endpoints disagree about records content, the
 #     change rode in through parent-order trickery or a rewind. Applied to
@@ -137,11 +141,23 @@ epoch_of() { # epoch_of <commit>
 # commit is in scope and reachable from the comparator, the content is
 # published, whatever unpublished src-only or no-op-merge commits sit
 # between it and the parent.
-parent_may_exempt() { # parent_may_exempt <parent> <base> <epoch>
+# The TREESAME edge is followed with the pusher's diff config neutralised
+# (log.follow only applies to a single file, and records/ holds no
+# submodule, but neither may decide which commit comes back).
+parent_may_exempt() { # parent_may_exempt <parent> <base> <epoch> <merge>
     [ -n "$3" ] || return 1
     git merge-base --is-ancestor "$1" "$3" 2>/dev/null && return 1
+    # Carrying this parent's records over another parent the comparator
+    # already contains with DIFFERENT records rolls a published state
+    # back; no parent may vouch for that.
+    mtree=$(records_tree "$4")
+    for q in $(git rev-parse "$4^@" 2>/dev/null); do
+        [ "$(records_tree "$q")" = "$mtree" ] && continue
+        git merge-base --is-ancestor "$q" "$2" 2>/dev/null && return 1
+    done
     git merge-base --is-ancestor "$1" "$2" 2>/dev/null && return 0
-    setter=$(git log --format=%H -n 1 "$1" -- records/ 2>/dev/null)
+    setter=$(git -c log.follow=false -c diff.ignoreSubmodules=none log \
+        --format=%H -n 1 "$1" -- records/ 2>/dev/null)
     [ -n "$setter" ] || return 1
     git merge-base --is-ancestor "$setter" "$3" 2>/dev/null && return 1
     git merge-base --is-ancestor "$setter" "$2" 2>/dev/null
@@ -169,8 +185,8 @@ while read -r _local_ref local_sha remote_ref remote_sha; do
         fi
     fi
     range="$base..$local_sha"
-    walked=$(git log --full-history --format=%H "$range" -- records/ \
-        2>/dev/null)
+    walked=$(git -c log.follow=false -c diff.ignoreSubmodules=none log \
+        --full-history --format=%H "$range" -- records/ 2>/dev/null)
     walk_rc=$?
     if [ "$walk_rc" -ne 0 ]; then
         refuse "$remote_ref" "range $range failed to walk" || status=1
@@ -185,7 +201,7 @@ while read -r _local_ref local_sha remote_ref remote_sha; do
         for p in $(git rev-parse "$c^@" 2>/dev/null); do
             nparent=$((nparent + 1))
             [ "$(records_tree "$p")" = "$ctree" ] || continue
-            parent_may_exempt "$p" "$base" "$epoch" && exempt=1
+            parent_may_exempt "$p" "$base" "$epoch" "$c" && exempt=1
         done
         if [ "$nparent" -ge 2 ] && [ "$exempt" = "1" ]; then
             continue
