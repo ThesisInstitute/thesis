@@ -6,9 +6,11 @@ of https://www.bls.gov/web/empsit/cpseea19.htm (tests/fixtures/a19/README.md).
 
 from __future__ import annotations
 
+import base64
 import copy
 import datetime as dt
 import gzip
+import hashlib
 import json
 import pathlib
 import sys
@@ -189,6 +191,15 @@ def test_implicitly_closed_cells_parse_and_only_a_nested_cell_refuses() -> None:
         )
         == expected
     )
+    # Header ids elsewhere on the page that merely share this table's prefix
+    # collide with nothing.
+    assert (
+        resolve_pending.a19_table(
+            '<table><tr><th id="cps_eande_m19.navigation">Navigation</th></tr>'
+            "</table>" + html
+        )
+        == expected
+    )
 
 
 def test_only_the_a19_table_is_read() -> None:
@@ -207,6 +218,19 @@ def test_only_the_a19_table_is_read() -> None:
     # Without the table's id nothing is read.
     assert (
         resolve_pending.a19_table(html.replace('id="cps_eande_m19"', 'id="x"', 1))
+        is None
+    )
+    # Two tables with this id: neither can be told to be the one.
+    assert resolve_pending.a19_table(html + html) is None
+    assert (
+        resolve_pending.a19_table(html.replace("Production", "Crafts") + html) is None
+    )
+    # One of this table's ids defined elsewhere on the page first: a browser
+    # would bind the cell to that header, so the page is not identified.
+    assert (
+        resolve_pending.a19_table(
+            '<table><tr><th id="cps_eande_m19.r.6.1">Crafts</th></tr></table>' + html
+        )
         is None
     )
 
@@ -272,6 +296,15 @@ def test_a_value_is_found_by_its_headers_not_its_position() -> None:
         lambda html: html.replace(
             ">7,716<", ">7<table/><tr><td>x</td></tr></table>,716<", 1
         ),
+        # Text in a table nested inside a value cell, even in its caption,
+        # would otherwise drop out of the value: "7" instead of 7,716.
+        lambda html: html.replace(
+            ">7,716<", ">7<table><caption>,716</caption></table><", 1
+        ),
+        lambda html: html.replace(">7,716<", ">7<table>,716</table><", 1),
+        # The table never closes: cut after the last value, or drop </table>.
+        lambda html: html[: html.rindex("</table>")],
+        lambda html: html[: html.index("12,011") + len("12,011</td>")],
     ],
 )
 def test_a_page_that_cannot_be_identified_yields_nothing(damage) -> None:
@@ -431,6 +464,12 @@ URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
 HEADER = ["timestamp", "original", "statuscode", "digest"]
 
 
+def digest(name: str) -> str:
+    """A content digest of the form the index uses (32 base-32 characters)."""
+
+    return base64.b32encode(hashlib.sha1(name.encode()).digest()).decode()
+
+
 def cdx(*rows: tuple[str, ...]) -> bytes:
     """An index body: rows are (stamp, status[, original[, digest]]).
 
@@ -445,7 +484,7 @@ def cdx(*rows: tuple[str, ...]) -> bytes:
                     row[0],
                     row[2] if len(row) > 2 and row[2] else URL,
                     row[1],
-                    row[3] if len(row) > 3 else f"D{row[0]}",
+                    row[3] if len(row) > 3 else digest(row[0]),
                 ]
                 for row in rows
             ],
@@ -532,7 +571,8 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         ("20260904170006", "200"),  # listed twice
         ("20260904170006", "-"),  # and once more without a status
         ("20260905000000", "403"),
-        ("20260907000000", "-", "", "DX"),  # a row without a status
+        ("20260907000000", "-", "", digest("x")),  # a row without a status
+        ("20260908000000", "-", "", "-"),  # and one without a digest either
         ("20260911000000", "200"),  # after the window
     )
     index = resolve_pending.a19_window_captures(WINDOW, reader(index, {}, calls))
@@ -540,23 +580,52 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
         replay_url("20260904170006"),
         replay_url("20260910235959"),
     ]
-    assert index.revisits == [("20260907000000", "DX")]
-    assert (index.listed, index.other_status, index.other_form) == (4, 1, 0)
+    assert [(row.stamp, row.digest) for row in index.revisits] == [
+        ("20260907000000", digest("x")),
+        ("20260908000000", None),
+    ]
+    assert [row.stamp for row in index.rows] == [
+        "20260904170006",
+        "20260907000000",
+        "20260908000000",
+        "20260910235959",
+    ]
+    assert (index.listed, index.other_status, index.other_form) == (5, 1, 0)
     # The counts are disjoint and add up.
-    assert index.listed == (
-        len(index.captures)
-        + len(index.revisits)
-        + index.other_status
-        + index.other_form
-    )
+    assert index.listed == len(index.rows) + index.other_status + index.other_form
     assert index.describe(WINDOW).endswith(
-        "4 capture(s) dated inside the registered window "
+        "5 capture(s) dated inside the registered window "
         f"{WINDOW!r}, 2 of them HTTP 200 for this exact URL; "
-        "1 without a status, 1 with another status"
+        "2 without a status, 1 with another status"
     )
     assert "from=20260902000000" in calls[0] and "to=20260910235959" in calls[0]
     assert "fl=timestamp,original,statuscode,digest" in calls[0]
     assert "filter=" not in calls[0]
+
+
+def test_a_stamp_listed_with_two_statuses_or_two_digests_is_ambiguous() -> None:
+    # Whichever row came first must not decide; the index is unusable.
+    for rows in (
+        [("20260904170006", "403"), ("20260904170006", "200")],
+        [("20260904170006", "200"), ("20260904170006", "403")],
+        [
+            ("20260904170006", "200", "", digest("a")),
+            ("20260904170006", "200", "", digest("b")),
+        ],
+        [
+            ("20260904170006", "-", "", digest("a")),
+            ("20260904170006", "200", "", digest("b")),
+        ],
+    ):
+        with pytest.raises(ValueError, match="lists 20260904170006 with"):
+            resolve_pending.a19_window_captures(WINDOW, reader(cdx(*rows), {}, []))
+    # A row without a status or without a digest fills in, in either order.
+    for rows in (
+        [("20260904170006", "-", "", digest("a")), ("20260904170006", "200", "", "-")],
+        [("20260904170006", "200", "", "-"), ("20260904170006", "-", "", digest("a"))],
+    ):
+        index = resolve_pending.a19_window_captures(WINDOW, reader(cdx(*rows), {}, []))
+        assert [(r.status, r.digest) for r in index.rows] == [("200", digest("a"))]
 
 
 def test_a_capture_stored_under_another_form_of_the_url_is_counted_not_used() -> None:
@@ -586,14 +655,10 @@ def test_a_closed_window_with_unread_captures_under_another_form_defers() -> Non
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
     )
     assert (url, raw) == (None, None)
-    # The name says what is true: a capture WAS read; the outcome is unknown
-    # because one row was not.
     assert verdict.startswith("WINDOW OUTCOME UNKNOWN (deferring)")
     assert "1 of them HTTP 200 for this exact URL; 1 under another form" in verdict
     assert "all 1 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
-    assert "1 other row(s) were not read and no read capture accounts for them" in (
-        verdict
-    )
+    assert "1 row(s) under another form of the URL were not read" in verdict
     assert "WINDOW MISSED" not in verdict
     assert identity_url("20260904170006") not in calls
 
@@ -610,39 +675,149 @@ def test_a_closed_window_whose_only_rows_are_403s_is_missed() -> None:
     assert "all 0 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
 
 
-def test_a_row_without_a_status_is_accounted_for_by_its_digest() -> None:
-    # Rows without a status are never read (they may not replay at their own
-    # timestamp). One that shares a digest with a capture that WAS read and
-    # printed another month cannot print this one.
+def test_a_row_without_a_status_is_read_or_accounted_for_by_its_digest() -> None:
+    # A row without a status is asked for at its own timestamp like any
+    # other. When the Archive does not serve it there, a read capture with
+    # the same digest says what it printed: the same bytes.
     calls: list[str] = []
     index = cdx(
-        ("20260903010101", "200", "", "JULY"),
-        ("20260903120000", "-", "", "JULY"),
-        ("20260904170006", "200", "", "AUG"),
+        ("20260903010101", "200", "", digest("july")),
+        ("20260903120000", "-", "", digest("july")),
+        ("20260904170006", "200", "", digest("aug")),
     )
     pages = {
         "20260903010101": fixture("2026-07"),
         CAPTURES["2026-08"]: fixture("2026-08"),
     }
-    url, raw, verdict = resolve_pending.a19_registered_capture(
+    found = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
     )
-    assert (url, verdict) == (capture_url("2026-08"), "")
-    assert identity_url("20260903120000") not in calls
-    # A later row without a status never holds a resolution back.
+    assert (found.url, found.verdict, found.witness) == (
+        capture_url("2026-08"),
+        "",
+        None,
+    )
+    assert identity_url("20260903120000") in calls
+    # A later row without a status never holds a resolution back, and is
+    # not asked for.
     calls.clear()
-    index = cdx(("20260904170006", "200", "", "AUG"), ("20260906000000", "-", "", "Z"))
+    index = cdx(
+        ("20260904170006", "200", "", digest("aug")),
+        ("20260906000000", "-", "", digest("z")),
+    )
     url, _, verdict = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
     )
     assert (url, verdict) == (capture_url("2026-08"), "")
+    assert identity_url("20260906000000") not in calls
+    # Served at its own timestamp and printing the month, it IS the
+    # earliest capture.
+    calls.clear()
+    index = cdx(
+        ("20260903120000", "-", "", digest("aug")),
+        ("20260904170006", "200", "", digest("aug")),
+    )
+    served = {"20260903120000": fixture("2026-08"), **pages}
+    found = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, served, calls)
+    )
+    assert (found.url, found.witness) == (replay_url("20260903120000"), None)
+    assert found.raw == fixture("2026-08").encode()
+    assert identity_url("20260904170006") not in calls
+
+
+def test_an_unserved_earlier_row_with_the_same_digest_is_the_witness() -> None:
+    # The Archive lists Sep 3 with the digest of the Sep 4 capture but does
+    # not serve Sep 3 at its own timestamp. Sep 3 is the earliest print; Sep
+    # 4 supplied its bytes, and the result says so.
+    calls: list[str] = []
+    index = cdx(
+        ("20260903120000", "-", "", digest("aug")),
+        ("20260904170006", "200", "", digest("aug")),
+    )
+    pages = {CAPTURES["2026-08"]: fixture("2026-08")}
+    found = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
+    )
+    assert (found.url, found.verdict) == (capture_url("2026-08"), "")
+    assert found.witness == "20260903120000"
+    assert found.raw == fixture("2026-08").encode()
+    assert identity_url("20260903120000") in calls
+    # The same through the main loop: the fact names both.
+    url, raw, verdict = found
+    assert (url, raw, verdict) == (found.url, found.raw, "")
+
+
+def test_a_later_capture_can_account_for_an_earlier_unserved_row() -> None:
+    # Sep 3 (no status, digest J) is not served; Sep 4 prints August; Sep 5
+    # carries digest J and prints July. Sep 3 therefore printed July, and
+    # Sep 4 is the earliest August print. The walk reads on to find that
+    # out instead of deferring.
+    calls: list[str] = []
+    index = cdx(
+        ("20260903120000", "-", "", digest("j")),
+        ("20260904170006", "200", "", digest("aug")),
+        ("20260905000000", "200", "", digest("j")),
+    )
+    pages = {
+        CAPTURES["2026-08"]: fixture("2026-08"),
+        "20260905000000": fixture("2026-07"),
+    }
+    found = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
+    )
+    assert (found.url, found.verdict, found.witness) == (
+        capture_url("2026-08"),
+        "",
+        None,
+    )
+    assert identity_url("20260905000000") in calls
+    # When the later capture with that digest prints August too, the
+    # earliest August print is Sep 3, and its bytes are Sep 5's.
+    pages["20260905000000"] = fixture("2026-08")
+    found = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
+    )
+    assert (found.url, found.witness) == (
+        replay_url("20260905000000"),
+        "20260903120000",
+    )
+
+
+def test_a_missing_digest_is_unknown_not_a_match() -> None:
+    # The index may list "-" where it has no digest. Two such rows are not
+    # the same bytes, so an unserved row without a digest is never accounted
+    # for: a closed window stays unknown, and a later August capture cannot
+    # resolve past it.
+    index = cdx(
+        ("20260903120000", "-", "", "-"),
+        ("20260904170006", "200", "", "-"),
+    )
+    pages = {CAPTURES["2026-08"]: fixture("2026-07")}
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("WINDOW OUTCOME UNKNOWN (deferring)")
+    assert "1 remain unknown" in verdict
+    index = cdx(
+        ("20260903120000", "-", "", "-"),
+        ("20260904170006", "200", "", "-"),
+        ("20260905000000", "200", "", "-"),
+    )
+    pages["20260905000000"] = fixture("2026-08")
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("EARLIER ROW UNREAD (deferring)")
 
 
 def test_an_earlier_unaccounted_row_without_a_status_defers() -> None:
     calls: list[str] = []
     index = cdx(
-        ("20260903120000", "-", "", "UNKNOWN"),
-        ("20260904170006", "200", "", "AUG"),
+        ("20260903120000", "-", "", digest("unknown")),
+        ("20260904170006", "200", "", digest("aug")),
     )
     pages = {CAPTURES["2026-08"]: fixture("2026-08")}
     url, raw, verdict = resolve_pending.a19_registered_capture(
@@ -651,18 +826,22 @@ def test_an_earlier_unaccounted_row_without_a_status_defers() -> None:
     assert (url, raw) == (None, None)
     assert verdict.startswith("EARLIER ROW UNREAD (deferring)")
     assert "20260903120000" in verdict
-    # The same row with the chosen capture's digest is the same bytes.
-    index = cdx(
-        ("20260903120000", "-", "", "AUG"), ("20260904170006", "200", "", "AUG")
+    assert "could not be read or identified at their own timestamp" in verdict
+    # It was asked for; the Archive did not serve it.
+    assert identity_url("20260903120000") in calls
+    # Served but unidentifiable at its own timestamp: the same.
+    served = {"20260903120000": "<html>Archive error</html>", **pages}
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, served, [])
     )
-    url, _, verdict = resolve_pending.a19_registered_capture(
-        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
-    )
-    assert (url, verdict) == (capture_url("2026-08"), "")
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("EARLIER ROW UNREAD (deferring)")
 
 
 def test_a_closed_window_with_an_unaccounted_row_without_a_status_is_unknown() -> None:
-    index = cdx(("20260903120000", "-", "", "UNKNOWN"), ("20260905000000", "200"))
+    index = cdx(
+        ("20260903120000", "-", "", digest("unknown")), ("20260905000000", "200")
+    )
     pages = {"20260905000000": fixture("2026-07")}
     url, raw, verdict = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
@@ -670,6 +849,21 @@ def test_a_closed_window_with_an_unaccounted_row_without_a_status_is_unknown() -
     assert (url, raw) == (None, None)
     assert verdict.startswith("WINDOW OUTCOME UNKNOWN (deferring)")
     assert "1 without a status" in verdict
+    assert (
+        "of 1 row(s) without a status, 0 were served at their own timestamp and "
+        "read, 0 share the digest of a read capture, 1 remain unknown" in verdict
+    )
+    # While the window is open the same rows still get a capture request,
+    # and the verdict does not claim the month is unprinted, only unread.
+    calls: list[str] = []
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 6), reader(index, pages, calls)
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("none of the rows read inside the registered window")
+    assert "1 remain unknown" in verdict
+    assert resolve_pending.A19_CAPTURE_REQUESTED in verdict
+    assert any("/save/" in call for call in calls)
 
 
 def test_window_missed_reports_what_the_index_listed_but_could_not_use() -> None:
@@ -698,21 +892,28 @@ def test_window_missed_reports_what_the_index_listed_but_could_not_use() -> None
         b'{"error":"Blocked Site Error"}',
         b"429",
         b"null",
-        b'[["timestamp","original","statuscode"], 5, null]',
+        b'[["timestamp","original","statuscode","digest"], 5, null]',
         b"<html>429 Too Many Requests</html>",
         # A table that is not the one requested.
         b'[["timestamp","statuscode"],["20260904170006","200"]]',
+        b'[["timestamp","original","statuscode"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
         b'[["error","blocked"]]',
-        b'[["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
+        b'[["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","200","X"]]',
         # Row-level damage must not read as "the window holds no capture".
-        b'[["timestamp","original","statuscode"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm"]]',
-        b'[["timestamp","original","statuscode"],["2026090417","https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
-        b'[["timestamp","original","statuscode"],[20260904170006,"https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
-        b'[["timestamp","original","statuscode"],["20260904170006","","200"]]',
-        # An empty body, an impossible date and a non-numeric status.
+        b'[["timestamp","original","statuscode","digest"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
+        b'[["timestamp","original","statuscode","digest"],["2026090417","https://www.bls.gov/web/empsit/cpseea19.htm","200","X"]]',
+        b'[["timestamp","original","statuscode","digest"],[20260904170006,"https://www.bls.gov/web/empsit/cpseea19.htm","200","X"]]',
+        b'[["timestamp","original","statuscode","digest"],["20260904170006","","200","X"]]',
+        b'[["timestamp","original","statuscode","digest"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","200",""]]',
+        # An empty body, an impossible date and statuses that are neither
+        # three digits nor "-".
         b"",
-        b'[["timestamp","original","statuscode"],["20260900170006","https://www.bls.gov/web/empsit/cpseea19.htm","200"]]',
-        b'[["timestamp","original","statuscode"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","blocked"]]',
+        b'[["timestamp","original","statuscode","digest"],["20260900170006","https://www.bls.gov/web/empsit/cpseea19.htm","200","X"]]',
+        b'[["timestamp","original","statuscode","digest"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","blocked","X"]]',
+        b'[["timestamp","original","statuscode","digest"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","-200","X"]]',
+        b'[["timestamp","original","statuscode","digest"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","20","X"]]',
+        # One stamp, two statuses.
+        b'[["timestamp","original","statuscode","digest"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","403","X"],["20260904170006","https://www.bls.gov/web/empsit/cpseea19.htm","200","X"]]',
     ],
 )
 def test_a_malformed_index_defers_and_never_escapes(body: bytes) -> None:
@@ -905,8 +1106,19 @@ def test_a_capped_scan_is_not_reported_as_a_missed_window(
         reader(cdx(*[(stamp, "200") for stamp in stamps]), pages, []),
     )
     assert (url, raw) == (None, None)
-    assert verdict.startswith("CAPTURE SCAN LIMIT REACHED (refusing): the first 2 of 3")
+    assert verdict.startswith(
+        "CAPTURE SCAN LIMIT REACHED (deferring): the first 2 of 3"
+    )
     assert "WINDOW MISSED" not in verdict
+    # Rows without a status count toward the cap too: they are read.
+    index = cdx((stamps[0], "-"), (stamps[1], "200"), (stamps[2], "200"))
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith(
+        "CAPTURE SCAN LIMIT REACHED (deferring): the first 2 of 3"
+    )
 
 
 def test_discovery_defers_when_the_index_is_unreachable() -> None:
@@ -1061,6 +1273,38 @@ def test_main_resolves_august_in_millions_and_refuses_the_july_window(
     # The publisher date the row vouches for is the capture's, not the
     # forecast's resolutionDate (the window's end, 2026-09-10).
     assert '"observed_at": "2026-09-04"' in output
+
+
+def test_main_names_the_unserved_earlier_row_the_fact_rests_on(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    index = cdx(
+        ("20260903120000", "-", "", digest("aug")),
+        (CAPTURES["2026-08"], "200", "", digest("aug")),
+    )
+    facts: list[dict] = []
+    real_fact = resolve_pending.a19_fact
+
+    def spy(*args: object) -> dict:
+        facts.append(real_fact(*args))
+        return facts[-1]
+
+    monkeypatch.setattr(resolve_pending, "a19_fact", spy)
+    output, calls = run_main(
+        monkeypatch,
+        capsys,
+        [registration()],
+        archive={CAPTURES["2026-08"]: fixture("2026-08")},
+        index=index,
+    )
+    assert "-> 7.716 millions" in output
+    assert [fact["source"]["source_file"] for fact in facts] == [
+        "cpseea19.htm (Wayback capture 20260904170006; the Archive's index lists "
+        "the same digest at 20260903120000, not served at that timestamp)"
+    ]
+    # The day the row vouches for is the capture whose bytes were read.
+    assert '"observed_at": "2026-09-04"' in output
+    assert identity_url("20260903120000") in calls
 
 
 def test_main_takes_the_earliest_capture_even_when_a_pin_names_a_later_one(

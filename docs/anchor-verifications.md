@@ -803,12 +803,14 @@ Which capture: a registered target resolves only from a capture dated inside
 its registered `expectedReleaseWindow`, and from the earliest such capture
 whose header names the target month. It always takes that capture from the
 Archive's index, walked in order; hand pins serve only cells that predate
-registration. If a capture in the window cannot be read, the run defers there:
-a later capture is the earliest one only if the unread one is known not to
-print the month. The same holds for a capture that does not parse as this
-table (an error page, a changed layout): it is unidentified, not "another
-month", and the run defers there too. Only a capture identified as a different
-month is passed over.
+registration. If an HTTP 200 capture in the window cannot be read, the run
+defers there: a later capture is the earliest one only if the unread one is
+known not to print the month. The same holds for a capture that does not
+parse as this table (an error page, a changed layout): it is unidentified,
+not "another month", and the run defers there too. Only a capture identified
+as a different month is passed over. Rows the index lists without a status
+are walked the same way but do not stop the walk; what they printed can also
+be known from their digest (below).
 
 How a value is read: BLS marks the table up accessibly, so every data cell's
 `headers` attribute names the ids of its row header and its three column
@@ -817,13 +819,18 @@ finds each value by what it is headed by (the occupation's row, "Total", "16
 years and over", and the later of exactly two same-month headings one year
 apart), never by its position, and all six occupations must agree on the
 month. Other tables on the page, and any table the A-19 table sits inside, are
-not read, so their ids and labels cannot collide with it. Inside the A-19
+not read, so their ids and labels cannot collide with it. There must be
+exactly one table with that id and it must close: a page cut off before its
+`</table>`, or holding two such tables, is not identified. Inside the A-19
 table a cell's closing tag may be omitted, as HTML allows; a new cell, row or
-table end closes it. A cell opening while a recorded cell of the table is
-still open (a table nested in a value cell), text sitting in the table outside
-any cell or caption, or a cell that names this table's ids from outside it
-makes the page unidentifiable. A page that cannot be identified that way
-yields nothing.
+table end closes it. A cell or any text (a caption included) in a table
+nested inside a value cell while that cell is open, or text sitting in the
+table outside any cell or caption, would split or lose a value and makes the
+page unidentifiable; an empty nested table does not. A header id that some
+other table on the page also defines is refused, because a browser binds a
+cell to the first element with that id; an id elsewhere that merely shares
+this table's prefix is nothing to it. A page that cannot be identified that
+way yields nothing.
 It reads the three fixtures and the full 125,026-byte page the resolver
 archived on 2026-07-10 to the same values. The resolver asks the Archive for the
 capture's stored response (`/web/<timestamp>id_/<url>`), so the hash recorded
@@ -868,32 +875,44 @@ treated as an index failure and defers. Nothing resolves and nothing is
 recorded. The refusal is reserved for one finding: the window is closed,
 every HTTP 200 capture of this exact URL in it was read, each prints another
 month, and every other row listed in the window is accounted for. The index
-is queried for every status and for the stored form of the URL, and each
-verdict reports what it listed, in disjoint counts: HTTP 200 captures of this
-exact URL, rows without a status, rows with another status, and rows under
-another form of the URL. A capture the Archive stored as a 403 (bls.gov's
-answer to non-browser clients) holds no table; it is counted and named, not
-read, because "no capture" and "no usable capture" are different findings.
-The same timestamp listed twice (once with a status, once without) counts
-once, with its status.
+is queried for every status and for the stored form of the URL, and the
+closed- and open-window verdicts report what it listed, in disjoint counts:
+HTTP 200 captures of this exact URL, rows without a status, rows with another
+status, and rows under another form of the URL, and then what was read. A
+capture the Archive stored as a 403 (bls.gov's answer to non-browser clients)
+holds no table; it is counted and named, not read, because "no capture" and
+"no usable capture" are different findings. The same timestamp listed twice
+(once with a status, once without) counts once, with its status; listed with
+two different statuses, or two different digests, it makes the index
+ambiguous, which is an index failure, not a choice.
 
-Rows without a status (`-`) are counted, not read. Nothing the index returns
-shows that such a row replays at its own timestamp, and if it does not, the
-read fails and the window could never advance. None has been listed for this
-URL as of 2026-09-22. Each row carries the index's content digest, and a row
-without a status whose digest equals that of a capture the resolver read, and
-found printing another month, is treated as those same bytes and accounted
-for. An unaccounted row dated
-before the chosen capture holds the resolution back (`EARLIER ROW UNREAD
-(deferring)`), because it might be an earlier print of the month; a later one
-does not matter. A row stored under another form of the URL (the index folds
-scheme and host under one key) is never read and never accounted for. A
-closed window with any unaccounted row defers with `WINDOW OUTCOME UNKNOWN`
-rather than refusing: a capture was read, but the outcome is not known. A
-capped scan, a failed or unidentified read, or an index answer that is not
-exactly the requested table (an empty body, a malformed row, an impossible
-timestamp, a status that is neither three digits nor `-`) reports itself
-instead. The 2026-07 pin is kept as custody evidence for
+Rows without a status (`-`) are counted and asked for at their own timestamp
+like any other row, but nothing the index returns shows that the Archive
+serves such a row there, so one it does not serve, or serves as something
+that is not this table, does not stop the walk. None has been listed for this
+URL as of 2026-09-22. Each row carries the index's content digest, and the
+digest names the bytes: a row the Archive did not serve is treated as the
+same bytes as a read capture with the same digest, whatever month that
+capture printed, and the walk reads on past a candidate to find such a
+capture before deferring. Only a digest of the form observed (32 base-32
+characters) can match; `-` or any other value is unknown, since two
+placeholders are not the same bytes. When an unserved row with the digest of
+a capture that prints the month is dated before every served capture that
+does, that row is the earliest print: the cell resolves from the served
+capture's bytes, its `observed_at` is that capture's date, and the fact's
+`source_file` names the unserved row as the earlier listing of the same
+digest. An unserved row dated before the first print that no read capture
+accounts for holds the resolution back (`EARLIER ROW UNREAD (deferring)`),
+because it might be an earlier print of the month; a later one does not
+matter. A row stored under another form of the URL (the index folds scheme
+and host under one key) is never read and never accounted for. A closed
+window with any unaccounted row defers with `WINDOW OUTCOME UNKNOWN` rather
+than refusing: what was read prints another month, and what was not read is
+not known. A capped scan (the first 32 rows read, none printing the month)
+defers and says so; a failed or unidentified read of an HTTP 200 capture, or
+an index answer that is not exactly the requested table (an empty body, a
+malformed row, an impossible timestamp, a status that is neither three
+digits nor `-`, an empty digest) reports itself instead. The 2026-07 pin is kept as custody evidence for
 the ruling and is never read for a registered cell, because it is dated
 outside the window. August resolving and July refusing say nothing about any
 other `generic-url` registration.
@@ -901,8 +920,8 @@ other `generic-url` registration.
 A registered target looks up the Archive's index for captures dated inside its
 window, and makes no request before the window opens. From the day it opens (not the
 forecast's `resolutionDate`, which would leave a single attempt on the last
-day), each daily run that reads every HTTP 200 capture in the window and
-identifies each as another month asks the Archive to capture the page, once
+day), each daily run that reads every row in the window it can and finds
+that none of them prints the month asks the Archive to capture the page, once
 per run, and defers, reporting what the index listed and what was read; an index failure, an unreadable or unidentified capture,
 or a capped scan reports itself and asks for nothing. An error from the save endpoint
 still counts as that run's request and is reported as "outcome unknown": on
