@@ -22,10 +22,10 @@ const stackItems = [
     href: `${SUITE}/simulator`,
   },
   {
-    label: "Axiom Microcosm",
+    label: "Microcosm",
     title: "Synthetic populations become forecasting substrate.",
     body: "Calibrated microdata lets agents test policy scenarios against transparent population structure and administrative benchmarks.",
-    href: `${SUITE}/microcosm`,
+    href: `${SUITE}/microcosm/release`,
   },
   {
     label: "Brier Decisions",

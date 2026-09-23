@@ -13,13 +13,13 @@ type Page =
   | "models";
 
 /** PROTOTYPE (axiom-forecasts-poc): Thesis as the Forecasts line of Axiom.
- *  The family bar links the other four lines to the unlisted suite mock. */
-export const SUITE = "https://axiom-suite-mock-5th7uq.pages.dev/#/suite";
+ *  The family bar follows the four-line variant (Rules, Records, Simulations,
+ *  Forecasts) and links the other three to the unlisted suite mock. */
+export const SUITE = "https://four-lines.axiom-suite-mock-5th7uq.pages.dev/#/suite";
 const LINES = [
   { name: "Rules", hue: "#B45309", href: `${SUITE}/rules` },
   { name: "Records", hue: "#33547D", href: `${SUITE}/records` },
-  { name: "Microcosm", hue: "#3E7A5E", href: `${SUITE}/microcosm` },
-  { name: "Simulator", hue: "#2C7A7B", href: `${SUITE}/simulator` },
+  { name: "Simulations", hue: "#2C7A7B", href: `${SUITE}/simulator` },
 ];
 const FORECASTS_HUE = "#A94E80";
 
@@ -83,12 +83,6 @@ export function Header({ activePage }: { activePage?: Page }) {
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: FORECASTS_HUE }} />
                 Forecasts
               </Link>
-            </li>
-            <li>
-              <a href={`${SUITE}/evals`} className={`${linkClass} gap-1.5`}>
-                <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: "#6B4E9B" }} />
-                Evals
-              </a>
             </li>
           </ul>
           <span
