@@ -84,6 +84,12 @@ export function Header({ activePage }: { activePage?: Page }) {
                 Forecasts
               </Link>
             </li>
+            <li>
+              <a href={`${SUITE}/evals`} className={`${linkClass} gap-1.5`}>
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: "#6B4E9B" }} />
+                Evals
+              </a>
+            </li>
           </ul>
           <span
             className="text-[0.72rem] text-[var(--theme-text-muted)] max-md:hidden"
