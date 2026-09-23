@@ -41,7 +41,10 @@ MAX_ARGUMENT_BYTES = 32 * 1024
 MAX_ARTIFACT_BYTES = 52 * 1024 * 1024
 EXCERPT_BYTES = 8 * 1024
 MAX_JSON_RESULT_BYTES = 32 * 1024
-TOOLS = frozenset({"fetch_source", "extract_json", "calculate"})
+MAX_IRS_SOI_ROWS = 512
+MAX_IRS_SOI_COLUMNS = 512
+MAX_IRS_SOI_SHEETS = 16
+TOOLS = frozenset({"fetch_source", "extract_json", "extract_irs_soi", "calculate"})
 REDACTED_URL = "[redacted: unsafe URL]"
 REDACTED_PLACEHOLDER = "[REDACTED]"
 REDACTED_JSON = "[redacted: unsafe JSON presentation]"
@@ -520,6 +523,92 @@ def _extract_result(arguments: dict[str, Any], previous: dict) -> dict[str, Any]
     return {"value": value}
 
 
+def _extract_irs_soi_result(
+    arguments: dict[str, Any], previous: dict
+) -> dict[str, Any]:
+    """Replay a reviewed Table 3.3 adapter against an earlier captured body.
+
+    The official URL and printed tax year identify the requested workbook;
+    neither they nor this extraction authenticate its publication vintage.
+    Anchor years are parser checks, not a limit on available history.
+    """
+
+    if set(arguments) != {"sourceCallId", "seriesId", "year"}:
+        raise EvidenceError("extract_irs_soi requires sourceCallId, seriesId, and year")
+    series_id, year = arguments["seriesId"], arguments["year"]
+    if not isinstance(year, str) or not re.fullmatch(r"[0-9]{4}", year):
+        raise EvidenceError("IRS SOI year must be an ASCII YYYY string")
+    try:
+        import resolve_pending as resolver
+    except ImportError as exc:
+        raise EvidenceError("reviewed IRS SOI adapters are unavailable") from exc
+    if (
+        not isinstance(series_id, str)
+        or series_id not in resolver.IRS_SOI_PUB1304_ADAPTERS
+    ):
+        raise EvidenceError("seriesId must identify a reviewed IRS SOI adapter")
+    spec = resolver.IRS_SOI_PUB1304_ADAPTERS[series_id]
+    source = _prior_call(arguments["sourceCallId"], previous)
+    if source["tool"] != "fetch_source":
+        raise EvidenceError("IRS SOI extraction requires a captured fetch_source call")
+    expected_url = spec["file_url_template"].format(yy=year[-2:], ext="xls")
+    source_url = source["arguments"].get("url")
+    if source_url != expected_url:
+        raise EvidenceError("source URL is not the exact official IRS SOI year URL")
+    body = _decode_response(source["response"], source_url)
+    if not 200 <= source["response"]["status"] <= 299:
+        raise EvidenceError("IRS SOI source has an unsuccessful HTTP status")
+
+    # The bounded loader reads only the selected sheet and checks dimensions
+    # before materializing its grid. Parser diagnostics must not enter MCP's
+    # stdout protocol; the complete input bytes remain in the source call.
+    try:
+        grid, refusal = resolver.irs_soi_pub1304_grid(
+            body,
+            spec,
+            max_rows=MAX_IRS_SOI_ROWS,
+            max_columns=MAX_IRS_SOI_COLUMNS,
+            max_sheets=MAX_IRS_SOI_SHEETS,
+            quiet=True,
+        )
+    except Exception as exc:
+        # Parser exceptions may contain untrusted workbook cell strings.
+        raise EvidenceError(
+            f"IRS SOI workbook parsing failed ({type(exc).__name__})"
+        ) from exc
+    if refusal or grid is None:
+        reason = redact_text(str(refusal or "missing workbook grid"))[:1024]
+        raise EvidenceError(f"IRS SOI workbook loader refused: {reason}")
+    refusal = resolver.irs_soi_pub1304_identity_refusal(grid, source_url, year)
+    if refusal:
+        raise EvidenceError(f"IRS SOI identity refused: {redact_text(refusal)[:1024]}")
+    raw_value, refusal = resolver.irs_soi_pub1304_count_from_grid(grid, spec)
+    if refusal or raw_value is None:
+        reason = redact_text(str(refusal or "missing published value"))[:1024]
+        raise EvidenceError(f"IRS SOI table contract refused: {reason}")
+    if (
+        type(raw_value) not in {int, float}
+        or not math.isfinite(raw_value)
+        or not 0 <= raw_value <= 2**53 - 1
+        or int(raw_value) != raw_value
+    ):
+        raise EvidenceError("IRS SOI raw value must be a nonnegative safe integer")
+    value = resolver.irs_soi_pub1304_apply_transform(spec, raw_value)
+    if type(value) not in {int, float} or not math.isfinite(value):
+        raise EvidenceError("IRS SOI transformed value must be finite")
+    return {
+        "value": value,
+        "sourceCallId": arguments["sourceCallId"],
+        "sourceSha256": source["response"]["sha256"],
+        "sourceUrl": source_url,
+        "seriesId": series_id,
+        "year": year,
+        "rawValue": int(raw_value),
+        "unit": spec["unit"],
+        "transform": dict(spec["value_transform"]),
+    }
+
+
 def _number(value: Any) -> int | float:
     if type(value) not in {int, float}:
         raise EvidenceError("calculator values must be finite numbers, not booleans")
@@ -566,7 +655,7 @@ def _calculate_result(arguments: dict[str, Any], previous: dict) -> dict[str, An
             if set(source) != {"callId"}:
                 raise EvidenceError("referenced input requires exactly callId")
             call = _prior_call(source["callId"], previous)
-            if call["tool"] not in {"extract_json", "calculate"}:
+            if call["tool"] not in {"extract_json", "extract_irs_soi", "calculate"}:
                 raise EvidenceError("input call must be an extraction or calculation")
             source = call["result"]["value"]
         resolved[name] = _numeric_input(source, source_strings=is_reference)
@@ -732,7 +821,8 @@ def verify_evidence(payload: Any) -> dict[str, Any]:
             }
             if not isinstance(call, dict) or not required <= call.keys():
                 raise EvidenceError("invalid call envelope")
-            if set(call) - required - {"response", "error", "terminalProjectionVersion"}:
+            optional = {"response", "error", "terminalProjectionVersion"}
+            if set(call) - required - optional:
                 raise EvidenceError("unknown call fields")
             if "terminalProjectionVersion" in call and (
                 type(call["terminalProjectionVersion"]) is not int
@@ -796,6 +886,10 @@ def verify_evidence(payload: Any) -> dict[str, Any]:
                 elif call["tool"] == "extract_json":
                     expected = _extract_result(call["arguments"], previous)
                     checks.append("json_pointer_replay")
+                    replay_status = "replayed"
+                elif call["tool"] == "extract_irs_soi":
+                    expected = _extract_irs_soi_result(call["arguments"], previous)
+                    checks.append("irs_soi_workbook_replay")
                     replay_status = "replayed"
                 else:
                     expected = _calculate_result(call["arguments"], previous)
@@ -941,6 +1035,8 @@ class EvidenceRecorder:
                 result = _fetch_result(response, body)
             elif tool == "extract_json":
                 result = _extract_result(arguments, previous)
+            elif tool == "extract_irs_soi":
+                result = _extract_irs_soi_result(arguments, previous)
             else:
                 result = _calculate_result(arguments, previous)
             call["result"] = result

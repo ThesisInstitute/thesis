@@ -1,0 +1,778 @@
+﻿2026-09-23T04:56:22.2199041Z Current runner version: '2.337.0'
+2026-09-23T04:56:22.2227966Z ##[group]Runner Image Provisioner
+2026-09-23T04:56:22.2229396Z Hosted Compute Agent
+2026-09-23T04:56:22.2230170Z Version: 20260828.587
+2026-09-23T04:56:22.2231072Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+2026-09-23T04:56:22.2231977Z Build Date: 2026-08-28T16:44:25Z
+2026-09-23T04:56:22.2232799Z Worker ID: {2ac86d1c-8033-4c37-88a0-0dbe68434023}
+2026-09-23T04:56:22.2233790Z Azure Region: westus3
+2026-09-23T04:56:22.2234573Z ##[endgroup]
+2026-09-23T04:56:22.2236764Z ##[group]Operating System
+2026-09-23T04:56:22.2237531Z Ubuntu
+2026-09-23T04:56:22.2238137Z 24.04.5
+2026-09-23T04:56:22.2239189Z LTS
+2026-09-23T04:56:22.2239828Z ##[endgroup]
+2026-09-23T04:56:22.2240634Z ##[group]Runner Image
+2026-09-23T04:56:22.2241406Z Image: ubuntu-24.04
+2026-09-23T04:56:22.2242092Z Version: 20260920.314.1
+2026-09-23T04:56:22.2243816Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260920.314/images/ubuntu/Ubuntu2404-Readme.md
+2026-09-23T04:56:22.2245923Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260920.314
+2026-09-23T04:56:22.2247170Z ##[endgroup]
+2026-09-23T04:56:22.2248876Z ##[group]GITHUB_TOKEN Permissions
+2026-09-23T04:56:22.2251225Z Contents: read
+2026-09-23T04:56:22.2252054Z Metadata: read
+2026-09-23T04:56:22.2252729Z ##[endgroup]
+2026-09-23T04:56:22.2255103Z Secret source: Actions
+2026-09-23T04:56:22.2256387Z Cache mode: write
+2026-09-23T04:56:22.2257436Z Prepare workflow directory
+2026-09-23T04:56:22.2667379Z Prepare all required actions
+2026-09-23T04:56:22.2705103Z Getting action download info
+2026-09-23T04:56:22.5689563Z Download action repository 'actions/checkout@v5' (SHA:fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09)
+2026-09-23T04:56:22.6721050Z Download action repository 'oven-sh/setup-bun@v2' (SHA:0c5077e51419868618aeaa5fe8019c62421857d6)
+2026-09-23T04:56:23.2624748Z Download action repository 'actions/download-artifact@v8' (SHA:3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c)
+2026-09-23T04:56:23.9377903Z Download action repository 'astral-sh/setup-uv@v5' (SHA:d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86)
+2026-09-23T04:56:24.9675961Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-09-23T04:56:25.1962347Z Complete job name: generate
+2026-09-23T04:56:25.2599658Z ##[group]Run actions/checkout@v5
+2026-09-23T04:56:25.2600191Z with:
+2026-09-23T04:56:25.2600400Z   ref: 69d9ae2e500e77460016b37effc4cb52c7683854
+2026-09-23T04:56:25.2600648Z   fetch-depth: 0
+2026-09-23T04:56:25.2600837Z   persist-credentials: false
+2026-09-23T04:56:25.2601063Z   repository: ThesisInstitute/thesis
+2026-09-23T04:56:25.2603356Z   token: ***
+2026-09-23T04:56:25.2603540Z   ssh-strict: true
+2026-09-23T04:56:25.2603714Z   ssh-user: git
+2026-09-23T04:56:25.2603888Z   clean: true
+2026-09-23T04:56:25.2604075Z   sparse-checkout-cone-mode: true
+2026-09-23T04:56:25.2604302Z   fetch-tags: false
+2026-09-23T04:56:25.2604482Z   show-progress: true
+2026-09-23T04:56:25.2604658Z   lfs: false
+2026-09-23T04:56:25.2604833Z   submodules: false
+2026-09-23T04:56:25.2605013Z   set-safe-directory: true
+2026-09-23T04:56:25.2605226Z   allow-unsafe-pr-checkout: false
+2026-09-23T04:56:25.2605570Z env:
+2026-09-23T04:56:25.2605753Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:25.2606044Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:25.2606305Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:25.2607011Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:25.2607199Z ##[endgroup]
+2026-09-23T04:56:25.3391460Z Syncing repository: ThesisInstitute/thesis
+2026-09-23T04:56:25.3392815Z ##[group]Getting Git version info
+2026-09-23T04:56:25.3393200Z Working directory is '/home/runner/work/thesis/thesis'
+2026-09-23T04:56:25.3393682Z [command]/usr/bin/git version
+2026-09-23T04:56:25.3471627Z git version 2.55.0
+2026-09-23T04:56:25.3489322Z ##[endgroup]
+2026-09-23T04:56:25.3501661Z Temporarily overriding HOME='/home/runner/work/_temp/6275904e-7190-4564-92f7-596ac39831b1' before making global git config changes
+2026-09-23T04:56:25.3502959Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-23T04:56:25.3518916Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/thesis/thesis
+2026-09-23T04:56:25.3567881Z Deleting the contents of '/home/runner/work/thesis/thesis'
+2026-09-23T04:56:25.3572772Z ##[group]Initializing the repository
+2026-09-23T04:56:25.3576996Z [command]/usr/bin/git init /home/runner/work/thesis/thesis
+2026-09-23T04:56:25.3648839Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-09-23T04:56:25.3649737Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-09-23T04:56:25.3650521Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-09-23T04:56:25.3651128Z hint: call:
+2026-09-23T04:56:25.3651488Z hint:
+2026-09-23T04:56:25.3652018Z hint: 	git config --global init.defaultBranch <name>
+2026-09-23T04:56:25.3652532Z hint:
+2026-09-23T04:56:25.3653026Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-09-23T04:56:25.3653740Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-09-23T04:56:25.3654324Z hint:
+2026-09-23T04:56:25.3654648Z hint: 	git branch -m <name>
+2026-09-23T04:56:25.3655052Z hint:
+2026-09-23T04:56:25.3655609Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-09-23T04:56:25.3656472Z Initialized empty Git repository in /home/runner/work/thesis/thesis/.git/
+2026-09-23T04:56:25.3657971Z [command]/usr/bin/git remote add origin https://github.com/ThesisInstitute/thesis
+2026-09-23T04:56:25.3699754Z ##[endgroup]
+2026-09-23T04:56:25.3700286Z ##[group]Disabling automatic garbage collection
+2026-09-23T04:56:25.3703008Z [command]/usr/bin/git config --local gc.auto 0
+2026-09-23T04:56:25.3731248Z ##[endgroup]
+2026-09-23T04:56:25.3731860Z ##[group]Setting up auth
+2026-09-23T04:56:25.3737595Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-23T04:56:25.3768422Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-23T04:56:25.4074736Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-23T04:56:25.4114884Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-23T04:56:25.4300998Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-23T04:56:25.4332113Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-23T04:56:25.4520230Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-09-23T04:56:25.4555171Z ##[endgroup]
+2026-09-23T04:56:25.4555615Z ##[group]Fetching the repository
+2026-09-23T04:56:25.4564654Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-09-23T04:56:36.1490378Z From https://github.com/ThesisInstitute/thesis
+2026-09-23T04:56:36.1493060Z  * [new branch]        attested/2026-08-04-d0e9df19ed153b0736ccd7e0b4266144160e7a5198cacfa4242bce7c0d5e253b -> origin/attested/2026-08-04-d0e9df19ed153b0736ccd7e0b4266144160e7a5198cacfa4242bce7c0d5e253b
+2026-09-23T04:56:36.1495120Z  * [new branch]        attested/2026-08-06-a8c720af9064965ffcbccb9a434b7303cfa40a8ff247b20b278e745b50a71a05 -> origin/attested/2026-08-06-a8c720af9064965ffcbccb9a434b7303cfa40a8ff247b20b278e745b50a71a05
+2026-09-23T04:56:36.1497195Z  * [new branch]        attested/2026-08-08-0f89261369bdb0dd9889f661e4ba4c238ad2a3a35fdd90e3a0a8d060c7c5cb3a -> origin/attested/2026-08-08-0f89261369bdb0dd9889f661e4ba4c238ad2a3a35fdd90e3a0a8d060c7c5cb3a
+2026-09-23T04:56:36.1499817Z  * [new branch]        attested/2026-08-08-d5cd1aeb3d7c6148a299e7f45ff0d128bd3c1ee014e9c9cfcbd763a54097e3d1 -> origin/attested/2026-08-08-d5cd1aeb3d7c6148a299e7f45ff0d128bd3c1ee014e9c9cfcbd763a54097e3d1
+2026-09-23T04:56:36.1502077Z  * [new branch]        attested/2026-08-14-415d8dc5225036cf587efabb57b34982177205f74e4ffed30e218202bdb02531 -> origin/attested/2026-08-14-415d8dc5225036cf587efabb57b34982177205f74e4ffed30e218202bdb02531
+2026-09-23T04:56:36.1504334Z  * [new branch]        attested/2026-08-14-ebf9b6bb201c3b1e07e917af66fed91efc61741c2f66f6ab0d609af963007fd6 -> origin/attested/2026-08-14-ebf9b6bb201c3b1e07e917af66fed91efc61741c2f66f6ab0d609af963007fd6
+2026-09-23T04:56:36.1506499Z  * [new branch]        attested/2026-08-15-ac01a361fb2e4ef75e6b4320dd5c0c4a8dc777eb69717d0f3ef3c9abd24d7f22 -> origin/attested/2026-08-15-ac01a361fb2e4ef75e6b4320dd5c0c4a8dc777eb69717d0f3ef3c9abd24d7f22
+2026-09-23T04:56:36.1507938Z  * [new branch]        axiom-forecasts-poc     -> origin/axiom-forecasts-poc
+2026-09-23T04:56:36.1508554Z  * [new branch]        challenge-lane-v2       -> origin/challenge-lane-v2
+2026-09-23T04:56:36.1509285Z  * [new branch]        chore/receipt-0.6.0     -> origin/chore/receipt-0.6.0
+2026-09-23T04:56:36.1509923Z  * [new branch]        claude/sweet-germain-f31510 -> origin/claude/sweet-germain-f31510
+2026-09-23T04:56:36.1510573Z  * [new branch]        codex-salvage/fix-208   -> origin/codex-salvage/fix-208
+2026-09-23T04:56:36.1511201Z  * [new branch]        codex-salvage/fix-208-r3 -> origin/codex-salvage/fix-208-r3
+2026-09-23T04:56:36.1511854Z  * [new branch]        codex-salvage/fix-209   -> origin/codex-salvage/fix-209
+2026-09-23T04:56:36.1512537Z  * [new branch]        codex-salvage/gemini-backend -> origin/codex-salvage/gemini-backend
+2026-09-23T04:56:36.1512978Z  * [new branch]        codex-salvage/policy-chain -> origin/codex-salvage/policy-chain
+2026-09-23T04:56:36.1513400Z  * [new branch]        codex-salvage/register  -> origin/codex-salvage/register
+2026-09-23T04:56:36.1513798Z  * [new branch]        codex-salvage/review-208 -> origin/codex-salvage/review-208
+2026-09-23T04:56:36.1514180Z  * [new branch]        codex-salvage/review-209 -> origin/codex-salvage/review-209
+2026-09-23T04:56:36.1514753Z  * [new branch]        docket-codex-gpt-5-6    -> origin/docket-codex-gpt-5-6
+2026-09-23T04:56:36.1515207Z  * [new branch]        eci-q3-reseed           -> origin/eci-q3-reseed
+2026-09-23T04:56:36.1515610Z  * [new branch]        feat/a19-registrable-adapter -> origin/feat/a19-registrable-adapter
+2026-09-23T04:56:36.1516084Z  * [new branch]        feat/accountability-wave-gh-bw -> origin/feat/accountability-wave-gh-bw
+2026-09-23T04:56:36.1516588Z  * [new branch]        feat/attested-generation-lane -> origin/feat/attested-generation-lane
+2026-09-23T04:56:36.1517034Z  * [new branch]        feat/awaiting-forecast-lane -> origin/feat/awaiting-forecast-lane
+2026-09-23T04:56:36.1517461Z  * [new branch]        feat/bill-pairs-wave2   -> origin/feat/bill-pairs-wave2
+2026-09-23T04:56:36.1517867Z  * [new branch]        feat/bill-pipeline-e2e  -> origin/feat/bill-pipeline-e2e
+2026-09-23T04:56:36.1518274Z  * [new branch]        feat/bills-full-coverage -> origin/feat/bills-full-coverage
+2026-09-23T04:56:36.1518968Z  * [new branch]        feat/bls-api-registrable -> origin/feat/bls-api-registrable
+2026-09-23T04:56:36.1519544Z  * [new branch]        feat/bls-real-earnings  -> origin/feat/bls-real-earnings
+2026-09-23T04:56:36.1520013Z  * [new branch]        feat/bounded-resolve-by-targets -> origin/feat/bounded-resolve-by-targets
+2026-09-23T04:56:36.1520569Z  * [new branch]        feat/challenge-public-surface -> origin/feat/challenge-public-surface
+2026-09-23T04:56:36.1521152Z  * [new branch]        feat/conditional-policy-chain-rubric -> origin/feat/conditional-policy-chain-rubric
+2026-09-23T04:56:36.1521672Z  * [new branch]        feat/crp-fresh-pair     -> origin/feat/crp-fresh-pair
+2026-09-23T04:56:36.1522089Z  * [new branch]        feat/crp-pair-live-surface -> origin/feat/crp-pair-live-surface
+2026-09-23T04:56:36.1522618Z  * [new branch]        feat/executor-gate      -> origin/feat/executor-gate
+2026-09-23T04:56:36.1522993Z  * [new branch]        feat/gemini-cli-backend -> origin/feat/gemini-cli-backend
+2026-09-23T04:56:36.1523359Z  * [new branch]        feat/history-floor      -> origin/feat/history-floor
+2026-09-23T04:56:36.1523716Z  * [new branch]        feat/hr1021-metric-hints -> origin/feat/hr1021-metric-hints
+2026-09-23T04:56:36.1524096Z  * [new branch]        feat/ingestion-wave-1   -> origin/feat/ingestion-wave-1
+2026-09-23T04:56:36.1524496Z  * [new branch]        feat/mapper-catalog-land -> origin/feat/mapper-catalog-land
+2026-09-23T04:56:36.1524962Z  * [new branch]        feat/ndaa-conditional-dod-pair -> origin/feat/ndaa-conditional-dod-pair
+2026-09-23T04:56:36.1525402Z  * [new branch]        feat/resolution-status  -> origin/feat/resolution-status
+2026-09-23T04:56:36.1525912Z  * [new branch]        feat/retry-docket-authenticated-anchors -> origin/feat/retry-docket-authenticated-anchors
+2026-09-23T04:56:36.1526432Z  * [new branch]        feat/roll-retry-lane    -> origin/feat/roll-retry-lane
+2026-09-23T04:56:36.1526850Z  * [new branch]        feat/s3596-actc-pair-link -> origin/feat/s3596-actc-pair-link
+2026-09-23T04:56:36.1527290Z  * [new branch]        feat/s3596-analysis-20260922 -> origin/feat/s3596-analysis-20260922
+2026-09-23T04:56:36.1527720Z  * [new branch]        feat/s3596-spm-pair-link -> origin/feat/s3596-spm-pair-link
+2026-09-23T04:56:36.1528156Z  * [new branch]        feat/sba-pdf-custody-family -> origin/feat/sba-pdf-custody-family
+2026-09-23T04:56:36.1528994Z  * [new branch]        feat/sba-series-admission -> origin/feat/sba-series-admission
+2026-09-23T04:56:36.1529752Z  * [new branch]        feat/series-ingestion-wave1 -> origin/feat/series-ingestion-wave1
+2026-09-23T04:56:36.1530702Z  * [new branch]        feat/tool-evidence-native-binding-at-generation -> origin/feat/tool-evidence-native-binding-at-generation
+2026-09-23T04:56:36.1531473Z  * [new branch]        feat/waveb-bea-ita      -> origin/feat/waveb-bea-ita
+2026-09-23T04:56:36.1531993Z  * [new branch]        feat/waveb-eia-flare    -> origin/feat/waveb-eia-flare
+2026-09-23T04:56:36.1532887Z  * [new branch]        feat/waveb-qcew-annual  -> origin/feat/waveb-qcew-annual
+2026-09-23T04:56:36.1533576Z  * [new branch]        feat/waveb-usaspending  -> origin/feat/waveb-usaspending
+2026-09-23T04:56:36.1534333Z  * [new branch]        feat/witness-registered-windows -> origin/feat/witness-registered-windows
+2026-09-23T04:56:36.1535088Z  * [new branch]        fix/a19-registered-scale -> origin/fix/a19-registered-scale
+2026-09-23T04:56:36.1535773Z  * [new branch]        fix/actc-strategy-custody -> origin/fix/actc-strategy-custody
+2026-09-23T04:56:36.1536468Z  * [new branch]        fix/annual-id-enumeration -> origin/fix/annual-id-enumeration
+2026-09-23T04:56:36.1537248Z  * [new branch]        fix/append-regenerates-catalog -> origin/fix/append-regenerates-catalog
+2026-09-23T04:56:36.1537992Z  * [new branch]        fix/awaiting-forecast-lane -> origin/fix/awaiting-forecast-lane
+2026-09-23T04:56:36.1538838Z  * [new branch]        fix/bill-page-honest-states -> origin/fix/bill-page-honest-states
+2026-09-23T04:56:36.1539736Z  * [new branch]        fix/bounded-interregnum-history -> origin/fix/bounded-interregnum-history
+2026-09-23T04:56:36.1540630Z  * [new branch]        fix/calibration-normalized-mean -> origin/fix/calibration-normalized-mean
+2026-09-23T04:56:36.1541487Z  * [new branch]        fix/chronicle-ledger-dag-20260905 -> origin/fix/chronicle-ledger-dag-20260905
+2026-09-23T04:56:36.1542250Z  * [new branch]        fix/ci-agent-sandbox-userns -> origin/fix/ci-agent-sandbox-userns
+2026-09-23T04:56:36.1543012Z  * [new branch]        fix/contract-full-machine-checks -> origin/fix/contract-full-machine-checks
+2026-09-23T04:56:36.1543888Z  * [new branch]        fix/contract-machine-checked-phrasings -> origin/fix/contract-machine-checked-phrasings
+2026-09-23T04:56:36.1544814Z  * [new branch]        fix/docket-calendar-resolution-date -> origin/fix/docket-calendar-resolution-date
+2026-09-23T04:56:36.1545714Z  * [new branch]        fix/errmsg-custody      -> origin/fix/errmsg-custody
+2026-09-23T04:56:36.1546279Z  * [new branch]        fix/errmsg-site         -> origin/fix/errmsg-site
+2026-09-23T04:56:36.1546856Z  * [new branch]        fix/errmsg-validators   -> origin/fix/errmsg-validators
+2026-09-23T04:56:36.1547576Z  * [new branch]        fix/evidence-envelope-secret-scan -> origin/fix/evidence-envelope-secret-scan
+2026-09-23T04:56:36.1548399Z  * [new branch]        fix/frozen-registry-duplicates -> origin/fix/frozen-registry-duplicates
+2026-09-23T04:56:36.1549398Z  * [new branch]        fix/full-prompt-embeds-cell-contract -> origin/fix/full-prompt-embeds-cell-contract
+2026-09-23T04:56:36.1550365Z  * [new branch]        fix/judges-strategy-normalized-aggregates -> origin/fix/judges-strategy-normalized-aggregates
+2026-09-23T04:56:36.1551543Z  * [new branch]        fix/ledger-chronicle-migration -> origin/fix/ledger-chronicle-migration
+2026-09-23T04:56:36.1552609Z  * [new branch]        fix/ledger-tsa-signer-rotation -> origin/fix/ledger-tsa-signer-rotation
+2026-09-23T04:56:36.1553365Z  * [new branch]        fix/legible-failures    -> origin/fix/legible-failures
+2026-09-23T04:56:36.1554099Z  * [new branch]        fix/ndaa-pair-country-extras -> origin/fix/ndaa-pair-country-extras
+2026-09-23T04:56:36.1555003Z  * [new branch]        fix/normalizer-refuses-with-diagnostics -> origin/fix/normalizer-refuses-with-diagnostics
+2026-09-23T04:56:36.1555929Z  * [new branch]        fix/ons-pair-expiry-ratchet -> origin/fix/ons-pair-expiry-ratchet
+2026-09-23T04:56:36.1556854Z  * [new branch]        fix/orphan-grace-2026-07-31-seeds -> origin/fix/orphan-grace-2026-07-31-seeds
+2026-09-23T04:56:36.1557573Z  * [new branch]        fix/pe-minwage-certified -> origin/fix/pe-minwage-certified
+2026-09-23T04:56:36.1558330Z  * [new branch]        fix/pin-ledger-merge-topology -> origin/fix/pin-ledger-merge-topology
+2026-09-23T04:56:36.1559312Z  * [new branch]        fix/prepush-guard-noop-merge -> origin/fix/prepush-guard-noop-merge
+2026-09-23T04:56:36.1560066Z  * [new branch]        fix/prepush-own-contribution -> origin/fix/prepush-own-contribution
+2026-09-23T04:56:36.1561189Z  * [new branch]        fix/preserve-batch-on-gate-failure -> origin/fix/preserve-batch-on-gate-failure
+2026-09-23T04:56:36.1562233Z  * [new branch]        fix/private-source-screen-projection -> origin/fix/private-source-screen-projection
+2026-09-23T04:56:36.1563224Z  * [new branch]        fix/prompt-unit-echoes-registration -> origin/fix/prompt-unit-echoes-registration
+2026-09-23T04:56:36.1564154Z  * [new branch]        fix/provenance-message-followup -> origin/fix/provenance-message-followup
+2026-09-23T04:56:36.1565168Z  * [new branch]        fix/records-provenance-merge-false-positive -> origin/fix/records-provenance-merge-false-positive
+2026-09-23T04:56:36.1566288Z  * [new branch]        fix/registered-query-history-instruction -> origin/fix/registered-query-history-instruction
+2026-09-23T04:56:36.1567338Z  * [new branch]        fix/remit-link-and-quarter-anchors -> origin/fix/remit-link-and-quarter-anchors
+2026-09-23T04:56:36.1568472Z  * [new branch]        fix/resolver-intl-routing-and-robustness -> origin/fix/resolver-intl-routing-and-robustness
+2026-09-23T04:56:36.1569542Z  * [new branch]        fix/roll-skips-expired-ids -> origin/fix/roll-skips-expired-ids
+2026-09-23T04:56:36.1570253Z  * [new branch]        fix/sba-announcement-url -> origin/fix/sba-announcement-url
+2026-09-23T04:56:36.1571056Z  * [new branch]        fix/spm-forecast-replay-consistency -> origin/fix/spm-forecast-replay-consistency
+2026-09-23T04:56:36.1571888Z  * [new branch]        fix/stale-resolution-report -> origin/fix/stale-resolution-report
+2026-09-23T04:56:36.1572693Z  * [new branch]        fix/state-adaptive-pending-card -> origin/fix/state-adaptive-pending-card
+2026-09-23T04:56:36.1573718Z  * [new branch]        fix/strategy-selection-registration-projection -> origin/fix/strategy-selection-registration-projection
+2026-09-23T04:56:36.1575318Z  * [new branch]        fix/tool-evidence-jsonl-newline-splitting -> origin/fix/tool-evidence-jsonl-newline-splitting
+2026-09-23T04:56:36.1576190Z  * [new branch]        hack/artifact-enrichment -> origin/hack/artifact-enrichment
+2026-09-23T04:56:36.1576841Z  * [new branch]        hack/challenge-adapter  -> origin/hack/challenge-adapter
+2026-09-23T04:56:36.1577510Z  * [new branch]        hack/challenge-catalog-wire -> origin/hack/challenge-catalog-wire
+2026-09-23T04:56:36.1578260Z  * [new branch]        hack/crp-conditional-machinery -> origin/hack/crp-conditional-machinery
+2026-09-23T04:56:36.1579121Z  * [new branch]        hack/crp-docket-promotion -> origin/hack/crp-docket-promotion
+2026-09-23T04:56:36.1579831Z  * [new branch]        hack/demo-layer-preservation -> origin/hack/demo-layer-preservation
+2026-09-23T04:56:36.1580625Z  * [new branch]        hack/expired-unforecast-2026-07-22 -> origin/hack/expired-unforecast-2026-07-22
+2026-09-23T04:56:36.1581090Z  * [new branch]        hack/frontier-artifact  -> origin/hack/frontier-artifact
+2026-09-23T04:56:36.1581499Z  * [new branch]        hack/keller-copy-components -> origin/hack/keller-copy-components
+2026-09-23T04:56:36.1581939Z  * [new branch]        hack/keller-u6-submission -> origin/hack/keller-u6-submission
+2026-09-23T04:56:36.1582377Z  * [new branch]        hack/keller-verifier-windows -> origin/hack/keller-verifier-windows
+2026-09-23T04:56:36.1582788Z  * [new branch]        hack/pavel-bills        -> origin/hack/pavel-bills
+2026-09-23T04:56:36.1583189Z  * [new branch]        hack/pavel-bills-hardening -> origin/hack/pavel-bills-hardening
+2026-09-23T04:56:36.1583617Z  * [new branch]        hack/pending-certification -> origin/hack/pending-certification
+2026-09-23T04:56:36.1584195Z  * [new branch]        hack/provenance-first-parent -> origin/hack/provenance-first-parent
+2026-09-23T04:56:36.1584934Z  * [new branch]        hack/refused-conditionals -> origin/hack/refused-conditionals
+2026-09-23T04:56:36.1585603Z  * [new branch]        hack/revert-95          -> origin/hack/revert-95
+2026-09-23T04:56:36.1586119Z  * [new branch]        hack/s3596-conditional-actc -> origin/hack/s3596-conditional-actc
+2026-09-23T04:56:36.1586721Z  * [new branch]        hack/s3596-conditional-final -> origin/hack/s3596-conditional-final
+2026-09-23T04:56:36.1587172Z  * [new branch]        hack/s3596-conditional-pairs -> origin/hack/s3596-conditional-pairs
+2026-09-23T04:56:36.1587577Z  * [new branch]        hack/s3596-pair         -> origin/hack/s3596-pair
+2026-09-23T04:56:36.1587975Z  * [new branch]        hack/single-arm-conditionals -> origin/hack/single-arm-conditionals
+2026-09-23T04:56:36.1588369Z  * [new branch]        hack/sol-mapper         -> origin/hack/sol-mapper
+2026-09-23T04:56:36.1588918Z  * [new branch]        hack/stress-bills       -> origin/hack/stress-bills
+2026-09-23T04:56:36.1589327Z  * [new branch]        hack/trimmer-compute-row -> origin/hack/trimmer-compute-row
+2026-09-23T04:56:36.1589862Z  * [new branch]        hack/trimmer-policyengine -> origin/hack/trimmer-policyengine
+2026-09-23T04:56:36.1590329Z  * [new branch]        harden/pin-no-replace-objects -> origin/harden/pin-no-replace-objects
+2026-09-23T04:56:36.1590874Z  * [new branch]        hotfix/site-adapter-union -> origin/hotfix/site-adapter-union
+2026-09-23T04:56:36.1591367Z  * [new branch]        jev-system-one-forecaster -> origin/jev-system-one-forecaster
+2026-09-23T04:56:36.1591784Z  * [new branch]        ledger-catalog-pin      -> origin/ledger-catalog-pin
+2026-09-23T04:56:36.1592237Z  * [new branch]        license-mit             -> origin/license-mit
+2026-09-23T04:56:36.1592568Z  * [new branch]        main                    -> origin/main
+2026-09-23T04:56:36.1592997Z  * [new branch]        mapper-catalog-v2       -> origin/mapper-catalog-v2
+2026-09-23T04:56:36.1593391Z  * [new branch]        perf/site-test-timeouts -> origin/perf/site-test-timeouts
+2026-09-23T04:56:36.1593855Z  * [new branch]        pilot/afa-bundle        -> origin/pilot/afa-bundle
+2026-09-23T04:56:36.1594333Z  * [new branch]        pilot/afa-revisions     -> origin/pilot/afa-revisions
+2026-09-23T04:56:36.1594848Z  * [new branch]        pilot/s3596-preregistration -> origin/pilot/s3596-preregistration
+2026-09-23T04:56:36.1595340Z  * [new branch]        pin/receipt-0.6.1       -> origin/pin/receipt-0.6.1
+2026-09-23T04:56:36.1595747Z  * [new branch]        promote/stress-substantive -> origin/promote/stress-substantive
+2026-09-23T04:56:36.1596385Z  * [new branch]        provenance-noop-merges-and-alarms -> origin/provenance-noop-merges-and-alarms
+2026-09-23T04:56:36.1596906Z  * [new branch]        receipt-051             -> origin/receipt-051
+2026-09-23T04:56:36.1597278Z  * [new branch]        thesis-app-20260905     -> origin/thesis-app-20260905
+2026-09-23T04:56:36.1597736Z  * [new branch]        thesis-core-20260904    -> origin/thesis-core-20260904
+2026-09-23T04:56:36.1598172Z  * [new branch]        thesis-gdm-education-20260907 -> origin/thesis-gdm-education-20260907
+2026-09-23T04:56:36.1598887Z  * [new branch]        thesis-gemini-app-20260907 -> origin/thesis-gemini-app-20260907
+2026-09-23T04:56:36.1599400Z  * [new branch]        tsa-anchors-v3          -> origin/tsa-anchors-v3
+2026-09-23T04:56:36.1599856Z  * [new branch]        worktree-pe-minwage-e2e -> origin/worktree-pe-minwage-e2e
+2026-09-23T04:56:36.1600305Z  * [new branch]        worktree-prompt-components -> origin/worktree-prompt-components
+2026-09-23T04:56:36.1600743Z  * [new tag]           v0.2.0                  -> v0.2.0
+2026-09-23T04:56:36.1601008Z  * [new tag]           v0.2.1                  -> v0.2.1
+2026-09-23T04:56:36.1601249Z  * [new tag]           v0.2.2                  -> v0.2.2
+2026-09-23T04:56:36.1601581Z  * [new tag]           v0.2.3                  -> v0.2.3
+2026-09-23T04:56:36.1601825Z  * [new tag]           v0.2.4                  -> v0.2.4
+2026-09-23T04:56:36.1603008Z [command]/usr/bin/git rev-parse --verify --quiet 69d9ae2e500e77460016b37effc4cb52c7683854^{object}
+2026-09-23T04:56:36.1603488Z 69d9ae2e500e77460016b37effc4cb52c7683854
+2026-09-23T04:56:36.1604168Z ##[endgroup]
+2026-09-23T04:56:36.1604650Z ##[group]Determining the checkout info
+2026-09-23T04:56:36.1604992Z ##[endgroup]
+2026-09-23T04:56:36.1605188Z [command]/usr/bin/git sparse-checkout disable
+2026-09-23T04:56:36.1622342Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-09-23T04:56:36.1655356Z ##[group]Checking out the ref
+2026-09-23T04:56:36.1658556Z [command]/usr/bin/git checkout --progress --force 69d9ae2e500e77460016b37effc4cb52c7683854
+2026-09-23T04:56:37.2014649Z Updating files:  27% (9345/33411)
+2026-09-23T04:56:37.2450615Z Updating files:  28% (9356/33411)
+2026-09-23T04:56:37.2911033Z Updating files:  29% (9690/33411)
+2026-09-23T04:56:37.3225241Z Updating files:  30% (10024/33411)
+2026-09-23T04:56:37.3709733Z Updating files:  31% (10358/33411)
+2026-09-23T04:56:37.4207348Z Updating files:  32% (10692/33411)
+2026-09-23T04:56:37.4696132Z Updating files:  33% (11026/33411)
+2026-09-23T04:56:37.5209979Z Updating files:  34% (11360/33411)
+2026-09-23T04:56:37.5733213Z Updating files:  35% (11694/33411)
+2026-09-23T04:56:37.6217473Z Updating files:  36% (12028/33411)
+2026-09-23T04:56:37.7696353Z Updating files:  37% (12363/33411)
+2026-09-23T04:56:37.8177528Z Updating files:  38% (12697/33411)
+2026-09-23T04:56:37.8706778Z Updating files:  39% (13031/33411)
+2026-09-23T04:56:38.0901301Z Updating files:  40% (13365/33411)
+2026-09-23T04:56:38.1036948Z Updating files:  41% (13699/33411)
+2026-09-23T04:56:38.1186481Z Updating files:  42% (14033/33411)
+2026-09-23T04:56:38.1539057Z Updating files:  43% (14367/33411)
+2026-09-23T04:56:38.1810510Z Updating files:  44% (14701/33411)
+2026-09-23T04:56:38.1989526Z Updating files:  45% (15035/33411)
+2026-09-23T04:56:38.2431027Z Updating files:  45% (15173/33411)
+2026-09-23T04:56:38.3098521Z Updating files:  46% (15370/33411)
+2026-09-23T04:56:38.4132374Z Updating files:  47% (15704/33411)
+2026-09-23T04:56:38.4709298Z Updating files:  48% (16038/33411)
+2026-09-23T04:56:38.5272833Z Updating files:  49% (16372/33411)
+2026-09-23T04:56:38.5608807Z Updating files:  50% (16706/33411)
+2026-09-23T04:56:38.6055848Z Updating files:  51% (17040/33411)
+2026-09-23T04:56:38.6328791Z Updating files:  52% (17374/33411)
+2026-09-23T04:56:38.7127432Z Updating files:  53% (17708/33411)
+2026-09-23T04:56:38.8792421Z Updating files:  54% (18042/33411)
+2026-09-23T04:56:38.9109876Z Updating files:  55% (18377/33411)
+2026-09-23T04:56:38.9237740Z Updating files:  56% (18711/33411)
+2026-09-23T04:56:38.9381287Z Updating files:  57% (19045/33411)
+2026-09-23T04:56:38.9590912Z Updating files:  58% (19379/33411)
+2026-09-23T04:56:38.9728613Z Updating files:  59% (19713/33411)
+2026-09-23T04:56:38.9865384Z Updating files:  60% (20047/33411)
+2026-09-23T04:56:39.0006246Z Updating files:  61% (20381/33411)
+2026-09-23T04:56:39.0215911Z Updating files:  62% (20715/33411)
+2026-09-23T04:56:39.0357470Z Updating files:  63% (21049/33411)
+2026-09-23T04:56:39.0501761Z Updating files:  64% (21384/33411)
+2026-09-23T04:56:39.0650811Z Updating files:  65% (21718/33411)
+2026-09-23T04:56:39.0888956Z Updating files:  66% (22052/33411)
+2026-09-23T04:56:39.1077184Z Updating files:  67% (22386/33411)
+2026-09-23T04:56:39.1241831Z Updating files:  68% (22720/33411)
+2026-09-23T04:56:39.1370488Z Updating files:  69% (23054/33411)
+2026-09-23T04:56:39.1503217Z Updating files:  70% (23388/33411)
+2026-09-23T04:56:39.1634453Z Updating files:  71% (23722/33411)
+2026-09-23T04:56:39.1757363Z Updating files:  72% (24056/33411)
+2026-09-23T04:56:39.1892818Z Updating files:  73% (24391/33411)
+2026-09-23T04:56:39.2081996Z Updating files:  74% (24725/33411)
+2026-09-23T04:56:39.2330034Z Updating files:  74% (24907/33411)
+2026-09-23T04:56:39.4087758Z Updating files:  75% (25059/33411)
+2026-09-23T04:56:39.6487060Z Updating files:  76% (25393/33411)
+2026-09-23T04:56:39.7339206Z Updating files:  77% (25727/33411)
+2026-09-23T04:56:39.7483324Z Updating files:  78% (26061/33411)
+2026-09-23T04:56:39.7611250Z Updating files:  79% (26395/33411)
+2026-09-23T04:56:39.7797993Z Updating files:  80% (26729/33411)
+2026-09-23T04:56:39.7928878Z Updating files:  81% (27063/33411)
+2026-09-23T04:56:39.8060613Z Updating files:  82% (27398/33411)
+2026-09-23T04:56:39.8252957Z Updating files:  83% (27732/33411)
+2026-09-23T04:56:39.9619192Z Updating files:  84% (28066/33411)
+2026-09-23T04:56:40.0446831Z Updating files:  85% (28400/33411)
+2026-09-23T04:56:40.0570982Z Updating files:  86% (28734/33411)
+2026-09-23T04:56:40.0707577Z Updating files:  87% (29068/33411)
+2026-09-23T04:56:40.0906566Z Updating files:  88% (29402/33411)
+2026-09-23T04:56:40.1575692Z Updating files:  89% (29736/33411)
+2026-09-23T04:56:40.2071226Z Updating files:  90% (30070/33411)
+2026-09-23T04:56:40.4623734Z Updating files:  90% (30161/33411)
+2026-09-23T04:56:40.6434277Z Updating files:  91% (30405/33411)
+2026-09-23T04:56:40.7346008Z Updating files:  92% (30739/33411)
+2026-09-23T04:56:40.8176995Z Updating files:  93% (31073/33411)
+2026-09-23T04:56:40.9482908Z Updating files:  94% (31407/33411)
+2026-09-23T04:56:41.0640586Z Updating files:  95% (31741/33411)
+2026-09-23T04:56:41.2151808Z Updating files:  96% (32075/33411)
+2026-09-23T04:56:41.4106852Z Updating files:  96% (32231/33411)
+2026-09-23T04:56:41.6048896Z Updating files:  97% (32409/33411)
+2026-09-23T04:56:41.6570690Z Updating files:  98% (32743/33411)
+2026-09-23T04:56:41.8306757Z Updating files:  99% (33077/33411)
+2026-09-23T04:56:41.8307055Z Updating files: 100% (33411/33411)
+2026-09-23T04:56:41.8307291Z Updating files: 100% (33411/33411), done.
+2026-09-23T04:56:41.8683196Z Note: switching to '69d9ae2e500e77460016b37effc4cb52c7683854'.
+2026-09-23T04:56:41.8683447Z 
+2026-09-23T04:56:41.8683615Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-09-23T04:56:41.8684007Z changes and commit them, and you can discard any commits you make in this
+2026-09-23T04:56:41.8684374Z state without impacting any branches by switching back to a branch.
+2026-09-23T04:56:41.8684587Z 
+2026-09-23T04:56:41.8684732Z If you want to create a new branch to retain commits you create, you may
+2026-09-23T04:56:41.8685314Z do so (now or later) by using -c with the switch command. Example:
+2026-09-23T04:56:41.8685513Z 
+2026-09-23T04:56:41.8685609Z   git switch -c <new-branch-name>
+2026-09-23T04:56:41.8685739Z 
+2026-09-23T04:56:41.8685841Z Or undo this operation with:
+2026-09-23T04:56:41.8685966Z 
+2026-09-23T04:56:41.8686042Z   git switch -
+2026-09-23T04:56:41.8686144Z 
+2026-09-23T04:56:41.8686312Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-09-23T04:56:41.8686548Z 
+2026-09-23T04:56:41.8686753Z HEAD is now at 69d9ae2e Scan validated evidence bodies without base64 false positives (#284)
+2026-09-23T04:56:41.8789581Z ##[endgroup]
+2026-09-23T04:56:41.8839217Z [command]/usr/bin/git log -1 --format=%H
+2026-09-23T04:56:41.8864682Z 69d9ae2e500e77460016b37effc4cb52c7683854
+2026-09-23T04:56:41.8875547Z ##[group]Removing auth
+2026-09-23T04:56:41.8875894Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-23T04:56:41.8903821Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-23T04:56:41.9109575Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-23T04:56:41.9131758Z http.https://github.com/.extraheader
+2026-09-23T04:56:41.9137728Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-09-23T04:56:41.9339306Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-23T04:56:41.9544119Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-23T04:56:41.9580939Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-23T04:56:41.9790773Z ##[endgroup]
+2026-09-23T04:56:42.0113848Z ##[group]Run oven-sh/setup-bun@v2
+2026-09-23T04:56:42.0114073Z with:
+2026-09-23T04:56:42.0114251Z   no-cache: false
+2026-09-23T04:56:42.0116454Z   token: ***
+2026-09-23T04:56:42.0116624Z env:
+2026-09-23T04:56:42.0116804Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:42.0117068Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:42.0117326Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:42.0118039Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:42.0118224Z ##[endgroup]
+2026-09-23T04:56:42.5715253Z Downloading a new version of Bun: https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-x64.zip
+2026-09-23T04:56:42.9838372Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/bd77290e-9840-47e3-a1e9-9d6d6b077cc0.zip
+2026-09-23T04:56:43.5649169Z [command]/home/runner/.bun/bin/bun --revision
+2026-09-23T04:56:43.5689700Z 1.4.2+744846f84
+2026-09-23T04:56:43.5871406Z ##[group]Run actions/download-artifact@v8
+2026-09-23T04:56:43.5871661Z with:
+2026-09-23T04:56:43.5871849Z   name: strategy-selection-35820167972-1
+2026-09-23T04:56:43.5872086Z   path: /tmp/trusted-selection
+2026-09-23T04:56:43.5872302Z   merge-multiple: false
+2026-09-23T04:56:43.5872507Z   repository: ThesisInstitute/thesis
+2026-09-23T04:56:43.5872723Z   run-id: 35820167972
+2026-09-23T04:56:43.5872905Z   skip-decompress: false
+2026-09-23T04:56:43.5873096Z   digest-mismatch: error
+2026-09-23T04:56:43.5873272Z env:
+2026-09-23T04:56:43.5873447Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:43.5873701Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:43.5873967Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:43.5874733Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:43.5874912Z ##[endgroup]
+2026-09-23T04:56:43.6940170Z Downloading single artifact
+2026-09-23T04:56:43.9064561Z Preparing to download the following artifacts:
+2026-09-23T04:56:43.9065394Z - strategy-selection-35820167972-1 (ID: 10733211291, Size: 3365, Expected Digest: sha256:69cb7270d998069f6ee674af8c5ef030e1ba7146d0076ea4f46fe8a09198f408)
+2026-09-23T04:56:44.3259198Z Redirecting to blob download url: https://productionresultssa10.blob.core.windows.net/actions-results/e46b78d5-aa26-4697-b312-709062318e56/workflow-job-run-619ac1ce-0c2f-5eab-9e61-d604f2d36817/artifacts/cdf6d8e15f964904e7f111722c46d9b4079c90c77aa7da2351462c0ae12969dd.zip
+2026-09-23T04:56:44.3260166Z Starting download of artifact to: /tmp/trusted-selection
+2026-09-23T04:56:44.5447796Z (node:2136) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-09-23T04:56:44.5449201Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-09-23T04:56:44.5476563Z SHA256 digest of downloaded artifact is 69cb7270d998069f6ee674af8c5ef030e1ba7146d0076ea4f46fe8a09198f408
+2026-09-23T04:56:44.5477306Z Artifact download completed successfully.
+2026-09-23T04:56:44.5477708Z Total of 1 artifact(s) downloaded
+2026-09-23T04:56:44.5481320Z Download artifact has finished successfully
+2026-09-23T04:56:44.5622298Z ##[group]Run set -euo pipefail
+2026-09-23T04:56:44.5622710Z [36;1mset -euo pipefail[0m
+2026-09-23T04:56:44.5623005Z [36;1mpython3 - <<'PY' > /tmp/selection-ledger-env[0m
+2026-09-23T04:56:44.5623370Z [36;1mimport json[0m
+2026-09-23T04:56:44.5623750Z [36;1mselection = json.load(open("/tmp/trusted-selection/strategy-targets.json"))[0m
+2026-09-23T04:56:44.5624198Z [36;1mevidence = selection["ledgerEvidence"][0m
+2026-09-23T04:56:44.5624677Z [36;1mfor key in ("repository", "branch", "path", "repositoryCommit", "blobSha"):[0m
+2026-09-23T04:56:44.5625088Z [36;1m    print(f"{key}={evidence[key]}")[0m
+2026-09-23T04:56:44.5625316Z [36;1mPY[0m
+2026-09-23T04:56:44.5625499Z [36;1msource /tmp/selection-ledger-env[0m
+2026-09-23T04:56:44.5625736Z [36;1mgh_fetch() {[0m
+2026-09-23T04:56:44.5626003Z [36;1m  # Truncate the output file on every attempt: a request that dies[0m
+2026-09-23T04:56:44.5626390Z [36;1m  # mid-body must never leave partial bytes for the next attempt[0m
+2026-09-23T04:56:44.5626780Z [36;1m  # to append to (the content-hash gate caught exactly that).[0m
+2026-09-23T04:56:44.5627062Z [36;1m  local out=$1[0m
+2026-09-23T04:56:44.5627247Z [36;1m  shift[0m
+2026-09-23T04:56:44.5627421Z [36;1m  local attempt[0m
+2026-09-23T04:56:44.5627625Z [36;1m  for attempt in 1 2 3 4 5; do[0m
+2026-09-23T04:56:44.5627855Z [36;1m    if "$@" > "$out"; then return 0; fi[0m
+2026-09-23T04:56:44.5628149Z [36;1m    echo "transient gh failure (attempt $attempt): $*" >&2[0m
+2026-09-23T04:56:44.5628445Z [36;1m    sleep 3[0m
+2026-09-23T04:56:44.5628795Z [36;1m  done[0m
+2026-09-23T04:56:44.5629010Z [36;1m  return 1[0m
+2026-09-23T04:56:44.5629198Z [36;1m}[0m
+2026-09-23T04:56:44.5629541Z [36;1mgh_fetch /tmp/gh-scalar gh api "repos/$repository/contents/$path?ref=$repositoryCommit" --jq .sha[0m
+2026-09-23T04:56:44.5629949Z [36;1mtest "$(cat /tmp/gh-scalar)" = "$blobSha"[0m
+2026-09-23T04:56:44.5630229Z [36;1mgh_fetch /tmp/pinned-ledger.jsonl \[0m
+2026-09-23T04:56:44.5630535Z [36;1m  gh api -H "Accept: application/vnd.github.raw+json" \[0m
+2026-09-23T04:56:44.5630908Z [36;1m  "repos/$repository/contents/$path?ref=$repositoryCommit"[0m
+2026-09-23T04:56:44.5631316Z [36;1mgh_fetch /tmp/gh-scalar gh api "repos/$repository/commits/$branch" --jq .sha[0m
+2026-09-23T04:56:44.5631661Z [36;1mlatest_sha=$(cat /tmp/gh-scalar)[0m
+2026-09-23T04:56:44.5631911Z [36;1mgh_fetch /tmp/latest-ledger.jsonl \[0m
+2026-09-23T04:56:44.5632212Z [36;1m  gh api -H "Accept: application/vnd.github.raw+json" \[0m
+2026-09-23T04:56:44.5632531Z [36;1m  "repos/$repository/contents/$path?ref=$latest_sha"[0m
+2026-09-23T04:56:44.6975803Z shell: /usr/bin/bash -e {0}
+2026-09-23T04:56:44.6976051Z env:
+2026-09-23T04:56:44.6976263Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:44.6976539Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:44.6977028Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:44.6977849Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:44.6980327Z   GH_TOKEN: ***
+2026-09-23T04:56:44.6980521Z ##[endgroup]
+2026-09-23T04:56:48.9787752Z ##[group]Run set -euo pipefail
+2026-09-23T04:56:48.9788034Z [36;1mset -euo pipefail[0m
+2026-09-23T04:56:48.9788305Z [36;1mtest "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"[0m
+2026-09-23T04:56:48.9789132Z [36;1mtest "$(python3 -c "import json;print(json.load(open('/tmp/trusted-selection/strategy-targets.json'))['selectionSetHash'])")" = "$EXPECTED_SET_HASH"[0m
+2026-09-23T04:56:48.9789680Z [36;1mpython3 scripts/strategy_targets.py verify \[0m
+2026-09-23T04:56:48.9790020Z [36;1m  --selection /tmp/trusted-selection/strategy-targets.json \[0m
+2026-09-23T04:56:48.9790351Z [36;1m  --ledger-jsonl /tmp/pinned-ledger.jsonl[0m
+2026-09-23T04:56:48.9790644Z [36;1mpython3 scripts/strategy_targets.py ensure-open \[0m
+2026-09-23T04:56:48.9790970Z [36;1m  --selection /tmp/trusted-selection/strategy-targets.json \[0m
+2026-09-23T04:56:48.9791295Z [36;1m  --ledger-jsonl /tmp/latest-ledger.jsonl \[0m
+2026-09-23T04:56:48.9791630Z [36;1m  --checked-at-utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"[0m
+2026-09-23T04:56:48.9847953Z shell: /usr/bin/bash -e {0}
+2026-09-23T04:56:48.9848166Z env:
+2026-09-23T04:56:48.9848367Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:48.9848759Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:48.9849028Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:48.9849816Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:48.9850124Z   EXPECTED_SET_HASH: dcc92b43b04cd770d2094e5b218121555931ad406a7eae97bf236705990d82f6
+2026-09-23T04:56:48.9850520Z   EXPECTED_SOURCE_SHA: 69d9ae2e500e77460016b37effc4cb52c7683854
+2026-09-23T04:56:48.9850792Z ##[endgroup]
+2026-09-23T04:56:56.5807776Z strategy selection verified
+2026-09-23T04:56:56.6590073Z selected strategy targets remain open
+2026-09-23T04:56:56.6701312Z ##[group]Run set -euo pipefail
+2026-09-23T04:56:56.6701594Z [36;1mset -euo pipefail[0m
+2026-09-23T04:56:56.6701847Z [36;1mpython3 - <<'PY' >> "$GITHUB_OUTPUT"[0m
+2026-09-23T04:56:56.6702086Z [36;1mimport json[0m
+2026-09-23T04:56:56.6702266Z [36;1mimport os[0m
+2026-09-23T04:56:56.6702439Z [36;1m[0m
+2026-09-23T04:56:56.6702719Z [36;1mselection = json.load(open("/tmp/trusted-selection/strategy-targets.json"))[0m
+2026-09-23T04:56:56.6703077Z [36;1mworkflow = selection["workflow"][0m
+2026-09-23T04:56:56.6703327Z [36;1mrun_id = workflow.get("runId")[0m
+2026-09-23T04:56:56.6703580Z [36;1mrun_attempt = workflow.get("runAttempt")[0m
+2026-09-23T04:56:56.6703825Z [36;1mif ([0m
+2026-09-23T04:56:56.6704081Z [36;1m    workflow.get("repository") != os.environ["EXPECTED_REPOSITORY"][0m
+2026-09-23T04:56:56.6704389Z [36;1m    or type(run_id) is not int[0m
+2026-09-23T04:56:56.6704607Z [36;1m    or run_id < 1[0m
+2026-09-23T04:56:56.6704870Z [36;1m    or str(run_id) != os.environ["EXPECTED_RUN_ID"][0m
+2026-09-23T04:56:56.6705141Z [36;1m    or type(run_attempt) is not int[0m
+2026-09-23T04:56:56.6705372Z [36;1m    or run_attempt < 1[0m
+2026-09-23T04:56:56.6705578Z [36;1m):[0m
+2026-09-23T04:56:56.6705845Z [36;1m    raise SystemExit("selection belongs to a different workflow invocation")[0m
+2026-09-23T04:56:56.6706173Z [36;1mprint(f"run_id={run_id}")[0m
+2026-09-23T04:56:56.6706409Z [36;1mprint(f"run_attempt={run_attempt}")[0m
+2026-09-23T04:56:56.6706731Z [36;1mprint(f"publication_artifact=strategy-docket-{run_id}-{run_attempt}")[0m
+2026-09-23T04:56:56.6707037Z [36;1mPY[0m
+2026-09-23T04:56:56.6762731Z shell: /usr/bin/bash -e {0}
+2026-09-23T04:56:56.6762951Z env:
+2026-09-23T04:56:56.6763145Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:56.6763416Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:56.6763677Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:56.6764601Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:56.6764834Z   EXPECTED_REPOSITORY: ThesisInstitute/thesis
+2026-09-23T04:56:56.6765080Z   EXPECTED_RUN_ID: 35820167972
+2026-09-23T04:56:56.6765606Z ##[endgroup]
+2026-09-23T04:56:56.7247973Z Prepare all required actions
+2026-09-23T04:56:56.7317834Z ##[group]Run ./.github/actions/enable-agent-sandbox
+2026-09-23T04:56:56.7318105Z env:
+2026-09-23T04:56:56.7318296Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:56.7318547Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:56.7319018Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:56.7319757Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:56.7319945Z ##[endgroup]
+2026-09-23T04:56:56.7363181Z ##[start-action display=Probe and enable unprivileged user namespaces;id=__self.__run]
+2026-09-23T04:56:56.7381974Z ##[group]Run set -euo pipefail
+2026-09-23T04:56:56.7382236Z [36;1mset -euo pipefail[0m
+2026-09-23T04:56:56.7382440Z [36;1mprobe() {[0m
+2026-09-23T04:56:56.7382713Z [36;1m  unshare --user --map-root-user true 2>/dev/null || return 1[0m
+2026-09-23T04:56:56.7383086Z [36;1m  # When the runner ships a bubblewrap binary, exercise the[0m
+2026-09-23T04:56:56.7383454Z [36;1m  # real thing too — AppArmor decisions can be[0m
+2026-09-23T04:56:56.7383780Z [36;1m  # executable-specific, so unshare alone can false-pass.[0m
+2026-09-23T04:56:56.7384092Z [36;1m  if command -v bwrap >/dev/null 2>&1; then[0m
+2026-09-23T04:56:56.7384430Z [36;1m    bwrap --unshare-user --dev-bind / / true 2>/dev/null || return 1[0m
+2026-09-23T04:56:56.7384730Z [36;1m  fi[0m
+2026-09-23T04:56:56.7384901Z [36;1m  return 0[0m
+2026-09-23T04:56:56.7385088Z [36;1m}[0m
+2026-09-23T04:56:56.7385328Z [36;1mif probe; then echo "agent sandbox namespaces: ok"; exit 0; fi[0m
+2026-09-23T04:56:56.7385706Z [36;1msudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true[0m
+2026-09-23T04:56:56.7386087Z [36;1msudo sysctl -w kernel.unprivileged_userns_clone=1 || true[0m
+2026-09-23T04:56:56.7386466Z [36;1mif probe; then echo "agent sandbox namespaces: enabled via sysctl"; exit 0; fi[0m
+2026-09-23T04:56:56.7386912Z [36;1mecho "unprivileged user namespaces unavailable; the agent sandbox cannot run" >&2[0m
+2026-09-23T04:56:56.7387263Z [36;1mexit 1[0m
+2026-09-23T04:56:56.7440912Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-23T04:56:56.7441203Z env:
+2026-09-23T04:56:56.7441407Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:56.7441662Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:56.7441918Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:56.7442699Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:56.7442898Z ##[endgroup]
+2026-09-23T04:56:56.8664478Z kernel.apparmor_restrict_unprivileged_userns = 0
+2026-09-23T04:56:56.8722100Z kernel.unprivileged_userns_clone = 1
+2026-09-23T04:56:56.8743766Z agent sandbox namespaces: enabled via sysctl
+2026-09-23T04:56:56.8771262Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=140]
+2026-09-23T04:56:56.8799264Z ##[group]Run bun add -g @openai/codex@0.144.0
+2026-09-23T04:56:56.8799578Z [36;1mbun add -g @openai/codex@0.144.0[0m
+2026-09-23T04:56:56.8853412Z shell: /usr/bin/bash -e {0}
+2026-09-23T04:56:56.8853628Z env:
+2026-09-23T04:56:56.8853830Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:56.8854097Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:56.8854368Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:56.8855144Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:56.8855343Z ##[endgroup]
+2026-09-23T04:56:56.8951089Z bun add v1.4.2 (744846f84)
+2026-09-23T04:56:56.8959815Z Resolving dependencies
+2026-09-23T04:56:58.3125434Z Resolved, downloaded and extracted [5]
+2026-09-23T04:56:58.3133828Z Saved lockfile
+2026-09-23T04:56:58.3616737Z 
+2026-09-23T04:56:58.3617742Z installed @openai/codex@0.144.0 with binaries:
+2026-09-23T04:56:58.3618152Z  - codex
+2026-09-23T04:56:58.3618294Z 
+2026-09-23T04:56:58.3618400Z 2 packages installed [1467.00ms]
+2026-09-23T04:56:58.3737975Z ##[group]Run printenv OPENAI_API_KEY | codex login --with-api-key
+2026-09-23T04:56:58.3738369Z [36;1mprintenv OPENAI_API_KEY | codex login --with-api-key[0m
+2026-09-23T04:56:58.3794202Z shell: /usr/bin/bash -e {0}
+2026-09-23T04:56:58.3794431Z env:
+2026-09-23T04:56:58.3794628Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:56:58.3794893Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:56:58.3795155Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:56:58.3795934Z   OPENAI_API_KEY: ***
+2026-09-23T04:56:58.3796120Z ##[endgroup]
+2026-09-23T04:57:00.3386455Z Reading API key from stdin...
+2026-09-23T04:57:00.3409942Z Successfully logged in
+2026-09-23T04:57:00.3540781Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-09-23T04:57:00.3541806Z ##[group]Run astral-sh/setup-uv@v5
+2026-09-23T04:57:00.3542031Z with:
+2026-09-23T04:57:00.3544259Z   github-token: ***
+2026-09-23T04:57:00.3544455Z   enable-cache: auto
+2026-09-23T04:57:00.3544697Z   cache-dependency-glob: **/uv.lock
+**/requirements*.txt
+
+2026-09-23T04:57:00.3544982Z   prune-cache: true
+2026-09-23T04:57:00.3545179Z   ignore-nothing-to-cache: false
+2026-09-23T04:57:00.3545400Z   ignore-empty-workdir: false
+2026-09-23T04:57:00.3545599Z env:
+2026-09-23T04:57:00.3545789Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:57:00.3546039Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:57:00.3546325Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:57:00.3547020Z   OPENAI_API_KEY: ***
+2026-09-23T04:57:00.3547199Z ##[endgroup]
+2026-09-23T04:57:00.4899733Z (node:3457) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-09-23T04:57:00.4900321Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-09-23T04:57:00.8710976Z Downloading uv from "https://github.com/astral-sh/uv/releases/download/0.12.18/uv-x86_64-unknown-linux-gnu.tar.gz" ...
+2026-09-23T04:57:01.2308173Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/8e8aef66-603e-4754-b1a5-e0c29c53d010 -f /home/runner/work/_temp/9c153d1d-c716-40ff-a6fb-5560ad497f3a
+2026-09-23T04:57:01.7913914Z Added /home/runner/.local/bin to the path
+2026-09-23T04:57:01.7916660Z Added /opt/hostedtoolcache/uv/0.12.18/x86_64 to the path
+2026-09-23T04:57:01.7938476Z Set UV_CACHE_DIR to /home/runner/work/_temp/setup-uv-cache
+2026-09-23T04:57:01.7939392Z Successfully installed uv version 0.12.18
+2026-09-23T04:57:01.7939947Z Searching files using cache dependency glob: **/uv.lock,**/requirements*.txt
+2026-09-23T04:57:03.4260660Z /home/runner/work/thesis/thesis/scripts/tools/requirements-tax.txt
+2026-09-23T04:57:03.4538765Z /home/runner/work/thesis/thesis/uv.lock
+2026-09-23T04:57:03.4553869Z Found 2 files to hash.
+2026-09-23T04:57:03.5102959Z Trying to restore uv cache from GitHub Actions cache with key: setup-uv-1-x86_64-unknown-linux-gnu-3.12.3-1a865233cc2290d3cf3e821255c0a53bb59fa24987a5b3ef4a04511e345ef8bd
+2026-09-23T04:57:03.6961528Z Cache hit for: setup-uv-1-x86_64-unknown-linux-gnu-3.12.3-1a865233cc2290d3cf3e821255c0a53bb59fa24987a5b3ef4a04511e345ef8bd
+2026-09-23T04:57:03.7040358Z (node:3457) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-09-23T04:57:04.1399556Z Received 213732 of 213732 (100.0%), 0.9 MBs/sec
+2026-09-23T04:57:04.1399884Z Cache Size: ~0 MB (213732 B)
+2026-09-23T04:57:04.1418567Z [command]/usr/bin/tar -xf /home/runner/work/_temp/429d8b78-1981-4caa-848d-35772f0a193e/cache.tzst -P -C /home/runner/work/thesis/thesis --use-compress-program unzstd
+2026-09-23T04:57:04.1493745Z Cache restored successfully
+2026-09-23T04:57:04.1499172Z uv cache restored from GitHub Actions cache with key: setup-uv-1-x86_64-unknown-linux-gnu-3.12.3-1a865233cc2290d3cf3e821255c0a53bb59fa24987a5b3ef4a04511e345ef8bd
+2026-09-23T04:57:04.1640739Z ##[group]Run uv sync --locked --extra custody
+2026-09-23T04:57:04.1641057Z [36;1muv sync --locked --extra custody[0m
+2026-09-23T04:57:04.1696798Z shell: /usr/bin/bash -e {0}
+2026-09-23T04:57:04.1697017Z env:
+2026-09-23T04:57:04.1697221Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:57:04.1697490Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:57:04.1697759Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:57:04.1698503Z   OPENAI_API_KEY: ***
+2026-09-23T04:57:04.1698908Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-09-23T04:57:04.1699164Z ##[endgroup]
+2026-09-23T04:57:04.2163157Z Using CPython 3.12.3 interpreter at: /usr/bin/python3
+2026-09-23T04:57:04.2163657Z Creating virtual environment at: .venv
+2026-09-23T04:57:04.2206380Z Resolved 103 packages in 0.89ms
+2026-09-23T04:57:04.2223460Z    Building brier @ file:///home/runner/work/thesis/thesis
+2026-09-23T04:57:04.2882559Z Downloading cryptography (4.3MiB)
+2026-09-23T04:57:04.3882111Z  Downloaded cryptography
+2026-09-23T04:57:05.0090319Z       Built brier @ file:///home/runner/work/thesis/thesis
+2026-09-23T04:57:05.0098003Z Prepared 6 packages in 788ms
+2026-09-23T04:57:05.0135736Z Installed 6 packages in 3ms
+2026-09-23T04:57:05.0136064Z  + brier==0.2.4 (from file:///home/runner/work/thesis/thesis)
+2026-09-23T04:57:05.0136361Z  + cffi==2.0.0
+2026-09-23T04:57:05.0136571Z  + cryptography==46.0.5
+2026-09-23T04:57:05.0136774Z  + pycparser==3.0
+2026-09-23T04:57:05.0136957Z  + pypdf==6.14.2
+2026-09-23T04:57:05.0137132Z  + receipt==0.6.1
+2026-09-23T04:57:05.0273617Z ##[group]Run set -euo pipefail
+2026-09-23T04:57:05.0273913Z [36;1mset -euo pipefail[0m
+2026-09-23T04:57:05.0274180Z [36;1m.venv/bin/python scripts/run_strategy_suite.py \[0m
+2026-09-23T04:57:05.0274546Z [36;1m  --selection /tmp/trusted-selection/strategy-targets.json \[0m
+2026-09-23T04:57:05.0274915Z [36;1m  --selection-ledger-jsonl /tmp/pinned-ledger.jsonl \[0m
+2026-09-23T04:57:05.0275226Z [36;1m  --model "$CODEX_MODEL" \[0m
+2026-09-23T04:57:05.0275449Z [36;1m  --run-id "35820167972" \[0m
+2026-09-23T04:57:05.0275677Z [36;1m  --run-attempt "1"[0m
+2026-09-23T04:57:05.0275965Z [36;1mSUITE_MANIFEST=$(find records/thesis-analyst/strategy-suites \[0m
+2026-09-23T04:57:05.0276318Z [36;1m  -type f -name "strategy-35820167972-a1.json" \[0m
+2026-09-23T04:57:05.0276584Z [36;1m  -print -quit)[0m
+2026-09-23T04:57:05.0276798Z [36;1mtest -n "$SUITE_MANIFEST"[0m
+2026-09-23T04:57:05.0277080Z [36;1mecho "suite_manifest=$SUITE_MANIFEST" >> "$GITHUB_OUTPUT"[0m
+2026-09-23T04:57:05.0332701Z shell: /usr/bin/bash -e {0}
+2026-09-23T04:57:05.0332927Z env:
+2026-09-23T04:57:05.0333138Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T04:57:05.0333403Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T04:57:05.0333680Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T04:57:05.0334445Z   OPENAI_API_KEY: ***
+2026-09-23T04:57:05.0334692Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-09-23T04:57:05.0334969Z   CODEX_MODEL: gpt-5.5
+2026-09-23T04:57:05.0335160Z ##[endgroup]
+2026-09-23T04:57:05.1332774Z [1/2] irs.actc.total_claims 2027
+2026-09-23T05:01:35.1893859Z {"ok": false, "manifestPath": "records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/manifest.json", "validationErrors": ["historicalContext has 4 distinct canonical prints; at least 6 are mandatory unless the sealed checkout's reviewed docket authorizes this exact series and target period"]}
+2026-09-23T05:01:35.1895496Z [2/2] irs.actc.total_claims 2027
+2026-09-23T05:05:03.0171520Z {"ok": true, "manifestPath": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/manifest.json", "validationErrors": []}
+2026-09-23T05:05:03.0938099Z batch manifest: /home/runner/work/thesis/thesis/records/thesis-analyst/batches/2026-09-23/strategy-35820167972-a1-ladder.json
+2026-09-23T05:05:03.1007451Z {"median3": 0, "selectionSetHash": "dcc92b43b04cd770d2094e5b218121555931ad406a7eae97bf236705990d82f6", "suite": "ladder"}
+2026-09-23T05:05:03.1134737Z ##[group]Run python3 scripts/archive_strategy_attempt.py \
+2026-09-23T05:05:03.1135094Z [36;1mpython3 scripts/archive_strategy_attempt.py \[0m
+2026-09-23T05:05:03.1135433Z [36;1m  --selection /tmp/trusted-selection/strategy-targets.json \[0m
+2026-09-23T05:05:03.1135739Z [36;1m  --run-id "35820167972" \[0m
+2026-09-23T05:05:03.1135961Z [36;1m  --run-attempt "1" \[0m
+2026-09-23T05:05:03.1136181Z [36;1m  --execution-attempt "1" \[0m
+2026-09-23T05:05:03.1136427Z [36;1m  --out /tmp/strategy-attempt-diagnostic[0m
+2026-09-23T05:05:03.1192067Z shell: /usr/bin/bash -e {0}
+2026-09-23T05:05:03.1192288Z env:
+2026-09-23T05:05:03.1192490Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T05:05:03.1192754Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T05:05:03.1193014Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T05:05:03.1193764Z   OPENAI_API_KEY: ***
+2026-09-23T05:05:03.1193999Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-09-23T05:05:03.1194302Z ##[endgroup]
+2026-09-23T05:05:03.7504757Z Retained 84 diagnostic files; 0 omitted
+2026-09-23T05:05:03.7677696Z ##[group]Run actions/upload-artifact@v7
+2026-09-23T05:05:03.7678069Z with:
+2026-09-23T05:05:03.7678428Z   name: strategy-attempt-35820167972-1-execution-1
+2026-09-23T05:05:03.7678983Z   path: /tmp/strategy-attempt-diagnostic/
+2026-09-23T05:05:03.7679468Z   include-hidden-files: true
+2026-09-23T05:05:03.7679797Z   if-no-files-found: error
+2026-09-23T05:05:03.7680172Z   retention-days: 90
+2026-09-23T05:05:03.7680463Z   compression-level: 6
+2026-09-23T05:05:03.7680796Z   overwrite: false
+2026-09-23T05:05:03.7681122Z   archive: true
+2026-09-23T05:05:03.7681387Z env:
+2026-09-23T05:05:03.7681761Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T05:05:03.7682124Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T05:05:03.7682582Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T05:05:03.7683430Z   OPENAI_API_KEY: ***
+2026-09-23T05:05:03.7683848Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-09-23T05:05:03.7684217Z ##[endgroup]
+2026-09-23T05:05:03.8903469Z With the provided path, there will be 86 files uploaded
+2026-09-23T05:05:03.8907771Z Artifact name is valid!
+2026-09-23T05:05:03.8908224Z Root directory input is valid!
+2026-09-23T05:05:04.2249193Z Uploading artifact: strategy-attempt-35820167972-1-execution-1.zip
+2026-09-23T05:05:04.2276050Z Beginning upload of artifact content to blob storage
+2026-09-23T05:05:05.3756321Z Uploaded bytes 7313744
+2026-09-23T05:05:05.4361799Z Finished uploading artifact content to blob storage!
+2026-09-23T05:05:05.4362560Z SHA256 digest of uploaded artifact is e5d6ccfa08a35a2adadd65c4c4187dcc90742f892bb59b5a7d2c4fa68b67628c
+2026-09-23T05:05:05.4363189Z Finalizing artifact upload
+2026-09-23T05:05:05.7772026Z Artifact strategy-attempt-35820167972-1-execution-1 successfully finalized. Artifact ID 10733406016
+2026-09-23T05:05:05.7773023Z Artifact strategy-attempt-35820167972-1-execution-1 has been successfully uploaded! Final size is 7313744 bytes. Artifact ID is 10733406016
+2026-09-23T05:05:05.7775734Z Artifact download URL: https://github.com/ThesisInstitute/thesis/actions/runs/35820167972/artifacts/10733406016
+2026-09-23T05:05:05.7886533Z ##[group]Run set -euo pipefail
+2026-09-23T05:05:05.7886825Z [36;1mset -euo pipefail[0m
+2026-09-23T05:05:05.7887080Z [36;1mpython3 scripts/strategy_publication.py stage \[0m
+2026-09-23T05:05:05.7887410Z [36;1m  --bundle-dir /tmp/strategy-publication \[0m
+2026-09-23T05:05:05.7887891Z [36;1m  --suite-manifest "records/thesis-analyst/strategy-suites/2026-09-23/strategy-35820167972-a1.json" \[0m
+2026-09-23T05:05:05.7888396Z [36;1m  --trusted-selection /tmp/trusted-selection/strategy-targets.json[0m
+2026-09-23T05:05:05.7944122Z shell: /usr/bin/bash -e {0}
+2026-09-23T05:05:05.7944353Z env:
+2026-09-23T05:05:05.7944557Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T05:05:05.7944826Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T05:05:05.7945269Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T05:05:05.7946032Z   OPENAI_API_KEY: ***
+2026-09-23T05:05:05.7946272Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-09-23T05:05:05.7946648Z ##[endgroup]
+2026-09-23T05:05:08.3546550Z staged 84 strategy files in /tmp/strategy-publication
+2026-09-23T05:05:08.3706782Z ##[group]Run actions/upload-artifact@v7
+2026-09-23T05:05:08.3707037Z with:
+2026-09-23T05:05:08.3707228Z   name: strategy-docket-35820167972-1
+2026-09-23T05:05:08.3707476Z   path: /tmp/strategy-publication/
+2026-09-23T05:05:08.3707710Z   if-no-files-found: error
+2026-09-23T05:05:08.3707920Z   retention-days: 7
+2026-09-23T05:05:08.3708104Z   compression-level: 6
+2026-09-23T05:05:08.3708299Z   overwrite: false
+2026-09-23T05:05:08.3708489Z   include-hidden-files: false
+2026-09-23T05:05:08.3708860Z   archive: true
+2026-09-23T05:05:08.3709108Z env:
+2026-09-23T05:05:08.3709295Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+2026-09-23T05:05:08.3709557Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+2026-09-23T05:05:08.3709837Z   LEDGER_PATH: ledger/official_observations.jsonl
+2026-09-23T05:05:08.3710597Z   OPENAI_API_KEY: ***
+2026-09-23T05:05:08.3710834Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-09-23T05:05:08.3711087Z ##[endgroup]
+2026-09-23T05:05:08.4879737Z With the provided path, there will be 85 files uploaded
+2026-09-23T05:05:08.4884218Z Artifact name is valid!
+2026-09-23T05:05:08.4884664Z Root directory input is valid!
+2026-09-23T05:05:08.8015432Z Uploading artifact: strategy-docket-35820167972-1.zip
+2026-09-23T05:05:08.8045234Z Beginning upload of artifact content to blob storage
+2026-09-23T05:05:09.9494462Z Uploaded bytes 7310152
+2026-09-23T05:05:10.0096239Z Finished uploading artifact content to blob storage!
+2026-09-23T05:05:10.0098770Z SHA256 digest of uploaded artifact is 831a05c65e9b1c3f5343491925457361893771dba70f0da61b517f9e34b9ed6b
+2026-09-23T05:05:10.0100232Z Finalizing artifact upload
+2026-09-23T05:05:10.3631496Z Artifact strategy-docket-35820167972-1 successfully finalized. Artifact ID 10733925150
+2026-09-23T05:05:10.3632556Z Artifact strategy-docket-35820167972-1 has been successfully uploaded! Final size is 7310152 bytes. Artifact ID is 10733925150
+2026-09-23T05:05:10.3633610Z Artifact download URL: https://github.com/ThesisInstitute/thesis/actions/runs/35820167972/artifacts/10733925150
+2026-09-23T05:05:10.3806566Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-09-23T05:05:10.3808235Z Post job cleanup.
+2026-09-23T05:05:10.4791945Z Cache hit occurred on key setup-uv-1-x86_64-unknown-linux-gnu-3.12.3-1a865233cc2290d3cf3e821255c0a53bb59fa24987a5b3ef4a04511e345ef8bd, not saving cache.
+2026-09-23T05:05:10.4794394Z (node:7991) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-09-23T05:05:10.4795460Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-09-23T05:05:10.4887734Z Post job cleanup.
+2026-09-23T05:05:10.6653575Z Post job cleanup.
+2026-09-23T05:05:10.7389625Z [command]/usr/bin/git version
+2026-09-23T05:05:10.7415234Z git version 2.55.0
+2026-09-23T05:05:10.7446344Z Temporarily overriding HOME='/home/runner/work/_temp/ef25a7c0-5b79-4bc1-a735-da5032d87458' before making global git config changes
+2026-09-23T05:05:10.7447532Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-23T05:05:10.7453143Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/thesis/thesis
+2026-09-23T05:05:10.7490015Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-23T05:05:10.7523108Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-23T05:05:10.7765515Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-23T05:05:10.7806235Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-23T05:05:10.8040805Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-23T05:05:10.8066488Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-23T05:05:10.8450029Z Cleaning up orphan processes
+2026-09-23T05:05:10.8753287Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: astral-sh/setup-uv@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

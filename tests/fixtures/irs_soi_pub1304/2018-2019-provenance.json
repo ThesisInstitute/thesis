@@ -1,0 +1,48 @@
+{
+  "purpose": "New official-source diagnostic fixtures, not reconstructed evidence from any forecast run. Current bytes do not authenticate first-release vintage.",
+  "retrievedAtUtc": "2026-09-23T05:10:06Z",
+  "parser": "xlrd 2.0.1",
+  "sheet": "TBL33",
+  "rowLabelCell": "A10",
+  "rowLabel": "All returns, total",
+  "conceptHeaderCell": "AM5",
+  "conceptHeader": "Additional child tax credit",
+  "parentConceptCell": "AI4",
+  "parentConcept": "Total refundable credits",
+  "subheaderCell": "AM7",
+  "subheader": "Number of returns",
+  "printedColumnNumberCell": "AM9",
+  "printedColumnNumber": 38,
+  "valueCell": "AM10",
+  "unit": "whole returns; thousands-of-dollars footnote applies only to amount columns",
+  "sources": [
+    {
+      "taxYear": "2018",
+      "url": "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+      "file": "18in33ar.xls",
+      "httpStatus": 200,
+      "contentType": "application/vnd.ms-excel",
+      "bytes": 99328,
+      "sha256": "cb11d2a6c5c2fa0bf17701974d56070a8bb1dc6254a5f56288f84f8d82ee00fe",
+      "responseLastModified": "Thu, 03 Sep 2020 02:11:51 GMT",
+      "returns": 20450468,
+      "millions": 20.450468,
+      "excludedRefundablePortionCell": "CW10",
+      "excludedRefundablePortionReturns": 19528542
+    },
+    {
+      "taxYear": "2019",
+      "url": "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+      "file": "19in33ar.xls",
+      "httpStatus": 200,
+      "contentType": "application/vnd.ms-excel",
+      "bytes": 90112,
+      "sha256": "388a121d73f1dbad83452138544df5bfe382407b55e2a88bf3823fdaf1744b2c",
+      "responseLastModified": "Thu, 02 Dec 2021 16:23:57 GMT",
+      "returns": 19867646,
+      "millions": 19.867646,
+      "excludedRefundablePortionCell": "CS10",
+      "excludedRefundablePortionReturns": 19011027
+    }
+  ]
+}

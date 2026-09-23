@@ -9435,14 +9435,30 @@ def _irs_soi_normalized_text(value: Any) -> str:
     return text.strip().rstrip(":").strip()
 
 
-def irs_soi_pub1304_grid(raw: bytes, spec: Mapping[str, Any]):
+def irs_soi_pub1304_grid(
+    raw: bytes,
+    spec: Mapping[str, Any],
+    *,
+    max_rows: int | None = None,
+    max_columns: int | None = None,
+    max_sheets: int | None = None,
+    quiet: bool = False,
+):
     """Extract the Table 3.3 sheet as a row grid, failing closed.
 
     Returns ``(grid, refusal)``. The workbook boundary is xlrd (the only
     parser for IRS's legacy BIFF .xls prints); everything after the grid is
     pure logic so tests can arm both real workbooks and synthetic grids.
+    Optional limits let native evidence replay load only the selected sheet
+    and refuse large grids. Defaults preserve the resolver's existing loader.
     """
 
+    limits = (max_rows, max_columns, max_sheets)
+    if any(
+        limit is not None and (type(limit) is not int or limit < 1) for limit in limits
+    ):
+        return None, "invalid workbook resource limit"
+    bounded = any(limit is not None for limit in limits)
     try:
         import xlrd  # noqa: PLC0415 - optional resolver dependency
     except ImportError:
@@ -9451,21 +9467,45 @@ def irs_soi_pub1304_grid(raw: bytes, spec: Mapping[str, Any]):
             "(xlrd==2.0.1) to parse IRS SOI .xls prints"
         )
     try:
-        book = xlrd.open_workbook(file_contents=raw)
+        options: dict[str, Any] = {}
+        if bounded:
+            options["on_demand"] = True
+        if quiet:
+            # xlrd accepts a text writer for diagnostics. Discard them rather
+            # than accumulating untrusted text or corrupting MCP stdout.
+            class QuietWorkbookLog:
+                def write(self, text: str) -> int:
+                    return len(text)
+
+                def flush(self) -> None:
+                    pass
+
+            options["logfile"] = QuietWorkbookLog()
+        book = xlrd.open_workbook(file_contents=raw, **options)
     except Exception as exc:  # noqa: BLE001 - any parse failure fails closed
         return None, f"workbook parse failed: {exc}"
-    sheet_name = str(spec["sheet_name"])
-    if sheet_name not in book.sheet_names():
-        return None, (
-            f"sheet {sheet_name!r} not found (sheets: {book.sheet_names()!r}); "
-            "IRS changed the workbook layout — extend the adapter"
-        )
-    sheet = book.sheet_by_name(sheet_name)
-    grid = [
-        [sheet.cell_value(row, col) for col in range(sheet.ncols)]
-        for row in range(sheet.nrows)
-    ]
-    return grid, None
+    try:
+        if max_sheets is not None and book.nsheets > max_sheets:
+            return None, "workbook exceeds the sheet limit"
+        sheet_name = str(spec["sheet_name"])
+        if sheet_name not in book.sheet_names():
+            return None, (
+                f"sheet {sheet_name!r} not found (sheets: {book.sheet_names()!r}); "
+                "IRS changed the workbook layout — extend the adapter"
+            )
+        sheet = book.sheet_by_name(sheet_name)
+        if (max_rows is not None and sheet.nrows > max_rows) or (
+            max_columns is not None and sheet.ncols > max_columns
+        ):
+            return None, "workbook exceeds dimension limits"
+        grid = [
+            [sheet.cell_value(row, col) for col in range(sheet.ncols)]
+            for row in range(sheet.nrows)
+        ]
+        return grid, None
+    finally:
+        if bounded:
+            book.release_resources()
 
 
 def irs_soi_pub1304_count_from_grid(

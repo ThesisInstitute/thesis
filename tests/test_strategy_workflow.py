@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/strategy-docket.yml"
@@ -111,3 +112,125 @@ def test_diagnostic_attempt_upload_precedes_custody_staging_and_is_not_published
     assert "-execution-${{ github.run_attempt }}" in generate[upload:stage]
     assert "include-hidden-files: true" in generate[upload:stage]
     assert "overwrite: true" not in generate[upload:stage]
+
+
+def test_all_strategy_replay_consumers_use_the_locked_custody_environment():
+    text = WORKFLOW.read_text()
+    select = text.split("  select:\n", 1)[1].split("  generate:\n", 1)[0]
+    generate = text.split("  generate:\n", 1)[1].split("  publish:\n", 1)[0]
+    publish = text.split("  publish:\n", 1)[1]
+    path_export = 'echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"'
+    for job, consumer in (
+        (select, "python3 scripts/verify_custody.py"),
+        (generate, "python3 scripts/archive_strategy_attempt.py"),
+        (publish, "python3 scripts/strategy_publication.py validate"),
+    ):
+        assert job.index("uv sync --locked --extra custody") < job.index(path_export)
+        assert job.index(path_export) < job.index(consumer)
+    # Rebase can change the trusted dependency lock before another replay.
+    rebase = publish.split("git pull --rebase origin main", 1)[1]
+    assert rebase.index("uv sync --locked --extra custody") < rebase.index(
+        "python3 scripts/strategy_publication.py validate"
+    )
+
+
+def _named_step(source: str, marker: str) -> str:
+    steps = source.split("\n      - ")[1:]
+    matches = [step for step in steps if marker in step.splitlines()[0]]
+    assert len(matches) == 1, marker
+    return matches[0]
+
+
+def _step_condition(step: str) -> str | None:
+    match = re.search(r"^        if: (.+)$", step, re.MULTILINE)
+    return match.group(1) if match else None
+
+
+def test_other_captured_replay_jobs_provision_locked_runtime_before_consumers():
+    path_export = 'echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"'
+    cases = [
+        (
+            workflow,
+            job,
+            next_job,
+            consumers,
+        )
+        for workflow in ("roll-docket.yml", "prospect-docket.yml")
+        for job, next_job, consumers in (
+            (
+                "register",
+                "generate",
+                ("scripts/docket_publication.py scan-staged", "scripts/verify_custody.py"),
+            ),
+            (
+                "generate",
+                "publish",
+                ("scripts/run_thesis_batch.py", "scripts/docket_publication.py stage"),
+            ),
+            (
+                "publish",
+                None,
+                ("scripts/docket_publication.py validate", "scripts/verify_custody.py"),
+            ),
+        )
+    ]
+    cases += [
+        (
+            "mint-generation-ticket.yml",
+            "mint",
+            None,
+            ("scripts/docket_publication.py scan-staged", "scripts/verify_custody.py"),
+        ),
+        (
+            "publish-attested.yml",
+            "publish",
+            None,
+            ("scripts/verify_attested_bundle.py", "scripts/verify_custody.py"),
+        ),
+        (
+            "api-canary.yml",
+            "canary",
+            None,
+            ("scripts/run_thesis_analyst.py", "from verify_custody import verify_run"),
+        ),
+    ]
+    assert len(cases) == 9
+    for workflow, name, next_name, consumers in cases:
+        source = (ROOT / ".github" / "workflows" / workflow).read_text()
+        job = job_block(source, name, next_name)
+        provision = _named_step(job, "name: Provision custody replay runtime")
+        checkout = _named_step(job, "uses: actions/checkout@")
+        setup = job.index("uses: astral-sh/setup-uv@")
+        prepared = job.index("name: Provision custody replay runtime")
+        exported = job.index(path_export)
+        assert setup < prepared < exported, (workflow, name)
+        assert job.index("uses: actions/checkout@") < prepared
+        assert provision.index("uv sync --locked --extra custody") < provision.index(
+            path_export
+        )
+        assert _step_condition(provision) == _step_condition(checkout), (
+            workflow,
+            name,
+        )
+        for consumer in consumers:
+            assert exported < job.index(consumer), (workflow, name, consumer)
+            # GITHUB_PATH becomes effective only in subsequent steps.
+            assert consumer not in provision
+
+
+def test_other_publication_rebases_resync_before_replaying_new_checkout():
+    expected_rebases = {
+        "roll-docket.yml": 2,
+        "prospect-docket.yml": 2,
+        "mint-generation-ticket.yml": 2,
+        "publish-attested.yml": 1,
+    }
+    for workflow, expected_count in expected_rebases.items():
+        source = (ROOT / ".github" / "workflows" / workflow).read_text()
+        rebases = source.split("git pull --rebase origin main")[1:]
+        assert len(rebases) == expected_count, workflow
+        for after_rebase in rebases:
+            # No Python verification or build can run against a newly rebased
+            # checkout while its dependency environment still uses the old lock.
+            following_lines = after_rebase.lstrip().splitlines()
+            assert following_lines[0].strip() == "uv sync --locked --extra custody"

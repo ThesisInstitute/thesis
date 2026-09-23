@@ -96,7 +96,9 @@ ANNOUNCEMENT_MCP_SCRIPT = SCRIPTS / "announcement_fetch_mcp.py"
 ANNOUNCEMENT_MCP_STARTUP_TIMEOUT_SECONDS = 10
 ANNOUNCEMENT_MCP_TOOL_TIMEOUT_SECONDS = 30
 TOOL_EVIDENCE_MCP_SERVER = "thesis_tool_evidence"
-TOOL_EVIDENCE_MCP_TOOLS = ("fetch_source", "extract_json", "calculate")
+TOOL_EVIDENCE_MCP_TOOLS = (
+    "fetch_source", "extract_json", "extract_irs_soi", "calculate"
+)
 TOOL_EVIDENCE_MCP_STARTUP_TIMEOUT_SECONDS = 10
 TOOL_EVIDENCE_MCP_TOOL_TIMEOUT_SECONDS = 45
 TOOL_EVIDENCE_NOTE = """
@@ -104,7 +106,10 @@ TOOL_EVIDENCE_NOTE = """
 Use the thesis_tool_evidence MCP tools for source reads and calculations.
 fetch_source saves the complete public HTTPS response and returns its call ID,
 hash, and a bounded excerpt. extract_json selects a JSON Pointer from a prior
-fetch_source response. calculate evaluates bounded arithmetic, with named inputs
+fetch_source response. extract_irs_soi replays the reviewed IRS Table 3.3
+parser on a prior captured workbook, selecting the exact series and tax year;
+its numeric value is already in the registered unit. calculate evaluates
+bounded arithmetic, with named inputs
 that can refer to earlier extraction/calculation results by {"callId":"call-0001"}.
 Use these tools for the base rate and interval arithmetic, and cite the returned
 call IDs in your trace. Keep supplied assumptions and judgment adjustments
@@ -716,7 +721,39 @@ def format_target_context(target_context: dict[str, Any] | None) -> str:
     adapter = (target_context.get("sourceBinding") or {}).get("adapter")
     fetch_command = BASE_RATE_FETCH_COMMANDS.get(adapter)
     series = target_context.get("series")
-    if fetch_command and isinstance(series, str) and series:
+    if adapter == "irs-soi-pub1304" and isinstance(series, str) and series:
+        lines += [
+            "",
+            "# Resolution-grade base-rate fetch (captured workbook extraction)",
+            "For each of the latest six published tax years, call fetch_source "
+            "on https://www.irs.gov/pub/irs-soi/YYin33ar.xls (YY is the "
+            "two-digit tax year), then use that returned call ID in:",
+            fetch_command.format(series=series),
+            "The tool replays the registered adapter against the complete "
+            "captured bytes and returns rawValue plus value in the target "
+            "unit. Use value directly; do not apply the transform twice. "
+            "Use the extraction call IDs as calculate inputs for the base "
+            "rate and interval arithmetic. Preserve the exact extracted "
+            "values and year identities in historicalContext through review "
+            "and revision. A binary fetch excerpt is not a parsed table. "
+            "Do not guess a value from it or substitute a rounded bulletin "
+            "number. Parser errors describe an extraction failure, not "
+            "unavailability of that official year. Record the refusal and "
+            "keep the run failed if canonical history cannot be extracted. "
+            "Four verified anchors do not mean only four years exist. "
+            "Fetch earlier official workbooks to retain at least six "
+            "canonical prints; do not replace them with a history waiver.",
+            "Use these MCP calls in the native captured lane; shell network "
+            "access and package installation are unavailable there.",
+        ]
+        if series == "irs.actc.total_claims":
+            lines.append(
+                "This count is TOTAL ACTC claiming returns at the reviewed "
+                "plain Additional child tax credit concept header. The "
+                "separate refundable portion and used to offset other taxes "
+                "columns are different subsets; never substitute them."
+            )
+    elif fetch_command and isinstance(series, str) and series:
         lines += [
             "",
             "# Resolution-grade base-rate fetch (run this — do not substitute)",
@@ -746,12 +783,10 @@ def format_generation_ticket(ticket: dict[str, str] | None) -> str:
     )
 
 
-# Per-adapter, copy-runnable base-rate fetch commands surfaced in the target
-# context. Five S.3596 waves (thesis#115) fetched IRS Pub 4801 line-item
-# estimates — a real official series for nearly the same concept — instead
-# of the registered Table 3.3 print, and prose pointing at the parser did
-# not change that; an explicit command does. PERIOD is chosen by the agent
-# (recent published periods); anchor values themselves are never injected.
+# Per-adapter base-rate recipes. IRS uses captured MCP workbook extraction
+# because bounded native strategy runs cannot use shell HTTP or install parsers.
+# Other adapters retain their operator commands. Periods are selected by the
+# agent from published official files; anchor values are never injected.
 BASE_RATE_FETCH_COMMANDS = {
     "eia-dnav-xls": (
         "  pip install --user xlrd==2.0.1 >/dev/null 2>&1; "
@@ -762,12 +797,9 @@ BASE_RATE_FETCH_COMMANDS = {
         "   # PERIOD = an annual reference year like 2024"
     ),
     "irs-soi-pub1304": (
-        "  pip install --user xlrd==2.0.1 >/dev/null 2>&1; "
-        "python3 -c \"import sys; sys.path.insert(0, 'scripts'); "
-        "import resolve_pending as r; "
-        "print(r.irs_soi_pub1304_fetch_normalized_year("
-        "r.IRS_SOI_PUB1304_ADAPTERS['{series}'], 'PERIOD')[0])\""
-        "   # PERIOD = a tax year like 2023"
+        '  extract_irs_soi({{"sourceCallId":"FETCH_CALL_ID",'
+        '"seriesId":"{series}","year":"YYYY"}})'
+        "   # YYYY is that workbook's four-digit tax year"
     ),
     "fsa-crp-monthly-summary": (
         "  python3 -c \"import sys; sys.path.insert(0, 'scripts'); "

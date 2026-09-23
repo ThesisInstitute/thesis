@@ -181,7 +181,13 @@ this parse (e.g. `irs_soi_pub1304_fetch_year` downloads and reads the
 official Table 3.3 workbook cell); with workspace access you may run them
 — installing a pinned parser like `xlrd==2.0.1` first if needed — and a
 base rate fetched through the resolution parser is, by construction, the
-series the target resolves against.
+series the target resolves against. In native captured runs, fetch each IRS
+workbook with `fetch_source`, then call `extract_irs_soi` with that source call
+ID, the registered series ID, and tax year. This replays the same parser on
+the captured bytes without shell networking or installing packages inside the
+agent. Use the normalized returned value once; preserve its exact year/value
+through revision and distinguish total ACTC claimants from the separate
+refundable-portion subset.
 
 Resolve-by-bound targets during a methodology transition: while NO
 official print under the announced revised methodology exists —
