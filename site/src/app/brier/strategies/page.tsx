@@ -25,7 +25,7 @@ import {
 } from "@/data/thesis-log";
 
 export const metadata: Metadata = {
-  title: "Strategy Lab — Thesis Institute",
+  title: "Strategy Lab — Axiom Forecasts",
   description:
     "Replayable baseline and forward-only agent strategy comparisons for Brier.",
   robots: {

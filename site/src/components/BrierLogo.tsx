@@ -3,7 +3,7 @@
  *
  * Two perspective lines converging toward a luminous focal point.
  * "Clear Horizon" palette:
- * - Lines use Mist-400 (#9FB6C6) — visible on light backgrounds
+ * - Lines use Mist-400 (#A8A29E) — visible on light backgrounds
  * - Dot uses Rose-600 (#A94E80) — brand accent
  */
 export function BrierLogoMark({
@@ -37,7 +37,7 @@ export function BrierLogoMark({
         y1="4.5"
         x2="17"
         y2="12"
-        stroke="#9FB6C6"
+        stroke="#A8A29E"
         strokeWidth="1.2"
         strokeLinecap="round"
         opacity="0.55"
@@ -48,7 +48,7 @@ export function BrierLogoMark({
         y1="23.5"
         x2="17"
         y2="16"
-        stroke="#9FB6C6"
+        stroke="#A8A29E"
         strokeWidth="1.5"
         strokeLinecap="round"
         opacity="0.65"

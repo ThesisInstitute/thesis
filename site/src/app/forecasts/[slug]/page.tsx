@@ -36,9 +36,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const forecast = getForecastCell(slug);
-  if (!forecast) return { title: "Forecast not found — Thesis Institute" };
+  if (!forecast) return { title: "Forecast not found — Axiom Forecasts" };
   return {
-    title: `${forecast.title} — Thesis Institute forecasts`,
+    title: `${forecast.title} — Axiom Forecasts`,
     description: forecast.question,
     robots: {
       index: false,

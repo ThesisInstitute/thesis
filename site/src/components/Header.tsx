@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BrierLogoMark } from "./BrierLogo";
 
 type Page =
   | "docs"
@@ -13,8 +12,18 @@ type Page =
   | "calibration"
   | "models";
 
+/** PROTOTYPE (axiom-forecasts-poc): Thesis as the Forecasts line of Axiom.
+ *  The family bar links the other four lines to the unlisted suite mock. */
+export const SUITE = "https://axiom-suite-mock-5th7uq.pages.dev/#/suite";
+const LINES = [
+  { name: "Rules", hue: "#B45309", href: `${SUITE}/rules` },
+  { name: "Records", hue: "#33547D", href: `${SUITE}/records` },
+  { name: "Microcosm", hue: "#3E7A5E", href: `${SUITE}/microcosm` },
+  { name: "Simulator", hue: "#2C7A7B", href: `${SUITE}/simulator` },
+];
+const FORECASTS_HUE = "#A94E80";
+
 const primaryLinks: { page: Page; href: string; label: string }[] = [
-  { page: "forecasts", href: "/", label: "Forecasts" },
   { page: "bills", href: "/bills", label: "Bills" },
   { page: "paper", href: "/paper", label: "Research" },
 ];
@@ -25,7 +34,7 @@ const moreLinks: { page: Page; href: string; label: string }[] = [
   { page: "calibration", href: "/calibration", label: "Calibration" },
   { page: "log", href: "/log", label: "Log" },
   { page: "docs", href: "/docs", label: "Docs" },
-  { page: "thesis", href: "/thesis", label: "Thesis" },
+  { page: "thesis", href: "/thesis", label: "About" },
   { page: "brier", href: "/brier", label: "Brier" },
 ];
 
@@ -44,17 +53,40 @@ export function Header({ activePage }: { activePage?: Page }) {
       }}
     >
       <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-x-8 px-8 py-2 max-sm:flex-wrap max-sm:px-5 max-sm:pt-3 max-sm:pb-1">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link
-            href="/"
-            className="flex items-center gap-[0.35em] [font-family:var(--font-display)] text-[1.1rem] font-semibold tracking-[-0.01em] no-underline hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
-            style={{ color: "var(--theme-text)" }}
+        <div className="flex min-w-0 items-center gap-6 max-sm:flex-wrap max-sm:gap-y-1">
+          <a
+            href={SUITE}
+            className="flex shrink-0 items-center no-underline hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
           >
-            <BrierLogoMark size={26} />
-            <span>thesis</span>
-          </Link>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/axiom-wordmark.svg" alt="Axiom" className="h-[22px] w-auto" />
+          </a>
+          <ul
+            aria-label="Axiom lines"
+            className="m-0 flex list-none items-center gap-5 p-0 [font-family:var(--font-body)] text-[0.88rem] text-[var(--theme-text-muted)] max-md:gap-3.5 max-md:text-[0.8rem]"
+          >
+            {LINES.map((line) => (
+              <li key={line.name}>
+                <a href={line.href} className={`${linkClass} gap-1.5`}>
+                  <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: line.hue }} />
+                  {line.name}
+                </a>
+              </li>
+            ))}
+            <li>
+              <Link
+                href="/"
+                aria-current="page"
+                className={`${linkClass} gap-1.5 text-[var(--theme-text)]`}
+                style={{ boxShadow: `inset 0 -2px 0 ${FORECASTS_HUE}` }}
+              >
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: FORECASTS_HUE }} />
+                Forecasts
+              </Link>
+            </li>
+          </ul>
           <span
-            className="text-[0.72rem] text-[var(--theme-text-muted)]"
+            className="text-[0.72rem] text-[var(--theme-text-muted)] max-md:hidden"
             aria-label="Prototype build"
           >
             Prototype

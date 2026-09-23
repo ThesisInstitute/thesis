@@ -19,9 +19,9 @@ import {
 } from "@/data/thesis-log";
 
 export const metadata: Metadata = {
-  title: "Brier Lab — Thesis Institute",
+  title: "Brier Lab — Axiom Forecasts",
   description:
-    "Agent-only forecast accuracy lab built on Thesis prediction records, resolution facts, and proper scoring rewards.",
+    "Agent-only forecast accuracy lab built on Axiom Forecasts prediction records, resolution facts, and proper scoring rewards.",
   robots: {
     index: false,
     follow: false,
@@ -65,7 +65,7 @@ export default async function BrierLabPage() {
             Training substrate for agentic forecasting
           </h1>
           <p className="text-[1.03rem] leading-[1.65] text-[var(--theme-text-muted)]">
-            Brier turns Thesis runs into an objective reward table: immutable
+            Brier turns forecast runs into an objective reward table: immutable
             agent outputs, first-print resolutions, proper scoring rows, and
             time-based holdouts. The reward is negative normalized CRPS, so
             higher is better and every improvement has to show up in resolved
@@ -82,7 +82,7 @@ export default async function BrierLabPage() {
               href="/log.json"
               className="inline-block [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)] no-underline hover:text-[var(--color-accent)] hover:no-underline"
             >
-              Thesis Log JSON →
+              Forecast log JSON →
             </a>
             <Link
               href="/forecasts/log"

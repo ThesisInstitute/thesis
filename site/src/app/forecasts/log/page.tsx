@@ -31,7 +31,7 @@ import {
 } from "@/data/thesis-log";
 
 export const metadata: Metadata = {
-  title: "Thesis Log — Thesis Institute",
+  title: "Forecast log — Axiom Forecasts",
   description: "Prediction records, distributions, traces, and scoring rows.",
   robots: {
     index: false,
@@ -111,13 +111,13 @@ export default async function ThesisLogPage() {
             ← all forecasts
           </Link>
           <p className="mb-3 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.15em] text-[var(--color-accent)]">
-            Thesis Log · prediction records
+            Forecast log · prediction records
           </p>
           <h1 className="mb-5 [font-family:var(--font-display)] text-[clamp(1.9rem,4vw,2.6rem)] font-light leading-[1.15] tracking-[-0.02em] text-[var(--theme-text)]">
-            Thesis Log
+            Forecast log
           </h1>
           <p className="text-[1.02rem] leading-[1.65] text-[var(--theme-text-muted)]">
-            Thesis Log records predictions, distributions, trace metadata,
+            Forecast log records predictions, distributions, trace metadata,
             resolution events, and scores. Resolved predictions reference facts
             in the PolicyEngine Ledger. The machine-readable v3 surface is a
             compact manifest whose hash-verified chunks preserve every full
@@ -324,7 +324,7 @@ function ProductionContractPanel({
         />
         <ContractStep
           label="store"
-          value="Thesis Log"
+          value="Forecast log"
           detail="Stores prediction runs and scores; observed facts stay in PolicyEngine Ledger."
         />
       </div>

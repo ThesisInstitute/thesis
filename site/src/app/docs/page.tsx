@@ -7,11 +7,11 @@ function CodeBlock({ children }: { children: React.ReactNode }) {
     <div
       className="rounded-2xl p-5 overflow-x-auto"
       style={{
-        background: "linear-gradient(180deg, #172633 0%, #0F1A24 100%)",
-        border: "1px solid #2B3D4B",
+        background: "linear-gradient(180deg, #292524 0%, #1C1917 100%)",
+        border: "1px solid #44403C",
       }}
     >
-      <pre className="[font-family:var(--font-mono)] text-[0.78rem] leading-[1.75] text-[#E8F0F5] whitespace-pre-wrap m-0">
+      <pre className="[font-family:var(--font-mono)] text-[0.78rem] leading-[1.75] text-[#FAFAF9] whitespace-pre-wrap m-0">
         {children}
       </pre>
     </div>
@@ -28,12 +28,12 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="py-16 border-b border-[#D9E4EC] last:border-b-0">
+    <section className="py-16 border-b border-[#E7E5E4] last:border-b-0">
       <div className="mb-8">
         <div className="[font-family:var(--font-mono)] text-[0.68rem] tracking-[0.12em] uppercase text-[#A94E80] mb-3">
           {kicker}
         </div>
-        <h2 className="[font-family:var(--font-display)] text-[clamp(1.6rem,3vw,2.3rem)] font-medium leading-[1.08] tracking-[-0.03em] text-[#14202B]">
+        <h2 className="[font-family:var(--font-display)] text-[clamp(1.6rem,3vw,2.3rem)] font-medium leading-[1.08] tracking-[-0.03em] text-[#1C1917]">
           {title}
         </h2>
       </div>
@@ -44,55 +44,55 @@ function Section({
 
 export default function DocsPage() {
   return (
-    <div className="bg-[#F7FAFC] text-[#14202B] min-h-screen grain-overlay">
+    <div className="bg-[#FAF9F6] text-[#1C1917] min-h-screen grain-overlay">
       <Header activePage="docs" />
       <main className="max-w-[1100px] mx-auto px-8 max-md:px-4 pb-24">
-        <header className="py-20 max-md:py-14 border-b border-[#D9E4EC]">
+        <header className="py-20 max-md:py-14 border-b border-[#E7E5E4]">
           <div className="[font-family:var(--font-mono)] text-[0.72rem] tracking-[0.12em] uppercase text-[#A94E80] mb-5">
             Documentation
           </div>
-          <h1 className="[font-family:var(--font-display)] text-[clamp(2.1rem,5vw,3.4rem)] font-medium leading-[1.02] tracking-[-0.04em] text-[#14202B] max-w-[820px] mb-6">
+          <h1 className="[font-family:var(--font-display)] text-[clamp(2.1rem,5vw,3.4rem)] font-medium leading-[1.02] tracking-[-0.04em] text-[#1C1917] max-w-[820px] mb-6">
             Use brier with Codex, Claude Code, or the local CLI.
           </h1>
-          <p className="text-[1.02rem] text-[#415463] leading-[1.7] max-w-[760px] mb-8">
+          <p className="text-[1.02rem] text-[#57534E] leading-[1.7] max-w-[760px] mb-8">
             The install story is package-first. The PyPI package now includes
             the CLI, MCP server, and packaged Codex and Claude skills. The CLI
             itself is local-only and does not call an LLM or require an API key.
           </p>
 
           <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-            <div className="rounded-2xl bg-white border border-[#D9E4EC] p-5">
+            <div className="rounded-2xl bg-white border border-[#E7E5E4] p-5">
               <div className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.08em] text-[#A94E80] mb-2">
                 Recommended
               </div>
-              <div className="[font-family:var(--font-display)] text-[1.1rem] font-semibold text-[#14202B] mb-2">
+              <div className="[font-family:var(--font-display)] text-[1.1rem] font-semibold text-[#1C1917] mb-2">
                 Codex + MCP
               </div>
-              <p className="text-[0.88rem] leading-[1.6] text-[#415463] m-0">
+              <p className="text-[0.88rem] leading-[1.6] text-[#57534E] m-0">
                 Best path if you want native tools, persistent decisions, and
                 the `$brier` trigger.
               </p>
             </div>
-            <div className="rounded-2xl bg-white border border-[#D9E4EC] p-5">
-              <div className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.08em] text-[#5E7A8D] mb-2">
+            <div className="rounded-2xl bg-white border border-[#E7E5E4] p-5">
+              <div className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.08em] text-[#57534E] mb-2">
                 Local
               </div>
-              <div className="[font-family:var(--font-display)] text-[1.1rem] font-semibold text-[#14202B] mb-2">
+              <div className="[font-family:var(--font-display)] text-[1.1rem] font-semibold text-[#1C1917] mb-2">
                 CLI / Python
               </div>
-              <p className="text-[0.88rem] leading-[1.6] text-[#415463] m-0">
+              <p className="text-[0.88rem] leading-[1.6] text-[#57534E] m-0">
                 Use this if you want a decision log and calibration loop without
                 any agent integration.
               </p>
             </div>
-            <div className="rounded-2xl bg-white border border-[#D9E4EC] p-5">
-              <div className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.08em] text-[#5E7A8D] mb-2">
+            <div className="rounded-2xl bg-white border border-[#E7E5E4] p-5">
+              <div className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.08em] text-[#57534E] mb-2">
                 Plugin
               </div>
-              <div className="[font-family:var(--font-display)] text-[1.1rem] font-semibold text-[#14202B] mb-2">
+              <div className="[font-family:var(--font-display)] text-[1.1rem] font-semibold text-[#1C1917] mb-2">
                 Claude Code
               </div>
-              <p className="text-[0.88rem] leading-[1.6] text-[#415463] m-0">
+              <p className="text-[0.88rem] leading-[1.6] text-[#57534E] m-0">
                 Use the plugin if you want the slash-command flow and
                 Claude-specific integration.
               </p>
@@ -106,10 +106,10 @@ export default function DocsPage() {
             className="grid grid-cols-3 gap-6 max-md:grid-cols-1"
           >
             <div className="space-y-4">
-              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#14202B]">
+              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#1C1917]">
                 1. Codex with MCP
               </h3>
-              <p className="text-[0.92rem] text-[#415463] leading-[1.65]">
+              <p className="text-[0.92rem] text-[#57534E] leading-[1.65]">
                 This gives Codex native tools, access to stored decisions, and a
                 reusable `$brier` skill.
               </p>
@@ -119,10 +119,10 @@ brier setup codex
             </div>
 
             <div className="space-y-4">
-              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#14202B]">
+              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#1C1917]">
                 2. Claude Code local skill
               </h3>
-              <p className="text-[0.92rem] text-[#415463] leading-[1.65]">
+              <p className="text-[0.92rem] text-[#57534E] leading-[1.65]">
                 This gives Claude Code the same local MCP-backed workflow as
                 Codex, but through Claude skills instead of the Codex skill
                 format.
@@ -133,10 +133,10 @@ brier setup claude
             </div>
 
             <div className="space-y-4">
-              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#14202B]">
+              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#1C1917]">
                 3. Local CLI / Python
               </h3>
-              <p className="text-[0.92rem] text-[#415463] leading-[1.65]">
+              <p className="text-[0.92rem] text-[#57534E] leading-[1.65]">
                 This path creates and scores decisions locally. No LLM API key
                 is required for these commands.
               </p>
@@ -147,14 +147,14 @@ brier calibration`}</CodeBlock>
             </div>
           </div>
 
-          <div className="mt-8 rounded-2xl bg-white border border-[#D9E4EC] p-6">
-            <div className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.08em] text-[#5E7A8D] mb-2">
+          <div className="mt-8 rounded-2xl bg-white border border-[#E7E5E4] p-6">
+            <div className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.08em] text-[#57534E] mb-2">
               Optional
             </div>
-            <div className="[font-family:var(--font-display)] text-[1.05rem] font-semibold text-[#14202B] mb-2">
+            <div className="[font-family:var(--font-display)] text-[1.05rem] font-semibold text-[#1C1917] mb-2">
               Claude plugin path
             </div>
-            <p className="text-[0.9rem] text-[#415463] leading-[1.65] mb-4">
+            <p className="text-[0.9rem] text-[#57534E] leading-[1.65] mb-4">
               If you prefer the older plugin flow instead of local Claude
               skills, it still works:
             </p>
@@ -186,12 +186,12 @@ claude plugin install brier@maxghenis-plugins
             ].map(([title, description]) => (
               <div
                 key={title}
-                className="rounded-2xl bg-white border border-[#D9E4EC] p-6"
+                className="rounded-2xl bg-white border border-[#E7E5E4] p-6"
               >
                 <div className="[font-family:var(--font-mono)] text-[0.72rem] tracking-[0.04em] text-[#A94E80] mb-3">
                   {title}
                 </div>
-                <p className="text-[0.9rem] text-[#415463] leading-[1.6] m-0">
+                <p className="text-[0.9rem] text-[#57534E] leading-[1.6] m-0">
                   {description}
                 </p>
               </div>
@@ -209,7 +209,7 @@ brier setup codex`}</CodeBlock>
             <CodeBlock>{`python -m pip install 'brier[mcp]'
 brier setup claude`}</CodeBlock>
           </div>
-          <p className="mt-5 text-[0.92rem] text-[#415463] leading-[1.7] max-w-[760px]">
+          <p className="mt-5 text-[0.92rem] text-[#57534E] leading-[1.7] max-w-[760px]">
             `brier setup` installs the packaged skill and registers the local
             MCP server with the same Python interpreter that launched `brier`.
             The last step is just restarting Codex or Claude Code.
@@ -218,7 +218,7 @@ brier setup claude`}</CodeBlock>
             <CodeBlock>{`brier doctor codex`}</CodeBlock>
             <CodeBlock>{`brier doctor claude`}</CodeBlock>
           </div>
-          <p className="mt-5 text-[0.92rem] text-[#415463] leading-[1.7] max-w-[760px]">
+          <p className="mt-5 text-[0.92rem] text-[#57534E] leading-[1.7] max-w-[760px]">
             `brier doctor` checks three things: whether the packaged skill is
             installed, whether the agent CLI is on `PATH`, and whether the local
             MCP server is already registered.
@@ -231,7 +231,7 @@ brier setup claude`}</CodeBlock>
         >
           <div className="grid grid-cols-[320px_minmax(0,1fr)] gap-8 items-start max-md:grid-cols-1">
             <div>
-              <p className="text-[0.94rem] text-[#415463] leading-[1.7] mb-5">
+              <p className="text-[0.94rem] text-[#57534E] leading-[1.7] mb-5">
                 This is the actual package-first Codex path from the docs:
                 install, run setup, use
                 <span className="[font-family:var(--font-mono)]">
@@ -251,10 +251,10 @@ brier doctor codex`}</CodeBlock>
         <Section kicker="Repair" title="Fix drifted installs or reset cleanly">
           <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
             <div className="space-y-4">
-              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#14202B]">
+              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#1C1917]">
                 Repair in place
               </h3>
-              <p className="text-[0.92rem] text-[#415463] leading-[1.65]">
+              <p className="text-[0.92rem] text-[#57534E] leading-[1.65]">
                 If the skill file drifted, the agent CLI moved, or MCP setup
                 only half-worked, let `doctor` repair what it can.
               </p>
@@ -262,10 +262,10 @@ brier doctor codex`}</CodeBlock>
 brier doctor claude --fix`}</CodeBlock>
             </div>
             <div className="space-y-4">
-              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#14202B]">
+              <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-semibold text-[#1C1917]">
                 Reset from scratch
               </h3>
-              <p className="text-[0.92rem] text-[#415463] leading-[1.65]">
+              <p className="text-[0.92rem] text-[#57534E] leading-[1.65]">
                 Remove the local skill and MCP registration, then run setup
                 again.
               </p>
@@ -281,11 +281,11 @@ brier setup claude`}</CodeBlock>
         <Section kicker="Workflow" title="What to expect from the framework">
           <div className="grid grid-cols-2 gap-8 max-md:grid-cols-1">
             <div className="space-y-4">
-              <p className="text-[0.94rem] text-[#415463] leading-[1.7]">
+              <p className="text-[0.94rem] text-[#57534E] leading-[1.7]">
                 The framework is not “ask an LLM for advice.” It is a structured
                 decision workflow:
               </p>
-              <ol className="list-decimal pl-5 text-[0.92rem] text-[#415463] leading-[1.8]">
+              <ol className="list-decimal pl-5 text-[0.92rem] text-[#57534E] leading-[1.8]">
                 <li>Define the KPI and time horizon.</li>
                 <li>Expand the option set beyond the initial framing.</li>
                 <li>Anchor on a reference class or base rate.</li>
@@ -308,13 +308,13 @@ Review date: 2026-06-15`}</CodeBlock>
         <Section kicker="Forecasts" title="Draft public forecast questions">
           <div className="grid grid-cols-2 gap-8 max-md:grid-cols-1">
             <div className="space-y-4">
-              <p className="text-[0.94rem] text-[#415463] leading-[1.7]">
+              <p className="text-[0.94rem] text-[#57534E] leading-[1.7]">
                 `brier forecast-draft` turns a stored decision forecast or a
                 standalone policy question into Manifold-ready JSON. It is
                 intentionally draft-only: it does not publish anything, place a
                 bet, or require a Manifold API key.
               </p>
-              <p className="text-[0.94rem] text-[#415463] leading-[1.7]">
+              <p className="text-[0.94rem] text-[#57534E] leading-[1.7]">
                 For public policy questions, use it to turn a live debate into a
                 falsifiable forecast with explicit resolution criteria before
                 anyone posts a public question. The Waymo/DC example uses an
@@ -365,12 +365,12 @@ Review date: 2026-09-01`,
             ].map((example) => (
               <div
                 key={example.title}
-                className="rounded-2xl bg-white border border-[#D9E4EC] p-6"
+                className="rounded-2xl bg-white border border-[#E7E5E4] p-6"
               >
-                <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#14202B] mb-2">
+                <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#1C1917] mb-2">
                   {example.title}
                 </div>
-                <p className="text-[0.9rem] leading-[1.6] text-[#415463] mb-4">
+                <p className="text-[0.9rem] leading-[1.6] text-[#57534E] mb-4">
                   {example.body}
                 </p>
                 <CodeBlock>{example.code}</CodeBlock>
@@ -381,29 +381,29 @@ Review date: 2026-09-01`,
 
         <Section kicker="API keys" title="What needs credentials">
           <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-            <div className="rounded-2xl bg-white border border-[#D9E4EC] p-6">
-              <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#14202B] mb-2">
+            <div className="rounded-2xl bg-white border border-[#E7E5E4] p-6">
+              <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#1C1917] mb-2">
                 CLI
               </div>
-              <p className="text-[0.9rem] leading-[1.6] text-[#415463] m-0">
+              <p className="text-[0.9rem] leading-[1.6] text-[#57534E] m-0">
                 No model credentials required. The CLI reads and writes local
                 decision records only.
               </p>
             </div>
-            <div className="rounded-2xl bg-white border border-[#D9E4EC] p-6">
-              <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#14202B] mb-2">
+            <div className="rounded-2xl bg-white border border-[#E7E5E4] p-6">
+              <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#1C1917] mb-2">
                 MCP + skills
               </div>
-              <p className="text-[0.9rem] leading-[1.6] text-[#415463] m-0">
+              <p className="text-[0.9rem] leading-[1.6] text-[#57534E] m-0">
                 No separate brier API key. Your agent client uses its own
                 normal model credentials.
               </p>
             </div>
-            <div className="rounded-2xl bg-white border border-[#D9E4EC] p-6">
-              <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#14202B] mb-2">
+            <div className="rounded-2xl bg-white border border-[#E7E5E4] p-6">
+              <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#1C1917] mb-2">
                 Experiments
               </div>
-              <p className="text-[0.9rem] leading-[1.6] text-[#415463] m-0">
+              <p className="text-[0.9rem] leading-[1.6] text-[#57534E] m-0">
                 The experiment runners do call external models and need provider
                 keys like `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`.
               </p>
@@ -429,12 +429,12 @@ Review date: 2026-09-01`,
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl bg-white border border-[#D9E4EC] p-6"
+                className="rounded-2xl bg-white border border-[#E7E5E4] p-6"
               >
-                <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#14202B] mb-2">
+                <div className="[font-family:var(--font-display)] text-[1rem] font-semibold text-[#1C1917] mb-2">
                   {item.title}
                 </div>
-                <p className="text-[0.9rem] leading-[1.6] text-[#415463] m-0">
+                <p className="text-[0.9rem] leading-[1.6] text-[#57534E] m-0">
                   {item.body}
                 </p>
               </div>
@@ -446,19 +446,19 @@ Review date: 2026-09-01`,
           <div className="flex gap-4 flex-wrap">
             <Link
               href="/paper"
-              className="inline-flex items-center gap-2 py-[0.75em] px-5 [font-family:var(--font-display)] text-[0.88rem] font-medium no-underline rounded-lg bg-[#14202B] text-[#FCFDFE]"
+              className="inline-flex items-center gap-2 py-[0.75em] px-5 [font-family:var(--font-display)] text-[0.88rem] font-medium no-underline rounded-lg bg-[#1C1917] text-[#FDFCFA]"
             >
               Read the paper
             </Link>
             <a
               href="https://github.com/ThesisInstitute/thesis/blob/main/docs/agent-workflows.md"
-              className="inline-flex items-center gap-2 py-[0.75em] px-5 [font-family:var(--font-display)] text-[0.88rem] font-medium no-underline rounded-lg bg-white text-[#415463] border border-[#BED0DB]"
+              className="inline-flex items-center gap-2 py-[0.75em] px-5 [font-family:var(--font-display)] text-[0.88rem] font-medium no-underline rounded-lg bg-white text-[#57534E] border border-[#D6D3D1]"
             >
               Agent workflow markdown
             </a>
             <a
               href="https://github.com/ThesisInstitute/thesis"
-              className="inline-flex items-center gap-2 py-[0.75em] px-5 [font-family:var(--font-display)] text-[0.88rem] font-medium no-underline rounded-lg bg-white text-[#415463] border border-[#BED0DB]"
+              className="inline-flex items-center gap-2 py-[0.75em] px-5 [font-family:var(--font-display)] text-[0.88rem] font-medium no-underline rounded-lg bg-white text-[#57534E] border border-[#D6D3D1]"
             >
               Repository
             </a>

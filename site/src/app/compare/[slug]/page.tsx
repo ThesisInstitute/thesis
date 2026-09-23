@@ -21,9 +21,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const resolved = getConditionalGroup(slug);
-  if (!resolved) return { title: "Comparison not found — Thesis Institute" };
+  if (!resolved) return { title: "Comparison not found — Axiom Forecasts" };
   return {
-    title: `${resolved.group.title} — Thesis conditional comparison`,
+    title: `${resolved.group.title} — Axiom Forecasts conditional comparison`,
     description: resolved.group.question,
     robots: { index: false, follow: false, nocache: true },
   };

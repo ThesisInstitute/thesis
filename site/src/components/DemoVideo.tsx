@@ -9,7 +9,7 @@ export function DemoVideo({
 
   return (
     <figure className="m-0">
-      <div className="rounded-[28px] overflow-hidden border border-[#D9E4EC] bg-white shadow-[0_20px_50px_rgba(20,32,43,0.12)]">
+      <div className="rounded-[28px] overflow-hidden border border-[#E7E5E4] bg-white shadow-[0_20px_50px_rgba(28,25,23,0.12)]">
         <video
           className="block w-full h-auto"
           autoPlay
@@ -26,7 +26,7 @@ export function DemoVideo({
       </div>
       <figcaption className="mt-4 space-y-3">
         {caption ? (
-          <p className="m-0 text-[0.82rem] text-[#6B7C89] leading-[1.6]">
+          <p className="m-0 text-[0.82rem] text-[#78716C] leading-[1.6]">
             {caption}
           </p>
         ) : null}
@@ -35,7 +35,7 @@ export function DemoVideo({
             href={videoSrc}
             target="_blank"
             rel="noreferrer"
-            className="text-[#415463] underline decoration-[#BED0DB] underline-offset-4 hover:text-[#14202B] hover:decoration-[#14202B]"
+            className="text-[#57534E] underline decoration-[#D6D3D1] underline-offset-4 hover:text-[#1C1917] hover:decoration-[#1C1917]"
           >
             Open 4K MP4
           </a>
@@ -43,7 +43,7 @@ export function DemoVideo({
             href={posterSrc}
             target="_blank"
             rel="noreferrer"
-            className="text-[#415463] underline decoration-[#BED0DB] underline-offset-4 hover:text-[#14202B] hover:decoration-[#14202B]"
+            className="text-[#57534E] underline decoration-[#D6D3D1] underline-offset-4 hover:text-[#1C1917] hover:decoration-[#1C1917]"
           >
             Open poster
           </a>

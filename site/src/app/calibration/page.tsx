@@ -22,9 +22,9 @@ import {
 } from "@/data/thesis-log";
 
 export const metadata: Metadata = {
-  title: "Calibration — Thesis Institute",
+  title: "Calibration — Axiom Forecasts",
   description:
-    "The public scoreboard: interval coverage, CRPS against persistence baselines, and per-forecaster calibration for every resolved Thesis forecast.",
+    "The public scoreboard: interval coverage, CRPS against persistence baselines, and per-forecaster calibration for every resolved forecast.",
 };
 
 const BASELINE_AGENT_PREFIX = "brier.time_series_prior";
@@ -703,7 +703,7 @@ export default async function CalibrationPage() {
             className="mt-4 text-[0.82rem]"
             style={{ color: "var(--theme-text-muted)" }}
           >
-            Full history: <Link href="/log">the Thesis Log</Link> · method:{" "}
+            Full history: <Link href="/log">the forecast log</Link> · method:{" "}
             <Link href="/thesis">why forecasting is the harness</Link>
           </p>
         </section>

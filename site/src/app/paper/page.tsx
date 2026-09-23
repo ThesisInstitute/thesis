@@ -47,7 +47,7 @@ function getQuartoContent(): { mainHtml: string; styles: string } {
 }
 
 export const metadata: Metadata = {
-  title: "Stability-under-probing — Thesis Institute",
+  title: "Stability-under-probing — Axiom Forecasts",
 };
 
 export default function PaperPage() {
@@ -62,7 +62,7 @@ export default function PaperPage() {
           all: initial;
           display: block;
           font-family: "IBM Plex Sans", -apple-system, sans-serif;
-          color: #14202B;
+          color: #1C1917;
           line-height: 1.7;
           max-width: 960px;
           margin: 0 auto;
@@ -74,7 +74,7 @@ export default function PaperPage() {
         /* Override Quarto's global resets within scope */
         #quarto-paper-scope h1, #quarto-paper-scope h2, #quarto-paper-scope h3 {
           font-family: "Newsreader", Georgia, serif;
-          color: #14202B;
+          color: #1C1917;
           margin-top: 2.5rem;
           margin-bottom: 1rem;
         }
@@ -82,15 +82,15 @@ export default function PaperPage() {
         #quarto-paper-scope h2 { font-size: 1.4rem; font-weight: 500; }
         #quarto-paper-scope h3 { font-size: 1.1rem; font-weight: 500; }
         #quarto-paper-scope p { margin-bottom: 1rem; }
-        #quarto-paper-scope a { color: #356C99; text-decoration: none; }
+        #quarto-paper-scope a { color: #33547D; text-decoration: none; }
         #quarto-paper-scope a:hover { color: #A94E80; text-decoration: underline; }
         #quarto-paper-scope em { font-style: italic; }
         #quarto-paper-scope strong { font-weight: 600; }
         #quarto-paper-scope table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
-        #quarto-paper-scope th { text-align: left; padding: 0.75rem; border-bottom: 2px solid #D9E4EC; font-weight: 600; }
-        #quarto-paper-scope td { padding: 0.75rem; border-bottom: 1px solid #D9E4EC; }
-        #quarto-paper-scope code { font-family: "IBM Plex Mono", monospace; background: #EEF4F8; padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.88em; }
-        #quarto-paper-scope pre { background: linear-gradient(180deg, #172633, #0F1A24); color: #E8F0F5; padding: 1.5rem; border-radius: 12px; overflow-x: auto; margin: 1.5rem 0; border: 1px solid #2B3D4B; }
+        #quarto-paper-scope th { text-align: left; padding: 0.75rem; border-bottom: 2px solid #E7E5E4; font-weight: 600; }
+        #quarto-paper-scope td { padding: 0.75rem; border-bottom: 1px solid #E7E5E4; }
+        #quarto-paper-scope code { font-family: "IBM Plex Mono", monospace; background: #F5F5F4; padding: 0.15em 0.4em; border-radius: 3px; font-size: 0.88em; }
+        #quarto-paper-scope pre { background: linear-gradient(180deg, #292524, #1C1917); color: #FAFAF9; padding: 1.5rem; border-radius: 12px; overflow-x: auto; margin: 1.5rem 0; border: 1px solid #44403C; }
         #quarto-paper-scope pre code { background: none; padding: 0; color: inherit; }
         #quarto-paper-scope blockquote { border-left: 3px solid #A94E80; padding: 1rem 1.5rem; margin: 1.5rem 0; background: #F6E7F0; border-radius: 0 8px 8px 0; }
         #quarto-paper-scope .quarto-appendix-contents { margin-top: 2rem; }
@@ -100,14 +100,14 @@ export default function PaperPage() {
         #quarto-paper-scope section { margin-bottom: 2rem; }
         #quarto-paper-scope img { max-width: 100%; height: auto; margin: 1rem 0; border-radius: 8px; }
         #quarto-paper-scope .math { font-style: normal; }
-        #quarto-paper-scope #quarto-appendix { border-top: 1px solid #D9E4EC; padding-top: 2rem; margin-top: 3rem; }
+        #quarto-paper-scope #quarto-appendix { border-top: 1px solid #E7E5E4; padding-top: 2rem; margin-top: 3rem; }
       </style>
       ${mainHtml}
     </div>
   `;
 
   return (
-    <div className="bg-[#F7FAFC] text-[#14202B] min-h-screen">
+    <div className="bg-[#FAF9F6] text-[#1C1917] min-h-screen">
       <Script id="paper-mathjax-config" strategy="beforeInteractive">
         {`
           window.MathJax = window.MathJax || {

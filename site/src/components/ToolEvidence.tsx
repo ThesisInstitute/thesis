@@ -37,7 +37,7 @@ export function ToolEvidence({
       ) : (
         <>
           <p className="mb-5 max-w-[75ch] text-sm leading-relaxed text-[var(--theme-text-muted)]">
-            Captured by Thesis’s tools. Artifact hashes match the run archive;
+            Captured by Axiom Forecasts’ tools. Artifact hashes match the run archive;
             replay results below were recorded by the runner. These checks do
             not authenticate the source publisher or validate the forecast’s
             judgment. Calls made through other tools are not covered.

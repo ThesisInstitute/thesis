@@ -22,7 +22,7 @@ const PACK_OVERVIEW_POINTS = [
 ];
 
 export const metadata: Metadata = {
-  title: "Briefings — Thesis Institute",
+  title: "Briefings — Axiom Forecasts",
   description:
     "Browse the briefing library — versioned bundles of curated reference material handed to forecasters, with their purpose, checks, versions, and forecast runs.",
   robots: {
@@ -50,7 +50,7 @@ export default function PacksPage() {
       <main className="mx-auto max-w-[1200px] px-8 pb-32 pt-12 max-md:px-5">
         <section className="mb-12 max-w-[760px]">
           <p className="mb-3 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.15em] text-[var(--color-accent)]">
-            Thesis Institute · the briefing library
+            Axiom Forecasts · the briefing library
           </p>
           <h1 className="mb-5 [font-family:var(--font-display)] text-[clamp(1.9rem,4vw,2.6rem)] font-light leading-[1.15] tracking-[-0.02em] text-[var(--theme-text)]">
             Briefings: versioned material handed to forecasters

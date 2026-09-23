@@ -4,7 +4,7 @@ import { Header } from "@/components/Header";
 import { loadBills } from "@/data/bills";
 
 export const metadata: Metadata = {
-  title: "Bill analyses — Thesis Institute",
+  title: "Bill analyses — Axiom Forecasts",
   description:
     "Bills as forecasting input: provisions, countersignable goals, likely effects, and the outcome metrics the political system is about to bet on.",
   robots: {
@@ -28,7 +28,7 @@ export default function BillsIndexPage() {
       <main className="mx-auto max-w-[1100px] px-8 pb-32 pt-12 max-md:px-5">
         <section className="mb-12 max-w-[760px]">
           <p className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.15em] text-[var(--color-accent)] mb-3">
-            Thesis Institute · bill analyses
+            Axiom Forecasts · bill analyses
           </p>
           <h1 className="[font-family:var(--font-display)] text-[clamp(1.8rem,4vw,2.6rem)] font-light leading-[1.15] tracking-[-0.02em] text-[var(--theme-text)] mb-5">
             Start from the bill, derive the outcomes

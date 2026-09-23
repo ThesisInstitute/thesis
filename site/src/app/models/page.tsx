@@ -11,7 +11,7 @@ import {
 } from "@/data/thesis-log";
 
 export const metadata: Metadata = {
-  title: "Models — Thesis Institute",
+  title: "Models — Axiom Forecasts",
   description:
     "Model-by-model comparison under identical elicitation contracts: trace-rubric compliance by lane now, resolved accuracy as targets print.",
 };

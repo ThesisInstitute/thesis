@@ -4,6 +4,54 @@
 
 @import "brier-design/theme.css";
 
+/* ── PROTOTYPE (axiom-forecasts-poc): Axiom Forecasts ──
+   The Clear Horizon tokens remapped onto Axiom's stone-on-paper palette and
+   type (Geist Sans, Newsreader italic, JetBrains Mono). The rose accent is
+   already the Forecasts line hue; horizon blues move to the Records blue,
+   so observed values read as records. Unlayered, so it outranks @theme. */
+:root {
+  --color-canvas: #faf9f6;
+  --color-paper: #fdfcfa;
+  --color-section: #f5f5f4;
+  --color-card: #ffffff;
+  --color-border-soft: #e7e5e4;
+  --color-border-strong: #d6d3d1;
+  --color-text-primary: #1c1917;
+  --color-text-secondary: #57534e;
+  --color-text-tertiary: #78716c;
+  --color-text-disabled: #a8a29e;
+  --color-mist-100: #f5f5f4;
+  --color-mist-200: #e7e5e4;
+  --color-mist-400: #a8a29e;
+  --color-mist-600: #57534e;
+  --color-horizon-50: #f1f4f8;
+  --color-horizon-100: #e3e9f1;
+  --color-horizon-300: #9db0c9;
+  --color-horizon-500: #5b7aa3;
+  --color-horizon-600: #45658f;
+  --color-horizon-700: #33547d;
+  --color-ink-dark: #1c1917;
+  --color-slate-dark: #292524;
+  --color-ink-border: #44403c;
+  --color-ink-text: #fafaf9;
+  --color-ink-muted: #a8a29e;
+  --font-display: "Geist", -apple-system, sans-serif;
+  --font-body: "Geist", -apple-system, sans-serif;
+  --font-editorial: "Newsreader", Georgia, serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* Axiom sets headings in bold Geist with tight tracking; Thesis set them in
+   light Newsreader. Figures and body keep their own weights. */
+h1[class*="font-display"],
+h2[class*="font-display"],
+h3[class*="font-display"],
+.prose-content h2,
+.prose-content h3 {
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -26,19 +74,19 @@
   --theme-text-dim: var(--color-text-tertiary);
   --theme-border: var(--color-border-soft);
   --theme-border-strong: var(--color-border-strong);
-  --theme-header-bg: rgba(252, 253, 254, 0.85);
+  --theme-header-bg: rgba(250,249,246, 0.85);
 }
 
 .theme-dark {
   --theme-bg: var(--color-ink-dark);
   --theme-bg-elevated: var(--color-slate-dark);
-  --theme-bg-surface: #1A2D3B;
+  --theme-bg-surface: #292524;
   --theme-text: var(--color-ink-text);
   --theme-text-muted: var(--color-ink-muted);
-  --theme-text-dim: #6B8494;
+  --theme-text-dim: #78716c;
   --theme-border: var(--color-ink-border);
-  --theme-border-strong: #3A5060;
-  --theme-header-bg: rgba(15, 26, 36, 0.82);
+  --theme-border-strong: #57534e;
+  --theme-header-bg: rgba(28,25,23, 0.82);
 }
 
 /* ── Global reset and base styles ── */
@@ -72,6 +120,12 @@
 
   a:hover {
     text-decoration: underline;
+  }
+
+  /* PROTOTYPE: Axiom's nav reads in muted ink; the active link's accent
+     utility still wins because utilities outrank base. */
+  header a {
+    color: inherit;
   }
 
   @media (max-width: 600px) {

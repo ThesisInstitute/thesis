@@ -1,6 +1,6 @@
 import { getPublishedForecasts } from "@/lib/forecast-publication";
 import Link from "next/link";
-import { Header } from "@/components/Header";
+import { Header, SUITE } from "@/components/Header";
 import { loadBills } from "@/data/bills";
 import { formatValue } from "@/data/forecast-cells";
 
@@ -16,16 +16,16 @@ const stackItems = [
     href: "/forecasts",
   },
   {
-    label: "PolicyEngine",
+    label: "Axiom Simulator",
     title: "Policy simulations stay inspectable.",
     body: "Tax and benefit forecasts call open microsimulation models instead of treating model outputs as hidden oracle claims.",
-    href: "https://policyengine.org",
+    href: `${SUITE}/simulator`,
   },
   {
-    label: "Microplex",
+    label: "Axiom Microcosm",
     title: "Synthetic populations become forecasting substrate.",
     body: "Calibrated microdata lets agents test policy scenarios against transparent population structure and administrative benchmarks.",
-    href: "/vision",
+    href: `${SUITE}/microcosm`,
   },
   {
     label: "Brier Decisions",
@@ -37,29 +37,29 @@ const stackItems = [
 
 const methodSteps = [
   "Define the public outcome and the exact source that will resolve it.",
-  "Call official data, encoded law, PolicyEngine, and other inspectable tools.",
+  "Call official data, encoded law, Axiom Simulator, and other inspectable tools.",
   "Publish the forecast distribution, public trace, and later score.",
 ];
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden border-b border-[#D9E4EC] bg-[#F7FAFC]">
+    <section className="relative overflow-hidden border-b border-[#E7E5E4] bg-[#FAF9F6]">
       <div
         className="absolute inset-0 opacity-70"
         style={{
           background:
-            "linear-gradient(115deg, rgba(247,250,252,0.96) 0%, rgba(247,250,252,0.86) 45%, rgba(238,244,248,0.72) 100%)",
+            "linear-gradient(115deg, rgba(250,249,246,0.96) 0%, rgba(250,249,246,0.86) 45%, rgba(245,245,244,0.72) 100%)",
         }}
       />
       <div className="relative mx-auto grid min-h-[calc(100svh-74px)] max-w-[1200px] grid-cols-[minmax(0,0.95fr)_minmax(360px,1fr)] items-center gap-14 px-8 py-16 max-lg:grid-cols-1 max-md:min-h-[auto] max-md:px-5 max-md:py-12">
         <div className="max-w-[650px] animate-[fade-up_0.7s_ease-out]">
           <p className="[font-family:var(--font-mono)] mb-5 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-[#A94E80]">
-            Thesis Institute
+            Axiom Forecasts
           </p>
-          <h1 className="[font-family:var(--font-display)] mb-6 text-[clamp(2.7rem,7vw,5.8rem)] font-light leading-[0.95] tracking-[-0.03em] text-[#14202B]">
+          <h1 className="[font-family:var(--font-display)] mb-6 text-[clamp(2.4rem,4.6vw,3.9rem)] font-light leading-[1.02] tracking-[-0.03em] text-[#1C1917]">
             Open-source forecasting agents for public outcomes.
           </h1>
-          <p className="mb-8 max-w-[560px] text-[1.05rem] leading-[1.7] text-[#415463]">
+          <p className="mb-8 max-w-[560px] text-[1.05rem] leading-[1.7] text-[#57534E]">
             We build agents whose job is to predict consequential public facts,
             explain the evidence, call inspectable tools, and learn from scored
             outcomes.
@@ -67,13 +67,13 @@ function Hero() {
           <div className="flex flex-wrap gap-4">
             <Link
               href="/forecasts"
-              className="inline-flex items-center rounded-lg bg-[#14202B] px-6 py-[0.78em] [font-family:var(--font-display)] text-[0.9rem] font-semibold text-white no-underline shadow-[0_2px_8px_rgba(20,32,43,0.12)] transition-all duration-200 hover:-translate-y-[1px] hover:no-underline"
+              className="inline-flex items-center rounded-lg bg-[#1C1917] px-6 py-[0.78em] [font-family:var(--font-display)] text-[0.9rem] font-semibold text-white no-underline shadow-[0_2px_8px_rgba(28,25,23,0.12)] transition-all duration-200 hover:-translate-y-[1px] hover:no-underline"
             >
               Open forecasts
             </Link>
             <Link
               href="/vision"
-              className="inline-flex items-center rounded-lg border border-[#BED0DB] bg-white px-6 py-[0.78em] [font-family:var(--font-display)] text-[0.9rem] font-medium text-[#415463] no-underline transition-all duration-200 hover:border-[#A94E80] hover:text-[#14202B] hover:no-underline"
+              className="inline-flex items-center rounded-lg border border-[#D6D3D1] bg-white px-6 py-[0.78em] [font-family:var(--font-display)] text-[0.9rem] font-medium text-[#57534E] no-underline transition-all duration-200 hover:border-[#A94E80] hover:text-[#1C1917] hover:no-underline"
             >
               Read the vision
             </Link>
@@ -82,19 +82,19 @@ function Hero() {
 
         <div className="relative min-h-[520px] animate-[fade-up_0.7s_ease-out_0.14s_both] max-lg:min-h-[420px] max-md:min-h-[340px]">
           <div className="absolute inset-0">
-            <div className="absolute left-[8%] top-[8%] h-[70%] w-px bg-[#BED0DB]" />
-            <div className="absolute left-[28%] top-[18%] h-[68%] w-px bg-[#D9E4EC]" />
-            <div className="absolute left-[54%] top-[4%] h-[82%] w-px bg-[#BED0DB]" />
-            <div className="absolute left-[78%] top-[20%] h-[62%] w-px bg-[#D9E4EC]" />
-            <div className="absolute left-[8%] top-[18%] h-px w-[72%] bg-[#D9E4EC]" />
-            <div className="absolute left-[2%] top-[42%] h-px w-[86%] bg-[#BED0DB]" />
-            <div className="absolute left-[18%] top-[70%] h-px w-[76%] bg-[#D9E4EC]" />
+            <div className="absolute left-[8%] top-[8%] h-[70%] w-px bg-[#D6D3D1]" />
+            <div className="absolute left-[28%] top-[18%] h-[68%] w-px bg-[#E7E5E4]" />
+            <div className="absolute left-[54%] top-[4%] h-[82%] w-px bg-[#D6D3D1]" />
+            <div className="absolute left-[78%] top-[20%] h-[62%] w-px bg-[#E7E5E4]" />
+            <div className="absolute left-[8%] top-[18%] h-px w-[72%] bg-[#E7E5E4]" />
+            <div className="absolute left-[2%] top-[42%] h-px w-[86%] bg-[#D6D3D1]" />
+            <div className="absolute left-[18%] top-[70%] h-px w-[76%] bg-[#E7E5E4]" />
           </div>
           {featuredForecasts.map((forecast, index) => (
             <Link
               key={forecast.slug}
               href={`/forecasts/${forecast.slug}`}
-              className={`absolute block w-[min(88%,420px)] rounded-[6px] border border-[#D9E4EC] bg-white/92 p-5 text-left no-underline shadow-[0_18px_45px_rgba(20,32,43,0.08)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#A94E80] hover:no-underline ${
+              className={`absolute block w-[min(88%,420px)] rounded-[6px] border border-[#E7E5E4] bg-white/92 p-5 text-left no-underline shadow-[0_18px_45px_rgba(28,25,23,0.08)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#A94E80] hover:no-underline ${
                 index === 0
                   ? "left-[2%] top-[9%]"
                   : index === 1
@@ -102,17 +102,17 @@ function Hero() {
                     : "left-[16%] bottom-[5%]"
               }`}
             >
-              <p className="[font-family:var(--font-mono)] mb-3 text-[0.6rem] uppercase tracking-[0.14em] text-[#6B7C89]">
+              <p className="[font-family:var(--font-mono)] mb-3 text-[0.6rem] uppercase tracking-[0.14em] text-[#78716C]">
                 {forecast.country} · {forecast.type}
               </p>
-              <h2 className="[font-family:var(--font-display)] mb-3 text-[1.18rem] font-medium leading-[1.22] tracking-[-0.01em] text-[#14202B]">
+              <h2 className="[font-family:var(--font-display)] mb-3 text-[1.18rem] font-medium leading-[1.22] tracking-[-0.01em] text-[#1C1917]">
                 {forecast.title}
               </h2>
               <div className="flex items-end justify-between gap-4">
                 <p className="[font-family:var(--font-mono)] text-[0.72rem] uppercase tracking-[0.08em] text-[#A94E80]">
                   {formatValue(forecast.pointEstimate, forecast.unit)}
                 </p>
-                <p className="text-right [font-family:var(--font-mono)] text-[0.64rem] uppercase tracking-[0.1em] text-[#6B7C89]">
+                <p className="text-right [font-family:var(--font-mono)] text-[0.64rem] uppercase tracking-[0.1em] text-[#78716C]">
                   resolves {forecast.resolutionDate}
                 </p>
               </div>
@@ -132,25 +132,25 @@ function StackSection() {
           <p className="[font-family:var(--font-mono)] mb-4 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#A94E80]">
             The stack
           </p>
-          <h2 className="[font-family:var(--font-display)] text-[clamp(2rem,4vw,3rem)] font-light leading-[1.08] tracking-[-0.025em] text-[#14202B]">
+          <h2 className="[font-family:var(--font-display)] text-[clamp(2rem,4vw,3rem)] font-light leading-[1.08] tracking-[-0.025em] text-[#1C1917]">
             We connect prediction, law, data, and simulation in one open loop.
           </h2>
         </div>
-        <div className="divide-y divide-[#D9E4EC] border-y border-[#D9E4EC]">
+        <div className="divide-y divide-[#E7E5E4] border-y border-[#E7E5E4]">
           {stackItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
-              className="grid grid-cols-[180px_minmax(0,1fr)_24px] gap-8 py-7 text-[#14202B] no-underline transition-colors duration-200 hover:text-[#A94E80] hover:no-underline max-md:grid-cols-1 max-md:gap-3"
+              className="grid grid-cols-[180px_minmax(0,1fr)_24px] gap-8 py-7 text-[#1C1917] no-underline transition-colors duration-200 hover:text-[#A94E80] hover:no-underline max-md:grid-cols-1 max-md:gap-3"
             >
-              <p className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.14em] text-[#6B7C89]">
+              <p className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.14em] text-[#78716C]">
                 {item.label}
               </p>
               <div>
                 <h3 className="[font-family:var(--font-display)] mb-2 text-[1.35rem] font-medium leading-[1.18] tracking-[-0.01em]">
                   {item.title}
                 </h3>
-                <p className="max-w-[720px] text-[0.95rem] leading-[1.65] text-[#415463]">
+                <p className="max-w-[720px] text-[0.95rem] leading-[1.65] text-[#57534E]">
                   {item.body}
                 </p>
               </div>
@@ -165,16 +165,16 @@ function StackSection() {
 
 function MethodSection() {
   return (
-    <section className="bg-[#EEF4F8] px-8 py-[clamp(84px,10vw,132px)] max-md:px-5">
+    <section className="bg-[#F5F5F4] px-8 py-[clamp(84px,10vw,132px)] max-md:px-5">
       <div className="mx-auto grid max-w-[1120px] grid-cols-[minmax(0,0.9fr)_minmax(320px,1fr)] gap-14 max-lg:grid-cols-1">
         <div>
-          <p className="[font-family:var(--font-mono)] mb-4 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#5E7A8D]">
+          <p className="[font-family:var(--font-mono)] mb-4 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#57534E]">
             Forecasting as alignment pressure
           </p>
-          <h2 className="[font-family:var(--font-display)] mb-5 text-[clamp(1.9rem,3.8vw,2.8rem)] font-light leading-[1.1] tracking-[-0.025em] text-[#14202B]">
+          <h2 className="[font-family:var(--font-display)] mb-5 text-[clamp(1.9rem,3.8vw,2.8rem)] font-light leading-[1.1] tracking-[-0.025em] text-[#1C1917]">
             A system that must predict reality has to stay accountable to it.
           </h2>
-          <p className="text-[1rem] leading-[1.7] text-[#415463]">
+          <p className="text-[1rem] leading-[1.7] text-[#57534E]">
             Forecasting gives AI systems a narrow public job, a hard feedback
             loop, and a record others can inspect. The work compounds when each
             resolved outcome improves the next agent run.
@@ -186,7 +186,7 @@ function MethodSection() {
               <span className="[font-family:var(--font-mono)] text-[0.72rem] text-[#A94E80]">
                 0{index + 1}
               </span>
-              <p className="m-0 text-[1.05rem] leading-[1.55] text-[#14202B]">
+              <p className="m-0 text-[1.05rem] leading-[1.55] text-[#1C1917]">
                 {step}
               </p>
             </li>
@@ -199,43 +199,43 @@ function MethodSection() {
 
 function ForecastPreview() {
   return (
-    <section className="bg-[#F7FAFC] px-8 py-[clamp(84px,10vw,132px)] max-md:px-5">
+    <section className="bg-[#FAF9F6] px-8 py-[clamp(84px,10vw,132px)] max-md:px-5">
       <div className="mx-auto max-w-[1120px]">
         <div className="mb-12 flex items-end justify-between gap-8 max-md:block">
           <div className="max-w-[680px]">
             <p className="[font-family:var(--font-mono)] mb-4 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#A94E80]">
               Public preview
             </p>
-            <h2 className="[font-family:var(--font-display)] text-[clamp(1.9rem,3.8vw,2.8rem)] font-light leading-[1.1] tracking-[-0.025em] text-[#14202B]">
+            <h2 className="[font-family:var(--font-display)] text-[clamp(1.9rem,3.8vw,2.8rem)] font-light leading-[1.1] tracking-[-0.025em] text-[#1C1917]">
               The forecast app lives one level deeper.
             </h2>
           </div>
           <Link
             href="/forecasts"
-            className="inline-flex items-center rounded-lg border border-[#BED0DB] bg-white px-5 py-[0.72em] [font-family:var(--font-display)] text-[0.88rem] font-medium text-[#415463] no-underline transition-colors duration-200 hover:border-[#A94E80] hover:text-[#14202B] hover:no-underline max-md:mt-6"
+            className="inline-flex items-center rounded-lg border border-[#D6D3D1] bg-white px-5 py-[0.72em] [font-family:var(--font-display)] text-[0.88rem] font-medium text-[#57534E] no-underline transition-colors duration-200 hover:border-[#A94E80] hover:text-[#1C1917] hover:no-underline max-md:mt-6"
           >
             View all forecasts
           </Link>
         </div>
-        <div className="divide-y divide-[#D9E4EC] border-y border-[#D9E4EC]">
+        <div className="divide-y divide-[#E7E5E4] border-y border-[#E7E5E4]">
           {featuredForecasts.map((forecast) => (
             <Link
               key={forecast.slug}
               href={`/forecasts/${forecast.slug}`}
-              className="grid grid-cols-[minmax(0,1fr)_160px_160px] items-center gap-8 py-6 text-[#14202B] no-underline transition-colors duration-200 hover:text-[#A94E80] hover:no-underline max-md:grid-cols-1 max-md:gap-2"
+              className="grid grid-cols-[minmax(0,1fr)_160px_160px] items-center gap-8 py-6 text-[#1C1917] no-underline transition-colors duration-200 hover:text-[#A94E80] hover:no-underline max-md:grid-cols-1 max-md:gap-2"
             >
               <div>
-                <p className="[font-family:var(--font-mono)] mb-2 text-[0.62rem] uppercase tracking-[0.12em] text-[#6B7C89]">
+                <p className="[font-family:var(--font-mono)] mb-2 text-[0.62rem] uppercase tracking-[0.12em] text-[#78716C]">
                   {forecast.country} · {forecast.type}
                 </p>
                 <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-medium leading-[1.25]">
                   {forecast.title}
                 </h3>
               </div>
-              <p className="[font-family:var(--font-mono)] text-[0.8rem] text-[#415463]">
+              <p className="[font-family:var(--font-mono)] text-[0.8rem] text-[#57534E]">
                 {formatValue(forecast.pointEstimate, forecast.unit)}
               </p>
-              <p className="text-right [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[#6B7C89] max-md:text-left">
+              <p className="text-right [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[#78716C] max-md:text-left">
                 {forecast.resolutionDate}
               </p>
             </Link>
@@ -257,18 +257,18 @@ function BillsPreview() {
             <p className="[font-family:var(--font-mono)] mb-4 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[#A94E80]">
               Bill analyses
             </p>
-            <h2 className="[font-family:var(--font-display)] text-[clamp(1.9rem,3.8vw,2.8rem)] font-light leading-[1.1] tracking-[-0.025em] text-[#14202B]">
+            <h2 className="[font-family:var(--font-display)] text-[clamp(1.9rem,3.8vw,2.8rem)] font-light leading-[1.1] tracking-[-0.025em] text-[#1C1917]">
               Start from the bill, derive the outcomes.
             </h2>
           </div>
           <Link
             href="/bills"
-            className="inline-flex items-center rounded-lg border border-[#BED0DB] bg-white px-5 py-[0.72em] [font-family:var(--font-display)] text-[0.88rem] font-medium text-[#415463] no-underline transition-colors duration-200 hover:border-[#A94E80] hover:text-[#14202B] hover:no-underline max-md:mt-6"
+            className="inline-flex items-center rounded-lg border border-[#D6D3D1] bg-white px-5 py-[0.72em] [font-family:var(--font-display)] text-[0.88rem] font-medium text-[#57534E] no-underline transition-colors duration-200 hover:border-[#A94E80] hover:text-[#1C1917] hover:no-underline max-md:mt-6"
           >
             View all bills
           </Link>
         </div>
-        <div className="divide-y divide-[#D9E4EC] border-y border-[#D9E4EC]">
+        <div className="divide-y divide-[#E7E5E4] border-y border-[#E7E5E4]">
           {bills.map((entry) => {
             const metricCount = entry.provisions.reduce(
               (sum, provision) => sum + provision.metrics.length,
@@ -278,20 +278,20 @@ function BillsPreview() {
               <Link
                 key={entry.slug}
                 href={`/bills/${entry.slug}`}
-                className="grid grid-cols-[minmax(0,1fr)_160px_160px] items-center gap-8 py-6 text-[#14202B] no-underline transition-colors duration-200 hover:text-[#A94E80] hover:no-underline max-md:grid-cols-1 max-md:gap-2"
+                className="grid grid-cols-[minmax(0,1fr)_160px_160px] items-center gap-8 py-6 text-[#1C1917] no-underline transition-colors duration-200 hover:text-[#A94E80] hover:no-underline max-md:grid-cols-1 max-md:gap-2"
               >
                 <div>
-                  <p className="[font-family:var(--font-mono)] mb-2 text-[0.62rem] uppercase tracking-[0.12em] text-[#6B7C89]">
+                  <p className="[font-family:var(--font-mono)] mb-2 text-[0.62rem] uppercase tracking-[0.12em] text-[#78716C]">
                     {entry.bill.status}
                   </p>
                   <h3 className="[font-family:var(--font-display)] text-[1.2rem] font-medium leading-[1.25]">
                     {entry.bill.name}
                   </h3>
                 </div>
-                <p className="[font-family:var(--font-mono)] text-[0.8rem] text-[#415463]">
+                <p className="[font-family:var(--font-mono)] text-[0.8rem] text-[#57534E]">
                   {entry.provisions.length} provisions · {metricCount} metrics
                 </p>
-                <p className="text-right [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[#6B7C89] max-md:text-left">
+                <p className="text-right [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[#78716C] max-md:text-left">
                   {entry.bill.analysisDate}
                 </p>
               </Link>
@@ -305,41 +305,47 @@ function BillsPreview() {
 
 function Footer() {
   return (
-    <footer className="border-t border-[#D9E4EC] bg-white px-8 py-12 max-md:px-5">
+    <footer className="border-t border-[#E7E5E4] bg-white px-8 py-12 max-md:px-5">
       <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-6 max-md:block">
-        <p className="[font-family:var(--font-display)] text-[1.1rem] font-medium text-[#14202B]">
-          Thesis Institute
-        </p>
+        <div>
+          <a href={SUITE} className="no-underline hover:no-underline">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/axiom-wordmark.svg" alt="Axiom" className="h-[24px] w-auto" />
+          </a>
+          <p className="mt-3 text-[0.85rem] text-[#78716C]">
+            The Axiom Institute builds open models of law and policy.
+          </p>
+        </div>
         <div className="flex gap-6 text-[0.78rem] [font-family:var(--font-mono)] max-md:mt-5 max-md:flex-wrap">
           <Link
             href="/forecasts"
-            className="text-[#6B7C89] no-underline transition-colors hover:text-[#14202B]"
+            className="text-[#78716C] no-underline transition-colors hover:text-[#1C1917]"
           >
             Forecasts
           </Link>
           <Link
             href="/bills"
-            className="text-[#6B7C89] no-underline transition-colors hover:text-[#14202B]"
+            className="text-[#78716C] no-underline transition-colors hover:text-[#1C1917]"
           >
             Bills
           </Link>
           <Link
             href="/vision"
-            className="text-[#6B7C89] no-underline transition-colors hover:text-[#14202B]"
+            className="text-[#78716C] no-underline transition-colors hover:text-[#1C1917]"
           >
             Vision
           </Link>
           <Link
             href="/docs"
-            className="text-[#6B7C89] no-underline transition-colors hover:text-[#14202B]"
+            className="text-[#78716C] no-underline transition-colors hover:text-[#1C1917]"
           >
             Brier Decisions
           </Link>
           <a
             href="https://policyengine.org"
-            className="text-[#6B7C89] no-underline transition-colors hover:text-[#14202B]"
+            className="text-[#78716C] no-underline transition-colors hover:text-[#1C1917]"
           >
-            PolicyEngine
+            Axiom Simulator
           </a>
         </div>
       </div>
@@ -349,7 +355,7 @@ function Footer() {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#F7FAFC] text-[#14202B]">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#1C1917]">
       <Header />
       <Hero />
       <StackSection />

@@ -107,13 +107,13 @@ function RenderedStep({
       return (
         <div className="my-3">
           <div
-            className="flex items-center justify-between rounded-t-md border-x border-t bg-[#0F1A24] px-4 py-2 text-[#9FB6C6] [font-family:var(--font-mono)] text-[0.7rem]"
+            className="flex items-center justify-between rounded-t-md border-x border-t bg-[#1C1917] px-4 py-2 text-[#A8A29E] [font-family:var(--font-mono)] text-[0.7rem]"
             style={{ borderColor: "var(--color-ink-border)" }}
           >
-            <span className="text-[#5E97C8]">
+            <span className="text-[#5B7AA3]">
               ▸ {label}: {tool}
             </span>
-            <span className="text-[#9DB1BF]">
+            <span className="text-[#A8A29E]">
               {illustrative
                 ? "authored, not executed"
                 : reconstructedBaseline
@@ -122,13 +122,13 @@ function RenderedStep({
             </span>
           </div>
           <pre
-            className="overflow-x-auto border-x bg-[#0F1A24] px-4 py-3 text-[#E8F0F5] [font-family:var(--font-mono)] text-[0.78rem] leading-[1.55]"
+            className="overflow-x-auto border-x bg-[#1C1917] px-4 py-3 text-[#FAFAF9] [font-family:var(--font-mono)] text-[0.78rem] leading-[1.55]"
             style={{ borderColor: "var(--color-ink-border)" }}
           >
             <code>{step.call}</code>
           </pre>
           <pre
-            className="overflow-x-auto rounded-b-md border-x border-b bg-[#172633] px-4 py-3 text-[#9FC4E6] [font-family:var(--font-mono)] text-[0.75rem] leading-[1.55]"
+            className="overflow-x-auto rounded-b-md border-x border-b bg-[#292524] px-4 py-3 text-[#9DB0C9] [font-family:var(--font-mono)] text-[0.75rem] leading-[1.55]"
             style={{ borderColor: "var(--color-ink-border)" }}
           >
             <code>

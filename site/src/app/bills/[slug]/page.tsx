@@ -39,9 +39,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const entry = getBill(slug);
-  if (!entry) return { title: "Bill not found — Thesis Institute" };
+  if (!entry) return { title: "Bill not found — Axiom Forecasts" };
   return {
-    title: `${entry.bill.name} — Thesis Institute bill analyses`,
+    title: `${entry.bill.name} — Axiom Forecasts bill analyses`,
     description: `Provisions, countersignable goals, likely effects, and candidate outcome metrics for ${entry.bill.name}.`,
     robots: {
       index: false,
@@ -491,7 +491,7 @@ export default async function BillDetailPage({
           {computeRows.length > 0 && (
             <div className="mt-5">
               <h3 className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)] mb-3">
-                Computed impact — PolicyEngine
+                Computed impact — Axiom Simulator
               </h3>
               <div className="grid gap-3">
                 {computeRows.map((row, i) => (

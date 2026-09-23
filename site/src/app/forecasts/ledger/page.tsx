@@ -12,7 +12,7 @@ import {
 } from "@/data/thesis-log";
 
 export const metadata: Metadata = {
-  title: "Ledger — Thesis Institute",
+  title: "Ledger — Axiom Forecasts",
   description:
     "Public facts, official observations, source links, and provenance.",
   robots: {
@@ -54,8 +54,8 @@ export default async function PolicyEngineLedgerPage() {
           </h1>
           <p className="text-[1.02rem] leading-[1.65] text-[var(--theme-text-muted)]">
             Ledger records public fact targets before prediction runs, then the
-            official observations that resolve them. Thesis predictions live in
-            the Thesis Log and point back to these fact IDs.
+            official observations that resolve them. Predictions live in
+            the forecast log and point back to these fact IDs.
           </p>
           <div className="mt-5 flex flex-wrap gap-4">
             <a
@@ -68,7 +68,7 @@ export default async function PolicyEngineLedgerPage() {
               href="/log"
               className="inline-block [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)] no-underline hover:text-[var(--color-accent)] hover:no-underline"
             >
-              View Thesis Log →
+              View Forecast log →
             </a>
             <a
               href="https://github.com/PolicyEngine/chronicle"

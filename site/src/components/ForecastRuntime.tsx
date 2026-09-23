@@ -171,7 +171,7 @@ export function ForecastRuntime({
             className="text-[var(--color-accent)] hover:underline"
             href={sourceHref}
           >
-            {manifestPath ? "Run record" : "Thesis Log"} ↗
+            {manifestPath ? "Run record" : "Forecast log"} ↗
           </a>
         </div>
         {report.modelUnavailable && (

@@ -23,10 +23,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { briefingId } = await params;
   const pack = getPredictionPackCatalogEntry(briefingId);
-  if (!pack) return { title: "Briefing not found — Thesis Institute" };
+  if (!pack) return { title: "Briefing not found — Axiom Forecasts" };
 
   return {
-    title: `${pack.label} — Thesis Institute briefing`,
+    title: `${pack.label} — Axiom Forecasts briefing`,
     description: pack.summary,
     robots: {
       index: false,

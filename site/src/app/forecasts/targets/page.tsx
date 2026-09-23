@@ -5,9 +5,9 @@ import type { ThesisTargetArchitectureProjection } from "@/data/thesis-target-ar
 import { loadTargetArchitectureProjection } from "@/data/thesis-target-architecture-runtime";
 
 export const metadata: Metadata = {
-  title: "Target architecture — Thesis Institute",
+  title: "Target architecture — Axiom Forecasts",
   description:
-    "Generated target-architecture projection for Thesis forecasts, strategies, packs, artifacts, and distributions.",
+    "Generated target-architecture projection for forecasts, strategies, packs, artifacts, and distributions.",
   robots: {
     index: false,
     follow: false,
@@ -33,10 +33,10 @@ export default async function TargetArchitecturePage() {
             href="/forecasts/log"
             className="mb-5 inline-block [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)] no-underline hover:text-[var(--color-accent)] hover:no-underline"
           >
-            ← Thesis Log
+            ← Forecast log
           </Link>
           <p className="mb-3 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.15em] text-[var(--color-accent)]">
-            Thesis Log · clean projection
+            Forecast log · clean projection
           </p>
           <h1 className="mb-5 [font-family:var(--font-display)] text-[clamp(1.9rem,4vw,2.6rem)] font-light leading-[1.15] tracking-[-0.02em] text-[var(--theme-text)]">
             Target architecture
@@ -58,7 +58,7 @@ export default async function TargetArchitecturePage() {
               href="/log.json"
               className="inline-block [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)] no-underline hover:text-[var(--color-accent)] hover:no-underline"
             >
-              Thesis Log JSON →
+              Forecast log JSON →
             </a>
           </div>
         </section>

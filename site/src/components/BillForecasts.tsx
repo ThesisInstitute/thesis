@@ -157,7 +157,7 @@ export function BillForecasts({ views }: { views: BillForecastView[] }) {
           <strong className="[font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em]">
             Example rendering
           </strong>{" "}
-          — these are real registered Thesis forecast pairs for other policy
+          — these are real registered forecast pairs for other policy
           states, shown here to demonstrate the bill-forecast view. They are
           not anchored to this bill; bill-anchored pairs replace them once
           registered.

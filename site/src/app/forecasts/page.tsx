@@ -11,7 +11,7 @@ import {
 } from "@/data/thesis-log";
 
 export const metadata: Metadata = {
-  title: "Policy forecasts — Thesis Institute",
+  title: "Policy forecasts — Axiom Forecasts",
   description:
     "Open forecasts on government statistics, policy states like the federal minimum wage, and outcomes conditional on those policy states. The audit trails, data, and everything else are visible.",
   robots: {
@@ -36,13 +36,13 @@ export default async function ForecastsPage() {
       <main className="mx-auto max-w-[1200px] px-8 pb-32 pt-12 max-md:px-5">
         <section className="mb-12 max-w-[760px]">
           <p className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.15em] text-[var(--color-accent)] mb-3">
-            Thesis Institute · policy futures
+            Axiom Forecasts · policy futures
           </p>
           <h1 className="[font-family:var(--font-display)] text-[clamp(1.9rem,4vw,2.6rem)] font-light leading-[1.15] tracking-[-0.02em] text-[var(--theme-text)] mb-5">
             Forecasts on every consequential cell of government data
           </h1>
           <p className="text-[1.05rem] leading-[1.65] text-[var(--theme-text-muted)]">
-            Thesis provides three types of forecasts:{" "}
+            Axiom Forecasts provides three types of forecasts:{" "}
             <strong>government statistics</strong>,{" "}
             <strong>policy states</strong> (like the federal minimum wage), and{" "}
             <strong>conditional forecasts</strong> <em>given</em> different
@@ -54,7 +54,7 @@ export default async function ForecastsPage() {
               href="/log"
               className="inline-block [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.12em] text-[var(--color-accent)] no-underline hover:no-underline"
             >
-              View Thesis Log →
+              View Forecast log →
             </Link>
             <Link
               href="/ledger"
