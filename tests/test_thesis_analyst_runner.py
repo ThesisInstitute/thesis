@@ -4673,6 +4673,7 @@ def test_target_context_never_guesses_parser_series_from_data_point_id() -> None
     )
     assert "Resolution-grade base-rate fetch" not in missing_series
     assert "IRS_SOI_PUB1304_ADAPTERS" not in missing_series
+    assert "extract_irs_soi(" not in missing_series
 
     exact_series = analyst_runner.format_target_context(
         {
@@ -4681,5 +4682,8 @@ def test_target_context_never_guesses_parser_series_from_data_point_id() -> None
             "sourceBinding": {"adapter": "irs-soi-pub1304"},
         }
     )
-    assert "IRS_SOI_PUB1304_ADAPTERS['irs.actc.total_claims']" in exact_series
-    assert "IRS_SOI_PUB1304_ADAPTERS['opaque.unrelated.stem']" not in exact_series
+    assert (
+        'extract_irs_soi({"sourceCallId":"FETCH_CALL_ID",'
+        '"seriesId":"irs.actc.total_claims","year":"YYYY"})'
+    ) in exact_series
+    assert '"seriesId":"opaque.unrelated.stem"' not in exact_series
