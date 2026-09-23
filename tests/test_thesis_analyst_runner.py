@@ -4474,8 +4474,8 @@ def test_target_context_surfaces_the_resolution_parser_command() -> None:
     # Five waves fetched IRS Pub 4801 line-item estimates — a real official
     # near-neighbor — instead of the registered Table 3.3 print; prose
     # pointing at the parser did not change that (thesis#115). The target
-    # context now renders the adapter's own fetch as a copy-runnable
-    # command; anchor values are still never injected.
+    # context renders captured extraction using the same reviewed adapter,
+    # without a shell network command; anchor values are never injected.
     context = {
         "series": "irs.actc.total_claims",
         "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
@@ -4483,10 +4483,15 @@ def test_target_context_surfaces_the_resolution_parser_command() -> None:
     }
     block = analyst_runner.format_target_context(context)
     assert "Resolution-grade base-rate fetch" in block
-    assert "IRS_SOI_PUB1304_ADAPTERS['irs.actc.total_claims']" in block
-    assert "irs_soi_pub1304_fetch_normalized_year" in block
-    assert "xlrd==2.0.1" in block
-    assert "PERIOD" in block
+    assert 'extract_irs_soi({"sourceCallId":"FETCH_CALL_ID",' in block
+    assert '"seriesId":"irs.actc.total_claims","year":"YYYY"}' in block
+    assert "latest six published tax years" in block
+    assert "TOTAL ACTC claiming returns" in block
+    assert "refundable portion" in block
+    assert "do not apply the transform twice" in block
+    assert "extraction failure, not unavailability" in block
+    assert "pip install" not in block
+    assert "python3 -c" not in block
     for anchor_value in ("19119249", "37771612", "18076696", "17626084"):
         assert anchor_value not in block
 

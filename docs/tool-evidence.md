@@ -5,7 +5,7 @@ Native Codex analyst runs configure the repository-owned
 including complete fetched response bodies, independently of the model's written
 reasoning. Each draft, review, and final stage has its own call sequence.
 
-The first version offers three tools:
+The recorder offers four tools:
 
 - `fetch_source(url)` fetches an unauthenticated public HTTPS URL. The recorder
   retains the complete body as base64, SHA-256, byte count, response metadata,
@@ -20,6 +20,17 @@ The first version offers three tools:
   captured response. Verification re-extracts the value from the preserved
   bytes. CSV, HTML, and PDF bodies can be preserved, but this version does not
   claim to replay extraction from those formats.
+- `extract_irs_soi(sourceCallId, seriesId, year)` parses a previously captured
+  official IRS Table 3.3 XLS workbook with the existing reviewed Publication
+  1304 adapter. The exact official URL, tax-year title, sheet, concept header,
+  subcolumn, and total row must match. It returns the raw count or amount, the
+  registered transform and unit, the normalized numeric value, and source
+  call/hash identity. Replay runs the same parser on the captured bytes with
+  pinned `xlrd==2.0.1`; it performs no network request. Other workbook formats,
+  unknown series, ambiguous layouts and oversized sheets fail closed.
+  The ACTC claimant series counts total claimants, not the separate
+  refundable-portion subset. Reviewed anchors are cross-checks, not a limit
+  on available history. The six-print requirement still applies.
 - `calculate(expression, inputs)` evaluates restricted arithmetic. Named inputs
   may be supplied numbers or numeric arrays, or refer to prior
   extraction/calculation call IDs. Referenced numeric strings are converted
@@ -80,13 +91,13 @@ successful run.
 For a standalone evidence artifact:
 
 ```bash
-uv run python scripts/tool_evidence.py --verify /path/to/tool_evidence.json
+uv run --extra custody python scripts/tool_evidence.py --verify /path/to/tool_evidence.json
 ```
 
 For a complete analyst run:
 
 ```bash
-uv run python scripts/verify_custody.py /path/to/run
+uv run --extra custody python scripts/verify_custody.py /path/to/run
 ```
 
 These artifacts feed Thesis's existing publication custody and Receipt-backed

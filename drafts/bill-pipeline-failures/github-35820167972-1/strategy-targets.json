@@ -1,0 +1,230 @@
+{
+  "billSelection": {
+    "billSha256": "9ed0283aee4a7b9030b7fd3bc7bc73594bdb411f40c79db2759a9ae1b45aedb4",
+    "billSlug": "s3596-119",
+    "bindingsSha256": "d6e6440f665cd8a8741fe42a79225ea0c7716f31f3d7c887c5cf4d6ffd88e642",
+    "catalogSlugs": [
+      "additional-child-tax-credit-total-claims-ty2027-current-law",
+      "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar"
+    ],
+    "pairs": [
+      {
+        "arms": [
+          {
+            "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+            "conditionId": "cond.s3596-actc-threshold.enacted",
+            "conditional": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+            "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar"
+          },
+          {
+            "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+            "conditionId": "cond.s3596-actc-threshold.current-law",
+            "conditional": "No legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+            "dataPointId": "irs.actc.total_claims.2027.first_print.current_law"
+          }
+        ],
+        "catalogSlugs": [
+          "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+          "additional-child-tax-credit-total-claims-ty2027-current-law"
+        ],
+        "conditionContracts": [
+          {
+            "checkSource": "govinfo enrolled bill text",
+            "conditionId": "cond.s3596-actc-threshold.enacted",
+            "deadline": "2027-12-31",
+            "description": "Legislation enacted on or before 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027 (S.3596's first-dollar phase-in, in any vehicle).",
+            "matchStrings": [
+              "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+              "For the CY2027 Census Supplemental Poverty Measure child-poverty outcome, legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027."
+            ],
+            "provisionDescription": "Refundable child tax credit earned-income threshold of no more than $1 for tax year 2027",
+            "resolvesBy": "2027-12-31",
+            "statutoryTest": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+            "type": "provision_enacted"
+          },
+          {
+            "conditionId": "cond.s3596-actc-threshold.current-law",
+            "description": "No legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds.",
+            "matchStrings": [
+              "No legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+              "For the CY2027 Census Supplemental Poverty Measure child-poverty outcome, no legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount."
+            ],
+            "resolvesBy": "2027-12-31",
+            "type": "recorded_status"
+          }
+        ],
+        "conditionDeadline": "2027-12-31",
+        "expectedReleaseWindow": {
+          "end": "2029-12-31",
+          "start": "2029-01-01"
+        },
+        "groupSlug": "actc-claims-ty2027-threshold-one-dollar",
+        "ledgerUuid": "23396038-b31d-43cd-be08-4aa9fe916b56",
+        "metricLabel": "ACTC total claims (TY2027)",
+        "metricLocations": [
+          {
+            "metric": 1,
+            "provision": 0
+          }
+        ],
+        "period": "2027",
+        "series": "irs.actc.total_claims"
+      }
+    ],
+    "schemaVersion": "thesis_bill_forecast_selection_v1",
+    "series": "irs.actc.total_claims",
+    "sourceMetadataSha256": "e384093e17f1a4d959e548cdf5c6ebfd11c6e71dc6a65d74160d47687b2a7aa8",
+    "sourceTextSha256": "c45170c8e73d94d2d9b542135dc9e0abba2361fb0d9658422788fc3e3d865352",
+    "sourceUrl": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml"
+  },
+  "ledgerEvidence": {
+    "blobSha": "e4f7260987299f3a908f8788473908f4b5db6e34",
+    "branch": "codex/thesis-ledger-facts",
+    "checkedAtUtc": "2026-09-23T04:56:03Z",
+    "contentSha256": "2da302b25d15386aeab7089a199edf79e395a33eca5e6b35c023d3fbc45d3bce",
+    "path": "ledger/official_observations.jsonl",
+    "repository": "PolicyEngine/chronicle",
+    "repositoryCommit": "3dd95a0dd7eb48b84ce56a84e02742c4b76c4c0c",
+    "resolvedDataPointIds": []
+  },
+  "localResolutionEvidence": {
+    "chainHeadPath": "records/CHAIN_HEAD.json",
+    "chainHeadSha256": "446cb459f664ee2a01ad320a546b280800431a50ac1bdcb8474be1e283835c52",
+    "checkedAtUtc": "2026-09-23T04:56:03Z",
+    "resolutionCount": 47,
+    "resolvedDataPointIds": [],
+    "snapshotPath": "records/2026-09-22/digest-35764657204-1.json",
+    "snapshotRecordedAt": "2026-09-22T18:52:48Z",
+    "snapshotSha256": "a5be566afbccae0d64b4f45ab5ddfcfe6de6a1d28929b44fb6c1cd54d24a5f7c"
+  },
+  "request": {
+    "autoSelect": false,
+    "billSeries": "irs.actc.total_claims",
+    "billSlug": "s3596-119",
+    "catalogSlugs": [],
+    "maxTargets": 2,
+    "suite": "ladder"
+  },
+  "schemaVersion": "thesis_strategy_selection_v1",
+  "selectedAtUtc": "2026-09-23T04:56:03Z",
+  "selectionPath": "records/thesis-analyst/strategy-selections/2026-09-23/strategy-35820167972-a1.json",
+  "selectionSetHash": "dcc92b43b04cd770d2094e5b218121555931ad406a7eae97bf236705990d82f6",
+  "sourceSha": "69d9ae2e500e77460016b37effc4cb52c7683854",
+  "targets": [
+    {
+      "anchors": {
+        "2020": 19.119,
+        "2021": 37.772,
+        "2022": 18.077,
+        "2023": 17.626
+      },
+      "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+      "comparisonTarget": true,
+      "conditionDeadline": "2027-12-31",
+      "conditionId": "cond.s3596-actc-threshold.current-law",
+      "conditional": "No legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+      "country": "US",
+      "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+      "expectedReleaseWindow": {
+        "end": "2029-12-31",
+        "start": "2029-01-01"
+      },
+      "period": "2027",
+      "publishedResolutionDate": "2029-12-31",
+      "registeredAtUtc": "2026-08-03T20:13:09Z",
+      "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+      "resolutionDate": "2029-12-31",
+      "resolutionDateBasis": "resolve-by-bound",
+      "resolutionPolicy": "first_print",
+      "resolutionRule": "Resolve from the first IRS SOI Publication 1304 Table 3.3 print for tax year 2027: All returns, total row; Refundable child tax credit or additional child tax credit; Number of returns. Multiply the published whole-return count by 0.000001 and retain six decimal places in millions. Later revisions are irrelevant. The registered IRS release window is 2029-01-01 through 2029-12-31, with 2029-12-31 retained as the registered resolutionDate because no exact IRS publication-calendar day is registered. Evaluate the condition on 2027-12-31; if the condition fails, mark this conditional cell unresolved rather than resolving it from the tax-year print.",
+      "resolutionSource": "Internal Revenue Service, SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+      "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+      "series": "irs.actc.total_claims",
+      "sourceBinding": {
+        "adapter": "irs-soi-pub1304",
+        "allowedHosts": [
+          "www.irs.gov"
+        ],
+        "expectedReleaseWindow": {
+          "end": "2029-12-31",
+          "start": "2029-01-01"
+        },
+        "field": "refundable_child_tax_credit_returns",
+        "releasePolicy": "first_print",
+        "sourceSeriesId": "irs.actc.total_claims",
+        "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+        "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+        "transform": {
+          "factor": 1e-06,
+          "operation": "multiply"
+        }
+      },
+      "targetContentHash": "b92e9752beaf38a9e2e735c5066e7c741e29436546e7fab2c8d0568f05355909",
+      "targetRegistrationPath": "records/targets/2026-08-03-b92e9752beaf38a9e2e735c5066e7c741e29436546e7fab2c8d0568f05355909.json",
+      "targetUnit": "millions",
+      "valueScale": 1e-06
+    },
+    {
+      "anchors": {
+        "2020": 19.119,
+        "2021": 37.772,
+        "2022": 18.077,
+        "2023": 17.626
+      },
+      "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+      "comparisonTarget": true,
+      "conditionDeadline": "2027-12-31",
+      "conditionId": "cond.s3596-actc-threshold.enacted",
+      "conditional": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+      "country": "US",
+      "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+      "expectedReleaseWindow": {
+        "end": "2029-12-31",
+        "start": "2029-01-01"
+      },
+      "period": "2027",
+      "publishedResolutionDate": "2029-12-31",
+      "registeredAtUtc": "2026-08-03T20:13:09Z",
+      "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+      "resolutionDate": "2029-12-31",
+      "resolutionDateBasis": "resolve-by-bound",
+      "resolutionPolicy": "first_print",
+      "resolutionRule": "If the condition in conditionalOn is satisfied, resolve from the first IRS publication of tax-year 2027 Publication 1304 Table 3.3: the 'All returns, total' row and 'Number of returns' subcolumn under 'Refundable child tax credit or additional child tax credit.' The series is annual and not seasonally adjusted. The adapter returns the published whole-return count; multiply it by 0.000001 to express it in millions. Later revisions are irrelevant. The registered official-source release window is 2029-01-01 through 2029-12-31, with resolutionDate set to its verified by-date endpoint, 2029-12-31. If the stated legislative condition is not satisfied by 2027-12-31, mark this conditional forecast unresolved.",
+      "resolutionSource": "IRS Statistics of Income, Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+      "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+      "series": "irs.actc.total_claims",
+      "sourceBinding": {
+        "adapter": "irs-soi-pub1304",
+        "allowedHosts": [
+          "www.irs.gov"
+        ],
+        "expectedReleaseWindow": {
+          "end": "2029-12-31",
+          "start": "2029-01-01"
+        },
+        "field": "refundable_child_tax_credit_returns",
+        "releasePolicy": "first_print",
+        "sourceSeriesId": "irs.actc.total_claims",
+        "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+        "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+        "transform": {
+          "factor": 1e-06,
+          "operation": "multiply"
+        }
+      },
+      "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+      "targetRegistrationPath": "records/targets/2026-08-03-6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6.json",
+      "targetUnit": "millions",
+      "valueScale": 1e-06
+    }
+  ],
+  "workflow": {
+    "artifactCreatedAtUtc": "2026-09-23T04:56:13Z",
+    "artifactDigest": "sha256:2e556712d108f453117c45e4c85783dbaa5ec163b31c371f5a7e1db07b4e48d7",
+    "artifactId": 10733081813,
+    "artifactName": "strategy-selection-probe-35820167972-1",
+    "repository": "ThesisInstitute/thesis",
+    "runAttempt": 1,
+    "runId": 35820167972
+  }
+}

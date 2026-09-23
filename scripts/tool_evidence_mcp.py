@@ -53,6 +53,28 @@ def tool_definitions(*, allow_fetch: bool = True) -> list[dict[str, Any]]:
             },
         },
         {
+            "name": "extract_irs_soi",
+            "description": (
+                "Read a reviewed IRS SOI Publication 1304 Table 3.3 series from "
+                "an earlier captured official XLS workbook. Requires the exact "
+                "reviewed series ID and tax year; validates workbook identity, "
+                "concept, row, subcolumn, and unit before applying the registered "
+                "transform. Returns the value and source byte hash, with a call "
+                "ID usable in calculate. No new fetch or arbitrary code execution. "
+                "Does not authenticate publication vintage."
+            ),
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "sourceCallId": {"type": "string"},
+                    "seriesId": {"type": "string"},
+                    "year": {"type": "string", "pattern": "^[0-9]{4}$"},
+                },
+                "required": ["sourceCallId", "seriesId", "year"],
+                "additionalProperties": False,
+            },
+        },
+        {
             "name": "calculate",
             "description": (
                 "Execute replayable bounded arithmetic (+ - * / // % ** and abs, "

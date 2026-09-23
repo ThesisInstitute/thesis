@@ -25,6 +25,23 @@ function timestamp(value: unknown): value is string {
   return typeof value === "string" && Number.isFinite(Date.parse(value));
 }
 
+function exactKeys(value: unknown, keys: string[]): value is Json {
+  return (
+    object(value) &&
+    Object.keys(value).length === keys.length &&
+    keys.every((key) => Object.hasOwn(value, key))
+  );
+}
+
+// The runner multiplies the whole published integer by a decimal factor before
+// converting to float. Avoid introducing a second binary rounding operation.
+function decimalProduct(value: number, factor: number): number {
+  const [coefficient, exponent = "0"] = factor.toString().split("e");
+  const [whole, fraction = ""] = coefficient.split(".");
+  const product = BigInt(value) * BigInt(whole + fraction);
+  return Number(`${product}e${Number(exponent) - fraction.length}`);
+}
+
 const REDACTED_URL = "[redacted: unsafe URL]";
 const sensitiveQueryNames = new Set([
   "key",
@@ -295,7 +312,9 @@ export function readCapturedToolCalls(
     requireValue(
       object(call) &&
         call.callId === `call-${String(index + 1).padStart(4, "0")}` &&
-        ["fetch_source", "extract_json", "calculate"].includes(call.tool) &&
+        ["fetch_source", "extract_json", "extract_irs_soi", "calculate"].includes(
+          call.tool,
+        ) &&
         object(call.arguments) &&
         timestamp(call.startedAt) &&
         timestamp(call.completedAt) &&
@@ -328,6 +347,60 @@ export function readCapturedToolCalls(
         "Extraction refers to a missing or failed captured source",
       );
     }
+    if (call.status === "succeeded" && call.tool === "extract_irs_soi") {
+      const args = call.arguments;
+      const source = seen.get(args.sourceCallId);
+      requireValue(
+        exactKeys(args, ["sourceCallId", "seriesId", "year"]) &&
+          typeof args.sourceCallId === "string" &&
+          typeof args.seriesId === "string" &&
+          args.seriesId.length > 0 &&
+          typeof args.year === "string" &&
+          /^[0-9]{4}$/.test(args.year) &&
+          source?.tool === "fetch_source" &&
+          source.status === "succeeded" &&
+          source.response.status >= 200 &&
+          source.response.status <= 299,
+        "IRS extraction refers to a missing or failed captured source",
+      );
+      const result = call.result;
+      requireValue(
+        exactKeys(result, [
+          "value",
+          "sourceCallId",
+          "sourceSha256",
+          "sourceUrl",
+          "seriesId",
+          "year",
+          "rawValue",
+          "unit",
+          "transform",
+        ]) &&
+          result.sourceCallId === args.sourceCallId &&
+          result.sourceSha256 === source.response.sha256 &&
+          result.sourceUrl === source.response.url &&
+          result.sourceUrl === source.arguments.url &&
+          result.sourceUrl ===
+            `https://www.irs.gov/pub/irs-soi/${args.year.slice(2)}in33ar.xls` &&
+          result.seriesId === args.seriesId &&
+          result.year === args.year &&
+          Number.isSafeInteger(result.rawValue) &&
+          result.rawValue >= 0 &&
+          finiteNumber(result.value) &&
+          typeof result.unit === "string" &&
+          result.unit.length > 0 &&
+          exactKeys(result.transform, ["operation", "factor"]) &&
+          result.transform.operation === "multiply" &&
+          finiteNumber(result.transform.factor) &&
+          result.transform.factor > 0 &&
+          result.value ===
+            decimalProduct(result.rawValue, result.transform.factor) &&
+          check.checks.includes("irs_soi_workbook_replay"),
+        "IRS extraction provenance differs from its captured workbook or replay report",
+      );
+      // The bound Python report authenticates the reviewed workbook parser and
+      // series specification. This reader checks provenance, not BIFF contents.
+    }
     if (call.status === "succeeded" && call.tool === "calculate") {
       requireValue(
         typeof call.arguments.expression === "string" &&
@@ -343,7 +416,7 @@ export function readCapturedToolCalls(
             (object(input) &&
               typeof input.callId === "string" &&
               seen.get(input.callId)?.status === "succeeded" &&
-              ["extract_json", "calculate"].includes(
+              ["extract_json", "extract_irs_soi", "calculate"].includes(
                 seen.get(input.callId)?.tool,
               )),
           "Calculation refers to a missing or failed captured value",
