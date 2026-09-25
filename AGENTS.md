@@ -111,7 +111,7 @@ uv run --extra dev python scripts/run_thesis_analyst.py \
   --series ons.labour.unemployment_rate \
   --period 2026-Q4 \
   --prompt-mode fast \
-  --command "/Users/maxghenis/.bun/bin/codex --search exec --ignore-user-config -m gpt-5.5 -c 'service_tier=\"fast\"' --sandbox read-only -C {repo_root} -"
+  --command "/Users/maxghenis/.bun/bin/codex --search exec --ignore-user-config -m gpt-5.6 -c 'service_tier=\"fast\"' --sandbox read-only -C {repo_root} -"
 ```
 
 Use `--prompt-mode fast` for high-volume public-release batches. Use full
@@ -159,7 +159,7 @@ Mint against exactly one registry series or an exact slug set:
 gh workflow run mint-generation-ticket.yml --ref main \
   -f slugs=hard-target-slug \
   -f prompt_mode=fast \
-  -f codex_model=gpt-5.5 \
+  -f codex_model=gpt-5.6 \
   -f codex_reasoning_effort=high \
   -f codex_network=true \
   -f attempt=1

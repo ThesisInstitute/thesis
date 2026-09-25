@@ -30,7 +30,7 @@ from generation_tickets import (
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts" / "run_thesis_analyst.py"
-DEFAULT_CODEX_MODEL = "gpt-5.5"
+DEFAULT_CODEX_MODEL = "gpt-5.6"
 
 TICKET_CONFLICT_FLAGS = (
     "--target",
@@ -555,7 +555,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     # Review is on by default: the reviewer rubric (interval-from-realized-
     # volatility, resolver exactness, variant pinning) is exactly the failure
     # profile of unreviewed fast-mode runs. --no-pre-submit-review to opt out.
-    parser.add_argument("--pre-submit-review-codex-model", default="gpt-5.5")
+    parser.add_argument("--pre-submit-review-codex-model", default="gpt-5.6")
     parser.add_argument("--no-pre-submit-review", action="store_true")
     parser.add_argument("--pre-submit-review-codex-search", action="store_true")
     parser.add_argument("--out")
