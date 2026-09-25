@@ -15,9 +15,11 @@ import copy
 import datetime as dt
 import glob
 import hashlib
+import itertools
 import json
 import pathlib
 import sys
+from decimal import Decimal
 
 import pytest
 
@@ -1013,8 +1015,8 @@ def test_resolver_routes_a_registered_a19_target_through_the_real_router(
 # The one June 2026 observation Chronicle holds for the production row, copied
 # byte for byte from PolicyEngine/chronicle@3dd95a0d (branch
 # codex/thesis-ledger-facts), ledger/official_observations.jsonl.
-CHRONICLE_JUNE_ROW = ROOT / "tests" / "fixtures" / "a19" / (
-    "chronicle-production-june-2026-row.jsonl"
+CHRONICLE_JUNE_ROW = (
+    ROOT / "tests" / "fixtures" / "a19" / ("chronicle-production-june-2026-row.jsonl")
 )
 PRODUCTION = "bls.cps.employed_people_by_occupation.production"
 
@@ -1146,3 +1148,59 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
     assert f"LEDGER UNIT CONFLICT (refusing): {ref}" in out
     assert "nothing new to record" in out
     assert fetched == []
+
+
+# --- invariants, checked exhaustively over their whole realistic domain -------
+
+
+def test_invariant_every_thousands_level_scales_to_exact_millions() -> None:
+    # For every integer level up to 30 million people (A-19's largest row is
+    # about 16 million), the emitted value is exactly thousands / 1000 at
+    # three decimals: no float noise, no lost or invented digit.
+    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
+    for thousands in range(0, 30_001):
+        rows = {"2030-01": {"value": float(thousands), "latest": True}}
+        value, refusal = resolve_pending.bls_transformed_value(rows, spec, "2030-01")
+        assert refusal is None
+        assert Decimal(repr(value)) == Decimal(thousands) / 1000, thousands
+
+
+def test_invariant_only_a_bls_api_binding_leaves_the_archive_leg() -> None:
+    # For every adapter the registrar offers, and for no registration at all,
+    # an A-19 reference routes to the BLS API leg exactly when it binds
+    # bls-api, and to the a19 leg otherwise.
+    for series in A19_SERIES:
+        contract = _contract(series)
+        ref = contract["dataPointId"]
+        assert _route(ref, None) == ["a19"]
+        for adapter in sorted(register_targets.SOURCE_ADAPTERS):
+            candidate = copy.deepcopy(contract)
+            candidate["sourceBinding"]["adapter"] = adapter
+            expected = (
+                ["bls_api"]
+                if adapter == resolve_pending.BLS_API_BINDING_ADAPTER
+                else ["a19"]
+            )
+            assert _route(ref, {"contract": candidate}) == expected, (ref, adapter)
+            if adapter != resolve_pending.BLS_API_BINDING_ADAPTER:
+                assert _refusal(candidate) is not None, (ref, adapter)
+
+
+def test_invariant_the_guard_reads_the_last_row_per_record_id() -> None:
+    # Over every ordering of these rows the verdict depends only on the last
+    # row of each record id: the June row in thousands, its correction in
+    # millions, and a July row in millions.
+    june = _chronicle_june_row()
+    correction = copy.deepcopy(june)
+    correction["value"] = 7.759
+    correction["measure"]["unit"] = "millions"
+    july = copy.deepcopy(correction)
+    july["source_record_id"] = f"{PRODUCTION}.2026_07.first_print"
+    july["period"] = {"type": "month", "value": "2026-07"}
+    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
+    for order in itertools.permutations([june, correction, july]):
+        june_last = order.index(june) > order.index(correction)
+        refusal = resolve_pending.bls_ledger_unit_conflict(
+            list(order), PRODUCTION, spec
+        )
+        assert (refusal is not None) == june_last
