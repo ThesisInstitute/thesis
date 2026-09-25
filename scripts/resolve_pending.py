@@ -132,6 +132,24 @@ MAX_TIMESTAMP_TOKEN_BYTES = 1024 * 1024
 DEFAULT_TIMESTAMP_TIMEOUT_SECONDS = 45.0
 PRODUCER_SIGNING_KEY_ENV = "LEDGER_PRODUCER_SIGNING_KEY"
 
+# The chronicle gate jobs wait for a runner before they judge anything. The
+# 2026-09-22 and 2026-09-23 proposals (chronicle #285, #286) sat queued for
+# 33 and 68 minutes, and the old 30 x 20 s poll closed both PRs while their
+# gates were still queued, reporting that the gate "did not pass". Wait on
+# a wall-clock budget instead; the resolve job's timeout-minutes in
+# .github/workflows/resolve-and-rebuild.yml must cover it.
+DEFAULT_APPEND_GATE_TIMEOUT_MINUTES = 150.0
+APPEND_GATE_TIMEOUT_ENV = "LEDGER_APPEND_GATE_TIMEOUT_MINUTES"
+APPEND_GATE_MAX_POLL_SECONDS = 120.0
+APPEND_GATE_MAX_READ_FAILURES = 5
+# Both are required checks on the ledger branch, but the resolver's token is
+# a repository admin and enforce_admins is off: its merges have gone through
+# with checks that are required today failing (chronicle #240) or still
+# running (#162, trusted base). This tuple is therefore what enforces either
+# verdict on a resolver merge. The trusted job runs the default branch's
+# workflow definition, which the proposal cannot edit.
+REQUIRED_APPEND_GATES = ("Append gate", "Trusted base append gate")
+
 SBA_CUSTODY_ABSENT = "SBA CUSTODY ABSENT (refusing):"
 SBA_CUSTODY_UNWITNESSED = "SBA CUSTODY UNWITNESSED (refusing):"
 SBA_CUSTODY_UNATTESTED = "SBA CUSTODY UNATTESTED (refusing):"
@@ -12245,6 +12263,167 @@ def append_gate_verdict(gate_runs: list[dict]) -> bool:
     return "success" in conclusions
 
 
+def append_gate_state(gate_runs: list[dict]) -> str:
+    """Classify one required gate's check runs: passed, failed or pending.
+
+    "failed" as soon as any run concluded against the proposal, even while
+    its twin is still queued, so a rejection never waits out the budget.
+    "passed" only when every run completed and append_gate_verdict accepts
+    them. Everything else is "pending", including a set of skipped twins
+    alone: the delivering event's real run belongs to a separate workflow
+    run, so the other event's twin can be the only run visible for a moment.
+    """
+    if any(
+        run.get("status") == "completed"
+        and run.get("conclusion") not in ("success", "skipped", "neutral")
+        for run in gate_runs
+    ):
+        return "failed"
+    if gate_runs and all(run.get("status") == "completed" for run in gate_runs):
+        if append_gate_verdict(gate_runs):
+            return "passed"
+    return "pending"
+
+
+def _describe_gate_runs(gate: str, gate_runs: list[dict]) -> str:
+    judging = [run for run in gate_runs if run.get("conclusion") != "skipped"]
+    if not gate_runs:
+        return f"{gate}: no check run yet"
+    if not judging:
+        return f"{gate}: only skipped twins so far"
+    return "; ".join(
+        f"{gate}: "
+        + (
+            str(run.get("conclusion"))
+            if run.get("status") == "completed"
+            else str(run.get("status") or "unknown status")
+        )
+        + f" ({run.get('html_url') or 'no run URL'})"
+        for run in judging
+    )
+
+
+def append_gate_timeout_seconds(
+    cli_minutes: float | None, environ: Mapping[str, str]
+) -> float:
+    """The gate budget in seconds: CLI flag, else environment, else default."""
+
+    minutes: Any = cli_minutes
+    if minutes is None:
+        raw = environ.get(APPEND_GATE_TIMEOUT_ENV, "").strip()
+        try:
+            minutes = float(raw) if raw else DEFAULT_APPEND_GATE_TIMEOUT_MINUTES
+        except ValueError as exc:
+            raise LedgerProposalError(
+                f"{APPEND_GATE_TIMEOUT_ENV} is not a number: {raw!r}"
+            ) from exc
+    if isinstance(minutes, bool) or not isinstance(minutes, (int, float)):
+        raise LedgerProposalError("append gate timeout must be a number of minutes")
+    return _validate_gate_timeout(float(minutes) * 60)
+
+
+def _validate_gate_timeout(value: float) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise LedgerProposalError(
+            "gate_timeout_seconds must be a finite positive number"
+        )
+    result = float(value)
+    if not math.isfinite(result) or result <= 0:
+        raise LedgerProposalError(
+            "gate_timeout_seconds must be a finite positive number"
+        )
+    return result
+
+
+def await_append_gates(
+    repo: str,
+    commit_sha: str,
+    pr_number: int,
+    *,
+    timeout_seconds: float,
+    poll_seconds: float = 20,
+    max_poll_seconds: float = APPEND_GATE_MAX_POLL_SECONDS,
+    poll_attempts: int | None = None,
+    gates: tuple[str, ...] = REQUIRED_APPEND_GATES,
+    clock: Callable[[], float] = time.monotonic,
+    sleep: Callable[[float], None] = time.sleep,
+) -> None:
+    """Return once every required gate passed on the proposal head.
+
+    Raises LedgerProposalError naming the adverse run as soon as any gate
+    concludes against the proposal, and a differently worded error naming
+    the still-queued or running jobs when the wall-clock budget runs out.
+    A timeout is not a verdict; the old single message ("did not pass")
+    made a runner-queue delay read as a rejected append (thesis #286).
+    ``poll_attempts`` additionally caps the number of reads (tests use 1).
+    """
+    timeout_seconds = _validate_gate_timeout(timeout_seconds)
+    started = clock()
+    deadline = started + timeout_seconds
+    delay = max(0.0, float(poll_seconds))
+    attempts = 0
+    read_failures = 0
+    last_read_error: BaseException | None = None
+    last_seen: dict[str, list[dict]] = {gate: [] for gate in gates}
+    while True:
+        attempts += 1
+        try:
+            payload = json.loads(
+                _gh_api(f"repos/{repo}/commits/{commit_sha}/check-runs?per_page=100")
+            )
+            runs = payload.get("check_runs") if type(payload) is dict else None
+            if type(runs) is not list:
+                raise LedgerProposalError("GitHub check-runs response has no list")
+        except (RuntimeError, json.JSONDecodeError) as exc:
+            # Reading check runs has no side effects, so a transient API
+            # error (5xx, secondary rate limit) retries inside the budget
+            # rather than closing a proposal whose gate may be about to pass.
+            read_failures += 1
+            last_read_error = exc
+            if read_failures >= APPEND_GATE_MAX_READ_FAILURES:
+                raise LedgerProposalError(
+                    f"could not read append gate status for {repo}#{pr_number} "
+                    f"({read_failures} consecutive failures): {exc}"
+                ) from exc
+        else:
+            read_failures = 0
+            last_read_error = None
+            states: dict[str, str] = {}
+            for gate in gates:
+                last_seen[gate] = [
+                    run for run in runs if type(run) is dict and run.get("name") == gate
+                ]
+                states[gate] = append_gate_state(last_seen[gate])
+            failed = [gate for gate in gates if states[gate] == "failed"]
+            if failed:
+                raise LedgerProposalError(
+                    f"append gate failed for {repo}#{pr_number}: "
+                    + "; ".join(
+                        _describe_gate_runs(gate, last_seen[gate]) for gate in failed
+                    )
+                    + "; refusing to merge"
+                )
+            if all(states[gate] == "passed" for gate in gates):
+                return
+        now = clock()
+        if now >= deadline or (poll_attempts is not None and attempts >= poll_attempts):
+            waiting = [
+                gate for gate in gates if append_gate_state(last_seen[gate]) != "passed"
+            ]
+            detail = "; ".join(
+                _describe_gate_runs(gate, last_seen[gate]) for gate in waiting
+            )
+            if last_read_error is not None:
+                detail += f"; last status read failed: {last_read_error}"
+            raise LedgerProposalError(
+                f"append gate did not complete for {repo}#{pr_number} after "
+                f"{(now - started) / 60:.1f} of {timeout_seconds / 60:g} allowed "
+                f"minutes; no verdict yet ({detail})"
+            )
+        sleep(max(0.0, min(delay, deadline - now)))
+        delay = min(delay * 2, max_poll_seconds)
+
+
 def propose_ledger_append(
     repo: str,
     branch: str,
@@ -12254,8 +12433,9 @@ def propose_ledger_append(
     base_sha: str,
     added: int,
     *,
-    poll_seconds: int = 20,
-    poll_attempts: int = 30,
+    poll_seconds: float = 20,
+    poll_attempts: int | None = None,
+    gate_timeout_seconds: float = DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60,
     timestamp_requester: TimestampRequester | None = None,
     timestamp_timeout_seconds: float = DEFAULT_TIMESTAMP_TIMEOUT_SECONDS,
     clock_skew_seconds: int = DEFAULT_CLOCK_SKEW_SECONDS,
@@ -12268,6 +12448,8 @@ def propose_ledger_append(
     environment_signing_key = os.environ.pop(PRODUCER_SIGNING_KEY_ENV, None)
     if producer_signing_key is None:
         producer_signing_key = environment_signing_key
+    # A malformed budget must refuse before the TSA or any remote mutation.
+    gate_timeout_seconds = _validate_gate_timeout(gate_timeout_seconds)
     candidate_ledger = content.encode("utf-8")
     base_tree = _fetch_repository_tree(repo, base_sha, path)
     if base_tree.blob_shas.get(path) != blob_sha:
@@ -12346,21 +12528,16 @@ def propose_ledger_append(
             raise LedgerProposalError("GitHub did not return a pull-request number")
         pr_number = pr["number"]
 
-        gate_passed = False
-        for _ in range(poll_attempts):
-            runs = json.loads(
-                _gh_api(f"repos/{repo}/commits/{proposal_commit}/check-runs")
-            ).get("check_runs", [])
-            gate_runs = [run for run in runs if run.get("name") == "Append gate"]
-            if gate_runs and all(run.get("status") == "completed" for run in gate_runs):
-                gate_passed = append_gate_verdict(gate_runs)
-                break
-            time.sleep(poll_seconds)
-        if not gate_passed:
-            raise LedgerProposalError(
-                f"append gate did not pass for {repo}#{pr_number}; refusing to "
-                "leave a failed proposal branch or PR"
-            )
+        # Raises on a failed gate or an exhausted budget; the handler below
+        # closes the PR and deletes the branch either way.
+        await_append_gates(
+            repo,
+            proposal_commit,
+            pr_number,
+            timeout_seconds=gate_timeout_seconds,
+            poll_seconds=poll_seconds,
+            poll_attempts=poll_attempts,
+        )
 
         current_base = _branch_head(repo, branch)
         if current_base != base_sha:
@@ -13257,7 +13434,22 @@ def main() -> int:
     parser.add_argument("--ledger-repo", default="PolicyEngine/chronicle")
     parser.add_argument("--ledger-branch", default="codex/thesis-ledger-facts")
     parser.add_argument("--ledger-path", default="ledger/official_observations.jsonl")
+    parser.add_argument(
+        "--append-gate-timeout-minutes",
+        type=float,
+        default=None,
+        help=(
+            "wall-clock minutes to wait for the chronicle append gates "
+            f"(default: ${APPEND_GATE_TIMEOUT_ENV}, else "
+            f"{DEFAULT_APPEND_GATE_TIMEOUT_MINUTES:g})"
+        ),
+    )
     args = parser.parse_args()
+    # Resolve and validate the budget before any fetch, so a bad value fails
+    # the run at startup instead of after the TSA round trip.
+    gate_timeout_seconds = append_gate_timeout_seconds(
+        args.append_gate_timeout_minutes, os.environ
+    )
 
     log = load_thesis_log(LOG_URL)
     todo = pending_claims_refs(log)
@@ -15054,6 +15246,7 @@ def main() -> int:
         ledger_repo_sha,
         len(new_rows),
         producer_signing_key=producer_signing_key,
+        gate_timeout_seconds=gate_timeout_seconds,
     )
     print(
         f"appended {len(new_rows)} observation(s) to "

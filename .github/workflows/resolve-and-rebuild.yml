@@ -32,7 +32,16 @@ jobs:
     # overlap it, and that day's snapshot would then predate the fresh
     # resolutions. The next snapshot picks them up; a cancelled run loses
     # the publish outright, so the longer cap is the better trade.
-    timeout-minutes: 60
+    # The resolver also waits for chronicle's append gates, whose jobs sat
+    # queued for a runner 33-68 minutes on 2026-09-22/23 (chronicle #285,
+    # #286). That wait has its own 150-minute budget
+    # (DEFAULT_APPEND_GATE_TIMEOUT_MINUTES; override with
+    # LEDGER_APPEND_GATE_TIMEOUT_MINUTES on the resolve step), so the cap is
+    # that budget plus the 17-minute resolve high-water mark, the 12-minute
+    # deploy canary and the pin, witness, push and attestation steps, with
+    # room to spare. The workflow-level concurrency group queues a
+    # dispatched or next-day run behind a long wait instead of overlapping it.
+    timeout-minutes: 210
     steps:
       - uses: actions/checkout@v5
         with:
@@ -277,8 +286,17 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           title="Resolution loop failed $(date -u +%F)"
+          # Quote the resolver's final exception so the issue says whether a
+          # gate rejected the append or never ran, without opening the log.
+          reason=$(grep -E '^[A-Za-z_][A-Za-z0-9_.]*(Error|Exception): ' \
+            /tmp/resolve-out.log 2>/dev/null | tail -n 1 || true)
           existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number' || true)
           if [ -z "$existing" ]; then
-            gh issue create --title "$title" \
-              --body "The resolve-pending loop failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Unresolved cells stay pending — fix before the next release day."
+            {
+              echo "The resolve-pending loop failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Unresolved cells stay pending — fix before the next release day."
+              if [ -n "$reason" ]; then
+                printf '\n```\n%s\n```\n' "$reason"
+              fi
+            } > /tmp/resolve-failure-issue.md
+            gh issue create --title "$title" --body-file /tmp/resolve-failure-issue.md
           fi
