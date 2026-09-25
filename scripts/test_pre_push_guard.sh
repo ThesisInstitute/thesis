@@ -477,9 +477,11 @@ fi
 # ---- 48-51: a branch that merged main forward, then merged a side branch
 # lagging main's records: the second merge's records tree is main's, but
 # its same-tree parent is a branch commit main does not contain. Hit
-# 2026-09-22 (thesis#270 merging #269). The content is published, through
-# the commit that last set it, so the merge is exempt; a tree that merely
-# EQUALS main's, set by an unpublished commit, still is not.
+# 2026-09-22 (thesis#270 merging #269). Merging it into main would leave
+# main's records as they are, so the merge is exempt. A records commit
+# underneath it is still refused as a commit (50), and so is a commit that
+# re-creates main's records by hand (51); a merge over such a copy changes
+# nothing if merged, so only the copying commit is named (51b).
 git clone -q "$S/origin.git" "$S/dev21" 2>/dev/null
 git -C "$S/dev21" checkout -qb fwd "$INIT"
 commit_file "$S/dev21" src/o.txt o "src on fwd"
@@ -518,14 +520,17 @@ fi
 git -C "$S/dev21" merge -q --no-edit -m "side merge over the hand-made copy" lag
 hook "$S/dev21" origin "refs/heads/replica $(git -C "$S/dev21" rev-parse replica) refs/heads/replica $ZERO40"
 check "51 merge over a hand-made copy of main's records blocks" 1 $rc "$S/err" "re-create main's records by hand"
-check "51b that merge is named too (its parent's setter is unpublished)" 1 $rc "$S/err" "side merge over the hand-made copy"
+# the merge over it changes nothing if merged into main, so the merge is
+# exempt; the hand-made commit is what the push is refused for
+grep -q "side merge over the hand-made copy" "$S/err"
+check "51b the merge over the copy carries only main's records, not named" 1 $?
 
 # ---- 52-53: a rollback of a PUBLISHED records state on a branch push.
 # Main has two post-epoch records states; a branch off the older one
 # carries it over the newer main (`git merge -s ours main`, or a literal
 # stale parent). Content closure never sees a branch push, and the GitHub
-# merge button would then delete the newer records from main. The
-# published-setter relaxation must not admit the first shape, and the
+# merge button would then delete the newer records from main. Merging
+# either into main would change main's records, so neither is exempt; the
 # second was a pre-existing hole (the old hook exempted it).
 commit_file "$S/seed" records/r3.txt r3 "attested record 3"
 git -C "$S/seed" push -q origin main
@@ -613,10 +618,12 @@ fi
 hook "$S/dev23" origin "refs/heads/side $SIDE refs/heads/side $ZERO40"
 check "59b still allowed once main has absorbed the side branch" 0 $rc
 walked "$S/dev23" "$(git -C "$S/dev23" rev-parse origin/main)" "$SIDE" "$SIDE"
-check "59bw once absorbed, that side merge is outside the walked range" 1 $?
+check "59bw once absorbed, that side merge is outside the path walk" 1 $?
+# it is still judged (its records differ from the lagging parent), and it
+# keeps main's records, so it stays allowed: 59b above
 
-# ---- 60-62: the newest published state a merge contains decides, not
-# which commit last set a parent's records (2026-09-23 review of #280,
+# ---- 60-62: what merging into main would do to main's records decides,
+# not which commit last set a parent's records (2026-09-23 review of #280,
 # N1-N3). 60: main restores an earlier records state; a branch that took
 # that restoration and then merges a child of the state main discarded
 # keeps main's current records, an honest merge the walk does visit. 61:
@@ -687,6 +694,71 @@ M62=$(git -C "$S/o62" commit-tree "$P62^{tree}" -p "$P62" -p "$Q62" \
     -m "resurrecting records a published merge deleted")
 hook "$S/o62" origin "refs/heads/p62 $M62 refs/heads/p62 $ZERO40"
 check "62 resurrecting records a published merge deleted blocks" 1 $rc "$S/err" "resurrecting records"
+
+# ---- 61b-63: the same rollbacks once main has moved on, so the discarded
+# commit is an OLDER main commit, not the comparator. Git's path walk
+# skips these merges (their only differing parent is on main); the guard
+# must judge them anyway (2026-09-25 review of #280, D1).
+git -C "$S/o61" checkout -q --detach "$K61"
+commit_file "$S/o61" src/later.txt l "main moves on past K61"
+git -C "$S/o61" push -q origin "HEAD:refs/heads/main"
+L61=$(git -C "$S/o61" rev-parse HEAD)
+walked "$S/o61" "$L61" "$M61" "$M61"
+check "61bw the path walk skips it" 1 $?
+hook "$S/o61" origin "refs/heads/p61b $M61 refs/heads/p61b $ZERO40"
+check "61b re-selecting a discarded state past an older main commit blocks" 1 $rc "$S/err" "re-selecting a over"
+git -C "$S/o62" checkout -q --detach "$K62"
+commit_file "$S/o62" src/later.txt l "main moves on past K62"
+git -C "$S/o62" push -q origin "HEAD:refs/heads/main"
+M62B=$(git -C "$S/o62" commit-tree "$P62^{tree}" -p "$P62" -p "$K62" \
+    -m "resurrecting deleted records over an older main commit")
+hook "$S/o62" origin "refs/heads/p62b $M62B refs/heads/p62b $ZERO40"
+check "62b resurrecting deleted records past an older main commit blocks" 1 $rc "$S/err" "resurrecting deleted records"
+fresh_origin o63
+commit_file "$S/o63" records/a.txt a "records a"
+A63=$(git -C "$S/o63" rev-parse HEAD)
+commit_file "$S/o63" records/b.txt b "records a+b"
+B63=$(git -C "$S/o63" rev-parse HEAD)
+commit_file "$S/o63" src/c.txt c "src on main"
+C63=$(git -C "$S/o63" rev-parse HEAD)
+git -C "$S/o63" push -q origin HEAD:main
+git -C "$S/o63" checkout -qb p63 "$A63"
+commit_file "$S/o63" src/p.txt p "src on p63"
+P63=$(git -C "$S/o63" rev-parse HEAD)
+M63=$(git -C "$S/o63" commit-tree "$P63^{tree}" -p "$P63" -p "$B63" \
+    -m "ours-merge of an older main commit dropping records/b.txt")
+walked "$S/o63" "$C63" "$M63" "$M63"
+check "63w the path walk skips it" 1 $?
+hook "$S/o63" origin "refs/heads/p63 $M63 refs/heads/p63 $ZERO40"
+check "63 rollback through an older main commit blocks" 1 $rc "$S/err" "dropping records/b.txt"
+
+# ---- 64: a branch that merged a sibling PR, then main; the sibling then
+# lands on main with a merge commit. The branch's update merge keeps
+# main's records and must stay pushable (D2): its merge bases with main
+# disagree ({R1, f1}), which is ordinary history, not a rollback.
+fresh_origin o64
+commit_file "$S/o64" records/r0.txt r0 "records r0"
+R064=$(git -C "$S/o64" rev-parse HEAD)
+git -C "$S/o64" push -q origin HEAD:main
+git -C "$S/o64" checkout -qb f64 "$R064"
+commit_file "$S/o64" src/f.txt f "sibling PR f"
+git -C "$S/o64" checkout -qb h64 "$R064"
+commit_file "$S/o64" src/h.txt h "branch h"
+git -C "$S/o64" merge -q --no-edit -m "h merges sibling f" f64
+git -C "$S/o64" checkout -q --detach "$R064"
+commit_file "$S/o64" records/r1.txt r1 "recorder r1"
+R164=$(git -C "$S/o64" rev-parse HEAD)
+git -C "$S/o64" push -q origin HEAD:main
+git -C "$S/o64" checkout -q h64
+git -C "$S/o64" merge -q --no-edit -m "h merges main r1" "$R164"
+H64=$(git -C "$S/o64" rev-parse HEAD)
+hook "$S/o64" origin "refs/heads/h64 $H64 refs/heads/h64 $ZERO40"
+check "64a branch merging a sibling, then main, allowed" 0 $rc
+git -C "$S/o64" checkout -q --detach "$R164"
+git -C "$S/o64" merge -q --no-ff --no-edit -m "land sibling f" f64
+git -C "$S/o64" push -q origin HEAD:main
+hook "$S/o64" origin "refs/heads/h64 $H64 refs/heads/h64 $ZERO40"
+check "64 still allowed once the sibling has landed on main" 0 $rc
 
 echo
 echo "== $pass passed, $fail failed =="

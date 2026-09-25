@@ -414,12 +414,13 @@ git config core.hooksPath .githooks
 It refuses any local push that would publish a commit touching
 `records/**`, using the same commit-level walk the provenance audit
 runs. It blocks every push the audit would redden main for, and some the
-audit would pass: a merge is exempt only when its records tree is exactly
-the newest published records state it contains (the tree of every merge
-base of the merge and the comparator), so a merge that keeps an older
-published state over a newer one is refused on a branch, where the
-audit, which only sees main, would not call it a rollback. Where those
-merge bases disagree (a criss-cross history) no merge is exempt.
+audit would pass: a merge is exempt only when merging it into the
+destination main (`git merge-tree`, the merge GitHub would compute) leaves
+main's records exactly as they are, so a merge that would roll main's
+records back is refused on a branch, where the audit, which only sees
+main, would not call it a rollback. Every merge in the push whose records
+differ from any parent is judged that way, including the ones git's path
+walk skips because their only differing parent is already on main.
 Pushes to `main` are judged on every commit they publish; any other ref
 is judged on the branch's own contribution against the main of the
 destination that push is actually landing in — fetched at push time and

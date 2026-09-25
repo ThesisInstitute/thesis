@@ -20,27 +20,31 @@
 #     the verifier, resolved here the same self-anchoring way, from the
 #     graph BEING PUSHED rather than from ambient HEAD). The guard runs
 #     before the audit ever sees the commit, so it asks one thing more:
-#     that the merge's records tree be exactly the newest published records
-#     state the merge contains — the tree of every merge base of the merge
-#     and the comparator, the newest commits of its history the comparator
-#     also holds. That one test does three jobs. It admits a branch that
-#     merged main forward and then merges a side branch lagging main's
-#     records (the merge carries main's tree through a parent main does not
-#     yet contain; hit 2026-09-22). It refuses a tree merely EQUAL to main's
-#     that the branch built by hand, since the branch's history holds no
-#     published commit with that tree. And it refuses every rollback of a
-#     published state, however the discarded state is reached: `git merge
-#     -s ours main` on a branch, a literal stale parent, an unpublished
-#     child of newer main, an octopus, a merge that re-selects a state a
-#     published merge had discarded, or one that resurrects records a
-#     published merge deleted (closure never sees a branch push). Where the
-#     merge bases disagree (a criss-cross history) nothing is exempt: the
-#     guard cannot tell which published state is newest, and refusing is
-#     the safe side of that doubt. An ancient records state resurrected
-#     through a pre-epoch parent is what the epoch test refuses. No
-#     resolvable epoch means no exemption at all — never a weaker one.
-#     This is stricter than the audit's merge rule, which never sees a
-#     branch and so has no notion of a rollback relative to main.
+#     that merging the commit into the comparator (git merge-tree, the
+#     merge GitHub would compute) leave the comparator's records exactly as
+#     they are. A merge that passes publishes nothing main lacks and rolls
+#     nothing main holds back. It admits a branch that merged main forward
+#     and then merges a side branch lagging main's records (hit
+#     2026-09-22), a branch whose sibling PR has since landed on main, and
+#     a merge that keeps main's restoration of an earlier state. It refuses
+#     a merge that carries records main does not have, and every rollback
+#     of main's records the merge would bring: `git merge -s ours main`, a
+#     literal stale parent, an unpublished child of newer main, an octopus,
+#     re-selecting a state a published merge discarded, resurrecting
+#     records a published merge deleted. A records conflict in that merge,
+#     unrelated histories, or a git without merge-tree --write-tree exempt
+#     nothing. A tree merely EQUAL to main's that the branch built by hand
+#     is exempt as a merge — merging it changes nothing — but the commit
+#     that built it is not a merge and is refused on its own.
+#     Git's path walk skips a merge whose only differing parent is already
+#     on the comparator (`git merge -s ours` of an older main commit), so
+#     every merge in the range whose records differ from any parent is
+#     judged the same way, walked or not. An ancient records state
+#     resurrected through a pre-epoch parent is what the epoch test
+#     refuses. No resolvable epoch means no exemption at all — never a
+#     weaker one. This is stricter than the audit's merge rule, which
+#     never sees a branch and so has no notion of a rollback relative to
+#     main.
 #   - enforce_range_content_closure: if nothing in the range needs
 #     attestation yet the endpoints disagree about records content, the
 #     change rode in through parent-order trickery or a rewind. Applied to
@@ -139,22 +143,40 @@ epoch_of() { # epoch_of <commit>
     printf '%s\n' "$commits"
 }
 
-# A parent may vouch for a merge only if the audit would let it — in scope,
-# not a proven ancestor of the epoch — and only if the merge's records tree
-# is the newest published records state the merge contains: the records tree
-# of every merge base of the merge and the comparator. The merge bases are
-# the newest commits of the merge's history that the comparator also holds;
-# a merge whose records differ from theirs either brings in content nobody
-# published or keeps an older published state over a newer one. Merge bases
-# that disagree among themselves exempt nothing.
-parent_may_exempt() { # parent_may_exempt <parent> <base> <epoch> <merge>
-    [ -n "$3" ] || return 1
-    git merge-base --is-ancestor "$1" "$3" 2>/dev/null && return 1
-    bases=$(git merge-base --all "$4" "$2" 2>/dev/null) || return 1
-    [ -n "$bases" ] || return 1
-    mtree=$(records_tree "$4")
-    for z in $bases; do
-        [ "$(records_tree "$z")" = "$mtree" ] || return 1
+# A parent may vouch for a merge only if the audit would let it: its records
+# tree is the merge's, and it is in scope (not a proven ancestor of the
+# epoch). A vouched merge is exempt only if merging it into the comparator
+# leaves the comparator's records as they are (merge_keeps_records).
+parent_may_vouch() { # parent_may_vouch <parent> <epoch> <merge>
+    [ -n "$2" ] || return 1
+    [ "$(records_tree "$1")" = "$(records_tree "$3")" ] || return 1
+    ! git merge-base --is-ancestor "$1" "$2" 2>/dev/null
+}
+merge_keeps_records() { # merge_keeps_records <merge> <comparator>
+    out=$(git merge-tree --write-tree --name-only --no-messages "$2" "$1" \
+        2>/dev/null)
+    rc=$?
+    [ "$rc" -le 1 ] || return 1
+    tree=$(printf '%s\n' "$out" | sed -n 1p)
+    [ -n "$tree" ] || return 1
+    if [ "$rc" = "1" ] &&
+        printf '%s\n' "$out" | sed 1d | grep -Eq '^records(/|$)'; then
+        return 1
+    fi
+    [ "$(records_tree "$tree")" = "$(records_tree "$2")" ]
+}
+# Merges in the range whose records tree differs from any parent, including
+# parents already on the comparator, which git's path walk does not compare.
+records_merges() { # records_merges <range>
+    merges=$(git rev-list --merges "$1" 2>/dev/null) || return 1
+    for m in $merges; do
+        mt=$(records_tree "$m")
+        for q in $(git rev-parse "$m^@" 2>/dev/null); do
+            if [ "$(records_tree "$q")" != "$mt" ]; then
+                echo "$m"
+                break
+            fi
+        done
     done
 }
 
@@ -187,18 +209,22 @@ while read -r _local_ref local_sha remote_ref remote_sha; do
         refuse "$remote_ref" "range $range failed to walk" || status=1
         continue
     fi
+    if ! extra=$(records_merges "$range"); then
+        refuse "$remote_ref" "range $range failed to list merges" || status=1
+        continue
+    fi
+    candidates=$(printf '%s\n%s\n' "$walked" "$extra" | awk 'NF && !seen[$0]++')
     epoch=$(epoch_of "$local_sha") || epoch=""
     offenders=""
-    for c in $walked; do
-        ctree=$(records_tree "$c")
+    for c in $candidates; do
         nparent=0
-        exempt=0
+        vouched=0
         for p in $(git rev-parse "$c^@" 2>/dev/null); do
             nparent=$((nparent + 1))
-            [ "$(records_tree "$p")" = "$ctree" ] || continue
-            parent_may_exempt "$p" "$base" "$epoch" "$c" && exempt=1
+            parent_may_vouch "$p" "$epoch" "$c" && vouched=1
         done
-        if [ "$nparent" -ge 2 ] && [ "$exempt" = "1" ]; then
+        if [ "$nparent" -ge 2 ] && [ "$vouched" = "1" ] &&
+            merge_keeps_records "$c" "$base"; then
             continue
         fi
         offenders="$offenders $c"
