@@ -53,6 +53,17 @@ hook_url() { # hook_url <clone_dir> <remote_name> <url> <line...>
     printf '%s\n' "$@" | (cd "$d" && sh "$HOOK" "$rn" "$u" 2>"$S/err")
     rc=$?
 }
+walked() { # walked <dir> <base> <tip> <commit>: is <commit> in the guard's walk?
+    git -C "$1" -c log.follow=false -c diff.ignoreSubmodules=none log \
+        --full-history --format=%H "$2..$3" -- records/ | grep -qx "$4"
+}
+fresh_origin() { # fresh_origin <name>: bare origin + clone $S/<name> with an epoch
+    git init -q --bare "$S/$1.git"
+    git -C "$S/$1.git" symbolic-ref HEAD refs/heads/main
+    git clone -q "$S/$1.git" "$S/$1" 2>/dev/null
+    commit_file "$S/$1" src/seed.txt s "seed $1"
+    commit_file "$S/$1" scripts/verify_records_attestations.py "# stub" "epoch $1"
+}
 commit_file() { # commit_file <dir> <path> <content> <msg>
     mkdir -p "$1/$(dirname "$2")"
     echo "$3" > "$1/$2"
@@ -562,6 +573,8 @@ WRAP=$(git -C "$S/dev23" commit-tree "$P^{tree}" -p "$P" -p "$Q" \
     -m "wrapped rollback over an unpublished child of main")
 hook "$S/dev23" origin "refs/heads/wrap $WRAP refs/heads/wrap $ZERO40"
 check "55 rollback over an unpublished child of newer main blocks" 1 $rc "$S/err" "wrapped rollback"
+walked "$S/dev23" "$MTIP2" "$WRAP" "$WRAP"
+check "55w the wrapped rollback is in the walked range" 0 $?
 OCTO=$(git -C "$S/dev23" commit-tree "$P^{tree}" -p "$P" -p "$Q" -p "$Q2" \
     -m "octopus rollback over two unpublished children of main")
 hook "$S/dev23" origin "refs/heads/wrap $OCTO refs/heads/wrap $ZERO40"
@@ -574,6 +587,9 @@ GOOD=$(git -C "$S/dev23" commit-tree "$MTIP2^{tree}" -p "$MTIP" -p "$MTIP2" \
     -m "honest no-ff merge of newer main from an older main commit")
 hook "$S/dev23" origin "refs/heads/wrap $GOOD refs/heads/wrap $ZERO40"
 check "58 keeping the newer published state over an older one allowed" 0 $rc
+# a compatibility control only: git does not walk this merge at all
+walked "$S/dev23" "$MTIP2" "$GOOD" "$GOOD"
+check "58w that merge is outside the walked range" 1 $?
 git -C "$S/dev23" checkout -qb side "$INIT"
 commit_file "$S/dev23" src/v.txt v "src on side"
 git -C "$S/dev23" merge -q --no-edit origin/main            # forward merge
@@ -585,6 +601,8 @@ if [ "$(git -C "$S/dev23" rev-parse "$SIDE:records")" != \
 fi
 hook "$S/dev23" origin "refs/heads/side $SIDE refs/heads/side $ZERO40"
 check "59 side merge of a lagging branch allowed" 0 $rc
+walked "$S/dev23" "$MTIP2" "$SIDE" "$SIDE"
+check "59w that side merge is in the walked range" 0 $?
 git -C "$S/dev23" checkout -q -B main origin/main
 git -C "$S/dev23" merge -q --no-edit lag2                   # main absorbs the side branch
 git -C "$S/dev23" push -q origin main
@@ -594,6 +612,81 @@ if [ "$(git -C "$S/dev23" rev-parse "origin/main:records")" != \
 fi
 hook "$S/dev23" origin "refs/heads/side $SIDE refs/heads/side $ZERO40"
 check "59b still allowed once main has absorbed the side branch" 0 $rc
+walked "$S/dev23" "$(git -C "$S/dev23" rev-parse origin/main)" "$SIDE" "$SIDE"
+check "59bw once absorbed, that side merge is outside the walked range" 1 $?
+
+# ---- 60-62: the newest published state a merge contains decides, not
+# which commit last set a parent's records (2026-09-23 review of #280,
+# N1-N3). 60: main restores an earlier records state; a branch that took
+# that restoration and then merges a child of the state main discarded
+# keeps main's current records, an honest merge the walk does visit. 61:
+# a published merge chose b over a; a branch re-selects a over it, with
+# the two states' setters not ancestor-related. 62: a published merge
+# deleted the records; a branch resurrects them over it.
+fresh_origin o60
+commit_file "$S/o60" records/a.txt a "records a"
+A60=$(git -C "$S/o60" rev-parse HEAD)
+commit_file "$S/o60" records/b.txt b "records a+b"
+B60=$(git -C "$S/o60" rev-parse HEAD)
+git -C "$S/o60" rm -q records/b.txt
+git -C "$S/o60" commit -qm "restore records a"
+C60=$(git -C "$S/o60" rev-parse HEAD)
+git -C "$S/o60" push -q origin HEAD:main
+git -C "$S/o60" checkout -qb p60 "$A60"
+commit_file "$S/o60" src/p.txt p "src on p60"
+git -C "$S/o60" merge -q --no-edit "$C60"
+git -C "$S/o60" checkout -qb q60 "$B60"
+commit_file "$S/o60" src/q.txt q "src on q60"
+git -C "$S/o60" checkout -q p60
+git -C "$S/o60" merge -q --no-edit -m "honest merge keeping main's restored records" q60
+M60=$(git -C "$S/o60" rev-parse HEAD)
+if [ "$(git -C "$S/o60" rev-parse "$M60:records")" != \
+    "$(git -C "$S/o60" rev-parse "$C60:records")" ]; then
+    echo "FAIL 60 fixture: the merge did not keep main's records"; fail=$((fail+1))
+fi
+walked "$S/o60" "$C60" "$M60" "$M60"
+check "60w that merge is in the walked range" 0 $?
+hook "$S/o60" origin "refs/heads/p60 $M60 refs/heads/p60 $ZERO40"
+check "60 keeping main's restored records over an older state allowed" 0 $rc
+
+fresh_origin o61
+E61=$(git -C "$S/o61" rev-parse HEAD)
+commit_file "$S/o61" records/a.txt a "records a"
+A61=$(git -C "$S/o61" rev-parse HEAD)
+git -C "$S/o61" checkout -qb b61 "$E61"
+commit_file "$S/o61" records/b.txt b "records b"
+B61=$(git -C "$S/o61" rev-parse HEAD)
+K61=$(git -C "$S/o61" commit-tree "$B61^{tree}" -p "$A61" -p "$B61" \
+    -m "published merge choosing b over a")
+git -C "$S/o61" push -q origin "$K61:refs/heads/main"
+git -C "$S/o61" checkout -qb p61 "$A61"
+commit_file "$S/o61" src/p.txt p "src on p61"
+P61=$(git -C "$S/o61" rev-parse HEAD)
+M61=$(git -C "$S/o61" commit-tree "$P61^{tree}" -p "$P61" -p "$K61" \
+    -m "re-selecting a over the published choice of b")
+hook "$S/o61" origin "refs/heads/p61 $M61 refs/heads/p61 $ZERO40"
+check "61 re-selecting a state a published merge discarded blocks" 1 $rc "$S/err" "re-selecting a over"
+
+fresh_origin o62
+E62=$(git -C "$S/o62" rev-parse HEAD)
+commit_file "$S/o62" records/a.txt a "records a"
+A62=$(git -C "$S/o62" rev-parse HEAD)
+git -C "$S/o62" checkout -qb n62 "$E62"
+commit_file "$S/o62" src/n.txt n "src on n62"
+N62=$(git -C "$S/o62" rev-parse HEAD)
+K62=$(git -C "$S/o62" commit-tree "$N62^{tree}" -p "$A62" -p "$N62" \
+    -m "published merge deleting the records")
+git -C "$S/o62" push -q origin "$K62:refs/heads/main"
+git -C "$S/o62" checkout -qb p62 "$A62"
+commit_file "$S/o62" src/p.txt p "src on p62"
+P62=$(git -C "$S/o62" rev-parse HEAD)
+git -C "$S/o62" checkout -qb q62 "$K62"
+commit_file "$S/o62" src/q.txt q "src on q62"
+Q62=$(git -C "$S/o62" rev-parse HEAD)
+M62=$(git -C "$S/o62" commit-tree "$P62^{tree}" -p "$P62" -p "$Q62" \
+    -m "resurrecting records a published merge deleted")
+hook "$S/o62" origin "refs/heads/p62 $M62 refs/heads/p62 $ZERO40"
+check "62 resurrecting records a published merge deleted blocks" 1 $rc "$S/err" "resurrecting records"
 
 echo
 echo "== $pass passed, $fail failed =="
