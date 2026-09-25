@@ -54,8 +54,10 @@ hook_url() { # hook_url <clone_dir> <remote_name> <url> <line...>
     rc=$?
 }
 walked() { # walked <dir> <base> <tip> <commit>: is <commit> in the guard's walk?
-    git -C "$1" -c log.follow=false -c diff.ignoreSubmodules=none log \
-        --full-history --format=%H "$2..$3" -- records/ | grep -qx "$4"
+    # 0 yes, 1 no, 2 the walk itself failed (never mistaken for "no")
+    _w=$(git -C "$1" -c log.follow=false -c diff.ignoreSubmodules=none log \
+        --full-history --format=%H "$2..$3" -- records/) || return 2
+    printf '%s\n' "$_w" | grep -qx "$4"
 }
 fresh_origin() { # fresh_origin <name>: bare origin + clone $S/<name> with an epoch
     git init -q --bare "$S/$1.git"
@@ -164,6 +166,8 @@ git -C "$S/dev2" update-ref refs/remotes/origin/main "$T"      # forge/stale
 git -C "$S/dev2" remote set-url origin "$S/does-not-exist.git" # fetch fails
 hook "$S/dev2" origin "refs/heads/fb $T refs/heads/fb $TIP"
 check "12 failed refresh: existing ref falls back to endpoint, blocks" 1 $rc "$S/err" "records/topo.txt"
+grep -q "main could not be fetched" "$S/err"
+check "12b the refusal says main was not fetched and to retry" 0 $?
 hook "$S/dev2" origin "refs/heads/fb $T refs/heads/fb $ZERO40"
 check "13 failed refresh: new ref refuses as unverifiable" 1 $rc "$S/err" "cannot verify"
 printf '%s\n' "refs/heads/fb $T refs/heads/fb $ZERO40" \
@@ -477,11 +481,11 @@ fi
 # ---- 48-51: a branch that merged main forward, then merged a side branch
 # lagging main's records: the second merge's records tree is main's, but
 # its same-tree parent is a branch commit main does not contain. Hit
-# 2026-09-22 (thesis#270 merging #269). Merging it into main would leave
-# main's records as they are, so the merge is exempt. A records commit
-# underneath it is still refused as a commit (50), and so is a commit that
-# re-creates main's records by hand (51); a merge over such a copy changes
-# nothing if merged, so only the copying commit is named (51b).
+# 2026-09-22 (thesis#270 merging #269). Its records equal those of its
+# merge base with main, and merging it into main leaves main's records as
+# they are, so the merge is exempt. A records commit underneath it is still
+# refused as a commit (50), and so is a commit that re-creates main's
+# records by hand (51), together with the merge over it (51b).
 git clone -q "$S/origin.git" "$S/dev21" 2>/dev/null
 git -C "$S/dev21" checkout -qb fwd "$INIT"
 commit_file "$S/dev21" src/o.txt o "src on fwd"
@@ -520,10 +524,9 @@ fi
 git -C "$S/dev21" merge -q --no-edit -m "side merge over the hand-made copy" lag
 hook "$S/dev21" origin "refs/heads/replica $(git -C "$S/dev21" rev-parse replica) refs/heads/replica $ZERO40"
 check "51 merge over a hand-made copy of main's records blocks" 1 $rc "$S/err" "re-create main's records by hand"
-# the merge over it changes nothing if merged into main, so the merge is
-# exempt; the hand-made commit is what the push is refused for
-grep -q "side merge over the hand-made copy" "$S/err"
-check "51b the merge over the copy carries only main's records, not named" 1 $?
+# the merge over it changes records relative to its merge base with main,
+# so it is named too, beside the commit that made the copy
+check "51b that merge is named too" 1 $rc "$S/err" "side merge over the hand-made copy"
 
 # ---- 52-53: a rollback of a PUBLISHED records state on a branch push.
 # Main has two post-epoch records states; a branch off the older one
@@ -592,7 +595,8 @@ GOOD=$(git -C "$S/dev23" commit-tree "$MTIP2^{tree}" -p "$MTIP" -p "$MTIP2" \
     -m "honest no-ff merge of newer main from an older main commit")
 hook "$S/dev23" origin "refs/heads/wrap $GOOD refs/heads/wrap $ZERO40"
 check "58 keeping the newer published state over an older one allowed" 0 $rc
-# a compatibility control only: git does not walk this merge at all
+# git's path walk does not visit this merge, but the guard judges it
+# anyway (its records differ from a parent), and it keeps main's records:
 walked "$S/dev23" "$MTIP2" "$GOOD" "$GOOD"
 check "58w that merge is outside the walked range" 1 $?
 git -C "$S/dev23" checkout -qb side "$INIT"
@@ -759,6 +763,27 @@ git -C "$S/o64" merge -q --no-ff --no-edit -m "land sibling f" f64
 git -C "$S/o64" push -q origin HEAD:main
 hook "$S/o64" origin "refs/heads/h64 $H64 refs/heads/h64 $ZERO40"
 check "64 still allowed once the sibling has landed on main" 0 $rc
+
+# ---- 65: a merge that equals main's CURRENT records only because main has
+# restored an older state, without containing that restoration: main is
+# E -> A(a) -> B(b) -> C(a); M = P(a, a src-only child of A) + B with P's
+# tree. Merging M into C changes nothing, but its merge base is B (b), so
+# once main restores b again (D), a GitHub merge would roll main back to a.
+# Refused at push time (2026-09-25 review of #280, R19 #1).
+fresh_origin o65
+commit_file "$S/o65" records/x.txt a "records a"
+A65=$(git -C "$S/o65" rev-parse HEAD)
+commit_file "$S/o65" records/x.txt b "records b"
+B65=$(git -C "$S/o65" rev-parse HEAD)
+commit_file "$S/o65" records/x.txt a "records a restored"
+git -C "$S/o65" push -q origin HEAD:main
+git -C "$S/o65" checkout -qb p65 "$A65"
+commit_file "$S/o65" src/p.txt p "src on p65"
+P65=$(git -C "$S/o65" rev-parse HEAD)
+M65=$(git -C "$S/o65" commit-tree "$P65^{tree}" -p "$P65" -p "$B65" \
+    -m "ours-merge of b while main shows a again")
+hook "$S/o65" origin "refs/heads/p65 $M65 refs/heads/p65 $ZERO40"
+check "65 a merge equal to main only through main's restoration blocks" 1 $rc "$S/err" "ours-merge of b while main shows a again"
 
 echo
 echo "== $pass passed, $fail failed =="

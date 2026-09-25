@@ -19,23 +19,34 @@
 #     proven ancestor of the enforcement epoch (the commit that introduced
 #     the verifier, resolved here the same self-anchoring way, from the
 #     graph BEING PUSHED rather than from ambient HEAD). The guard runs
-#     before the audit ever sees the commit, so it asks one thing more:
-#     that merging the commit into the comparator (git merge-tree, the
-#     merge GitHub would compute) leave the comparator's records exactly as
-#     they are. A merge that passes publishes nothing main lacks and rolls
-#     nothing main holds back. It admits a branch that merged main forward
-#     and then merges a side branch lagging main's records (hit
-#     2026-09-22), a branch whose sibling PR has since landed on main, and
-#     a merge that keeps main's restoration of an earlier state. It refuses
-#     a merge that carries records main does not have, and every rollback
-#     of main's records the merge would bring: `git merge -s ours main`, a
-#     literal stale parent, an unpublished child of newer main, an octopus,
-#     re-selecting a state a published merge discarded, resurrecting
-#     records a published merge deleted. A records conflict in that merge,
-#     unrelated histories, or a git without merge-tree --write-tree exempt
-#     nothing. A tree merely EQUAL to main's that the branch built by hand
-#     is exempt as a merge — merging it changes nothing — but the commit
-#     that built it is not a merge and is refused on its own.
+#     before the audit ever sees the commit, so it asks two things more,
+#     both against the comparator (normally the destination's main):
+#     that the merge's records tree equal the records tree of the merge
+#     base git would use to merge it into the comparator (the single merge
+#     base, or the merge of two, as git builds its virtual ancestor), and
+#     that merging it into the comparator (git merge-tree) leave the
+#     comparator's records exactly as they are. The first means the merge
+#     changes no records relative to that base, so a later three-way merge
+#     takes main's side for every record even after main moves on — a
+#     merge that only happens to equal main's CURRENT records (main had
+#     restored a state the merge rolls back to) is refused. The second
+#     catches conflicts and rename effects inside records/. Together they
+#     admit a branch that merged main forward and then merges a side branch
+#     lagging main's records (hit 2026-09-22), a branch whose sibling PR has
+#     since landed on main, and a merge that keeps main's restoration of an
+#     earlier state; they refuse a merge that carries records main does not
+#     have and every rollback of main's records: `git merge -s ours main`,
+#     a literal stale parent, an unpublished child of newer main, an
+#     octopus, re-selecting a state a published merge discarded,
+#     resurrecting records a published merge deleted, and keeping a state
+#     main has restored but the merge does not contain. A records conflict,
+#     unrelated histories, more than two merge bases, or a git without
+#     merge-tree --write-tree exempt nothing. The check uses the comparator
+#     pinned at push time and local git; the audit on main remains the
+#     check of what a merge actually lands. A source file renamed INTO
+#     records/ on main while a branch edits it is not examined (no records
+#     commit on the branch to walk). A tree merely EQUAL to main's that the
+#     branch built by hand is refused as the commit that built it.
 #     Git's path walk skips a merge whose only differing parent is already
 #     on the comparator (`git merge -s ours` of an older main commit), so
 #     every merge in the range whose records differ from any parent is
@@ -165,6 +176,32 @@ merge_keeps_records() { # merge_keeps_records <merge> <comparator>
     fi
     [ "$(records_tree "$tree")" = "$(records_tree "$2")" ]
 }
+# The records tree of the merge base git would use to merge <a> into <b>:
+# the single merge base, or, for two, their merge (git's virtual
+# ancestor). No merge base, more than two, or a records conflict between
+# two is a failure.
+base_records_tree() { # base_records_tree <a> <b>
+    bases=$(git merge-base --all "$1" "$2" 2>/dev/null) || return 1
+    # shellcheck disable=SC2086
+    set -- $bases
+    case $# in
+    1) records_tree "$1" ;;
+    2)
+        out=$(git merge-tree --write-tree --name-only --no-messages "$1" "$2" \
+            2>/dev/null)
+        rc=$?
+        [ "$rc" -le 1 ] || return 1
+        tree=$(printf '%s\n' "$out" | sed -n 1p)
+        [ -n "$tree" ] || return 1
+        if [ "$rc" = "1" ] &&
+            printf '%s\n' "$out" | sed 1d | grep -Eq '^records(/|$)'; then
+            return 1
+        fi
+        records_tree "$tree"
+        ;;
+    *) return 1 ;;
+    esac
+}
 # Merges in the range whose records tree differs from any parent, including
 # parents already on the comparator, which git's path walk does not compare.
 records_merges() { # records_merges <range>
@@ -187,12 +224,14 @@ while read -r _local_ref local_sha remote_ref remote_sha; do
         continue
     fi
     base=""
+    unpinned=""
     if [ "$remote_ref" != "refs/heads/main" ] && pin_destination_main; then
         base=$dest_main
     fi
     if [ -z "$base" ]; then
         if [ "$remote_sha" != "$ZERO" ]; then
             base="$remote_sha"
+            [ "$remote_ref" = "refs/heads/main" ] || unpinned=1
         elif pin_destination_main; then
             base=$dest_main
         else
@@ -224,6 +263,8 @@ while read -r _local_ref local_sha remote_ref remote_sha; do
             parent_may_vouch "$p" "$epoch" "$c" && vouched=1
         done
         if [ "$nparent" -ge 2 ] && [ "$vouched" = "1" ] &&
+            btree=$(base_records_tree "$c" "$base") &&
+            [ "$btree" = "$(records_tree "$c")" ] &&
             merge_keeps_records "$c" "$base"; then
             continue
         fi
@@ -254,6 +295,12 @@ while read -r _local_ref local_sha remote_ref remote_sha; do
     if [ -n "$paths" ]; then
         echo "  paths:" >&2
         printf '%s\n' "$paths" | head -5 | sed 's/^/    /' >&2
+    fi
+    if [ -n "$unpinned" ]; then
+        echo "" >&2
+        echo "The destination's main could not be fetched, so this was checked" >&2
+        echo "against the branch's own remote tip, where records main already" >&2
+        echo "published count as new. Retry when the fetch works." >&2
     fi
     echo "" >&2
     echo "records/** is written by the allowlisted workflows, which attest" >&2
