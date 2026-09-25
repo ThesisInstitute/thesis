@@ -1046,7 +1046,12 @@ def test_the_guard_refuses_a_fact_chronicle_would_hold_in_two_units() -> None:
         assert resolve_pending.bls_ledger_unit_conflict([row], series, spec)
 
 
-def test_the_guard_lifts_when_a_correction_restates_the_row_in_millions() -> None:
+def test_the_guard_reads_the_last_row_for_a_record_id() -> None:
+    # A later row for the same record id replaces the earlier one here, as a
+    # correction replaces it in Chronicle's current view. This proves only
+    # the guard's reading. Chronicle's catalog generator cannot yet accept a
+    # correction of a row written before assertion versioning, which every
+    # June 2026 A-19 row is (docs/anchor-verifications.md).
     june = _chronicle_june_row()
     correction = copy.deepcopy(june)
     correction["value"] = 7.759
@@ -1060,6 +1065,32 @@ def test_the_guard_lifts_when_a_correction_restates_the_row_in_millions() -> Non
     assert resolve_pending.bls_ledger_unit_conflict(
         [correction, june], PRODUCTION, spec
     )
+
+
+def test_the_guard_matches_the_concept_under_another_record_id() -> None:
+    # Chronicle keys identity on the measure concept, not the record id. A
+    # row filed under another id whose concept is the series plus its own
+    # month is the same lineage.
+    quits = "bls.jolts.quits_rate"
+    spec = resolve_pending.BLS_API_ADAPTERS[quits]
+    row = copy.deepcopy(_chronicle_june_row())
+    row["source_record_id"] = "legacy.quits.june_2026.first_print"
+    row["measure"]["unit"] = "rate"
+    for token in ("2026_06", "2026-06", "june_2026", "jun_2026"):
+        row["measure"]["concept"] = f"{quits}.{token}"
+        assert resolve_pending.bls_ledger_unit_conflict([row], quits, spec), token
+    row["measure"]["concept"] = quits
+    assert resolve_pending.bls_ledger_unit_conflict([row], quits, spec)
+    # A suffix that is not this row's own month names another concept.
+    for token in ("total", "2026_07", "july_2026", "2026"):
+        row["measure"]["concept"] = f"{quits}.{token}"
+        assert resolve_pending.bls_ledger_unit_conflict([row], quits, spec) is None
+
+
+def test_every_registrable_spec_names_its_own_series() -> None:
+    for stem in REGISTRABLE:
+        spec = resolve_pending.BLS_API_ADAPTERS[stem]
+        assert spec["series_stem"] == stem
 
 
 def test_the_guard_ignores_other_identities_and_other_series() -> None:
@@ -1104,8 +1135,8 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     # The same run as the real-router test above, against a ledger that holds
-    # Chronicle's June row: the reference is refused, nothing is fetched, and
-    # nothing is proposed.
+    # Chronicle's June row: the reference is refused, nothing is fetched,
+    # nothing is proposed, and the run exits 1.
     series = PRODUCTION
     contract = register_targets.build_contract(
         _target(series, period="2026-08", release="2026-09-04"), dt.date(2026, 8, 13)
@@ -1143,10 +1174,12 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
     monkeypatch.setattr(resolve_pending, "utc_now", lambda: "2026-09-25T13:40:00Z")
     monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
-    assert resolve_pending.main() == 0
+    # The run fails so the alarm fires every day until Chronicle is curated.
+    assert resolve_pending.main() == 1
     out = capsys.readouterr().out
     assert f"LEDGER UNIT CONFLICT (refusing): {ref}" in out
     assert "nothing new to record" in out
+    assert "1 reference(s) refused for a Chronicle unit conflict" in out
     assert fetched == []
 
 

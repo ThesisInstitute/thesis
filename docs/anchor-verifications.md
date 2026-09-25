@@ -1112,10 +1112,10 @@ the section above do. Max chose this route on 2026-09-25 over an
 Archive-capture adapter (thesis#270, closed unmerged). The registrable BLS API
 specs go from six to twelve.
 
-**No new A-19 target can resolve until Chronicle curates the six lineages to
-one unit.** See "Chronicle holds these lineages in thousands" below. The
-resolver refuses the capture until then, so the failure is loud and confined to
-these six references.
+**No new A-19 target can resolve until Chronicle can hold the six lineages in
+one unit.** See "Chronicle holds these lineages in thousands" below. Until
+then the resolver refuses these six references, appends everything else, and
+exits 1, so the daily run fails and the alarm fires.
 
 ## Series identity
 
@@ -1163,7 +1163,8 @@ Employment Situation that first published the month. The evidence is the table
 element of the Archive's captures of 2026-07-10, 2026-08-19 and 2026-09-04,
 whose current-month column is headed "June 2026", "July 2026" and "Aug. 2026"
 (`tests/fixtures/a19/`). So, unlike the JOLTS and CES anchors above, these
-anchors are first prints: the unadjusted figures had not moved by 2026-09-25.
+anchors are first prints: the unadjusted figures had not moved by the time
+each API capture was taken.
 
 Run-time tolerance is 0.001 million, one step of the published precision. This
 is the same lab choice as the 0.1 on one-decimal rates. A revision that reaches
@@ -1201,10 +1202,19 @@ The `a19` leg and the BLS API family both claim the six stems. The rule is the
 one the ALFRED and BLS API families already share: a reference whose
 registration binds `bls-api` routes to the BLS API leg. Every other reference
 keeps the `a19` leg. That covers the 18 `generic-url` registrations for July,
-August and September 2026, and the June cells that predate bindings.
-`EXECUTION_PLAN_UNREGISTRABLE_FAMILIES` still lists `a19`, so a contract that
-does not carry the whole reviewed `bls-api` template is still refused. This
-change decides nothing about the 18 existing registrations.
+August and September 2026, and the June cells that predate bindings. A new
+contract that does not carry the whole reviewed `bls-api` template is still
+refused:
+
+- a `bls-api` contract whose template drifted, by the BLS API admission
+  predicate;
+- a `generic-url` contract, by the rule that names no executor;
+- any other adapter, because it routes to the `a19` leg, which emits thousands
+  and has no admission predicate (`EXECUTION_PLAN_UNREGISTRABLE_FAMILIES`
+  still lists it).
+
+A test checks this for every adapter the registrar offers. This change decides
+nothing about the 18 existing registrations.
 
 ## Calendar
 
@@ -1252,25 +1262,36 @@ Chronicle commit `3dd95a0d`, with one synthetic October production row added:
 - in thousands, it exited 0, as it does on the unmodified branch.
 
 The resolver regenerates that catalog for every append, and sends all of a
-run's new rows in one proposal. So one such fact would fail the whole run's
-append, not only its own row.
+run's new rows in one proposal. On this base, one such fact would fail the
+whole run's append, not only its own row. thesis#269 adds an exclusion at
+append time for any row the catalog refuses; the check below still refuses
+earlier, before the keyless request is spent.
 
 `bls_ledger_unit_conflict` refuses the capture before the API request is
-spent. It fires when the ledger's latest row for any period of the series has
-another unit, for the same entity and geography. Only that reference is
-refused (`LEDGER UNIT CONFLICT`); the rest of the run appends. Chronicle's
-current view drops a row that a later correction supersedes, and a correction
-keeps the row's `source_record_id`. The guard reads the last row per record id
-the same way, so a correction that restates June in millions lifts it
-automatically. A curation of another kind, a split for example, keeps the guard
-refusing until a reviewed change lifts it. That fails closed.
+spent. It fires when the ledger already holds the series in another unit, for
+the same entity and geography. A row belongs to the series when its record id
+is under the series, or when its measure concept is the series or the series
+plus a spelling of the row's own month (`2026_06`, `2026-06`, `june_2026`,
+`jun_2026`). Chronicle strips those spellings, and may strip others, so the
+guard can miss a conflict; a miss is the behaviour before the guard existed.
+Of each record id it reads only the last row, as Chronicle's current view does
+after a correction. Only that reference is refused (`LEDGER UNIT CONFLICT`).
+The rest of the run appends, and the run then exits 1.
 
-**What this needs.** Chronicle must curate the six lineages to one unit before
-the first October capture, due 2026-11-06. If the October month is still
-refused on 2026-12-04, the November release replaces it as the latest month and
-the targets are lost as missed windows, never resolved to a revised value. The
-18 `generic-url` registrations are also in millions, so the same curation is
-needed before the `a19` leg records any of them.
+**What this needs.** The obvious curation does not work yet. The six June rows
+sit in the ledger's immutable prefix (lines 119 to 124) and were written
+before assertion versioning, so they carry no `assertionVersion`.
+`build_series_catalog.py` learns version ids only from rows that carry one, so
+a correction that supersedes a June row exits 1 with "supersedes unknown
+version", although receipt's append gate would accept it. Chronicle therefore
+needs one of two changes first. Either the generator addresses rows written
+before versioning by their content-address id, as receipt does, and six
+corrections then restate June in millions. Or one identity may hold units that
+convert by scale. That is Max's decision, d397. It must land before the first
+October capture, due 2026-11-06. If October is still refused on 2026-12-04, the
+November release replaces it as the latest month and the targets are lost as
+missed windows, never resolved to a revised value. The 18 `generic-url`
+registrations are also in millions and wait on the same change.
 
 ## Fixtures
 

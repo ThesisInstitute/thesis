@@ -2533,8 +2533,9 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
 # The anchors are first prints, not only settled values: each is the figure
 # Table A-19 printed in the Employment Situation that first published the
 # month (tests/fixtures/a19, the Archive's captures of 2026-07-10, 2026-08-19
-# and 2026-09-04), and the API served the same integer on 2026-09-25. That
-# equality is also what ties each series id to its A-19 row.
+# and 2026-09-04), and the API capture of each series in tests/fixtures/bls_api
+# serves the same integer. That equality is also what ties each series id to
+# its A-19 row.
 # ``anchor_abs_tolerance`` is one step of the published precision (1,000
 # people, 0.001 million), the same lab choice as the 0.1 on one-decimal
 # rates: BLS does not normally revise unadjusted CPS data, and a revision
@@ -2600,11 +2601,13 @@ for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
             "January was no longer the latest month."
         ),
     }
-for _spec in BLS_API_ADAPTERS.values():
+for _stem, _spec in BLS_API_ADAPTERS.items():
     if "binding_transform" in _spec:
         # Every registrable spec pins anchors in the unit it emits (see the
         # note above the six entries); legacy specs pin the served level.
         _spec["anchor_unit"] = "emitted"
+        # The main loop's unit guard needs the series a spec resolves.
+        _spec["series_stem"] = _stem
 _BLS_EVIDENCE_NOTES_LATEST_CPI = (
     "One-month percent change for {period}, derived as 100 x (index / prior "
     "month's index - 1) rounded to one decimal from the seasonally adjusted "
@@ -8146,17 +8149,27 @@ def bls_ledger_unit_conflict(
 
     Chronicle's ``scripts/build_series_catalog.py`` groups observations by
     (concept, geography, entity) and exits with "unit conflict within
-    identity" when one identity holds two units. The resolver regenerates
-    that catalog for every append and sends all of a run's rows in one
-    proposal, so one conflicting fact fails the whole run's append
-    (verified 2026-09-25 against Chronicle's generator). The Table A-19
-    lineages hold a June 2026 observation in thousands, and these specs
-    emit millions.
+    identity" when one identity holds two units (verified 2026-09-25 against
+    Chronicle's generator). The resolver regenerates that catalog for every
+    append and sends all of a run's rows in one proposal, so on this base one
+    conflicting fact fails the whole run's append. (thesis#269 adds an
+    append-time exclusion; this check still saves the keyless request.) The
+    Table A-19 lineages hold a June 2026 observation in thousands, and these
+    specs emit millions.
+
+    A row belongs to the series when its record id is under ``stem``, or when
+    its measure concept is ``stem`` itself or ``stem`` plus a spelling of the
+    row's own month (``2026_06``, ``2026-06``, ``june_2026``, ``jun_2026``):
+    the spellings Chronicle's catalog lists as stripped period segments.
+    Chronicle may strip more, so this can miss a conflict; a miss is the
+    behaviour before the guard existed, never a wrong value.
 
     Chronicle's current view drops a row that a later correction
-    supersedes. A correction keeps the fact's ``source_record_id``, so the
-    last row per record id stands in for that view here. A curation that
-    leaves the old row current in this sense keeps refusing: fail closed.
+    supersedes, and a correction keeps the fact's ``source_record_id``, so the
+    last row per record id stands in for that view here. Chronicle's catalog
+    generator cannot yet accept a correction of a row written before
+    assertion versioning (every June 2026 A-19 row is one); until it can,
+    nothing lifts this refusal for Table A-19.
     """
 
     entity = spec.get("entity", {"name": "economy", "role": "aggregate"})
@@ -8167,7 +8180,13 @@ def bls_ledger_unit_conflict(
     latest: dict[str, Mapping[str, Any]] = {}
     for row in ledger_rows:
         record_id = row.get("source_record_id")
-        if isinstance(record_id, str) and record_id.startswith(stem + "."):
+        if not isinstance(record_id, str):
+            continue
+        concept = (row.get("measure") or {}).get("concept")
+        if record_id.startswith(stem + ".") or (
+            isinstance(concept, str)
+            and _concept_names_series(concept, stem, row.get("period"))
+        ):
             latest[record_id] = row
     units = set()
     for row in latest.values():
@@ -8188,6 +8207,45 @@ def bls_ledger_unit_conflict(
         "whole append with a unit conflict. Chronicle must curate the lineage "
         "to one unit first"
     )
+
+
+_MONTH_NAMES = (
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+)
+
+
+def _concept_names_series(concept: str, stem: str, period: Any) -> bool:
+    """Whether ``concept`` is ``stem``, or ``stem`` plus its own month token."""
+
+    if concept == stem:
+        return True
+    if not concept.startswith(stem + "."):
+        return False
+    token = concept[len(stem) + 1 :]
+    if not isinstance(period, Mapping) or period.get("type") != "month":
+        return False
+    match = re.fullmatch(r"(\d{4})-(\d{2})", str(period.get("value") or ""))
+    if not match or not 1 <= int(match.group(2)) <= 12:
+        return False
+    year, month = match.group(1), match.group(2)
+    name = _MONTH_NAMES[int(month) - 1]
+    return token in {
+        f"{year}_{month}",
+        f"{year}-{month}",
+        f"{name}_{year}",
+        f"{name[:3]}_{year}",
+    }
 
 
 FSA_CRP_BINDING_TEMPLATE_KEYS = {
@@ -13854,6 +13912,10 @@ def main() -> int:
     )
     ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
+    # References refused because their fact would give a Chronicle lineage a
+    # second unit. The rest of the run still appends; the run then exits 1 so
+    # the alarm fires every day until Chronicle is curated.
+    ledger_unit_refusals: list[str] = []
 
     fetched_rows: list[tuple[dict[str, Any], str, str, bytes, str, str]] = []
     today = dt.date.today()
@@ -14436,12 +14498,12 @@ def main() -> int:
                     continue
                 # Refused before the keyless request is spent, and only this
                 # reference: every other row in the run still appends.
-                stem = next(
-                    name for name, known in BLS_API_ADAPTERS.items() if known is spec
+                unit_conflict = bls_ledger_unit_conflict(
+                    ledger_rows, spec["series_stem"], spec
                 )
-                unit_conflict = bls_ledger_unit_conflict(ledger_rows, stem, spec)
                 if unit_conflict:
                     print(f"  LEDGER UNIT CONFLICT (refusing): {ref} — {unit_conflict}")
+                    ledger_unit_refusals.append(f"{ref}: {unit_conflict}")
                     continue
             bls_key = (
                 series_id,
@@ -15596,12 +15658,12 @@ def main() -> int:
         return 1
     if not fetched_rows:
         print("nothing new to record")
-        return 0
+        return _report_ledger_unit_refusals(ledger_unit_refusals)
     if args.dry_run:
         print(f"dry-run: would append {len(fetched_rows)} row(s)")
         for row, *_ in fetched_rows:
             print(json.dumps(row)[:200])
-        return 0
+        return _report_ledger_unit_refusals(ledger_unit_refusals)
 
     run_retrieved_at = min(item[4] for item in fetched_rows)
     run_dir = resolution_run_dir(run_retrieved_at)
@@ -15636,6 +15698,7 @@ def main() -> int:
         print("every fetched row was refused; nothing to append")
         for line in provenance_refusals:
             print(f"  refused: {line}")
+        _report_ledger_unit_refusals(ledger_unit_refusals)
         return 1
 
     updated = (
@@ -15684,8 +15747,23 @@ def main() -> int:
             f"{len(provenance_refusals)} row(s) refused contract binding; "
             "appended the rest — fix the registrations above"
         )
+        _report_ledger_unit_refusals(ledger_unit_refusals)
         return 1
-    return 0
+    return _report_ledger_unit_refusals(ledger_unit_refusals)
+
+
+def _report_ledger_unit_refusals(refusals: list[str]) -> int:
+    """List references the unit guard refused; 1 when there were any."""
+
+    if not refusals:
+        return 0
+    print(
+        f"{len(refusals)} reference(s) refused for a Chronicle unit conflict; "
+        "curate the lineage in Chronicle before its first-print window closes"
+    )
+    for line in refusals:
+        print(f"  refused: {line}")
+    return 1
 
 
 if __name__ == "__main__":
