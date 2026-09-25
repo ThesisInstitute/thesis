@@ -269,14 +269,36 @@ def test_a_value_is_found_by_its_headers_not_its_position() -> None:
     )
     period, values = resolve_pending.a19_table(relabeled)
     assert (period, values["production"]) == ("2026-08", 7482.0)
-    # Inline markup inside a number keeps its digits together; a line break
-    # between words keeps them apart.
-    assert resolve_pending.a19_table(
-        html.replace(">7,716<", ">7,<span>716</span><", 1)
-    ) == ("2026-08", ANCHORS["2026-08"])
+    # Markup inside a number splits it: the page is refused, never misread
+    # (a footnote marker before a value must not become a leading digit).
+    for split in (">7,<span>716</span><", "><sup>1</sup><span>7,716</span><"):
+        assert resolve_pending.a19_table(html.replace(">7,716<", split, 1)) is None
+    # A line break inside a label still reads as a space.
     assert resolve_pending.a19_table(
         html.replace("Production occupations", "Production<br/>occupations", 1)
     ) == ("2026-08", ANCHORS["2026-08"])
+    # An element that repeats its headers or id attribute: a browser keeps
+    # the first, so the page is refused rather than read by the last.
+    assert (
+        resolve_pending.a19_table(
+            html.replace(
+                'headers="cps_eande_m19.r.6.1 cps_eande_m19.h.1.2 '
+                'cps_eande_m19.h.2.2 cps_eande_m19.h.3.3"',
+                'headers="cps_eande_m19.r.6.1 cps_eande_m19.h.1.2 '
+                'cps_eande_m19.h.2.2 cps_eande_m19.h.3.3" headers="x"',
+                1,
+            )
+        )
+        is None
+    )
+    assert (
+        resolve_pending.a19_table(
+            html.replace(
+                'id="cps_eande_m19.r.6.1"', 'id="cps_eande_m19.r.6.1" id="x"', 1
+            )
+        )
+        is None
+    )
 
 
 @pytest.mark.parametrize(
@@ -495,16 +517,26 @@ URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
 HEADER = ["timestamp", "original", "statuscode", "digest"]
 
 
-def digest(name: str) -> str:
-    """A content digest of the form the index uses (32 base-32 characters)."""
+PAGE_DIGESTS = {"june": "2026-06", "july": "2026-07", "aug": "2026-08"}
 
-    return base64.b32encode(hashlib.sha1(name.encode()).digest()).decode()
+
+def digest(name: str) -> str:
+    """A digest of the form the index uses: base-32 SHA-1 of stored bytes.
+
+    "june", "july" and "aug" name the fixture page the stand-in Archive
+    serves for that month, so a read of it verifies; any other name is the
+    digest of bytes nobody serves.
+    """
+
+    body = fixture(PAGE_DIGESTS[name]) if name in PAGE_DIGESTS else name
+    return base64.b32encode(hashlib.sha1(body.encode()).digest()).decode()
 
 
 def cdx(*rows: tuple[str, ...]) -> bytes:
     """An index body: rows are (stamp, status[, original[, digest]]).
 
-    The digest defaults to one per stamp, i.e. every capture's bytes differ.
+    The digest defaults to "-": the index gives none, so the read is not
+    verified and the row accounts for no other.
     """
 
     return json.dumps(
@@ -515,7 +547,7 @@ def cdx(*rows: tuple[str, ...]) -> bytes:
                     row[0],
                     row[2] if len(row) > 2 and row[2] else URL,
                     row[1],
-                    row[3] if len(row) > 3 else digest(row[0]),
+                    row[3] if len(row) > 3 else "-",
                 ]
                 for row in rows
             ],
@@ -549,6 +581,30 @@ def test_read_capture_returns_the_bytes_of_exactly_that_capture() -> None:
     assert raw == fixture("2026-08").encode()
     # The identity form: the stored response, not the replay wrapper.
     assert calls == [identity_url(stamp)]
+
+
+def test_a_read_is_verified_against_the_index_digest_of_the_stored_bytes() -> None:
+    # The index's digest is the SHA-1 of the stored body as the id_ form
+    # serves it, before the resolver decompresses gzip (checked 2026-09-25 on
+    # three captures of this page).
+    assert resolve_pending.a19_digest(b"") == "3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ"
+    page = fixture("2026-08").encode()
+    stored = gzip.compress(page, mtime=0)
+
+    def read(url: str) -> tuple[bytes, str]:
+        return stored, url
+
+    url = capture_url("2026-08")
+    digest_of_stored = resolve_pending.a19_digest(stored)
+    assert resolve_pending.a19_read_capture(url, read, digest_of_stored) == page
+    # The digest of the decompressed page is not the stored body's.
+    with pytest.raises(resolve_pending.A19CaptureError, match="does not hash"):
+        resolve_pending.a19_read_capture(url, read, resolve_pending.a19_digest(page))
+    # Nor is a truncated body's.
+    with pytest.raises(resolve_pending.A19CaptureError, match="does not hash"):
+        resolve_pending.a19_read_capture(
+            url, lambda u: (stored[:-9], u), digest_of_stored
+        )
 
 
 def test_read_capture_gunzips_what_the_archive_passes_through() -> None:
@@ -623,7 +679,12 @@ def test_window_captures_keeps_only_good_captures_inside_the_window() -> None:
     ]
     assert (index.listed, index.other_status, index.other_form) == (5, 1, 0)
     # The counts are disjoint and add up.
-    assert index.listed == len(index.rows) + index.other_status + index.other_form
+    assert index.listed == (
+        len(index.captures)
+        + len(index.revisits)
+        + index.other_status
+        + index.other_form
+    )
     assert index.describe(WINDOW).endswith(
         "5 capture(s) dated inside the registered window "
         f"{WINDOW!r}, 2 of them HTTP 200 for this exact URL; "
@@ -707,9 +768,8 @@ def test_a_closed_window_whose_only_rows_are_403s_is_missed() -> None:
 
 
 def test_a_row_without_a_status_is_read_or_accounted_for_by_its_digest() -> None:
-    # A row without a status is asked for at its own timestamp like any
-    # other. When the Archive does not serve it there, a read capture with
-    # the same digest says what it printed: the same bytes.
+    # A row without a status holds what a verified read of its digest holds,
+    # so it is not asked for again.
     calls: list[str] = []
     index = cdx(
         ("20260903010101", "200", "", digest("july")),
@@ -728,7 +788,7 @@ def test_a_row_without_a_status_is_read_or_accounted_for_by_its_digest() -> None
         "",
         None,
     )
-    assert identity_url("20260903120000") in calls
+    assert identity_url("20260903120000") not in calls
     # A later row without a status never holds a resolution back, and is
     # not asked for.
     calls.clear()
@@ -741,8 +801,8 @@ def test_a_row_without_a_status_is_read_or_accounted_for_by_its_digest() -> None
     )
     assert (url, verdict) == (capture_url("2026-08"), "")
     assert identity_url("20260906000000") not in calls
-    # Served at its own timestamp and printing the month, it IS the
-    # earliest capture.
+    # Served at its own timestamp, verified and printing the month, it IS
+    # the earliest capture, and the later one with its digest is not read.
     calls.clear()
     index = cdx(
         ("20260903120000", "-", "", digest("aug")),
@@ -780,15 +840,15 @@ def test_an_unserved_earlier_row_with_the_same_digest_is_the_witness() -> None:
 
 
 def test_a_later_capture_can_account_for_an_earlier_unserved_row() -> None:
-    # Sep 3 (no status, digest J) is not served; Sep 4 prints August; Sep 5
-    # carries digest J and prints July. Sep 3 therefore printed July, and
-    # Sep 4 is the earliest August print. The walk reads on to find that
-    # out instead of deferring.
+    # Sep 3 (no status) is not served; its digest is July's page. Sep 4
+    # prints August; Sep 5 is July's page. Sep 3 therefore printed July and
+    # Sep 4 is the earliest August print: the walk reads on to find that out
+    # instead of deferring.
     calls: list[str] = []
     index = cdx(
-        ("20260903120000", "-", "", digest("j")),
+        ("20260903120000", "-", "", digest("july")),
         ("20260904170006", "200", "", digest("aug")),
-        ("20260905000000", "200", "", digest("j")),
+        ("20260905000000", "200", "", digest("july")),
     )
     pages = {
         CAPTURES["2026-08"]: fixture("2026-08"),
@@ -803,71 +863,122 @@ def test_a_later_capture_can_account_for_an_earlier_unserved_row() -> None:
         None,
     )
     assert identity_url("20260905000000") in calls
-    # When the later capture with that digest prints August too, the
-    # earliest August print is Sep 3, and its bytes are Sep 5's.
-    pages["20260905000000"] = fixture("2026-08")
+    # When a later capture carries the unserved row's digest and prints
+    # August, the earliest August print is Sep 3, and its bytes are that
+    # capture's.
+    index = cdx(
+        ("20260903120000", "-", "", digest("aug")),
+        ("20260905000000", "200", "", digest("july")),
+        ("20260906000000", "200", "", digest("aug")),
+    )
+    pages = {
+        "20260905000000": fixture("2026-07"),
+        "20260906000000": fixture("2026-08"),
+    }
     found = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
     )
     assert (found.url, found.witness) == (
-        replay_url("20260905000000"),
+        replay_url("20260906000000"),
         "20260903120000",
     )
+    assert found.raw == fixture("2026-08").encode()
 
 
-def test_two_captures_with_one_digest_must_print_the_same_table() -> None:
-    # R14: Sep 3 rows are not served; Sep 4 01:01 and 02:02 share digest D but
-    # print July and August. The digest cannot stand for either, so nothing
-    # resolves, whichever of them a witness would have borrowed.
+def test_a_capture_whose_bytes_do_not_hash_to_its_digest_is_not_a_read() -> None:
+    # R14's case: rows share a digest while their served bodies differ. Every
+    # read is verified, so a body that does not hash to its row's digest is
+    # no read at all, and no witness can borrow it.
     index = cdx(
-        ("20260903010101", "-", "", digest("x")),
-        ("20260903020202", "-", "", digest("d")),
-        ("20260904010101", "200", "", digest("d")),
-        ("20260904020202", "200", "", digest("d")),
-        ("20260905010101", "200", "", digest("x")),
+        ("20260903020202", "-", "", digest("aug")),
+        ("20260904010101", "200", "", digest("aug")),
+        ("20260904020202", "200", "", digest("aug")),
     )
     pages = {
         "20260904010101": fixture("2026-07"),
         "20260904020202": fixture("2026-08"),
-        "20260905010101": fixture("2026-07"),
     }
     found = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
     )
     assert (found.url, found.raw, found.witness) == (None, None, None)
     assert found.verdict.startswith(
-        "DIGEST CONFLICT (deferring): the index lists 20260904010101 and "
-        "20260904020202 with the same digest, but they print different tables "
-        "(2026-07 and 2026-08)"
+        "CAPTURE READ FAILED (deferring): "
+        + replay_url("20260904010101")
+        + " could not be read (A19CaptureError: capture 20260904010101 does not "
+        "hash to its index digest"
     )
-    # Same month, different values: still a conflict. The unserved first row
-    # keeps the walk going until both captures with digest D are read.
-    changed = fixture("2026-08").replace(">7,716<", ">8,121<", 1)
-    pages = {
-        "20260904010101": changed,
-        "20260904020202": fixture("2026-08"),
-        "20260905010101": fixture("2026-07"),
-    }
+    # Same month, other values: the same refusal, never a value.
+    pages["20260904010101"] = fixture("2026-08").replace(">7,716<", ">8,121<", 1)
     found = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
     )
     assert found.url is None
-    assert found.verdict.startswith(
-        "DIGEST CONFLICT (deferring): the index lists 20260904010101 and "
-        "20260904020202 with the same digest, but they print different tables "
-        "(2026-08 and 2026-08)"
+    assert "does not hash to its index digest" in found.verdict
+    # A row without a status whose served body does not hash is not read
+    # either: it stays unread, and a verified capture of its digest accounts
+    # for it.
+    index = cdx(
+        ("20260903020202", "-", "", digest("aug")),
+        ("20260904020202", "200", "", digest("aug")),
     )
-    # When the captures with one digest agree, the witness resolves from the
-    # first of them.
-    pages["20260904010101"] = fixture("2026-08")
+    pages = {"20260903020202": fixture("2026-07"), "20260904020202": fixture("2026-08")}
     found = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
     )
     assert (found.url, found.witness) == (
-        replay_url("20260904010101"),
+        replay_url("20260904020202"),
         "20260903020202",
     )
-    assert found.raw == fixture("2026-08").encode()
+    assert found.witness_reason == (
+        "which could not be read and verified at that timestamp"
+    )
+
+
+def test_rows_whose_digest_is_known_are_not_read_or_counted() -> None:
+    # Many captures of one unchanged page before the month's print: one
+    # verified read says what all of them hold, so the cap is not spent on
+    # them and the month still resolves.
+    stamps = [f"2026090{d}000000" for d in range(2, 9)]
+    index = cdx(
+        *[(stamp, "200", "", digest("july")) for stamp in stamps[:-1]],
+        (stamps[-1], "200", "", digest("aug")),
+    )
+    pages = {stamps[0]: fixture("2026-07"), stamps[-1]: fixture("2026-08")}
+    calls: list[str] = []
+    old_cap = resolve_pending.A19_MAX_WINDOW_CAPTURES
+    resolve_pending.A19_MAX_WINDOW_CAPTURES = 2
+    try:
+        found = resolve_pending.a19_registered_capture(
+            "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, calls)
+        )
+    finally:
+        resolve_pending.A19_MAX_WINDOW_CAPTURES = old_cap
+    assert (found.url, found.verdict) == (replay_url(stamps[-1]), "")
+    assert [call for call in calls if "id_/" in call] == [
+        identity_url(stamps[0]),
+        identity_url(stamps[-1]),
+    ]
+
+
+def test_a_row_under_another_form_does_not_borrow_a_same_stamp_capture() -> None:
+    # An exact capture and a row under another form listed at one timestamp:
+    # reading the first says nothing about the second.
+    other = "http://www.bls.gov/web/empsit/cpseea19.htm"
+    index = cdx(
+        ("20260903120000", "200", other, digest("unknown")),
+        ("20260903120000", "200"),
+        (CAPTURES["2026-08"], "200", "", digest("aug")),
+    )
+    pages = {
+        "20260903120000": fixture("2026-07"),
+        CAPTURES["2026-08"]: fixture("2026-08"),
+    }
+    url, raw, verdict = resolve_pending.a19_registered_capture(
+        "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
+    )
+    assert (url, raw) == (None, None)
+    assert verdict.startswith("EARLIER ROW UNREAD (deferring)")
 
 
 def test_an_earlier_row_under_another_form_of_the_url_holds_the_result() -> None:
@@ -922,14 +1033,18 @@ def test_the_witness_says_why_its_own_row_was_not_read() -> None:
     found = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, pages, [])
     )
-    assert found.witness_reason == "which it did not serve at that timestamp"
+    assert found.witness == "20260903120000"
+    assert found.witness_reason == (
+        "which could not be read and verified at that timestamp"
+    )
+    # Served, but as a body that does not hash to the digest: the same.
     served = {"20260903120000": "<html>Archive error</html>", **pages}
     found = resolve_pending.a19_registered_capture(
         "2026-08", WINDOW, dt.date(2026, 9, 20), reader(index, served, [])
     )
     assert found.witness == "20260903120000"
     assert found.witness_reason == (
-        "which it served at that timestamp as something other than this table"
+        "which could not be read and verified at that timestamp"
     )
 
 
@@ -1096,6 +1211,13 @@ BAD_ROW = "malformed Archive index row"
             index_rows(
                 ["20260904170006", URL, "200", "A" * 32],
                 ["20260904170006", URL, "200", "B" * 32],
+            ),
+            "lists 20260904170006 with two digests",
+        ),
+        (
+            index_rows(
+                ["20260904170006", URL, "200", "sha1:abc"],
+                ["20260904170006", URL, "200", "A" * 32],
             ),
             "lists 20260904170006 with two digests",
         ),
@@ -1294,7 +1416,8 @@ def test_a_capped_scan_is_not_reported_as_a_missed_window(
     )
     assert (url, raw) == (None, None)
     assert verdict.startswith(
-        "CAPTURE SCAN LIMIT REACHED (deferring): 2 of the 3 rows inside"
+        "CAPTURE SCAN LIMIT REACHED (deferring): 2 read attempt(s) made, of 3 "
+        "row(s) inside"
     )
     assert "none of the rows identified so far prints 2026-08" in verdict
     assert "WINDOW MISSED" not in verdict
@@ -1305,15 +1428,16 @@ def test_a_capped_scan_is_not_reported_as_a_missed_window(
     )
     assert (url, raw) == (None, None)
     assert verdict.startswith(
-        "CAPTURE SCAN LIMIT REACHED (deferring): 2 of the 3 rows inside"
+        "CAPTURE SCAN LIMIT REACHED (deferring): 2 read attempt(s) made, of 3 "
+        "row(s) inside"
     )
     # A candidate found before the cap is named, and so is what holds it
     # back: an earlier row nobody has accounted for yet. The verdict does
     # not say the month went unprinted.
     index = cdx(
-        ("20260903010101", "-", "", digest("j")),
+        ("20260903010101", "-", "", digest("july")),
         ("20260904170006", "200", "", digest("aug")),
-        ("20260905000000", "200", "", digest("j")),
+        ("20260905000000", "200", "", digest("july")),
     )
     pages = {
         CAPTURES["2026-08"]: fixture("2026-08"),
@@ -1522,8 +1646,8 @@ def test_main_names_the_unserved_earlier_row_the_fact_rests_on(
     assert "-> 7.716 millions" in output
     assert [fact["source"]["source_file"] for fact in facts] == [
         "cpseea19.htm (Wayback capture 20260904170006; the Archive's index lists "
-        "the same digest at 20260903120000, which it did not serve at that "
-        "timestamp)"
+        "the same digest at 20260903120000, which could not be read and "
+        "verified at that timestamp)"
     ]
     # The day the row vouches for is the capture whose bytes were read.
     assert '"observed_at": "2026-09-04"' in output
