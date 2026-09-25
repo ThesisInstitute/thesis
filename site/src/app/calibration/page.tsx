@@ -184,11 +184,14 @@ export default async function CalibrationPage() {
           claimed-time-verified, outside the official numbers, alongside
           unverified and violated legacy runs. CRPS is normalized only by
           same-series ledger dispersion frozen at target registration; scores
-          without three pre-cutoff ledger observations publish raw CRPS and stay
-          out of normalized means and rewards. The agent-versus-persistence
-          headline is a per-target RAW CRPS ratio against the paired ledger
-          baseline, which needs no scale at all — nothing a forecast authors can
-          move its denominator.
+          without three pre-cutoff ledger observations, or whose dispersion is
+          only floating-point residue (at most 1e-12 of the series&apos;
+          magnitude), publish raw CRPS and stay out of normalized means and
+          rewards. The agent-versus-persistence headline and the forecaster
+          ranking are the mean per-target difference in normalized CRPS against
+          the paired ledger baseline: linear in every score, so honest
+          distributions minimize it in expectation, and no forecast can move its
+          scale.
         </p>
 
         <section className="mt-10 grid grid-cols-4 gap-4 max-md:grid-cols-2">
