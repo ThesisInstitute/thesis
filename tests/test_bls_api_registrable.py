@@ -1,10 +1,11 @@
 """The registrable BLS Public Data API specs and their docket entries.
 
-Fixture bytes are official keyless API responses captured 2026-09-20 (see
+Fixture bytes are official keyless API responses captured 2026-09-20 and, for
+the six Table A-19 rows, 2026-09-25 and 2026-09-26 (see
 ``tests/fixtures/bls_api/README.md``). They prove the parser, the transforms
 and the binding; they are never resolution evidence.
 
-Six specs are registrable. Three have docket templates. The other three wait
+Twelve specs are registrable. Nine have docket templates. The other three wait
 on a Chronicle lineage decision (``LINEAGE_BLOCKED`` below).
 """
 
@@ -67,6 +68,44 @@ CAPTURES = {
         "d0c8d0236ccc51b4bcc7e0dbb3dba73cb6fd834446d722301b43a399cbe0afd3",
         "2026-08",
         162.0,
+    ),
+    # Table A-19 rows: the August figure the 2026-09-04 release printed, in
+    # thousands, divided by 1,000 (tests/fixtures/a19).
+    "bls.cps.employed_people_by_occupation.business_financial_operations": (
+        "LNU02032454-2026-2026.json",
+        "8736f84807450744285a9c75f6f3ec7ce9af0c2972c90a2a176d1ba098c7cd10",
+        "2026-08",
+        10.167,
+    ),
+    "bls.cps.employed_people_by_occupation.computer_mathematical": (
+        "LNU02032455-2026-2026.json",
+        "af021869dffc4f654216e7d7c20dbcbdcedf937c21a62a31530a7042f2af86fc",
+        "2026-08",
+        7.010,
+    ),
+    "bls.cps.employed_people_by_occupation.healthcare_support": (
+        "LNU02032463-2026-2026.json",
+        "0fae2a5e4b15112f7201bbfbdd15aa25944fc64d69b9e8d1b0bc7f67ca7dc410",
+        "2026-08",
+        5.709,
+    ),
+    "bls.cps.employed_people_by_occupation.office_administrative_support": (
+        "LNU02032207-2026-2026.json",
+        "8ef8b905b38944647eec5ce458982f011a5d7111c09ef0be377af7cea3cd69c5",
+        "2026-08",
+        16.154,
+    ),
+    "bls.cps.employed_people_by_occupation.production": (
+        "LNU02032213-2026-2026.json",
+        "PENDING_PRODUCTION_SHA256",
+        "2026-08",
+        7.716,
+    ),
+    "bls.cps.employed_people_by_occupation.transportation_material_moving": (
+        "LNU02032214-2026-2026.json",
+        "PENDING_TRANSPORTATION_SHA256",
+        "2026-08",
+        12.011,
     ),
 }
 REGISTRABLE = sorted(CAPTURES)
@@ -711,3 +750,399 @@ def test_roller_rolls_only_a_period_with_an_official_date(
     assert extras is not None
     assert extras["expectedReleaseDate"] == "2026-12-01"
     assert extras["releaseCalendarUrl"] == entry["releaseCalendarUrl"]
+
+
+# --- Table A-19 ---------------------------------------------------------------
+
+A19_PREFIX = resolve_pending.A19_STEM + "."
+A19_SERIES = sorted(series for series in REGISTRABLE if series.startswith(A19_PREFIX))
+# Data month -> (the verbatim <table> element of the Internet Archive's capture
+# of cpseea19.htm after the release that first printed that month, its
+# SHA-256, and BLS's header for the current-month column). Provenance is in
+# tests/fixtures/bls_api/README.md.
+A19_TABLES = {
+    "2026-06": (
+        "cpseea19-2026-06-wayback-20260710110509.table.html",
+        "3b0c626048d920079f6cde70af947b767bcf291b097fe57be3c5234b38bef607",
+        "June<br/>2026",
+    ),
+    "2026-07": (
+        "cpseea19-2026-07-wayback-20260819191418.table.html",
+        "0fba99933a44a2d5815e864d2d41fa3d1e3ecab2fec1ae7e2f96e7476ea27e3d",
+        "July<br/>2026",
+    ),
+    "2026-08": (
+        "cpseea19-2026-08-wayback-20260904170006.table.html",
+        "b3833556f6c72ec716f249e7afc152f17bcbfeb5dde4c9f8a5eb2c7da38d10d1",
+        "Aug.<br/>2026",
+    ),
+}
+# The Employment Situation schedule (bls.gov/schedule/news_release/empsit.htm,
+# read 2026-09-20) runs through the November 2026 data.
+A19_OFFICIAL_DATES = {"2026-10": "2026-11-06", "2026-11": "2026-12-04"}
+
+
+def _a19_row(series: str) -> str:
+    return series[len(A19_PREFIX) :]
+
+
+def _a19_printed() -> dict[str, dict[str, float]]:
+    printed = {}
+    for month, (name, digest, header) in A19_TABLES.items():
+        raw = (ROOT / "tests" / "fixtures" / "a19" / name).read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == digest
+        html = raw.decode()
+        # The current-month column is this month, so the table is the release
+        # that first printed it.
+        assert f'id="cps_eande_m19.h.3.3">{header}' in html
+        printed[month] = resolve_pending.a19_values_from_html(html)
+        assert sorted(printed[month]) == sorted(resolve_pending.A19_ROW_LABELS)
+    return printed
+
+
+def _registered_a19_contracts() -> dict[str, dict]:
+    out = {}
+    for path in sorted(glob.glob(str(ROOT / "records" / "targets" / "*.json"))):
+        for contract in json.loads(pathlib.Path(path).read_text()).get("targets", []):
+            if contract["series"].startswith(A19_PREFIX):
+                out[contract["dataPointId"]] = contract
+    return out
+
+
+def _a19_docket_entries() -> dict[str, dict]:
+    return {
+        entry["series"]: entry
+        for entry in _bls_api_docket_entries()
+        if entry["series"].startswith(A19_PREFIX)
+    }
+
+
+def test_a19_specs_cover_exactly_the_six_docket_rows() -> None:
+    assert [_a19_row(s) for s in A19_SERIES] == sorted(resolve_pending.A19_ROW_LABELS)
+    ids = {resolve_pending.BLS_API_ADAPTERS[s]["series_id"] for s in A19_SERIES}
+    assert len(ids) == 6
+
+
+def test_each_a19_series_serves_the_figures_table_a19_first_printed() -> None:
+    printed = _a19_printed()
+    for series in A19_SERIES:
+        spec = resolve_pending.BLS_API_ADAPTERS[series]
+        rows = _rows(series)
+        assert sorted(spec["anchors"]) == sorted(A19_TABLES)
+        for month in A19_TABLES:
+            # The API serves the table's own integer, in thousands, so every
+            # anchor is a first print and not only a settled value.
+            assert rows[month]["value"] == printed[month][_a19_row(series)]
+            assert spec["anchors"][month] == round(rows[month]["value"] / 1000, 3)
+        # Identity: across the three months the series matches its own row
+        # and no other.
+        matching = {
+            row
+            for row in resolve_pending.A19_ROW_LABELS
+            if all(rows[month]["value"] == printed[month][row] for month in A19_TABLES)
+        }
+        assert matching == {_a19_row(series)}, series
+
+
+def test_the_a19_note_does_not_claim_unadjusted_cps_is_never_revised() -> None:
+    for series in A19_SERIES:
+        note = resolve_pending.BLS_API_ADAPTERS[series]["evidence_notes"]
+        assert "normally are not revised" in note and "January 2026" in note
+        assert "never" not in note
+        raw = json.loads((FIXTURES / CAPTURES[series][0]).read_text())
+        january = next(
+            row
+            for row in raw["Results"]["series"][0]["data"]
+            if row["year"] == "2026" and row["period"] == "M01"
+        )
+        assert "revised to incorporate updated population controls" in json.dumps(
+            january
+        )
+
+
+def test_an_a19_row_routes_by_the_registered_adapter() -> None:
+    for series in A19_SERIES:
+        contract = _contract(series)
+        ref = contract["dataPointId"]
+        assert _route(ref, {"contract": contract}) == ["bls_api"]
+        for adapter in ("generic-url", "alfred-fred"):
+            other = copy.deepcopy(contract)
+            other["sourceBinding"]["adapter"] = adapter
+            assert _route(ref, {"contract": other}) == ["a19"]
+        assert _route(ref, None) == ["a19"]
+
+
+def test_the_eighteen_generic_url_registrations_keep_the_archive_leg() -> None:
+    legacy = {
+        ref: contract
+        for ref, contract in _registered_a19_contracts().items()
+        if contract["sourceBinding"]["adapter"] == "generic-url"
+    }
+    assert len(legacy) == 18
+    assert {c["period"] for c in legacy.values()} == {"2026-07", "2026-08", "2026-09"}
+    for ref, contract in legacy.items():
+        assert _route(ref, {"contract": contract}) == ["a19"]
+        # They were never new-registration material and still are not.
+        assert "generic-url" in (_refusal(contract) or "")
+
+
+def test_a19_docket_entries_commit_the_employment_situation_dates() -> None:
+    entries = _a19_docket_entries()
+    assert sorted(entries) == A19_SERIES
+    for entry in entries.values():
+        assert entry["releaseCalendarUrl"] == (
+            "https://www.bls.gov/schedule/news_release/empsit.htm"
+        )
+        assert entry["releaseDates"] == A19_OFFICIAL_DATES
+        # The docket-to-Ledger unit check accepts millions against the
+        # lineage's thousands only under this scale.
+        assert entry["extras"]["valueScale"] == 0.001
+        assert entry["extras"]["targetUnit"] == "millions"
+
+
+@pytest.mark.parametrize("series", A19_SERIES)
+def test_the_roller_mints_an_october_target_the_gate_admits(
+    series: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    entry = _a19_docket_entries()[series]
+    september = next(
+        contract
+        for contract in _registered_a19_contracts().values()
+        if contract["series"] == series and contract["period"] == "2026-09"
+    )
+    # September is a generic-url registration and gets no second target.
+    assert roll_docket.target_extras_for_period(entry, "2026-09") is None
+    assert "no valid explicit official release date" in capsys.readouterr().err
+    extras = roll_docket.target_extras_for_period(entry, "2026-10")
+    assert extras is not None
+    # The target roll_docket.main builds: the docket's extras, and a
+    # previousTarget copied from the published September forecast, which
+    # carries no sourceBinding.
+    target = {
+        "series": series,
+        "period": "2026-10",
+        "catalogSlug": roll_docket.format_slug(entry["slug"], "2026-10", "monthly"),
+        **extras,
+        "previousTarget": {
+            "country": "US",
+            "unit": september["unit"],
+            "dataPointId": september["dataPointId"],
+            "resolutionDate": september["sourceBinding"]["expectedReleaseWindow"][
+                "end"
+            ],
+            "resolutionSource": (
+                "U.S. Bureau of Labor Statistics Employment Situation, CPS Table A-19"
+            ),
+            "resolutionSourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+            "period": "2026-09",
+        },
+    }
+    assert roll_docket.roll_execution_plan_refusal(target) is None
+    contract = register_targets.build_contract(target, dt.date(2026, 10, 1))
+    assert contract["dataPointId"] == f"{series}.2026_10.first_print"
+    assert contract["unit"] == "millions" and contract["valueScale"] == 0.001
+    binding = contract["sourceBinding"]
+    assert binding["adapter"] == resolve_pending.BLS_API_BINDING_ADAPTER
+    # The September forecast's Archive page does not widen custody.
+    assert binding["allowedHosts"] == ["api.bls.gov"]
+    assert binding["expectedReleaseWindow"] == {
+        "start": "2026-11-06",
+        "end": "2026-11-06",
+    }
+    assert _refusal(contract) is None
+    assert _route(contract["dataPointId"], {"contract": contract}) == ["bls_api"]
+
+
+def test_resolver_routes_a_registered_a19_target_through_the_real_router(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Unlike _run_main, the router is not replaced: main() must route the
+    # reference to the BLS API leg because its registration binds bls-api.
+    series = "bls.cps.employed_people_by_occupation.office_administrative_support"
+    spec = resolve_pending.BLS_API_ADAPTERS[series]
+    contract = register_targets.build_contract(
+        _target(series, period="2026-08", release="2026-09-04"), dt.date(2026, 8, 13)
+    )
+    ref = contract["dataPointId"]
+    raw = (FIXTURES / CAPTURES[series][0]).read_bytes()
+    rows = resolve_pending.bls_rows_from_payload(raw, spec["series_id"])
+    fetched: list[str] = []
+
+    def fetch(series_id: str, start: int, end: int):
+        fetched.append(series_id)
+        url = resolve_pending.BLS_API_URL.format(series=series_id, start=start, end=end)
+        return rows, raw, url, "2026-09-25T13:40:00Z"
+
+    def no_archive(*_args, **_kwargs):
+        raise AssertionError("a bls-api registration must not reach the Archive leg")
+
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": "slug",
+                "resolutionDate": "2026-09-04",
+                "unit": "millions",
+            }
+        ],
+        "resolutionLinks": [
+            {"status": "pending", "targetFactRef": ref, "forecastSlug": "slug"}
+        ],
+    }
+    monkeypatch.setattr(resolve_pending, "load_thesis_log", lambda _url: log)
+    monkeypatch.setattr(
+        resolve_pending, "ledger_state", lambda *_args: ("", "blob", "b" * 40)
+    )
+    monkeypatch.setattr(
+        resolve_pending,
+        "registration_contracts",
+        lambda: {ref: {"targetContentHash": "a" * 64, "contract": contract}},
+    )
+    monkeypatch.setattr(resolve_pending, "utc_now", lambda: "2026-09-25T13:40:00Z")
+    monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
+    monkeypatch.setattr(resolve_pending.urllib.request, "urlopen", no_archive)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert f"resolve {ref} -> 16.154 millions" in out
+    assert fetched == ["LNU02032207"]
+
+
+# --- the Chronicle unit guard -------------------------------------------------
+
+# The one June 2026 observation Chronicle holds for the production row, copied
+# byte for byte from PolicyEngine/chronicle@3dd95a0d (branch
+# codex/thesis-ledger-facts), ledger/official_observations.jsonl.
+CHRONICLE_JUNE_ROW = ROOT / "tests" / "fixtures" / "a19" / (
+    "chronicle-production-june-2026-row.jsonl"
+)
+PRODUCTION = "bls.cps.employed_people_by_occupation.production"
+
+
+def _chronicle_june_row() -> dict:
+    raw = CHRONICLE_JUNE_ROW.read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == (
+        "199a0a41a692eb0a4d158ad72f6157791924d544785cd3b31978bc6b5ad7e567"
+    )
+    (row,) = [json.loads(line) for line in raw.decode().splitlines()]
+    return row
+
+
+def test_the_guard_refuses_a_fact_chronicle_would_hold_in_two_units() -> None:
+    june = _chronicle_june_row()
+    assert june["measure"]["unit"] == "thousands"
+    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
+    refusal = resolve_pending.bls_ledger_unit_conflict([june], PRODUCTION, spec)
+    assert refusal is not None and "['thousands']" in refusal
+    assert "'millions'" in refusal
+    # Every A-19 row has the same June observation shape, and every A-19 spec
+    # emits millions.
+    for series in A19_SERIES:
+        row = copy.deepcopy(june)
+        row["source_record_id"] = f"{series}.june_2026.first_print"
+        spec = resolve_pending.BLS_API_ADAPTERS[series]
+        assert resolve_pending.bls_ledger_unit_conflict([row], series, spec)
+
+
+def test_the_guard_lifts_when_a_correction_restates_the_row_in_millions() -> None:
+    june = _chronicle_june_row()
+    correction = copy.deepcopy(june)
+    correction["value"] = 7.759
+    correction["measure"]["unit"] = "millions"
+    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
+    # The last row per record id stands in for Chronicle's current view.
+    assert (
+        resolve_pending.bls_ledger_unit_conflict([june, correction], PRODUCTION, spec)
+        is None
+    )
+    assert resolve_pending.bls_ledger_unit_conflict(
+        [correction, june], PRODUCTION, spec
+    )
+
+
+def test_the_guard_ignores_other_identities_and_other_series() -> None:
+    june = _chronicle_june_row()
+    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
+    # Chronicle keys identity on entity and geography too.
+    other_entity = copy.deepcopy(june)
+    other_entity["entity"] = {"name": "person", "role": "employed"}
+    assert (
+        resolve_pending.bls_ledger_unit_conflict([other_entity], PRODUCTION, spec)
+        is None
+    )
+    other_place = copy.deepcopy(june)
+    other_place["geography"] = dict(other_place["geography"], id="CA")
+    assert (
+        resolve_pending.bls_ledger_unit_conflict([other_place], PRODUCTION, spec)
+        is None
+    )
+    # A neighbouring stem that shares a prefix is another series.
+    transport = "bls.cps.employed_people_by_occupation.transportation_material_moving"
+    assert (
+        resolve_pending.bls_ledger_unit_conflict(
+            [june], transport, resolve_pending.BLS_API_ADAPTERS[transport]
+        )
+        is None
+    )
+    # A series whose lineage already holds the unit it emits is untouched.
+    openings = copy.deepcopy(june)
+    openings["source_record_id"] = "bls.jolts.job_openings.june_2026.first_print"
+    openings["measure"]["unit"] = "millions"
+    assert (
+        resolve_pending.bls_ledger_unit_conflict(
+            [openings],
+            "bls.jolts.job_openings",
+            resolve_pending.BLS_API_ADAPTERS["bls.jolts.job_openings"],
+        )
+        is None
+    )
+
+
+def test_resolver_refuses_an_a19_capture_before_spending_a_request(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # The same run as the real-router test above, against a ledger that holds
+    # Chronicle's June row: the reference is refused, nothing is fetched, and
+    # nothing is proposed.
+    series = PRODUCTION
+    contract = register_targets.build_contract(
+        _target(series, period="2026-08", release="2026-09-04"), dt.date(2026, 8, 13)
+    )
+    ref = contract["dataPointId"]
+    fetched: list[str] = []
+
+    def fetch(series_id: str, start: int, end: int):
+        fetched.append(series_id)
+        raise AssertionError("the guard must refuse before the keyless request")
+
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": "slug",
+                "resolutionDate": "2026-09-04",
+                "unit": "millions",
+            }
+        ],
+        "resolutionLinks": [
+            {"status": "pending", "targetFactRef": ref, "forecastSlug": "slug"}
+        ],
+    }
+    ledger = CHRONICLE_JUNE_ROW.read_text()
+    monkeypatch.setattr(resolve_pending, "load_thesis_log", lambda _url: log)
+    monkeypatch.setattr(
+        resolve_pending, "ledger_state", lambda *_args: (ledger, "blob", "b" * 40)
+    )
+    monkeypatch.setattr(
+        resolve_pending,
+        "registration_contracts",
+        lambda: {ref: {"targetContentHash": "a" * 64, "contract": contract}},
+    )
+    monkeypatch.setattr(resolve_pending, "utc_now", lambda: "2026-09-25T13:40:00Z")
+    monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert f"LEDGER UNIT CONFLICT (refusing): {ref}" in out
+    assert "nothing new to record" in out
+    assert fetched == []

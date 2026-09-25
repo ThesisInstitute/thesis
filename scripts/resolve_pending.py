@@ -2521,6 +2521,85 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
         },
     },
 }
+# Employment Situation Table A-19 ("Employed people by occupation, sex, and
+# age", not seasonally adjusted, in thousands): the six rows the docket
+# forecasts, each from the CPS series that prints its "Total, 16 years and
+# over" column. The legacy ``a19`` leg reads the same rows from Internet
+# Archive captures of cpseea19.htm and stays unregistrable; these specs are
+# how a NEW A-19 target registers (Max's ruling, 2026-09-25). BLS's
+# series catalog (ln.series) titles each id "(Unadj) Employment Level - <row>",
+# employed, monthly, not seasonally adjusted.
+#
+# The anchors are first prints, not only settled values: each is the figure
+# Table A-19 printed in the Employment Situation that first published the
+# month (tests/fixtures/a19, the Archive's captures of 2026-07-10, 2026-08-19
+# and 2026-09-04), and the API served the same integer on 2026-09-25. That
+# equality is also what ties each series id to its A-19 row.
+# ``anchor_abs_tolerance`` is one step of the published precision (1,000
+# people, 0.001 million), the same lab choice as the 0.1 on one-decimal
+# rates: BLS does not normally revise unadjusted CPS data, and a revision
+# that reaches an anchor month refuses every capture with ANCHOR MISMATCH
+# until the anchors are re-verified.
+A19_BLS_API_SERIES: dict[str, tuple[str, dict[str, float]]] = {
+    "business_financial_operations": (
+        "LNU02032454",
+        {"2026-06": 9.720, "2026-07": 9.835, "2026-08": 10.167},
+    ),
+    "computer_mathematical": (
+        "LNU02032455",
+        {"2026-06": 6.950, "2026-07": 6.924, "2026-08": 7.010},
+    ),
+    "healthcare_support": (
+        "LNU02032463",
+        {"2026-06": 5.691, "2026-07": 5.797, "2026-08": 5.709},
+    ),
+    "office_administrative_support": (
+        "LNU02032207",
+        {"2026-06": 16.184, "2026-07": 16.457, "2026-08": 16.154},
+    ),
+    "production": (
+        "LNU02032213",
+        {"2026-06": 7.759, "2026-07": 8.121, "2026-08": 7.716},
+    ),
+    "transportation_material_moving": (
+        "LNU02032214",
+        {"2026-06": 12.010, "2026-07": 12.223, "2026-08": 12.011},
+    ),
+}
+for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
+    BLS_API_ADAPTERS[f"{A19_STEM}.{_row}"] = {
+        "series_id": _series_id,
+        "period_type": "month",
+        "unit": "millions",
+        "scale": 0.001,
+        "round": 3,
+        "label": f"US employed people, {A19_ROW_LABELS[_row]}, 16 years and over (NSA)",
+        "source_name": "bls_cps",
+        "source_table": (
+            f"Current Population Survey, employed people, {A19_ROW_LABELS[_row]}, "
+            "total 16 years and over, not seasonally adjusted, in thousands "
+            "(Employment Situation, Table A-19)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": _series_id,
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.001,
+        "anchors": dict(_anchors),
+        "binding_transform": {"operation": "multiply", "factor": 0.001},
+        "evidence_notes": (
+            "First print for {period} captured from {source_url} (BLS Public "
+            "Data API v2, current estimates only), in thousands and divided by "
+            "1,000. At capture {period} was still the series' latest published "
+            "month, so no later Employment Situation had been published and "
+            "the value is the one that release's Table A-19 printed. CPS rows "
+            "carry no preliminary footnote, and BLS states that the original "
+            "(unadjusted) sample data normally are not revised. The one "
+            "exception observed, the population-control revision of January "
+            "2026, was published with the February estimates, after which "
+            "January was no longer the latest month."
+        ),
+    }
 for _spec in BLS_API_ADAPTERS.values():
     if "binding_transform" in _spec:
         # Every registrable spec pins anchors in the unit it emits (see the
@@ -8060,6 +8139,57 @@ def bls_api_verified_anchors(spec: Mapping[str, Any]) -> dict[str, float] | None
     return dict(anchors)
 
 
+def bls_ledger_unit_conflict(
+    ledger_rows: list[Mapping[str, Any]], stem: str, spec: Mapping[str, Any]
+) -> str | None:
+    """Why a fact for ``stem`` would break Chronicle's catalog, or None.
+
+    Chronicle's ``scripts/build_series_catalog.py`` groups observations by
+    (concept, geography, entity) and exits with "unit conflict within
+    identity" when one identity holds two units. The resolver regenerates
+    that catalog for every append and sends all of a run's rows in one
+    proposal, so one conflicting fact fails the whole run's append
+    (verified 2026-09-25 against Chronicle's generator). The Table A-19
+    lineages hold a June 2026 observation in thousands, and these specs
+    emit millions.
+
+    Chronicle's current view drops a row that a later correction
+    supersedes. A correction keeps the fact's ``source_record_id``, so the
+    last row per record id stands in for that view here. A curation that
+    leaves the old row current in this sense keeps refusing: fail closed.
+    """
+
+    entity = spec.get("entity", {"name": "economy", "role": "aggregate"})
+    identity = (
+        (entity.get("name"), entity.get("role")),
+        (US_GEOGRAPHY["level"], US_GEOGRAPHY["id"], US_GEOGRAPHY["vintage"]),
+    )
+    latest: dict[str, Mapping[str, Any]] = {}
+    for row in ledger_rows:
+        record_id = row.get("source_record_id")
+        if isinstance(record_id, str) and record_id.startswith(stem + "."):
+            latest[record_id] = row
+    units = set()
+    for row in latest.values():
+        row_entity = row.get("entity") or {}
+        geography = row.get("geography") or {}
+        row_identity = (
+            (row_entity.get("name"), row_entity.get("role")),
+            (geography.get("level"), geography.get("id"), geography.get("vintage")),
+        )
+        unit = (row.get("measure") or {}).get("unit")
+        if row_identity == identity and unit is not None and unit != spec["unit"]:
+            units.add(str(unit))
+    if not units:
+        return None
+    return (
+        f"Chronicle already holds {sorted(units)} observations of {stem}, and "
+        f"this spec emits {spec['unit']!r}: the catalog would refuse the "
+        "whole append with a unit conflict. Chronicle must curate the lineage "
+        "to one unit first"
+    )
+
+
 FSA_CRP_BINDING_TEMPLATE_KEYS = {
     "adapter",
     "sourceUrl",
@@ -11367,21 +11497,36 @@ def pending_adapter_refs(
             continue
         if ref.startswith(A19_STEM + "."):
             occupation = ref[len(A19_STEM) + 1 :].split(".")[0]
-            parsed = parse_ref_period(ref, f"{A19_STEM}.{occupation}")
-            if occupation in A19_ROW_LABELS and parsed:
-                spec = {
-                    "label": f"CPS employed, {A19_ROW_LABELS[occupation]}",
-                    "unit": "thousands",
-                    "source_name": "bls_cps",
-                    "source_table": "Employment Situation, Table A-19",
-                    "concept_authority": "bls",
-                    "source_concept": A19_ROW_LABELS[occupation],
-                    "a19_row": occupation,
-                }
-                out.append(
-                    (ref, "a19", spec, parsed[0], parsed[1], release_date, forecast)
-                )
-            continue
+            a19_route = True
+            if f"{A19_STEM}.{occupation}" in BLS_API_ADAPTERS:
+                # Each row also has a registrable BLS API spec. As for the
+                # stems the ALFRED and BLS API families both claim, the
+                # registered adapter decides: only a target that binds
+                # ``bls-api`` falls through to the BLS API leg below. The
+                # generic-url registrations and the cells that predate
+                # bindings keep the Archive leg they had.
+                if bls_registrations is None:
+                    bls_registrations = registration_contracts()
+                registered = (
+                    (bls_registrations.get(ref) or {}).get("contract") or {}
+                ).get("sourceBinding") or {}
+                a19_route = registered.get("adapter") != BLS_API_BINDING_ADAPTER
+            if a19_route:
+                parsed = parse_ref_period(ref, f"{A19_STEM}.{occupation}")
+                if occupation in A19_ROW_LABELS and parsed:
+                    spec = {
+                        "label": f"CPS employed, {A19_ROW_LABELS[occupation]}",
+                        "unit": "thousands",
+                        "source_name": "bls_cps",
+                        "source_table": "Employment Situation, Table A-19",
+                        "concept_authority": "bls",
+                        "source_concept": A19_ROW_LABELS[occupation],
+                        "a19_row": occupation,
+                    }
+                    out.append(
+                        (ref, "a19", spec, parsed[0], parsed[1], release_date, forecast)
+                    )
+                continue
         va_mmwr_stem = longest_adapter_stem(ref, VA_MMWR_ADAPTERS)
         if va_mmwr_stem:
             report_date = parse_va_mmwr_ref(ref, va_mmwr_stem)
@@ -13476,13 +13621,16 @@ EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
     "usaspending": _plan_usaspending,
 }
 # Families that resolve only cells that predate bindings. SSA and VA MMWR
-# name adapters ``register_targets.SOURCE_ADAPTERS`` does not offer; A-19 and
-# CMS provider data have no binding adapter at all, so a target for them
-# could only be registered as ``generic-url``. Moving a family out of this
-# set means giving it a registrable adapter, a full-binding predicate above,
-# and a first-print acquisition that needs no per-period hand pin. BLS API
-# left it on 2026-09-20, and only for the specs that declare a
-# ``binding_transform``: ``_plan_bls_api`` still refuses every other stem.
+# name adapters ``register_targets.SOURCE_ADAPTERS`` does not offer; the
+# Archive-capture A-19 leg and CMS provider data have no binding adapter at
+# all, so a target for them could only be registered as ``generic-url``.
+# Moving a family out of this set means giving it a registrable adapter, a
+# full-binding predicate above, and a first-print acquisition that needs no
+# per-period hand pin. BLS API left it on 2026-09-20, and only for the specs
+# that declare a ``binding_transform``: ``_plan_bls_api`` still refuses every
+# other stem. The six A-19 rows register through that family (2026-09-25):
+# a contract that binds ``bls-api`` routes to it, and every other A-19
+# contract still routes here and is refused.
 EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
     {"a19", "cms_provider_data", "ssa_official", "va_mmwr"}
 )
@@ -13704,11 +13852,8 @@ def main() -> int:
     content, sha, ledger_repo_sha = ledger_state(
         args.ledger_repo, args.ledger_branch, args.ledger_path
     )
-    existing_ids = {
-        json.loads(line)["source_record_id"]
-        for line in content.splitlines()
-        if line.strip()
-    }
+    ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
+    existing_ids = {row["source_record_id"] for row in ledger_rows}
 
     fetched_rows: list[tuple[dict[str, Any], str, str, bytes, str, str]] = []
     today = dt.date.today()
@@ -14288,6 +14433,15 @@ def main() -> int:
                         "  BINDING/ADAPTER MISMATCH (refusing, no registered "
                         f"bls-api binding or seven-key registry drift): {ref}"
                     )
+                    continue
+                # Refused before the keyless request is spent, and only this
+                # reference: every other row in the run still appends.
+                stem = next(
+                    name for name, known in BLS_API_ADAPTERS.items() if known is spec
+                )
+                unit_conflict = bls_ledger_unit_conflict(ledger_rows, stem, spec)
+                if unit_conflict:
+                    print(f"  LEDGER UNIT CONFLICT (refusing): {ref} — {unit_conflict}")
                     continue
             bls_key = (
                 series_id,

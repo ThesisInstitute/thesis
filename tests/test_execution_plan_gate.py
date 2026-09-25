@@ -327,23 +327,34 @@ def test_reviewed_legacy_exceptions_are_not_inherited_by_new_contracts(
     ), "the existing run-time exception must keep working"
 
 
-def test_a19_cannot_take_new_registrations_under_any_adapter(
+def test_a19_takes_new_registrations_only_through_the_bls_api_template(
     registered: dict[str, dict],
 ) -> None:
+    # Deliberately changed on 2026-09-25: A-19 rows used to refuse every new
+    # registration. They now register through the BLS API family, and only a
+    # contract that carries the whole reviewed seven-key template gets there
+    # (tests/test_bls_api_registrable.py admits one). Every other contract
+    # still routes to the Archive-capture leg and is refused.
     ref = next(
         ref for ref in sorted(registered) if ref.startswith(resolve_pending.A19_STEM)
     )
     contract = copy.deepcopy(registered[ref]["contract"])
     assert "generic-url" in (_refusal(contract) or "")
-    contract["sourceBinding"]["adapter"] = "alfred-fred"
-    contract["unit"] = "thousands"
+    alfred = copy.deepcopy(contract)
+    alfred["sourceBinding"]["adapter"] = "alfred-fred"
+    alfred["unit"] = "thousands"
     # Whichever refusal comes first: the family has no admission predicate,
     # and (once A-19 gains a FAMILY_ADAPTERS entry) ALFRED is not its adapter.
-    refusal = _refusal(contract) or ""
+    refusal = _refusal(alfred) or ""
     assert (
         "no registration-time admission predicate" in refusal
         or "is not one the a19 family resolves" in refusal
     )
+    # Naming the adapter is not enough: the Archive page, its host, and its
+    # eight-day window are not the reviewed BLS API template.
+    renamed = copy.deepcopy(contract)
+    renamed["sourceBinding"]["adapter"] = resolve_pending.BLS_API_BINDING_ADAPTER
+    assert "not the reviewed BLS API template" in (_refusal(renamed) or "")
 
 
 def test_unregistrable_family_refuses_whatever_the_adapter(

@@ -1038,7 +1038,7 @@ pages, read 2026-09-20. No date is inferred from cadence.
 
 | Release | `releaseCalendarUrl` | Bytes | SHA-256 | Periods read | Committed in the docket for |
 |---|---|---:|---|---|---|
-| Employment Situation | https://www.bls.gov/schedule/news_release/empsit.htm | 55,578 | `8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04 | payroll change (the unemployment rate is lineage-blocked) |
+| Employment Situation | https://www.bls.gov/schedule/news_release/empsit.htm | 55,578 | `8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04 | payroll change, and since 2026-09-25 the six Table A-19 rows (see that section) (the unemployment rate is lineage-blocked) |
 | Consumer Price Index | https://www.bls.gov/schedule/news_release/cpi.htm | 55,572 | `36b83ba3723ac4e1d96431214b22f22bb4240718dab1ec2b6289fef9e7829580` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10 | nothing yet (both CPI series are lineage-blocked) |
 | JOLTS | https://www.bls.gov/schedule/news_release/jolts.htm | 55,620 | `b7f2ded2873b885c72548e4f269755f65a1df5409e34709ded85518e41d29bc9` | 2026-10 → 2026-12-01 | job openings, quits rate |
 
@@ -1095,3 +1095,201 @@ before the scheduled revised release, plus quarterly row parsing, or Route B.
 
 Both series stay in `waivers.json` `templateless_docket_series` and keep
 minting nothing under the execution-plan gate.
+
+---
+
+# Anchor verifications — Table A-19 rows on the BLS Public Data API (2026-09-25)
+
+The six docket series `bls.cps.employed_people_by_occupation.*` forecast rows
+of Employment Situation Table A-19, "Employed people by occupation, sex, and
+age", which BLS prints not seasonally adjusted, in thousands. Until now they
+could bind only `generic-url`, and the resolver read them from Internet Archive
+captures of `cpseea19.htm` (the `a19` leg). Each row is also an official BLS
+series in the Public Data API. This change adds six registrable specs to
+`BLS_API_ADAPTERS` and switches the six docket templates to `bls-api`. A new
+A-19 target now registers and resolves the way the JOLTS and payroll series in
+the section above do. Max chose this route on 2026-09-25 over an
+Archive-capture adapter (thesis#270, closed unmerged). The registrable BLS API
+specs go from six to twelve.
+
+**No new A-19 target can resolve until Chronicle curates the six lineages to
+one unit.** See "Chronicle holds these lineages in thousands" below. The
+resolver refuses the capture until then, so the failure is loud and confined to
+these six references.
+
+## Series identity
+
+BLS's LN series catalog names each id. The catalog was read in a desktop
+browser on 2026-09-25 at 11:15 UTC:
+`https://download.bls.gov/pub/time.series/ln/ln.series`, `Last-Modified: Fri,
+04 Sep 2026 12:30:00 GMT`, 15,288,538 bytes, SHA-256
+`033970d8dd9e3f1b0563463acc64cb248e7624334220c56e8783314930938b88`.
+
+| Series | API id | Catalog title | `occupation_code` |
+|---|---|---|---|
+| `business_financial_operations` | `LNU02032454` | (Unadj) Employment Level - Business and Financial Operations Occupations | `0499` |
+| `computer_mathematical` | `LNU02032455` | (Unadj) Employment Level - Computer and Mathematical Occupations | `0999` |
+| `healthcare_support` | `LNU02032463` | (Unadj) Employment Level - Healthcare Support Occupations | `3599` |
+| `office_administrative_support` | `LNU02032207` | (Unadj) Employment Level - Office and Administrative Support Occupations | `4999` |
+| `production` | `LNU02032213` | (Unadj) Employment Level - Production Occupations | `7699` |
+| `transportation_material_moving` | `LNU02032214` | (Unadj) Employment Level - Transportation and Material Moving Occupations | `8999` |
+
+Every row has `lfst_code` 20, `periodicity_code` M, `ages_code` 00,
+`sexs_code` 0 and `seasonal` U. BLS's own mapping files, read the same
+minute, give those codes as "Employed", "Monthly", "16 years and over" and
+"Both Sexes". `ln.occupation` gives each `occupation_code` a text identical to
+the A-19 row label the resolver already uses (`A19_ROW_LABELS`). That is Table
+A-19's "Total, 16 years and over" column.
+
+The data make the same tie. For June, July and August 2026, each series serves
+exactly the integer Table A-19 printed for its row, and in all three months it
+matches no other row (`test_each_a19_series_serves_the_figures_table_a19_first_printed`).
+
+## Anchors are first prints
+
+| Series | 2026-06 | 2026-07 | 2026-08 |
+|---|---:|---:|---:|
+| `business_financial_operations` | 9.720 | 9.835 | 10.167 |
+| `computer_mathematical` | 6.950 | 6.924 | 7.010 |
+| `healthcare_support` | 5.691 | 5.797 | 5.709 |
+| `office_administrative_support` | 16.184 | 16.457 | 16.154 |
+| `production` | 7.759 | 8.121 | 7.716 |
+| `transportation_material_moving` | 12.010 | 12.223 | 12.011 |
+
+Values are millions: the API's thousands divided by 1,000. The adapter
+reproduces each one with zero tolerance from the captures in
+`tests/fixtures/bls_api/`. Each one is also the figure Table A-19 printed in the
+Employment Situation that first published the month. The evidence is the table
+element of the Archive's captures of 2026-07-10, 2026-08-19 and 2026-09-04,
+whose current-month column is headed "June 2026", "July 2026" and "Aug. 2026"
+(`tests/fixtures/a19/`). So, unlike the JOLTS and CES anchors above, these
+anchors are first prints: the unadjusted figures had not moved by 2026-09-25.
+
+Run-time tolerance is 0.001 million, one step of the published precision. This
+is the same lab choice as the 0.1 on one-decimal rates. A revision that reaches
+an anchor month refuses every capture with `ANCHOR MISMATCH` until the anchors
+are re-verified.
+
+## First-print gate and revisions
+
+The specs use `first_print_gate: "latest_month"`, as the unemployment rate
+does: CPS rows carry no preliminary footnote, and a month is captured only while
+it is still the series' latest published month.
+
+The basis is BLS's own statement about unadjusted CPS data: "The case for
+revisions to previous-month seasonally adjusted estimates is less compelling
+for CPS series, because the original sample data normally are not revised."
+(https://www.bls.gov/cps/seasonal-adjustment-methodology.htm, re-read
+2026-09-25, SHA-256
+`2496d3096be39ddddf5bd22d0b94526e019bb90db8b74fd749cf29bf4603b678`, the same
+bytes as the 2026-09-20 read above.) "Original" there is the data before
+seasonal adjustment, which is what Table A-19 prints. The seasonal revision
+at year end re-derives seasonally adjusted estimates and does not apply to
+these series.
+
+"Normally" is not "never". All CPS data for January 2026 were revised to
+incorporate population controls, with the February estimates (see the CPS
+exception above). The January 2026 row of each of the six captures carries
+footnote code `12` for it. That revision arrived with the next release, when
+January was no longer the latest month, so the gate had already closed. The
+same population-control note says earlier months "have not been revised, in
+accordance with usual practice."
+
+## Routing
+
+The `a19` leg and the BLS API family both claim the six stems. The rule is the
+one the ALFRED and BLS API families already share: a reference whose
+registration binds `bls-api` routes to the BLS API leg. Every other reference
+keeps the `a19` leg. That covers the 18 `generic-url` registrations for July,
+August and September 2026, and the June cells that predate bindings.
+`EXECUTION_PLAN_UNREGISTRABLE_FAMILIES` still lists `a19`, so a contract that
+does not carry the whole reviewed `bls-api` template is still refused. This
+change decides nothing about the 18 existing registrations.
+
+## Calendar
+
+The Employment Situation schedule
+(https://www.bls.gov/schedule/news_release/empsit.htm) was re-read on
+2026-09-25 at 11:16 UTC. It returned 55,578 bytes with SHA-256
+`8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47`, identical
+to the 2026-09-20 read above. The six docket entries commit:
+
+| Period | Release |
+|---|---|
+| 2026-10 | 2026-11-06, 08:30 ET |
+| 2026-11 | 2026-12-04, 08:30 ET |
+
+September 2026 (released 2026-10-02) is left out on purpose. It already holds
+a `generic-url` registration, and a test keeps a docket date from ever naming a
+registered period. The schedule ends with the November 2026 data. The December
+date is added by a reviewed edit when BLS posts it. On 2026-11-06, 08:30 ET is
+13:30 UTC, ten minutes before the daily run. A capture that misses that run is
+taken by the next one, while October is still the latest month, which lasts
+until 2026-12-04.
+
+## Chronicle holds these lineages in thousands
+
+Each of the six concepts has exactly one Chronicle lineage, `economy/aggregate`
+in the United States. It holds one observation: the June 2026 figure the `a19`
+leg recorded, in thousands. (Live catalog, PolicyEngine/chronicle branch
+`codex/thesis-ledger-facts`, fetched 2026-09-25.) The docket pins that lineage,
+and the containment gate re-derives the same pin, because there is one
+candidate. The docket's `targetUnit` "millions" agrees with the catalog's
+"thousands" under the unchanged `valueScale` 0.001. The containment tests
+pass against both the frozen fixture and the live catalog.
+
+A fact must carry its contract's unit (`source_binding_projection`), and every
+A-19 contract is in millions: the 18 existing ones and every one this adapter
+registers. Chronicle's `scripts/build_series_catalog.py` groups observations by
+concept, geography and entity, and refuses to build when one identity holds two
+units. This was run on 2026-09-25 against a scratch copy of the ledger branch,
+Chronicle commit `3dd95a0d`, with one synthetic October production row added:
+
+- in millions, the generator exited 1 with "unit conflict within identity
+  ('bls.cps.employed_people_by_occupation.production', ... ['economy',
+  'aggregate']): ['millions', 'thousands'] — resolve by curation (split or
+  correct upstream)";
+- in thousands, it exited 0, as it does on the unmodified branch.
+
+The resolver regenerates that catalog for every append, and sends all of a
+run's new rows in one proposal. So one such fact would fail the whole run's
+append, not only its own row.
+
+`bls_ledger_unit_conflict` refuses the capture before the API request is
+spent. It fires when the ledger's latest row for any period of the series has
+another unit, for the same entity and geography. Only that reference is
+refused (`LEDGER UNIT CONFLICT`); the rest of the run appends. Chronicle's
+current view drops a row that a later correction supersedes, and a correction
+keeps the row's `source_record_id`. The guard reads the last row per record id
+the same way, so a correction that restates June in millions lifts it
+automatically. A curation of another kind, a split for example, keeps the guard
+refusing until a reviewed change lifts it. That fails closed.
+
+**What this needs.** Chronicle must curate the six lineages to one unit before
+the first October capture, due 2026-11-06. If the October month is still
+refused on 2026-12-04, the November release replaces it as the latest month and
+the targets are lost as missed windows, never resolved to a revised value. The
+18 `generic-url` registrations are also in millions, so the same curation is
+needed before the `a19` leg records any of them.
+
+## Fixtures
+
+- `tests/fixtures/bls_api/LNU*.json`: the six API captures, with request URLs,
+  times and hashes in that directory's README.
+- `tests/fixtures/a19/*.table.html`: the three Table A-19 table elements. These
+  are byte-identical to the files thesis#269 adds at the same paths.
+- `tests/fixtures/a19/chronicle-production-june-2026-row.jsonl`: Chronicle's
+  June 2026 production observation, byte for byte from commit `3dd95a0d`, used
+  by the unit-guard tests.
+
+## What this does not prove or decide
+
+- No capture is the 08:30 bytes. The gate proves only that no later
+  Employment Situation had been published at capture.
+- It adds six keyless requests to an Employment Situation day, when the payroll
+  change is also pending. On 2026-09-25 the keyless API refused this session's
+  own requests with "the daily threshold for total number of requests ... has
+  been reached" (see the fixture README). The resolver treats that response as
+  a failed fetch and defers; the window lasts about four weeks.
+- It does not choose how Chronicle curates the lineages.
+- It decides nothing about the 18 existing registrations or their custody.
