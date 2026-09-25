@@ -36,6 +36,17 @@ function formatCrps(value: number | null): string {
 function formatCoverage(value: number | null): string {
   return value === null ? "—" : `${Math.round(value * 100)}%`;
 }
+function formatSignedCrps(value: number): string {
+  return `${value > 0 ? "+" : value < 0 ? "−" : ""}${Math.abs(value).toFixed(3)}`;
+}
+// A mean normalized-CRPS difference with its standard error when there is
+// more than one target to estimate one from.
+function formatDelta(value: number | null, stdError: number | null): string {
+  if (value === null) return "—";
+  return stdError === null
+    ? formatSignedCrps(value)
+    : `${formatSignedCrps(value)} ± ${stdError.toFixed(3)}`;
+}
 
 export default async function CalibrationPage() {
   const ledger = await loadPolicyEngineLedger();
@@ -107,11 +118,10 @@ export default async function CalibrationPage() {
   // once witnessed scores exist.
   const witnessedLive = scores.length > 0;
 
-  const leaderboard = [...rewardExport.leaderboard].sort((left, right) => {
-    if (left.pairedCrpsRatioGeomean === null) return 1;
-    if (right.pairedCrpsRatioGeomean === null) return -1;
-    return left.pairedCrpsRatioGeomean - right.pairedCrpsRatioGeomean;
-  });
+  // The export's order IS the ranking (leaderboardRankingStatistic); a
+  // second sort here once ranked by a different, improper statistic.
+  const leaderboard = rewardExport.leaderboard;
+  const headToHead = rewardExport.headToHead;
 
   const cellBySlug = new Map(forecasts.map((cell) => [cell.slug, cell]));
   const recentScores = [...publishedScores]
@@ -220,16 +230,18 @@ export default async function CalibrationPage() {
                 : `Lower is better; ${claimedNormalizedScores.length} of ${publishedScores.length} claimed-time scores have a usable pre-registered ledger scale.`,
             },
             {
-              label: "CRPS ratio vs persistence",
+              label: "nCRPS vs persistence",
               tier: "witness-verified",
-              value:
-                rewardExport.pairedComparison.crpsRatioGeomean === null
-                  ? "—"
-                  : rewardExport.pairedComparison.crpsRatioGeomean.toFixed(2),
+              value: formatDelta(
+                rewardExport.pairedComparison.normalizedCrpsDelta,
+                rewardExport.pairedComparison.normalizedCrpsDeltaStdError,
+              ),
               detail:
-                rewardExport.pairedComparison.pairedTargets > 0
-                  ? `Geometric mean of per-target raw CRPS ratios (agent / paired persistence baseline) on ${rewardExport.pairedComparison.pairedTargets} matched targets; below 1 beats persistence. ${formatCoverage(rewardExport.pairedComparison.agentWinRate)} agent win rate.`
-                  : "Pairs form as series accumulate repeat resolutions; the headline ratio scores witness-verified runs only.",
+                rewardExport.pairedComparison.normalizedTargets > 0
+                  ? `Mean per-target normalized CRPS, primary run minus the paired persistence baseline, on ${rewardExport.pairedComparison.normalizedTargets} of ${rewardExport.pairedComparison.pairedTargets} matched targets with a usable ledger scale (± one standard error); below 0 beats persistence. ${formatCoverage(rewardExport.pairedComparison.agentWinRate)} agent win rate on raw CRPS.`
+                  : rewardExport.pairedComparison.pairedTargets > 0
+                    ? `${rewardExport.pairedComparison.pairedTargets} matched targets, none with a usable ledger scale yet. ${formatCoverage(rewardExport.pairedComparison.agentWinRate)} agent win rate on raw CRPS.`
+                    : "Pairs form as series accumulate repeat resolutions; the headline difference scores witness-verified runs only.",
             },
           ].map((stat) => (
             <div
@@ -379,15 +391,19 @@ export default async function CalibrationPage() {
             className="mt-2 max-w-[640px] text-[0.88rem] leading-[1.6]"
             style={{ color: "var(--theme-text-muted)" }}
           >
-            Per-target raw CRPS ratio against the paired ledger persistence
-            baseline (geometric mean; below 1 beats persistence), lowest first.
-            Unpaired means remain visible for context. The persistence baseline
-            forecasts every target as its last official print with a
-            realized-volatility interval — an agent earns its place by beating
-            it. Forecaster rows score here only when witness-verified; the
-            deterministic baseline is a replayable function of pre-cutoff ledger
-            data and needs no witness of its own. Rows with few scored runs are
-            noisy; read them accordingly.
+            Ranked by mean normalized CRPS minus the paired ledger persistence
+            baseline&apos;s, over each forecaster&apos;s own matched targets
+            with a usable ledger scale (± one standard error; below 0 beats
+            persistence), lowest first. The difference is linear in every score,
+            so in expectation no forecaster can improve its rank by reporting
+            anything but its honest distribution. Win rates and unpaired means
+            remain visible for context. The persistence baseline forecasts every
+            target as its last official print with a realized-volatility
+            interval — an agent earns its place by beating it. Forecaster rows
+            score here only when witness-verified; the deterministic baseline is
+            a replayable function of pre-cutoff ledger data and needs no witness
+            of its own. Rows with few scored runs are noisy; read them
+            accordingly.
           </p>
           <div
             className="mt-5 overflow-x-auto rounded-[14px] border"
@@ -409,7 +425,7 @@ export default async function CalibrationPage() {
                     Claimed-time scored
                   </th>
                   <th className="px-4 py-3 text-right font-normal">
-                    CRPS ratio vs persistence
+                    nCRPS vs persistence
                   </th>
                   <th className="px-4 py-3 text-right font-normal">
                     Paired win rate
@@ -492,9 +508,18 @@ export default async function CalibrationPage() {
                         className="px-4 py-3 text-right [font-family:var(--font-mono)]"
                         style={{ color: "var(--theme-text)" }}
                       >
-                        {row.pairedCrpsRatioGeomean === null
-                          ? "—"
-                          : row.pairedCrpsRatioGeomean.toFixed(2)}
+                        {formatDelta(
+                          row.pairedNormalizedCrpsDelta,
+                          row.pairedNormalizedCrpsDeltaStdError,
+                        )}
+                        {row.pairedNormalizedTargets > 0 ? (
+                          <span
+                            className="ml-1 text-[0.72rem]"
+                            style={{ color: "var(--theme-text-muted)" }}
+                          >
+                            ({row.pairedNormalizedTargets})
+                          </span>
+                        ) : null}
                       </td>
                       <td
                         className="px-4 py-3 text-right [font-family:var(--font-mono)]"
@@ -521,6 +546,91 @@ export default async function CalibrationPage() {
             </table>
           </div>
         </section>
+
+        {headToHead.length > 0 ? (
+          <section className="mt-14">
+            <h2
+              className="[font-family:var(--font-display)] text-[1.3rem] font-semibold"
+              style={{ color: "var(--theme-text)" }}
+            >
+              Head to head on shared targets
+            </h2>
+            <p
+              className="mt-2 max-w-[640px] text-[0.88rem] leading-[1.6]"
+              style={{ color: "var(--theme-text-muted)" }}
+            >
+              Forecasters pick their own targets, so the ranking above pairs
+              each with persistence on its own set. These rows compare two
+              forecasters directly, only on targets both scored with a usable
+              ledger scale: mean normalized CRPS of the first minus the second
+              (± one standard error; below 0 favors the first).
+            </p>
+            <div
+              className="mt-5 overflow-x-auto rounded-[14px] border"
+              style={{ borderColor: "var(--theme-border)" }}
+            >
+              <table className="w-full border-collapse text-[0.84rem]">
+                <thead>
+                  <tr
+                    className="[font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em]"
+                    style={{ color: "var(--theme-text-muted)" }}
+                  >
+                    <th className="px-4 py-3 text-left font-normal">First</th>
+                    <th className="px-4 py-3 text-left font-normal">Second</th>
+                    <th className="px-4 py-3 text-right font-normal">
+                      Shared targets
+                    </th>
+                    <th className="px-4 py-3 text-right font-normal">
+                      nCRPS difference
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {headToHead.map((pair) => (
+                    <tr
+                      key={`${pair.left.agent}-${pair.left.model ?? ""}-${pair.right.agent}-${pair.right.model ?? ""}`}
+                      className="border-t"
+                      style={{ borderColor: "var(--theme-border)" }}
+                    >
+                      {[pair.left, pair.right].map((side, index) => (
+                        <td
+                          key={index}
+                          className="px-4 py-3"
+                          style={{ color: "var(--theme-text)" }}
+                        >
+                          {side.agent}
+                          {side.model ? (
+                            <span
+                              className="ml-2 text-[0.72rem]"
+                              style={{ color: "var(--theme-text-muted)" }}
+                            >
+                              {side.model}
+                            </span>
+                          ) : null}
+                        </td>
+                      ))}
+                      <td
+                        className="px-4 py-3 text-right [font-family:var(--font-mono)]"
+                        style={{ color: "var(--theme-text-muted)" }}
+                      >
+                        {pair.sharedTargets}
+                      </td>
+                      <td
+                        className="px-4 py-3 text-right [font-family:var(--font-mono)]"
+                        style={{ color: "var(--theme-text)" }}
+                      >
+                        {formatDelta(
+                          pair.meanNormalizedCrpsDifference,
+                          pair.stdError,
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-14">
           <h2
