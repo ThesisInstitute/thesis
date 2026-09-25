@@ -233,6 +233,13 @@ TSA_ENDPOINTS = {
 TimestampRequester = Callable[[str, bytes, float], bytes]
 
 
+# main's exit status when it finished cleanly but refused one or more rows
+# (a contract-binding or ledger-catalog refusal). Whatever it appended must
+# still be committed and published, so the workflow tells this apart from a
+# crash (1), publishes, and then fails the job so the alert fires.
+EXIT_REFUSED_ROWS = 3
+
+
 class LedgerProposalError(RuntimeError):
     """A witnessed ledger proposal could not be constructed or published."""
 
@@ -13123,6 +13130,8 @@ def ledger_catalog_refusals(
     separated: the append then fails as before.
     """
 
+    if not rows:
+        return {}
     tree = _fetch_repository_tree(repo, base_sha, path)
     lines = [json.dumps(row, separators=(",", ":")) for row in rows]
 
@@ -13147,17 +13156,47 @@ def ledger_catalog_refusals(
             )
         if completed.returncode == 0:
             return None
-        detail = (completed.stderr.strip() or completed.stdout.strip())[-500:]
+        output = completed.stderr.strip() or completed.stdout.strip()
+        detail = " ".join(
+            line for line in output.splitlines() if not line.startswith("note:")
+        )[-500:]
         return f"series-catalog generator exit {completed.returncode}: {detail}"
 
-    if not lines or failure(lines) is None or failure([]) is not None:
+    if failure(lines) is None or failure([]) is not None:
         return {}
     refusals: dict[str, str] = {}
     for row, line in zip(rows, lines):
         reason = failure([line])
         if reason is not None:
             refusals[str(row.get("source_record_id", "?"))] = reason
+    kept = [
+        line
+        for row, line in zip(rows, lines)
+        if str(row.get("source_record_id", "?")) not in refusals
+    ]
+    if kept:
+        together = failure(kept)
+        if together is not None:
+            # Rows that fail only together cannot be told apart here; stop
+            # before anything is written rather than inside the append.
+            raise LedgerProposalError(
+                "rows the series catalog accepts one by one fail it together: "
+                f"{together}"
+            )
     return refusals
+
+
+def apply_catalog_refusals(
+    rows: list[dict[str, Any]],
+    refusals: dict[str, str],
+    refused: list[str],
+) -> list[dict[str, Any]]:
+    """Report each catalog refusal, add it to ``refused``, return the rest."""
+
+    for ref, reason in refusals.items():
+        refused.append(f"{ref}: {reason}")
+        print(f"  CATALOG REFUSED (excluded from append): {ref} — {reason}")
+    return exclude_catalog_refusals(rows, refusals)
 
 
 def exclude_catalog_refusals(
@@ -15751,18 +15790,18 @@ def main() -> int:
     # The same rule for the ledger's catalog: a row Chronicle's generator
     # refuses on its own (a unit conflict with its lineage) is excluded and
     # reported, and the rest are appended.
-    catalog_refusals = ledger_catalog_refusals(
-        args.ledger_repo, ledger_repo_sha, args.ledger_path, content, new_rows
+    new_rows = apply_catalog_refusals(
+        new_rows,
+        ledger_catalog_refusals(
+            args.ledger_repo, ledger_repo_sha, args.ledger_path, content, new_rows
+        ),
+        provenance_refusals,
     )
-    for ref, reason in catalog_refusals.items():
-        provenance_refusals.append(f"{ref}: {reason}")
-        print(f"  CATALOG REFUSED (excluded from append): {ref} — {reason}")
-    new_rows = exclude_catalog_refusals(new_rows, catalog_refusals)
     if not new_rows:
         print("every fetched row was refused; nothing to append")
         for line in provenance_refusals:
             print(f"  refused: {line}")
-        return 1
+        return EXIT_REFUSED_ROWS
 
     updated = (
         content.rstrip("\n")
@@ -15811,7 +15850,7 @@ def main() -> int:
             "ledger's series catalog; appended the rest — fix the registrations "
             "or curate the ledger's lineages named above"
         )
-        return 1
+        return EXIT_REFUSED_ROWS
     return 0
 
 

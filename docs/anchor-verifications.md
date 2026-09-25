@@ -881,8 +881,9 @@ refuse with `FIRST-PRINT WINDOW MISSED` and await a disposition ruling. On
 list `[]`, which the resolver reads as an empty index. An empty body is still
 treated as an index failure and defers. Nothing resolves and nothing is
 recorded. The refusal is reserved for one finding: the window is closed,
-every HTTP 200 capture of this exact URL in it was read, each prints another
-month, and every other row listed in the window is accounted for. The index
+every HTTP 200 capture of this exact URL in it was read or carries the digest
+of a verified read, each prints another month, and every other row listed in
+the window is accounted for. The index
 is queried for every status and for the stored form of the URL, and the
 closed- and open-window verdicts report what it listed, in disjoint counts:
 HTTP 200 captures of this exact URL, rows without a status, rows with another
@@ -948,12 +949,16 @@ Chronicle's series-catalog generator refuses an identity with two units
 (checked 2026-09-25 on `codex/thesis-ledger-facts` at `3dd95a0`: an August
 row in millions exits 1 with a unit conflict, the same row in thousands exits
 0). The resolver runs that generator on the staged base before every append
-(`ledger_catalog_refusals`), and a row it refuses on its own is excluded,
-reported as `CATALOG REFUSED`, and fails the run, while every other row is
-appended. So until those lineages are curated in Chronicle, the A-19 facts
-defer instead of blocking the day's other resolutions; the dated captures
-they rest on stay in the Archive, so a run after the curation can still
-resolve them.
+(`ledger_catalog_refusals`), and a row it refuses on its own is excluded and
+reported as `CATALOG REFUSED` while the other rows are appended; rows that
+fail only together stop the run before anything is written. A run that
+refused any row, by contract binding or by the catalog, exits 3
+(`EXIT_REFUSED_ROWS`), and `resolve-and-rebuild.yml` still commits and
+publishes what it appended before failing the job, so the alert fires. So
+until those lineages hold one unit in Chronicle (a Chronicle change, not a
+resolver one), the A-19 facts defer instead of blocking the day's other
+resolutions; the dated captures they rest on stay in the Archive, so a run
+after that change can still resolve them.
 
 A registered target looks up the Archive's index for captures dated inside its
 window, and makes no request before the window opens. From the day it opens (not the

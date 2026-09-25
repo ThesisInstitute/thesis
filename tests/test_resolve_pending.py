@@ -1578,7 +1578,14 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         lambda: f"{release_date}T12:00:00Z",
     )
 
-    def fake_catalog_refusals(_repo, _sha, _path, _content, rows):
+    def fake_catalog_refusals(repo, sha, path, content, rows):
+        # The preflight sees the base the append is built on.
+        assert (repo, sha, path, content) == (
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            "ledger/official_observations.jsonl",
+            "",
+        )
         if not catalog_refuses:
             return {}
         return {str(row["source_record_id"]): "unit conflict (fixture)" for row in rows}
@@ -1591,8 +1598,8 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
 
     if catalog_refuses:
         # A row the ledger's catalog refuses is excluded, its archive with it,
-        # and the run fails loudly instead of aborting inside the append.
-        assert resolve_pending.main() == 1
+        # and the run reports refused rows instead of aborting in the append.
+        assert resolve_pending.main() == resolve_pending.EXIT_REFUSED_ROWS
         assert appended == {}
         assert not [
             path for path in tmp_path.rglob("*.gz") if "responses" in path.parts
@@ -5508,3 +5515,75 @@ def test_excluded_catalog_rows_leave_no_orphan_archive(
     assert [row["source_record_id"] for row in kept] == ["kept"]
     assert not (responses / "own.gz").exists()
     assert (responses / "shared.gz").exists()
+
+
+def test_catalog_refusals_are_reported_counted_and_excluded(
+    tmp_path: pathlib.Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    responses = tmp_path / "run" / "responses"
+    responses.mkdir(parents=True)
+    for name in ("a.gz", "b.gz"):
+        (responses / name).write_bytes(b"x")
+    rows = [
+        {"source_record_id": "kept", "responseArchive": {"path": "run/responses/a.gz"}},
+        {"source_record_id": "gone", "responseArchive": {"path": "run/responses/b.gz"}},
+    ]
+    refused = ["earlier: contract"]
+    kept = resolve_pending.apply_catalog_refusals(
+        rows, {"gone": "unit conflict"}, refused
+    )
+    assert [row["source_record_id"] for row in kept] == ["kept"]
+    assert refused == ["earlier: contract", "gone: unit conflict"]
+    assert "CATALOG REFUSED (excluded from append): gone — unit conflict" in (
+        capsys.readouterr().out
+    )
+    assert (responses / "a.gz").exists() and not (responses / "b.gz").exists()
+
+
+def test_rows_that_fail_the_catalog_only_together_stop_before_any_write(
+    monkeypatch,
+) -> None:
+    generator = b"""import json, pathlib, sys
+text = pathlib.Path("ledger/official_observations.jsonl").read_text()
+ids = {json.loads(line)["source_record_id"] for line in text.splitlines() if line}
+if {"x", "y"} <= ids or "z" in ids:
+    sys.exit("note: registry\\nconflict")
+"""
+    tree = _catalog_tree(generator)
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    path = "ledger/official_observations.jsonl"
+    rows = [{"source_record_id": ref} for ref in ("x", "y")]
+    with pytest.raises(resolve_pending.LedgerProposalError, match="together"):
+        resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, rows)
+    # A lone refusal's reason drops the generator's notes.
+    refusals = resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, path, base, [{"source_record_id": "z"}]
+    )
+    assert refusals == {"z": "series-catalog generator exit 1: conflict"}
+    # No rows: nothing is fetched.
+    monkeypatch.setattr(
+        resolve_pending, "_fetch_repository_tree", lambda *_: pytest.fail("fetched")
+    )
+    assert resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, []) == {}
+
+
+def test_the_workflow_publishes_before_failing_on_refused_rows() -> None:
+    workflow = (ROOT / ".github/workflows/resolve-and-rebuild.yml").read_text()
+    resolve_step = workflow.split(
+        "      - name: Resolve pending cells against official prints\n", 1
+    )[1].split("\n      - name:", 1)[0]
+    assert 'statuses=("${PIPESTATUS[@]}")' in resolve_step
+    assert '[ "$resolver_rc" -ne 3 ]' in resolve_step
+    assert 'echo "resolver_rc=$resolver_rc" >> "$GITHUB_OUTPUT"' in resolve_step
+    assert resolve_pending.EXIT_REFUSED_ROWS == 3
+    names = [
+        line.strip()[len("- name: ") :]
+        for line in workflow.splitlines()
+        if line.strip().startswith("- name: ")
+    ]
+    fail_step = names.index("Fail the run on refused rows")
+    assert fail_step == names.index("Alert on failure") - 1
+    assert fail_step > names.index("Record the successfully deployed ledger SHA")
+    assert "if: steps.resolve.outputs.resolver_rc == '3'" in workflow
