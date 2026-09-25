@@ -48,6 +48,7 @@ import tempfile
 import time
 import unicodedata
 from datetime import datetime, timedelta, timezone
+from decimal import ROUND_HALF_UP, Context
 from typing import Any
 from urllib.parse import urlparse
 
@@ -174,11 +175,23 @@ def write_artifact(
     }
 
 
+# ECMAScript toPrecision rounds the exact binary value and, between two equally
+# close 12-digit candidates, takes the larger magnitude: Decimal's ROUND_HALF_UP.
+# The earlier format(value, ".12g") rounded those ties half-to-even, turning
+# 100000.0078125 into 100000.007812 where the site builder writes 100000.007813
+# (2026-09-24 review: 1,174 of 40,000 synthetic interval inputs diverged).
+JS_TO_PRECISION_12 = Context(prec=12, rounding=ROUND_HALF_UP)
+
+
 def round_distribution_number(value: float) -> float:
-    """Match JavaScript Number(value.toPrecision(12))."""
+    """Match JavaScript Number(value.toPrecision(12)) for every double."""
+    # create_decimal_from_float rounds the float's exact value once, and
+    # float() of the 12-digit decimal is correctly rounded like Number(string).
+    # NaN and the infinities pass through, as they do in JavaScript.
+    rounded = JS_TO_PRECISION_12.create_decimal_from_float(value)
     # + 0.0 unifies IEEE signed zeros: Python's json keeps "-0.0" while
     # JSON.stringify drops the sign, so -0 must never reach a sealed record.
-    return float(format(value, ".12g")) + 0.0
+    return float(rounded) + 0.0
 
 
 def unsign_zero(value: Any) -> Any:
@@ -192,7 +205,10 @@ def coalesce_cdf_knots(
     knots: list[tuple[float, float]] = []
     for value, probability in sorted(raw_knots):
         if knots and abs(knots[-1][0] - value) < 1e-12:
-            knots[-1] = (value, max(knots[-1][1], probability))
+            # Keep the EARLIER knot's value, as the site's coalesceCdfKnots
+            # does: taking the later one moved the whole lower segment when
+            # the knots were distinct but within 1e-12 (point - ciLow = 1e-13).
+            knots[-1] = (knots[-1][0], max(knots[-1][1], probability))
         else:
             knots.append((value, probability))
     return knots

@@ -458,7 +458,7 @@ describe("forecast catalog", () => {
       ),
     ).toBe(false);
 
-    expect(exportPayload.schemaVersion).toBe("brier_reward_export_v2");
+    expect(exportPayload.schemaVersion).toBe("brier_reward_export_v3");
     expect(exportPayload.mission.objective).toBe("maximize_forecast_accuracy");
     expect(exportPayload.mission.reward).toBe("negative_normalized_crps");
     expect(exportPayload.counts.runs).toBe(runs.length);
