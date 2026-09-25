@@ -7488,6 +7488,9 @@ _A19_COLUMN_GROUP = ("Total", "16 years and over")
 
 
 _A19_TABLE_ID = "cps_eande_m19"
+# Elements that break a line of text: their tags separate the words on either
+# side. Other markup inside a cell (a span around a number) joins its text.
+_A19_TEXT_BREAKS = {"br", "p", "div", "li", "hr"}
 
 
 class _A19TableParser(HTMLParser):
@@ -7502,9 +7505,12 @@ class _A19TableParser(HTMLParser):
     read either, and anything that would split or lose a recorded cell's
     text without an error marks the page malformed: a cell or any text in a
     nested table while a recorded cell is open, or text in the table outside
-    any cell or caption. Header ids defined anywhere else on the page are
-    kept apart (``foreign_ids``): a duplicate of one of this table's ids,
-    which a browser would bind cells to first, is refused by ``a19_table``.
+    any cell or caption. The id of every other element on the page, inside
+    this table or out, is kept apart (``foreign_ids``): one equal to a header
+    id of this table makes the ``headers`` reference ambiguous, and
+    ``a19_table`` refuses it. Text inside a cell keeps its words together
+    across inline markup (``7,<span>716</span>`` is 7,716); a line break or a
+    block element between them separates them.
     """
 
     def __init__(self) -> None:
@@ -7531,6 +7537,10 @@ class _A19TableParser(HTMLParser):
         values = {name: value or "" for name, value in attrs}
         frame = self._frames[-1] if self._frames else None
         kind = frame[0] if frame else "outside"
+        if values.get("id") and not (tag == "th" and kind == "target"):
+            self.foreign_ids.add(values["id"])
+        if tag in _A19_TEXT_BREAKS and kind == "target" and frame[1] is not None:
+            frame[1][2].append(" ")
         if tag == "table":
             if kind != "outside":
                 if values.get("id") == _A19_TABLE_ID:
@@ -7545,8 +7555,6 @@ class _A19TableParser(HTMLParser):
                 self._frames.append(["outside", None, False])
         elif tag in ("th", "td"):
             if kind != "target":
-                if tag == "th" and values.get("id"):
-                    self.foreign_ids.add(values["id"])
                 if kind == "inner" and self._in_recorded_cell():
                     self.malformed = True
                 return
@@ -7584,6 +7592,8 @@ class _A19TableParser(HTMLParser):
             self._frames.pop()
         elif frame[0] != "target":
             return
+        elif tag in _A19_TEXT_BREAKS and frame[1] is not None:
+            frame[1][2].append(" ")
         elif tag == "tr" and frame[1] is not None:
             self._close_cell(frame)
         elif tag in ("td", "th") and frame[1] is not None and frame[1][0] == tag:
@@ -7594,7 +7604,7 @@ class _A19TableParser(HTMLParser):
     def _close_cell(self, frame: list[Any]) -> None:
         tag, values, parts, _ = frame[1]
         frame[1] = None
-        text = " ".join(" ".join(parts).split())
+        text = " ".join("".join(parts).split())
         if tag == "th" and values.get("id"):
             if values["id"] in self.header_text:
                 self.duplicate_ids.add(values["id"])
@@ -7604,7 +7614,7 @@ class _A19TableParser(HTMLParser):
 
 
 def _a19_header_month(text: str) -> tuple[int, int] | None:
-    match = re.fullmatch(r"([A-Za-z]+\.?) (\d{4})", text)
+    match = re.fullmatch(r"([A-Za-z]+\.?) ([0-9]{4})", text)
     month = _A19_HEADER_MONTHS.get(match.group(1).lower()) if match else None
     return (int(match.group(2)), month) if match and month else None
 
@@ -7669,7 +7679,7 @@ def a19_table(html: str) -> tuple[str, dict[str, float]] | None:
         ((year_ago, month_ago), _), ((year, month), printed) = dated
         if (year - year_ago, month) != (1, month_ago):
             return None
-        if not re.fullmatch(r"\d{1,3}(,\d{3})*", printed):
+        if not re.fullmatch(r"[0-9]{1,3}(,[0-9]{3})*", printed):
             return None
         values[key] = float(printed.replace(",", ""))
         months.add((year, month))
@@ -7736,12 +7746,19 @@ class A19CaptureError(ValueError):
 
 @dataclass(frozen=True)
 class A19Row:
-    """One index row for exactly the bound URL: HTTP 200, or without a status."""
+    """One index row that could hold the page: HTTP 200, or without a status."""
 
     stamp: str
     status: str
     digest: str | None
     """The index's content digest, or None when it is not of the observed form."""
+    original: str = A19_SOURCE_URL
+    """The URL the Archive stored it under."""
+
+    @property
+    def exact(self) -> bool:
+        """Stored under exactly the bound URL, so a capture this resolver reads."""
+        return self.original == A19_SOURCE_URL
 
     @property
     def url(self) -> str:
@@ -7752,27 +7769,35 @@ class A19Row:
 class A19Index:
     """What the Archive's index lists for one registered window.
 
-    Every count is disjoint: ``listed == len(rows) + other_status + other_form``.
+    Every count is disjoint: ``listed == len(captures) + len(revisits) +
+    other_status + other_form``.
     """
 
     rows: list[A19Row]
-    """Rows for exactly the bound URL with status 200 or ``-``, oldest first."""
+    """Every row with status 200 or ``-``, under any form of the URL, oldest
+    first: the rows that could hold the page."""
     listed: int
     """Every row dated inside the window."""
     other_status: int
     """Rows for the bound URL whose status is neither 200 nor ``-``."""
     other_form: int
-    """Rows stored under another form of the URL (scheme, host); not read."""
+    """Rows stored under another form of the URL (scheme, host), any status;
+    never read."""
 
     @property
     def captures(self) -> list[str]:
-        """HTTP 200 captures, oldest first."""
-        return [row.url for row in self.rows if row.status == "200"]
+        """HTTP 200 captures of exactly the bound URL, oldest first."""
+        return [row.url for row in self.rows if row.exact and row.status == "200"]
 
     @property
     def revisits(self) -> list[A19Row]:
-        """Rows without a status, oldest first."""
-        return [row for row in self.rows if row.status == "-"]
+        """Rows for exactly the bound URL without a status, oldest first."""
+        return [row for row in self.rows if row.exact and row.status == "-"]
+
+    @property
+    def other_form_rows(self) -> list[A19Row]:
+        """Rows under another form of the URL with status 200 or ``-``."""
+        return [row for row in self.rows if not row.exact]
 
     def describe(self, window: Any) -> str:
         text = (
@@ -7873,9 +7898,9 @@ def a19_window_captures(
             not isinstance(row, list)
             or len(row) != 4
             or not all(isinstance(cell, str) for cell in row)
-            or not re.fullmatch(r"\d{14}", row[0])
+            or not re.fullmatch(r"[0-9]{14}", row[0])
             or not row[1]
-            or not re.fullmatch(r"\d{3}|-", row[2])
+            or not re.fullmatch(r"[0-9]{3}|-", row[2])
             or not row[3]
         ):
             raise ValueError(f"malformed Archive index row {row!r}")
@@ -7904,10 +7929,10 @@ def a19_window_captures(
         result.listed += 1
         if original != A19_SOURCE_URL:
             result.other_form += 1
-        elif status in ("200", "-"):
-            result.rows.append(A19Row(stamp, status, digest))
-        else:
+        elif status not in ("200", "-"):
             result.other_status += 1
+        if status in ("200", "-"):
+            result.rows.append(A19Row(stamp, status, digest, original))
     return result
 
 
@@ -7925,8 +7950,13 @@ class A19Discovery:
     """The line to print when nothing resolves; empty otherwise."""
     witness: str | None = None
     """When set, the stamp of an earlier row the index lists with the same
-    digest as ``url`` but did not serve at its own timestamp: the earliest
-    print inside the window, whose bytes ``url`` supplied."""
+    digest as ``url`` but that was not read and identified at its own
+    timestamp: the earliest print inside the window, whose bytes ``url``
+    supplied."""
+    witness_reason: str | None = None
+    """Why the witness row itself was not read: not served at its timestamp,
+    served as something other than this table, or listed under another form
+    of the URL."""
 
     def __iter__(self) -> Iterator[Any]:
         return iter((self.url, self.raw, self.verdict))
@@ -7943,25 +7973,31 @@ def a19_registered_capture(
     """The capture a registered A-19 target resolves from, or why not yet.
 
     Takes the EARLIEST row dated inside the registered window that prints
-    ``period``, walking the index in order. Every row is read at its own
-    timestamp; an HTTP 200 capture that cannot be read or identified stops
-    the walk there (a later capture is the earliest only if this one is known
-    not to print the month). A row without a status that the Archive does not
-    serve at its own timestamp is not a stop: what it printed is known when a
-    read capture carries the same digest, since the index's digest names the
-    bytes. So a later read capture can account for an earlier unread row, and
-    an earlier unread row that a read capture matches is the earliest print,
-    with the read capture supplying its bytes (``witness``). A row nobody
-    accounts for that is dated before the first print defers the result.
+    ``period``, walking the index in order. Every row stored under exactly
+    the bound URL is read at its own timestamp; an HTTP 200 capture that
+    cannot be read or identified stops the walk there (a later capture is the
+    earliest only if this one is known not to print the month). A row without
+    a status that the Archive does not serve at its own timestamp, or serves
+    as something other than this table, is not a stop, and a row under
+    another form of the URL is never read. What such a row printed is taken
+    to be known when a read capture carries the same digest: the resolver
+    treats the index's digest as naming the stored bytes, an assumption about
+    the index, checked only in that two read captures with one digest must
+    print the same table (``DIGEST CONFLICT`` otherwise). So a later read
+    capture can account for an earlier unread row, and an earlier unread row
+    that a read capture matches is the earliest print, with the read capture
+    supplying its bytes (``witness``). A row nobody accounts for that is
+    dated before the first print defers the result.
 
     ``FIRST-PRINT WINDOW MISSED`` is reserved for one finding: the window is
     closed, every row in it is accounted for, and each prints another month.
     Rows that were not read and are not accounted for make the outcome
     unknown, which defers. An index failure, an unreadable or unidentified
-    HTTP 200 capture, or a capped scan reports itself and asks for nothing.
-    Only when the window is still open, every row read prints another
-    month, and ``request_capture`` is set (once per run) does it ask the
-    Archive to capture the page, and defer.
+    HTTP 200 capture, a digest conflict, or a scan that reached its cap
+    without settling reports itself and asks for nothing. Only when the
+    window is still open, every row read prints another month, and
+    ``request_capture`` is set (once per run) does it ask the Archive to
+    capture the page, and defer.
     """
 
     state = snapshot_window_state(today, window)
@@ -7983,15 +8019,23 @@ def a19_registered_capture(
             ),
         )
     rows = index.rows
-    month_by_stamp: dict[str, str] = {}
-    month_by_digest: dict[str, str] = {}
+    # What each read capture printed, by stamp, and by digest once the
+    # digest's read captures agree; raw bytes by stamp; why each unread row
+    # is unread.
+    table_by_stamp: dict[str, tuple[str, dict[str, float]]] = {}
+    table_by_digest: dict[str, tuple[tuple[str, dict[str, float]], str]] = {}
     raw_by_stamp: dict[str, bytes] = {}
+    unread: dict[str, str] = {
+        row.stamp: "which is stored under another form of the URL and not read"
+        for row in rows
+        if not row.exact
+    }
 
     def month_of(row: A19Row) -> str | None:
-        if row.stamp in month_by_stamp:
-            return month_by_stamp[row.stamp]
-        if row.digest is not None:
-            return month_by_digest.get(row.digest)
+        if row.stamp in table_by_stamp:
+            return table_by_stamp[row.stamp][0]
+        if row.digest is not None and row.digest in table_by_digest:
+            return table_by_digest[row.digest][0][0]
         return None
 
     def settled() -> A19Discovery | None:
@@ -8005,22 +8049,33 @@ def a19_registered_capture(
                 continue
             if row.stamp in raw_by_stamp:
                 return A19Discovery(row.url, raw_by_stamp[row.stamp], "")
-            source = next(
-                r for r in rows if r.stamp in raw_by_stamp and r.digest == row.digest
-            )
+            source = table_by_digest[row.digest][1]
             return A19Discovery(
-                source.url, raw_by_stamp[source.stamp], "", witness=row.stamp
+                f"https://web.archive.org/web/{source}/{A19_SOURCE_URL}",
+                raw_by_stamp[source],
+                "",
+                witness=row.stamp,
+                witness_reason=unread[row.stamp],
             )
         return None
 
-    for row in rows[:A19_MAX_WINDOW_CAPTURES]:
+    reads = 0
+    capped = False
+    for row in rows:
         found = settled()
         if found is not None:
             return found
+        if not row.exact:
+            continue
+        if reads == A19_MAX_WINDOW_CAPTURES:
+            capped = True
+            break
+        reads += 1
         try:
             raw = a19_read_capture(row.url, read)
         except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
             if row.status != "200":
+                unread[row.stamp] = "which it did not serve at that timestamp"
                 continue
             return A19Discovery(
                 None,
@@ -8031,11 +8086,15 @@ def a19_registered_capture(
                     "earlier capture cannot be skipped"
                 ),
             )
-        printed = a19_snapshot_period(raw.decode(errors="replace"))
-        if printed is None:
+        table = a19_table(raw.decode(errors="replace"))
+        if table is None:
             # Not "a different month": an error page, a changed layout or an
             # empty body says nothing about what the page printed.
             if row.status != "200":
+                unread[row.stamp] = (
+                    "which it served at that timestamp as something other than "
+                    "this table"
+                )
                 continue
             return A19Discovery(
                 None,
@@ -8046,64 +8105,88 @@ def a19_registered_capture(
                     "skipped"
                 ),
             )
-        month_by_stamp[row.stamp] = printed
+        if row.digest is not None and row.digest in table_by_digest:
+            known, source = table_by_digest[row.digest]
+            if known != table:
+                return A19Discovery(
+                    None,
+                    None,
+                    (
+                        f"DIGEST CONFLICT (deferring): the index lists {source} and "
+                        f"{row.stamp} with the same digest, but they print different "
+                        f"tables ({known[0]} and {table[0]}), so the digest cannot "
+                        "stand for either"
+                    ),
+                )
+        table_by_stamp[row.stamp] = table
         raw_by_stamp[row.stamp] = raw
         if row.digest is not None:
-            month_by_digest[row.digest] = printed
+            table_by_digest.setdefault(row.digest, (table, row.stamp))
     found = settled()
     if found is not None:
         return found
-    if len(rows) > A19_MAX_WINDOW_CAPTURES:
+    first = next((row for row in rows if month_of(row) == period), None)
+    blocking = (
+        [r.stamp for r in rows if r.stamp < first.stamp and month_of(r) is None]
+        if first is not None
+        else []
+    )
+    if capped:
+        where = (
+            f"{first.url} prints {period}, but {len(blocking)} earlier row(s) "
+            f"({', '.join(blocking[:3])}) are not accounted for"
+            if first is not None
+            else f"none of the rows identified so far prints {period}"
+        )
         return A19Discovery(
             None,
             None,
             (
-                f"CAPTURE SCAN LIMIT REACHED (deferring): the first "
-                f"{A19_MAX_WINDOW_CAPTURES} of {len(rows)} rows inside "
-                f"{window!r} do not print {period}, and the rest were not read"
+                f"CAPTURE SCAN LIMIT REACHED (deferring): {reads} of the "
+                f"{len(rows)} rows inside {window!r} that could hold the page were "
+                f"read and the earliest print of {period} is not settled: {where}"
             ),
         )
-    first = next((row for row in rows if month_of(row) == period), None)
     if first is not None:
-        blocking = [
-            row.stamp
-            for row in rows
-            if row.stamp < first.stamp and month_of(row) is None
-        ]
         return A19Discovery(
             None,
             None,
             (
                 f"EARLIER ROW UNREAD (deferring): {first.url} prints {period}, but "
-                f"{len(blocking)} earlier row(s) without a status "
-                f"({', '.join(blocking[:3])}) could not be read or identified at "
-                "their own timestamp and carry a digest no read capture accounts "
-                "for, so it may not be the earliest"
+                f"{len(blocking)} earlier row(s) ({', '.join(blocking[:3])}) were "
+                "not read and identified at their own timestamp, and no read "
+                "capture carries their digest, so it may not be the earliest"
             ),
         )
     revisits = index.revisits
-    unknown = [row for row in revisits if month_of(row) is None]
+    others = index.other_form_rows
+    unknown = [row for row in rows if month_of(row) is None]
     notes = [
         f"all {len(index.captures)} HTTP 200 capture(s) were read and none "
         f"prints {period}"
     ]
     if revisits:
-        served = sum(1 for row in revisits if row.stamp in month_by_stamp)
+        served = sum(1 for row in revisits if row.stamp in table_by_stamp)
+        missing = sum(1 for row in revisits if month_of(row) is None)
         notes.append(
             f"of {len(revisits)} row(s) without a status, {served} were served at "
-            f"their own timestamp and read, {len(revisits) - served - len(unknown)} "
-            f"share the digest of a read capture, {len(unknown)} remain unknown"
+            f"their own timestamp and read, {len(revisits) - served - missing} "
+            f"share the digest of a read capture, {missing} remain unknown"
         )
     if index.other_form:
+        missing = sum(1 for row in others if month_of(row) is None)
         notes.append(
-            f"{index.other_form} row(s) under another form of the URL were not read"
+            f"{index.other_form} row(s) under another form of the URL were not "
+            f"read: {len(others) - missing} share the digest of a read capture, "
+            f"{missing} remain unknown, {index.other_form - len(others)} have a "
+            "status other than 200"
         )
     read_note = "; ".join(notes)
-    unaccounted = index.other_form + len(unknown)
-    if state == "missed" and unaccounted:
-        # A row stored under another form of the URL, or without a status
-        # and matched by nothing, may be a capture of this page that prints
-        # the month. Unknown is not "missed".
+    if state == "missed" and unknown:
+        # A row under another form of the URL, or without a status and
+        # matched by nothing, may be a capture of this page that prints the
+        # month. Unknown is not "missed": what was read prints another month,
+        # and what was not read is not known.
         return A19Discovery(
             None,
             None,
@@ -15455,11 +15538,11 @@ def main() -> int:
             source_file = f"cpseea19.htm (Wayback capture {capture[0]:%Y%m%d%H%M%S}"
             if registration and discovery.witness:
                 # The earliest print is a row the Archive lists with the
-                # same digest but did not serve at its own timestamp; the
-                # capture named first supplied the bytes.
+                # same digest that was not read and identified at its own
+                # timestamp; the capture named first supplied the bytes.
                 source_file += (
                     f"; the Archive's index lists the same digest at "
-                    f"{discovery.witness}, not served at that timestamp"
+                    f"{discovery.witness}, {discovery.witness_reason}"
                 )
             source_file += ")"
             extension = "html"
