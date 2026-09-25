@@ -329,6 +329,14 @@ Resolution and scoring code should preserve these invariants:
 - training cannot see future official outcomes;
 - reward rows include provenance hashes and activity-artifact count.
 
+A published target whose registration no resolver leg can execute is
+witnessed, not resolved. `witness-registered-windows.yml` asks the Internet
+Archive to capture that target's `sourceUrl` on each day of its registered
+`expectedReleaseWindow`, reads the Archive's index back, and commits nothing.
+It keeps a later disposition ruling possible and makes none: do not read a
+capture as a resolution, and do not add record writes to that workflow. See
+`docs/registered-window-custody.md`.
+
 ### Bills end to end — series ingestion is part of the pipeline
 
 The remote extraction, Chronicle mapping, reviewed bill binding and paired
