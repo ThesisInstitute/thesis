@@ -1166,7 +1166,7 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
 ) -> None:
     # The same run as the real-router test above, against a ledger that holds
     # Chronicle's June row: the reference is refused, nothing is fetched,
-    # nothing is proposed, and the run exits 1.
+    # nothing is proposed, and the run exits EXIT_REFUSED_ROWS.
     series = PRODUCTION
     contract = register_targets.build_contract(
         _target(series, period="2026-08", release="2026-09-04"), dt.date(2026, 8, 13)
@@ -1204,8 +1204,9 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
     monkeypatch.setattr(resolve_pending, "utc_now", lambda: "2026-09-25T13:40:00Z")
     monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
-    # The run fails so the alarm fires every day until Chronicle is curated.
-    assert resolve_pending.main() == 1
+    # A clean run that refused rows: the workflow publishes what was appended
+    # and then fails the job, so the alarm fires.
+    assert resolve_pending.main() == resolve_pending.EXIT_REFUSED_ROWS == 3
     out = capsys.readouterr().out
     assert f"LEDGER UNIT CONFLICT (refusing): {ref}" in out
     assert "nothing new to record" in out

@@ -232,6 +232,13 @@ TSA_ENDPOINTS = {
 TimestampRequester = Callable[[str, bytes, float], bytes]
 
 
+# main's exit status when it finished cleanly but refused one or more rows
+# (a contract-binding or ledger-catalog refusal). Whatever it appended must
+# still be committed and published, so the workflow tells this apart from a
+# crash (1), publishes, and then fails the job so the alert fires.
+EXIT_REFUSED_ROWS = 3
+
+
 class LedgerProposalError(RuntimeError):
     """A witnessed ledger proposal could not be constructed or published."""
 
@@ -13929,8 +13936,8 @@ def main() -> int:
     ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
     # References refused because their fact would give a Chronicle lineage a
-    # second unit. The rest of the run still appends; the run then exits 1 so
-    # the alarm fires every day until Chronicle is curated.
+    # second unit. The rest of the run still appends; the run then exits
+    # EXIT_REFUSED_ROWS, the refused-rows status the workflow publishes past.
     ledger_unit_refusals: list[str] = []
 
     fetched_rows: list[tuple[dict[str, Any], str, str, bytes, str, str]] = []
@@ -15769,7 +15776,7 @@ def main() -> int:
 
 
 def _report_ledger_unit_refusals(refusals: list[str]) -> int:
-    """List references the unit guard refused; 1 when there were any."""
+    """List references the unit guard refused; ``EXIT_REFUSED_ROWS`` if any."""
 
     if not refusals:
         return 0
@@ -15779,7 +15786,7 @@ def _report_ledger_unit_refusals(refusals: list[str]) -> int:
     )
     for line in refusals:
         print(f"  refused: {line}")
-    return 1
+    return EXIT_REFUSED_ROWS
 
 
 if __name__ == "__main__":

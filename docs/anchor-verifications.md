@@ -1280,10 +1280,12 @@ Chronicle would accept. An independent reviewer compared the two over 116,640
 concept and month cases and found no such case. Of each record id the guard
 reads only the last row, as Chronicle's current view does after a correction.
 Only that reference is refused (`LEDGER UNIT CONFLICT`). The rest of the run
-appends, and the run exits 1. That exit adds no new stop: without the guard,
-Chronicle would refuse the same append, which on this base fails the run and
-under thesis#269 excludes the row and exits 1. The resolve workflow publishes
-only after a successful resolve step, so this is why registration is held
+appends, and the run exits `EXIT_REFUSED_ROWS` (3). That is the refused-rows
+status thesis#269 introduces: with #269's workflow, the run publishes what it
+appended and then fails the job so the alert fires. Before #269, any non-zero
+exit skips publishing, but the guard adds no new stop even then: without it,
+Chronicle would refuse the same append and the run would fail anyway. A target
+refused every day would still raise that alert daily, so registration is held
 rather than left to the guard.
 
 **What this needs.** The obvious curation does not work yet. The six June rows
