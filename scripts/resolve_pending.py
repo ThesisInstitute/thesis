@@ -7495,7 +7495,8 @@ class _A19TableParser(HTMLParser):
 
     Only the table whose id is ``cps_eande_m19`` is read: the rest of the
     page, including any table that wraps this one, is ignored, so page chrome
-    can neither supply a value nor make the table unidentifiable. There must
+    cannot supply a value; it can make the page unidentifiable only through a
+    duplicate id or a repeated attribute (below). There must
     be exactly one such table and it must close. Inside it, a cell's closing
     tag may be omitted, as HTML allows; the next cell, the next row or the
     end of the table closes it. A table nested inside one of its cells is not
@@ -8177,7 +8178,8 @@ def a19_registered_capture(
     others = index.other_form_rows
     unknown = [row for row in rows if month_of(row) is None]
     notes = [
-        f"all {len(index.captures)} HTTP 200 capture(s) were read and none "
+        f"all {len(index.captures)} HTTP 200 capture(s) were read or accounted "
+        "for by a verified digest, and none "
         f"prints {period}"
     ]
     if revisits:
@@ -13100,6 +13102,84 @@ def append_gate_verdict(gate_runs: list[dict]) -> bool:
     return "success" in conclusions
 
 
+def ledger_catalog_refusals(
+    repo: str,
+    base_sha: str,
+    path: str,
+    base_content: str,
+    rows: list[dict[str, Any]],
+) -> dict[str, str]:
+    """Rows the ledger's own series-catalog generator refuses on their own.
+
+    Chronicle regenerates its series catalog on every append, and the
+    generator fails the whole append when one series identity would carry
+    two units or two cadences. One such row would then hold every other
+    resolution in the run hostage (2026-09-25: the 18 registered A-19
+    contracts are in millions, while Chronicle's six A-19 lineages hold their
+    June 2026 observation in thousands). The candidate append is built once
+    on the staged base commit; only when that fails, and the base alone
+    passes, is each row tried alone, and a row that fails alone is refused
+    with the generator's reason. Rows that fail only together are not
+    separated: the append then fails as before.
+    """
+
+    tree = _fetch_repository_tree(repo, base_sha, path)
+    lines = [json.dumps(row, separators=(",", ":")) for row in rows]
+
+    def failure(selected: list[str]) -> str | None:
+        candidate = base_content.rstrip("\n") + "\n"
+        if selected:
+            candidate += "\n".join(selected) + "\n"
+        with tempfile.TemporaryDirectory(prefix="thesis-catalog-preflight-") as name:
+            stage = pathlib.Path(name)
+            _materialize_repository_tree(stage, tree)
+            generator = stage / "scripts" / "build_series_catalog.py"
+            if not generator.is_file():
+                return None
+            (stage / _validated_repository_path(path)).write_text(
+                candidate, encoding="utf-8"
+            )
+            completed = subprocess.run(
+                [sys.executable, str(generator)],
+                cwd=stage,
+                capture_output=True,
+                text=True,
+            )
+        if completed.returncode == 0:
+            return None
+        detail = (completed.stderr.strip() or completed.stdout.strip())[-500:]
+        return f"series-catalog generator exit {completed.returncode}: {detail}"
+
+    if not lines or failure(lines) is None or failure([]) is not None:
+        return {}
+    refusals: dict[str, str] = {}
+    for row, line in zip(rows, lines):
+        reason = failure([line])
+        if reason is not None:
+            refusals[str(row.get("source_record_id", "?"))] = reason
+    return refusals
+
+
+def exclude_catalog_refusals(
+    rows: list[dict[str, Any]], refusals: dict[str, str]
+) -> list[dict[str, Any]]:
+    """The rows the catalog accepts; refused rows' archives are removed.
+
+    A refused row's response archive is deleted unless a kept row shares it,
+    so an excluded row leaves no orphan archive in the run directory.
+    """
+
+    kept = [row for row in rows if str(row["source_record_id"]) not in refusals]
+    kept_archives = {row["responseArchive"]["path"] for row in kept}
+    for row in rows:
+        if str(row["source_record_id"]) not in refusals:
+            continue
+        archive = row["responseArchive"]["path"]
+        if archive not in kept_archives:
+            (ROOT / archive).unlink(missing_ok=True)
+    return kept
+
+
 def propose_ledger_append(
     repo: str,
     branch: str,
@@ -15668,6 +15748,16 @@ def main() -> int:
             ref = str(row.get("source_record_id", "?"))
             provenance_refusals.append(f"{ref}: {exc}")
             print(f"  PROVENANCE REFUSED (excluded from append): {ref} — {exc}")
+    # The same rule for the ledger's catalog: a row Chronicle's generator
+    # refuses on its own (a unit conflict with its lineage) is excluded and
+    # reported, and the rest are appended.
+    catalog_refusals = ledger_catalog_refusals(
+        args.ledger_repo, ledger_repo_sha, args.ledger_path, content, new_rows
+    )
+    for ref, reason in catalog_refusals.items():
+        provenance_refusals.append(f"{ref}: {reason}")
+        print(f"  CATALOG REFUSED (excluded from append): {ref} — {reason}")
+    new_rows = exclude_catalog_refusals(new_rows, catalog_refusals)
     if not new_rows:
         print("every fetched row was refused; nothing to append")
         for line in provenance_refusals:
@@ -15717,8 +15807,9 @@ def main() -> int:
     )
     if provenance_refusals:
         print(
-            f"{len(provenance_refusals)} row(s) refused contract binding; "
-            "appended the rest — fix the registrations above"
+            f"{len(provenance_refusals)} row(s) refused contract binding or the "
+            "ledger's series catalog; appended the rest — fix the registrations "
+            "or curate the ledger's lineages named above"
         )
         return 1
     return 0

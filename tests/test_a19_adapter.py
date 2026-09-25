@@ -749,7 +749,10 @@ def test_a_closed_window_with_unread_captures_under_another_form_defers() -> Non
     assert (url, raw) == (None, None)
     assert verdict.startswith("WINDOW OUTCOME UNKNOWN (deferring)")
     assert "1 of them HTTP 200 for this exact URL; 1 under another form" in verdict
-    assert "all 1 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
+    assert (
+        "all 1 HTTP 200 capture(s) were read or accounted for by a "
+        "verified digest, and none prints 2026-08" in verdict
+    )
     assert "1 row(s) under another form of the URL were not read" in verdict
     assert "WINDOW MISSED" not in verdict
     assert identity_url("20260904170006") not in calls
@@ -764,7 +767,10 @@ def test_a_closed_window_whose_only_rows_are_403s_is_missed() -> None:
     assert (url, raw) == (None, None)
     assert verdict.startswith("FIRST-PRINT WINDOW MISSED (refusing)")
     assert "0 of them HTTP 200 for this exact URL; 2 with another status" in verdict
-    assert "all 0 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
+    assert (
+        "all 0 HTTP 200 capture(s) were read or accounted for by a "
+        "verified digest, and none prints 2026-08" in verdict
+    )
 
 
 def test_a_row_without_a_status_is_read_or_accounted_for_by_its_digest() -> None:
@@ -1146,7 +1152,10 @@ def test_window_missed_reports_what_the_index_listed_but_could_not_use() -> None
         "capture(s) dated inside the registered window"
     )
     assert "1 of them HTTP 200 for this exact URL; 1 with another status" in verdict
-    assert "all 1 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
+    assert (
+        "all 1 HTTP 200 capture(s) were read or accounted for by a "
+        "verified digest, and none prints 2026-08" in verdict
+    )
     assert identity_url("20260904170006") not in calls
 
 
@@ -1182,19 +1191,19 @@ BAD_ROW = "malformed Archive index row"
         (b'[["error","blocked"]]', NOT_TABLE),
         (json.dumps([["20260904170006", URL, "200", "X"]]).encode(), NOT_TABLE),
         # Row-level damage must not read as "the window holds no capture".
-        (index_rows(5), BAD_ROW),
-        (index_rows(None), BAD_ROW),
-        (index_rows(["20260904170006", URL, "200"]), BAD_ROW),
-        (index_rows(["2026090417", URL, "200", "X"]), BAD_ROW),
-        (index_rows([20260904170006, URL, "200", "X"]), BAD_ROW),
-        (index_rows(["20260904170006", "", "200", "X"]), BAD_ROW),
-        (index_rows(["20260904170006", URL, "200", ""]), BAD_ROW),
-        (index_rows(["٢٠٢٦٠٩٠٤١٧٠٠٠٦", URL, "200", "X"]), BAD_ROW),
+        (index_rows(5), BAD_ROW + " (shape)"),
+        (index_rows(None), BAD_ROW + " (shape)"),
+        (index_rows(["20260904170006", URL, "200"]), BAD_ROW + " (shape)"),
+        (index_rows(["2026090417", URL, "200", "X"]), BAD_ROW + " (timestamp)"),
+        (index_rows([20260904170006, URL, "200", "X"]), BAD_ROW + " (shape)"),
+        (index_rows(["20260904170006", "", "200", "X"]), BAD_ROW + " (original)"),
+        (index_rows(["20260904170006", URL, "200", ""]), BAD_ROW + " (digest)"),
+        (index_rows(["٢٠٢٦٠٩٠٤١٧٠٠٠٦", URL, "200", "X"]), BAD_ROW + " (timestamp)"),
         # Statuses that are neither three ASCII digits nor "-".
-        (index_rows(["20260904170006", URL, "blocked", "X"]), BAD_ROW),
-        (index_rows(["20260904170006", URL, "-200", "X"]), BAD_ROW),
-        (index_rows(["20260904170006", URL, "20", "X"]), BAD_ROW),
-        (index_rows(["20260904170006", URL, "٢٠٠", "X"]), BAD_ROW),
+        (index_rows(["20260904170006", URL, "blocked", "X"]), BAD_ROW + " (status)"),
+        (index_rows(["20260904170006", URL, "-200", "X"]), BAD_ROW + " (status)"),
+        (index_rows(["20260904170006", URL, "20", "X"]), BAD_ROW + " (status)"),
+        (index_rows(["20260904170006", URL, "٢٠٠", "X"]), BAD_ROW + " (status)"),
         # An impossible date.
         (
             index_rows(["20260900170006", URL, "200", "X"]),
@@ -1287,7 +1296,10 @@ def test_discovery_asks_for_a_capture_while_the_window_is_open() -> None:
     assert resolve_pending.A19_CAPTURE_REQUESTED in verdict
     assert verdict.endswith("(deferring)")
     assert "the Archive's index lists 1 capture(s)" in verdict
-    assert "all 1 HTTP 200 capture(s) were read and none prints 2026-08" in verdict
+    assert (
+        "all 1 HTTP 200 capture(s) were read or accounted for by a "
+        "verified digest, and none prints 2026-08" in verdict
+    )
     assert [call for call in calls if "/save/" in call] == [
         f"https://web.archive.org/save/{resolve_pending.A19_SOURCE_URL}"
     ]
@@ -1339,7 +1351,10 @@ def test_window_missed_means_the_whole_index_was_read_and_nothing_prints_it() ->
         "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists 1 "
         "capture(s) dated inside the registered window"
     )
-    assert "; all 1 HTTP 200 capture(s) were read and none prints 2026-07" in verdict
+    assert (
+        "; all 1 HTTP 200 capture(s) were read or accounted for by a "
+        "verified digest, and none prints 2026-07" in verdict
+    )
     assert not any("/save/" in call for call in calls)
 
 

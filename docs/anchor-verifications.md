@@ -942,6 +942,19 @@ the ruling and is never read for a registered cell, because it is dated
 outside the window. August resolving and July refusing say nothing about any
 other `generic-url` registration.
 
+A resolved A-19 fact carries its contract's unit, millions. Chronicle's six
+A-19 lineages hold one observation each, June 2026, in thousands, and
+Chronicle's series-catalog generator refuses an identity with two units
+(checked 2026-09-25 on `codex/thesis-ledger-facts` at `3dd95a0`: an August
+row in millions exits 1 with a unit conflict, the same row in thousands exits
+0). The resolver runs that generator on the staged base before every append
+(`ledger_catalog_refusals`), and a row it refuses on its own is excluded,
+reported as `CATALOG REFUSED`, and fails the run, while every other row is
+appended. So until those lineages are curated in Chronicle, the A-19 facts
+defer instead of blocking the day's other resolutions; the dated captures
+they rest on stay in the Archive, so a run after the curation can still
+resolve them.
+
 A registered target looks up the Archive's index for captures dated inside its
 window, and makes no request before the window opens. From the day it opens (not the
 forecast's `resolutionDate`, which would leave a single attempt on the last
