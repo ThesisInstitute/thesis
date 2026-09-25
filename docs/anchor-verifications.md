@@ -1106,16 +1106,18 @@ age", which BLS prints not seasonally adjusted, in thousands. Until now they
 could bind only `generic-url`, and the resolver read them from Internet Archive
 captures of `cpseea19.htm` (the `a19` leg). Each row is also an official BLS
 series in the Public Data API. This change adds six registrable specs to
-`BLS_API_ADAPTERS` and switches the six docket templates to `bls-api`. A new
-A-19 target now registers and resolves the way the JOLTS and payroll series in
-the section above do. Max chose this route on 2026-09-25 over an
+`BLS_API_ADAPTERS` and switches the six docket templates to `bls-api`. Once
+registration opens (below), a new A-19 target registers and resolves the way
+the JOLTS and payroll series in the section above do. Max chose this route on 2026-09-25 over an
 Archive-capture adapter (thesis#270, closed unmerged). The registrable BLS API
 specs go from six to twelve.
 
-**No new A-19 target can resolve until Chronicle can hold the six lineages in
-one unit.** See "Chronicle holds these lineages in thousands" below. Until
-then the resolver refuses these six references, appends everything else, and
-exits 1, so the daily run fails and the alarm fires.
+**Registration is on hold until Chronicle can hold the six lineages in one
+unit.** See "Chronicle holds these lineages in thousands" below. Each spec
+carries `registration_hold`, and the execution-plan gate refuses it after every
+structural check. So the roller skips October with that reason, and nothing
+can register an A-19 target that would be refused every day from its release.
+A reviewed edit removes the hold once Max's decision d397 lands.
 
 ## Series identity
 
@@ -1267,16 +1269,22 @@ whole run's append, not only its own row. thesis#269 adds an exclusion at
 append time for any row the catalog refuses; the check below still refuses
 earlier, before the keyless request is spent.
 
-`bls_ledger_unit_conflict` refuses the capture before the API request is
-spent. It fires when the ledger already holds the series in another unit, for
-the same entity and geography. A row belongs to the series when its record id
-is under the series, or when its measure concept is the series or the series
-plus a spelling of the row's own month (`2026_06`, `2026-06`, `june_2026`,
-`jun_2026`). Chronicle strips those spellings, and may strip others, so the
-guard can miss a conflict; a miss is the behaviour before the guard existed.
-Of each record id it reads only the last row, as Chronicle's current view does
-after a correction. Only that reference is refused (`LEDGER UNIT CONFLICT`).
-The rest of the run appends, and the run then exits 1.
+The hold stops registration. Behind it, `bls_ledger_unit_conflict` refuses a
+capture before the API request is spent, for any registrable series. It fires
+when the ledger already holds the series in another unit, for the same entity
+and geography. A row belongs to the series when its measure concept is the
+series, or the series plus a spelling of the row's own month (`2026_06`,
+`2026-06`, `june_2026`, `jun_2026`). Chronicle strips those spellings, and may
+strip others. So the guard can miss a conflict, but it never refuses one
+Chronicle would accept. An independent reviewer compared the two over 116,640
+concept and month cases and found no such case. Of each record id the guard
+reads only the last row, as Chronicle's current view does after a correction.
+Only that reference is refused (`LEDGER UNIT CONFLICT`). The rest of the run
+appends, and the run exits 1. That exit adds no new stop: without the guard,
+Chronicle would refuse the same append, which on this base fails the run and
+under thesis#269 excludes the row and exits 1. The resolve workflow publishes
+only after a successful resolve step, so this is why registration is held
+rather than left to the guard.
 
 **What this needs.** The obvious curation does not work yet. The six June rows
 sit in the ledger's immutable prefix (lines 119 to 124) and were written
@@ -1287,11 +1295,12 @@ version", although receipt's append gate would accept it. Chronicle therefore
 needs one of two changes first. Either the generator addresses rows written
 before versioning by their content-address id, as receipt does, and six
 corrections then restate June in millions. Or one identity may hold units that
-convert by scale. That is Max's decision, d397. It must land before the first
-October capture, due 2026-11-06. If October is still refused on 2026-12-04, the
-November release replaces it as the latest month and the targets are lost as
-missed windows, never resolved to a revised value. The 18 `generic-url`
-registrations are also in millions and wait on the same change.
+convert by scale. That is Max's decision, d397. If the scale option is chosen,
+the same change must relax `bls_ledger_unit_conflict`. The hold then lifts. If
+it lifts in time for the roller to mint October before its 2026-11-06 release,
+October is the first A-19 target on this route. Otherwise the roller skips the
+released months, and the first target is the next unreleased one. The 18
+`generic-url` registrations are also in millions and wait on the same change.
 
 ## Fixtures
 

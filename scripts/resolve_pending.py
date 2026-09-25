@@ -2567,6 +2567,17 @@ A19_BLS_API_SERIES: dict[str, tuple[str, dict[str, float]]] = {
         {"2026-06": 12.010, "2026-07": 12.223, "2026-08": 12.011},
     ),
 }
+# Registration waits for Chronicle. Each A-19 lineage holds its June 2026
+# observation in thousands, every A-19 contract is in millions, and
+# Chronicle's catalog build refuses a lineage with two units. A registered
+# target would be refused every day from its release, so none is minted until
+# the Chronicle change in decision d397 lands and a reviewed edit removes this
+# hold (docs/anchor-verifications.md).
+A19_REGISTRATION_HOLD = (
+    "Chronicle holds each Table A-19 lineage's June 2026 observation in "
+    "thousands and its catalog refuses a second unit; registration waits for "
+    "the Chronicle change in decision d397"
+)
 for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
     BLS_API_ADAPTERS[f"{A19_STEM}.{_row}"] = {
         "series_id": _series_id,
@@ -2588,6 +2599,7 @@ for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
         "anchor_abs_tolerance": 0.001,
         "anchors": dict(_anchors),
         "binding_transform": {"operation": "multiply", "factor": 0.001},
+        "registration_hold": A19_REGISTRATION_HOLD,
         "evidence_notes": (
             "First print for {period} captured from {source_url} (BLS Public "
             "Data API v2, current estimates only), in thousands and divided by "
@@ -8157,12 +8169,12 @@ def bls_ledger_unit_conflict(
     Table A-19 lineages hold a June 2026 observation in thousands, and these
     specs emit millions.
 
-    A row belongs to the series when its record id is under ``stem``, or when
-    its measure concept is ``stem`` itself or ``stem`` plus a spelling of the
-    row's own month (``2026_06``, ``2026-06``, ``june_2026``, ``jun_2026``):
-    the spellings Chronicle's catalog lists as stripped period segments.
-    Chronicle may strip more, so this can miss a conflict; a miss is the
-    behaviour before the guard existed, never a wrong value.
+    A row belongs to the series when its measure concept is ``stem`` itself or
+    ``stem`` plus a spelling of the row's own month (``2026_06``,
+    ``2026-06``, ``june_2026``, ``jun_2026``): spellings Chronicle's catalog
+    strips as period segments. Chronicle may strip more, so this can miss a
+    conflict, never add one: whenever it refuses, Chronicle would have refused
+    the append too, so failing the run adds no new stop.
 
     Chronicle's current view drops a row that a later correction
     supersedes, and a correction keeps the fact's ``source_record_id``, so the
@@ -8183,9 +8195,8 @@ def bls_ledger_unit_conflict(
         if not isinstance(record_id, str):
             continue
         concept = (row.get("measure") or {}).get("concept")
-        if record_id.startswith(stem + ".") or (
-            isinstance(concept, str)
-            and _concept_names_series(concept, stem, row.get("period"))
+        if isinstance(concept, str) and _concept_names_series(
+            concept, stem, row.get("period")
         ):
             latest[record_id] = row
     units = set()
@@ -13547,6 +13558,10 @@ def _plan_bls_api(
             "the BLS API executor starts capturing on one official release "
             f"day; expectedReleaseWindow {window!r} is not a one-day window"
         )
+    # Checked last, so a structurally wrong contract gets its own refusal.
+    hold = spec.get("registration_hold")
+    if hold:
+        return f"registration of this BLS API series is on hold: {hold}"
     return None
 
 
@@ -13686,9 +13701,10 @@ EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
 # full-binding predicate above, and a first-print acquisition that needs no
 # per-period hand pin. BLS API left it on 2026-09-20, and only for the specs
 # that declare a ``binding_transform``: ``_plan_bls_api`` still refuses every
-# other stem. The six A-19 rows register through that family (2026-09-25):
-# a contract that binds ``bls-api`` routes to it, and every other A-19
-# contract still routes here and is refused.
+# other stem. The six A-19 rows register through that family (2026-09-25),
+# once their ``registration_hold`` lifts: a contract that binds ``bls-api``
+# routes to it, and every other A-19 contract still routes here and is
+# refused.
 EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
     {"a19", "cms_provider_data", "ssa_official", "va_mmwr"}
 )

@@ -310,7 +310,15 @@ def _refusal(contract: dict) -> str | None:
 
 
 @pytest.mark.parametrize("series", REGISTRABLE)
-def test_registrar_builds_the_contract_the_executor_admits(series: str) -> None:
+def test_registrar_builds_the_contract_the_executor_admits(
+    series: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    spec = resolve_pending.BLS_API_ADAPTERS[series]
+    if "registration_hold" in spec:
+        # Table A-19 waits for Chronicle (decision d397). Lifting the hold is
+        # all it takes: the contract below is otherwise admitted.
+        assert "is on hold" in (_refusal(_contract(series)) or "")
+        monkeypatch.delitem(spec, "registration_hold")
     contract = _contract(series)
     binding = contract["sourceBinding"]
     # Canonical id, not an edit of the previous target's alias.
@@ -902,9 +910,25 @@ def test_a19_docket_entries_commit_the_employment_situation_dates() -> None:
         assert entry["extras"]["targetUnit"] == "millions"
 
 
+def test_a19_registration_is_held_until_chronicle_can_hold_one_unit() -> None:
+    for series in A19_SERIES:
+        spec = resolve_pending.BLS_API_ADAPTERS[series]
+        assert spec["registration_hold"] == resolve_pending.A19_REGISTRATION_HOLD
+        refusal = _refusal(_contract(series)) or ""
+        assert refusal.startswith("registration of this BLS API series is on hold")
+        assert "d397" in refusal
+    # No other registrable series is held.
+    held = {
+        s
+        for s in REGISTRABLE
+        if "registration_hold" in resolve_pending.BLS_API_ADAPTERS[s]
+    }
+    assert held == set(A19_SERIES)
+
+
 @pytest.mark.parametrize("series", A19_SERIES)
-def test_the_roller_mints_an_october_target_the_gate_admits(
-    series: str, capsys: pytest.CaptureFixture[str]
+def test_the_roller_mints_an_october_target_once_the_hold_lifts(
+    series: str, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     entry = _a19_docket_entries()[series]
     september = next(
@@ -939,6 +963,10 @@ def test_the_roller_mints_an_october_target_the_gate_admits(
             "period": "2026-09",
         },
     }
+    # While the hold stands, the roller skips October with the hold as reason.
+    held = roll_docket.roll_execution_plan_refusal(target) or ""
+    assert "is on hold" in held
+    monkeypatch.delitem(resolve_pending.BLS_API_ADAPTERS[series], "registration_hold")
     assert roll_docket.roll_execution_plan_refusal(target) is None
     contract = register_targets.build_contract(target, dt.date(2026, 10, 1))
     assert contract["dataPointId"] == f"{series}.2026_10.first_print"
@@ -1042,6 +1070,7 @@ def test_the_guard_refuses_a_fact_chronicle_would_hold_in_two_units() -> None:
     for series in A19_SERIES:
         row = copy.deepcopy(june)
         row["source_record_id"] = f"{series}.june_2026.first_print"
+        row["measure"]["concept"] = f"{series}.june_2026"
         spec = resolve_pending.BLS_API_ADAPTERS[series]
         assert resolve_pending.bls_ledger_unit_conflict([row], series, spec)
 
@@ -1120,6 +1149,7 @@ def test_the_guard_ignores_other_identities_and_other_series() -> None:
     # A series whose lineage already holds the unit it emits is untouched.
     openings = copy.deepcopy(june)
     openings["source_record_id"] = "bls.jolts.job_openings.june_2026.first_print"
+    openings["measure"]["concept"] = "bls.jolts.job_openings.june_2026"
     openings["measure"]["unit"] = "millions"
     assert (
         resolve_pending.bls_ledger_unit_conflict(
