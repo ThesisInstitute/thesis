@@ -1075,25 +1075,41 @@ def test_the_guard_refuses_a_fact_chronicle_would_hold_in_two_units() -> None:
         assert resolve_pending.bls_ledger_unit_conflict([row], series, spec)
 
 
-def test_the_guard_reads_the_last_row_for_a_record_id() -> None:
-    # A later row for the same record id replaces the earlier one here, as a
-    # correction replaces it in Chronicle's current view. This proves only
-    # the guard's reading. Chronicle's catalog generator cannot yet accept a
-    # correction of a row written before assertion versioning, which every
-    # June 2026 A-19 row is (docs/anchor-verifications.md).
+def _versioned(row: dict, version: str, supersedes: str | None = None) -> dict:
+    out = copy.deepcopy(row)
+    out["assertionVersion"] = {"id": version}
+    if supersedes:
+        out["assertionVersion"]["supersedes"] = supersedes
+    return out
+
+
+def test_the_guard_follows_chronicles_supersede_links() -> None:
     june = _chronicle_june_row()
-    correction = copy.deepcopy(june)
-    correction["value"] = 7.759
-    correction["measure"]["unit"] = "millions"
+    assert "assertionVersion" not in june  # written before versioning
     spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
-    # The last row per record id stands in for Chronicle's current view.
-    assert (
-        resolve_pending.bls_ledger_unit_conflict([june, correction], PRODUCTION, spec)
-        is None
-    )
-    assert resolve_pending.bls_ledger_unit_conflict(
-        [correction, june], PRODUCTION, spec
-    )
+    millions = copy.deepcopy(june)
+    millions["value"] = 7.759
+    millions["measure"]["unit"] = "millions"
+
+    def verdict(rows: list[dict]) -> str | None:
+        return resolve_pending.bls_ledger_unit_conflict(rows, PRODUCTION, spec)
+
+    # A later row with the same record id replaces nothing: Chronicle keeps
+    # both, so the thousands row still counts.
+    assert verdict([june, millions])
+    # A row written before versioning cannot be superseded yet: the generator
+    # refuses the link ("supersedes unknown version"), so it keeps counting.
+    assert verdict([june, _versioned(millions, "v2", supersedes="content-address")])
+    # A versioned row drops out once a link names it, whatever record id or
+    # concept the replacement carries (a split).
+    v1 = _versioned(june, "v1")
+    assert verdict([v1])
+    assert verdict([v1, _versioned(millions, "v2", supersedes="v1")]) is None
+    split = _versioned(millions, "v2", supersedes="v1")
+    split["source_record_id"] = "another.series.june_2026.first_print"
+    split["measure"]["concept"] = "another.series.june_2026"
+    split["measure"]["unit"] = "thousands"
+    assert verdict([v1, split]) is None
 
 
 def test_the_guard_matches_the_concept_under_another_record_id() -> None:
@@ -1250,21 +1266,54 @@ def test_invariant_only_a_bls_api_binding_leaves_the_archive_leg() -> None:
                 assert _refusal(candidate) is not None, (ref, adapter)
 
 
-def test_invariant_the_guard_reads_the_last_row_per_record_id() -> None:
-    # Over every ordering of these rows the verdict depends only on the last
-    # row of each record id: the June row in thousands, its correction in
-    # millions, and a July row in millions.
+def test_invariant_the_guard_does_not_depend_on_row_order() -> None:
+    # Over every ordering of a ledger with a versioned thousands row, its
+    # correction in millions, an unrelated July row and a legacy thousands
+    # row, the verdict is the same: Chronicle's current view is a set.
     june = _chronicle_june_row()
-    correction = copy.deepcopy(june)
-    correction["value"] = 7.759
+    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
+    v1 = _versioned(june, "v1")
+    correction = _versioned(june, "v2", supersedes="v1")
     correction["measure"]["unit"] = "millions"
     july = copy.deepcopy(correction)
+    july["assertionVersion"] = {"id": "v3"}
     july["source_record_id"] = f"{PRODUCTION}.2026_07.first_print"
     july["period"] = {"type": "month", "value": "2026-07"}
-    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
-    for order in itertools.permutations([june, correction, july]):
-        june_last = order.index(june) > order.index(correction)
-        refusal = resolve_pending.bls_ledger_unit_conflict(
-            list(order), PRODUCTION, spec
-        )
-        assert (refusal is not None) == june_last
+    july["measure"]["concept"] = f"{PRODUCTION}.2026_07"
+    for rows, expected in (
+        ([v1, correction, july], None),
+        ([v1, correction, july, june], "thousands"),
+    ):
+        for order in itertools.permutations(rows):
+            refusal = resolve_pending.bls_ledger_unit_conflict(
+                list(order), PRODUCTION, spec
+            )
+            if expected is None:
+                assert refusal is None, order
+            else:
+                assert refusal is not None and expected in refusal, order
+
+
+def test_every_other_registrable_lineage_already_holds_the_unit_it_emits() -> None:
+    # The guard runs for every registrable series. In Chronicle's frozen
+    # catalog each one's economy/aggregate lineage in the United States is
+    # either a placeholder or already in the unit its spec emits, so the guard
+    # refuses none of them. The six A-19 lineages are the known exception.
+    catalog = json.loads(
+        (ROOT / "tests" / "fixtures" / "ledger_series_catalog.json").read_text()
+    )["series"]
+    for stem in REGISTRABLE:
+        spec = resolve_pending.BLS_API_ADAPTERS[stem]
+        units = {
+            row["unit"]
+            for row in catalog
+            if row["concept"] == stem
+            and (row.get("entity") or {})
+            in ({}, {"name": "economy", "role": "aggregate"})
+            and (row.get("geography") or {}).get("id") == "0100000US"
+            and row["unit"] is not None
+        }
+        if stem in A19_SERIES:
+            assert units == {"thousands"}, stem
+        else:
+            assert units <= {spec["unit"]}, (stem, units)

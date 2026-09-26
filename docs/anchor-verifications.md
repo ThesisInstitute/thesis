@@ -1271,22 +1271,34 @@ earlier, before the keyless request is spent.
 
 The hold stops registration. Behind it, `bls_ledger_unit_conflict` refuses a
 capture before the API request is spent, for any registrable series. It fires
-when the ledger already holds the series in another unit, for the same entity
-and geography. A row belongs to the series when its measure concept is the
-series, or the series plus a spelling of the row's own month (`2026_06`,
-`2026-06`, `june_2026`, `jun_2026`). Chronicle strips those spellings, and may
-strip others. So the guard can miss a conflict, but it never refuses one
-Chronicle would accept. An independent reviewer compared the two over 116,640
-concept and month cases and found no such case. Of each record id the guard
-reads only the last row, as Chronicle's current view does after a correction.
+when Chronicle's current view already holds the series in another unit, for
+the entity and geography the fact would carry. It follows Chronicle's rules as
+read in its code:
+
+- A row belongs to the series when its measure concept is the series, or the
+  series plus a spelling of the row's own month (`2026_06`, `2026-06`,
+  `june_2026`, `jun_2026`). Chronicle strips those spellings and may strip or
+  merge more, so its identity holds at least these rows.
+- A row drops out of the current view only when another row's
+  `assertionVersion.supersedes` names its version id. A row written before
+  versioning always counts, because Chronicle's generator refuses a link to
+  one (below). If Chronicle changes that, the guard keeps refusing until a
+  reviewed change follows it.
+
+So a refusal means Chronicle would refuse the same fact; the guard can miss a
+conflict but not invent one. `test_every_other_registrable_lineage_already_holds_the_unit_it_emits`
+checks the frozen catalog: every other registrable series' lineage is a
+placeholder or already in the unit its spec emits.
+
 Only that reference is refused (`LEDGER UNIT CONFLICT`). The rest of the run
-appends, and the run exits `EXIT_REFUSED_ROWS` (3). That is the refused-rows
-status thesis#269 introduces: with #269's workflow, the run publishes what it
-appended and then fails the job so the alert fires. Before #269, any non-zero
-exit skips publishing, but the guard adds no new stop even then: without it,
-Chronicle would refuse the same append and the run would fail anyway. A target
-refused every day would still raise that alert daily, so registration is held
-rather than left to the guard.
+appends, and the run exits `EXIT_REFUSED_ROWS` (3), the refused-rows status
+thesis#269 introduces. With #269's workflow the run publishes what it appended
+and then fails the job, so the alert fires; before it, any non-zero exit skips
+publishing. The guard runs before the fetch and the first-print check, so it
+refuses even on a day no fact would be produced, including after the window
+closes. A registered target in conflict would therefore raise the alert every
+day, and before #269 stop publishing every day. That is why registration is
+held rather than left to the guard.
 
 **What this needs.** The obvious curation does not work yet. The six June rows
 sit in the ledger's immutable prefix (lines 119 to 124) and were written

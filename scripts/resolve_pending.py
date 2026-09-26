@@ -8166,29 +8166,32 @@ def bls_ledger_unit_conflict(
 ) -> str | None:
     """Why a fact for ``stem`` would break Chronicle's catalog, or None.
 
-    Chronicle's ``scripts/build_series_catalog.py`` groups observations by
-    (concept, geography, entity) and exits with "unit conflict within
-    identity" when one identity holds two units (verified 2026-09-25 against
-    Chronicle's generator). The resolver regenerates that catalog for every
-    append and sends all of a run's rows in one proposal, so on this base one
-    conflicting fact fails the whole run's append. (thesis#269 adds an
-    append-time exclusion; this check still saves the keyless request.) The
-    Table A-19 lineages hold a June 2026 observation in thousands, and these
-    specs emit millions.
+    Chronicle's ``scripts/build_series_catalog.py`` groups current
+    observations by (concept, geography, entity) and exits with "unit
+    conflict within identity" when one identity holds two units (verified
+    2026-09-25 against Chronicle's generator). The resolver regenerates that
+    catalog for every append and sends all of a run's rows in one proposal, so
+    on this base one conflicting fact fails the whole run's append.
+    (thesis#269 adds an append-time exclusion; this check still saves the
+    keyless request.) The Table A-19 lineages hold a June 2026 observation in
+    thousands, and these specs emit millions.
+
+    Current rows follow Chronicle's rule. A row drops out only when another
+    row's ``assertionVersion.supersedes`` names its version id. A row written
+    before assertion versioning carries no id, and the generator refuses a
+    link to one ("supersedes unknown version"), so such a row always counts.
+    If Chronicle later accepts those links, this check keeps refusing until a
+    reviewed change follows it: it fails closed.
 
     A row belongs to the series when its measure concept is ``stem`` itself or
     ``stem`` plus a spelling of the row's own month (``2026_06``,
-    ``2026-06``, ``june_2026``, ``jun_2026``): spellings Chronicle's catalog
-    strips as period segments. Chronicle may strip more, so this can miss a
-    conflict, never add one: whenever it refuses, Chronicle would have refused
-    the append too, so failing the run adds no new stop.
-
-    Chronicle's current view drops a row that a later correction
-    supersedes, and a correction keeps the fact's ``source_record_id``, so the
-    last row per record id stands in for that view here. Chronicle's catalog
-    generator cannot yet accept a correction of a row written before
-    assertion versioning (every June 2026 A-19 row is one); until it can,
-    nothing lifts this refusal for Table A-19.
+    ``2026-06``, ``june_2026``, ``jun_2026``), with the entity and geography
+    the fact would carry. Chronicle strips those spellings and may strip or
+    merge more, so its identity holds at least these rows. A refusal here
+    therefore means Chronicle would refuse the fact too; the check can miss a
+    conflict, never invent one. It runs before the fetch, so it also refuses
+    on a day no fact would be produced; that is why Table A-19 registration
+    is held rather than left to this check.
     """
 
     entity = spec.get("entity", {"name": "economy", "role": "aggregate"})
@@ -8196,18 +8199,21 @@ def bls_ledger_unit_conflict(
         (entity.get("name"), entity.get("role")),
         (US_GEOGRAPHY["level"], US_GEOGRAPHY["id"], US_GEOGRAPHY["vintage"]),
     )
-    latest: dict[str, Mapping[str, Any]] = {}
+    superseded = set()
     for row in ledger_rows:
-        record_id = row.get("source_record_id")
-        if not isinstance(record_id, str):
+        version = row.get("assertionVersion")
+        if isinstance(version, Mapping) and version.get("supersedes"):
+            superseded.add(str(version["supersedes"]))
+    units = set()
+    for row in ledger_rows:
+        version = row.get("assertionVersion")
+        if isinstance(version, Mapping) and str(version.get("id")) in superseded:
             continue
         concept = (row.get("measure") or {}).get("concept")
-        if isinstance(concept, str) and _concept_names_series(
+        if not isinstance(concept, str) or not _concept_names_series(
             concept, stem, row.get("period")
         ):
-            latest[record_id] = row
-    units = set()
-    for row in latest.values():
+            continue
         row_entity = row.get("entity") or {}
         geography = row.get("geography") or {}
         row_identity = (
@@ -8225,6 +8231,24 @@ def bls_ledger_unit_conflict(
         "whole append with a unit conflict. Chronicle must curate the lineage "
         "to one unit first"
     )
+
+
+def _report_ledger_unit_refusals(refusals: list[str]) -> int:
+    """List references the unit guard refused; ``EXIT_REFUSED_ROWS`` if any.
+
+    A run that also refused rows for other reasons exits on that path
+    instead; the refusals below were already printed as they happened.
+    """
+
+    if not refusals:
+        return 0
+    print(
+        f"{len(refusals)} reference(s) refused for a Chronicle unit conflict; "
+        "curate the lineage in Chronicle before its first-print window closes"
+    )
+    for line in refusals:
+        print(f"  refused: {line}")
+    return EXIT_REFUSED_ROWS
 
 
 _MONTH_NAMES = (
@@ -11571,38 +11595,37 @@ def pending_adapter_refs(
                     )
                 )
             continue
-        if ref.startswith(A19_STEM + "."):
+        a19_binds_bls_api = False
+        a19_row_stem = f"{A19_STEM}.{ref[len(A19_STEM) + 1 :].split('.')[0]}"
+        if ref.startswith(A19_STEM + ".") and a19_row_stem in BLS_API_ADAPTERS:
+            # Each row also has a registrable BLS API spec. As for the stems
+            # the ALFRED and BLS API families both claim, the registered
+            # adapter decides: only a target that binds ``bls-api`` falls
+            # through to the BLS API leg below. The generic-url registrations
+            # and the cells that predate bindings keep the Archive leg.
+            if bls_registrations is None:
+                bls_registrations = registration_contracts()
+            registered = ((bls_registrations.get(ref) or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            a19_binds_bls_api = registered.get("adapter") == BLS_API_BINDING_ADAPTER
+        if ref.startswith(A19_STEM + ".") and not a19_binds_bls_api:
             occupation = ref[len(A19_STEM) + 1 :].split(".")[0]
-            a19_route = True
-            if f"{A19_STEM}.{occupation}" in BLS_API_ADAPTERS:
-                # Each row also has a registrable BLS API spec. As for the
-                # stems the ALFRED and BLS API families both claim, the
-                # registered adapter decides: only a target that binds
-                # ``bls-api`` falls through to the BLS API leg below. The
-                # generic-url registrations and the cells that predate
-                # bindings keep the Archive leg they had.
-                if bls_registrations is None:
-                    bls_registrations = registration_contracts()
-                registered = (
-                    (bls_registrations.get(ref) or {}).get("contract") or {}
-                ).get("sourceBinding") or {}
-                a19_route = registered.get("adapter") != BLS_API_BINDING_ADAPTER
-            if a19_route:
-                parsed = parse_ref_period(ref, f"{A19_STEM}.{occupation}")
-                if occupation in A19_ROW_LABELS and parsed:
-                    spec = {
-                        "label": f"CPS employed, {A19_ROW_LABELS[occupation]}",
-                        "unit": "thousands",
-                        "source_name": "bls_cps",
-                        "source_table": "Employment Situation, Table A-19",
-                        "concept_authority": "bls",
-                        "source_concept": A19_ROW_LABELS[occupation],
-                        "a19_row": occupation,
-                    }
-                    out.append(
-                        (ref, "a19", spec, parsed[0], parsed[1], release_date, forecast)
-                    )
-                continue
+            parsed = parse_ref_period(ref, f"{A19_STEM}.{occupation}")
+            if occupation in A19_ROW_LABELS and parsed:
+                spec = {
+                    "label": f"CPS employed, {A19_ROW_LABELS[occupation]}",
+                    "unit": "thousands",
+                    "source_name": "bls_cps",
+                    "source_table": "Employment Situation, Table A-19",
+                    "concept_authority": "bls",
+                    "source_concept": A19_ROW_LABELS[occupation],
+                    "a19_row": occupation,
+                }
+                out.append(
+                    (ref, "a19", spec, parsed[0], parsed[1], release_date, forecast)
+                )
+            continue
         va_mmwr_stem = longest_adapter_stem(ref, VA_MMWR_ADAPTERS)
         if va_mmwr_stem:
             report_date = parse_va_mmwr_ref(ref, va_mmwr_stem)
@@ -15721,7 +15744,6 @@ def main() -> int:
         print("every fetched row was refused; nothing to append")
         for line in provenance_refusals:
             print(f"  refused: {line}")
-        _report_ledger_unit_refusals(ledger_unit_refusals)
         return 1
 
     updated = (
@@ -15770,23 +15792,8 @@ def main() -> int:
             f"{len(provenance_refusals)} row(s) refused contract binding; "
             "appended the rest — fix the registrations above"
         )
-        _report_ledger_unit_refusals(ledger_unit_refusals)
         return 1
     return _report_ledger_unit_refusals(ledger_unit_refusals)
-
-
-def _report_ledger_unit_refusals(refusals: list[str]) -> int:
-    """List references the unit guard refused; ``EXIT_REFUSED_ROWS`` if any."""
-
-    if not refusals:
-        return 0
-    print(
-        f"{len(refusals)} reference(s) refused for a Chronicle unit conflict; "
-        "curate the lineage in Chronicle before its first-print window closes"
-    )
-    for line in refusals:
-        print(f"  refused: {line}")
-    return EXIT_REFUSED_ROWS
 
 
 if __name__ == "__main__":
