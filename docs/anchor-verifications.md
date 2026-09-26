@@ -1309,8 +1309,11 @@ version", although receipt's append gate would accept it. Chronicle therefore
 needs one of two changes first. Either the generator addresses rows written
 before versioning by their content-address id, as receipt does, and six
 corrections then restate June in millions. Or one identity may hold units that
-convert by scale. That is Max's decision, d397. If the scale option is chosen,
-the same change must relax `bls_ledger_unit_conflict`. The hold then lifts. If
+convert by scale. That is Max's decision, d397. Either way, the change that
+lifts the hold must also update `bls_ledger_unit_conflict`: it always counts
+the six pre-versioning June rows, so it would keep refusing after corrections
+restate them, and it compares units strictly. Lifting the hold without that
+brings back the daily refusals. If
 it lifts in time for the roller to mint October before its 2026-11-06 release,
 October is the first A-19 target on this route. Otherwise the roller skips the
 released months, and the first target is the next unreleased one. The 18

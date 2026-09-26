@@ -1313,7 +1313,8 @@ def test_every_other_registrable_lineage_already_holds_the_unit_it_emits() -> No
             and (row.get("geography") or {}).get("id") == "0100000US"
             and row["unit"] is not None
         }
-        if stem in A19_SERIES:
-            assert units == {"thousands"}, stem
-        else:
-            assert units <= {spec["unit"]}, (stem, units)
+        if "registration_hold" in spec:
+            # Held until its lineage can take the unit; lifting the hold
+            # before then makes this test fail.
+            continue
+        assert units <= {spec["unit"]}, (stem, units)
