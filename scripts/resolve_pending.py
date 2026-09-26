@@ -62,7 +62,7 @@ import urllib.request
 import zipfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from html import unescape
 from html.parser import HTMLParser
 from typing import Any
@@ -2318,8 +2318,305 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
             "2026-06": 3193312,
         },
     },
+    # Registrable recurring docket series (wired 2026-09-20). These six are the
+    # first BLS API specs a NEW registration may bind: each carries a
+    # ``binding_transform``, which is what ``bls_api_binding_template`` turns
+    # into the reviewed seven-key sourceBinding and what the registration-time
+    # execution-plan gate requires. Its shape is the prospector's
+    # (``prospect_targets._transform_errors``): exactly ``operation`` and
+    # ``factor``, from that function's operation vocabulary, because a later
+    # proposal carries this binding as its ``previousTarget.sourceBinding``.
+    # Rounding is the executor's (``round``), as for the StatCan growth series.
+    # The older specs above have no ``binding_transform``, so they keep
+    # resolving only the cells that predate bindings.
+    #
+    # The keyless API answers ``calculations`` with "Calculations have been
+    # disabled for this request" (probed 2026-09-20), so month-over-month
+    # figures are derived here from two served rows. ``mom_pct`` and
+    # ``mom_diff`` require the immediately preceding CALENDAR month: BLS
+    # published no October 2025 value for several series (the API serves
+    # ``"-"``), and a change across a gap is not a statistic BLS printed.
+    #
+    # Anchors are in the transformed unit and are months whose values no longer
+    # move between releases: CPS and CPI months other than the latest (revised
+    # only in the annual seasonal revision), JOLTS second estimates, and CES
+    # third estimates. They are NOT first prints: the API drops a first print
+    # one release later (June 2026 openings printed 7,359 and are served as
+    # 7,182; July 2026 payrolls printed -23 and are served as +21). First-print
+    # custody comes from the gate, never from an anchor. Each anchor is
+    # verified against the release that printed it; see "Anchor verifications
+    # — BLS registrable docket series (2026-09-20)" in
+    # docs/anchor-verifications.md.
+    # ``anchor_abs_tolerance`` replaces the relative tolerance on one-decimal
+    # figures. 0.1 is a lab choice, one step of the published precision, not a
+    # bound BLS states: the annual CPS revision and the February CPI seasonal
+    # revision re-derive these months, and a larger move refuses every capture
+    # with ANCHOR MISMATCH until the anchors are re-verified. Extending a
+    # docket calendar across a series' annual revision therefore means
+    # re-verifying and re-committing its anchors in the same change.
+    #
+    # Three of the six have no docket template yet, so nothing can register
+    # them: the unemployment rate and the two CPI series. Chronicle holds two
+    # lineages for each concept (an ``economy/aggregate`` one the ALFRED leg
+    # wrote, and an older one the docket pins), a declared ``sourceSeriesId``
+    # matches neither, and the docket-to-Ledger containment gate refuses the
+    # pin. That is a Chronicle identity decision; see the docs section.
+    "bls.cps.unemployment_rate": {
+        "series_id": "LNS14000000",
+        "period_type": "month",
+        "unit": "percent",
+        "label": "US unemployment rate, 16 years and over (SA)",
+        "source_name": "bls_cps",
+        "source_table": (
+            "Current Population Survey, unemployment rate, 16 years and over, "
+            "seasonally adjusted (Employment Situation, Table A-1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "LNS14000000",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-04": 4.3,
+            "2026-05": 4.3,
+            "2026-06": 4.2,
+            "2026-07": 4.1,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 1},
+    },
+    "bls.cpi.u.headline_mom": {
+        "series_id": "CUSR0000SA0",
+        "period_type": "month",
+        "transform": "mom_pct",
+        "unit": "percent_growth",
+        "round": 1,
+        "label": "US CPI-U all items, one-month percent change (SA)",
+        "source_name": "bls_cpi",
+        "source_table": (
+            "Consumer Price Index for All Urban Consumers, US city average, "
+            "all items, seasonally adjusted (CPI news release, Table A)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CUSR0000SA0",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-05": 0.5,
+            "2026-06": -0.4,
+            "2026-07": 0.1,
+        },
+        "binding_transform": {
+            "operation": "percent_change_previous_period",
+            "factor": 1,
+        },
+    },
+    "bls.cpi.u.core_mom": {
+        "series_id": "CUSR0000SA0L1E",
+        "period_type": "month",
+        "transform": "mom_pct",
+        "unit": "percent_growth",
+        "round": 1,
+        "label": (
+            "US CPI-U all items less food and energy, one-month percent change (SA)"
+        ),
+        "source_name": "bls_cpi",
+        "source_table": (
+            "Consumer Price Index for All Urban Consumers, US city average, "
+            "all items less food and energy, seasonally adjusted (CPI news "
+            "release, Table A)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CUSR0000SA0L1E",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-05": 0.2,
+            "2026-06": 0.0,
+            "2026-07": 0.2,
+        },
+        "binding_transform": {
+            "operation": "percent_change_previous_period",
+            "factor": 1,
+        },
+    },
+    "bls.jolts.job_openings": {
+        "series_id": "JTS000000000000000JOL",
+        "period_type": "month",
+        "unit": "millions",
+        "scale": 0.001,
+        "round": 3,
+        "label": "US job openings, total nonfarm (SA)",
+        "source_name": "bls_jolts",
+        "source_table": (
+            "Job Openings and Labor Turnover Survey, job openings level, total "
+            "nonfarm, seasonally adjusted (JOLTS news release, Table 1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "JTS000000000000000JOL",
+        "anchor_start_year": 2026,
+        # The API serves thousands; anchors are in the ledger's millions.
+        "anchors": {
+            "2026-04": 7.585,
+            "2026-05": 7.537,
+            "2026-06": 7.182,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 0.001},
+    },
+    "bls.jolts.quits_rate": {
+        "series_id": "JTS000000000000000QUR",
+        "period_type": "month",
+        "unit": "percent",
+        "label": "US quits rate, total nonfarm (SA)",
+        "source_name": "bls_jolts",
+        "source_table": (
+            "Job Openings and Labor Turnover Survey, quits rate, total "
+            "nonfarm, seasonally adjusted (JOLTS news release, Table 4)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "JTS000000000000000QUR",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-04": 1.9,
+            "2026-05": 2.0,
+            "2026-06": 2.0,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 1},
+    },
+    "bls.ces.nonfarm_payrolls.change": {
+        "series_id": "CES0000000001",
+        "period_type": "month",
+        "transform": "mom_diff",
+        "unit": "thousands",
+        "round": 0,
+        "label": "US total nonfarm payroll employment, one-month change (SA)",
+        "source_name": "bls_ces",
+        "source_table": (
+            "Current Employment Statistics, all employees, total nonfarm, "
+            "seasonally adjusted (Employment Situation, Table B-1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CES0000000001",
+        "anchor_start_year": 2026,
+        # Annual benchmarking moves a published monthly change by tens of
+        # thousands. This bound cannot tell total nonfarm from a neighbouring
+        # CES aggregate, and the payload's echoed seriesID proves only that
+        # the response matches the request. What ties CES0000000001 to the
+        # published statistic is the zero-tolerance reproduction of the
+        # captured official bytes in tests/test_bls_api_registrable.py and the
+        # release-text verification in the docs. At run time the bound only
+        # has to catch a wrong unit or transform, which is off by orders of
+        # magnitude.
+        "anchor_abs_tolerance": 75.0,
+        "anchors": {
+            "2026-04": 148.0,
+            "2026-05": 63.0,
+            "2026-06": 31.0,
+        },
+        "binding_transform": {
+            "operation": "difference_previous_period",
+            "factor": 1,
+        },
+    },
+    # Real Earnings is published with the CPI, about a week AFTER the
+    # Employment Situation that revises the earnings underneath it, and its
+    # one-month percent moves between releases (June 2026 printed +0.8, then
+    # +0.7, then +0.6). So "latest and still preliminary" is not enough here:
+    # the next Employment Situation could revise the latest row while it is
+    # still latest and still flagged. ``capture_within_days`` narrows that: the
+    # month is captured only within that many days of the REGISTERED release
+    # day. On BLS's 2026 schedule pages as read on 2026-09-20, the shortest
+    # interval from a Real Earnings release to the next Employment Situation is
+    # 21 days (2026-02-13 to 2026-03-06, and 2026-09-11 to 2026-10-02). The
+    # resolver reads no schedule: if BLS moves an Employment Situation to
+    # within 7 days after a registered Real Earnings day, this bound does not
+    # see it. That residual risk is recorded in docs/anchor-verifications.md.
+    "bls.real_earnings.avg_hourly_mom": {
+        "series_id": "CES0500000013",
+        "period_type": "month",
+        "transform": "mom_pct",
+        "unit": "percent",
+        "round": 1,
+        "label": (
+            "US real average hourly earnings, all employees, one-month percent "
+            "change (SA)"
+        ),
+        "source_name": "bls_ces",
+        "source_table": (
+            "Real average hourly earnings for all employees on private nonfarm "
+            "payrolls, constant 1982-1984 dollars, seasonally adjusted (Real "
+            "Earnings news release, Table A-1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CES0500000013",
+        "capture_within_days": 7,
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-04": -0.5,
+            "2026-05": -0.2,
+            "2026-06": 0.6,
+        },
+        "binding_transform": {
+            "operation": "percent_change_previous_period",
+            "factor": 1,
+        },
+    },
 }
 for _spec in BLS_API_ADAPTERS.values():
+    if "binding_transform" in _spec:
+        # Every registrable spec pins anchors in the unit it emits (see the
+        # note above the six entries); legacy specs pin the served level.
+        _spec["anchor_unit"] = "emitted"
+_BLS_EVIDENCE_NOTES_LATEST_CPI = (
+    "One-month percent change for {period}, derived as 100 x (index / prior "
+    "month's index - 1) rounded to one decimal from the seasonally adjusted "
+    "index served by {source_url} (BLS Public Data API v2, current estimates "
+    "only). At capture {period} was still the series' latest published month, "
+    "so both index values are the ones its own release carried: CPI-U rows "
+    "have no preliminary footnote, and BLS revises seasonally adjusted "
+    "indexes once a year, in February, for the previous 5 years."
+)
+BLS_API_ADAPTERS["bls.cpi.u.headline_mom"]["evidence_notes"] = (
+    _BLS_EVIDENCE_NOTES_LATEST_CPI
+)
+BLS_API_ADAPTERS["bls.cpi.u.core_mom"]["evidence_notes"] = (
+    _BLS_EVIDENCE_NOTES_LATEST_CPI
+)
+BLS_API_ADAPTERS["bls.cps.unemployment_rate"]["evidence_notes"] = (
+    "First print for {period} captured from {source_url} (BLS Public Data API "
+    "v2, current estimates only). At capture {period} was still the series' "
+    "latest published month, so no later Employment Situation had been "
+    "published. CPS rows carry no preliminary footnote. BLS's stated policy is "
+    "not to revise previous months' official seasonally adjusted CPS estimates "
+    "as new data arrive during the year. It has made exceptions, and the one "
+    "observed, the population-control revision of January 2026, was published "
+    "with the February estimates, after which January was no longer the "
+    "latest month."
+)
+BLS_API_ADAPTERS["bls.ces.nonfarm_payrolls.change"]["evidence_notes"] = (
+    "One-month change for {period}, derived as the level for {period} minus "
+    "the prior month's level, both served by {source_url} (BLS Public Data "
+    "API v2, current estimates only). At capture {period} was still the "
+    "series' latest published month and still carried BLS's preliminary "
+    "footnote, so the pair is the one its own Employment Situation printed: "
+    "the first estimate for {period} and that release's revised prior month."
+)
+BLS_API_ADAPTERS["bls.real_earnings.avg_hourly_mom"]["evidence_notes"] = (
+    "One-month percent change for {period}, derived as 100 x (level / prior "
+    "month's level - 1) rounded to one decimal from the two-decimal constant "
+    "1982-1984 dollar levels served by {source_url} (BLS Public Data API v2, "
+    "current estimates only). At capture {period} was still the series' latest "
+    "published month, still carried BLS's preliminary footnote, and the capture "
+    "fell within 7 days of the registered Real Earnings release day."
+)
+for _spec in BLS_API_ADAPTERS.values():
+    if "evidence_notes" in _spec:
+        # A spec that states its own first-print basis keeps it: the notes
+        # below describe CPS policy and the preliminary footnote only.
+        continue
     if _spec.get("first_print_gate") == "latest_month":
         _spec["evidence_notes"] = (
             "First print for {period} captured from {source_url} (BLS Public "
@@ -7655,6 +7952,211 @@ def bls_first_print(
     return state["value"], None
 
 
+BLS_MONTHLY_TRANSFORMS = {"level", "mom_diff", "mom_pct"}
+
+
+def bls_transformed_value(
+    rows: dict[str, dict[str, Any]], spec: Mapping[str, Any], period: str
+) -> tuple[float | None, str | None]:
+    """(value, refusal) for one month in the unit the spec emits.
+
+    ``mom_diff`` and ``mom_pct`` read the immediately preceding calendar
+    month and refuse when the API serves no value for it: BLS published no
+    October 2025 figure for several series, and a change measured across a
+    gap is not a number BLS printed. An absent target month defers.
+    """
+    transform = spec.get("transform", "level")
+    if transform not in BLS_MONTHLY_TRANSFORMS:
+        raise ValueError(f"unknown monthly BLS transform {transform!r}")
+    state = rows.get(period)
+    if state is None:
+        return None, None
+    if transform == "level":
+        value = state["value"]
+    else:
+        prior_period = prior_period_date(period, "month")
+        prior = rows.get(prior_period)
+        if prior is None:
+            return None, (
+                f"{prior_period} has no served value, so the one-month change "
+                f"for {period} cannot be derived from two published months"
+            )
+        if transform == "mom_diff":
+            value = state["value"] - prior["value"]
+        elif prior["value"] == 0:
+            return None, f"{prior_period} is zero; a percent change is undefined"
+        else:
+            # Exact decimal arithmetic on the served figures, rounded half away
+            # from zero. A binary float decides an exact half by noise
+            # (12.00 -> 12.03 is exactly +0.25 and float ``round`` gives 0.2,
+            # while 12.00 -> 12.09, exactly +0.75, gives 0.8). Which way BLS
+            # breaks a tie is not verified; this makes the choice one rule.
+            # Level specs keep float ``round`` so the specs that predate
+            # bindings stay byte-identical (all eight are levels). A payroll
+            # difference is an integer, so no tie can arise there.
+            percent = (
+                Decimal(repr(state["value"])) / Decimal(repr(prior["value"])) - 1
+            ) * 100
+            digits = spec.get("round")
+            if digits is not None:
+                percent = percent.quantize(
+                    Decimal(1).scaleb(-int(digits)), rounding=ROUND_HALF_UP
+                )
+            return round(float(percent) * spec.get("scale", 1), 4) + 0.0, None
+    value *= spec.get("scale", 1)
+    digits = spec.get("round")
+    if digits is not None:
+        value = round(value, digits)
+    # Same IEEE -0.0 guard as apply_transform: core CPI rounded to -0.0 in
+    # June 2026, which BLS printed as "unchanged".
+    return round(value, 4) + 0.0, None
+
+
+def bls_spec_anchor_mismatches(
+    rows: dict[str, dict[str, Any]], spec: Mapping[str, Any]
+) -> list[str]:
+    """Anchor periods the fetched response cannot reproduce.
+
+    Specs that predate registrable bindings pin the served level and keep
+    ``bls_anchor_mismatches`` unchanged. A spec with ``anchor_unit:
+    "emitted"`` pins the value its transform emits, so the same check proves
+    the transform and the scale, within ``anchor_abs_tolerance`` when the
+    spec states one and the relative ``BLS_ANCHOR_TOLERANCE`` otherwise.
+    """
+    anchors = spec["anchors"]
+    if spec.get("anchor_unit") != "emitted":
+        return bls_anchor_mismatches(rows, anchors)
+    abs_tolerance = spec.get("anchor_abs_tolerance")
+    problems = []
+    for anchor_period, expected in sorted(anchors.items()):
+        got, refusal = bls_transformed_value(rows, spec, anchor_period)
+        if got is None:
+            problems.append(
+                f"{anchor_period}=missing ({refusal or 'not served'}; "
+                f"verified {expected})"
+            )
+            continue
+        allowed = (
+            abs_tolerance
+            if abs_tolerance is not None
+            else BLS_ANCHOR_TOLERANCE * abs(expected)
+        )
+        if abs(got - expected) > allowed + 1e-9:
+            problems.append(f"{anchor_period}={got} (verified {expected})")
+    return problems
+
+
+def bls_registered_release_day(binding: Mapping[str, Any]) -> dt.date | None:
+    """The one official release day a ``bls-api`` binding registers."""
+    if binding.get("adapter") != BLS_API_BINDING_ADAPTER:
+        return None
+    window = binding.get("expectedReleaseWindow")
+    start = window.get("start") if isinstance(window, Mapping) else None
+    try:
+        return dt.date.fromisoformat(str(start)) if start else None
+    except ValueError:
+        return None
+
+
+def bls_capture_bound_refusal(
+    spec: Mapping[str, Any], binding: Mapping[str, Any], capture_day: dt.date
+) -> str | None:
+    """Why a capture falls outside a spec's ``capture_within_days`` bound.
+
+    The bound is measured from the registered release day, so a spec that
+    states one resolves only a target that registers the ``bls-api`` binding:
+    a cell with no registered release day has nothing to measure from.
+    """
+    days = spec.get("capture_within_days")
+    if days is None:
+        return None
+    window = binding.get("expectedReleaseWindow")
+    start = window.get("start") if isinstance(window, Mapping) else None
+    if binding.get("adapter") != BLS_API_BINDING_ADAPTER or not start:
+        return (
+            "this series is captured only within a bound measured from a "
+            "registered bls-api release day, and the target registers none"
+        )
+    try:
+        release_day = dt.date.fromisoformat(str(start))
+    except ValueError:
+        return f"registered release day {start!r} is not a date"
+    last_day = release_day + dt.timedelta(days=int(days))
+    if capture_day > last_day:
+        return (
+            f"captured {capture_day}, after the {days}-day bound that ended "
+            f"{last_day} (registered release day {release_day}); a later "
+            "release may have revised the value"
+        )
+    return None
+
+
+BLS_API_BINDING_ADAPTER = "bls-api"
+BLS_API_ALLOWED_HOSTS = ("api.bls.gov",)
+BLS_API_SOURCE_URL = "https://api.bls.gov/publicAPI/v2/timeseries/data/{series}"
+BLS_API_BINDING_TEMPLATE_KEYS = {
+    "adapter",
+    "sourceUrl",
+    "sourceSeriesId",
+    "field",
+    "table",
+    "transform",
+    "releasePolicy",
+}
+BLS_API_BINDING_DERIVED_KEYS = {"expectedReleaseWindow", "allowedHosts"}
+BLS_API_MIN_ANCHORS = 3
+
+
+def bls_api_binding_template(spec: Mapping[str, Any]) -> dict[str, Any] | None:
+    """The reviewed seven-key sourceBinding, or None for a legacy spec.
+
+    Only a spec that declares ``binding_transform`` is registrable. The
+    ``sourceUrl`` is the executor's own request without its year range, so
+    the registered host is the host every resolution fetches.
+    """
+    transform = spec.get("binding_transform")
+    if not isinstance(transform, Mapping):
+        return None
+    return {
+        "adapter": BLS_API_BINDING_ADAPTER,
+        "sourceUrl": BLS_API_SOURCE_URL.format(series=spec["series_id"]),
+        "sourceSeriesId": spec["series_id"],
+        "field": "value",
+        "table": spec["source_table"],
+        "transform": copy.deepcopy(dict(transform)),
+        "releasePolicy": "first_print",
+    }
+
+
+def bls_api_binding_matches_spec(binding: Any, spec: Mapping[str, Any]) -> bool:
+    """Require the registered seven keys and hosts to match the executor."""
+
+    template = bls_api_binding_template(spec)
+    if template is None or not isinstance(binding, dict):
+        return False
+    if set(binding) - BLS_API_BINDING_DERIVED_KEYS != BLS_API_BINDING_TEMPLATE_KEYS:
+        return False
+    # Required, not optional: ``source_binding_projection`` checks the appended
+    # fact's host only when the registration lists hosts, so a binding without
+    # the list would resolve with no custody check at all.
+    allowed_hosts = binding.get("allowedHosts")
+    if not isinstance(allowed_hosts, list) or sorted(allowed_hosts) != sorted(
+        BLS_API_ALLOWED_HOSTS
+    ):
+        return False
+    projection = {key: binding[key] for key in BLS_API_BINDING_TEMPLATE_KEYS}
+    return canonical_bytes(projection) == canonical_bytes(template)
+
+
+def bls_api_verified_anchors(spec: Mapping[str, Any]) -> dict[str, float] | None:
+    """The spec's anchors when it carries enough of them to be admitted."""
+
+    anchors = spec.get("anchors")
+    if not isinstance(anchors, Mapping) or len(anchors) < BLS_API_MIN_ANCHORS:
+        return None
+    return dict(anchors)
+
+
 FSA_CRP_BINDING_TEMPLATE_KEYS = {
     "adapter",
     "sourceUrl",
@@ -10919,6 +11421,7 @@ def pending_adapter_refs(
     }
     out = []
     sba_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
+    bls_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
     for link in log["resolutionLinks"]:
         if link.get("status") != "pending":
             continue
@@ -11052,6 +11555,20 @@ def pending_adapter_refs(
             (stem for stem in BLS_API_ADAPTERS if ref.startswith(stem + ".")),
             None,
         )
+        if bls_stem and bls_stem in ALFRED_ADAPTERS:
+            # Four docket stems are claimed by both families. The registered
+            # adapter decides (FAMILY_ADAPTERS): only a target that binds
+            # ``bls-api`` routes here. Every other reference for the stem, a
+            # generic-url registration or a cell that predates bindings, falls
+            # through to the ALFRED leg exactly as it did before this family
+            # became registrable.
+            if bls_registrations is None:
+                bls_registrations = registration_contracts()
+            registered = ((bls_registrations.get(ref) or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            if registered.get("adapter") != BLS_API_BINDING_ADAPTER:
+                bls_stem = None
         if bls_stem:
             parsed = parse_ref_period(ref, bls_stem)
             spec = BLS_API_ADAPTERS[bls_stem]
@@ -12915,6 +13432,73 @@ def _plan_bea_release(
     return None
 
 
+def _plan_bls_api(
+    registration: Mapping[str, Any],
+    spec: Mapping[str, Any],
+    period: str,
+    *_: Any,
+) -> str | None:
+    if bls_api_binding_template(spec) is None:
+        return (
+            "this BLS API stem has no reviewed registrable binding: it resolves "
+            "only the cells that predate bindings"
+        )
+    if bls_api_verified_anchors(spec) is None:
+        return "the BLS API adapter has fewer than three verified anchors"
+    # The executor reads the month the dataPointId routes to; the calendar
+    # authenticates the month the contract names. They must be one month.
+    contract_period = registration["contract"].get("period")
+    if contract_period != period:
+        return (
+            f"the dataPointId routes to {period} but the contract's period is "
+            f"{contract_period!r}"
+        )
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        bls_api_binding_matches_spec(binding, spec), "BLS API"
+    )
+    if refusal:
+        return refusal
+    # main() refuses a resolve-by-bound target the day after its registered
+    # window closes. This executor's window is one day and its capture is
+    # bounded by the first-print gate instead: JOLTS publishes at 10:00 ET,
+    # after the daily 13:40 UTC run, so a bounded contract could never resolve.
+    basis = registration["contract"].get(
+        "resolutionDateBasis", DEFAULT_RESOLUTION_DATE_BASIS
+    )
+    if basis != DEFAULT_RESOLUTION_DATE_BASIS:
+        return (
+            f"the BLS API executor resolves only the {DEFAULT_RESOLUTION_DATE_BASIS!r} "
+            f"basis; a {basis!r} contract closes with its one-day window, before "
+            "the API can be relied on to serve the print"
+        )
+    # The API serves current estimates only, so the capture has to start on
+    # the day BLS's own schedule names; a cadence-inferred span could open
+    # before the print exists or after the next release has replaced it.
+    window = binding.get("expectedReleaseWindow") or {}
+    if not window.get("start") or window.get("start") != window.get("end"):
+        return (
+            "the BLS API executor starts capturing on one official release "
+            f"day; expectedReleaseWindow {window!r} is not a one-day window"
+        )
+    days = spec.get("capture_within_days")
+    resolution_date = registration["contract"].get("resolutionDate")
+    if days is not None and resolution_date:
+        try:
+            last_day = dt.date.fromisoformat(str(window["start"])) + dt.timedelta(
+                days=int(days)
+            )
+            too_late = dt.date.fromisoformat(str(resolution_date)) > last_day
+        except ValueError:
+            return "the contract's resolutionDate or release day is not a date"
+        if too_late:
+            return (
+                f"resolutionDate {resolution_date} is after the {days}-day capture "
+                f"bound that ends {last_day}; the executor could never resolve it"
+            )
+    return None
+
+
 def _plan_census_spm(
     registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
 ) -> str | None:
@@ -13033,6 +13617,7 @@ def _plan_usaspending(
 EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
     "alfred": _plan_alfred,
     "bea_release": _plan_bea_release,
+    "bls_api": _plan_bls_api,
     "census_spm": _plan_census_spm,
     "eia_dnav": _plan_eia_dnav,
     "fsa_crp": _plan_fsa_crp,
@@ -13042,14 +13627,16 @@ EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
     "sba_pdf": _plan_sba_pdf,
     "usaspending": _plan_usaspending,
 }
-# Families that resolve only cells that predate bindings. BLS API, SSA and
-# VA MMWR name adapters ``register_targets.SOURCE_ADAPTERS`` does not offer;
-# A-19 and CMS provider data have no binding adapter at all, so a target for
-# them could only be registered as ``generic-url``. Moving a family out of
-# this set means giving it a registrable adapter, a full-binding predicate
-# above, and a first-print acquisition that needs no per-period hand pin.
+# Families that resolve only cells that predate bindings. SSA and VA MMWR
+# name adapters ``register_targets.SOURCE_ADAPTERS`` does not offer; A-19 and
+# CMS provider data have no binding adapter at all, so a target for them
+# could only be registered as ``generic-url``. Moving a family out of this
+# set means giving it a registrable adapter, a full-binding predicate above,
+# and a first-print acquisition that needs no per-period hand pin. BLS API
+# left it on 2026-09-20, and only for the specs that declare a
+# ``binding_transform``: ``_plan_bls_api`` still refuses every other stem.
 EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
-    {"a19", "bls_api", "cms_provider_data", "ssa_official", "va_mmwr"}
+    {"a19", "cms_provider_data", "ssa_official", "va_mmwr"}
 )
 _CLAIMS_PLAN = {
     "initial": ("ICSA", "thousands"),
@@ -13364,6 +13951,17 @@ def main() -> int:
             continue
         release_day = dt.date.fromisoformat(source_vintage)
         registration = loop_contracts.get(ref)
+        if kind == "bls_api" and spec.get("capture_within_days") is not None:
+            # The forecast's resolutionDate is analyst-written. A capture
+            # bound is measured from the registered official release day, so
+            # that day, not a later forecast date, decides when this series
+            # is first attempted; otherwise the bound could close before the
+            # first attempt.
+            registered_day = bls_registered_release_day(
+                ((registration or {}).get("contract") or {}).get("sourceBinding") or {}
+            )
+            if registered_day is not None:
+                release_day = registered_day
         resolution_date_basis, basis_refusal = effective_resolution_date_basis(
             ref, registration, spec
         )
@@ -13837,6 +14435,34 @@ def main() -> int:
             extension = "csv"
         elif kind == "bls_api":
             series_id = spec["series_id"]
+            registered_binding = ((registration or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            registrable = bls_api_binding_template(spec) is not None
+            if registrable or registered_binding.get("adapter") == (
+                BLS_API_BINDING_ADAPTER
+            ):
+                # The specs that predate bindings keep resolving cells that
+                # have no registration. A registrable spec does not: it
+                # resolves only a target that registers the reviewed template,
+                # so a reference with no contract is never fetched for.
+                if not bls_api_binding_matches_spec(registered_binding, spec):
+                    print(
+                        "  BINDING/ADAPTER MISMATCH (refusing, no registered "
+                        f"bls-api binding or seven-key registry drift): {ref}"
+                    )
+                    continue
+            # The bound needs no fetched data, so it is judged before a keyless
+            # request is spent (25 a day per address), and again below on the
+            # response's own retrieval day.
+            bound_refusal = bls_capture_bound_refusal(
+                spec, registered_binding, dt.date.fromisoformat(utc_now()[:10])
+            )
+            if bound_refusal:
+                print(
+                    f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {bound_refusal}"
+                )
+                continue
             bls_key = (
                 series_id,
                 spec["anchor_start_year"],
@@ -13848,10 +14474,18 @@ def main() -> int:
             if raw is None:
                 print(f"  BLS API fetch failed: {ref}")
                 continue
+            bound_refusal = bls_capture_bound_refusal(
+                spec, registered_binding, dt.date.fromisoformat(retrieved_at[:10])
+            )
+            if bound_refusal:
+                print(
+                    f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {bound_refusal}"
+                )
+                continue
             if period_type == "year":
                 mismatches = bls_annual_anchor_mismatches(rows, spec["anchors"])
             else:
-                mismatches = bls_anchor_mismatches(rows, spec["anchors"])
+                mismatches = bls_spec_anchor_mismatches(rows, spec)
             if mismatches:
                 print(
                     f"  ANCHOR MISMATCH (refusing, wrong series?): {ref} "
@@ -13869,10 +14503,23 @@ def main() -> int:
             if refusal:
                 print(f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {refusal}")
                 continue
-            if value is not None and ("scale" in spec or "round" in spec):
-                # LAUS serves persons for a catalog in thousands; rounding
-                # follows the cell's resolver (one decimal thousand).
-                value = round(value * spec.get("scale", 1), spec.get("round", 4)) + 0.0
+            if period_type == "year":
+                if value is not None and ("scale" in spec or "round" in spec):
+                    value = (
+                        round(value * spec.get("scale", 1), spec.get("round", 4)) + 0.0
+                    )
+            elif value is not None:
+                # The gate above judged the target month's own row. Scaling,
+                # rounding and any one-month change are applied only now: LAUS
+                # serves persons for a catalog in thousands, and a derived
+                # change also needs the preceding month.
+                value, transform_refusal = bls_transformed_value(rows, spec, period)
+                if transform_refusal:
+                    print(
+                        f"  BLS TRANSFORM REFUSAL (refusing): {ref} — "
+                        f"{transform_refusal}"
+                    )
+                    continue
             # The API has no vintage archive, so the capture day IS the
             # source vintage; the latest+preliminary gate above bounds it
             # inside the first-print window.

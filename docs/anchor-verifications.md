@@ -751,3 +751,405 @@ published figure). The adapter reads the witnessed file, authenticates the
 reporting period, and refuses with `SOURCE PUBLISHES NO NATIONAL AGGREGATE`
 rather than computing a derived national statistic the resolver never
 defined.
+
+---
+
+# Anchor verifications — BLS registrable docket series (2026-09-20)
+
+Integrator session, 2026-09-20 and 2026-09-21 UTC. Seven recurring docket
+series that could bind only `generic-url` gain a registrable `bls-api` spec. The
+existing `BLS_API_ADAPTERS` family already read this API; what is new is a
+binding a registration can carry, the transforms two of the series need, and
+calendar gating. The registration-time execution-plan gate admits only the
+seven specs that declare a `binding_transform`.
+
+**Four of the seven can mint targets now; three cannot yet.** JOLTS job
+openings, the JOLTS quits rate, the payroll change and real earnings have
+docket templates.
+The unemployment rate and the two CPI series have verified specs and anchors
+but no docket template, because of a Chronicle lineage conflict described in
+the next subsection. They stay in `waivers.json` `templateless_docket_series`.
+
+## Three series wait on a Chronicle lineage decision
+
+The docket pins each series to one Chronicle lineage
+(`scripts/docket_series.json` `ledger.uuid`), and
+`tests/test_docket_ledger_containment.py` re-derives that pin from the series
+catalog. Catalog identity is concept, geography and entity. Once a docket entry
+declares a `sourceSeriesId`, that id must appear in the `source_concepts` of
+exactly one candidate lineage; when several lineages survive the filters and
+none lists it, the gate refuses (`declared binding ... needed but matched
+nothing`), and `scripts/stamp_docket_ledger_refs.py` applies the same rule.
+
+In the frozen catalog fixture each of these three concepts has two observed
+lineages:
+
+| Series | Lineage the docket pins | Other lineage |
+|---|---|---|
+| `bls.cps.unemployment_rate` | `8dbbd54f`, entity `person/civilian_labor_force`, 1 observation from 2026-05, source `bls.cps.unemployment_rate` | `db2f3857`, entity `economy/aggregate`, 2 observations from 2026-06, source `UNRATE` |
+| `bls.cpi.u.headline_mom` | `3e796803`, entity `household/cpi_u_all_items`, 1 observation from 2026-05, source `bls.cpi.u.headline_mom.may_2026` | `70ca2ecf`, entity `economy/aggregate`, 2 observations from 2026-06, source `CPIAUCSL` |
+| `bls.cpi.u.core_mom` | `d85c3c7f`, entity `household/cpi_u_less_food_energy`, 1 observation from 2026-05, source `bls.cpi.u.core_mom.may_2026` | `e5e402d5`, entity `economy/aggregate`, 2 observations from 2026-06, source `CPILFESL` |
+
+With these docket templates in place, three containment tests failed; without
+them all 14 pass. The conflict predates this work: with no declared binding
+the gate falls back to the earliest lineage, which is the pinned one, while the
+ALFRED leg has been writing to the other. `generic_fact` gives every BLS API
+spec the default entity `economy/aggregate`, so a `bls-api` observation would
+also join the lineage the docket does **not** pin.
+
+This is a Chronicle identity decision and is not made here. Loosening the
+containment rule locally would hide the mismatch. The way through is to settle
+in Chronicle which lineage is canonical for each concept (merging the duplicate,
+or recording the BLS series id on the surviving lineage), re-stamp
+`ledger.uuid` if the survivor changes, set `entity` on the three specs if the
+survivor is not `economy/aggregate`, and then commit the docket templates and
+the Employment Situation and CPI calendar rows recorded below.
+`test_lineage_blocked_series_stay_templateless_until_chronicle_is_fixed`
+asserts the blocking condition itself, so it fails, on purpose, as soon as the
+catalog fixture no longer shows it.
+
+The other three are unaffected. `bls.jolts.job_openings` has one observed
+lineage, `economy/aggregate`, which is where a `bls-api` fact lands.
+`bls.jolts.quits_rate`, `bls.ces.nonfarm_payrolls.change` and
+`bls.real_earnings.avg_hourly_mom` are docket-only placeholders that take
+their first observation through the resolver's placeholder enrichment.
+
+## Route choice
+
+Two official routes were evaluated per series. FRED and ALFRED were not
+candidates: an agency source exists for every series.
+
+**Route A, BLS Public Data API** (`https://api.bls.gov/publicAPI/v2/timeseries/data/<id>`,
+keyless, answers `curl`). It serves current estimates only. One keyless POST
+for all eight candidate series (2026-09-20, response SHA-256
+`f295533e7f2c94600ab2b6d14d98cb68f004a3619b55dde5264121c379cf599e`) showed
+which rows carry the preliminary footnote `P`, and returned the message
+"Calculations have been disabled for this request" to `"calculations": true`.
+The keyless API therefore does not serve percent changes; they are derived.
+BLS's developer FAQ says the same: "Net/Percent Changes" is "No" for
+unregistered use.
+
+**Route B, dated archived news releases**
+(`https://www.bls.gov/news.release/archives/<family>_MMDDYYYY.htm`). Every
+archive URL predicted from BLS's schedule dates existed. `www.bls.gov` answered
+`curl` with HTTP 403 on a schedule page and on an archived release, with and
+without a browser User-Agent string (2026-09-20), so this route needs the
+headless-browser transport. It was used here as the verification source for
+every anchor. It was not chosen as a runtime source: whether a headless
+browser is served from a GitHub Actions runner is **unverified** for
+`www.bls.gov` (the SSA family verified that only for `ssa.gov`), and each
+release family would need its own HTML table parser.
+
+| Series | API id | `P` footnote | Route | First-print gate |
+|---|---|---|---|---|
+| `bls.cps.unemployment_rate` | `LNS14000000` | none | A | `latest_month` |
+| `bls.cpi.u.headline_mom` | `CUSR0000SA0` | none | A, derived percent | `latest_month` |
+| `bls.cpi.u.core_mom` | `CUSR0000SA0L1E` | none | A, derived percent | `latest_month` |
+| `bls.jolts.job_openings` | `JTS000000000000000JOL` | latest month only | A | `latest_preliminary` |
+| `bls.jolts.quits_rate` | `JTS000000000000000QUR` | latest month only | A | `latest_preliminary` |
+| `bls.ces.nonfarm_payrolls.change` | `CES0000000001` | latest two months | A, derived difference | `latest_preliminary` |
+| `bls.real_earnings.avg_hourly_mom` | `CES0500000013` | latest two months | A, derived percent | `latest_preliminary` plus a 7-day capture bound |
+| `bls.productivity.nonfarm_qoq_prelim` | `PRS85006092` | none | not admitted | see below |
+
+## Why the gate, not an anchor, carries first-print custody
+
+The API drops a first print one release later. Both cases below were read from
+the archived releases and compared with the API on 2026-09-20:
+
+- June 2026 job openings printed 7,359 (release of 2026-08-04). The next
+  release says "The number of job openings for June was revised down by
+  177,000 to 7.2 million", and the API serves 7,182.
+- July 2026 payrolls printed -23,000 (release of 2026-08-07). The next release
+  says "the change for July was revised up by 44,000, from -23,000 to
+  +21,000", and the API level difference is +21.
+
+So no anchor below is a first print, except where stated. Anchors are months
+whose served values no longer move between releases, and they prove series
+identity, transform, scale and rounding. A target month is captured only while
+it is still the series' latest published month, and for JOLTS and CES only
+while it still carries `P`. CES flags its latest two months; only the latest
+passes.
+
+What the `latest_month` gate guarantees is narrow: at capture no later month
+had been published. It does not prove the latest month's own value was never
+changed between releases; the API cannot show that. It relies on BLS
+publishing revisions with a release, which is what the two policy statements
+below describe and what the one observed exception did:
+
+- CPS: "BLS policy is to not revise previous months' official seasonally
+  adjusted CPS estimates as new data become available during the year.
+  Instead, revisions are introduced for the most recent 5 years of data at the
+  end of each year."
+  (https://www.bls.gov/cps/seasonal-adjustment-methodology.htm, re-read
+  2026-09-20, SHA-256
+  `2496d3096be39ddddf5bd22d0b94526e019bb90db8b74fd749cf29bf4603b678`.)
+- CPI: "These factors are updated each February, and the new factors are used
+  to revise the previous 5 years of seasonally adjusted data", and
+  "Seasonally adjusted data, including the U.S. city average all items index
+  levels, are subject to revision for up to 5 years after their original
+  release" (technical note of the May 2026 CPI release). The same release's
+  sentence "the indexes for the past 10 to 12 months are subject to revision"
+  belongs to the C-CPI-U paragraph, not to CPI-U.
+
+- CPS exception, observed: BLS revised all January 2026 CPS data after their
+  first print. "The 2026 adjustment was delayed by a month due to the 2025
+  federal government shutdown and was implemented with the publication of
+  February estimates in March. All CPS data for January were revised at that
+  time to incorporate the new population estimates." The same passage says
+  "the unemployment rate was unaffected."
+  (https://www.bls.gov/cps/methods/population-controls/experimental-series-accounting-for-january-2026-population-control-effects.htm,
+  "Last modified date: April 10, 2026", read 2026-09-20, 66,343 bytes, SHA-256
+  `fa74e967411bed2dbcbcf8f59143354f8f5fd4d87a373defcbc1748f6ac34e1d`.) The API
+  marks it: the January 2026 row in the committed `LNS14000000` capture carries
+  footnote code `12`, "January 2026 estimates were revised to incorporate
+  updated population controls." That revision arrived with the February
+  release, which is the moment January stopped being the latest month, so the
+  gate had already closed. The resolver reads only footnote code `P`; a
+  footnote-`12` row looks like any other to it.
+
+In the February CPI release both the January index and the revised December
+index are published together, and the API serves both while January is latest,
+so the derived January change uses that release's own pair.
+
+## Timing, and a docket date that is wrong
+
+The resolver runs daily at 13:40 UTC (`.github/workflows/resolve-and-rebuild.yml`).
+The `bls_api` leg has no upper date bound: it defers until the registered
+release day is reached and then captures on any later run while the gate
+holds. The site never compares `expectedReleaseWindow` with the capture day.
+So the one-day registered window is the first attempt, not the only one. An
+08:30 ET release is 12:30 UTC in daylight time and 13:30 UTC in standard time,
+10 minutes before the run; JOLTS publishes at 10:00 ET, after the run, so a
+JOLTS month is always captured on the following day's run. In both cases the
+recorded `observed_at` is the capture day.
+
+Nothing checks a committed `releaseDates` value against the agency. A date that
+is too early only produces deferrals ("not yet published"). A date that is too
+late starts capture late and silently; the gate is then the only protection,
+and if the date is late by more than a release cycle the month is no longer
+the latest and the target is refused as a missed window. It never resolves to
+a revised value.
+
+## Real earnings: why the footnote gate needs a capture bound
+
+Real Earnings is published with the CPI, about a week after the Employment
+Situation that revises the earnings underneath it. Its one-month percent moves
+between releases while the latest row stays latest and flagged: June 2026
+printed +0.8 (release of 2026-07-14), +0.7 (2026-08-12) and +0.6 (2026-09-11).
+Whether the API revises the latest row on an Employment Situation day, before
+the next Real Earnings release, could not be observed on 2026-09-20, so the
+adapter does not assume it does not.
+
+`capture_within_days: 7` bounds the capture to 7 days from the registered
+release day (`bls_capture_bound_refusal`). It is judged before a keyless
+request is spent and again on the response's retrieval day, and a bounded
+series is first attempted on its registered release day, not on the
+forecast's analyst-written `resolutionDate`.
+
+The 7 days rest on a reading of BLS's schedule pages on 2026-09-20, committed
+as `tests/fixtures/bls_api/release-schedules-2026-09-20.json`. A test computes
+the interval from each Real Earnings release to the next Employment Situation:
+the shortest is 21 days, twice (2026-02-13 to 2026-03-06, and 2026-09-11 to
+2026-10-02). The same test requires every committed docket date to be one
+whose following Employment Situation BLS has already scheduled. That is why
+only October 2026 data (2026-11-10, followed by the Employment Situation of
+2026-12-04, 24 days later) is committed. November data (2026-12-10) is on the
+schedule, but the Employment Situation after it is not, so it waits.
+
+**Residual risk.** The resolver reads no schedule. If BLS moves an Employment
+Situation to within 7 days after a registered Real Earnings day (a shutdown has
+moved both before), a capture inside the bound could be a revised value, and
+the row would still be the latest and still flagged `P`. The per-capture
+evidence note therefore states only what was checked: latest, flagged, and
+within 7 days of the registered day. The other cost is operational: a resolver
+outage longer than 7 days after a release loses that print, and the refusal
+says so rather than recording a possibly revised value.
+
+The bound is measured from a registered release day, so this spec resolves
+only a target that registers the `bls-api` binding.
+
+The arithmetic was tested separately from the gate. Across seven archived
+releases (2026-03-11 through 2026-09-11), all 28 published one-month percents
+in Tables A-1 and A-2 equal the percent computed from that same release's
+printed two-decimal dollar levels, rounded to one decimal. As with CPI, that
+is empirical: no BLS sentence was found stating which precision the published
+percent is computed from, and the tie rule (an exact half rounds away from
+zero) is this lab's choice. With two-decimal levels near $11.30 an exact half
+needs a move of 1.25 percent or more; it becomes an ordinary-sized case
+(0.25 percent) only at a level of exactly $12.00.
+
+This series is a ratio of two separately revised series, so its anchors face
+both the CES benchmark and the February CPI seasonal revision. They are third
+estimates and reproduce exactly today; expect to re-verify them each February,
+and treat an ANCHOR MISMATCH refusal then as that, not as a wrong series.
+
+## How the CPI percent is derived, and the open gap
+
+The value is `round(100 * (index / prior month's index - 1), 1)` on the
+seasonally adjusted three-decimal indexes. The release's technical note,
+"Calculating Index Changes", documents that arithmetic (index-point change
+divided by the prior index, times 100) with three-decimal example values.
+
+**Not found:** a BLS sentence stating that its *published* one-month percents
+are computed from the rounded published indexes rather than from unrounded
+ones. The evidence is empirical: all eight published first prints checked
+(headline and core, May through August 2026) equal the derived value,
+including the discriminating June core case, where the derived -0.017 rounds
+to 0.0 and BLS printed "was unchanged in June". If BLS ever prints a percent
+that the rounded indexes do not reproduce, the affected target resolves to a
+value 0.1 away from the release text; nothing at run time can detect that.
+
+A second, smaller gap is the tie rule. The percent is computed in exact
+decimal arithmetic and an exact half rounds away from zero (`ROUND_HALF_UP`).
+A binary float decided such ties by noise: 320.000 to 320.800 is exactly +0.25
+and float `round` gave 0.2, while an exact +0.75 gave 0.8. Which way BLS breaks
+a tie was not verified. Ties are rare (a reviewer's scan found 5 in about
+584,000 realistic three-decimal index pairs), and none of the verified months
+is one.
+
+A one-month change requires the immediately preceding calendar month. BLS
+published no October 2025 CPI (the API serves `"-"` with footnote `X`), so the
+adapter refuses November 2025 rather than measuring a change across the gap.
+
+## Anchors
+
+Each value was reproduced by the adapter, with zero tolerance, from the
+captured official API bytes in `tests/fixtures/bls_api/` (hashes in that
+directory's README), and verified against the release named in the same row.
+Release pages were read on 2026-09-20 through a desktop browser; the SHA-256 is
+of the body a same-origin `fetch` returned then. Three pages were fetched a
+second time and returned identical bytes.
+
+| Series | Period | Adapter value | Official release evidence |
+|---|---|---:|---|
+| `bls.cps.unemployment_rate` | 2026-04 | 4.3 | Table A-1, Employment Situation of 2026-09-04 |
+| | 2026-05 | 4.3 | same table |
+| | 2026-06 | 4.2 | same table |
+| | 2026-07 | 4.1 | same table |
+| `bls.cpi.u.headline_mom` | 2026-05 | 0.5 | "increased 0.5 percent on a seasonally adjusted basis in May", CPI release of 2026-06-10 (first print) |
+| | 2026-06 | -0.4 | "decreased 0.4 percent ... in June", 2026-07-14 (first print) |
+| | 2026-07 | 0.1 | "increased 0.1 percent ... in July", 2026-08-12 (first print) |
+| `bls.cpi.u.core_mom` | 2026-05 | 0.2 | "rose 0.2 percent in May", 2026-06-10 (first print) |
+| | 2026-06 | 0.0 | "was unchanged in June", 2026-07-14 (first print) |
+| | 2026-07 | 0.2 | "rose 0.2 percent after being unchanged in June", 2026-08-12 (first print) |
+| `bls.jolts.job_openings` | 2026-04 | 7.585 | Table 1, JOLTS release of 2026-09-01: 7,585 (second estimate) |
+| | 2026-05 | 7.537 | same table: 7,537 (second estimate; first print was 7,594) |
+| | 2026-06 | 7.182 | same table: 7,182 (second estimate; first print was 7,359) |
+| `bls.jolts.quits_rate` | 2026-04 | 1.9 | Table 4, JOLTS release of 2026-09-01 |
+| | 2026-05 | 2.0 | same table |
+| | 2026-06 | 2.0 | same table |
+| `bls.real_earnings.avg_hourly_mom` | 2026-04 | -0.5 | Table A-1 percent-change row, `Apr. 2026`, Real Earnings release of 2026-07-14 (third estimate) |
+| | 2026-05 | -0.2 | same row, `May 2026`, release of 2026-08-12 (third estimate; first print was -0.1) |
+| | 2026-06 | 0.6 | same row, `June 2026`, release of 2026-09-11 (third estimate; first print was +0.8) |
+| `bls.ces.nonfarm_payrolls.change` | 2026-04 | 148 | "April was revised down by 31,000, from +179,000 to +148,000", 2026-07-02 (third estimate) |
+| | 2026-05 | 63 | "May was revised down by 66,000, from +129,000 to +63,000", 2026-08-07 (third estimate) |
+| | 2026-06 | 31 | "June was revised up by 11,000, from +20,000 to +31,000", 2026-09-04 (third estimate) |
+
+The CPI anchors are first prints that have not moved: no February revision has
+intervened. The others are the estimates BLS now serves, each printed by a
+later release, as marked.
+
+The same captures also reproduce the month that was latest on 2026-09-20,
+which is a genuine first print, against its own release: unemployment 4.1
+("unchanged at 4.1 percent"), payrolls +162 ("increased by 162,000 in
+August"), headline CPI 0.4, core CPI 0.3, openings 7.271 and quits rate 1.9
+(Tables 1 and 4, `July 2026(p)`), and real earnings -0.1 ("decreased 0.1
+percent from July to August, seasonally adjusted").
+
+| Release page | Bytes | SHA-256 |
+|---|---:|---|
+| [`empsit_07022026.htm`](https://www.bls.gov/news.release/archives/empsit_07022026.htm) (USDL-26-1125) | 1,065,204 | `a1be102c0f196204af49cc772e153724e8c62bdfef027c139048eafa95e0825f` |
+| [`empsit_08072026.htm`](https://www.bls.gov/news.release/archives/empsit_08072026.htm) (USDL-26-1291) | 1,066,217 | `4602e50c53ccfc789d52ef73191171d9918141516b7734524e70f2b8326024a5` |
+| [`empsit_09042026.htm`](https://www.bls.gov/news.release/archives/empsit_09042026.htm) (USDL-26-1435) | 1,064,564 | `6d83eeecf867f1e8c9a2a5449a4b064896062f4529ad36c4ff2a37e6968b7481` |
+| [`cpi_06102026.htm`](https://www.bls.gov/news.release/archives/cpi_06102026.htm) (USDL-26-0824) | 1,378,756 | `ba198a462a41b85b997df781558b90d3ab4663d9640efc8cdccca9e81e046a2f` |
+| [`cpi_07142026.htm`](https://www.bls.gov/news.release/archives/cpi_07142026.htm) (USDL-26-1191) | 1,379,586 | `382f20db3bdeba1f45a7783dacdaebb87e4ca8461ae2e701db803538afdfc790` |
+| [`cpi_08122026.htm`](https://www.bls.gov/news.release/archives/cpi_08122026.htm) (USDL-26-1378) | 1,372,127 | `d18471db7736e302e35085e14d746eddf51a4f6d27b954642e3ddec3e85778e5` |
+| [`cpi_09112026.htm`](https://www.bls.gov/news.release/archives/cpi_09112026.htm) (USDL-26-1496) | 1,372,789 | `aee0cdff604c295d784e6302b2ba74130f10f535675a5a0fb7262c936edaaabd` |
+| [`jolts_06302026.htm`](https://www.bls.gov/news.release/archives/jolts_06302026.htm) | 752,023 | `79ad299ec645796dbc2a961a6d37a743aac80975476921aaff8bf73535b86483` |
+| [`jolts_08042026.htm`](https://www.bls.gov/news.release/archives/jolts_08042026.htm) | 752,278 | `e5e4aac65e338bad17ffc7ba80740575eb3cde770dfbc16a0dc929b922e5d0a8` |
+| [`jolts_09012026.htm`](https://www.bls.gov/news.release/archives/jolts_09012026.htm) (USDL-26-1432) | 752,399 | `78ce44264dc7e95fde56200f82233f2b053413c5ee1fa7b34221f9d99e7f2d74` |
+| [`realer_03112026.htm`](https://www.bls.gov/news.release/archives/realer_03112026.htm) | 76,590 | `34e9502685da6672387d030c1109e5249a1a596c29e7acba21536fb428b6e58e` |
+| [`realer_04102026.htm`](https://www.bls.gov/news.release/archives/realer_04102026.htm) | 76,586 | `87a08bad7754b07feb8f2d897a6fd708fe158a5c3a2bc7110b7f6b20618b3a57` |
+| [`realer_05122026.htm`](https://www.bls.gov/news.release/archives/realer_05122026.htm) | 76,578 | `c418cfd60c385df83245181953b56acd54225ec706ac9cc4d5711692e79bd547` |
+| [`realer_06102026.htm`](https://www.bls.gov/news.release/archives/realer_06102026.htm) | 76,605 | `39af55a05b9257a991b2b2f7454e139abb7ef23d3d0e820ef3b0ffc11988acfc` |
+| [`realer_07142026.htm`](https://www.bls.gov/news.release/archives/realer_07142026.htm) | 76,628 | `a25f154e28412c2f3cb9dbe284842e3b4060b50190c61289ae7af222340003a2` |
+| [`realer_08122026.htm`](https://www.bls.gov/news.release/archives/realer_08122026.htm) | 76,495 | `69e110fdeb48b553d7cc3f9634cb26b650ccf052b4e97efb62ba90ffd4d39db9` |
+| [`realer_09112026.htm`](https://www.bls.gov/news.release/archives/realer_09112026.htm) | 76,640 | `aa11a8c8377c0035275c1722d16260ff2c754c9b5fbe15a45936c5aa81e15275` |
+
+Run-time anchor tolerance is separate from admission. The resolver re-verifies
+the anchors from every live response. It allows 0.1 on the one-decimal rates
+and percents, 2% on the openings level, and 75 thousand on the payroll change.
+These are lab choices, not bounds BLS states: 0.1 is one step of the published
+precision, and how far an annual revision moves a one-month seasonally adjusted
+percent was not measured. A breach refuses and forces review; it never
+resolves. Because a `latest_month` print cannot be recovered once the next
+release lands, **extending a docket calendar across a series' annual revision
+(the year-end CPS revision, the February CPI seasonal revision, the CES
+benchmark) requires re-verifying and re-committing that series' anchors in the
+same change.** The calendars committed here end before all three.
+
+The tolerances do not establish which series is being read. The payroll bound
+cannot separate total nonfarm from a neighbouring CES aggregate, and 0.1 cannot
+separate core CPI from a near neighbour. The payload's echoed `seriesID` proves
+only that the response matches the request. What ties each id to its published
+statistic is the zero-tolerance reproduction of captured official bytes in
+`tests/test_bls_api_registrable.py` together with the release-text
+verification in the table above.
+
+## Calendar
+
+The docket records exact period-to-date mappings from BLS's own schedule
+pages, read 2026-09-20. No date is inferred from cadence.
+
+| Release | `releaseCalendarUrl` | Bytes | SHA-256 | Periods read | Committed in the docket for |
+|---|---|---:|---|---|---|
+| Employment Situation | https://www.bls.gov/schedule/news_release/empsit.htm | 55,578 | `8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04 | payroll change (the unemployment rate is lineage-blocked) |
+| Consumer Price Index | https://www.bls.gov/schedule/news_release/cpi.htm | 55,572 | `36b83ba3723ac4e1d96431214b22f22bb4240718dab1ec2b6289fef9e7829580` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10 | nothing yet (both CPI series are lineage-blocked) |
+| JOLTS | https://www.bls.gov/schedule/news_release/jolts.htm | 55,620 | `b7f2ded2873b885c72548e4f269755f65a1df5409e34709ded85518e41d29bc9` | 2026-10 → 2026-12-01 | job openings, quits rate |
+| Real Earnings | https://www.bls.gov/schedule/news_release/realer.htm | 55,556 | `62319c0e9f286df49ae8434dbecbcfc652bcaaec4b790ad818cbb396c339d857` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10 | real earnings, October 2026 only (see the capture-bound subsection) |
+
+The schedule also lists September 2026 (and, for JOLTS, August 2026). Those
+periods are deliberately absent from the docket. Each already holds an
+immutable `generic-url` registration, the roller skips a calendar-gated period
+that has no committed date, and leaving them out means this adapter cannot mint
+a second target for a period that is already registered. A test enforces it.
+The schedule is finite: when BLS posts later dates, they are added here by a
+reviewed edit.
+
+## What this does not decide or prove
+
+- It decides nothing about the existing `generic-url` registrations for these
+  series. They keep the run-time route they had: on the four stems the ALFRED
+  family also claims, a reference routes to the BLS API leg only when its
+  registration binds `bls-api`.
+- It does not prove first-print custody for any past month. The API cannot
+  supply one.
+- It does not remove the keyless API's limits. BLS's developer FAQ
+  (https://www.bls.gov/developers/api_faqs.htm, read 2026-09-20) gives
+  unregistered use 25 queries per day, 25 series per query and 10 years per
+  query, and lists net and percent changes as unavailable without
+  registration, which is the refusal the probe above received. The resolver
+  issues one single-series request per run for each pending series whose
+  release day has been reached, so the registrable series here plus the eight older
+  specs can approach that daily limit if every one is pending on the same day
+  from one address. A failed fetch defers to the next run and the first-print
+  windows last weeks, so one lost day does not lose a print. A registered key
+  would lift the limit to 500; registering is an account decision and was not
+  done here.
+
+## Not admitted
+
+**`bls.productivity.nonfarm_qoq_prelim`.** BLS schedules a preliminary and a
+revised release for every quarter (second quarter 2026: 2026-08-06 and
+2026-09-03, https://www.bls.gov/schedule/news_release/prod2.htm). The API row
+for the latest quarter carries no footnote, so the API alone cannot tell the
+preliminary print from the revised one. The monthly parser also skips `Q01` to
+`Q04` periods. Admission needs a capture bound like the real earnings one,
+ending before the scheduled revised release, plus quarterly row parsing, or
+Route B. It would also mint nothing today: the third quarter of 2026 already
+holds an immutable `generic-url` registration, and BLS's schedule page lists no
+later quarter, so there is no official date to commit for any registrable
+period.
+
+The series stays in `waivers.json` `templateless_docket_series` and keeps
+minting nothing under the execution-plan gate.
