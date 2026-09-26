@@ -52,8 +52,8 @@ Situation Table A-19 row the docket forecasts. Each returned HTTP 200 with
 | `LNU02032455-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455?startyear=2026&endyear=2026` | 2026-09-25T11:06:09Z | 978 | `af021869dffc4f654216e7d7c20dbcbdcedf937c21a62a31530a7042f2af86fc` |
 | `LNU02032463-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032463?startyear=2026&endyear=2026` | 2026-09-25T11:06:12Z | 978 | `0fae2a5e4b15112f7201bbfbdd15aa25944fc64d69b9e8d1b0bc7f67ca7dc410` |
 | `LNU02032207-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032207?startyear=2026&endyear=2026` | 2026-09-25T11:06:14Z | 986 | `8ef8b905b38944647eec5ce458982f011a5d7111c09ef0be377af7cea3cd69c5` |
-| `LNU02032213-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032213?startyear=2026&endyear=2026` | PENDING_PRODUCTION_TIME | PENDING_PRODUCTION_BYTES | `PENDING_PRODUCTION_SHA256` |
-| `LNU02032214-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032214?startyear=2026&endyear=2026` | PENDING_TRANSPORTATION_TIME | PENDING_TRANSPORTATION_BYTES | `PENDING_TRANSPORTATION_SHA256` |
+| `LNU02032213-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032213?startyear=2026&endyear=2026` | 2026-09-26T04:10:26Z | 978 | `5df0aacd93bc56747c8d54638a6a294116c768a0ac0e2476ac527d6afddaaf86` |
+| `LNU02032214-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032214?startyear=2026&endyear=2026` | 2026-09-26T04:10:29Z | 986 | `1ddb775262040e244afdb4ff13cd6549deac7482b0eecfd411f25eb48f6c3241` |
 
 The first requests for the last two, at 2026-09-25T11:06:16Z and 11:06:18Z,
 returned HTTP 200 with `"status": "REQUEST_NOT_PROCESSED"` and the message

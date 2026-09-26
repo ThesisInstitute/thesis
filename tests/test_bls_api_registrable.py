@@ -99,13 +99,13 @@ CAPTURES = {
     ),
     "bls.cps.employed_people_by_occupation.production": (
         "LNU02032213-2026-2026.json",
-        "PENDING_PRODUCTION_SHA256",
+        "5df0aacd93bc56747c8d54638a6a294116c768a0ac0e2476ac527d6afddaaf86",
         "2026-08",
         7.716,
     ),
     "bls.cps.employed_people_by_occupation.transportation_material_moving": (
         "LNU02032214-2026-2026.json",
-        "PENDING_TRANSPORTATION_SHA256",
+        "1ddb775262040e244afdb4ff13cd6549deac7482b0eecfd411f25eb48f6c3241",
         "2026-08",
         12.011,
     ),
