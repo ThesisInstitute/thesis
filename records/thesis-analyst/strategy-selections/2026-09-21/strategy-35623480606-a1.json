@@ -1,0 +1,133 @@
+{
+  "ledgerEvidence": {
+    "blobSha": "e4f7260987299f3a908f8788473908f4b5db6e34",
+    "branch": "codex/thesis-ledger-facts",
+    "checkedAtUtc": "2026-09-21T16:09:20Z",
+    "contentSha256": "2da302b25d15386aeab7089a199edf79e395a33eca5e6b35c023d3fbc45d3bce",
+    "path": "ledger/official_observations.jsonl",
+    "repository": "PolicyEngine/chronicle",
+    "repositoryCommit": "3dd95a0dd7eb48b84ce56a84e02742c4b76c4c0c",
+    "resolvedDataPointIds": []
+  },
+  "localResolutionEvidence": {
+    "chainHeadPath": "records/CHAIN_HEAD.json",
+    "chainHeadSha256": "92a0815477473091245ffc84d98ca9067eddd375061f0ddfa403692d8247eab3",
+    "checkedAtUtc": "2026-09-21T16:09:20Z",
+    "resolutionCount": 47,
+    "resolvedDataPointIds": [],
+    "snapshotPath": "records/2026-09-21/digest-35614855022-1.json",
+    "snapshotRecordedAt": "2026-09-21T14:50:47Z",
+    "snapshotSha256": "6e3844775e894f3d4cfcc3b6eaf5a51ce094e24ffc56d6dc7c279a6be5f63137"
+  },
+  "request": {
+    "autoSelect": false,
+    "catalogSlugs": [
+      "us-private-nonresidential-fixed-investment-q3-2026",
+      "us-private-research-development-fixed-investment-q3-2026"
+    ],
+    "maxTargets": 2,
+    "suite": "ladder"
+  },
+  "schemaVersion": "thesis_strategy_selection_v1",
+  "selectedAtUtc": "2026-09-21T16:09:20Z",
+  "selectionPath": "records/thesis-analyst/strategy-selections/2026-09-21/strategy-35623480606-a1.json",
+  "selectionSetHash": "24b19058f008c87a202c2269d82a784e03eb638855531a7b8a4c28cb5a0e8a37",
+  "sourceSha": "72e7bd49fed8a8bbdf29e2a65e80611f3e291e4d",
+  "targets": [
+    {
+      "catalogSlug": "us-private-nonresidential-fixed-investment-q3-2026",
+      "comparisonTarget": true,
+      "country": "US",
+      "dataPointId": "bea.private_nonresidential_fixed_investment.2026_q3.first_print",
+      "expectedReleaseWindow": {
+        "end": "2026-10-29",
+        "start": "2026-10-29"
+      },
+      "period": "2026-Q3",
+      "publishedResolutionDate": "2026-10-29",
+      "registeredAtUtc": "2026-08-17T16:54:17Z",
+      "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+      "resolutionPolicy": "first_print",
+      "resolutionRule": "Resolve to the first official BEA GDP advance-release print for 2026-Q3, NIPA Table 5.3.5, line 2 Nonresidential, nominal seasonally adjusted annual rate. Use the published table value transformed by multiplying the table's millions-of-dollars value by 0.001 to usd_billions. Do not use later second, third, annual-update, or comprehensive-revision values except insofar as BEA has already incorporated them into the first Q3 advance-release table on 2026-10-29.",
+      "resolutionSource": "U.S. Bureau of Economic Analysis GDP advance release, NIPA Table 5.3.5 line 2",
+      "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+      "series": "bea.private_nonresidential_fixed_investment",
+      "sourceBinding": {
+        "adapter": "bea-release",
+        "allowedHosts": [
+          "apps.bea.gov",
+          "www.bea.gov"
+        ],
+        "expectedReleaseWindow": {
+          "end": "2026-10-29",
+          "start": "2026-10-29"
+        },
+        "field": "Line 2: Nonresidential",
+        "releasePolicy": "first_print",
+        "sourceSeriesId": "T50305:L2",
+        "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+        "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 2 (Nonresidential)",
+        "transform": {
+          "factor": 0.001,
+          "operation": "multiply"
+        }
+      },
+      "targetContentHash": "78ab7e77198fa656ee058e98fa6d3e8743b3f9f24714b851883bee7fff4d2114",
+      "targetRegistrationPath": "records/targets/2026-08-17-78ab7e77198fa656ee058e98fa6d3e8743b3f9f24714b851883bee7fff4d2114.json",
+      "targetUnit": "usd_billions",
+      "valueScale": 1
+    },
+    {
+      "catalogSlug": "us-private-research-development-fixed-investment-q3-2026",
+      "comparisonTarget": true,
+      "country": "US",
+      "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+      "expectedReleaseWindow": {
+        "end": "2026-10-29",
+        "start": "2026-10-29"
+      },
+      "period": "2026-Q3",
+      "publishedResolutionDate": "2026-10-29",
+      "registeredAtUtc": "2026-08-17T16:54:17Z",
+      "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+      "resolutionPolicy": "first_print",
+      "resolutionRule": "Resolve to the first official BEA GDP advance-release print for 2026-Q3, NIPA Table 5.3.5, line 18 Research and development, nominal seasonally adjusted annual rate. Use the published table value transformed by multiplying the table's millions-of-dollars value by 0.001 to usd_billions, retaining the precision implied by the official table; do not use later second, third, annual-update, or comprehensive-revision values except insofar as BEA has already incorporated them into the first Q3 advance-release table on 2026-10-29.",
+      "resolutionSource": "U.S. Bureau of Economic Analysis GDP advance release, NIPA Table 5.3.5 line 18",
+      "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+      "series": "bea.research_and_development_fixed_investment",
+      "sourceBinding": {
+        "adapter": "bea-release",
+        "allowedHosts": [
+          "apps.bea.gov",
+          "www.bea.gov"
+        ],
+        "expectedReleaseWindow": {
+          "end": "2026-10-29",
+          "start": "2026-10-29"
+        },
+        "field": "Line 18: Research and development",
+        "releasePolicy": "first_print",
+        "sourceSeriesId": "T50305:L18",
+        "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+        "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 18 (Research and development)",
+        "transform": {
+          "factor": 0.001,
+          "operation": "multiply"
+        }
+      },
+      "targetContentHash": "a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1",
+      "targetRegistrationPath": "records/targets/2026-08-17-a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1.json",
+      "targetUnit": "usd_billions",
+      "valueScale": 1
+    }
+  ],
+  "workflow": {
+    "artifactCreatedAtUtc": "2026-09-21T16:09:28Z",
+    "artifactDigest": "sha256:9f6db8bb9e1205d41acdec1845be94476107c9ea19f72754e283125515055cf5",
+    "artifactId": 10650269628,
+    "artifactName": "strategy-selection-probe-35623480606-1",
+    "repository": "ThesisInstitute/thesis",
+    "runAttempt": 1,
+    "runId": 35623480606
+  }
+}

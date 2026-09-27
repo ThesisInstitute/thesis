@@ -1,7 +1,7 @@
 /** Public projection of runner-captured evidence; never supplied by model cells. */
 export interface CapturedToolCall {
   callId: string;
-  tool: "fetch_source" | "extract_json" | "calculate";
+  tool: "fetch_source" | "extract_json" | "extract_irs_soi" | "calculate";
   arguments: Record<string, unknown>;
   startedAt: string;
   completedAt: string;

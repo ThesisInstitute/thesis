@@ -339,7 +339,11 @@ def _archive(
 
 
 def _validate_jsonl(raw: bytes) -> dict[str, Any]:
-    lines = [line for line in raw.decode("utf-8").splitlines() if line.strip()]
+    # Newline-only splitting, matching pin_ledger._lines and the custody
+    # verifier: str.splitlines() also breaks on U+0085/U+2028/U+2029, which
+    # JSON leaves unescaped inside strings, and would make the witnessed
+    # lineCount disagree with the pinned one for such a row.
+    lines = [line for line in raw.decode("utf-8").split("\n") if line.strip()]
     seen: set[str] = set()
     for number, line in enumerate(lines, start=1):
         row = json.loads(line)

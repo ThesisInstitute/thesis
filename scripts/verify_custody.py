@@ -408,7 +408,13 @@ def _tool_evidence_events(run_dir: Path, prefix: str) -> list[dict[str, Any]]:
         return []
     events = []
     try:
-        lines = path.read_text().splitlines()
+        # Split on newline characters only. str.splitlines() also breaks on
+        # U+0085, U+2028, U+2029 and the ASCII separators VT/FF/FS/GS/RS,
+        # which JSON leaves unescaped inside strings: a fetched PDF excerpt
+        # carrying U+0085 fragmented one completion event into unparseable
+        # pieces and orphaned its evidence call (roll-docket run
+        # 35526068252, draft call-0009).
+        lines = path.read_text(encoding="utf-8").split("\n")
     except (OSError, UnicodeDecodeError) as exc:
         raise CustodyError(f"invalid Codex tool event stream: {path.name}") from exc
     for line in lines:
@@ -552,24 +558,31 @@ def verify_tool_evidence_stage(
             )
         except (KeyError, TypeError, ValueError):
             text_result = None
-        if (
-            item.get("tool") != call["tool"]
-            or item.get("status")
-            not in (
+        agreements = {
+            "tool": item.get("tool") == call["tool"],
+            "status": item.get("status")
+            in (
                 {"completed"}
                 if call["status"] == "succeeded"
                 else {"completed", "failed"}
-            )
-            or canonical_bytes(native_arguments) != canonical_bytes(call["arguments"])
-            or canonical_bytes(structured) != canonical_bytes(expected_result)
-            or canonical_bytes(text_result) != canonical_bytes(expected_result)
-            or any(
+            ),
+            "arguments": canonical_bytes(native_arguments)
+            == canonical_bytes(call["arguments"]),
+            "structuredContent": canonical_bytes(structured)
+            == canonical_bytes(expected_result),
+            "content": canonical_bytes(text_result) == canonical_bytes(expected_result),
+            "isError": not any(
                 key in result and result[key] is not (call["status"] == "failed")
                 for key in ("isError", "is_error")
-            )
-        ):
+            ),
+        }
+        mismatches = [field for field, agrees in agreements.items() if not agrees]
+        if mismatches:
+            # Field names are useful even if a failed run's artifacts were not
+            # uploaded. Never echo source values or native argument contents.
             raise CustodyError(
                 f"{prefix}tool evidence call {call_id} differs from its native event"
+                f" ({', '.join(mismatches)})"
             )
         matched.add(call_id)
     if not failed_stage and matched != set(calls):
@@ -1467,7 +1480,12 @@ def _verify_ledger_witness_v2(
                 )
         if record.get("role") == "official_observations_jsonl":
             observations_witnessed = True
-            lines = [line for line in raw.decode("utf-8").splitlines() if line.strip()]
+            # Newline-only splitting, matching pin_ledger._lines and the
+            # witness writer: an observation row containing U+0085 or U+2028
+            # must count as one line on both sides of the commitment.
+            lines = [
+                line for line in raw.decode("utf-8").split("\n") if line.strip()
+            ]
             if type(jsonl_claim.get("bytes")) is not int or jsonl_claim["bytes"] < 0:
                 raise CustodyError(
                     "ledger witness jsonl bytes must be a non-negative integer"

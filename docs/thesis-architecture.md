@@ -516,6 +516,14 @@ by a snapshot witnessed under an already active bundle. During a transition,
 new-authority attempts are recorded as non-authorizing supplemental outcomes;
 the old-bundle token must make the transition available before replay activates
 the new bundle. Subsequent snapshots must use the highest active bundle.
+A bundle that only re-pins an anchor already in the active bundle, as when a
+TSA replaces its responder certificate, has no supplemental outcomes. The
+pull request that approves a bundle cannot write `records/trust/`, so it stages
+the exact bytes under `scripts/staged_trust_bundles/`, and the recorder workflow
+publishes them with `scripts/publish_trust_bundles.py` only when they equal the
+code pin. One available anchor keeps a snapshot witnessed, so the recorder
+reports any unavailable anchor in an issue (`scripts/witness_health.py`) rather
+than failing. `docs/tsa-trust-bundle-rotation.md` is the full procedure.
 `scripts/witnessed_timeline.py` publishes only run roots and registrations
 reached by an available pinned witness; an unavailable witness never becomes
 a claimed publication time. Root rows also expose custody inventory version,

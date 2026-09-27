@@ -1,0 +1,4 @@
+{"status":"REQUEST_SUCCEEDED","responseTime":81,"message":["Unable to get Catalog Data for series JTS000000000000000JOL"],"Results":{
+"series":
+[{"seriesID":"JTS000000000000000JOL","data":[{"year":"2026","period":"M07","periodName":"July","latest":"true","value":"7271","footnotes":[{"code":"P","text":"preliminary"}]},{"year":"2026","period":"M06","periodName":"June","value":"7182","footnotes":[{}]},{"year":"2026","period":"M05","periodName":"May","value":"7537","footnotes":[{}]},{"year":"2026","period":"M04","periodName":"April","value":"7585","footnotes":[{}]},{"year":"2026","period":"M03","periodName":"March","value":"6887","footnotes":[{}]},{"year":"2026","period":"M02","periodName":"February","value":"6922","footnotes":[{}]},{"year":"2026","period":"M01","periodName":"January","value":"7240","footnotes":[{}]}]}]
+}}

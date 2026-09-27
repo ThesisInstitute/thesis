@@ -27,6 +27,7 @@ def test_tool_configuration_is_closed_and_review_does_not_fetch(tmp_path):
     config = runner.tool_evidence_mcp_config(output, allow_fetch=False)
     assert all(item.startswith("mcp_servers.thesis_tool_evidence.") for item in config)
     assert not any("fetch_source" in item for item in config)
+    assert any("extract_irs_soi" in item for item in config)
     args = json.loads(
         next(item.split("=", 1)[1] for item in config if ".args=" in item)
     )

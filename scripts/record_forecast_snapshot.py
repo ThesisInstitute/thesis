@@ -22,7 +22,9 @@ from verify_custody import (
     verify_run,
 )
 from verify_record_chain import (
+    ChainError,
     ChainVerification,
+    _load_trust_bundle,
     logical_path,
     trust_bundle_updates_for_snapshot,
     verify_chain,
@@ -92,6 +94,26 @@ def add_trust_bundle_updates(
     updates = trust_bundle_updates_for_snapshot(verification)
     if updates:
         payload["trustBundleUpdates"] = updates
+
+
+def require_published_trust_bundles(
+    records: Path, verification: ChainVerification
+) -> None:
+    """Refuse to mint a snapshot that would introduce an unpublished bundle.
+
+    The snapshot names every code-approved bundle the chain has not seen yet.
+    ``scripts/publish_trust_bundles.py`` must have written those files first,
+    or the witness step would reject the snapshot after it already exists.
+    """
+
+    for reference in trust_bundle_updates_for_snapshot(verification):
+        try:
+            _load_trust_bundle(records.resolve(), reference)
+        except ChainError as error:
+            raise SystemExit(
+                f"cannot introduce {reference['path']}: {error}. Run "
+                "scripts/publish_trust_bundles.py before recording."
+            ) from error
 
 
 def current_artifact_commitments(records: Path) -> dict[str, list[dict[str, Any]]]:
@@ -237,6 +259,7 @@ def main() -> int:
         else []
     )
     verification = verify_chain(args.records)
+    require_published_trust_bundles(args.records, verification)
     previous = verification.ordered[-1]
     day = args.recorded_at[:10]
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):

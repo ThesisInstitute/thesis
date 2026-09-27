@@ -1,0 +1,88 @@
+{
+  "ledgerEvidence": {
+    "blobSha": "e4f7260987299f3a908f8788473908f4b5db6e34",
+    "branch": "codex/thesis-ledger-facts",
+    "checkedAtUtc": "2026-09-21T14:33:52Z",
+    "contentSha256": "2da302b25d15386aeab7089a199edf79e395a33eca5e6b35c023d3fbc45d3bce",
+    "path": "ledger/official_observations.jsonl",
+    "repository": "PolicyEngine/chronicle",
+    "repositoryCommit": "3dd95a0dd7eb48b84ce56a84e02742c4b76c4c0c",
+    "resolvedDataPointIds": []
+  },
+  "localResolutionEvidence": {
+    "chainHeadPath": "records/CHAIN_HEAD.json",
+    "chainHeadSha256": "d2919105339cac1a8570cc3acf3aa8250b69b7bc09f008d6b13fb297ffe3c390",
+    "checkedAtUtc": "2026-09-21T14:33:52Z",
+    "resolutionCount": 47,
+    "resolvedDataPointIds": [],
+    "snapshotPath": "records/2026-09-20/digest-35525897559-1.json",
+    "snapshotRecordedAt": "2026-09-20T17:56:13Z",
+    "snapshotSha256": "52c58579f1cf40e5c84be69d210552497860808906a17d1444688569e74b0939"
+  },
+  "request": {
+    "autoSelect": false,
+    "catalogSlugs": [
+      "unemployment-rate-september-2026"
+    ],
+    "maxTargets": 1,
+    "suite": "ladder"
+  },
+  "schemaVersion": "thesis_strategy_selection_v1",
+  "selectedAtUtc": "2026-09-21T14:33:52Z",
+  "selectionPath": "records/thesis-analyst/strategy-selections/2026-09-21/strategy-35612706405-a1.json",
+  "selectionSetHash": "fa2ac0da14c4b5d4119ab39f4521b7e52ae5f41175fb3da1e7f7943d3557783c",
+  "sourceSha": "232d43c7812303fb246082f3cbdf3af1ab8a1163",
+  "targets": [
+    {
+      "catalogSlug": "unemployment-rate-september-2026",
+      "comparisonTarget": true,
+      "country": "US",
+      "dataPointId": "bls.cps.unemployment_rate.september_2026.first_print",
+      "expectedReleaseWindow": {
+        "end": "2026-10-08",
+        "start": "2026-09-30"
+      },
+      "period": "2026-09",
+      "publishedResolutionDate": "2026-10-02",
+      "registeredAtUtc": "2026-09-04T19:02:52Z",
+      "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+      "resolutionPolicy": "first_print",
+      "resolutionRule": "Resolve to the first-print seasonally adjusted unemployment rate for total civilian labor force, 16 years and over, in BLS Employment Situation household survey table A-1 for September 2026, as initially published on October 2, 2026. Use the value rounded to one decimal percent as printed by BLS; do not use later revisions, annual seasonal-factor revisions, corrected subsequent database vintages, or same-day corrections unless BLS replaces the initial release before public availability.",
+      "resolutionSource": "U.S. Bureau of Labor Statistics Employment Situation",
+      "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+      "series": "bls.cps.unemployment_rate",
+      "sourceBinding": {
+        "adapter": "generic-url",
+        "allowedHosts": [
+          "www.bls.gov"
+        ],
+        "expectedReleaseWindow": {
+          "end": "2026-10-08",
+          "start": "2026-09-30"
+        },
+        "field": "bls.cps.unemployment_rate",
+        "releasePolicy": "first_print",
+        "sourceSeriesId": "bls.cps.unemployment_rate",
+        "sourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+        "table": "U.S. Bureau of Labor Statistics Employment Situation (Current Population Survey)",
+        "transform": {
+          "factor": 1,
+          "operation": "multiply"
+        }
+      },
+      "targetContentHash": "4f9351e9599bb007177abdf8c158ee801328243b30407e6ff10d9b25084c2d8a",
+      "targetRegistrationPath": "records/targets/2026-09-04-4f9351e9599bb007177abdf8c158ee801328243b30407e6ff10d9b25084c2d8a.json",
+      "targetUnit": "percent",
+      "valueScale": 1
+    }
+  ],
+  "workflow": {
+    "artifactCreatedAtUtc": "2026-09-21T14:34:00Z",
+    "artifactDigest": "sha256:88fc763f125fc1c79243aa37e5ad7f7df373bbae9f40296783bd1106125571cd",
+    "artifactId": 10645082334,
+    "artifactName": "strategy-selection-probe-35612706405-1",
+    "repository": "ThesisInstitute/thesis",
+    "runAttempt": 1,
+    "runId": 35612706405
+  }
+}

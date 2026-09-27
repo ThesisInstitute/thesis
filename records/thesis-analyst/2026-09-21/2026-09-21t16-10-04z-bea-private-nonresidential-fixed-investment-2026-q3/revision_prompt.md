@@ -1,0 +1,202 @@
+# Thesis analyst fast public-release run
+
+Return exactly one JSON object and no Markdown. Do not wrap it in a code fence.
+
+# Context access
+You may inspect the local repository/workspace when useful. This is optional, not required. Useful read-only context can include docs/cell-contract.md, site/src/data/forecast-cells.ts, site/src/data/ledger-targets.ts, prediction packs, generated comparison data, records/thesis-analyst run manifests, full activity artifacts, prior reasoning traces, and model-candidate files. You may run read-only commands such as rg, sed, cat, find, git log/status/show, `date -u +%Y-%m-%dT%H:%M:%SZ`, and short inline arithmetic commands. Local context is admissible only when it is a public repository artifact, a published Thesis record, or a generated file derived from public official sources. Do not use private meeting notes, call transcripts, email/chat content, pasted attachments, personal notes, or other non-public local files as forecast evidence, source context, or tool-call provenance. If such material is present on disk, ignore it; if a prior run cites it, treat that run as tainted for evidence purposes. Do not modify files. Treat prior forecasts as historical forecasts or strategy context, not as ground-truth outcomes. If prior runs affect your forecast, briefly state the update from the previous run; if they do not matter, ignore them. Existing catalog pointEstimate, ciLow, and ciHigh values are not official evidence for a new forecast; use local catalog context to verify target identity/resolver fields only unless explicitly auditing an existing forecast.
+
+Goal: produce one auditable forecast for an automatically resolvable government/public statistical release. Resolve on the first official print unless the series itself is a policy decision level after an announcement.
+
+# Question spec
+- series: bea.private_nonresidential_fixed_investment
+- period: 2026-Q3
+- conditionalOn: null
+
+# Canonical ledger target context
+Use these ledger fields as the target contract for slug, unit, dataPointId, resolutionDate, and resolver text. The cell's unit must equal targetUnit below byte-for-byte, even when it is not a member of the contract's exploratory unit menu. If you find a concrete ledger error, keep the forecast tied to the same target and state the discrepancy in reasoning rather than silently changing the target.
+- catalogSlug: "us-private-nonresidential-fixed-investment-q3-2026"
+- country: "US"
+- targetUnit: "usd_billions"
+- dataPointId: "bea.private_nonresidential_fixed_investment.2026_q3.first_print"
+- publishedResolutionDate: "2026-10-29"
+- expectedReleaseWindow: {"end": "2026-10-29", "start": "2026-10-29"}
+- resolutionSource: "U.S. Bureau of Economic Analysis GDP advance release, NIPA Table 5.3.5 line 2"
+- resolutionSourceUrl: "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey"
+- resolutionRule: "Resolve to the first official BEA GDP advance-release print for 2026-Q3, NIPA Table 5.3.5, line 2 Nonresidential, nominal seasonally adjusted annual rate. Use the published table value transformed by multiplying the table's millions-of-dollars value by 0.001 to usd_billions. Do not use later second, third, annual-update, or comprehensive-revision values except insofar as BEA has already incorporated them into the first Q3 advance-release table on 2026-10-29."
+- resolutionPolicy: "first_print"
+- sourceBinding: {"adapter": "bea-release", "allowedHosts": ["apps.bea.gov", "www.bea.gov"], "expectedReleaseWindow": {"end": "2026-10-29", "start": "2026-10-29"}, "field": "Line 2: Nonresidential", "releasePolicy": "first_print", "sourceSeriesId": "T50305:L2", "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey", "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 2 (Nonresidential)", "transform": {"factor": 0.001, "operation": "multiply"}}
+- targetRegistrationPath: "records/targets/2026-08-17-78ab7e77198fa656ee058e98fa6d3e8743b3f9f24714b851883bee7fff4d2114.json"
+- targetContentHash: "78ab7e77198fa656ee058e98fa6d3e8743b3f9f24714b851883bee7fff4d2114"
+- registrationCommit: "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95"
+- registeredAtUtc: "2026-08-17T16:54:17Z"
+
+# Comparison target contract (machine checked)
+This run is a strategy comparison against an already published forecast. The sealed cell's resolutionDate, resolutionSource, resolutionSourceUrl and resolutionRule are pinned to that forecast's published resolver; publishedResolutionDate "2026-10-29" is its resolver date. Still verify the official release schedule this run and state any discrepancy in reasoning rather than changing the target.
+
+# Source hints
+- Use the official agency release calendar, not inferred cadence.
+- FRED may be used as a history mirror, but resolution cites the agency.
+- For FOMC targets, resolve to the target range upper bound after the announcement.
+- For DOL claims, name the week-ending date and cite the release date.
+
+# Default promoted forecasting practices
+- Resolve the exact first-print target before inside-view evidence.
+- Fetch and state the recent official-source reference class: at least 6 distinct prints are MANDATORY whenever the official source exposes them.
+- Anchor on the outside-view base rate before current-release adjustments.
+- Separate level, momentum, one-off, and policy-mechanism effects before combining them.
+- Include one public reasoning step beginning "Prior/update/interval:" that names the model or persistence prior, historical sample, adjustment components, interval method, and final implied bounds.
+- For strict first-print or original-vintage targets, keep the ledger resolver in substance and do not add same-day correction or release-day grace exceptions unless the target rule includes them.
+- Size the 80% interval from realized dispersion and SHOW the arithmetic in the Prior/update/interval step: compute sigma from the fetched history (successive changes for level/rate series; the values themselves for change/flow series), state it literally as "sigma = X", and derive the half-width as roughly 1.28*sigma. If you widen or narrow beyond about 0.75x-1.75x of that half-width, state the regime or mechanism reason in the same step. Never default to a round hedged band.
+- When a release has variants (gross vs smoothed/synthetic, SA vs NSA, flash vs final), the resolution rule must name the variant and every anchor and historical value must come from that same variant; say so once in a text step.
+- resolutionSourceUrl must be the most specific stable page for the exact series (release page, table, or databrowser query with the series code), never a portal or theme landing page; state the series code or table id in a text step when one exists.
+- Name concrete upside, downside, and outside-the-interval scenarios, using the literal phrases "upside risk", "downside risk", and "outside the interval" (or "would land above/below the interval") so the falsification step is machine-checkable.
+
+# Required JSON shape
+{
+  "slug": "kebab-case-unique-vs-catalog",
+  "country": "US|UK|CA|AU|EA|JP",
+  "type": "data",
+  "title": "Short display title",
+  "question": "Exact agency series, period, adjustment, first print",
+  "unit": "the registered targetUnit, byte-for-byte",
+  "pointEstimate": 0,
+  "ciLow": 0,
+  "ciHigh": 0,
+  "confidence": 0.8,
+  "resolutionDate": "YYYY-MM-DD",
+  "resolutionSource": "Official agency release",
+  "resolutionSourceUrl": "https://official-source.example",
+  "resolutionRule": "First-print rule with rounding and revision policy",
+  "dataPointId": "agency.dataset.concept.period.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "Human-readable period label",
+      "value": 0
+    }
+  ],
+  "drivers": [
+    "short driver phrases"
+  ],
+  "sourceContext": [
+    "https://urls-actually-used"
+  ],
+  "runAt": "date -u +%Y-%m-%dT%H:%M:%SZ",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast title"
+    },
+    {
+      "kind": "text",
+      "text": "Framing and exact resolver"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "source lookup description",
+      "result": "fetched numbers"
+    },
+    {
+      "kind": "math",
+      "text": "point and 80% interval calculation"
+    },
+    {
+      "kind": "forecast",
+      "point": 0,
+      "ciLow": 0,
+      "ciHigh": 0
+    }
+  ]
+}
+
+# Validation rules
+- Use confidence 0.8 exactly.
+- ciLow < pointEstimate < ciHigh, except discrete policy-rate targets may put the modal point at an interval edge if needed.
+- historicalContext must contain at least 6 distinct numeric fetched prints. Every entry needs a canonical period object: type month with YYYY-MM, quarter with YYYY-Q1..Q4, year/fiscal_year with YYYY, or week_ending with YYYY-MM-DD. Its label must unambiguously name that same period. The whole trimmed label must be one closed printable-ASCII form: YYYY-MM, Month YYYY, YYYY Month, YYYY-QN, YYYY QN, QN YYYY, YYYY, calendar year YYYY, FY2026, fiscal year YYYY, YYYY-MM-DD, or week ending YYYY-MM-DD. Never add source names, first-print or revision prose, ranges, or a second period cue to the label. Relative, contradictory, non-ASCII, and multi-period labels refuse. Alternate labels do not make duplicate canonical periods distinct. Validation refuses fewer unless the sealed checkout carries the reviewed authorization below.
+- Only when the official source exposes fewer than 6 prints, fetch all available prints and add this top-level audit commentary (replace 5 with the actual count and give a nonempty detail): {"historyAvailability": {"status": "official_source_exposes_fewer_than_six_prints", "availablePrintCount": 5, "detail": "Series began recently; the official source exposes only these five prints."}}
+  This model-authored commentary never authorizes an exception: a reviewed docket entry in the sealed checkout must independently list the exact target period, available count, and canonical periods.
+- sourceContext must contain at least 2 source URLs actually used.
+- sourceContext, reasoning, drivers, and tool calls must not cite or use private meeting notes, call transcripts, email/chat content, pasted attachments, personal notes, or non-public local files.
+- reasoning must contain at least 7 steps, at least 3 tool steps whose result strings include fetched numbers, one explicit base-rate or reference-class step (literally say "base rate" or "reference class"), one math step, one counter-consideration that states what would land outside the 80% interval (literally use "upside risk", "downside risk", or "outside the interval"), one step beginning Prior/update/interval:, and a final forecast step whose numbers exactly match the cell.
+- Every tool step result must include at least one fetched numeric value — an actual statistic from the source, not just field names or identifiers. Definitional lookups (data dictionaries, field definitions, methodology pages) belong in text steps, as do other qualitative source notes. Numbers may come from official public sources or inspected local run/model artifacts, but the provenance must be clear.
+- resolutionDate must be verified from an official release calendar or announcement schedule this run. Do not infer it from cadence.
+- Do not use existing local catalog point estimates or intervals as forecast evidence. If inspected, treat them only as non-authoritative prior strategy context and keep them out of tool-result evidence.
+- runAt must be the actual UTC date command output from this run.
+- Slug should be stable and descriptive; if the same target already exists, reuse the obvious canonical slug rather than inventing a near-duplicate.
+
+Emit the final JSON object only. (agent thesis.analyst v2.5.11, prompt 87db344b803f, tools 024388e49298, promptMode fast)
+
+# Threshold-ladder elicitation (promptMode ladder)
+This run elicits the distribution as binary exceedance questions BEFORE stating any point estimate, then derives the published numbers from the ladder.
+- After research, choose 11-15 strictly increasing thresholds t in the target's print units spanning your genuine uncertainty: the first rung's cumulative probability must be <= 0.10 and the last >= 0.90.
+- For each rung independently answer the binary question 'What is the probability the first print is <= t?', as if pricing a binary market. Probabilities must be non-decreasing across rungs and within [0.01, 0.99].
+- Add one math reasoning step that begins 'Ladder:' and lists every rung literally as 'P(X <= t) = p' pairs.
+- Derive the published numbers FROM the ladder by linear interpolation between rungs: pointEstimate at cumulative 0.50, ciLow at 0.10, ciHigh at 0.90, each rounded to the print precision. The cell fields and the final forecast step must equal these derived values exactly.
+- Keep every fast-mode requirement above (sigma arithmetic, base rate, upside/downside/outside-the-interval risks). In the Prior/update/interval step, also state how the ladder-implied 80% width compares to the 1.28*sigma width.
+- Add this top-level field to the cell JSON, with your actual rungs as two equal-length numeric arrays:
+{
+  "thresholdLadder": {
+    "thresholds": [
+      "strictly increasing numeric rungs"
+    ],
+    "cumulativeProbabilities": [
+      "non-decreasing, within [0.01, 0.99]"
+    ]
+  }
+}
+
+
+# Captured tool evidence
+Use the thesis_tool_evidence MCP tools for source reads and calculations.
+fetch_source saves the complete public HTTPS response and returns its call ID,
+hash, and a bounded excerpt. extract_json selects a JSON Pointer from a prior
+fetch_source response. calculate evaluates bounded arithmetic, with named inputs
+that can refer to earlier extraction/calculation results by {"callId":"call-0001"}.
+Use these tools for the base rate and interval arithmetic, and cite the returned
+call IDs in your trace. Keep supplied assumptions and judgment adjustments
+explicit. An extraction or calculation replay verifies the operation on its
+inputs; it does not independently verify those assumptions or the source's truth.
+Tool calls outside this channel, including hosted web search and shell commands,
+do not preserve full response receipts here. Say when evidence was not captured.
+Never manufacture a tool receipt or describe model-authored text as captured
+output. Failed calls remain in the record. Only public, unauthenticated HTTPS
+sources are supported; do not send credentials or private URLs to these tools.
+
+
+# Pre-submit review loop
+
+You already drafted the response below. A reviewer then checked the draft against the Thesis rubric. Produce the final JSON forecast now.
+
+Rules for the final submission:
+- Return exactly one JSON object and no Markdown.
+- Use only pre-resolution public evidence available to the draft.
+- Accept reviewer fixes only when they improve resolver clarity, source grounding, base-rate discipline, uncertainty calibration, or internal coherence.
+- Add a public reasoning text step beginning with "Review disposition:" that states which critique items were accepted or rejected. Keep this concise; do not reveal hidden chain-of-thought.
+- Put the Review disposition text step before the final forecast step.
+- The final reasoning step must be the forecast step, and its numbers must exactly match pointEstimate, ciLow, and ciHigh.
+
+# Draft forecast response
+{"slug":"us-private-nonresidential-fixed-investment-q3-2026","country":"US","type":"data","title":"US private nonresidential fixed investment, Q3 2026","question":"What will BEA report as the first-print nominal seasonally adjusted annual-rate value for private nonresidential fixed investment, NIPA Table 5.3.5 line 2, in 2026-Q3?","unit":"usd_billions","pointEstimate":4710,"ciLow":4618.571,"ciHigh":4802,"confidence":0.8,"resolutionDate":"2026-10-29","resolutionSource":"U.S. Bureau of Economic Analysis GDP advance release, NIPA Table 5.3.5 line 2","resolutionSourceUrl":"https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey","resolutionRule":"Resolve to the first official BEA GDP advance-release print for 2026-Q3, NIPA Table 5.3.5, line 2 Nonresidential, nominal seasonally adjusted annual rate. Use the published table value transformed by multiplying the table's millions-of-dollars value by 0.001 to usd_billions. Do not use later second, third, annual-update, or comprehensive-revision values except insofar as BEA has already incorporated them into the first Q3 advance-release table on 2026-10-29.","dataPointId":"bea.private_nonresidential_fixed_investment.2026_q3.first_print","historicalContext":[{"period":{"type":"quarter","value":"2023-Q1"},"label":"2023-Q1","value":3756.575},{"period":{"type":"quarter","value":"2023-Q2"},"label":"2023-Q2","value":3854.267},{"period":{"type":"quarter","value":"2023-Q3"},"label":"2023-Q3","value":3871.644},{"period":{"type":"quarter","value":"2023-Q4"},"label":"2023-Q4","value":3941.343},{"period":{"type":"quarter","value":"2024-Q1"},"label":"2024-Q1","value":3963.752},{"period":{"type":"quarter","value":"2024-Q2"},"label":"2024-Q2","value":4012.411},{"period":{"type":"quarter","value":"2024-Q3"},"label":"2024-Q3","value":4069.186},{"period":{"type":"quarter","value":"2024-Q4"},"label":"2024-Q4","value":4046.39},{"period":{"type":"quarter","value":"2025-Q1"},"label":"2025-Q1","value":4137.819},{"period":{"type":"quarter","value":"2025-Q2"},"label":"2025-Q2","value":4207.512},{"period":{"type":"quarter","value":"2025-Q3"},"label":"2025-Q3","value":4293.474},{"period":{"type":"quarter","value":"2025-Q4"},"label":"2025-Q4","value":4364.412},{"period":{"type":"quarter","value":"2026-Q1"},"label":"2026-Q1","value":4490.516},{"period":{"type":"quarter","value":"2026-Q2"},"label":"2026-Q2","value":4623.356}],"drivers":["recent nominal nonresidential fixed investment rose strongly through 2026-Q2","Q2 advance GDP release reported current-dollar GDP growth of 7.9 percent SAAR","BEA Q2 text cited investment strength in equipment and intellectual property products partly offset by structures","September 2026 annual update can shift the level before the Q3 advance print","advance GDP estimates use partial source data and BEA projections"],"sourceContext":["https://www.bea.gov/news/schedule/full","https://www.bea.gov/news/2026/gdp-advance-estimate-2nd-quarter-2026","https://api.db.nomics.world/v22/series/BEA/NIPA-T50305/A008RC-Q?observations=1","https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey"],"runAt":"2026-09-21T16:10:17Z","thresholdLadder":{"thresholds":[4580,4610,4640,4670,4690,4710,4730,4750,4770,4790,4810,4840,4870],"cumulativeProbabilities":[0.04,0.08,0.15,0.27,0.4,0.5,0.61,0.71,0.8,0.87,0.92,0.96,0.98]},"reasoning":[{"kind":"heading","text":"US private nonresidential fixed investment, 2026-Q3 first print"},{"kind":"text","text":"Resolver framing: this is BEA NIPA Table 5.3.5 line 2, Nonresidential, nominal seasonally adjusted annual rate, source concept T50305:L2. The official table is in millions of dollars; the registered target unit is usd_billions, so resolution multiplies the first-print table value by 0.001. No discrepancy was found in the ledger date, unit, source, or rule."},{"kind":"tool","tool":"official.lookup","call":"fetch_source call-0001 captured the BEA full release schedule and I checked the GDP advance-estimate row for 2026-Q3.","result":"call-0001 fetched 124266 bytes from BEA's official schedule; the schedule lists GDP (Advance Estimate), 3rd Quarter 2026 on 2026-10-29 at 8:30 AM, matching the registered resolutionDate 2026-10-29."},{"kind":"tool","tool":"official.lookup","call":"fetch_source call-0007 and extract_json call-0020 captured the public BEA/DBnomics NIPA Table 5.3.5 A008RC-Q series used as a BEA-source history mirror for line 2.","result":"call-0007 identifies provider BEA and dataset Table 5.3.5, LastRevised August 26, 2026; fetched line-2 values in the BEA table's millions scale were 2025-Q1 4137819, 2025-Q2 4207512, 2025-Q3 4293474, 2025-Q4 4364412, 2026-Q1 4490516, and 2026-Q2 4623356, transformed to 4137.819, 4207.512, 4293.474, 4364.412, 4490.516, and 4623.356 usd_billions."},{"kind":"tool","tool":"official.lookup","call":"fetch_source call-0012 captured BEA's Q2 2026 GDP advance-estimate release for current macro and investment context.","result":"call-0012 fetched 53098 bytes; BEA reported real GDP +1.5 percent SAAR in 2026-Q2, first-quarter real GDP +2.1 percent, and the release metadata states this was the 2nd Quarter 2026 advance estimate."},{"kind":"tool","tool":"official.calculate","call":"calculate calls call-0013 through call-0015 used the fetched 2023-Q1 through 2026-Q2 history to compute the reference-class mean change and interval scale.","result":"call-0013 computed mean(diff(history)) = 66.67546153846153 usd_billions; call-0014 computed sigma = 43.50312264963554 usd_billions from successive changes; call-0015 computed 1.28*sigma = 55.6839969915335 usd_billions."},{"kind":"text","text":"Base rate/reference class: the 2023-Q1 through 2026-Q2 level history gives an outside-view quarterly increase of about +66.675 usd_billions. The latest five changes were +69.693, +85.962, +70.938, +126.104, and +132.840, so simple persistence plus the broad recent base rate centers the next print near 4690 before judgmental Q3 adjustments."},{"kind":"math","text":"Ladder: P(X <= 4580) = 0.04; P(X <= 4610) = 0.08; P(X <= 4640) = 0.15; P(X <= 4670) = 0.27; P(X <= 4690) = 0.40; P(X <= 4710) = 0.50; P(X <= 4730) = 0.61; P(X <= 4750) = 0.71; P(X <= 4770) = 0.80; P(X <= 4790) = 0.87; P(X <= 4810) = 0.92; P(X <= 4840) = 0.96; P(X <= 4870) = 0.98. Linear interpolation gives p10 = 4618.571 from call-0016, p50 = 4710 because the 0.50 rung is exact, and p90 = 4802 from call-0017."},{"kind":"math","text":"Prior/update/interval: persistence prior is the 2026-Q2 fetched level 4623.356 plus the 2023-Q1 to 2026-Q2 mean quarterly change of 66.675, giving 4690.031 in call-0019. Adjustment components are +20 for continued nominal momentum, Q2 equipment and intellectual-property strength, and the recent +126.104 and +132.840 moves, partly tempered by structures weakness and high financing costs, placing the median rung at 4710. Interval method is threshold-ladder interpolation, checked against realized dispersion: sigma = 43.503 usd_billions from call-0014, so 1.28*sigma = 55.684 from call-0015; the ladder-implied 80% width is 183.429 from call-0018, or half-width 91.714, about 1.65 times 1.28*sigma, widened for first-print source-data uncertainty and the upcoming September 2026 annual update."},{"kind":"text","text":"Prior run update: the published 2026-08-17 control forecast used point 4710 and an 80 billion half-width based on then-fetched Q2 advance history. This ladder run keeps the same median because the current fetched history still supports about the same level, but it widens the lower side to the p10 ladder value after incorporating the August 26 revised current-history value for 2026-Q2."},{"kind":"text","text":"Upside risk: stronger Q3 nominal GDP, continued data-center and software investment strength, or an upward annual-update level revision would land above the interval. Downside risk: a pullback in structures, weaker capital-goods shipments/imports, tighter financing drag, or downward annual-update rebasing would land below the interval. An outside the interval outcome would most likely require both a large annual-update level shift and an unusually large Q3 source-data surprise."},{"kind":"forecast","point":4710,"ciLow":4618.571,"ciHigh":4802}]}
+
+# Reviewer critique
+{
+  "summary": "The draft is mostly publication-ready, but it should remove or clearly quarantine the published-control forecast reference to avoid catalog forecast circularity.",
+  "requiredFixes": [
+    {
+      "rubricItem": "leakage",
+      "severity": "warning",
+      "summary": "The reasoning cites the already published 2026-08-17 control forecast point and interval, then says this run keeps the same median; that creates avoidable catalog point/interval circularity risk for a strategy comparison.",
+      "actionRequested": "Remove the prior-run point/interval sentence, or rephrase it as a post-hoc comparison only after the final forecast is independently justified from public BEA history and stated updates."
+    }
+  ],
+  "optionalSuggestions": [
+    "In the Prior/update/interval step, make the +20 adjustment slightly more explicit by tying it to the latest two observed quarterly changes and the BEA Q2 investment components.",
+    "The interval explanation is solid; consider saying directly that the wider-than-realized-volatility ladder reflects advance-source and annual-update uncertainty."
+  ]
+}
+
+Emit the final JSON object only.

@@ -29,6 +29,7 @@ from collections.abc import Callable
 from typing import Any
 
 import announcement_fetch_mcp as transport
+from canonical_json import canonical_stringify
 
 SCHEMA_VERSION = "thesis_tool_evidence_v1"
 CAPTURE_METHOD = "thesis-controlled-tools-v1"
@@ -40,8 +41,41 @@ MAX_ARGUMENT_BYTES = 32 * 1024
 MAX_ARTIFACT_BYTES = 52 * 1024 * 1024
 EXCERPT_BYTES = 8 * 1024
 MAX_JSON_RESULT_BYTES = 32 * 1024
-TOOLS = frozenset({"fetch_source", "extract_json", "calculate"})
+MAX_IRS_SOI_ROWS = 512
+MAX_IRS_SOI_COLUMNS = 512
+MAX_IRS_SOI_SHEETS = 16
+TOOLS = frozenset({"fetch_source", "extract_json", "extract_irs_soi", "calculate"})
 REDACTED_URL = "[redacted: unsafe URL]"
+REDACTED_PLACEHOLDER = "[REDACTED]"
+REDACTED_JSON = "[redacted: unsafe JSON presentation]"
+MAX_REDACTION_JSON_DEPTH = 64
+TERMINAL_PROJECTION_VERSION = 1
+# Shared with the runner: sanitize the MCP presentation before it enters the
+# native stream, rather than changing only one side of the custody binding.
+ENV_SECRET_ASSIGNMENT_RE = re.compile(
+    r"([A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)=\S+"
+)
+SECRET_FIELD_NAME_RE = re.compile(
+    r"[A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*", re.IGNORECASE
+)
+JSON_SECRET_FIELD_RE = re.compile(
+    r"\"([A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)\"\s*:\s*\"[^\"]*\"",
+    re.IGNORECASE,
+)
+SECRET_TOKEN_RE = re.compile(
+    "|".join(
+        [
+            r"sk-(?:ant|proj|or)-[A-Za-z0-9_-]+",
+            r"sk-[A-Za-z0-9]{20,}",
+            r"ghp_[A-Za-z0-9]+",
+            r"github_pat_[A-Za-z0-9_]+",
+            r"xox[bp]-[A-Za-z0-9-]+",
+            r"AIza[A-Za-z0-9_-]+",
+            r"eyJhbGciOi[A-Za-z0-9_.=-]+",
+            r"AKIA[A-Z0-9]+",
+        ]
+    )
+)
 REQUEST_HEADERS = {
     "Accept": "application/json,text/plain,text/html,*/*;q=0.1",
     "Accept-Encoding": "identity",
@@ -130,6 +164,140 @@ def url_contains_credentials(value: str) -> bool:
         ):
             return True
     return False
+
+
+def redact_text(text: str) -> str:
+    """Redact credential values from plain text (idempotent)."""
+    if not text:
+        return text
+    text = re.sub(
+        r"https?://[^\s\"'<>\\]+",
+        lambda match: REDACTED_URL if url_contains_credentials(match[0]) else match[0],
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = ENV_SECRET_ASSIGNMENT_RE.sub(rf"\1={REDACTED_PLACEHOLDER}", text)
+    text = JSON_SECRET_FIELD_RE.sub(rf'"\1": "{REDACTED_PLACEHOLDER}"', text)
+    return SECRET_TOKEN_RE.sub(REDACTED_PLACEHOLDER, text)
+
+
+def _within_json_presentation_depth(value: str) -> bool:
+    depth = 0
+    quoted = False
+    escaped = False
+    for char in value:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+        elif char in "[{":
+            depth += 1
+            if depth > MAX_REDACTION_JSON_DEPTH:
+                return False
+        elif char in "]}":
+            depth -= 1
+    return True
+
+
+def _within_container_depth(value: Any, limit: int) -> bool:
+    pending = [(value, 0)]
+    while pending:
+        item, depth = pending.pop()
+        if isinstance(item, (dict, list)):
+            depth += 1
+            if depth > limit:
+                return False
+            children = item.values() if isinstance(item, dict) else item
+            pending.extend((child, depth) for child in children)
+    return True
+
+
+def _redact_incomplete_json(value: str) -> str:
+    # Keep historical benign/truncated excerpts byte-compatible with the plain
+    # text sanitizer. Escaped keys/values and unfinished credential values need
+    # a safe marker because that sanitizer cannot interpret their JSON syntax.
+    for match in re.finditer(r'("(?:[^"\\]|\\.)*")\s*:\s*', value):
+        try:
+            name = json.loads(match[1])
+        except ValueError:
+            return REDACTED_JSON
+        if not SECRET_FIELD_NAME_RE.fullmatch(name):
+            continue
+        tail = value[match.end() :]
+        if not tail.startswith('"'):
+            continue
+        try:
+            _decoded, end = json.JSONDecoder().raw_decode(tail)
+        except ValueError:
+            return REDACTED_JSON
+        if "\\" in match[1] or "\\" in tail[:end]:
+            return REDACTED_JSON
+    return redact_text(value)
+
+
+def _redact_json_string(value: str) -> str:
+    if value in {REDACTED_URL, REDACTED_PLACEHOLDER, REDACTED_JSON}:
+        return value
+    if re.match(r"https?://", value, re.IGNORECASE) and url_contains_credentials(value):
+        return REDACTED_URL
+    if value.lstrip().startswith(("{", "[")):
+        if not _within_json_presentation_depth(value):
+            return REDACTED_JSON
+        try:
+            nested = _strict_json(value)
+        except EvidenceError:
+            return _redact_incomplete_json(value)
+        redacted = redact_json_value(nested)
+        if redacted == nested:
+            return value
+        try:
+            return canonical_stringify(redacted)
+        except (ValueError, OverflowError, RecursionError):
+            # A syntactically valid JSON number can overflow during parsing.
+            # Never let an unrepresentable public excerpt crash the MCP reply.
+            return REDACTED_JSON
+    return redact_text(value)
+
+
+def redact_json_value(value: Any) -> Any:
+    """Preserve JSON shape, including an MCP text block's serialized JSON.
+
+    Walk containers iteratively: a bounded source excerpt can still contain
+    hundreds of nested arrays. Encoded JSON strings have their own depth limit,
+    independent of the extra native event wrapper, so repeated projection is
+    idempotent. Never apply text regexes to an entire serialized terminal object.
+    """
+    result: list[Any] = [None]
+    pending: list[tuple[Any, Any, Any]] = [(value, result, 0)]
+    while pending:
+        item, parent, key = pending.pop()
+        if isinstance(item, str):
+            parent[key] = _redact_json_string(item)
+        elif isinstance(item, list):
+            shaped: Any = [None] * len(item)
+            parent[key] = shaped
+            pending.extend((child, shaped, index) for index, child in enumerate(item))
+        elif isinstance(item, dict):
+            shaped = {}
+            parent[key] = shaped
+            for name, child in item.items():
+                safe_name = redact_text(name) if isinstance(name, str) else name
+                if (
+                    isinstance(name, str)
+                    and SECRET_FIELD_NAME_RE.fullmatch(name)
+                    and isinstance(child, str)
+                ):
+                    shaped[safe_name] = REDACTED_PLACEHOLDER
+                else:
+                    pending.append((child, shaped, safe_name))
+        else:
+            parent[key] = item
+    return result[0]
 
 
 def validate_public_url(value: Any) -> str:
@@ -355,6 +523,92 @@ def _extract_result(arguments: dict[str, Any], previous: dict) -> dict[str, Any]
     return {"value": value}
 
 
+def _extract_irs_soi_result(
+    arguments: dict[str, Any], previous: dict
+) -> dict[str, Any]:
+    """Replay a reviewed Table 3.3 adapter against an earlier captured body.
+
+    The official URL and printed tax year identify the requested workbook;
+    neither they nor this extraction authenticate its publication vintage.
+    Anchor years are parser checks, not a limit on available history.
+    """
+
+    if set(arguments) != {"sourceCallId", "seriesId", "year"}:
+        raise EvidenceError("extract_irs_soi requires sourceCallId, seriesId, and year")
+    series_id, year = arguments["seriesId"], arguments["year"]
+    if not isinstance(year, str) or not re.fullmatch(r"[0-9]{4}", year):
+        raise EvidenceError("IRS SOI year must be an ASCII YYYY string")
+    try:
+        import resolve_pending as resolver
+    except ImportError as exc:
+        raise EvidenceError("reviewed IRS SOI adapters are unavailable") from exc
+    if (
+        not isinstance(series_id, str)
+        or series_id not in resolver.IRS_SOI_PUB1304_ADAPTERS
+    ):
+        raise EvidenceError("seriesId must identify a reviewed IRS SOI adapter")
+    spec = resolver.IRS_SOI_PUB1304_ADAPTERS[series_id]
+    source = _prior_call(arguments["sourceCallId"], previous)
+    if source["tool"] != "fetch_source":
+        raise EvidenceError("IRS SOI extraction requires a captured fetch_source call")
+    expected_url = spec["file_url_template"].format(yy=year[-2:], ext="xls")
+    source_url = source["arguments"].get("url")
+    if source_url != expected_url:
+        raise EvidenceError("source URL is not the exact official IRS SOI year URL")
+    body = _decode_response(source["response"], source_url)
+    if not 200 <= source["response"]["status"] <= 299:
+        raise EvidenceError("IRS SOI source has an unsuccessful HTTP status")
+
+    # The bounded loader reads only the selected sheet and checks dimensions
+    # before materializing its grid. Parser diagnostics must not enter MCP's
+    # stdout protocol; the complete input bytes remain in the source call.
+    try:
+        grid, refusal = resolver.irs_soi_pub1304_grid(
+            body,
+            spec,
+            max_rows=MAX_IRS_SOI_ROWS,
+            max_columns=MAX_IRS_SOI_COLUMNS,
+            max_sheets=MAX_IRS_SOI_SHEETS,
+            quiet=True,
+        )
+    except Exception as exc:
+        # Parser exceptions may contain untrusted workbook cell strings.
+        raise EvidenceError(
+            f"IRS SOI workbook parsing failed ({type(exc).__name__})"
+        ) from exc
+    if refusal or grid is None:
+        reason = redact_text(str(refusal or "missing workbook grid"))[:1024]
+        raise EvidenceError(f"IRS SOI workbook loader refused: {reason}")
+    refusal = resolver.irs_soi_pub1304_identity_refusal(grid, source_url, year)
+    if refusal:
+        raise EvidenceError(f"IRS SOI identity refused: {redact_text(refusal)[:1024]}")
+    raw_value, refusal = resolver.irs_soi_pub1304_count_from_grid(grid, spec)
+    if refusal or raw_value is None:
+        reason = redact_text(str(refusal or "missing published value"))[:1024]
+        raise EvidenceError(f"IRS SOI table contract refused: {reason}")
+    if (
+        type(raw_value) not in {int, float}
+        or not math.isfinite(raw_value)
+        or not 0 <= raw_value <= 2**53 - 1
+        or int(raw_value) != raw_value
+    ):
+        raise EvidenceError("IRS SOI raw value must be a nonnegative safe integer")
+    value = resolver.irs_soi_pub1304_apply_transform(spec, raw_value)
+    if type(value) not in {int, float} or not math.isfinite(value):
+        raise EvidenceError("IRS SOI transformed value must be finite")
+    return {
+        "value": value,
+        "sourceCallId": arguments["sourceCallId"],
+        "sourceSha256": source["response"]["sha256"],
+        "sourceUrl": source_url,
+        "seriesId": series_id,
+        "year": year,
+        "rawValue": int(raw_value),
+        "unit": spec["unit"],
+        "transform": dict(spec["value_transform"]),
+    }
+
+
 def _number(value: Any) -> int | float:
     if type(value) not in {int, float}:
         raise EvidenceError("calculator values must be finite numbers, not booleans")
@@ -401,7 +655,7 @@ def _calculate_result(arguments: dict[str, Any], previous: dict) -> dict[str, An
             if set(source) != {"callId"}:
                 raise EvidenceError("referenced input requires exactly callId")
             call = _prior_call(source["callId"], previous)
-            if call["tool"] not in {"extract_json", "calculate"}:
+            if call["tool"] not in {"extract_json", "extract_irs_soi", "calculate"}:
                 raise EvidenceError("input call must be an extraction or calculation")
             source = call["result"]["value"]
         resolved[name] = _numeric_input(source, source_strings=is_reference)
@@ -567,8 +821,14 @@ def verify_evidence(payload: Any) -> dict[str, Any]:
             }
             if not isinstance(call, dict) or not required <= call.keys():
                 raise EvidenceError("invalid call envelope")
-            if set(call) - required - {"response", "error"}:
+            optional = {"response", "error", "terminalProjectionVersion"}
+            if set(call) - required - optional:
                 raise EvidenceError("unknown call fields")
+            if "terminalProjectionVersion" in call and (
+                type(call["terminalProjectionVersion"]) is not int
+                or call["terminalProjectionVersion"] != TERMINAL_PROJECTION_VERSION
+            ):
+                raise EvidenceError("unsupported terminal projection version")
             if call["callId"] != call_id or call["tool"] not in TOOLS:
                 raise EvidenceError("call ID/order or tool name is invalid")
             times = []
@@ -627,6 +887,10 @@ def verify_evidence(payload: Any) -> dict[str, Any]:
                     expected = _extract_result(call["arguments"], previous)
                     checks.append("json_pointer_replay")
                     replay_status = "replayed"
+                elif call["tool"] == "extract_irs_soi":
+                    expected = _extract_irs_soi_result(call["arguments"], previous)
+                    checks.append("irs_soi_workbook_replay")
+                    replay_status = "replayed"
                 else:
                     expected = _calculate_result(call["arguments"], previous)
                     checks.append("arithmetic_replay")
@@ -657,8 +921,36 @@ def load_evidence(path: str | pathlib.Path) -> dict[str, Any]:
 
 
 def terminal_call(call: dict[str, Any]) -> dict[str, Any]:
-    """Exact MCP structuredContent projection used to bind native tool events."""
-    return {key: value for key, value in call.items() if key != "response"}
+    """Exact public MCP projection used both before reply and for native binding.
+
+    The complete response and replayable result stay unchanged in the capture.
+    Sanitizing this presentation before replying makes the runner's later
+    credential hygiene pass idempotent, preserving exact native-event equality.
+    """
+    if "terminalProjectionVersion" not in call:
+        # Historical native events bound the original projection. Never apply
+        # a new presentation policy retroactively or accept either projection.
+        return {key: value for key, value in call.items() if key != "response"}
+    if (
+        type(call["terminalProjectionVersion"]) is not int
+        or call["terminalProjectionVersion"] != TERMINAL_PROJECTION_VERSION
+    ):
+        raise EvidenceError("unsupported terminal projection version")
+    # Reserve one level for this terminal object, so its serialized text block
+    # stays within the same depth bound when the native stream redacts it again.
+    # Keep call identity and raw evidence even when an extracted value is too
+    # deeply nested for a useful presentation.
+    return redact_json_value(
+        {
+            key: (
+                value
+                if _within_container_depth(value, MAX_REDACTION_JSON_DEPTH - 1)
+                else REDACTED_JSON
+            )
+            for key, value in call.items()
+            if key != "response"
+        }
+    )
 
 
 class EvidenceRecorder:
@@ -711,6 +1003,7 @@ class EvidenceRecorder:
         call: dict[str, Any] = {
             "callId": f"call-{len(self.payload['calls']) + 1:04d}",
             "tool": tool,
+            "terminalProjectionVersion": TERMINAL_PROJECTION_VERSION,
             "arguments": captured_arguments(tool, arguments),
             "startedAt": _now(),
             "completedAt": "",
@@ -742,6 +1035,8 @@ class EvidenceRecorder:
                 result = _fetch_result(response, body)
             elif tool == "extract_json":
                 result = _extract_result(arguments, previous)
+            elif tool == "extract_irs_soi":
+                result = _extract_irs_soi_result(arguments, previous)
             else:
                 result = _calculate_result(arguments, previous)
             call["result"] = result

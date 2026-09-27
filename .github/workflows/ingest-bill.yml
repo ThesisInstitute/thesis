@@ -1,0 +1,105 @@
+name: Analyze and map a bill
+
+# This job produces reviewable proposals only. It cannot register targets,
+# publish forecasts, change the site, or dispatch a write-capable workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      bill_ref:
+        description: "Bill reference, e.g. 119/s/3596 (choose this OR source_url)"
+        default: ""
+      source_url:
+        description: "Official bill document URL, for committee drafts"
+        default: ""
+      bill_slug:
+        description: "Stable bill slug, e.g. s3596-119"
+        required: true
+      use_committed_source:
+        description: "Analyze this slug's preserved bill text and provenance instead of fetching"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bill-analysis-${{ inputs.bill_slug }}
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v5
+      - uses: oven-sh/setup-bun@v2
+      - uses: ./.github/actions/enable-agent-sandbox
+
+      - name: Install the reviewed extractor runtime
+        run: |
+          uv sync --locked --extra bills
+          bun add -g @openai/codex@0.144.0
+
+      - name: Fetch the Chronicle series catalog at an immutable commit
+        id: catalog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SHA=$(gh api repos/PolicyEngine/chronicle/commits/codex/thesis-ledger-facts --jq .sha)
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]
+          gh api -H "Accept: application/vnd.github.raw+json" \
+            "repos/PolicyEngine/chronicle/contents/ledger/series_catalog.json?ref=$SHA" \
+            > /tmp/bill-series-catalog.json
+          echo "commit=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate the extraction runtime
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: printenv OPENAI_API_KEY | codex login --with-api-key
+
+      - name: Extract provision-anchored outcomes and map them to Chronicle
+        env:
+          BILL_REF: ${{ inputs.bill_ref }}
+          SOURCE_URL: ${{ inputs.source_url }}
+          BILL_SLUG: ${{ inputs.bill_slug }}
+          USE_COMMITTED_SOURCE: ${{ inputs.use_committed_source }}
+          CATALOG_COMMIT: ${{ steps.catalog.outputs.commit }}
+          CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY || 'DEMO_KEY' }}
+        run: |
+          set -euo pipefail
+          [[ "$BILL_SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]
+          args=(uv run --locked --extra bills python scripts/ingest_bill.py
+            --slug "$BILL_SLUG"
+            --catalog /tmp/bill-series-catalog.json
+            --catalog-commit "$CATALOG_COMMIT"
+            --run-id "github-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}")
+          if [ "$USE_COMMITTED_SOURCE" = "true" ]; then
+            if [ -n "$BILL_REF" ] || [ -n "$SOURCE_URL" ]; then
+              echo "Committed-source mode cannot also name a remote source" >&2
+              exit 1
+            fi
+            args+=(--text-path "bills/raw/$BILL_SLUG.txt"
+              --meta-path "bills/raw/$BILL_SLUG.meta.json")
+          elif [ -n "$BILL_REF" ] && [ -z "$SOURCE_URL" ]; then
+            args+=("$BILL_REF")
+          elif [ -n "$SOURCE_URL" ] && [ -z "$BILL_REF" ]; then
+            args+=(--url "$SOURCE_URL")
+          else
+            echo "Select exactly one bill source" >&2
+            exit 1
+          fi
+          "${args[@]}"
+
+      - name: Preserve the full analysis attempt, including failures
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: bill-analysis-${{ github.run_id }}-${{ github.run_attempt }}
+          path: drafts/bill-ingestion/github-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 90

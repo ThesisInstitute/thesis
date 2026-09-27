@@ -23,6 +23,12 @@ from typing import Any
 import docket_publication as docket
 import median_rollout_ensemble as median_builder
 from canonical_json import canonical_bytes, canonical_sha256
+from strategy_targets import (
+    StrategyTargetError,
+    conditional_comparison_context,
+    require_bill_target_set,
+    require_conditional_open,
+)
 from verify_custody import CustodyError, verify_run
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -43,7 +49,11 @@ RESOLVER_FIELDS = (
     "country",
     "dataPointId",
     "targetUnit",
-    "resolutionDate",
+    # The published forecast's resolver date. A trusted target never stores
+    # it as `resolutionDate`: that key must mirror the registered contract
+    # with the snapshot's exact presence, and release-calendar contracts omit
+    # it (see strategy_targets.published_target).
+    "publishedResolutionDate",
     "resolutionSource",
     "resolutionSourceUrl",
     "resolutionRule",
@@ -182,6 +192,10 @@ def _validate_selection(
             raise StrategyPublicationError(
                 f"trusted comparison target {slug} lacks {', '.join(missing)}"
             )
+    try:
+        require_bill_target_set(selection)
+    except StrategyTargetError as exc:
+        raise StrategyPublicationError(str(exc)) from exc
     return selection, targets_by_slug, artifact_at
 
 
@@ -380,7 +394,26 @@ def _target_map(
 
 
 def _resolver_equal(cell: dict[str, Any], target: dict[str, Any]) -> None:
-    cell_keys = {"catalogSlug": "slug", "targetUnit": "unit"}
+    premise = target.get("conditional")
+    if canonical_bytes(cell.get("conditionalOn")) != canonical_bytes(premise):
+        raise StrategyPublicationError(
+            "cell conditionalOn differs from trusted target premise"
+        )
+    if premise is not None and cell.get("type") != "conditional":
+        raise StrategyPublicationError(
+            "conditional comparison cell must have type conditional"
+        )
+    if premise is None and cell.get("type") == "conditional":
+        raise StrategyPublicationError(
+            "unconditional comparison cannot carry conditional type"
+        )
+    cell_keys = {
+        "catalogSlug": "slug",
+        "targetUnit": "unit",
+        # Comparison cells are graded against the published forecast's
+        # resolver, so their resolutionDate must equal its published date.
+        "publishedResolutionDate": "resolutionDate",
+    }
     for field in RESOLVER_FIELDS:
         # resolutionPolicy is target-architecture metadata; forecast cells carry
         # the substantive rule/source/date but do not duplicate this field.
@@ -389,7 +422,8 @@ def _resolver_equal(cell: dict[str, Any], target: dict[str, Any]) -> None:
         cell_field = cell_keys.get(field, field)
         if canonical_bytes(cell.get(cell_field)) != canonical_bytes(target.get(field)):
             raise StrategyPublicationError(
-                f"cell resolver differs from trusted target field {field}"
+                f"cell resolver {cell_field} differs from trusted target "
+                f"field {field}"
             )
     for field in REGISTRATION_FIELDS:
         if canonical_bytes(cell.get(field)) != canonical_bytes(target.get(field)):
@@ -417,6 +451,7 @@ def _validate_analyst_result(
     prompt_mode: str,
     lower: dt.datetime,
     upper: dt.datetime,
+    strategy_source_sha: str | None = None,
 ) -> tuple[pathlib.PurePosixPath, str | None]:
     target = result["target"]
     manifest_relative = _run_relative(result.get("manifestPath"))
@@ -429,6 +464,15 @@ def _validate_analyst_result(
     if canonical_bytes(manifest.get("targetContext")) != canonical_bytes(target):
         raise StrategyPublicationError("run targetContext differs from trusted target")
     _validate_manifest_identity(manifest, target, ("series", "period", "conditional"))
+    bounded_strategy = target.get("resolutionDateBasis") == "resolve-by-bound"
+    if bounded_strategy and (
+        not target.get("conditional")
+        or not strategy_source_sha
+        or manifest.get("checkoutSha") != strategy_source_sha
+    ):
+        raise StrategyPublicationError(
+            "bounded strategy run lacks its exact selected checkout and conditional target"
+        )
     expected_ok = result.get("ok") is True
     if manifest.get("ok") is not expected_ok:
         raise StrategyPublicationError("batch and run success status differ")
@@ -476,12 +520,12 @@ def _validate_analyst_result(
         # snapshots introduced strictly before the v3 cutover stay eligible.
         docket.validate_target_registration(
             repo,
-            target,
+            conditional_comparison_context(ROOT, target),
             run_started_at=str(manifest.get("runStartedAt")),
             require_git_binding=True,
             allow_pre_cutover_v2=True,
         )
-    except docket.PublicationError as exc:
+    except (docket.PublicationError, StrategyTargetError) as exc:
         raise StrategyPublicationError(str(exc)) from exc
     cells_value = result.get("cellsPath")
     if manifest.get("cellsPath") != cells_value:
@@ -495,7 +539,12 @@ def _validate_analyst_result(
         if not isinstance(cells, list) or len(cells) != 1:
             raise StrategyPublicationError("strategy run must contain exactly one cell")
         cell = cells[0]
-        _resolver_equal(cell, target)
+        if expected_ok:
+            _resolver_equal(cell, target)
+        # A failed model response may itself violate the target premise or
+        # resolver. Preserve that failure under the authenticated run context;
+        # below, the trusted validator must reproduce its failed status, and
+        # failed results never become comparison augments.
         seal = _instant(cell.get("runAt"), "cell runAt")
         if cell.get("runStartedAt") != manifest.get("runStartedAt"):
             raise StrategyPublicationError("cell start differs from its manifest")
@@ -526,6 +575,9 @@ def _validate_analyst_result(
             # The staged bundle is data, not authority and may not even be a
             # Git checkout. Read reviewed authorization from trusted code.
             history_registry_root=ROOT,
+            trusted_strategy_target=target if bounded_strategy else None,
+            strategy_run_dir=manifest_path.parent,
+            strategy_run_relative=manifest_relative.parent,
         )
         if bool(report.get("ok")) != expected_ok:
             raise StrategyPublicationError(
@@ -554,6 +606,7 @@ def _validate_batch(
     prompt_mode: str,
     lower: dt.datetime,
     upper: dt.datetime,
+    strategy_source_sha: str | None = None,
 ) -> tuple[dict[str, dict[str, Any]], set[pathlib.PurePosixPath], dt.datetime]:
     batch = _load_object(_repo_file(repo, relative), "strategy batch")
     if batch.get("schemaVersion") != "thesis_batch_manifest_v1":
@@ -587,6 +640,7 @@ def _validate_batch(
             prompt_mode=prompt_mode,
             lower=lower,
             upper=upper,
+            strategy_source_sha=strategy_source_sha,
         )
         prefixes.add(manifest_relative.parent)
     return results, prefixes, batch_finish
@@ -748,6 +802,15 @@ def validate_tree(
     upper = _instant(publish_validated_at, "publishValidatedAtUtc")
     if upper < lower:
         raise StrategyPublicationError("publish validation predates selection witness")
+    if selection.get("billSelection") is not None:
+        from bill_forecast_plan import require_open_bill_selection
+
+        try:
+            require_open_bill_selection(ROOT, selection["billSelection"], upper)
+            for target in targets_by_slug.values():
+                require_conditional_open(target, upper)
+        except ValueError as exc:
+            raise StrategyPublicationError(str(exc)) from exc
     _validate_source_sha(str(selection["sourceSha"]), exact=exact_source)
     suite = _load_object(_repo_file(repo, suite_relative), "strategy suite")
     ladder, rollout_lanes, medians = _validate_suite_shape(
@@ -772,6 +835,7 @@ def validate_tree(
             prompt_mode=expected_ladder_mode,
             lower=lower,
             upper=upper,
+            strategy_source_sha=selection["sourceSha"],
         )
         _claim_run_prefixes(prefixes, batch_prefixes)
         finishes.append(finished)
@@ -788,6 +852,7 @@ def validate_tree(
             prompt_mode="fast",
             lower=lower,
             upper=upper,
+            strategy_source_sha=selection["sourceSha"],
         )
         rollout_results[lane["index"]] = results
         _claim_run_prefixes(prefixes, batch_prefixes)

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-09-21T14:34:37Z",
+  "finishedAt": "2026-09-21T14:36:42Z",
+  "promptMode": "ladder",
+  "timeoutSeconds": 540,
+  "targets": 1,
+  "ok": 1,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "unemployment-rate-september-2026",
+        "comparisonTarget": true,
+        "country": "US",
+        "dataPointId": "bls.cps.unemployment_rate.september_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-08",
+          "start": "2026-09-30"
+        },
+        "period": "2026-09",
+        "publishedResolutionDate": "2026-10-02",
+        "registeredAtUtc": "2026-09-04T19:02:52Z",
+        "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolve to the first-print seasonally adjusted unemployment rate for total civilian labor force, 16 years and over, in BLS Employment Situation household survey table A-1 for September 2026, as initially published on October 2, 2026. Use the value rounded to one decimal percent as printed by BLS; do not use later revisions, annual seasonal-factor revisions, corrected subsequent database vintages, or same-day corrections unless BLS replaces the initial release before public availability.",
+        "resolutionSource": "U.S. Bureau of Labor Statistics Employment Situation",
+        "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+        "series": "bls.cps.unemployment_rate",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-08",
+            "start": "2026-09-30"
+          },
+          "field": "bls.cps.unemployment_rate",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "bls.cps.unemployment_rate",
+          "sourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+          "table": "U.S. Bureau of Labor Statistics Employment Situation (Current Population Survey)",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "4f9351e9599bb007177abdf8c158ee801328243b30407e6ff10d9b25084c2d8a",
+        "targetRegistrationPath": "records/targets/2026-09-04-4f9351e9599bb007177abdf8c158ee801328243b30407e6ff10d9b25084c2d8a.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "startedAt": "2026-09-21T14:34:37Z",
+      "finishedAt": "2026-09-21T14:36:42Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/cells.with_activity.json",
+      "stdoutTail": "\",\n      \"bytes\": 25695,\n      \"createdAt\": \"2026-09-21T14:34:37Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/distribution.json\",\n      \"sha256\": \"b01d47f4a158f0bcedbb493c77eed63692234c05c2299f1d5def0f8246ce5493\",\n      \"bytes\": 13349,\n      \"createdAt\": \"2026-09-21T14:34:37Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/validation.json\",\n      \"sha256\": \"fc1a4c83d0e7d71318079793ab852cc89f3faff8208c5959488b1f650833b5e5\",\n      \"bytes\": 133,\n      \"createdAt\": \"2026-09-21T14:34:37Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/cells.with_activity.json\",\n      \"sha256\": \"dc03fc6e6b4680479cde185761b4f2a63ec4dfb7004787f33abcae2deccc29fb\",\n      \"bytes\": 42426,\n      \"createdAt\": \"2026-09-21T14:34:37Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/manifest.json\",\n      \"sha256\": \"93dbfb7b8efbff963fb6374a5432be5972e744b99cc5b654004e1fe2c827f091\",\n      \"bytes\": 17284,\n      \"createdAt\": \"2026-09-21T14:34:37Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"unemployment-rate-september-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"232d43c7812303fb246082f3cbdf3af1ab8a1163\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"352c6b097a6d7949dc943ddc23d6e34b3e45d02b48fe958a6042c6188359fcaa\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}
