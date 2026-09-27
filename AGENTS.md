@@ -97,7 +97,15 @@ runtime question; whether any code could ever read it is not.
   family: a target that binds `bls-api` routes to the BLS API leg, and every
   other reference for the stem keeps its ALFRED route. A `bls-api` contract
   takes the docket's canonical series as its id stem, and its docket
-  `releaseDates` must never name a period that is already registered.
+  `releaseDates` must never name a period that is already registered. The six
+  Table A-19 stems follow the same rule between the Archive-capture `a19` leg
+  and the BLS API family.
+- A resolved fact must not give a Chronicle lineage a second unit: Chronicle's
+  catalog build refuses it, and the resolve workflow publishes nothing after a
+  failed run. Do not register a series whose facts would do that: the six
+  Table A-19 specs carry `registration_hold` until the Chronicle change in
+  decision d397. Behind the hold, the BLS API leg refuses such a capture
+  (`LEDGER UNIT CONFLICT`).
 - Existing snapshots are never re-judged: retries reuse them, and what happens
   to already-published targets with no executor is a disposition decision, not
   a registration one. The run-time exceptions for two reviewed legacy contracts

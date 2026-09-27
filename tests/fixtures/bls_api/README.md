@@ -39,3 +39,49 @@ from it, and captures a month only while the first-print gate still holds.
 Release-text verification of every anchor is in
 `docs/anchor-verifications.md`, "Anchor verifications — BLS registrable docket
 series (2026-09-20)".
+
+## Table A-19 rows (added 2026-09-25)
+
+Six more unmodified responses, fetched the same way, one per Employment
+Situation Table A-19 row the docket forecasts. Each returned HTTP 200 with
+`"status": "REQUEST_SUCCEEDED"`.
+
+| File | Request | Retrieved (UTC) | Bytes | SHA-256 |
+|---|---|---|---:|---|
+| `LNU02032454-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032454?startyear=2026&endyear=2026` | 2026-09-25T11:06:07Z | 984 | `8736f84807450744285a9c75f6f3ec7ce9af0c2972c90a2a176d1ba098c7cd10` |
+| `LNU02032455-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455?startyear=2026&endyear=2026` | 2026-09-25T11:06:09Z | 978 | `af021869dffc4f654216e7d7c20dbcbdcedf937c21a62a31530a7042f2af86fc` |
+| `LNU02032463-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032463?startyear=2026&endyear=2026` | 2026-09-25T11:06:12Z | 978 | `0fae2a5e4b15112f7201bbfbdd15aa25944fc64d69b9e8d1b0bc7f67ca7dc410` |
+| `LNU02032207-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032207?startyear=2026&endyear=2026` | 2026-09-25T11:06:14Z | 986 | `8ef8b905b38944647eec5ce458982f011a5d7111c09ef0be377af7cea3cd69c5` |
+| `LNU02032213-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032213?startyear=2026&endyear=2026` | 2026-09-26T04:10:26Z | 978 | `5df0aacd93bc56747c8d54638a6a294116c768a0ac0e2476ac527d6afddaaf86` |
+| `LNU02032214-2026-2026.json` | `https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032214?startyear=2026&endyear=2026` | 2026-09-26T04:10:29Z | 986 | `1ddb775262040e244afdb4ff13cd6549deac7482b0eecfd411f25eb48f6c3241` |
+
+The first requests for the last two, at 2026-09-25T11:06:16Z and 11:06:18Z,
+returned HTTP 200 with `"status": "REQUEST_NOT_PROCESSED"` and the message
+"Request could not be serviced, as the daily threshold for total number of
+requests allocated to the user with registration key  has been reached." That
+is the keyless daily limit for this address. They were fetched again after it
+reset.
+
+Every A-19 capture's latest month is August 2026, with no footnote, and its
+January 2026 row carries footnote code `12`, "January 2026 estimates were
+revised to incorporate updated population controls."
+
+### The Table A-19 pages these rows are checked against
+
+`tests/fixtures/a19/` holds the `<table>` element of three Internet Archive
+captures of `https://www.bls.gov/web/empsit/cpseea19.htm`, each taken after
+the Employment Situation that first printed its month. The files are
+byte-identical to the ones thesis#269 adds at the same paths. They were taken
+verbatim from the Archive's replay responses, fetched 2026-09-20.
+
+| Data month | Capture (UTC) | Replay URL | File SHA-256 |
+|---|---|---|---|
+| 2026-06 | 2026-07-10 11:05:09 | https://web.archive.org/web/20260710110509/https://www.bls.gov/web/empsit/cpseea19.htm | `3b0c626048d920079f6cde70af947b767bcf291b097fe57be3c5234b38bef607` |
+| 2026-07 | 2026-08-19 19:14:18 | https://web.archive.org/web/20260819191418/https://www.bls.gov/web/empsit/cpseea19.htm | `0fba99933a44a2d5815e864d2d41fa3d1e3ecab2fec1ae7e2f96e7476ea27e3d` |
+| 2026-08 | 2026-09-04 17:00:06 | https://web.archive.org/web/20260904170006/https://www.bls.gov/web/empsit/cpseea19.htm | `b3833556f6c72ec716f249e7afc152f17bcbfeb5dde4c9f8a5eb2c7da38d10d1` |
+
+Each table's current-month column header names its month ("June", "July",
+"Aug."). For all six rows and all three months, the API capture serves the
+integer the table printed, and matches no other row in all three months.
+`tests/test_bls_api_registrable.py` checks that equality, so the six anchors
+are first prints, not only settled values.
