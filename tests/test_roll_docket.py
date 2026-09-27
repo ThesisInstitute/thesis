@@ -1016,6 +1016,7 @@ def test_all_native_docket_series_commit_official_calendar_dates() -> None:
         "bls.jolts.job_openings",
         "bls.jolts.quits_rate",
         "bls.qcew.child_day_care_services.annual_avg_employment",
+        "bls.real_earnings.avg_hourly_mom",
         "eurostat.hicp.flash.yoy",
         "statcan.cpi.allitems.yoy",
         "statcan.gdp_by_industry.monthly_growth",

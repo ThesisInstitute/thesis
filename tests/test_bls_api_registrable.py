@@ -4,7 +4,7 @@ Fixture bytes are official keyless API responses captured 2026-09-20 (see
 ``tests/fixtures/bls_api/README.md``). They prove the parser, the transforms
 and the binding; they are never resolution evidence.
 
-Six specs are registrable. Three have docket templates. The other three wait
+Seven specs are registrable. Four have docket templates. The other three wait
 on a Chronicle lineage decision (``LINEAGE_BLOCKED`` below).
 """
 
@@ -67,6 +67,12 @@ CAPTURES = {
         "d0c8d0236ccc51b4bcc7e0dbb3dba73cb6fd834446d722301b43a399cbe0afd3",
         "2026-08",
         162.0,
+    ),
+    "bls.real_earnings.avg_hourly_mom": (
+        "CES0500000013-2026-2026.json",
+        "b66521b06729e3c295ee6d60f8aac796a9dafa370ca36e4828980e8d2e9fdca7",
+        "2026-08",
+        -0.1,
     ),
 }
 REGISTRABLE = sorted(CAPTURES)
@@ -224,6 +230,73 @@ def test_legacy_specs_keep_the_served_level_anchor_check() -> None:
         3193.3,
         None,
     )
+
+
+# --- capture bound ----------------------------------------------------------
+
+
+def _bound(binding: dict, day: str) -> str | None:
+    spec = resolve_pending.BLS_API_ADAPTERS["bls.real_earnings.avg_hourly_mom"]
+    return resolve_pending.bls_capture_bound_refusal(
+        spec, binding, dt.date.fromisoformat(day)
+    )
+
+
+def test_real_earnings_is_captured_only_near_its_registered_release_day() -> None:
+    # Real Earnings moves between releases while its latest row stays latest
+    # and flagged, so the footnote gate alone cannot bound it.
+    binding = {
+        "adapter": "bls-api",
+        "expectedReleaseWindow": {"start": "2026-11-10", "end": "2026-11-10"},
+    }
+    assert _bound(binding, "2026-11-10") is None
+    assert _bound(binding, "2026-11-17") is None
+    assert "after the 7-day bound that ended 2026-11-17" in (
+        _bound(binding, "2026-11-18") or ""
+    )
+    # The next Employment Situation (2026-12-04) is far outside the bound.
+    assert _bound(binding, "2026-12-04") is not None
+
+
+def test_a_bounded_series_needs_a_registered_release_day() -> None:
+    for binding in (
+        {},
+        {"adapter": "generic-url", "expectedReleaseWindow": {"start": "2026-11-10"}},
+        {"adapter": "bls-api"},
+        {"adapter": "bls-api", "expectedReleaseWindow": {"start": ""}},
+    ):
+        assert "registers none" in (_bound(binding, "2026-11-10") or "")
+    garbled = {"adapter": "bls-api", "expectedReleaseWindow": {"start": "soon"}}
+    assert "is not a date" in (_bound(garbled, "2026-11-10") or "")
+
+
+def test_series_without_a_bound_are_never_refused_by_it() -> None:
+    for series in REGISTRABLE:
+        spec = resolve_pending.BLS_API_ADAPTERS[series]
+        if "capture_within_days" in spec:
+            continue
+        assert (
+            resolve_pending.bls_capture_bound_refusal(spec, {}, dt.date(2099, 1, 1))
+            is None
+        )
+    bounded = [
+        s
+        for s in resolve_pending.BLS_API_ADAPTERS.values()
+        if "capture_within_days" in s
+    ]
+    assert [s["series_id"] for s in bounded] == ["CES0500000013"]
+
+
+def test_real_earnings_first_print_and_its_later_revisions() -> None:
+    # BLS printed June 2026 as +0.8 (2026-07-14), +0.7 (2026-08-12) and +0.6
+    # (2026-09-11). The capture of 2026-09-20 serves the last of those.
+    spec = resolve_pending.BLS_API_ADAPTERS["bls.real_earnings.avg_hourly_mom"]
+    rows = _rows("bls.real_earnings.avg_hourly_mom")
+    assert resolve_pending.bls_transformed_value(rows, spec, "2026-06") == (0.6, None)
+    assert [p for p, s in sorted(rows.items()) if s["preliminary"]] == [
+        "2026-07",
+        "2026-08",
+    ]
 
 
 # --- registration ---------------------------------------------------------
@@ -563,6 +636,126 @@ def test_resolver_never_fetches_for_a_registrable_ref_with_no_registration(
     )
     assert "BINDING/ADAPTER MISMATCH (refusing, no registered bls-api binding" in out
     assert ref in out and "nothing new to record" in out
+
+
+REAL_EARNINGS = "bls.real_earnings.avg_hourly_mom"
+# August 2026 is the latest, still-preliminary month in the capture, and BLS
+# released it on 2026-09-11.
+REAL_EARNINGS_RUN = {
+    "series": REAL_EARNINGS,
+    "period": "2026-08",
+    "release": "2026-09-11",
+}
+
+
+def test_resolver_captures_real_earnings_inside_the_bound(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ref, out = _run_main(
+        monkeypatch, capsys, now="2026-09-18T13:40:00Z", **REAL_EARNINGS_RUN
+    )
+    assert f"resolve {ref} -> -0.1 percent" in out
+    assert "dry-run: would append 1 row(s)" in out
+
+
+def test_resolver_refuses_past_the_bound_without_spending_a_request(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ref, out = _run_main(
+        monkeypatch,
+        capsys,
+        now="2026-09-19T13:40:00Z",
+        fetch_allowed=False,
+        **REAL_EARNINGS_RUN,
+    )
+    assert f"FIRST-PRINT WINDOW MISSED (refusing): {ref}" in out
+    assert "after the 7-day bound that ended 2026-09-18" in out
+    assert "nothing new to record" in out
+
+
+def test_resolver_refuses_an_unregistered_bounded_cell_without_a_request(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        now="2026-09-12T13:40:00Z",
+        registered=False,
+        fetch_allowed=False,
+        **REAL_EARNINGS_RUN,
+    )
+    assert "no registered bls-api binding" in out
+    assert "nothing new to record" in out
+
+
+def test_a_bounded_series_is_attempted_from_its_registered_release_day(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # The forecast's resolutionDate is analyst-written. Were it to decide the
+    # first attempt, a date past the bound would make the target unresolvable.
+    ref, out = _run_main(
+        monkeypatch,
+        capsys,
+        now="2026-09-12T13:40:00Z",
+        forecast_resolution_date="2099-01-01",
+        **REAL_EARNINGS_RUN,
+    )
+    assert "not reached" not in out
+    assert f"resolve {ref} -> -0.1 percent" in out
+
+
+def test_the_capture_bound_stays_inside_bls_own_schedule() -> None:
+    # The bound is safe only while no Employment Situation falls inside it.
+    # Computed from BLS's schedule rows, not asserted from a reading.
+    schedule = json.loads((FIXTURES / "release-schedules-2026-09-20.json").read_text())
+    employment = sorted(
+        dt.date.fromisoformat(day)
+        for day in schedule["employment_situation"]["releaseDates"].values()
+    )
+    bound = resolve_pending.BLS_API_ADAPTERS[REAL_EARNINGS]["capture_within_days"]
+
+    def days_to_next_employment_situation(release: dt.date) -> int | None:
+        later = [day for day in employment if day > release]
+        return (later[0] - release).days if later else None
+
+    gaps = {
+        period: days_to_next_employment_situation(dt.date.fromisoformat(day))
+        for period, day in schedule["real_earnings"]["releaseDates"].items()
+    }
+    known = {period: gap for period, gap in gaps.items() if gap is not None}
+    assert min(known.values()) == 21
+    assert sorted(p for p, gap in known.items() if gap == 21) == ["2026-01", "2026-08"]
+    assert all(gap > bound for gap in known.values())
+
+    # Every committed docket date must be one whose FOLLOWING Employment
+    # Situation BLS has already scheduled; otherwise the bound is unverified.
+    entry = next(e for e in _bls_api_docket_entries() if e["series"] == REAL_EARNINGS)
+    assert entry["releaseDates"] == {"2026-10": "2026-11-10"}
+    for period, day in entry["releaseDates"].items():
+        assert schedule["real_earnings"]["releaseDates"][period] == day
+        gap = days_to_next_employment_situation(dt.date.fromisoformat(day))
+        assert gap is not None and gap > bound, period
+    # November 2026 data (2026-12-10) is on BLS's schedule, but the Employment
+    # Situation after it is not, so it is not committed yet.
+    assert gaps["2026-11"] is None
+
+
+def test_real_earnings_still_requires_the_preliminary_footnote() -> None:
+    assert _gate(REAL_EARNINGS) == "latest_preliminary"
+    spec = resolve_pending.BLS_API_ADAPTERS[REAL_EARNINGS]
+    assert spec["capture_within_days"] == 7
+    assert "Employment Situation" not in spec["evidence_notes"]
+
+
+def test_gate_refuses_a_resolution_date_the_bound_could_never_reach() -> None:
+    contract = _contract(REAL_EARNINGS)
+    assert _refusal(contract) is None
+    contract["resolutionDate"] = "2030-02-15"
+    assert _refusal(contract) is None
+    contract["resolutionDate"] = "2030-02-16"
+    assert "after the 7-day capture bound that ends 2030-02-15" in (
+        _refusal(contract) or ""
+    )
 
 
 # --- routing ----------------------------------------------------------------

@@ -1,0 +1,44 @@
+{
+ "comment": "BLS 'Schedule of Releases' rows for the Employment Situation and Real Earnings, transcribed from the official pages as read in a desktop browser on 2026-09-20 (www.bls.gov answers curl with HTTP 403). sha256 is of the body a same-origin fetch returned that day. A transcription for computing release intervals in tests; never resolution evidence and never a source for a docket date, which is committed from the page itself in a reviewed edit.",
+ "readAtUtc": "2026-09-20",
+ "employment_situation": {
+  "url": "https://www.bls.gov/schedule/news_release/empsit.htm",
+  "bytes": 55578,
+  "sha256": "8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47",
+  "releaseDates": {
+   "2025-11": "2025-12-16",
+   "2025-12": "2026-01-09",
+   "2026-01": "2026-02-11",
+   "2026-02": "2026-03-06",
+   "2026-03": "2026-04-03",
+   "2026-04": "2026-05-08",
+   "2026-05": "2026-06-05",
+   "2026-06": "2026-07-02",
+   "2026-07": "2026-08-07",
+   "2026-08": "2026-09-04",
+   "2026-09": "2026-10-02",
+   "2026-10": "2026-11-06",
+   "2026-11": "2026-12-04"
+  }
+ },
+ "real_earnings": {
+  "url": "https://www.bls.gov/schedule/news_release/realer.htm",
+  "bytes": 55556,
+  "sha256": "62319c0e9f286df49ae8434dbecbcfc652bcaaec4b790ad818cbb396c339d857",
+  "releaseDates": {
+   "2025-11": "2025-12-18",
+   "2025-12": "2026-01-13",
+   "2026-01": "2026-02-13",
+   "2026-02": "2026-03-11",
+   "2026-03": "2026-04-10",
+   "2026-04": "2026-05-12",
+   "2026-05": "2026-06-10",
+   "2026-06": "2026-07-14",
+   "2026-07": "2026-08-12",
+   "2026-08": "2026-09-11",
+   "2026-09": "2026-10-14",
+   "2026-10": "2026-11-10",
+   "2026-11": "2026-12-10"
+  }
+ }
+}
