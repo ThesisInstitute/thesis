@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { BrierRewardRow } from "@/data/brier-lab";
-import { summarizePairedComparison } from "@/data/brier-lab";
+import {
+  buildBrierAgentLeaderboard,
+  buildBrierHeadToHead,
+  leaderboardRankingStatistic,
+  summarizePairedComparison,
+} from "@/data/brier-lab";
 import { canonicalStringify, sha256Hex } from "@/data/canonical-json";
 import type { ForecastCell } from "@/data/forecast-cells";
 import { getForecastRunEntries } from "@/data/forecast-cells";
@@ -279,52 +284,135 @@ describe("fair ledger-backed baselines", () => {
     ).toBe(true);
   });
 
-  it("computes scale-free paired CRPS ratios and win rate", () => {
-    const row = (predictionId: string, crps: number, agent: string) =>
-      ({
-        predictionId,
-        agent,
-        reward: {
-          value: null,
-          components: { crps },
+  // Rows as the export writes them: raw CRPS always, normalized CRPS only
+  // under a usable ledger scale (scale null means "unavailable").
+  const pairedRow = (
+    predictionId: string,
+    crps: number,
+    agent: string,
+    scale: number | null,
+    model?: string,
+  ) =>
+    ({
+      predictionId,
+      agent,
+      model,
+      reward: {
+        value: scale === null ? null : -crps / scale,
+        components: {
+          crps,
+          normalizedCrps: scale === null ? null : crps / scale,
+          normalizationScale: scale,
+          normalizationScaleSource:
+            scale === null ? "unavailable" : "ledger_dispersion",
         },
-      }) as BrierRewardRow;
+      },
+      provenance: { activityArtifactCount: 1 },
+    }) as BrierRewardRow;
+
+  it("computes the paired normalized-CRPS difference and win rate", () => {
     const summary = summarizePairedComparison(
-      [row("a", 0.3, "agent"), row("b", 0.5, "agent")],
+      [pairedRow("a", 0.3, "agent", 2), pairedRow("b", 0.5, "agent", 0.5)],
       [
-        row("a", 0.4, PERSISTENCE_BASELINE_AGENT),
-        row("b", 0.2, PERSISTENCE_BASELINE_AGENT),
+        pairedRow("a", 0.4, PERSISTENCE_BASELINE_AGENT, 2),
+        pairedRow("b", 0.2, PERSISTENCE_BASELINE_AGENT, 0.5),
       ],
     );
 
     expect(summary.pairedTargets).toBe(2);
-    // Geometric mean of 0.3/0.4 and 0.5/0.2: sqrt(0.75 * 2.5).
-    expect(summary.crpsRatioGeomean).toBeCloseTo(Math.sqrt(0.75 * 2.5), 8);
+    expect(summary.normalizedTargets).toBe(2);
+    // Per-target deltas: (0.3 - 0.4) / 2 = -0.05 and (0.5 - 0.2) / 0.5 = 0.6.
+    expect(summary.normalizedCrpsDelta).toBeCloseTo((-0.05 + 0.6) / 2, 12);
+    // Sample SD of two values is |a - b| / sqrt(2); over sqrt(2) again.
+    expect(summary.normalizedCrpsDeltaStdError).toBeCloseTo(0.65 / 2, 12);
     expect(summary.agentWinRate).toBe(0.5);
-    expect(summary.zeroCrpsPairs).toBe(0);
   });
 
-  it("keeps zero-CRPS pairs out of the ratio but in the win rate", () => {
-    const row = (predictionId: string, crps: number, agent: string) =>
-      ({
-        predictionId,
-        agent,
-        reward: {
-          value: null,
-          components: { crps },
-        },
-      }) as BrierRewardRow;
+  it("keeps zero-CRPS pairs in the difference and scale-less pairs out", () => {
     const summary = summarizePairedComparison(
-      [row("a", 0, "agent"), row("b", 0.5, "agent")],
       [
-        row("a", 0.4, PERSISTENCE_BASELINE_AGENT),
-        row("b", 0.25, PERSISTENCE_BASELINE_AGENT),
+        pairedRow("a", 0, "agent", 1),
+        pairedRow("b", 0.5, "agent", 0.25),
+        pairedRow("c", 0.1, "agent", null),
+      ],
+      [
+        pairedRow("a", 0.4, PERSISTENCE_BASELINE_AGENT, 1),
+        pairedRow("b", 0.25, PERSISTENCE_BASELINE_AGENT, 0.25),
+        pairedRow("c", 0.2, PERSISTENCE_BASELINE_AGENT, null),
       ],
     );
 
+    // A perfect forecast (CRPS 0) is an ordinary pair for a difference —
+    // the old ratio had to drop it. A target without a usable scale still
+    // counts toward the raw-CRPS win rate but not toward the difference.
+    expect(summary.pairedTargets).toBe(3);
+    expect(summary.normalizedTargets).toBe(2);
+    expect(summary.normalizedCrpsDelta).toBeCloseTo((-0.4 + 1) / 2, 12);
+    expect(summary.agentWinRate).toBeCloseTo(2 / 3, 12);
+  });
+
+  it("averages repeat runs within a target before pairing", () => {
+    const summary = summarizePairedComparison(
+      [
+        pairedRow("a", 0.1, "agent", 1),
+        pairedRow("a", 0.1, "agent", 1),
+        pairedRow("a", 0.1, "agent", 1),
+        pairedRow("b", 0.9, "agent", 1),
+      ],
+      [
+        pairedRow("a", 0.5, PERSISTENCE_BASELINE_AGENT, 1),
+        pairedRow("b", 0.5, PERSISTENCE_BASELINE_AGENT, 1),
+      ],
+    );
+
+    // Targets weigh equally: (0.1 - 0.5) and (0.9 - 0.5) cancel, however
+    // many runs the agent spent on the easy target.
     expect(summary.pairedTargets).toBe(2);
-    expect(summary.crpsRatioGeomean).toBeCloseTo(2, 8);
+    expect(summary.normalizedCrpsDelta).toBeCloseTo(0, 12);
     expect(summary.agentWinRate).toBe(0.5);
-    expect(summary.zeroCrpsPairs).toBe(1);
+  });
+
+  it("ranks by the paired difference and compares forecasters head to head on shared targets only", () => {
+    const rows = [
+      pairedRow("a", 0.4, PERSISTENCE_BASELINE_AGENT, 1, "persistence"),
+      pairedRow("b", 0.4, PERSISTENCE_BASELINE_AGENT, 1, "persistence"),
+      pairedRow("c", 0.4, PERSISTENCE_BASELINE_AGENT, 1, "persistence"),
+      // good: better than persistence on a and b.
+      pairedRow("a", 0.2, "good", 1),
+      pairedRow("b", 0.3, "good", 1),
+      // fair: forecasts a, b, and c; matches persistence on average.
+      pairedRow("a", 0.3, "fair", 1),
+      pairedRow("b", 0.5, "fair", 1),
+      pairedRow("c", 0.4, "fair", 1),
+      // loner: its only target is c, which good never forecast.
+      pairedRow("c", 0.9, "loner", 1),
+    ];
+    const leaderboard = buildBrierAgentLeaderboard(rows);
+    expect(leaderboard.map((row) => row.agent)).toEqual([
+      "good",
+      "fair",
+      "loner",
+      PERSISTENCE_BASELINE_AGENT,
+    ]);
+    expect(leaderboard[0].pairedNormalizedCrpsDelta).toBeCloseTo(-0.15, 12);
+    expect(leaderboard[1].pairedNormalizedCrpsDelta).toBeCloseTo(0, 12);
+    expect(leaderboard[2].pairedNormalizedCrpsDelta).toBeCloseTo(0.5, 12);
+    expect(leaderboard[2].pairedNormalizedCrpsDeltaStdError).toBeNull();
+    expect(leaderboard.map((row) => leaderboardRankingStatistic(row))).toEqual(
+      leaderboard.map((row) => row.pairedNormalizedCrpsDelta),
+    );
+
+    const pairs = buildBrierHeadToHead(rows, leaderboard);
+    // good and loner share no target, so they never meet.
+    expect(pairs.map((pair) => [pair.left.agent, pair.right.agent])).toEqual([
+      ["good", "fair"],
+      ["fair", "loner"],
+    ]);
+    // good vs fair on a and b only: (0.2 - 0.3) and (0.3 - 0.5).
+    expect(pairs[0].sharedTargets).toBe(2);
+    expect(pairs[0].meanNormalizedCrpsDifference).toBeCloseTo(-0.15, 12);
+    expect(pairs[1].sharedTargets).toBe(1);
+    expect(pairs[1].meanNormalizedCrpsDifference).toBeCloseTo(-0.5, 12);
+    expect(pairs[1].stdError).toBeNull();
   });
 });

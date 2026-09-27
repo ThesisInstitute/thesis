@@ -1490,6 +1490,17 @@ export interface TargetNormalizationScale {
   observationCount: number;
 }
 
+// A step dispersion must exceed this fraction of the history's own
+// magnitude to count as dispersion at all. Equal decimal steps leave
+// binary-float residue that scales with the values (1.814, 1.805, 1.796
+// left 1.57e-16; the same linear shape near 215 leaves 2.0e-14, which
+// passed the old absolute Number.EPSILON gate), bounded by about
+// 2 * n * Number.EPSILON of the magnitude for n steps, so under 1e-12 for
+// any history shorter than ~2,000 prints. Twelve significant digits is
+// also all the resolution a materialized distribution keeps
+// (toPrecision(12)); no official series publishes finer.
+export const NORMALIZATION_SCALE_RELATIVE_FLOOR = 1e-12;
+
 // The denominator is frozen per dataPointId from observations that were in
 // the public ledger before target registration. Legacy registrations have no
 // timestamp, so their primary run seal is the cutoff. No forecast output —
@@ -1546,7 +1557,21 @@ export function targetNormalizationScale(
     diffs.reduce((total, diff) => total + (diff - mean) ** 2, 0) /
     (diffs.length - 1);
   const scale = Math.sqrt(variance);
-  if (!Number.isFinite(scale) || scale <= 0) {
+  const magnitude = values.reduce(
+    (largest, value) => Math.max(largest, Math.abs(value)),
+    0,
+  );
+  // Residue below the relative floor is zero dispersion, not a tiny
+  // denominator: dividing by it put -7.08e13 rewards in the 2026-09-23
+  // export (continued-claims-week-2026-08-01), because the aggregate-only
+  // fix (10670132) left the stored score and the per-row reward ungated.
+  // Refusing here nulls normalized CRPS, sharpness, and reward for every
+  // consumer at once; the variance arithmetic itself is unchanged, so
+  // every usable scale (and its scoreId) stays byte-identical.
+  if (
+    !Number.isFinite(scale) ||
+    !(scale > magnitude * NORMALIZATION_SCALE_RELATIVE_FLOOR)
+  ) {
     return unavailable(cutoff, history.length);
   }
   return {
