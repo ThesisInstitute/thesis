@@ -1012,6 +1012,9 @@ def test_all_native_docket_series_commit_official_calendar_dates() -> None:
     assert {entry["series"] for entry in native_entries} == {
         "abs.cpi.all_groups.yoy",
         "abs.labour.unemployment_rate",
+        "bls.ces.nonfarm_payrolls.change",
+        "bls.jolts.job_openings",
+        "bls.jolts.quits_rate",
         "bls.qcew.child_day_care_services.annual_avg_employment",
         "eurostat.hicp.flash.yoy",
         "statcan.cpi.allitems.yoy",

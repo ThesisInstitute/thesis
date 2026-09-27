@@ -49,6 +49,26 @@
    "series": "bls.ces.nonfarm_payrolls.change",
    "cadence": "monthly",
    "slug": "nonfarm-payrolls-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "releaseDates": {
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04"
+   },
+   "extras": {
+    "targetUnit": "thousands",
+    "sourceBinding": {
+     "adapter": "bls-api",
+     "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+     "sourceSeriesId": "CES0000000001",
+     "field": "value",
+     "table": "Current Employment Statistics, all employees, total nonfarm, seasonally adjusted (Employment Situation, Table B-1)",
+     "transform": {
+      "operation": "difference_previous_period",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
    "ledger": {
     "uuid": "d8ab9f3a-aa0c-4b7f-89df-a0c9107cfdbb",
     "concept": "bls.ces.nonfarm_payrolls.change"
@@ -67,9 +87,25 @@
    "series": "bls.jolts.job_openings",
    "cadence": "monthly",
    "slug": "jolts-openings-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
+   "releaseDates": {
+    "2026-10": "2026-12-01"
+   },
    "extras": {
     "valueScale": 0.001,
-    "targetUnit": "millions"
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "bls-api",
+     "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL",
+     "sourceSeriesId": "JTS000000000000000JOL",
+     "field": "value",
+     "table": "Job Openings and Labor Turnover Survey, job openings level, total nonfarm, seasonally adjusted (JOLTS news release, Table 1)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
    },
    "ledger": {
     "uuid": "020dafc2-2ca3-453b-a6bc-f96d443a5f77",
@@ -80,6 +116,25 @@
    "series": "bls.jolts.quits_rate",
    "cadence": "monthly",
    "slug": "jolts-quits-rate-{month}-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
+   "releaseDates": {
+    "2026-10": "2026-12-01"
+   },
+   "extras": {
+    "targetUnit": "percent",
+    "sourceBinding": {
+     "adapter": "bls-api",
+     "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+     "sourceSeriesId": "JTS000000000000000QUR",
+     "field": "value",
+     "table": "Job Openings and Labor Turnover Survey, quits rate, total nonfarm, seasonally adjusted (JOLTS news release, Table 4)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
    "ledger": {
     "uuid": "e6aed5ae-2f23-413b-a600-4c5b80edeb18",
     "concept": "bls.jolts.quits_rate"

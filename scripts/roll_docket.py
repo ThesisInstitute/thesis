@@ -61,6 +61,7 @@ OFFICIAL_CALENDAR_ADAPTERS = frozenset(
     {
         "abs-data-api",
         "abs-release-page",
+        "bls-api",
         "bls-qcew",
         "eurostat-api",
         "ons-timeseries",

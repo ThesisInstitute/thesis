@@ -450,20 +450,23 @@ def _configure_root(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def _generic_target() -> dict:
+    # A docket series that still has no sourceBinding template, so it can only
+    # bind ``generic-url``. (The unemployment rate was this example until it
+    # gained a registrable ``bls-api`` template on 2026-09-20.)
     return {
-        "series": "bls.cps.unemployment_rate",
+        "series": "bls.cps.telework_share",
         "period": "2030-01",
-        "catalogSlug": "unemployment-rate-january-2030",
+        "catalogSlug": "telework-share-january-2030",
         "targetUnit": "percent",
         "valueScale": 1,
         "previousTarget": {
             "period": "2029-12",
-            "dataPointId": "bls.cps.unemployment_rate.2029_12.first_print",
+            "dataPointId": "bls.cps.telework_share.2029_12.first_print",
             "country": "US",
             "unit": "percent",
             "resolutionDate": "2030-01-10",
-            "resolutionSource": "Employment Situation",
-            "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+            "resolutionSource": "Telework or work at home for pay",
+            "resolutionSourceUrl": "https://www.bls.gov/cps/telework.htm",
         },
     }
 
@@ -499,7 +502,7 @@ def test_register_refuses_a_new_target_without_a_plan_and_writes_nothing(
 
     with pytest.raises(
         register_targets.RegistrationError,
-        match="unemployment-rate-january-2030 has no executable resolution plan",
+        match="telework-share-january-2030 has no executable resolution plan",
     ):
         _register(targets_path)
 
@@ -553,7 +556,7 @@ def test_skip_unbindable_registers_the_executable_and_reports_the_rest(
         row["catalogSlug"] for row in json.loads(targets_path.read_text())["targets"]
     ] == ["initial-claims-week-2030-01-12"]
     err = capsys.readouterr().err
-    assert "skipping unbindable target unemployment-rate-january-2030" in err
+    assert "skipping unbindable target telework-share-january-2030" in err
     assert "no executable resolution plan" in err
 
 
@@ -676,7 +679,7 @@ def test_roller_never_splits_a_pair_whose_arm_has_no_plan(
     pair = [_claims_target(), _generic_target()]
     assert _append(pair, frozenset()) == []
     out = capsys.readouterr().out
-    assert "unemployment-rate-january-2030: no executable resolution plan" in out
+    assert "telework-share-january-2030: no executable resolution plan" in out
     assert "initial-claims-week-2030-01-12: conditional pair-mate has no" in out
 
 
@@ -714,7 +717,7 @@ def test_prospect_validation_refuses_a_proposal_without_a_plan(
             state=state,
             strict=True,
         )
-    assert calls and calls[0]["contract"]["series"] == "bls.cps.unemployment_rate"
+    assert calls and calls[0]["contract"]["series"] == "bls.cps.telework_share"
     envelope, batch = prospect_targets.validate_proposals(
         payload, today=dt.date(2030, 1, 2), root=tmp_path, state=state, strict=False
     )

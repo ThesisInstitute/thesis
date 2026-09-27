@@ -92,6 +92,12 @@ runtime question; whether any code could ever read it is not.
 - A resolver family the router names must appear in either
   `EXECUTION_PLAN_FAMILY_CHECKS` or `EXECUTION_PLAN_UNREGISTRABLE_FAMILIES`.
   A family in neither refuses every new registration, and a test fails.
+- When two families claim one stem, the registered adapter picks the route.
+  Four BLS docket stems are claimed by both the ALFRED family and the BLS API
+  family: a target that binds `bls-api` routes to the BLS API leg, and every
+  other reference for the stem keeps its ALFRED route. A `bls-api` contract
+  takes the docket's canonical series as its id stem, and its docket
+  `releaseDates` must never name a period that is already registered.
 - Existing snapshots are never re-judged: retries reuse them, and what happens
   to already-published targets with no executor is a disposition decision, not
   a registration one. The run-time exceptions for two reviewed legacy contracts
