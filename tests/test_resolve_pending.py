@@ -4,6 +4,7 @@ import base64
 import datetime as dt
 import gzip
 import hashlib
+import itertools
 import json
 import os
 import pathlib
@@ -1516,6 +1517,7 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         )
 
     appended: dict[str, str] = {}
+    propose_kwargs: dict[str, object] = {}
 
     def fake_propose(
         _repo,
@@ -1528,6 +1530,7 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         **_kwargs,
     ):
         appended["content"] = content
+        propose_kwargs.update(_kwargs)
         return "d" * 40
 
     monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
@@ -1569,8 +1572,13 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
     )
     monkeypatch.setattr(resolve_pending, "propose_ledger_append", fake_propose)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+    monkeypatch.delenv(resolve_pending.APPEND_GATE_TIMEOUT_ENV, raising=False)
 
     assert resolve_pending.main() == 0
+    # main forwards the wall-clock gate budget, not an attempt count.
+    assert propose_kwargs["gate_timeout_seconds"] == (
+        resolve_pending.DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60
+    )
     rows = [
         json.loads(line) for line in appended["content"].splitlines() if line.strip()
     ]
@@ -2279,10 +2287,42 @@ def _pre_genesis_tree() -> resolve_pending.RepositoryTree:
     )
 
 
+def _gate_check_runs(
+    append_conclusion: str | None,
+    trusted_conclusion: str | None,
+) -> list[dict]:
+    """Check runs as chronicle's gate workflow leaves them on a proposal head.
+
+    Each required gate has one real run (the delivering event) and one
+    skipped twin (the other event's job-level condition). None models a real
+    run still queued for a runner.
+    """
+
+    def real(name: str, conclusion: str | None, run_id: int) -> dict:
+        return {
+            "name": name,
+            "status": "queued" if conclusion is None else "completed",
+            "conclusion": conclusion,
+            "html_url": f"https://github.com/PolicyEngine/chronicle/actions/runs/{run_id}",
+        }
+
+    def twin(name: str) -> dict:
+        return {"name": name, "status": "completed", "conclusion": "skipped"}
+
+    return [
+        twin("Append gate"),
+        real("Append gate", append_conclusion, 1),
+        twin("Trusted base append gate"),
+        real("Trusted base append gate", trusted_conclusion, 2),
+        {"name": "Arch checks", "status": "completed", "conclusion": "failure"},
+    ]
+
+
 def _proposal_api_stub(
-    gate_conclusion: str,
+    gate_conclusion: str | None,
     calls: list[tuple[tuple[str, ...], dict | None]],
     *,
+    trusted_conclusion: str | None = "success",
     fail_ref_creation: bool = False,
     fail_pr_creation: bool = False,
     recover_pr_number: int | None = None,
@@ -2310,15 +2350,7 @@ def _proposal_api_stub(
             return json.dumps({"number": 7})
         if "/check-runs" in joined:
             return json.dumps(
-                {
-                    "check_runs": [
-                        {
-                            "name": "Append gate",
-                            "status": "completed",
-                            "conclusion": gate_conclusion,
-                        }
-                    ]
-                }
+                {"check_runs": _gate_check_runs(gate_conclusion, trusted_conclusion)}
             )
         if "/merge" in joined:
             result = (
@@ -2353,7 +2385,8 @@ def _install_proposal_transport(
     tree: resolve_pending.RepositoryTree,
     calls: list[tuple[tuple[str, ...], dict | None]],
     *,
-    gate_conclusion: str = "success",
+    gate_conclusion: str | None = "success",
+    trusted_conclusion: str | None = "success",
     fail_ref_creation: bool = False,
     fail_pr_creation: bool = False,
     recover_pr_number: int | None = None,
@@ -2380,6 +2413,7 @@ def _install_proposal_transport(
         _proposal_api_stub(
             gate_conclusion,
             calls,
+            trusted_conclusion=trusted_conclusion,
             fail_ref_creation=fail_ref_creation,
             fail_pr_creation=fail_pr_creation,
             recover_pr_number=recover_pr_number,
@@ -2992,6 +3026,374 @@ def test_append_proposal_refuses_to_merge_and_cleans_gate_failure(
     assert not any("/merge" in call for call in joined)
     assert any("PATCH" in call and "/pulls/7" in call for call in joined)
     assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
+
+
+class _FakeClock:
+    """Monotonic clock and sleep that advance together, without waiting."""
+
+    def __init__(self) -> None:
+        self.now = 0.0
+        self.sleeps: list[float] = []
+
+    def __call__(self) -> float:
+        return self.now
+
+    def sleep(self, seconds: float) -> None:
+        self.sleeps.append(seconds)
+        self.now += seconds
+
+
+def test_append_gate_state_separates_queued_failed_and_passed() -> None:
+    state = resolve_pending.append_gate_state
+    twin = {"status": "completed", "conclusion": "skipped"}
+    queued = {"status": "queued", "conclusion": None}
+    # The 2026-09-22/23 shape: a skipped twin beside a real run still queued
+    # for a runner. Not a verdict either way, so keep waiting.
+    assert state([twin, queued]) == "pending"
+    assert state([twin, {"status": "in_progress", "conclusion": None}]) == "pending"
+    assert state([twin, {"status": "completed", "conclusion": "success"}]) == "passed"
+    assert state([twin, {"status": "completed", "conclusion": "failure"}]) == "failed"
+    # An adverse conclusion fails at once, whatever is still queued.
+    assert state([queued, {"status": "completed", "conclusion": "cancelled"}]) == (
+        "failed"
+    )
+    # A lone twin is not a verdict and not yet a failure: the delivering
+    # event's real run lives in a separate workflow run and may not exist yet.
+    assert state([twin]) == "pending"
+    assert state([]) == "pending"
+
+
+# Every check-run shape GitHub reports, as (status, conclusion).
+_RUN_SHAPES = [
+    ("queued", None),
+    ("in_progress", None),
+    *(
+        ("completed", conclusion)
+        for conclusion in (
+            "success",
+            "skipped",
+            "neutral",
+            "failure",
+            "cancelled",
+            "timed_out",
+            "action_required",
+            "stale",
+        )
+    ),
+]
+
+
+def test_append_gate_state_invariants_hold_for_every_run_set() -> None:
+    """Exhaustive over every multiset of up to three runs of one gate.
+
+    I1 "passed" only when every run completed, at least one succeeded and
+       none concluded against the proposal: exactly what append_gate_verdict
+       accepted before, so no run set the old poll refused can pass now.
+    I2 "failed" exactly when some run completed with a conclusion other than
+       success, skipped or neutral, whatever else is still queued.
+    I3 otherwise "pending": waiting, never a verdict.
+    I4 order never matters.
+    """
+
+    adverse = {"failure", "cancelled", "timed_out", "action_required", "stale"}
+    checked = 0
+    for size in range(0, 4):
+        for shapes in itertools.combinations_with_replacement(_RUN_SHAPES, size):
+            runs = [{"status": s, "conclusion": c} for s, c in shapes]
+            state = resolve_pending.append_gate_state(runs)
+            completed = all(s == "completed" for s, _ in shapes)
+            any_adverse = any(s == "completed" and c in adverse for s, c in shapes)
+            if any_adverse:
+                assert state == "failed", shapes
+            elif runs and completed and resolve_pending.append_gate_verdict(runs):
+                assert state == "passed", shapes
+                assert any(c == "success" for _, c in shapes), shapes
+            else:
+                assert state == "pending", shapes
+            for order in itertools.permutations(runs):
+                assert resolve_pending.append_gate_state(list(order)) == state
+            checked += 1
+    assert checked == 1 + 10 + 55 + 220
+
+
+def test_await_append_gates_outlasts_a_long_runner_queue(monkeypatch) -> None:
+    clock = _FakeClock()
+    reads: list[str] = []
+
+    def api(*args: str, input_body=None) -> str:
+        reads.append(" ".join(args))
+        # Chronicle #286's real queue times: trusted base started after 47
+        # minutes, the pull_request Append gate after 68.
+        return json.dumps(
+            {
+                "check_runs": _gate_check_runs(
+                    "success" if clock.now >= 68 * 60 else None,
+                    "success" if clock.now >= 47 * 60 else None,
+                )
+            }
+        )
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        286,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+
+    # The old loop (30 reads x 20 s) gave up after ten minutes.
+    assert clock.now >= 68 * 60 > 30 * 20
+    # Backoff doubles from 20 s and is capped, so the pass is noticed within
+    # one capped interval of the gate finishing.
+    assert clock.sleeps[:3] == [20, 40, 80]
+    assert max(clock.sleeps) == resolve_pending.APPEND_GATE_MAX_POLL_SECONDS
+    assert clock.now < 68 * 60 + resolve_pending.APPEND_GATE_MAX_POLL_SECONDS
+    expected_read = f"repos/PolicyEngine/chronicle/commits/{'c' * 40}/check-runs"
+    assert reads and all(read == expected_read + "?per_page=100" for read in reads)
+
+
+def test_await_append_gates_timeout_names_queued_jobs_not_a_failure(
+    monkeypatch,
+) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            {"check_runs": _gate_check_runs(None, "success")}
+        ),
+    )
+
+    with pytest.raises(resolve_pending.LedgerProposalError) as info:
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            286,
+            timeout_seconds=150 * 60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    message = str(info.value)
+    assert "append gate did not complete for PolicyEngine/chronicle#286" in message
+    assert "after 150.0 of 150 allowed minutes; no verdict yet" in message
+    assert (
+        "Append gate: queued "
+        "(https://github.com/PolicyEngine/chronicle/actions/runs/1)" in message
+    )
+    # The gate that passed is not listed, and nothing reads as a rejection.
+    assert "Trusted base" not in message
+    assert "failed" not in message and "did not pass" not in message
+    # The last read lands exactly on the deadline, never past it.
+    assert clock.now == 150 * 60
+
+
+def test_await_append_gates_fails_fast_while_twin_is_queued(monkeypatch) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            {"check_runs": _gate_check_runs("failure", None)}
+        ),
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=re.escape(
+            "append gate failed for PolicyEngine/chronicle#283: Append gate: "
+            "failure (https://github.com/PolicyEngine/chronicle/actions/runs/1); "
+            "refusing to merge"
+        ),
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            283,
+            timeout_seconds=150 * 60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    assert clock.sleeps == []
+
+
+def test_await_append_gates_requires_the_trusted_base_gate(monkeypatch) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            {"check_runs": _gate_check_runs("success", "failure")}
+        ),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"append gate failed .*Trusted base append gate: failure",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    # A passing Append gate alone never merges: with no trusted-base run at
+    # all the wait runs out instead.
+    only_append = [
+        run
+        for run in _gate_check_runs("success", "success")
+        if run["name"] != "Trusted base append gate"
+    ]
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps({"check_runs": only_append}),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"did not complete .*Trusted base append gate: no check run yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=3,
+        )
+
+
+def test_await_append_gates_retries_transient_read_failures(monkeypatch) -> None:
+    clock = _FakeClock()
+    outcomes = iter(
+        [
+            RuntimeError("gh api check-runs failed: HTTP 502"),
+            RuntimeError("gh api check-runs failed: HTTP 502"),
+            None,
+        ]
+    )
+
+    def flaky(*_args, **_kwargs) -> str:
+        outcome = next(outcomes)
+        if outcome is not None:
+            raise outcome
+        return json.dumps({"check_runs": _gate_check_runs("success", "success")})
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", flaky)
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    assert clock.sleeps == [20, 40]
+
+    reads: list[int] = []
+
+    def down(*_args, **_kwargs) -> str:
+        reads.append(1)
+        raise RuntimeError("gh api check-runs failed: HTTP 503")
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", down)
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="could not read append gate status .*5 consecutive failures",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=150 * 60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+        )
+    assert len(reads) == resolve_pending.APPEND_GATE_MAX_READ_FAILURES
+
+
+def test_append_proposal_gate_timeout_closes_pr_without_a_rejection_message(
+    monkeypatch,
+) -> None:
+    tree = _pre_genesis_tree()
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, tree, calls, gate_conclusion=None)
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.queue","value":1}\n'
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError, match="did not complete"
+    ) as info:
+        resolve_pending.propose_ledger_append(
+            "PolicyEngine/chronicle",
+            "codex/thesis-ledger-facts",
+            "ledger/official_observations.jsonl",
+            candidate.decode(),
+            "a" * 40,
+            "b" * 40,
+            1,
+            poll_seconds=0,
+            poll_attempts=3,
+        )
+
+    assert "Append gate: queued" in str(info.value)
+    joined = [" ".join(args) for args, _ in calls]
+    assert sum("/check-runs" in call for call in joined) == 3
+    assert not any("/merge" in call for call in joined)
+    assert any("PATCH" in call and "/pulls/7" in call for call in joined)
+    assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
+
+
+@pytest.mark.parametrize("budget", [0, -1, float("inf"), float("nan"), True, "90"])
+def test_append_proposal_bad_gate_budget_has_no_remote_mutation(
+    monkeypatch, budget
+) -> None:
+    tree = _pre_genesis_tree()
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, tree, calls)
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.budget","value":1}\n'
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError, match="gate_timeout_seconds"
+    ):
+        resolve_pending.propose_ledger_append(
+            "PolicyEngine/chronicle",
+            "codex/thesis-ledger-facts",
+            "ledger/official_observations.jsonl",
+            candidate.decode(),
+            "a" * 40,
+            "b" * 40,
+            1,
+            gate_timeout_seconds=budget,
+        )
+
+    assert calls == []
+
+
+def test_append_gate_timeout_prefers_flag_then_environment_then_default() -> None:
+    budget = resolve_pending.append_gate_timeout_seconds
+    env = resolve_pending.APPEND_GATE_TIMEOUT_ENV
+    assert budget(None, {}) == resolve_pending.DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60
+    assert budget(None, {env: " "}) == 150 * 60
+    assert budget(None, {env: "90"}) == 90 * 60
+    assert budget(45.0, {env: "90"}) == 45 * 60
+    for bad in ("soon", "0", "-5", "inf", "nan"):
+        with pytest.raises(resolve_pending.LedgerProposalError):
+            budget(None, {env: bad})
+    with pytest.raises(resolve_pending.LedgerProposalError):
+        budget(0.0, {})
 
 
 def test_append_proposal_cleans_pr_and_branch_when_merge_is_refused(
