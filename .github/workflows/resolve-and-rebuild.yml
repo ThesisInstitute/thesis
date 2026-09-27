@@ -77,7 +77,22 @@ jobs:
           # -u: through the pipe Python block-buffers stdout, so every line
           # carried the timestamp of the flush, not of the event, and a run
           # that died mid-buffer lost its last lines.
+          # Exit 3 (EXIT_REFUSED_ROWS) means the resolver finished cleanly
+          # but refused some rows: what it appended must still be committed
+          # and published, so the step goes on and the job fails at the end
+          # ("Fail the run on refused rows"). Any other failure stops here.
+          set +e
           python3 -u scripts/resolve_pending.py 2>&1 | tee /tmp/resolve-out.log
+          statuses=("${PIPESTATUS[@]}")
+          set -e
+          resolver_rc=${statuses[0]}
+          if [ "${statuses[1]}" -ne 0 ]; then
+            exit "${statuses[1]}"
+          fi
+          if [ "$resolver_rc" -ne 0 ] && [ "$resolver_rc" -ne 3 ]; then
+            exit "$resolver_rc"
+          fi
+          echo "resolver_rc=$resolver_rc" >> "$GITHUB_OUTPUT"
           if grep -q "^appended" /tmp/resolve-out.log; then
             echo "appended=1" >> "$GITHUB_OUTPUT"
           else
@@ -269,6 +284,13 @@ jobs:
         uses: ./.github/actions/attest-records-push
         with:
           commit: ${{ steps.deployed_ledger.outputs.pushed_sha }}
+
+      - name: Fail the run on refused rows
+        if: steps.resolve.outputs.resolver_rc == '3'
+        run: |
+          echo "The resolver refused one or more rows (see 'Resolve pending" >&2
+          echo "cells'); everything it appended was committed and published." >&2
+          exit 1
 
       - name: Alert on failure
         if: failure()
