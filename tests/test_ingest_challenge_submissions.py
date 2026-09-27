@@ -803,9 +803,15 @@ def _with(**changes: Any) -> Callable[[dict[str, Any]], bytes]:
 
 
 def _nested(payload: dict[str, Any]) -> bytes:
-    raw = payload_bytes(payload)
+    # Whether 100,000 levels raise RecursionError depends on the
+    # interpreter's stack (they did under CPython 3.14 on macOS, not on the
+    # Linux CI runner), so the nesting sits in notes, which must be a
+    # string: the content is invalid whether it parses or not.
+    # test_recursion_error_is_a_submission_error_not_a_batch_abort forces
+    # the RecursionError path itself.
+    raw = payload_bytes({k: v for k, v in payload.items() if k != "notes"})
     assert raw.endswith(b"}\n")
-    return raw[:-2] + b', "x": ' + b"[" * 100_000 + b"]" * 100_000 + b"}\n"
+    return raw[:-2] + b', "notes": ' + b"[" * 100_000 + b"]" * 100_000 + b"}\n"
 
 
 # Every way a first shot can parse (or nearly parse) yet fail the
@@ -815,10 +821,10 @@ def _nested(payload: dict[str, Any]) -> bytes:
 # locked the challenger out of the target forever. The encoding rows are
 # the parse-path split the same review flagged: json.loads(bytes)
 # auto-detects UTF-16 and strips a UTF-8 BOM, while the adapter's text
-# read refused both. The last two rows aborted the whole batch instead:
-# pathological nesting raised RecursionError in the walk, and an integer
-# past CPython's 4300-digit limit raised a bare ValueError that neither
-# parse path caught.
+# read refused both. The last two rows could abort the whole batch
+# instead: pathological nesting can raise RecursionError in the walk, and
+# an integer past CPython's 4300-digit limit raised a bare ValueError that
+# neither parse path caught.
 FIRST_SHOT_DEFECTS: dict[str, Callable[[dict[str, Any]], bytes]] = {
     "non-monotone quantiles": lambda payload: payload_bytes(
         {
@@ -1044,15 +1050,44 @@ def test_repo_root_below_the_git_toplevel_keeps_one_shot(
         b"\xef\xbb\xbf{}",
         "{}".encode("utf-16"),
         b'{"a": "\xff"}',
-        b"[" * 100_000 + b"]" * 100_000,
         b'{"n": 1' + b"0" * 5000 + b"}",
         b"{",
     ],
-    ids=["bom", "utf-16", "invalid-utf-8", "nesting", "digit-limit", "truncated"],
+    ids=["bom", "utf-16", "invalid-utf-8", "digit-limit", "truncated"],
 )
 def test_parse_submission_bytes_refuses_unreadable_json(raw: bytes) -> None:
     with pytest.raises(ingest.ChallengeSubmissionError, match="not readable JSON"):
         ingest.parse_submission_bytes(raw)
+
+
+def test_recursion_error_is_a_submission_error_not_a_batch_abort(
+    submission_repo: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Deep nesting raises RecursionError on some interpreters and parses on
+    # others, so force the error for any blob carrying a marker: both parse
+    # paths must turn it into a per-file refusal, and a hostile blob that
+    # exists only in history must not stop the recorder batch.
+    real_loads = json.loads
+
+    def recursing_loads(text: Any, *args: Any, **kwargs: Any) -> Any:
+        if isinstance(text, str) and "hostile-recursion" in text:
+            raise RecursionError("maximum recursion depth exceeded")
+        return real_loads(text, *args, **kwargs)
+
+    monkeypatch.setattr(ingest.json, "loads", recursing_loads)
+    with pytest.raises(ingest.ChallengeSubmissionError, match="not readable JSON"):
+        ingest.parse_submission_bytes(b'{"hostile-recursion": 1}')
+
+    hostile = {**submission_repo["submission"], "notes": "hostile-recursion"}
+    bad = submission_repo["inbox_dir"] / "fixture-user" / "hostile.json"
+    write_json(bad, hostile)
+    commit_all(submission_repo["repo"], "Add a blob whose parse recurses out")
+    # Current tree: the adapter refuses the file and keeps the batch going.
+    assert challengers_of(run_ingest(submission_repo)) == ["github:fixture-user"]
+    bad.unlink()
+    commit_all(submission_repo["repo"], "Remove it; only history holds it now")
+    assert challengers_of(run_ingest(submission_repo)) == ["github:fixture-user"]
 
 
 def test_validate_submission_content_ignores_repository_state() -> None:
