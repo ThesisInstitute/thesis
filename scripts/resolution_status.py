@@ -48,8 +48,25 @@ _LINE_RULES: tuple[tuple[re.Pattern[str], str, str], ...] = tuple(
         ),
         (r"^not yet published", "deferred", "NOT_YET_PUBLISHED"),
         (r"WINDOW NOT OPEN \(deferring\)$", "deferred", "WINDOW_NOT_OPEN"),
-        (r"FETCH FAILED \(deferring\)$", "fetch_failed", "SOURCE_UNREACHABLE"),
+        (
+            r"release window opens \d{4}-\d{2}-\d{2} \(deferring\)$",
+            "deferred",
+            "WINDOW_NOT_OPEN",
+        ),
+        # "fetch/parse failed" is not matched: it may be a parse failure.
+        (r"(?i)\bfetch failed\b", "fetch_failed", "SOURCE_UNREACHABLE"),
         (r"^UNIT MISMATCH \(refusing\)$", "refused", "UNIT_MISMATCH"),
+        (r"^LEDGER UNIT CONFLICT \(refusing\)$", "refused", "LEDGER_UNIT_CONFLICT"),
+        (
+            r"^CATALOG REFUSED \(excluded from append\)$",
+            "refused",
+            "LEDGER_CATALOG_REFUSED",
+        ),
+        (
+            r"^PROVENANCE REFUSED \(excluded from append\)$",
+            "refused",
+            "PROVENANCE_REFUSED",
+        ),
         (
             r"^BINDING/ADAPTER MISMATCH \(skipping, registered adapter='generic-url'",
             "refused",
@@ -57,7 +74,8 @@ _LINE_RULES: tuple[tuple[re.Pattern[str], str, str], ...] = tuple(
         ),
         (r"^BINDING/ADAPTER MISMATCH", "refused", "BINDING_MISMATCH"),
         (
-            r"^FIRST-PRINT WINDOW (MISSED|CLOSED)",
+            # Also "A-19 FIRST-PRINT WINDOW MISSED (refusing)".
+            r"(^|\s)FIRST-PRINT WINDOW (MISSED|CLOSED)",
             "refused",
             "FIRST_PRINT_WINDOW_MISSED",
         ),
@@ -112,6 +130,20 @@ REASONS = {
         "a resolver binding, and a registration cannot be changed. The "
         "resolver will not substitute a different route to the number."
     ),
+    "LEDGER_UNIT_CONFLICT": (
+        "The ledger already holds this series in a different unit from the "
+        "one this target is registered in, so the resolver refused it before "
+        "fetching. The ledger has to hold the series in one unit first."
+    ),
+    "LEDGER_CATALOG_REFUSED": (
+        "The resolver read the official figure, but the ledger's series "
+        "catalog refused the row, so it was not recorded. The catalog refuses "
+        "a row that would give one series two units or two cadences."
+    ),
+    "PROVENANCE_REFUSED": (
+        "The resolver read the official figure, but refused to record it "
+        "when attaching the target's registered provenance."
+    ),
     "BINDING_MISMATCH": (
         "The resolver reports that this target's registered source binding "
         "differs from the one it reads for this series, in the fields "
@@ -155,49 +187,129 @@ REASONS = {
     "NO_RESOLVER_RUN": ("No resolver log was available when this status was written."),
 }
 
+# A line the rules do not know keeps its code, UNCLASSIFIED, and the
+# resolver's own words as the detail. Its reason says only what the line's
+# state says: a deferral is not a refusal.
+UNCLASSIFIED_REASONS = {
+    "refused": (
+        "The resolver refused this target for a reason this page does not yet classify."
+    ),
+    "deferred": (
+        "The resolver deferred this target to a later run, for a reason this "
+        "page does not yet classify."
+    ),
+    "fetch_failed": (
+        "The resolver could not read this target's source on its last run, "
+        "for a reason this page does not yet classify."
+    ),
+}
+
+
+def reason_for(code: str, state: str) -> str:
+    """The sentence the page prints for a row."""
+    return (
+        REASONS.get(code)
+        or UNCLASSIFIED_REASONS.get(state)
+        or "The resolver declined this target."
+    )
+
+
 _REF_RE = re.compile(r"(?<![A-Za-z0-9_.\-])([a-z][a-z0-9_]*(?:\.[A-Za-z0-9_\-]+)+)")
 _UNSAFE_RE = re.compile(r"[^A-Za-z0-9 =,.()/_+@'\-]")
+
+# Heads of the lines a run prints at its end to list refusals it already
+# reported one by one (``  refused: <ref>: <reason>``, ``  fatal: ...``).
+# They never replace the line that reported the target first.
+_SUMMARY_HEADS = {
+    "refused": ("refused", "UNCLASSIFIED"),
+    "fatal": (
+        "fetch_failed",
+        "ENVIRONMENT_FAILURE",
+    ),
+}
+# A run that stops on this line appended nothing (resolve_pending.main).
+_ENVIRONMENT_STOP = "environment failures left admitted references unresolvable"
 
 
 def _plain(text: str, limit: int = 240) -> str:
     """Resolver text made safe to reprint (page, JSON, Actions log)."""
-    return _UNSAFE_RE.sub(" ", text).strip()[:limit]
+    return _UNSAFE_RE.sub(" ", text).strip()[:limit].rstrip()
 
 
-def parse_resolver_log(text: str) -> tuple[dict[str, dict[str, str]], dict[str, Any]]:
+def _locate_ref(
+    line: str, known_refs: frozenset[str] | set[str] | None
+) -> tuple[str, str, str, str] | None:
+    """(head, words the rules read, ref, detail) for a target line, or None.
+
+    The resolver puts the reference in one of two places: right after the
+    first ": " (``  <message>: <ref>[ — detail]``), or after the last one
+    when the message carries its own colons (``  A-19 <verdict>: <ref>``,
+    ``  <exception>: <ref>``). In the second shape the head is the text
+    before the message's first ": ", the rest of the message is the detail,
+    and the rules read the whole message: an A-19 verdict can say
+    "(deferring)" only at its end. With `known_refs`, only a reference in
+    that set counts, so a dotted word inside a message cannot pass for the
+    target.
+    """
+    candidates: list[tuple[str, str, str, str]] = []
+    head, separator, tail = line.partition(": ")
+    if not separator:
+        return None
+    first = _REF_RE.match(tail)
+    if first:
+        detail = tail[first.end() :].lstrip(" —-")
+        candidates.append((head, head, first.group(1), detail))
+    message, _separator, last = line.rpartition(": ")
+    if _REF_RE.fullmatch(last):
+        verdict, _colon, rest = message.partition(": ")
+        candidates.append((verdict, message, last, rest))
+    for candidate in candidates:
+        if known_refs is None or candidate[2] in known_refs:
+            return candidate
+    return None
+
+
+def parse_resolver_log(
+    text: str, known_refs: frozenset[str] | set[str] | None = None
+) -> tuple[dict[str, dict[str, str]], dict[str, Any]]:
     """({ref: {state, code, detail}}, run summary) from resolver stdout.
 
     Target lines are the two-space-indented ones the main loop prints:
-    ``  <message>: <ref>[ — detail]``, ``  resolve <ref> -> value unit``,
-    ``  already recorded: <ref>``, ``  release <date> not reached: <ref>``.
-    The last line about a reference wins.
+    ``  <message>: <ref>[ — detail]``, ``  <message>: <ref>``,
+    ``  resolve <ref> -> value unit``, ``  already recorded: <ref>``,
+    ``  release <date> not reached: <ref>``. The last line about a
+    reference wins, except the summary lines a run prints at its end
+    (``  refused: ...``, ``  fatal: ...``), which restate earlier ones.
     """
     targets: dict[str, dict[str, str]] = {}
     for raw in text.splitlines():
         if not raw.startswith("  ") or raw.startswith("   "):
             continue
         line = raw.strip()
-        resolved = re.match(r"^resolve (\S+) -> (.+)$", line)
+        resolved = re.match(r"^resolve (\S+) ->", line)
         if resolved:
-            targets[resolved.group(1)] = {
-                "state": "resolved_this_run",
-                "code": "RESOLVED_AWAITING_RECORD",
-                "detail": "",
-            }
+            if known_refs is None or resolved.group(1) in known_refs:
+                targets[resolved.group(1)] = {
+                    "state": "resolved_this_run",
+                    "code": "RESOLVED_AWAITING_RECORD",
+                    "detail": "",
+                }
             continue
-        head, separator, tail = line.partition(": ")
-        if not separator:
+        located = _locate_ref(line, known_refs)
+        if located is None:
             continue
-        ref_match = _REF_RE.match(tail)
-        if not ref_match:
-            continue
-        ref = ref_match.group(1)
-        detail = tail[ref_match.end() :].lstrip(" —-")
-        for pattern, state, code in _LINE_RULES:
-            if pattern.search(head):
-                break
+        head, words, ref, detail = located
+        summary = _SUMMARY_HEADS.get(head)
+        if summary is not None:
+            if ref in targets:
+                continue
+            state, code = summary
         else:
-            state, code = "refused", "UNCLASSIFIED"
+            for pattern, state, code in _LINE_RULES:
+                if pattern.search(words):
+                    break
+            else:
+                state, code = "refused", "UNCLASSIFIED"
         if code == "BINDING_MISMATCH" and not detail.strip():
             # "registry drift? — " followed by nothing. Saying the binding
             # differs would claim more than the resolver did.
@@ -207,16 +319,18 @@ def parse_resolver_log(text: str) -> tuple[dict[str, dict[str, str]], dict[str, 
             "code": code,
             "detail": _plain(f"{head}. {detail}" if code == "UNCLASSIFIED" else detail),
         }
+    lines = text.splitlines()
     crashed = "Traceback (most recent call last):" in text
+    stopped = any(line.startswith(_ENVIRONMENT_STOP) for line in lines)
     error = ""
     if crashed:
-        tail_lines = [
-            line for line in text.splitlines() if line and not line.startswith(" ")
-        ]
+        tail_lines = [line for line in lines if line and not line.startswith(" ")]
         error = _plain(tail_lines[-1] if tail_lines else "", 300)
+    elif stopped:
+        error = _plain(_ENVIRONMENT_STOP, 300)
     run = {
         "logAvailable": bool(text.strip()),
-        "completed": bool(text.strip()) and not crashed,
+        "completed": bool(text.strip()) and not crashed and not stopped,
         "error": error,
     }
     return targets, run
@@ -266,7 +380,7 @@ def build_status(
             else:
                 code = "NO_EXECUTOR_SERIES_NOT_COVERED"
                 detail = _plain(f"registered adapter {adapter}")
-        reason = REASONS.get(code) or "The resolver declined this target."
+        reason = reason_for(code, state)
         rows[ref] = {
             "forecastSlug": slug,
             "resolutionDate": due,
@@ -319,7 +433,12 @@ def main(argv: list[str] | None = None) -> int:
     text = ""
     if args.resolver_log and args.resolver_log.is_file():
         text = args.resolver_log.read_text(errors="replace")
-    resolver_targets, run = parse_resolver_log(text)
+    pending_refs = {
+        link["targetFactRef"]
+        for link in log.get("resolutionLinks", [])
+        if link.get("status") == "pending" and link.get("targetFactRef")
+    }
+    resolver_targets, run = parse_resolver_log(text, pending_refs)
     claimed = {item[0] for item in resolve_pending.pending_claims_refs(log)}
     claimed |= {item[0] for item in resolve_pending.pending_adapter_refs(log)}
     as_of = (

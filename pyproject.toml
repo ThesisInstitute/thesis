@@ -88,6 +88,8 @@ dev = [
     "pyyaml>=6.0.2",
     # The IRS SOI and EIA DNav adapter fixtures parse real .xls workbooks.
     "xlrd==2.0.1",
+    # Property tests (tests/test_resolution_status.py).
+    "hypothesis>=6.140",
 ]
 
 [tool.setuptools.packages.find]
