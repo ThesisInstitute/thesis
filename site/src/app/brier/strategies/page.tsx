@@ -1,7 +1,8 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/Header";
-import { FORECAST_CELLS, formatValue } from "@/data/forecast-cells";
+import { formatValue } from "@/data/forecast-cells";
 import {
   buildStrategyLabReport,
   type StrategyComparisonRow,
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
 
 export default async function StrategyLabPage() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
   const report = buildStrategyLabReport(forecasts, ledger);
   const priorReport = buildTimeSeriesPriorAdjustmentReport(forecasts);
   // Judge diagnostics read the published verified-chronology population

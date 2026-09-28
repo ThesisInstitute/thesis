@@ -1,0 +1,4 @@
+{"status":"REQUEST_SUCCEEDED","responseTime":85,"message":[],"Results":{
+"series":
+[{"seriesID":"CES0000000001","data":[{"year":"2026","period":"M08","periodName":"August","latest":"true","value":"159075","footnotes":[{"code":"P","text":"preliminary"}]},{"year":"2026","period":"M07","periodName":"July","value":"158913","footnotes":[{"code":"P","text":"preliminary"}]},{"year":"2026","period":"M06","periodName":"June","value":"158892","footnotes":[{}]},{"year":"2026","period":"M05","periodName":"May","value":"158861","footnotes":[{}]},{"year":"2026","period":"M04","periodName":"April","value":"158798","footnotes":[{}]},{"year":"2026","period":"M03","periodName":"March","value":"158650","footnotes":[{}]},{"year":"2026","period":"M02","periodName":"February","value":"158436","footnotes":[{}]},{"year":"2026","period":"M01","periodName":"January","value":"158592","footnotes":[{}]}]}]
+}}

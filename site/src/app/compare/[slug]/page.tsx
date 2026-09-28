@@ -9,7 +9,9 @@ import {
 } from "@/data/conditional-groups";
 
 export function generateStaticParams() {
-  return CONDITIONAL_GROUPS.map((group) => ({ slug: group.slug }));
+  return CONDITIONAL_GROUPS.filter(
+    (group) => getConditionalGroup(group.slug)?.falseArm,
+  ).map((group) => ({ slug: group.slug }));
 }
 
 export async function generateMetadata({
@@ -184,10 +186,12 @@ export default async function ComparePage({
               Math.min(trueArm.pointEstimate, falseArm.pointEstimate),
               falseArm.unit,
             )}{" "}
-            ={" "}
-            <strong>{formatValue(Math.abs(gap), trueArm.unit)}</strong>
+            = <strong>{formatValue(Math.abs(gap), trueArm.unit)}</strong>
             {group.gapNote ? (
-              <span className="text-[var(--theme-text-muted)]"> — {group.gapNote}</span>
+              <span className="text-[var(--theme-text-muted)]">
+                {" "}
+                — {group.gapNote}
+              </span>
             ) : null}
           </div>
         </div>
@@ -233,9 +237,9 @@ export default async function ComparePage({
             ? "If an arm's condition holds when the outcome publishes, scoring covers that arm"
             : "When the outcome publishes, scoring covers the resolving arm"}
           {unconditional ? ", the unconditional mixture," : ""}
-          {probability ? " and the policy-probability cell" : ""} — one
-          outcome, multiple calibration receipts. Disagree with
-          the headline? Say which cell you disagree with.
+          {probability ? " and the policy-probability cell" : ""} — one outcome,
+          multiple calibration receipts. Disagree with the headline? Say which
+          cell you disagree with.
         </p>
       </main>
     </div>

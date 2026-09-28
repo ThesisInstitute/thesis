@@ -1,4 +1,4 @@
-import { FORECAST_CELLS } from "@/data/forecast-cells";
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import { buildForecastJudgeExport } from "@/data/forecast-judges";
 import {
   loadPolicyEngineLedger,
@@ -10,7 +10,7 @@ export const dynamic = "force-static";
 
 export async function GET() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
   const scores = scoreResolvedForecasts(forecasts, ledger);
 
   return Response.json(buildForecastJudgeExport({ forecasts, scores }));

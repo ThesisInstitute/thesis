@@ -1139,6 +1139,15 @@ def validate(args: argparse.Namespace) -> None:
 
 
 def scan_bytes(data: bytes) -> list[str]:
+    from evidence_secret_scan import INVALID_ENVELOPE, scan_evidence_bytes
+
+    evidence_hits = scan_evidence_bytes(data, SECRET_PATTERNS)
+    if evidence_hits is not None:
+        if INVALID_ENVELOPE in evidence_hits:
+            return evidence_hits + [
+                name for name, pattern in SECRET_PATTERNS.items() if pattern.search(data)
+            ]
+        return evidence_hits
     return [name for name, pattern in SECRET_PATTERNS.items() if pattern.search(data)]
 
 

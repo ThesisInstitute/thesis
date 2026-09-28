@@ -181,7 +181,13 @@ this parse (e.g. `irs_soi_pub1304_fetch_year` downloads and reads the
 official Table 3.3 workbook cell); with workspace access you may run them
 — installing a pinned parser like `xlrd==2.0.1` first if needed — and a
 base rate fetched through the resolution parser is, by construction, the
-series the target resolves against.
+series the target resolves against. In native captured runs, fetch each IRS
+workbook with `fetch_source`, then call `extract_irs_soi` with that source call
+ID, the registered series ID, and tax year. This replays the same parser on
+the captured bytes without shell networking or installing packages inside the
+agent. Use the normalized returned value once; preserve its exact year/value
+through revision and distinguish total ACTC claimants from the separate
+refundable-portion subset.
 
 Resolve-by-bound targets during a methodology transition: while NO
 official print under the announced revised methodology exists —
@@ -197,6 +203,11 @@ prints are required exactly as this section demands for every other
 target, and old-methodology history stops being admissible.
 
 `activityLog` is added by `scripts/run_thesis_analyst.py`, not by the model.
+Native Codex stages add `tool_evidence` and `tool_evidence_verification`
+artifacts as described in [`tool-evidence.md`](tool-evidence.md). Their call IDs
+are assigned by the recorder; the model may cite them but cannot manufacture
+receipts by emitting a reasoning step. Reasoning `tool` blocks remain the
+model's account of its work, separate from the captured tool evidence.
 It preserves the full run envelope behind the curated public trace: prompt,
 command metadata, stdout/stderr, raw response, parsed/normalized cells,
 model-candidate JSON, and validation report. When pre-submit review is enabled,

@@ -9,7 +9,7 @@ import {
   TYPE_LABEL,
   type CountryCode,
   type ForecastCellType,
-} from "@/data/forecast-cells";
+} from "@/data/forecast-display";
 import {
   filterForecastListing,
   type ForecastListingFilter,
@@ -101,10 +101,11 @@ export function ForecastBrowser({ forecasts }: ForecastBrowserProps) {
       if (!item.publisher) continue;
       const existing = counts.get(item.publisher.slug);
       if (existing) existing.count += 1;
-      else counts.set(item.publisher.slug, {
-        label: item.publisher.label,
-        count: 1,
-      });
+      else
+        counts.set(item.publisher.slug, {
+          label: item.publisher.label,
+          count: 1,
+        });
     }
     return [...counts.entries()]
       .map(([slug, entry]) => ({ slug, ...entry }))

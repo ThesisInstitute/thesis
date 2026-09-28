@@ -14,6 +14,7 @@ export type TargetSourceAdapter =
   | "alfred-fred"
   | "bea-ita-itable"
   | "bea-release"
+  | "bls-api"
   | "bls-qcew"
   | "census-spm-annual-report"
   | "eia-dnav-xls"

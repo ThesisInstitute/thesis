@@ -1,4 +1,5 @@
-import { formatValue, type Unit } from "@/data/forecast-cells";
+import { formatValue, type Unit } from "@/data/forecast-display";
+import type { PredictionDistribution } from "@/data/prediction-distribution";
 
 type HistoricalPoint = { label: string; value: number };
 
@@ -8,6 +9,7 @@ interface ForecastVizProps {
   ciHigh: number;
   unit: Unit;
   history?: HistoricalPoint[];
+  distribution?: PredictionDistribution;
   size?: "compact" | "full";
 }
 
@@ -18,6 +20,7 @@ interface ForecastTrendProps {
   unit: Unit;
   history: HistoricalPoint[];
   targetLabel: string;
+  showInterval?: boolean;
   actual?: {
     label: string;
     value: number;
@@ -25,11 +28,11 @@ interface ForecastTrendProps {
 }
 
 /**
- * CI-and-density visualization for a forecast.
+ * Forecast interval, with a stored cumulative distribution when available.
  *
  * "compact" mode draws a horizontal range bar suitable for a card.
- * "full" mode draws a wider range bar with axis ticks, historical anchors,
- * and a normal-shaped density underlay.
+ * "full" mode plots the supplied CDF directly. It never infers a density
+ * from the point estimate and interval.
  */
 export function ForecastViz({
   point,
@@ -37,8 +40,12 @@ export function ForecastViz({
   ciHigh,
   unit,
   history,
+  distribution,
   size = "full",
 }: ForecastVizProps) {
+  if (size === "full" && distribution) {
+    return <ForecastCdf distribution={distribution} unit={unit} />;
+  }
   const allValues = [
     ciLow,
     ciHigh,
@@ -59,7 +66,9 @@ export function ForecastViz({
   const labelPct = (v: number) => Math.min(94, Math.max(6, pct(v)));
 
   const axisLabels = (textSize: string) => (
-    <div className={`relative mt-1 h-4 w-full [font-family:var(--font-mono)] ${textSize} text-[var(--theme-text-dim)]`}>
+    <div
+      className={`relative mt-1 h-4 w-full [font-family:var(--font-mono)] ${textSize} text-[var(--theme-text-dim)]`}
+    >
       <span
         className="absolute -translate-x-1/2"
         style={{ left: `${labelPct(ciLow)}%` }}
@@ -102,58 +111,13 @@ export function ForecastViz({
     );
   }
 
-  // Full mode: bell curve underlay + range bar + history anchors
-  const densityWidth = pct(ciHigh) - pct(ciLow);
-  const densityCenter = pct(point);
-  const densityPath = buildDensityPath(densityCenter, densityWidth);
-
   return (
     <div className="w-full">
-      <div className="relative h-32 w-full">
-        <svg
-          viewBox="0 0 100 32"
-          preserveAspectRatio="none"
-          className="absolute inset-0 h-full w-full"
-        >
-          <defs>
-            <linearGradient id="density-fill" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="var(--color-rose-300)" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="var(--color-rose-300)" stopOpacity="0.05" />
-            </linearGradient>
-          </defs>
-          <path
-            d={`${densityPath} L 100 32 L 0 32 Z`}
-            fill="url(#density-fill)"
-          />
-          <path
-            d={densityPath}
-            stroke="var(--color-accent)"
-            strokeWidth="0.4"
-            fill="none"
-          />
-          {history?.map((h, i) => (
-            <line
-              key={i}
-              x1={pct(h.value)}
-              x2={pct(h.value)}
-              y1="22"
-              y2="32"
-              stroke="var(--color-mist-400)"
-              strokeWidth="0.3"
-              strokeDasharray="0.5 0.5"
-            />
-          ))}
-          <line
-            x1={pct(point)}
-            x2={pct(point)}
-            y1="2"
-            y2="32"
-            stroke="var(--color-accent)"
-            strokeWidth="0.5"
-          />
-        </svg>
-      </div>
-      <div className="relative h-3 w-full rounded-full bg-[var(--theme-bg-surface)]">
+      <div
+        role="img"
+        aria-label={`Forecast ${formatValue(point, unit)}; 80% interval ${formatValue(ciLow, unit)} to ${formatValue(ciHigh, unit)}`}
+        className="relative h-3 w-full rounded-full bg-[var(--theme-bg-surface)]"
+      >
         <div
           className="absolute h-3 rounded-full bg-[var(--color-horizon-300)] opacity-70"
           style={{
@@ -175,6 +139,10 @@ export function ForecastViz({
         ))}
       </div>
       {axisLabels("text-[0.7rem]")}
+      <p className="mt-4 text-sm text-[var(--theme-text-muted)]">
+        Point estimate and 80% interval. A full probability distribution is not
+        available for this run.
+      </p>
       {history && history.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 [font-family:var(--font-mono)] text-[0.65rem] text-[var(--theme-text-dim)]">
           <span className="text-[var(--theme-text-muted)]">history:</span>
@@ -192,28 +160,145 @@ export function ForecastViz({
   );
 }
 
-function buildDensityPath(center: number, width: number): string {
-  // Construct a smooth open bell-curve path in the [0,100] x-range mapped to
-  // the CI window; callers close it against the baseline for the area fill.
-  const half = Math.max(width / 2, 4);
-  const steps = 48;
-  const points: [number, number][] = [];
-  const peakY = 4;
-  const baseY = 32;
-  for (let i = 0; i <= steps; i++) {
-    const t = (i / steps - 0.5) * 2; // -1..1
-    const x = center + t * half * 1.5;
-    const y = baseY - (baseY - peakY) * Math.exp(-3 * t * t);
-    points.push([x, y]);
-  }
-  return points
-    .map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`)
+function ForecastCdf({
+  distribution,
+  unit,
+}: {
+  distribution: PredictionDistribution;
+  unit: Unit;
+}) {
+  const width = 640;
+  const height = 270;
+  const margin = { top: 20, right: 25, bottom: 55, left: 60 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  const { lower, upper } = distribution.support;
+  const span = upper - lower || 1;
+  const x = (value: number) =>
+    margin.left + ((value - lower) / span) * plotWidth;
+  const y = (probability: number) =>
+    margin.top + (1 - probability) * plotHeight;
+  const { pointEstimate, interval80 } = distribution.summary;
+  const source =
+    distribution.provenance === "agent_reported"
+      ? "Based on probabilities reported by the forecasting agent."
+      : "Derived from the point estimate and 80% interval; the agent did not report a full distribution.";
+  const path = distribution.points
+    .map(
+      ({ value, probability }, index) =>
+        `${index === 0 ? "M" : "L"} ${x(value).toFixed(2)} ${y(probability).toFixed(2)}`,
+    )
     .join(" ");
+
+  return (
+    <figure className="w-full">
+      <p className="text-sm font-medium text-[var(--theme-text)]">
+        Cumulative probability
+      </p>
+      <p className="mt-1 text-sm text-[var(--theme-text-muted)]">
+        Chance that the outcome is at or below each value.
+      </p>
+      <svg
+        role="img"
+        aria-label={`Cumulative probability distribution; forecast ${formatValue(pointEstimate, unit)}, 80% interval ${formatValue(interval80.lower, unit)} to ${formatValue(interval80.upper, unit)}. ${source}`}
+        viewBox={`0 0 ${width} ${height}`}
+        className="mt-3 h-auto w-full max-sm:[&_text]:text-[19px]"
+      >
+        <rect
+          x={x(interval80.lower)}
+          y={margin.top}
+          width={x(interval80.upper) - x(interval80.lower)}
+          height={plotHeight}
+          fill="var(--color-horizon-300)"
+          opacity="0.25"
+        />
+        {[0, 0.25, 0.5, 0.75, 1].map((probability) => (
+          <g key={probability}>
+            <line
+              x1={margin.left}
+              x2={width - margin.right}
+              y1={y(probability)}
+              y2={y(probability)}
+              stroke="var(--theme-border)"
+            />
+            <text
+              x={margin.left - 10}
+              y={y(probability) + 4}
+              textAnchor="end"
+              className="[font-family:var(--font-mono)] text-[12px] fill-[var(--theme-text-muted)]"
+            >
+              {probability * 100}%
+            </text>
+          </g>
+        ))}
+        <line
+          x1={x(pointEstimate)}
+          x2={x(pointEstimate)}
+          y1={margin.top}
+          y2={margin.top + plotHeight}
+          stroke="var(--color-accent)"
+          strokeDasharray="4 4"
+        />
+        <path
+          d={path}
+          fill="none"
+          stroke="var(--color-accent)"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+        {[lower, pointEstimate, upper].map((value, index) => (
+          <text
+            key={index}
+            x={x(value)}
+            y={margin.top + plotHeight + 25}
+            textAnchor={index === 0 ? "start" : index === 2 ? "end" : "middle"}
+            className={`[font-family:var(--font-mono)] text-[12px] fill-[var(--theme-text-muted)] ${
+              index === 1 &&
+              Math.min(
+                x(value) - margin.left,
+                width - margin.right - x(value),
+              ) < 140
+                ? "max-sm:hidden"
+                : ""
+            }`}
+          >
+            {formatValue(value, unit)}
+          </text>
+        ))}
+        <text
+          x={margin.left + plotWidth / 2}
+          y={height - 3}
+          textAnchor="middle"
+          className="text-[12px] fill-[var(--theme-text-muted)]"
+        >
+          Forecast value
+        </text>
+      </svg>
+      <figcaption className="space-y-2 text-sm leading-relaxed text-[var(--theme-text-muted)]">
+        <p>
+          Shaded band: 80% interval ({formatValue(interval80.lower, unit)}–
+          {formatValue(interval80.upper, unit)}). Dashed line: point estimate (
+          {formatValue(pointEstimate, unit)}).
+        </p>
+        <p>{source}</p>
+      </figcaption>
+    </figure>
+  );
 }
 
 const MONTH_INDEX: Record<string, number> = {
-  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
-  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11,
 };
 
 /**
@@ -266,6 +351,7 @@ export function ForecastTrend({
   history,
   point,
   targetLabel,
+  showInterval = true,
   unit,
 }: ForecastTrendProps) {
   if (history.length === 0) return null;
@@ -302,7 +388,8 @@ export function ForecastTrend({
     targetTime !== null &&
     times.every((time) => time !== null) &&
     timeline.every(
-      (time, index) => index === 0 || (time as number) > (timeline[index - 1] as number),
+      (time, index) =>
+        index === 0 || (time as number) > (timeline[index - 1] as number),
     );
   const x = (index: number) => {
     if (proportional) {
@@ -338,7 +425,7 @@ export function ForecastTrend({
         role="img"
         aria-label={`Historical trend ending with forecast ${formatValue(point, unit)}`}
         viewBox={`0 0 ${width} ${height}`}
-        className="h-auto w-full overflow-visible"
+        className="h-auto w-full overflow-visible max-sm:[&_text]:text-[19px]"
       >
         <line
           x1={margin.left}
@@ -387,25 +474,29 @@ export function ForecastTrend({
           strokeWidth="3"
         />
 
-        <line
-          x1={targetX}
-          x2={targetX}
-          y1={intervalY1}
-          y2={intervalY2}
-          stroke="var(--color-accent)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          opacity="0.2"
-        />
-        <line
-          x1={targetX}
-          x2={targetX}
-          y1={intervalY1}
-          y2={intervalY2}
-          stroke="var(--color-accent)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
+        {showInterval && (
+          <>
+            <line
+              x1={targetX}
+              x2={targetX}
+              y1={intervalY1}
+              y2={intervalY2}
+              stroke="var(--color-accent)"
+              strokeWidth="8"
+              strokeLinecap="round"
+              opacity="0.2"
+            />
+            <line
+              x1={targetX}
+              x2={targetX}
+              y1={intervalY1}
+              y2={intervalY2}
+              stroke="var(--color-accent)"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </>
+        )}
 
         {history.map((item, index) => (
           <g key={`${item.label}-${index}`}>
@@ -422,7 +513,13 @@ export function ForecastTrend({
                 x={x(index)}
                 y={margin.top + plotHeight + 25}
                 textAnchor={index === 0 ? "start" : "middle"}
-                className="[font-family:var(--font-mono)] text-[11px] fill-[var(--theme-text-dim)]"
+                className={`[font-family:var(--font-mono)] text-[11px] fill-[var(--theme-text-dim)] ${
+                  index !== 0 &&
+                  targetX - x(index) <
+                    targetLabel.length * 12 + item.label.length * 6 + 12
+                    ? "max-sm:hidden"
+                    : ""
+                }`}
               >
                 {item.label}
               </text>
@@ -442,7 +539,7 @@ export function ForecastTrend({
           x={targetX}
           y={margin.top + plotHeight + 25}
           textAnchor="middle"
-          className="[font-family:var(--font-mono)] text-[11px] fill-[var(--theme-text-dim)]"
+          className="[font-family:var(--font-mono)] text-[11px] fill-[var(--theme-text-dim)] max-sm:[text-anchor:end]"
         >
           {targetLabel}
         </text>
@@ -450,7 +547,7 @@ export function ForecastTrend({
           x={targetX}
           y={Math.max(14, targetY - 12)}
           textAnchor="middle"
-          className="[font-family:var(--font-mono)] text-[12px] font-medium fill-[var(--color-accent)]"
+          className="[font-family:var(--font-mono)] text-[12px] font-medium fill-[var(--color-accent)] max-sm:[text-anchor:end]"
         >
           {formatValue(point, unit)}
         </text>
@@ -497,10 +594,12 @@ export function ForecastTrend({
           <span className="h-[2px] w-5 rounded-full border-t-2 border-dashed border-[var(--color-accent)]" />
           forecast path
         </span>
-        <span className="inline-flex items-center gap-2">
-          <span className="h-4 w-[3px] rounded-full bg-[var(--color-accent)] opacity-70" />
-          80% interval
-        </span>
+        {showInterval && (
+          <span className="inline-flex items-center gap-2">
+            <span className="h-4 w-[3px] rounded-full bg-[var(--color-accent)] opacity-70" />
+            80% interval
+          </span>
+        )}
         {actual && (
           <span className="inline-flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-[var(--color-horizon-600)]" />

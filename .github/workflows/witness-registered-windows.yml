@@ -1,0 +1,139 @@
+name: Witness registered release windows
+
+# Some published forecasts are registered with a source binding that no
+# resolver leg can execute. Whether they are ever scored is a founder ruling.
+# One possible ruling needs first-print custody made while each registered
+# release window is open, so this workflow asks the Internet Archive to
+# capture each such source page on every day of its window and reads the
+# Archive's index back. It decides nothing about any target.
+#
+# The Archive's index is the record. This job holds a read-only contents
+# token, commits nothing, and is deliberately absent from the records
+# attestation allowlist. See docs/registered-window-custody.md.
+on:
+  schedule:
+    # Main pass. Late in the UTC day, so a page updated that morning or
+    # afternoon in North America or Europe is already up, and four hours
+    # clear of the UTC date change, which a delayed schedule must not cross:
+    # a capture dated after a window's last day is outside it. (The script
+    # re-checks the date before each request and refuses if it has crossed.)
+    - cron: "40 19 * * *"
+    # Second pass for whatever the first could not get: the Archive
+    # rate-limits and fails in bursts that outlast one run's retries. It
+    # leaves alone any URL the index already shows captured since 19:30.
+    - cron: "10 22 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "capture asks the Archive; dry-run prints the plan; audit only reads the index for every started window"
+        type: choice
+        default: capture
+        options:
+          - capture
+          - dry-run
+          - audit
+
+permissions:
+  contents: read
+  issues: write # surfaces a window about to close with no capture
+
+concurrency:
+  group: witness-registered-windows
+  cancel-in-progress: false
+
+jobs:
+  witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Ask the Archive to capture open registered windows
+        id: witness
+        env:
+          MODE: ${{ github.event.inputs.mode || 'capture' }}
+          SCHEDULE: ${{ github.event.schedule || '' }}
+        run: |
+          set -euo pipefail
+          REPORT="$RUNNER_TEMP/registered-window-witness/report.json"
+          ARGS=(--report "$REPORT")
+          case "$MODE" in
+            capture) ;;
+            dry-run) ARGS+=(--dry-run) ;;
+            audit) ARGS+=(--audit) ;;
+            *) echo "unknown mode: $MODE" >&2; exit 2 ;;
+          esac
+          if [ "$MODE" = "capture" ] && [ "$SCHEDULE" = "10 22 * * *" ]; then
+            ARGS+=(--skip-captured-since 19:30)
+          fi
+          echo "report=$REPORT" >> "$GITHUB_OUTPUT"
+          uv run --locked python scripts/witness_registered_windows.py "${ARGS[@]}"
+
+      - name: Keep the run's report
+        if: always() && steps.witness.outputs.report != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: registered-window-witness-${{ github.run_id }}
+          path: ${{ steps.witness.outputs.report }}
+          if-no-files-found: warn
+          retention-days: 90
+
+      # Per-URL failures are findings and leave the run green. Three things
+      # turn it red, each once: a registered window on its last two days with
+      # no capture in the index; the same with an index that could not be
+      # read, so nobody knows; and a window that has closed with none. Each
+      # alert carries a marker, and one already written into an issue or a
+      # comment is not raised again. A closing window's marker carries the
+      # date, so it is raised each day someone can still act.
+      - name: Flag custody alerts nobody has been told about
+        env:
+          REPORT: ${{ steps.witness.outputs.report }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          test -f "$REPORT"
+          WORK="$RUNNER_TEMP/registered-window-witness"
+          NEW="$WORK/new-alerts.md"
+          : > "$NEW"
+          jq -r '(.alerts // [])[] | [.marker, .text] | @tsv' "$REPORT" > "$WORK/alerts.tsv"
+          while IFS=$'\t' read -r marker text; do
+            [ -n "$marker" ] || continue
+            # If the search itself fails, raise the alert: better twice than never.
+            seen=$(gh issue list --state all --search "\"$marker\"" --json number --jq 'length' 2>/dev/null || echo 0)
+            if [ "$seen" = "0" ]; then
+              printf -- '- %s (`%s`)\n' "$text" "$marker" >> "$NEW"
+            fi
+          done < "$WORK/alerts.tsv"
+          if [ -s "$NEW" ]; then
+            cat "$NEW" >&2
+            exit 1
+          fi
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          title="Registered-window witness needs a look $(date -u +%F)"
+          body="$RUNNER_TEMP/witness-issue.md"
+          {
+            echo "The registered-window witness failed, or has custody alerts nobody has been told about: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            cat "$RUNNER_TEMP/registered-window-witness/new-alerts.md" 2>/dev/null || true
+            echo
+            echo "A capture can only be made while the window is open. For a window that is still open, try a manual capture at https://web.archive.org/save before its last UTC day ends, and read the index yourself if the job could not. If the publisher refuses the Archive's crawler, the window closes without third-party custody; that is a fact for the disposition ruling, not something to repair afterwards. This job changes no target. See docs/registered-window-custody.md."
+          } > "$body"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number' || true)
+          if [ -z "$existing" ]; then
+            gh issue create --title "$title" --body-file "$body"
+          else
+            # The second pass of the day: its alerts go on the day's issue, so
+            # their markers are on record and are not raised again.
+            gh issue comment "$existing" --body-file "$body"
+          fi

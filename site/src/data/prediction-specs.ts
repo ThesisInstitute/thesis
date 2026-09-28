@@ -429,7 +429,7 @@ export function buildResolutionRef(predictionId: string) {
 export function buildRecordedPredictionRunId(
   forecast: ForecastCell,
   createdAt: string = forecast.predictionRun?.runAt ?? SEEDED_RUN_RECORDED_AT,
-  variantId = "primary",
+  variantId = forecast.primaryVariantId ?? "primary",
   runEntry?: ForecastRunEntry,
 ) {
   const run =

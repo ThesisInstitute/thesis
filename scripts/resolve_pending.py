@@ -60,9 +60,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
-from collections.abc import Callable, Mapping
+import zlib
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, replace
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from html import unescape
 from html.parser import HTMLParser
 from typing import Any
@@ -230,6 +231,13 @@ TSA_ENDPOINTS = {
     "digicert": "http://timestamp.digicert.com",
 }
 TimestampRequester = Callable[[str, bytes, float], bytes]
+
+
+# main's exit status when it finished cleanly but refused one or more rows
+# (a contract-binding or ledger-catalog refusal). Whatever it appended must
+# still be committed and published, so the workflow tells this apart from a
+# crash (1), publishes, and then fails the job so the alert fires.
+EXIT_REFUSED_ROWS = 3
 
 
 class LedgerProposalError(RuntimeError):
@@ -2074,14 +2082,22 @@ def bea_ita_release_snapshot_envelope(
 # immutable Wayback Machine snapshot of the cells' OWN bound source page
 # (bls.gov blocks non-browser fetches; web.archive.org serves the exact
 # bytes and independently timestamps them). One snapshot per data month,
-# captured right after the Employment Situation release. The three rows
-# that DO have FRED mirrors (office/admin, production, transport) were
+# captured between that month's Employment Situation release and the next.
+# The three rows that DO have FRED mirrors (office/admin, production, transport) were
 # cross-checked against ALFRED at the release vintage and matched exactly.
+#
+# Every pin is a capture taken between the Employment Situation that first
+# printed the month and the next one (BLS schedule, archived 2026-07-31:
+# https://web.archive.org/web/20260731041428/https://www.bls.gov/schedule/news_release/empsit.htm
+# — June printed 2026-07-02, July 2026-08-07, August 2026-09-04, September
+# 2026-10-02). The page is overwritten each month, so the capture's own
+# current-month header is checked against the target period before any row is
+# read (a19_snapshot_period); a pin to the wrong capture refuses.
+A19_SOURCE_URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
 A19_SNAPSHOT_URLS: dict[str, str] = {
-    "2026-06": (
-        "https://web.archive.org/web/20260710110509/"
-        "https://www.bls.gov/web/empsit/cpseea19.htm"
-    ),
+    "2026-06": f"https://web.archive.org/web/20260710110509/{A19_SOURCE_URL}",
+    "2026-07": f"https://web.archive.org/web/20260819191418/{A19_SOURCE_URL}",
+    "2026-08": f"https://web.archive.org/web/20260904170006/{A19_SOURCE_URL}",
 }
 A19_ROW_LABELS: dict[str, str] = {
     "business_financial_operations": "Business and financial operations occupations",
@@ -2318,8 +2334,347 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
             "2026-06": 3193312,
         },
     },
+    # Registrable recurring docket series (wired 2026-09-20). These six are the
+    # first BLS API specs a NEW registration may bind: each carries a
+    # ``binding_transform``, which is what ``bls_api_binding_template`` turns
+    # into the reviewed seven-key sourceBinding and what the registration-time
+    # execution-plan gate requires. Its shape is the prospector's
+    # (``prospect_targets._transform_errors``): exactly ``operation`` and
+    # ``factor``, from that function's operation vocabulary, because a later
+    # proposal carries this binding as its ``previousTarget.sourceBinding``.
+    # Rounding is the executor's (``round``), as for the StatCan growth series.
+    # The older specs above have no ``binding_transform``, so they keep
+    # resolving only the cells that predate bindings.
+    #
+    # The keyless API answers ``calculations`` with "Calculations have been
+    # disabled for this request" (probed 2026-09-20), so month-over-month
+    # figures are derived here from two served rows. ``mom_pct`` and
+    # ``mom_diff`` require the immediately preceding CALENDAR month: BLS
+    # published no October 2025 value for several series (the API serves
+    # ``"-"``), and a change across a gap is not a statistic BLS printed.
+    #
+    # Anchors are in the transformed unit and are months whose values no longer
+    # move between releases: CPS and CPI months other than the latest (revised
+    # only in the annual seasonal revision), JOLTS second estimates, and CES
+    # third estimates. They are NOT first prints: the API drops a first print
+    # one release later (June 2026 openings printed 7,359 and are served as
+    # 7,182; July 2026 payrolls printed -23 and are served as +21). First-print
+    # custody comes from the gate, never from an anchor. Each anchor is
+    # verified against the release that printed it; see "Anchor verifications
+    # — BLS registrable docket series (2026-09-20)" in
+    # docs/anchor-verifications.md.
+    # ``anchor_abs_tolerance`` replaces the relative tolerance on one-decimal
+    # figures. 0.1 is a lab choice, one step of the published precision, not a
+    # bound BLS states: the annual CPS revision and the February CPI seasonal
+    # revision re-derive these months, and a larger move refuses every capture
+    # with ANCHOR MISMATCH until the anchors are re-verified. Extending a
+    # docket calendar across a series' annual revision therefore means
+    # re-verifying and re-committing its anchors in the same change.
+    #
+    # Three of the six have no docket template yet, so nothing can register
+    # them: the unemployment rate and the two CPI series. Chronicle holds two
+    # lineages for each concept (an ``economy/aggregate`` one the ALFRED leg
+    # wrote, and an older one the docket pins), a declared ``sourceSeriesId``
+    # matches neither, and the docket-to-Ledger containment gate refuses the
+    # pin. That is a Chronicle identity decision; see the docs section.
+    "bls.cps.unemployment_rate": {
+        "series_id": "LNS14000000",
+        "period_type": "month",
+        "unit": "percent",
+        "label": "US unemployment rate, 16 years and over (SA)",
+        "source_name": "bls_cps",
+        "source_table": (
+            "Current Population Survey, unemployment rate, 16 years and over, "
+            "seasonally adjusted (Employment Situation, Table A-1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "LNS14000000",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-04": 4.3,
+            "2026-05": 4.3,
+            "2026-06": 4.2,
+            "2026-07": 4.1,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 1},
+    },
+    "bls.cpi.u.headline_mom": {
+        "series_id": "CUSR0000SA0",
+        "period_type": "month",
+        "transform": "mom_pct",
+        "unit": "percent_growth",
+        "round": 1,
+        "label": "US CPI-U all items, one-month percent change (SA)",
+        "source_name": "bls_cpi",
+        "source_table": (
+            "Consumer Price Index for All Urban Consumers, US city average, "
+            "all items, seasonally adjusted (CPI news release, Table A)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CUSR0000SA0",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-05": 0.5,
+            "2026-06": -0.4,
+            "2026-07": 0.1,
+        },
+        "binding_transform": {
+            "operation": "percent_change_previous_period",
+            "factor": 1,
+        },
+    },
+    "bls.cpi.u.core_mom": {
+        "series_id": "CUSR0000SA0L1E",
+        "period_type": "month",
+        "transform": "mom_pct",
+        "unit": "percent_growth",
+        "round": 1,
+        "label": (
+            "US CPI-U all items less food and energy, one-month percent change (SA)"
+        ),
+        "source_name": "bls_cpi",
+        "source_table": (
+            "Consumer Price Index for All Urban Consumers, US city average, "
+            "all items less food and energy, seasonally adjusted (CPI news "
+            "release, Table A)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CUSR0000SA0L1E",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-05": 0.2,
+            "2026-06": 0.0,
+            "2026-07": 0.2,
+        },
+        "binding_transform": {
+            "operation": "percent_change_previous_period",
+            "factor": 1,
+        },
+    },
+    "bls.jolts.job_openings": {
+        "series_id": "JTS000000000000000JOL",
+        "period_type": "month",
+        "unit": "millions",
+        "scale": 0.001,
+        "round": 3,
+        "label": "US job openings, total nonfarm (SA)",
+        "source_name": "bls_jolts",
+        "source_table": (
+            "Job Openings and Labor Turnover Survey, job openings level, total "
+            "nonfarm, seasonally adjusted (JOLTS news release, Table 1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "JTS000000000000000JOL",
+        "anchor_start_year": 2026,
+        # The API serves thousands; anchors are in the ledger's millions.
+        "anchors": {
+            "2026-04": 7.585,
+            "2026-05": 7.537,
+            "2026-06": 7.182,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 0.001},
+    },
+    "bls.jolts.quits_rate": {
+        "series_id": "JTS000000000000000QUR",
+        "period_type": "month",
+        "unit": "percent",
+        "label": "US quits rate, total nonfarm (SA)",
+        "source_name": "bls_jolts",
+        "source_table": (
+            "Job Openings and Labor Turnover Survey, quits rate, total "
+            "nonfarm, seasonally adjusted (JOLTS news release, Table 4)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "JTS000000000000000QUR",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-04": 1.9,
+            "2026-05": 2.0,
+            "2026-06": 2.0,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 1},
+    },
+    "bls.ces.nonfarm_payrolls.change": {
+        "series_id": "CES0000000001",
+        "period_type": "month",
+        "transform": "mom_diff",
+        "unit": "thousands",
+        "round": 0,
+        "label": "US total nonfarm payroll employment, one-month change (SA)",
+        "source_name": "bls_ces",
+        "source_table": (
+            "Current Employment Statistics, all employees, total nonfarm, "
+            "seasonally adjusted (Employment Situation, Table B-1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CES0000000001",
+        "anchor_start_year": 2026,
+        # Annual benchmarking moves a published monthly change by tens of
+        # thousands. This bound cannot tell total nonfarm from a neighbouring
+        # CES aggregate, and the payload's echoed seriesID proves only that
+        # the response matches the request. What ties CES0000000001 to the
+        # published statistic is the zero-tolerance reproduction of the
+        # captured official bytes in tests/test_bls_api_registrable.py and the
+        # release-text verification in the docs. At run time the bound only
+        # has to catch a wrong unit or transform, which is off by orders of
+        # magnitude.
+        "anchor_abs_tolerance": 75.0,
+        "anchors": {
+            "2026-04": 148.0,
+            "2026-05": 63.0,
+            "2026-06": 31.0,
+        },
+        "binding_transform": {
+            "operation": "difference_previous_period",
+            "factor": 1,
+        },
+    },
 }
+# Employment Situation Table A-19 ("Employed people by occupation, sex, and
+# age", not seasonally adjusted, in thousands): the six rows the docket
+# forecasts, each from the CPS series that prints its "Total, 16 years and
+# over" column. The legacy ``a19`` leg reads the same rows from Internet
+# Archive captures of cpseea19.htm and stays unregistrable; these specs are
+# how a NEW A-19 target registers (Max's ruling, 2026-09-25). BLS's
+# series catalog (ln.series) titles each id "(Unadj) Employment Level - <row>",
+# employed, monthly, not seasonally adjusted.
+#
+# The anchors are first prints, not only settled values: each is the figure
+# Table A-19 printed in the Employment Situation that first published the
+# month (tests/fixtures/a19, the Archive's captures of 2026-07-10, 2026-08-19
+# and 2026-09-04), and the API capture of each series in tests/fixtures/bls_api
+# serves the same integer. That equality is also what ties each series id to
+# its A-19 row.
+# ``anchor_abs_tolerance`` is one step of the published precision (1,000
+# people, 0.001 million), the same lab choice as the 0.1 on one-decimal
+# rates: BLS does not normally revise unadjusted CPS data, and a revision
+# that reaches an anchor month refuses every capture with ANCHOR MISMATCH
+# until the anchors are re-verified.
+A19_BLS_API_SERIES: dict[str, tuple[str, dict[str, float]]] = {
+    "business_financial_operations": (
+        "LNU02032454",
+        {"2026-06": 9.720, "2026-07": 9.835, "2026-08": 10.167},
+    ),
+    "computer_mathematical": (
+        "LNU02032455",
+        {"2026-06": 6.950, "2026-07": 6.924, "2026-08": 7.010},
+    ),
+    "healthcare_support": (
+        "LNU02032463",
+        {"2026-06": 5.691, "2026-07": 5.797, "2026-08": 5.709},
+    ),
+    "office_administrative_support": (
+        "LNU02032207",
+        {"2026-06": 16.184, "2026-07": 16.457, "2026-08": 16.154},
+    ),
+    "production": (
+        "LNU02032213",
+        {"2026-06": 7.759, "2026-07": 8.121, "2026-08": 7.716},
+    ),
+    "transportation_material_moving": (
+        "LNU02032214",
+        {"2026-06": 12.010, "2026-07": 12.223, "2026-08": 12.011},
+    ),
+}
+# Registration waits for Chronicle. Each A-19 lineage holds its June 2026
+# observation in thousands, every A-19 contract is in millions, and
+# Chronicle's catalog build refuses a lineage with two units. A registered
+# target would be refused every day from its release, so none is minted until
+# the Chronicle change in decision d397 lands and a reviewed edit removes this
+# hold (docs/anchor-verifications.md).
+A19_REGISTRATION_HOLD = (
+    "Chronicle holds each Table A-19 lineage's June 2026 observation in "
+    "thousands and its catalog refuses a second unit; registration waits for "
+    "the Chronicle change in decision d397"
+)
+for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
+    BLS_API_ADAPTERS[f"{A19_STEM}.{_row}"] = {
+        "series_id": _series_id,
+        "period_type": "month",
+        "unit": "millions",
+        "scale": 0.001,
+        "round": 3,
+        "label": f"US employed people, {A19_ROW_LABELS[_row]}, 16 years and over (NSA)",
+        "source_name": "bls_cps",
+        "source_table": (
+            f"Current Population Survey, employed people, {A19_ROW_LABELS[_row]}, "
+            "total 16 years and over, not seasonally adjusted, in thousands "
+            "(Employment Situation, Table A-19)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": _series_id,
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.001,
+        "anchors": dict(_anchors),
+        "binding_transform": {"operation": "multiply", "factor": 0.001},
+        "registration_hold": A19_REGISTRATION_HOLD,
+        "evidence_notes": (
+            "First print for {period} captured from {source_url} (BLS Public "
+            "Data API v2, current estimates only), in thousands and divided by "
+            "1,000. At capture {period} was still the series' latest published "
+            "month, so no later Employment Situation had been published and "
+            "the value is the one that release's Table A-19 printed. CPS rows "
+            "carry no preliminary footnote, and BLS states that the original "
+            "(unadjusted) sample data normally are not revised. The one "
+            "exception observed, the population-control revision of January "
+            "2026, was published with the February estimates, after which "
+            "January was no longer the latest month."
+        ),
+    }
+for _stem, _spec in BLS_API_ADAPTERS.items():
+    if "binding_transform" in _spec:
+        # Every registrable spec pins anchors in the unit it emits (see the
+        # note above the six entries); legacy specs pin the served level.
+        _spec["anchor_unit"] = "emitted"
+        # The main loop's unit guard needs the series a spec resolves.
+        _spec["series_stem"] = _stem
+_BLS_EVIDENCE_NOTES_LATEST_CPI = (
+    "One-month percent change for {period}, derived as 100 x (index / prior "
+    "month's index - 1) rounded to one decimal from the seasonally adjusted "
+    "index served by {source_url} (BLS Public Data API v2, current estimates "
+    "only). At capture {period} was still the series' latest published month, "
+    "so both index values are the ones its own release carried: CPI-U rows "
+    "have no preliminary footnote, and BLS revises seasonally adjusted "
+    "indexes once a year, in February, for the previous 5 years."
+)
+BLS_API_ADAPTERS["bls.cpi.u.headline_mom"]["evidence_notes"] = (
+    _BLS_EVIDENCE_NOTES_LATEST_CPI
+)
+BLS_API_ADAPTERS["bls.cpi.u.core_mom"]["evidence_notes"] = (
+    _BLS_EVIDENCE_NOTES_LATEST_CPI
+)
+BLS_API_ADAPTERS["bls.cps.unemployment_rate"]["evidence_notes"] = (
+    "First print for {period} captured from {source_url} (BLS Public Data API "
+    "v2, current estimates only). At capture {period} was still the series' "
+    "latest published month, so no later Employment Situation had been "
+    "published. CPS rows carry no preliminary footnote. BLS's stated policy is "
+    "not to revise previous months' official seasonally adjusted CPS estimates "
+    "as new data arrive during the year. It has made exceptions, and the one "
+    "observed, the population-control revision of January 2026, was published "
+    "with the February estimates, after which January was no longer the "
+    "latest month."
+)
+BLS_API_ADAPTERS["bls.ces.nonfarm_payrolls.change"]["evidence_notes"] = (
+    "One-month change for {period}, derived as the level for {period} minus "
+    "the prior month's level, both served by {source_url} (BLS Public Data "
+    "API v2, current estimates only). At capture {period} was still the "
+    "series' latest published month and still carried BLS's preliminary "
+    "footnote, so the pair is the one its own Employment Situation printed: "
+    "the first estimate for {period} and that release's revised prior month."
+)
 for _spec in BLS_API_ADAPTERS.values():
+    if "evidence_notes" in _spec:
+        # A spec that states its own first-print basis keeps it: the notes
+        # below describe CPS policy and the preliminary footnote only.
+        continue
     if _spec.get("first_print_gate") == "latest_month":
         _spec["evidence_notes"] = (
             "First print for {period} captured from {source_url} (BLS Public "
@@ -7461,17 +7816,902 @@ def sba_pdf_fact(
     }
 
 
-def a19_values_from_html(html: str) -> dict[str, float]:
-    """June-style A-19 parse: each row label followed by year-ago then
-    current-month totals; the CURRENT month (second number) is the print."""
-    text = re.sub(r"<[^>]+>", "|", html)
-    text = re.sub(r"[\s|]+", " ", text)
-    out: dict[str, float] = {}
+_A19_HEADER_MONTHS = {
+    "jan.": 1,
+    "feb.": 2,
+    "mar.": 3,
+    "apr.": 4,
+    "may": 5,
+    "june": 6,
+    "july": 7,
+    "aug.": 8,
+    "sept.": 9,
+    "oct.": 10,
+    "nov.": 11,
+    "dec.": 12,
+}
+_A19_COLUMN_GROUP = ("Total", "16 years and over")
+
+
+_A19_TABLE_ID = "cps_eande_m19"
+
+
+class _A19TableParser(HTMLParser):
+    """Collect Table A-19's header cells by id and its data cells by ``headers``.
+
+    Only the table whose id is ``cps_eande_m19`` is read: the rest of the
+    page, including any table that wraps this one, is ignored, so page chrome
+    cannot supply a value; it can make the page unidentifiable only through a
+    duplicate id or a repeated attribute (below). There must
+    be exactly one such table and it must close. Inside it, a cell's closing
+    tag may be omitted, as HTML allows; the next cell, the next row or the
+    end of the table closes it. A table nested inside one of its cells is not
+    read either, and anything that would split or lose a recorded cell's
+    text without an error marks the page malformed: a cell or any text in a
+    nested table while a recorded cell is open, or text in the table outside
+    any cell or caption. The id of every other element on the page, inside
+    this table or out, is kept apart (``foreign_ids``): one equal to a header
+    id of this table makes the ``headers`` reference ambiguous, and
+    ``a19_table`` refuses it. An element that repeats its ``id`` or
+    ``headers`` attribute is malformed: a browser keeps the first, a parser
+    the last. The text pieces of a cell are joined with spaces, so markup
+    inside a number splits it and the page is refused rather than misread.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.header_text: dict[str, str] = {}
+        self.duplicate_ids: set[str] = set()
+        self.foreign_ids: set[str] = set()
+        self.malformed = False
+        self.closed = False
+        self.cells: list[tuple[tuple[str, ...], str]] = []
+        # One frame per open <table>: [kind, open cell or None, in caption],
+        # the kind being "target", "inner" (nested in the target) or
+        # "outside". An open cell is [tag, attrs, text parts, recorded].
+        self._frames: list[list[Any]] = []
+        self._seen = False
+
+    def _in_recorded_cell(self) -> bool:
+        for frame in self._frames:
+            if frame[0] == "target":
+                return frame[1] is not None and frame[1][3]
+        return False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = {name: value or "" for name, value in attrs}
+        names = [name for name, _ in attrs]
+        if names.count("id") > 1 or names.count("headers") > 1:
+            self.malformed = True
+        frame = self._frames[-1] if self._frames else None
+        kind = frame[0] if frame else "outside"
+        if values.get("id") and not (tag == "th" and kind == "target"):
+            self.foreign_ids.add(values["id"])
+        if tag == "table":
+            if kind != "outside":
+                if values.get("id") == _A19_TABLE_ID:
+                    self.malformed = True
+                self._frames.append(["inner", None, False])
+            elif values.get("id") == _A19_TABLE_ID:
+                if self._seen:
+                    self.malformed = True
+                self._seen = True
+                self._frames.append(["target", None, False])
+            else:
+                self._frames.append(["outside", None, False])
+        elif tag in ("th", "td"):
+            if kind != "target":
+                if kind == "inner" and self._in_recorded_cell():
+                    self.malformed = True
+                return
+            if frame[1] is not None:
+                self._close_cell(frame)
+            recorded = bool(values.get("headers") if tag == "td" else values.get("id"))
+            frame[1] = [tag, values, [], recorded]
+        elif tag == "tr" and kind == "target" and frame[1] is not None:
+            self._close_cell(frame)
+        elif tag == "caption" and kind == "target":
+            frame[2] = True
+
+    def handle_data(self, data: str) -> None:
+        frame = self._frames[-1] if self._frames else None
+        if frame is None or frame[0] == "outside":
+            return
+        if frame[0] == "inner":
+            if data.strip() and self._in_recorded_cell():
+                self.malformed = True
+            return
+        if frame[1] is not None:
+            frame[1][2].append(data)
+        elif not frame[2] and data.strip():
+            self.malformed = True
+
+    def handle_endtag(self, tag: str) -> None:
+        frame = self._frames[-1] if self._frames else None
+        if frame is None:
+            return
+        if tag == "table":
+            if frame[0] == "target":
+                if frame[1] is not None:
+                    self._close_cell(frame)
+                self.closed = True
+            self._frames.pop()
+        elif frame[0] != "target":
+            return
+        elif tag == "tr" and frame[1] is not None:
+            self._close_cell(frame)
+        elif tag in ("td", "th") and frame[1] is not None and frame[1][0] == tag:
+            self._close_cell(frame)
+        elif tag == "caption":
+            frame[2] = False
+
+    def _close_cell(self, frame: list[Any]) -> None:
+        tag, values, parts, _ = frame[1]
+        frame[1] = None
+        text = " ".join(" ".join(parts).split())
+        if tag == "th" and values.get("id"):
+            if values["id"] in self.header_text:
+                self.duplicate_ids.add(values["id"])
+            self.header_text[values["id"]] = text
+        elif tag == "td" and values.get("headers"):
+            self.cells.append((tuple(values["headers"].split()), text))
+
+
+def _a19_header_month(text: str) -> tuple[int, int] | None:
+    match = re.fullmatch(r"([A-Za-z]+\.?) ([0-9]{4})", text)
+    month = _A19_HEADER_MONTHS.get(match.group(1).lower()) if match else None
+    return (int(match.group(2)), month) if match and month else None
+
+
+def a19_table(html: str) -> tuple[str, dict[str, float]] | None:
+    """(data month, thousands by occupation) the page prints, or None.
+
+    BLS marks up the table accessibly: every data cell's ``headers``
+    attribute names the ids of its row header and of its three column headers
+    (group, age, month). Each value is therefore found by WHAT it is headed
+    by, never by position: the occupation's row, "Total", "16 years and
+    over", and the later of exactly two same-month headings one year apart.
+    All six occupations must agree on the month. Anything else (a missing
+    row, an unknown month label, a third dated column, a non-numeric cell, a
+    reused id, a malformed or unclosed table, a second table with this id, a
+    page without it) returns None: the page is overwritten monthly, and a
+    value from a capture that cannot be identified must never be recorded.
+    """
+
+    parser = _A19TableParser()
+    try:
+        parser.feed(html)
+        parser.close()
+    except (AssertionError, ValueError):
+        return None
+    if (
+        not parser.closed
+        or parser.malformed
+        or parser.duplicate_ids
+        or parser.foreign_ids & parser.header_text.keys()
+    ):
+        return None
+    ids_by_text: dict[str, list[str]] = {}
+    for header_id, text in parser.header_text.items():
+        ids_by_text.setdefault(text, []).append(header_id)
+    values: dict[str, float] = {}
+    months: set[tuple[int, int]] = set()
     for key, label in A19_ROW_LABELS.items():
-        m = re.search(re.escape(label) + r"\s+([0-9,]+)\s+([0-9,]+)", text)
-        if m:
-            out[key] = float(m.group(2).replace(",", ""))
-    return out
+        row_ids = ids_by_text.get(label, [])
+        if len(row_ids) != 1:
+            return None
+        dated: list[tuple[tuple[int, int], str]] = []
+        for header_ids, text in parser.cells:
+            if row_ids[0] not in header_ids:
+                continue
+            columns = [
+                parser.header_text.get(header_id)
+                for header_id in header_ids
+                if header_id != row_ids[0]
+            ]
+            if None in columns:
+                return None
+            if not all(part in columns for part in _A19_COLUMN_GROUP):
+                continue
+            stamps = [stamp for stamp in map(_a19_header_month, columns) if stamp]
+            if len(columns) != 3 or len(stamps) != 1:
+                return None
+            dated.append((stamps[0], text))
+        dated.sort()
+        if len(dated) != 2:
+            return None
+        ((year_ago, month_ago), _), ((year, month), printed) = dated
+        if (year - year_ago, month) != (1, month_ago):
+            return None
+        if not re.fullmatch(r"[0-9]{1,3}(,[0-9]{3})*", printed):
+            return None
+        values[key] = float(printed.replace(",", ""))
+        months.add((year, month))
+    if len(months) != 1:
+        return None
+    ((year, month),) = months
+    return f"{year}-{month:02d}", values
+
+
+def a19_values_from_html(html: str) -> dict[str, float]:
+    """Thousands by occupation for the month the page prints ({} if unidentified)."""
+
+    table = a19_table(html)
+    return table[1] if table else {}
+
+
+def a19_snapshot_period(html: str) -> str | None:
+    """The data month (YYYY-MM) the page prints (None if unidentified)."""
+
+    table = a19_table(html)
+    return table[0] if table else None
+
+
+def a19_capture(snapshot_url: str) -> tuple[dt.datetime, str] | None:
+    """(capture instant, archived publisher URL) of a pinned Wayback URL."""
+
+    match = re.fullmatch(
+        r"https://web\.archive\.org/web/(\d{14})/(https://.+)", snapshot_url
+    )
+    if not match:
+        return None
+    try:
+        captured = dt.datetime.strptime(match.group(1), "%Y%m%d%H%M%S").replace(
+            tzinfo=dt.timezone.utc
+        )
+    except ValueError:
+        return None
+    return captured, match.group(2)
+
+
+# Every status and the stored URL form, so the index can be reported in
+# full: a capture the Archive recorded as a 403 (bls.gov's answer to
+# non-browser clients) or under another form of the URL is not a capture
+# this resolver can use, but "no capture" and "no usable capture" are
+# different findings.
+WAYBACK_CDX_URL = (
+    "https://web.archive.org/cdx/search/cdx?url={url}&from={start}&to={end}"
+    "&output=json&fl=timestamp,original,statuscode,digest"
+)
+_WAYBACK_CDX_HEADER = ["timestamp", "original", "statuscode", "digest"]
+# The form of the index's content digest as observed (32 base-32 characters,
+# 2026-09-22). Any other value is treated as unknown and never as a match:
+# two placeholders are not the same bytes.
+_A19_DIGEST = re.compile(r"[A-Z2-7]{32}")
+WAYBACK_SAVE_URL = "https://web.archive.org/save/{url}"
+A19_MAX_WINDOW_CAPTURES = 32
+A19_CAPTURE_REQUESTED = "asked the Internet Archive to capture the page"
+_WAYBACK_READ_ERRORS = (OSError, EOFError, http.client.HTTPException)
+
+
+class A19CaptureError(ValueError):
+    """The Archive did not serve the exact capture that was asked for."""
+
+
+@dataclass(frozen=True)
+class A19Row:
+    """One index row that could hold the page: HTTP 200, or without a status."""
+
+    stamp: str
+    status: str
+    digest: str | None
+    """The index's content digest, or None when it is not of the observed form."""
+    original: str = A19_SOURCE_URL
+    """The URL the Archive stored it under."""
+
+    @property
+    def exact(self) -> bool:
+        """Stored under exactly the bound URL, so a capture this resolver reads."""
+        return self.original == A19_SOURCE_URL
+
+    @property
+    def url(self) -> str:
+        return f"https://web.archive.org/web/{self.stamp}/{A19_SOURCE_URL}"
+
+
+@dataclass
+class A19Index:
+    """What the Archive's index lists for one registered window.
+
+    Every count is disjoint: ``listed == len(captures) + len(revisits) +
+    other_status + other_form``.
+    """
+
+    rows: list[A19Row]
+    """Every row with status 200 or ``-``, under any form of the URL, oldest
+    first: the rows that could hold the page."""
+    listed: int
+    """Every row dated inside the window."""
+    other_status: int
+    """Rows for the bound URL whose status is neither 200 nor ``-``."""
+    other_form: int
+    """Rows stored under another form of the URL (scheme, host), any status;
+    never read."""
+
+    @property
+    def captures(self) -> list[str]:
+        """HTTP 200 captures of exactly the bound URL, oldest first."""
+        return [row.url for row in self.rows if row.exact and row.status == "200"]
+
+    @property
+    def revisits(self) -> list[A19Row]:
+        """Rows for exactly the bound URL without a status, oldest first."""
+        return [row for row in self.rows if row.exact and row.status == "-"]
+
+    @property
+    def other_form_rows(self) -> list[A19Row]:
+        """Rows under another form of the URL with status 200 or ``-``."""
+        return [row for row in self.rows if not row.exact]
+
+    def describe(self, window: Any) -> str:
+        text = (
+            f"{self.listed} capture(s) dated inside the registered window "
+            f"{window!r}, {len(self.captures)} of them HTTP 200 for this exact URL"
+        )
+        detail = [
+            f"{count} {label}"
+            for count, label in (
+                (len(self.revisits), "without a status"),
+                (self.other_status, "with another status"),
+                (self.other_form, "under another form of the URL"),
+            )
+            if count
+        ]
+        return text + (f"; {', '.join(detail)}" if detail else "")
+
+
+def _wayback_read(url: str) -> tuple[bytes, str]:
+    """(body, final URL after redirects) for one Internet Archive request."""
+
+    request = urllib.request.Request(url, headers={"User-Agent": INTL_USER_AGENT})
+    with urllib.request.urlopen(request, timeout=120) as response:
+        return response.read(), response.geturl()
+
+
+def a19_digest(raw: bytes) -> str:
+    """The Archive index's digest of a stored body: base-32 SHA-1 of its bytes.
+
+    Checked 2026-09-25 against the index rows of the 2026-07-10, 2026-08-19
+    and 2026-09-04 captures of this page: each equals the SHA-1 of the bytes
+    the ``id_`` form serves, before the resolver decompresses BLS's gzip.
+    """
+
+    return base64.b32encode(hashlib.sha1(raw).digest()).decode()
+
+
+def a19_read_capture(
+    capture_url: str,
+    read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+    digest: str | None = None,
+) -> bytes:
+    """BLS's own bytes for exactly one capture of the A-19 page.
+
+    With ``digest`` (the index's digest for the row), the stored bytes must
+    hash to it, so what is read is exactly what the index lists: a truncated,
+    spliced or substituted body refuses.
+
+    Asked for a timestamp it holds no capture of, the Archive answers with
+    the nearest capture and rewrites the path (observed 2026-09-20: a request
+    for 20260901000000 returned the 20260904170006 capture with HTTP 200). A
+    window check on the requested timestamp would then judge a date nothing
+    served, so the final URL must name the same timestamp and page. The
+    ``id_`` form returns the response the Archive stored, without its replay
+    toolbar or link rewriting, so the hash recorded for the fact is one
+    anybody can reproduce; the Archive passes BLS's gzip encoding through.
+    """
+
+    capture = a19_capture(capture_url)
+    if capture is None or capture[1] != A19_SOURCE_URL:
+        raise A19CaptureError(f"not a capture of {A19_SOURCE_URL}: {capture_url}")
+    stamp = f"{capture[0]:%Y%m%d%H%M%S}"
+    raw, final_url = read(f"https://web.archive.org/web/{stamp}id_/{A19_SOURCE_URL}")
+    served = re.fullmatch(
+        r"https?://web\.archive\.org/web/(\d{14})id_/(https://.+)", final_url
+    )
+    if not served or served.groups() != (stamp, A19_SOURCE_URL):
+        raise A19CaptureError(
+            f"asked the Archive for capture {stamp} and was served {final_url}"
+        )
+    if digest is not None and a19_digest(raw) != digest:
+        raise A19CaptureError(
+            f"capture {stamp} does not hash to its index digest {digest}"
+        )
+    if raw[:2] == b"\x1f\x8b":
+        try:
+            raw = gzip.decompress(raw)
+        except (OSError, EOFError, zlib.error) as exc:
+            raise A19CaptureError(f"capture {stamp} is not valid gzip") from exc
+    return raw
+
+
+def a19_window_captures(
+    window: Mapping[str, Any],
+    read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+) -> A19Index:
+    """Internet Archive captures of the A-19 page dated inside ``window``.
+
+    The Archive's own index supplies the timestamps, so a registered target
+    needs no per-period hand pin. A body that is not the index's requested
+    table raises ValueError.
+    """
+
+    start = dt.date.fromisoformat(str(window["start"]))
+    end = dt.date.fromisoformat(str(window["end"]))
+    body, _ = read(
+        WAYBACK_CDX_URL.format(
+            url=urllib.parse.quote(A19_SOURCE_URL, safe=""),
+            start=f"{start:%Y%m%d}000000",
+            end=f"{end:%Y%m%d}235959",
+        )
+    )
+    index = json.loads(body.decode())
+    # The JSON list ``[]`` is an empty index (observed 2026-09-22 for a
+    # window with no capture). Anything else must be exactly the requested
+    # shape: an empty body, a malformed row, an impossible timestamp or a
+    # non-numeric status is an index failure, never evidence that the window
+    # holds no capture.
+    if not isinstance(index, list) or (index and index[0] != _WAYBACK_CDX_HEADER):
+        raise ValueError("the Archive index is not the requested table")
+    # One row per (stamp, stored URL): a row listed both with a status and
+    # without one is the capture with the status, and a digest fills in for
+    # a "-". Two different statuses, or two different digests, for one row
+    # make the index ambiguous, which is an index failure, not a choice. A
+    # digest not of the observed form is kept as unknown: it verifies and
+    # accounts for nothing.
+    rows: dict[tuple[str, str], tuple[str, str]] = {}
+    for row in index[1:]:
+        if (
+            not isinstance(row, list)
+            or len(row) != 4
+            or not all(isinstance(cell, str) for cell in row)
+        ):
+            raise ValueError(f"malformed Archive index row (shape): {row!r}")
+        for field, ok in (
+            ("timestamp", re.fullmatch(r"[0-9]{14}", row[0])),
+            ("original", row[1]),
+            ("status", re.fullmatch(r"[0-9]{3}|-", row[2])),
+            ("digest", row[3]),
+        ):
+            if not ok:
+                raise ValueError(f"malformed Archive index row ({field}): {row!r}")
+        key = (row[0], row[1])
+        status, digest = row[2], row[3]
+        if key in rows:
+            kept_status, kept_digest = rows[key]
+            if "-" not in (status, kept_status) and status != kept_status:
+                raise ValueError(
+                    f"the Archive index lists {row[0]} with statuses "
+                    f"{kept_status} and {status}"
+                )
+            if "-" not in (digest, kept_digest) and digest != kept_digest:
+                raise ValueError(f"the Archive index lists {row[0]} with two digests")
+            status = kept_status if status == "-" else status
+            digest = kept_digest if digest == "-" else digest
+        rows[key] = (status, digest)
+    result = A19Index(rows=[], listed=0, other_status=0, other_form=0)
+    for (stamp, original), (status, listed_digest) in sorted(rows.items()):
+        digest = listed_digest if _A19_DIGEST.fullmatch(listed_digest) else None
+        capture = a19_capture(f"https://web.archive.org/web/{stamp}/{A19_SOURCE_URL}")
+        if capture is None:
+            raise ValueError(f"impossible Archive index timestamp {stamp!r}")
+        if not start <= capture[0].date() <= end:
+            continue
+        result.listed += 1
+        if original != A19_SOURCE_URL:
+            result.other_form += 1
+        elif status not in ("200", "-"):
+            result.other_status += 1
+        if status in ("200", "-"):
+            result.rows.append(A19Row(stamp, status, digest, original))
+    return result
+
+
+@dataclass
+class A19Discovery:
+    """The outcome of walking one registered window's index.
+
+    Unpacks as ``(url, raw, verdict)`` for callers that want only those.
+    """
+
+    url: str | None
+    """The capture whose bytes ``raw`` are, when the cell resolves."""
+    raw: bytes | None
+    verdict: str
+    """The line to print when nothing resolves; empty otherwise."""
+    witness: str | None = None
+    """When set, the stamp of an earlier row the index lists with the same
+    digest as ``url`` that was not itself read: the earliest print inside the
+    window. ``url``'s bytes hash to that digest, so they are its bytes."""
+    witness_reason: str | None = None
+    """Why the witness row itself was not read: it could not be read and
+    verified at its own timestamp, or it is stored under another form of the
+    URL."""
+
+    def __iter__(self) -> Iterator[Any]:
+        return iter((self.url, self.raw, self.verdict))
+
+
+def a19_registered_capture(
+    period: str,
+    window: Any,
+    today: dt.date,
+    read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+    *,
+    request_capture: bool = True,
+) -> A19Discovery:
+    """The capture a registered A-19 target resolves from, or why not yet.
+
+    Takes the EARLIEST row dated inside the registered window that prints
+    ``period``, walking the index in order. The index's digest is the SHA-1
+    of a row's stored bytes (``a19_digest``), and every read is verified
+    against it, so two rows with one digest hold the same bytes. Every row
+    stored under exactly the bound URL is read at its own timestamp, unless
+    a verified read of its digest already says what it holds; an HTTP 200
+    capture that cannot be read, verified or identified stops the walk there
+    (a later capture is the earliest only if this one is known not to print
+    the month). A row without a status that cannot be read and verified at
+    its own timestamp is not a stop, and a row under another form of the URL
+    is never read: what either holds is known when a verified read carries
+    the same digest. So a later read can account for an earlier unread row,
+    and an earlier unread row whose digest a read capture of the month
+    carries is the earliest print, with that capture supplying its bytes
+    (``witness``). A row nobody accounts for that is dated before the first
+    print defers the result. A row whose digest is not of the observed form
+    is read without verification and accounts for nothing.
+
+    ``FIRST-PRINT WINDOW MISSED`` is reserved for one finding: the window is
+    closed, every row in it is accounted for, and each prints another month.
+    Rows that were not read and are not accounted for make the outcome
+    unknown, which defers. An index failure, an unreadable or unidentified
+    HTTP 200 capture, or a scan that reached its cap without settling
+    reports itself and asks for nothing. Only when the
+    window is still open, every row read prints another month, and
+    ``request_capture`` is set (once per run) does it ask the Archive to
+    capture the page, and defer.
+    """
+
+    state = snapshot_window_state(today, window)
+    if state == "invalid":
+        return A19Discovery(None, None, "NO REGISTERED RELEASE WINDOW (refusing)")
+    if state == "pending":
+        return A19Discovery(
+            None, None, f"release window opens {window['start']} (deferring)"
+        )
+    try:
+        index = a19_window_captures(window, read)
+    except (*_WAYBACK_READ_ERRORS, ValueError) as exc:
+        return A19Discovery(
+            None,
+            None,
+            (
+                f"WAYBACK INDEX FETCH FAILED (deferring): {type(exc).__name__}: "
+                f"{str(exc)[:200]}"
+            ),
+        )
+    rows = index.rows
+    # What each read capture printed, by stamp, and by digest once the
+    # digest's read captures agree; raw bytes by stamp; why each unread row
+    # is unread.
+    table_by_stamp: dict[str, tuple[str, dict[str, float]]] = {}
+    table_by_digest: dict[str, tuple[tuple[str, dict[str, float]], str]] = {}
+    raw_by_stamp: dict[str, bytes] = {}
+    unread: dict[str, str] = {
+        row.stamp: "which is stored under another form of the URL and not read"
+        for row in rows
+        if not row.exact
+    }
+
+    def month_of(row: A19Row) -> str | None:
+        if row.exact and row.stamp in table_by_stamp:
+            return table_by_stamp[row.stamp][0]
+        if row.digest is not None and row.digest in table_by_digest:
+            return table_by_digest[row.digest][0][0]
+        return None
+
+    def settled() -> A19Discovery | None:
+        # The first row known to print the month, once every row before it
+        # is known to print another.
+        for row in rows:
+            month = month_of(row)
+            if month is None:
+                return None
+            if month != period:
+                continue
+            if row.exact and row.stamp in raw_by_stamp:
+                return A19Discovery(row.url, raw_by_stamp[row.stamp], "")
+            source = table_by_digest[row.digest][1]
+            return A19Discovery(
+                f"https://web.archive.org/web/{source}/{A19_SOURCE_URL}",
+                raw_by_stamp[source],
+                "",
+                witness=row.stamp,
+                witness_reason=unread[row.stamp],
+            )
+        return None
+
+    reads = 0
+    capped = False
+    for row in rows:
+        found = settled()
+        if found is not None:
+            return found
+        if not row.exact:
+            continue
+        if row.digest is not None and row.digest in table_by_digest:
+            # A verified read of this digest already says what it holds.
+            continue
+        if reads == A19_MAX_WINDOW_CAPTURES:
+            capped = True
+            break
+        reads += 1
+        try:
+            raw = a19_read_capture(row.url, read, row.digest)
+        except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
+            if row.status != "200":
+                unread[row.stamp] = (
+                    "which could not be read and verified at that timestamp"
+                )
+                continue
+            return A19Discovery(
+                None,
+                None,
+                (
+                    f"CAPTURE READ FAILED (deferring): {row.url} could not be read "
+                    f"({type(exc).__name__}: {str(exc)[:160]}), and an unread "
+                    "earlier capture cannot be skipped"
+                ),
+            )
+        table = a19_table(raw.decode(errors="replace"))
+        if table is None:
+            # Not "a different month": an error page, a changed layout or an
+            # empty body says nothing about what the page printed.
+            if row.status != "200":
+                unread[row.stamp] = (
+                    "which was served at that timestamp as something other than "
+                    "this table"
+                )
+                continue
+            return A19Discovery(
+                None,
+                None,
+                (
+                    f"CAPTURE UNIDENTIFIED (deferring): {row.url} does not parse as "
+                    "Table A-19, and an unidentified earlier capture cannot be "
+                    "skipped"
+                ),
+            )
+        table_by_stamp[row.stamp] = table
+        raw_by_stamp[row.stamp] = raw
+        if row.digest is not None:
+            table_by_digest.setdefault(row.digest, (table, row.stamp))
+    found = settled()
+    if found is not None:
+        return found
+    first = next((row for row in rows if month_of(row) == period), None)
+    blocking = (
+        [r.stamp for r in rows if r.stamp < first.stamp and month_of(r) is None]
+        if first is not None
+        else []
+    )
+    if capped:
+        where = (
+            f"{first.url} prints {period}, but {len(blocking)} earlier row(s) "
+            f"({', '.join(blocking[:3])}) are not accounted for"
+            if first is not None
+            else f"none of the rows identified so far prints {period}"
+        )
+        return A19Discovery(
+            None,
+            None,
+            (
+                f"CAPTURE SCAN LIMIT REACHED (deferring): {reads} read attempt(s) "
+                f"made, of {len(rows)} row(s) inside {window!r} that could hold the "
+                f"page; the earliest print of {period} is not settled: {where}"
+            ),
+        )
+    if first is not None:
+        return A19Discovery(
+            None,
+            None,
+            (
+                f"EARLIER ROW UNREAD (deferring): {first.url} prints {period}, but "
+                f"{len(blocking)} earlier row(s) ({', '.join(blocking[:3])}) were "
+                "not read and identified at their own timestamp, and no read "
+                "capture carries their digest, so it may not be the earliest"
+            ),
+        )
+    revisits = index.revisits
+    others = index.other_form_rows
+    unknown = [row for row in rows if month_of(row) is None]
+    notes = [
+        f"all {len(index.captures)} HTTP 200 capture(s) were read or accounted "
+        "for by a verified digest, and none "
+        f"prints {period}"
+    ]
+    if revisits:
+        served = sum(1 for row in revisits if row.stamp in table_by_stamp)
+        missing = sum(1 for row in revisits if month_of(row) is None)
+        notes.append(
+            f"of {len(revisits)} row(s) without a status, {served} were served at "
+            f"their own timestamp and read, {len(revisits) - served - missing} "
+            f"share the digest of a read capture, {missing} remain unknown"
+        )
+    if index.other_form:
+        missing = sum(1 for row in others if month_of(row) is None)
+        notes.append(
+            f"{index.other_form} row(s) under another form of the URL were not "
+            f"read: {len(others) - missing} share the digest of a read capture, "
+            f"{missing} remain unknown, {index.other_form - len(others)} have a "
+            "status other than 200"
+        )
+    read_note = "; ".join(notes)
+    if state == "missed" and unknown:
+        # A row under another form of the URL, or without a status and
+        # matched by nothing, may be a capture of this page that prints the
+        # month. Unknown is not "missed": what was read prints another month,
+        # and what was not read is not known.
+        return A19Discovery(
+            None,
+            None,
+            (
+                "WINDOW OUTCOME UNKNOWN (deferring): the Archive's index lists "
+                f"{index.describe(window)}; {read_note}"
+            ),
+        )
+    if state == "missed":
+        return A19Discovery(
+            None,
+            None,
+            (
+                "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists "
+                f"{index.describe(window)}; {read_note}"
+            ),
+        )
+    if not request_capture:
+        return A19Discovery(
+            None,
+            None,
+            (
+                f"none of the rows read inside the registered window prints "
+                f"{period} yet: the Archive's index lists {index.describe(window)}; "
+                f"{read_note} (deferring)"
+            ),
+        )
+    # An error from the save endpoint does not mean no capture was made: on
+    # 2026-09-21 three requests were each answered HTTP 500 and the index then
+    # held a new capture (20260921154639) that read back through
+    # a19_read_capture. So a failed request still counts as this run's one
+    # request, and the verdict does not say the capture failed.
+    try:
+        read(WAYBACK_SAVE_URL.format(url=A19_SOURCE_URL))
+        requested = A19_CAPTURE_REQUESTED
+    except _WAYBACK_READ_ERRORS as exc:
+        requested = (
+            f"{A19_CAPTURE_REQUESTED}; the request returned "
+            f"{type(exc).__name__}, outcome unknown"
+        )
+    return A19Discovery(
+        None,
+        None,
+        (
+            f"none of the rows read inside the registered window prints {period} "
+            f"yet: the Archive's index lists {index.describe(window)}; {read_note}; "
+            f"{requested} (deferring)"
+        ),
+    )
+
+
+def a19_fact(
+    ref: str,
+    spec: dict[str, Any],
+    period_type: str,
+    period: str,
+    value: float,
+    release_day: dt.date,
+    capture_url: str,
+    source_file: str,
+) -> dict:
+    """A-19 ledger fact: BLS is the source, the Archive capture the evidence.
+
+    bls.gov refuses non-browser fetches and overwrites this page monthly, so
+    the Internet Archive is the transport that kept the month's bytes. The
+    fact names the publisher's page as its source, which is what a registered
+    contract's allowedHosts constrains, and keeps the exact capture as its
+    evidence URL. Callers have checked that the capture archives that page.
+    """
+
+    row = generic_fact(
+        ref, spec, period_type, period, value, release_day, capture_url, source_file
+    )
+    row["source"]["url"] = A19_SOURCE_URL
+    row["source"]["extraction_method"] = (
+        "Automated read of an Internet Archive capture of the BLS page by "
+        "scripts/resolve_pending.py (anchor-verified adapter)"
+    )
+    return row
+
+
+A19_REGISTERED_TABLE = (
+    "CPS Employment Situation Table A-19, employed persons by occupation, not "
+    "seasonally adjusted (thousands)"
+)
+A19_BINDING_KEYS = frozenset(
+    {
+        "adapter",
+        "allowedHosts",
+        "expectedReleaseWindow",
+        "field",
+        "releasePolicy",
+        "sourceSeriesId",
+        "sourceUrl",
+        "table",
+        "transform",
+    }
+)
+
+
+# What a registered A-19 contract may ask of the table. BLS prints thousands;
+# the docket registers these cells in millions with an explicit x0.001
+# transform. Like every other adapter, the executor emits the unit its spec
+# declares and the refusal ladder compares that with the forecast: the
+# registration selects the spec, it is never a free-form multiplier.
+A19_REGISTERED_SCALES: dict[str, tuple[float, int]] = {
+    "thousands": (1.0, 0),
+    "millions": (0.001, 3),
+}
+
+
+def a19_execution_spec(
+    spec: dict[str, Any], registration: Mapping[str, Any] | None
+) -> tuple[dict[str, Any] | None, str | None]:
+    """(spec to execute, refusal) for an A-19 cell.
+
+    A cell that predates registration keeps the table's own thousands. A
+    registered cell must carry exactly the reviewed binding (this page, this
+    table, this row, this series, BLS's host, first print) and one of the two
+    reviewed unit contracts, with ``valueScale`` and ``transform`` agreeing;
+    then the spec emits the registered unit. The release window is the one
+    free field, and the capture is judged against it.
+    """
+
+    if not registration:
+        return spec, None
+    contract = registration.get("contract") or {}
+    binding = contract.get("sourceBinding") or {}
+    unit = contract.get("unit")
+    scale = A19_REGISTERED_SCALES.get(str(unit))
+    problems = []
+    if not isinstance(binding, dict) or set(binding) != A19_BINDING_KEYS:
+        return None, "sourceBinding keys"
+    # The only adapter an A-19 contract has ever been registered under. It
+    # names no executor, which is why every other field is pinned here.
+    if binding.get("adapter") != "generic-url":
+        problems.append("adapter")
+    if binding.get("allowedHosts") != [urlparse(A19_SOURCE_URL).hostname]:
+        problems.append("allowedHosts")
+    if binding.get("table") != A19_REGISTERED_TABLE:
+        problems.append("table")
+    series = f"{A19_STEM}.{spec['a19_row']}"
+    if contract.get("series") != series or binding.get("sourceSeriesId") != series:
+        problems.append("series")
+    if binding.get("sourceUrl") != A19_SOURCE_URL:
+        problems.append("sourceUrl")
+    if binding.get("field") != spec["source_concept"]:
+        problems.append("field")
+    if binding.get("releasePolicy") != "first_print":
+        problems.append("releasePolicy")
+    if scale is None:
+        problems.append("unit")
+    else:
+        factor, _ = scale
+        if binding.get("transform") != {"operation": "multiply", "factor": factor}:
+            problems.append("transform")
+        if contract.get("valueScale") != factor:
+            problems.append("valueScale")
+    if problems:
+        return None, ", ".join(problems)
+    factor, digits = scale
+    return {**spec, "unit": unit, "scale": factor, "round": digits}, None
 
 
 def bls_rows_from_payload(raw: bytes, series_id: str) -> dict[str, dict[str, Any]]:
@@ -7653,6 +8893,295 @@ def bls_first_print(
             "from an archived vintage"
         )
     return state["value"], None
+
+
+BLS_MONTHLY_TRANSFORMS = {"level", "mom_diff", "mom_pct"}
+
+
+def bls_transformed_value(
+    rows: dict[str, dict[str, Any]], spec: Mapping[str, Any], period: str
+) -> tuple[float | None, str | None]:
+    """(value, refusal) for one month in the unit the spec emits.
+
+    ``mom_diff`` and ``mom_pct`` read the immediately preceding calendar
+    month and refuse when the API serves no value for it: BLS published no
+    October 2025 figure for several series, and a change measured across a
+    gap is not a number BLS printed. An absent target month defers.
+    """
+    transform = spec.get("transform", "level")
+    if transform not in BLS_MONTHLY_TRANSFORMS:
+        raise ValueError(f"unknown monthly BLS transform {transform!r}")
+    state = rows.get(period)
+    if state is None:
+        return None, None
+    if transform == "level":
+        value = state["value"]
+    else:
+        prior_period = prior_period_date(period, "month")
+        prior = rows.get(prior_period)
+        if prior is None:
+            return None, (
+                f"{prior_period} has no served value, so the one-month change "
+                f"for {period} cannot be derived from two published months"
+            )
+        if transform == "mom_diff":
+            value = state["value"] - prior["value"]
+        elif prior["value"] == 0:
+            return None, f"{prior_period} is zero; a percent change is undefined"
+        else:
+            # Exact decimal arithmetic on the served figures, rounded half away
+            # from zero. A binary float decides an exact half by noise
+            # (12.00 -> 12.03 is exactly +0.25 and float ``round`` gives 0.2,
+            # while 12.00 -> 12.09, exactly +0.75, gives 0.8). Which way BLS
+            # breaks a tie is not verified; this makes the choice one rule.
+            # Level specs keep float ``round`` so the specs that predate
+            # bindings stay byte-identical (all eight are levels). A payroll
+            # difference is an integer, so no tie can arise there.
+            percent = (
+                Decimal(repr(state["value"])) / Decimal(repr(prior["value"])) - 1
+            ) * 100
+            digits = spec.get("round")
+            if digits is not None:
+                percent = percent.quantize(
+                    Decimal(1).scaleb(-int(digits)), rounding=ROUND_HALF_UP
+                )
+            return round(float(percent) * spec.get("scale", 1), 4) + 0.0, None
+    value *= spec.get("scale", 1)
+    digits = spec.get("round")
+    if digits is not None:
+        value = round(value, digits)
+    # Same IEEE -0.0 guard as apply_transform: core CPI rounded to -0.0 in
+    # June 2026, which BLS printed as "unchanged".
+    return round(value, 4) + 0.0, None
+
+
+def bls_spec_anchor_mismatches(
+    rows: dict[str, dict[str, Any]], spec: Mapping[str, Any]
+) -> list[str]:
+    """Anchor periods the fetched response cannot reproduce.
+
+    Specs that predate registrable bindings pin the served level and keep
+    ``bls_anchor_mismatches`` unchanged. A spec with ``anchor_unit:
+    "emitted"`` pins the value its transform emits, so the same check proves
+    the transform and the scale, within ``anchor_abs_tolerance`` when the
+    spec states one and the relative ``BLS_ANCHOR_TOLERANCE`` otherwise.
+    """
+    anchors = spec["anchors"]
+    if spec.get("anchor_unit") != "emitted":
+        return bls_anchor_mismatches(rows, anchors)
+    abs_tolerance = spec.get("anchor_abs_tolerance")
+    problems = []
+    for anchor_period, expected in sorted(anchors.items()):
+        got, refusal = bls_transformed_value(rows, spec, anchor_period)
+        if got is None:
+            problems.append(
+                f"{anchor_period}=missing ({refusal or 'not served'}; "
+                f"verified {expected})"
+            )
+            continue
+        allowed = (
+            abs_tolerance
+            if abs_tolerance is not None
+            else BLS_ANCHOR_TOLERANCE * abs(expected)
+        )
+        if abs(got - expected) > allowed + 1e-9:
+            problems.append(f"{anchor_period}={got} (verified {expected})")
+    return problems
+
+
+BLS_API_BINDING_ADAPTER = "bls-api"
+BLS_API_ALLOWED_HOSTS = ("api.bls.gov",)
+BLS_API_SOURCE_URL = "https://api.bls.gov/publicAPI/v2/timeseries/data/{series}"
+BLS_API_BINDING_TEMPLATE_KEYS = {
+    "adapter",
+    "sourceUrl",
+    "sourceSeriesId",
+    "field",
+    "table",
+    "transform",
+    "releasePolicy",
+}
+BLS_API_BINDING_DERIVED_KEYS = {"expectedReleaseWindow", "allowedHosts"}
+BLS_API_MIN_ANCHORS = 3
+
+
+def bls_api_binding_template(spec: Mapping[str, Any]) -> dict[str, Any] | None:
+    """The reviewed seven-key sourceBinding, or None for a legacy spec.
+
+    Only a spec that declares ``binding_transform`` is registrable. The
+    ``sourceUrl`` is the executor's own request without its year range, so
+    the registered host is the host every resolution fetches.
+    """
+    transform = spec.get("binding_transform")
+    if not isinstance(transform, Mapping):
+        return None
+    return {
+        "adapter": BLS_API_BINDING_ADAPTER,
+        "sourceUrl": BLS_API_SOURCE_URL.format(series=spec["series_id"]),
+        "sourceSeriesId": spec["series_id"],
+        "field": "value",
+        "table": spec["source_table"],
+        "transform": copy.deepcopy(dict(transform)),
+        "releasePolicy": "first_print",
+    }
+
+
+def bls_api_binding_matches_spec(binding: Any, spec: Mapping[str, Any]) -> bool:
+    """Require the registered seven keys and hosts to match the executor."""
+
+    template = bls_api_binding_template(spec)
+    if template is None or not isinstance(binding, dict):
+        return False
+    if set(binding) - BLS_API_BINDING_DERIVED_KEYS != BLS_API_BINDING_TEMPLATE_KEYS:
+        return False
+    # Required, not optional: ``source_binding_projection`` checks the appended
+    # fact's host only when the registration lists hosts, so a binding without
+    # the list would resolve with no custody check at all.
+    allowed_hosts = binding.get("allowedHosts")
+    if not isinstance(allowed_hosts, list) or sorted(allowed_hosts) != sorted(
+        BLS_API_ALLOWED_HOSTS
+    ):
+        return False
+    projection = {key: binding[key] for key in BLS_API_BINDING_TEMPLATE_KEYS}
+    return canonical_bytes(projection) == canonical_bytes(template)
+
+
+def bls_api_verified_anchors(spec: Mapping[str, Any]) -> dict[str, float] | None:
+    """The spec's anchors when it carries enough of them to be admitted."""
+
+    anchors = spec.get("anchors")
+    if not isinstance(anchors, Mapping) or len(anchors) < BLS_API_MIN_ANCHORS:
+        return None
+    return dict(anchors)
+
+
+def bls_ledger_unit_conflict(
+    ledger_rows: list[Mapping[str, Any]], stem: str, spec: Mapping[str, Any]
+) -> str | None:
+    """Why a fact for ``stem`` would break Chronicle's catalog, or None.
+
+    Chronicle's ``scripts/build_series_catalog.py`` groups current
+    observations by (concept, geography, entity) and exits with "unit
+    conflict within identity" when one identity holds two units (verified
+    2026-09-25 against Chronicle's generator). The resolver regenerates that
+    catalog for every append and sends all of a run's rows in one proposal, so
+    on this base one conflicting fact fails the whole run's append.
+    (thesis#269 adds an append-time exclusion; this check still saves the
+    keyless request.) The Table A-19 lineages hold a June 2026 observation in
+    thousands, and these specs emit millions.
+
+    Current rows follow Chronicle's rule. A row drops out only when another
+    row's ``assertionVersion.supersedes`` names its version id. A row written
+    before assertion versioning carries no id, and the generator refuses a
+    link to one ("supersedes unknown version"), so such a row always counts.
+    If Chronicle later accepts those links, this check keeps refusing until a
+    reviewed change follows it: it fails closed.
+
+    A row belongs to the series when its measure concept is ``stem`` itself or
+    ``stem`` plus a spelling of the row's own month (``2026_06``,
+    ``2026-06``, ``june_2026``, ``jun_2026``), with the entity and geography
+    the fact would carry. Chronicle strips those spellings and may strip or
+    merge more, so its identity holds at least these rows. A refusal here
+    therefore means Chronicle would refuse the fact too; the check can miss a
+    conflict, never invent one. It runs before the fetch, so it also refuses
+    on a day no fact would be produced; that is why Table A-19 registration
+    is held rather than left to this check.
+    """
+
+    entity = spec.get("entity", {"name": "economy", "role": "aggregate"})
+    identity = (
+        (entity.get("name"), entity.get("role")),
+        (US_GEOGRAPHY["level"], US_GEOGRAPHY["id"], US_GEOGRAPHY["vintage"]),
+    )
+    superseded = set()
+    for row in ledger_rows:
+        version = row.get("assertionVersion")
+        if isinstance(version, Mapping) and version.get("supersedes"):
+            superseded.add(str(version["supersedes"]))
+    units = set()
+    for row in ledger_rows:
+        version = row.get("assertionVersion")
+        if isinstance(version, Mapping) and str(version.get("id")) in superseded:
+            continue
+        concept = (row.get("measure") or {}).get("concept")
+        if not isinstance(concept, str) or not _concept_names_series(
+            concept, stem, row.get("period")
+        ):
+            continue
+        row_entity = row.get("entity") or {}
+        geography = row.get("geography") or {}
+        row_identity = (
+            (row_entity.get("name"), row_entity.get("role")),
+            (geography.get("level"), geography.get("id"), geography.get("vintage")),
+        )
+        unit = (row.get("measure") or {}).get("unit")
+        if row_identity == identity and unit is not None and unit != spec["unit"]:
+            units.add(str(unit))
+    if not units:
+        return None
+    return (
+        f"Chronicle already holds {sorted(units)} observations of {stem}, and "
+        f"this spec emits {spec['unit']!r}: the catalog would refuse the "
+        "whole append with a unit conflict. Chronicle must curate the lineage "
+        "to one unit first"
+    )
+
+
+def _report_ledger_unit_refusals(refusals: list[str]) -> int:
+    """List references the unit guard refused; ``EXIT_REFUSED_ROWS`` if any.
+
+    A run that also refused rows for other reasons exits on that path
+    instead; the refusals below were already printed as they happened.
+    """
+
+    if not refusals:
+        return 0
+    print(
+        f"{len(refusals)} reference(s) refused for a Chronicle unit conflict; "
+        "curate the lineage in Chronicle before its first-print window closes"
+    )
+    for line in refusals:
+        print(f"  refused: {line}")
+    return EXIT_REFUSED_ROWS
+
+
+_MONTH_NAMES = (
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+)
+
+
+def _concept_names_series(concept: str, stem: str, period: Any) -> bool:
+    """Whether ``concept`` is ``stem``, or ``stem`` plus its own month token."""
+
+    if concept == stem:
+        return True
+    if not concept.startswith(stem + "."):
+        return False
+    token = concept[len(stem) + 1 :]
+    if not isinstance(period, Mapping) or period.get("type") != "month":
+        return False
+    match = re.fullmatch(r"(\d{4})-(\d{2})", str(period.get("value") or ""))
+    if not match or not 1 <= int(match.group(2)) <= 12:
+        return False
+    year, month = match.group(1), match.group(2)
+    name = _MONTH_NAMES[int(month) - 1]
+    return token in {
+        f"{year}_{month}",
+        f"{year}-{month}",
+        f"{name}_{year}",
+        f"{name[:3]}_{year}",
+    }
 
 
 FSA_CRP_BINDING_TEMPLATE_KEYS = {
@@ -9435,14 +10964,30 @@ def _irs_soi_normalized_text(value: Any) -> str:
     return text.strip().rstrip(":").strip()
 
 
-def irs_soi_pub1304_grid(raw: bytes, spec: Mapping[str, Any]):
+def irs_soi_pub1304_grid(
+    raw: bytes,
+    spec: Mapping[str, Any],
+    *,
+    max_rows: int | None = None,
+    max_columns: int | None = None,
+    max_sheets: int | None = None,
+    quiet: bool = False,
+):
     """Extract the Table 3.3 sheet as a row grid, failing closed.
 
     Returns ``(grid, refusal)``. The workbook boundary is xlrd (the only
     parser for IRS's legacy BIFF .xls prints); everything after the grid is
     pure logic so tests can arm both real workbooks and synthetic grids.
+    Optional limits let native evidence replay load only the selected sheet
+    and refuse large grids. Defaults preserve the resolver's existing loader.
     """
 
+    limits = (max_rows, max_columns, max_sheets)
+    if any(
+        limit is not None and (type(limit) is not int or limit < 1) for limit in limits
+    ):
+        return None, "invalid workbook resource limit"
+    bounded = any(limit is not None for limit in limits)
     try:
         import xlrd  # noqa: PLC0415 - optional resolver dependency
     except ImportError:
@@ -9451,21 +10996,45 @@ def irs_soi_pub1304_grid(raw: bytes, spec: Mapping[str, Any]):
             "(xlrd==2.0.1) to parse IRS SOI .xls prints"
         )
     try:
-        book = xlrd.open_workbook(file_contents=raw)
+        options: dict[str, Any] = {}
+        if bounded:
+            options["on_demand"] = True
+        if quiet:
+            # xlrd accepts a text writer for diagnostics. Discard them rather
+            # than accumulating untrusted text or corrupting MCP stdout.
+            class QuietWorkbookLog:
+                def write(self, text: str) -> int:
+                    return len(text)
+
+                def flush(self) -> None:
+                    pass
+
+            options["logfile"] = QuietWorkbookLog()
+        book = xlrd.open_workbook(file_contents=raw, **options)
     except Exception as exc:  # noqa: BLE001 - any parse failure fails closed
         return None, f"workbook parse failed: {exc}"
-    sheet_name = str(spec["sheet_name"])
-    if sheet_name not in book.sheet_names():
-        return None, (
-            f"sheet {sheet_name!r} not found (sheets: {book.sheet_names()!r}); "
-            "IRS changed the workbook layout — extend the adapter"
-        )
-    sheet = book.sheet_by_name(sheet_name)
-    grid = [
-        [sheet.cell_value(row, col) for col in range(sheet.ncols)]
-        for row in range(sheet.nrows)
-    ]
-    return grid, None
+    try:
+        if max_sheets is not None and book.nsheets > max_sheets:
+            return None, "workbook exceeds the sheet limit"
+        sheet_name = str(spec["sheet_name"])
+        if sheet_name not in book.sheet_names():
+            return None, (
+                f"sheet {sheet_name!r} not found (sheets: {book.sheet_names()!r}); "
+                "IRS changed the workbook layout — extend the adapter"
+            )
+        sheet = book.sheet_by_name(sheet_name)
+        if (max_rows is not None and sheet.nrows > max_rows) or (
+            max_columns is not None and sheet.ncols > max_columns
+        ):
+            return None, "workbook exceeds dimension limits"
+        grid = [
+            [sheet.cell_value(row, col) for col in range(sheet.ncols)]
+            for row in range(sheet.nrows)
+        ]
+        return grid, None
+    finally:
+        if bounded:
+            book.release_resources()
 
 
 def irs_soi_pub1304_count_from_grid(
@@ -10863,16 +12432,23 @@ def pending_claims_refs(log: dict) -> list[tuple[str, str, str, str]]:
 
 def pending_adapter_refs(
     log: dict,
+    registrations: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[tuple[str, str, dict[str, Any], str, str, str, dict[str, Any]]]:
     """(ref, kind, spec, period_type, period, release_date, forecast_entry)
-    for pending cells covered by the generic adapters."""
+    for pending cells covered by the generic adapters.
+
+    ``registrations`` replaces the on-disk registration lookup. The
+    registration-time execution-plan gate passes the one contract it is
+    judging, which is not on disk yet.
+    """
     forecasts = {
         entry["forecastSlug"]: entry
         for entry in log.get("entries", [])
         if entry.get("kind") == "prediction_recorded" and entry.get("forecastSlug")
     }
     out = []
-    sba_registrations: dict[str, dict[str, Any]] | None = None
+    sba_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
+    bls_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
     for link in log["resolutionLinks"]:
         if link.get("status") != "pending":
             continue
@@ -10953,7 +12529,21 @@ def pending_adapter_refs(
                     )
                 )
             continue
-        if ref.startswith(A19_STEM + "."):
+        a19_binds_bls_api = False
+        a19_row_stem = f"{A19_STEM}.{ref[len(A19_STEM) + 1 :].split('.')[0]}"
+        if ref.startswith(A19_STEM + ".") and a19_row_stem in BLS_API_ADAPTERS:
+            # Each row also has a registrable BLS API spec. As for the stems
+            # the ALFRED and BLS API families both claim, the registered
+            # adapter decides: only a target that binds ``bls-api`` falls
+            # through to the BLS API leg below. The generic-url registrations
+            # and the cells that predate bindings keep the Archive leg.
+            if bls_registrations is None:
+                bls_registrations = registration_contracts()
+            registered = ((bls_registrations.get(ref) or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            a19_binds_bls_api = registered.get("adapter") == BLS_API_BINDING_ADAPTER
+        if ref.startswith(A19_STEM + ".") and not a19_binds_bls_api:
             occupation = ref[len(A19_STEM) + 1 :].split(".")[0]
             parsed = parse_ref_period(ref, f"{A19_STEM}.{occupation}")
             if occupation in A19_ROW_LABELS and parsed:
@@ -10965,6 +12555,15 @@ def pending_adapter_refs(
                     "concept_authority": "bls",
                     "source_concept": A19_ROW_LABELS[occupation],
                     "a19_row": occupation,
+                    "evidence_notes": (
+                        "Value for {period} read from {source_url}, an "
+                        "Internet Archive capture of BLS Table A-19 whose "
+                        "current-month column is {period}: BLS overwrites the "
+                        "table with each Employment Situation, so the capture "
+                        "was taken after {period} was published and before "
+                        "the next month replaced it. This does not claim the "
+                        "bytes BLS served at the moment of release."
+                    ),
                 }
                 out.append(
                     (ref, "a19", spec, parsed[0], parsed[1], release_date, forecast)
@@ -11006,6 +12605,20 @@ def pending_adapter_refs(
             (stem for stem in BLS_API_ADAPTERS if ref.startswith(stem + ".")),
             None,
         )
+        if bls_stem and bls_stem in ALFRED_ADAPTERS:
+            # Four docket stems are claimed by both families. The registered
+            # adapter decides (FAMILY_ADAPTERS): only a target that binds
+            # ``bls-api`` routes here. Every other reference for the stem, a
+            # generic-url registration or a cell that predates bindings, falls
+            # through to the ALFRED leg exactly as it did before this family
+            # became registrable.
+            if bls_registrations is None:
+                bls_registrations = registration_contracts()
+            registered = ((bls_registrations.get(ref) or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            if registered.get("adapter") != BLS_API_BINDING_ADAPTER:
+                bls_stem = None
         if bls_stem:
             parsed = parse_ref_period(ref, bls_stem)
             spec = BLS_API_ADAPTERS[bls_stem]
@@ -12199,6 +13812,116 @@ def append_gate_verdict(gate_runs: list[dict]) -> bool:
     return "success" in conclusions
 
 
+def ledger_catalog_refusals(
+    repo: str,
+    base_sha: str,
+    path: str,
+    base_content: str,
+    rows: list[dict[str, Any]],
+) -> dict[str, str]:
+    """Rows the ledger's own series-catalog generator refuses on their own.
+
+    Chronicle regenerates its series catalog on every append, and the
+    generator fails the whole append when one series identity would carry
+    two units or two cadences. One such row would then hold every other
+    resolution in the run hostage (2026-09-25: the 18 registered A-19
+    contracts are in millions, while Chronicle's six A-19 lineages hold their
+    June 2026 observation in thousands). The candidate append is built once
+    on the staged base commit; only when that fails, and the base alone
+    passes, is each row tried alone, and a row that fails alone is refused
+    with the generator's reason. Rows that fail only together are not
+    separated: the append then fails as before.
+    """
+
+    if not rows:
+        return {}
+    tree = _fetch_repository_tree(repo, base_sha, path)
+    lines = [json.dumps(row, separators=(",", ":")) for row in rows]
+
+    def failure(selected: list[str]) -> str | None:
+        candidate = base_content.rstrip("\n") + "\n"
+        if selected:
+            candidate += "\n".join(selected) + "\n"
+        with tempfile.TemporaryDirectory(prefix="thesis-catalog-preflight-") as name:
+            stage = pathlib.Path(name)
+            _materialize_repository_tree(stage, tree)
+            generator = stage / "scripts" / "build_series_catalog.py"
+            if not generator.is_file():
+                return None
+            (stage / _validated_repository_path(path)).write_text(
+                candidate, encoding="utf-8"
+            )
+            completed = subprocess.run(
+                [sys.executable, str(generator)],
+                cwd=stage,
+                capture_output=True,
+                text=True,
+            )
+        if completed.returncode == 0:
+            return None
+        output = completed.stderr.strip() or completed.stdout.strip()
+        detail = " ".join(
+            line for line in output.splitlines() if not line.startswith("note:")
+        )[-500:]
+        return f"series-catalog generator exit {completed.returncode}: {detail}"
+
+    if failure(lines) is None or failure([]) is not None:
+        return {}
+    refusals: dict[str, str] = {}
+    for row, line in zip(rows, lines):
+        reason = failure([line])
+        if reason is not None:
+            refusals[str(row.get("source_record_id", "?"))] = reason
+    kept = [
+        line
+        for row, line in zip(rows, lines)
+        if str(row.get("source_record_id", "?")) not in refusals
+    ]
+    if kept:
+        together = failure(kept)
+        if together is not None:
+            # Rows that fail only together cannot be told apart here; stop
+            # before anything is written rather than inside the append.
+            raise LedgerProposalError(
+                "rows the series catalog accepts one by one fail it together: "
+                f"{together}"
+            )
+    return refusals
+
+
+def apply_catalog_refusals(
+    rows: list[dict[str, Any]],
+    refusals: dict[str, str],
+    refused: list[str],
+) -> list[dict[str, Any]]:
+    """Report each catalog refusal, add it to ``refused``, return the rest."""
+
+    for ref, reason in refusals.items():
+        refused.append(f"{ref}: {reason}")
+        print(f"  CATALOG REFUSED (excluded from append): {ref} — {reason}")
+    return exclude_catalog_refusals(rows, refusals)
+
+
+def exclude_catalog_refusals(
+    rows: list[dict[str, Any]], refusals: dict[str, str]
+) -> list[dict[str, Any]]:
+    """The rows the catalog accepts; refused rows' archives are removed.
+
+    A refused row's response archive is deleted unless a kept row shares it,
+    so an excluded row leaves no orphan archive in the run directory.
+    """
+
+    kept = [row for row in rows if str(row["source_record_id"]) not in refusals]
+    kept_archives = {row["responseArchive"]["path"] for row in kept}
+    for row in rows:
+        if str(row["source_record_id"]) not in refusals:
+            continue
+        archive = row["responseArchive"]["path"]
+        if archive not in kept_archives:
+            (ROOT / archive).unlink(missing_ok=True)
+    return kept
+
+
 def propose_ledger_append(
     repo: str,
     branch: str,
@@ -12770,6 +14493,9 @@ FAMILY_ADAPTERS = {
     # must never be resolved by a series-stem family that happens to share
     # the series name — the 2026-07-25 new-home-sales collision, where a
     # 2026-07-10 generic-url registration met a newly added ALFRED stem.
+    # A-19 has no adapter of its own: its registrations are generic-url
+    # contracts that a19_execution_spec pins field by field.
+    "a19": {"generic-url"},
     "alfred": {"alfred-fred"},
     "bea_release": {"bea-release", "bea-ita-itable"},
     "bls_api": {"bls-api"},
@@ -12800,6 +14526,380 @@ def binding_adapter_mismatch(
     if allowed is None:
         return None
     return None if adapter in allowed else str(adapter)
+
+
+# ---------------------------------------------------------------------------
+# Registration-time execution plan
+#
+# ``register_targets.py`` used to accept any target whose binding it could
+# construct, and a seed with no adapter defaults to ``generic-url``: a page
+# address, which no adapter-routed leg of the main loop accepts
+# (docs/lanes/2026-08-03-series-ingestion-wave1.md). ``roll_docket.py`` steps
+# from the latest PUBLISHED period, so such a series kept minting targets that
+# could never resolve: 67 of the 116 forecasts overdue on 2026-09-19.
+#
+# ``execution_plan_refusal`` asks, before a NEW registration is written, the
+# question the main loop asks after the forecast is already public: would
+# this exact contract reach an admitted executor? It routes the contract's
+# dataPointId through the same router and then applies the main loop's
+# date-independent refusals in its order: resolution-date basis, emitted unit,
+# registered adapter, then the family's own predicates. It never touches the
+# network and never reads ``records/`` (the QCEW predicate reads the committed
+# docket calendar): whether the print exists yet, or the window is open, is a
+# runtime question. Whether any code could ever read it is not.
+# ---------------------------------------------------------------------------
+
+NO_EXECUTOR_ADAPTER = "generic-url"
+
+
+def _plan_binding_refusal(matches: bool, family: str) -> str | None:
+    if matches:
+        return None
+    return (
+        f"the registered sourceBinding is not the reviewed {family} template "
+        "the executor authenticates before it reads anything"
+    )
+
+
+def _plan_alfred(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    # Stricter than the main loop: the ALFRED leg keys its fetch on the
+    # stem's spec and never reads the binding, so it would resolve a contract
+    # that names another series. A new contract must name the series it will
+    # be scored against. Every ALFRED docket template already does.
+    binding = registration["contract"]["sourceBinding"]
+    if binding.get("sourceSeriesId") != spec["fred"]:
+        return (
+            f"sourceBinding.sourceSeriesId {binding.get('sourceSeriesId')!r} is "
+            f"not the ALFRED series {spec['fred']!r} this stem's executor reads"
+        )
+    return None
+
+
+def _plan_bea_release(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        bea_release_binding_matches_spec(binding, spec), "BEA release"
+    )
+    if refusal:
+        return refusal
+    window = binding.get("expectedReleaseWindow") or {}
+    if not window.get("start") or window.get("start") != window.get("end"):
+        return (
+            "the BEA executor captures only on one registered release day; "
+            f"expectedReleaseWindow {window!r} is not a one-day window"
+        )
+    return None
+
+
+def _plan_bls_api(
+    registration: Mapping[str, Any],
+    spec: Mapping[str, Any],
+    period: str,
+    *_: Any,
+) -> str | None:
+    if bls_api_binding_template(spec) is None:
+        return (
+            "this BLS API stem has no reviewed registrable binding: it resolves "
+            "only the cells that predate bindings"
+        )
+    if bls_api_verified_anchors(spec) is None:
+        return "the BLS API adapter has fewer than three verified anchors"
+    # The executor reads the month the dataPointId routes to; the calendar
+    # authenticates the month the contract names. They must be one month.
+    contract_period = registration["contract"].get("period")
+    if contract_period != period:
+        return (
+            f"the dataPointId routes to {period} but the contract's period is "
+            f"{contract_period!r}"
+        )
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        bls_api_binding_matches_spec(binding, spec), "BLS API"
+    )
+    if refusal:
+        return refusal
+    # main() refuses a resolve-by-bound target the day after its registered
+    # window closes. This executor's window is one day and its capture is
+    # bounded by the first-print gate instead: JOLTS publishes at 10:00 ET,
+    # after the daily 13:40 UTC run, so a bounded contract could never resolve.
+    basis = registration["contract"].get(
+        "resolutionDateBasis", DEFAULT_RESOLUTION_DATE_BASIS
+    )
+    if basis != DEFAULT_RESOLUTION_DATE_BASIS:
+        return (
+            f"the BLS API executor resolves only the {DEFAULT_RESOLUTION_DATE_BASIS!r} "
+            f"basis; a {basis!r} contract closes with its one-day window, before "
+            "the API can be relied on to serve the print"
+        )
+    # The API serves current estimates only, so the capture has to start on
+    # the day BLS's own schedule names; a cadence-inferred span could open
+    # before the print exists or after the next release has replaced it.
+    window = binding.get("expectedReleaseWindow") or {}
+    if not window.get("start") or window.get("start") != window.get("end"):
+        return (
+            "the BLS API executor starts capturing on one official release "
+            f"day; expectedReleaseWindow {window!r} is not a one-day window"
+        )
+    # Checked last, so a structurally wrong contract gets its own refusal.
+    hold = spec.get("registration_hold")
+    if hold:
+        return f"registration of this BLS API series is on hold: {hold}"
+    return None
+
+
+def _plan_census_spm(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if census_spm_verified_anchors(spec) is None:
+        return (
+            "the Census SPM adapter is deliberately unarmed until the six "
+            "revised-methodology anchors are verified "
+            "(docs/anchor-verifications.md)"
+        )
+    return _plan_binding_refusal(
+        census_spm_binding_matches_spec(
+            registration["contract"]["sourceBinding"], spec
+        ),
+        "Census SPM",
+    )
+
+
+def _plan_eia_dnav(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if eia_dnav_verified_anchors(spec) is None:
+        return "the EIA dnav adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        eia_dnav_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "EIA dnav",
+    )
+
+
+def _plan_fsa_crp(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if fsa_crp_verified_anchors(spec) is None:
+        return "the FSA CRP adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        fsa_crp_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "FSA CRP",
+    )
+
+
+def _plan_intl(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    # The router hands out a copy carrying two routing keys; the admission
+    # check is defined on the canonical adapter object, so judge that.
+    canonical = INTL_ADAPTERS.get(str(spec.get("target_series")))
+    if canonical is None or intl_execution_spec(dict(registration), canonical) is None:
+        mismatches = intl_binding_mismatches(
+            spec, registration["contract"]["sourceBinding"]
+        )
+        return (
+            "the registered contract is not the admitted international "
+            "adapter's exact registry template"
+            + (f" (differs in {', '.join(mismatches)})" if mismatches else "")
+        )
+    return None
+
+
+def _plan_irs_soi_pub1304(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if irs_soi_pub1304_verified_anchors(spec) is None:
+        return "the IRS SOI adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        irs_soi_pub1304_binding_matches_spec(
+            registration["contract"]["sourceBinding"], spec
+        ),
+        "IRS SOI Publication 1304",
+    )
+
+
+def _plan_qcew(
+    registration: Mapping[str, Any],
+    spec: Mapping[str, Any],
+    period: str,
+    release_day: dt.date,
+) -> str | None:
+    if not qcew_adapter_verified(dict(spec)):
+        return "the QCEW adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        qcew_registration_matches_spec(
+            registration["contract"]["sourceBinding"], spec, period, release_day
+        ),
+        "QCEW",
+    )
+
+
+def _plan_sba_pdf(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    return _plan_binding_refusal(
+        sba_pdf_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "SBA PDF",
+    )
+
+
+def _plan_usaspending(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], period: str, *_: Any
+) -> str | None:
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        usaspending_binding_matches_spec(binding, spec), "USAspending"
+    )
+    if refusal:
+        return refusal
+    host = urllib.parse.urlparse(
+        spec["url_template"].format(fiscal_year=period)
+    ).hostname
+    if host not in (binding.get("allowedHosts") or []):
+        return f"the USAspending executor's host {host!r} is not in allowedHosts"
+    return None
+
+
+# One entry per family the router can name AND a registration can bind. A
+# family missing here refuses every new registration, so adding a family to
+# the router without deciding its admission predicate fails closed.
+EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
+    "alfred": _plan_alfred,
+    "bea_release": _plan_bea_release,
+    "bls_api": _plan_bls_api,
+    "census_spm": _plan_census_spm,
+    "eia_dnav": _plan_eia_dnav,
+    "fsa_crp": _plan_fsa_crp,
+    "intl": _plan_intl,
+    "irs_soi_pub1304": _plan_irs_soi_pub1304,
+    "qcew": _plan_qcew,
+    "sba_pdf": _plan_sba_pdf,
+    "usaspending": _plan_usaspending,
+}
+# Families that resolve only cells that predate bindings. SSA and VA MMWR
+# name adapters ``register_targets.SOURCE_ADAPTERS`` does not offer; the
+# Archive-capture A-19 leg and CMS provider data have no binding adapter at
+# all, so a target for them could only be registered as ``generic-url``.
+# Moving a family out of this set means giving it a registrable adapter, a
+# full-binding predicate above, and a first-print acquisition that needs no
+# per-period hand pin. BLS API left it on 2026-09-20, and only for the specs
+# that declare a ``binding_transform``: ``_plan_bls_api`` still refuses every
+# other stem. The six A-19 rows register through that family (2026-09-25),
+# once their ``registration_hold`` lifts: a contract that binds ``bls-api``
+# routes to it, and every other A-19 contract still routes here and is
+# refused.
+EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
+    {"a19", "cms_provider_data", "ssa_official", "va_mmwr"}
+)
+_CLAIMS_PLAN = {
+    "initial": ("ICSA", "thousands"),
+    "continued": ("CCSA", "millions"),
+}
+
+
+def execution_plan_refusal(registration: Mapping[str, Any]) -> str | None:
+    """Why the resolver could never execute this contract, or None if it can.
+
+    ``registration`` is ``{"contract": ..., "targetContentHash": ...}``, the
+    shape ``registration_contracts`` returns. The answer is about the code
+    in this file as committed: it is offline and independent of the date.
+    """
+
+    contract = registration.get("contract")
+    binding = contract.get("sourceBinding") if isinstance(contract, dict) else None
+    if not isinstance(contract, dict) or not isinstance(binding, dict):
+        return "registration has no contract sourceBinding"
+    ref = contract.get("dataPointId")
+    window = binding.get("expectedReleaseWindow")
+    if not isinstance(ref, str) or not ref:
+        return "contract has no dataPointId"
+    if not isinstance(window, dict):
+        return "contract has no dated expectedReleaseWindow"
+    # Stricter than the main loop for the ALFRED and claims legs, which never
+    # read allowedHosts: registration always writes a sorted host list, and a
+    # contract without one is malformed whichever leg would take it.
+    hosts = binding.get("allowedHosts")
+    if not isinstance(hosts, list) or not all(isinstance(h, str) for h in hosts):
+        return "sourceBinding.allowedHosts is not a list of hosts"
+    try:
+        release_day = dt.date.fromisoformat(
+            str(contract.get("resolutionDate") or window.get("end"))
+        )
+    except ValueError:
+        return "contract has no dated expectedReleaseWindow"
+    adapter = binding.get("adapter")
+    if adapter == NO_EXECUTOR_ADAPTER:
+        # Stricter than the main loop in one place, on purpose: the weekly
+        # claims leg routes by reference id and never reads the binding, so
+        # it would resolve a generic-url claims target. Registration cannot
+        # produce one (SERIES_BINDINGS forces alfred-fred), and a contract
+        # that names no executor is refused whatever would happen to it.
+        return (
+            f"sourceBinding.adapter is {NO_EXECUTOR_ADAPTER!r}: it names a page, "
+            "not an executor, and no adapter-routed resolver leg accepts it"
+        )
+
+    # One pending link, routed by the routers the main loop uses, so this
+    # gate cannot drift from them.
+    slug = str(contract.get("catalogSlug") or ref)
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": slug,
+                "resolutionDate": release_day.isoformat(),
+                "unit": contract.get("unit"),
+            }
+        ],
+        "resolutionLinks": [
+            {"status": "pending", "targetFactRef": ref, "forecastSlug": slug}
+        ],
+    }
+    claims = pending_claims_refs(log)
+    if claims:
+        fred_id, unit = _CLAIMS_PLAN[claims[0][2]]
+        if adapter != "alfred-fred" or binding.get("sourceSeriesId") != fred_id:
+            return (
+                f"the weekly claims executor reads ALFRED {fred_id}; the binding "
+                f"names adapter {adapter!r}, series "
+                f"{binding.get('sourceSeriesId')!r}"
+            )
+        if contract.get("unit") != unit:
+            return (
+                f"the weekly claims executor emits {unit!r}; the contract "
+                f"registers {contract.get('unit')!r}"
+            )
+        return None
+    routes = pending_adapter_refs(log, registrations={ref: registration})
+    if not routes:
+        return f"no resolver family routes dataPointId {ref!r}"
+    _, kind, spec, _, period, _, forecast = routes[0]
+    # The main loop's first refusal: a bounded family executes only a
+    # contract that registers its resolve-by-bound basis, and the reverse.
+    _, basis_refusal = effective_resolution_date_basis(ref, registration, spec)
+    if basis_refusal:
+        return f"resolution-date basis mismatch: {basis_refusal}"
+    if not adapter_unit_matches(spec, forecast):
+        return (
+            f"the {kind} executor emits {spec['unit']!r}; the contract registers "
+            f"{contract.get('unit')!r}"
+        )
+    mismatched = binding_adapter_mismatch(kind, dict(registration))
+    if mismatched:
+        return (
+            f"registered adapter {mismatched!r} is not one the {kind} family "
+            f"resolves ({sorted(FAMILY_ADAPTERS[kind])})"
+        )
+    check = EXECUTION_PLAN_FAMILY_CHECKS.get(kind)
+    if check is None:
+        return (
+            f"the {kind} family has no registration-time admission predicate, "
+            "so it cannot accept new registrations"
+        )
+    return check(registration, spec, period, release_day)
 
 
 def resolution_run_dir(retrieved_at: str) -> pathlib.Path:
@@ -12912,11 +15012,12 @@ def main() -> int:
     content, sha, ledger_repo_sha = ledger_state(
         args.ledger_repo, args.ledger_branch, args.ledger_path
     )
-    existing_ids = {
-        json.loads(line)["source_record_id"]
-        for line in content.splitlines()
-        if line.strip()
-    }
+    ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
+    existing_ids = {row["source_record_id"] for row in ledger_rows}
+    # References refused because their fact would give a Chronicle lineage a
+    # second unit. The rest of the run still appends; the run then exits
+    # EXIT_REFUSED_ROWS, the refused-rows status the workflow publishes past.
+    ledger_unit_refusals: list[str] = []
 
     fetched_rows: list[tuple[dict[str, Any], str, str, bytes, str, str]] = []
     today = dt.date.today()
@@ -12978,6 +15079,19 @@ def main() -> int:
     ] = {}
     qcew_contracts: dict[str, dict[str, Any]] | None = None
     a19_cache: dict[str, tuple[dict[str, float], bytes | None, str, str]] = {}
+    a19_discovered: dict[str, tuple[str | None, bytes | None, str]] = {}
+    a19_capture_requested = False
+    a19_reads: dict[str, tuple[bytes, str]] = {}
+
+    def a19_wayback_read(url: str) -> tuple[bytes, str]:
+        # One read per stored capture per run, whether a pin or discovery
+        # asks; index queries and capture requests are never memoised.
+        if "id_/" not in url:
+            return _wayback_read(url)
+        if url not in a19_reads:
+            a19_reads[url] = _wayback_read(url)
+        return a19_reads[url]
+
     intl_cache: dict[Any, tuple] = {}
     # International requests are checked against the immutable registered
     # contract before any network call. Existing registrations whose source
@@ -13033,14 +15147,29 @@ def main() -> int:
         is_edition_page = (
             kind == "ssa_official" and spec.get("release_evidence") == "edition_page"
         )
+        # A registered A-19 cell's custody must be captured while its window
+        # is open, and its resolutionDate is the window's END: gating on that
+        # date would leave one attempt, on the last day. The leg defers on its
+        # own until the window opens.
+        is_a19_window = kind == "a19" and registration is not None
         if (
             release_day > today
             and resolution_date_basis == DEFAULT_RESOLUTION_DATE_BASIS
             and not is_registered_query_snapshot
             and not is_edition_page
+            and not is_a19_window
         ):
             print(f"  release {release_day} not reached: {ref}")
             continue
+        if kind == "a19":
+            a19_spec, a19_refusal = a19_execution_spec(spec, registration)
+            if a19_spec is None:
+                print(
+                    "  BINDING/ADAPTER MISMATCH (refusing, registered A-19 "
+                    f"contract differs in {a19_refusal}): {ref}"
+                )
+                continue
+            spec = a19_spec
         unit = (forecast or {}).get("unit")
         if not adapter_unit_matches(spec, forecast):
             print(
@@ -13480,6 +15609,32 @@ def main() -> int:
             extension = "csv"
         elif kind == "bls_api":
             series_id = spec["series_id"]
+            registered_binding = ((registration or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            registrable = bls_api_binding_template(spec) is not None
+            if registrable or registered_binding.get("adapter") == (
+                BLS_API_BINDING_ADAPTER
+            ):
+                # The specs that predate bindings keep resolving cells that
+                # have no registration. A registrable spec does not: it
+                # resolves only a target that registers the reviewed template,
+                # so a reference with no contract is never fetched for.
+                if not bls_api_binding_matches_spec(registered_binding, spec):
+                    print(
+                        "  BINDING/ADAPTER MISMATCH (refusing, no registered "
+                        f"bls-api binding or seven-key registry drift): {ref}"
+                    )
+                    continue
+                # Refused before the keyless request is spent, and only this
+                # reference: every other row in the run still appends.
+                unit_conflict = bls_ledger_unit_conflict(
+                    ledger_rows, spec["series_stem"], spec
+                )
+                if unit_conflict:
+                    print(f"  LEDGER UNIT CONFLICT (refusing): {ref} — {unit_conflict}")
+                    ledger_unit_refusals.append(f"{ref}: {unit_conflict}")
+                    continue
             bls_key = (
                 series_id,
                 spec["anchor_start_year"],
@@ -13494,7 +15649,7 @@ def main() -> int:
             if period_type == "year":
                 mismatches = bls_annual_anchor_mismatches(rows, spec["anchors"])
             else:
-                mismatches = bls_anchor_mismatches(rows, spec["anchors"])
+                mismatches = bls_spec_anchor_mismatches(rows, spec)
             if mismatches:
                 print(
                     f"  ANCHOR MISMATCH (refusing, wrong series?): {ref} "
@@ -13512,10 +15667,23 @@ def main() -> int:
             if refusal:
                 print(f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {refusal}")
                 continue
-            if value is not None and ("scale" in spec or "round" in spec):
-                # LAUS serves persons for a catalog in thousands; rounding
-                # follows the cell's resolver (one decimal thousand).
-                value = round(value * spec.get("scale", 1), spec.get("round", 4)) + 0.0
+            if period_type == "year":
+                if value is not None and ("scale" in spec or "round" in spec):
+                    value = (
+                        round(value * spec.get("scale", 1), spec.get("round", 4)) + 0.0
+                    )
+            elif value is not None:
+                # The gate above judged the target month's own row. Scaling,
+                # rounding and any one-month change are applied only now: LAUS
+                # serves persons for a catalog in thousands, and a derived
+                # change also needs the preceding month.
+                value, transform_refusal = bls_transformed_value(rows, spec, period)
+                if transform_refusal:
+                    print(
+                        f"  BLS TRANSFORM REFUSAL (refusing): {ref} — "
+                        f"{transform_refusal}"
+                    )
+                    continue
             # The API has no vintage archive, so the capture day IS the
             # source vintage; the latest+preliminary gate above bounds it
             # inside the first-print window.
@@ -14537,28 +16705,97 @@ def main() -> int:
             source_file = "registered query snapshot (USAspending API v2)"
             extension = "json"
         else:
-            snapshot_url = A19_SNAPSHOT_URLS.get(period)
+            utc_today = dt.date.fromisoformat(utc_now()[:10])
+            window = source_binding.get("expectedReleaseWindow")
+            if registration:
+                # A registered cell's custody is the EARLIEST capture dated
+                # inside the window its contract registered, so it always
+                # comes from the Archive's index, walked in order; a hand pin
+                # could name a later capture, or one outside the window.
+                # Nothing is requested before the window opens. Cells of one
+                # month can register different windows, so discovery is per
+                # (month, window). One capture request per run.
+                discovery_key = f"{period}@{canonical_sha256(window)}"
+                if discovery_key not in a19_discovered:
+                    a19_discovered[discovery_key] = a19_registered_capture(
+                        period,
+                        window,
+                        utc_today,
+                        a19_wayback_read,
+                        request_capture=not a19_capture_requested,
+                    )
+                    if A19_CAPTURE_REQUESTED in a19_discovered[discovery_key].verdict:
+                        a19_capture_requested = True
+                discovery = a19_discovered[discovery_key]
+                snapshot_url, discovered_raw = discovery.url, discovery.raw
+                if not snapshot_url or discovered_raw is None:
+                    print(f"  A-19 {discovery.verdict}: {ref}")
+                    continue
+                if a19_cache.get(snapshot_url, (None, None))[1] is None:
+                    # Also replaces a failed fetch of the same capture by an
+                    # unregistered cell earlier in this run.
+                    a19_cache[snapshot_url] = (
+                        a19_values_from_html(discovered_raw.decode(errors="replace")),
+                        discovered_raw,
+                        snapshot_url,
+                        utc_now(),
+                    )
+            else:
+                # Cells that predate registration have no window; they keep
+                # the reviewed per-month pins.
+                snapshot_url = A19_SNAPSHOT_URLS.get(period)
             if not snapshot_url:
                 print(f"  no A-19 snapshot registered for {period}: {ref}")
                 continue
-            if period not in a19_cache:
+            capture = a19_capture(snapshot_url)
+            if capture is None or capture[1] != A19_SOURCE_URL:
+                print(f"  A-19 SNAPSHOT PIN INVALID (refusing): {ref} — {snapshot_url}")
+                continue
+            if snapshot_url not in a19_cache:
                 retrieved_at = utc_now()
                 try:
-                    with urllib.request.urlopen(snapshot_url, timeout=120) as r:
-                        raw_html = r.read()
-                    a19_cache[period] = (
-                        a19_values_from_html(raw_html.decode()),
+                    raw_html = a19_read_capture(snapshot_url, a19_wayback_read)
+                    a19_cache[snapshot_url] = (
+                        a19_values_from_html(raw_html.decode(errors="replace")),
                         raw_html,
                         snapshot_url,
                         retrieved_at,
                     )
-                except urllib.error.HTTPError as exc:
-                    print(f"  A-19 snapshot fetch failed ({exc}): {ref}")
-                    a19_cache[period] = ({}, None, snapshot_url, retrieved_at)
-            values, raw, source_url, retrieved_at = a19_cache[period]
+                except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
+                    print(
+                        f"  A-19 snapshot fetch failed (deferring): {ref} — "
+                        f"{type(exc).__name__}: {str(exc)[:200]}"
+                    )
+                    a19_cache[snapshot_url] = ({}, None, snapshot_url, retrieved_at)
+            values, raw, source_url, retrieved_at = a19_cache[snapshot_url]
+            if raw is None:
+                continue
+            printed = a19_snapshot_period(raw.decode(errors="replace"))
+            if printed != period:
+                print(
+                    f"  A-19 SNAPSHOT PERIOD MISMATCH (refusing): {ref} — "
+                    f"the capture prints {printed}, not {period}"
+                )
+                continue
             value = values.get(spec["a19_row"])
+            if value is not None and "scale" in spec:
+                value = round(value * spec["scale"], spec["round"]) + 0.0
+            if registration:
+                # The publisher's date this row can vouch for is the day the
+                # Archive saw the page, not the forecast's resolutionDate,
+                # which for these contracts is the window's end.
+                release_day = capture[0].date()
             series_id = f"cpseea19-{spec['a19_row']}"
-            source_file = "cpseea19.htm (Wayback snapshot)"
+            source_file = f"cpseea19.htm (Wayback capture {capture[0]:%Y%m%d%H%M%S}"
+            if registration and discovery.witness:
+                # The earliest print is a row the Archive lists with the
+                # same digest that was not read and identified at its own
+                # timestamp; the capture named first supplied the bytes.
+                source_file += (
+                    f"; the Archive's index lists the same digest at "
+                    f"{discovery.witness}, {discovery.witness_reason}"
+                )
+            source_file += ")"
             extension = "html"
         if value is None or raw is None:
             print(f"  not yet published: {ref}")
@@ -14579,6 +16816,17 @@ def main() -> int:
         elif kind == "qcew":
             assert qcew_row is not None
             row = qcew_row
+        elif kind == "a19":
+            row = a19_fact(
+                ref,
+                spec,
+                period_type,
+                period,
+                value,
+                release_day,
+                source_url,
+                source_file,
+            )
         else:
             row = generic_fact(
                 ref,
@@ -14620,12 +16868,12 @@ def main() -> int:
         return 1
     if not fetched_rows:
         print("nothing new to record")
-        return 0
+        return _report_ledger_unit_refusals(ledger_unit_refusals)
     if args.dry_run:
         print(f"dry-run: would append {len(fetched_rows)} row(s)")
         for row, *_ in fetched_rows:
             print(json.dumps(row)[:200])
-        return 0
+        return _report_ledger_unit_refusals(ledger_unit_refusals)
 
     run_retrieved_at = min(item[4] for item in fetched_rows)
     run_dir = resolution_run_dir(run_retrieved_at)
@@ -14656,11 +16904,21 @@ def main() -> int:
             ref = str(row.get("source_record_id", "?"))
             provenance_refusals.append(f"{ref}: {exc}")
             print(f"  PROVENANCE REFUSED (excluded from append): {ref} — {exc}")
+    # The same rule for the ledger's catalog: a row Chronicle's generator
+    # refuses on its own (a unit conflict with its lineage) is excluded and
+    # reported, and the rest are appended.
+    new_rows = apply_catalog_refusals(
+        new_rows,
+        ledger_catalog_refusals(
+            args.ledger_repo, ledger_repo_sha, args.ledger_path, content, new_rows
+        ),
+        provenance_refusals,
+    )
     if not new_rows:
         print("every fetched row was refused; nothing to append")
         for line in provenance_refusals:
             print(f"  refused: {line}")
-        return 1
+        return EXIT_REFUSED_ROWS
 
     updated = (
         content.rstrip("\n")
@@ -14705,11 +16963,12 @@ def main() -> int:
     )
     if provenance_refusals:
         print(
-            f"{len(provenance_refusals)} row(s) refused contract binding; "
-            "appended the rest — fix the registrations above"
+            f"{len(provenance_refusals)} row(s) refused contract binding or the "
+            "ledger's series catalog; appended the rest — fix the registrations "
+            "or curate the ledger's lineages named above"
         )
-        return 1
-    return 0
+        return EXIT_REFUSED_ROWS
+    return _report_ledger_unit_refusals(ledger_unit_refusals)
 
 
 if __name__ == "__main__":

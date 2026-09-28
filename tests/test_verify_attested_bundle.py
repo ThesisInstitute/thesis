@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import docket_publication  # noqa: E402
 import generation_tickets  # noqa: E402
 import run_thesis_analyst as analyst  # noqa: E402
+import tool_evidence  # noqa: E402
 import verify_attested_bundle as verifier  # noqa: E402
 from canonical_json import canonical_sha256  # noqa: E402
 
@@ -238,6 +239,7 @@ def command_argv(
     model: str,
     search: bool,
     announcement_url: str | None = None,
+    capture_evidence: bool = False,
 ) -> list[str]:
     argv = ["/opt/thesis/bin/codex"]
     if search:
@@ -261,6 +263,14 @@ def command_argv(
             'reasoning_effort="high"',
         ]
     )
+    if capture_evidence:
+        for config in analyst.tool_evidence_mcp_config(
+            fixture.repo.parent / "thesis-tool-evidence-fixture" / "tool_evidence.json",
+            checkout_root=fixture.repo,
+            python_executable=str(fixture.repo / ".venv" / "bin" / "python3"),
+            allow_fetch=search or fixture.ticket["policy"]["codexNetwork"],
+        ):
+            argv.extend(["-c", config])
     if announcement_url is not None:
         for config in analyst.announcement_mcp_config(
             announcement_url,
@@ -322,7 +332,9 @@ def codex_jsonl(
 def attested_bundle(
     tmp_path: pathlib.Path, request: pytest.FixtureRequest
 ) -> AttestedFixture:
-    bounded = getattr(request, "param", None) == "bounded"
+    fixture_mode = getattr(request, "param", None)
+    bounded = fixture_mode in {"bounded", "bounded-evidence"}
+    capture_evidence = fixture_mode in {"evidence", "bounded-evidence"}
     repo = tmp_path / "checkout"
     repo.mkdir()
     git(repo, "init")
@@ -433,6 +445,7 @@ def attested_bundle(
         target,
         ticket=prompt_context,
         network_tools=policy["codexNetwork"],
+        tool_evidence=capture_evidence,
     )
     raw_cells = [
         {
@@ -545,6 +558,7 @@ def attested_bundle(
             model=model,
             search=search,
             announcement_url=announcement_url,
+            capture_evidence=capture_evidence,
         )
         command = {
             "backend": "codex",
@@ -560,6 +574,22 @@ def attested_bundle(
             "startedAt": started_at,
             "finishedAt": finished_at,
         }
+        if capture_evidence:
+            command["toolEvidence"] = {
+                "schemaVersion": tool_evidence.SCHEMA_VERSION,
+                "artifact": f"{prefix}tool_evidence.json",
+                "verificationArtifact": f"{prefix}tool_evidence_verification.json",
+            }
+            captured = tool_evidence.empty_evidence()
+            captured_bytes = (json.dumps(captured, indent=2) + "\n").encode()
+            report = tool_evidence.verify_evidence(captured)
+            report["evidenceSha256"] = sha256_bytes(captured_bytes)
+            artifact(f"{prefix}tool_evidence.json", "tool_evidence", captured_bytes)
+            artifact(
+                f"{prefix}tool_evidence_verification.json",
+                "tool_evidence_verification",
+                json.dumps(report, indent=2),
+            )
         artifact(
             f"{prefix}command.json",
             "command",
@@ -766,6 +796,105 @@ def verify(fixture: AttestedFixture, *, now_utc: dt.datetime = NOW_UTC) -> None:
 
 def test_consistent_attested_bundle_passes(attested_bundle: AttestedFixture) -> None:
     verify(attested_bundle)
+
+
+@pytest.mark.parametrize(
+    "attested_bundle", ["evidence", "bounded-evidence"], indirect=True
+)
+def test_tool_evidence_bundle_replays_with_exact_mcp_configuration(
+    attested_bundle: AttestedFixture,
+) -> None:
+    verify(attested_bundle)
+
+
+@pytest.mark.parametrize("attested_bundle", ["evidence"], indirect=True)
+@pytest.mark.parametrize(
+    ("part", "replacement", "message"),
+    [
+        (".command=", '"/usr/bin/python3"', "virtual environment interpreter"),
+        (".required=", "false", "does not match the trusted runner"),
+        (".cwd=", '"/tmp"', "does not match the trusted runner"),
+    ],
+)
+def test_tool_evidence_mcp_execution_policy_cannot_be_replaced(
+    attested_bundle: AttestedFixture,
+    part: str,
+    replacement: str,
+    message: str,
+) -> None:
+    command = json.loads(run_path(attested_bundle, "draft_command.json").read_text())
+    config_prefix = f"mcp_servers.thesis_tool_evidence{part}"
+    command["argv"] = [
+        config_prefix + replacement if value.startswith(config_prefix) else value
+        for value in command["argv"]
+    ]
+    rewrite_run_artifact(
+        attested_bundle, "draft_command.json", json.dumps(command).encode()
+    )
+    with pytest.raises(verifier.AttestedBundleError, match=message):
+        verify(attested_bundle)
+
+
+@pytest.mark.parametrize("attested_bundle", ["evidence"], indirect=True)
+@pytest.mark.parametrize(
+    "mutation", ["script", "checkout-output", "relative-output", "extra-arg"]
+)
+def test_tool_evidence_mcp_argv_is_closed_to_trusted_capture(
+    attested_bundle: AttestedFixture,
+    mutation: str,
+) -> None:
+    command = json.loads(run_path(attested_bundle, "draft_command.json").read_text())
+    config_prefix = "mcp_servers.thesis_tool_evidence.args="
+    for index, value in enumerate(command["argv"]):
+        if not value.startswith(config_prefix):
+            continue
+        args = json.loads(value.removeprefix(config_prefix))
+        if mutation == "script":
+            args[0] = str(attested_bundle.repo / "untrusted.py")
+        elif mutation == "checkout-output":
+            args[2] = str(
+                attested_bundle.repo
+                / "thesis-tool-evidence-fixture"
+                / "tool_evidence.json"
+            )
+        elif mutation == "relative-output":
+            args[2] = "thesis-tool-evidence-fixture/tool_evidence.json"
+        else:
+            args.append("--untrusted-code")
+        command["argv"][index] = config_prefix + json.dumps(args, separators=(",", ":"))
+    rewrite_run_artifact(
+        attested_bundle, "draft_command.json", json.dumps(command).encode()
+    )
+    with pytest.raises(verifier.AttestedBundleError, match="tool evidence MCP"):
+        verify(attested_bundle)
+
+
+@pytest.mark.parametrize("attested_bundle", ["evidence"], indirect=True)
+def test_attested_tool_evidence_report_is_recomputed(
+    attested_bundle: AttestedFixture,
+) -> None:
+    filename = "draft_tool_evidence_verification.json"
+    report = json.loads(run_path(attested_bundle, filename).read_text())
+    report["succeededCount"] = 1
+    rewrite_run_artifact(attested_bundle, filename, json.dumps(report).encode())
+    with pytest.raises(
+        verifier.AttestedBundleError, match="differs from trusted replay"
+    ):
+        verify(attested_bundle)
+
+
+@pytest.mark.parametrize("attested_bundle", ["evidence"], indirect=True)
+def test_attested_tool_evidence_cannot_borrow_review_artifact(
+    attested_bundle: AttestedFixture,
+) -> None:
+    filename = "draft_command.json"
+    command = json.loads(run_path(attested_bundle, filename).read_text())
+    command["toolEvidence"]["artifact"] = "pre_submit_review_tool_evidence.json"
+    rewrite_run_artifact(attested_bundle, filename, json.dumps(command).encode())
+    with pytest.raises(
+        verifier.AttestedBundleError, match="invalid tool evidence declaration"
+    ):
+        verify(attested_bundle)
 
 
 @pytest.mark.parametrize("attested_bundle", ["bounded"], indirect=True)

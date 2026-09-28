@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildScoreId,
   CHRONOLOGY_POLICY_VERSION,
@@ -18,6 +18,24 @@ import { WITNESSED_TIMELINE_SCHEMA_VERSION } from "@/data/witnessed-timeline.gen
 import type { ForecastCell } from "@/data/forecast-cells";
 import { getForecastRunEntries } from "@/data/forecast-cells";
 import type { TargetRegisteredLedgerEntry } from "@/data/ledger-targets";
+
+// These fixtures test publication chronology after archive execution verification has succeeded.
+// The production verification boundary is exercised without mocks in
+// published-scoring-gate.test.ts and forecast-publication.test.ts.
+vi.mock("@/lib/forecast-publication", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/forecast-publication")>();
+  return {
+    ...actual,
+    verifyForecastRun: () => ({
+      eligible: true,
+      reason: "Downstream scoring fixture",
+    }),
+    filterPublishedForecasts: (
+      forecasts: import("@/data/forecast-cells").ForecastCell[],
+    ) => forecasts,
+  };
+});
 
 // Re-audit N1: the headline chronology tier requires external witness proof
 // from the record chain, not claimed timestamps. These tests pin the proof
@@ -77,9 +95,7 @@ describe("publication proof classifier", () => {
     expect(proof.earliestWitnessedAt).toBe("2026-07-10T06:06:00Z");
     expect(proof.headlineEligible).toBe(true);
     expect(proof.inventoryStatus).toBe("complete");
-    expect(proof.witnessDigest).toBe(
-      "records/2026-07-10/digest-fixture.json",
-    );
+    expect(proof.witnessDigest).toBe("records/2026-07-10/digest-fixture.json");
   });
 
   it("rejects a witness at or after the observation", () => {
@@ -109,8 +125,7 @@ describe("publication proof classifier", () => {
 
   it("never passes a legacy-incomplete or ineligible root", () => {
     expect(
-      classifyPublicationProof(LEGACY_ROOT, afterWitness, FIXTURE_ROOTS)
-        .status,
+      classifyPublicationProof(LEGACY_ROOT, afterWitness, FIXTURE_ROOTS).status,
     ).toBe("root_not_headline_eligible");
     expect(
       classifyPublicationProof(
@@ -330,9 +345,7 @@ describe("witness tier through the scoring pipeline", () => {
     expect(noRoot?.chronologyProof.status).toBe("no_custody_root");
 
     const fabricated = score(
-      cell(
-        "4444444444444444444444444444444444444444444444444444444444444444",
-      ),
+      cell("4444444444444444444444444444444444444444444444444444444444444444"),
       "2026-08-01T12:00:00Z",
     );
     expect(fabricated?.chronology).toBe("claimed_time_verified");
@@ -381,6 +394,8 @@ describe("witness tier through the scoring pipeline", () => {
     expect(buildScoreId(payload)).not.toBe(
       buildScoreId({ ...payload, contractBinding: "legacy_unbound" }),
     );
-    expect(CHRONOLOGY_POLICY_VERSION).toBe("chronology_v4_witnessed_publication");
+    expect(CHRONOLOGY_POLICY_VERSION).toBe(
+      "chronology_v4_witnessed_publication",
+    );
   });
 });

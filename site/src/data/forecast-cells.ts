@@ -1,4 +1,5 @@
 import { BENEFIT_PROGRAM_EXAMPLES } from "./forecast-examples/benefits";
+import { AUTO_2026_09_21_2BB50B199A447D17071EB2004498B2C0108F1E3F494A09F4610DE14E0767CB5F_WAVE } from "./forecast-examples/auto-2026-09-21-2bb50b199a447d17071eb2004498b2c0108f1e3f494a09f4610de14e0767cb5f";
 import { AUTO_2026_09_14_1F51F8F1E0284F9806BA60CCC14724EB0905FB43418733BB6E698620528F917B_WAVE } from "./forecast-examples/auto-2026-09-14-1f51f8f1e0284f9806ba60ccc14724eb0905fb43418733bb6e698620528f917b";
 import { AUTO_2026_09_11_393E84484652C64E9317E0406BED7B440B62E87796D1A96DB83272419EDD0D11_WAVE } from "./forecast-examples/auto-2026-09-11-393e84484652c64e9317e0406bed7b440b62e87796d1a96db83272419edd0d11";
 import { AUTO_2026_09_09_0E17B26D7DFDB7070176727BFA081222DBB74049B8795FA080FA189FA68C7755_WAVE } from "./forecast-examples/auto-2026-09-09-0e17b26d7dfdb7070176727bfa081222dbb74049b8795fa080fa189fa68c7755";
@@ -190,6 +191,8 @@ export type PredictionRunActivityArtifactType =
   | "codex_events_jsonl"
   | "codex_last_message"
   | "codex_trace"
+  | "tool_evidence"
+  | "tool_evidence_verification"
   | "draft_forecast"
   | "review_prompt"
   | "pre_submit_review"
@@ -351,6 +354,7 @@ export interface ForecastComparisonRun {
   ciHigh: number;
   confidence?: number;
   drivers?: string[];
+  historicalContext?: HistoricalPoint[];
   predictionRun: PredictionRunMetadata;
   predictionDistribution?: PredictionDistribution;
   reasoning: ReasoningStep[];
@@ -358,6 +362,10 @@ export interface ForecastComparisonRun {
 }
 
 export interface ForecastCell {
+  /** Preserve a promoted comparison’s immutable run identity. */
+  primaryVariantId?: string;
+  /** Original target scale cutoff; null preserves an unavailable legacy cutoff. */
+  normalizationCutoffRunAt?: string | null;
   slug: string;
   country?: CountryCode;
   type: ForecastCellType;
@@ -406,6 +414,7 @@ export interface ForecastRunEntry {
   ciHigh: number;
   confidence: number;
   drivers: string[];
+  historicalContext?: HistoricalPoint[];
   predictionRun?: PredictionRunMetadata;
   packSet?: PredictionPackSet;
   predictionDistribution: PredictionDistribution;
@@ -442,81 +451,6 @@ export function getForecastRuntimeLabel(
   if (kind === "agent-run") return "Agent run";
   return "Static mock trace";
 }
-
-export function getForecastRunEntries(
-  forecast: ForecastCell,
-): ForecastRunEntry[] {
-  const primaryDistribution =
-    forecast.predictionDistribution ??
-    buildNumericCdfFromInterval({
-      pointEstimate: forecast.pointEstimate,
-      ciLow: forecast.ciLow,
-      ciHigh: forecast.ciHigh,
-    });
-  const primary: ForecastRunEntry = {
-    variantId: "primary",
-    label: forecast.predictionRun?.runLabel ?? "Headline",
-    description: forecast.predictionRun?.runDescription,
-    isPrimary: true,
-    pointEstimate: forecast.pointEstimate,
-    ciLow: forecast.ciLow,
-    ciHigh: forecast.ciHigh,
-    confidence: forecast.confidence,
-    drivers: forecast.drivers,
-    predictionRun: forecast.predictionRun,
-    packSet: forecast.predictionRun?.packSet,
-    predictionDistribution: primaryDistribution,
-    reasoning: forecast.reasoning,
-  };
-
-  return [
-    primary,
-    ...(forecast.comparisonRuns ?? []).map(
-      (run): ForecastRunEntry => ({
-        variantId: run.variantId,
-        label: run.label,
-        description: run.description,
-        isPrimary: false,
-        pointEstimate: run.pointEstimate,
-        ciLow: run.ciLow,
-        ciHigh: run.ciHigh,
-        confidence: run.confidence ?? forecast.confidence,
-        drivers: run.drivers ?? forecast.drivers,
-        predictionRun: run.predictionRun,
-        packSet: run.predictionRun.packSet,
-        predictionDistribution:
-          run.predictionDistribution ??
-          buildNumericCdfFromInterval({
-            pointEstimate: run.pointEstimate,
-            ciLow: run.ciLow,
-            ciHigh: run.ciHigh,
-          }),
-        reasoning: run.reasoning,
-        externalSubmission: run.externalSubmission,
-      }),
-    ),
-  ];
-}
-
-export function getResolutionResult(
-  forecast: ForecastCell,
-): "inside" | "outside" | null {
-  if (!forecast.resolvedOutcome) return null;
-  const actual = forecast.resolvedOutcome.value;
-  return forecast.ciLow <= actual && actual <= forecast.ciHigh
-    ? "inside"
-    : "outside";
-}
-
-export const COUNTRY_LABEL: Record<CountryCode, string> = {
-  US: "United States",
-  UK: "United Kingdom",
-  CA: "Canada",
-  AU: "Australia",
-  EA: "Euro area",
-  JP: "Japan",
-  BE: "Belgium",
-};
 
 const PACK_REFERENCES = {
   "base-rate-first": {
@@ -630,52 +564,6 @@ function buildPackSet({
     packs: packIds.map((packId) => PACK_REFERENCES[packId]),
     notes,
   };
-}
-
-export function getForecastCountry(forecast: ForecastCell): CountryCode {
-  if (forecast.country) return forecast.country;
-  if (forecast.series?.country) return forecast.series.country;
-  if (
-    forecast.slug.startsWith("canada-") ||
-    /\b(Canada|Statistics Canada|Bank of Canada)\b/.test(
-      `${forecast.title} ${forecast.question} ${forecast.resolutionSource}`,
-    )
-  ) {
-    return "CA";
-  }
-  if (
-    forecast.slug.startsWith("australia-") ||
-    /\b(Australia|Australian Bureau of Statistics|Reserve Bank of Australia|RBA)\b/.test(
-      `${forecast.title} ${forecast.question} ${forecast.resolutionSource}`,
-    )
-  ) {
-    return "AU";
-  }
-  if (
-    forecast.slug.startsWith("euro-area-") ||
-    /\b(Euro area|euro area|Eurostat|European Central Bank|ECB)\b/.test(
-      `${forecast.title} ${forecast.question} ${forecast.resolutionSource}`,
-    )
-  ) {
-    return "EA";
-  }
-  if (
-    forecast.slug.startsWith("japan-") ||
-    /\b(Japan|Bank of Japan|Statistics Bureau of Japan|Tokyo CPI|BOJ)\b/.test(
-      `${forecast.title} ${forecast.question} ${forecast.resolutionSource}`,
-    )
-  ) {
-    return "JP";
-  }
-  if (
-    forecast.slug.startsWith("uk-") ||
-    /\b(UK|United Kingdom|Great Britain|Office for National Statistics|Bank of England|HMRC)\b/.test(
-      `${forecast.title} ${forecast.question} ${forecast.resolutionSource}`,
-    )
-  ) {
-    return "UK";
-  }
-  return "US";
 }
 
 const FORECAST_CELL_DEFINITIONS: ForecastCell[] = [
@@ -5263,6 +5151,7 @@ const FORECAST_CELL_DEFINITIONS: ForecastCell[] = [
   },
 
   ...LAUNCH_CADENCE_EXAMPLES,
+  ...AUTO_2026_09_21_2BB50B199A447D17071EB2004498B2C0108F1E3F494A09F4610DE14E0767CB5F_WAVE,
   ...AUTO_2026_09_14_1F51F8F1E0284F9806BA60CCC14724EB0905FB43418733BB6E698620528F917B_WAVE,
   ...AUTO_2026_09_11_393E84484652C64E9317E0406BED7B440B62E87796D1A96DB83272419EDD0D11_WAVE,
   ...AUTO_2026_09_09_0E17B26D7DFDB7070176727BFA081222DBB74049B8795FA080FA189FA68C7755_WAVE,
@@ -5742,15 +5631,12 @@ const FORECAST_COMPARISON_RUN_AUGMENTS: Record<
       predictionRun: {
         kind: "recorded-agent-run",
         runAt: "2026-07-31T14:00:26Z",
-        agent:
-          "github:PavelMakarchuk::Claude Fable 5 (pavel onboarding agent)",
+        agent: "github:PavelMakarchuk::Claude Fable 5 (pavel onboarding agent)",
         model: "Claude Fable 5 (pavel onboarding agent)",
         runLabel: "PavelMakarchuk challenge submission",
         runDescription:
           "Published challenge forecast recorded in records/2026-07-31/digest-30648581183-1.json.",
-        sourceContext: [
-          "records/2026-07-31/digest-30648581183-1.json",
-        ],
+        sourceContext: ["records/2026-07-31/digest-30648581183-1.json"],
       },
       predictionDistribution: buildNumericCdfFromQuantiles({
         pointEstimate: 3.3,
@@ -5811,9 +5697,7 @@ const FORECAST_COMPARISON_RUN_AUGMENTS: Record<
         runLabel: "khs challenge submission",
         runDescription:
           "Published challenge forecast recorded in records/2026-07-31/digest-30648581183-1.json.",
-        sourceContext: [
-          "records/2026-07-31/digest-30648581183-1.json",
-        ],
+        sourceContext: ["records/2026-07-31/digest-30648581183-1.json"],
       },
       predictionDistribution: buildNumericCdfFromQuantiles({
         pointEstimate: 7.9,
@@ -7739,80 +7623,14 @@ export function getForecastCell(slug: string): ForecastCell | undefined {
   return FORECAST_CELLS.find((m) => m.slug === slug);
 }
 
-export function formatValue(value: number, unit: Unit): string {
-  switch (unit) {
-    case "count":
-      return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    case "percent":
-      return `${formatPercent(value)}%`;
-    case "percent_growth":
-      return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
-    case "gbp_billions":
-      return `£${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}B`;
-    case "usd":
-      if (Math.abs(value) >= 1000) {
-        return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-      }
-      return `$${value.toFixed(2)}`;
-    case "usd_millions":
-      return `$${value.toLocaleString(undefined, { maximumFractionDigits: 3 })}M`;
-    case "usd_billions":
-      return `$${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}B`;
-    case "usd_monthly":
-      return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}/mo`;
-    case "thousands":
-      if (Math.abs(value) >= 1000) {
-        return `${formatScaledThousandsAsMillions(value)}m`;
-      }
-      return `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}k`;
-    case "millions":
-      return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}M`;
-    case "million_cubic_feet":
-      return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })} MMcf`;
-    case "per_1000_live_births":
-      return `${value.toFixed(2)} per 1,000`;
-    case "ratio":
-      return value.toFixed(2);
-    case "index_points":
-      // Survey balances (NBB barometer, consumer confidence) print signed.
-      return `${value >= 0 ? "+" : ""}${value.toFixed(1)}`;
-    case "minutes":
-      return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })} min`;
-    default:
-      return value.toString();
-  }
-}
-
-function formatScaledThousandsAsMillions(value: number): string {
-  const millions = value / 1000;
-  return millions.toLocaleString(undefined, {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: Math.abs(millions) >= 10 ? 2 : 1,
-  });
-}
-
-function formatPercent(value: number): string {
-  const roundedToTenth = Math.round(value * 10) / 10;
-  return Math.abs(value - roundedToTenth) < 1e-9
-    ? value.toFixed(1)
-    : value.toFixed(2);
-}
-
-export function formatValueShort(value: number, unit: Unit): string {
-  if (unit === "usd" && Math.abs(value) >= 1000) {
-    return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}B`;
-  }
-  return formatValue(value, unit);
-}
-
-export const TYPE_LABEL: Record<ForecastCellType, string> = {
-  data: "Government data",
-  policy: "Policy",
-  conditional: "Conditional",
-};
-
-export const TYPE_DESCRIPTION: Record<ForecastCellType, string> = {
-  data: "Forecast cell on a published government data point.",
-  policy: "Forecast cell on a formal policy setting or encoded parameter.",
-  conditional: "Outcome forecast conditional on a policy state.",
-};
+// Client-safe helpers are separate so withdrawn source records never enter browser bundles.
+export {
+  getForecastRunEntries,
+  getResolutionResult,
+  getForecastCountry,
+  formatValue,
+  formatValueShort,
+  COUNTRY_LABEL,
+  TYPE_LABEL,
+  TYPE_DESCRIPTION,
+} from "./forecast-display";

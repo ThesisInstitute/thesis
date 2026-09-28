@@ -2,15 +2,15 @@
   "slug": "s3596-119",
   "bill_number": "S.3596",
   "title": "Stronger Start for Working Families Act",
-  "resolved_via": "axiom-supabase",
-  "source_url": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.htm",
-  "version_label": "introduced-in-senate-html",
-  "format": "html",
-  "text_sha256": "f4ba370356f81df89dace5e75f1bde59704191340b571158a258d6c9bed8b65a",
-  "source_fetched_at": "2026-07-31T15:45:30+00:00",
-  "retrieved_at": "2026-07-31T18:59:34+00:00",
+  "resolved_via": "congress.gov-api",
+  "source_url": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml",
+  "version_label": "Introduced in Senate",
+  "format": "xml",
+  "text_sha256": "c45170c8e73d94d2d9b542135dc9e0abba2361fb0d9658422788fc3e3d865352",
+  "source_fetched_at": null,
+  "retrieved_at": "2026-09-22T03:12:46+00:00",
   "text_file": "s3596-119.txt",
-  "source_file": null,
+  "source_file": "s3596-119.xml",
   "axiomBillId": "6f906b34-3f3c-422b-9b3d-89184f5eb0e7",
   "axiomDashboardUrl": "https://axiom.org/bills/bills/6f906b34-3f3c-422b-9b3d-89184f5eb0e7",
   "statuteMap": {
@@ -45,5 +45,15 @@
       }
     ],
     "source": "axiom-bills precompute-diffs"
+  },
+  "retained_enrichment": {
+    "fields": [
+      "axiomBillId",
+      "axiomDashboardUrl",
+      "statuteMap"
+    ],
+    "sourceCommit": "5261d708edc0b43847cc25bbdc10dfae710409b6",
+    "sourcePath": "bills/raw/s3596-119.meta.json",
+    "note": "Historical Axiom enrichment retained; the fresh extraction used Congress XML and did not rerun Axiom encoding."
   }
 }

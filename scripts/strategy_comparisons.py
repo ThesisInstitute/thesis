@@ -232,11 +232,51 @@ MEDIAN3_ALGORITHM_VERSION = "pointwise_median_cdf_v1"
 def batch_results(batch_paths: list[pathlib.Path]):
     for batch_path in batch_paths:
         batch = json.loads(repo_path(batch_path).read_text())
-        for result in batch.get("results", []):
+        results = batch.get("results", [])
+        conditional_groups: dict[tuple[str, str], list[dict]] = {}
+        for result in results:
+            target = result.get("target") or {}
+            if target.get("conditional") is not None:
+                key = (str(target.get("series")), str(target.get("period")))
+                conditional_groups.setdefault(key, []).append(result)
+        complete_pairs = set()
+        for key, siblings in conditional_groups.items():
+            if len(siblings) != 2 or not all(
+                row.get("ok") is True
+                and row.get("cellsPath")
+                and row.get("manifestPath")
+                for row in siblings
+            ):
+                continue
+            if any(
+                len({row["target"].get(field) for row in siblings}) != 2
+                or not all(row["target"].get(field) for row in siblings)
+                for field in (
+                    "catalogSlug",
+                    "dataPointId",
+                    "conditional",
+                    "conditionId",
+                )
+            ):
+                continue
+            if not all(
+                json.loads(repo_path(row["cellsPath"]).read_text()) for row in siblings
+            ):
+                continue
+            complete_pairs.add(key)
+        for result in results:
             if not result.get("ok"):
                 continue
             target = result.get("target") or {}
             if not target.get("catalogSlug"):
+                continue
+            if (
+                target.get("conditional") is not None
+                and (str(target.get("series")), str(target.get("period")))
+                not in complete_pairs
+            ):
+                # Keep both runs in custody, but never display one successful
+                # premise as if it were a complete conditional comparison.
                 continue
             manifest = json.loads(repo_path(result["manifestPath"]).read_text())
             cells = json.loads(repo_path(result["cellsPath"]).read_text())

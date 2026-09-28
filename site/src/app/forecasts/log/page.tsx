@@ -1,9 +1,9 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import {
   COUNTRY_LABEL,
-  FORECAST_CELLS,
   formatValue,
   getForecastCountry,
   type ForecastCell,
@@ -71,7 +71,7 @@ interface Scoreboard {
 
 export default async function ThesisLogPage() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
   const specs = buildPredictionSpecs(forecasts);
   const runs = buildRecordedPredictionRunRecords(forecasts, specs);
   const logEntries = buildThesisLog(forecasts, ledger);
@@ -403,7 +403,8 @@ function ScoreboardPanel({
           </h2>
         </div>
         <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          {scoreboard.overall.scored} scored · nCRPS = CRPS / ledger dispersion scale
+          {scoreboard.overall.scored} scored · nCRPS = CRPS / ledger dispersion
+          scale
         </span>
       </div>
 
@@ -447,8 +448,8 @@ function ScoreboardPanel({
           pre-registered normalization scale — CRPS divided by the target's
           historical dispersion in the official ledger at registration. No
           resolved score has an eligible scale yet; scales activate as the
-          ledger accumulates pre-cutoff observations per target, and raw
-          CRPS stays published on every resolved prediction below meanwhile.
+          ledger accumulates pre-cutoff observations per target, and raw CRPS
+          stays published on every resolved prediction below meanwhile.
         </p>
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-7 lg:grid-cols-2">
@@ -868,7 +869,7 @@ function ScoreRow({
 
 function getForecastBySlug(
   slug: string,
-  forecasts: ForecastCell[] = FORECAST_CELLS,
+  forecasts: ForecastCell[] = getPublishedForecasts(),
 ): ForecastCell | undefined {
   return forecasts.find((forecast) => forecast.slug === slug);
 }

@@ -11,6 +11,7 @@ import type {
   Unit,
 } from "./forecast-cells";
 import { getForecastRunEntries } from "./forecast-cells";
+import { verifyForecastRun } from "@/lib/forecast-publication";
 import {
   conditionForCell,
   conditionStatusFor,
@@ -57,6 +58,7 @@ import {
 import {
   buildLedgerPersistenceBaseline,
   ledgerHistoryAtCutoff,
+  PERSISTENCE_BASELINE_AGENT,
   TIME_SERIES_PRIOR_VARIANT_ID,
 } from "./time-series-priors";
 import {
@@ -583,7 +585,10 @@ function enrichWithAcceptance(
     );
   }
   const lineSha256 = createHash("sha256").update(line, "utf8").digest("hex");
-  if (row.lineSha256 !== lineSha256 || row.sourceRecordId !== entry.dataPointId) {
+  if (
+    row.lineSha256 !== lineSha256 ||
+    row.sourceRecordId !== entry.dataPointId
+  ) {
     throw new Error(
       `ledger line ${index + 1} (${entry.dataPointId}) does not match its ` +
         `availability record (${row.sourceRecordId})`,
@@ -1222,9 +1227,8 @@ export function buildThesisLogData(
       // external witness proves it), unverified (no trustworthy run time),
       // and violated (run time at/after the observation) scores stay in
       // `scores` for transparency but are outside the official track record.
-      scored: scores.filter(
-        (score) => score.chronology === "witness_verified",
-      ).length,
+      scored: scores.filter((score) => score.chronology === "witness_verified")
+        .length,
       scoredClaimedTimeChronology: scores.filter(
         (score) => score.chronology === "claimed_time_verified",
       ).length,
@@ -1444,9 +1448,7 @@ export function classifyScoreChronology(
   }
   const observedInstant = explicitInstantOf(observedAt);
   if (runInstant !== null && observedInstant !== null) {
-    return runInstant < observedInstant
-      ? "claimed_time_verified"
-      : "violated";
+    return runInstant < observedInstant ? "claimed_time_verified" : "violated";
   }
   // Day granularity: strictly earlier written UTC dates verify, strictly
   // later violate, and same-day ordering is unknowable in either
@@ -1518,9 +1520,11 @@ export function targetNormalizationScale(
       entry.dataPointId === forecast.dataPointId,
   );
   const registeredAt = target?.registeredAt;
-  const primaryRunAt = getForecastRunEntries(forecast).find(
-    (run) => run.isPrimary,
-  )?.predictionRun?.runAt;
+  const primaryRunAt =
+    forecast.normalizationCutoffRunAt !== undefined
+      ? forecast.normalizationCutoffRunAt
+      : getForecastRunEntries(forecast).find((run) => run.isPrimary)
+          ?.predictionRun?.runAt;
   const cutoff =
     registeredAt && Number.isFinite(Date.parse(registeredAt))
       ? registeredAt
@@ -1559,6 +1563,7 @@ export function targetNormalizationScale(
 // way rather than folding it into "unresolved" (re-audit X9).
 export type ScoreExclusionReason =
   | "unresolved"
+  | "unverified_run"
   | "condition_not_satisfied"
   | "missing_distribution"
   | "contract_violation";
@@ -1754,12 +1759,60 @@ export function scoreResolvedForecastRun(
     .score;
 }
 
+/**
+ * Artifact-backed analyst runs can be scored. The only generated exception is
+ * the paired ledger baseline, whose entire run must equal a fresh replay from
+ * the supplied ledger and whose primary run must independently verify.
+ */
+export function isScoreEligibleForecastRun(
+  forecast: ForecastCell,
+  run: ForecastRunEntry,
+  ledger: PolicyEngineLedgerEntry[],
+): boolean {
+  if (run.variantId !== TIME_SERIES_PRIOR_VARIANT_ID) {
+    return verifyForecastRun(forecast, run).eligible;
+  }
+  if (
+    run.isPrimary ||
+    run.predictionRun?.agent !== PERSISTENCE_BASELINE_AGENT
+  ) {
+    return false;
+  }
+  const primary = getForecastRunEntries(forecast).find(
+    (entry) => entry.isPrimary,
+  );
+  if (!primary || !verifyForecastRun(forecast, primary).eligible) return false;
+  const reconstructed = buildLedgerPersistenceBaseline(
+    forecast,
+    ledger,
+  ).comparisonRun;
+  if (!reconstructed) return false;
+  const expected = getForecastRunEntries({
+    ...forecast,
+    comparisonRuns: [reconstructed],
+  }).find((entry) => entry.variantId === TIME_SERIES_PRIOR_VARIANT_ID);
+  try {
+    return canonicalStringify(run) === canonicalStringify(expected);
+  } catch {
+    return false;
+  }
+}
+
 export function evaluateResolvedForecastRun(
   forecast: ForecastCell,
   run: ForecastRunEntry,
   ledger: PolicyEngineLedgerEntry[],
   conditionOverrides?: Map<string, ConditionStatus>,
 ): ForecastRunScoreEvaluation {
+  if (!isScoreEligibleForecastRun(forecast, run, ledger)) {
+    return {
+      exclusion: {
+        reason: "unverified_run",
+        detail:
+          "Run lacks verified execution artifacts or a matching ledger baseline reconstruction",
+      },
+    };
+  }
   // A conditional branch is graded only when its registered condition
   // actually occurred. Both branches share the same official-print contract,
   // but an open, failed, or counterfactual branch is excluded before resolution
@@ -1953,10 +2006,7 @@ export function withResolvedOutcome(
   // itself a deterministic reconstruction: pairs only reach the HEADLINE
   // statistic when the agent side is witness-verified (brier-lab attaches
   // score components to witness-verified rows only).
-  if (
-    !primaryScore ||
-    !hasVerifiedClaimedChronology(primaryScore.chronology)
-  ) {
+  if (!primaryScore || !hasVerifiedClaimedChronology(primaryScore.chronology)) {
     return resolvedForecast;
   }
 

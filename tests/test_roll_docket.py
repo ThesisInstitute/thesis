@@ -34,6 +34,20 @@ from roll_docket import (  # noqa: E402
 )
 
 
+@pytest.fixture
+def resolver_admits(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stub the resolver's verdict for tests that use a fictional series.
+
+    No resolver leg executes a fixture series, so the execution-plan gate
+    would refuse it before the mechanics under test run. The gate is tested
+    against the real resolver in tests/test_execution_plan_gate.py.
+    """
+
+    monkeypatch.setattr(
+        roll_docket, "execution_plan_refusal", lambda registration: None
+    )
+
+
 def registry_entry(cadence: str, slug: str) -> dict[str, str]:
     return {"series": "fixture.series", "cadence": cadence, "slug": slug}
 
@@ -519,6 +533,7 @@ def test_real_bounded_annual_seeds_are_reviewable_and_bound_to_docket() -> None:
         )
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_main_prioritizes_dated_seeds_before_a_capped_cursor_target(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -583,6 +598,7 @@ def test_main_prioritizes_dated_seeds_before_a_capped_cursor_target(
     assert all(target["seedPeriod"] == target["period"] for target in targets)
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_main_skips_expired_seed_before_cap_without_affecting_nonlisted_seed(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -747,6 +763,7 @@ def test_fresh_eci_registration_prevents_another_seed_registration(
     ) in stdout
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_main_hands_a_published_seed_back_to_the_ordinary_cursor(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -995,6 +1012,15 @@ def test_all_native_docket_series_commit_official_calendar_dates() -> None:
     assert {entry["series"] for entry in native_entries} == {
         "abs.cpi.all_groups.yoy",
         "abs.labour.unemployment_rate",
+        "bls.ces.nonfarm_payrolls.change",
+        "bls.cps.employed_people_by_occupation.business_financial_operations",
+        "bls.cps.employed_people_by_occupation.computer_mathematical",
+        "bls.cps.employed_people_by_occupation.healthcare_support",
+        "bls.cps.employed_people_by_occupation.office_administrative_support",
+        "bls.cps.employed_people_by_occupation.production",
+        "bls.cps.employed_people_by_occupation.transportation_material_moving",
+        "bls.jolts.job_openings",
+        "bls.jolts.quits_rate",
         "bls.qcew.child_day_care_services.annual_avg_employment",
         "eurostat.hicp.flash.yoy",
         "statcan.cpi.allitems.yoy",

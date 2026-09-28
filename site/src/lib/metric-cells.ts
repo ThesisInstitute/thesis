@@ -1,18 +1,15 @@
-import {
-  FORECAST_CELLS,
-  formatValue,
-  type ForecastCell,
-} from "@/data/forecast-cells";
+import { getPublishedForecasts } from "@/lib/forecast-publication";
+import { formatValue, type ForecastCell } from "@/data/forecast-cells";
 
 /**
  * The live join from a candidate metric to registered forecast cells —
  * the piece that turns a bill analysis from case study into scoreboard
- * view. Matches the metric's series_hint as a prefix against cell
- * dataPointIds at build time.
+ * view. Matches an exact series ID or dot-descendant dataPointId at
+ * build time. Bill pages first resolve their hint against the docket.
  *
  * Fail-closed: a missing, short, or unmatched hint returns null and the
- * card renders exactly as before. A confident match supersedes any
- * stored registry value — the docket is the authority on reachability.
+ * card has no forecast link. A published forecast does not itself prove
+ * current docket admission; bill badges use their independent docket join.
  */
 export interface MetricCellMatch {
   slug: string;
@@ -72,8 +69,10 @@ export function resolveMetricCell(
 
 export function cellsForSeries(seriesHint: string): ForecastCell[] {
   if (!isConfidentHint(seriesHint)) return [];
-  return FORECAST_CELLS.filter(
+  return getPublishedForecasts().filter(
     (cell) =>
-      cell.type !== "conditional" && cell.dataPointId?.startsWith(seriesHint),
+      cell.type !== "conditional" &&
+      (cell.dataPointId === seriesHint ||
+        cell.dataPointId?.startsWith(`${seriesHint}.`)),
   );
 }

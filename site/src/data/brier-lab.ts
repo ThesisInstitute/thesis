@@ -24,6 +24,7 @@ import {
   evaluateResolvedForecastRun,
   getResolutionForForecast,
   hasVerifiedClaimedChronology,
+  isScoreEligibleForecastRun,
   scoreResolvedForecasts,
   withResolvedOutcomes,
   type ForecastRunScoreEvaluation,
@@ -33,7 +34,11 @@ import {
   getDistributionTransformVersion,
   type DistributionProvenance,
 } from "./prediction-distribution";
-import { PERSISTENCE_BASELINE_AGENT } from "./time-series-priors";
+import {
+  PERSISTENCE_BASELINE_AGENT,
+  TIME_SERIES_PRIOR_VARIANT_ID,
+} from "./time-series-priors";
+import { filterPublishedForecasts } from "@/lib/forecast-publication";
 
 export type BrierEvalSplit = "train" | "validation" | "test" | "unresolved";
 
@@ -58,6 +63,7 @@ export type BrierScoreEligibility =
   | "excluded_condition_not_satisfied"
   | "excluded_contract_violation"
   | "excluded_missing_distribution"
+  | "excluded_unverified_run"
   | "unresolved";
 
 const SCORE_CARRYING_ELIGIBILITIES: ReadonlySet<BrierScoreEligibility> =
@@ -282,11 +288,23 @@ export function buildBrierRewardExport({
   ledger: PolicyEngineLedgerEntry[];
   generatedAt?: string;
 }): BrierRewardExport {
-  const preparedForecasts = withResolvedOutcomes(forecasts, ledger);
+  // Callers may supply the raw catalog: publication verification is a boundary
+  // of the export itself, so prototypes cannot become even unscored training
+  // or evaluation examples through a less careful route.
+  const preparedForecasts = withResolvedOutcomes(
+    filterPublishedForecasts(forecasts),
+    ledger,
+  );
+  const publishedIds = new Set(
+    preparedForecasts.map((forecast) => forecast.slug),
+  );
+  const publishedSpecs = specs.filter((spec) =>
+    publishedIds.has(spec.predictionId),
+  );
   const suppliedRunsById = new Map(runs.map((run) => [run.runId, run]));
   for (const run of buildRecordedPredictionRunRecords(
     preparedForecasts,
-    specs,
+    publishedSpecs,
   )) {
     suppliedRunsById.set(run.runId, run);
   }
@@ -309,50 +327,61 @@ export function buildBrierRewardExport({
     judgeResults.postResolution.map((judge) => [judge.runId, judge]),
   );
   const specByPredictionId = new Map(
-    specs.map((spec) => [spec.predictionId, spec]),
+    publishedSpecs.map((spec) => [spec.predictionId, spec]),
   );
   const runByRunId = new Map(preparedRuns.map((run) => [run.runId, run]));
   const rewardRows = preparedForecasts.flatMap((forecast) => {
     const spec = specByPredictionId.get(forecast.slug);
     const resolved = Boolean(getResolutionForForecast(forecast, ledger));
-    return getForecastRunEntries(forecast).map((run) => {
-      const runId = buildRecordedPredictionRunId(
-        forecast,
-        run.predictionRun?.runAt,
-        run.variantId,
-        run,
-      );
-      const evaluation = evaluateResolvedForecastRun(forecast, run, ledger);
-      const scoreEligibility = rewardEligibilityFor(
-        evaluation,
-        resolved,
-        run.predictionRun?.agent,
-      );
-      const score = SCORE_CARRYING_ELIGIBILITIES.has(scoreEligibility)
-        ? evaluation.score
-        : undefined;
-      const runRecord = runByRunId.get(runId);
-      // Splits describe RESOLUTION state; integrity exclusions are the
-      // scoreEligibility field's job (re-audit X9: resolved-but-excluded
-      // rows previously landed in "unresolved").
-      const split = getBrierEvalSplit(forecast, resolved);
-      return buildRewardRow({
-        forecast,
-        run,
-        runId,
-        spec,
-        score,
-        scoreEligibility,
-        runRecord,
-        split,
-        traceJudge: traceJudgeByRunId.get(runId),
-        postResolutionJudge: postResolutionJudgeByRunId.get(runId),
+    return getForecastRunEntries(forecast)
+      .filter((run) => isScoreEligibleForecastRun(forecast, run, ledger))
+      .map((run) => {
+        const runId = buildRecordedPredictionRunId(
+          forecast,
+          run.predictionRun?.runAt,
+          run.variantId,
+          run,
+        );
+        const evaluation = evaluateResolvedForecastRun(forecast, run, ledger);
+        const scoreEligibility = rewardEligibilityFor(
+          evaluation,
+          resolved,
+          run.variantId === TIME_SERIES_PRIOR_VARIANT_ID &&
+            run.predictionRun?.agent === PERSISTENCE_BASELINE_AGENT,
+        );
+        const score = SCORE_CARRYING_ELIGIBILITIES.has(scoreEligibility)
+          ? evaluation.score
+          : undefined;
+        const runRecord = runByRunId.get(runId);
+        // Splits describe RESOLUTION state; integrity exclusions are the
+        // scoreEligibility field's job (re-audit X9: resolved-but-excluded
+        // rows previously landed in "unresolved").
+        const split = getBrierEvalSplit(forecast, resolved);
+        return buildRewardRow({
+          forecast,
+          run,
+          runId,
+          spec,
+          score,
+          scoreEligibility,
+          runRecord,
+          split,
+          traceJudge: traceJudgeByRunId.get(runId),
+          postResolutionJudge: postResolutionJudgeByRunId.get(runId),
+        });
       });
-    });
   });
   const leaderboard = buildBrierAgentLeaderboard(rewardRows);
+  const primaryVariants = new Map(
+    preparedForecasts.map((forecast) => [
+      forecast.slug,
+      forecast.primaryVariantId ?? "primary",
+    ]),
+  );
   const pairedComparison = summarizePairedComparison(
-    rewardRows.filter((row) => row.runVariantId === "primary"),
+    rewardRows.filter((row) => {
+      return row.runVariantId === primaryVariants.get(row.predictionId);
+    }),
     rewardRows.filter((row) => row.agent === PERSISTENCE_BASELINE_AGENT),
   );
   const baselineCoverage = preparedForecasts.flatMap((forecast) => {
@@ -390,7 +419,7 @@ export function buildBrierRewardExport({
       ],
     },
     counts: {
-      specs: specs.length,
+      specs: publishedSpecs.length,
       runs: rewardRows.length,
       scoredRuns: rewardRows.filter((row) => row.reward.value !== null).length,
       rawScoredRuns: rewardRows.filter(
@@ -446,7 +475,7 @@ export function getBrierEvalSplit(
 function rewardEligibilityFor(
   evaluation: ForecastRunScoreEvaluation,
   resolved: boolean,
-  agent: string | undefined,
+  reconstructedBaseline: boolean,
 ): BrierScoreEligibility {
   if (evaluation.score) {
     switch (evaluation.score.chronology) {
@@ -456,7 +485,7 @@ function rewardEligibilityFor(
         // The persistence baseline is a replayable pure function of
         // pre-cutoff ledger data — it has no custody root to witness, and
         // it only ever pairs against a witness-verified agent row.
-        return agent === PERSISTENCE_BASELINE_AGENT
+        return reconstructedBaseline
           ? "scored_deterministic_baseline"
           : "excluded_chronology_claimed_only";
       case "violated":
@@ -466,6 +495,8 @@ function rewardEligibilityFor(
     }
   }
   switch (evaluation.exclusion?.reason) {
+    case "unverified_run":
+      return "excluded_unverified_run";
     case "condition_not_satisfied":
       return "excluded_condition_not_satisfied";
     case "contract_violation":
@@ -596,7 +627,9 @@ export function buildBrierAgentLeaderboard(
   return [...groups.entries()]
     .map(([key, group]) => {
       const [agent, model] = key.split("\u0000");
-      const externalRows = group.filter((row) => Boolean(row.externalSubmission));
+      const externalRows = group.filter((row) =>
+        Boolean(row.externalSubmission),
+      );
       // A group mixing internal and external rows means one agent
       // identity is being used by both the lab and a challenger; that is
       // an integrity anomaly, not a display choice — fail the build.
@@ -610,7 +643,9 @@ export function buildBrierAgentLeaderboard(
         ? [
             ...new Set(
               externalRows.flatMap((row) =>
-                row.externalSubmission ? [row.externalSubmission.systemType] : [],
+                row.externalSubmission
+                  ? [row.externalSubmission.systemType]
+                  : [],
               ),
             ),
           ].sort()
@@ -667,8 +702,7 @@ export function buildBrierAgentLeaderboard(
       };
     })
     .sort((left, right) => {
-      const leftRatio =
-        left.pairedCrpsRatioGeomean ?? Number.POSITIVE_INFINITY;
+      const leftRatio = left.pairedCrpsRatioGeomean ?? Number.POSITIVE_INFINITY;
       const rightRatio =
         right.pairedCrpsRatioGeomean ?? Number.POSITIVE_INFINITY;
       if (leftRatio !== rightRatio) return leftRatio - rightRatio;
@@ -813,8 +847,8 @@ export function summarizeBrierCoverage({
 }) {
   const recorded = buildPredictionRecordedLogEntries(forecasts);
   const resolved = buildResolvedPredictionLogEntries(forecasts, ledger);
-  const scored = scoreResolvedForecasts(forecasts, ledger).filter(
-    (score) => hasVerifiedClaimedChronology(score.chronology),
+  const scored = scoreResolvedForecasts(forecasts, ledger).filter((score) =>
+    hasVerifiedClaimedChronology(score.chronology),
   );
   return {
     recordedRuns: recorded.length,

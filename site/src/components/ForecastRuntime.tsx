@@ -1,262 +1,199 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { AgentReasoning } from "@/components/AgentReasoning";
 import { classifyTraceProvenance } from "@/data/trace-provenance";
 import { ForecastTrend, ForecastViz } from "@/components/ForecastViz";
 import {
-  LIVE_FORECAST_SLUGS,
   formatValue,
   getForecastRunEntries,
-  getForecastRuntimeKind,
   getResolutionResult,
   type ForecastCell,
   type ForecastRunEntry,
-  type PredictionDistribution,
   type PredictionPackReference,
-  type ReasoningStep,
-} from "@/data/forecast-cells";
+} from "@/data/forecast-display";
 import type { ResolvedForecastScore } from "@/data/thesis-log";
-
-type RuntimeMode = "mock" | "connecting" | "live" | "complete" | "fallback";
-
-// How long the stream may stay completely silent before the page gives up on
-// the live API and replays the static trace. A hung connection never fires
-// onerror, so without this a stuck socket pins the UI on "connecting" forever.
-export const STREAM_WATCHDOG_MS = 10_000;
-
-interface RuntimeForecast {
-  pointEstimate: number;
-  ciLow: number;
-  ciHigh: number;
-  confidence: 0.8;
-  distribution?: PredictionDistribution;
-  source?:
-    | "ai_gateway"
-    | "deterministic_fallback"
-    | "calibration_fallback"
-    | "census_calibration_fallback";
-  model?: string;
-  generatedAt?: string;
-  drivers?: string[];
-}
-
-interface ActiveTool {
-  tool: string;
-  call: string;
-}
+import { ToolEvidence } from "@/components/ToolEvidence";
+import type { ForecastToolEvidenceByVariant } from "@/data/tool-evidence";
+import { prepareReportContent } from "@/lib/report-content";
+import { canPlotReportHistory } from "@/lib/report-history";
 
 interface ForecastRuntimeProps {
   forecast: ForecastCell;
   resolvedScore?: ResolvedForecastScore;
+  runScores?: Record<string, ResolvedForecastScore>;
+  toolEvidence?: ForecastToolEvidenceByVariant;
+}
+
+type ReportRun = ForecastRunEntry;
+
+function reportRuns(forecast: ForecastCell): ReportRun[] {
+  return getForecastRunEntries(forecast)
+    .filter((run) => classifyTraceProvenance(run) === "activity_backed")
+    .map((run) => ({
+      ...run,
+      label: run.label === "Headline" ? "Original forecast" : run.label,
+    }));
+}
+
+function runTime(run: ReportRun) {
+  return run.predictionRun?.runAt;
+}
+
+function runMethod(run: ReportRun) {
+  return run.predictionRun?.model;
+}
+
+function isReconstructedBaseline(run: ReportRun) {
+  return (
+    run.variantId === "time-series-prior" &&
+    run.predictionRun?.model === "persistence.last_print"
+  );
 }
 
 export function ForecastRuntime({
   forecast: forecastCell,
   resolvedScore,
+  runScores,
+  toolEvidence,
 }: ForecastRuntimeProps) {
-  const supportsLive = LIVE_FORECAST_SLUGS.has(forecastCell.slug);
-  const runtimeKind = getForecastRuntimeKind(forecastCell);
-  const [mode, setMode] = useState<RuntimeMode>(
-    supportsLive ? "connecting" : "mock",
-  );
-  const [statusLabel, setStatusLabel] = useState(
-    supportsLive
-      ? "opening live stream"
-      : runtimeKind === "agent-run"
-        ? "recorded agent run"
-        : "mock replay",
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [activeTool, setActiveTool] = useState<ActiveTool | null>(null);
-  const [liveSteps, setLiveSteps] = useState<ReasoningStep[]>([]);
-  const [liveForecast, setLiveForecast] = useState<RuntimeForecast | null>(
-    null,
-  );
-
-  useEffect(() => {
-    if (!supportsLive) return;
-    if (new URLSearchParams(window.location.search).get("mock") === "1") {
-      setMode("mock");
-      setStatusLabel("mock replay");
-      return;
-    }
-
-    let completed = false;
-    let sawStream = false;
-    const source = new EventSource(
-      `${resolveApiBase()}/forecasts/${forecastCell.slug}/stream`,
-    );
-
-    setMode("connecting");
-    setStatusLabel("connecting to live API");
-    setError(null);
-    setLiveSteps([]);
-    setActiveTool(null);
-
-    const watchdog = window.setTimeout(() => {
-      if (sawStream || completed) return;
-      source.close();
-      setError(
-        "The live forecast API did not respond in time. Replaying the static reasoning trace.",
-      );
-      setStatusLabel("mock fallback");
-      setMode("fallback");
-    }, STREAM_WATCHDOG_MS);
-
-    source.addEventListener("status", (event) => {
-      sawStream = true;
-      const data = parseEventData<{ label?: string; state?: string }>(event);
-      if (!data) return;
-      setStatusLabel(data.label ?? "live stream running");
-      if (data.state !== "complete") setMode("live");
-    });
-
-    source.addEventListener("step", (event) => {
-      sawStream = true;
-      const step = parseEventData<ReasoningStep>(event);
-      if (!step || !isReasoningStep(step)) return;
-      setLiveSteps((prev) => [...prev, step]);
-      setMode("live");
-    });
-
-    source.addEventListener("tool_start", (event) => {
-      sawStream = true;
-      const data = parseEventData<ActiveTool>(event);
-      if (!data) return;
-      setActiveTool(data);
-      setStatusLabel(`${data.tool} running`);
-      setMode("live");
-    });
-
-    source.addEventListener("tool_result", (event) => {
-      sawStream = true;
-      const data = parseEventData<ActiveTool & { result: string }>(event);
-      if (!data) return;
-      setActiveTool(null);
-      setLiveSteps((prev) => [
-        ...prev,
-        {
-          kind: "tool",
-          tool: data.tool,
-          call: data.call,
-          result: data.result,
-        },
-      ]);
-      setStatusLabel(`${data.tool} complete`);
-      setMode("live");
-    });
-
-    source.addEventListener("forecast", (event) => {
-      sawStream = true;
-      const forecast = parseEventData<RuntimeForecast>(event);
-      if (!forecast) return;
-      setLiveForecast(forecast);
-      setLiveSteps((prev) => [
-        ...prev,
-        {
-          kind: "forecast",
-          point: forecast.pointEstimate,
-          ciLow: forecast.ciLow,
-          ciHigh: forecast.ciHigh,
-        },
-      ]);
-      setStatusLabel(
-        forecast.source === "ai_gateway"
-          ? "AI Gateway forecast complete"
-          : "fallback forecast complete",
-      );
-      setMode("complete");
-    });
-
-    source.addEventListener("failure", (event) => {
-      sawStream = true;
-      const data = parseEventData<{ message?: string }>(event);
-      setError(data?.message ?? "Live forecast failed.");
-      setStatusLabel("live API failed");
-      setMode("fallback");
-      source.close();
-    });
-
-    source.addEventListener("done", () => {
-      sawStream = true;
-      completed = true;
-      setMode("complete");
-      source.close();
-    });
-
-    source.onerror = () => {
-      if (completed) return;
-      window.clearTimeout(watchdog);
-      setError("Could not connect to the live forecast API.");
-      setStatusLabel("mock fallback");
-      setMode("fallback");
-      source.close();
-    };
-
-    return () => {
-      completed = true;
-      window.clearTimeout(watchdog);
-      source.close();
-    };
-  }, [forecastCell.slug, supportsLive]);
-
-  const displayedForecast = liveForecast ?? {
-    pointEstimate: forecastCell.pointEstimate,
-    ciLow: forecastCell.ciLow,
-    ciHigh: forecastCell.ciHigh,
-    confidence: 0.8 as const,
+  const runs = reportRuns(forecastCell);
+  const [selection, setSelection] = useState({
+    slug: forecastCell.slug,
+    id: runs[0]?.variantId ?? "",
+  });
+  const selected =
+    (selection.slug === forecastCell.slug &&
+      runs.find((run) => run.variantId === selection.id)) ||
+    runs[0];
+  const selectRun = (id: string) =>
+    setSelection({ slug: forecastCell.slug, id });
+  if (!selected) return <p>No forecast available.</p>;
+  const history = canPlotReportHistory(selected.historicalContext ?? [])
+    ? selected.historicalContext!
+    : [];
+  const report = prepareReportContent(selected.reasoning);
+  const selectedForecast: ForecastCell = {
+    ...forecastCell,
+    pointEstimate: selected.pointEstimate,
+    ciLow: selected.ciLow,
+    ciHigh: selected.ciHigh,
+    confidence: selected.confidence,
+    drivers: selected.drivers,
+    reasoning: selected.reasoning,
+    predictionRun: selected.predictionRun,
+    predictionDistribution: selected.predictionDistribution,
+    historicalContext: history,
+    comparisonRuns: undefined,
   };
-  const drivers =
-    liveForecast?.drivers && liveForecast.drivers.length > 0
-      ? liveForecast.drivers
-      : forecastCell.drivers;
-  const isLiveForecast = Boolean(liveForecast);
-  const recordedRuns = getForecastRunEntries(forecastCell);
+  const score =
+    runScores?.[selected.variantId] ??
+    (selected.isPrimary ? resolvedScore : undefined);
+  const generatedAt = runTime(selected);
+  const manifest = selected.predictionRun?.activityLog?.find(
+    (artifact) => artifact.artifactType === "manifest",
+  );
+  const normalizedArtifact = selected.predictionRun?.activityLog?.find(
+    (artifact) => artifact.artifactType === "normalized_cell",
+  );
+  // The publication gate also verifies manifests committed through custody
+  // roots; those modern manifests may not be repeated in the artifact list.
+  const manifestPath =
+    manifest?.path ??
+    normalizedArtifact?.path.replace(/\/[^/]+$/, "/manifest.json");
+  const sourceHref = manifestPath
+    ? `https://github.com/ThesisInstitute/thesis/blob/main/${manifestPath}`
+    : "/log";
+  const catalogRuns = runs;
+  const pointProjection = isPointProjection(selected, forecastCell.unit);
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.05fr_1fr]">
-      <section className="min-w-0">
-        <div
-          className="rounded-xl border bg-[var(--theme-bg-elevated)] p-6"
-          style={{ borderColor: "var(--theme-border)" }}
-        >
-          <div className="mb-4 flex items-baseline justify-between gap-4">
-            <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-              {isLiveForecast ? "live forecast" : "current forecast"} · 80% CI
-            </span>
-            <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-accent)]">
-              {formatValue(displayedForecast.pointEstimate, forecastCell.unit)}
-            </span>
+    <div className="space-y-12">
+      <section
+        aria-label="Forecast estimate"
+        className="border-y border-[var(--theme-border)] py-7"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div>
+            <p className="mb-2 text-sm text-[var(--theme-text-muted)]">
+              Forecast
+            </p>
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3">
+              <span className="[font-family:var(--font-display)] text-[clamp(2.75rem,7vw,4.5rem)] leading-none tracking-[-0.035em] text-[var(--color-accent)]">
+                {formatValue(selected.pointEstimate, forecastCell.unit)}
+              </span>
+              {pointProjection ? (
+                <p className="text-sm text-[var(--theme-text-muted)]">
+                  Point projection
+                </p>
+              ) : (
+                <div className="text-[var(--theme-text)]">
+                  <div className="text-lg tabular-nums">
+                    {formatValue(selected.ciLow, forecastCell.unit)}–
+                    {formatValue(selected.ciHigh, forecastCell.unit)}
+                  </div>
+                  <div className="mt-1 text-sm text-[var(--theme-text-muted)]">
+                    80% prediction interval
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-          <ForecastViz
-            point={displayedForecast.pointEstimate}
-            ciLow={displayedForecast.ciLow}
-            ciHigh={displayedForecast.ciHigh}
-            unit={forecastCell.unit}
-            history={forecastCell.historicalContext}
-            size="full"
-          />
-          {forecastCell.historicalContext.length > 0 && (
-            <div
-              className="mt-6 border-t pt-5"
-              style={{ borderColor: "var(--theme-border)" }}
-            >
-              <div className="mb-3 flex items-baseline justify-between gap-4">
-                <h2 className="[font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-                  Trend
-                </h2>
-                <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  history + forecast
-                </span>
-              </div>
+          {runs.length > 1 && (
+            <label className="flex max-w-full flex-col gap-2 text-sm text-[var(--theme-text-muted)]">
+              Forecast version
+              <select
+                aria-label="Forecast version"
+                className="max-w-full rounded-md border border-[var(--theme-border-strong)] bg-[var(--theme-bg)] px-3 py-2 text-sm text-[var(--theme-text)] sm:max-w-[300px]"
+                value={selected.variantId}
+                onChange={(event) => selectRun(event.target.value)}
+              >
+                {runs.map((run) => (
+                  <option key={run.variantId} value={run.variantId}>
+                    {run.label}
+                    {runTime(run)
+                      ? ` · ${formatShortFullDate(runTime(run)!)}`
+                      : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[var(--theme-text-muted)]">
+          <span>{runMethod(selected)}</span>
+          {generatedAt && (
+            <time dateTime={generatedAt}>
+              {formatRecordedTime(generatedAt)}
+            </time>
+          )}
+          <a
+            className="text-[var(--color-accent)] hover:underline"
+            href={sourceHref}
+          >
+            {manifestPath ? "Run record" : "Thesis Log"} ↗
+          </a>
+        </div>
+        {report.modelUnavailable && (
+          <p
+            role="note"
+            className="mt-5 border-l-2 border-[#B17B39] pl-3 text-sm leading-relaxed text-[var(--theme-text)]"
+          >
+            A model request failed during this run. See run details for the
+            original diagnostic.
+          </p>
+        )}
+        {(!pointProjection || history.length > 0) && (
+          <div className="mt-8" aria-label="Forecast chart">
+            {history.length > 0 ? (
               <ForecastTrend
-                point={displayedForecast.pointEstimate}
-                ciLow={displayedForecast.ciLow}
-                ciHigh={displayedForecast.ciHigh}
+                point={selected.pointEstimate}
+                ciLow={selected.ciLow}
+                ciHigh={selected.ciHigh}
                 unit={forecastCell.unit}
-                history={forecastCell.historicalContext}
+                history={history}
                 targetLabel={targetPeriodLabel(forecastCell)}
+                showInterval={!pointProjection}
                 actual={
                   forecastCell.resolvedOutcome
                     ? {
@@ -266,153 +203,399 @@ export function ForecastRuntime({
                     : undefined
                 }
               />
+            ) : (
+              <ForecastViz
+                point={selected.pointEstimate}
+                ciLow={selected.ciLow}
+                ciHigh={selected.ciHigh}
+                unit={forecastCell.unit}
+                distribution={selected.predictionDistribution}
+              />
+            )}
+          </div>
+        )}
+        {!pointProjection && history.length > 0 && (
+          <details className="mt-5 border-t border-[var(--theme-border)] pt-4">
+            <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
+              Probability distribution
+            </summary>
+            <div className="mt-5">
+              <ForecastViz
+                point={selected.pointEstimate}
+                ciLow={selected.ciLow}
+                ciHigh={selected.ciHigh}
+                unit={forecastCell.unit}
+                distribution={selected.predictionDistribution}
+              />
             </div>
-          )}
-          <p className="mt-4 [font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-            {forecastSourceLabel(
-              forecastCell,
-              supportsLive,
-              mode,
-              statusLabel,
-              liveForecast,
-            )}
-          </p>
-          {forecastCell.resolvedOutcome && (
-            <ResolvedOutcomePanel
-              forecast={forecastCell}
-              score={resolvedScore}
-            />
-          )}
-          <ThesisLogRecordPanel forecast={forecastCell} />
-          <RunComparisonPanel runs={recordedRuns} unit={forecastCell.unit} />
-        </div>
+          </details>
+        )}
+        {forecastCell.resolvedOutcome && (
+          <ResolvedOutcomePanel forecast={selectedForecast} score={score} />
+        )}
+      </section>
 
-        <div
-          className="mt-6 rounded-xl border bg-[var(--theme-bg-elevated)] p-6"
-          style={{ borderColor: "var(--theme-border)" }}
+      <section aria-labelledby="analysis-heading" className="max-w-[75ch]">
+        <h2
+          id="analysis-heading"
+          className="mb-5 [font-family:var(--font-display)] text-2xl font-semibold"
         >
-          <h2 className="mb-3 [font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-            Key drivers
-          </h2>
-          <ul className="grid grid-cols-1 gap-2 [font-family:var(--font-body)] text-[0.88rem] text-[var(--theme-text)] sm:grid-cols-2">
-            {drivers.map((driver) => (
-              <li key={driver} className="flex items-start gap-2 leading-[1.5]">
-                <span className="mt-[6px] inline-block h-1 w-2 shrink-0 bg-[var(--color-accent)]" />
-                <span>{driver}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          Analysis
+        </h2>
+        <AgentReasoning
+          steps={report.steps.filter((step) => step.kind !== "forecast")}
+          unit={forecastCell.unit}
+          provenance={classifyTraceProvenance(selected)}
+          reconstructedBaseline={isReconstructedBaseline(selected)}
+        />
+        {selected.drivers.length > 0 && (
+          <div className="mt-8">
+            <h3 className="mb-3 [font-family:var(--font-display)] text-lg font-semibold">
+              Key drivers
+            </h3>
+            <ul className="list-disc space-y-2 pl-5 text-[0.94rem] leading-relaxed text-[var(--theme-text)]">
+              {selected.drivers.map((driver) => (
+                <li key={driver}>{driver}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
 
-        <div
-          className="mt-6 rounded-xl border bg-[var(--theme-bg-elevated)] p-6"
-          style={{ borderColor: "var(--theme-border)" }}
+      <ToolEvidence
+        key={`evidence-${selected.variantId}`}
+        evidence={toolEvidence?.[selected.variantId]}
+      />
+
+      <section
+        aria-labelledby="evidence-heading"
+        className="border-t border-[var(--theme-border)] pt-7"
+      >
+        <h2
+          id="evidence-heading"
+          className="mb-5 [font-family:var(--font-display)] text-2xl font-semibold"
         >
-          <h2 className="mb-4 [font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-            Resolution
-          </h2>
-          <dl className="grid grid-cols-1 gap-x-5 gap-y-3 [font-family:var(--font-body)] text-[0.86rem] sm:grid-cols-[120px_minmax(0,1fr)]">
-            <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              source
-            </dt>
-            <dd className="min-w-0 break-words text-[var(--theme-text)]">
-              {forecastCell.resolutionSourceUrl ? (
-                <a
-                  className="text-[var(--theme-text)] no-underline hover:text-[var(--color-accent)] hover:no-underline"
-                  href={forecastCell.resolutionSourceUrl}
-                >
-                  {forecastCell.resolutionSource}
-                </a>
-              ) : (
-                forecastCell.resolutionSource
-              )}
-            </dd>
-            <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              {forecastCell.resolvedOutcome ? "resolved" : "expected"}
-            </dt>
-            <dd className="min-w-0 break-words text-[var(--theme-text)]">
-              {formatFullDate(
-                forecastCell.resolvedOutcome?.resolvedAt ??
-                  forecastCell.resolutionDate,
-              )}
-            </dd>
-            {forecastCell.resolvedOutcome && (
-              <>
-                <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  actual
-                </dt>
-                <dd className="min-w-0 break-words text-[var(--theme-text)]">
-                  {formatValue(
-                    forecastCell.resolvedOutcome.value,
-                    forecastCell.unit,
-                  )}
-                </dd>
-              </>
+          Sources and resolution
+        </h2>
+        <dl className="grid gap-x-6 gap-y-3 text-[0.94rem] leading-relaxed sm:grid-cols-[150px_minmax(0,1fr)]">
+          <dt className="text-[var(--theme-text-muted)]">Official source</dt>
+          <dd>
+            {forecastCell.resolutionSourceUrl ? (
+              <a
+                className="text-[var(--color-accent)] hover:underline"
+                href={forecastCell.resolutionSourceUrl}
+              >
+                {forecastCell.resolutionSource}
+              </a>
+            ) : (
+              forecastCell.resolutionSource
             )}
-            <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              rule
-            </dt>
-            <dd className="min-w-0 break-words leading-[1.55] text-[var(--theme-text)]">
-              {forecastCell.resolutionRule}
-            </dd>
+          </dd>
+          <dt className="text-[var(--theme-text-muted)]">
+            {forecastCell.resolvedOutcome ? "Resolved" : "Resolution date"}
+          </dt>
+          <dd>
+            {formatFullDate(
+              forecastCell.resolvedOutcome?.resolvedAt ??
+                forecastCell.resolutionDate,
+            )}
+            {!forecastCell.resolvedOutcome && (
+              <span className="ml-2 text-sm text-[var(--theme-text-muted)]">
+                · outcome not recorded
+              </span>
+            )}
+          </dd>
+          <dt className="text-[var(--theme-text-muted)]">Resolution rule</dt>
+          <dd>{forecastCell.resolutionRule}</dd>
+        </dl>
+      </section>
+
+      <RunHistory
+        runs={runs}
+        selectedId={selected.variantId}
+        onSelect={selectRun}
+        unit={forecastCell.unit}
+        runScores={runScores}
+        primaryScore={resolvedScore}
+      />
+
+      <RunDetails
+        key={selected.variantId}
+        run={selected}
+        diagnostics={report.diagnostics}
+        unit={forecastCell.unit}
+      />
+      {catalogRuns.some((run) => run.packSet?.packs.length) && (
+        <PackDetails runs={catalogRuns} />
+      )}
+      {(forecastCell.series ||
+        forecastCell.dataPointId ||
+        forecastCell.policyParameter) && (
+        <details className="border-t border-[var(--theme-border)] pt-5">
+          <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
+            Target metadata
+          </summary>
+          <div className="mt-4 space-y-3 text-sm text-[var(--theme-text-muted)]">
             {forecastCell.dataPointId && (
-              <>
-                <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  Data point
-                </dt>
-                <dd className="min-w-0 break-all [font-family:var(--font-mono)] text-[0.78rem] leading-[1.55] text-[var(--color-horizon-700)]">
-                  {forecastCell.dataPointId}
-                </dd>
-              </>
+              <p>
+                Data point:{" "}
+                <code className="break-all">{forecastCell.dataPointId}</code>
+              </p>
             )}
             {forecastCell.policyParameter && (
-              <>
-                <dt className="[font-family:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-                  Policy parameter
-                </dt>
-                <dd className="min-w-0 break-all [font-family:var(--font-mono)] text-[0.78rem] leading-[1.55] text-[var(--color-rose-700)]">
+              <p>
+                Policy parameter:{" "}
+                <code className="break-all">
                   {forecastCell.policyParameter}
-                </dd>
-              </>
+                </code>
+              </p>
             )}
-          </dl>
-        </div>
-        {forecastCell.series && <SeriesMetadataPanel forecast={forecastCell} />}
-      </section>
-
-      <section className="min-w-0">
-        <div className="mb-3 flex items-center justify-between gap-4">
-          <h2 className="[font-family:var(--font-display)] text-[1rem] font-semibold tracking-[-0.01em]">
-            Analyst agent · reasoning trace
-          </h2>
-          <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-            {reasoningStatusLabel(supportsLive, mode, liveSteps, forecastCell)}
-          </span>
-        </div>
-        <TraceStatusBanner
-          forecast={forecastCell}
-          liveForecast={liveForecast}
-          mode={mode}
-          supportsLive={supportsLive}
-        />
-        <ReasoningSurface
-          activeTool={activeTool}
-          error={error}
-          forecast={forecastCell}
-          mode={mode}
-          statusLabel={statusLabel}
-          steps={liveSteps}
-          supportsLive={supportsLive}
-        />
-        <p className="mt-3 text-[0.76rem] leading-[1.55] text-[var(--theme-text-dim)]">
-          {supportsLive
-            ? liveModeDescription(forecastCell.slug)
-            : forecastCell.predictionRun
-              ? "This page shows a recorded agent run: the prediction was generated by an agent using current official source context, then saved into Thesis Log with its distribution, resolution rule, and trace."
-              : "The route, resolution rule, and catalog entry are live. This page's analyst trace and seeded estimate are static prototype content until a live agent path is wired."}
-        </p>
-      </section>
+            {forecastCell.series && (
+              <SeriesMetadataPanel forecast={selectedForecast} />
+            )}
+          </div>
+        </details>
+      )}
     </div>
+  );
+}
+
+function isPointProjection(
+  run: Pick<ReportRun, "ciLow" | "ciHigh">,
+  unit: ForecastCell["unit"],
+) {
+  return formatValue(run.ciLow, unit) === formatValue(run.ciHigh, unit);
+}
+
+function RunHistory({
+  runs,
+  selectedId,
+  onSelect,
+  unit,
+  runScores,
+  primaryScore,
+}: {
+  runs: ReportRun[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  unit: ForecastCell["unit"];
+  runScores?: Record<string, ResolvedForecastScore>;
+  primaryScore?: ResolvedForecastScore;
+}) {
+  if (runs.length <= 1) return null;
+  const ordered = [...runs].sort(
+    (a, b) =>
+      (Date.parse(runTime(b) ?? "") || 0) - (Date.parse(runTime(a) ?? "") || 0),
+  );
+  const hasScores = ordered.some(
+    (run) => runScores?.[run.variantId] || (run.isPrimary && primaryScore),
+  );
+  return (
+    <section
+      aria-labelledby="history-heading"
+      className="border-t border-[var(--theme-border)] pt-7"
+    >
+      <h2
+        id="history-heading"
+        className="mb-2 [font-family:var(--font-display)] text-2xl font-semibold"
+      >
+        Forecast history
+      </h2>
+      <p className="mb-5 text-sm text-[var(--theme-text-muted)]">
+        Select a version to read its estimate and analysis.
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-left text-sm">
+          <caption className="sr-only">
+            Forecast versions, estimates, and intervals
+          </caption>
+          <thead className="border-b border-[var(--theme-border-strong)] text-[var(--theme-text-muted)]">
+            <tr>
+              <th scope="col" className="py-3 pr-4 font-normal">
+                Version
+              </th>
+              <th scope="col" className="px-3 py-3 font-normal">
+                Date
+              </th>
+              <th scope="col" className="px-3 py-3 font-normal">
+                Estimate
+              </th>
+              <th scope="col" className="py-3 pl-3 font-normal">
+                80% interval
+              </th>
+              {hasScores && (
+                <th scope="col" className="py-3 pl-3 font-normal">
+                  CRPS
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {ordered.map((run) => {
+              const selected = run.variantId === selectedId;
+              const score =
+                runScores?.[run.variantId] ??
+                (run.isPrimary ? primaryScore : undefined);
+              return (
+                <tr
+                  key={run.variantId}
+                  data-forecast-run={run.variantId}
+                  className={`border-b border-[var(--theme-border)] ${selected ? "bg-[var(--theme-bg-surface)]" : ""}`}
+                >
+                  <th scope="row" className="py-4 pr-4 font-normal">
+                    <button
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => onSelect(run.variantId)}
+                      className="text-left font-medium text-[var(--color-accent)] hover:underline"
+                    >
+                      {run.label}
+                    </button>
+                    <span className="mt-1 block text-xs text-[var(--theme-text-muted)]">
+                      {runMethod(run)}
+                      {selected ? " · selected" : ""}
+                    </span>
+                  </th>
+                  <td className="whitespace-nowrap px-3 py-4 text-[var(--theme-text-muted)]">
+                    {runTime(run)
+                      ? formatShortFullDate(runTime(run)!)
+                      : "Undated"}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 font-medium tabular-nums">
+                    {formatValue(run.pointEstimate, unit)}
+                  </td>
+                  <td className="whitespace-nowrap py-4 pl-3 tabular-nums text-[var(--theme-text-muted)]">
+                    {isPointProjection(run, unit)
+                      ? "Point projection"
+                      : `${formatValue(run.ciLow, unit)}–${formatValue(run.ciHigh, unit)}`}
+                  </td>
+                  {hasScores && (
+                    <td className="py-4 pl-3 tabular-nums">
+                      {score ? formatCompactNumber(score.crps) : "—"}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function RunDetails({
+  run,
+  diagnostics,
+  unit,
+}: {
+  run: ReportRun;
+  diagnostics: string[];
+  unit: ForecastCell["unit"];
+}) {
+  const metadata = run.predictionRun;
+  return (
+    <details
+      id="run-details"
+      className="border-t border-[var(--theme-border)] pt-5"
+    >
+      <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
+        Run details{diagnostics.length ? " and diagnostics" : ""}
+      </summary>
+      <div className="mt-5 space-y-5 text-sm leading-relaxed">
+        <p>
+          {isReconstructedBaseline(run)
+            ? "This baseline is reconstructed from pre-cutoff ledger observations. It is a comparison calculation, not an AI forecast."
+            : "The analysis is the model’s written report. Tool-use descriptions in that report are model claims; the activity artifacts contain the execution record."}
+        </p>
+        {run.description && <p>{run.description}</p>}
+        {metadata && (
+          <p>
+            {metadata.agent} · {metadata.model}
+            {metadata.promptMode ? ` · ${metadata.promptMode}` : ""}
+            {metadata.agentVersion ? ` · v${metadata.agentVersion}` : ""}
+          </p>
+        )}
+        {run.externalSubmission && (
+          <p>
+            External submission by {run.externalSubmission.challenger};
+            self-declared {run.externalSubmission.systemType}. A reasoning trace
+            is not required.
+          </p>
+        )}
+        {run.packSet && (
+          <p>
+            Pack set: {run.packSet.label} · {run.packSet.mode}
+          </p>
+        )}
+        {diagnostics.length > 0 && (
+          <div>
+            <h3 className="mb-3 font-medium">Original diagnostics</h3>
+            {diagnostics.map((text, index) => (
+              <pre
+                key={index}
+                className="my-3 whitespace-pre-wrap break-words rounded-md bg-[var(--theme-bg-surface)] p-4 text-xs"
+              >
+                <code>{text}</code>
+              </pre>
+            ))}
+          </div>
+        )}
+        {metadata?.preSubmitReview && (
+          <PreSubmitReviewTrace review={metadata.preSubmitReview} />
+        )}
+        {Boolean(metadata?.activityLog?.length) && (
+          <div>
+            <h3 className="mb-3 font-medium">Activity artifacts</h3>
+            <ul className="space-y-2">
+              {metadata!.activityLog!.map((artifact) => (
+                <li key={artifact.path}>
+                  <a
+                    className="break-all text-[var(--color-accent)] hover:underline"
+                    href={`https://github.com/ThesisInstitute/thesis/blob/main/${artifact.path}`}
+                  >
+                    {artifact.artifactType}: {artifact.path}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <details>
+          <summary className="cursor-pointer text-[var(--theme-text-muted)]">
+            Complete original trace
+          </summary>
+          <div className="mt-5">
+            <AgentReasoning
+              steps={run.reasoning}
+              unit={unit}
+              provenance={classifyTraceProvenance(run)}
+              reconstructedBaseline={isReconstructedBaseline(run)}
+            />
+          </div>
+        </details>
+      </div>
+    </details>
+  );
+}
+
+function PackDetails({ runs }: { runs: ForecastRunEntry[] }) {
+  const packs = buildUniquePacks(runs);
+  const [selection, setSelection] = useState(packs[0]?.key ?? "");
+  if (!packs.length) return null;
+  return (
+    <details className="border-t border-[var(--theme-border)] pt-5">
+      <summary className="cursor-pointer text-sm text-[var(--theme-text-muted)]">
+        Forecasting packs
+      </summary>
+      <div className="mt-5">
+        <PackVisualizer
+          packs={packs}
+          selectedPackKey={selection}
+          onSelectPack={setSelection}
+        />
+      </div>
+    </details>
   );
 }
 
@@ -426,53 +609,51 @@ function ResolvedOutcomePanel({
   const outcome = forecast.resolvedOutcome;
   if (!outcome) return null;
   const result = getResolutionResult(forecast);
+  const pointProjection = isPointProjection(forecast, forecast.unit);
   const resultLabel =
     result === "inside" ? "inside 80% interval" : "outside 80% interval";
 
   return (
     <div
-      className="mt-5 rounded-lg border bg-[var(--theme-bg-surface)] p-4"
+      className="mt-7 border-t pt-5"
       style={{ borderColor: "var(--theme-border)" }}
     >
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-          resolved outcome
+        <span className="[font-family:var(--font-display)] text-lg font-semibold">
+          Observed outcome
         </span>
-        <span
-          className={`rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em] ${
-            result === "inside"
-              ? "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)]"
-              : "border-[#F2DCAF] bg-[#FFF4DD] text-[#7A5C20]"
-          }`}
-        >
-          {resultLabel}
-        </span>
+        {!pointProjection && (
+          <span
+            className={`rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em] ${
+              result === "inside"
+                ? "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)]"
+                : "border-[#F2DCAF] bg-[#FFF4DD] text-[#7A5C20]"
+            }`}
+          >
+            {resultLabel}
+          </span>
+        )}
       </div>
       <dl className="grid grid-cols-1 gap-x-5 gap-y-2 [font-family:var(--font-body)] text-[0.84rem] sm:grid-cols-[120px_minmax(0,1fr)]">
-        <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          actual
-        </dt>
+        <dt className="text-sm text-[var(--theme-text-muted)]">actual</dt>
         <dd className="text-[var(--theme-text)]">
           {formatValue(outcome.value, forecast.unit)}
         </dd>
-        <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          forecast
-        </dt>
+        <dt className="text-sm text-[var(--theme-text-muted)]">forecast</dt>
         <dd className="text-[var(--theme-text)]">
-          {formatValue(forecast.pointEstimate, forecast.unit)} with 80% CI [
-          {formatValue(forecast.ciLow, forecast.unit)},{" "}
-          {formatValue(forecast.ciHigh, forecast.unit)}]
+          {formatValue(forecast.pointEstimate, forecast.unit)}
+          {pointProjection
+            ? " · point projection"
+            : ` with 80% interval [${formatValue(forecast.ciLow, forecast.unit)}, ${formatValue(forecast.ciHigh, forecast.unit)}]`}
         </dd>
         {score && (
           <>
-            <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              error
-            </dt>
+            <dt className="text-sm text-[var(--theme-text-muted)]">error</dt>
             <dd className="text-[var(--theme-text)]">
               {formatSignedValue(score.signedError, forecast.unit)} · absolute{" "}
               {formatValue(score.absoluteError, forecast.unit)}
             </dd>
-            <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
+            <dt className="text-sm text-[var(--theme-text-muted)]">
               cdf score
             </dt>
             <dd className="text-[var(--theme-text)]">
@@ -481,9 +662,7 @@ function ResolvedOutcomePanel({
             </dd>
           </>
         )}
-        <dt className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          source
-        </dt>
+        <dt className="text-sm text-[var(--theme-text-muted)]">source</dt>
         <dd className="min-w-0 break-words text-[var(--theme-text)]">
           {outcome.sourceUrl ? (
             <a
@@ -506,311 +685,16 @@ function ResolvedOutcomePanel({
   );
 }
 
-function ThesisLogRecordPanel({ forecast }: { forecast: ForecastCell }) {
-  const distribution = forecast.predictionDistribution;
-  const run = forecast.predictionRun;
-  const runs = getForecastRunEntries(forecast);
-  if (!distribution && !run && !forecast.dataPointId) return null;
-
-  return (
-    <div
-      className="mt-5 rounded-lg border bg-[var(--theme-bg-surface)] p-4"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-          recorded in Thesis Log
-        </span>
-        <a
-          className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--color-accent)] no-underline hover:no-underline"
-          href="/log"
-        >
-          Open log →
-        </a>
-      </div>
-      <dl className="grid grid-cols-1 gap-x-5 gap-y-2 [font-family:var(--font-body)] text-[0.82rem] sm:grid-cols-[120px_minmax(0,1fr)]">
-        <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          record
-        </dt>
-        <dd className="text-[var(--theme-text)]">
-          {run?.runAt ? formatFullDate(run.runAt) : "prototype seed"}
-        </dd>
-        <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          agent
-        </dt>
-        <dd className="text-[var(--theme-text)]">
-          {run?.agent ?? "prototype seed"}
-        </dd>
-        <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          distribution
-        </dt>
-        <dd className="text-[var(--theme-text)]">
-          {runs.length > 1
-            ? `${runs.length} runs · ${distribution?.pointCount ?? 201} CDF points each`
-            : distribution
-              ? `${distribution.pointCount} CDF points`
-              : "not recorded"}
-        </dd>
-        {run?.model && (
-          <>
-            <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              model
-            </dt>
-            <dd className="text-[var(--theme-text)]">{run.model}</dd>
-          </>
-        )}
-        {forecast.dataPointId && (
-          <>
-            <dt className="[font-family:var(--font-mono)] text-[0.66rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-              ledger fact
-            </dt>
-            <dd className="min-w-0 break-all [font-family:var(--font-mono)] text-[0.76rem] text-[var(--color-horizon-700)]">
-              <a
-                className="text-[var(--color-horizon-700)] no-underline hover:text-[var(--color-accent)] hover:no-underline"
-                href="/ledger"
-              >
-                {forecast.dataPointId}
-              </a>
-            </dd>
-          </>
-        )}
-      </dl>
-    </div>
-  );
-}
-
-function RunComparisonPanel({
-  runs,
-  unit,
-}: {
-  runs: ForecastRunEntry[];
-  unit: ForecastCell["unit"];
-}) {
-  const displayRuns = [...runs].sort(compareRunsByRecordedTime);
-  const packs = buildUniquePacks(displayRuns);
-  const [selectedPackKey, setSelectedPackKey] = useState<string | null>(null);
-
-  if (runs.length <= 1) return null;
-  const baseline =
-    displayRuns.find((run) => run.packSet?.mode === "none") ?? displayRuns[0];
-  const domain = buildRunDomain(displayRuns);
-  const agentOrdinals = buildAgentOrdinals(displayRuns);
-  const agentCount = new Set(displayRuns.map(getRunAgentLabel)).size;
-  const modelCount = new Set(displayRuns.map(getRunModelLabel)).size;
-  const packSetCount = new Set(
-    displayRuns.map((run) => run.packSet?.packSetId ?? "unreported"),
-  ).size;
-  const reviewedCount = displayRuns.filter(
-    (run) => run.predictionRun?.preSubmitReview?.status === "completed",
-  ).length;
-  const activePackKey =
-    packs.find((pack) => pack.key === selectedPackKey)?.key ??
-    packs[0]?.key ??
-    null;
-
-  return (
-    <div
-      className="mt-5 border-t pt-5"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="[font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em]">
-          Forecast runs
-        </h2>
-        <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-          same target · agents, packs, updates
-        </span>
-      </div>
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <RunStat label="runs" value={displayRuns.length} />
-        <RunStat label="agents" value={agentCount} />
-        <RunStat label="models" value={modelCount} />
-        <RunStat label="pack sets" value={packSetCount} />
-        <RunStat label="reviewed" value={reviewedCount} />
-      </div>
-      {packs.length > 0 && activePackKey && (
-        <PackVisualizer
-          onSelectPack={setSelectedPackKey}
-          packs={packs}
-          selectedPackKey={activePackKey}
-        />
-      )}
-      <div className="space-y-3">
-        {displayRuns.map((run) => (
-          <ForecastRunLane
-            agentOrdinal={agentOrdinals.get(run.variantId)}
-            baseline={baseline}
-            domain={domain}
-            key={run.variantId}
-            onSelectPack={setSelectedPackKey}
-            run={run}
-            selectedPackKey={activePackKey}
-            unit={unit}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function RunStat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="border-y border-[var(--theme-border)] py-3">
-      <div className="[font-family:var(--font-display)] text-[1.55rem] font-semibold leading-none text-[var(--theme-text)]">
-        {value}
-      </div>
-      <div className="mt-1 [font-family:var(--font-mono)] text-[0.56rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function ForecastRunLane({
-  agentOrdinal,
-  baseline,
-  domain,
-  onSelectPack,
-  run,
-  selectedPackKey,
-  unit,
-}: {
-  agentOrdinal?: { count: number; index: number };
-  baseline: ForecastRunEntry;
-  domain: { lower: number; upper: number };
-  onSelectPack: (packKey: string) => void;
-  run: ForecastRunEntry;
-  selectedPackKey: string | null;
-  unit: ForecastCell["unit"];
-}) {
-  const intervalLeft = runScalePosition(run.ciLow, domain);
-  const intervalRight = runScalePosition(run.ciHigh, domain);
-  const point = runScalePosition(run.pointEstimate, domain);
-  const delta = run.pointEstimate - baseline.pointEstimate;
-  const agentLabel = getRunAgentLabel(run);
-  const modelLabel = getRunModelLabel(run);
-  const ciLowLabel = formatValue(run.ciLow, unit).replace(/^\+/, "");
-  const ciHighLabel = formatValue(run.ciHigh, unit).replace(/^\+/, "");
-  // A point projection (e.g. a published BLS point estimate) carries a
-  // negligible display interval, so its bounds round to the same value.
-  // Render it as a point rather than a nonsensical "80% X to X" band.
-  const isPointProjection = ciLowLabel === ciHighLabel;
-  const pointLabel = formatValue(run.pointEstimate, unit).replace(/^\+/, "");
-
-  return (
-    <div
-      className="border-y border-[var(--theme-border)] py-4"
-      data-forecast-run={run.variantId}
-    >
-      <div className="grid grid-cols-[minmax(0,0.58fr)_minmax(0,1fr)_minmax(5.5rem,auto)] gap-4 max-md:grid-cols-1">
-        <div className="min-w-0">
-          <div className="font-medium leading-[1.35] text-[var(--theme-text)]">
-            {run.label}
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-2 [font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.08em] text-[var(--theme-text-dim)]">
-            <span>{agentLabel}</span>
-            <span>{modelLabel}</span>
-            <span>{formatRunRecordedAt(run)}</span>
-            {run.externalSubmission && (
-              <span
-                className="rounded-full border border-[#A94E80] px-2 py-[1px] text-[#A94E80]"
-                title={`Open-challenge submission by ${run.externalSubmission.challenger} (self-declared ${run.externalSubmission.systemType}). Shows the submission record; a reasoning trace is not required.`}
-              >
-                external · {run.externalSubmission.systemType}
-              </span>
-            )}
-            {agentOrdinal && agentOrdinal.count > 1 && (
-              <span className="rounded-full border border-[var(--theme-border)] px-2 py-[1px]">
-                update {agentOrdinal.index}/{agentOrdinal.count}
-              </span>
-            )}
-            {run.predictionRun?.preSubmitReview && (
-              <span className="rounded-full border border-[var(--theme-border)] px-2 py-[1px]">
-                review{" "}
-                {run.predictionRun.preSubmitReview.status.replace(/_/g, " ")}
-              </span>
-            )}
-          </div>
-          {run.description && (
-            <p className="mt-2 text-[0.74rem] leading-[1.45] text-[var(--theme-text-muted)]">
-              {run.description}
-            </p>
-          )}
-          <div className="mt-3">
-            <PackSetSummary
-              onSelectPack={onSelectPack}
-              run={run}
-              selectedPackKey={selectedPackKey}
-            />
-          </div>
-        </div>
-
-        <div className="min-w-0">
-          <div className="relative h-10">
-            <div className="absolute left-0 right-0 top-[18px] h-[2px] bg-[var(--theme-border)]" />
-            {!isPointProjection && (
-              <div
-                className="absolute top-[14px] h-[10px] rounded-full bg-[var(--color-horizon-300)]"
-                style={{
-                  left: `${intervalLeft}%`,
-                  width: `${Math.max(intervalRight - intervalLeft, 1)}%`,
-                }}
-              />
-            )}
-            <div
-              className="absolute top-[9px] h-5 w-5 -translate-x-1/2 rounded-full border-2 border-white bg-[var(--color-accent)] shadow-sm"
-              style={{ left: `${point}%` }}
-            />
-          </div>
-          <div className="mt-1 flex items-center justify-between [font-family:var(--font-mono)] text-[0.58rem] text-[var(--theme-text-dim)]">
-            <span>{formatValue(domain.lower, unit)}</span>
-            <span>
-              {isPointProjection
-                ? `point ${pointLabel}`
-                : `80% ${ciLowLabel} to ${ciHighLabel}`}
-            </span>
-            <span>{formatValue(domain.upper, unit)}</span>
-          </div>
-          <RunTraceDetails run={run} unit={unit} />
-        </div>
-
-        <div className="text-right max-md:text-left">
-          <div className="[font-family:var(--font-display)] text-[1.75rem] font-semibold leading-none text-[var(--color-accent)]">
-            {formatValue(run.pointEstimate, unit)}
-          </div>
-          <div className="mt-2 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.08em] text-[var(--theme-text-dim)]">
-            {run === baseline ? "baseline" : formatSignedValue(delta, unit)}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RunTraceDetails({
-  run,
-  unit,
-}: {
-  run: ForecastRunEntry;
-  unit: ForecastCell["unit"];
-}) {
-  return (
-    <details className="mt-3 border-t border-[var(--theme-border)] pt-3">
-      <summary className="[font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-        {run.externalSubmission
-          ? "submission record (no reasoning trace required)"
-          : "public trace"}
-      </summary>
-      <div className="mt-3 space-y-2">
-        {run.predictionRun?.preSubmitReview && (
-          <PreSubmitReviewTrace review={run.predictionRun.preSubmitReview} />
-        )}
-        {run.reasoning.map((step, index) => (
-          <RunTraceStep key={index} step={step} unit={unit} />
-        ))}
-      </div>
-    </details>
-  );
+function formatRecordedTime(iso: string): string {
+  return new Date(iso).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
+  });
 }
 
 function PreSubmitReviewTrace({
@@ -833,7 +717,7 @@ function PreSubmitReviewTrace({
       </p>
       {review.findings.length > 0 && (
         <ul className="mt-2 space-y-1">
-          {review.findings.slice(0, 3).map((finding) => (
+          {review.findings.map((finding) => (
             <li
               className="text-[0.72rem] leading-[1.45] text-[var(--theme-text-muted)]"
               key={finding.findingId}
@@ -848,7 +732,7 @@ function PreSubmitReviewTrace({
       )}
       {review.dispositions.length > 0 && (
         <div className="mt-2 space-y-1">
-          {review.dispositions.slice(0, 3).map((disposition) => (
+          {review.dispositions.map((disposition) => (
             <p
               className="text-[0.72rem] leading-[1.45] text-[var(--theme-text-muted)]"
               key={disposition.findingId}
@@ -865,133 +749,8 @@ function PreSubmitReviewTrace({
   );
 }
 
-function RunTraceStep({
-  step,
-  unit,
-}: {
-  step: ReasoningStep;
-  unit: ForecastCell["unit"];
-}) {
-  if (step.kind === "heading") {
-    return (
-      <div className="[font-family:var(--font-display)] text-[0.82rem] font-semibold text-[var(--theme-text)]">
-        {step.text}
-      </div>
-    );
-  }
-  if (step.kind === "text") {
-    return (
-      <p className="text-[0.75rem] leading-[1.55] text-[var(--theme-text-muted)]">
-        {step.text}
-      </p>
-    );
-  }
-  if (step.kind === "math") {
-    return (
-      <p className="break-words [font-family:var(--font-mono)] text-[0.68rem] leading-[1.55] text-[var(--theme-text)]">
-        {step.text}
-      </p>
-    );
-  }
-  if (step.kind === "tool") {
-    return (
-      <div className="break-words [font-family:var(--font-mono)] text-[0.66rem] leading-[1.55] text-[var(--theme-text-dim)]">
-        <div>
-          <span className="text-[var(--color-accent)]">
-            {step.tool ?? "policyengine.simulate"}
-          </span>{" "}
-          {step.call}
-        </div>
-        {step.result && (
-          <div className="mt-1 border-l border-[var(--theme-border)] pl-3 text-[var(--theme-text)]">
-            <span className="text-[var(--theme-text-dim)]">result </span>
-            {step.result}
-          </div>
-        )}
-      </div>
-    );
-  }
-  const stepLow = formatValue(step.ciLow, unit).replace(/^\+/, "");
-  const stepHigh = formatValue(step.ciHigh, unit).replace(/^\+/, "");
-  return (
-    <div className="[font-family:var(--font-mono)] text-[0.7rem] text-[var(--theme-text)]">
-      {stepLow === stepHigh
-        ? `forecast ${formatValue(step.point, unit)} · point`
-        : `forecast ${formatValue(step.point, unit)} · 80% [${stepLow}, ${stepHigh}]`}
-    </div>
-  );
-}
-
-function compareRunsByRecordedTime(
-  left: ForecastRunEntry,
-  right: ForecastRunEntry,
-) {
-  const leftTime = parseRunTime(left);
-  const rightTime = parseRunTime(right);
-  if (leftTime !== rightTime) return leftTime - rightTime;
-  return left.label.localeCompare(right.label);
-}
-
-function parseRunTime(run: ForecastRunEntry) {
-  const value = run.predictionRun?.runAt;
-  if (!value) return 0;
-  const parsed = Date.parse(value);
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
-
-function buildRunDomain(runs: ForecastRunEntry[]) {
-  const lower = Math.min(...runs.map((run) => run.ciLow));
-  const upper = Math.max(...runs.map((run) => run.ciHigh));
-  const spread = Math.max(upper - lower, 0.1);
-  return {
-    lower: lower - spread * 0.08,
-    upper: upper + spread * 0.08,
-  };
-}
-
-function runScalePosition(
-  value: number,
-  domain: { lower: number; upper: number },
-) {
-  const width = domain.upper - domain.lower;
-  if (width <= 0) return 50;
-  return Math.max(0, Math.min(100, ((value - domain.lower) / width) * 100));
-}
-
-function buildAgentOrdinals(runs: ForecastRunEntry[]) {
-  const totals = new Map<string, number>();
-  const seen = new Map<string, number>();
-  const ordinals = new Map<string, { count: number; index: number }>();
-
-  for (const run of runs) {
-    const agent = getRunAgentLabel(run);
-    totals.set(agent, (totals.get(agent) ?? 0) + 1);
-  }
-  for (const run of runs) {
-    const agent = getRunAgentLabel(run);
-    const next = (seen.get(agent) ?? 0) + 1;
-    seen.set(agent, next);
-    ordinals.set(run.variantId, {
-      count: totals.get(agent) ?? 1,
-      index: next,
-    });
-  }
-
-  return ordinals;
-}
-
 function getRunAgentLabel(run: ForecastRunEntry) {
   return run.predictionRun?.agent ?? "prototype seed";
-}
-
-function getRunModelLabel(run: ForecastRunEntry) {
-  return run.predictionRun?.model ?? "unreported model";
-}
-
-function formatRunRecordedAt(run: ForecastRunEntry) {
-  const value = run.predictionRun?.runAt;
-  if (!value) return "seed";
-  return formatShortFullDate(value);
 }
 
 interface PackVisualizerEntry {
@@ -1118,63 +877,6 @@ function PackVisualizer({
   );
 }
 
-function PackSetSummary({
-  onSelectPack,
-  run,
-  selectedPackKey,
-}: {
-  onSelectPack: (packKey: string) => void;
-  run: ForecastRunEntry;
-  selectedPackKey: string | null;
-}) {
-  const packSet = run.packSet;
-  if (!packSet) {
-    return (
-      <span className="[font-family:var(--font-mono)] text-[0.66rem] text-[var(--theme-text-dim)]">
-        unreported
-      </span>
-    );
-  }
-  if (packSet.packs.length === 0) {
-    return (
-      <span className="inline-flex rounded-full border border-[var(--theme-border)] px-2 py-[2px] [font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.08em] text-[var(--theme-text-dim)]">
-        {packSet.label}
-      </span>
-    );
-  }
-
-  return (
-    <div>
-      <div className="mb-2 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.08em] text-[var(--theme-text)]">
-        {packSet.label}
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {packSet.packs.map((pack) => {
-          const key = buildPackKey(pack);
-          const isSelected = key === selectedPackKey;
-          return (
-            <button
-              aria-pressed={isSelected}
-              className={`inline-flex rounded-full border px-2 py-[2px] [font-family:var(--font-mono)] text-[0.56rem] uppercase tracking-[0.06em] transition-colors ${
-                isSelected
-                  ? "border-[var(--color-accent)] bg-[var(--color-horizon-100)] text-[var(--theme-text)]"
-                  : "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)] hover:border-[var(--color-accent)]"
-              }`}
-              data-pack-key={key}
-              key={key}
-              onClick={() => onSelectPack(key)}
-              title={pack.summary}
-              type="button"
-            >
-              {pack.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function buildUniquePacks(runs: ForecastRunEntry[]): PackVisualizerEntry[] {
   const entries = new Map<
     string,
@@ -1226,40 +928,6 @@ function formatCompactNumber(value: number): string {
   if (Math.abs(value) >= 10) return value.toFixed(1);
   if (Math.abs(value) >= 1) return value.toFixed(2);
   return value.toPrecision(2);
-}
-
-function TraceStatusBanner({
-  forecast,
-  liveForecast,
-  mode,
-  supportsLive,
-}: {
-  forecast: ForecastCell;
-  liveForecast: RuntimeForecast | null;
-  mode: RuntimeMode;
-  supportsLive: boolean;
-}) {
-  const status = traceStatus(mode, supportsLive, liveForecast, forecast);
-
-  return (
-    <div
-      className="mb-3 rounded-md border bg-[var(--theme-bg-surface)] px-4 py-3 text-[0.78rem] leading-[1.5]"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <span
-        className={`mr-2 inline-block rounded-full border px-2 py-[1px] [font-family:var(--font-mono)] text-[0.58rem] uppercase tracking-[0.1em] ${
-          status.tone === "live"
-            ? "border-[var(--color-horizon-300)] bg-[var(--color-horizon-50)] text-[var(--color-horizon-700)]"
-            : status.tone === "fallback"
-              ? "border-[#F2DCAF] bg-[#FFF4DD] text-[#7A5C20]"
-              : "border-[var(--theme-border)] bg-[var(--theme-bg-elevated)] text-[var(--theme-text-dim)]"
-        }`}
-      >
-        {status.label}
-      </span>
-      <span className="text-[var(--theme-text-muted)]">{status.body}</span>
-    </div>
-  );
 }
 
 function SeriesMetadataPanel({ forecast }: { forecast: ForecastCell }) {
@@ -1331,411 +999,6 @@ function SeriesMetadataPanel({ forecast }: { forecast: ForecastCell }) {
   );
 }
 
-function ReasoningSurface({
-  activeTool,
-  error,
-  forecast,
-  mode,
-  statusLabel,
-  steps,
-  supportsLive,
-}: {
-  activeTool: ActiveTool | null;
-  error: string | null;
-  forecast: ForecastCell;
-  mode: RuntimeMode;
-  statusLabel: string;
-  steps: ReasoningStep[];
-  supportsLive: boolean;
-}) {
-  const shouldReplayMock =
-    !supportsLive ||
-    mode === "mock" ||
-    (mode === "fallback" && steps.length === 0);
-
-  if (shouldReplayMock) {
-    return (
-      <>
-        {error && (
-          <div
-            className="mb-3 rounded-md border bg-[var(--theme-bg-elevated)] px-4 py-3 text-[0.78rem] leading-[1.5] text-[var(--theme-text-muted)]"
-            style={{ borderColor: "var(--theme-border)" }}
-          >
-            {error} Replaying the static reasoning trace.
-          </div>
-        )}
-        <AgentReasoning
-          steps={forecast.reasoning}
-          unit={forecast.unit}
-          provenance={classifyTraceProvenance(forecast)}
-        />
-      </>
-    );
-  }
-
-  return (
-    <LiveReasoningTimeline
-      activeTool={activeTool}
-      complete={mode === "complete"}
-      error={error}
-      statusLabel={statusLabel}
-      steps={steps}
-      unit={forecast.unit}
-    />
-  );
-}
-
-function LiveReasoningTimeline({
-  activeTool,
-  complete,
-  error,
-  statusLabel,
-  steps,
-  unit,
-}: {
-  activeTool: ActiveTool | null;
-  complete: boolean;
-  error: string | null;
-  statusLabel: string;
-  steps: ReasoningStep[];
-  unit: ForecastCell["unit"];
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-  }, [steps.length, activeTool]);
-
-  return (
-    <div
-      className="rounded-xl border bg-[var(--theme-bg-elevated)]"
-      style={{ borderColor: "var(--theme-border)" }}
-    >
-      <header
-        className="flex items-center justify-between gap-3 border-b px-5 py-3"
-        style={{ borderColor: "var(--theme-border)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            {!complete && !error && (
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-accent)] opacity-60" />
-            )}
-            <span
-              className="relative inline-flex h-2 w-2 rounded-full"
-              style={{
-                backgroundColor: complete
-                  ? "var(--color-horizon-500)"
-                  : "var(--color-accent)",
-              }}
-            />
-          </span>
-          <span className="[font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.12em] text-[var(--theme-text-muted)]">
-            {complete ? "analysis complete" : statusLabel}
-          </span>
-        </div>
-      </header>
-      <div
-        ref={containerRef}
-        className="max-h-[640px] overflow-y-auto px-5 py-5"
-      >
-        {steps.length === 0 && !activeTool && (
-          <p className="my-3 text-[0.93rem] leading-[1.65] text-[var(--theme-text-muted)]">
-            Opening live analyst stream…
-          </p>
-        )}
-        {steps.map((step, index) => (
-          <LiveStep key={index} step={step} unit={unit} />
-        ))}
-        {activeTool && (
-          <ToolBlock call={activeTool.call} running tool={activeTool.tool} />
-        )}
-        {error && (
-          <p className="mt-4 text-[0.78rem] leading-[1.5] text-[var(--theme-text-muted)]">
-            {error}
-          </p>
-        )}
-        {complete && (
-          <div className="mt-6 [font-family:var(--font-mono)] text-[0.65rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
-            — end of analyst stream —
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function LiveStep({
-  step,
-  unit,
-}: {
-  step: ReasoningStep;
-  unit: ForecastCell["unit"];
-}) {
-  switch (step.kind) {
-    case "heading":
-      return (
-        <h4 className="mt-6 first:mt-0 mb-2 [font-family:var(--font-display)] text-[0.95rem] font-semibold tracking-[-0.01em] text-[var(--theme-text)]">
-          <span className="mr-2 text-[var(--color-accent)]">§</span>
-          {step.text}
-        </h4>
-      );
-    case "text":
-      return (
-        <p className="my-3 text-[0.93rem] leading-[1.65] text-[var(--theme-text)]">
-          {step.text}
-        </p>
-      );
-    case "math":
-      return (
-        <p
-          className="my-3 rounded-md border bg-[var(--theme-bg-surface)] px-4 py-2 [font-family:var(--font-mono)] text-[0.78rem] leading-[1.7] text-[var(--theme-text)]"
-          style={{ borderColor: "var(--theme-border)" }}
-        >
-          {step.text}
-        </p>
-      );
-    case "tool":
-      return (
-        <ToolBlock
-          call={step.call}
-          result={step.result}
-          tool={step.tool ?? "policyengine.simulate"}
-        />
-      );
-    case "forecast":
-      return (
-        <div className="mt-6 rounded-xl border border-[var(--color-accent)] bg-[var(--color-accent-subtle)] p-5">
-          <div className="mb-2 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--color-rose-700)]">
-            calibrated forecast · 80% CI
-          </div>
-          <div className="flex flex-wrap items-baseline gap-4">
-            <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-rose-700)]">
-              {formatValue(step.point, unit)}
-            </span>
-            <span className="[font-family:var(--font-mono)] text-[0.85rem] text-[var(--color-rose-700)]">
-              [{formatValue(step.ciLow, unit)} ·{" "}
-              {formatValue(step.ciHigh, unit)}]
-            </span>
-          </div>
-        </div>
-      );
-  }
-}
-
-function ToolBlock({
-  call,
-  result,
-  running = false,
-  tool,
-}: {
-  call: string;
-  result?: string;
-  running?: boolean;
-  tool: string;
-}) {
-  return (
-    <div className="my-3">
-      <div
-        className="flex items-center justify-between rounded-t-md border-x border-t bg-[#0F1A24] px-4 py-2 text-[#9FB6C6] [font-family:var(--font-mono)] text-[0.7rem]"
-        style={{ borderColor: "var(--color-ink-border)" }}
-      >
-        <span className="text-[#5E97C8]">▸ {tool}</span>
-        <span className="text-[#9DB1BF]">
-          {running ? "running…" : "complete"}
-        </span>
-      </div>
-      <pre
-        className="overflow-x-auto border-x bg-[#0F1A24] px-4 py-3 text-[#E8F0F5] [font-family:var(--font-mono)] text-[0.78rem] leading-[1.55]"
-        style={{ borderColor: "var(--color-ink-border)" }}
-      >
-        <code>{call}</code>
-      </pre>
-      {running ? (
-        <div
-          className="flex items-center gap-2 rounded-b-md border-x border-b bg-[#172633] px-4 py-3 [font-family:var(--font-mono)] text-[0.72rem] text-[#9DB1BF]"
-          style={{ borderColor: "var(--color-ink-border)" }}
-        >
-          <Spinner />
-          <span>running live data lookup…</span>
-        </div>
-      ) : (
-        <pre
-          className="overflow-x-auto rounded-b-md border-x border-b bg-[#172633] px-4 py-3 text-[#9FC4E6] [font-family:var(--font-mono)] text-[0.75rem] leading-[1.55]"
-          style={{ borderColor: "var(--color-ink-border)" }}
-        >
-          <code>
-            <span className="text-[#E7A6C8]">↳ </span>
-            {result}
-          </code>
-        </pre>
-      )}
-    </div>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      className="animate-spin"
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeOpacity="0.25"
-        strokeWidth="3"
-      />
-      <path
-        d="M12 2a10 10 0 0 1 10 10"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="3"
-      />
-    </svg>
-  );
-}
-
-function resolveApiBase() {
-  const configured = (
-    process.env.NEXT_PUBLIC_THESIS_API_BASE_URL ??
-    process.env.NEXT_PUBLIC_BRIER_API_BASE_URL
-  )?.replace(/\/$/, "");
-  if (configured) return configured;
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  ) {
-    return "http://127.0.0.1:3002";
-  }
-  return "https://api.thesisinstitute.org";
-}
-
-function parseEventData<T>(event: Event) {
-  try {
-    return JSON.parse((event as MessageEvent<string>).data) as T;
-  } catch {
-    return null;
-  }
-}
-
-function isReasoningStep(step: ReasoningStep): step is ReasoningStep {
-  return (
-    step.kind === "heading" ||
-    step.kind === "text" ||
-    step.kind === "math" ||
-    step.kind === "tool" ||
-    step.kind === "forecast"
-  );
-}
-
-function forecastSourceLabel(
-  forecastCell: ForecastCell,
-  supportsLive: boolean,
-  mode: RuntimeMode,
-  statusLabel: string,
-  forecast: RuntimeForecast | null,
-) {
-  if (!supportsLive && forecastCell.predictionRun) {
-    return `${forecastCell.predictionRun.agent} · ${forecastCell.predictionRun.runAt}`;
-  }
-  if (!supportsLive) return "static prototype estimate · seeded forecast value";
-  if (forecast?.source === "ai_gateway") {
-    return `generated by ${forecast.model ?? "AI Gateway"}`;
-  }
-  if (forecast?.source === "deterministic_fallback") {
-    return "live BLS data · deterministic fallback";
-  }
-  if (forecast?.source === "calibration_fallback") {
-    return "live PolicyEngine data · calibration fallback";
-  }
-  if (forecast?.source === "census_calibration_fallback") {
-    return "live Census + PolicyEngine inputs · calibration fallback";
-  }
-  if (mode === "fallback") return "static mock · live API unavailable";
-  return statusLabel;
-}
-
-function reasoningStatusLabel(
-  supportsLive: boolean,
-  mode: RuntimeMode,
-  steps: ReasoningStep[],
-  forecast: ForecastCell,
-) {
-  if (!supportsLive && forecast.predictionRun) return "recorded agent run";
-  if (!supportsLive || mode === "mock") return "static mock";
-  if (mode === "complete") return `${steps.length} live steps`;
-  if (mode === "fallback") return "static fallback";
-  return "streaming";
-}
-
-function traceStatus(
-  mode: RuntimeMode,
-  supportsLive: boolean,
-  forecast: RuntimeForecast | null,
-  forecastCell: ForecastCell,
-) {
-  if (!supportsLive && forecastCell.predictionRun) {
-    return {
-      label: "Recorded agent run",
-      tone: "live" as const,
-      body: "The reasoning below was generated by an agent using current official source context and saved in Thesis Log as this prediction's trace.",
-    };
-  }
-  if (!supportsLive) {
-    return {
-      label: "Static mock trace",
-      tone: "mock" as const,
-      body: "The reasoning below is prewritten prototype content; the page, catalog entry, and resolution rule are live.",
-    };
-  }
-  if (mode === "fallback") {
-    return {
-      label: "Fallback static trace",
-      tone: "fallback" as const,
-      body: "This cell has live API wiring, but the stream is unavailable, so the prototype is replaying the static mock trace.",
-    };
-  }
-  if (mode === "mock") {
-    return {
-      label: "Static mock trace",
-      tone: "mock" as const,
-      body: "This cell can use the live API path, but this view is replaying the prewritten trace.",
-    };
-  }
-  if (forecast) {
-    return {
-      label: "Live run",
-      tone: "live" as const,
-      body: "This run streamed through the live API and updated the forecast value on the page.",
-    };
-  }
-  return {
-    label: "Live API path",
-    tone: "live" as const,
-    body: "This cell is opening a server-sent reasoning stream. If the API is unavailable, the page falls back to the static mock trace.",
-  };
-}
-
-function liveModeDescription(slug: string) {
-  if (slug === "spm-child-poverty-2025") {
-    return "Live mode checks public Census release/SPM pages, verifies the PolicyEngine current-law policy, applies an explicit child-poverty calibration prior, and calls the forecast model when AI Gateway credentials are available. If the API fails, the page replays the static trace.";
-  }
-  if (slug === "ctc-expansion-cost-ty2026") {
-    return "Live mode queries the PolicyEngine policy and economy APIs, applies an explicit calibration prior, and calls the forecast model when AI Gateway credentials are available. If the API fails, the page replays the static trace.";
-  }
-  if (slug === "ctc-current-law-outlays-ty2026") {
-    return "Live mode queries the PolicyEngine current-law policy, applies an explicit CTC outlay calibration prior, and streams the adjustment path. If the API fails, the page replays the static trace.";
-  }
-  return "Live mode queries BLS CPI-U data, computes an audit-ready data summary, and calls the forecast model when AI Gateway credentials are available. If the API fails, the page replays the static trace.";
-}
-
 // Read the calendar date written in an ISO string (the Y/M/D before any time
 // zone offset) and rebuild it as a UTC instant. Formatting that as UTC shows
 // the date exactly as recorded, identically on the server and the client —
@@ -1781,6 +1044,8 @@ function targetPeriodLabel(cell: ForecastCell): string {
   if (schoolYear) return `SY ${schoolYear[1]}-${schoolYear[2]}`;
   const fiscalYear = /fy[_ -]?(\d{4})/i.exec(cell.dataPointId ?? "");
   if (fiscalYear) return `FY ${fiscalYear[1]}`;
+  const calendarYear = /\.(\d{4})$/.exec(cell.dataPointId ?? "");
+  if (calendarYear) return calendarYear[1];
   return formatShortDate(
     cell.resolvedOutcome?.resolvedAt ?? cell.resolutionDate,
   );

@@ -60,6 +60,19 @@ from history_floor import (
     history_floor_requires_authorization,
     reviewed_history_floor_authorization,
 )
+from tool_evidence import (
+    ENV_SECRET_ASSIGNMENT_RE as ENV_SECRET_ASSIGNMENT_RE,
+)
+from tool_evidence import (
+    JSON_SECRET_FIELD_RE as JSON_SECRET_FIELD_RE,
+)
+from tool_evidence import (
+    REDACTED_PLACEHOLDER as REDACTED_PLACEHOLDER,
+)
+from tool_evidence import (
+    SECRET_TOKEN_RE as SECRET_TOKEN_RE,
+)
+from tool_evidence import redact_json_value, redact_text
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 AGENT_ROOT = ROOT / "agents" / "thesis-analyst"
@@ -82,6 +95,32 @@ ANNOUNCEMENT_MCP_TOOL = "fetch_official_announcement"
 ANNOUNCEMENT_MCP_SCRIPT = SCRIPTS / "announcement_fetch_mcp.py"
 ANNOUNCEMENT_MCP_STARTUP_TIMEOUT_SECONDS = 10
 ANNOUNCEMENT_MCP_TOOL_TIMEOUT_SECONDS = 30
+TOOL_EVIDENCE_MCP_SERVER = "thesis_tool_evidence"
+TOOL_EVIDENCE_MCP_TOOLS = (
+    "fetch_source", "extract_json", "extract_irs_soi", "calculate"
+)
+TOOL_EVIDENCE_MCP_STARTUP_TIMEOUT_SECONDS = 10
+TOOL_EVIDENCE_MCP_TOOL_TIMEOUT_SECONDS = 45
+TOOL_EVIDENCE_NOTE = """
+# Captured tool evidence
+Use the thesis_tool_evidence MCP tools for source reads and calculations.
+fetch_source saves the complete public HTTPS response and returns its call ID,
+hash, and a bounded excerpt. extract_json selects a JSON Pointer from a prior
+fetch_source response. extract_irs_soi replays the reviewed IRS Table 3.3
+parser on a prior captured workbook, selecting the exact series and tax year;
+its numeric value is already in the registered unit. calculate evaluates
+bounded arithmetic, with named inputs
+that can refer to earlier extraction/calculation results by {"callId":"call-0001"}.
+Use these tools for the base rate and interval arithmetic, and cite the returned
+call IDs in your trace. Keep supplied assumptions and judgment adjustments
+explicit. An extraction or calculation replay verifies the operation on its
+inputs; it does not independently verify those assumptions or the source's truth.
+Tool calls outside this channel, including hosted web search and shell commands,
+do not preserve full response receipts here. Say when evidence was not captured.
+Never manufacture a tool receipt or describe model-authored text as captured
+output. Failed calls remain in the record. Only public, unauthenticated HTTPS
+sources are supported; do not send credentials or private URLs to these tools.
+"""
 
 
 def utc_now() -> str:
@@ -468,6 +507,24 @@ def build_run_prompt(
     target_context: dict[str, Any] | None = None,
     ticket: dict[str, str] | None = None,
     network_tools: bool = False,
+    tool_evidence: bool = False,
+) -> tuple[str, dict]:
+    prompt, meta = _build_run_prompt(
+        series, period, conditional, mode, target_context, ticket, network_tools
+    )
+    if tool_evidence:
+        prompt = f"{prompt}\n{TOOL_EVIDENCE_NOTE}"
+    return prompt, meta
+
+
+def _build_run_prompt(
+    series: str,
+    period: str,
+    conditional: str | None,
+    mode: str,
+    target_context: dict[str, Any] | None = None,
+    ticket: dict[str, str] | None = None,
+    network_tools: bool = False,
 ) -> tuple[str, dict]:
     prompt, meta = build_prompt(series, period, conditional)
     target_context_block = format_target_context(target_context)
@@ -536,6 +593,7 @@ def format_target_context(target_context: dict[str, Any] | None) -> str:
         "targetUnit",
         "dataPointId",
         "resolutionDate",
+        "publishedResolutionDate",
         "resolutionDateBasis",
         "expectedReleaseWindow",
         "resolutionSource",
@@ -568,6 +626,31 @@ def format_target_context(target_context: dict[str, Any] | None) -> str:
         value = target_context.get(key)
         if value not in (None, ""):
             lines.append(f"- {key}: {json.dumps(value, sort_keys=True)}")
+    if target_context.get("anchors"):
+        lines += [
+            "",
+            "Reviewed anchors are cross-checks, not the full historical reference "
+            "class or a history-floor waiver. Fetch at least six distinct "
+            "canonical official prints when available, including earlier "
+            "years if the recent table exposes fewer. Do not count an anchor "
+            "as a fetched print without its official source.",
+        ]
+    published_date = target_context.get("publishedResolutionDate")
+    if target_context.get("comparisonTarget") is True and published_date not in (
+        None,
+        "",
+    ):
+        lines += [
+            "",
+            "# Comparison target contract (machine checked)",
+            "This run is a strategy comparison against an already published "
+            "forecast. The sealed cell's resolutionDate, resolutionSource, "
+            "resolutionSourceUrl and resolutionRule are pinned to that "
+            "forecast's published resolver; publishedResolutionDate "
+            f"{json.dumps(published_date)} is its resolver date. Still verify "
+            "the official release schedule this run and state any discrepancy "
+            "in reasoning rather than changing the target.",
+        ]
     if target_context.get("resolutionDateBasis") == "resolve-by-bound":
         bound = target_context.get("resolutionDate")
         announcement_url = (target_context.get("sourceBinding") or {}).get("sourceUrl")
@@ -638,7 +721,39 @@ def format_target_context(target_context: dict[str, Any] | None) -> str:
     adapter = (target_context.get("sourceBinding") or {}).get("adapter")
     fetch_command = BASE_RATE_FETCH_COMMANDS.get(adapter)
     series = target_context.get("series")
-    if fetch_command and isinstance(series, str) and series:
+    if adapter == "irs-soi-pub1304" and isinstance(series, str) and series:
+        lines += [
+            "",
+            "# Resolution-grade base-rate fetch (captured workbook extraction)",
+            "For each of the latest six published tax years, call fetch_source "
+            "on https://www.irs.gov/pub/irs-soi/YYin33ar.xls (YY is the "
+            "two-digit tax year), then use that returned call ID in:",
+            fetch_command.format(series=series),
+            "The tool replays the registered adapter against the complete "
+            "captured bytes and returns rawValue plus value in the target "
+            "unit. Use value directly; do not apply the transform twice. "
+            "Use the extraction call IDs as calculate inputs for the base "
+            "rate and interval arithmetic. Preserve the exact extracted "
+            "values and year identities in historicalContext through review "
+            "and revision. A binary fetch excerpt is not a parsed table. "
+            "Do not guess a value from it or substitute a rounded bulletin "
+            "number. Parser errors describe an extraction failure, not "
+            "unavailability of that official year. Record the refusal and "
+            "keep the run failed if canonical history cannot be extracted. "
+            "Four verified anchors do not mean only four years exist. "
+            "Fetch earlier official workbooks to retain at least six "
+            "canonical prints; do not replace them with a history waiver.",
+            "Use these MCP calls in the native captured lane; shell network "
+            "access and package installation are unavailable there.",
+        ]
+        if series == "irs.actc.total_claims":
+            lines.append(
+                "This count is TOTAL ACTC claiming returns at the reviewed "
+                "plain Additional child tax credit concept header. The "
+                "separate refundable portion and used to offset other taxes "
+                "columns are different subsets; never substitute them."
+            )
+    elif fetch_command and isinstance(series, str) and series:
         lines += [
             "",
             "# Resolution-grade base-rate fetch (run this — do not substitute)",
@@ -668,12 +783,10 @@ def format_generation_ticket(ticket: dict[str, str] | None) -> str:
     )
 
 
-# Per-adapter, copy-runnable base-rate fetch commands surfaced in the target
-# context. Five S.3596 waves (thesis#115) fetched IRS Pub 4801 line-item
-# estimates — a real official series for nearly the same concept — instead
-# of the registered Table 3.3 print, and prose pointing at the parser did
-# not change that; an explicit command does. PERIOD is chosen by the agent
-# (recent published periods); anchor values themselves are never injected.
+# Per-adapter base-rate recipes. IRS uses captured MCP workbook extraction
+# because bounded native strategy runs cannot use shell HTTP or install parsers.
+# Other adapters retain their operator commands. Periods are selected by the
+# agent from published official files; anchor values are never injected.
 BASE_RATE_FETCH_COMMANDS = {
     "eia-dnav-xls": (
         "  pip install --user xlrd==2.0.1 >/dev/null 2>&1; "
@@ -684,12 +797,9 @@ BASE_RATE_FETCH_COMMANDS = {
         "   # PERIOD = an annual reference year like 2024"
     ),
     "irs-soi-pub1304": (
-        "  pip install --user xlrd==2.0.1 >/dev/null 2>&1; "
-        "python3 -c \"import sys; sys.path.insert(0, 'scripts'); "
-        "import resolve_pending as r; "
-        "print(r.irs_soi_pub1304_fetch_normalized_year("
-        "r.IRS_SOI_PUB1304_ADAPTERS['{series}'], 'PERIOD')[0])\""
-        "   # PERIOD = a tax year like 2023"
+        '  extract_irs_soi({{"sourceCallId":"FETCH_CALL_ID",'
+        '"seriesId":"{series}","year":"YYYY"}})'
+        "   # YYYY is that workbook's four-digit tax year"
     ),
     "fsa-crp-monthly-summary": (
         "  python3 -c \"import sys; sys.path.insert(0, 'scripts'); "
@@ -1347,37 +1457,6 @@ AGENT_ENV_ALLOWLIST = (
     "CODEX_HOME",
 )
 
-REDACTED_PLACEHOLDER = "[REDACTED]"
-
-# `NAME=value` lines for credential-shaped env var names: the incident shape.
-ENV_SECRET_ASSIGNMENT_RE = re.compile(
-    r"([A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)=\S+"
-)
-
-# `"name": "value"` JSON fields with credential-shaped names — catches an
-# agent cat-ing auth/config files (auth.json and friends) into its trace.
-JSON_SECRET_FIELD_RE = re.compile(
-    r"\"([A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*)\"\s*:\s*\"[^\"]*\"",
-    re.IGNORECASE,
-)
-
-# Well-known credential token formats (the incident list plus legacy
-# OpenAI `sk-` keys, which auth.json can hold under API-key login).
-SECRET_TOKEN_RE = re.compile(
-    "|".join(
-        [
-            r"sk-(?:ant|proj|or)-[A-Za-z0-9_-]+",  # Anthropic/OpenAI/OpenRouter
-            r"sk-[A-Za-z0-9]{20,}",  # legacy OpenAI secret keys
-            r"ghp_[A-Za-z0-9]+",  # GitHub classic PAT
-            r"github_pat_[A-Za-z0-9_]+",  # GitHub fine-grained PAT
-            r"xox[bp]-[A-Za-z0-9-]+",  # Slack bot/user tokens
-            r"AIza[A-Za-z0-9_-]+",  # Google API keys
-            r"eyJhbGciOi[A-Za-z0-9_.=-]+",  # JWTs (Supabase service keys, ...)
-            r"AKIA[A-Z0-9]+",  # AWS access key ids
-        ]
-    )
-)
-
 
 def agent_subprocess_env(
     overrides: dict[str, str] | None = None,
@@ -1389,30 +1468,6 @@ def agent_subprocess_env(
     if overrides:
         env.update(overrides)
     return env
-
-
-def redact_text(text: str) -> str:
-    """Redact credential values from plain text (idempotent)."""
-    if not text:
-        return text
-    text = ENV_SECRET_ASSIGNMENT_RE.sub(rf"\1={REDACTED_PLACEHOLDER}", text)
-    text = JSON_SECRET_FIELD_RE.sub(rf'"\1": "{REDACTED_PLACEHOLDER}"', text)
-    return SECRET_TOKEN_RE.sub(REDACTED_PLACEHOLDER, text)
-
-
-def redact_json_value(value: Any) -> Any:
-    if isinstance(value, str):
-        return redact_text(value)
-    if isinstance(value, list):
-        return [redact_json_value(item) for item in value]
-    if isinstance(value, dict):
-        return {
-            (redact_text(key) if isinstance(key, str) else key): (
-                redact_json_value(item)
-            )
-            for key, item in value.items()
-        }
-    return value
 
 
 def redact_stream_line(line: str) -> str:
@@ -1667,7 +1722,12 @@ def parse_codex_jsonl(stdout_text: str, stderr_text: str) -> dict[str, Any]:
     non_json_lines: list[str] = []
 
     for stream_name, text in (("stdout", stdout_text), ("stderr", stderr_text)):
-        for line in text.splitlines():
+        # Newline-only splitting: str.splitlines() also breaks on U+0085,
+        # U+2028, U+2029 and ASCII separators that JSON leaves unescaped
+        # inside strings, which turned one MCP completion event into
+        # non-JSON fragments and dropped it from the archived event stream
+        # (see verify_custody._tool_evidence_events).
+        for line in text.split("\n"):
             stripped = line.strip()
             if not stripped:
                 continue
@@ -1702,6 +1762,36 @@ def parse_codex_jsonl(stdout_text: str, stderr_text: str) -> dict[str, Any]:
         "lastError": last_error,
         "nonJsonStderr": "\n".join(non_json_lines),
     }
+
+
+def tool_evidence_mcp_config(
+    output_path: pathlib.PurePath,
+    *,
+    checkout_root: pathlib.PurePath = ROOT,
+    python_executable: str = sys.executable,
+    allow_fetch: bool = True,
+) -> list[str]:
+    """Configure only the trusted recorder; signing keys never enter this stage."""
+    server = f"mcp_servers.{TOOL_EVIDENCE_MCP_SERVER}"
+    names = list(TOOL_EVIDENCE_MCP_TOOLS)
+    args = [
+        str(checkout_root / "scripts/tool_evidence_mcp.py"),
+        "--output",
+        str(output_path),
+    ]
+    if not allow_fetch:
+        args.append("--no-fetch")
+        names.remove("fetch_source")
+    return [
+        f"{server}.command=" + json.dumps(python_executable),
+        f"{server}.args=" + json.dumps(args, separators=(",", ":")),
+        f"{server}.cwd=" + json.dumps(str(checkout_root)),
+        f"{server}.required=true",
+        f"{server}.enabled_tools=" + json.dumps(names, separators=(",", ":")),
+        f"{server}.startup_timeout_sec={TOOL_EVIDENCE_MCP_STARTUP_TIMEOUT_SECONDS}",
+        f"{server}.tool_timeout_sec={TOOL_EVIDENCE_MCP_TOOL_TIMEOUT_SECONDS}",
+        *[f'{server}.tools.{name}.approval_mode="approve"' for name in names],
+    ]
 
 
 def announcement_mcp_config(
@@ -1875,6 +1965,77 @@ def run_codex_agent_command(
     network: bool = False,
     announcement_url: str | None = None,
 ) -> dict[str, Any]:
+    """Record controlled tool traffic outside the agent's writable checkout."""
+    from tool_evidence import _strict_json, empty_evidence, verify_evidence
+
+    with tempfile.TemporaryDirectory(prefix="thesis-tool-evidence-") as spool:
+        output = pathlib.Path(spool) / "tool_evidence.json"
+        output.write_text(json.dumps(empty_evidence()) + "\n")
+        result = _run_codex_agent_command(
+            prompt=prompt,
+            timeout_seconds=timeout_seconds,
+            model=model,
+            out_dir=out_dir,
+            prefix=prefix,
+            search=search,
+            sandbox=sandbox,
+            reasoning_effort=reasoning_effort,
+            network=network,
+            announcement_url=announcement_url,
+            evidence_output=output,
+        )
+        try:
+            if (
+                output.is_symlink()
+                or not output.is_file()
+                or output.stat().st_size > 64 * 1024 * 1024
+            ):
+                raise ValueError("missing, unsafe, or oversized capture file")
+            raw = output.read_bytes()
+            payload = _strict_json(raw)
+            if not isinstance(payload, dict):
+                raise ValueError("capture must be a JSON object")
+            # The custody canonicalizer cannot represent non-finite values.
+            canonical_bytes(payload)
+        except (OSError, ValueError, TypeError, OverflowError, RecursionError):
+            payload = {
+                **empty_evidence(),
+                "captureError": "Capture file was missing, unsafe, or invalid JSON",
+            }
+            raw = (json.dumps(payload) + "\n").encode()
+        report = {**verify_evidence(payload), "evidenceSha256": sha256_bytes(raw)}
+        result["toolEvidence"] = {
+            "schemaVersion": "thesis_tool_evidence_v1",
+            "artifact": f"{prefix}tool_evidence.json",
+            "verificationArtifact": f"{prefix}tool_evidence_verification.json",
+        }
+        result["toolEvidenceRaw"] = raw
+        result["toolEvidenceVerification"] = report
+        if not report["valid"]:
+            result["returnCode"] = 1
+            result["stderr"] = (
+                str(result.get("stderr", "")) + "\nTool evidence verification failed."
+            )
+            if isinstance(result.get("codexTrace"), dict):
+                result["codexTrace"]["effectiveReturnCode"] = 1
+                result["codexTrace"]["lastError"] = "Tool evidence verification failed"
+        return result
+
+
+def _run_codex_agent_command(
+    *,
+    prompt: str,
+    timeout_seconds: int,
+    model: str,
+    out_dir: pathlib.Path,
+    prefix: str,
+    search: bool,
+    sandbox: str,
+    reasoning_effort: str | None,
+    network: bool = False,
+    announcement_url: str | None = None,
+    evidence_output: pathlib.Path,
+) -> dict[str, Any]:
     """Run a prompt through Codex CLI/ChatGPT auth and retain the full trace."""
     out_dir.mkdir(parents=True, exist_ok=True)
     last_message_file = out_dir / f"{prefix}codex_last_message.txt"
@@ -1899,6 +2060,10 @@ def run_codex_agent_command(
         cmd.extend(["-c", f'reasoning_effort="{reasoning_effort}"'])
     if network:
         cmd.extend(["-c", "sandbox_workspace_write.network_access=true"])
+    for config in tool_evidence_mcp_config(
+        evidence_output, allow_fetch=search or network
+    ):
+        cmd.extend(["-c", config])
     if announcement_url is not None:
         for config in announcement_mcp_config(announcement_url):
             cmd.extend(["-c", config])
@@ -2136,6 +2301,11 @@ def append_command_artifacts(
                         else {}
                     ),
                     **(
+                        {"toolEvidence": command_result["toolEvidence"]}
+                        if "toolEvidence" in command_result
+                        else {}
+                    ),
+                    **(
                         {"timeoutSeconds": command_result["timeoutSeconds"]}
                         if "timeoutSeconds" in command_result
                         else {}
@@ -2160,6 +2330,25 @@ def append_command_artifacts(
             created_at,
         )
     )
+    if "toolEvidence" in command_result:
+        refs.append(
+            write_artifact(
+                out_dir,
+                "tool_evidence",
+                f"{prefix}tool_evidence.json",
+                command_result["toolEvidenceRaw"],
+                created_at,
+            )
+        )
+        refs.append(
+            write_artifact(
+                out_dir,
+                "tool_evidence_verification",
+                f"{prefix}tool_evidence_verification.json",
+                json.dumps(command_result["toolEvidenceVerification"], indent=2) + "\n",
+                created_at,
+            )
+        )
     if command_result.get("codexStdoutRaw") is not None:
         refs.append(
             write_artifact(
@@ -2524,6 +2713,11 @@ def pin_comparison_contract(
         ("resolutionRule", "resolutionRule"),
     ):
         value = target_context.get(context_key)
+        if cell_key == "resolutionDate" and value in (None, ""):
+            # A release-calendar registration binds no resolutionDate, so the
+            # comparison context carries the published forecast's resolver
+            # date separately (strategy_targets.published_target).
+            value = target_context.get("publishedResolutionDate")
         if value not in (None, ""):
             cell[cell_key] = value
 
@@ -2700,6 +2894,9 @@ def validate_cells(
     series: Any = None,
     target_period: Any = None,
     history_registry_root: pathlib.Path | None = None,
+    trusted_strategy_target: dict[str, Any] | None = None,
+    strategy_run_dir: pathlib.Path | None = None,
+    strategy_run_relative: pathlib.PurePosixPath | None = None,
 ) -> dict[str, Any]:
     sys.path.insert(0, str(SCRIPTS))
     try:
@@ -2717,6 +2914,16 @@ def validate_cells(
     ok = True
     trusted_history_authorization = None
     authorization_error = None
+    strategy_errors: list[str] = []
+    if trusted_strategy_target is not None:
+        from strategy_generation import bounded_strategy_evidence_errors
+
+        if strategy_run_dir is None or strategy_run_relative is None:
+            strategy_errors = ["bounded strategy lacks native run evidence"]
+        else:
+            strategy_errors = bounded_strategy_evidence_errors(
+                strategy_run_dir, strategy_run_relative, trusted_strategy_target
+            )
     if any(history_floor_requires_authorization(cell, agent_version) for cell in cells):
         try:
             trusted_history_authorization = reviewed_history_floor_authorization(
@@ -2735,7 +2942,9 @@ def validate_cells(
             generation_ticket=generation_ticket,
             agent_version=agent_version,
             trusted_history_authorization=trusted_history_authorization,
+            trusted_strategy_target=trusted_strategy_target,
         )
+        errors.extend(strategy_errors)
         if allow_existing_slug:
             errors = [error for error in errors if "slug collides" not in error]
         if authorization_error:
@@ -2793,6 +3002,16 @@ def target_context_validation_errors(
             errors.append(
                 f"{cell_key} {actual!r} does not match target context "
                 f"{context_key} {expected!r}"
+            )
+    published_date = target_context.get("publishedResolutionDate")
+    if target_context.get("comparisonTarget") is True and published_date not in (
+        None,
+        "",
+    ):
+        if not canonical_equal(cell.get("resolutionDate"), published_date):
+            errors.append(
+                f"resolutionDate {cell.get('resolutionDate')!r} does not match "
+                f"the published comparison resolver date {published_date!r}"
             )
     binding = target_context.get("sourceBinding")
     if isinstance(binding, dict) and binding.get("sourceUrl"):
@@ -3396,6 +3615,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--period", required=True)
     parser.add_argument("--conditional")
     parser.add_argument("--target-context-json")
+    parser.add_argument("--strategy-selection", type=pathlib.Path)
+    parser.add_argument("--strategy-ledger-jsonl", type=pathlib.Path)
     parser.add_argument("--ticket-id")
     parser.add_argument("--ticket-path")
     parser.add_argument("--ticket-nonce")
@@ -3522,6 +3743,52 @@ def parse_target_context(value: str | None) -> dict[str, Any] | None:
     return parsed
 
 
+def parse_strategy_generation_context(
+    args: argparse.Namespace,
+    target: dict[str, Any] | None,
+    *,
+    run_started_at: str,
+    generation_ticket: dict[str, str] | None,
+) -> dict[str, Any] | None:
+    selection_path = getattr(args, "strategy_selection", None)
+    ledger_path = getattr(args, "strategy_ledger_jsonl", None)
+    if selection_path is None and ledger_path is None:
+        return None
+    if selection_path is None or ledger_path is None:
+        raise SystemExit("bounded strategy requires both selection and pinned ledger")
+    if (
+        generation_ticket is not None
+        or not isinstance(target, dict)
+        or args.command is not None
+        or args.response_file is not None
+        or args.mock_cell
+        or args.pre_submit_review_command is not None
+        or not args.codex_model
+        or not args.pre_submit_review_codex_model
+        or args.prompt_mode not in {"ladder", "ladder_v2"}
+        or args.codex_sandbox != "read-only"
+        or args.codex_network
+        or args.no_codex_search
+        or args.codex_reasoning_effort != "low"
+    ):
+        raise SystemExit(
+            "bounded strategy requires the reviewed native Codex ladder lane"
+        )
+    from strategy_generation import authenticate_strategy_target
+
+    try:
+        return authenticate_strategy_target(
+            root=ROOT,
+            selection_path=selection_path,
+            ledger_path=ledger_path,
+            target=target,
+            run_started_at=run_started_at,
+            prompt_mode=args.prompt_mode,
+        )
+    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+        raise SystemExit(f"bounded strategy authentication failed: {exc}") from exc
+
+
 def run_forecaster(
     args: argparse.Namespace,
     *,
@@ -3599,9 +3866,15 @@ def main() -> int:
     run_at = utc_now()
     checkout_sha = workspace_checkout_sha()
     target_context = parse_target_context(args.target_context_json)
+    trusted_strategy_target = parse_strategy_generation_context(
+        args,
+        target_context,
+        run_started_at=run_at,
+        generation_ticket=generation_ticket,
+    )
     announcement_url = (
         target_announcement_url(target_context)
-        if generation_ticket is not None
+        if generation_ticket is not None or trusted_strategy_target is not None
         else None
     )
     prompt, meta = build_run_prompt(
@@ -3612,6 +3885,7 @@ def main() -> int:
         target_context,
         ticket=generation_ticket,
         network_tools=bool(args.codex_network),
+        tool_evidence=bool(args.codex_model),
     )
     if args.print_prompt:
         print(prompt)
@@ -3669,7 +3943,7 @@ def main() -> int:
 
     def collect_hygiene(stage_result: dict[str, Any]) -> dict[str, Any]:
         nonlocal hygiene_guarded
-        if generation_ticket is not None:
+        if generation_ticket is not None or trusted_strategy_target is not None:
             stage_result = enforce_ticket_codex_stream_binding(stage_result)
         if "workspaceMutations" in stage_result:
             hygiene_guarded = True
@@ -4048,6 +4322,9 @@ def main() -> int:
             checkout_sha=checkout_sha,
             series=args.series,
             target_period=args.period,
+            trusted_strategy_target=trusted_strategy_target,
+            strategy_run_dir=out_dir,
+            strategy_run_relative=pathlib.PurePosixPath(repo_relative(out_dir)),
         )
     except (
         ValueError,
@@ -4102,7 +4379,8 @@ def main() -> int:
         refs,
         runtime_meta,
         pre_submit_review,
-        force_model=generation_ticket is not None,
+        force_model=generation_ticket is not None
+        or trusted_strategy_target is not None,
     )
     cells_path = out_dir / "cells.with_activity.json"
     cells_path.write_text(json.dumps(cells_with_activity, indent=2) + "\n")

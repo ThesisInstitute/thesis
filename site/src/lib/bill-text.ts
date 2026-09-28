@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -7,7 +8,8 @@ import path from "node:path";
  * federal "SEC. NNNN." headings and the section numbers named in the
  * provision heading; replaced by ingest-emitted provision spans once
  * the chunker lands (issue #43). Returns null rather than guessing —
- * never show the wrong text.
+ * never show the wrong text. Flattened XML can use reviewed exact spans in
+ * bills/raw/<slug>.sections.json, bound to the raw source bytes' SHA-256.
  */
 
 const RAW_DIR = path.join(process.cwd(), "..", "bills", "raw");
@@ -117,14 +119,69 @@ export function extractSections(
   return slices.length > 0 ? slices.join("\n\n· · ·\n\n") : null;
 }
 
+/**
+ * A reviewed sidecar identifies whole sections when extraction lost headings.
+ * The review establishes section boundaries; these checks only authenticate
+ * the source version and require every supplied span to remain verbatim.
+ */
+export function reviewedSections(
+  rawBytes: Uint8Array,
+  sectionNumbers: string[],
+  sidecar: unknown,
+): string | null {
+  if (!sidecar || typeof sidecar !== "object" || Array.isArray(sidecar)) {
+    return null;
+  }
+  const value = sidecar as Record<string, unknown>;
+  if (
+    Object.keys(value).sort().join(",") !== "sections,sourceTextSha256" ||
+    typeof value.sourceTextSha256 !== "string" ||
+    !/^[0-9a-f]{64}$/.test(value.sourceTextSha256) ||
+    createHash("sha256").update(rawBytes).digest("hex") !== value.sourceTextSha256 ||
+    !value.sections ||
+    typeof value.sections !== "object" ||
+    Array.isArray(value.sections)
+  ) {
+    return null;
+  }
+  const rawText = Buffer.from(rawBytes).toString("utf8");
+  const sections = value.sections as Record<string, unknown>;
+  if (
+    Object.entries(sections).some(([number, text]) =>
+      !/^[1-9][0-9]{0,3}$/.test(number) ||
+      typeof text !== "string" ||
+      !text.trim() ||
+      !rawText.includes(text),
+    ) ||
+    sectionNumbers.length === 0 ||
+    sectionNumbers.some((number) => !Object.hasOwn(sections, number))
+  ) {
+    return null;
+  }
+  return sectionNumbers.map((number) => sections[number] as string).join("\n\n· · ·\n\n");
+}
+
 export function fullSectionText(
   slug: string,
   heading: string,
   title: string,
 ): string | null {
-  const raw = loadRawBillText(slug);
-  if (!raw) return null;
   const numbers = parseSectionNumbers(heading, title);
   if (numbers.length === 0) return null;
-  return extractSections(raw, numbers);
+  const rawPath = path.join(RAW_DIR, `${slug}.txt`);
+  if (!fs.existsSync(rawPath)) return null;
+  const rawBytes = fs.readFileSync(rawPath);
+  const parsed = extractSections(rawBytes.toString("utf8"), numbers);
+  if (parsed !== null) return parsed;
+  const sidecarPath = path.join(RAW_DIR, `${slug}.sections.json`);
+  if (!fs.existsSync(sidecarPath)) return null;
+  try {
+    return reviewedSections(
+      rawBytes,
+      numbers,
+      JSON.parse(fs.readFileSync(sidecarPath, "utf8")),
+    );
+  } catch {
+    return null;
+  }
 }

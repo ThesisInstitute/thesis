@@ -1,4 +1,4 @@
-import { FORECAST_CELLS } from "./forecast-cells";
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import {
   buildThesisLogData,
   loadPolicyEngineLedger,
@@ -21,7 +21,7 @@ export function resetThesisLogDataCache() {
 async function buildThesisLogDataOnce(): Promise<ThesisLogData> {
   const ledger = await loadPolicyEngineLedger();
   return buildThesisLogData(
-    withResolvedOutcomes(FORECAST_CELLS, ledger),
+    withResolvedOutcomes(getPublishedForecasts(), ledger),
     ledger,
   );
 }

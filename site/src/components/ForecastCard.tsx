@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { COUNTRY_LABEL, TYPE_LABEL } from "@/data/forecast-cells";
+import { COUNTRY_LABEL, TYPE_LABEL } from "@/data/forecast-display";
 import type { ForecastListingItem } from "@/data/forecast-listing";
 
 const typeBadgeClass: Record<ForecastListingItem["type"], string> = {

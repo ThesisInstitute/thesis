@@ -40,4 +40,7 @@ for (const budget of budgets) {
   }
 }
 
+// Also enforce the archive/runtime boundary on the real production build.
+await import("./check-archive-traces.mjs");
+
 if (failed) process.exit(1);
