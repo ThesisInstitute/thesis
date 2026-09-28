@@ -13,12 +13,13 @@ import argparse
 import json
 import logging
 import math
+import os
 import re
 import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 SUBMISSION_SCHEMA_VERSION = "thesis_challenge_submission_v1"
@@ -39,6 +40,27 @@ class RegisteredTarget:
     data_point_id: str
     catalog_slug: str
     release_at: datetime
+
+
+@dataclass(frozen=True)
+class SubmissionContent:
+    """A submission's fields, validated from its bytes alone."""
+
+    challenger: str
+    system_type: str
+    system_name: str
+    data_point_id: str
+    point_estimate: int | float
+    quantiles: list[dict[str, Any]]
+    generated_value: str
+    generated_at: datetime
+    notes: str | None
+
+    @property
+    def key(self) -> tuple[str, str]:
+        # One shot per (challenger, dataPointId), case-insensitive on the
+        # challenger because GitHub logins are.
+        return (self.challenger.lower(), self.data_point_id)
 
 
 def parse_utc_datetime(value: Any, *, field: str, allow_date: bool = False) -> datetime:
@@ -263,6 +285,84 @@ def validate_quantiles(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return quantiles
 
 
+def parse_submission_bytes(raw: bytes) -> Any:
+    """Decode one submission's bytes exactly as the intake reads them.
+
+    The current-tree adapter and the history walk both parse through here
+    so they cannot disagree about which bytes are JSON at all. They did
+    (2026-09-24 review): the walk's json.loads(bytes) sniffed UTF-16 and
+    stripped a UTF-8 BOM while the adapter's text read refused both, so
+    bytes the intake never accepted could still become canonical. Decoding
+    is strict UTF-8. Every parser failure is a submission error, never a
+    batch abort: pathological nesting raises RecursionError, and an
+    integer past CPython's int-digit limit raises a bare ValueError that
+    is not a JSONDecodeError — either escaping would stop the recorder.
+    """
+
+    try:
+        return json.loads(raw.decode("utf-8"))
+    except (RecursionError, ValueError) as error:
+        # ValueError covers JSONDecodeError and UnicodeDecodeError too.
+        raise ChallengeSubmissionError(
+            f"submission is not readable JSON: {error}"
+        ) from error
+
+
+def validate_submission_content(payload: Any) -> SubmissionContent:
+    """Run every check that depends only on the submission's bytes.
+
+    Pure: no registry, ratchet, release window, path, or clock. The
+    history walk canonicalizes on this alone, and adapt_submission layers
+    the state-dependent checks on top, so "valid content" means the same
+    thing on both paths.
+    """
+
+    if not isinstance(payload, dict):
+        raise ChallengeSubmissionError("submission must be a JSON object")
+    if payload.get("schemaVersion") != SUBMISSION_SCHEMA_VERSION:
+        raise ChallengeSubmissionError(
+            "schemaVersion must be " + SUBMISSION_SCHEMA_VERSION
+        )
+
+    challenger = _required_string(payload, "challenger")
+    system_type = _required_string(payload, "systemType")
+    if system_type not in SYSTEM_TYPES:
+        raise ChallengeSubmissionError(
+            f"systemType must be one of {sorted(SYSTEM_TYPES)}"
+        )
+    system_name = _required_string(payload, "systemName")
+    data_point_id = _required_string(payload, "dataPointId")
+
+    point_estimate = _finite_number(payload.get("pointEstimate"), field="pointEstimate")
+    quantiles = validate_quantiles(payload)
+    # ciLow/ciHigh and the 0.1/0.9 rungs describe the same 80% band; a
+    # submission that disagrees with itself is refused rather than
+    # silently resolved in favor of the grid.
+    ci_low = _finite_number(payload.get("ciLow"), field="ciLow")
+    ci_high = _finite_number(payload.get("ciHigh"), field="ciHigh")
+    if ci_low != quantiles[1]["value"] or ci_high != quantiles[5]["value"]:
+        raise ChallengeSubmissionError(
+            "ciLow/ciHigh must equal the 0.1 and 0.9 quantile values"
+        )
+    generated_value = _required_string(payload, "generatedAtUtc")
+    generated_at = parse_utc_datetime(generated_value, field="generatedAtUtc")
+
+    notes = payload.get("notes")
+    if notes is not None and not isinstance(notes, str):
+        raise ChallengeSubmissionError("notes must be a string when present")
+    return SubmissionContent(
+        challenger=challenger,
+        system_type=system_type,
+        system_name=system_name,
+        data_point_id=data_point_id,
+        point_estimate=point_estimate,
+        quantiles=quantiles,
+        generated_value=generated_value,
+        generated_at=generated_at,
+        notes=notes,
+    )
+
+
 def forecaster_id(challenger: str, system_name: str) -> str:
     """Build a reversible competing-system identity from both declared parts."""
 
@@ -282,17 +382,43 @@ def submission_path(path: Path, repo_root: Path) -> str:
         ) from error
 
 
+def _is_submission_name(name: str) -> bool:
+    # Sigstore sidecars also end in .json but are provenance for a cell,
+    # not forecast submissions themselves.
+    return name.endswith(".json") and not name.endswith(".sigstore.json")
+
+
 def first_accepted_content(
     inbox_dir: Path, repo_root: Path
 ) -> dict[tuple[str, str], tuple[bytes, str]]:
     """Map each (challenger, dataPointId) to its first-accepted bytes and path.
 
-    One shot per target binds the CONTENT, not a pathname: walking the
-    inbox history oldest-first and recording the earliest parseable file
-    for each key means an edit, a rename, or a delete-and-readd all
-    leave the canonical bytes unchanged — any current file whose bytes
-    differ from them is refused. A predecessor that never parsed (and so
-    was never an accepted forecast) does not define canonical content.
+    One shot per target binds the CONTENT, not a pathname. Walking the
+    first-parent history oldest-first, a key's canonical content is the
+    first blob, at a path the intake reads (inbox/<dir>/<name>.json,
+    sidecars excluded), that passes parse_submission_bytes and
+    validate_submission_content — every check that depends only on the
+    bytes. An edit, a rename, or a delete-and-readd after that leaves the
+    canonical bytes unchanged, so any current file whose bytes differ is
+    refused. Content the intake refuses on its bytes alone (unparseable,
+    or parseable but invalid: a broken quantile grid, an offset-less
+    timestamp) was never an accepted forecast and does not define
+    canonical content. The 2026-09-24 review caught this walk
+    canonicalizing the first merely PARSEABLE file, so an invalid first
+    merge locked its challenger out of the target forever.
+
+    The state-dependent checks (target registration, the expiry ratchet,
+    generatedAtUtc before the release) are deliberately excluded.
+    Registrations are append-only snapshots and the earliest release
+    instant can move earlier, so a state-dependent predicate could flip
+    which historical content is canonical and hand a challenger a second
+    shot; content-intrinsic validity is a pure function of the bytes, so
+    the canonical choice for a key never changes as repository state
+    evolves. Registration existence and expiry are per-key (every content
+    of a key shares its dataPointId), so excluding them cannot change
+    which content wins. The release check is per-content: a post-release
+    first shot therefore binds its key even though adapt_submission
+    refuses it, and a backdated re-submission cannot replace it.
     """
 
     inbox_rel = (
@@ -300,17 +426,24 @@ def first_accepted_content(
         .relative_to(repo_root.resolve(strict=True))
         .as_posix()
     )
+    inbox_parts = PurePosixPath(inbox_rel).parts
     try:
         # Acceptance order is the FIRST-PARENT chain: content counts as
         # accepted when it lands on the mainline, whether by a direct
         # commit or inside a merge result (-m diffs merges against their
         # first parent). Every change type is walked — not just
         # additions — because the first ACCEPTED FORECAST for a key may
-        # arrive as a modification (e.g. an undecodable file later fixed
-        # in place); filtering to additions would leave such keys with
-        # no canonical content and one-shot fail-open. Plain --reverse
+        # arrive as a modification (e.g. an invalid file later fixed in
+        # place); filtering to additions would leave such keys with no
+        # canonical content and one-shot fail-open. Plain --reverse
         # would walk the whole DAG, letting a stale side branch merged
-        # later pre-date the true first forecast.
+        # later pre-date the true first forecast. -z because the default
+        # output C-quotes any path holding non-ASCII, '"' or '\\'
+        # ("jos\303\251.json"), and a quoted path never matched a .json
+        # suffix, so such files never bound one shot. --relative prints
+        # paths against repo_root (the cwd) rather than the git toplevel,
+        # matching the adapter's provenance paths when repo_root sits
+        # below the toplevel.
         log = subprocess.run(
             [
                 "git",
@@ -318,6 +451,8 @@ def first_accepted_content(
                 "--reverse",
                 "--first-parent",
                 "-m",
+                "-z",
+                "--relative",
                 "--format=%H",
                 "--name-status",
                 "--",
@@ -326,32 +461,56 @@ def first_accepted_content(
             cwd=repo_root,
             check=True,
             capture_output=True,
-            text=True,
         )
     except (OSError, subprocess.CalledProcessError) as error:
         raise ChallengeSubmissionError(
             f"cannot walk the inbox history for {inbox_rel}: {error}"
         ) from error
-    canonical: dict[tuple[str, str], bytes] = {}
+    canonical: dict[tuple[str, str], tuple[bytes, str]] = {}
     commit = ""
-    for line in log.stdout.splitlines():
-        if _COMMIT_RE.fullmatch(line.strip()):
-            commit = line.strip()
+    tokens = log.stdout.split(b"\0")
+    index = 0
+    while index < len(tokens):
+        # -z output is "<commit>\0\n<status>\0<path>\0[<path>\0]..." —
+        # the newline ending each commit header lands on the next token.
+        token = tokens[index].lstrip(b"\n").decode("ascii", "replace")
+        index += 1
+        if not token:
             continue
-        fields = line.split("\t")
-        if len(fields) < 2 or not fields[0]:
+        if _COMMIT_RE.fullmatch(token):
+            commit = token
             continue
-        status = fields[0][0]
+        status = token[0]
+        if status not in "ACDMRT" or not commit:
+            # A desynchronized parse could read paths as statuses and
+            # skip real submissions — fail-open — so refuse instead.
+            raise ChallengeSubmissionError(
+                f"unexpected git log entry {token!r} walking {inbox_rel}"
+            )
+        # A/M/T/D carry one path; renames (R) and copies (C) carry two
+        # and land the content at their DESTINATION path.
+        width = 2 if status in "RC" else 1
+        if index + width > len(tokens):
+            raise ChallengeSubmissionError(
+                f"truncated git log entry {token!r} walking {inbox_rel}"
+            )
+        landed = os.fsdecode(tokens[index + width - 1])
+        index += width
         if status == "D":
             continue
-        # A/M/T use the single path; renames (R) and copies (C) land the
-        # content at their DESTINATION path.
-        added = fields[-1]
-        if not added.endswith(".json") or added.endswith(".sigstore.json"):
+        relative = PurePosixPath(landed).parts
+        if (
+            relative[: len(inbox_parts)] != inbox_parts
+            or len(relative) != len(inbox_parts) + 2
+            or not _is_submission_name(relative[-1])
+        ):
+            # The intake reads exactly inbox/<dir>/<name>.json; a file it
+            # never reads was never an accepted forecast.
             continue
         try:
             raw = subprocess.run(
-                ["git", "show", f"{commit}:{added}"],
+                # "./" resolves the path against the cwd, like --relative.
+                ["git", "show", f"{commit}:./{landed}"],
                 cwd=repo_root,
                 check=True,
                 capture_output=True,
@@ -359,20 +518,13 @@ def first_accepted_content(
         except (OSError, subprocess.CalledProcessError):
             continue
         try:
-            payload = json.loads(raw)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            # Undecodable or unparseable history was never an accepted
+            content = validate_submission_content(parse_submission_bytes(raw))
+        except ChallengeSubmissionError:
+            # Content refused on its bytes was never an accepted
             # forecast; it must not define canonical content or abort
             # the batch.
             continue
-        if not isinstance(payload, dict):
-            continue
-        challenger = payload.get("challenger")
-        data_point_id = payload.get("dataPointId")
-        if not isinstance(challenger, str) or not isinstance(data_point_id, str):
-            continue
-        key = (challenger.lower(), data_point_id)
-        canonical.setdefault(key, (raw, added))
+        canonical.setdefault(content.key, (raw, landed))
     return canonical
 
 
@@ -407,31 +559,24 @@ def adapt_submission(
     repo_root: Path,
     expired_registrations: frozenset[str],
 ) -> dict[str, Any]:
-    """Validate and adapt one inbox JSON file into a snapshot prediction row."""
+    """Validate and adapt one inbox JSON file into a snapshot prediction row.
+
+    The bytes pass the same parse and content-intrinsic validation the
+    history walk canonicalizes on; only then do the state-dependent
+    checks (registration, expiry ratchet, release boundary) run.
+    """
 
     if path.is_symlink() or not path.is_file():
         raise ChallengeSubmissionError("submission must be a regular file")
     try:
-        payload = json.loads(path.read_text())
-    except (OSError, RecursionError, UnicodeError, json.JSONDecodeError) as error:
+        raw = path.read_bytes()
+    except OSError as error:
         raise ChallengeSubmissionError(
             f"submission is not readable JSON: {error}"
         ) from error
-    if not isinstance(payload, dict):
-        raise ChallengeSubmissionError("submission must be a JSON object")
-    if payload.get("schemaVersion") != SUBMISSION_SCHEMA_VERSION:
-        raise ChallengeSubmissionError(
-            "schemaVersion must be " + SUBMISSION_SCHEMA_VERSION
-        )
+    content = validate_submission_content(parse_submission_bytes(raw))
 
-    challenger = _required_string(payload, "challenger")
-    system_type = _required_string(payload, "systemType")
-    if system_type not in SYSTEM_TYPES:
-        raise ChallengeSubmissionError(
-            f"systemType must be one of {sorted(SYSTEM_TYPES)}"
-        )
-    system_name = _required_string(payload, "systemName")
-    data_point_id = _required_string(payload, "dataPointId")
+    data_point_id = content.data_point_id
     target = registered_targets.get(data_point_id)
     if target is None:
         raise ChallengeSubmissionError(f"unregistered dataPointId: {data_point_id}")
@@ -442,39 +587,22 @@ def adapt_submission(
             f"registration {data_point_id} expired unforecast; "
             "post-grace submissions are refused"
         )
-
-    point_estimate = _finite_number(payload.get("pointEstimate"), field="pointEstimate")
-    quantiles = validate_quantiles(payload)
-    # ciLow/ciHigh and the 0.1/0.9 rungs describe the same 80% band; a
-    # submission that disagrees with itself is refused rather than
-    # silently resolved in favor of the grid.
-    ci_low = _finite_number(payload.get("ciLow"), field="ciLow")
-    ci_high = _finite_number(payload.get("ciHigh"), field="ciHigh")
-    if ci_low != quantiles[1]["value"] or ci_high != quantiles[5]["value"]:
+    if content.generated_at >= target.release_at:
         raise ChallengeSubmissionError(
-            "ciLow/ciHigh must equal the 0.1 and 0.9 quantile values"
-        )
-    generated_value = _required_string(payload, "generatedAtUtc")
-    generated_at = parse_utc_datetime(generated_value, field="generatedAtUtc")
-    if generated_at >= target.release_at:
-        raise ChallengeSubmissionError(
-            f"generatedAtUtc {generated_value} does not precede release "
+            f"generatedAtUtc {content.generated_value} does not precede release "
             f"{_utc_string(target.release_at)}"
         )
 
-    notes = payload.get("notes")
-    if notes is not None and not isinstance(notes, str):
-        raise ChallengeSubmissionError("notes must be a string when present")
-
     relative = submission_path(path, repo_root)
+    quantiles = content.quantiles
     record: dict[str, Any] = {
         "forecastSlug": target.catalog_slug,
         "dataPointId": data_point_id,
-        "forecasterId": forecaster_id(challenger, system_name),
-        "challenger": challenger,
-        "systemType": system_type,
-        "systemName": system_name,
-        "pointEstimate": point_estimate,
+        "forecasterId": forecaster_id(content.challenger, content.system_name),
+        "challenger": content.challenger,
+        "systemType": content.system_type,
+        "systemName": content.system_name,
+        "pointEstimate": content.point_estimate,
         "interval80": {
             "lower": quantiles[1]["value"],
             "upper": quantiles[5]["value"],
@@ -482,8 +610,8 @@ def adapt_submission(
         # Keep the submitted rungs and values exactly as parsed; do not sort,
         # interpolate, or materialize a replacement distribution here.
         "quantiles": quantiles,
-        "generatedAtUtc": generated_value,
-        "recordedAt": generated_value,
+        "generatedAtUtc": content.generated_value,
+        "recordedAt": content.generated_value,
         "resolutionDate": target.release_at.date().isoformat(),
         "provenance": {
             "submissionPath": relative,
@@ -491,8 +619,8 @@ def adapt_submission(
             "schemaVersion": SUBMISSION_SCHEMA_VERSION,
         },
     }
-    if notes is not None:
-        record["notes"] = notes
+    if content.notes is not None:
+        record["notes"] = content.notes
     return record
 
 
@@ -513,10 +641,10 @@ def ingest_challenge_submissions(
     # repo corruption and must abort the whole ingest, not skip rows.
     expired_registrations = expired_unforecast_registrations(repo_root)
     records: list[dict[str, Any]] = []
+    # The history walk in first_accepted_content applies this same path
+    # shape; the two must agree on which files are submissions at all.
     for path in sorted(inbox_dir.glob("*/*.json")):
-        # Sigstore sidecars also end in .json but are provenance for a cell,
-        # not forecast submissions themselves.
-        if path.name.endswith(".sigstore.json"):
+        if not _is_submission_name(path.name):
             continue
         try:
             record = adapt_submission(

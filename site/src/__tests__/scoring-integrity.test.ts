@@ -9,6 +9,7 @@ import {
   loadPolicyEngineLedger,
   scoreResolvedForecastRun,
   scoreResolvedForecasts,
+  NORMALIZATION_SCALE_RELATIVE_FLOOR,
   targetNormalizationScale,
   withResolvedOutcomes,
   type ObservationRecordedLedgerEntry,
@@ -362,76 +363,110 @@ describe("target normalization scale", () => {
     expect(primary?.scoreEligibility).toBe("scored_witness_verified");
     expect(reward.counts.scoredRuns).toBe(0);
     // Primary plus its F9 persistence baseline both carry raw scores, so
-    // the scale-free paired comparison still works.
+    // the pair forms and the raw-CRPS win rate still reads; the normalized
+    // difference that ranks forecasters needs the scale, so it stays null.
     expect(reward.counts.rawScoredRuns).toBe(2);
     expect(reward.pairedComparison.pairedTargets).toBe(1);
-    expect(reward.pairedComparison.crpsRatioGeomean).toEqual(
-      expect.any(Number),
-    );
+    expect(reward.pairedComparison.agentWinRate).toEqual(expect.any(Number));
+    expect(reward.pairedComparison.normalizedTargets).toBe(0);
+    expect(reward.pairedComparison.normalizedCrpsDelta).toBeNull();
   });
 
-  it("excludes floating-point-zero dispersion from normalized aggregates", () => {
-    const degenerateHistory = [
-      observation("2022", 1.1, "2026-02-01T00:00:00Z"),
-      observation("2023", 1.2, "2026-03-01T00:00:00Z"),
-      observation("2024", 1.3, "2026-04-01T00:00:00Z"),
-    ];
-    const degenerateLedger: PolicyEngineLedgerEntry[] = [
-      target,
-      ...historyRegistrations,
-      ...degenerateHistory,
-      outcome,
-    ];
-    const validLedger: PolicyEngineLedgerEntry[] = [
-      target,
-      ...historyRegistrations,
-      ...history,
-      outcome,
-    ];
-    const run = getForecastRunEntries(baseCell)[0];
-    const degenerateScore = scoreResolvedForecastRun(
-      baseCell,
-      run,
-      degenerateLedger,
-    );
-    const validScore = scoreResolvedForecastRun(baseCell, run, validLedger);
-    expect(degenerateScore?.crps).toEqual(expect.any(Number));
-    expect(degenerateScore?.normalizationScaleSource).toBe("ledger_dispersion");
-    expect(degenerateScore?.normalizationScaleObservationCount).toBe(3);
-    expect(degenerateScore?.normalizationScale).toBeGreaterThan(0);
-    expect(degenerateScore?.normalizationScale).toBeLessThan(Number.EPSILON);
-    expect(degenerateScore?.normalizedCrps).toBeGreaterThan(1_000_000);
-    expect(degenerateScore?.sharpness).toBeGreaterThan(1_000_000);
-    expect(validScore).toBeDefined();
+  // Exactly linear decimal histories have zero step dispersion, but binary
+  // floating point leaves a residue that grows with the values: the live
+  // continued-claims-week-2026-08-01 history (1.814, 1.805, 1.796) left
+  // 1.57e-16 and published reward -7.08e13 on 2026-09-23; the same shape
+  // near 215 leaves 2.0e-14, which also passed the old absolute
+  // Number.EPSILON aggregate gate.
+  it.each([
+    ["live continued-claims residue", [1.814, 1.805, 1.796]],
+    ["residue above Number.EPSILON", [215.1, 215.2, 215.3]],
+    ["short decimal steps", [1.1, 1.2, 1.3]],
+  ])(
+    "refuses floating-point-zero dispersion at the source (%s)",
+    (_label, values) => {
+      // The fixture really is residue: the unchanged variance arithmetic
+      // yields a positive scale, below the relative floor.
+      const diffs = values
+        .slice(1)
+        .map((value, index) => value - values[index]);
+      const center = diffs.reduce((total, diff) => total + diff, 0) / 2;
+      const residue = Math.sqrt(
+        diffs.reduce((total, diff) => total + (diff - center) ** 2, 0),
+      );
+      expect(residue).toBeGreaterThan(0);
+      expect(residue).toBeLessThan(
+        Math.max(...values) * NORMALIZATION_SCALE_RELATIVE_FLOOR,
+      );
 
-    const summary = summarizeNormalizedScores([validScore!, degenerateScore!]);
-    expect(summary.eligibleScores).toEqual([validScore]);
-    expect(summary.meanNormalizedCrps).toBe(validScore?.normalizedCrps);
-    expect(summary.meanSharpness).toBe(validScore?.sharpness);
-    expect(Number.isFinite(summary.meanNormalizedCrps)).toBe(true);
-    expect(Number.isFinite(summary.meanSharpness)).toBe(true);
-    expect(summary.meanNormalizedCrps).toBeLessThan(1_000_000);
-    expect(summary.meanSharpness).toBeLessThan(1_000_000);
+      const degenerateLedger: PolicyEngineLedgerEntry[] = [
+        target,
+        ...historyRegistrations,
+        observation("2022", values[0], "2026-02-01T00:00:00Z"),
+        observation("2023", values[1], "2026-03-01T00:00:00Z"),
+        observation("2024", values[2], "2026-04-01T00:00:00Z"),
+        outcome,
+      ];
+      const validLedger: PolicyEngineLedgerEntry[] = [
+        target,
+        ...historyRegistrations,
+        ...history,
+        outcome,
+      ];
+      expect(targetNormalizationScale(baseCell, degenerateLedger)).toEqual({
+        scale: null,
+        source: "unavailable",
+        cutoff: target.registeredAt,
+        observationCount: 3,
+      });
 
-    const specs = buildPredictionSpecs([baseCell]);
-    const reward = buildBrierRewardExport({
-      forecasts: [baseCell],
-      specs,
-      runs: buildRecordedPredictionRunRecords([baseCell], specs),
-      ledger: degenerateLedger,
-    });
-    const primary = reward.rewardRows.find(
-      (row) => row.runVariantId === "primary",
-    );
-    const agent = reward.leaderboard.find((row) => row.agent === "test.agent");
-    expect(primary?.reward.components.normalizedCrps).toBe(
-      degenerateScore?.normalizedCrps,
-    );
-    expect(agent?.unpairedMeanNormalizedCrps).toBeNull();
-    // The raw row keeps its stored reward: the degenerate value publishes
-    // as-is and only aggregates exclude it.
-    expect(primary?.reward.value).toBeLessThan(-1_000_000);
-  });
+      const run = getForecastRunEntries(baseCell)[0];
+      const degenerateScore = scoreResolvedForecastRun(
+        baseCell,
+        run,
+        degenerateLedger,
+      );
+      const validScore = scoreResolvedForecastRun(baseCell, run, validLedger);
+      // Raw CRPS still publishes; nothing normalized exists without a scale.
+      expect(degenerateScore?.crps).toEqual(expect.any(Number));
+      expect(degenerateScore?.normalizationScaleSource).toBe("unavailable");
+      expect(degenerateScore?.normalizationScale).toBeNull();
+      expect(degenerateScore?.normalizedCrps).toBeNull();
+      expect(degenerateScore?.normalizedAbsoluteError).toBeNull();
+      expect(degenerateScore?.sharpness).toBeNull();
+      expect(validScore?.normalizedCrps).toEqual(expect.any(Number));
+
+      const summary = summarizeNormalizedScores([
+        validScore!,
+        degenerateScore!,
+      ]);
+      expect(summary.eligibleScores).toEqual([validScore]);
+      expect(summary.meanNormalizedCrps).toBe(validScore?.normalizedCrps);
+      expect(summary.meanSharpness).toBe(validScore?.sharpness);
+
+      const specs = buildPredictionSpecs([baseCell]);
+      const reward = buildBrierRewardExport({
+        forecasts: [baseCell],
+        specs,
+        runs: buildRecordedPredictionRunRecords([baseCell], specs),
+        ledger: degenerateLedger,
+      });
+      // No row — agent or baseline — carries a reward, and the scored-run
+      // count the export publishes excludes them.
+      for (const row of reward.rewardRows) {
+        expect(row.reward.value).toBeNull();
+        expect(row.reward.components.normalizedCrps).toBeNull();
+      }
+      expect(reward.counts.scoredRuns).toBe(0);
+      expect(reward.counts.rawScoredRuns).toBeGreaterThan(0);
+      const agent = reward.leaderboard.find(
+        (row) => row.agent === "test.agent",
+      );
+      expect(agent?.unpairedMeanReward).toBeNull();
+      expect(agent?.unpairedMeanNormalizedCrps).toBeNull();
+      expect(agent?.pairedNormalizedCrpsDelta).toBeNull();
+    },
+  );
 
   it("keeps floating-point-zero dispersion out of judge calibration aggregates", () => {
     const degenerateSeries = "census.spm.deep_child_poverty_rate";
@@ -527,10 +562,13 @@ describe("target normalization scale", () => {
     );
     expect(validScore?.normalizationScale).toBeGreaterThan(Number.EPSILON);
     expect(validScore?.normalizedCrps).toBeLessThan(1);
-    expect(degenerateScore?.normalizationScaleSource).toBe("ledger_dispersion");
-    expect(degenerateScore?.normalizationScale).toBeGreaterThan(0);
-    expect(degenerateScore?.normalizationScale).toBeLessThan(Number.EPSILON);
-    expect(degenerateScore?.normalizedCrps).toBeGreaterThan(1_000_000);
+    // targetNormalizationScale refuses the residue at the source, so the
+    // degenerate score carries raw CRPS only; the judge aggregates below
+    // must still count it where raw values belong and nowhere else.
+    expect(degenerateScore?.crps).toEqual(expect.any(Number));
+    expect(degenerateScore?.normalizationScaleSource).toBe("unavailable");
+    expect(degenerateScore?.normalizationScale).toBeNull();
+    expect(degenerateScore?.normalizedCrps).toBeNull();
 
     const judgeExport = buildForecastJudgeExport({
       forecasts: [baseCell, degenerateCell],
@@ -592,9 +630,7 @@ describe("target normalization scale", () => {
         resolvedAt: "2026-08-01T12:00:00Z",
         source: "Test",
       },
-      reasoning: [
-        { kind: "forecast", point: 11.5, ciLow: 10.5, ciHigh: 12.5 },
-      ],
+      reasoning: [{ kind: "forecast", point: 11.5, ciLow: 10.5, ciHigh: 12.5 }],
     };
     const degenerateSnapCell: ForecastCell = {
       ...baseCell,
@@ -689,29 +725,17 @@ describe("target normalization scale", () => {
         row.forecastSlug === degenerateSnapCell.slug &&
         row.strategyId === "agent.brier.primary",
     );
-    // Premise pins: both panel members resolve, and the degenerate rows
-    // carry a sub-epsilon ledger_dispersion scale with trillion-scale
-    // normalized values on the raw row surface, which publishes as-is.
+    // Premise pins: both panel members resolve and score raw CRPS, and the
+    // Wyoming rows' residue scale is refused at the source, so their
+    // normalized values are null rather than trillion-scale.
     expect(family?.resolvedTargetCount).toBe(2);
     expect(report.counts.scoredRows).toBe(6);
     expect(degeneratePersistenceRow?.normalizationScaleSource).toBe(
-      "ledger_dispersion",
+      "unavailable",
     );
-    expect(degeneratePersistenceRow?.normalizationScale).toBeGreaterThan(0);
-    expect(degeneratePersistenceRow?.normalizationScale).toBeLessThan(
-      Number.EPSILON,
-    );
-    expect(degeneratePersistenceRow?.normalizedCrps).toBeGreaterThan(
-      1_000_000,
-    );
-    expect(degenerateAgentRow?.normalizedCrps).toBeGreaterThan(1_000_000);
-    // The degenerate pair's delta clears the ranking's > 0 threshold by a
-    // huge margin — its absence from the top-misses list below is the
-    // eligibility gate at work, not the threshold.
-    expect(
-      (degenerateAgentRow?.normalizedCrps ?? 0) -
-        (degeneratePersistenceRow?.normalizedCrps ?? 0),
-    ).toBeGreaterThan(1_000_000);
+    expect(degeneratePersistenceRow?.normalizationScale).toBeNull();
+    expect(degeneratePersistenceRow?.normalizedCrps).toBeNull();
+    expect(degenerateAgentRow?.normalizedCrps).toBeNull();
 
     for (const summary of report.summaries) {
       expect(summary.scoredRows).toBe(2);

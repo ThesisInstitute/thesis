@@ -1,6 +1,7 @@
 import { canonicalStringify, sha256Hex } from "./canonical-json";
 import {
   buildNumericCdfFromInterval,
+  validateNumericCdfDistribution,
   type PredictionDistribution,
 } from "./prediction-distribution";
 import type {
@@ -135,6 +136,19 @@ export function buildLedgerPersistenceBaseline(
     ciLow: prior.ciLow,
     ciHigh: prior.ciHigh,
   });
+  // A flat history makes the p80 half-width zero; the interval transform
+  // then spans +/-1.5e-9, and from |value| >= 10 the 201-point grid
+  // collapses under 12-significant-digit rounding, so the CDF fails the
+  // scorer's own contract and scoring would throw mid-build. A baseline
+  // the scorer cannot read is unavailable, with the validator's reasons.
+  const distributionErrors = validateNumericCdfDistribution(distribution);
+  if (distributionErrors.length > 0) {
+    return unavailable(
+      `persistence interval [${prior.ciLow}, ${prior.ciHigh}] is too narrow to materialize as a valid CDF: ${distributionErrors.join("; ")}`,
+      prior.observations,
+      prior.seriesId,
+    );
+  }
   const inputPayload = {
     schemaVersion: "thesis_persistence_baseline_inputs_v1",
     algorithmVersion: PERSISTENCE_BASELINE_ALGORITHM_VERSION,

@@ -144,15 +144,36 @@ export interface BrierAgentLeaderboardRow {
   unpairedMeanNormalizedCrps: number | null;
   unpairedMeanAbsoluteError: number | null;
   unpairedInterval80Coverage: number | null;
+  /** Targets where this agent and the persistence baseline both carry raw CRPS. */
   pairedTargets: number;
-  // Geometric mean of per-target raw CRPS ratios (agent / paired
-  // persistence baseline). Scale-free by construction: the baseline is
-  // ledger-derived and shares the target's units and outcome, so no
-  // normalization denominator — and nothing any forecast authors — can
-  // move the statistic (re-audit X2/N5). Below 1 beats persistence.
-  pairedCrpsRatioGeomean: number | null;
+  /** The paired targets with a usable ledger scale: the ranking population. */
+  pairedNormalizedTargets: number;
+  // The ranking statistic (see leaderboardRankingStatistic): the mean over
+  // pairedNormalizedTargets of (this agent's mean normalized CRPS on the
+  // target - the persistence baseline's). Below 0 beats persistence.
+  pairedNormalizedCrpsDelta: number | null;
+  /** Sample SD of the per-target deltas over sqrt(n); null below two targets. */
+  pairedNormalizedCrpsDeltaStdError: number | null;
+  // Share of pairedTargets where the agent's mean raw CRPS is strictly
+  // below persistence. Descriptive only: a win rate is not a proper score,
+  // so it never orders the leaderboard.
   pairedWinRate: number | null;
   activityArtifactCoverage: number;
+}
+
+// Agents choose their own targets, so two leaderboard rows are usually
+// scored on different target sets; each row's delta is against persistence
+// on that row's own targets. A direct agent-vs-agent comparison is only
+// meaningful on the targets both forecast, which is what these rows carry.
+export interface BrierHeadToHeadRow {
+  /** The higher-ranked side. */
+  left: { agent: string; model?: string };
+  right: { agent: string; model?: string };
+  /** Targets both sides scored with a usable ledger scale. */
+  sharedTargets: number;
+  /** Mean per-target normalized CRPS, left minus right; below 0 favors left. */
+  meanNormalizedCrpsDifference: number;
+  stdError: number | null;
 }
 
 export interface BrierBaselineCoverageRow {
@@ -170,13 +191,15 @@ export interface BrierBaselineCoverageRow {
 
 export interface BrierPairedComparisonSummary {
   pairedTargets: number;
-  // Geometric mean of per-target raw CRPS ratios (primary agent run /
-  // paired persistence baseline); below 1 beats persistence. Pairs where
-  // either side's CRPS is exactly zero cannot form a ratio and are
-  // reported separately (they still count in the win rate).
-  crpsRatioGeomean: number | null;
+  /** Paired targets with a usable ledger scale. */
+  normalizedTargets: number;
+  // Mean per-target normalized CRPS of the primary agent runs minus the
+  // paired persistence baseline's, over normalizedTargets; below 0 beats
+  // persistence. Same statistic as the leaderboard's ranking key.
+  normalizedCrpsDelta: number | null;
+  normalizedCrpsDeltaStdError: number | null;
+  /** Descriptive: share of pairedTargets where raw CRPS beats persistence. */
   agentWinRate: number | null;
-  zeroCrpsPairs: number;
 }
 
 interface NormalizationScaleCandidate {
@@ -188,13 +211,16 @@ export function hasUsableNormalizationScale(
   score: NormalizationScaleCandidate,
 ): boolean {
   const scale = score.normalizationScale;
-  // Equal decimal step changes can leave a positive sub-epsilon deviation in
-  // binary floating point; that is zero usable dispersion, not a denominator.
+  // Float residue from equal decimal steps is refused where the scale is
+  // computed (targetNormalizationScale), relative to the history's own
+  // magnitude — the only place that magnitude is known. The absolute
+  // Number.EPSILON bound this predicate used to apply was the wrong rule:
+  // a linear series near 215 leaves a 2.0e-14 residue that passed it.
   return (
     score.normalizationScaleSource === "ledger_dispersion" &&
     scale !== null &&
     Number.isFinite(scale) &&
-    scale > Number.EPSILON
+    scale > 0
   );
 }
 
@@ -227,7 +253,7 @@ export function summarizeNormalizedScores(scores: ResolvedForecastScore[]) {
 }
 
 export interface BrierRewardExport {
-  schemaVersion: "brier_reward_export_v2";
+  schemaVersion: "brier_reward_export_v3";
   generatedAt: string;
   mission: {
     agent: "Brier";
@@ -269,6 +295,7 @@ export interface BrierRewardExport {
     calibrationRule: string;
   };
   leaderboard: BrierAgentLeaderboardRow[];
+  headToHead: BrierHeadToHeadRow[];
   pairedComparison: BrierPairedComparisonSummary;
   baselineCoverage: BrierBaselineCoverageRow[];
   rewardRows: BrierRewardRow[];
@@ -372,6 +399,7 @@ export function buildBrierRewardExport({
       });
   });
   const leaderboard = buildBrierAgentLeaderboard(rewardRows);
+  const headToHead = buildBrierHeadToHead(rewardRows, leaderboard);
   const primaryVariants = new Map(
     preparedForecasts.map((forecast) => [
       forecast.slug,
@@ -404,7 +432,7 @@ export function buildBrierRewardExport({
   });
 
   return {
-    schemaVersion: "brier_reward_export_v2",
+    schemaVersion: "brier_reward_export_v3",
     generatedAt,
     mission: {
       agent: "Brier",
@@ -455,6 +483,7 @@ export function buildBrierRewardExport({
         "Judge scores can be used as process diagnostics only after checking whether they predict held-out normalized CRPS. They must not replace the proper-score reward.",
     },
     leaderboard,
+    headToHead,
     pairedComparison,
     baselineCoverage,
     rewardRows,
@@ -555,10 +584,15 @@ function buildRewardRow({
     horizonDaysAtRun: getHorizonDaysAtRun(run.predictionRun?.runAt, forecast),
     reward: {
       objective: "minimize_normalized_crps",
+      // Reward exists only where the shared usable-scale predicate holds, so
+      // no row can carry a normalized value its own aggregates would refuse
+      // (the 2026-09-23 export published -7.08e13 on a residue scale).
       value:
-        score?.normalizedCrps === null || score?.normalizedCrps === undefined
-          ? null
-          : -score.normalizedCrps,
+        score &&
+        hasUsableNormalizationScale(score) &&
+        isNumber(score.normalizedCrps)
+          ? -score.normalizedCrps
+          : null,
       components: {
         crps: score?.crps ?? null,
         normalizedCrps: score?.normalizedCrps ?? null,
@@ -666,10 +700,12 @@ export function buildBrierAgentLeaderboard(
         agent === PERSISTENCE_BASELINE_AGENT
           ? {
               pairedTargets: 0,
-              pairedCrpsRatioGeomean: null,
+              pairedNormalizedTargets: 0,
+              pairedNormalizedCrpsDelta: null,
+              pairedNormalizedCrpsDeltaStdError: null,
               pairedWinRate: null,
             }
-          : pairedCrpsRatiosForRows(rawScoredRows, rows).stats;
+          : pairedPersistenceStats(rawScoredRows, rows);
       return {
         agent,
         model: model || undefined,
@@ -702,10 +738,12 @@ export function buildBrierAgentLeaderboard(
       };
     })
     .sort((left, right) => {
-      const leftRatio = left.pairedCrpsRatioGeomean ?? Number.POSITIVE_INFINITY;
-      const rightRatio =
-        right.pairedCrpsRatioGeomean ?? Number.POSITIVE_INFINITY;
-      if (leftRatio !== rightRatio) return leftRatio - rightRatio;
+      const leftDelta =
+        leaderboardRankingStatistic(left) ?? Number.POSITIVE_INFINITY;
+      const rightDelta =
+        leaderboardRankingStatistic(right) ?? Number.POSITIVE_INFINITY;
+      if (leftDelta !== rightDelta) return leftDelta - rightDelta;
+      // Also proper: the unpaired mean reward is linear in each CRPS too.
       const leftReward = left.unpairedMeanReward ?? Number.NEGATIVE_INFINITY;
       const rightReward = right.unpairedMeanReward ?? Number.NEGATIVE_INFINITY;
       if (leftReward !== rightReward) return rightReward - leftReward;
@@ -713,61 +751,106 @@ export function buildBrierAgentLeaderboard(
     });
 }
 
-// The headline agent-vs-baseline statistic is a per-target RAW CRPS ratio
-// against the paired ledger persistence baseline. Both sides score the
-// same outcome in the same units, so the target's scale cancels: no
-// normalization denominator exists for a forecast to game (re-audit X2
-// killed the forecast-width fallback; N5 demanded a scale no forecast
-// controls). Geometric mean is the right aggregate for ratios; the win
-// rate counts strictly-better pairs.
-function pairedCrpsRatiosForRows(
+// What orders the leaderboard, lowest first. It must stay proper: in
+// expectation, reporting one's true belief minimizes it on every target,
+// which leaderboard-propriety.test.ts checks through the real kernel and
+// this function. The mean paired normalized-CRPS difference qualifies
+// because it is LINEAR in each CRPS with weights (1 / scale, per target
+// and run count) fixed before the outcome and untouched by the report,
+// and CRPS itself is proper. The geometric mean of raw CRPS ratios it
+// replaces was not: it minimizes E[log CRPS], whose optimal Gaussian
+// "80%" interval is 0.39x the truthful width (38% coverage) whatever the
+// baseline. Ratio-of-means and mean-of-ratios are improper at small n
+// too, because the baseline's realized CRPS in the denominator reweights
+// outcomes.
+export function leaderboardRankingStatistic(
+  row: Pick<BrierAgentLeaderboardRow, "pairedNormalizedCrpsDelta">,
+): number | null {
+  return row.pairedNormalizedCrpsDelta;
+}
+
+// Normalized CRPS a row may contribute to a paired statistic: only under
+// the same usable-scale rule that gates its reward.
+function usableNormalizedCrps(row: BrierRewardRow): number | null {
+  const { normalizedCrps } = row.reward.components;
+  return hasUsableNormalizationScale(row.reward.components) &&
+    isNumber(normalizedCrps)
+    ? normalizedCrps
+    : null;
+}
+
+// Per-target means of a row set's usable normalized CRPS. A target counts
+// only when every one of its rows has one: the scale is per dataPointId,
+// so a partial set would mean the rows disagree about the target's scale.
+function normalizedCrpsByTarget(rows: BrierRewardRow[]) {
+  const rowsByTarget = new Map<string, BrierRewardRow[]>();
+  for (const row of rows) {
+    rowsByTarget.set(row.predictionId, [
+      ...(rowsByTarget.get(row.predictionId) ?? []),
+      row,
+    ]);
+  }
+  const byTarget = new Map<string, number>();
+  for (const [predictionId, targetRows] of rowsByTarget) {
+    const values = targetRows.map(usableNormalizedCrps);
+    if (values.every(isNumber)) {
+      byTarget.set(predictionId, mean(values as number[])!);
+    }
+  }
+  return byTarget;
+}
+
+// Pairs an agent's rows with the ledger persistence baseline on each
+// target they share. Averaging the agent's runs within a target first
+// weights targets equally, so repeat runs on one target cannot outweigh
+// the rest. The win rate compares raw CRPS on the same outcome in the
+// same units, so it needs no scale.
+function pairedPersistenceStats(
   agentRows: BrierRewardRow[],
   allRows: BrierRewardRow[],
 ) {
-  const baselineByTarget = new Map<string, number>();
+  const baselineByTarget = new Map<string, BrierRewardRow>();
   for (const row of allRows) {
-    const crps = row.reward.components.crps;
-    if (row.agent === PERSISTENCE_BASELINE_AGENT && crps !== null) {
-      baselineByTarget.set(row.predictionId, crps);
+    if (
+      row.agent === PERSISTENCE_BASELINE_AGENT &&
+      row.reward.components.crps !== null
+    ) {
+      baselineByTarget.set(row.predictionId, row);
     }
   }
-  const agentScoresByTarget = new Map<string, number[]>();
-  for (const row of agentRows) {
-    const crps = row.reward.components.crps;
-    if (crps === null || !baselineByTarget.has(row.predictionId)) continue;
-    agentScoresByTarget.set(row.predictionId, [
-      ...(agentScoresByTarget.get(row.predictionId) ?? []),
-      crps,
+  const pairedRows = agentRows.filter(
+    (row) =>
+      row.reward.components.crps !== null &&
+      baselineByTarget.has(row.predictionId),
+  );
+  const agentCrpsByTarget = new Map<string, number[]>();
+  for (const row of pairedRows) {
+    agentCrpsByTarget.set(row.predictionId, [
+      ...(agentCrpsByTarget.get(row.predictionId) ?? []),
+      row.reward.components.crps as number,
     ]);
   }
   let wins = 0;
-  let zeroCrpsPairs = 0;
-  const logRatios: number[] = [];
-  for (const [predictionId, agentScores] of agentScoresByTarget) {
-    const baselineCrps = baselineByTarget.get(predictionId);
-    const agentCrps = mean(agentScores);
-    if (baselineCrps === undefined || agentCrps === null) continue;
-    if (agentCrps < baselineCrps) wins += 1;
-    if (agentCrps > 0 && baselineCrps > 0) {
-      logRatios.push(Math.log(agentCrps / baselineCrps));
-    } else {
-      zeroCrpsPairs += 1;
-    }
+  for (const [predictionId, agentScores] of agentCrpsByTarget) {
+    const baselineCrps =
+      baselineByTarget.get(predictionId)!.reward.components.crps!;
+    if (mean(agentScores)! < baselineCrps) wins += 1;
   }
-  const pairedTargets = agentScoresByTarget.size;
+  const agentNormalized = normalizedCrpsByTarget(pairedRows);
+  const deltas: number[] = [];
+  for (const [predictionId, agentValue] of agentNormalized) {
+    const baselineValue = usableNormalizedCrps(
+      baselineByTarget.get(predictionId)!,
+    );
+    if (baselineValue !== null) deltas.push(agentValue - baselineValue);
+  }
+  const pairedTargets = agentCrpsByTarget.size;
   return {
-    stats: {
-      pairedTargets,
-      pairedCrpsRatioGeomean:
-        logRatios.length === 0
-          ? null
-          : Math.exp(
-              logRatios.reduce((total, value) => total + value, 0) /
-                logRatios.length,
-            ),
-      pairedWinRate: pairedTargets === 0 ? null : wins / pairedTargets,
-    },
-    zeroCrpsPairs,
+    pairedTargets,
+    pairedNormalizedTargets: deltas.length,
+    pairedNormalizedCrpsDelta: mean(deltas),
+    pairedNormalizedCrpsDeltaStdError: standardError(deltas),
+    pairedWinRate: pairedTargets === 0 ? null : wins / pairedTargets,
   };
 }
 
@@ -775,13 +858,73 @@ export function summarizePairedComparison(
   agentRows: BrierRewardRow[],
   baselineRows: BrierRewardRow[],
 ): BrierPairedComparisonSummary {
-  const paired = pairedCrpsRatiosForRows(agentRows, baselineRows);
+  const paired = pairedPersistenceStats(agentRows, baselineRows);
   return {
-    pairedTargets: paired.stats.pairedTargets,
-    crpsRatioGeomean: paired.stats.pairedCrpsRatioGeomean,
-    agentWinRate: paired.stats.pairedWinRate,
-    zeroCrpsPairs: paired.zeroCrpsPairs,
+    pairedTargets: paired.pairedTargets,
+    normalizedTargets: paired.pairedNormalizedTargets,
+    normalizedCrpsDelta: paired.pairedNormalizedCrpsDelta,
+    normalizedCrpsDeltaStdError: paired.pairedNormalizedCrpsDeltaStdError,
+    agentWinRate: paired.pairedWinRate,
   };
+}
+
+// Every pair of forecasters (persistence excluded: the leaderboard already
+// pairs everyone with it) compared only on the targets both scored with a
+// usable scale, each side averaged within target first. Pairs follow
+// leaderboard order, so "left" is the higher-ranked side.
+export function buildBrierHeadToHead(
+  rows: BrierRewardRow[],
+  leaderboard: BrierAgentLeaderboardRow[],
+): BrierHeadToHeadRow[] {
+  const groupKey = (agent: string | undefined, model: string | undefined) =>
+    `${agent ?? "prototype seed"}\u0000${model ?? ""}`;
+  const normalizedByGroup = new Map<string, Map<string, number>>();
+  const rowsByGroup = new Map<string, BrierRewardRow[]>();
+  for (const row of rows) {
+    if (row.agent === PERSISTENCE_BASELINE_AGENT) continue;
+    if (row.reward.components.crps === null) continue;
+    const key = groupKey(row.agent, row.model);
+    rowsByGroup.set(key, [...(rowsByGroup.get(key) ?? []), row]);
+  }
+  for (const [key, groupRows] of rowsByGroup) {
+    normalizedByGroup.set(key, normalizedCrpsByTarget(groupRows));
+  }
+  const ranked = leaderboard.filter((row) =>
+    normalizedByGroup.has(groupKey(row.agent, row.model)),
+  );
+  const pairs: BrierHeadToHeadRow[] = [];
+  for (let leftIndex = 0; leftIndex < ranked.length; leftIndex += 1) {
+    for (
+      let rightIndex = leftIndex + 1;
+      rightIndex < ranked.length;
+      rightIndex += 1
+    ) {
+      const left = ranked[leftIndex];
+      const right = ranked[rightIndex];
+      const leftValues = normalizedByGroup.get(
+        groupKey(left.agent, left.model),
+      )!;
+      const rightValues = normalizedByGroup.get(
+        groupKey(right.agent, right.model),
+      )!;
+      const differences = [...leftValues.keys()]
+        .filter((predictionId) => rightValues.has(predictionId))
+        .sort()
+        .map(
+          (predictionId) =>
+            leftValues.get(predictionId)! - rightValues.get(predictionId)!,
+        );
+      if (differences.length === 0) continue;
+      pairs.push({
+        left: { agent: left.agent, model: left.model },
+        right: { agent: right.agent, model: right.model },
+        sharedTargets: differences.length,
+        meanNormalizedCrpsDifference: mean(differences)!,
+        stdError: standardError(differences),
+      });
+    }
+  }
+  return pairs;
 }
 
 function buildSplitSummary(
@@ -832,6 +975,17 @@ function getHorizonDaysAtRun(
 function mean(values: number[]) {
   if (values.length === 0) return null;
   return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+// Standard error of a mean of independent per-target values: the sample
+// SD (n - 1) over sqrt(n). One target has no spread to estimate from.
+function standardError(values: number[]) {
+  if (values.length < 2) return null;
+  const center = mean(values)!;
+  const variance =
+    values.reduce((total, value) => total + (value - center) ** 2, 0) /
+    (values.length - 1);
+  return Math.sqrt(variance / values.length);
 }
 
 function isNumber(value: unknown): value is number {
