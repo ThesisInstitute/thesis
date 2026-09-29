@@ -778,7 +778,8 @@ def test_bind_native_events_reports_orphaned_and_incomplete_calls(
 def _mutate_native_stream(
     rng: random.Random, events: list[dict[str, Any]], call_ids: list[str]
 ) -> list[str]:
-    """Apply up to three seeded perturbations to native events in place."""
+    """Apply up to three seeded perturbations to native events in place and
+    return the names of those that changed the stream."""
     applied: list[str] = []
     for _ in range(rng.randrange(4)):
         if not events:
@@ -847,23 +848,28 @@ def _mutate_native_stream(
                 ),
             ]
         )
+        before = copy.deepcopy(events)
         mutate()
-        applied.append(name)
+        if events != before:
+            applied.append(name)
     return applied
 
 
 @pytest.mark.parametrize("prefix", ["", "draft_"])
 def test_generation_binding_and_custody_agree_on_perturbed_streams(
-    tmp_path: pathlib.Path, prefix: str
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, prefix: str
 ) -> None:
     """Invariants over seeded perturbations of a four-call native stream.
 
-    1. The runner's generation-time bind accepts a stream exactly when custody
-       accepts the successful stage, and custody's error is the bind error
-       under the stage prefix. The two checks cannot drift.
+    1. The runner's stage-end check (run_codex_agent_command, driven here with
+       the recorded capture and the perturbed stream) fails the stage exactly
+       when custody refuses the successful stage, and custody's error is the
+       runner's binding error under the stage prefix. The two checks cannot
+       drift.
     2. A successful bind matches every recorded call.
-    3. A failed stage relaxes only completeness. Any error it raises is the
-       successful stage's error, and it never raises a completeness error.
+    3. A failed stage relaxes only completeness: it accepts exactly what the
+       successful stage accepts or refuses only for completeness, and
+       otherwise raises the successful stage's error.
     """
     body = b'{"history":[1711.9,1716.8]}'
     command, entries = write_stage(
@@ -883,7 +889,8 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
             ("calculate", {"expression": "base +", "inputs": {"base": 1}}),
         ),
     )
-    payload = json.loads((tmp_path / f"{prefix}tool_evidence.json").read_text())
+    capture = (tmp_path / f"{prefix}tool_evidence.json").read_bytes()
+    payload = json.loads(capture)
     call_ids = [call["callId"] for call in payload["calls"]]
     assert [call["status"] for call in payload["calls"]] == [
         "succeeded",
@@ -895,8 +902,41 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
     baseline = [json.loads(line) for line in stream_path.read_text().splitlines()]
     # The native side of a rejected fetch carries the URL the model sent.
     baseline[2]["item"]["arguments"] = {"url": "http://example.gov/data.json"}
+    assert evidence.bind_native_events(payload, baseline) == set(call_ids)
     failed_command = {**command, "returnCode": 1}
-    outcomes: set[str] = set()
+    completeness = ("native completion events", "incomplete native calls")
+    stream = ""
+
+    def fake_stage(**kwargs: Any) -> dict[str, Any]:
+        kwargs["evidence_output"].write_bytes(capture)
+        return {
+            "returnCode": 0,
+            "stderr": "",
+            "codexStdoutRaw": stream,
+            "codexTrace": {"effectiveReturnCode": 0, "lastError": None},
+        }
+
+    monkeypatch.setattr(analyst, "_run_codex_agent_command", fake_stage)
+
+    def runner_error() -> str | None:
+        result = analyst.run_codex_agent_command(
+            prompt="test",
+            timeout_seconds=5,
+            model="test",
+            out_dir=tmp_path / "runner",
+            prefix=prefix,
+            search=True,
+            sandbox="read-only",
+            reasoning_effort=None,
+        )
+        assert result["toolEvidenceVerification"]["valid"] is True
+        failure = result.get("toolEvidenceFailure")
+        assert (result["returnCode"] == 0) is (failure is None)
+        if failure is None:
+            return None
+        return f"{prefix}" + failure.removeprefix(
+            "Tool evidence native binding failed: "
+        )
 
     def verdict(stage_command: dict[str, Any], succeeded: bool) -> str | None:
         try:
@@ -911,6 +951,7 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
             return str(exc)
         return None
 
+    outcomes: set[str] = set()
     for seed in range(300):
         rng = random.Random(seed)
         events = copy.deepcopy(baseline)
@@ -921,22 +962,20 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
         stream_path.write_text(stream, encoding="utf-8")
         context = f"seed {seed}: {applied}"
 
-        try:
+        succeeded = verdict(command, True)
+        assert succeeded == runner_error(), context
+        if succeeded is None:
             matched = evidence.bind_native_events(
                 payload, evidence.native_tool_events(stream)
             )
-            bound = None
-        except evidence.EvidenceError as exc:
-            matched, bound = None, f"{prefix}{exc}"
-        succeeded = verdict(command, True)
-        assert succeeded == bound, context
-        if bound is None:
             assert matched == set(call_ids), context
 
-        failed = verdict(failed_command, False)
-        assert failed is None or failed == succeeded, context
-        assert failed is None or "native completion events" not in failed, context
-        assert failed is None or "incomplete native calls" not in failed, context
+        relaxed = succeeded is not None and any(
+            family in succeeded for family in completeness
+        )
+        assert verdict(failed_command, False) == (
+            None if relaxed else succeeded
+        ), context
         outcomes.add(
             "ok" if succeeded is None else succeeded.split(" (")[0].split(":")[0]
         )
@@ -947,9 +986,44 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
         "repeats a native completion event",
         "unknown or repeated event call ID",
         "differs from its native event",
-        "lack native completion events",
-        "incomplete native calls",
+        *completeness,
     }
     assert "ok" in outcomes
     for family in families:
         assert any(family in outcome for outcome in outcomes), family
+
+
+def test_oversized_native_arguments_on_a_redacted_fetch_fail_cleanly(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The redacted-fetch escape reprojects native arguments through
+    captured_arguments, which refuses an unbounded object. Custody reports that
+    as a prefixed CustodyError, like every other binding error; main let the
+    bare EvidenceError escape, which callers catching only CustodyError (the
+    docket publisher among them) did not handle."""
+    command, entries = write_stage(
+        tmp_path,
+        prefix="draft_",
+        tool="fetch_source",
+        arguments={"url": "http://example.gov/data.json"},
+    )
+    events_path = tmp_path / "draft_codex_stdout.jsonl"
+    event = json.loads(events_path.read_text())
+    assert event["item"]["arguments"] == {"url": evidence.REDACTED_URL}
+    event["item"]["arguments"] = {
+        "url": "http://example.gov/data.json",
+        "extra": "x" * evidence.MAX_ARGUMENT_BYTES,
+    }
+    stream = json.dumps(event) + "\n"
+    events_path.write_text(stream)
+    payload = json.loads((tmp_path / "draft_tool_evidence.json").read_text())
+
+    with pytest.raises(
+        evidence.EvidenceError, match="^tool arguments must be a bounded JSON object$"
+    ):
+        evidence.bind_native_events(payload, evidence.native_tool_events(stream))
+    with pytest.raises(
+        custody.CustodyError,
+        match="^draft_tool arguments must be a bounded JSON object$",
+    ):
+        check(tmp_path, command, entries, prefix="draft_")
