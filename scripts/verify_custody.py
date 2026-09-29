@@ -672,7 +672,7 @@ def _verify_analyst_v2(
         and "cellsPath" in manifest
         and manifest["cellsPath"] is None
     )
-    if declared_phase in {"parse", "normalize", "seal", "validate"}:
+    if declared_phase in {"parse", "tool_evidence", "normalize", "seal", "validate"}:
         # A failure phase on a run that otherwise presents as complete
         # would route it through the lighter failure inventories and let
         # it read as succeeded downstream. write_failure_manifest always
@@ -690,7 +690,10 @@ def _verify_analyst_v2(
             raise CustodyError(
                 f"{declared_phase}-failure error artifact disagrees with the manifest"
             )
-    parse_failed = declared_phase == "parse"
+    # A stage whose tool evidence failed replay or native binding is recorded
+    # before its output is parsed, so it has exactly the parse-failure
+    # inventory (run_thesis_analyst writes it right after raw_response.txt).
+    parse_failed = declared_phase in {"parse", "tool_evidence"}
     if parse_failed:
         base = {
             "prompt.md": "prompt",
@@ -707,12 +710,14 @@ def _verify_analyst_v2(
         }
         present = {str(entry["path"]) for entry in entries}
         if forbidden & present:
-            raise CustodyError("parse-failure inventory contains post-parse artifacts")
+            raise CustodyError(
+                f"{declared_phase}-failure inventory contains post-parse artifacts"
+            )
         allowed = {*base, *_verify_invocation_stages(run_dir, manifest, entries)}
         unexpected = sorted(present - allowed)
         if unexpected:
             raise CustodyError(
-                "parse-failure inventory contains unexpected artifacts: "
+                f"{declared_phase}-failure inventory contains unexpected artifacts: "
                 + ", ".join(unexpected)
             )
         return

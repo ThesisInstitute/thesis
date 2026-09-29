@@ -2040,6 +2040,9 @@ def run_codex_agent_command(
             )
             result["returnCode"] = 1
             result["stderr"] = str(result.get("stderr", "")) + f"\n{failure}."
+            # The run records this as a tool_evidence failure, not as cells:
+            # a stage whose evidence failed cannot vouch for its output.
+            result["toolEvidenceFailure"] = failure
             if isinstance(result.get("codexTrace"), dict):
                 result["codexTrace"]["effectiveReturnCode"] = 1
                 result["codexTrace"]["lastError"] = failure
@@ -4146,6 +4149,31 @@ def main() -> int:
             out_dir, "raw_response", "raw_response.txt", raw_response, run_at
         )
     )
+
+    evidence_failure = (command_result or {}).get("toolEvidenceFailure")
+    if evidence_failure:
+        # A stage whose tool evidence failed replay or native binding cannot
+        # vouch for the cells it returned, even when they would validate.
+        # Sealing them would leave ok:false beside cells the publisher's
+        # validator replay accepts, and that mismatch refuses the whole
+        # batch. Record a failed trace instead, before any post-parse
+        # artifact exists; custody verifies it with the parse-failure
+        # inventory.
+        manifest = write_failure_manifest(
+            out_dir,
+            run_at,
+            args,
+            runtime_meta,
+            refs,
+            "tool_evidence",
+            evidence_failure,
+            command_result,
+            target_context,
+            checkout_sha=checkout_sha,
+            generation_ticket=generation_ticket,
+        )
+        print(json.dumps(manifest, indent=2))
+        return 1
 
     try:
         parsed_cells = extract_json_payload(raw_response)
