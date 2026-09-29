@@ -3,8 +3,8 @@
   "asOf": "2026-09-29",
   "run": {
     "logAvailable": true,
-    "completed": false,
-    "error": "LedgerProposalError  append gate did not pass for PolicyEngine/chronicle 300  refusing to leave a failed proposal branch or PR"
+    "completed": true,
+    "error": ""
   },
   "targets": {
     "ons.labour.claimant_count.2026_06.first_print": {
@@ -312,13 +312,6 @@
       "code": "NO_ROUTE_UNREGISTERED",
       "reason": "The resolver has no route for this target's reference, and the target has no registered resolution contract."
     },
-    "bls.jolts.hires_rate.2026_07.first_print": {
-      "forecastSlug": "jolts-hires-rate-july-2026",
-      "resolutionDate": "2026-09-01",
-      "state": "recorded_awaiting_publish",
-      "code": "RECORDED_AWAITING_PUBLISH",
-      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
-    },
     "bls.jolts.job_openings.july_2026.first_print": {
       "forecastSlug": "jolts-openings-july-2026",
       "resolutionDate": "2026-09-01",
@@ -332,13 +325,6 @@
       "state": "refused",
       "code": "REGISTERED_WITHOUT_EXECUTOR",
       "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
-    },
-    "census.construction_spending.total_mom.2026_07.first_print": {
-      "forecastSlug": "us-construction-spending-mom-july-2026",
-      "resolutionDate": "2026-09-01",
-      "state": "recorded_awaiting_publish",
-      "code": "RECORDED_AWAITING_PUBLISH",
-      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
     },
     "eurostat.une_rt_m.unemployment_rate.belgium.2026_07.first_print": {
       "forecastSlug": "belgium-unemployment-rate-july-2026",
@@ -354,27 +340,6 @@
       "state": "no_route",
       "code": "NO_ROUTE_GENERIC_URL",
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
-    },
-    "us.dol.initial_claims.sa.week_2026-08-22": {
-      "forecastSlug": "initial-claims-week-2026-08-22",
-      "resolutionDate": "2026-09-02",
-      "state": "recorded_awaiting_publish",
-      "code": "RECORDED_AWAITING_PUBLISH",
-      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
-    },
-    "bea.trade.goods_services_deficit.2026_07.first_print": {
-      "forecastSlug": "us-goods-services-trade-deficit-july-2026",
-      "resolutionDate": "2026-09-03",
-      "state": "recorded_awaiting_publish",
-      "code": "RECORDED_AWAITING_PUBLISH",
-      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
-    },
-    "dol.eta.continued_claims.sa.week_2026-08-22.first_print": {
-      "forecastSlug": "continued-claims-week-2026-08-22",
-      "resolutionDate": "2026-09-03",
-      "state": "recorded_awaiting_publish",
-      "code": "RECORDED_AWAITING_PUBLISH",
-      "reason": "The official figure is recorded in the ledger. The site has not yet been rebuilt against that ledger state."
     },
     "statbel.cpi.headline_yoy.2026-08.first_print": {
       "forecastSlug": "belgium-cpi-annual-rate-august-2026",
@@ -401,18 +366,18 @@
     "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "refused",
-      "code": "LEDGER_CATALOG_REFUSED",
-      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
-      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.computer_mathematical', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curati"
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "refused",
-      "code": "LEDGER_CATALOG_REFUSED",
-      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
-      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.healthcare_support', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curation"
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.telework_share.2026-08.first_print": {
       "forecastSlug": "us-telework-rate-august-2026",
@@ -435,27 +400,6 @@
       "code": "NO_ROUTE_GENERIC_URL",
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding.",
       "registration": "series statjp.cpi.tokyo_all_items_yoy"
-    },
-    "fed.g19.consumer_credit_nonrevolving_annual_rate.2026_07.first_print": {
-      "forecastSlug": "us-nonrevolving-consumer-credit-annual-rate-july-2026",
-      "resolutionDate": "2026-09-08",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
-    },
-    "fed.g19.consumer_credit_revolving_annual_rate.2026_07.first_print": {
-      "forecastSlug": "us-revolving-consumer-credit-annual-rate-july-2026",
-      "resolutionDate": "2026-09-08",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
-    },
-    "fed.g19.consumer_credit_total_annual_rate.2026_07.first_print": {
-      "forecastSlug": "us-consumer-credit-annual-rate-july-2026",
-      "resolutionDate": "2026-09-08",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "bls.ecec.private_total_compensation.hourly_cost.2026_q2.first_print": {
       "forecastSlug": "bls-ecec-private-total-compensation-hourly-cost-q2-2026",
@@ -497,18 +441,18 @@
     "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "refused",
-      "code": "LEDGER_CATALOG_REFUSED",
-      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
-      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.business_financial_operations', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve b"
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "refused",
-      "code": "LEDGER_CATALOG_REFUSED",
-      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
-      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.office_administrative_support', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve b"
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
@@ -523,20 +467,6 @@
       "state": "no_route",
       "code": "NO_ROUTE_GENERIC_URL",
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
-    },
-    "us.dol.initial_claims.sa.week_2026-08-29": {
-      "forecastSlug": "initial-claims-week-2026-08-29",
-      "resolutionDate": "2026-09-11",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
-    },
-    "dol.eta.continued_claims.sa.week_2026-08-29.first_print": {
-      "forecastSlug": "continued-claims-week-2026-08-29",
-      "resolutionDate": "2026-09-12",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "statcan.cpi.allitems.yoy.2026_08.first_print": {
       "forecastSlug": "canada-cpi-annual-rate-august-2026",
@@ -601,20 +531,6 @@
       "code": "NO_ROUTE_GENERIC_URL",
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
     },
-    "us.dol.initial_claims.sa.week_2026-09-05": {
-      "forecastSlug": "initial-claims-week-2026-09-05",
-      "resolutionDate": "2026-09-20",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
-    },
-    "dol.eta.continued_claims.sa.week_2026-09-05.first_print": {
-      "forecastSlug": "continued-claims-week-2026-09-05",
-      "resolutionDate": "2026-09-21",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
-    },
     "treasury.mts.monthly_deficit.august_2026.first_print": {
       "forecastSlug": "us-mts-deficit-august-2026",
       "resolutionDate": "2026-09-21",
@@ -659,6 +575,6 @@
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
     }
   },
-  "generatedAtUtc": "2026-09-29T11:20:03Z",
-  "workflowRun": "36560463620"
+  "generatedAtUtc": "2026-09-29T12:08:14Z",
+  "workflowRun": "36564793248"
 }
