@@ -81,12 +81,25 @@ custody compares the exact deterministic presentation, without accepting other
 result differences. Arguments still require exact identity except for the
 existing rejected-URL projection. Mismatch diagnostics list field names only.
 
-`scripts/verify_custody.py` recomputes the report and checks captured calls
-against recorded MCP completion events. The attested publisher also checks
-the exact repository-owned server configuration. Changing a body, call result,
-dependency, replay verdict, or artifact reference fails verification. A failed
-stage may preserve an incomplete event stream without being promoted as a
-successful run.
+When the stage ends, the runner also binds every recorded call to exactly one
+native MCP completion event in the redacted stream it archives.
+`scripts/verify_custody.py` recomputes the report and repeats that binding from
+the archived stream with the same function, so the publication claim does not
+depend on the runner. The attested publisher also checks the exact
+repository-owned server configuration. Changing a body, call result,
+dependency, replay verdict, or artifact reference fails verification.
+
+A stage whose capture fails replay or native binding fails its run as a
+`tool_evidence` failure. The run keeps the stage artifacts and the model's raw
+response but seals no parsed cells: evidence that failed cannot vouch for the
+output, and a failed run whose cells still validated would refuse the whole
+docket publication as a validator status mismatch. Custody verifies the record
+with the parse-failure inventory, so a publication retains it as one failed
+trace. A failed stage may preserve an incomplete event stream (a recorded call
+with no completion event) without being promoted as a successful run. Every
+other binding error still applies to a failed stage: an event with no native
+ID, a repeated completion, an unknown call ID, or an event that differs from
+its call refuses custody whether or not the stage failed.
 
 For a standalone evidence artifact:
 
