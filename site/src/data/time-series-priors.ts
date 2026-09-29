@@ -16,6 +16,10 @@ import type {
   PolicyEngineLedgerEntry,
 } from "./thesis-log";
 import type { TargetRegisteredLedgerEntry } from "./ledger-targets";
+import {
+  firstAcceptedSequence,
+  observationViewAsOf,
+} from "./ledger-current-view";
 
 export const TIME_SERIES_PRIOR_VARIANT_ID = "time-series-prior";
 export const PERSISTENCE_BASELINE_AGENT = "brier.time_series_prior";
@@ -416,16 +420,20 @@ export function ledgerHistoryAtCutoff(
   // observedAt but a late acceptance; admitting it would silently rewrite
   // published baselines and normalization scales (finding N5). Rows without
   // an acceptance record fail closed.
-  const observations = ledger.filter(
-    (entry): entry is ObservationRecordedLedgerEntry =>
-      entry.kind === "observation_recorded" &&
+  //
+  // The rows come from the ledger's current view as of the cutoff, taken
+  // before the unit and series filters: a row superseded by a correction
+  // accepted by then never enters, even when the correction itself fails a
+  // filter, and a correction accepted later changes nothing here.
+  const observations = observationViewAsOf(ledger, cutoffTime).filter(
+    (entry) =>
       entry.unit === forecast.unit &&
-      observationSeriesFromRegistrations(entry, registrations) ===
+      observationSeriesFromRegistrations(entry, registrations, ledger) ===
         targetSeriesId &&
-      Date.parse(entry.observedAt) <= cutoffTime &&
-      typeof entry.acceptedAtUtc === "string" &&
-      Date.parse(entry.acceptedAtUtc) <= cutoffTime,
+      Date.parse(entry.observedAt) <= cutoffTime,
   );
+  // Under the append gate the view holds one row per observationId; the
+  // map keeps the latest in ledger order if a view ever held two.
   const byObservationId = new Map(
     observations.map((observation) => [observation.observationId, observation]),
   );
@@ -577,6 +585,7 @@ export function registeredTargetSeriesIdentity(
 function projectionMatchesRegistration(
   observation: ObservationRecordedLedgerEntry,
   target: TargetRegisteredLedgerEntry,
+  ledger: PolicyEngineLedgerEntry[],
 ): boolean {
   const projection = observation.sourceBindingProjection;
   const binding = target.sourceBinding;
@@ -605,12 +614,16 @@ function projectionMatchesRegistration(
   ) {
     return false;
   }
-  if (
-    typeof target.ledgerPinLineCount === "number" &&
-    (typeof observation.acceptedSequence !== "number" ||
-      observation.acceptedSequence < target.ledgerPinLineCount)
-  ) {
-    return false;
+  // Membership is judged on the first acceptance in the supersede chain, so
+  // a correction cannot launder a print the registration already held.
+  if (typeof target.ledgerPinLineCount === "number") {
+    const acceptedSequence = firstAcceptedSequence(observation, ledger);
+    if (
+      acceptedSequence === null ||
+      acceptedSequence < target.ledgerPinLineCount
+    ) {
+      return false;
+    }
   }
   const allowedHosts = binding.allowedHosts;
   if (allowedHosts && allowedHosts.length > 0) {
@@ -671,17 +684,19 @@ export function registeredObservationSeriesIdentity(
   return observationSeriesFromRegistrations(
     observation,
     registrationsByDataPointId(ledger),
+    ledger,
   );
 }
 
 function observationSeriesFromRegistrations(
   observation: ObservationRecordedLedgerEntry,
   registrations: Map<string, TargetRegisteredLedgerEntry>,
+  ledger: PolicyEngineLedgerEntry[],
 ): string | null {
   const target = registrations.get(observation.dataPointId);
   const series = contractSeries(target);
   if (series) {
-    return target && projectionMatchesRegistration(observation, target)
+    return target && projectionMatchesRegistration(observation, target, ledger)
       ? series
       : null;
   }
