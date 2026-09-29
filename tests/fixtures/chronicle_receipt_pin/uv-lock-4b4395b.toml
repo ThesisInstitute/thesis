@@ -1,0 +1,21 @@
+# PolicyEngine/chronicle uv.lock at 4b4395b07dcf65d3eb15c406c4c8ca5c4ab7ffd9, the merge of chronicle#299 (receipt 0.6.2):
+# the lock header and the receipt entry, copied byte for byte.
+version = 1
+revision = 3
+requires-python = ">=3.11"
+resolution-markers = [
+    "python_full_version >= '3.12'",
+    "python_full_version < '3.12'",
+]
+
+[[package]]
+name = "receipt"
+version = "0.6.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fc/1e/704f8990bc7e64cf8eec79e7027ce31a75e8565c54d5f92e66c3879a8555/receipt-0.6.2.tar.gz", hash = "sha256:699a9d870e27b8a61a825103177f49991f977f4c0d58605d17b8966fc0da4a9f", size = 1622025, upload-time = "2026-09-28T18:29:42.724Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/78/10/0f8997293cb120d2a67c6375da77be8ad9afec88146e2043a120dd1282aa/receipt-0.6.2-py3-none-any.whl", hash = "sha256:4320a894f2c4a340583e31e2dc63e338e79fa5a8167089583bd60f0c57de2f6f", size = 235838, upload-time = "2026-09-28T18:29:41.114Z" },
+]

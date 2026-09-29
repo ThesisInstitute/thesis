@@ -1288,7 +1288,17 @@ def test_bare_year_sba_routing_requires_the_registered_sba_contract(
 
 def test_resolution_workflow_installs_the_sba_pdf_parser() -> None:
     workflow = (ROOT / ".github/workflows/resolve-and-rebuild.yml").read_text()
-    assert "pip install --user xlrd==2.0.1 pypdf==6.14.2" in workflow
+    action = (ROOT / ".github/actions/install-resolver-python/action.yml").read_text()
+    # The resolver's Python comes from uv.lock's resolver extra, hash-checked;
+    # that extra pins the strict PDF parser the witnessed replay needs.
+    assert "uses: ./.github/actions/install-resolver-python" in workflow
+    assert "--extra resolver" in action and "--require-hashes" in action
+    tomllib = pytest.importorskip("tomllib")
+    resolver_extra = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"][
+        "optional-dependencies"
+    ]["resolver"]
+    assert "pypdf==6.14.2" in resolver_extra
+    assert "xlrd==2.0.1" in resolver_extra
     assert "fetch-depth: 0" in workflow
 
 

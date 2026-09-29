@@ -1,0 +1,36 @@
+name: Install the resolver's Python runtime
+description: >-
+  Build a virtual environment on the runner's own python3 that holds exactly
+  uv.lock's resolver and custody extras, every artifact checked against the
+  lock's hashes, and put it first on PATH for the rest of the job.
+  resolve-and-rebuild.yml runs the resolver in it; the CI job
+  resolver-runtime runs this same install on every pull request, so a lock
+  that interpreter cannot install fails there first.
+
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v5
+
+    - name: Install uv.lock's resolver and custody extras, hash-checked
+      shell: bash
+      run: |
+        set -euo pipefail
+        requirements="$RUNNER_TEMP/resolver-requirements.txt"
+        venv="$RUNNER_TEMP/resolver-venv"
+        # --locked refuses a uv.lock that disagrees with pyproject.toml.
+        uv export --locked --no-dev --no-emit-project \
+          --extra resolver --extra custody \
+          --format requirements-txt \
+          --output-file "$requirements"
+        # The runner's own python3, and nothing else from the system: an
+        # import the two extras do not declare fails loudly instead of
+        # borrowing an unpinned system copy.
+        uv venv --python "$(command -v python3)" "$venv"
+        # --require-hashes refuses any artifact, and any dependency, that the
+        # exported file does not name with a matching hash. So receipt,
+        # cryptography and the rest are the bytes uv.lock records.
+        uv pip install --python "$venv/bin/python" --require-hashes \
+          --requirements "$requirements"
+        "$venv/bin/python" -c 'import sys; print(sys.executable, sys.version)'
+        echo "$venv/bin" >> "$GITHUB_PATH"

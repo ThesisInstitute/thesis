@@ -97,6 +97,27 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -q
 
+  # resolve-and-rebuild.yml installs its Python runtime from uv.lock,
+  # hash-checked, on the runner's own python3. Run that same install here so
+  # a lock that interpreter cannot install, or a resolver import the resolver
+  # and custody extras do not declare, fails a pull request instead of the
+  # 13:40 UTC resolution run.
+  resolver-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/install-resolver-python
+
+      - name: Import what the resolution run imports
+        run: |
+          set -euo pipefail
+          python3 scripts/chronicle_receipt_pin.py --installed-only
+          cd scripts
+          python3 -c "import resolve_pending, pin_ledger, witness_upstream_ledger, verify_witnessed_pin, official_browser_fetch, attest_subject, xlrd, pypdf, cryptography, playwright.sync_api, receipt.sign, receipt.release_chain, receipt.append_gate"
+
   # Give the bill extraction and paired-publication boundary fast feedback
   # while the complete Python suite continues to verify the entire archive.
   bill-pipeline:

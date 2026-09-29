@@ -1,0 +1,83 @@
+name: Receipt pin drift
+
+# The resolver runs Chronicle's staged series-catalog generator under the
+# receipt thesis's uv.lock names, and refuses before any capture work when
+# Chronicle's ledger branch locks a different one (scripts/
+# chronicle_receipt_pin.py). Chronicle moves on its own schedule, so compare
+# the two locks between resolver runs: an issue opens as soon as they differ,
+# while there is still time to land the matching bump before 13:40 UTC, and
+# closes once they agree again. A pull request that changes thesis's lock gets
+# the same comparison, so a bump that would leave the two apart shows red.
+
+on:
+  schedule:
+    - cron: "23 */3 * * *" # every three hours
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - pyproject.toml
+      - uv.lock
+      - scripts/chronicle_receipt_pin.py
+      - .github/workflows/receipt-pin-drift.yml
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency: receipt-pin-drift-${{ github.ref }}
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ISSUE_TITLE: "Receipt pin drift: thesis and Chronicle's ledger branch lock different receipts"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Compare thesis's receipt with Chronicle's ledger branch
+        id: compare
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          set +e
+          python3 scripts/chronicle_receipt_pin.py | tee "$RUNNER_TEMP/receipt-pin.txt"
+          rc=${PIPESTATUS[0]}
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit "$rc"
+
+      - name: Open a drift issue
+        if: failure() && steps.compare.outputs.rc == '1' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          existing=$(gh issue list --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            echo "drift issue #$existing is already open"
+            exit 0
+          fi
+          {
+            echo "The resolver will refuse to open a Chronicle append proposal until these agree ($RUN_URL):"
+            echo
+            cat "$RUNNER_TEMP/receipt-pin.txt"
+          } > "$RUNNER_TEMP/issue.md"
+          gh issue create --title "$ISSUE_TITLE" --body-file "$RUNNER_TEMP/issue.md"
+
+      - name: Close a drift issue once the locks agree
+        if: success() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          for number in $(gh issue list --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[].number'); do
+            gh issue close "$number" --comment "The locks agree again ($RUN_URL): $(cat "$RUNNER_TEMP/receipt-pin.txt")"
+          done

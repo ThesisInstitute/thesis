@@ -40,17 +40,26 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      # Every Python package the resolver imports comes from uv.lock's resolver
+      # and custody extras, hash-checked, in a virtual environment on this
+      # runner's python3 that the rest of the job runs: xlrd (IRS SOI and EIA
+      # DNav legacy BIFF .xls), pypdf (witnessed SBA PDF members), playwright
+      # (SSA pages, below) and receipt, with what they import (cryptography
+      # included). receipt is also what Chronicle's staged series-catalog
+      # generator imports during witnessed append proposals, so
+      # resolve_pending.py refuses before any capture work when Chronicle's
+      # ledger branch locks a different receipt
+      # (scripts/chronicle_receipt_pin.py; receipt-pin-drift.yml flags that
+      # between runs).
+      - name: Install the resolver's Python runtime from uv.lock
+        uses: ./.github/actions/install-resolver-python
+
       - name: Install resolver parser dependencies
-        # IRS SOI and EIA DNav use legacy BIFF .xls; witnessed SBA custody replays PDF
-        # members; FSA CRP monthly summaries resolve through the poppler
-        # pdftotext binary. Missing parsers are fatal rather than silent
-        # deferrals — without poppler the 2027 CRP resolution would
-        # refuse with "pdftotext is unavailable".
+        # FSA CRP monthly summaries resolve through the poppler pdftotext
+        # binary. Missing parsers are fatal rather than silent deferrals —
+        # without poppler the 2027 CRP resolution would refuse with
+        # "pdftotext is unavailable".
         run: |
-          # receipt: the staged chronicle series-catalog generator (run during
-          # witnessed append proposals) imports it via check_thesis_facts_append.
-          # Exact-pinned like its neighbors and matching chronicle's own pin.
-          pip install --user xlrd==2.0.1 pypdf==6.14.2 receipt==0.6.1
           sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
           pdftotext -v 2>&1 | head -1
           # SSA official pages resolve through a declared headless-browser
@@ -58,7 +67,7 @@ jobs:
           # Bot Manager answers every non-browser TLS client with 403 while
           # serving Chromium normally (verified from this runner 2026-08-23).
           # A missing engine is fatal in the resolver, never a silent defer.
-          pip install --user playwright==1.62.0
+          # playwright itself came from uv.lock above; this adds the browser.
           python3 -m playwright install --with-deps chromium
           python3 scripts/official_browser_fetch.py \
             https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/index.html \
@@ -299,8 +308,13 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           title="Resolution loop failed $(date -u +%F)"
+          body="The resolve-pending loop failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Unresolved cells stay pending — fix before the next release day."
+          # A receipt pin refusal names exactly what to change; carry it here.
+          refusal=$(grep -m1 '^RECEIPT PIN REFUSED: ' /tmp/resolve-out.log 2>/dev/null || true)
+          if [ -n "$refusal" ]; then
+            body="$body"$'\n\n'"$refusal"
+          fi
           existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number' || true)
           if [ -z "$existing" ]; then
-            gh issue create --title "$title" \
-              --body "The resolve-pending loop failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Unresolved cells stay pending — fix before the next release day."
+            gh issue create --title "$title" --body "$body"
           fi
