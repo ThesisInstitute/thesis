@@ -31,7 +31,9 @@ from typing import Any
 SCHEMA_VERSION = "thesis_resolution_status_v1"
 
 # (state, code) for each line the resolver prints about a target, matched
-# against the text before the reference. Order matters: first match wins.
+# against the verdict's head (the text before the reference, or before the
+# message's first ": " when the reference comes last), then, only when no
+# rule knows the head, against the whole message. First match wins.
 _LINE_RULES: tuple[tuple[re.Pattern[str], str, str], ...] = tuple(
     (re.compile(pattern), state, code)
     for pattern, state, code in (
@@ -120,7 +122,7 @@ REASONS = {
     "WINDOW_NOT_OPEN": "The registered release window for this figure has not opened.",
     "SOURCE_UNREACHABLE": (
         "The resolver's last attempt to fetch this target's source data, or "
-        "the archive capture that corroborates it, did not return usable data."
+        "an archive record of it, did not return usable data."
     ),
     "UNIT_MISMATCH": (
         "The forecast is in a different unit from the one the resolver's "
@@ -170,19 +172,20 @@ REASONS = {
         "names, so it cannot resolve mechanically."
     ),
     "ENVIRONMENT_FAILURE": (
-        "The resolver's environment failed before it could read this source."
+        "The resolver reported an environment failure for this target on its last run."
     ),
     "NO_EXECUTOR_GENERIC_URL": (
-        "No resolver covers this series. The target was registered with a "
-        "generic source link rather than a resolver binding."
+        "The resolver has no route for this target's reference. The target "
+        "was registered with a generic source link rather than a resolver "
+        "binding."
     ),
     "NO_EXECUTOR_UNREGISTERED": (
-        "No resolver covers this series, and its target has no registered "
-        "resolution contract."
+        "The resolver has no route for this target's reference, and the "
+        "target has no registered resolution contract."
     ),
     "NO_EXECUTOR_SERIES_NOT_COVERED": (
-        "No resolver covers this series, although its registration names a "
-        "resolver family."
+        "The resolver has no route for this target's reference, although its "
+        "registration names a resolver family."
     ),
     "NO_REPORT": (
         "A resolver covers this series, but its last run printed no line "
@@ -267,10 +270,10 @@ def _locate_ref(
     when the message carries its own colons (``  A-19 <verdict>: <ref>``,
     ``  <exception>: <ref>``). In the second shape the head is the text
     before the message's first ": ", the rest of the message is the detail,
-    and the rules read the whole message: an A-19 verdict can say
-    "(deferring)" only at its end. With `known_refs`, only a reference in
-    that set counts, so a dotted word inside a message cannot pass for the
-    target.
+    and the whole message is what the rules fall back to when none knows
+    the head: an A-19 verdict can say "(deferring)" only at its end. With
+    `known_refs`, only a reference in that set counts, so a dotted word
+    inside a message cannot pass for the target.
     """
     candidates: list[tuple[str, str, str, str]] = []
     head, separator, tail = line.partition(": ")
@@ -417,16 +420,26 @@ def build_status(
         elif ref in claimed_refs:
             state, code = "unknown", "NO_REPORT"
         else:
+            # The resolver routes by the reference's own spelling and never
+            # reads the registration's `series`. Only routing is known here,
+            # so a registered series spelled differently from the reference
+            # is shown, not judged (bls.wp.WPSFD4.2026-07 is registered as
+            # series bls.ppi.final_demand_monthly_change).
             state = "no_executor"
             contract = (registrations.get(ref) or {}).get("contract") or {}
             adapter = (contract.get("sourceBinding") or {}).get("adapter")
+            series = contract.get("series")
+            notes = []
             if ref not in registrations:
                 code = "NO_EXECUTOR_UNREGISTERED"
             elif adapter in (None, "", "generic-url"):
                 code = "NO_EXECUTOR_GENERIC_URL"
             else:
                 code = "NO_EXECUTOR_SERIES_NOT_COVERED"
-                detail = _plain(f"registered adapter {adapter}")
+                notes.append(f"registered adapter {adapter}")
+            if isinstance(series, str) and series and not ref.startswith(series + "."):
+                notes.append(f"registered series {series}")
+            detail = _plain(", ".join(notes))
         reason = reason_for(code, state)
         rows[ref] = {
             "forecastSlug": slug,

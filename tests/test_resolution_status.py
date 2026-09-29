@@ -638,7 +638,11 @@ def test_every_resolver_target_line_is_read_back_with_its_reference(ref, fill, s
 
 # --- Properties of the status file ---
 
-_STATES_CODES = [(state, code) for _p, state, code in rs._LINE_RULES]
+_STATES_CODES = [(state, code) for _p, state, code in rs._LINE_RULES] + [
+    ("unknown", "UNCLASSIFIED"),
+    ("refused", "UNCLASSIFIED"),
+    ("deferred", "UNCLASSIFIED"),
+]
 
 
 @st.composite
@@ -858,3 +862,99 @@ def test_the_verdicts_own_marker_beats_text_interpolated_after_it():
     )
     row = _status(_log((ref, "s", "2026-08-06")), text=text)["targets"][ref]
     assert row["state"] == "deferred"
+
+
+# --- Review R25 ---
+
+
+def test_a_registered_series_spelled_differently_is_shown_not_judged():
+    """R25 finding 1: bls.wp.WPSFD4.2026-07 is registered as series
+    bls.ppi.final_demand_monthly_change, which ALFRED_ADAPTERS covers. The
+    resolver routes by the reference's spelling, so "no resolver covers this
+    series" was false. The status says only that the reference has no route,
+    and shows the registered series."""
+    ref = "bls.wp.WPSFD4.2026-07.first_print"
+    registrations = {
+        ref: {
+            "contract": {
+                "series": "bls.ppi.final_demand_monthly_change",
+                "sourceBinding": {"adapter": "alfred-fred", "sourceSeriesId": "PPIFIS"},
+            }
+        }
+    }
+    row = _status(
+        _log((ref, "s", "2026-08-13")), text="  x: y.z\n", registrations=registrations
+    )["targets"][ref]
+    assert row["code"] == "NO_EXECUTOR_SERIES_NOT_COVERED"
+    assert "No resolver covers" not in row["reason"]
+    assert row["reason"].startswith("The resolver has no route for this target's")
+    assert row["detail"] == (
+        "registered adapter alfred-fred, registered series "
+        "bls.ppi.final_demand_monthly_change"
+    )
+    # A registered series that is the reference's own prefix adds nothing.
+    same = "ons.cpi.annual_rate.june_2026.first_print"
+    row = _status(
+        _log((same, "s", "2026-07-16")),
+        text="  x: y.z\n",
+        registrations={
+            same: {
+                "contract": {
+                    "series": "ons.cpi.annual_rate",
+                    "sourceBinding": {"adapter": "generic-url"},
+                }
+            }
+        },
+    )["targets"][same]
+    assert row["code"] == "NO_EXECUTOR_GENERIC_URL" and "detail" not in row
+
+
+def test_no_executor_sentences_claim_only_the_routing_check():
+    for code in (
+        "NO_EXECUTOR_GENERIC_URL",
+        "NO_EXECUTOR_UNREGISTERED",
+        "NO_EXECUTOR_SERIES_NOT_COVERED",
+    ):
+        assert rs.REASONS[code].startswith(
+            "The resolver has no route for this target's reference"
+        )
+        assert "covers" not in rs.REASONS[code]
+
+
+_HEADS = [
+    ("QCEW PARSE REFUSAL (refusing)", "refused"),
+    ("BEA iTABLE fetch failed (deferring)", "fetch_failed"),
+    ("RELEASE WINDOW NOT OPEN (deferring)", "deferred"),
+    ("IRS SOI ENVIRONMENT FAILURE (fatal)", "fetch_failed"),
+    ("CATALOG REFUSED (excluded from append)", "refused"),
+]
+# Text an exception or URL could carry, markers included (R25 finding 5:
+# the other fills cannot spell a marker).
+_MARKED = st.lists(
+    st.sampled_from(
+        [
+            "(refusing",
+            "(deferring)",
+            "(fatal",
+            "fetch failed",
+            "FIRST-PRINT WINDOW MISSED",
+            "(skipping,",
+            "not yet published",
+            "x",
+            ": ",
+            " ",
+            "503",
+        ]
+    ),
+    max_size=8,
+).map("".join)
+
+
+@settings(max_examples=400, deadline=None)
+@given(head=st.sampled_from(_HEADS), ref=_REFS, fill=_MARKED)
+def test_the_verdicts_head_decides_whatever_follows_it(head, ref, fill):
+    text, state = head
+    for line in (f"  {text}: {ref} — {fill}", f"  {text}: {fill}: {ref}"):
+        targets, _run = rs.parse_resolver_log(line + "\n", {ref})
+        assert set(targets) == {ref}, line
+        assert targets[ref]["state"] == state, line

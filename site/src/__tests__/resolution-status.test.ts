@@ -15,9 +15,9 @@ const row: OverdueStatus = {
   forecastSlug: "us-mts-deficit-june-2026",
   resolutionDate: "2026-07-13",
   state: "no_executor",
-  code: "NO_EXECUTOR_UNREGISTERED",
+  code: "NO_EXECUTOR_GENERIC_URL",
   reason:
-    "No resolver covers this series. The forecast predates target registration.",
+    "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding.",
 };
 const file = {
   asOf: "2026-09-19",
@@ -85,7 +85,9 @@ describe("card wording", () => {
   });
 
   it("shortens a reason to its first sentence", () => {
-    expect(shortReason(row.reason)).toBe("No resolver covers this series.");
+    expect(shortReason(row.reason)).toBe(
+      "The resolver has no route for this target's reference.",
+    );
     expect(shortReason("One sentence only.")).toBe("One sentence only.");
   });
 });
