@@ -986,6 +986,26 @@ def native_tool_events(
     return events
 
 
+def result_free_native_error(item: dict[str, Any]) -> bool:
+    """True for a native completion that reports an error and carries no result.
+
+    Codex writes this shape when a call fails outside the tool's own result.
+    The server may have answered with a JSON-RPC error, which is how the
+    recorder refuses a call it will not record (past ``MAX_CALLS``, or
+    arguments over ``MAX_ARGUMENT_BYTES``). The server may have exited, or
+    Codex may have given up at its tool timeout. Without a result the event
+    carries no call ID, no structured or text content, and nothing that reads
+    as tool output. Verbatim examples: tests/fixtures/codex_mcp_errors.
+    """
+    error = item.get("error")
+    return (
+        item.get("status") == "failed"
+        and item.get("result") is None
+        and isinstance(error, dict)
+        and isinstance(error.get("message"), str)
+    )
+
+
 def bind_native_events(
     evidence: dict[str, Any],
     events: list[dict[str, Any]],
@@ -997,14 +1017,19 @@ def bind_native_events(
     The runner applies this when a stage ends, from the exact redacted stream
     it archives, and the custody verifier repeats it at publication from the
     archived file, so the two checks cannot drift. ``failed_stage`` relaxes
-    only the completeness requirements: a failed invocation may preserve an
-    incomplete event stream without being promoted as a successful run.
-    Raises ``EvidenceError`` with the wording the verifier reports.
+    only what a failed invocation cannot vouch for without claiming anything:
+    recorded calls may lack completion events, native calls may lack
+    completions, and result-free native errors may bind to no recorded call.
+    Those checks all run after the per-event loop, which is the same in both
+    modes, so a failed stage raises every other error a successful one does
+    and is never promoted as a successful run. Raises ``EvidenceError`` with
+    the wording the verifier reports.
     """
     calls = {call["callId"]: call for call in evidence["calls"]}
     matched: set[str] = set()
     native_ids: set[str] = set()
     completed_ids: set[str] = set()
+    unbound_errors = 0
     for event in events:
         item = event.get("item") if isinstance(event, dict) else None
         native_id = item.get("id") if isinstance(item, dict) else None
@@ -1016,6 +1041,12 @@ def bind_native_events(
         if native_id in completed_ids:
             raise EvidenceError("tool evidence repeats a native completion event")
         completed_ids.add(native_id)
+        if result_free_native_error(item):
+            # Nothing to bind: the recorder refused the call before recording
+            # it, or Codex abandoned a call whose record, if any, then lacks
+            # its own completion event.
+            unbound_errors += 1
+            continue
         result = item.get("result")
         structured = (
             result.get("structured_content", result.get("structuredContent"))
@@ -1079,6 +1110,10 @@ def bind_native_events(
                 f" ({', '.join(mismatches)})"
             )
         matched.add(call_id)
+    if not failed_stage and unbound_errors:
+        raise EvidenceError(
+            "tool evidence has native tool errors that bind to no recorded call"
+        )
     if not failed_stage and matched != set(calls):
         raise EvidenceError(
             "tool evidence calls lack native completion events: "

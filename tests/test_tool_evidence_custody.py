@@ -775,6 +775,207 @@ def test_bind_native_events_reports_orphaned_and_incomplete_calls(
         evidence.bind_native_events(payload, events + [started])
 
 
+CODEX_ERROR_LINES = (
+    ROOT / "tests/fixtures/codex_mcp_errors/refused_and_closed_calls.jsonl"
+).read_text(encoding="utf-8")
+UNBOUND = "native tool errors that bind to no recorded call"
+
+
+def _codex_error_events() -> dict[str, list[dict[str, Any]]]:
+    """Verbatim Codex 0.144.0/0.158.0 events, keyed by native call ID."""
+    events: dict[str, list[dict[str, Any]]] = {}
+    for line in CODEX_ERROR_LINES.splitlines():
+        event = json.loads(line)
+        events.setdefault(event["item"]["id"], []).append(event)
+    return events
+
+
+def _result_free_error(
+    native_id: str, *, drop: tuple[str, ...] = (), **item: Any
+) -> list[dict[str, Any]]:
+    """A started/completed pair shaped like Codex's own error events, with
+    ``item`` overriding and ``drop`` removing fields of the completion."""
+    base = {
+        "id": native_id,
+        "type": "mcp_tool_call",
+        "server": custody.TOOL_EVIDENCE_SERVER,
+        "tool": "calculate",
+        "arguments": {"expression": "a", "inputs": {"a": 1}},
+    }
+    completed = {
+        **base,
+        "result": None,
+        "error": {"message": "tool call error: tool call failed"},
+        "status": "failed",
+        **item,
+    }
+    return [
+        {
+            "type": "item.started",
+            "item": {**base, "result": None, "error": None, "status": "in_progress"},
+        },
+        {
+            "type": "item.completed",
+            "item": {k: v for k, v in completed.items() if k not in drop},
+        },
+    ]
+
+
+def test_codex_error_events_fixture_is_the_shape_codex_writes() -> None:
+    """The fixture is real Codex output; pin what the binding relies on."""
+    events = _codex_error_events()
+    assert set(events) == {"item_129", "item_2"}
+    for started, completed in events.values():
+        assert started["type"] == "item.started"
+        assert completed["type"] == "item.completed"
+        item = completed["item"]
+        assert (item["status"], item["result"]) == ("failed", None)
+        assert set(item["error"]) == {"message"}
+        assert evidence.result_free_native_error(item)
+        assert not evidence.result_free_native_error(started["item"])
+    assert "Mcp error: -32602" in events["item_129"][1]["item"]["error"]["message"]
+    assert "Transport closed" in events["item_2"][1]["item"]["error"]["message"]
+
+
+def _stage_with_stream(
+    run_dir: pathlib.Path,
+    compose: Any,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """A one-call draft stage whose stream is ``compose(bound_events)``."""
+    command, entries = write_stage(run_dir, prefix="draft_")
+    path = run_dir / "draft_codex_stdout.jsonl"
+    bound = [json.loads(line) for line in path.read_text().splitlines()]
+    path.write_text(
+        analyst.redact_stream_text(
+            "".join(json.dumps(event) + "\n" for event in compose(bound))
+        ),
+        encoding="utf-8",
+    )
+    return command, entries
+
+
+@pytest.mark.parametrize("native_id", ["item_129", "item_2"])
+def test_real_codex_error_events_are_retained_only_in_a_failed_stage(
+    tmp_path: pathlib.Path, native_id: str
+) -> None:
+    """A call the recorder refused (the 129th, or oversized arguments) or never
+    answered (server gone) leaves Codex's result-free error event and no
+    record. A successful stage still refuses it; a failed stage keeps it, so
+    one such run no longer blocks the docket."""
+    command, entries = _stage_with_stream(
+        tmp_path, lambda bound: bound + _codex_error_events()[native_id]
+    )
+    with pytest.raises(
+        custody.CustodyError, match=f"^draft_tool evidence has {UNBOUND}$"
+    ):
+        check(tmp_path, command, entries, prefix="draft_")
+    failed = {**command, "returnCode": 1}
+    assert check(tmp_path, failed, entries, prefix="draft_", run_succeeded=False)
+    # A failed invocation inside a run that presents as successful is still
+    # judged as a successful stage.
+    with pytest.raises(custody.CustodyError, match=UNBOUND):
+        check(tmp_path, failed, entries, prefix="draft_", run_succeeded=True)
+
+
+def _with_error(event: dict[str, Any]) -> list[dict[str, Any]]:
+    event["item"].update(status="failed", error={"message": "tool call failed"})
+    return [event]
+
+
+FORGED = {"callId": "call-9999", "result": {"value": 42}}
+FORGED_RESULT = {
+    "structured_content": FORGED,
+    "content": [{"type": "text", "text": json.dumps(FORGED)}],
+}
+FAILED_STAGE_SHAPES = {
+    # Admitted in a failed stage: the event reports failure and carries no
+    # result at all.
+    "result absent": (
+        lambda bound: bound + _result_free_error("item_9", drop=("result",)),
+        None,
+    ),
+    # Codex gave up at its tool timeout, then the recorder finished and
+    # recorded the call: an orphaned record plus an unbound error.
+    "replaces a recorded call's completion": (
+        lambda bound: _result_free_error(bound[0]["item"]["id"]),
+        None,
+    ),
+    # Refused in both modes: something in the event is not a bare error.
+    "errorless failure": (
+        lambda bound: bound + _result_free_error("item_9", error=None),
+        "unknown or repeated event call ID",
+    ),
+    "error on a completed call": (
+        lambda bound: bound + _result_free_error("item_9", status="completed"),
+        "unknown or repeated event call ID",
+    ),
+    "non-string message": (
+        lambda bound: bound + _result_free_error("item_9", error={"message": 5}),
+        "unknown or repeated event call ID",
+    ),
+    "empty result object": (
+        lambda bound: bound + _result_free_error("item_9", result={}),
+        "unknown or repeated event call ID",
+    ),
+    "error beside a forged result": (
+        lambda bound: bound + _result_free_error("item_9", result=FORGED_RESULT),
+        "unknown or repeated event call ID",
+    ),
+    "error beside a recorded result": (
+        lambda bound: _with_error(bound[0]),
+        r"differs from its native event \(status\)",
+    ),
+    "repeats a completion": (
+        lambda bound: bound + _result_free_error(bound[0]["item"]["id"])[1:],
+        "repeats a native completion event",
+    ),
+    "no native ID": (
+        lambda bound: bound + _result_free_error("item_9", drop=("id",))[1:],
+        "lacks its native call ID",
+    ),
+}
+
+
+@pytest.mark.parametrize("shape", sorted(FAILED_STAGE_SHAPES))
+def test_failed_stage_admits_only_result_free_native_errors(
+    tmp_path: pathlib.Path, shape: str
+) -> None:
+    """Only an event that reports failure and carries no result may go unbound,
+    and only in a failed stage. Anything that could read as tool output, or
+    that breaks native-ID bookkeeping, is refused whether or not the stage
+    failed."""
+    compose, expected = FAILED_STAGE_SHAPES[shape]
+    command, entries = _stage_with_stream(tmp_path, compose)
+    failed = {**command, "returnCode": 1}
+    if expected is None:
+        with pytest.raises(custody.CustodyError, match=UNBOUND):
+            check(tmp_path, command, entries, prefix="draft_")
+        check(tmp_path, failed, entries, prefix="draft_", run_succeeded=False)
+        return
+    for stage_command, succeeded in ((command, True), (failed, False)):
+        with pytest.raises(custody.CustodyError, match=expected):
+            check(
+                tmp_path,
+                stage_command,
+                entries,
+                prefix="draft_",
+                run_succeeded=succeeded,
+            )
+
+
+def _completed(event: dict[str, Any]) -> bool:
+    return event.get("type") == "item.completed"
+
+
+def _structured_call_id(item: dict[str, Any]) -> Any:
+    """The call ID a completion claims, read independently of the binder."""
+    result = item.get("result")
+    if not isinstance(result, dict):
+        return None
+    structured = result.get("structured_content", result.get("structuredContent"))
+    return structured.get("callId") if isinstance(structured, dict) else None
+
+
 def _mutate_native_stream(
     rng: random.Random, events: list[dict[str, Any]], call_ids: list[str]
 ) -> list[str]:
@@ -846,6 +1047,39 @@ def _mutate_native_stream(
                         }
                     ),
                 ),
+                # Codex's shape for a call that failed outside its result: a
+                # JSON-RPC refusal, a timeout, or a closed transport.
+                (
+                    "server error",
+                    lambda: item.update(
+                        status="failed", result=None, error={"message": "timed out"}
+                    ),
+                ),
+                (
+                    "stray server error",
+                    lambda: events.extend(_result_free_error(f"mcp-refused-{index}")),
+                ),
+                (
+                    "real codex error",
+                    lambda: events.extend(
+                        copy.deepcopy(
+                            _codex_error_events()[rng.choice(["item_129", "item_2"])]
+                        )
+                    ),
+                ),
+                # Near misses: each keeps something that is not a bare error.
+                (
+                    "errorless failure",
+                    lambda: item.update(status="failed", result=None),
+                ),
+                (
+                    "error beside result",
+                    lambda: item.update(status="failed", error={"message": "x"}),
+                ),
+                (
+                    "error on completed",
+                    lambda: item.update(result=None, error={"message": "x"}),
+                ),
             ]
         )
         before = copy.deepcopy(events)
@@ -866,10 +1100,15 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
        when custody refuses the successful stage, and custody's error is the
        runner's binding error under the stage prefix. The two checks cannot
        drift.
-    2. A successful bind matches every recorded call.
-    3. A failed stage relaxes only completeness: it accepts exactly what the
-       successful stage accepts or refuses only for completeness, and
-       otherwise raises the successful stage's error.
+    2. A successful bind is complete both ways: every recorded call and every
+       native completion event bind one to one, and every started native call
+       completes (checked by an independent oracle).
+    3. A failed stage relaxes only completeness and result-free native errors:
+       it accepts exactly what the successful stage accepts or refuses only
+       for those, and otherwise raises the successful stage's error.
+    4. In an accepted failed stage, every completion event either binds to a
+       distinct recorded call or reports failure with no result at all, so
+       nothing unbound reads as tool output (independent oracle).
     """
     body = b'{"history":[1711.9,1716.8]}'
     command, entries = write_stage(
@@ -904,7 +1143,7 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
     baseline[2]["item"]["arguments"] = {"url": "http://example.gov/data.json"}
     assert evidence.bind_native_events(payload, baseline) == set(call_ids)
     failed_command = {**command, "returnCode": 1}
-    completeness = ("native completion events", "incomplete native calls")
+    relaxable = ("native completion events", "incomplete native calls", UNBOUND)
     stream = ""
 
     def fake_stage(**kwargs: Any) -> dict[str, Any]:
@@ -952,6 +1191,7 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
         return None
 
     outcomes: set[str] = set()
+    relaxed_with_unbound = 0
     for seed in range(300):
         rng = random.Random(seed)
         events = copy.deepcopy(baseline)
@@ -964,33 +1204,54 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
 
         succeeded = verdict(command, True)
         assert succeeded == runner_error(), context
+        seen = evidence.native_tool_events(stream)
+        completions = [event["item"] for event in seen if _completed(event)]
+        bound_ids = [_structured_call_id(item) for item in completions]
         if succeeded is None:
-            matched = evidence.bind_native_events(
-                payload, evidence.native_tool_events(stream)
-            )
+            matched = evidence.bind_native_events(payload, seen)
             assert matched == set(call_ids), context
+            assert sorted(bound_ids) == sorted(call_ids), context
+            assert {event["item"]["id"] for event in seen} == {
+                item["id"] for item in completions
+            }, context
 
         relaxed = succeeded is not None and any(
-            family in succeeded for family in completeness
+            family in succeeded for family in relaxable
         )
-        assert verdict(failed_command, False) == (
-            None if relaxed else succeeded
-        ), context
+        failed = verdict(failed_command, False)
+        assert failed == (None if relaxed else succeeded), context
+        if failed is None:
+            unbound = [
+                item for item, call_id in zip(completions, bound_ids) if call_id is None
+            ]
+            bound = [call_id for call_id in bound_ids if call_id is not None]
+            assert all(
+                item.get("status") == "failed"
+                and item.get("result") is None
+                and isinstance((item.get("error") or {}).get("message"), str)
+                for item in unbound
+            ), context
+            assert set(bound) <= set(call_ids), context
+            assert len(bound) == len(set(bound)), context
+            assert len(completions) == len({item["id"] for item in completions})
+            relaxed_with_unbound += bool(unbound)
         outcomes.add(
             "ok" if succeeded is None else succeeded.split(" (")[0].split(":")[0]
         )
 
-    # The seeds reach acceptance and every binding error family.
+    # The seeds reach acceptance, every binding error family, and failed stages
+    # that keep unbound result-free errors.
     families = {
         "lacks its native call ID",
         "repeats a native completion event",
         "unknown or repeated event call ID",
         "differs from its native event",
-        *completeness,
+        *relaxable,
     }
     assert "ok" in outcomes
     for family in families:
         assert any(family in outcome for outcome in outcomes), family
+    assert relaxed_with_unbound, "no failed stage kept a result-free error"
 
 
 def test_oversized_native_arguments_on_a_redacted_fetch_fail_cleanly(
