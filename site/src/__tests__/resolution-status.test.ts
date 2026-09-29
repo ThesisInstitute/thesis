@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { resolutionVerb } from "@/components/ForecastCard";
+import { FORECAST_CELLS } from "@/data/forecast-cells";
+import rawStatus from "@/data/resolution-status.json";
 import {
   NO_REPORT_REASON,
   OVERDUE_TARGET_COUNT,
@@ -92,6 +94,20 @@ describe("card wording", () => {
 describe("the committed status file", () => {
   it("is a real resolver report, with a row per overdue target", () => {
     expect(RESOLUTION_STATUS_META.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(OVERDUE_TARGET_COUNT).toBeGreaterThanOrEqual(0);
+    const rows = Object.entries(rawStatus.targets);
+    expect(rows).toHaveLength(OVERDUE_TARGET_COUNT);
+    // Each row is a forecast this site publishes, on the target it
+    // forecasts, past its own due date as of the file's date, and
+    // explained.
+    const cells = new Map(FORECAST_CELLS.map((cell) => [cell.slug, cell]));
+    for (const [dataPointId, row] of rows) {
+      const cell = cells.get(row.forecastSlug);
+      expect(cell, row.forecastSlug).toBeDefined();
+      if (cell?.dataPointId) expect(cell.dataPointId).toBe(dataPointId);
+      expect(cell?.resolutionDate.slice(0, 10)).toBe(row.resolutionDate);
+      expect(row.resolutionDate < RESOLUTION_STATUS_META.asOf).toBe(true);
+      expect(row.code).toMatch(/^[A-Z_]+$/);
+      expect(row.reason.length).toBeGreaterThan(0);
+    }
   });
 });

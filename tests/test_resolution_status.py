@@ -181,12 +181,127 @@ def test_no_resolver_log_says_so_instead_of_guessing():
     assert (row["state"], row["code"]) == ("unknown", "NO_RESOLVER_RUN")
 
 
-def test_a_completed_run_reports_a_resolved_cell_as_awaiting_record():
-    text = "  resolve a.b.2026_07.first_print -> 4.2 percent\nappended 1 row(s)\n"
-    row = _status(_log(("a.b.2026_07.first_print", "s", "2026-09-01")), text=text)
-    assert (
-        row["targets"]["a.b.2026_07.first_print"]["code"] == "RESOLVED_AWAITING_RECORD"
+# resolve_pending.main's own line once the reviewed proposal has merged.
+APPENDED = (
+    "appended 1 observation(s) to PolicyEngine/chronicle@codex/thesis-ledger-facts:"
+    "ledger/official_observations.jsonl via reviewed proposal (merged at "
+    + "a" * 40
+    + ")"
+)
+
+
+def test_a_run_that_appended_reports_the_figure_as_recorded():
+    """R22 finding 1: after "appended N observation(s) ... via reviewed
+    proposal", the rows the run resolved are in the ledger. Saying they
+    are "not yet recorded" was false."""
+    ref = "us.dol.initial_claims.sa.week_2026-09-05"
+    text = f"  resolve {ref} -> 206.0 thousands\n{APPENDED}\n"
+    row = _status(_log((ref, "s", "2026-09-10")), text=text)["targets"][ref]
+    assert (row["state"], row["code"]) == (
+        "recorded_awaiting_publish",
+        "RECORDED_AWAITING_PUBLISH",
     )
+    # Appended, then crashed on a later step: still recorded.
+    crashed = text + "Traceback (most recent call last):\nValueError: later step\n"
+    row = _status(_log((ref, "s", "2026-09-10")), text=crashed)["targets"][ref]
+    assert row["code"] == "RECORDED_AWAITING_PUBLISH"
+
+
+def test_a_resolved_row_the_run_refused_is_not_called_recorded():
+    ref = "bls.cps.employed_people_by_occupation.production.august_2026.first_print"
+    text = (
+        f"  resolve {ref} -> 7.716 millions\n"
+        f"  CATALOG REFUSED (excluded from append): {ref} — unit conflict\n"
+        f"{APPENDED}\n"
+    )
+    row = _status(_log((ref, "s", "2026-09-05")), text=text)["targets"][ref]
+    assert row["code"] == "LEDGER_CATALOG_REFUSED"
+
+
+def test_without_append_evidence_the_status_does_not_claim_the_ledger_lacks_it():
+    ref = "a.b.2026_07.first_print"
+    text = f"  resolve {ref} -> 4.2 percent\nnothing new to record\n"
+    row = _status(_log((ref, "s", "2026-09-01")), text=text)["targets"][ref]
+    assert row["code"] == "RESOLVED_AWAITING_RECORD"
+    assert "not yet recorded" not in row["reason"]
+    assert "does not show" in row["reason"]
+
+
+@pytest.mark.parametrize(
+    "line, code, must_not_say, must_say",
+    [
+        # R22 finding 3: each line is the resolver's own format; the case
+        # beside it is what the reviewer executed through the resolver.
+        (
+            # fred_advance_value on HTTP 503 prints "not yet published".
+            "not yet published: {ref}",
+            "NOT_YET_PUBLISHED",
+            "had not published",
+            "reported it as not yet published",
+        ),
+        (
+            # bls_series_rows read an API error document: nothing unreachable.
+            "BLS API fetch failed: {ref}",
+            "SOURCE_UNREACHABLE",
+            "could not be reached",
+            "did not return usable data",
+        ),
+        (
+            # The Colorado LAUS adapter emits thousands from persons.
+            "UNIT MISMATCH (refusing): {ref} cell='persons' adapter='thousands'",
+            "UNIT_MISMATCH",
+            "official source publishes",
+            "adapter",
+        ),
+        (
+            # bls_annual_first_print: an incomplete 24-month history.
+            "FIRST-PRINT WINDOW MISSED (refusing): {ref} — 2026 December is "
+            "latest but the target/prior 24-month window is incomplete; "
+            "refusing a partial annual average",
+            "FIRST_PRINT_WINDOW_MISSED",
+            "not captured inside its registered window",
+            "first-print check",
+        ),
+        (
+            # BEA: the registered window differs from the one required.
+            "FORECAST/REGISTERED RELEASE DATE MISMATCH (refusing): {ref} — "
+            "forecast 2026-07-30 is outside {{'start': '2026-07-01', "
+            "'end': '2026-09-30'}}",
+            "RELEASE_DATE_MISMATCH",
+            "falls outside",
+            "does not agree",
+        ),
+    ],
+)
+def test_reasons_claim_no_more_than_the_emitting_branch(
+    line, code, must_not_say, must_say
+):
+    ref = "bls.test.2026_08.first_print"
+    text = "  " + line.format(ref=ref) + "\n"
+    row = _status(_log((ref, "s", "2026-09-01")), text=text)["targets"][ref]
+    assert row["code"] == code
+    assert must_not_say not in row["reason"]
+    assert must_say in row["reason"]
+
+
+def test_a_named_a19_binding_difference_is_kept():
+    """R22 finding 2: a19_execution_spec's refusal names the difference
+    before the reference."""
+    ref = "bls.cps.employed_people_by_occupation.production.august_2026.first_print"
+    text = (
+        "  BINDING/ADAPTER MISMATCH (refusing, registered A-19 contract differs "
+        f"in sourceBinding keys): {ref}\n"
+    )
+    row = _status(_log((ref, "s", "2026-09-05")), text=text)["targets"][ref]
+    assert row["code"] == "BINDING_MISMATCH"
+    assert "sourceBinding keys" in row["detail"]
+    # "full seven-key registry drift?" names nothing: still unexplained.
+    text = (
+        "  BINDING/ADAPTER MISMATCH (refusing, full seven-key registry drift?): "
+        f"{ref}\n"
+    )
+    row = _status(_log((ref, "s", "2026-09-05")), text=text)["targets"][ref]
+    assert row["code"] == "BINDING_MISMATCH_UNEXPLAINED"
 
 
 def test_an_unknown_refusal_keeps_the_resolvers_own_words():
@@ -635,6 +750,12 @@ def test_reprinted_resolver_text_is_always_safe(text, limit):
 @given(
     lines=st.lists(
         st.one_of(
+            # The resolver's own target lines (R22: noise alone never spells
+            # a rule head, so it exercised only UNCLASSIFIED).
+            st.tuples(
+                st.sampled_from(TARGET_TEMPLATES), _REFS, _FILLER, st.integers(0, 99)
+            ).map(lambda t: _render(t[0], t[1], t[2], random.Random(t[3]))),
+            st.just(APPENDED),
             _FILLER.map(lambda s: "  " + s),
             st.tuples(_FILLER, _REFS, _FILLER).map(
                 lambda t: f"  {t[0]}: {t[1]} — {t[2]}"

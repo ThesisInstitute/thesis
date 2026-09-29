@@ -98,12 +98,12 @@ _LINE_RULES: tuple[tuple[re.Pattern[str], str, str], ...] = tuple(
 
 REASONS = {
     "RESOLVED_AWAITING_RECORD": (
-        "The resolver read the official figure on its last run. It is not yet "
-        "recorded in the ledger."
+        "The resolver read the official figure on its last run. That run's log "
+        "does not show the figure recorded in the ledger."
     ),
     "RESOLVED_BUT_RUN_FAILED": (
         "The resolver read the official figure on its last run, but the run "
-        "failed before recording it."
+        "failed, and its log does not show the figure recorded in the ledger."
     ),
     "RECORDED_AWAITING_PUBLISH": (
         "The official figure is recorded in the ledger. The site has not yet "
@@ -114,16 +114,18 @@ REASONS = {
         "the date shown on the forecast."
     ),
     "NOT_YET_PUBLISHED": (
-        "The official source had not published this period at the last run."
+        "The resolver did not get this period's figure on its last run and "
+        "reported it as not yet published."
     ),
     "WINDOW_NOT_OPEN": "The registered release window for this figure has not opened.",
     "SOURCE_UNREACHABLE": (
-        "The official source, or the archive that corroborates it, could not "
-        "be reached on the last run."
+        "The resolver's last attempt to fetch this figure, from its source or "
+        "from the archive that corroborates it, did not return usable data."
     ),
     "UNIT_MISMATCH": (
-        "The forecast is registered in one unit and the official source "
-        "publishes another. The resolver does not convert between them."
+        "The forecast is in a different unit from the one the resolver's "
+        "adapter produces for this series, and the resolver does not convert "
+        "between them."
     ),
     "REGISTERED_WITHOUT_EXECUTOR": (
         "This target was registered with a generic source link rather than "
@@ -132,13 +134,15 @@ REASONS = {
     ),
     "LEDGER_UNIT_CONFLICT": (
         "The ledger already holds this series in a different unit from the "
-        "one this target is registered in, so the resolver refused it before "
-        "fetching. The ledger has to hold the series in one unit first."
+        "one the resolver's adapter produces for it, so the resolver refused "
+        "it before fetching. The ledger has to hold the series in one unit "
+        "first."
     ),
     "LEDGER_CATALOG_REFUSED": (
         "The resolver read the official figure, but the ledger's series "
-        "catalog refused the row, so it was not recorded. The catalog refuses "
-        "a row that would give one series two units or two cadences."
+        "catalog refused the row, so it was not recorded. The catalog refuses, "
+        "for example, a row that would give one series two units or two "
+        "cadences."
     ),
     "PROVENANCE_REFUSED": (
         "The resolver read the official figure, but refused to record it "
@@ -154,13 +158,12 @@ REASONS = {
         "no field that differs."
     ),
     "FIRST_PRINT_WINDOW_MISSED": (
-        "The first official print was not captured inside its registered "
-        "window. Later figures may be revised, so the resolver will not "
-        "score against them."
+        "The resolver refused this target at its first-print check."
     ),
     "RELEASE_DATE_MISMATCH": (
-        "The forecast's resolution date falls outside the release window "
-        "its registration committed to."
+        "The resolver refused this target because its registered release "
+        "window does not agree with the release date or window the resolver "
+        "checks it against."
     ),
     "SOURCE_DOES_NOT_PUBLISH_FIGURE": (
         "The registered source does not publish the figure this forecast "
@@ -199,8 +202,8 @@ UNCLASSIFIED_REASONS = {
         "page does not yet classify."
     ),
     "fetch_failed": (
-        "The resolver could not read this target's source on its last run, "
-        "for a reason this page does not yet classify."
+        "The resolver did not get usable data from this target's source on "
+        "its last run, for a reason this page does not yet classify."
     ),
 }
 
@@ -229,6 +232,11 @@ _SUMMARY_HEADS = {
 }
 # A run that stops on this line appended nothing (resolve_pending.main).
 _ENVIRONMENT_STOP = "environment failures left admitted references unresolvable"
+# resolve_pending.main prints this after the reviewed proposal merged; every
+# row it resolved and did not refuse afterwards is then in the ledger.
+_APPENDED_RE = re.compile(
+    r"^appended \d+ observation\(s\) to \S+ via reviewed proposal"
+)
 
 
 def _plain(text: str, limit: int = 240) -> str:
@@ -311,9 +319,15 @@ def parse_resolver_log(
             else:
                 state, code = "refused", "UNCLASSIFIED"
         if code == "BINDING_MISMATCH" and not detail.strip():
-            # "registry drift? — " followed by nothing. Saying the binding
-            # differs would claim more than the resolver did.
-            code = "BINDING_MISMATCH_UNEXPLAINED"
+            # "(refusing, registered A-19 contract differs in sourceBinding
+            # keys): <ref>" names the difference before the reference.
+            named = re.search(r"\(refusing, ([^)]*\bdiffers in [^)]+)\)", words)
+            if named:
+                detail = named.group(1)
+            else:
+                # "registry drift? — " followed by nothing. Saying the
+                # binding differs would claim more than the resolver did.
+                code = "BINDING_MISMATCH_UNEXPLAINED"
         targets[ref] = {
             "state": state,
             "code": code,
@@ -328,6 +342,13 @@ def parse_resolver_log(
         error = _plain(tail_lines[-1] if tail_lines else "", 300)
     elif stopped:
         error = _plain(_ENVIRONMENT_STOP, 300)
+    if any(_APPENDED_RE.match(line) for line in lines):
+        for row in targets.values():
+            if row["code"] == "RESOLVED_AWAITING_RECORD":
+                row.update(
+                    state="recorded_awaiting_publish",
+                    code="RECORDED_AWAITING_PUBLISH",
+                )
     run = {
         "logAvailable": bool(text.strip()),
         "completed": bool(text.strip()) and not crashed and not stopped,

@@ -1,10 +1,10 @@
 {
   "schemaVersion": "thesis_resolution_status_v1",
-  "asOf": "2026-09-27",
+  "asOf": "2026-09-29",
   "run": {
     "logAvailable": true,
     "completed": false,
-    "error": "LedgerProposalError  append gate did not pass for PolicyEngine/chronicle 297  refusing to leave a failed proposal branch or PR"
+    "error": "cannot import the supersede-aware current view from check_thesis_facts_append (receipt package required)  cannot import name 'PinnedSigner' from 'receipt.release_chain' (/home/runner/.local/lib/python3.12/site-packages/receipt/release_chain.py)"
   },
   "targets": {
     "ons.labour.claimant_count.2026_06.first_print": {
@@ -146,48 +146,48 @@
       "resolutionDate": "2026-08-06",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.july_2026.first_print": {
       "forecastSlug": "cps-transport-material-moving-employment-july-2026",
       "resolutionDate": "2026-08-06",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.business_financial_operations.july_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-july-2026",
       "resolutionDate": "2026-08-07",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.computer_mathematical.july_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-july-2026",
       "resolutionDate": "2026-08-07",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.july_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-july-2026",
       "resolutionDate": "2026-08-07",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.july_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-july-2026",
       "resolutionDate": "2026-08-07",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.real_earnings.avg_hourly_mom.2026-07.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-july-2026",
@@ -223,7 +223,7 @@
       "resolutionDate": "2026-08-17",
       "state": "refused",
       "code": "FIRST_PRINT_WINDOW_MISSED",
-      "reason": "The first official print was not captured inside its registered window. Later figures may be revised, so the resolver will not score against them."
+      "reason": "The resolver refused this target at its first-print check."
     },
     "treasury.mts.monthly_deficit.july_2026.first_print": {
       "forecastSlug": "us-mts-deficit-july-2026",
@@ -251,7 +251,7 @@
       "resolutionDate": "2026-08-20",
       "state": "refused",
       "code": "FIRST_PRINT_WINDOW_MISSED",
-      "reason": "The first official print was not captured inside its registered window. Later figures may be revised, so the resolver will not score against them."
+      "reason": "The resolver refused this target at its first-print check."
     },
     "statcan.employment_insurance.regular_beneficiaries.canada.june_2026.first_print": {
       "forecastSlug": "canada-ei-regular-beneficiaries-june-2026",
@@ -287,7 +287,7 @@
       "resolutionDate": "2026-08-28",
       "state": "refused",
       "code": "FIRST_PRINT_WINDOW_MISSED",
-      "reason": "The first official print was not captured inside its registered window. Later figures may be revised, so the resolver will not score against them.",
+      "reason": "The resolver refused this target at its first-print check.",
       "detail": "registered release day was 2026-08-28"
     },
     "nbb.business_barometer.overall.2026-08.first_print": {
@@ -399,18 +399,16 @@
     "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "bls.cps.telework_share.2026-08.first_print": {
       "forecastSlug": "us-telework-rate-august-2026",
@@ -438,21 +436,21 @@
       "resolutionDate": "2026-09-08",
       "state": "resolved_this_run",
       "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "fed.g19.consumer_credit_revolving_annual_rate.2026_07.first_print": {
       "forecastSlug": "us-revolving-consumer-credit-annual-rate-july-2026",
       "resolutionDate": "2026-09-08",
       "state": "resolved_this_run",
       "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "fed.g19.consumer_credit_total_annual_rate.2026_07.first_print": {
       "forecastSlug": "us-consumer-credit-annual-rate-july-2026",
       "resolutionDate": "2026-09-08",
       "state": "resolved_this_run",
       "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "bls.ecec.private_total_compensation.hourly_cost.2026_q2.first_print": {
       "forecastSlug": "bls-ecec-private-total-compensation-hourly-cost-q2-2026",
@@ -464,18 +462,18 @@
     "bls.cps.employed_people_by_occupation.production.august_2026.first_print": {
       "forecastSlug": "cps-production-employment-august-2026",
       "resolutionDate": "2026-09-10",
-      "state": "deferred",
-      "code": "UNCLASSIFIED",
-      "reason": "The resolver deferred this target to a later run, for a reason this page does not yet classify.",
-      "detail": "A-19 CAPTURE READ FAILED (deferring). https //web.archive.org/web/20260904170006/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error timed out ), and an unread earlier capture cannot be skipped"
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print": {
       "forecastSlug": "cps-transport-material-moving-employment-august-2026",
       "resolutionDate": "2026-09-10",
-      "state": "deferred",
-      "code": "UNCLASSIFIED",
-      "reason": "The resolver deferred this target to a later run, for a reason this page does not yet classify.",
-      "detail": "A-19 CAPTURE READ FAILED (deferring). https //web.archive.org/web/20260904170006/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error timed out ), and an unread earlier capture cannot be skipped"
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cpi.u.core_mom.august_2026.first_print": {
       "forecastSlug": "us-core-cpi-mom-august-2026",
@@ -494,18 +492,16 @@
     "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The official source, or the archive that corroborates it, could not be reached on the last run.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "state": "resolved_this_run",
+      "code": "RESOLVED_BUT_RUN_FAILED",
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
@@ -526,21 +522,21 @@
       "resolutionDate": "2026-09-11",
       "state": "resolved_this_run",
       "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "dol.eta.continued_claims.sa.week_2026-08-29.first_print": {
       "forecastSlug": "continued-claims-week-2026-08-29",
       "resolutionDate": "2026-09-12",
       "state": "resolved_this_run",
       "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "statcan.cpi.allitems.yoy.2026_08.first_print": {
       "forecastSlug": "canada-cpi-annual-rate-august-2026",
       "resolutionDate": "2026-09-14",
       "state": "refused",
       "code": "FIRST_PRINT_WINDOW_MISSED",
-      "reason": "The first official print was not captured inside its registered window. Later figures may be revised, so the resolver will not score against them."
+      "reason": "The resolver refused this target at its first-print check."
     },
     "co.hcpf.medicaid.total_caseload.2026-08.first_print": {
       "forecastSlug": "colorado-medicaid-caseload-august-2026",
@@ -603,14 +599,14 @@
       "resolutionDate": "2026-09-20",
       "state": "resolved_this_run",
       "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "dol.eta.continued_claims.sa.week_2026-09-05.first_print": {
       "forecastSlug": "continued-claims-week-2026-09-05",
       "resolutionDate": "2026-09-21",
       "state": "resolved_this_run",
       "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed before recording it."
+      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
     },
     "treasury.mts.monthly_deficit.august_2026.first_print": {
       "forecastSlug": "us-mts-deficit-august-2026",
@@ -631,14 +627,14 @@
       "resolutionDate": "2026-09-24",
       "state": "refused",
       "code": "FIRST_PRINT_WINDOW_MISSED",
-      "reason": "The first official print was not captured inside its registered window. Later figures may be revised, so the resolver will not score against them."
+      "reason": "The resolver refused this target at its first-print check."
     },
     "bea.ita.personal_transfer_payments.2026_q2.first_print": {
       "forecastSlug": "us-personal-transfer-payments-q2-2026",
       "resolutionDate": "2026-09-24",
       "state": "refused",
       "code": "FIRST_PRINT_WINDOW_MISSED",
-      "reason": "The first official print was not captured inside its registered window. Later figures may be revised, so the resolver will not score against them.",
+      "reason": "The resolver refused this target at its first-print check.",
       "detail": "registered release day was 2026-09-24"
     },
     "nbb.business_barometer.overall.2026-09.first_print": {
@@ -656,6 +652,6 @@
       "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
     }
   },
-  "generatedAtUtc": "2026-09-28T21:06:40Z",
-  "workflowRun": "36338749942"
+  "generatedAtUtc": "2026-09-29T03:28:23Z",
+  "workflowRun": "36503673388"
 }
