@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-29-b13eb096d14f12e2.csv.gz",
+      "sha256": "abfb4cfada5d5a56ac85010d4293341d0d5bd6ad19f8fdde407e53b381fa76cc",
+      "bytes": 13685,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-20-051e04c05d125f58.csv.gz",
+      "sha256": "6441dd5568c1063706942aee94ff155c4232862281e4e8c1e79c8566b911055f",
+      "bytes": 13682,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-09-21-3b93cd193cb36e8f.csv.gz",
+      "sha256": "63629030ab4eeb5be392ff1a5f9779b455e4354289a60a201ef149a4a6122303",
+      "bytes": 15668,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-11-48c1604272f69868.csv.gz",
+      "sha256": "33f587b3874c5dd5ea61f46fa2dc3c79df82f602e5400f75950ea65bc82b2e6e",
+      "bytes": 13679,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-09-12-4f4077aebbbb5855.csv.gz",
+      "sha256": "9a2704b18b7450b2cde7c9e8cb762ac4ca168cd2fa18af9730f3a697f76e2088",
+      "bytes": 15662,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/totalslar-2026-09-08-25f5e748f7bb6d13.csv.gz",
+      "sha256": "07eb939938a5712b9e6d51a04e0ebd0a8fc1f6f6e155bbc693b4a03ee4a78a74",
+      "bytes": 4756,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/revolslar-2026-09-08-76611b7ca19d29b6.csv.gz",
+      "sha256": "8de0f6fa576be68059b9952ae86e8f99176dce0a916a98befb3eb38533a165b5",
+      "bytes": 3411,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/nonrevslar-2026-09-08-190cbee601fc707e.csv.gz",
+      "sha256": "c3c0fa4ae7f091178eeac3a7f5403323ab812efdcd388a40c854458bd5ecb6de",
+      "bytes": 4792,
+      "createdAt": "2026-09-29T11:56:59Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "3cfa0b15561269993e8a7a8ae48e55f8623aaa963a9e2584817fce5dfef00848"
+  }
+}
