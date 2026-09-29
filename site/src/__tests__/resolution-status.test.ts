@@ -4,7 +4,6 @@ import { FORECAST_CELLS } from "@/data/forecast-cells";
 import rawStatus from "@/data/resolution-status.json";
 import {
   NO_REPORT_REASON,
-  OVERDUE_TARGET_COUNT,
   RESOLUTION_STATUS_META,
   overdueNotice,
   shortReason,
@@ -92,10 +91,12 @@ describe("card wording", () => {
 });
 
 describe("the committed status file", () => {
-  it("is a real resolver report, with a row per overdue target", () => {
+  // Completeness (one row per overdue pending target, nothing extra) is a
+  // property of scripts/resolution_status.py, tested there against the
+  // Thesis log; this site has no view of that log's pending links.
+  it("names only published forecasts past their own due date", () => {
     expect(RESOLUTION_STATUS_META.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     const rows = Object.entries(rawStatus.targets);
-    expect(rows).toHaveLength(OVERDUE_TARGET_COUNT);
     // Each row is a forecast this site publishes, on the target it
     // forecasts, past its own due date as of the file's date, and
     // explained.

@@ -146,7 +146,7 @@
       "resolutionDate": "2026-08-06",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "reason": "The resolver's last attempt to fetch this target's source data, or the archive capture that corroborates it, did not return usable data.",
       "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.july_2026.first_print": {
@@ -154,7 +154,7 @@
       "resolutionDate": "2026-08-06",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "reason": "The resolver's last attempt to fetch this target's source data, or the archive capture that corroborates it, did not return usable data.",
       "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.business_financial_operations.july_2026.first_print": {
@@ -162,7 +162,7 @@
       "resolutionDate": "2026-08-07",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "reason": "The resolver's last attempt to fetch this target's source data, or the archive capture that corroborates it, did not return usable data.",
       "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.computer_mathematical.july_2026.first_print": {
@@ -170,7 +170,7 @@
       "resolutionDate": "2026-08-07",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "reason": "The resolver's last attempt to fetch this target's source data, or the archive capture that corroborates it, did not return usable data.",
       "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.july_2026.first_print": {
@@ -178,7 +178,7 @@
       "resolutionDate": "2026-08-07",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "reason": "The resolver's last attempt to fetch this target's source data, or the archive capture that corroborates it, did not return usable data.",
       "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.july_2026.first_print": {
@@ -186,7 +186,7 @@
       "resolutionDate": "2026-08-07",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "reason": "The resolver's last attempt to fetch this target's source data, or the archive capture that corroborates it, did not return usable data.",
       "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
     },
     "bls.real_earnings.avg_hourly_mom.2026-07.first_print": {
@@ -310,7 +310,7 @@
       "resolutionDate": "2026-08-31",
       "state": "no_executor",
       "code": "NO_EXECUTOR_UNREGISTERED",
-      "reason": "No resolver covers this series. The forecast predates target registration."
+      "reason": "No resolver covers this series, and its target has no registered resolution contract."
     },
     "bls.jolts.hires_rate.2026_07.first_print": {
       "forecastSlug": "jolts-hires-rate-july-2026",
@@ -464,7 +464,7 @@
       "resolutionDate": "2026-09-10",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "reason": "The resolver's last attempt to fetch this target's source data, or the archive capture that corroborates it, did not return usable data.",
       "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print": {
@@ -472,7 +472,7 @@
       "resolutionDate": "2026-09-10",
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch this figure, from its source or from the archive that corroborates it, did not return usable data.",
+      "reason": "The resolver's last attempt to fetch this target's source data, or the archive capture that corroborates it, did not return usable data.",
       "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cpi.u.core_mom.august_2026.first_print": {
@@ -543,7 +543,7 @@
       "resolutionDate": "2026-09-15",
       "state": "no_executor",
       "code": "NO_EXECUTOR_UNREGISTERED",
-      "reason": "No resolver covers this series. The forecast predates target registration."
+      "reason": "No resolver covers this series, and its target has no registered resolution contract."
     },
     "ons.earnings.regular_pay_yoy.2026_07.first_print": {
       "forecastSlug": "uk-regular-pay-growth-may-jul-2026",
@@ -652,6 +652,6 @@
       "reason": "No resolver covers this series. The target was registered with a generic source link rather than a resolver binding."
     }
   },
-  "generatedAtUtc": "2026-09-29T03:28:23Z",
+  "generatedAtUtc": "2026-09-29T04:49:56Z",
   "workflowRun": "36503673388"
 }

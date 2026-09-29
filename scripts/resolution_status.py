@@ -110,8 +110,8 @@ REASONS = {
         "been rebuilt against that ledger state."
     ),
     "RELEASE_DAY_NOT_REACHED": (
-        "The resolver's verified release day for this figure is later than "
-        "the date shown on the forecast."
+        "The resolver's last run came before the release day it expects for "
+        "this figure."
     ),
     "NOT_YET_PUBLISHED": (
         "The resolver did not get this period's figure on its last run and "
@@ -119,8 +119,8 @@ REASONS = {
     ),
     "WINDOW_NOT_OPEN": "The registered release window for this figure has not opened.",
     "SOURCE_UNREACHABLE": (
-        "The resolver's last attempt to fetch this figure, from its source or "
-        "from the archive that corroborates it, did not return usable data."
+        "The resolver's last attempt to fetch this target's source data, or "
+        "the archive capture that corroborates it, did not return usable data."
     ),
     "UNIT_MISMATCH": (
         "The forecast is in a different unit from the one the resolver's "
@@ -134,9 +134,9 @@ REASONS = {
     ),
     "LEDGER_UNIT_CONFLICT": (
         "The ledger already holds this series in a different unit from the "
-        "one the resolver's adapter produces for it, so the resolver refused "
-        "it before fetching. The ledger has to hold the series in one unit "
-        "first."
+        "one the resolver's adapter produces for it. Recording this figure "
+        "would give the series two units, so the resolver refused it before "
+        "fetching."
     ),
     "LEDGER_CATALOG_REFUSED": (
         "The resolver read the official figure, but the ledger's series "
@@ -177,15 +177,16 @@ REASONS = {
         "generic source link rather than a resolver binding."
     ),
     "NO_EXECUTOR_UNREGISTERED": (
-        "No resolver covers this series. The forecast predates target registration."
+        "No resolver covers this series, and its target has no registered "
+        "resolution contract."
     ),
     "NO_EXECUTOR_SERIES_NOT_COVERED": (
         "No resolver covers this series, although its registration names a "
         "resolver family."
     ),
     "NO_REPORT": (
-        "A resolver covers this series, but its last run printed nothing "
-        "about this target."
+        "A resolver covers this series, but its last run printed no line "
+        "naming this target."
     ),
     "NO_RESOLVER_RUN": ("No resolver log was available when this status was written."),
 }
@@ -204,6 +205,10 @@ UNCLASSIFIED_REASONS = {
     "fetch_failed": (
         "The resolver did not get usable data from this target's source on "
         "its last run, for a reason this page does not yet classify."
+    ),
+    "unknown": (
+        "The resolver's last run printed a line about this target that this "
+        "page does not yet classify."
     ),
 }
 
@@ -242,6 +247,14 @@ _APPENDED_RE = re.compile(
 def _plain(text: str, limit: int = 240) -> str:
     """Resolver text made safe to reprint (page, JSON, Actions log)."""
     return _UNSAFE_RE.sub(" ", text).strip()[:limit].rstrip()
+
+
+def _classify(text: str) -> tuple[str, str] | None:
+    """(state, code) of the first rule matching `text`, or None."""
+    for pattern, state, code in _LINE_RULES:
+        if pattern.search(text):
+            return state, code
+    return None
 
 
 def _locate_ref(
@@ -313,15 +326,28 @@ def parse_resolver_log(
                 continue
             state, code = summary
         else:
-            for pattern, state, code in _LINE_RULES:
-                if pattern.search(words):
-                    break
-            else:
-                state, code = "refused", "UNCLASSIFIED"
+            # The verdict's own head decides first, so text interpolated
+            # after it (an exception message, a URL) cannot overrule it.
+            # Only a head no rule knows falls back to the whole message: an
+            # A-19 verdict can say "(deferring)" only at its end.
+            state, code = (
+                _classify(head)
+                or _classify(words)
+                or (
+                    "unknown",
+                    "UNCLASSIFIED",
+                )
+            )
         if code == "BINDING_MISMATCH" and not detail.strip():
             # "(refusing, registered A-19 contract differs in sourceBinding
-            # keys): <ref>" names the difference before the reference.
-            named = re.search(r"\(refusing, ([^)]*\bdiffers in [^)]+)\)", words)
+            # keys): <ref>" and "(skipping, registered adapter='bls-api' is
+            # not a alfred family): <ref>" name the difference before the
+            # reference.
+            named = re.search(
+                r"\((?:refusing|skipping), ([^)]*\b(?:differs in|registered "
+                r"adapter=)[^)]+)\)",
+                words,
+            )
             if named:
                 detail = named.group(1)
             else:

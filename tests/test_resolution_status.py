@@ -775,6 +775,86 @@ def test_any_log_parses_to_known_states_and_explained_codes(lines):
             "deferred",
             "fetch_failed",
             "refused",
+            "unknown",
         }
         assert row["code"] == "UNCLASSIFIED" or row["code"] in rs.REASONS
         assert not rs._UNSAFE_RE.search(row["detail"])
+
+
+# --- Review R24 ---
+
+
+def test_an_unregistered_target_is_not_said_to_predate_registration():
+    """R24 finding 1: the check is "no registered contract"; the two
+    Colorado forecasts were made after registration existed."""
+    ref = "co.dor.individual_income_tax.net_collections.2026_07.first_print"
+    row = _status(_log((ref, "s", "2026-08-31")), text="  x: y.z\n")["targets"][ref]
+    assert row["code"] == "NO_EXECUTOR_UNREGISTERED"
+    assert "predates" not in row["reason"]
+    assert "no registered resolution contract" in row["reason"]
+
+
+def test_a_named_adapter_family_mismatch_is_kept():
+    """R24 finding 2: resolve_pending prints the registered adapter when
+    it belongs to another family."""
+    ref = "bls.wp.WPSFD4.2026-07.first_print"
+    text = (
+        "  BINDING/ADAPTER MISMATCH (skipping, registered adapter='bls-api' is "
+        f"not a alfred family): {ref}\n"
+    )
+    row = _status(_log((ref, "s", "2026-08-13")), text=text)["targets"][ref]
+    assert row["code"] == "BINDING_MISMATCH"
+    assert "registered adapter='bls-api'" in row["detail"]
+
+
+def test_a_target_with_no_line_naming_it_is_not_said_to_have_none_printed():
+    """R24 finding 3: SBA refusals print no reference, so "printed nothing
+    about this target" can be false; "no line naming it" is what is known."""
+    ref = "sba.7a.loans.fy2026.first_print"
+    text = (
+        "  SBA CUSTODY ABSENT (refusing): no dedicated capture exists for "
+        "sba.7a fiscal year 2026\n"
+    )
+    row = _status(_log((ref, "s", "2026-09-01")), text=text, claimed=[ref])["targets"][
+        ref
+    ]
+    assert row["code"] == "NO_REPORT"
+    assert "printed no line naming this target" in row["reason"]
+
+
+def test_release_day_not_reached_says_only_that_the_run_came_first():
+    ref = "a.b.2026_08.first_print"
+    text = f"  release 2026-09-30 not reached: {ref}\n"
+    row = _status(_log((ref, "s", "2026-09-01")), text=text)["targets"][ref]
+    assert row["code"] == "RELEASE_DAY_NOT_REACHED"
+    assert "later than the date shown" not in row["reason"]
+    assert "came before the release day" in row["reason"]
+
+
+def test_a_line_with_no_marker_is_neither_a_refusal_nor_a_deferral():
+    """R24 finding 5: the intl adapters print "  <exception>: <ref>" for a
+    KeyError, e.g. "'data': <ref>", with no refusing or deferring marker."""
+    ref = "abs.cpi.all_groups.yoy.2026_08.first_print"
+    row = _status(_log((ref, "s", "2026-09-01")), text=f"  'data': {ref}\n")
+    row = row["targets"][ref]
+    assert (row["state"], row["code"]) == ("unknown", "UNCLASSIFIED")
+    assert row["reason"] == rs.UNCLASSIFIED_REASONS["unknown"]
+
+
+def test_the_verdicts_own_marker_beats_text_interpolated_after_it():
+    """R24 finding 6: an exception after the verdict cannot overrule it."""
+    ref = "bls.cps.employed_people_by_occupation.production.july_2026.first_print"
+    text = (
+        "  A-19 WAYBACK INDEX FETCH FAILED (deferring): ConnectionError: peer "
+        f"(refusing connections): {ref}\n"
+    )
+    row = _status(_log((ref, "s", "2026-08-06")), text=text)["targets"][ref]
+    assert (row["state"], row["code"]) == ("fetch_failed", "SOURCE_UNREACHABLE")
+    # A verdict whose marker comes only at its end still reads as its marker.
+    text = (
+        "  A-19 none of the rows read inside the registered window prints "
+        "2026-07 yet: the Archive's index lists 2 rows; 1 unread (deferring): "
+        f"{ref}\n"
+    )
+    row = _status(_log((ref, "s", "2026-08-06")), text=text)["targets"][ref]
+    assert row["state"] == "deferred"
