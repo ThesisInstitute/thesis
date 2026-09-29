@@ -341,7 +341,35 @@ Resolution and scoring code should preserve these invariants:
 - unresolved rows have null reward;
 - resolved rows link to official observations;
 - training cannot see future official outcomes;
-- reward rows include provenance hashes and activity-artifact count.
+- reward rows include provenance hashes and activity-artifact count;
+- a superseded Chronicle row never grades.
+
+Chronicle is append-only, so a correction is a new row whose
+`assertionVersion.supersedes` names the version it replaces. The site grades
+on the ledger's current view (`site/src/data/ledger-current-view.ts`, a port
+of receipt 0.6.2's `effective_current_rows`), which works as follows:
+
+- The correction grades in place of the row it supersedes, and it still has to
+  pass `getResolutionContractViolation`.
+- A pre-versioning row is addressed by its recomputed `av2` content address,
+  as the append gate addresses it.
+- Chronology and ledger membership (finding N5) come from the first print in
+  the correction's chain. A later-dated correction therefore cannot admit a
+  late run, and a correction cannot launder a print the registration's pinned
+  state already held.
+- Cutoff histories (baselines and normalization scales) use the view as of
+  the cutoff, so a correction accepted later never rewrites them.
+- A correction's resolution event gets its own id. Every other row keeps the
+  id it always had.
+
+The build also re-runs the append gate's assertion-version checks on the pinned
+rows. Every explicit id must equal its recomputed content address, and every
+supersede must name the active version of its record. If the port drifted from
+receipt anywhere it could change what grades, the build fails before any score
+is published.
+`scripts/generate_receipt_current_view_fixture.py` runs receipt itself over
+seeded ledgers to produce the fixture the port is tested against. Regenerate
+it whenever the `receipt` pin in `pyproject.toml` moves.
 
 A published target whose registration no resolver leg can execute is
 witnessed, not resolved. `witness-registered-windows.yml` asks the Internet

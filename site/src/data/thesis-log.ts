@@ -49,6 +49,15 @@ import {
 } from "./ledger-targets";
 import { createHash } from "node:crypto";
 import { canonicalStringify, sha256Hex } from "./canonical-json";
+import {
+  assertAppendGateAssertionVersions,
+  currentLedgerView,
+  firstAcceptedSequence,
+  firstObservedAt,
+  observationAssertionId,
+  observationSupersedes,
+  supersededContentAddresses,
+} from "./ledger-current-view";
 import ledgerPinJson from "./ledger-pin.json";
 import {
   LEDGER_AVAILABILITY,
@@ -136,6 +145,11 @@ export interface ObservationRecordedLedgerEntry extends ResolvedOutcome {
   // publisher's observedAt, which a backfill can predate.
   resolutionRecordedAt?: string;
   assertionVersion?: { id: string; supersedes: string | null };
+  // Set only on a pre-versioning row that a later correction supersedes: its
+  // av2 content address, which is the id that correction names. Every other
+  // row is addressed by its explicit assertionVersion.id or cannot be
+  // superseded at all (ledger-current-view.ts).
+  supersededContentAddress?: string;
   sourceBindingProjection?: SourceBindingProjection;
   responseArchive?: {
     path: string;
@@ -465,11 +479,30 @@ export function resetPolicyEngineLedgerCache() {
 export function parsePolicyEngineLedgerFacts(
   jsonl: string,
 ): PolicyEngineLedgerEntry[] {
-  return jsonl
+  const rows = jsonl
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => mapPolicyEngineAggregateFactToObservation(JSON.parse(line)));
+    .map((line) => JSON.parse(line) as unknown);
+  assertAppendGateAssertionVersions(rows);
+  return mapPolicyEngineLedgerRows(rows);
+}
+
+// Maps parsed Chronicle rows in ledger order. A pre-versioning row that a
+// correction supersedes also gets the content address that correction names,
+// so the current view can drop it after the raw row is gone. Callers verify
+// the append gate's assertion-version invariants first.
+export function mapPolicyEngineLedgerRows(
+  rows: readonly unknown[],
+): ObservationRecordedLedgerEntry[] {
+  const addresses = supersededContentAddresses(rows);
+  return rows.map((row, index) => {
+    const entry = mapPolicyEngineAggregateFactToObservation(
+      row as PolicyEngineAggregateFactRow,
+    );
+    const address = addresses[index];
+    return address ? { ...entry, supersededContentAddress: address } : entry;
+  });
 }
 
 function assertPinnedLedgerBytes(raw: Buffer, pin: PolicyEngineLedgerPin) {
@@ -658,17 +691,19 @@ async function fetchPolicyEngineLedger(): Promise<PolicyEngineLedgerEntry[]> {
     );
   }
   const raw = await fetchPinnedPolicyEngineLedgerBytes(pin);
-  const facts = raw
+  const lines = raw
     .toString("utf-8")
     .split("\n")
-    .filter((line) => line.trim())
-    .map((line, index) =>
-      enrichWithAcceptance(
-        mapPolicyEngineAggregateFactToObservation(JSON.parse(line)),
-        line,
-        index,
-      ),
-    );
+    .filter((line) => line.trim());
+  const rows = lines.map((line) => JSON.parse(line) as unknown);
+  // Grading reads the supersede-aware current view, so the site holds the
+  // pinned rows to the append gate's assertion-version invariants: a port
+  // that drifted from receipt fails the build here instead of letting a
+  // superseded row grade.
+  assertAppendGateAssertionVersions(rows);
+  const facts = mapPolicyEngineLedgerRows(rows).map((entry, index) =>
+    enrichWithAcceptance(entry, lines[index], index),
+  );
   return [...THESIS_TARGET_LEDGER, ...facts];
 }
 
@@ -930,10 +965,10 @@ function buildPredictionResolvedLogEntry(
   return {
     kind: "prediction_resolved",
     resolutionRef: buildResolutionRef(forecast.slug),
-    resolutionEventId: buildResolutionEventId({
-      forecastSlug: forecast.slug,
-      observationId: observation.observationId,
-    }),
+    resolutionEventId: buildObservationResolutionEventId(
+      forecast.slug,
+      observation,
+    ),
     forecastSlug: forecast.slug,
     recordedAt: observation.resolvedAt,
     dataPointId: observation.dataPointId,
@@ -1345,11 +1380,14 @@ export function buildForecastJudgeLogSummary(
   };
 }
 
+// Both lookups read the ledger's current view. An original and its
+// correction share observationId and dataPointId, so without it the
+// first-print sort ties them and keeps the superseded original.
 export function getObservationForId(
   observationId: string,
   ledger: PolicyEngineLedgerEntry[],
 ): ObservationRecordedLedgerEntry | undefined {
-  return ledger
+  return currentLedgerView(ledger)
     .filter(isObservationRecordedLedgerEntry)
     .filter((entry) => entry.observationId === observationId)
     .sort(compareFirstPrintObservations)[0];
@@ -1359,7 +1397,7 @@ export function getObservationsForDataPoint(
   dataPointId: string,
   ledger: PolicyEngineLedgerEntry[],
 ): ObservationRecordedLedgerEntry[] {
-  return ledger
+  return currentLedgerView(ledger)
     .filter(isObservationRecordedLedgerEntry)
     .filter((entry) => entry.dataPointId === dataPointId);
 }
@@ -1734,14 +1772,17 @@ export function getResolutionContractViolation(
   // Registration pinned a ledger state; a resolving print that was already
   // a member of that state is a backfill grading a pre-registered target
   // (finding N5: availability means membership, not publisher dates).
+  // A correction is judged on its chain's first acceptance, so correcting a
+  // print the pinned state already held cannot make it grade.
   if (typeof target.ledgerPinLineCount === "number") {
-    if (typeof observation.acceptedSequence !== "number") {
+    const acceptedSequence = firstAcceptedSequence(observation, ledger);
+    if (acceptedSequence === null) {
       return "post-quarantine observation has no ledger acceptance record";
     }
-    if (observation.acceptedSequence < target.ledgerPinLineCount) {
+    if (acceptedSequence < target.ledgerPinLineCount) {
       return (
         `observation was already inside the pinned ledger state at ` +
-        `registration (sequence ${observation.acceptedSequence} < pinned ` +
+        `registration (sequence ${acceptedSequence} < pinned ` +
         `count ${target.ledgerPinLineCount})`
       );
     }
@@ -1866,7 +1907,7 @@ export function evaluateResolvedForecastRun(
     run.variantId,
     run,
   );
-  const resolutionEventId = buildResolutionEventId(resolution);
+  const resolutionEventId = resolution.resolutionEventId;
   const scoringRule = "numeric_cdf_crps_v3_ledger_scale";
   const distributionProvenance = run.predictionDistribution.provenance;
   const transformVersion = getDistributionTransformVersion(
@@ -1874,12 +1915,15 @@ export function evaluateResolvedForecastRun(
   );
   const interval80Width = Math.abs(run.ciHigh - run.ciLow);
   const normalization = targetNormalizationScale(forecast, ledger);
+  // The outcome was public from its first print: a correction grades with
+  // its own value, but a run must precede the earliest print in its chain.
+  const observedAt = firstObservedAt(observation, ledger);
   const chronologyProof = classifyPublicationProof(
     run.predictionRun?.custodyRootSha256,
-    observation.observedAt,
+    observedAt,
   );
   const chronology = composeScoreChronology(
-    classifyScoreChronology(run.predictionRun?.runAt, observation.observedAt),
+    classifyScoreChronology(run.predictionRun?.runAt, observedAt),
     chronologyProof,
   );
 
@@ -1903,7 +1947,7 @@ export function evaluateResolvedForecastRun(
       normalizationScaleSource: normalization.source,
       normalizationScaleCutoff: normalization.cutoff,
       normalizationScaleObservationCount: normalization.observationCount,
-      observedAt: observation.observedAt,
+      observedAt,
       chronology,
       chronologyPolicy: CHRONOLOGY_POLICY_VERSION,
       // Whether the resolving observation was contract-bound is part of
@@ -1931,7 +1975,7 @@ export function evaluateResolvedForecastRun(
     chronology,
     chronologyProof,
     contractBinding,
-    observedAt: observation.observedAt,
+    observedAt,
     conditionId: condition?.conditionId ?? null,
     conditionStatus,
     ledgerFactRef: observation.dataPointId,
@@ -2037,6 +2081,28 @@ function buildResolutionEventId({
   return `resolution_event.${forecastSlug}.${observationId
     .replace(/^obs\./, "")
     .replace(/[^A-Za-z0-9]+/g, "-")}`;
+}
+
+// One resolution event per forecast and grading assertion. A row that
+// supersedes nothing keeps the id it always had. A correction shares its
+// original's observationId, so its event appends the correction's own
+// assertion version, and an event id never names two different outcomes.
+export function buildObservationResolutionEventId(
+  forecastSlug: string,
+  observation: ObservationRecordedLedgerEntry,
+): string {
+  const eventId = buildResolutionEventId({
+    forecastSlug,
+    observationId: observation.observationId,
+  });
+  if (observationSupersedes(observation) === null) return eventId;
+  const assertionId = observationAssertionId(observation);
+  if (!assertionId) {
+    throw new Error(
+      `correction ${observation.observationId} carries no assertion version id`,
+    );
+  }
+  return `${eventId}.${assertionId.replace(/[^A-Za-z0-9]+/g, "-")}`;
 }
 
 export function buildScoreId(payload: {
