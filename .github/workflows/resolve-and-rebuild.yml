@@ -337,10 +337,13 @@ jobs:
         # Two kinds of red get two titles (scripts/resolution_alert.py):
         # "Resolution rows refused" when the step above failed (its `if`
         # names no status function, so every earlier step succeeded or was
-        # skipped: the loop worked), naming each refused row; "Resolution
-        # loop failed" otherwise. A second red run on the same day comments
-        # on the open issue instead of vanishing. If the script or the
-        # issue call fails, the old title and one-line body still go out.
+        # skipped, the always-run status page aside: the loop worked),
+        # naming each refused row; "Resolution loop failed" otherwise. A
+        # second red run on the same day comments on the open issue instead
+        # of vanishing. If the script fails, the old title and one-line body
+        # go out; if the issue call fails, a one-line issue under the same
+        # title does (a call that failed only on our side can then post
+        # twice, which beats posting nothing).
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -369,10 +372,11 @@ jobs:
           cat /tmp/alert-body.md >> "$GITHUB_STEP_SUMMARY"
           existing=$(gh issue list --state open --search "\"$title\" in:title" \
             --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty" || true)
+          short="The alert body could not be posted; see $RUN_URL"
           if [ -z "$existing" ]; then
             gh issue create --title "$title" --body-file /tmp/alert-body.md \
-              || gh issue create --title "Resolution loop failed $(date -u +%F)" --body "$fallback"
+              || gh issue create --title "$title" --body "$short"
           else
             gh issue comment "$existing" --body-file /tmp/alert-body.md \
-              || gh issue create --title "Resolution loop failed $(date -u +%F)" --body "$fallback"
+              || gh issue create --title "$title" --body "$short"
           fi

@@ -169,6 +169,41 @@ def test_a_broken_loop_says_only_what_it_knows(
     assert says in alert["body"]
 
 
+def test_a_clean_resolver_exit_is_not_read_as_a_crash() -> None:
+    # A refusal reason can quote a generator traceback; when the resolve
+    # step itself succeeded, that text is not the resolver stopping.
+    log = (
+        "  resolve a.b.c -> 1.0 thousands\n"
+        "  CATALOG REFUSED (excluded from append): a.b.c — series-catalog "
+        "generator exit 1: Traceback (most recent call last):   File gen.py "
+        "KeyError: 'unit'\n"
+        "appended 1 observation(s) to o/r@b:l.jsonl via reviewed proposal "
+        f"(merged at {'b' * 40})\n"
+    )
+    alert = ra.build_alert(
+        log, refused_gate="skipped", run_url=URL, date=DATE, resolve_outcome="success"
+    )
+    assert "stopped on" not in alert["body"]
+    assert "may not be on the site yet" in alert["body"]
+    assert alert["refused"] == ["a.b.c"]
+
+
+def test_truncation_drops_whole_lines_and_stays_within_the_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(ra, "MAX_BODY_CHARS", 500)
+    lines = [f"- `row {n}`: `{'x' * 40}`" for n in range(100)]
+    body = ra._bounded(lines)
+    assert len(body) <= 500
+    assert body.endswith("(truncated; see the run)\n")
+    assert body.count("`") % 2 == 0
+    kept = [line for line in body.splitlines() if line.startswith("- ")]
+    assert kept == lines[: len(kept)]
+    # One line longer than the limit is dropped, not cut.
+    body = ra._bounded(["head", "`" + "y" * 600 + "`"])
+    assert len(body) <= 500 and "y" not in body and body.count("`") == 0
+
+
 @pytest.mark.parametrize(
     ("date", "url"),
     [
@@ -433,7 +468,10 @@ def _run_alert_step(
 ) -> list[list[str]]:
     """Run the workflow's own alert script against a fake ``gh``.
 
-    Like real ``gh --jq``, the fake prints nothing for a null result.
+    The fake narrows ``issue list`` by the ``"<phrase>" in:title`` search
+    the way GitHub does (phrase contained in the title), then applies the
+    step's ``--jq``; for a null result it prints nothing, which ``$(...)``
+    reads the same as real gh's blank line.
     """
     if shutil.which("jq") is None:
         pytest.skip("jq is needed to apply the step's --jq filter")
@@ -459,7 +497,11 @@ def _run_alert_step(
         "    sys.exit(1)\n"
         "if args[:2] == ['issue', 'list']:\n"
         "    expr = args[args.index('--jq') + 1]\n"
-        "    issues = os.environ['FAKE_ISSUES']\n"
+        "    issues = json.loads(os.environ['FAKE_ISSUES'])\n"
+        "    search = args[args.index('--search') + 1]\n"
+        "    phrase = search.split('\"')[1].lower()\n"
+        "    issues = [i for i in issues if phrase in i['title'].lower()]\n"
+        "    issues = json.dumps(issues)\n"
         "    out = subprocess.run(['jq', '-r', expr], input=issues,\n"
         "                         capture_output=True, text=True, check=True)\n"
         "    lines = [line for line in out.stdout.splitlines() if line != 'null']\n"
@@ -545,7 +587,10 @@ def test_if_the_script_fails_the_old_alert_still_goes_out(
     )
     create = calls[-1]
     assert create[create.index("--title") + 1] == f"Resolution loop failed {_today()}"
-    body = pathlib.Path(create[create.index("--body-file") + 1]).read_text()
+    if "--body-file" in create:
+        body = pathlib.Path(create[create.index("--body-file") + 1]).read_text()
+    else:
+        body = create[create.index("--body") + 1] + "\n"
     assert body == (
         f"The resolve-pending loop failed: {bad_url}. Unresolved cells stay "
         "pending — fix before the next release day.\n"
@@ -567,7 +612,8 @@ def test_if_the_issue_call_fails_a_one_line_issue_still_goes_out(
     )
     last = calls[-1]
     assert last[:2] == ["issue", "create"]
-    assert last[last.index("--title") + 1] == f"Resolution loop failed {_today()}"
-    assert last[last.index("--body") + 1].startswith(
-        f"The resolve-pending loop failed: {URL}."
+    # The degraded path keeps the classification.
+    assert last[last.index("--title") + 1] == title
+    assert last[last.index("--body") + 1] == (
+        f"The alert body could not be posted; see {URL}"
     )

@@ -63,7 +63,7 @@ EXIT_REFUSED_CODES = frozenset(
 MAX_LISTED_ROWS = 50
 MAX_BODY_CHARS = 60000
 _APPENDED_RE = re.compile(
-    r"^appended ([0-9]+) observation\(s\) to (\S+) via reviewed proposal "
+    r"^appended ([0-9]{1,9}) observation\(s\) to (\S+) via reviewed proposal "
     r"\(merged at ([0-9a-f]{40})\)"
 )
 _DATE_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
@@ -100,10 +100,22 @@ def _row_lines(rows: list[tuple[str, str]]) -> list[str]:
 
 
 def _bounded(lines: list[str]) -> str:
+    """The lines as a body of at most MAX_BODY_CHARS characters.
+
+    Whole lines are dropped from the end, never cut, so no code span is
+    left open."""
     body = "\n".join(lines) + "\n"
     if len(body) <= MAX_BODY_CHARS:
         return body
-    return body[:MAX_BODY_CHARS].rsplit("\n", 1)[0] + "\n\n(truncated; see the run)\n"
+    trailer = "\n(truncated; see the run)\n"
+    kept: list[str] = []
+    size = len(trailer)
+    for line in lines:
+        if size + len(line) + 1 > MAX_BODY_CHARS:
+            break
+        kept.append(line)
+        size += len(line) + 1
+    return "\n".join(kept) + "\n" + trailer
 
 
 def build_alert(
@@ -119,12 +131,16 @@ def build_alert(
 
     ``refused_gate`` is the outcome of the "Fail the run on refused rows"
     step. Its ``if`` names no status function, so it runs only when every
-    earlier step succeeded or was skipped, and it always exits 1. "failure"
+    earlier step succeeded or was skipped (the always-run status page may
+    fail without stopping it; it publishes nothing but the status file),
+    and it always exits 1. "failure"
     there therefore means the loop worked and the job failed on refused rows;
     ``needs_publish`` then says whether anything new was published or there
     was nothing new to publish. Any other gate outcome ("skipped", "", or
     anything unexpected) means the loop itself broke; ``resolve_outcome``
-    ("success"/"failure") says whether the resolver was the step that broke.
+    ("success"/"failure") says whether the resolver was the step that broke;
+    when it succeeded, text in its log that looks like a traceback (a
+    refusal reason can quote one) is not read as a crash.
     """
 
     if not _DATE_RE.fullmatch(date):
@@ -179,14 +195,7 @@ def build_alert(
         lines.append(
             "The resolver printed nothing: it did not start or its log was lost."
         )
-    elif run["error"]:
-        lines.append(f"The resolver stopped on: {_code(run['error'])}")
-    elif resolve_outcome == "failure":
-        lines.append(
-            "The resolve step failed without a traceback; read its log for the "
-            "exit status."
-        )
-    elif appended:
+    elif resolve_outcome == "success" and appended:
         lines.append(
             f"The resolver appended {appended.group(1)} observation(s) (merged "
             f"at {_code(appended.group(3))}); a later step failed, so they may "
@@ -194,6 +203,13 @@ def build_alert(
         )
     elif resolve_outcome == "success":
         lines.append("The resolver finished; a later step failed.")
+    elif run["error"]:
+        lines.append(f"The resolver stopped on: {_code(run['error'])}")
+    elif resolve_outcome == "failure":
+        lines.append(
+            "The resolve step failed without a traceback; read its log for the "
+            "exit status."
+        )
     else:
         lines.append("Read the run's log for the step that failed.")
     if rows:
