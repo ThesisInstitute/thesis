@@ -102,9 +102,10 @@ runtime question; whether any code could ever read it is not.
   and the BLS API family.
 - A resolved fact must not give a Chronicle lineage a second unit: Chronicle's
   catalog build refuses it. The resolver then leaves that row out
-  (`CATALOG REFUSED`), appends and publishes the rest, and the run ends red
-  with a "Resolution rows refused" issue naming the row. Do not register a
-  series whose facts would do that: the six Table A-19 specs carry
+  (`CATALOG REFUSED`) and appends the rest. If the rest of the run succeeds,
+  the run ends red with a "Resolution rows refused" issue naming the row; if
+  a later step fails, the "Resolution loop failed" issue names it. Do not
+  register a series whose facts would do that: the six Table A-19 specs carry
   `registration_hold` until the Chronicle change in decision d397. Behind the
   hold, the BLS API leg refuses such a capture (`LEDGER UNIT CONFLICT`).
 - Existing snapshots are never re-judged: retries reuse them, and what happens

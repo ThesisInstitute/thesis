@@ -335,23 +335,28 @@ jobs:
 
       - name: Alert on failure
         # Two kinds of red get two titles (scripts/resolution_alert.py):
-        # "Resolution rows refused" when the run published and then failed
-        # on refused rows (the step above failed, so every step before it
-        # succeeded), naming each refused row; "Resolution loop failed"
-        # otherwise. A second red run on the same day comments on the open
-        # issue instead of vanishing. If the script cannot run, the old
-        # title and body still go out.
+        # "Resolution rows refused" when the step above failed (its `if`
+        # names no status function, so every earlier step succeeded or was
+        # skipped: the loop worked), naming each refused row; "Resolution
+        # loop failed" otherwise. A second red run on the same day comments
+        # on the open issue instead of vanishing. If the script or the
+        # issue call fails, the old title and one-line body still go out.
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REFUSED_GATE: ${{ steps.refused_gate.outcome }}
+          RESOLVE_OUTCOME: ${{ steps.resolve.outcome }}
+          NEEDS_PUBLISH: ${{ steps.ledger.outputs.needs_publish }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           [ -f /tmp/resolve-out.log ] || : > /tmp/resolve-out.log
+          fallback="The resolve-pending loop failed: $RUN_URL. Unresolved cells stay pending — fix before the next release day."
           if python3 scripts/resolution_alert.py \
               --resolver-log /tmp/resolve-out.log \
               --refused-gate "$REFUSED_GATE" \
+              --resolve-outcome "$RESOLVE_OUTCOME" \
+              --needs-publish "$NEEDS_PUBLISH" \
               --run-url "$RUN_URL" \
               --date "$(date -u +%F)" \
               --out /tmp/alert.json; then
@@ -359,13 +364,15 @@ jobs:
             python3 -c 'import json; print(json.load(open("/tmp/alert.json"))["body"], end="")' > /tmp/alert-body.md
           else
             title="Resolution loop failed $(date -u +%F)"
-            printf '%s\n' "The resolve-pending loop failed: $RUN_URL. Unresolved cells stay pending — fix before the next release day." > /tmp/alert-body.md
+            printf '%s\n' "$fallback" > /tmp/alert-body.md
           fi
           cat /tmp/alert-body.md >> "$GITHUB_STEP_SUMMARY"
           existing=$(gh issue list --state open --search "\"$title\" in:title" \
             --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty" || true)
           if [ -z "$existing" ]; then
-            gh issue create --title "$title" --body-file /tmp/alert-body.md
+            gh issue create --title "$title" --body-file /tmp/alert-body.md \
+              || gh issue create --title "Resolution loop failed $(date -u +%F)" --body "$fallback"
           else
-            gh issue comment "$existing" --body-file /tmp/alert-body.md
+            gh issue comment "$existing" --body-file /tmp/alert-body.md \
+              || gh issue create --title "Resolution loop failed $(date -u +%F)" --body "$fallback"
           fi
