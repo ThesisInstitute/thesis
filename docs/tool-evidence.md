@@ -5,7 +5,7 @@ Native Codex analyst runs configure the repository-owned
 including complete fetched response bodies, independently of the model's written
 reasoning. Each draft, review, and final stage has its own call sequence.
 
-The first version offers three tools:
+The recorder offers four tools:
 
 - `fetch_source(url)` fetches an unauthenticated public HTTPS URL. The recorder
   retains the complete body as base64, SHA-256, byte count, response metadata,
@@ -20,6 +20,17 @@ The first version offers three tools:
   captured response. Verification re-extracts the value from the preserved
   bytes. CSV, HTML, and PDF bodies can be preserved, but this version does not
   claim to replay extraction from those formats.
+- `extract_irs_soi(sourceCallId, seriesId, year)` parses a previously captured
+  official IRS Table 3.3 XLS workbook with the existing reviewed Publication
+  1304 adapter. The exact official URL, tax-year title, sheet, concept header,
+  subcolumn, and total row must match. It returns the raw count or amount, the
+  registered transform and unit, the normalized numeric value, and source
+  call/hash identity. Replay runs the same parser on the captured bytes with
+  pinned `xlrd==2.0.1`; it performs no network request. Other workbook formats,
+  unknown series, ambiguous layouts and oversized sheets fail closed.
+  The ACTC claimant series counts total claimants, not the separate
+  refundable-portion subset. Reviewed anchors are cross-checks, not a limit
+  on available history. The six-print requirement still applies.
 - `calculate(expression, inputs)` evaluates restricted arithmetic. Named inputs
   may be supplied numbers or numeric arrays, or refer to prior
   extraction/calculation call IDs. Referenced numeric strings are converted
@@ -59,28 +70,38 @@ same deterministic argument projection, so a rejected HTTP URL followed by a
 successful HTTPS retry remains auditable. The runner separately redacts URL
 credentials from native logs before sealing them; evidence sanitization alone
 would not remove a secret from the model platform's original event stream.
+The MCP terminal presentation applies that same redaction before replying, so
+its text JSON and structured result remain identical after native-log hygiene.
+New calls bind `terminalProjectionVersion: 1` in both the capture and native
+result. Calls without that field retain the original exact presentation for
+historical custody replay; unknown versions are refused. Excessively nested
+JSON uses a bounded presentation marker without changing captured source data.
+Complete source bytes and replayable results remain unchanged in the capture;
+custody compares the exact deterministic presentation, without accepting other
+result differences. Arguments still require exact identity except for the
+existing rejected-URL projection. Mismatch diagnostics list field names only.
 
 When the stage ends, the runner also binds every recorded call to exactly one
 native MCP completion event in the redacted stream it archives; a stage whose
 stream does not account for a recorded call fails as one run instead of
 blocking a whole docket publication. `scripts/verify_custody.py` recomputes
 the report and repeats that binding from the archived stream, using the same
-function, so the publication claim does not depend on the runner. The attested publisher also checks
-the exact repository-owned server configuration. Changing a body, call result,
-dependency, replay verdict, or artifact reference fails verification. A failed
-stage may preserve an incomplete event stream without being promoted as a
-successful run.
+function, so the publication claim does not depend on the runner. The attested
+publisher also checks the exact repository-owned server configuration. Changing
+a body, call result, dependency, replay verdict, or artifact reference fails
+verification. A failed stage may preserve an incomplete event stream without
+being promoted as a successful run.
 
 For a standalone evidence artifact:
 
 ```bash
-uv run python scripts/tool_evidence.py --verify /path/to/tool_evidence.json
+uv run --extra custody python scripts/tool_evidence.py --verify /path/to/tool_evidence.json
 ```
 
 For a complete analyst run:
 
 ```bash
-uv run python scripts/verify_custody.py /path/to/run
+uv run --extra custody python scripts/verify_custody.py /path/to/run
 ```
 
 These artifacts feed Thesis's existing publication custody and Receipt-backed
@@ -109,3 +130,27 @@ security principal. Receipt protects published artifact custody and identity;
 it does not prove model authorship, source truth, completeness of all tool
 activity, or correctness of judgment. Stronger execution claims require an
 isolated trusted recorder or externally attested execution environment.
+
+## Publication secret scanning
+
+The publication and diagnostic-archive scanners inspect complete captured HTTP
+bodies as decoded bytes. A binary body's base64 representation can coincidentally
+match a credential pattern. A fresh diagnostic fetch of the public IRS
+`22in33ar.xls` workbook reproduced this for a response hash recorded in strategy
+attempt 35808962969. That attempt remains failed; three evidence files omitted
+by its diagnostic secret scan cannot be reconstructed.
+
+The scanner uses this interpretation only for a strict UTF-8, duplicate-free,
+recognized evidence envelope that passes the existing complete offline replay.
+Canonical base64, body length, SHA-256, response identity, and resource bounds
+must all verify. Only the exact response `bodyBase64` string spans are excluded
+from text scanning. The unchanged surrounding bytes, all other decoded JSON
+strings and keys, and every decoded response body are scanned with the existing
+credential patterns. Arbitrary base64 receives no exemption; malformed recognized
+envelopes block publication. This read-only scanning view never rewrites evidence,
+native events, replay results, or custody commitments.
+
+JSON-object candidates above the evidence artifact-size limit are also refused
+before parsing, including ordinary JSON objects whose type cannot be safely
+established within that bound. Escaped or late metadata cannot turn an oversized
+capture into an unscanned response body.

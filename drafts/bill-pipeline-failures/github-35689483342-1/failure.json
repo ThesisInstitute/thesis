@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "thesis_failed_workflow_observation_v1",
+  "runId": 35689483342,
+  "runAttempt": 1,
+  "url": "https://github.com/ThesisInstitute/thesis/actions/runs/35689483342",
+  "sourceSha": "4417984e1ac42080c99c714fdc3b8752b112eeb6",
+  "observedAt": "2026-09-22T05:22:02.053830+00:00",
+  "failure": {
+    "log": "/tmp/thesis-actc-35689483342-generate.log",
+    "selectionPassed": true,
+    "generationReturnedTwoFailedRuns": true,
+    "runDirectories": [
+      "records/thesis-analyst/2026-09-22/2026-09-22t05-10-34z-irs-actc-total-claims-2027",
+      "records/thesis-analyst/2026-09-22/2026-09-22t05-14-39z-irs-actc-total-claims-2027"
+    ],
+    "validationErrors": [
+      "Both: resolve-by-bound target requires generation ticket context",
+      "Second: historicalContext4 distinct canonical prints below6; no approved exception"
+    ],
+    "stagingError": "draft_tool evidence call call-0001 differs from its native event",
+    "preservationLimit": "Workflow uploaded only selection/probe artifacts. Stage failed before generation bundle upload; native run bytes are not available in Actions artifacts. Keep exact logs/selection/failure metadata; cannot reconstruct lost runner files or claim full failed-attempt custody.",
+    "published": false,
+    "recorderDispatched": false
+  },
+  "githubArtifacts": [
+    {
+      "id": 10678057748,
+      "name": "strategy-selection-probe-35689483342-1",
+      "size_in_bytes": 3265,
+      "digest": "sha256:d55479c02faa2610e83374fed903032bc02216482ec97448c60b6e4ea94bcabd",
+      "expired": false,
+      "created_at": "2026-09-22T05:09:54Z"
+    },
+    {
+      "id": 10677932966,
+      "name": "strategy-selection-35689483342-1",
+      "size_in_bytes": 3365,
+      "digest": "sha256:f31dcd626f3559e57941d4ddcd56fb7e7dec8e22049f94f58e570df33e8ca71b",
+      "expired": false,
+      "created_at": "2026-09-22T05:09:56Z"
+    }
+  ],
+  "retainedFiles": [
+    {
+      "path": "generate.log",
+      "sha256": "faee052004ec54bdb7d7a38d62cdaf350d16f2184bbe4fdfc8413eefa6f7fced",
+      "bytes": 77869
+    },
+    {
+      "path": "strategy-targets.json",
+      "sha256": "92d25dfb5fd639a7ae7ceed7e758f1cbb06ffe40e6b4c574400eb50fc8856dc8",
+      "bytes": 13128
+    }
+  ]
+}

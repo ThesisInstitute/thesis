@@ -26,11 +26,17 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
+      - uses: astral-sh/setup-uv@v5
       - uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Provision custody replay runtime
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
       - uses: oven-sh/setup-bun@v2
 

@@ -44,10 +44,15 @@ same-unit PolicyEngine Ledger observations available when the target was
 registered. Legacy targets use the primary run seal as that cutoff. The scale is
 shared by every run on a `dataPointId`; forecast-authored `historicalContext` and
 forecast interval widths are never normalization inputs. With fewer than three
-pre-cutoff ledger observations (or zero usable dispersion), the raw CRPS and
-absolute error remain public, while normalized CRPS, normalized absolute error,
-sharpness, reward, leaderboard means, and paired skill are null or exclude the
-row.
+pre-cutoff ledger observations — or a dispersion of exactly zero — the scale is
+unavailable: raw CRPS and absolute error remain public while normalized CRPS,
+normalized absolute error, sharpness, and reward are null. A positive but
+sub-epsilon dispersion (binary-float residue from an exactly-linear series) is
+numerical zero with a different footprint: the normalized fields and reward
+publish their raw values, but every normalized aggregate — leaderboard means,
+the calibration and judge-calibration reports, Strategy Lab summaries —
+excludes the row. Paired skill compares raw CRPS against the persistence
+baseline and works either way.
 
 Same-series membership comes from exact target registrations and each
 observation's matching contract hash and source-binding projection;
@@ -64,9 +69,10 @@ required. Targets without that history carry an explicit unavailable baseline
 record; forecast-supplied `historicalContext` is never a baseline input.
 
 The leaderboard reports unpaired means as descriptive statistics, but ranks
-agents by the target-paired difference `agent normalizedCrps - persistence
-normalizedCrps`. It also reports the share of paired targets where the agent's
-normalized CRPS is lower than persistence.
+agents by the geometric mean of per-target raw CRPS ratios (agent over paired
+persistence baseline; below 1 beats persistence), tie-breaking on unpaired
+mean reward and then scored-run count. It also reports the share of paired
+targets where the agent's CRPS beats the baseline's on the same target.
 
 ## LLM Judges
 

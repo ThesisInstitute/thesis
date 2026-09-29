@@ -1,0 +1,165 @@
+{
+  "slug": "s3596-119",
+  "bill": {
+    "slug": "s3596-119",
+    "name": "Stronger Start for Working Families Act",
+    "status": "Introduced in Senate",
+    "pages": 0,
+    "analyzed": "Analyzed the introduced text supplied for S. 3596, focused on section 2 amendments to Internal Revenue Code section 24 affecting the refundable child tax credit earned income threshold, conforming amendment, and effective date.",
+    "analysisDate": "2026-09-22",
+    "sourceUrl": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml"
+  },
+  "provisions": [
+    {
+      "title": "Earned income threshold for refundable child tax credit",
+      "heading": "Earned income threshold for refundable child tax credit",
+      "quote": "2. Earned income threshold for refundable child tax credit (a) In general Section 24(d)(1)(B)(i)  of the Internal Revenue Code of 1986 is amended by striking  $3,000  and inserting  $1 . (b) Conforming amendment Section 24(h) of such Code is amended by striking paragraph (6). (c) Effective date The amendments made by this section shall apply to taxable years beginning after December 31, 2025.",
+      "goals": [
+        "Expand access to the refundable child tax credit for taxpayers with earned income below the current threshold.",
+        "Increase after-tax resources for low-earning working families with qualifying children.",
+        "Reduce child poverty or material hardship among affected households."
+      ],
+      "effects": [
+        {
+          "mechanism": "Threshold reduction",
+          "text": "Replacing the $3,000 earned income threshold with $1 would allow otherwise eligible taxpayers with very low earned income to begin qualifying for the refundable portion of the child tax credit sooner."
+        },
+        {
+          "mechanism": "Refund delivery",
+          "text": "If eligible families file returns and claim the credit, the statutory change could increase refundable credit amounts paid to low-earning households after tax filing."
+        },
+        {
+          "mechanism": "Fiscal offset",
+          "text": "Larger refundable credit eligibility could increase federal outlays or reduce receipts relative to current law, with the realized effect depending on take-up, eligibility, and filing behavior."
+        },
+        {
+          "mechanism": "Incomplete take-up",
+          "text": "Families with little earned income may have low filing rates or face documentation barriers, which could dampen the intended benefit even if eligibility expands."
+        }
+      ],
+      "barriers": [
+        {
+          "actor": "Internal Revenue Service",
+          "text": "The IRS would need to update forms, instructions, eligibility logic, taxpayer-facing guidance, and processing systems for taxable years beginning after December 31, 2025."
+        },
+        {
+          "actor": "Taxpayers and preparers",
+          "text": "Eligible low-earning families would need to file returns, document earned income and qualifying children, and understand the changed refundable credit threshold."
+        },
+        {
+          "actor": "Treasury and IRS compliance administrators",
+          "text": "Lowering the threshold may increase the importance of verifying eligibility while avoiding delays or mistaken denials for households newly eligible for refunds."
+        }
+      ],
+      "metrics": [
+        {
+          "kind": "Refundable child tax credit amount",
+          "text": "Annual total amount of Additional Child Tax Credit claimed, as an outcome measure of refundable credit dollars delivered after the threshold change.",
+          "series_hint": "irs.actc.total_credit_amount",
+          "rationale": "This is the closest supplied IRS concept for the direct statutory outcome because the bill changes refundability under section 24. It measures dollars claimed rather than the exact marginal increase caused by the bill, so analysis would need a baseline or microsimulation to isolate the proposal's contribution.",
+          "layer": "outcome",
+          "category": "intended",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "serves"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "serves"
+            }
+          ],
+          "registry": "reachable",
+          "matched_series": "irs.actc.total_credit_amount"
+        },
+        {
+          "kind": "Refundable child tax credit claims",
+          "text": "Annual total number of Additional Child Tax Credit claims, used to track whether more households participate in the refundable credit after eligibility expands.",
+          "series_hint": "irs.actc.total_claims",
+          "rationale": "Claims illuminate the take-up mechanism behind the policy, but they are a participation measure and can move because of filing behavior, demographics, or outreach rather than the threshold change alone. It should complement, not replace, dollar and poverty outcomes.",
+          "layer": "participation",
+          "category": "operational",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "serves"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ],
+          "registry": "reachable",
+          "matched_series": "irs.actc.total_claims"
+        },
+        {
+          "kind": "Child poverty rate",
+          "text": "Supplemental Poverty Measure child poverty rate, as a recurring official outcome for whether expanded refundability is associated with reduced child poverty.",
+          "series_hint": "census.spm.child_poverty_rate",
+          "rationale": "The SPM is a more relevant poverty metric than broad labor or inflation series because refundable tax credits affect after-tax resources. It is annual and population-wide, so it may be too coarse to detect this bill alone and cannot identify eligible families below the former earned income threshold without additional microdata.",
+          "layer": "outcome",
+          "category": "intended",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "serves"
+            }
+          ],
+          "registry": "reachable",
+          "matched_series": "census.spm.child_poverty_rate"
+        },
+        {
+          "kind": "Federal budget balance",
+          "text": "Monthly federal deficit, monitored as a broad adverse fiscal outcome if refundable credit outlays rise or receipts fall.",
+          "series_hint": "treasury.mts.monthly_deficit",
+          "rationale": "The supplied docket includes a recurring Treasury deficit series that can reflect fiscal pressure, but it is far broader than this tax credit and will be dominated by unrelated revenue and spending changes. A more precise recurring tax-expenditure or ACTC outlay series would be preferable if separately ingested.",
+          "layer": "outcome",
+          "category": "unintended",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
+            }
+          ],
+          "registry": "reachable",
+          "matched_series": "treasury.mts.monthly_deficit"
+        }
+      ],
+      "conditionals": [
+        "Applies only to taxable years beginning after December 31, 2025.",
+        "The taxpayer must otherwise qualify for the refundable child tax credit under Internal Revenue Code section 24.",
+        "The analyzed effect depends on enactment and IRS implementation of the amended $1 earned income threshold."
+      ]
+    }
+  ],
+  "summary": {
+    "reachable": 4,
+    "ledger": 0,
+    "notYet": 0,
+    "unmapped": 0
+  }
+}

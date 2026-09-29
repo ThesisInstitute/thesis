@@ -21,7 +21,18 @@ concurrency: resolve-pending
 jobs:
   resolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Successful runs took 1-11 minutes through August 2026 and the resolve
+    # step alone 14-17 minutes by mid-September as the pending set grew. At
+    # 30 minutes the 2026-09-03 run was cancelled in the pin step, after it
+    # had appended five observations to the ledger, so the site went on
+    # showing them as pending. The next run heals that (the ledger head no
+    # longer equals records/resolutions/latest.json, so needs_publish is 1),
+    # but only if it gets that far. Leave real headroom. A run that takes
+    # longer than the 37 minutes before the recorder's 14:17 slot can now
+    # overlap it, and that day's snapshot would then predate the fresh
+    # resolutions. The next snapshot picks them up; a cancelled run loses
+    # the publish outright, so the longer cap is the better trade.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
         with:
@@ -63,7 +74,25 @@ jobs:
           # Stream resolver output while capturing it: command substitution
           # swallowed stdout whenever the resolver failed, hiding which
           # cells resolved or deferred before the failure.
-          python3 scripts/resolve_pending.py 2>&1 | tee /tmp/resolve-out.log
+          # -u: through the pipe Python block-buffers stdout, so every line
+          # carried the timestamp of the flush, not of the event, and a run
+          # that died mid-buffer lost its last lines.
+          # Exit 3 (EXIT_REFUSED_ROWS) means the resolver finished cleanly
+          # but refused some rows: what it appended must still be committed
+          # and published, so the step goes on and the job fails at the end
+          # ("Fail the run on refused rows"). Any other failure stops here.
+          set +e
+          python3 -u scripts/resolve_pending.py 2>&1 | tee /tmp/resolve-out.log
+          statuses=("${PIPESTATUS[@]}")
+          set -e
+          resolver_rc=${statuses[0]}
+          if [ "${statuses[1]}" -ne 0 ]; then
+            exit "${statuses[1]}"
+          fi
+          if [ "$resolver_rc" -ne 0 ] && [ "$resolver_rc" -ne 3 ]; then
+            exit "$resolver_rc"
+          fi
+          echo "resolver_rc=$resolver_rc" >> "$GITHUB_OUTPUT"
           if grep -q "^appended" /tmp/resolve-out.log; then
             echo "appended=1" >> "$GITHUB_OUTPUT"
           else
@@ -255,6 +284,13 @@ jobs:
         uses: ./.github/actions/attest-records-push
         with:
           commit: ${{ steps.deployed_ledger.outputs.pushed_sha }}
+
+      - name: Fail the run on refused rows
+        if: steps.resolve.outputs.resolver_rc == '3'
+        run: |
+          echo "The resolver refused one or more rows (see 'Resolve pending" >&2
+          echo "cells'); everything it appended was committed and published." >&2
+          exit 1
 
       - name: Alert on failure
         if: failure()

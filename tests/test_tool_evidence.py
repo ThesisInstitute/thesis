@@ -483,6 +483,7 @@ def test_no_fetch_stage_omits_tool_and_refuses_direct_call(tmp_path):
     reply = mcp.handle_request({"id": 1, "method": "tools/list"}, recorder)
     assert {tool["name"] for tool in reply["result"]["tools"]} == {
         "extract_json",
+        "extract_irs_soi",
         "calculate",
     }
     call = recorder.call("fetch_source", {"url": URL})

@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-09-23T08:17:47Z",
+  "finishedAt": "2026-09-23T08:22:23Z",
+  "promptMode": "ladder",
+  "timeoutSeconds": 540,
+  "targets": 2,
+  "ok": 2,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "anchors": {
+          "2020": 19.119,
+          "2021": 37.772,
+          "2022": 18.077,
+          "2023": 17.626
+        },
+        "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+        "comparisonTarget": true,
+        "conditionDeadline": "2027-12-31",
+        "conditionId": "cond.s3596-actc-threshold.current-law",
+        "conditional": "No legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+        "country": "US",
+        "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+        "expectedReleaseWindow": {
+          "end": "2029-12-31",
+          "start": "2029-01-01"
+        },
+        "period": "2027",
+        "publishedResolutionDate": "2029-12-31",
+        "registeredAtUtc": "2026-08-03T20:13:09Z",
+        "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+        "resolutionDate": "2029-12-31",
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolve from the first IRS SOI Publication 1304 Table 3.3 print for tax year 2027: All returns, total row; Refundable child tax credit or additional child tax credit; Number of returns. Multiply the published whole-return count by 0.000001 and retain six decimal places in millions. Later revisions are irrelevant. The registered IRS release window is 2029-01-01 through 2029-12-31, with 2029-12-31 retained as the registered resolutionDate because no exact IRS publication-calendar day is registered. Evaluate the condition on 2027-12-31; if the condition fails, mark this conditional cell unresolved rather than resolving it from the tax-year print.",
+        "resolutionSource": "Internal Revenue Service, SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+        "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+        "series": "irs.actc.total_claims",
+        "sourceBinding": {
+          "adapter": "irs-soi-pub1304",
+          "allowedHosts": [
+            "www.irs.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2029-12-31",
+            "start": "2029-01-01"
+          },
+          "field": "refundable_child_tax_credit_returns",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "irs.actc.total_claims",
+          "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+          "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "b92e9752beaf38a9e2e735c5066e7c741e29436546e7fab2c8d0568f05355909",
+        "targetRegistrationPath": "records/targets/2026-08-03-b92e9752beaf38a9e2e735c5066e7c741e29436546e7fab2c8d0568f05355909.json",
+        "targetUnit": "millions",
+        "valueScale": 1e-06
+      },
+      "startedAt": "2026-09-23T08:17:47Z",
+      "finishedAt": "2026-09-23T08:20:03Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-23/2026-09-23t08-17-47z-irs-actc-total-claims-2027/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-23/2026-09-23t08-17-47z-irs-actc-total-claims-2027/cells.with_activity.json",
+      "stdoutTail": "f\",\n      \"bytes\": 28508,\n      \"createdAt\": \"2026-09-23T08:17:47Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-23/2026-09-23t08-17-47z-irs-actc-total-claims-2027/distribution.json\",\n      \"sha256\": \"56907ca5e41c1757d24817a75574b50eb61305927e4cb0e0ec9b4a8dc6469d68\",\n      \"bytes\": 15588,\n      \"createdAt\": \"2026-09-23T08:17:47Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-23/2026-09-23t08-17-47z-irs-actc-total-claims-2027/validation.json\",\n      \"sha256\": \"2de368c0849ffd7a3a6ab797875267a0e2a511f58af85de18a3e6c05962778c6\",\n      \"bytes\": 160,\n      \"createdAt\": \"2026-09-23T08:17:47Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-23/2026-09-23t08-17-47z-irs-actc-total-claims-2027/cells.with_activity.json\",\n      \"sha256\": \"450a4b35a11830d5931010b1db3b6366f2bffe8684f6f688053cbacf0ea5966b\",\n      \"bytes\": 46267,\n      \"createdAt\": \"2026-09-23T08:17:47Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-23/2026-09-23t08-17-47z-irs-actc-total-claims-2027/manifest.json\",\n      \"sha256\": \"33fbd70052f1f7f56243e184a742138d0e2b8aa3060e5f0ae45a12b034857d09\",\n      \"bytes\": 19418,\n      \"createdAt\": \"2026-09-23T08:17:47Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"additional-child-tax-credit-total-claims-ty2027-current-law\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"94c0466c8a214f12853f1fef66582412f9860f68\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"8d6863dd0219529aaa686eb43177501ede5c760c8161aa037454a9cf9adec716\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "anchors": {
+          "2020": 19.119,
+          "2021": 37.772,
+          "2022": 18.077,
+          "2023": 17.626
+        },
+        "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+        "comparisonTarget": true,
+        "conditionDeadline": "2027-12-31",
+        "conditionId": "cond.s3596-actc-threshold.enacted",
+        "conditional": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+        "country": "US",
+        "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+        "expectedReleaseWindow": {
+          "end": "2029-12-31",
+          "start": "2029-01-01"
+        },
+        "period": "2027",
+        "publishedResolutionDate": "2029-12-31",
+        "registeredAtUtc": "2026-08-03T20:13:09Z",
+        "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+        "resolutionDate": "2029-12-31",
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "If the condition in conditionalOn is satisfied, resolve from the first IRS publication of tax-year 2027 Publication 1304 Table 3.3: the 'All returns, total' row and 'Number of returns' subcolumn under 'Refundable child tax credit or additional child tax credit.' The series is annual and not seasonally adjusted. The adapter returns the published whole-return count; multiply it by 0.000001 to express it in millions. Later revisions are irrelevant. The registered official-source release window is 2029-01-01 through 2029-12-31, with resolutionDate set to its verified by-date endpoint, 2029-12-31. If the stated legislative condition is not satisfied by 2027-12-31, mark this conditional forecast unresolved.",
+        "resolutionSource": "IRS Statistics of Income, Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+        "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+        "series": "irs.actc.total_claims",
+        "sourceBinding": {
+          "adapter": "irs-soi-pub1304",
+          "allowedHosts": [
+            "www.irs.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2029-12-31",
+            "start": "2029-01-01"
+          },
+          "field": "refundable_child_tax_credit_returns",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "irs.actc.total_claims",
+          "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+          "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+        "targetRegistrationPath": "records/targets/2026-08-03-6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6.json",
+        "targetUnit": "millions",
+        "valueScale": 1e-06
+      },
+      "startedAt": "2026-09-23T08:20:03Z",
+      "finishedAt": "2026-09-23T08:22:23Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-23/2026-09-23t08-20-03z-irs-actc-total-claims-2027/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-23/2026-09-23t08-20-03z-irs-actc-total-claims-2027/cells.with_activity.json",
+      "stdoutTail": " \"bytes\": 28949,\n      \"createdAt\": \"2026-09-23T08:20:03Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-23/2026-09-23t08-20-03z-irs-actc-total-claims-2027/distribution.json\",\n      \"sha256\": \"261f9110b0a9aca8d05ccbb2c3282f44d3216aec21cb0cdc68c02c28c7b0a0a8\",\n      \"bytes\": 15073,\n      \"createdAt\": \"2026-09-23T08:20:03Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-23/2026-09-23t08-20-03z-irs-actc-total-claims-2027/validation.json\",\n      \"sha256\": \"4931bc3b0d0c0c97fb0928fcd3b03541b05a85214bbc736819ae5d9168776918\",\n      \"bytes\": 169,\n      \"createdAt\": \"2026-09-23T08:20:03Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-23/2026-09-23t08-20-03z-irs-actc-total-claims-2027/cells.with_activity.json\",\n      \"sha256\": \"a5a2a3c07ab6ebc27260b7d4a6bbeb310e1b98287039d80f74cb4cba5dc4acd1\",\n      \"bytes\": 46854,\n      \"createdAt\": \"2026-09-23T08:20:03Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-23/2026-09-23t08-20-03z-irs-actc-total-claims-2027/manifest.json\",\n      \"sha256\": \"07e493f85ac381a88d1a64e565442ed6fa15c4cb3583256a71bce47347af0dce\",\n      \"bytes\": 19366,\n      \"createdAt\": \"2026-09-23T08:20:03Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"94c0466c8a214f12853f1fef66582412f9860f68\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"6065b561a56cd23924c03ec17818c052402c394dee304aa466555b9ebf38603f\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

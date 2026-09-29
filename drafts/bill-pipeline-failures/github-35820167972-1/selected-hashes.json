@@ -1,0 +1,107 @@
+[
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/codex_trace.json",
+    "bytes": 560,
+    "sha256": "0ec9711a218b8866e2a1ac88ac576b783cdfcdda84b21db71d99381881c73785"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/custody_root.json",
+    "bytes": 9863,
+    "sha256": "b541029637c0c74a03b7557c258811d34015b8869fa76476976e96897da31fa4"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/draft_codex_trace.json",
+    "bytes": 562,
+    "sha256": "490bc85f6f3389ca2d8fd1523708f479baf1f99114f5a9b8672db83686c9eac6"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/draft_stdout.txt",
+    "bytes": 9276,
+    "sha256": "2eb3f8ef7bc65c56400ed6e6839583c560a603b922438b07683b4d57460a2834"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/draft_tool_evidence_verification.json",
+    "bytes": 2530,
+    "sha256": "28508ff7fecf9a510219a8716b483d99fff2a8c5f3db2182a304cdf791150644"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/manifest.json",
+    "bytes": 24635,
+    "sha256": "5055f928789a80d7d8559f9b5ad214b17105affc87242fcfe6feb4394834386a"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/normalized_cells.json",
+    "bytes": 30593,
+    "sha256": "e091e885780046898514e725acf4b05c1178cac8cad2567feac6f3653910677c"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/pre_submit_review_codex_trace.json",
+    "bytes": 559,
+    "sha256": "f72a2d4fddec0d9c15996abfa01c916343d2ddd4def1b6a46aa744f1718993ed"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/pre_submit_review_tool_evidence_verification.json",
+    "bytes": 406,
+    "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/tool_evidence_verification.json",
+    "bytes": 2606,
+    "sha256": "829320913c3bbf97530caf99e86f4fcbb19bd32edfda8493826551f7b7b76db2"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/codex_trace.json",
+    "bytes": 557,
+    "sha256": "134acba0a523787f0f227857d26b73ccc464a353c5819d2b29dcb31cde77c993"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/custody_root.json",
+    "bytes": 9858,
+    "sha256": "685e870d256046b2c8139509d9e98060cc5e32a6b3b3a6f227c301b9d597fbac"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_codex_trace.json",
+    "bytes": 562,
+    "sha256": "17f04c9e742ff6c5cae9c30fc12c727e935e080585ad8f2cb2cebce57c641db4"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_stdout.txt",
+    "bytes": 8497,
+    "sha256": "b41ade2dd98db330d0104a404e625d426eb58065381f855fa563a98b5e119275"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_tool_evidence_verification.json",
+    "bytes": 2569,
+    "sha256": "a37ad4bd871726a328f97187d793d0f89388e71c83d9f1201354566aa5c709df"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/manifest.json",
+    "bytes": 24479,
+    "sha256": "91adf8a9a955757eac274042fde6a9f0412cdfe2d0f90284450b3d962990f958"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/normalized_cells.json",
+    "bytes": 29705,
+    "sha256": "7588ca5677187c2f39d183df6035bdd318c527f12a5d2dda1d746792e8703afb"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_codex_trace.json",
+    "bytes": 561,
+    "sha256": "64631781e2d12717c5ca6cc57b5aa904cc2e122e2683a7885d6141c9679b45a0"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_tool_evidence_verification.json",
+    "bytes": 406,
+    "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/tool_evidence_verification.json",
+    "bytes": 406,
+    "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968"
+  },
+  {
+    "path": "bundle-selected/records/thesis-analyst/strategy-suites/2026-09-23/strategy-35820167972-a1.json",
+    "bytes": 665,
+    "sha256": "8b7e20c845b932f0743425db8f4d9c35f74182f061ee6538dcee222ad1b5f878"
+  }
+]

@@ -1282,9 +1282,8 @@ def test_generation_ticket_refuses_non_codex_executable_override() -> None:
 
 def test_ticket_manifest_binding_requires_exact_canonical_context() -> None:
     ticket = generation_ticket_context()
-    assert (
-        generation_tickets.ticket_record_path(ticket["ticketId"]).as_posix()
-        == (ticket["ticketPath"])
+    assert generation_tickets.ticket_record_path(ticket["ticketId"]).as_posix() == (
+        ticket["ticketPath"]
     )
     assert generation_tickets.ticket_manifest_binding(ticket) == {
         "ticketId": ticket["ticketId"],
@@ -2986,6 +2985,83 @@ def test_pin_comparison_contract_pins_resolver_but_not_units() -> None:
     assert unpinned == {"slug": "model-slug", "resolutionRule": "model words"}
 
 
+def test_pin_comparison_contract_uses_published_resolution_date() -> None:
+    # A release-calendar registration binds no resolutionDate, so the trusted
+    # comparison context carries the published forecast's resolver date as
+    # publishedResolutionDate (the 2026-09-20 strategy runs were rejected
+    # when the selector copied it into resolutionDate instead).
+    from run_thesis_analyst import (
+        pin_comparison_contract,
+        target_context_validation_errors,
+    )
+
+    context = {
+        "comparisonTarget": True,
+        "catalogSlug": "unemployment-rate-september-2026",
+        "country": "US",
+        "publishedResolutionDate": "2026-10-02",
+        "expectedReleaseWindow": {"start": "2026-09-30", "end": "2026-10-08"},
+        "resolutionSource": "BLS",
+        "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+        "resolutionRule": "First print only.",
+        "sourceBinding": {
+            "adapter": "generic-url",
+            "sourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+            "allowedHosts": ["www.bls.gov"],
+        },
+    }
+    cell = {
+        "slug": "model-slug",
+        "country": "US",
+        "resolutionDate": "2026-10-03",
+        "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+        "resolutionRule": "Model words.",
+    }
+    assert any(
+        "published comparison resolver date" in error
+        for error in target_context_validation_errors(cell, context)
+    )
+    pin_comparison_contract(cell, context)
+    assert cell["resolutionDate"] == "2026-10-02"
+    assert not [
+        error
+        for error in target_context_validation_errors(cell, context)
+        if "resolutionDate" in error
+    ]
+
+    # A bounded registration still pins the registered bound, and the
+    # published date (equal by selection-time construction) does not
+    # contradict it.
+    bounded = {
+        **context,
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionDate": "2026-10-31",
+        "publishedResolutionDate": "2026-10-31",
+    }
+    cell = {"slug": "model-slug", "resolutionDate": "2026-10-15"}
+    pin_comparison_contract(cell, bounded)
+    assert cell["resolutionDate"] == "2026-10-31"
+
+
+def test_format_target_context_explains_comparison_contract() -> None:
+    block = analyst_runner.format_target_context(
+        {
+            "comparisonTarget": True,
+            "catalogSlug": "unemployment-rate-september-2026",
+            "publishedResolutionDate": "2026-10-02",
+            "expectedReleaseWindow": {"start": "2026-09-30", "end": "2026-10-08"},
+        }
+    )
+    assert '- publishedResolutionDate: "2026-10-02"' in block
+    assert "# Comparison target contract (machine checked)" in block
+    assert "pinned to that forecast's published resolver" in block
+
+    plain = analyst_runner.format_target_context(
+        {"catalogSlug": "x", "publishedResolutionDate": "2026-10-02"}
+    )
+    assert "Comparison target contract" not in plain
+
+
 def _find_negative_zeros(value, path="$"):
     import math
 
@@ -4106,6 +4182,72 @@ def test_calendar_target_context_does_not_require_announcement_tool_fetch() -> N
     )
 
 
+def test_bounded_strategy_authority_is_explicit_and_keeps_history_floor(
+    tmp_path, monkeypatch
+) -> None:
+    import strategy_generation
+
+    announcement = "https://www.census.gov/newsroom/spm-announcement.html"
+    context = {
+        "comparisonTarget": True,
+        "conditional": "The reviewed provision is enacted by 2027-12-31.",
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionDate": "2027-12-31",
+        "sourceBinding": {
+            "sourceUrl": announcement,
+            "allowedHosts": ["www.census.gov"],
+            "expectedReleaseWindow": {"start": "2027-09-01", "end": "2027-12-31"},
+        },
+    }
+    cell = review_test_cell(point=5.1, ci_low=4.7, ci_high=5.8)
+    cell.update(
+        type="conditional",
+        conditionalOn=context["conditional"],
+        resolutionDate=context["resolutionDate"],
+        resolutionSourceUrl=announcement,
+        runStartedAt="2026-06-17T11:55:00Z",
+        comparisonTarget=True,
+        trusted_strategy_target=context,
+    )
+    cell["sourceContext"][0] = announcement
+    kwargs = dict(allow_existing_slug=True, target_context=context)
+    # Neither the selected-looking target nor a model-planted authority field
+    # can opt into the CI exception.
+    report = analyst_runner.validate_cells([cell], **kwargs)
+    assert (
+        "resolve-by-bound target requires generation ticket context"
+        in report["cells"][0]["errors"]
+    )
+    evidence_errors = []
+    monkeypatch.setattr(
+        strategy_generation,
+        "bounded_strategy_evidence_errors",
+        lambda *_a: evidence_errors,
+    )
+    trusted = dict(
+        **kwargs,
+        trusted_strategy_target=context,
+        strategy_run_dir=tmp_path,
+        strategy_run_relative=Path("records/thesis-analyst/fixture"),
+    )
+    assert analyst_runner.validate_cells([cell], **trusted)["ok"]
+    evidence_errors.append("missing authenticated announcement fetch")
+    assert not analyst_runner.validate_cells([cell], **trusted)["ok"]
+    evidence_errors.clear()
+    wrong = {**context, "conditional": "A different premise"}
+    report = analyst_runner.validate_cells(
+        [cell], **{**trusted, "trusted_strategy_target": wrong}
+    )
+    assert (
+        "resolve-by-bound target requires generation ticket context"
+        in report["cells"][0]["errors"]
+    )
+    cell["historicalContext"] = cell["historicalContext"][:4]
+    report = analyst_runner.validate_cells([cell], **trusted)
+    assert not report["ok"]
+    assert any("at least 6" in error for error in report["cells"][0]["errors"])
+
+
 def test_normalizer_refuses_schema_incomplete_drafts_with_diagnostics(
     tmp_path,
 ) -> None:
@@ -4332,8 +4474,8 @@ def test_target_context_surfaces_the_resolution_parser_command() -> None:
     # Five waves fetched IRS Pub 4801 line-item estimates — a real official
     # near-neighbor — instead of the registered Table 3.3 print; prose
     # pointing at the parser did not change that (thesis#115). The target
-    # context now renders the adapter's own fetch as a copy-runnable
-    # command; anchor values are still never injected.
+    # context renders captured extraction using the same reviewed adapter,
+    # without a shell network command; anchor values are never injected.
     context = {
         "series": "irs.actc.total_claims",
         "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
@@ -4341,10 +4483,15 @@ def test_target_context_surfaces_the_resolution_parser_command() -> None:
     }
     block = analyst_runner.format_target_context(context)
     assert "Resolution-grade base-rate fetch" in block
-    assert "IRS_SOI_PUB1304_ADAPTERS['irs.actc.total_claims']" in block
-    assert "irs_soi_pub1304_fetch_normalized_year" in block
-    assert "xlrd==2.0.1" in block
-    assert "PERIOD" in block
+    assert 'extract_irs_soi({"sourceCallId":"FETCH_CALL_ID",' in block
+    assert '"seriesId":"irs.actc.total_claims","year":"YYYY"}' in block
+    assert "latest six published tax years" in block
+    assert "TOTAL ACTC claiming returns" in block
+    assert "refundable portion" in block
+    assert "do not apply the transform twice" in block
+    assert "extraction failure, not unavailability" in block
+    assert "pip install" not in block
+    assert "python3 -c" not in block
     for anchor_value in ("19119249", "37771612", "18076696", "17626084"):
         assert anchor_value not in block
 
@@ -4526,6 +4673,7 @@ def test_target_context_never_guesses_parser_series_from_data_point_id() -> None
     )
     assert "Resolution-grade base-rate fetch" not in missing_series
     assert "IRS_SOI_PUB1304_ADAPTERS" not in missing_series
+    assert "extract_irs_soi(" not in missing_series
 
     exact_series = analyst_runner.format_target_context(
         {
@@ -4534,5 +4682,8 @@ def test_target_context_never_guesses_parser_series_from_data_point_id() -> None
             "sourceBinding": {"adapter": "irs-soi-pub1304"},
         }
     )
-    assert "IRS_SOI_PUB1304_ADAPTERS['irs.actc.total_claims']" in exact_series
-    assert "IRS_SOI_PUB1304_ADAPTERS['opaque.unrelated.stem']" not in exact_series
+    assert (
+        'extract_irs_soi({"sourceCallId":"FETCH_CALL_ID",'
+        '"seriesId":"irs.actc.total_claims","year":"YYYY"})'
+    ) in exact_series
+    assert '"seriesId":"opaque.unrelated.stem"' not in exact_series

@@ -60,6 +60,60 @@ deadline. A bounded target must set `resolutionDate` to its window's end and
 require the attested replay to contain a successful structured exact-URL fetch
 event for the registered announcement; never infer a day from cadence.
 
+### Register only what the resolver can execute
+
+A registration is a public promise to score a forecast against one number, so
+`scripts/register_targets.py` refuses to write a NEW registration unless
+`resolve_pending.execution_plan_refusal` finds an executable plan for that
+exact contract. The check runs the contract's `dataPointId` through the
+resolver's own routers, then the main loop's date-independent refusals in its
+order: resolution-date basis, emitted unit, registered adapter, and the routed
+family's own predicates (full binding template, verified anchors). It makes no
+network request and reads no records: whether the print exists yet is a
+runtime question; whether any code could ever read it is not.
+
+- `generic-url` names a page, not an executor, and is always refused,
+  whatever the main loop would do with it: the weekly claims, A-19 and CMS
+  provider-data legs would execute such a contract today, and the gate
+  refuses it anyway, on purpose. A seed with no adapter
+  still binds to `generic-url`, so a docket series needs a `sourceBinding`
+  template for an admitted adapter before it can mint targets. The two weekly
+  claims series are the exception: `register_targets.SERIES_BINDINGS` binds
+  them to ALFRED in code.
+- The gate is stricter than the main loop in two more places, also on purpose:
+  `allowedHosts` must be a list of hosts for every family, and an ALFRED
+  contract's `sourceSeriesId` must be the series its stem's executor reads
+  (the ALFRED leg itself never reads the binding).
+- A refused series stays on the docket and mints nothing. Each roll prints one
+  `skip …: no executable resolution plan` line for it and carries on; nothing
+  fails. When this landed, 30 of the 94 docket series were in that state.
+- The roller drops such candidates before the cap, and prospect validation
+  rejects such proposals, with the same verdict.
+- A resolver family the router names must appear in either
+  `EXECUTION_PLAN_FAMILY_CHECKS` or `EXECUTION_PLAN_UNREGISTRABLE_FAMILIES`.
+  A family in neither refuses every new registration, and a test fails.
+- When two families claim one stem, the registered adapter picks the route.
+  Four BLS docket stems are claimed by both the ALFRED family and the BLS API
+  family: a target that binds `bls-api` routes to the BLS API leg, and every
+  other reference for the stem keeps its ALFRED route. A `bls-api` contract
+  takes the docket's canonical series as its id stem, and its docket
+  `releaseDates` must never name a period that is already registered. The six
+  Table A-19 stems follow the same rule between the Archive-capture `a19` leg
+  and the BLS API family.
+- A resolved fact must not give a Chronicle lineage a second unit: Chronicle's
+  catalog build refuses it, and the resolve workflow publishes nothing after a
+  failed run. Do not register a series whose facts would do that: the six
+  Table A-19 specs carry `registration_hold` until the Chronicle change in
+  decision d397. Behind the hold, the BLS API leg refuses such a capture
+  (`LEDGER UNIT CONFLICT`).
+- Existing snapshots are never re-judged: retries reuse them, and what happens
+  to already-published targets with no executor is a disposition decision, not
+  a registration one. The run-time exceptions for two reviewed legacy contracts
+  (one ABS content hash, the legacy QCEW binding) do not admit new ones.
+- Nothing in `waivers.json` waives this, and it has no grandfather set. The
+  way through is admission: adapter or family reuse, anchors verified from
+  official prints per `docs/anchor-verifications.md`, docket template, tests.
+
 ## Common Tasks
 
 ### Add Or Run Forecasts
@@ -289,7 +343,21 @@ Resolution and scoring code should preserve these invariants:
 - training cannot see future official outcomes;
 - reward rows include provenance hashes and activity-artifact count.
 
+A published target whose registration no resolver leg can execute is
+witnessed, not resolved. `witness-registered-windows.yml` asks the Internet
+Archive to capture that target's `sourceUrl` on each day of its registered
+`expectedReleaseWindow`, reads the Archive's index back, and commits nothing.
+It keeps a later disposition ruling possible and makes none: do not read a
+capture as a resolution, and do not add record writes to that workflow. See
+`docs/registered-window-custody.md`.
+
 ### Bills end to end — series ingestion is part of the pipeline
+
+The remote extraction, Chronicle mapping, reviewed bill binding and paired
+comparison workflow is documented in `docs/bill-pipeline.md`. Use
+`ingest-bill.yml` for proposal extraction and `strategy-docket.yml`'s reviewed
+`bill_slug` mode for fresh comparisons of already-published conditional pairs.
+Never mint duplicate registrations merely to re-exercise an existing pair.
 
 Founder rule (2026-08-03): a bill metric whose official series is not yet
 admitted is a **worklist item, never a stopping point**. "End to end" for
@@ -366,16 +434,32 @@ git config core.hooksPath .githooks
 ```
 
 It refuses any local push that would publish a commit touching
-`records/**` — the same commit-level walk the provenance audit runs, so
-the guard blocks exactly the pushes the audit would redden main for.
+`records/**`, using the same commit-level walk the provenance audit
+runs. It blocks every push the audit would redden main for, and some the
+audit would pass: a merge is exempt only when its records equal those of
+the merge base git would use to merge it into the destination main (so
+it changes no records, and a later merge takes main's side even after
+main moves on) and merging it into that main (`git merge-tree`) leaves
+main's records exactly as they are. A merge that would roll main's
+records back is refused on a branch, where the audit, which only sees
+main, would not call it a rollback. Every merge in the push whose records
+differ from any parent is judged that way, including the ones git's path
+walk skips because their only differing parent is already on main. The
+check uses main as fetched at push time; when that fetch fails it falls
+back to the branch's remote tip and says so, and the audit on main
+remains the check of what a merge actually lands.
 Pushes to `main` are judged on every commit they publish; any other ref
 is judged on the branch's own contribution against the main of the
 destination that push is actually landing in — fetched at push time and
 pinned to an immutable id, so no remote name, URL spelling, or stale
-local ref decides it — and a branch rebased over main's attested
-recorder commits therefore does not trip it. Pushes the guard cannot
-verify (no comparator at the destination, unwalkable history, a shallow
-clone) fail closed.
+local ref decides it. If that fetch fails, an existing ref is judged
+against its own remote tip and a new ref is refused. A branch rebased
+over main's attested recorder commits therefore does not trip it, nor
+does a branch that merged main forward and then merges a side branch
+lagging main's records (the merge carries main's records tree through a
+parent main does not yet contain). Pushes the guard cannot verify (no
+comparator at the destination, unwalkable history, a shallow clone) fail
+closed.
 It prints the offending commits and can be overridden deliberately with
 `THESIS_ALLOW_RECORDS_PUSH=1` — an override that still lands unattested and
 still costs a permanent public waiver. Nine such waivers already exist

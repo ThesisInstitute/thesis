@@ -568,15 +568,23 @@ def test_value_plausibility_gate_blocks_scale_blunders() -> None:
 
 
 def test_a19_parse_reads_current_month_column() -> None:
+    # The real June 2026 table: each value is found by its headers (row,
+    # "Total", "16 years and over", the later of two June headings), not by
+    # its position. tests/test_a19_adapter.py covers the parser in depth.
     html = (
-        "<table><tr><td>Healthcare support occupations</td>"
-        "<td>5,950</td><td>5,691</td></tr>"
-        "<tr><td>Production occupations</td><td>7,938</td><td>7,759</td></tr>"
-        "</table>"
-    )
+        ROOT / "tests/fixtures/a19/cpseea19-2026-06-wayback-20260710110509.table.html"
+    ).read_text()
     values = resolve_pending.a19_values_from_html(html)
     assert values["healthcare_support"] == 5691.0
     assert values["production"] == 7759.0
+    # A bare row of numbers names no month and no column: nothing is read.
+    assert (
+        resolve_pending.a19_values_from_html(
+            "<table><tr><td>Production occupations</td><td>7,938</td>"
+            "<td>7,759</td></tr></table>"
+        )
+        == {}
+    )
 
 
 def test_pending_adapter_refs_maps_and_gates_units() -> None:
@@ -1423,9 +1431,11 @@ def test_qcew_legacy_aircraft_registration_remains_exactly_supported() -> None:
     )
 
 
+@pytest.mark.parametrize("catalog_refuses", [False, True])
 @pytest.mark.parametrize("variant", ["aircraft", "annual"])
 def test_main_qcew_branch_builds_and_projects_the_registered_fact(
     variant: str,
+    catalog_refuses: bool,
     tmp_path: pathlib.Path,
     monkeypatch,
 ) -> None:
@@ -1567,9 +1577,34 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         "utc_now",
         lambda: f"{release_date}T12:00:00Z",
     )
+
+    def fake_catalog_refusals(repo, sha, path, content, rows):
+        # The preflight sees the base the append is built on.
+        assert (repo, sha, path, content) == (
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            "ledger/official_observations.jsonl",
+            "",
+        )
+        if not catalog_refuses:
+            return {}
+        return {str(row["source_record_id"]): "unit conflict (fixture)" for row in rows}
+
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", fake_catalog_refusals
+    )
     monkeypatch.setattr(resolve_pending, "propose_ledger_append", fake_propose)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
 
+    if catalog_refuses:
+        # A row the ledger's catalog refuses is excluded, its archive with it,
+        # and the run reports refused rows instead of aborting in the append.
+        assert resolve_pending.main() == resolve_pending.EXIT_REFUSED_ROWS
+        assert appended == {}
+        assert not [
+            path for path in tmp_path.rglob("*.gz") if "responses" in path.parts
+        ]
+        return
     assert resolve_pending.main() == 0
     rows = [
         json.loads(line) for line in appended["content"].splitlines() if line.strip()
@@ -3851,6 +3886,89 @@ def test_current_native_executor_requires_exact_registry_series_spec_pair() -> N
     assert resolve_pending.intl_execution_spec(borrowed, spec) is None
 
 
+def _routed_intl_spec(ref: str) -> dict:
+    """The spec exactly as the resolver's router hands it to the main loop."""
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": "routed-target",
+                "resolutionDate": "2026-09-14",
+            }
+        ],
+        "resolutionLinks": [
+            {
+                "status": "pending",
+                "targetFactRef": ref,
+                "forecastSlug": "routed-target",
+            }
+        ],
+    }
+    ((got_ref, kind, spec, *_rest),) = resolve_pending.pending_adapter_refs(log)
+    assert (got_ref, kind) == (ref, "intl")
+    return spec
+
+
+def _current_intl_registration(series: str) -> dict:
+    spec = resolve_pending.INTL_REGISTRY_ADAPTERS[series]
+    binding = {
+        **json.loads(json.dumps(resolve_pending.intl_binding_template(spec))),
+        "allowedHosts": list(spec["allowed_hosts"]),
+        "expectedReleaseWindow": {"start": "2026-09-14", "end": "2026-09-14"},
+    }
+    return {
+        "targetContentHash": "0" * 64,
+        "contract": {"series": series, "sourceBinding": binding},
+    }
+
+
+def test_routed_international_spec_reaches_its_native_executor() -> None:
+    """The router copies the adapter (`{**spec, "period_type": ...,
+    "target_series": stem}`), so an identity test against the registry
+    refused every registered international target: both StatCan CPI cells
+    of summer 2026 printed "BINDING/ADAPTER MISMATCH (refusing, registry
+    drift?): ... — " with no mismatch named, and their first-print windows
+    closed unresolved. The direct-spec tests above could not see it."""
+    ref = "statcan.cpi.allitems.yoy.2026_08.first_print"
+    routed = _routed_intl_spec(ref)
+    canonical = resolve_pending.INTL_REGISTRY_ADAPTERS["statcan.cpi.allitems.yoy"]
+    assert routed is not canonical  # the router hands over a copy
+    assert resolve_pending.intl_registry_origin(routed) is canonical
+
+    registration = _current_intl_registration("statcan.cpi.allitems.yoy")
+    binding = registration["contract"]["sourceBinding"]
+    assert resolve_pending.intl_binding_mismatches(routed, binding) == []
+    execution = resolve_pending.intl_execution_spec(registration, routed)
+    assert execution is not None
+    assert execution["target_series"] == "statcan.cpi.allitems.yoy"
+
+
+def test_routed_spec_still_cannot_borrow_another_series_contract() -> None:
+    """What the identity test was for: the parser that runs must be the
+    canonical one for the series the immutable contract names."""
+    routed = _routed_intl_spec("statcan.cpi.allitems.yoy.2026_08.first_print")
+    borrowed = _current_intl_registration("statcan.cpi.allitems.yoy")
+    borrowed["contract"]["series"] = "statcan.gdp_by_industry.monthly_growth"
+    assert resolve_pending.intl_execution_spec(borrowed, routed) is None
+    unknown = _current_intl_registration("statcan.cpi.allitems.yoy")
+    unknown["contract"]["series"] = "unrelated.other.series"
+    assert resolve_pending.intl_execution_spec(unknown, routed) is None
+
+
+def test_altered_routed_spec_has_no_origin() -> None:
+    routed = _routed_intl_spec("statcan.cpi.allitems.yoy.2026_08.first_print")
+    registration = _current_intl_registration("statcan.cpi.allitems.yoy")
+    for tampered in (
+        {**routed, "series_id": "v00000000"},  # a different vector
+        {**routed, "extra_transform": "anything"},  # an added key
+        {k: v for k, v in routed.items() if k != "allowed_hosts"},  # a dropped key
+        {**routed, "target_series": "abs.cpi.all_groups.yoy"},  # another stem
+        {**routed, "target_series": "not.an.adapter"},
+    ):
+        assert resolve_pending.intl_registry_origin(tampered) is None
+        assert resolve_pending.intl_execution_spec(registration, tampered) is None
+
+
 def test_existing_legacy_international_targets_fail_closed_except_reviewed_one() -> (
     None
 ):
@@ -4893,6 +5011,54 @@ def test_main_ssa_hearings_leg_refuses_because_the_source_has_no_national_row(
     assert "nothing new to record" in out
 
 
+def test_main_survives_a_refused_wayback_refetch_and_resolves_the_rest(
+    monkeypatch, capsys
+) -> None:
+    """2026-09-01, 09-02 and 09-06: web.archive.org refused one connection
+    and the uncaught URLError ended the run, so nothing resolved that day
+    was appended. The hearings target must defer and the run must go on."""
+    import urllib.error
+
+    hearings = "ssa.hearings.average_processing_time_days.2026-06.first_print"
+    other = "ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print"
+    _fetched, _envelopes, pages = _install_aging_main(monkeypatch, [hearings, other])
+    archived = (AGING_FIXTURES / "ho_workload_2026-06-26.xml").read_bytes()
+    (workload_url,) = [url for url, body in pages.items() if body == archived]
+    # The live file has rolled on to July, so June survives only in Wayback.
+    pages[workload_url] = archived.replace(b"06/26/2026", b"07/31/2026")
+    snapshot_capture = (
+        AGING_FIXTURES / "stat_snapshot_2026-06.wayback-20260711204033.html"
+    ).read_bytes()
+    capture_reads = {"workload": 0}
+
+    def fake_wayback(url: str) -> bytes:
+        if "cdx/search" in url:
+            if "stat_snapshot/2026-06.html" in url:
+                return (AGING_FIXTURES / "cdx_stat_snapshot_2026-06.json").read_bytes()
+            if workload_url.split("://", 1)[1] in url:
+                return (
+                    b'[["timestamp","statuscode","digest","length"],'
+                    b'["20260701120000","200","AAAA","1000"]]'
+                )
+            return b"[]"
+        if url.endswith(workload_url):
+            capture_reads["workload"] += 1
+            if capture_reads["workload"] == 1:
+                return archived  # the corroboration's own guarded read
+            raise urllib.error.URLError(ConnectionRefusedError(111, "refused"))
+        return snapshot_capture
+
+    monkeypatch.setattr(resolve_pending, "ssa_wayback_fetch", fake_wayback)
+
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert capture_reads["workload"] == 2
+    assert f"  WAYBACK FETCH FAILED (deferring): {hearings}" in out
+    assert "::warning title=Resolver source unreachable::" in out
+    assert f"  resolve {other} -> 7006.0 thousands" in out
+    assert "dry-run: would append 1 row(s)" in out
+
+
 def test_main_ssa_official_leg_treats_a_missing_engine_as_fatal(
     monkeypatch, capsys
 ) -> None:
@@ -5268,3 +5434,156 @@ def test_append_proposal_accepts_the_generators_own_first_observation_mint(
     regenerated = changes["ledger/series_uuid_registry.jsonl"]
     assert regenerated.endswith(minted_line.encode() + b"\n")
     assert regenerated.startswith(tree.files["ledger/series_uuid_registry.jsonl"])
+
+
+def _catalog_tree(generator: bytes) -> resolve_pending.RepositoryTree:
+    files = {
+        "ledger/official_observations.jsonl": (
+            b'{"source_record_id":"base","unit":"thousands"}\n'
+        ),
+        "scripts/build_series_catalog.py": generator,
+    }
+    return resolve_pending.RepositoryTree(
+        tree_sha="1" * 40,
+        files=files,
+        modes={relative: "100644" for relative in files},
+        blob_shas={relative: "a" * 40 for relative in files},
+    )
+
+
+_UNIT_CONFLICT_GENERATOR = b"""import json, pathlib, sys
+text = pathlib.Path("ledger/official_observations.jsonl").read_text()
+rows = [json.loads(line) for line in text.splitlines() if line.strip()]
+units = {row.get("unit") for row in rows if row.get("unit")}
+if len(units) > 1:
+    sys.exit(f"unit conflict within identity: {sorted(units)}")
+"""
+
+
+def test_ledger_catalog_refusals_names_only_rows_that_fail_alone(monkeypatch) -> None:
+    tree = _catalog_tree(_UNIT_CONFLICT_GENERATOR)
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    good = {"source_record_id": "good", "unit": "thousands"}
+    bad = {"source_record_id": "bad", "unit": "millions"}
+    path = "ledger/official_observations.jsonl"
+    assert (
+        resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, [good]) == {}
+    )
+    refusals = resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, path, base, [good, bad]
+    )
+    assert list(refusals) == ["bad"]
+    assert (
+        "exit 1" in refusals["bad"] and "['millions', 'thousands']" in refusals["bad"]
+    )
+    # A base the generator already refuses is not blamed on the new rows: the
+    # append then fails as it did before.
+    broken = _catalog_tree(b"raise SystemExit(3)\n")
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: broken)
+    assert (
+        resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, [bad]) == {}
+    )
+
+
+def test_excluded_catalog_rows_leave_no_orphan_archive(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    responses = tmp_path / "records" / "resolutions" / "run" / "responses"
+    responses.mkdir(parents=True)
+    for name in ("own.gz", "shared.gz"):
+        (responses / name).write_bytes(b"x")
+    relative = "records/resolutions/run/responses/"
+    rows = [
+        {
+            "source_record_id": "refused",
+            "responseArchive": {"path": relative + "own.gz"},
+        },
+        {
+            "source_record_id": "refused.shared",
+            "responseArchive": {"path": relative + "shared.gz"},
+        },
+        {
+            "source_record_id": "kept",
+            "responseArchive": {"path": relative + "shared.gz"},
+        },
+    ]
+    kept = resolve_pending.exclude_catalog_refusals(
+        rows, {"refused": "conflict", "refused.shared": "conflict"}
+    )
+    assert [row["source_record_id"] for row in kept] == ["kept"]
+    assert not (responses / "own.gz").exists()
+    assert (responses / "shared.gz").exists()
+
+
+def test_catalog_refusals_are_reported_counted_and_excluded(
+    tmp_path: pathlib.Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    responses = tmp_path / "run" / "responses"
+    responses.mkdir(parents=True)
+    for name in ("a.gz", "b.gz"):
+        (responses / name).write_bytes(b"x")
+    rows = [
+        {"source_record_id": "kept", "responseArchive": {"path": "run/responses/a.gz"}},
+        {"source_record_id": "gone", "responseArchive": {"path": "run/responses/b.gz"}},
+    ]
+    refused = ["earlier: contract"]
+    kept = resolve_pending.apply_catalog_refusals(
+        rows, {"gone": "unit conflict"}, refused
+    )
+    assert [row["source_record_id"] for row in kept] == ["kept"]
+    assert refused == ["earlier: contract", "gone: unit conflict"]
+    assert "CATALOG REFUSED (excluded from append): gone — unit conflict" in (
+        capsys.readouterr().out
+    )
+    assert (responses / "a.gz").exists() and not (responses / "b.gz").exists()
+
+
+def test_rows_that_fail_the_catalog_only_together_stop_before_any_write(
+    monkeypatch,
+) -> None:
+    generator = b"""import json, pathlib, sys
+text = pathlib.Path("ledger/official_observations.jsonl").read_text()
+ids = {json.loads(line)["source_record_id"] for line in text.splitlines() if line}
+if {"x", "y"} <= ids or "z" in ids:
+    sys.exit("note: registry\\nconflict")
+"""
+    tree = _catalog_tree(generator)
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    path = "ledger/official_observations.jsonl"
+    rows = [{"source_record_id": ref} for ref in ("x", "y")]
+    with pytest.raises(resolve_pending.LedgerProposalError, match="together"):
+        resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, rows)
+    # A lone refusal's reason drops the generator's notes.
+    refusals = resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, path, base, [{"source_record_id": "z"}]
+    )
+    assert refusals == {"z": "series-catalog generator exit 1: conflict"}
+    # No rows: nothing is fetched.
+    monkeypatch.setattr(
+        resolve_pending, "_fetch_repository_tree", lambda *_: pytest.fail("fetched")
+    )
+    assert resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, []) == {}
+
+
+def test_the_workflow_publishes_before_failing_on_refused_rows() -> None:
+    workflow = (ROOT / ".github/workflows/resolve-and-rebuild.yml").read_text()
+    resolve_step = workflow.split(
+        "      - name: Resolve pending cells against official prints\n", 1
+    )[1].split("\n      - name:", 1)[0]
+    assert 'statuses=("${PIPESTATUS[@]}")' in resolve_step
+    assert '[ "$resolver_rc" -ne 3 ]' in resolve_step
+    assert 'echo "resolver_rc=$resolver_rc" >> "$GITHUB_OUTPUT"' in resolve_step
+    assert resolve_pending.EXIT_REFUSED_ROWS == 3
+    names = [
+        line.strip()[len("- name: ") :]
+        for line in workflow.splitlines()
+        if line.strip().startswith("- name: ")
+    ]
+    fail_step = names.index("Fail the run on refused rows")
+    assert fail_step == names.index("Alert on failure") - 1
+    assert fail_step > names.index("Record the successfully deployed ledger SHA")
+    assert "if: steps.resolve.outputs.resolver_rc == '3'" in workflow

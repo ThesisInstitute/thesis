@@ -1,0 +1,467 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-23T05:01:35Z",
+  "runStartedAt": "2026-09-23T05:01:35Z",
+  "sealedAt": "2026-09-23T05:05:02Z",
+  "series": "irs.actc.total_claims",
+  "period": "2027",
+  "conditional": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "targetContext": {
+    "anchors": {
+      "2020": 19.119,
+      "2021": 37.772,
+      "2022": 18.077,
+      "2023": 17.626
+    },
+    "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+    "comparisonTarget": true,
+    "conditionDeadline": "2027-12-31",
+    "conditionId": "cond.s3596-actc-threshold.enacted",
+    "conditional": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+    "country": "US",
+    "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+    "expectedReleaseWindow": {
+      "end": "2029-12-31",
+      "start": "2029-01-01"
+    },
+    "period": "2027",
+    "publishedResolutionDate": "2029-12-31",
+    "registeredAtUtc": "2026-08-03T20:13:09Z",
+    "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+    "resolutionDate": "2029-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "resolutionPolicy": "first_print",
+    "resolutionRule": "If the condition in conditionalOn is satisfied, resolve from the first IRS publication of tax-year 2027 Publication 1304 Table 3.3: the 'All returns, total' row and 'Number of returns' subcolumn under 'Refundable child tax credit or additional child tax credit.' The series is annual and not seasonally adjusted. The adapter returns the published whole-return count; multiply it by 0.000001 to express it in millions. Later revisions are irrelevant. The registered official-source release window is 2029-01-01 through 2029-12-31, with resolutionDate set to its verified by-date endpoint, 2029-12-31. If the stated legislative condition is not satisfied by 2027-12-31, mark this conditional forecast unresolved.",
+    "resolutionSource": "IRS Statistics of Income, Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+    "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "series": "irs.actc.total_claims",
+    "sourceBinding": {
+      "adapter": "irs-soi-pub1304",
+      "allowedHosts": [
+        "www.irs.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2029-12-31",
+        "start": "2029-01-01"
+      },
+      "field": "refundable_child_tax_credit_returns",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "irs.actc.total_claims",
+      "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+      "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+      "transform": {
+        "factor": 1e-06,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+    "targetRegistrationPath": "records/targets/2026-08-03-6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6.json",
+    "targetUnit": "millions",
+    "valueScale": 1e-06
+  },
+  "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+  "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+  "targetRegistrationPath": "records/targets/2026-08-03-6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6.json",
+  "registeredAtUtc": "2026-08-03T20:13:09Z",
+  "promptMode": "ladder",
+  "agent": {
+    "agent": "thesis.analyst.ladder",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-23T05:01:35Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "0cd0e93e7538179b1aaaaa4e3b8a40293705fffaddca87f96757fe4af665baf1"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "The draft says thesis_announcement_fetch fetched the exact registered URL, but the submitted reasoning only records this as text; the target contract requires a structured thesis_announcement_fetch.fetch_official_announcement event for the exact officialAnnouncementUrl.",
+        "actionRequested": "Add or preserve the structured tool event from thesis_announcement_fetch.fetch_official_announcement for https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304, and keep resolutionDate as 2029-12-31."
+      },
+      {
+        "findingId": "review.finding.2",
+        "severity": "warning",
+        "rubricItem": "model_prior",
+        "summary": "The draft uses a persistence prior but does not explicitly rule out a formal time-series model despite a short, policy-broken sample with TY2021 as an outlier.",
+        "actionRequested": "Add one compact sentence stating that a formal trend/ARIMA-style prior is ruled out because the six-print history is dominated by statutory regime changes, so the operative prior is non-ARPA persistence plus stated policy adjustments."
+      },
+      {
+        "findingId": "review.finding.3",
+        "severity": "warning",
+        "rubricItem": "update",
+        "summary": "The +1.0 million filing/population and +2.5 million low-earnings-threshold adjustments are plausible but read as asserted inputs rather than evidence-tied updates.",
+        "actionRequested": "Clarify that these are judgmental adjustment components from the policy mechanism, or cite any public estimate used to size them."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Keep the existing byte-for-byte unit, resolver text, source URL, dataPointId, and resolve-by-bound date."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The tail scenarios are useful; consider tying the upside tail more explicitly to bundled refundable-credit expansion versus the threshold-only condition."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking resolver critique by preserving the structured thesis_announcement_fetch.fetch_official_announcement event for the exact registered URL and keeping resolutionDate at 2029-12-31. Accepted the model-prior warning by ruling out a formal trend prior, and accepted the update warning by labeling the +1.0 million and +2.5 million updates as judgmental policy-mechanism components rather than sourced estimates.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.finding.2",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking resolver critique by preserving the structured thesis_announcement_fetch.fetch_official_announcement event for the exact registered URL and keeping resolutionDate at 2029-12-31. Accepted the model-prior warning by ruling out a formal trend prior, and accepted the update warning by labeling the +1.0 million and +2.5 million updates as judgmental policy-mechanism components rather than sourced estimates.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.finding.3",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking resolver critique by preserving the structured thesis_announcement_fetch.fetch_official_announcement event for the exact registered URL and keeping resolutionDate at 2029-12-31. Accepted the model-prior warning by ruling out a formal trend prior, and accepted the update warning by labeling the +1.0 million and +2.5 million updates as judgmental policy-mechanism components rather than sourced estimates.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by preserving the structured thesis_announcement_fetch.fetch_official_announcement event for the exact registered URL and keeping resolutionDate at 2029-12-31. Accepted the model-prior warning by ruling out a formal trend prior, and accepted the update warning by labeling the +1.0 million and +2.5 million updates as judgmental policy-mechanism components rather than sourced estimates.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by preserving the structured thesis_announcement_fetch.fetch_official_announcement event for the exact registered URL and keeping resolutionDate at 2029-12-31. Accepted the model-prior warning by ruling out a formal trend prior, and accepted the update warning by labeling the +1.0 million and +2.5 million updates as judgmental policy-mechanism components rather than sourced estimates.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "The forecast is mostly coherent on the resolver, unit, history, point, and interval, but publication should wait for a structured official-announcement fetch event rather than a prose claim."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/prompt.md",
+      "sha256": "6ff7a89b8115d60b5f6edfcb5d7be27d947ac7352af6e76a3c7df3f06a5fbb25",
+      "bytes": 18343,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_command.json",
+      "sha256": "dfd3f478b260418a0fa92971feea6bc0fe2dfc4a77ae1269d9af9b4f9155164e",
+      "bytes": 2843,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_tool_evidence.json",
+      "sha256": "5d398c6575846fec3e2174baa2e4d617dcbd4681f2a427aa2163b5785213b077",
+      "bytes": 1230154,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_tool_evidence_verification.json",
+      "sha256": "a37ad4bd871726a328f97187d793d0f89388e71c83d9f1201354566aa5c709df",
+      "bytes": 2569,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_codex_stdout.jsonl",
+      "sha256": "d67baa3612671abcf2b409d86d33ae6c9f377fa2390d6e529e91683b02492d68",
+      "bytes": 1858981,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_codex_stderr.log",
+      "sha256": "8704bf4057107970507b18d7520247648498fcc0303e4378346cf789c8c4ffad",
+      "bytes": 233,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_codex_events.jsonl",
+      "sha256": "af89eb7b67f5f07ee4f93f4620997b7094e2c309d54e13fd187ebd13c78f15fa",
+      "bytes": 1901898,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_codex_last_message.txt",
+      "sha256": "b41ade2dd98db330d0104a404e625d426eb58065381f855fa563a98b5e119275",
+      "bytes": 8497,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_codex_trace.json",
+      "sha256": "17f04c9e742ff6c5cae9c30fc12c727e935e080585ad8f2cb2cebce57c641db4",
+      "bytes": 562,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_stdout.txt",
+      "sha256": "b41ade2dd98db330d0104a404e625d426eb58065381f855fa563a98b5e119275",
+      "bytes": 8497,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_stderr.txt",
+      "sha256": "611d306f8dbb2c50ec6ec687bdfaa952d1408b86ad3c281e52e11d5f296bc02d",
+      "bytes": 248,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_prompt.md",
+      "sha256": "7c4f4afdc4960fad3079c65489716cd3261b8ccbbc2e6d1766de9f22ba223efe",
+      "bytes": 16401,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_command.json",
+      "sha256": "f327ef24188a0e49cf50af53ddccf2ca06aa1ad7073dcc6e0add4e80bf744304",
+      "bytes": 1853,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_tool_evidence.json",
+      "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+      "bytes": 100,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_tool_evidence_verification.json",
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+      "bytes": 406,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "b7294ed10bf08593663a8cf02122c3d9652e3bb2c275a8b429a7edab30935311",
+      "bytes": 31242,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_codex_stderr.log",
+      "sha256": "d9202d47748c44c63b4d955885c50080dca18265a6def2241bf1881c10d25e4a",
+      "bytes": 233,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_codex_events.jsonl",
+      "sha256": "1d0b88632b81b52751d301cafda5a03706d92f1309eca9607bb954e70fe560c4",
+      "bytes": 31513,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_codex_last_message.txt",
+      "sha256": "a40da6274662d38faf39e8e719f8066f75bdb7a87515bdf3b02893361ee3220b",
+      "bytes": 1961,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_codex_trace.json",
+      "sha256": "64631781e2d12717c5ca6cc57b5aa904cc2e122e2683a7885d6141c9679b45a0",
+      "bytes": 561,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_stdout.txt",
+      "sha256": "a40da6274662d38faf39e8e719f8066f75bdb7a87515bdf3b02893361ee3220b",
+      "bytes": 1961,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_stderr.txt",
+      "sha256": "b93a259cb763e377e88c31b41462da0221c7017c98904d104f70c1db99dc729a",
+      "bytes": 248,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/revision_prompt.md",
+      "sha256": "8235a37ed66f910fbc1d09fe38e705407a1ca6db1b157a591d702cba0bc3a31d",
+      "bytes": 29737,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/command.json",
+      "sha256": "86431e12456b253805bd5fbf79056f8032ba8c2c9463fad7ef86e79bf46278b2",
+      "bytes": 2825,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/tool_evidence.json",
+      "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+      "bytes": 100,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/tool_evidence_verification.json",
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+      "bytes": 406,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/codex_stdout.jsonl",
+      "sha256": "21bbfa6ad26ce5711ac42a7fcddd3689557cfdf8b9a8ba1e0b8098a1ca7b0bc3",
+      "bytes": 80775,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/codex_stderr.log",
+      "sha256": "02f425ac966641c71497274326c8176077e864d123b16b725f540084c7124c04",
+      "bytes": 233,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/codex_events.jsonl",
+      "sha256": "1611a72ff7913994245c5d4518484077ea93938ed7419246eaae7c250b1bad23",
+      "bytes": 80852,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/codex_last_message.txt",
+      "sha256": "b82e202da3825551ef567cbd3f833b5815cff97e180c1f8587b8d062286d01ef",
+      "bytes": 9392,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/codex_trace.json",
+      "sha256": "134acba0a523787f0f227857d26b73ccc464a353c5819d2b29dcb31cde77c993",
+      "bytes": 557,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/stdout.txt",
+      "sha256": "b82e202da3825551ef567cbd3f833b5815cff97e180c1f8587b8d062286d01ef",
+      "bytes": 9392,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/stderr.txt",
+      "sha256": "50c11a54e7ec0304e1cc4cc2ce57a9cbd8e6531cc95a32923cebbfa902ec706a",
+      "bytes": 248,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/raw_response.txt",
+      "sha256": "b82e202da3825551ef567cbd3f833b5815cff97e180c1f8587b8d062286d01ef",
+      "bytes": 9392,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/parsed_cells.json",
+      "sha256": "6267be40de688829bef98a9c60e7438fb863c0046d521cdfe78502d635de7973",
+      "bytes": 10950,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/normalized_cells.json",
+      "sha256": "7588ca5677187c2f39d183df6035bdd318c527f12a5d2dda1d746792e8703afb",
+      "bytes": 29705,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/distribution.json",
+      "sha256": "f5163632be490cc2c00c7737b72b18a3c789780f14c5e3d5ac5a09fae7a9eeeb",
+      "bytes": 14969,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/validation.json",
+      "sha256": "4931bc3b0d0c0c97fb0928fcd3b03541b05a85214bbc736819ae5d9168776918",
+      "bytes": 169,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/cells.with_activity.json",
+      "sha256": "cc47a52c20a75db3556cfcca9f030bf751018b4b92e60f34b4d23ee1eb79b0ee",
+      "bytes": 49095,
+      "createdAt": "2026-09-23T05:01:35Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/manifest.json",
+      "sha256": "ff33f2e50ffd20a0362c2d132c3a9078ed03ba723db68dc60b311594f8ab70c9",
+      "bytes": 20707,
+      "createdAt": "2026-09-23T05:01:35Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "69d9ae2e500e77460016b37effc4cb52c7683854",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "0945936223aab77c416e7f6ee3e379a8252884e7f280bd2a60a9db193d25eef5"
+}

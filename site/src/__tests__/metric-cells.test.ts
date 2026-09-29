@@ -15,6 +15,11 @@ describe("resolveMetricCell (live metric → cell join)", () => {
     expect(resolveMetricCell("usda.fsa.no_such_series")).toBeNull();
   });
 
+  it("does not match a partial token at the end of a series hint", () => {
+    expect(cellsForSeries("us.dol.initial_claim")).toEqual([]);
+    expect(resolveMetricCell("us.dol.initial_claim")).toBeNull();
+  });
+
   it("does not turn withdrawn SPM and ACTC prototypes into live metric estimates", () => {
     for (const hint of [
       "census.spm.child_poverty_rate",

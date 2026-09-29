@@ -132,6 +132,7 @@ challenge = [
 custody = [
     { name = "pypdf" },
     { name = "receipt", marker = "python_full_version >= '3.11'" },
+    { name = "xlrd" },
 ]
 dev = [
     { name = "black" },
@@ -185,6 +186,7 @@ requires-dist = [
     { name = "selectolax", marker = "extra == 'bills'", specifier = ">=0.3.21" },
     { name = "sigstore", marker = "python_full_version >= '3.11' and extra == 'challenge'", specifier = "==4.5.0" },
     { name = "statsmodels", marker = "extra == 'experiments'", specifier = ">=0.14.6" },
+    { name = "xlrd", marker = "extra == 'custody'", specifier = "==2.0.1" },
     { name = "xlrd", marker = "extra == 'dev'", specifier = "==2.0.1" },
     { name = "xlrd", marker = "extra == 'resolver'", specifier = "==2.0.1" },
 ]

@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { MetricStance } from "@/lib/stances";
+import ledgerPin from "@/data/ledger-pin.json";
+import reviewedBillBindings from "../../../scripts/bill_forecast_bindings.json";
 
 // bill.json artifacts live at the repo root (bills/<slug>.json), written
 // by scripts/ingest_bill.py — the site reads them at build time. Vercel
@@ -8,6 +10,11 @@ import type { MetricStance } from "@/lib/stances";
 // ignored-build-step watching bills/ for artifact-only pushes to deploy
 // (issue #43).
 const BILLS_DIR = path.join(process.cwd(), "..", "bills");
+const DOCKET_FILE = path.join(process.cwd(), "..", "scripts", "docket_series.json");
+
+// The catalog path is also used by scripts/pin_ledger.py. Link to the current
+// catalog for discovery; the identity displayed on the card comes from the docket.
+export const CHRONICLE_CATALOG_URL = `https://github.com/${ledgerPin.repo}/blob/${ledgerPin.branch}/ledger/series_catalog.json`;
 
 export interface BillInfo {
   slug?: string;
@@ -35,6 +42,10 @@ export interface BillMetric {
   series_hint?: string;
   /** Frozen analysis-day badge carried by ported artifacts. */
   registry?: string;
+  /** Proposal metadata only; the current docket remains admission authority. */
+  matched_series?: string;
+  ledger_uuid?: string;
+  mapping?: Record<string, unknown>;
   /**
    * Why this metric was selected — considered alternatives, resolution
    * properties, known weaknesses. Additive contract field; rendered as
@@ -107,14 +118,14 @@ export interface BillArtifact {
   provisions: BillProvision[];
 }
 
-export function loadBills(): BillArtifact[] {
-  if (!fs.existsSync(BILLS_DIR)) return [];
+export function loadBills(billsDir: string = BILLS_DIR): BillArtifact[] {
+  if (!fs.existsSync(billsDir)) return [];
   return fs
-    .readdirSync(BILLS_DIR)
-    .filter((name) => name.endsWith(".json"))
+    .readdirSync(billsDir)
+    .filter((name) => name.endsWith(".json") && !name.endsWith(".mapped.json"))
     .map((name) => {
       const raw = JSON.parse(
-        fs.readFileSync(path.join(BILLS_DIR, name), "utf-8"),
+        fs.readFileSync(path.join(billsDir, name), "utf-8"),
       ) as Omit<BillArtifact, "slug">;
       return { slug: name.replace(/\.json$/, ""), ...raw };
     })
@@ -146,29 +157,171 @@ export function loadBillMeta(slug: string): BillRawMeta | null {
   }
 }
 
-export type RegistryStatus = "reachable" | "not-yet" | "no-series" | "unknown";
+export type RegistryStatus = "reachable" | "not-yet" | "ambiguous" | "unknown";
 
 export const REGISTRY_LABEL: Record<RegistryStatus, string> = {
-  reachable: "In Thesis registry",
-  "not-yet": "Not yet in Thesis",
-  "no-series": "No official series",
-  unknown: "Unmapped",
+  reachable: "Admitted to docket",
+  "not-yet": "Admission work needed",
+  ambiguous: "Mapping review needed",
+  unknown: "Series mapping needed",
 };
 
-/**
- * The registry seam. The live registry mapper (issue #43, Max's track)
- * computes candidate-metric status against the docket at build time;
- * until it lands, ported artifacts fall back to their frozen
- * analysis-day badge. `live` tells the UI whether the badge is computed
- * or frozen.
- */
-export function metricRegistryStatus(metric: BillMetric): {
+export interface BillDocketSeries {
+  series: string;
+  ledger?: { uuid: string; concept: string };
+}
+
+export interface ReviewedBillSeriesAlias {
+  hint: string;
+  series: string;
+  ledgerUuid: string;
+}
+
+// These named identities were reviewed with the bill's conditional bindings.
+// They resolve metric names only; they do not authorize a new conditional pair.
+const REVIEWED_BILL_SERIES_ALIASES: ReviewedBillSeriesAlias[] = Object.values(
+  reviewedBillBindings.bills,
+).flatMap((bill) =>
+  bill.pairs.flatMap((pair) =>
+    pair.seriesHints
+      .filter((hint) => hint !== pair.series)
+      .map((hint) => ({ hint, series: pair.series, ledgerUuid: pair.ledgerUuid })),
+  ),
+);
+
+export interface MetricRegistryMapping {
   status: RegistryStatus;
-  live: boolean;
-} {
-  const frozen = metric.registry;
-  if (frozen === "reachable" || frozen === "not-yet" || frozen === "no-series") {
-    return { status: frozen, live: false };
+  live: true;
+  note: string;
+  series?: string;
+  ledger?: { uuid: string; concept: string };
+  candidates?: string[];
+}
+
+/** Read the reviewed docket at build time; a missing docket fails the build. */
+export function loadBillDocket(): BillDocketSeries[] {
+  const docket = JSON.parse(fs.readFileSync(DOCKET_FILE, "utf-8")) as {
+    series: BillDocketSeries[];
+  };
+  if (
+    !Array.isArray(docket.series) ||
+    docket.series.some(
+      (row) => typeof row.series !== "string" || !row.series.trim(),
+    )
+  ) {
+    throw new Error("Bill metric mapping requires a valid docket series registry");
   }
-  return { status: "unknown", live: false };
+  return docket.series;
+}
+
+/**
+ * Admission is computed from the current docket, never from an analysis-day
+ * badge, a proposal's matched_series/ledger_uuid, or the existence of a forecast.
+ * Reviewed aliases must retain their exact canonical series and Chronicle UUID.
+ * Otherwise prefer an exact identity; a dot-descendant must be unambiguous.
+ */
+export function metricRegistryStatus(
+  metric: BillMetric,
+  docket: readonly BillDocketSeries[] = loadBillDocket(),
+  reviewedAliases: readonly ReviewedBillSeriesAlias[] = REVIEWED_BILL_SERIES_ALIASES,
+): MetricRegistryMapping {
+  const hint = metric.series_hint?.trim();
+  if (!hint) {
+    return {
+      status: "unknown",
+      live: true,
+      note: "Mapping work: identify an official outcome series, then review its Chronicle coverage and docket admission.",
+    };
+  }
+
+  const exact = docket.filter((row) => row.series === hint);
+  const aliases = [
+    ...new Map(
+      reviewedAliases
+        .filter((row) => row.hint === hint)
+        .map((row) => [JSON.stringify([row.series, row.ledgerUuid]), row]),
+    ).values(),
+  ];
+  if (aliases.length > 0) {
+    const alias = aliases[0];
+    const concepts = [...new Set(aliases.map((row) => row.series))].sort();
+    if (aliases.length !== 1 || exact.some((row) => row.series !== alias.series)) {
+      return {
+        status: "ambiguous",
+        live: true,
+        note: "Mapping work: reviewed aliases or current docket entries assign conflicting identities to this hint. Review its exact series and Chronicle UUID.",
+        candidates: [...new Set([...concepts, ...exact.map((row) => row.series)])].sort(),
+      };
+    }
+    const admitted = docket.filter((row) => row.series === alias.series);
+    if (admitted.length === 0) {
+      return {
+        status: "not-yet",
+        live: true,
+        note: "Admission work: the reviewed alias names a canonical series that is absent from the current docket. Review its admission before registration.",
+        candidates: concepts,
+      };
+    }
+    if (
+      !alias.ledgerUuid.trim() ||
+      admitted.some(
+        (row) => row.ledger?.uuid !== alias.ledgerUuid ||
+          row.ledger?.concept !== alias.series,
+      )
+    ) {
+      return {
+        status: "ambiguous",
+        live: true,
+        note: "Mapping work: the reviewed alias and current docket disagree on the Chronicle identity. Resolve the series and UUID before registration.",
+        candidates: concepts,
+      };
+    }
+    return {
+      status: "reachable",
+      live: true,
+      note: "Reviewed alias maps to the admitted docket series. A bill-specific conditional pair requires separate preregistration.",
+      series: alias.series,
+      ledger: admitted[0].ledger,
+    };
+  }
+  const matchingRows =
+    exact.length > 0
+      ? exact
+      : docket.filter((row) => row.series.startsWith(`${hint}.`));
+  // Different periods can repeat one series. They are one mapping only when
+  // their Chronicle identity agrees; conflicting UUIDs remain review work.
+  const candidates = [
+    ...new Map(
+      matchingRows.map((row) => [
+        JSON.stringify([row.series, row.ledger?.uuid, row.ledger?.concept]),
+        row,
+      ]),
+    ).values(),
+  ];
+  if (candidates.length === 1) {
+    const match = candidates[0];
+    return {
+      status: "reachable",
+      live: true,
+      note: "Series admitted to the current docket. A bill-specific conditional pair requires separate preregistration.",
+      series: match.series,
+      ...(match.ledger ? { ledger: match.ledger } : {}),
+    };
+  }
+  if (candidates.length > 1) {
+    const concepts = [...new Set(candidates.map((row) => row.series))].sort();
+    return {
+      status: "ambiguous",
+      live: true,
+      note: concepts.length === 1
+        ? "Mapping work: this docket series has conflicting Chronicle identities. Resolve its identity before registration."
+        : "Mapping work: this hint matches multiple docket series. Review the metric's scope and select its exact series before registration.",
+      candidates: concepts,
+    };
+  }
+  return {
+    status: "not-yet",
+    live: true,
+    note: "Admission work: this hint has no current docket match. Verify the official series, ingest missing Chronicle history, and complete reviewed docket admission.",
+  };
 }

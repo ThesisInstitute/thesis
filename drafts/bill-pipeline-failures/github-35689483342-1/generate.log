@@ -1,0 +1,631 @@
+generate	Set up job	﻿2026-09-22T05:10:04.8121477Z Current runner version: '2.337.0'
+generate	Set up job	2026-09-22T05:10:04.8157858Z ##[group]Runner Image Provisioner
+generate	Set up job	2026-09-22T05:10:04.8159345Z Hosted Compute Agent
+generate	Set up job	2026-09-22T05:10:04.8160336Z Version: 20260828.587
+generate	Set up job	2026-09-22T05:10:04.8161458Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+generate	Set up job	2026-09-22T05:10:04.8162691Z Build Date: 2026-08-28T16:44:25Z
+generate	Set up job	2026-09-22T05:10:04.8163823Z Worker ID: {0060cc6f-1ec3-4f73-88cc-3965d762a742}
+generate	Set up job	2026-09-22T05:10:04.8165508Z Azure Region: eastus2
+generate	Set up job	2026-09-22T05:10:04.8166545Z ##[endgroup]
+generate	Set up job	2026-09-22T05:10:04.8168831Z ##[group]Operating System
+generate	Set up job	2026-09-22T05:10:04.8169872Z Ubuntu
+generate	Set up job	2026-09-22T05:10:04.8170815Z 24.04.5
+generate	Set up job	2026-09-22T05:10:04.8171711Z LTS
+generate	Set up job	2026-09-22T05:10:04.8172517Z ##[endgroup]
+generate	Set up job	2026-09-22T05:10:04.8173597Z ##[group]Runner Image
+generate	Set up job	2026-09-22T05:10:04.8174872Z Image: ubuntu-24.04
+generate	Set up job	2026-09-22T05:10:04.8175869Z Version: 20260907.300.1
+generate	Set up job	2026-09-22T05:10:04.8177747Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260907.300/images/ubuntu/Ubuntu2404-Readme.md
+generate	Set up job	2026-09-22T05:10:04.8180769Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260907.300
+generate	Set up job	2026-09-22T05:10:04.8182429Z ##[endgroup]
+generate	Set up job	2026-09-22T05:10:04.8184731Z ##[group]GITHUB_TOKEN Permissions
+generate	Set up job	2026-09-22T05:10:04.8187365Z Contents: read
+generate	Set up job	2026-09-22T05:10:04.8188507Z Metadata: read
+generate	Set up job	2026-09-22T05:10:04.8189376Z ##[endgroup]
+generate	Set up job	2026-09-22T05:10:04.8192333Z Secret source: Actions
+generate	Set up job	2026-09-22T05:10:04.8193840Z Cache mode: write
+generate	Set up job	2026-09-22T05:10:04.8195401Z Prepare workflow directory
+generate	Set up job	2026-09-22T05:10:04.8944735Z Prepare all required actions
+generate	Set up job	2026-09-22T05:10:04.9018443Z Getting action download info
+generate	Set up job	2026-09-22T05:10:05.1180204Z Download action repository 'actions/checkout@v5' (SHA:fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09)
+generate	Set up job	2026-09-22T05:10:05.2214893Z Download action repository 'oven-sh/setup-bun@v2' (SHA:0c5077e51419868618aeaa5fe8019c62421857d6)
+generate	Set up job	2026-09-22T05:10:05.4006896Z Download action repository 'actions/download-artifact@v8' (SHA:3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c)
+generate	Set up job	2026-09-22T05:10:05.5927111Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+generate	Set up job	2026-09-22T05:10:05.7723836Z Complete job name: generate
+generate	Run actions/checkout@v5	﻿2026-09-22T05:10:05.8505031Z ##[group]Run actions/checkout@v5
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8506070Z with:
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8506607Z   ref: 4417984e1ac42080c99c714fdc3b8752b112eeb6
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8507248Z   fetch-depth: 0
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8507743Z   persist-credentials: false
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8508312Z   repository: ThesisInstitute/thesis
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8512351Z   token: ***
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8512834Z   ssh-strict: true
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8513313Z   ssh-user: git
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8513771Z   clean: true
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8514671Z   sparse-checkout-cone-mode: true
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8515376Z   fetch-tags: false
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8515869Z   show-progress: true
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8516377Z   lfs: false
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8516827Z   submodules: false
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8517330Z   set-safe-directory: true
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8517916Z   allow-unsafe-pr-checkout: false
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8518804Z env:
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8519336Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8520007Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8520737Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8522485Z   OPENAI_API_KEY: ***
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.8522984Z ##[endgroup]
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9560732Z Syncing repository: ThesisInstitute/thesis
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9562894Z ##[group]Getting Git version info
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9563711Z Working directory is '/home/runner/work/thesis/thesis'
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9565173Z [command]/usr/bin/git version
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9629493Z git version 2.55.0
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9667513Z ##[endgroup]
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9676687Z Temporarily overriding HOME='/home/runner/work/_temp/d4e9b05c-0ef7-463e-8e98-a2dbc0732108' before making global git config changes
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9679948Z Adding repository directory to the temporary git global config as a safe directory
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9683139Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/thesis/thesis
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9735984Z Deleting the contents of '/home/runner/work/thesis/thesis'
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9739558Z ##[group]Initializing the repository
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9743250Z [command]/usr/bin/git init /home/runner/work/thesis/thesis
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9856085Z hint: Using 'master' as the name for the initial branch. This default branch name
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9858448Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9860274Z hint: to use in all of your new repositories, which will suppress this warning,
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9861817Z hint: call:
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9862728Z hint:
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9863740Z hint: 	git config --global init.defaultBranch <name>
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9865290Z hint:
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9869376Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9871493Z hint: 'development'. The just-created branch can be renamed via this command:
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9873158Z hint:
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9874805Z hint: 	git branch -m <name>
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9876470Z hint:
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9877923Z hint: Disable this message with "git config set advice.defaultBranchName false"
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9880227Z Initialized empty Git repository in /home/runner/work/thesis/thesis/.git/
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9884141Z [command]/usr/bin/git remote add origin https://github.com/ThesisInstitute/thesis
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9918324Z ##[endgroup]
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9920137Z ##[group]Disabling automatic garbage collection
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9921779Z [command]/usr/bin/git config --local gc.auto 0
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9952888Z ##[endgroup]
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9954688Z ##[group]Setting up auth
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9958079Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+generate	Run actions/checkout@v5	2026-09-22T05:10:05.9992100Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+generate	Run actions/checkout@v5	2026-09-22T05:10:06.0374675Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+generate	Run actions/checkout@v5	2026-09-22T05:10:06.0427372Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+generate	Run actions/checkout@v5	2026-09-22T05:10:06.0687760Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+generate	Run actions/checkout@v5	2026-09-22T05:10:06.0726303Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+generate	Run actions/checkout@v5	2026-09-22T05:10:06.0952506Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+generate	Run actions/checkout@v5	2026-09-22T05:10:06.0992500Z ##[endgroup]
+generate	Run actions/checkout@v5	2026-09-22T05:10:06.0994087Z ##[group]Fetching the repository
+generate	Run actions/checkout@v5	2026-09-22T05:10:06.1003505Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6805418Z From https://github.com/ThesisInstitute/thesis
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6811353Z  * [new branch]        attested/2026-08-04-d0e9df19ed153b0736ccd7e0b4266144160e7a5198cacfa4242bce7c0d5e253b -> origin/attested/2026-08-04-d0e9df19ed153b0736ccd7e0b4266144160e7a5198cacfa4242bce7c0d5e253b
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6814167Z  * [new branch]        attested/2026-08-06-a8c720af9064965ffcbccb9a434b7303cfa40a8ff247b20b278e745b50a71a05 -> origin/attested/2026-08-06-a8c720af9064965ffcbccb9a434b7303cfa40a8ff247b20b278e745b50a71a05
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6817482Z  * [new branch]        attested/2026-08-08-0f89261369bdb0dd9889f661e4ba4c238ad2a3a35fdd90e3a0a8d060c7c5cb3a -> origin/attested/2026-08-08-0f89261369bdb0dd9889f661e4ba4c238ad2a3a35fdd90e3a0a8d060c7c5cb3a
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6820610Z  * [new branch]        attested/2026-08-08-d5cd1aeb3d7c6148a299e7f45ff0d128bd3c1ee014e9c9cfcbd763a54097e3d1 -> origin/attested/2026-08-08-d5cd1aeb3d7c6148a299e7f45ff0d128bd3c1ee014e9c9cfcbd763a54097e3d1
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6824076Z  * [new branch]        attested/2026-08-14-415d8dc5225036cf587efabb57b34982177205f74e4ffed30e218202bdb02531 -> origin/attested/2026-08-14-415d8dc5225036cf587efabb57b34982177205f74e4ffed30e218202bdb02531
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6827624Z  * [new branch]        attested/2026-08-14-ebf9b6bb201c3b1e07e917af66fed91efc61741c2f66f6ab0d609af963007fd6 -> origin/attested/2026-08-14-ebf9b6bb201c3b1e07e917af66fed91efc61741c2f66f6ab0d609af963007fd6
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6830448Z  * [new branch]        attested/2026-08-15-ac01a361fb2e4ef75e6b4320dd5c0c4a8dc777eb69717d0f3ef3c9abd24d7f22 -> origin/attested/2026-08-15-ac01a361fb2e4ef75e6b4320dd5c0c4a8dc777eb69717d0f3ef3c9abd24d7f22
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6832319Z  * [new branch]        challenge-lane-v2       -> origin/challenge-lane-v2
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6833271Z  * [new branch]        chore/receipt-0.6.0     -> origin/chore/receipt-0.6.0
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6834981Z  * [new branch]        claude/sweet-germain-f31510 -> origin/claude/sweet-germain-f31510
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6836219Z  * [new branch]        codex-salvage/fix-208   -> origin/codex-salvage/fix-208
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6837273Z  * [new branch]        codex-salvage/fix-208-r3 -> origin/codex-salvage/fix-208-r3
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6838203Z  * [new branch]        codex-salvage/fix-209   -> origin/codex-salvage/fix-209
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6839164Z  * [new branch]        codex-salvage/gemini-backend -> origin/codex-salvage/gemini-backend
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6840385Z  * [new branch]        codex-salvage/policy-chain -> origin/codex-salvage/policy-chain
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6841453Z  * [new branch]        codex-salvage/register  -> origin/codex-salvage/register
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6842443Z  * [new branch]        codex-salvage/review-208 -> origin/codex-salvage/review-208
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6843453Z  * [new branch]        codex-salvage/review-209 -> origin/codex-salvage/review-209
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6844762Z  * [new branch]        docket-codex-gpt-5-6    -> origin/docket-codex-gpt-5-6
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6845738Z  * [new branch]        eci-q3-reseed           -> origin/eci-q3-reseed
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6847102Z  * [new branch]        feat/a19-registrable-adapter -> origin/feat/a19-registrable-adapter
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6848482Z  * [new branch]        feat/accountability-wave-gh-bw -> origin/feat/accountability-wave-gh-bw
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6849753Z  * [new branch]        feat/attested-generation-lane -> origin/feat/attested-generation-lane
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6850931Z  * [new branch]        feat/awaiting-forecast-lane -> origin/feat/awaiting-forecast-lane
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6852145Z  * [new branch]        feat/bill-pairs-wave2   -> origin/feat/bill-pairs-wave2
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6853149Z  * [new branch]        feat/bill-pipeline-e2e  -> origin/feat/bill-pipeline-e2e
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6854484Z  * [new branch]        feat/bills-full-coverage -> origin/feat/bills-full-coverage
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6855630Z  * [new branch]        feat/bls-api-registrable -> origin/feat/bls-api-registrable
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6856803Z  * [new branch]        feat/bls-real-earnings  -> origin/feat/bls-real-earnings
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6858074Z  * [new branch]        feat/bounded-resolve-by-targets -> origin/feat/bounded-resolve-by-targets
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6859352Z  * [new branch]        feat/challenge-public-surface -> origin/feat/challenge-public-surface
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6860781Z  * [new branch]        feat/conditional-policy-chain-rubric -> origin/feat/conditional-policy-chain-rubric
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6862046Z  * [new branch]        feat/crp-fresh-pair     -> origin/feat/crp-fresh-pair
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6863165Z  * [new branch]        feat/crp-pair-live-surface -> origin/feat/crp-pair-live-surface
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6864799Z  * [new branch]        feat/executor-gate      -> origin/feat/executor-gate
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6865667Z  * [new branch]        feat/gemini-cli-backend -> origin/feat/gemini-cli-backend
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6866743Z  * [new branch]        feat/history-floor      -> origin/feat/history-floor
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6867409Z  * [new branch]        feat/hr1021-metric-hints -> origin/feat/hr1021-metric-hints
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6868295Z  * [new branch]        feat/ingestion-wave-1   -> origin/feat/ingestion-wave-1
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6869367Z  * [new branch]        feat/mapper-catalog-land -> origin/feat/mapper-catalog-land
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6870332Z  * [new branch]        feat/ndaa-conditional-dod-pair -> origin/feat/ndaa-conditional-dod-pair
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6871174Z  * [new branch]        feat/resolution-status  -> origin/feat/resolution-status
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6872395Z  * [new branch]        feat/retry-docket-authenticated-anchors -> origin/feat/retry-docket-authenticated-anchors
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6873172Z  * [new branch]        feat/roll-retry-lane    -> origin/feat/roll-retry-lane
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6873812Z  * [new branch]        feat/s3596-actc-pair-link -> origin/feat/s3596-actc-pair-link
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6875016Z  * [new branch]        feat/s3596-analysis-20260922 -> origin/feat/s3596-analysis-20260922
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6875988Z  * [new branch]        feat/s3596-spm-pair-link -> origin/feat/s3596-spm-pair-link
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6876893Z  * [new branch]        feat/sba-pdf-custody-family -> origin/feat/sba-pdf-custody-family
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6877679Z  * [new branch]        feat/sba-series-admission -> origin/feat/sba-series-admission
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6878896Z  * [new branch]        feat/series-ingestion-wave1 -> origin/feat/series-ingestion-wave1
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6880584Z  * [new branch]        feat/tool-evidence-native-binding-at-generation -> origin/feat/tool-evidence-native-binding-at-generation
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6882105Z  * [new branch]        feat/waveb-bea-ita      -> origin/feat/waveb-bea-ita
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6882713Z  * [new branch]        feat/waveb-eia-flare    -> origin/feat/waveb-eia-flare
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6883306Z  * [new branch]        feat/waveb-qcew-annual  -> origin/feat/waveb-qcew-annual
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6883935Z  * [new branch]        feat/waveb-usaspending  -> origin/feat/waveb-usaspending
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6885138Z  * [new branch]        feat/witness-registered-windows -> origin/feat/witness-registered-windows
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6885840Z  * [new branch]        fix/a19-registered-scale -> origin/fix/a19-registered-scale
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6886511Z  * [new branch]        fix/annual-id-enumeration -> origin/fix/annual-id-enumeration
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6887224Z  * [new branch]        fix/append-regenerates-catalog -> origin/fix/append-regenerates-catalog
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6887998Z  * [new branch]        fix/awaiting-forecast-lane -> origin/fix/awaiting-forecast-lane
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6889047Z  * [new branch]        fix/bill-page-honest-states -> origin/fix/bill-page-honest-states
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6890182Z  * [new branch]        fix/bounded-interregnum-history -> origin/fix/bounded-interregnum-history
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6891431Z  * [new branch]        fix/calibration-normalized-mean -> origin/fix/calibration-normalized-mean
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6892365Z  * [new branch]        fix/chronicle-ledger-dag-20260905 -> origin/fix/chronicle-ledger-dag-20260905
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6893281Z  * [new branch]        fix/ci-agent-sandbox-userns -> origin/fix/ci-agent-sandbox-userns
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6894354Z  * [new branch]        fix/contract-full-machine-checks -> origin/fix/contract-full-machine-checks
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6895441Z  * [new branch]        fix/contract-machine-checked-phrasings -> origin/fix/contract-machine-checked-phrasings
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6896482Z  * [new branch]        fix/docket-calendar-resolution-date -> origin/fix/docket-calendar-resolution-date
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6897282Z  * [new branch]        fix/errmsg-custody      -> origin/fix/errmsg-custody
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6897906Z  * [new branch]        fix/errmsg-site         -> origin/fix/errmsg-site
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6898626Z  * [new branch]        fix/errmsg-validators   -> origin/fix/errmsg-validators
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6899617Z  * [new branch]        fix/frozen-registry-duplicates -> origin/fix/frozen-registry-duplicates
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6900534Z  * [new branch]        fix/full-prompt-embeds-cell-contract -> origin/fix/full-prompt-embeds-cell-contract
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6901608Z  * [new branch]        fix/judges-strategy-normalized-aggregates -> origin/fix/judges-strategy-normalized-aggregates
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6902616Z  * [new branch]        fix/ledger-chronicle-migration -> origin/fix/ledger-chronicle-migration
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6903524Z  * [new branch]        fix/ledger-tsa-signer-rotation -> origin/fix/ledger-tsa-signer-rotation
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6904391Z  * [new branch]        fix/legible-failures    -> origin/fix/legible-failures
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6905344Z  * [new branch]        fix/ndaa-pair-country-extras -> origin/fix/ndaa-pair-country-extras
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6906346Z  * [new branch]        fix/normalizer-refuses-with-diagnostics -> origin/fix/normalizer-refuses-with-diagnostics
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6907307Z  * [new branch]        fix/ons-pair-expiry-ratchet -> origin/fix/ons-pair-expiry-ratchet
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6908108Z  * [new branch]        fix/orphan-grace-2026-07-31-seeds -> origin/fix/orphan-grace-2026-07-31-seeds
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6908966Z  * [new branch]        fix/pe-minwage-certified -> origin/fix/pe-minwage-certified
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6909792Z  * [new branch]        fix/pin-ledger-merge-topology -> origin/fix/pin-ledger-merge-topology
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6910523Z  * [new branch]        fix/prepush-own-contribution -> origin/fix/prepush-own-contribution
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6911449Z  * [new branch]        fix/preserve-batch-on-gate-failure -> origin/fix/preserve-batch-on-gate-failure
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6912439Z  * [new branch]        fix/private-source-screen-projection -> origin/fix/private-source-screen-projection
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6913452Z  * [new branch]        fix/prompt-unit-echoes-registration -> origin/fix/prompt-unit-echoes-registration
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6914500Z  * [new branch]        fix/provenance-message-followup -> origin/fix/provenance-message-followup
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6915389Z  * [new branch]        fix/records-provenance-merge-false-positive -> origin/fix/records-provenance-merge-false-positive
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6916789Z  * [new branch]        fix/registered-query-history-instruction -> origin/fix/registered-query-history-instruction
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6917720Z  * [new branch]        fix/remit-link-and-quarter-anchors -> origin/fix/remit-link-and-quarter-anchors
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6918748Z  * [new branch]        fix/resolver-intl-routing-and-robustness -> origin/fix/resolver-intl-routing-and-robustness
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6919702Z  * [new branch]        fix/roll-skips-expired-ids -> origin/fix/roll-skips-expired-ids
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6920495Z  * [new branch]        fix/sba-announcement-url -> origin/fix/sba-announcement-url
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6921229Z  * [new branch]        fix/spm-forecast-replay-consistency -> origin/fix/spm-forecast-replay-consistency
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6922155Z  * [new branch]        fix/stale-resolution-report -> origin/fix/stale-resolution-report
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6923041Z  * [new branch]        fix/state-adaptive-pending-card -> origin/fix/state-adaptive-pending-card
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6924091Z  * [new branch]        fix/strategy-selection-registration-projection -> origin/fix/strategy-selection-registration-projection
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6925386Z  * [new branch]        fix/tool-evidence-jsonl-newline-splitting -> origin/fix/tool-evidence-jsonl-newline-splitting
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6926307Z  * [new branch]        hack/artifact-enrichment -> origin/hack/artifact-enrichment
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6926932Z  * [new branch]        hack/challenge-adapter  -> origin/hack/challenge-adapter
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6927629Z  * [new branch]        hack/challenge-catalog-wire -> origin/hack/challenge-catalog-wire
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6928430Z  * [new branch]        hack/crp-conditional-machinery -> origin/hack/crp-conditional-machinery
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6929290Z  * [new branch]        hack/crp-docket-promotion -> origin/hack/crp-docket-promotion
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6930115Z  * [new branch]        hack/demo-layer-preservation -> origin/hack/demo-layer-preservation
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6930880Z  * [new branch]        hack/expired-unforecast-2026-07-22 -> origin/hack/expired-unforecast-2026-07-22
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6931566Z  * [new branch]        hack/frontier-artifact  -> origin/hack/frontier-artifact
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6932188Z  * [new branch]        hack/keller-copy-components -> origin/hack/keller-copy-components
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6932823Z  * [new branch]        hack/keller-u6-submission -> origin/hack/keller-u6-submission
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6933473Z  * [new branch]        hack/keller-verifier-windows -> origin/hack/keller-verifier-windows
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6934370Z  * [new branch]        hack/pavel-bills        -> origin/hack/pavel-bills
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6935137Z  * [new branch]        hack/pavel-bills-hardening -> origin/hack/pavel-bills-hardening
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6935847Z  * [new branch]        hack/pending-certification -> origin/hack/pending-certification
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6936518Z  * [new branch]        hack/provenance-first-parent -> origin/hack/provenance-first-parent
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6937182Z  * [new branch]        hack/refused-conditionals -> origin/hack/refused-conditionals
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6937743Z  * [new branch]        hack/revert-95          -> origin/hack/revert-95
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6938311Z  * [new branch]        hack/s3596-conditional-actc -> origin/hack/s3596-conditional-actc
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6938958Z  * [new branch]        hack/s3596-conditional-final -> origin/hack/s3596-conditional-final
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6939606Z  * [new branch]        hack/s3596-conditional-pairs -> origin/hack/s3596-conditional-pairs
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6940198Z  * [new branch]        hack/s3596-pair         -> origin/hack/s3596-pair
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6940787Z  * [new branch]        hack/single-arm-conditionals -> origin/hack/single-arm-conditionals
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6941564Z  * [new branch]        hack/sol-mapper         -> origin/hack/sol-mapper
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6942267Z  * [new branch]        hack/stress-bills       -> origin/hack/stress-bills
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6942846Z  * [new branch]        hack/trimmer-compute-row -> origin/hack/trimmer-compute-row
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6943471Z  * [new branch]        hack/trimmer-policyengine -> origin/hack/trimmer-policyengine
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6944335Z  * [new branch]        harden/pin-no-replace-objects -> origin/harden/pin-no-replace-objects
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6945039Z  * [new branch]        hotfix/site-adapter-union -> origin/hotfix/site-adapter-union
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6945657Z  * [new branch]        jev-system-one-forecaster -> origin/jev-system-one-forecaster
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6946253Z  * [new branch]        ledger-catalog-pin      -> origin/ledger-catalog-pin
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6946784Z  * [new branch]        license-mit             -> origin/license-mit
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6947268Z  * [new branch]        main                    -> origin/main
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6947761Z  * [new branch]        mapper-catalog-v2       -> origin/mapper-catalog-v2
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6948341Z  * [new branch]        perf/site-test-timeouts -> origin/perf/site-test-timeouts
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6948897Z  * [new branch]        pilot/afa-bundle        -> origin/pilot/afa-bundle
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6949437Z  * [new branch]        pilot/afa-revisions     -> origin/pilot/afa-revisions
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6950044Z  * [new branch]        pilot/s3596-preregistration -> origin/pilot/s3596-preregistration
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6950629Z  * [new branch]        pin/receipt-0.6.1       -> origin/pin/receipt-0.6.1
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6951214Z  * [new branch]        promote/stress-substantive -> origin/promote/stress-substantive
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6951939Z  * [new branch]        provenance-noop-merges-and-alarms -> origin/provenance-noop-merges-and-alarms
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6952733Z  * [new branch]        receipt-051             -> origin/receipt-051
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6953260Z  * [new branch]        thesis-app-20260905     -> origin/thesis-app-20260905
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6953818Z  * [new branch]        thesis-core-20260904    -> origin/thesis-core-20260904
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6954759Z  * [new branch]        thesis-gdm-education-20260907 -> origin/thesis-gdm-education-20260907
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6955446Z  * [new branch]        thesis-gemini-app-20260907 -> origin/thesis-gemini-app-20260907
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6956027Z  * [new branch]        tsa-anchors-v3          -> origin/tsa-anchors-v3
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6956598Z  * [new branch]        worktree-pe-minwage-e2e -> origin/worktree-pe-minwage-e2e
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6957235Z  * [new branch]        worktree-prompt-components -> origin/worktree-prompt-components
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6957772Z  * [new tag]           v0.2.0                  -> v0.2.0
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6958177Z  * [new tag]           v0.2.1                  -> v0.2.1
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6958581Z  * [new tag]           v0.2.2                  -> v0.2.2
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6958973Z  * [new tag]           v0.2.3                  -> v0.2.3
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6959375Z  * [new tag]           v0.2.4                  -> v0.2.4
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6960795Z [command]/usr/bin/git rev-parse --verify --quiet 4417984e1ac42080c99c714fdc3b8752b112eeb6^{object}
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6961401Z 4417984e1ac42080c99c714fdc3b8752b112eeb6
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6962314Z ##[endgroup]
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6962776Z ##[group]Determining the checkout info
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6963272Z ##[endgroup]
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.6963578Z [command]/usr/bin/git sparse-checkout disable
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.7665464Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.7718135Z ##[group]Checking out the ref
+generate	Run actions/checkout@v5	2026-09-22T05:10:15.7720479Z [command]/usr/bin/git checkout --progress --force 4417984e1ac42080c99c714fdc3b8752b112eeb6
+generate	Run actions/checkout@v5	2026-09-22T05:10:16.8386612Z Updating files:  23% (7833/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:16.9001014Z Updating files:  24% (7998/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:16.9595188Z Updating files:  25% (8331/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.0130626Z Updating files:  26% (8665/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.0750440Z Updating files:  27% (8998/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.1261762Z Updating files:  28% (9331/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.1645303Z Updating files:  29% (9664/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.1998090Z Updating files:  30% (9998/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.2591048Z Updating files:  31% (10331/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.3218884Z Updating files:  32% (10664/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.3793892Z Updating files:  33% (10997/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.4452707Z Updating files:  34% (11331/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.5055320Z Updating files:  35% (11664/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.5634767Z Updating files:  36% (11997/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.6245910Z Updating files:  37% (12330/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.6835772Z Updating files:  38% (12664/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.7456630Z Updating files:  39% (12997/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:17.8755592Z Updating files:  40% (13330/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.0020229Z Updating files:  40% (13598/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.0187884Z Updating files:  41% (13663/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.0365326Z Updating files:  42% (13997/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.0736996Z Updating files:  43% (14330/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.1072257Z Updating files:  44% (14663/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.1916768Z Updating files:  45% (14996/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.2981721Z Updating files:  46% (15330/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.4233885Z Updating files:  47% (15663/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.4966853Z Updating files:  48% (15996/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.5803836Z Updating files:  49% (16329/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.6091390Z Updating files:  50% (16662/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.6667099Z Updating files:  51% (16996/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.7027613Z Updating files:  52% (17329/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.7741280Z Updating files:  53% (17662/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.8122885Z Updating files:  54% (17995/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.8330431Z Updating files:  54% (18221/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.8519680Z Updating files:  55% (18329/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.8704823Z Updating files:  56% (18662/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.8886161Z Updating files:  57% (18995/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.9094525Z Updating files:  58% (19328/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.9268776Z Updating files:  59% (19662/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.9437733Z Updating files:  60% (19995/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.9609670Z Updating files:  61% (20328/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.9810537Z Updating files:  62% (20661/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:18.9993945Z Updating files:  63% (20995/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.0183970Z Updating files:  64% (21328/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.0374425Z Updating files:  65% (21661/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.0577023Z Updating files:  66% (21994/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.0778437Z Updating files:  67% (22328/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.0961712Z Updating files:  68% (22661/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.1149344Z Updating files:  69% (22994/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.1320302Z Updating files:  70% (23327/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.1489926Z Updating files:  71% (23661/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.1661020Z Updating files:  72% (23994/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.1838339Z Updating files:  73% (24327/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.2266209Z Updating files:  74% (24660/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.2653420Z Updating files:  75% (24993/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.3333417Z Updating files:  76% (25327/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.3556261Z Updating files:  77% (25660/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.3766184Z Updating files:  78% (25993/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.3935198Z Updating files:  79% (26326/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.4103421Z Updating files:  80% (26660/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.4295459Z Updating files:  81% (26993/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.4468879Z Updating files:  82% (27326/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.4671793Z Updating files:  83% (27659/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.5011398Z Updating files:  84% (27993/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.5234478Z Updating files:  85% (28326/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.5399014Z Updating files:  86% (28659/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.5590037Z Updating files:  87% (28992/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.5842274Z Updating files:  88% (29326/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.6677125Z Updating files:  89% (29659/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.7548449Z Updating files:  90% (29992/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.8100877Z Updating files:  91% (30325/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.8105414Z Updating files:  92% (30659/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.8458082Z Updating files:  92% (30668/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.9002858Z Updating files:  93% (30992/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.9490357Z Updating files:  94% (31325/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:19.9937035Z Updating files:  95% (31658/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.1225809Z Updating files:  96% (31992/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.1884437Z Updating files:  97% (32325/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.2339480Z Updating files:  98% (32658/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.3250714Z Updating files:  99% (32991/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.3251288Z Updating files: 100% (33324/33324)
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.3251734Z Updating files: 100% (33324/33324), done.
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6133342Z Note: switching to '4417984e1ac42080c99c714fdc3b8752b112eeb6'.
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6134052Z 
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6134778Z You are in 'detached HEAD' state. You can look around, make experimental
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6135563Z changes and commit them, and you can discard any commits you make in this
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6136281Z state without impacting any branches by switching back to a branch.
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6136718Z 
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6137000Z If you want to create a new branch to retain commits you create, you may
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6137680Z do so (now or later) by using -c with the switch command. Example:
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6138077Z 
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6138235Z   git switch -c <new-branch-name>
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6138496Z 
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6138639Z Or undo this operation with:
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6138878Z 
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6139001Z   git switch -
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6139510Z 
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6139776Z Turn off this advice by setting config variable advice.detachedHead to false
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6140155Z 
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6140457Z HEAD is now at 4417984e Promote fresh S.3596 analysis with reviewed source evidence (#277)
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6258890Z ##[endgroup]
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6310556Z [command]/usr/bin/git log -1 --format=%H
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6342366Z 4417984e1ac42080c99c714fdc3b8752b112eeb6
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6352671Z ##[group]Removing auth
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6357511Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6390582Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6639278Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6669452Z http.https://github.com/.extraheader
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6677253Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6711019Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6962132Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.6996250Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+generate	Run actions/checkout@v5	2026-09-22T05:10:20.7241448Z ##[endgroup]
+generate	Run oven-sh/setup-bun@v2	﻿2026-09-22T05:10:20.7483611Z ##[group]Run oven-sh/setup-bun@v2
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7483916Z with:
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7484122Z   no-cache: false
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7486893Z   token: ***
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7487100Z env:
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7487321Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7487652Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7487998Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7488897Z   OPENAI_API_KEY: ***
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:20.7489117Z ##[endgroup]
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:21.2126286Z Downloading a new version of Bun: https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-x64.zip
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:21.4996893Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/e9f52fe2-dc49-4b3b-8119-4ca16d464c73.zip
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:22.1060476Z [command]/home/runner/.bun/bin/bun --revision
+generate	Run oven-sh/setup-bun@v2	2026-09-22T05:10:22.1108933Z 1.4.2+744846f84
+generate	Download the trusted strategy selection	﻿2026-09-22T05:10:22.1293026Z ##[group]Run actions/download-artifact@v8
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1293348Z with:
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1293573Z   name: strategy-selection-35689483342-1
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1293878Z   path: /tmp/trusted-selection
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1294139Z   merge-multiple: false
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1294783Z   repository: ThesisInstitute/thesis
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1295057Z   run-id: 35689483342
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1295278Z   skip-decompress: false
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1295527Z   digest-mismatch: error
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1295742Z env:
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1295958Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1296272Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1296602Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1297591Z   OPENAI_API_KEY: ***
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.1297813Z ##[endgroup]
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.2643947Z Downloading single artifact
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.3472607Z Preparing to download the following artifacts:
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.3474088Z - strategy-selection-35689483342-1 (ID: 10677932966, Size: 3365, Expected Digest: sha256:f31dcd626f3559e57941d4ddcd56fb7e7dec8e22049f94f58e570df33e8ca71b)
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.5001970Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/6000690b-0067-4130-be1f-f65ae3e0cf77/workflow-job-run-70cbabbf-55e8-5556-b884-a01959cabd32/artifacts/e95696075baa0ed9e8fd0bb1ca0a32891829e5dc4860fdba498205db9f59334c.zip
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.5005250Z Starting download of artifact to: /tmp/trusted-selection
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.5433963Z (node:2289) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.5436308Z (Use `node --trace-deprecation ...` to show where the warning was created)
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.5475190Z SHA256 digest of downloaded artifact is f31dcd626f3559e57941d4ddcd56fb7e7dec8e22049f94f58e570df33e8ca71b
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.5476482Z Artifact download completed successfully.
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.5477271Z Total of 1 artifact(s) downloaded
+generate	Download the trusted strategy selection	2026-09-22T05:10:22.5481234Z Download artifact has finished successfully
+generate	Fetch pinned and current resolution ledgers	﻿2026-09-22T05:10:22.5632444Z ##[group]Run set -euo pipefail
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5632850Z ^[[36;1mset -euo pipefail^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5633187Z ^[[36;1mpython3 - <<'PY' > /tmp/selection-ledger-env^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5633527Z ^[[36;1mimport json^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5633919Z ^[[36;1mselection = json.load(open("/tmp/trusted-selection/strategy-targets.json"))^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5634736Z ^[[36;1mevidence = selection["ledgerEvidence"]^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5635184Z ^[[36;1mfor key in ("repository", "branch", "path", "repositoryCommit", "blobSha"):^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5635618Z ^[[36;1m    print(f"{key}={evidence[key]}")^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5635897Z ^[[36;1mPY^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5636138Z ^[[36;1msource /tmp/selection-ledger-env^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5636425Z ^[[36;1mgh_fetch() {^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5636754Z ^[[36;1m  # Truncate the output file on every attempt: a request that dies^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5637241Z ^[[36;1m  # mid-body must never leave partial bytes for the next attempt^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5637698Z ^[[36;1m  # to append to (the content-hash gate caught exactly that).^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5638121Z ^[[36;1m  local out=$1^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5638349Z ^[[36;1m  shift^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5638566Z ^[[36;1m  local attempt^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5638815Z ^[[36;1m  for attempt in 1 2 3 4 5; do^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5639107Z ^[[36;1m    if "$@" > "$out"; then return 0; fi^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5639486Z ^[[36;1m    echo "transient gh failure (attempt $attempt): $*" >&2^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5639830Z ^[[36;1m    sleep 3^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5640039Z ^[[36;1m  done^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5640233Z ^[[36;1m  return 1^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5640441Z ^[[36;1m}^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5640870Z ^[[36;1mgh_fetch /tmp/gh-scalar gh api "repos/$repository/contents/$path?ref=$repositoryCommit" --jq .sha^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5641415Z ^[[36;1mtest "$(cat /tmp/gh-scalar)" = "$blobSha"^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5641763Z ^[[36;1mgh_fetch /tmp/pinned-ledger.jsonl \^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5642139Z ^[[36;1m  gh api -H "Accept: application/vnd.github.raw+json" \^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5642580Z ^[[36;1m  "repos/$repository/contents/$path?ref=$repositoryCommit"^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5643079Z ^[[36;1mgh_fetch /tmp/gh-scalar gh api "repos/$repository/commits/$branch" --jq .sha^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5643524Z ^[[36;1mlatest_sha=$(cat /tmp/gh-scalar)^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5643833Z ^[[36;1mgh_fetch /tmp/latest-ledger.jsonl \^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5644476Z ^[[36;1m  gh api -H "Accept: application/vnd.github.raw+json" \^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5644940Z ^[[36;1m  "repos/$repository/contents/$path?ref=$latest_sha"^[[0m
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5685833Z shell: /usr/bin/bash -e {0}
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5686109Z env:
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5686345Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5686685Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5687018Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5688011Z   OPENAI_API_KEY: ***
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5690532Z   GH_TOKEN: ***
+generate	Fetch pinned and current resolution ledgers	2026-09-22T05:10:22.5690755Z ##[endgroup]
+generate	Independently verify the target set and open state	﻿2026-09-22T05:10:23.8062616Z ##[group]Run set -euo pipefail
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8062985Z ^[[36;1mset -euo pipefail^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8063323Z ^[[36;1mtest "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8064631Z ^[[36;1mtest "$(python3 -c "import json;print(json.load(open('/tmp/trusted-selection/strategy-targets.json'))['selectionSetHash'])")" = "$EXPECTED_SET_HASH"^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8065469Z ^[[36;1mpython3 scripts/strategy_targets.py verify \^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8065906Z ^[[36;1m  --selection /tmp/trusted-selection/strategy-targets.json \^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8066352Z ^[[36;1m  --ledger-jsonl /tmp/pinned-ledger.jsonl^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8066741Z ^[[36;1mpython3 scripts/strategy_targets.py ensure-open \^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8067203Z ^[[36;1m  --selection /tmp/trusted-selection/strategy-targets.json \^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8067624Z ^[[36;1m  --ledger-jsonl /tmp/latest-ledger.jsonl \^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8068007Z ^[[36;1m  --checked-at-utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"^[[0m
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8104017Z shell: /usr/bin/bash -e {0}
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8104553Z env:
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8104802Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8105156Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8105503Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8106500Z   OPENAI_API_KEY: ***
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8106894Z   EXPECTED_SET_HASH: 2478315ef327dddbdf58eae31e5ae02d01217144bea1a3f6b59ec8745b43d610
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8107405Z   EXPECTED_SOURCE_SHA: 4417984e1ac42080c99c714fdc3b8752b112eeb6
+generate	Independently verify the target set and open state	2026-09-22T05:10:23.8107761Z ##[endgroup]
+generate	Independently verify the target set and open state	2026-09-22T05:10:32.8008753Z strategy selection verified
+generate	Independently verify the target set and open state	2026-09-22T05:10:32.8974723Z selected strategy targets remain open
+generate	Resolve the trusted invocation identity	﻿2026-09-22T05:10:32.9116809Z ##[group]Run set -euo pipefail
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9117185Z ^[[36;1mset -euo pipefail^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9117481Z ^[[36;1mpython3 - <<'PY' >> "$GITHUB_OUTPUT"^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9117787Z ^[[36;1mimport json^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9118007Z ^[[36;1mimport os^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9118219Z ^[[36;1m^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9118576Z ^[[36;1mselection = json.load(open("/tmp/trusted-selection/strategy-targets.json"))^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9119038Z ^[[36;1mworkflow = selection["workflow"]^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9119359Z ^[[36;1mrun_id = workflow.get("runId")^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9119676Z ^[[36;1mrun_attempt = workflow.get("runAttempt")^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9119972Z ^[[36;1mif (^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9120289Z ^[[36;1m    workflow.get("repository") != os.environ["EXPECTED_REPOSITORY"]^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9120686Z ^[[36;1m    or type(run_id) is not int^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9120963Z ^[[36;1m    or run_id < 1^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9121254Z ^[[36;1m    or str(run_id) != os.environ["EXPECTED_RUN_ID"]^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9121645Z ^[[36;1m    or type(run_attempt) is not int^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9121943Z ^[[36;1m    or run_attempt < 1^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9122194Z ^[[36;1m):^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9122540Z ^[[36;1m    raise SystemExit("selection belongs to a different workflow invocation")^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9122974Z ^[[36;1mprint(f"run_id={run_id}")^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9123271Z ^[[36;1mprint(f"run_attempt={run_attempt}")^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9123704Z ^[[36;1mprint(f"publication_artifact=strategy-docket-{run_id}-{run_attempt}")^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9124105Z ^[[36;1mPY^[[0m
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9159694Z shell: /usr/bin/bash -e {0}
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9159955Z env:
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9160183Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9160521Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9160863Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9162051Z   OPENAI_API_KEY: ***
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9162327Z   EXPECTED_REPOSITORY: ThesisInstitute/thesis
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9162641Z   EXPECTED_RUN_ID: 35689483342
+generate	Resolve the trusted invocation identity	2026-09-22T05:10:32.9162887Z ##[endgroup]
+generate	Enable the agent sandbox	﻿2026-09-22T05:10:32.9560227Z Prepare all required actions
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9598929Z ##[group]Run ./.github/actions/enable-agent-sandbox
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9599275Z env:
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9599516Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9599839Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9600332Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9601288Z   OPENAI_API_KEY: ***
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9601521Z ##[endgroup]
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9660482Z ##[start-action display=Probe and enable unprivileged user namespaces;id=__self.__run]
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9682462Z ##[group]Run set -euo pipefail
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9682776Z ^[[36;1mset -euo pipefail^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9683021Z ^[[36;1mprobe() {^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9683341Z ^[[36;1m  unshare --user --map-root-user true 2>/dev/null || return 1^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9683811Z ^[[36;1m  # When the runner ships a bubblewrap binary, exercise the^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9684409Z ^[[36;1m  # real thing too — AppArmor decisions can be^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9684871Z ^[[36;1m  # executable-specific, so unshare alone can false-pass.^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9685271Z ^[[36;1m  if command -v bwrap >/dev/null 2>&1; then^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9685704Z ^[[36;1m    bwrap --unshare-user --dev-bind / / true 2>/dev/null || return 1^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9686099Z ^[[36;1m  fi^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9686306Z ^[[36;1m  return 0^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9686524Z ^[[36;1m}^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9686822Z ^[[36;1mif probe; then echo "agent sandbox namespaces: ok"; exit 0; fi^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9687329Z ^[[36;1msudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9687825Z ^[[36;1msudo sysctl -w kernel.unprivileged_userns_clone=1 || true^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9688327Z ^[[36;1mif probe; then echo "agent sandbox namespaces: enabled via sysctl"; exit 0; fi^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9688916Z ^[[36;1mecho "unprivileged user namespaces unavailable; the agent sandbox cannot run" >&2^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9689361Z ^[[36;1mexit 1^[[0m
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9725478Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9725841Z env:
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9726085Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9726417Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9726746Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9727722Z   OPENAI_API_KEY: ***
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9727956Z ##[endgroup]
+generate	Enable the agent sandbox	2026-09-22T05:10:32.9929066Z kernel.apparmor_restrict_unprivileged_userns = 0
+generate	Enable the agent sandbox	2026-09-22T05:10:33.0000282Z kernel.unprivileged_userns_clone = 1
+generate	Enable the agent sandbox	2026-09-22T05:10:33.0026208Z agent sandbox namespaces: enabled via sysctl
+generate	Enable the agent sandbox	2026-09-22T05:10:33.0038791Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=37]
+generate	Install codex CLI	﻿2026-09-22T05:10:33.0070214Z ##[group]Run bun add -g @openai/codex@0.144.0
+generate	Install codex CLI	2026-09-22T05:10:33.0070586Z ^[[36;1mbun add -g @openai/codex@0.144.0^[[0m
+generate	Install codex CLI	2026-09-22T05:10:33.0105347Z shell: /usr/bin/bash -e {0}
+generate	Install codex CLI	2026-09-22T05:10:33.0105624Z env:
+generate	Install codex CLI	2026-09-22T05:10:33.0105860Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Install codex CLI	2026-09-22T05:10:33.0106194Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Install codex CLI	2026-09-22T05:10:33.0106542Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Install codex CLI	2026-09-22T05:10:33.0107693Z   OPENAI_API_KEY: ***
+generate	Install codex CLI	2026-09-22T05:10:33.0107969Z ##[endgroup]
+generate	Install codex CLI	2026-09-22T05:10:33.0181397Z bun add v1.4.2 (744846f84)
+generate	Install codex CLI	2026-09-22T05:10:33.0190940Z Resolving dependencies
+generate	Install codex CLI	2026-09-22T05:10:34.3402891Z Resolved, downloaded and extracted [5]
+generate	Install codex CLI	2026-09-22T05:10:34.3414398Z Saved lockfile
+generate	Install codex CLI	2026-09-22T05:10:34.3415303Z 
+generate	Install codex CLI	2026-09-22T05:10:34.3415612Z installed @openai/codex@0.144.0 with binaries:
+generate	Install codex CLI	2026-09-22T05:10:34.3416188Z  - codex
+generate	Install codex CLI	2026-09-22T05:10:34.3416392Z 
+generate	Install codex CLI	2026-09-22T05:10:34.3416590Z 2 packages installed [1324.00ms]
+generate	Authenticate codex	﻿2026-09-22T05:10:34.3533186Z ##[group]Run printenv OPENAI_API_KEY | codex login --with-api-key
+generate	Authenticate codex	2026-09-22T05:10:34.3534137Z ^[[36;1mprintenv OPENAI_API_KEY | codex login --with-api-key^[[0m
+generate	Authenticate codex	2026-09-22T05:10:34.3575776Z shell: /usr/bin/bash -e {0}
+generate	Authenticate codex	2026-09-22T05:10:34.3576058Z env:
+generate	Authenticate codex	2026-09-22T05:10:34.3576299Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Authenticate codex	2026-09-22T05:10:34.3576642Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Authenticate codex	2026-09-22T05:10:34.3576982Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Authenticate codex	2026-09-22T05:10:34.3578125Z   OPENAI_API_KEY: ***
+generate	Authenticate codex	2026-09-22T05:10:34.3578769Z ##[endgroup]
+generate	Authenticate codex	2026-09-22T05:10:34.5547020Z Reading API key from stdin...
+generate	Authenticate codex	2026-09-22T05:10:34.5576183Z Successfully logged in
+generate	Run the selected strategy suite	﻿2026-09-22T05:10:34.5676538Z ##[group]Run set -euo pipefail
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5676889Z ^[[36;1mset -euo pipefail^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5677186Z ^[[36;1mpython3 scripts/run_strategy_suite.py \^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5677616Z ^[[36;1m  --selection /tmp/trusted-selection/strategy-targets.json \^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5678025Z ^[[36;1m  --model "$CODEX_MODEL" \^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5678305Z ^[[36;1m  --run-id "35689483342" \^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5678569Z ^[[36;1m  --run-attempt "1"^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5678930Z ^[[36;1mSUITE_MANIFEST=$(find records/thesis-analyst/strategy-suites \^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5679383Z ^[[36;1m  -type f -name "strategy-35689483342-a1.json" \^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5679717Z ^[[36;1m  -print -quit)^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5679969Z ^[[36;1mtest -n "$SUITE_MANIFEST"^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5680324Z ^[[36;1mecho "suite_manifest=$SUITE_MANIFEST" >> "$GITHUB_OUTPUT"^[[0m
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5715879Z shell: /usr/bin/bash -e {0}
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5716152Z env:
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5716398Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5716770Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5717100Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5718115Z   OPENAI_API_KEY: ***
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5718348Z   CODEX_MODEL: gpt-5.5
+generate	Run the selected strategy suite	2026-09-22T05:10:34.5718571Z ##[endgroup]
+generate	Run the selected strategy suite	2026-09-22T05:10:34.6930017Z [1/2] irs.actc.total_claims 2027
+generate	Run the selected strategy suite	2026-09-22T05:14:39.9188237Z {"ok": false, "manifestPath": "records/thesis-analyst/2026-09-22/2026-09-22t05-10-34z-irs-actc-total-claims-2027/manifest.json", "validationErrors": ["resolve-by-bound target requires generation ticket context"]}
+generate	Run the selected strategy suite	2026-09-22T05:14:39.9189864Z [2/2] irs.actc.total_claims 2027
+generate	Run the selected strategy suite	2026-09-22T05:17:42.6925576Z {"ok": false, "manifestPath": "records/thesis-analyst/2026-09-22/2026-09-22t05-14-39z-irs-actc-total-claims-2027/manifest.json", "validationErrors": ["historicalContext has 4 distinct canonical prints; at least 6 are mandatory unless the sealed checkout's reviewed docket authorizes this exact series and target period", "resolve-by-bound target requires generation ticket context"]}
+generate	Run the selected strategy suite	2026-09-22T05:17:42.6932258Z batch manifest: /home/runner/work/thesis/thesis/records/thesis-analyst/batches/2026-09-22/strategy-35689483342-a1-ladder.json
+generate	Run the selected strategy suite	2026-09-22T05:17:42.7007212Z {"median3": 0, "selectionSetHash": "2478315ef327dddbdf58eae31e5ae02d01217144bea1a3f6b59ec8745b43d610", "suite": "ladder"}
+generate	Stage one exact-scope strategy bundle	﻿2026-09-22T05:17:42.7136475Z ##[group]Run set -euo pipefail
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7136806Z ^[[36;1mset -euo pipefail^[[0m
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7137122Z ^[[36;1mpython3 scripts/strategy_publication.py stage \^[[0m
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7137516Z ^[[36;1m  --bundle-dir /tmp/strategy-publication \^[[0m
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7138081Z ^[[36;1m  --suite-manifest "records/thesis-analyst/strategy-suites/2026-09-22/strategy-35689483342-a1.json" \^[[0m
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7138730Z ^[[36;1m  --trusted-selection /tmp/trusted-selection/strategy-targets.json^[[0m
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7174671Z shell: /usr/bin/bash -e {0}
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7174941Z env:
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7175173Z   LEDGER_REPOSITORY: PolicyEngine/chronicle
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7175531Z   LEDGER_BRANCH: codex/thesis-ledger-facts
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7175865Z   LEDGER_PATH: ledger/official_observations.jsonl
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7176821Z   OPENAI_API_KEY: ***
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:42.7177054Z ##[endgroup]
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:43.1525711Z STRATEGY PUBLICATION BLOCKED: run custody verification failed: draft_tool evidence call call-0001 differs from its native event
+generate	Stage one exact-scope strategy bundle	2026-09-22T05:17:43.1661642Z ##[error]Process completed with exit code 1.
+generate	Post Run actions/checkout@v5	﻿2026-09-22T05:17:43.1773578Z Post job cleanup.
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.2632876Z [command]/usr/bin/git version
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.2678183Z git version 2.55.0
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.2721288Z Temporarily overriding HOME='/home/runner/work/_temp/dadcb4fc-e5e5-4966-86b5-153bca038fd6' before making global git config changes
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.2722939Z Adding repository directory to the temporary git global config as a safe directory
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.2727600Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/thesis/thesis
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.2767702Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.2803149Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.3090623Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.3127428Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.3416908Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+generate	Post Run actions/checkout@v5	2026-09-22T05:17:43.3483597Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+generate	Complete job	﻿2026-09-22T05:17:43.3942601Z Cleaning up orphan processes
