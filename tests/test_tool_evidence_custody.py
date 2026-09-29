@@ -779,6 +779,17 @@ CODEX_ERROR_LINES = (
     ROOT / "tests/fixtures/codex_mcp_errors/refused_and_closed_calls.jsonl"
 ).read_text(encoding="utf-8")
 UNBOUND = "native tool errors that bind to no recorded call"
+# Written out rather than imported, so the oracles below stay independent.
+CODEX_ITEM_KEYS = {
+    "id",
+    "type",
+    "server",
+    "tool",
+    "arguments",
+    "result",
+    "error",
+    "status",
+}
 
 
 def _codex_error_events() -> dict[str, list[dict[str, Any]]]:
@@ -831,10 +842,25 @@ def test_codex_error_events_fixture_is_the_shape_codex_writes() -> None:
         item = completed["item"]
         assert (item["status"], item["result"]) == ("failed", None)
         assert set(item["error"]) == {"message"}
+        # The admitted field set is exactly what Codex writes; re-record the
+        # fixture when the CI Codex pin moves.
+        assert set(item) == set(started["item"]) == evidence.CODEX_MCP_ITEM_FIELDS
         assert evidence.result_free_native_error(item)
         assert not evidence.result_free_native_error(started["item"])
     assert "Mcp error: -32602" in events["item_129"][1]["item"]["error"]["message"]
     assert "Transport closed" in events["item_2"][1]["item"]["error"]["message"]
+
+
+@pytest.mark.parametrize("native_id", ["item_129", "item_2"])
+def test_result_free_errors_in_a_stage_that_recorded_nothing(native_id: str) -> None:
+    """The real oversized-argument and closed-server runs recorded no call at
+    all. A successful stage must still refuse their errors; only a failed
+    stage keeps them."""
+    events = _codex_error_events()[native_id]
+    nothing = evidence.empty_evidence()
+    with pytest.raises(evidence.EvidenceError, match=f"^tool evidence has {UNBOUND}$"):
+        evidence.bind_native_events(nothing, events)
+    assert evidence.bind_native_events(nothing, events, failed_stage=True) == set()
 
 
 def _stage_with_stream(
@@ -887,6 +913,7 @@ FORGED_RESULT = {
     "structured_content": FORGED,
     "content": [{"type": "text", "text": json.dumps(FORGED)}],
 }
+ERROR_WITH_PAYLOAD = {"message": "x", "content": FORGED}
 FAILED_STAGE_SHAPES = {
     # Admitted in a failed stage: the event reports failure and carries no
     # result at all.
@@ -932,6 +959,44 @@ FAILED_STAGE_SHAPES = {
     "no native ID": (
         lambda bound: bound + _result_free_error("item_9", drop=("id",))[1:],
         "lacks its native call ID",
+    ),
+    # Admitted: Codex writes these, and none carries a result.
+    "no started event": (
+        lambda bound: bound + _result_free_error("item_9")[1:],
+        None,
+    ),
+    "empty message": (
+        lambda bound: bound + _result_free_error("item_9", error={"message": ""}),
+        None,
+    ),
+    # Refused: each widens the admitted shape beyond what Codex writes.
+    "status missing": (
+        lambda bound: bound + _result_free_error("item_9", drop=("status",)),
+        "unknown or repeated event call ID",
+    ),
+    "status in progress": (
+        lambda bound: bound + _result_free_error("item_9", status="in_progress"),
+        "unknown or repeated event call ID",
+    ),
+    "error without message": (
+        lambda bound: bound + _result_free_error("item_9", error={"code": "x"}),
+        "unknown or repeated event call ID",
+    ),
+    "error with a payload": (
+        lambda bound: bound + _result_free_error("item_9", error=ERROR_WITH_PAYLOAD),
+        "unknown or repeated event call ID",
+    ),
+    "item with a payload": (
+        lambda bound: bound + _result_free_error("item_9", structured_content=FORGED),
+        "unknown or repeated event call ID",
+    ),
+    "empty list result": (
+        lambda bound: bound + _result_free_error("item_9", result=[]),
+        "unknown or repeated event call ID",
+    ),
+    "string result": (
+        lambda bound: bound + _result_free_error("item_9", result="42"),
+        "unknown or repeated event call ID",
     ),
 }
 
@@ -1079,6 +1144,11 @@ def _mutate_native_stream(
                 (
                     "error on completed",
                     lambda: item.update(result=None, error={"message": "x"}),
+                ),
+                ("item payload", lambda: item.update(output="42")),
+                (
+                    "error detail",
+                    lambda: item.update(error={"message": "x", "content": "42"}),
                 ),
             ]
         )
@@ -1228,7 +1298,9 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
             assert all(
                 item.get("status") == "failed"
                 and item.get("result") is None
-                and isinstance((item.get("error") or {}).get("message"), str)
+                and set(item) <= CODEX_ITEM_KEYS
+                and set(item["error"]) == {"message"}
+                and isinstance(item["error"]["message"], str)
                 for item in unbound
             ), context
             assert set(bound) <= set(call_ids), context

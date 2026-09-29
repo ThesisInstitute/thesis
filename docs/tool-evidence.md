@@ -101,28 +101,33 @@ A failed stage may keep three things a successful stage refuses, because none
 of them makes a claim: a recorded call with no completion event, a native call
 that never completed, and a native error that carries no result and so binds to
 no recorded call. Codex writes that last shape (`status: "failed"`,
-`result: null`, `error: {"message": ...}`) whenever a call fails outside the
-tool's own result:
+`result: null`, `error: {"message": ...}`, and no other fields) whenever a call
+fails outside the tool's own result:
 
-- the recorder refuses a call before recording it (a stage's 129th call, or
-  arguments over 32 KiB) with a JSON-RPC error;
+- the recorder refuses a call before recording it with a JSON-RPC error, for
+  example a stage's 129th call, arguments over 32 KiB, or arguments that are
+  not a JSON object;
 - the server has exited;
 - Codex gives up at its tool timeout, in which case the recorder may still
-  record the call, which then lacks its completion event.
+  record the call, which then lacks its completion event;
+- Codex declines the call itself.
 
 `tests/fixtures/codex_mcp_errors` holds verbatim examples from Codex 0.144.0 and
 0.158.0. Without this, one such run's failed trace refused custody and blocked
 the whole docket publication.
 
-A successful stage refuses all three, so the runner records such a stage as a
-`tool_evidence` failure with no cells and it is never promoted. Every other
-binding error refuses custody whether or not the stage failed:
+A successful stage refuses all three. When Codex exits 0, the runner therefore
+fails such a stage as a `tool_evidence` failure with no cells; a stage whose
+Codex exit code is already non-zero has failed anyway. Custody never accepts one
+inside a run that presents as successful. Every other binding error refuses
+custody whether or not the stage failed:
 
 - an event with no native ID;
 - a repeated completion;
-- a completion that binds to no fresh recorded call and is not a bare error:
-  one that carries any result, even beside an error, or lacks a failed status
-  or an error message;
+- a completion that binds to no fresh recorded call and is not exactly that
+  bare error: one that carries any result, even beside an error, has a field
+  Codex does not write, lacks a failed status, or has an error that is not
+  only a message;
 - an event that differs from its call.
 
 For a standalone evidence artifact:

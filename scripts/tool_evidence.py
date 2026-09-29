@@ -986,23 +986,38 @@ def native_tool_events(
     return events
 
 
+# Every field Codex's exec JSONL writes for an mcp_tool_call item
+# (McpToolCallItem plus the item's id and type, codex-rs/exec at 0.144.0 and
+# 0.158.0). An unbound error may carry nothing else.
+CODEX_MCP_ITEM_FIELDS = frozenset(
+    {"id", "type", "server", "tool", "arguments", "result", "error", "status"}
+)
+
+
 def result_free_native_error(item: dict[str, Any]) -> bool:
     """True for a native completion that reports an error and carries no result.
 
-    Codex writes this shape when a call fails outside the tool's own result.
-    The server may have answered with a JSON-RPC error, which is how the
-    recorder refuses a call it will not record (past ``MAX_CALLS``, or
-    arguments over ``MAX_ARGUMENT_BYTES``). The server may have exited, or
-    Codex may have given up at its tool timeout. Without a result the event
-    carries no call ID, no structured or text content, and nothing that reads
-    as tool output. Verbatim examples: tests/fixtures/codex_mcp_errors.
+    Codex writes exactly this shape whenever a call fails outside the tool's
+    own result:
+    - the server answered with a JSON-RPC error, which is how the recorder
+      refuses a call it will not record (for example past ``MAX_CALLS``,
+      arguments over ``MAX_ARGUMENT_BYTES``, or non-object arguments);
+    - the server had exited;
+    - Codex gave up at its tool timeout, or declined the call itself.
+
+    Nothing else is admitted: no result, no field Codex does not write, and an
+    error that is only a message. The event therefore carries no call ID, no
+    structured or text content, and nothing that reads as tool output.
+    Verbatim examples: tests/fixtures/codex_mcp_errors.
     """
     error = item.get("error")
     return (
         item.get("status") == "failed"
         and item.get("result") is None
+        and set(item) <= CODEX_MCP_ITEM_FIELDS
         and isinstance(error, dict)
-        and isinstance(error.get("message"), str)
+        and set(error) == {"message"}
+        and isinstance(error["message"], str)
     )
 
 

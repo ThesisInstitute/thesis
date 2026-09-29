@@ -393,12 +393,15 @@ REFUSED_CALL_LINES = [
     "def request(i, arguments):",
     "    return {'jsonrpc':'2.0','id':i,'method':'tools/call',"
     "'params':{'name':'calculate','arguments':arguments}}",
+    "oversized = {'expression':'1'+'+1'*20000,'inputs':{}}",
     "if VARIANT == 'call_limit':",
     "    requests = [request(i, {'expression':'a+1','inputs':{'a':i}})"
     " for i in range(1, 130)]",
+    "elif VARIANT == 'oversized_only':",
+    "    requests = [request(1, oversized)]",
     "else:",
     "    requests = [request(1, {'expression':'a+1','inputs':{'a':1}}),"
-    " request(2, {'expression':'1'+'+1'*20000,'inputs':{}})]",
+    " request(2, oversized)]",
     "completed = subprocess.run([sys.executable, *tool_args], "
     "input=''.join(json.dumps(r)+'\\n' for r in requests), "
     "capture_output=True, text=True, check=True)",
@@ -433,7 +436,8 @@ def _run_refused_call_stage(
 
 
 @pytest.mark.parametrize(
-    ("variant", "recorded"), [("call_limit", 128), ("oversized_arguments", 1)]
+    ("variant", "recorded"),
+    [("call_limit", 128), ("oversized_arguments", 1), ("oversized_only", 0)],
 )
 def test_refused_call_is_a_failed_trace_the_publisher_retains(
     tmp_path, monkeypatch, variant, recorded
