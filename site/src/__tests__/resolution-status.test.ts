@@ -14,8 +14,8 @@ const row: OverdueStatus = {
   dataPointId: "treasury.mts.monthly_deficit.june_2026.first_print",
   forecastSlug: "us-mts-deficit-june-2026",
   resolutionDate: "2026-07-13",
-  state: "no_executor",
-  code: "NO_EXECUTOR_GENERIC_URL",
+  state: "no_route",
+  code: "NO_ROUTE_GENERIC_URL",
   reason:
     "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding.",
 };
@@ -111,6 +111,11 @@ describe("the committed status file", () => {
       expect(row.resolutionDate < RESOLUTION_STATUS_META.asOf).toBe(true);
       expect(row.code).toMatch(/^[A-Z_]+$/);
       expect(row.reason.length).toBeGreaterThan(0);
+      // A reference the resolver has no route for has no resolver words:
+      // what it knows about the target is registration facts, labelled so.
+      if (row.code.startsWith("NO_ROUTE_")) {
+        expect("detail" in row, dataPointId).toBe(false);
+      }
     }
   });
 });

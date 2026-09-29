@@ -3,7 +3,9 @@
 // `resolution-status.json` is written by `scripts/resolution_status.py`
 // at the end of every resolver run (see resolve-and-rebuild.yml). Each row
 // restates what the resolver printed about one pending target whose
-// resolution date has passed, or the fact that no resolver covers it.
+// resolution date has passed (`detail` is the resolver's own words), or
+// the fact that the resolver has no route for its reference, with the
+// target's registered adapter and series in `registration`.
 // Nothing here decides anything: a forecast is "overdue" only because it
 // is still pending after the date it said it would resolve.
 import rawStatus from "./resolution-status.json";
@@ -15,7 +17,10 @@ export interface OverdueStatus {
   state: string;
   code: string;
   reason: string;
+  /** The resolver's own words about this target. */
   detail?: string;
+  /** Registration facts (adapter, series), never resolver output. */
+  registration?: string;
 }
 
 interface StatusFile {
@@ -58,6 +63,7 @@ export interface OverdueNotice {
   code: string;
   reason: string;
   detail?: string;
+  registration?: string;
 }
 
 /** The overdue notice for a forecast, or null when it is not overdue.
@@ -83,6 +89,7 @@ export function overdueNotice(
     code: row.code,
     reason: row.reason,
     ...(row.detail ? { detail: row.detail } : {}),
+    ...(row.registration ? { registration: row.registration } : {}),
   };
 }
 

@@ -126,11 +126,9 @@ def test_a_mismatch_that_names_no_field_is_not_reported_as_a_difference():
 
 def test_a_target_the_resolver_never_mentions_is_explained_by_its_registration():
     refs = {
-        "treasury.mts.monthly_deficit.june_2026.first_print": (
-            "NO_EXECUTOR_UNREGISTERED"
-        ),
-        "ons.cpi.annual_rate.june_2026.first_print": "NO_EXECUTOR_GENERIC_URL",
-        "x.other.series.2026_06.first_print": "NO_EXECUTOR_SERIES_NOT_COVERED",
+        "treasury.mts.monthly_deficit.june_2026.first_print": ("NO_ROUTE_UNREGISTERED"),
+        "ons.cpi.annual_rate.june_2026.first_print": "NO_ROUTE_GENERIC_URL",
+        "x.other.series.2026_06.first_print": "NO_ROUTE_ADAPTER_REGISTERED",
         "y.covered.series.2026_06.first_print": "NO_REPORT",
     }
     registrations = {
@@ -147,9 +145,10 @@ def test_a_target_the_resolver_never_mentions_is_explained_by_its_registration()
         registrations=registrations,
     )
     assert {ref: row["code"] for ref, row in status["targets"].items()} == refs
-    assert status["targets"]["x.other.series.2026_06.first_print"]["detail"] == (
-        "registered adapter bls-api"
-    )
+    row = status["targets"]["x.other.series.2026_06.first_print"]
+    assert row["registration"] == "adapter bls-api"
+    # Registration facts are never presented as the resolver's words.
+    assert all("detail" not in r for r in status["targets"].values())
 
 
 def test_only_pending_targets_past_their_date_get_a_row():
@@ -321,9 +320,9 @@ def test_every_code_the_rules_can_emit_has_a_reason():
         | {
             "RESOLVED_BUT_RUN_FAILED",
             "BINDING_MISMATCH_UNEXPLAINED",
-            "NO_EXECUTOR_GENERIC_URL",
-            "NO_EXECUTOR_UNREGISTERED",
-            "NO_EXECUTOR_SERIES_NOT_COVERED",
+            "NO_ROUTE_GENERIC_URL",
+            "NO_ROUTE_UNREGISTERED",
+            "NO_ROUTE_ADAPTER_REGISTERED",
             "NO_REPORT",
             "NO_RESOLVER_RUN",
         }
@@ -793,7 +792,7 @@ def test_an_unregistered_target_is_not_said_to_predate_registration():
     Colorado forecasts were made after registration existed."""
     ref = "co.dor.individual_income_tax.net_collections.2026_07.first_print"
     row = _status(_log((ref, "s", "2026-08-31")), text="  x: y.z\n")["targets"][ref]
-    assert row["code"] == "NO_EXECUTOR_UNREGISTERED"
+    assert row["code"] == "NO_ROUTE_UNREGISTERED"
     assert "predates" not in row["reason"]
     assert "no registered resolution contract" in row["reason"]
 
@@ -885,12 +884,13 @@ def test_a_registered_series_spelled_differently_is_shown_not_judged():
     row = _status(
         _log((ref, "s", "2026-08-13")), text="  x: y.z\n", registrations=registrations
     )["targets"][ref]
-    assert row["code"] == "NO_EXECUTOR_SERIES_NOT_COVERED"
+    assert row["code"] == "NO_ROUTE_ADAPTER_REGISTERED"
     assert "No resolver covers" not in row["reason"]
     assert row["reason"].startswith("The resolver has no route for this target's")
-    assert row["detail"] == (
-        "registered adapter alfred-fred, registered series "
-        "bls.ppi.final_demand_monthly_change"
+    # R26: registration facts, never under the resolver's label.
+    assert "detail" not in row
+    assert row["registration"] == (
+        "adapter alfred-fred, series bls.ppi.final_demand_monthly_change"
     )
     # A registered series that is the reference's own prefix adds nothing.
     same = "ons.cpi.annual_rate.june_2026.first_print"
@@ -906,14 +906,47 @@ def test_a_registered_series_spelled_differently_is_shown_not_judged():
             }
         },
     )["targets"][same]
-    assert row["code"] == "NO_EXECUTOR_GENERIC_URL" and "detail" not in row
+    assert row["code"] == "NO_ROUTE_GENERIC_URL"
+    assert "detail" not in row and "registration" not in row
 
 
-def test_no_executor_sentences_claim_only_the_routing_check():
+@pytest.mark.parametrize(
+    "series, noted",
+    [
+        ("bls.wp.WPSFD4", False),  # the reference's own series
+        ("bls.wp.WPSFD", True),  # a prefix without the dot boundary is not
+        ("bls.wp", False),  # a shorter own prefix
+        ("bls.ppi.final_demand_monthly_change", True),
+        ("", False),
+    ],
+)
+def test_the_registered_series_note_respects_the_dot_boundary(series, noted):
+    ref = "bls.wp.WPSFD4.2026-07.first_print"
+    registrations = {
+        ref: {
+            "contract": {"series": series, "sourceBinding": {"adapter": "generic-url"}}
+        }
+    }
+    row = _status(
+        _log((ref, "s", "2026-08-13")), text="  x: y.z\n", registrations=registrations
+    )["targets"][ref]
+    assert ("registration" in row) is noted
+    if noted:
+        assert row["registration"] == f"series {series}"
+
+
+def test_an_unregistered_target_carries_no_registration_facts():
+    ref = "co.hcpf.medicaid.total_caseload.2026-08.first_print"
+    row = _status(_log((ref, "s", "2026-09-15")), text="  x: y.z\n")["targets"][ref]
+    assert row["code"] == "NO_ROUTE_UNREGISTERED"
+    assert "registration" not in row and "detail" not in row
+
+
+def test_no_route_sentences_claim_only_the_routing_check():
     for code in (
-        "NO_EXECUTOR_GENERIC_URL",
-        "NO_EXECUTOR_UNREGISTERED",
-        "NO_EXECUTOR_SERIES_NOT_COVERED",
+        "NO_ROUTE_GENERIC_URL",
+        "NO_ROUTE_UNREGISTERED",
+        "NO_ROUTE_ADAPTER_REGISTERED",
     ):
         assert rs.REASONS[code].startswith(
             "The resolver has no route for this target's reference"
@@ -922,11 +955,11 @@ def test_no_executor_sentences_claim_only_the_routing_check():
 
 
 _HEADS = [
-    ("QCEW PARSE REFUSAL (refusing)", "refused"),
-    ("BEA iTABLE fetch failed (deferring)", "fetch_failed"),
-    ("RELEASE WINDOW NOT OPEN (deferring)", "deferred"),
-    ("IRS SOI ENVIRONMENT FAILURE (fatal)", "fetch_failed"),
-    ("CATALOG REFUSED (excluded from append)", "refused"),
+    ("QCEW PARSE REFUSAL (refusing)", "refused", "UNCLASSIFIED"),
+    ("BEA iTABLE fetch failed (deferring)", "fetch_failed", "SOURCE_UNREACHABLE"),
+    ("RELEASE WINDOW NOT OPEN (deferring)", "deferred", "WINDOW_NOT_OPEN"),
+    ("IRS SOI ENVIRONMENT FAILURE (fatal)", "fetch_failed", "ENVIRONMENT_FAILURE"),
+    ("CATALOG REFUSED (excluded from append)", "refused", "LEDGER_CATALOG_REFUSED"),
 ]
 # Text an exception or URL could carry, markers included (R25 finding 5:
 # the other fills cannot spell a marker).
@@ -953,8 +986,10 @@ _MARKED = st.lists(
 @settings(max_examples=400, deadline=None)
 @given(head=st.sampled_from(_HEADS), ref=_REFS, fill=_MARKED)
 def test_the_verdicts_head_decides_whatever_follows_it(head, ref, fill):
-    text, state = head
+    text, state, code = head
     for line in (f"  {text}: {ref} — {fill}", f"  {text}: {fill}: {ref}"):
         targets, _run = rs.parse_resolver_log(line + "\n", {ref})
         assert set(targets) == {ref}, line
-        assert targets[ref]["state"] == state, line
+        # R26: the code picks the printed reason, so it must follow the
+        # head too, not only the state.
+        assert (targets[ref]["state"], targets[ref]["code"]) == (state, code), line

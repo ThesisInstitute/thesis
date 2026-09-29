@@ -9,7 +9,10 @@ turns that log, the published Thesis log and the target registrations into
 one row per overdue target, which the site prints on the forecast.
 
 It reports; it decides nothing. Every row restates a line the resolver
-printed, or the fact that it printed none. A line shape this file does not
+printed (``detail`` carries the resolver's own words), or the fact that it
+printed none. A row for a reference the resolver has no route for also
+carries ``registration``: the target's registered adapter and series, which
+are registration facts, not resolver output. A line shape this file does not
 know becomes ``UNCLASSIFIED`` with the resolver's own words, so a new
 refusal shows up as itself and is never dropped.
 
@@ -121,8 +124,9 @@ REASONS = {
     ),
     "WINDOW_NOT_OPEN": "The registered release window for this figure has not opened.",
     "SOURCE_UNREACHABLE": (
-        "The resolver's last attempt to fetch this target's source data, or "
-        "an archive record of it, did not return usable data."
+        "The resolver's last attempt to fetch data it needs for this target "
+        "(its source, a check against the source, or an archive record of "
+        "it) did not return usable data."
     ),
     "UNIT_MISMATCH": (
         "The forecast is in a different unit from the one the resolver's "
@@ -174,22 +178,22 @@ REASONS = {
     "ENVIRONMENT_FAILURE": (
         "The resolver reported an environment failure for this target on its last run."
     ),
-    "NO_EXECUTOR_GENERIC_URL": (
+    "NO_ROUTE_GENERIC_URL": (
         "The resolver has no route for this target's reference. The target "
         "was registered with a generic source link rather than a resolver "
         "binding."
     ),
-    "NO_EXECUTOR_UNREGISTERED": (
+    "NO_ROUTE_UNREGISTERED": (
         "The resolver has no route for this target's reference, and the "
         "target has no registered resolution contract."
     ),
-    "NO_EXECUTOR_SERIES_NOT_COVERED": (
-        "The resolver has no route for this target's reference, although its "
-        "registration names a resolver family."
+    "NO_ROUTE_ADAPTER_REGISTERED": (
+        "The resolver has no route for this target's reference, although the "
+        "target's registration names a resolver adapter."
     ),
     "NO_REPORT": (
-        "A resolver covers this series, but its last run printed no line "
-        "naming this target."
+        "The resolver routes this target's reference, but its last run "
+        "printed no line naming this target."
     ),
     "NO_RESOLVER_RUN": ("No resolver log was available when this status was written."),
 }
@@ -410,7 +414,7 @@ def build_status(
         if not ref or not slug or not due or due >= as_of.isoformat():
             continue
         seen = resolver_targets.get(ref)
-        detail = ""
+        detail = registration = ""
         if seen:
             state, code, detail = seen["state"], seen["code"], seen["detail"]
             if state == "resolved_this_run" and not run["completed"]:
@@ -420,26 +424,27 @@ def build_status(
         elif ref in claimed_refs:
             state, code = "unknown", "NO_REPORT"
         else:
-            # The resolver routes by the reference's own spelling and never
-            # reads the registration's `series`. Only routing is known here,
-            # so a registered series spelled differently from the reference
-            # is shown, not judged (bls.wp.WPSFD4.2026-07 is registered as
-            # series bls.ppi.final_demand_monthly_change).
-            state = "no_executor"
+            # Only routing is known here. What follows is the registration's
+            # own adapter and series, shown as registration facts and never
+            # as the resolver's words; a registered series spelled
+            # differently from the reference is shown, not judged
+            # (bls.wp.WPSFD4.2026-07 is registered as series
+            # bls.ppi.final_demand_monthly_change).
+            state = "no_route"
             contract = (registrations.get(ref) or {}).get("contract") or {}
             adapter = (contract.get("sourceBinding") or {}).get("adapter")
             series = contract.get("series")
-            notes = []
+            facts = []
             if ref not in registrations:
-                code = "NO_EXECUTOR_UNREGISTERED"
+                code = "NO_ROUTE_UNREGISTERED"
             elif adapter in (None, "", "generic-url"):
-                code = "NO_EXECUTOR_GENERIC_URL"
+                code = "NO_ROUTE_GENERIC_URL"
             else:
-                code = "NO_EXECUTOR_SERIES_NOT_COVERED"
-                notes.append(f"registered adapter {adapter}")
+                code = "NO_ROUTE_ADAPTER_REGISTERED"
+                facts.append(f"adapter {adapter}")
             if isinstance(series, str) and series and not ref.startswith(series + "."):
-                notes.append(f"registered series {series}")
-            detail = _plain(", ".join(notes))
+                facts.append(f"series {series}")
+            registration = _plain(", ".join(facts))
         reason = reason_for(code, state)
         rows[ref] = {
             "forecastSlug": slug,
@@ -448,6 +453,7 @@ def build_status(
             "code": code,
             "reason": reason,
             **({"detail": detail} if detail else {}),
+            **({"registration": registration} if registration else {}),
         }
     ordered = dict(
         sorted(rows.items(), key=lambda item: (item[1]["resolutionDate"], item[0]))

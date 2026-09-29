@@ -136,6 +136,11 @@ export default async function ForecastDetailPage({
                   resolver: {overdue.detail}
                 </p>
               )}
+              {overdue.registration && (
+                <p className="mt-1 [font-family:var(--font-mono)] text-[0.72rem] leading-[1.5] text-[var(--theme-text-muted)]">
+                  registration: {overdue.registration}
+                </p>
+              )}
               <p className="mt-2 [font-family:var(--font-mono)] text-[0.66rem] text-[var(--theme-text-dim)]">
                 {overdue.code} · resolver status as of{" "}
                 {formatFullDate(RESOLUTION_STATUS_META.asOf)}
