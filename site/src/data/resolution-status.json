@@ -4,7 +4,7 @@
   "run": {
     "logAvailable": true,
     "completed": false,
-    "error": "cannot import the supersede-aware current view from check_thesis_facts_append (receipt package required)  cannot import name 'PinnedSigner' from 'receipt.release_chain' (/home/runner/.local/lib/python3.12/site-packages/receipt/release_chain.py)"
+    "error": "LedgerProposalError  append gate did not pass for PolicyEngine/chronicle 300  refusing to leave a failed proposal branch or PR"
   },
   "targets": {
     "ons.labour.claimant_count.2026_06.first_print": {
@@ -144,50 +144,50 @@
     "bls.cps.employed_people_by_occupation.production.july_2026.first_print": {
       "forecastSlug": "cps-production-employment-july-2026",
       "resolutionDate": "2026-08-06",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check.",
+      "detail": "the Archive's index lists 0 capture(s) dated inside the registered window  'end'  '2026-08-06', 'start'  '2026-07-29' , 0 of them HTTP 200 for this exact URL  all 0 HTTP 200 capture(s) were read or accounted for by a verified digest, and no"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.july_2026.first_print": {
       "forecastSlug": "cps-transport-material-moving-employment-july-2026",
       "resolutionDate": "2026-08-06",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check.",
+      "detail": "the Archive's index lists 0 capture(s) dated inside the registered window  'end'  '2026-08-06', 'start'  '2026-07-29' , 0 of them HTTP 200 for this exact URL  all 0 HTTP 200 capture(s) were read or accounted for by a verified digest, and no"
     },
     "bls.cps.employed_people_by_occupation.business_financial_operations.july_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-july-2026",
       "resolutionDate": "2026-08-07",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check.",
+      "detail": "the Archive's index lists 0 capture(s) dated inside the registered window  'end'  '2026-08-06', 'start'  '2026-07-29' , 0 of them HTTP 200 for this exact URL  all 0 HTTP 200 capture(s) were read or accounted for by a verified digest, and no"
     },
     "bls.cps.employed_people_by_occupation.computer_mathematical.july_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-july-2026",
       "resolutionDate": "2026-08-07",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check.",
+      "detail": "the Archive's index lists 0 capture(s) dated inside the registered window  'end'  '2026-08-06', 'start'  '2026-07-29' , 0 of them HTTP 200 for this exact URL  all 0 HTTP 200 capture(s) were read or accounted for by a verified digest, and no"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.july_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-july-2026",
       "resolutionDate": "2026-08-07",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check.",
+      "detail": "the Archive's index lists 0 capture(s) dated inside the registered window  'end'  '2026-08-06', 'start'  '2026-07-29' , 0 of them HTTP 200 for this exact URL  all 0 HTTP 200 capture(s) were read or accounted for by a verified digest, and no"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.july_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-july-2026",
       "resolutionDate": "2026-08-07",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 504  Gateway Time-out"
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check.",
+      "detail": "the Archive's index lists 0 capture(s) dated inside the registered window  'end'  '2026-08-06', 'start'  '2026-07-29' , 0 of them HTTP 200 for this exact URL  all 0 HTTP 200 capture(s) were read or accounted for by a verified digest, and no"
     },
     "bls.real_earnings.avg_hourly_mom.2026-07.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-july-2026",
@@ -401,16 +401,18 @@
     "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.computer_mathematical', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curati"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.healthcare_support', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curation"
     },
     "bls.cps.telework_share.2026-08.first_print": {
       "forecastSlug": "us-telework-rate-august-2026",
@@ -465,18 +467,18 @@
     "bls.cps.employed_people_by_occupation.production.august_2026.first_print": {
       "forecastSlug": "cps-production-employment-august-2026",
       "resolutionDate": "2026-09-10",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.production', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curation (split o"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print": {
       "forecastSlug": "cps-transport-material-moving-employment-august-2026",
       "resolutionDate": "2026-09-10",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.transportation_material_moving', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve"
     },
     "bls.cpi.u.core_mom.august_2026.first_print": {
       "forecastSlug": "us-core-cpi-mom-august-2026",
@@ -495,16 +497,18 @@
     "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.business_financial_operations', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve b"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_BUT_RUN_FAILED",
-      "reason": "The resolver read the official figure on its last run, but the run failed, and its log does not show the figure recorded in the ledger."
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.office_administrative_support', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve b"
     },
     "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
@@ -655,6 +659,6 @@
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
     }
   },
-  "generatedAtUtc": "2026-09-29T06:30:33Z",
-  "workflowRun": "36503673388"
+  "generatedAtUtc": "2026-09-29T11:20:03Z",
+  "workflowRun": "36560463620"
 }
