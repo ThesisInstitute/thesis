@@ -71,6 +71,7 @@ from urllib.parse import quote, urlparse
 from xml.etree import ElementTree as ET
 from zoneinfo import ZoneInfo
 
+import chronicle_receipt_pin
 import ssa_official_pages
 import va_mmwr
 import verify_records_attestations as records_provenance
@@ -238,6 +239,11 @@ TimestampRequester = Callable[[str, bytes, float], bytes]
 # still be committed and published, so the workflow tells this apart from a
 # crash (1), publishes, and then fails the job so the alert fires.
 EXIT_REFUSED_ROWS = 3
+# main's exit status when Chronicle's ledger branch locks a different receipt
+# than this interpreter runs. Every append proposal runs Chronicle's own
+# series-catalog generator under this interpreter, so main stops before any
+# capture work (see chronicle_receipt_pin.py).
+EXIT_RECEIPT_PIN_REFUSED = 4
 
 
 class LedgerProposalError(RuntimeError):
@@ -13137,6 +13143,15 @@ def _prepare_release_files(
         raise LedgerProposalError(
             f"base commit is missing immutable-prefix file {prefix_path}"
         )
+    # The staged generator below is Chronicle's code at this base and runs
+    # under this interpreter's receipt; refuse before it runs, not after.
+    receipt_refusal = _staged_receipt_pin_refusal(
+        tree, f"the staged Chronicle base (tree {tree.tree_sha[:12]})"
+    )
+    if receipt_refusal:
+        raise LedgerProposalError(
+            f"refusing to run the staged series-catalog generator: {receipt_refusal}"
+        )
 
     timeout = _validate_timestamp_timeout(timeout_seconds)
     if type(clock_skew_seconds) is not int or clock_skew_seconds < 0:
@@ -13269,6 +13284,68 @@ def ledger_state(repo: str, branch: str, path: str) -> tuple[str, str, str]:
     import base64
 
     return base64.b64decode(payload["content"]).decode(), payload["sha"], repo_sha
+
+
+def chronicle_receipt_lock(repo: str, commit_sha: str) -> bytes | None:
+    """Chronicle's ``uv.lock`` at one commit, or ``None`` when it has none."""
+
+    return chronicle_receipt_pin.fetch_lock(repo, commit_sha, gh=_gh_api)
+
+
+def installed_receipt_version() -> str | None:
+    """The receipt this interpreter, and so the staged generator, imports."""
+
+    return chronicle_receipt_pin.installed_version()
+
+
+def receipt_pin_refusal(
+    chronicle_lock: bytes | None, *, chronicle_label: str
+) -> str | None:
+    """Why Chronicle's staged generator must not run under this interpreter."""
+
+    return chronicle_receipt_pin.receipt_pin_refusal(
+        chronicle_lock,
+        chronicle_label=chronicle_label,
+        thesis_lock=chronicle_receipt_pin.THESIS_LOCK.read_bytes(),
+        installed=installed_receipt_version(),
+    )
+
+
+def chronicle_receipt_preflight(repo: str, branch: str, commit_sha: str) -> str | None:
+    """Refusal for the Chronicle commit this run will build its append on.
+
+    Every append proposal runs that commit's own series-catalog generator
+    under this interpreter's receipt, so a mismatch is refused before any
+    capture work rather than after it (run 36503673388 on 2026-09-28 fetched
+    every print, then failed importing ``PinnedSigner``). A lock that cannot
+    be read is refused too: nothing would then say the generator can run.
+    """
+
+    label = chronicle_receipt_pin.chronicle_label(repo, commit_sha, branch)
+    try:
+        chronicle_lock = chronicle_receipt_lock(repo, commit_sha)
+    except (
+        chronicle_receipt_pin.ReceiptPinError,
+        RuntimeError,
+        json.JSONDecodeError,
+    ) as exc:
+        return f"cannot read {label} {chronicle_receipt_pin.LOCK_PATH}: {exc}"
+    return receipt_pin_refusal(chronicle_lock, chronicle_label=label)
+
+
+def _staged_receipt_pin_refusal(tree: RepositoryTree, label: str) -> str | None:
+    return receipt_pin_refusal(
+        tree.files.get(chronicle_receipt_pin.LOCK_PATH), chronicle_label=label
+    )
+
+
+def announce_receipt_pin_refusal(refusal: str) -> None:
+    print(f"RECEIPT PIN REFUSED: {refusal}")
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        # A workflow-command annotation puts the reason on the run's summary
+        # page, not only in the step log.
+        message = refusal.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        print(f"::error title=Receipt pin mismatch::{message}")
 
 
 def _gh_api(*args: str, input_body: dict[str, Any] | None = None) -> str:
@@ -13478,11 +13555,12 @@ def _collect_release_tree_files(
 
 
 # Same-commit inputs the staged catalog regeneration needs beyond the ledger
-# itself: the generator, the gate module it imports, and the generator's three
+# itself: the generator, the gate module it imports, the generator's three
 # data inputs (prior catalog for identity carry-over, UUID registry, docket
-# seed). _prepare_release_files refuses the witnessed append when any of these
-# is absent from the base commit, so dropping one here fails closed rather
-# than silently skipping regeneration.
+# seed), and the lock naming the receipt the generator was tested under.
+# _prepare_release_files refuses the witnessed append when any of these is
+# absent from the base commit, so dropping one here fails closed rather than
+# silently skipping regeneration.
 CATALOG_REGENERATION_INPUTS = (
     "scripts/build_series_catalog.py",
     "scripts/check_thesis_facts_append.py",
@@ -13490,6 +13568,7 @@ CATALOG_REGENERATION_INPUTS = (
     "ledger/series_catalog.json",
     "ledger/series_uuid_registry.jsonl",
     "ledger/seeds/thesis_docket_series.json",
+    chronicle_receipt_pin.LOCK_PATH,
 )
 
 
@@ -13836,6 +13915,17 @@ def ledger_catalog_refusals(
     if not rows:
         return {}
     tree = _fetch_repository_tree(repo, base_sha, path)
+    if "scripts/build_series_catalog.py" in tree.files:
+        receipt_refusal = _staged_receipt_pin_refusal(
+            tree, chronicle_receipt_pin.chronicle_label(repo, base_sha)
+        )
+        if receipt_refusal:
+            # Every trial below would fail the same way and read as "the base
+            # alone fails", which hides the reason; say it instead.
+            raise LedgerProposalError(
+                "refusing to run the staged series-catalog generator: "
+                f"{receipt_refusal}"
+            )
     lines = [json.dumps(row, separators=(",", ":")) for row in rows]
 
     def failure(selected: list[str]) -> str | None:
@@ -15012,6 +15102,17 @@ def main() -> int:
     content, sha, ledger_repo_sha = ledger_state(
         args.ledger_repo, args.ledger_branch, args.ledger_path
     )
+    # The append is built on this commit and runs its own series-catalog
+    # generator under this interpreter's receipt. Check that before any
+    # capture work, not after every print has been fetched.
+    receipt_refusal = chronicle_receipt_preflight(
+        args.ledger_repo, args.ledger_branch, ledger_repo_sha
+    )
+    if receipt_refusal:
+        announce_receipt_pin_refusal(receipt_refusal)
+        if not args.dry_run:
+            return EXIT_RECEIPT_PIN_REFUSED
+        print("dry-run: continuing; a real run stops here")
     ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
     # References refused because their fact would give a Chronicle lineage a
