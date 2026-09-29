@@ -37,21 +37,20 @@ jobs:
         with:
           persist-credentials: false
 
+      # This step records the comparison's exit status and always succeeds, so
+      # the issue steps branch on that status rather than on a failed step's
+      # outputs. The last step fails the run.
       - name: Compare thesis's receipt with Chronicle's ledger branch
         id: compare
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          set +e
+          set -uo pipefail
           python3 scripts/chronicle_receipt_pin.py | tee "$RUNNER_TEMP/receipt-pin.txt"
-          rc=${PIPESTATUS[0]}
-          set -e
-          echo "rc=$rc" >> "$GITHUB_OUTPUT"
-          exit "$rc"
+          echo "rc=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Open a drift issue
-        if: failure() && steps.compare.outputs.rc == '1' && github.event_name != 'pull_request'
+        if: steps.compare.outputs.rc == '1' && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -71,7 +70,7 @@ jobs:
           gh issue create --title "$ISSUE_TITLE" --body-file "$RUNNER_TEMP/issue.md"
 
       - name: Close a drift issue once the locks agree
-        if: success() && github.event_name != 'pull_request'
+        if: steps.compare.outputs.rc == '0' && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -81,3 +80,15 @@ jobs:
           for number in $(gh issue list --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[].number'); do
             gh issue close "$number" --comment "The locks agree again ($RUN_URL): $(cat "$RUNNER_TEMP/receipt-pin.txt")"
           done
+
+      # 1: the locks disagree (issue opened above). 2: Chronicle's lock could
+      # not be read, which says nothing about drift, so no issue; the failed
+      # run is the signal.
+      - name: Fail unless the locks agree
+        env:
+          RC: ${{ steps.compare.outputs.rc }}
+        run: |
+          if [ "$RC" != "0" ]; then
+            echo "chronicle_receipt_pin.py exited ${RC:-without a status}" >&2
+            exit 1
+          fi
