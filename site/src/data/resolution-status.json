@@ -61,7 +61,7 @@
       "resolutionDate": "2026-07-29",
       "state": "refused",
       "code": "BINDING_MISMATCH",
-      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, and refuses it. The fields that differ are listed with it.",
       "detail": "adapter"
     },
     "bea.pce_price_index.monthly_change.june_2026.first_print": {
@@ -272,7 +272,7 @@
       "resolutionDate": "2026-08-26",
       "state": "refused",
       "code": "BINDING_MISMATCH",
-      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, and refuses it. The fields that differ are listed with it.",
       "detail": "adapter, field, sourceSeriesId, sourceUrl, table, transform, allowedHosts"
     },
     "us.bea.core_pce.mom_sa.2026-07": {
@@ -302,7 +302,7 @@
       "resolutionDate": "2026-08-28",
       "state": "refused",
       "code": "BINDING_MISMATCH",
-      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, and refuses it. The fields that differ are listed with it.",
       "detail": "adapter, field, sourceSeriesId, sourceUrl, table, transform"
     },
     "co.dor.individual_income_tax.net_collections.2026_07.first_print": {
@@ -655,6 +655,6 @@
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
     }
   },
-  "generatedAtUtc": "2026-09-29T06:30:33Z",
+  "generatedAtUtc": "2026-09-29T09:00:35Z",
   "workflowRun": "36503673388"
 }
