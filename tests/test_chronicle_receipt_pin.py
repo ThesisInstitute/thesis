@@ -632,12 +632,24 @@ def test_the_drift_monitor_compares_on_a_schedule_and_on_lock_changes() -> None:
         'python3 scripts/chronicle_receipt_pin.py | tee "$RUNNER_TEMP/receipt-pin.txt"'
         in compare
     )
+    assert 'echo "rc=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"' in compare
+    assert "set -e" not in compare.replace("set -uo pipefail", "")
     assert "GH_TOKEN: ${{ github.token }}" in compare
     opener = _step(workflow, "Open a drift issue")
     # Only a real disagreement (exit 1) opens an issue; an unreadable
     # Chronicle (exit 2) just fails the run.
-    assert "steps.compare.outputs.rc == '1'" in opener
-    assert "github.event_name != 'pull_request'" in opener
+    assert (
+        "if: steps.compare.outputs.rc == '1' && github.event_name != 'pull_request'"
+        in opener
+    )
     closer = _step(workflow, "Close a drift issue once the locks agree")
-    assert "if: success() && github.event_name != 'pull_request'" in closer
+    assert (
+        "if: steps.compare.outputs.rc == '0' && github.event_name != 'pull_request'"
+        in closer
+    )
+    failer = _step(workflow, "Fail unless the locks agree")
+    assert "RC: ${{ steps.compare.outputs.rc }}" in failer
+    assert 'if [ "$RC" != "0" ]; then' in failer
+    names = re.findall(r"^      - name: (.+)$", workflow, flags=re.MULTILINE)
+    assert names[-1] == "Fail unless the locks agree"
     assert "permissions:\n  contents: read\n  issues: write\n" in workflow
