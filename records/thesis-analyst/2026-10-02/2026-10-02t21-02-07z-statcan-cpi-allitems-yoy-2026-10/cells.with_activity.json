@@ -1,0 +1,1305 @@
+[
+  {
+    "slug": "canada-cpi-annual-rate-october-2026",
+    "country": "CA",
+    "type": "data",
+    "title": "Canada CPI annual rate, Oct. 2026",
+    "question": "Statistics Canada Consumer Price Index, Table 18-10-0004-01, all-items Canada not seasonally adjusted, October 2026 year-over-year percent change, first print.",
+    "unit": "percent",
+    "pointEstimate": 2.8,
+    "ciLow": 2.2,
+    "ciHigh": 3.4,
+    "confidence": 0.8,
+    "resolutionDate": "2026-11-16",
+    "resolutionSource": "Statistics Canada Consumer Price Index, Table 18-10-0004-01 and The Daily",
+    "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+    "resolutionRule": "Resolve to Statistics Canada's first official October 2026 all-items Canada CPI print from Table 18-10-0004-01 vector v41690973, transformed as 100 * (October 2026 index / October 2025 index - 1), rounded to one decimal percent. Use the first print on the scheduled release date and ignore later revisions or corrections unless Statistics Canada withdraws the first print before scoring.",
+    "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+    "historicalContext": [
+      {
+        "label": "March 2026",
+        "value": 2.4,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 2.8,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 3.2,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 2.8,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": 3,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "August 2026",
+        "value": 3,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      }
+    ],
+    "drivers": [
+      "Latest official annual CPI prints are clustered near 3 percent",
+      "October 2025 base index of 165.3 creates mild downward base-effect pressure from August 2026",
+      "Modest two-month index growth from August to October keeps the point above the flat-index 2.7 percent calculation",
+      "Headline energy and food prices can move the two-month bridge materially",
+      "Bank of Canada policy restraint argues against a sharp inflation reacceleration"
+    ],
+    "sourceContext": [
+      "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+      "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=41690973&startRefPeriod=2025-01-01&endReferencePeriod=2026-09-01",
+      "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm"
+    ],
+    "runAt": "2026-10-02T21:04:29Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast Canada CPI annual rate for October 2026"
+      },
+      {
+        "kind": "text",
+        "text": "The resolver is Statistics Canada Table 18-10-0004-01, all-items Canada CPI, not seasonally adjusted, vector v41690973. The target is the first-print October 2026 year-over-year percent change, in percent, rounded to one decimal from the official CPI index series."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0002 captured the Statistics Canada WDS vector range for v41690973, queried from 2025-01 through 2026-09 with returned values available through 2026-08 at draft time.",
+        "result": "Fetched official index values included 2025-03 163.5, 2025-04 163.4, 2025-05 164.3, 2025-06 164.4, 2025-07 164.9, 2025-08 164.8, 2025-10 165.3, 2026-03 167.4, 2026-04 168.0, 2026-05 169.6, 2026-06 169.0, 2026-07 169.9, and 2026-08 169.8."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0005 captured the Statistics Canada Daily page for Consumer Price Index, August 2026.",
+        "result": "The Daily page stated the CPI rose 3.0% year over year in August 2026, matching the 3.0% increase in July, and was issued on 2026-09-14."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0003 captured the official Statistics Canada 2026-2027 release dates PDF; the PDF bytes were preserved although the evidence excerpt is binary PDF text.",
+        "result": "The official 2026 release calendar row for Consumer Price Index gives November 16, 2026 for the October 2026 reference period; the same schedule has September 14, 2026 for August 2026 and October 19, 2026 for September 2026."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "extract_json and calculate calls call-0018 through call-0023 transformed the captured WDS index values into annual rates.",
+        "result": "Calculated year-over-year prints were March 2026 2.4, April 2026 2.8, May 2026 3.2, June 2026 2.8, July 2026 3.0, and August 2026 3.0 percent."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate/reference class: the relevant official-source reference class is the six latest transformed first-print-style annual rates from the same vector and variant, March through August 2026: 2.4, 2.8, 3.2, 2.8, 3.0, and 3.0 percent. That anchors the forecast near 3 percent before base-effect and two-month-bridge adjustments."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "calculate calls call-0029 and call-0030 used the captured August 2026 index, captured October 2025 index, and a stated two-month index-gain assumption.",
+        "result": "With August 2026 index 169.8 and October 2025 index 165.3, a flat index through October gives 2.7 percent; adding an assumed 0.2 index-point gain over September and October gives 2.8 percent."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: prior model is latest-rate persistence with a base-effect bridge, using the six official WDS-derived annual rates 2.4, 2.8, 3.2, 2.8, 3.0, and 3.0. Update components are level near 3.0, base-effect drag from the 2025-10 index of 165.3, and a modest +0.2 index-point September-October gain from the August 2026 index of 169.8, implying 2.8. Interval method uses realized dispersion of successive changes in the fetched annual-rate history: sigma = 0.3346640106 from call-0025, so 1.28*sigma = 0.4283699336 from call-0026. I widen to 0.6 because the sample is only six prints, the target is two CPI months ahead, and headline gasoline/food components can move the unadjusted index, which is about 1.4x the one-step half-width, giving 2.2 to 3.4."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-consideration: upside risk is a renewed gasoline increase, food-price acceleration, or broad goods/services strength that would land above the interval, above 3.4 percent. Downside risk is a gasoline decline, softer shelter/services inflation, or weak goods prices that would land below the interval, below 2.2 percent. The outside the interval cases would require more than routine month-to-month noise over September and October."
+      },
+      {
+        "kind": "math",
+        "text": "Point and interval calculation: call-0030 gives pointEstimate 2.8. Using the widened 0.6 half-width, call-0031 gives ciLow 2.2 and call-0032 gives ciHigh 3.4, all rounded to one decimal percent to match the Statistics Canada CPI annual-rate print convention."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the blocking resolver critique by changing resolutionSourceUrl to the canonical October-capable Statistics Canada WDS endpoint from the ledger source binding. Also accepted the consistency suggestion by clarifying that the WDS range was queried through 2026-09 but returned values through 2026-08 at draft time, and by explicitly noting the small six-print interval sample."
+      },
+      {
+        "kind": "forecast",
+        "point": 2.8,
+        "ciLow": 2.2,
+        "ciHigh": 3.4
+      }
+    ],
+    "agentReportedRunAt": "2026-10-02T21:02:17Z",
+    "runStartedAt": "2026-10-02T21:02:07Z",
+    "promptMode": "fast",
+    "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+    "targetContentHash": "0e09b18f90e7854e6dcb76a0fa5559f39add1130f2cd2a9dab1511711e58115f",
+    "targetRegistrationPath": "records/targets/2026-10-02-0e09b18f90e7854e6dcb76a0fa5559f39add1130f2cd2a9dab1511711e58115f.json",
+    "registeredAtUtc": "2026-10-02T20:51:43Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 1.3,
+        "upper": 4.3
+      },
+      "points": [
+        {
+          "value": 1.3,
+          "probability": 0.0
+        },
+        {
+          "value": 1.315,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 1.33,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 1.345,
+          "probability": 0.005
+        },
+        {
+          "value": 1.36,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 1.375,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 1.39,
+          "probability": 0.01
+        },
+        {
+          "value": 1.405,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 1.42,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 1.435,
+          "probability": 0.015
+        },
+        {
+          "value": 1.45,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 1.465,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 1.48,
+          "probability": 0.02
+        },
+        {
+          "value": 1.495,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 1.51,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 1.525,
+          "probability": 0.025
+        },
+        {
+          "value": 1.54,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 1.555,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 1.57,
+          "probability": 0.03
+        },
+        {
+          "value": 1.585,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 1.6,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 1.615,
+          "probability": 0.035
+        },
+        {
+          "value": 1.63,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 1.645,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 1.66,
+          "probability": 0.04
+        },
+        {
+          "value": 1.675,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 1.69,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 1.705,
+          "probability": 0.045
+        },
+        {
+          "value": 1.72,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 1.735,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 1.75,
+          "probability": 0.05
+        },
+        {
+          "value": 1.765,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 1.78,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 1.795,
+          "probability": 0.055
+        },
+        {
+          "value": 1.81,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 1.825,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 1.84,
+          "probability": 0.06
+        },
+        {
+          "value": 1.855,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 1.87,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 1.885,
+          "probability": 0.065
+        },
+        {
+          "value": 1.9,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 1.915,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 1.93,
+          "probability": 0.07
+        },
+        {
+          "value": 1.945,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 1.96,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 1.975,
+          "probability": 0.075
+        },
+        {
+          "value": 1.99,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 2.005,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 2.02,
+          "probability": 0.08
+        },
+        {
+          "value": 2.035,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 2.05,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 2.065,
+          "probability": 0.085
+        },
+        {
+          "value": 2.08,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 2.095,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 2.11,
+          "probability": 0.09
+        },
+        {
+          "value": 2.125,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 2.14,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 2.155,
+          "probability": 0.095
+        },
+        {
+          "value": 2.17,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 2.185,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 2.2,
+          "probability": 0.1
+        },
+        {
+          "value": 2.215,
+          "probability": 0.11
+        },
+        {
+          "value": 2.23,
+          "probability": 0.12
+        },
+        {
+          "value": 2.245,
+          "probability": 0.13
+        },
+        {
+          "value": 2.26,
+          "probability": 0.14
+        },
+        {
+          "value": 2.275,
+          "probability": 0.15
+        },
+        {
+          "value": 2.29,
+          "probability": 0.16
+        },
+        {
+          "value": 2.305,
+          "probability": 0.17
+        },
+        {
+          "value": 2.32,
+          "probability": 0.18
+        },
+        {
+          "value": 2.335,
+          "probability": 0.19
+        },
+        {
+          "value": 2.35,
+          "probability": 0.2
+        },
+        {
+          "value": 2.365,
+          "probability": 0.21
+        },
+        {
+          "value": 2.38,
+          "probability": 0.22
+        },
+        {
+          "value": 2.395,
+          "probability": 0.23
+        },
+        {
+          "value": 2.41,
+          "probability": 0.24
+        },
+        {
+          "value": 2.425,
+          "probability": 0.25
+        },
+        {
+          "value": 2.44,
+          "probability": 0.26
+        },
+        {
+          "value": 2.455,
+          "probability": 0.27
+        },
+        {
+          "value": 2.47,
+          "probability": 0.28
+        },
+        {
+          "value": 2.485,
+          "probability": 0.29
+        },
+        {
+          "value": 2.5,
+          "probability": 0.3
+        },
+        {
+          "value": 2.515,
+          "probability": 0.31
+        },
+        {
+          "value": 2.53,
+          "probability": 0.32
+        },
+        {
+          "value": 2.545,
+          "probability": 0.33
+        },
+        {
+          "value": 2.56,
+          "probability": 0.34
+        },
+        {
+          "value": 2.575,
+          "probability": 0.35
+        },
+        {
+          "value": 2.59,
+          "probability": 0.36
+        },
+        {
+          "value": 2.605,
+          "probability": 0.37
+        },
+        {
+          "value": 2.62,
+          "probability": 0.38
+        },
+        {
+          "value": 2.635,
+          "probability": 0.39
+        },
+        {
+          "value": 2.65,
+          "probability": 0.4
+        },
+        {
+          "value": 2.665,
+          "probability": 0.41
+        },
+        {
+          "value": 2.68,
+          "probability": 0.42
+        },
+        {
+          "value": 2.695,
+          "probability": 0.43
+        },
+        {
+          "value": 2.71,
+          "probability": 0.44
+        },
+        {
+          "value": 2.725,
+          "probability": 0.45
+        },
+        {
+          "value": 2.74,
+          "probability": 0.46
+        },
+        {
+          "value": 2.755,
+          "probability": 0.47
+        },
+        {
+          "value": 2.77,
+          "probability": 0.48
+        },
+        {
+          "value": 2.785,
+          "probability": 0.49
+        },
+        {
+          "value": 2.8,
+          "probability": 0.5
+        },
+        {
+          "value": 2.815,
+          "probability": 0.51
+        },
+        {
+          "value": 2.83,
+          "probability": 0.52
+        },
+        {
+          "value": 2.845,
+          "probability": 0.53
+        },
+        {
+          "value": 2.86,
+          "probability": 0.54
+        },
+        {
+          "value": 2.875,
+          "probability": 0.55
+        },
+        {
+          "value": 2.89,
+          "probability": 0.56
+        },
+        {
+          "value": 2.905,
+          "probability": 0.57
+        },
+        {
+          "value": 2.92,
+          "probability": 0.58
+        },
+        {
+          "value": 2.935,
+          "probability": 0.59
+        },
+        {
+          "value": 2.95,
+          "probability": 0.6
+        },
+        {
+          "value": 2.965,
+          "probability": 0.61
+        },
+        {
+          "value": 2.98,
+          "probability": 0.62
+        },
+        {
+          "value": 2.995,
+          "probability": 0.63
+        },
+        {
+          "value": 3.01,
+          "probability": 0.64
+        },
+        {
+          "value": 3.025,
+          "probability": 0.65
+        },
+        {
+          "value": 3.04,
+          "probability": 0.66
+        },
+        {
+          "value": 3.055,
+          "probability": 0.67
+        },
+        {
+          "value": 3.07,
+          "probability": 0.68
+        },
+        {
+          "value": 3.085,
+          "probability": 0.69
+        },
+        {
+          "value": 3.1,
+          "probability": 0.7
+        },
+        {
+          "value": 3.115,
+          "probability": 0.71
+        },
+        {
+          "value": 3.13,
+          "probability": 0.72
+        },
+        {
+          "value": 3.145,
+          "probability": 0.73
+        },
+        {
+          "value": 3.16,
+          "probability": 0.74
+        },
+        {
+          "value": 3.175,
+          "probability": 0.75
+        },
+        {
+          "value": 3.19,
+          "probability": 0.76
+        },
+        {
+          "value": 3.205,
+          "probability": 0.77
+        },
+        {
+          "value": 3.22,
+          "probability": 0.78
+        },
+        {
+          "value": 3.235,
+          "probability": 0.79
+        },
+        {
+          "value": 3.25,
+          "probability": 0.8
+        },
+        {
+          "value": 3.265,
+          "probability": 0.81
+        },
+        {
+          "value": 3.28,
+          "probability": 0.82
+        },
+        {
+          "value": 3.295,
+          "probability": 0.83
+        },
+        {
+          "value": 3.31,
+          "probability": 0.84
+        },
+        {
+          "value": 3.325,
+          "probability": 0.85
+        },
+        {
+          "value": 3.34,
+          "probability": 0.86
+        },
+        {
+          "value": 3.355,
+          "probability": 0.87
+        },
+        {
+          "value": 3.37,
+          "probability": 0.88
+        },
+        {
+          "value": 3.385,
+          "probability": 0.89
+        },
+        {
+          "value": 3.4,
+          "probability": 0.9
+        },
+        {
+          "value": 3.415,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 3.43,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 3.445,
+          "probability": 0.905
+        },
+        {
+          "value": 3.46,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 3.475,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 3.49,
+          "probability": 0.91
+        },
+        {
+          "value": 3.505,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 3.52,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 3.535,
+          "probability": 0.915
+        },
+        {
+          "value": 3.55,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 3.565,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 3.58,
+          "probability": 0.92
+        },
+        {
+          "value": 3.595,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 3.61,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 3.625,
+          "probability": 0.925
+        },
+        {
+          "value": 3.64,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 3.655,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 3.67,
+          "probability": 0.93
+        },
+        {
+          "value": 3.685,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 3.7,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 3.715,
+          "probability": 0.935
+        },
+        {
+          "value": 3.73,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 3.745,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 3.76,
+          "probability": 0.94
+        },
+        {
+          "value": 3.775,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 3.79,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 3.805,
+          "probability": 0.945
+        },
+        {
+          "value": 3.82,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 3.835,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 3.85,
+          "probability": 0.95
+        },
+        {
+          "value": 3.865,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 3.88,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 3.895,
+          "probability": 0.955
+        },
+        {
+          "value": 3.91,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 3.925,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 3.94,
+          "probability": 0.96
+        },
+        {
+          "value": 3.955,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 3.97,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 3.985,
+          "probability": 0.965
+        },
+        {
+          "value": 4.0,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 4.015,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 4.03,
+          "probability": 0.97
+        },
+        {
+          "value": 4.045,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 4.06,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 4.075,
+          "probability": 0.975
+        },
+        {
+          "value": 4.09,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 4.105,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 4.12,
+          "probability": 0.98
+        },
+        {
+          "value": 4.135,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 4.15,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 4.165,
+          "probability": 0.985
+        },
+        {
+          "value": 4.18,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 4.195,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 4.21,
+          "probability": 0.99
+        },
+        {
+          "value": 4.225,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 4.24,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 4.255,
+          "probability": 0.995
+        },
+        {
+          "value": 4.27,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 4.285,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 4.3,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 2.8,
+        "median": 2.8,
+        "interval80": {
+          "lower": 2.2,
+          "upper": 3.4
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/prompt.md",
+        "sha256": "5b99fd872fc2ca815411cf1dc3d43a9e9f4aaf7263d3b667c25a9ed8b8354220",
+        "bytes": 11789,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_command.json",
+        "sha256": "65d317a86de66836820192cdf9988e23844f95b0ffb256406f53da3fd418964c",
+        "bytes": 2055,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_tool_evidence.json",
+        "sha256": "fa8005c323fed0088c551a2b4f442746f2fdc45bfa7dc1b2054022dae8c273d6",
+        "bytes": 354217,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_tool_evidence_verification.json",
+        "sha256": "ecb86c630e98cd90d9db9ca8f33ce447935cb97071644000791fb65ff6876600",
+        "bytes": 4581,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_codex_stdout.jsonl",
+        "sha256": "81ecd20ddbaa80870059c260480f90436ac4633f2e0ec9c8a51e82520fc0d7fc",
+        "bytes": 1443470,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_codex_stderr.log",
+        "sha256": "a4d9c611d37daf22800dac7d9bf929af8d7ea35d680bf3adc5b42a1309f2ef70",
+        "bytes": 233,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_codex_events.jsonl",
+        "sha256": "ef06f001f1fe1eb9cbe824912c3c6bae302f120893d8e62c5f6f1f92ed973290",
+        "bytes": 1457286,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_codex_last_message.txt",
+        "sha256": "d1caff19b4c0ae0428a0d87b22e393458cb03a1eb1e0e15eb3f9d4606984cc72",
+        "bytes": 6631,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_codex_trace.json",
+        "sha256": "ac0c64397ffbac403f441f64c45f61eeb060246dca889f12f079953e625683bb",
+        "bytes": 562,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_stdout.txt",
+        "sha256": "d1caff19b4c0ae0428a0d87b22e393458cb03a1eb1e0e15eb3f9d4606984cc72",
+        "bytes": 6631,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_stderr.txt",
+        "sha256": "3f1efffdf71cd041a602606b67b1b577c508d1e7bbb8b40568daeb81fb066b89",
+        "bytes": 248,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_prompt.md",
+        "sha256": "2998b95636b5013367305efd301d2e8141cc6b3d72348d22cf046a1761d99c6d",
+        "bytes": 9889,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_command.json",
+        "sha256": "049decac0d99d6e73b24de6de8216ee4cc164c8c60cfd6bc9ecaa0c6a6ad41ef",
+        "bytes": 1978,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "572131583bb989d66ea396dc9b7c800523f7e941b694179a786f0a7fb55eff80",
+        "bytes": 1294,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_codex_stderr.log",
+        "sha256": "d7c7ba57e7bf73f4570ce66e6d551988e7731cdac2f69e094071c1938eb28096",
+        "bytes": 233,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_codex_events.jsonl",
+        "sha256": "2ccc3fd4dea045fc0816198419379d33d51ba4d90e7422f565c4a91c16390505",
+        "bytes": 1316,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_codex_last_message.txt",
+        "sha256": "b79a81a125fe923eb783441ad5d5ec5842069a09f433bf79e4cec332c117b438",
+        "bytes": 949,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_codex_trace.json",
+        "sha256": "7c3bf4947dd0aee5076ad7d7ea2b8d06e55182d791d21ee08a25ee2d346820f0",
+        "bytes": 555,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_stdout.txt",
+        "sha256": "b79a81a125fe923eb783441ad5d5ec5842069a09f433bf79e4cec332c117b438",
+        "bytes": 949,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_stderr.txt",
+        "sha256": "b14a118ed453980e66f4888b274cb737c72aa626b78d03d7b18039070f91a303",
+        "bytes": 248,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/revision_prompt.md",
+        "sha256": "60524810346e5c422afeef0c3513f25fe2a186f41f9d8ebea99038db103b98f3",
+        "bytes": 20305,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/command.json",
+        "sha256": "a3da8b55dec6d579531d69e52dd01b3b23178e8eccffdc313dd9d8261c4745bb",
+        "bytes": 2037,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/codex_stdout.jsonl",
+        "sha256": "4f97d4d8a426eff9e50c28c384f49b8677848b1cd04a902f12727e660410ceda",
+        "bytes": 7807,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/codex_stderr.log",
+        "sha256": "d5cefa539e7c57d3c06b04e27e2714bd7e2be96e785528924b58077330576806",
+        "bytes": 233,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/codex_events.jsonl",
+        "sha256": "e8592fcc60eca2cf845da7b634f3c42170b50a6a0e148068ef906525c7e9825c",
+        "bytes": 7829,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/codex_last_message.txt",
+        "sha256": "cd597b1e745889ba767bfb96fdc10b35bf42422445bb9cb0f34de76ba444ffd4",
+        "bytes": 7165,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/codex_trace.json",
+        "sha256": "d4b9b95413f8df38c70f1038a4ef124885b0f5da99683b907afba8145ee9a50a",
+        "bytes": 555,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/stdout.txt",
+        "sha256": "cd597b1e745889ba767bfb96fdc10b35bf42422445bb9cb0f34de76ba444ffd4",
+        "bytes": 7165,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/stderr.txt",
+        "sha256": "1293c70e01f2ec41d4287c5941269c102b7fd207b2d6f6b195e90c8e2aecfa37",
+        "bytes": 248,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/raw_response.txt",
+        "sha256": "cd597b1e745889ba767bfb96fdc10b35bf42422445bb9cb0f34de76ba444ffd4",
+        "bytes": 7165,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/parsed_cells.json",
+        "sha256": "087998661bb14fb19252ec7880f227908a26d60719bfdfe22fbf81ca200eaee1",
+        "bytes": 8401,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/normalized_cells.json",
+        "sha256": "362ea00fc44cd38654ae20fa2ea09598e7be3a3e8a6bd0a4dbfee8f6cd51a09e",
+        "bytes": 25523,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/distribution.json",
+        "sha256": "008f2d4fdfc48e719aef00ae3ec87c9c588bd8eba422998d82952d781a8c9a9f",
+        "bytes": 13338,
+        "createdAt": "2026-10-02T21:02:07Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/validation.json",
+        "sha256": "9d0899753e89a49c6f314941f80ef9ab697d4cd8f849136a24c80c1ebf9301cf",
+        "bytes": 136,
+        "createdAt": "2026-10-02T21:02:07Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-10-02T21:02:07Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "d88de6942323dfc2db361fed736d5678d5cc2190b6b63cda2e53b232d6f2f12b"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.finding.1",
+          "severity": "blocking",
+          "rubricItem": "resolver",
+          "summary": "resolutionSourceUrl points to a historical range ending before the October 2026 target and does not match the canonical StatCan WDS resolving endpoint in the ledger contract.",
+          "actionRequested": "Change resolutionSourceUrl to the canonical sourceBinding.sourceUrl or another October-capable official StatCan resolver URL, and keep The Daily only as supporting context if used."
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Clarify that the interval sigma is based on a very small six-print sample and that the 0.6 half-width is an explicit judgmental widening for two unreleased CPI months."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Make sourceContext consistent with the evidence text: the cited vector range says through 2026-09 while the trace says values were captured through 2026-08."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.finding.1",
+          "decision": "accepted",
+          "rationale": "Review disposition: accepted the blocking resolver critique by changing resolutionSourceUrl to the canonical October-capable Statistics Canada WDS endpoint from the ledger source binding. Also accepted the consistency suggestion by clarifying that the WDS range was queried through 2026-09 but returned values through 2026-08 at draft time, and by explicitly noting the small six-print interval sample.",
+          "forecastChanged": true
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver critique by changing resolutionSourceUrl to the canonical October-capable Statistics Canada WDS endpoint from the ledger source binding. Also accepted the consistency suggestion by clarifying that the WDS range was queried through 2026-09 but returned values through 2026-08 at draft time, and by explicitly noting the small six-print interval sample.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver critique by changing resolutionSourceUrl to the canonical October-capable Statistics Canada WDS endpoint from the ledger source binding. Also accepted the consistency suggestion by clarifying that the WDS range was queried through 2026-09 but returned values through 2026-08 at draft time, and by explicitly noting the small six-print interval sample.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "Draft is mostly publication-ready but needs the resolver URL/source aligned to the canonical target contract before publication."
+    }
+  }
+]

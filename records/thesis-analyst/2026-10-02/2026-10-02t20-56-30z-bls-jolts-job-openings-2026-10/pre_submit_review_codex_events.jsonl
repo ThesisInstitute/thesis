@@ -1,0 +1,4 @@
+{"type": "thread.started", "thread_id": "01a0fe68-5986-7e83-8a33-3a1c5686531f"}
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "{\"summary\":\"The draft is publishable: it matches the registered resolver contract and includes a clear persistence prior, update, volatility-based interval, tails, and coherent JSON fields.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Clarify that the December 1, 2026 resolution date is anchored by the registered target/sourceBinding since the schedule-page fetch was not receipt-preserved.\",\"Tighten the interval wording so it unambiguously says whether sigma is from month-to-month changes or level dispersion.\",\"Quantify the cooling adjustment with one sentence comparing August 2026 to the latest-three-month mean.\"]}"}}
+{"type": "turn.completed", "usage": {"input_tokens": 20980, "cached_input_tokens": 0, "output_tokens": 643, "reasoning_output_tokens": 516}}

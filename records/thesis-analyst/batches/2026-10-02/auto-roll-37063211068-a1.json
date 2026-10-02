@@ -1,0 +1,267 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-10-02T20:54:52Z",
+  "finishedAt": "2026-10-02T21:04:30Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 5,
+  "ok": 5,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "nonfarm-payrolls-october-2026",
+        "country": "US",
+        "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+        "expectedReleaseDate": "2026-11-06",
+        "expectedReleaseWindow": {
+          "end": "2026-11-06",
+          "start": "2026-11-06"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.ces.nonfarm_payrolls.change",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-06",
+            "start": "2026-11-06"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "CES0000000001",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+          "table": "Current Employment Statistics, all employees, total nonfarm, seasonally adjusted (Employment Situation, Table B-1)",
+          "transform": {
+            "factor": 1,
+            "operation": "difference_previous_period"
+          }
+        },
+        "targetContentHash": "63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945",
+        "targetRegistrationPath": "records/targets/2026-10-02-63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945.json",
+        "targetUnit": "thousands",
+        "valueScale": 1
+      },
+      "startedAt": "2026-10-02T20:54:52Z",
+      "finishedAt": "2026-10-02T20:56:30Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-54-52z-bls-ces-nonfarm-payrolls-change-2026-10/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-54-52z-bls-ces-nonfarm-payrolls-change-2026-10/cells.with_activity.json",
+      "stdoutTail": "62,\n      \"createdAt\": \"2026-10-02T20:54:52Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-54-52z-bls-ces-nonfarm-payrolls-change-2026-10/distribution.json\",\n      \"sha256\": \"bda8cf6742073ae9f11ff2b5cf32f8590a26658a0893f4c0f4d6883e4c97c81e\",\n      \"bytes\": 13468,\n      \"createdAt\": \"2026-10-02T20:54:52Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-54-52z-bls-ces-nonfarm-payrolls-change-2026-10/validation.json\",\n      \"sha256\": \"6db12c3513188bf979fa12b65fed8487da33fd6c8a6766c40baa8213a8a9fe36\",\n      \"bytes\": 130,\n      \"createdAt\": \"2026-10-02T20:54:52Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-54-52z-bls-ces-nonfarm-payrolls-change-2026-10/cells.with_activity.json\",\n      \"sha256\": \"7e33bb433972b12ca28726a97ab537cb47f0d353f55808cce2201ca13d6f80a4\",\n      \"bytes\": 41446,\n      \"createdAt\": \"2026-10-02T20:54:52Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-54-52z-bls-ces-nonfarm-payrolls-change-2026-10/manifest.json\",\n      \"sha256\": \"c22bff9a6f1163eaa8b68c7a9303d485d4ff01ffc91fe5fcdc40471ffa9255cb\",\n      \"bytes\": 16254,\n      \"createdAt\": \"2026-10-02T20:54:52Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"nonfarm-payrolls-october-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"b9b82b61a6ba14e30bdb3638acf77119c3e9733357e68d2fd70fcd13cf4243af\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "jolts-openings-october-2026",
+        "country": "US",
+        "dataPointId": "bls.jolts.job_openings.2026_10.first_print",
+        "expectedReleaseDate": "2026-12-01",
+        "expectedReleaseWindow": {
+          "end": "2026-12-01",
+          "start": "2026-12-01"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
+        "series": "bls.jolts.job_openings",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-01",
+            "start": "2026-12-01"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "JTS000000000000000JOL",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL",
+          "table": "Job Openings and Labor Turnover Survey, job openings level, total nonfarm, seasonally adjusted (JOLTS news release, Table 1)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "e464aa5ffca1a660d0e89b375382c6a8f4d6a61203d7a6743f7fcebe3896a2fc",
+        "targetRegistrationPath": "records/targets/2026-10-02-e464aa5ffca1a660d0e89b375382c6a8f4d6a61203d7a6743f7fcebe3896a2fc.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-10-02T20:56:30Z",
+      "finishedAt": "2026-10-02T20:57:55Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-56-30z-bls-jolts-job-openings-2026-10/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-56-30z-bls-jolts-job-openings-2026-10/cells.with_activity.json",
+      "stdoutTail": "27514ba43784882dc\",\n      \"bytes\": 24152,\n      \"createdAt\": \"2026-10-02T20:56:30Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-56-30z-bls-jolts-job-openings-2026-10/distribution.json\",\n      \"sha256\": \"0d78b82a9bd342d8637ab9734b16ff74e73ca4221d2c41468eadd4622329ba32\",\n      \"bytes\": 13228,\n      \"createdAt\": \"2026-10-02T20:56:30Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-56-30z-bls-jolts-job-openings-2026-10/validation.json\",\n      \"sha256\": \"39b4eaabc53df33b434a7ac74b236f7c81956d11c4aeffe5db8f04f669e2baa3\",\n      \"bytes\": 128,\n      \"createdAt\": \"2026-10-02T20:56:30Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-56-30z-bls-jolts-job-openings-2026-10/cells.with_activity.json\",\n      \"sha256\": \"ce809bc5e02a5201168272013882c86f80b7a9caab4fb9f7f244d13bfac6a62f\",\n      \"bytes\": 40695,\n      \"createdAt\": \"2026-10-02T20:56:30Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-56-30z-bls-jolts-job-openings-2026-10/manifest.json\",\n      \"sha256\": \"42328f47efb4967d65224a380296842df36b172558c0f99c86abce5742a87946\",\n      \"bytes\": 16546,\n      \"createdAt\": \"2026-10-02T20:56:30Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"jolts-openings-october-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"1320b1d3c98071bffc1be5de4d10c13af0c70c9893df3e3ef35c9f5d252a327b\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "jolts-quits-rate-october-2026",
+        "country": "US",
+        "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
+        "expectedReleaseDate": "2026-12-01",
+        "expectedReleaseWindow": {
+          "end": "2026-12-01",
+          "start": "2026-12-01"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
+        "series": "bls.jolts.quits_rate",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-01",
+            "start": "2026-12-01"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "JTS000000000000000QUR",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+          "table": "Job Openings and Labor Turnover Survey, quits rate, total nonfarm, seasonally adjusted (JOLTS news release, Table 4)",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "e34e567dd22af66b8a7fd7522759f16c936e8c17fc330767dc31316fd36ef905",
+        "targetRegistrationPath": "records/targets/2026-10-02-e34e567dd22af66b8a7fd7522759f16c936e8c17fc330767dc31316fd36ef905.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "startedAt": "2026-10-02T20:57:55Z",
+      "finishedAt": "2026-10-02T20:59:28Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-57-55z-bls-jolts-quits-rate-2026-10/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-57-55z-bls-jolts-quits-rate-2026-10/cells.with_activity.json",
+      "stdoutTail": "5b1a25e9ac9435ec845585e\",\n      \"bytes\": 25452,\n      \"createdAt\": \"2026-10-02T20:57:55Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-57-55z-bls-jolts-quits-rate-2026-10/distribution.json\",\n      \"sha256\": \"8e3da0672de249bbc94935c780603063b5778aa5508059b03c0f21e1fb713029\",\n      \"bytes\": 13700,\n      \"createdAt\": \"2026-10-02T20:57:55Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-57-55z-bls-jolts-quits-rate-2026-10/validation.json\",\n      \"sha256\": \"d08dc5085a8ba24364e2f4c9dcf0850cc9720245754d25b32f56bc0a3fb1445e\",\n      \"bytes\": 130,\n      \"createdAt\": \"2026-10-02T20:57:55Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-57-55z-bls-jolts-quits-rate-2026-10/cells.with_activity.json\",\n      \"sha256\": \"752ba0d4ffdb7e93daca0b89d35f8699fe9f7a2275c87370543d325e9d11257d\",\n      \"bytes\": 43334,\n      \"createdAt\": \"2026-10-02T20:57:55Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-57-55z-bls-jolts-quits-rate-2026-10/manifest.json\",\n      \"sha256\": \"b521aeb7058bf06519dc4793001c9ae573f00efef4ba51cd6371a950892beeb0\",\n      \"bytes\": 17706,\n      \"createdAt\": \"2026-10-02T20:57:55Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"jolts-quits-rate-october-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"27bb0e476bc81eb6341dd7104db26052677efcd06e67b7995d666835a3b242c2\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "canada-monthly-gdp-growth-october-2026",
+        "country": "CA",
+        "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_10.first_print",
+        "expectedReleaseDate": "2026-12-23",
+        "expectedReleaseWindow": {
+          "end": "2026-12-23",
+          "start": "2026-12-23"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.gdp_by_industry.monthly_growth",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-23",
+            "start": "2026-12-23"
+          },
+          "field": "v65201210",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v65201210",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_previous_period"
+          }
+        },
+        "targetContentHash": "34a059b60ed2afd5a7adae2667732292a90e8bd0d6387703ec4e9941108bc9b8",
+        "targetRegistrationPath": "records/targets/2026-10-02-34a059b60ed2afd5a7adae2667732292a90e8bd0d6387703ec4e9941108bc9b8.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "startedAt": "2026-10-02T20:59:28Z",
+      "finishedAt": "2026-10-02T21:02:07Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-59-28z-statcan-gdp-by-industry-monthly-growth-2026-10/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-59-28z-statcan-gdp-by-industry-monthly-growth-2026-10/cells.with_activity.json",
+      "stdoutTail": ":59:28Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-59-28z-statcan-gdp-by-industry-monthly-growth-2026-10/distribution.json\",\n      \"sha256\": \"3cb681d54528d049aa8fb57c66397703f765c7f98c3a574c18153e33a6a5ca0b\",\n      \"bytes\": 15026,\n      \"createdAt\": \"2026-10-02T20:59:28Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-59-28z-statcan-gdp-by-industry-monthly-growth-2026-10/validation.json\",\n      \"sha256\": \"38c9e07eda7cc5c1408b9ac57e6902295fc02b52dd3a9f2aadbfeb3884fdfa57\",\n      \"bytes\": 139,\n      \"createdAt\": \"2026-10-02T20:59:28Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-59-28z-statcan-gdp-by-industry-monthly-growth-2026-10/cells.with_activity.json\",\n      \"sha256\": \"636bfa75c9328b1a3075bc1fa78ec6856f59b5fb0959da06dea00681e246ca4d\",\n      \"bytes\": 46149,\n      \"createdAt\": \"2026-10-02T20:59:28Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t20-59-28z-statcan-gdp-by-industry-monthly-growth-2026-10/manifest.json\",\n      \"sha256\": \"2ac9129b8e86e6a788f99370bf1e27d113ef2d560a3cb92ba597c68b92b148da\",\n      \"bytes\": 18751,\n      \"createdAt\": \"2026-10-02T20:59:28Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"canada-monthly-gdp-growth-october-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"2822182b11094dde2ff0dc6b596eb75401d72c6b4370dd61147603783893b036\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "canada-cpi-annual-rate-october-2026",
+        "country": "CA",
+        "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+        "expectedReleaseDate": "2026-11-16",
+        "expectedReleaseWindow": {
+          "end": "2026-11-16",
+          "start": "2026-11-16"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.cpi.allitems.yoy",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-16",
+            "start": "2026-11-16"
+          },
+          "field": "v41690973",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v41690973",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "Consumer Price Index, Table 18-10-0004-01 (all-items, Canada)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_year_ago"
+          }
+        },
+        "targetContentHash": "0e09b18f90e7854e6dcb76a0fa5559f39add1130f2cd2a9dab1511711e58115f",
+        "targetRegistrationPath": "records/targets/2026-10-02-0e09b18f90e7854e6dcb76a0fa5559f39add1130f2cd2a9dab1511711e58115f.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "startedAt": "2026-10-02T21:02:07Z",
+      "finishedAt": "2026-10-02T21:04:30Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/cells.with_activity.json",
+      "stdoutTail": "e\",\n      \"bytes\": 25523,\n      \"createdAt\": \"2026-10-02T21:02:07Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/distribution.json\",\n      \"sha256\": \"008f2d4fdfc48e719aef00ae3ec87c9c588bd8eba422998d82952d781a8c9a9f\",\n      \"bytes\": 13338,\n      \"createdAt\": \"2026-10-02T21:02:07Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/validation.json\",\n      \"sha256\": \"9d0899753e89a49c6f314941f80ef9ab697d4cd8f849136a24c80c1ebf9301cf\",\n      \"bytes\": 136,\n      \"createdAt\": \"2026-10-02T21:02:07Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/cells.with_activity.json\",\n      \"sha256\": \"19af884ebfcda1f52bcc2cbb062c2faf50cb98ad7b48a25cc1f1f934c698ebe9\",\n      \"bytes\": 42569,\n      \"createdAt\": \"2026-10-02T21:02:07Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/manifest.json\",\n      \"sha256\": \"e860192c62de59843f3fcd984d577099b14bf7bcc6cb2dd3d50375e69f6be909\",\n      \"bytes\": 17032,\n      \"createdAt\": \"2026-10-02T21:02:07Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"canada-cpi-annual-rate-october-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"c4d61a1bf14259b0a59930daa00b02cd8e12f961d792c92c1cbe01ef0be17c79\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}
