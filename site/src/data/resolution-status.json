@@ -1,6 +1,6 @@
 {
   "schemaVersion": "thesis_resolution_status_v1",
-  "asOf": "2026-10-01",
+  "asOf": "2026-10-02",
   "run": {
     "logAvailable": true,
     "completed": true,
@@ -359,7 +359,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-august-2026",
@@ -367,7 +367,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
     },
     "bls.cps.telework_share.2026-08.first_print": {
       "forecastSlug": "us-telework-rate-august-2026",
@@ -432,7 +432,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-august-2026",
@@ -440,7 +440,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
+      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
     },
     "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
@@ -599,6 +599,6 @@
       "registration": "series fns.snap.total_persons"
     }
   },
-  "generatedAtUtc": "2026-10-01T20:02:35Z",
-  "workflowRun": "36911294354"
+  "generatedAtUtc": "2026-10-02T19:41:33Z",
+  "workflowRun": "37049087733"
 }
