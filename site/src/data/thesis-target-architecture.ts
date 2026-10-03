@@ -28,6 +28,7 @@ import {
   type ForecastJudgeExport,
 } from "./forecast-judges";
 import {
+  buildObservationResolutionEventId,
   getResolvedObservationForForecast,
   scoreResolvedForecasts,
   type ResolvedForecastScore,
@@ -1514,9 +1515,9 @@ function buildResolutionEventProjections({
       if (!context || !observation) return [];
       return [
         {
-          resolutionEventId: buildResolutionEventId(
+          resolutionEventId: buildObservationResolutionEventId(
             forecast.slug,
-            observation.observationId,
+            observation,
           ),
           targetVersionId: buildTargetVersionId(context.spec.predictionId),
           observationId: observation.observationId,
@@ -1859,12 +1860,6 @@ function buildVintageId(
   vintageKind: ObservationVintageProjection["vintageKind"],
 ) {
   return `vintage.${observationId.replace(/^obs\./, "")}.${vintageKind}`;
-}
-
-function buildResolutionEventId(forecastSlug: string, observationId: string) {
-  return `resolution_event.${forecastSlug}.${observationId
-    .replace(/^obs\./, "")
-    .replace(/[^A-Za-z0-9]+/g, "-")}`;
 }
 
 function buildHistoricalObservationId({
