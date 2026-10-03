@@ -1,6 +1,6 @@
 {
   "schemaVersion": "thesis_resolution_status_v1",
-  "asOf": "2026-10-02",
+  "asOf": "2026-10-03",
   "run": {
     "logAvailable": true,
     "completed": true,
@@ -356,18 +356,16 @@
     "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "state": "resolved_this_run",
+      "code": "RESOLVED_AWAITING_RECORD",
+      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "state": "resolved_this_run",
+      "code": "RESOLVED_AWAITING_RECORD",
+      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
     },
     "bls.cps.telework_share.2026-08.first_print": {
       "forecastSlug": "us-telework-rate-august-2026",
@@ -429,18 +427,16 @@
     "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "state": "resolved_this_run",
+      "code": "RESOLVED_AWAITING_RECORD",
+      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
+      "state": "resolved_this_run",
+      "code": "RESOLVED_AWAITING_RECORD",
+      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
     },
     "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
@@ -597,8 +593,23 @@
       "code": "NO_ROUTE_GENERIC_URL",
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding.",
       "registration": "series fns.snap.total_persons"
+    },
+    "bls.cps.unemployment_rate.september_2026.first_print": {
+      "forecastSlug": "unemployment-rate-september-2026",
+      "resolutionDate": "2026-10-02",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "statjp.cpi.tokyo_all_items_annual_rate.september_2026.preliminary": {
+      "forecastSlug": "japan-tokyo-cpi-annual-rate-september-2026-prelim",
+      "resolutionDate": "2026-10-02",
+      "state": "no_route",
+      "code": "NO_ROUTE_GENERIC_URL",
+      "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding.",
+      "registration": "series statjp.cpi.tokyo_all_items_yoy"
     }
   },
-  "generatedAtUtc": "2026-10-02T19:41:33Z",
-  "workflowRun": "37049087733"
+  "generatedAtUtc": "2026-10-03T18:37:24Z",
+  "workflowRun": "37141162574"
 }
