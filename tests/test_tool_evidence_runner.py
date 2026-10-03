@@ -232,9 +232,11 @@ def test_stage_binds_recorded_calls_to_native_events_before_sealing(
 
 
 
-def _run_unbound_stage(tmp_path: Path, out_dir: Path) -> subprocess.CompletedProcess:
-    """Run the real runner and MCP server on a model stream that completes only
-    the first of two recorded calls."""
+def _run_fake_codex_stage(
+    tmp_path: Path, out_dir: Path, extra_lines: list[str]
+) -> subprocess.CompletedProcess:
+    """Run the real runner, whose fake codex runs ``extra_lines`` against the
+    real MCP server before it answers with a valid cell."""
     codex = tmp_path / "codex"
     auth_home = tmp_path / "auth"
     auth_home.mkdir()
@@ -247,19 +249,7 @@ def _run_unbound_stage(tmp_path: Path, out_dir: Path) -> subprocess.CompletedPro
             "config = next(a for a in args if "
             "a.startswith('mcp_servers.thesis_tool_evidence.args='))",
             "tool_args = json.loads(config.split('=', 1)[1])",
-            "requests = [{'jsonrpc':'2.0','id':i,'method':'tools/call',"
-            "'params':{'name':'calculate','arguments':"
-            "{'expression':'prior + adjustment',"
-            "'inputs':{'prior':5.0,'adjustment':0.2}}}} for i in (1, 2)]",
-            "completed = subprocess.run([sys.executable, *tool_args], "
-            "input=''.join(json.dumps(r)+'\\n' for r in requests), "
-            "capture_output=True, text=True, check=True)",
-            "request, line = requests[0], completed.stdout.splitlines()[0]",
-            "print(json.dumps({'type':'item.completed','item':"
-            "{'id':'mcp-1','type':'mcp_tool_call',"
-            "'server':'thesis_tool_evidence','tool':'calculate',"
-            "'arguments':request['params']['arguments'],"
-            "'result':json.loads(line)['result'],'status':'completed'}}))",
+            *extra_lines,
         ],
     )
     return subprocess.run(
@@ -286,6 +276,72 @@ def _run_unbound_stage(tmp_path: Path, out_dir: Path) -> subprocess.CompletedPro
     )
 
 
+def _run_unbound_stage(tmp_path: Path, out_dir: Path) -> subprocess.CompletedProcess:
+    """Run the real runner and MCP server on a model stream that completes only
+    the first of two recorded calls."""
+    return _run_fake_codex_stage(
+        tmp_path,
+        out_dir,
+        [
+            "requests = [{'jsonrpc':'2.0','id':i,'method':'tools/call',"
+            "'params':{'name':'calculate','arguments':"
+            "{'expression':'prior + adjustment',"
+            "'inputs':{'prior':5.0,'adjustment':0.2}}}} for i in (1, 2)]",
+            "completed = subprocess.run([sys.executable, *tool_args], "
+            "input=''.join(json.dumps(r)+'\\n' for r in requests), "
+            "capture_output=True, text=True, check=True)",
+            "request, line = requests[0], completed.stdout.splitlines()[0]",
+            "print(json.dumps({'type':'item.completed','item':"
+            "{'id':'mcp-1','type':'mcp_tool_call',"
+            "'server':'thesis_tool_evidence','tool':'calculate',"
+            "'arguments':request['params']['arguments'],"
+            "'result':json.loads(line)['result'],'status':'completed'}}))",
+        ],
+    )
+
+
+def _validate_single_failed_run(
+    staged: Path, run_relative: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Publish one failed run as a batch through the real custody check."""
+    import docket_publication
+
+    batch_relative = "records/thesis-analyst/batches/2030-01-10/run.json"
+    batch_path = staged / batch_relative
+    batch_path.parent.mkdir(parents=True, exist_ok=True)
+    batch_path.write_text(
+        json.dumps(
+            {
+                "schemaVersion": "thesis_batch_manifest_v1",
+                "promptMode": "fast",
+                "startedAt": "2030-01-10T12:00:00Z",
+                "finishedAt": "2030-01-10T12:02:00Z",
+                "results": [
+                    {
+                        "ok": False,
+                        "cellsPath": None,
+                        "manifestPath": f"{run_relative}/manifest.json",
+                        "target": {},
+                        "startedAt": "2030-01-10T12:00:00Z",
+                        "finishedAt": "2030-01-10T12:01:00Z",
+                    }
+                ],
+            }
+        )
+        + "\n"
+    )
+    # Registration binding and the repo-relative file inventory need a
+    # registered target and repo-relative artifact paths (this run lives
+    # outside the checkout). Custody and the validator replay stay real.
+    monkeypatch.setattr(
+        docket_publication, "validate_run_file_inventory", lambda *_args: None
+    )
+    monkeypatch.setattr(
+        docket_publication, "validate_run_binding", lambda *_args, **_kwargs: None
+    )
+    docket_publication.validate_cells(staged, batch_relative)
+
+
 def test_unbound_stage_is_a_failed_trace_the_publisher_retains(
     tmp_path, monkeypatch
 ):
@@ -294,8 +350,6 @@ def test_unbound_stage_is_a_failed_trace_the_publisher_retains(
     tool_evidence failure that custody verifies and the publisher retains,
     instead of sealing ok:false beside cells that validate (which refuses the
     whole batch as a validator status mismatch)."""
-    import docket_publication
-
     staged = tmp_path / "staged"
     run_relative = "records/thesis-analyst/2030-01-10/2030-01-10t12-00-00z-unbound"
     out_dir = staged / run_relative
@@ -328,40 +382,160 @@ def test_unbound_stage_is_a_failed_trace_the_publisher_retains(
     assert verification.inventory_status == "complete"
     assert not verification.headline_eligible
 
-    batch_relative = "records/thesis-analyst/batches/2030-01-10/run.json"
-    batch_path = staged / batch_relative
-    batch_path.parent.mkdir(parents=True)
-    batch_path.write_text(
-        json.dumps(
-            {
-                "schemaVersion": "thesis_batch_manifest_v1",
-                "promptMode": "fast",
-                "startedAt": "2030-01-10T12:00:00Z",
-                "finishedAt": "2030-01-10T12:02:00Z",
-                "results": [
-                    {
-                        "ok": False,
-                        "cellsPath": manifest["cellsPath"],
-                        "manifestPath": f"{run_relative}/manifest.json",
-                        "target": {},
-                        "startedAt": "2030-01-10T12:00:00Z",
-                        "finishedAt": "2030-01-10T12:01:00Z",
-                    }
-                ],
+    _validate_single_failed_run(staged, run_relative, monkeypatch)
+
+
+# The fake codex sends ``requests`` to the real MCP server and writes each
+# reply the way Codex does: a started event, then a completion whose result is
+# the server's result, or, for a JSON-RPC error, no result and Codex's error
+# message (verbatim examples in tests/fixtures/codex_mcp_errors).
+REFUSED_CALL_LINES = [
+    "def request(i, arguments):",
+    "    return {'jsonrpc':'2.0','id':i,'method':'tools/call',"
+    "'params':{'name':'calculate','arguments':arguments}}",
+    "oversized = {'expression':'1'+'+1'*20000,'inputs':{}}",
+    "if VARIANT == 'call_limit':",
+    "    requests = [request(i, {'expression':'a+1','inputs':{'a':i}})"
+    " for i in range(1, 130)]",
+    "elif VARIANT == 'oversized_only':",
+    "    requests = [request(1, oversized)]",
+    "else:",
+    "    requests = [request(1, {'expression':'a+1','inputs':{'a':1}}),"
+    " request(2, oversized)]",
+    "completed = subprocess.run([sys.executable, *tool_args], "
+    "input=''.join(json.dumps(r)+'\\n' for r in requests), "
+    "capture_output=True, text=True, check=True)",
+    "for request, line in zip(requests, completed.stdout.splitlines()):",
+    "    reply = json.loads(line)",
+    "    item = {'id':'item_'+str(request['id']),'type':'mcp_tool_call',"
+    "'server':'thesis_tool_evidence','tool':'calculate',"
+    "'arguments':request['params']['arguments']}",
+    "    print(json.dumps({'type':'item.started','item':"
+    "{**item,'result':None,'error':None,'status':'in_progress'}}))",
+    "    if 'result' in reply:",
+    "        result = reply['result']",
+    "        print(json.dumps({'type':'item.completed','item':{**item,"
+    "'result':{'content':result['content'],"
+    "'structured_content':result['structuredContent']},'error':None,"
+    "'status':'failed' if result['isError'] else 'completed'}}))",
+    "    else:",
+    "        message = ('tool call error: tool call failed for "
+    "`thesis_tool_evidence/calculate`\\n\\nCaused by:\\n    Mcp error: '"
+    " + str(reply['error']['code']) + ': ' + reply['error']['message'])",
+    "        print(json.dumps({'type':'item.completed','item':{**item,"
+    "'result':None,'error':{'message':message},'status':'failed'}}))",
+]
+
+
+def _run_refused_call_stage(
+    tmp_path: Path, out_dir: Path, variant: str
+) -> subprocess.CompletedProcess:
+    return _run_fake_codex_stage(
+        tmp_path, out_dir, [f"VARIANT = {variant!r}", *REFUSED_CALL_LINES]
+    )
+
+
+@pytest.mark.parametrize(
+    ("variant", "recorded"),
+    [("call_limit", 128), ("oversized_arguments", 1), ("oversized_only", 0)],
+)
+def test_refused_call_is_a_failed_trace_the_publisher_retains(
+    tmp_path, monkeypatch, variant, recorded
+):
+    """End to end: the model makes a 129th call, or sends arguments over 32 KiB.
+    The real MCP server refuses it with a JSON-RPC error and records nothing,
+    and Codex writes a failed completion with no result. The runner fails the
+    stage on its own; custody must then keep the failed trace rather than
+    refuse it and, with it, the whole docket."""
+    staged = tmp_path / "staged"
+    run_relative = "records/thesis-analyst/2030-01-10/2030-01-10t12-00-00z-refused"
+    out_dir = staged / run_relative
+    completed = _run_refused_call_stage(tmp_path, out_dir, variant)
+    assert completed.returncode == 1, completed.stderr + completed.stdout[-2000:]
+    evidence = json.loads((out_dir / "tool_evidence.json").read_text())
+    assert len(evidence["calls"]) == recorded
+    stream = (out_dir / "codex_stdout.jsonl").read_text(encoding="utf-8")
+    errors = [
+        event["item"]
+        for event in map(json.loads, stream.splitlines())
+        if event.get("type") == "item.completed"
+        and event["item"].get("type") == "mcp_tool_call"
+        and event["item"]["result"] is None
+    ]
+    assert len(errors) == 1
+    assert errors[0]["status"] == "failed"
+    assert errors[0]["error"]["message"].endswith(
+        "Mcp error: -32602: invalid or exhausted evidence tool call"
+    )
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    assert manifest["ok"] is False
+    assert manifest["cellsPath"] is None
+    assert manifest["error"] == {
+        "phase": "tool_evidence",
+        "message": "Tool evidence native binding failed: tool evidence has "
+        "native tool errors that bind to no recorded call",
+        "command": {"returnCode": 1, "timedOut": False},
+    }
+    assert not (out_dir / "parsed_cells.json").exists()
+    verification = verify_run(out_dir)
+    assert verification.inventory_status == "complete"
+    assert not verification.headline_eligible
+    _validate_single_failed_run(staged, run_relative, monkeypatch)
+
+
+def test_failed_trace_whose_unbound_event_carries_a_result_still_blocks(
+    tmp_path, monkeypatch
+):
+    """Negative control for the relaxation: the same failed trace, re-sealed
+    after its refused call's event is given a result claiming an unrecorded
+    call ID, is refused by custody and blocks the batch. Only a result-free
+    error may go unbound."""
+    import docket_publication
+    from verify_custody import CustodyError
+
+    staged = tmp_path / "staged"
+    run_relative = "records/thesis-analyst/2030-01-10/2030-01-10t12-00-00z-forged"
+    out_dir = staged / run_relative
+    completed = _run_refused_call_stage(tmp_path, out_dir, "oversized_arguments")
+    assert completed.returncode == 1
+    verify_run(out_dir)
+    forged = {"callId": "call-0002", "result": {"value": 42}}
+    lines = []
+    for line in (out_dir / "codex_stdout.jsonl").read_text().splitlines():
+        event = json.loads(line)
+        item = event.get("item", {})
+        if event.get("type") == "item.completed" and item.get("id") == "item_2":
+            item["result"] = {
+                "content": [{"type": "text", "text": json.dumps(forged)}],
+                "structured_content": forged,
             }
-        )
-        + "\n"
-    )
-    # Registration binding and the repo-relative file inventory need a
-    # registered target and repo-relative artifact paths (this run lives
-    # outside the checkout). Custody and the validator replay stay real.
-    monkeypatch.setattr(
-        docket_publication, "validate_run_file_inventory", lambda *_args: None
-    )
-    monkeypatch.setattr(
-        docket_publication, "validate_run_binding", lambda *_args, **_kwargs: None
-    )
-    docket_publication.validate_cells(staged, batch_relative)
+            line = json.dumps(event)
+        lines.append(line + "\n")
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    manifest.pop("custodyRootSha256", None)
+    refs = [
+        ref
+        for ref in manifest["artifacts"]
+        if Path(str(ref["path"])).name != "manifest.json"
+    ]
+    for index, ref in enumerate(refs):
+        if Path(str(ref["path"])).name == "codex_stdout.jsonl":
+            refs[index] = runner.write_artifact(
+                out_dir,
+                ref["artifactType"],
+                "codex_stdout.jsonl",
+                "".join(lines),
+                ref["createdAt"],
+            )
+    manifest["artifacts"] = refs
+    runner.finalize_manifest(out_dir, manifest["runStartedAt"], manifest, refs)
+    with pytest.raises(CustodyError, match="unknown or repeated event call ID"):
+        verify_run(out_dir)
+    with pytest.raises(
+        docket_publication.PublicationError,
+        match="custody verification failed: .*unknown or repeated event call ID",
+    ):
+        _validate_single_failed_run(staged, run_relative, monkeypatch)
 
 
 @pytest.mark.parametrize("forgery", ["presents_complete", "post_parse_artifact"])
