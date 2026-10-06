@@ -1,6 +1,6 @@
 {
   "schemaVersion": "thesis_resolution_status_v1",
-  "asOf": "2026-10-05",
+  "asOf": "2026-10-06",
   "run": {
     "logAvailable": true,
     "completed": true,
@@ -45,9 +45,9 @@
     "census.new_residential_sales.new_single_family_houses_sold_saar.2026_06.first_print": {
       "forecastSlug": "us-new-home-sales-saar-june-2026",
       "resolutionDate": "2026-07-24",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "census.m3.defense_capital_goods.inventories.2026_06.first_print": {
       "forecastSlug": "us-defense-capital-goods-inventories-june-2026",
@@ -59,23 +59,24 @@
     "abs.cpi.all_groups_annual_rate.australia.june_2026.first_print": {
       "forecastSlug": "abs-cpi-all-groups-annual-rate-australia-june-2026",
       "resolutionDate": "2026-07-29",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "BINDING_MISMATCH",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "detail": "adapter"
     },
     "bea.pce_price_index.monthly_change.june_2026.first_print": {
       "forecastSlug": "bea-pce-price-index-monthly-change-june-2026",
       "resolutionDate": "2026-07-29",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bea.personal_current_taxes.level.june_2026.first_print": {
       "forecastSlug": "bea-personal-current-taxes-level-june-2026",
       "resolutionDate": "2026-07-29",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bls.bed.private_gross_job_gains.opening_establishments.2025_q4.first_print": {
       "forecastSlug": "bls-bed-opening-establishment-gross-job-gains-q4-2025",
@@ -94,93 +95,99 @@
     "bea.disposable_personal_income.level.june_2026.first_print": {
       "forecastSlug": "bea-disposable-personal-income-level-june-2026",
       "resolutionDate": "2026-07-30",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bea.government_social_benefits.level.june_2026.first_print": {
       "forecastSlug": "bea-government-social-benefits-level-june-2026",
       "resolutionDate": "2026-07-30",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bea.government_social_benefits.medicaid.june_2026.first_print": {
       "forecastSlug": "bea-government-social-benefits-medicaid-june-2026",
       "resolutionDate": "2026-07-30",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bea.government_social_benefits.medicare.june_2026.first_print": {
       "forecastSlug": "bea-government-social-benefits-medicare-june-2026",
       "resolutionDate": "2026-07-30",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bea.pce.core_mom.june_2026.first_print": {
       "forecastSlug": "bea-pce-core-mom-june-2026",
       "resolutionDate": "2026-07-30",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bea.government_social_benefits.social_security.june_2026.first_print": {
       "forecastSlug": "bea-government-social-benefits-social-security-june-2026",
       "resolutionDate": "2026-07-31",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bea.trade.goods_services_deficit.2026_06.first_print": {
       "forecastSlug": "us-goods-services-trade-deficit-june-2026",
       "resolutionDate": "2026-08-04",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bls.cps.employed_people_by_occupation.production.july_2026.first_print": {
       "forecastSlug": "cps-production-employment-july-2026",
       "resolutionDate": "2026-08-06",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.july_2026.first_print": {
       "forecastSlug": "cps-transport-material-moving-employment-july-2026",
       "resolutionDate": "2026-08-06",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.business_financial_operations.july_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-july-2026",
       "resolutionDate": "2026-08-07",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.computer_mathematical.july_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-july-2026",
       "resolutionDate": "2026-08-07",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.july_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-july-2026",
       "resolutionDate": "2026-08-07",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.july_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-july-2026",
       "resolutionDate": "2026-08-07",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "HTTPError  HTTP Error 503  Service Unavailable"
     },
     "bls.real_earnings.avg_hourly_mom.2026-07.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-july-2026",
@@ -214,9 +221,9 @@
     "statcan.cpi.allitems.yoy.2026_07.first_print": {
       "forecastSlug": "canada-cpi-annual-rate-july-2026",
       "resolutionDate": "2026-08-17",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check."
     },
     "treasury.mts.monthly_deficit.july_2026.first_print": {
       "forecastSlug": "us-mts-deficit-july-2026",
@@ -242,9 +249,9 @@
     "abs.labour.unemployment_rate.australia.july_2026.first_print": {
       "forecastSlug": "australia-unemployment-rate-july-2026",
       "resolutionDate": "2026-08-20",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check."
     },
     "statcan.employment_insurance.regular_beneficiaries.canada.june_2026.first_print": {
       "forecastSlug": "canada-ei-regular-beneficiaries-june-2026",
@@ -263,23 +270,25 @@
     "abs.cpi.all_groups.yoy.2026-07.first_print": {
       "forecastSlug": "australia-cpi-annual-rate-july-2026",
       "resolutionDate": "2026-08-26",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "BINDING_MISMATCH",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "detail": "adapter, field, sourceSeriesId, sourceUrl, table, transform, allowedHosts"
     },
     "us.bea.core_pce.mom_sa.2026-07": {
       "forecastSlug": "us-core-pce-mom-july-2026",
       "resolutionDate": "2026-08-26",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bls.qcew.aircraft_manufacturing.establishments.2026_q1.first_print": {
       "forecastSlug": "us-qcew-aircraft-manufacturing-establishments-q1-2026",
       "resolutionDate": "2026-08-28",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "FIRST_PRINT_WINDOW_MISSED",
+      "reason": "The resolver refused this target at its first-print check.",
+      "detail": "registered release day was 2026-08-28"
     },
     "nbb.business_barometer.overall.2026-08.first_print": {
       "forecastSlug": "belgium-nbb-business-barometer-august-2026",
@@ -291,9 +300,10 @@
     "statcan.36-10-0434-01.all_industries.month_to_month_percent_change.2026-06.first_print": {
       "forecastSlug": "canada-monthly-gdp-growth-june-2026",
       "resolutionDate": "2026-08-28",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "BINDING_MISMATCH",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "detail": "adapter, field, sourceSeriesId, sourceUrl, table, transform"
     },
     "co.dor.individual_income_tax.net_collections.2026_07.first_print": {
       "forecastSlug": "colorado-income-tax-collections-july-2026",
@@ -305,16 +315,16 @@
     "bls.jolts.job_openings.july_2026.first_print": {
       "forecastSlug": "jolts-openings-july-2026",
       "resolutionDate": "2026-09-01",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "bls.jolts.quits_rate.2026-07.first_print": {
       "forecastSlug": "jolts-quits-rate-july-2026",
       "resolutionDate": "2026-09-01",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
     },
     "eurostat.une_rt_m.unemployment_rate.belgium.2026_07.first_print": {
       "forecastSlug": "belgium-unemployment-rate-july-2026",
@@ -356,16 +366,18 @@
     "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_AWAITING_RECORD",
-      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_AWAITING_RECORD",
-      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
     },
     "bls.cps.telework_share.2026-08.first_print": {
       "forecastSlug": "us-telework-rate-august-2026",
@@ -399,16 +411,18 @@
     "bls.cps.employed_people_by_occupation.production.august_2026.first_print": {
       "forecastSlug": "cps-production-employment-august-2026",
       "resolutionDate": "2026-09-10",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_AWAITING_RECORD",
-      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.production', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curation (split o"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print": {
       "forecastSlug": "cps-transport-material-moving-employment-august-2026",
       "resolutionDate": "2026-09-10",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_AWAITING_RECORD",
-      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.transportation_material_moving', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve"
     },
     "bls.cpi.u.core_mom.august_2026.first_print": {
       "forecastSlug": "us-core-cpi-mom-august-2026",
@@ -427,16 +441,18 @@
     "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_AWAITING_RECORD",
-      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "resolved_this_run",
-      "code": "RESOLVED_AWAITING_RECORD",
-      "reason": "The resolver read the official figure on its last run. That run's log does not show the figure recorded in the ledger."
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "URLError   urlopen error _ssl.c 983  The handshake operation timed out"
     },
     "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
@@ -568,9 +584,10 @@
     "statcan.36-10-0434-01.all_industries.month_to_month_percent_change.2026-07.first_print": {
       "forecastSlug": "canada-monthly-gdp-growth-july-2026",
       "resolutionDate": "2026-09-29",
-      "state": "unknown",
-      "code": "NO_REPORT",
-      "reason": "The resolver routes this target's reference, but its last run printed no line naming this target."
+      "state": "refused",
+      "code": "BINDING_MISMATCH",
+      "reason": "The resolver reports that this target's registered source binding differs from the one it reads for this series, in the fields listed, and refuses it.",
+      "detail": "adapter, sourceUrl, table, transform"
     },
     "hmrc.property_transactions.uk_residential_sa.2026_08.first_print": {
       "forecastSlug": "uk-residential-property-transactions-sa-august-2026",
@@ -615,8 +632,30 @@
       "state": "refused",
       "code": "REGISTERED_WITHOUT_EXECUTOR",
       "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "bls.jolts.job_openings.august_2026.first_print": {
+      "forecastSlug": "jolts-openings-august-2026",
+      "resolutionDate": "2026-10-05",
+      "state": "refused",
+      "code": "REGISTERED_WITHOUT_EXECUTOR",
+      "reason": "This target was registered with a generic source link rather than a resolver binding, and a registration cannot be changed. The resolver will not substitute a different route to the number."
+    },
+    "eurostat.une_rt_m.unemployment_rate.belgium.2026_08.first_print": {
+      "forecastSlug": "belgium-unemployment-rate-august-2026",
+      "resolutionDate": "2026-10-05",
+      "state": "no_route",
+      "code": "NO_ROUTE_GENERIC_URL",
+      "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding.",
+      "registration": "series eurostat.unemployment_rate.belgium"
+    },
+    "eurostat.unemployment_rate.euro_area.august_2026.first_print": {
+      "forecastSlug": "euro-area-unemployment-rate-august-2026",
+      "resolutionDate": "2026-10-05",
+      "state": "no_route",
+      "code": "NO_ROUTE_GENERIC_URL",
+      "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
     }
   },
-  "generatedAtUtc": "2026-10-05T22:14:09Z",
-  "workflowRun": "37374524035"
+  "generatedAtUtc": "2026-10-06T20:04:02Z",
+  "workflowRun": "37516161348"
 }
