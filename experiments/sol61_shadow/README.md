@@ -54,12 +54,13 @@ production median3 strategy. The `full` arm was added before any `full` job
 ran; the `web` and `net` prompts it sits beside are byte-identical to the
 first pre-registration commit.
 
-**Eligibility.** A run counts only if all three hold:
+**Eligibility.** A run counts only if all four hold:
 
 1. the production runner validates its response (`validation.ok`);
 2. its Subfleet job finished before 00:00Z on the target's window-start day;
 3. its trace shows no search, opened page or shell command touching a Thesis
-   surface (`CONTAMINATION_RE`).
+   surface (`CONTAMINATION_RE`);
+4. the attempt's recorded launch argv ran `-m gpt-6.1-sol`.
 
 Ineligible runs stay in `results.json` with the reason; nothing is dropped
 silently.

@@ -586,6 +586,45 @@ def attempt_stream(job_id: str, attempt_id: str | None) -> pathlib.Path | None:
     return None
 
 
+EXPECTED_MODEL = "gpt-6.1-sol"
+
+
+def launch_facts(argv: list[str]) -> dict[str, Any]:
+    """Model, effort, sandbox and network access from a Codex launch argv."""
+
+    def option(flag: str) -> str | None:
+        for index, value in enumerate(argv[:-1]):
+            if value == flag:
+                return argv[index + 1]
+        return None
+
+    configs = [argv[i + 1] for i, value in enumerate(argv[:-1]) if value == "-c"]
+    effort = next(
+        (
+            c.split("=", 1)[1]
+            for c in configs
+            if c.startswith("model_reasoning_effort=")
+        ),
+        None,
+    )
+    return {
+        "binary": pathlib.Path(argv[0]).name if argv else None,
+        "model": option("-m"),
+        "reasoningEffort": effort,
+        "sandbox": option("--sandbox"),
+        "networkAccess": "sandbox_workspace_write.network_access=true" in configs,
+    }
+
+
+def attempt_launch(job_id: str, attempt_id: str | None) -> dict[str, Any] | None:
+    if not attempt_id:
+        return None
+    path = SUBFLEET_JOBS / job_id / attempt_id.rsplit("/", 1)[-1] / "launch.json"
+    if not path.is_file():
+        return None
+    return launch_facts(list(json.loads(path.read_text()).get("argv") or []))
+
+
 def redacted_lines(path: pathlib.Path) -> list[str]:
     sys.path.insert(0, str(SCRIPTS))
     from tool_evidence import redact_json_value, redact_text  # noqa: PLC0415
@@ -746,13 +785,12 @@ def cmd_collect(args: argparse.Namespace) -> int:
             trace.write_bytes(gzip.compress(payload, mtime=0))
             row["trace"] = rel(trace)
             row["traceSha256"] = sha256_bytes(payload)
-            audit = audit_trace(lines)
-            row["audit"] = audit
-            lane_model = _model_from_trace(lines)
-            if lane_model:
-                row["model"] = lane_model
+            row["audit"] = audit_trace(lines)
         else:
             row["audit"] = None
+        launch = attempt_launch(job_id, row["acceptedAttempt"])
+        row["launch"] = launch
+        row["model"] = (launch or {}).get("model")
         if state == "succeeded" and out.is_file() and out.stat().st_size:
             response = EXP / "responses" / arm / f"{slug}__r{rollout}.txt"
             response.parent.mkdir(parents=True, exist_ok=True)
@@ -777,6 +815,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
             and row["chronologyOk"]
             and audit
             and not audit.get("contaminated")
+            and row["model"] == EXPECTED_MODEL
         )
         row["final"] = True
         results[key] = row
@@ -791,14 +830,6 @@ def cmd_collect(args: argparse.Namespace) -> int:
         f"{pending} still pending"
     )
     return 0
-
-
-def _model_from_trace(lines: list[str]) -> str | None:
-    for event in iter_events(lines):
-        model = event.get("model") or (event.get("item") or {}).get("model")
-        if isinstance(model, str) and model:
-            return model
-    return None
 
 
 # ---------------------------------------------------------------- score

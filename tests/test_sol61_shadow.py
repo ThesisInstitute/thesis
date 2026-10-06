@@ -405,3 +405,35 @@ def test_score_distribution_reports_coverage_consistent_with_quantiles(
     if 0.1 + 1e-9 < q < 0.9 - 1e-9:
         p10, p90 = shadow._quantile(points, 0.1), shadow._quantile(points, 0.9)
         assert scored["covered80"] == (p10 <= observed <= p90)
+
+
+# ------------------------------------------------------------ launch facts
+
+
+def test_launch_facts_reads_the_codex_argv_subfleet_ran() -> None:
+    argv = [
+        "/opt/codex/bin/codex", "exec", "--json", "-m", "gpt-6.1-sol",
+        "-c", "model_reasoning_effort=ultra", "--sandbox", "workspace-write",
+        "-c", "sandbox_workspace_write.network_access=true",
+        "-c", "features.unified_exec=false", "--output-last-message", "/x/last.md",
+    ]  # fmt: skip
+    assert shadow.launch_facts(argv) == {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "reasoningEffort": "ultra",
+        "sandbox": "workspace-write",
+        "networkAccess": True,
+    }
+    read_only = [
+        "codex",
+        "exec",
+        "--json",
+        "-m",
+        "gpt-6-luna",
+        "--sandbox",
+        "read-only",
+    ]
+    facts = shadow.launch_facts(read_only)
+    assert facts["model"] == "gpt-6-luna" and facts["model"] != shadow.EXPECTED_MODEL
+    assert facts["networkAccess"] is False and facts["reasoningEffort"] is None
+    assert shadow.launch_facts([])["model"] is None
