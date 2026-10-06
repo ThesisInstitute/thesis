@@ -49,24 +49,32 @@ SUBFLEET_JOBS = (
 TARGETS_SCHEMA = "thesis_sol61_shadow_targets_v1"
 RESULTS_SCHEMA = "thesis_sol61_shadow_results_v1"
 SCORES_SCHEMA = "thesis_sol61_shadow_scores_v1"
-PROMPT_MODE = "fast"
-
-# The two arms differ only in tool access. `web` mirrors the CI default lane
-# (read-only sandbox, hosted web search). `net` mirrors the runner's
-# --codex-network lane (workspace-write with outbound network, plus the
-# runner's own fetch-honesty note), which Subfleet grants writable Codex jobs
-# under policy network.codex_workspace_write (d260).
+# `web` mirrors the CI default lane (read-only sandbox, hosted web search) in
+# fast prompt mode. `net` differs from it only in tool access: it mirrors the
+# runner's --codex-network lane (workspace-write with outbound network, plus
+# the runner's own fetch-honesty note), which Subfleet grants writable Codex
+# jobs under policy network.codex_workspace_write (d260). `full` differs from
+# `web` only in prompt mode.
 ARMS: dict[str, dict[str, Any]] = {
     "web": {
         "task": "research",
         "sandbox": "read-only",
         "network": False,
+        "promptMode": "fast",
         "rollouts": 3,
     },
     "net": {
         "task": "build",
         "sandbox": "workspace-write",
         "network": True,
+        "promptMode": "fast",
+        "rollouts": 1,
+    },
+    "full": {
+        "task": "research",
+        "sandbox": "read-only",
+        "network": False,
+        "promptMode": "full",
         "rollouts": 1,
     },
 }
@@ -77,7 +85,7 @@ WRAPPER = """\
 You are producing ONE forecast for an unpublished research comparison inside
 the Thesis forecasting lab. The task prompt between the markers below is the
 exact production prompt the Thesis CI analyst (thesis.analyst, prompt mode
-fast) receives for this registered target. Follow it exactly, with these
+{prompt_mode}) receives for this registered target. Follow it exactly, with these
 overrides:
 
 1. No repository. This workspace intentionally holds no Thesis checkout.
@@ -112,6 +120,7 @@ ARM_WRAPPER_FIELDS = {
         "evidence_tools": " with your web search tool or `curl -sS`",
     },
 }
+ARM_WRAPPER_FIELDS["full"] = ARM_WRAPPER_FIELDS["web"]
 
 # Strings whose appearance in a run's searches, opened pages or shell
 # commands means the run may have seen a Thesis forecast or record.
@@ -121,6 +130,8 @@ CONTAMINATION_RE = re.compile(
     r"ledger-targets|forecast-examples|/ThesisInstitute/",
     re.IGNORECASE,
 )
+NET_BRANCH = "sol61-shadow-run"
+
 # Codex records shell calls wrapped as `bash -lc 'curl ...'`, so a quote can
 # precede the command name.
 CURL_RE = re.compile(r"(^|[\s;&|('\"])curl\s", re.IGNORECASE)
@@ -247,7 +258,6 @@ def cmd_freeze(args: argparse.Namespace) -> int:
         "frozenAtUtc": utc_now(),
         "checkoutSha": git_head(),
         "cutoff": args.cutoff,
-        "promptMode": PROMPT_MODE,
         "targets": [
             {
                 "slug": row["target"]["catalogSlug"],
@@ -284,7 +294,9 @@ def load_targets() -> list[dict[str, Any]]:
 # ---------------------------------------------------------------- prompts
 
 
-def runner_argv(target: dict[str, Any], *, network: bool) -> list[str]:
+def runner_argv(
+    target: dict[str, Any], *, network: bool, prompt_mode: str
+) -> list[str]:
     argv = [
         sys.executable,
         str(RUNNER),
@@ -293,7 +305,7 @@ def runner_argv(target: dict[str, Any], *, network: bool) -> list[str]:
         "--period",
         target["period"],
         "--prompt-mode",
-        PROMPT_MODE,
+        prompt_mode,
         "--allow-existing-slug",
         "--target-context-json",
         json.dumps(target, sort_keys=True),
@@ -305,9 +317,12 @@ def runner_argv(target: dict[str, Any], *, network: bool) -> list[str]:
     return argv
 
 
-def production_prompt(target: dict[str, Any], *, network: bool) -> str:
+def production_prompt(
+    target: dict[str, Any], *, network: bool, prompt_mode: str
+) -> str:
     completed = subprocess.run(
-        runner_argv(target, network=network) + ["--print-prompt"],
+        runner_argv(target, network=network, prompt_mode=prompt_mode)
+        + ["--print-prompt"],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -323,7 +338,11 @@ def production_prompt(target: dict[str, Any], *, network: bool) -> str:
 
 def compose_prompt(production: str, arm: str) -> str:
     fields = ARM_WRAPPER_FIELDS[arm]
-    return WRAPPER.format(production=production.rstrip("\n"), **fields)
+    return WRAPPER.format(
+        production=production.rstrip("\n"),
+        prompt_mode=ARMS[arm]["promptMode"],
+        **fields,
+    )
 
 
 def extract_production(prompt: str) -> str:
@@ -342,9 +361,10 @@ def cmd_prompts(args: argparse.Namespace) -> int:
     index: dict[str, str] = {}
     for row in load_targets():
         for arm, spec in ARMS.items():
-            text = compose_prompt(
-                production_prompt(row["target"], network=spec["network"]), arm
+            production = production_prompt(
+                row["target"], network=spec["network"], prompt_mode=spec["promptMode"]
             )
+            text = compose_prompt(production, arm)
             path = prompt_path(arm, row["slug"])
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text)
@@ -378,7 +398,8 @@ def ensure_net_workdir(ops: pathlib.Path, slug: str, rollout: int) -> pathlib.Pa
             "GIT_COMMITTER_EMAIL": "sol61-shadow@localhost",
         }
         for argv in (
-            ["git", "init", "-q"],
+            # Subfleet refuses a writable job on main or master.
+            ["git", "init", "-q", "-b", NET_BRANCH],
             ["git", "add", "README.md"],
             ["git", "commit", "-q", "--no-verify", "-m", "Empty shadow workspace"],
         ):
@@ -387,7 +408,10 @@ def ensure_net_workdir(ops: pathlib.Path, slug: str, rollout: int) -> pathlib.Pa
 
 
 def out_path(ops: pathlib.Path, arm: str, slug: str, rollout: int) -> pathlib.Path:
-    return ops / "out" / arm / f"{slug}__r{rollout}.txt"
+    """Where Subfleet exports the job's final message (its parent must exist)."""
+    path = ops / "out" / arm / f"{slug}__r{rollout}.txt"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def batch_manifest(
@@ -587,11 +611,12 @@ def validate_response(
     run_dir: pathlib.Path,
     *,
     network: bool,
+    prompt_mode: str,
 ) -> dict[str, Any]:
     if run_dir.exists():
         for child in sorted(run_dir.rglob("*"), reverse=True):
             child.unlink() if child.is_file() else child.rmdir()
-    argv = runner_argv(target, network=network) + [
+    argv = runner_argv(target, network=network, prompt_mode=prompt_mode) + [
         "--response-file",
         str(response),
         "--out-dir",
@@ -739,6 +764,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
                 response,
                 EXP / "runs" / arm / f"{slug}__r{rollout}",
                 network=ARMS[arm]["network"],
+                prompt_mode=ARMS[arm]["promptMode"],
             )
         else:
             row["validation"] = {

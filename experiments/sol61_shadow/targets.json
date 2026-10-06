@@ -2,7 +2,6 @@
   "checkoutSha": "17b62a1a205d3009c5944f9fa7f3c13712cd85c9",
   "cutoff": "2026-10-13",
   "frozenAtUtc": "2026-10-06T20:48:40Z",
-  "promptMode": "fast",
   "schemaVersion": "thesis_sol61_shadow_targets_v1",
   "targets": [
     {

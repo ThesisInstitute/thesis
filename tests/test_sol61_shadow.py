@@ -34,12 +34,15 @@ def test_compose_then_extract_round_trips(production: str) -> None:
         assert shadow.extract_production(composed) == production.rstrip("\n")
 
 
-def test_wrapper_names_only_the_tools_each_arm_has() -> None:
+def test_wrapper_names_only_the_tools_and_mode_each_arm_has() -> None:
     web = shadow.compose_prompt("PROMPT", "web")
     net = shadow.compose_prompt("PROMPT", "net")
-    assert "curl" not in web
+    full = shadow.compose_prompt("PROMPT", "full")
+    assert "curl" not in web and "curl" not in full
     assert "curl -sS" in net
-    for text in (web, net):
+    assert "prompt mode\nfast)" in web and "prompt mode\nfast)" in net
+    assert "prompt mode\nfull)" in full
+    for text in (web, net, full):
         assert "thesisinstitute.org" in text
         assert "exactly the one JSON object" in text
 
@@ -53,7 +56,9 @@ def test_committed_prompts_embed_the_runner_prompt_byte_for_byte() -> None:
     for arm, spec in shadow.ARMS.items():
         text = shadow.prompt_path(arm, sample["slug"]).read_text()
         assert shadow.sha256_bytes(text.encode()) == index[f"{arm}/{sample['slug']}"]
-        expected = shadow.production_prompt(sample["target"], network=spec["network"])
+        expected = shadow.production_prompt(
+            sample["target"], network=spec["network"], prompt_mode=spec["promptMode"]
+        )
         assert shadow.extract_production(text) == expected.rstrip("\n")
 
 
@@ -154,6 +159,10 @@ def test_batch_manifest_isolates_writable_jobs(tmp_path) -> None:
     assert len(set(workdirs)) == len(rows)
     for workdir in workdirs:
         assert (workdir / ".git").is_dir()
+        branch = subprocess.check_output(
+            ["git", "branch", "--show-current"], cwd=workdir, text=True
+        ).strip()
+        assert branch == shadow.NET_BRANCH and branch not in {"main", "master"}
         assert (
             subprocess.check_output(
                 ["git", "status", "--porcelain"], cwd=workdir, text=True

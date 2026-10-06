@@ -32,22 +32,27 @@ nested `sourceBinding.expectedReleaseWindow`, falling back to the top-level
 window and then `resolutionDate`.
 
 **Prompt.** Each prompt is the runner's own `--print-prompt` output for the
-target's committed batch context, in fast mode, under a short wrapper
+target's committed batch context, in the arm's prompt mode, under a short
+wrapper
 (`shadow.py:WRAPPER`). The wrapper says there is no repository, forbids any
 Thesis or Brier surface (site, API, GitHub, records), and asks for the bare
 JSON object. `prompts/index.json` pins the SHA-256 of every prompt sent.
 
-**Arms.** Both run `gpt-6.1-sol` at ultra reasoning effort through Subfleet
-(`--task research|build --tier hard`).
+**Arms.** All three run `gpt-6.1-sol` at ultra reasoning effort through
+Subfleet (`--task research|build --tier hard`). Each differs from `web` in
+one respect.
 
-| Arm | Sandbox | Tools | Rollouts |
-|---|---|---|---|
-| `web` | read-only | hosted web search (the CI default lane) | 3 |
-| `net` | workspace-write with outbound network | web search plus `curl`, with the runner's `--codex-network` fetch-honesty note | 1 |
+| Arm | Prompt mode | Sandbox | Tools | Rollouts |
+|---|---|---|---|---|
+| `web` | fast | read-only | hosted web search (the CI default lane) | 3 |
+| `net` | fast | workspace-write with outbound network | web search plus `curl`, with the runner's `--codex-network` fetch-honesty note | 1 |
+| `full` | full | read-only | hosted web search | 1 |
 
 The three `web` rollouts are independent jobs, so their median CDF
 (`scripts/median_rollout_ensemble.py:median_distribution`) mirrors the
-production median3 strategy.
+production median3 strategy. The `full` arm was added before any `full` job
+ran; the `web` and `net` prompts it sits beside are byte-identical to the
+first pre-registration commit.
 
 **Eligibility.** A run counts only if all three hold:
 
@@ -80,6 +85,9 @@ the target's `dataPointId` and whose unit equals the target unit:
   comparisons.
 - **Single pass.** Production primaries ran draft, pre-submit review and
   revision. These runs are single-pass.
+- **Prompt mode.** 55 primaries ran in fast mode and 16 in full mode; the
+  `web` and `net` arms run fast mode on all 71, and `full` runs full mode on
+  all 71.
 - **Harness.** Codex CLI 0.159.0 on a subscription login through Subfleet,
   against CI's pinned Codex CLI 0.144.0 on an API key, where the batch runs
   the runner's default model (`gpt-5.5` today) unless dispatched with
