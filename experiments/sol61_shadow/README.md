@@ -2,9 +2,9 @@
 
 An unpublished model comparison. GPT-6.1 Sol forecasts the open registered
 targets that Thesis has already published primary forecasts for, using the
-exact production `thesis.analyst` prompt. Its runs are validated by the
-production runner and scored against the same Chronicle first prints once the
-targets resolve.
+production `thesis.analyst` prompt (see Prompt below). Its runs are validated
+by the production runner and scored against the same Chronicle first prints
+once the targets resolve.
 
 These are **not Thesis forecasts**. They never enter `records/**`, the docket,
 the site or the Brier reward export. The publication gate
@@ -33,8 +33,11 @@ window and then `resolutionDate`.
 
 **Prompt.** Each prompt is the runner's own `--print-prompt` output for the
 target's committed batch context, in the arm's prompt mode, under a short
-wrapper
-(`shadow.py:WRAPPER`). The wrapper says there is no repository, forbids any
+wrapper. It is the prompt for a run without the tool-evidence MCP server, the shape
+every primary generated before 2026-09-20 received. CI runs since #260
+(2026-09-20) add a "Captured tool evidence" section for an MCP server these
+runs do not have; 6 of the 67 validatable targets have primaries from
+after that change. The wrapper (`shadow.py:WRAPPER`) says there is no repository, forbids any
 Thesis or Brier surface (site, API, GitHub, records), and asks for the bare
 JSON object. `prompts/index.json` pins the SHA-256 of every prompt sent.
 
@@ -64,6 +67,20 @@ first pre-registration commit.
 
 Ineligible runs stay in `results.json` with the reason; nothing is dropped
 silently.
+
+**Targets the runner cannot validate here.** The runner validates a
+resolve-by-bound target only inside a generation ticket, so a saved response
+for one always fails (`spawned_cells_to_ts.py`: "resolve-by-bound target
+requires generation ticket context"). The pilot's SPM run showed this. Batches
+after the pilot leave out the four such targets (the CRP and SPM conditional
+pairs), leaving 67 targets. The pilot run stays in `results.json` as an
+ineligible record.
+
+**Network-arm validation.** The runner refuses `--codex-network` outside a
+live Codex run, and the flag changes only the prompt text and the Codex
+invocation. `net` responses are therefore validated without it, so the
+`prompt.md` in their run directories is the non-network variant; the prompt
+actually sent is the one pinned in `prompts/net/`.
 
 ## Comparisons (fixed before any run)
 

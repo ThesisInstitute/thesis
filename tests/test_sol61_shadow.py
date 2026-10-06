@@ -437,3 +437,17 @@ def test_launch_facts_reads_the_codex_argv_subfleet_ran() -> None:
     assert facts["model"] == "gpt-6-luna" and facts["model"] != shadow.EXPECTED_MODEL
     assert facts["networkAccess"] is False and facts["reasoningEffort"] is None
     assert shadow.launch_facts([])["model"] is None
+
+
+def test_resolve_by_bound_targets_are_not_validatable() -> None:
+    assert shadow.validatable({"resolutionDateBasis": "release-calendar"})
+    assert shadow.validatable({})
+    assert not shadow.validatable({"resolutionDateBasis": "resolve-by-bound"})
+    frozen = shadow.load_targets()
+    bound = {row["slug"] for row in frozen if not shadow.validatable(row["target"])}
+    assert bound == {
+        "spm-child-poverty-rate-cy2027-current-law",
+        "spm-child-poverty-rate-cy2027-threshold-one-dollar",
+        "us-crp-enrolled-acres-september-2027-ceiling-27-million-source-recovered-2026-08-13",
+        "us-crp-enrolled-acres-september-2027-no-fy2027-31-ceiling-source-recovered-2026-08-13",
+    }

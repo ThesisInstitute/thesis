@@ -1,0 +1,295 @@
+{
+  "collectedAtUtc": "2026-10-06T21:36:27Z",
+  "runs": {
+    "net/jolts-openings-october-2026__r1": {
+      "acceptedAttempt": "20261006-165851-s61-net1-jolts-openings-october-2026/a1",
+      "arm": "net",
+      "audit": {
+        "commandCount": 4,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc \"curl -sS --max-time 30 'https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL?startyear=2025&endyear=2026'\"",
+            "curl": true,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -c 'import statistics, math; x=[7.431,7.242,6.952,7.098,7.310,7.204,7.089,6.919,7.169,7.170,6.846,6.550,7.240,6.922,6.887,7.585,7.537,7.182,7.335,7.079]; d=[b-a for a,b in zip(x,x[1:])]; print({\\\"n\\\":len(x),\\\"mean\\\":statistics.mean(x),\\\"mean_2026\\\":statistics.mean(x[-8:]),\\\"mean_latest6\\\":statistics.mean(x[-6:]),\\\"mean_delta\\\":statistics.mean(d),\\\"sigma\\\":statistics.stdev(d),\\\"one_month_half_width\\\":1.28*statistics.stdev(d),\\\"two_month_half_width\\\":1.28*statistics.stdev(d)*",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -c 'import statistics, math; x=[6.866,7.618,7.594,7.359,7.271,7.079]; d=[b-a for a,b in zip(x,x[1:])]; s=statistics.stdev(d); level=x[-1]; reversion=0.25*(statistics.mean(x)-level); recent_drift=(x[-1]-x[-4])/3; momentum=0.25*2*recent_drift; p=level+reversion+momentum; h=1.28*s*math.sqrt(2); print({\\\"first_print_levels_millions\\\":x,\\\"successive_changes_millions\\\":[round(v,6) for v in d],\\\"mean_level\\\":statistics.mean(x),\\\"mean_change\\\":statistics.mean(d),\\\"sum_squared_cente",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 1,
+        "curlSucceeded": 1,
+        "usage": {
+          "cached_input_tokens": 361216,
+          "input_tokens": 411231,
+          "output_tokens": 6929
+        },
+        "webSearchCount": 3,
+        "webSearches": [
+          "open_page | https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL | https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL",
+          "open_page | https://www.bls.gov/news.release/jolts.htm | https://www.bls.gov/news.release/jolts.htm",
+          "open_page | https://www.bls.gov/news.release/empsit.nr0.htm | https://www.bls.gov/news.release/empsit.nr0.htm"
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-06T20:58:51Z",
+      "eligible": true,
+      "final": true,
+      "finishedAt": "2026-10-06T21:30:18Z",
+      "jobId": "20261006-165851-s61-net1-jolts-openings-october-2026",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": true,
+        "reasoningEffort": "ultra",
+        "sandbox": "workspace-write"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/net/jolts-openings-october-2026__r1.txt",
+      "responseSha256": "79f21ab7af969bc7f72a15ff7f70bfaf570199bfcb2492c6c5973199b0338f31",
+      "rollout": 1,
+      "slug": "jolts-openings-october-2026",
+      "startedAt": "2026-10-06T21:16:09Z",
+      "state": "succeeded",
+      "trace": "experiments/sol61_shadow/traces/net/jolts-openings-october-2026__r1.jsonl.gz",
+      "traceSha256": "ad950ade8750e6a96c8f9d58662833876b5e1551d02e7267e6d37ae235d677f8",
+      "validation": {
+        "errors": [],
+        "ok": true,
+        "returnCode": 0,
+        "runDir": "experiments/sol61_shadow/runs/net/jolts-openings-october-2026__r1"
+      },
+      "windowStart": "2026-12-01"
+    },
+    "web/canada-cpi-annual-rate-october-2026__r1": {
+      "acceptedAttempt": "20261006-165827-s61-web1-canada-cpi-annual-rate-october/a1",
+      "arm": "web",
+      "audit": {
+        "commandCount": 2,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -c 'import statistics,math; y=[2.4,2.8,3.2,2.8,3.0,3.0]; d=[b-a for a,b in zip(y,y[1:])]; s=statistics.stdev(d); h=1.28*s*math.sqrt(2); print({\\\"mean_rate\\\":statistics.mean(y),\\\"changes\\\":d,\\\"mean_change\\\":statistics.mean(d),\\\"sigma\\\":s,\\\"one_step_half_width\\\":1.28*s,\\\"two_step_half_width\\\":h,\\\"bounds_at_3_1\\\":[3.1-h,3.1+h],\\\"gasoline_base_effect_pp\\\":4.01*((252.2/199.4-1)-(252.2/205.4-1)),\\\"implied_october_index\\\":165.3*1.031})'\"",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 0,
+        "curlSucceeded": 0,
+        "usage": {
+          "cached_input_tokens": 506880,
+          "input_tokens": 594101,
+          "output_tokens": 6677
+        },
+        "webSearchCount": 8,
+        "webSearches": [
+          "site:statcan.gc.ca \"Consumer Price Index\" \"August 2026\" | site:statcan.gc.ca \"Consumer Price Index\" \"September 2026\" | site:statcan.gc.ca \"Consumer Price Index\" \"July 2026\" | search | site:statcan.gc.ca \"Consumer Price Index\" \"August 2026\" ...",
+          "site:statcan.gc.ca \"Consumer Price Index\" \"June 2026\" | site:statcan.gc.ca \"Consumer Price Index\" \"May 2026\" | site:statcan.gc.ca \"Consumer Price Index\" \"April 2026\" | site:statcan.gc.ca \"Consumer Price Index\" \"March 2026\" | search | site:statcan.gc.ca \"Consumer Price Index\" \"June 2026\" ...",
+          "open_page | https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm | https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm",
+          "site:statcan.gc.ca \"Consumer Price Index\" \"October 2025\" \"164\" | site:statcan.gc.ca \"Consumer Price Index\" \"September 2025\" \"All-items\" | site:statcan.gc.ca \"18-10-0004-01\" \"v41690973\" | search | site:statcan.gc.ca \"Consumer Price Index\" \"October 2025\" \"164\" ...",
+          "open_page | https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm | https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm",
+          "site:statcan.gc.ca \"release-diffusion/2026-eng.pdf\" \"November 16, 2026\" \"October 2026\" | site:statcan.gc.ca \"v41690973\" | search | site:statcan.gc.ca \"release-diffusion/2026-eng.pdf\" \"November 16, 2026\" \"October 2026\" ...",
+          "site:www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf \"Consumer Price Index\" \"November 16\" | search | site:www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf \"Consumer Price Index\" \"November 16\"",
+          "site:alberta.ca/affordability-resources \"October 1\" \"13 cents\" \"2026\" | site:natural-resources.canada.ca/domestic-international-markets/fuel-consumption-levies-canada \"2026\" \"October\" \"13\" | search | site:alberta.ca/affordability-resources \"October 1\" \"13 cents\" \"2026\" ..."
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-06T20:58:27Z",
+      "eligible": false,
+      "final": true,
+      "finishedAt": "2026-10-06T21:30:51Z",
+      "jobId": "20261006-165827-s61-web1-canada-cpi-annual-rate-october",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": false,
+        "reasoningEffort": "ultra",
+        "sandbox": "read-only"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/web/canada-cpi-annual-rate-october-2026__r1.txt",
+      "responseSha256": "83b63dbab99bcf050d1c478a5197dc394c303766648c4036f2d5aec40c7d1bcf",
+      "rollout": 1,
+      "slug": "canada-cpi-annual-rate-october-2026",
+      "startedAt": "2026-10-06T21:16:09Z",
+      "state": "succeeded",
+      "trace": "experiments/sol61_shadow/traces/web/canada-cpi-annual-rate-october-2026__r1.jsonl.gz",
+      "traceSha256": "5e35a79ff55a6f3bec5be44fabdf3d273e31c149b9ebdcf58ba211bdb294e1c3",
+      "validation": {
+        "errors": [
+          "math step does not show interval derivation (sigma = X or 1.28)"
+        ],
+        "ok": false,
+        "returnCode": 1,
+        "runDir": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1"
+      },
+      "windowStart": "2026-11-16"
+    },
+    "web/jolts-openings-october-2026__r1": {
+      "acceptedAttempt": "20261006-165827-s61-web1-jolts-openings-october-2026/a1",
+      "arm": "web",
+      "audit": {
+        "commandCount": 3,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -c 'import statistics,math; x=[6.946,6.882,6.866,7.618,7.594,7.359,7.271,7.079]; d=[b-a for a,b in zip(x,x[1:])]; mu=statistics.mean(d); ss=sum((v-mu)**2 for v in d); s=statistics.stdev(d); trend=statistics.mean(d[-3:]); p=x[-1]+0.25*2*trend; h=1.28*s*math.sqrt(2); print({\\\"mean_level\\\":statistics.mean(x),\\\"changes\\\":d,\\\"mean_change\\\":mu,\\\"sum_squared_deviations\\\":ss,\\\"sigma\\\":s,\\\"monthly_half_width\\\":1.28*s,\\\"recent_trend\\\":trend,\\\"momentum_adjustment\\\":0.25*2*trend,\\\"poin",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 0,
+        "curlSucceeded": 0,
+        "usage": {
+          "cached_input_tokens": 508160,
+          "input_tokens": 574323,
+          "output_tokens": 5346
+        },
+        "webSearchCount": 6,
+        "webSearches": [
+          "open_page | https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL | https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL",
+          "open_page | https://www.bls.gov/news.release/jolts.nr0.htm | https://www.bls.gov/news.release/jolts.nr0.htm",
+          "site.bls.gov \"2026\" \"September\" \"unemployment rate\" \"4.4\" | site.bls.gov \"JOLTS\" \"July 2026\" \"7,335\" | search | site.bls.gov \"2026\" \"September\" \"unemployment rate\" \"4.4\" ...",
+          "open_page | https://www.bls.gov/news.release/archives/empsit_10022026.htm | https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+          "other",
+          "open_page | https://www.bls.gov/jlt/ | https://www.bls.gov/jlt/"
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-06T20:58:27Z",
+      "eligible": true,
+      "final": true,
+      "finishedAt": "2026-10-06T21:30:24Z",
+      "jobId": "20261006-165827-s61-web1-jolts-openings-october-2026",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": false,
+        "reasoningEffort": "ultra",
+        "sandbox": "read-only"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/web/jolts-openings-october-2026__r1.txt",
+      "responseSha256": "073e87243c7a6a5033f5f52be240c361fc2b9ee38d1778424e1f12be63b60f9e",
+      "rollout": 1,
+      "slug": "jolts-openings-october-2026",
+      "startedAt": "2026-10-06T21:16:09Z",
+      "state": "succeeded",
+      "trace": "experiments/sol61_shadow/traces/web/jolts-openings-october-2026__r1.jsonl.gz",
+      "traceSha256": "1d0fa847d72f86f65db3540063fb2c73ba9229f7483b28316545ae3f4f80b4d9",
+      "validation": {
+        "errors": [],
+        "ok": true,
+        "returnCode": 0,
+        "runDir": "experiments/sol61_shadow/runs/web/jolts-openings-october-2026__r1"
+      },
+      "windowStart": "2026-12-01"
+    },
+    "web/spm-child-poverty-rate-cy2027-current-law__r1": {
+      "acceptedAttempt": "20261006-165827-s61-web1-spm-child-poverty-rate-cy2027-c/a1",
+      "arm": "web",
+      "audit": {
+        "commandCount": 2,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 0,
+        "curlSucceeded": 0,
+        "usage": {
+          "cached_input_tokens": 1146112,
+          "input_tokens": 1266179,
+          "output_tokens": 8589
+        },
+        "webSearchCount": 13,
+        "webSearches": [
+          "open_page | https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html | https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+          "site:census.gov \"Poverty in the United States: 2025\" \"Supplemental\" | site:census.gov \"2026\" \"revised\" \"Supplemental Poverty Measure\" | search | site:census.gov \"Poverty in the United States: 2025\" \"Supplemental\" ...",
+          "open_page | https://www.census.gov/library/working-papers/2026/demo/sehsd-wp2026-17.html | https://www.census.gov/library/working-papers/2026/demo/sehsd-wp2026-17.html",
+          "open_page | https://www.census.gov/library/publications/2026/demo/p60-290.html | https://www.census.gov/library/publications/2026/demo/p60-290.html",
+          "other",
+          "15.9 | find_in_page | '15.9'",
+          "other",
+          "open_page | https://www2.census.gov/library/working-papers/2026/demo/sehsd-wp2026-17.pdf | https://www2.census.gov/library/working-papers/2026/demo/sehsd-wp2026-17.pdf",
+          "open_page | https://www.irs.gov/irb/2026-38_irb | https://www.irs.gov/irb/2026-38_irb",
+          "open_page | https://www.cbo.gov/system/files/2025-08/61367-SNAP.pdf | https://www.cbo.gov/system/files/2025-08/61367-SNAP.pdf",
+          "other",
+          "Change in real GDP | find_in_page | 'Change in real GDP'",
+          "open_page | https://www2.census.gov/library/working-papers/2026/demo/sehsd-wp2026-16.pdf | https://www2.census.gov/library/working-papers/2026/demo/sehsd-wp2026-16.pdf"
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-06T20:58:27Z",
+      "eligible": false,
+      "final": true,
+      "finishedAt": "2026-10-06T21:33:08Z",
+      "jobId": "20261006-165827-s61-web1-spm-child-poverty-rate-cy2027-c",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": false,
+        "reasoningEffort": "ultra",
+        "sandbox": "read-only"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/web/spm-child-poverty-rate-cy2027-current-law__r1.txt",
+      "responseSha256": "c253da2a6005ba43cf9dce52dfc87816cd9ae36412abca8aa9cbb07e86b4cd68",
+      "rollout": 1,
+      "slug": "spm-child-poverty-rate-cy2027-current-law",
+      "startedAt": "2026-10-06T21:16:09Z",
+      "state": "succeeded",
+      "trace": "experiments/sol61_shadow/traces/web/spm-child-poverty-rate-cy2027-current-law__r1.jsonl.gz",
+      "traceSha256": "11db96a27d205b4261c7ff883ca62d7e87c9f88b11a93e6a527a0eb114c839f5",
+      "validation": {
+        "errors": [
+          "resolve-by-bound target requires generation ticket context"
+        ],
+        "ok": false,
+        "returnCode": 1,
+        "runDir": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1"
+      },
+      "windowStart": "2028-08-01"
+    }
+  },
+  "schemaVersion": "thesis_sol61_shadow_results_v1"
+}

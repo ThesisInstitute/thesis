@@ -3,8 +3,9 @@
 
 GPT-6.1 Sol, run on ChatGPT-subscription Codex lanes through Subfleet,
 forecasts the same registered targets Thesis has already published primary
-forecasts for. Each run receives the exact production thesis.analyst prompt
-(`run_thesis_analyst.py --print-prompt`) under a short wrapper, and its final
+forecasts for. Each run receives the production thesis.analyst prompt as
+`run_thesis_analyst.py --print-prompt` prints it (no tool-evidence MCP
+section) under a short wrapper, and its final
 message is validated by the production runner in `--response-file` mode.
 
 Nothing here touches `records/**`, the docket, the site, or the publication
@@ -452,6 +453,12 @@ def cmd_batch(args: argparse.Namespace) -> int:
         missing = wanted - {row["slug"] for row in rows}
         if missing:
             raise SystemExit(f"unknown slugs: {sorted(missing)}")
+    skipped = [row["slug"] for row in rows if not validatable(row["target"])]
+    if skipped:
+        print(f"skipping {len(skipped)} resolve-by-bound targets: {', '.join(skipped)}")
+    rows = [row for row in rows if validatable(row["target"])]
+    if args.exclude:
+        rows = [row for row in rows if row["slug"] not in set(args.exclude.split(","))]
     for row in rows:
         if not prompt_path(args.arm, row["slug"]).is_file():
             raise SystemExit(
@@ -644,18 +651,35 @@ def redacted_lines(path: pathlib.Path) -> list[str]:
     return out
 
 
+def validatable(target: dict[str, Any]) -> bool:
+    """Whether the runner can validate a saved response for this target.
+
+    The runner validates a resolve-by-bound target only inside a generation
+    ticket (spawned_cells_to_ts.py refuses it otherwise), so a shadow run on
+    one could never pass validation.
+    """
+    return target.get("resolutionDateBasis") != "resolve-by-bound"
+
+
 def validate_response(
     target: dict[str, Any],
     response: pathlib.Path,
     run_dir: pathlib.Path,
     *,
-    network: bool,
     prompt_mode: str,
 ) -> dict[str, Any]:
+    """Validate a saved response with the production runner.
+
+    The network flag is never passed: the runner refuses --codex-network
+    outside a live --codex-model run, and the flag changes only the prompt
+    text and the Codex invocation, not validation. The run directory's
+    prompt.md is therefore the non-network variant; the prompt actually sent
+    is pinned in prompts/ and prompts/index.json.
+    """
     if run_dir.exists():
         for child in sorted(run_dir.rglob("*"), reverse=True):
             child.unlink() if child.is_file() else child.rmdir()
-    argv = runner_argv(target, network=network, prompt_mode=prompt_mode) + [
+    argv = runner_argv(target, network=False, prompt_mode=prompt_mode) + [
         "--response-file",
         str(response),
         "--out-dir",
@@ -801,7 +825,6 @@ def cmd_collect(args: argparse.Namespace) -> int:
                 target["target"],
                 response,
                 EXP / "runs" / arm / f"{slug}__r{rollout}",
-                network=ARMS[arm]["network"],
                 prompt_mode=ARMS[arm]["promptMode"],
             )
         else:
@@ -1053,6 +1076,7 @@ def main(argv: list[str] | None = None) -> int:
     batch.add_argument("--rollout", type=int, required=True)
     batch.add_argument("--tier", default="hard")
     batch.add_argument("--slugs", help="comma-separated subset (default: all)")
+    batch.add_argument("--exclude", help="comma-separated slugs to leave out")
     batch.add_argument("--label")
     batch.set_defaults(func=cmd_batch)
 

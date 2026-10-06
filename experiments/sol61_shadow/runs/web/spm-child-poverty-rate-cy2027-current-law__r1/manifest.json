@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-06T21:36:27Z",
+  "runStartedAt": "2026-10-06T21:36:27Z",
+  "sealedAt": "2026-10-06T21:36:27Z",
+  "series": "census.spm.child_poverty_rate",
+  "period": "2027",
+  "conditional": "For the CY2027 Census Supplemental Poverty Measure child-poverty outcome, no legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "targetContext": {
+    "catalogSlug": "spm-child-poverty-rate-cy2027-current-law",
+    "conditionDeadline": "2027-12-31",
+    "conditionId": "cond.s3596-actc-threshold.current-law",
+    "conditional": "For the CY2027 Census Supplemental Poverty Measure child-poverty outcome, no legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+    "country": "US",
+    "dataPointId": "census.spm.child_poverty_rate.2027.first_print.current_law",
+    "expectedReleaseWindow": {
+      "end": "2028-12-31",
+      "start": "2028-08-01"
+    },
+    "period": "2027",
+    "registeredAt": "2026-08-05T23:10:13Z",
+    "registeredAtUtc": "2026-08-05T23:10:13Z",
+    "registrationCommit": "8b58fab29b2593537430443eb9dc9ca69dff7e2e",
+    "registrationState": "preregistered",
+    "resolutionDate": "2028-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "resolutionRule": "Resolve to the first Census annual income-and-poverty release artifact for CY2027 using the revised SPM methodology whose identity is authenticated by the registered 2026-07-17 Census announcement: Poverty in the United States: 2027, Supplemental Poverty Measure Table B-2, ALL RACES 2027 row, Under 18 years / Below Poverty / Percent column. The 2028-08-01 through 2028-12-31 expected release window and 2028-12-31 resolve-by deadline are Thesis lab commitments; the announcement does not establish either timing value. Record the published percent without scaling or rounding and ignore later revisions.",
+    "resolutionSource": "U.S. Census Bureau revised-SPM methodology announcement (identity) and Poverty in the United States: 2027, Supplemental Poverty Measure Table B-2 (resolving artifact)",
+    "resolutionSourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+    "series": "census.spm.child_poverty_rate",
+    "sourceBinding": {
+      "adapter": "census-spm-annual-report",
+      "allowedHosts": [
+        "www.census.gov",
+        "www2.census.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2028-12-31",
+        "start": "2028-08-01"
+      },
+      "field": "under_18_percent_in_poverty",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "census.spm.child_poverty_rate",
+      "sourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+      "table": "Poverty in the United States annual income-and-poverty release, revised-methodology Supplemental Poverty Measure Table B-2, ALL RACES year row, Under 18 years / Below Poverty / Percent column",
+      "transform": {
+        "factor": 1,
+        "operation": "identity"
+      }
+    },
+    "targetContentHash": "cfde77fe3c3a53a3404a01811dbb779c71bb0728e2562e6e63da7ce30acf9389",
+    "targetRegistrationPath": "records/targets/2026-08-05-cfde77fe3c3a53a3404a01811dbb779c71bb0728e2562e6e63da7ce30acf9389.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "8b58fab29b2593537430443eb9dc9ca69dff7e2e",
+  "targetContentHash": "cfde77fe3c3a53a3404a01811dbb779c71bb0728e2562e6e63da7ce30acf9389",
+  "targetRegistrationPath": "records/targets/2026-08-05-cfde77fe3c3a53a3404a01811dbb779c71bb0728e2562e6e63da7ce30acf9389.json",
+  "registeredAtUtc": "2026-08-05T23:10:13Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": false,
+  "cellsPath": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/prompt.md",
+      "sha256": "5b4c6da33393236a14f65cb2c8ea592ed099ff3cdb24b6176901e31ffe7fa874",
+      "bytes": 15257,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/command.json",
+      "sha256": "3316be5f2c5fd97976dc1fc73d93abdf6f3c5ff578513da5fd5840df7298bde7",
+      "bytes": 199,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/stdout.txt",
+      "sha256": "c253da2a6005ba43cf9dce52dfc87816cd9ae36412abca8aa9cbb07e86b4cd68",
+      "bytes": 10611,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/raw_response.txt",
+      "sha256": "c253da2a6005ba43cf9dce52dfc87816cd9ae36412abca8aa9cbb07e86b4cd68",
+      "bytes": 10611,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/parsed_cells.json",
+      "sha256": "b4d8cf34e4f3d4b3a75093e419b12e520e2728290748a8d62b763bccdd3b1704",
+      "bytes": 11133,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/normalized_cells.json",
+      "sha256": "870b8278049803d4513960cc9f38cbbf7fbf804da775abfe3bf8cecd6a5cf608",
+      "bytes": 28774,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/distribution.json",
+      "sha256": "77c767256127eeb9838f2ab07946907ae2d41c5962ffd5ebadc7cee405d858d0",
+      "bytes": 13857,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/validation.json",
+      "sha256": "52873eb351a07bb5e5c2bdf349d0ab0fb12990c73e1b97c4da71e6aeb19ca0eb",
+      "bytes": 220,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/cells.with_activity.json",
+      "sha256": "b50cb8f81486fc9a7526f0041b9296210f8f536b4b946549754239d0eb6ffc32",
+      "bytes": 31736,
+      "createdAt": "2026-10-06T21:36:27Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/spm-child-poverty-rate-cy2027-current-law__r1/manifest.json",
+      "sha256": "442a38a7cca5870e95837ed4dc88b4c357284e000a37a4f7600043bcae85cf67",
+      "bytes": 7285,
+      "createdAt": "2026-10-06T21:36:27Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": false,
+    "cells": [
+      {
+        "slug": "spm-child-poverty-rate-cy2027-current-law",
+        "ok": false,
+        "errors": [
+          "resolve-by-bound target requires generation ticket context"
+        ]
+      }
+    ]
+  },
+  "checkoutSha": "cd738d892e7bc9ef303e055f2bf4c7adf98c142c",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "7c785135883e561cc781b9761be803c9e5974af40a187f97a83ecc7bfb2f5185"
+}

@@ -1,0 +1,1054 @@
+[
+  {
+    "slug": "canada-cpi-annual-rate-october-2026",
+    "country": "CA",
+    "type": "data",
+    "title": "Canada CPI annual rate, October 2026",
+    "question": "What will Statistics Canada's first print of the October 2026 Canada all-items Consumer Price Index, not seasonally adjusted, show for the year-over-year percentage change?",
+    "unit": "percent",
+    "pointEstimate": 3.1,
+    "ciLow": 2.49,
+    "ciHigh": 3.71,
+    "confidence": 0.8,
+    "resolutionDate": "2026-11-16",
+    "resolutionSource": "Statistics Canada, Consumer Price Index, Table 18-10-0004-01",
+    "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "resolutionRule": "Resolve using the first official print of October 2026 Canada all-items CPI, not seasonally adjusted, in Table 18-10-0004-01, vector v41690973. Calculate 100 times (October 2026 index divided by October 2025 index minus 1), using the index values available in that first print, and round to one decimal place. Freeze that first-print result; subsequent corrections and revisions do not replace it.",
+    "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+    "historicalContext": [
+      {
+        "label": "March 2026",
+        "value": 2.4,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 2.8,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 3.2,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 2.8,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": 3,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "August 2026",
+        "value": 3,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      }
+    ],
+    "drivers": [
+      "Persistence near the latest headline inflation rate",
+      "Lower October 2025 gasoline price base",
+      "October provincial fuel-tax relief",
+      "Slowing grocery inflation alongside firmer non-gasoline inflation",
+      "Energy supply uncertainty"
+    ],
+    "sourceContext": [
+      "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+      "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260519/dq260519a-eng.htm?HPA=1",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260720/dq260720a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260720/t001a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/pub/62-001-x/2011002/t031-eng.htm",
+      "https://natural-resources.canada.ca/domestic-international-markets/fuel-consumption-levies-canada",
+      "https://www.alberta.ca/alberta-energy-rebate"
+    ],
+    "runAt": "2026-10-06T21:36:26Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "October 2026 Canada CPI first-print forecast"
+      },
+      {
+        "kind": "text",
+        "text": "The target is the national all-items, not-seasonally-adjusted annual CPI rate, derived from Table 18-10-0004-01 vector v41690973. All headline historical prints and index anchors use this same variant. The vector's Canada all-items NSA identity is confirmed by Statistics Canada's [archived vector table](https://www150.statcan.gc.ca/n1/pub/62-001-x/2011002/t031-eng.htm). Component series below inform adjustments rather than replace the target."
+      },
+      {
+        "kind": "text",
+        "text": "The official calendar explicitly schedules October 2026 CPI for November 16, 2026, matching the ledger. September CPI is scheduled for October 19 and was unavailable at this run's timestamp. Source: [Statistics Canada release calendar](https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf)."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch Statistics Canada's March, April and May 2026 CPI releases.",
+        "result": "Headline annual CPI was 2.4% in [March](https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.htm), 2.8% in [April](https://www150.statcan.gc.ca/n1/daily-quotidien/260519/dq260519a-eng.htm?HPA=1), and 3.2% in [May](https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm)."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch Statistics Canada's June, July and August 2026 CPI releases.",
+        "result": "Headline annual CPI was 2.8% in [June](https://www150.statcan.gc.ca/n1/daily-quotidien/260720/dq260720a-eng.htm), 3.0% in [July](https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.htm), and 3.0% in [August](https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm). August CPI excluding gasoline was 2.4%, versus July's 2.2%; grocery inflation slowed to 2.8% from 3.1%."
+      },
+      {
+        "kind": "text",
+        "text": "The recent reference class contains six official monthly prints, March through August 2026, with mean 2.867%, range 2.4%-3.2%, and latest value 3.0%. The base rate anchor is a no-drift persistence forecast of 3.0%. The sample's positive average change is not extrapolated because it includes the initial energy shock and subsequent reversal."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch official NSA component index anchors and the current gasoline basket weight.",
+        "result": "The [August 2026 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm) reports all-items indices of 169.8 for August 2026 and 164.8 for August 2025; gasoline indices are 252.2 and 205.4. The [October 2025 table](https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm) reports all-items 165.3 and gasoline 199.4. The [June 2026 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260720/t001a-eng.htm) gives gasoline a 4.01% basket weight."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch official October fuel-tax policy changes.",
+        "result": "[Natural Resources Canada](https://natural-resources.canada.ca/domestic-international-markets/fuel-consumption-levies-canada) reports Alberta's 13-cent-per-litre fuel-tax suspension from October 1 through December 31, 2026, and PEI's suspension beginning September 26. The [Alberta announcement](https://www.alberta.ca/alberta-energy-rebate) confirms that its tax relief resumes after the July 1-September 30 rebate period."
+      },
+      {
+        "kind": "text",
+        "text": "Separate effects: the level prior is 3.0%; the momentum adjustment is zero, balancing firmer non-gasoline inflation against slowing groceries. The one-off gasoline base effect is positive because October 2025 gasoline was cheaper than August 2025. The policy mechanism is negative through lower pump taxes. Current national weekly gasoline prices could not be fetched, so gasoline-level persistence and the policy contribution remain explicit modeling assumptions."
+      },
+      {
+        "kind": "math",
+        "text": "Holding the gasoline index at August's 252.2 before new tax relief, its annual-rate change from the denominator alone is 100*(252.2/199.4-252.2/205.4)=3.6959 percentage points. Multiplying by the fetched basket share 0.0401 gives an approximate headline effect of +0.1482 points. Apply a judgmental -0.05-point national policy offset, not an officially measured contribution: 3.0+0.1482-0.05=3.0982%, rounded to a 3.1% point estimate."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: Use a no-drift persistence prior anchored at August's 3.0%, with the six March-August official prints as the historical sample. Updates are zero momentum, approximately +0.1482 points from the gasoline base, and a judgmental -0.05 points from provincial fuel-tax relief, yielding 3.1% after rounding. Successive headline changes are [0.4,0.4,-0.4,0.2,0.0] points, with mean 0.12. Sample variance is ((0.4-0.12)^2+(0.4-0.12)^2+(-0.4-0.12)^2+(0.2-0.12)^2+(0-0.12)^2)/4=0.112; sigma = 0.334664 percentage points. The normal-approximation 80% one-month half-width is 1.28*sigma=0.428370. For the two unobserved monthly transitions from August to October, assuming approximately independent innovations, multiply by sqrt(2): half-width=0.605807. Thus 3.1 +/- 0.605807 gives 2.494193%-3.705807%, reported as 2.49%-3.71%."
+      },
+      {
+        "kind": "text",
+        "text": "The upside risk is renewed energy supply disruption, with higher gasoline prices and travel fuel surcharges reinforcing the low prior-year gasoline base. The downside risk is rapid energy-price normalization, stronger tax pass-through and further grocery disinflation. A renewed fuel-price surge could put the result outside the interval above 3.71%; a sharp fuel-price decline combined with broader disinflation could put it outside the interval below 2.49%."
+      },
+      {
+        "kind": "forecast",
+        "point": 3.1,
+        "ciLow": 2.49,
+        "ciHigh": 3.71
+      }
+    ],
+    "agentReportedRunAt": "2026-10-06T21:22:34Z",
+    "runStartedAt": "2026-10-06T21:36:26Z",
+    "promptMode": "fast",
+    "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+    "targetContentHash": "0e09b18f90e7854e6dcb76a0fa5559f39add1130f2cd2a9dab1511711e58115f",
+    "targetRegistrationPath": "records/targets/2026-10-02-0e09b18f90e7854e6dcb76a0fa5559f39add1130f2cd2a9dab1511711e58115f.json",
+    "registeredAtUtc": "2026-10-02T20:51:43Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 1.575,
+        "upper": 4.625
+      },
+      "points": [
+        {
+          "value": 1.575,
+          "probability": 0.0
+        },
+        {
+          "value": 1.59025,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 1.6055,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 1.62075,
+          "probability": 0.005
+        },
+        {
+          "value": 1.636,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 1.65125,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 1.6665,
+          "probability": 0.01
+        },
+        {
+          "value": 1.68175,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 1.697,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 1.71225,
+          "probability": 0.015
+        },
+        {
+          "value": 1.7275,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 1.74275,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 1.758,
+          "probability": 0.02
+        },
+        {
+          "value": 1.77325,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 1.7885,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 1.80375,
+          "probability": 0.025
+        },
+        {
+          "value": 1.819,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 1.83425,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 1.8495,
+          "probability": 0.03
+        },
+        {
+          "value": 1.86475,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 1.88,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 1.89525,
+          "probability": 0.035
+        },
+        {
+          "value": 1.9105,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 1.92575,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 1.941,
+          "probability": 0.04
+        },
+        {
+          "value": 1.95625,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 1.9715,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 1.98675,
+          "probability": 0.045
+        },
+        {
+          "value": 2.002,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 2.01725,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 2.0325,
+          "probability": 0.05
+        },
+        {
+          "value": 2.04775,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 2.063,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 2.07825,
+          "probability": 0.055
+        },
+        {
+          "value": 2.0935,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 2.10875,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 2.124,
+          "probability": 0.06
+        },
+        {
+          "value": 2.13925,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 2.1545,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 2.16975,
+          "probability": 0.065
+        },
+        {
+          "value": 2.185,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 2.20025,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 2.2155,
+          "probability": 0.07
+        },
+        {
+          "value": 2.23075,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 2.246,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 2.26125,
+          "probability": 0.075
+        },
+        {
+          "value": 2.2765,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 2.29175,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 2.307,
+          "probability": 0.08
+        },
+        {
+          "value": 2.32225,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 2.3375,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 2.35275,
+          "probability": 0.085
+        },
+        {
+          "value": 2.368,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 2.38325,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 2.3985,
+          "probability": 0.09
+        },
+        {
+          "value": 2.41375,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 2.429,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 2.44425,
+          "probability": 0.095
+        },
+        {
+          "value": 2.4595,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 2.47475,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 2.49,
+          "probability": 0.1
+        },
+        {
+          "value": 2.50525,
+          "probability": 0.11
+        },
+        {
+          "value": 2.5205,
+          "probability": 0.12
+        },
+        {
+          "value": 2.53575,
+          "probability": 0.13
+        },
+        {
+          "value": 2.551,
+          "probability": 0.14
+        },
+        {
+          "value": 2.56625,
+          "probability": 0.15
+        },
+        {
+          "value": 2.5815,
+          "probability": 0.16
+        },
+        {
+          "value": 2.59675,
+          "probability": 0.17
+        },
+        {
+          "value": 2.612,
+          "probability": 0.18
+        },
+        {
+          "value": 2.62725,
+          "probability": 0.19
+        },
+        {
+          "value": 2.6425,
+          "probability": 0.2
+        },
+        {
+          "value": 2.65775,
+          "probability": 0.21
+        },
+        {
+          "value": 2.673,
+          "probability": 0.22
+        },
+        {
+          "value": 2.68825,
+          "probability": 0.23
+        },
+        {
+          "value": 2.7035,
+          "probability": 0.24
+        },
+        {
+          "value": 2.71875,
+          "probability": 0.25
+        },
+        {
+          "value": 2.734,
+          "probability": 0.26
+        },
+        {
+          "value": 2.74925,
+          "probability": 0.27
+        },
+        {
+          "value": 2.7645,
+          "probability": 0.28
+        },
+        {
+          "value": 2.77975,
+          "probability": 0.29
+        },
+        {
+          "value": 2.795,
+          "probability": 0.3
+        },
+        {
+          "value": 2.81025,
+          "probability": 0.31
+        },
+        {
+          "value": 2.8255,
+          "probability": 0.32
+        },
+        {
+          "value": 2.84075,
+          "probability": 0.33
+        },
+        {
+          "value": 2.856,
+          "probability": 0.34
+        },
+        {
+          "value": 2.87125,
+          "probability": 0.35
+        },
+        {
+          "value": 2.8865,
+          "probability": 0.36
+        },
+        {
+          "value": 2.90175,
+          "probability": 0.37
+        },
+        {
+          "value": 2.917,
+          "probability": 0.38
+        },
+        {
+          "value": 2.93225,
+          "probability": 0.39
+        },
+        {
+          "value": 2.9475,
+          "probability": 0.4
+        },
+        {
+          "value": 2.96275,
+          "probability": 0.41
+        },
+        {
+          "value": 2.978,
+          "probability": 0.42
+        },
+        {
+          "value": 2.99325,
+          "probability": 0.43
+        },
+        {
+          "value": 3.0085,
+          "probability": 0.44
+        },
+        {
+          "value": 3.02375,
+          "probability": 0.45
+        },
+        {
+          "value": 3.039,
+          "probability": 0.46
+        },
+        {
+          "value": 3.05425,
+          "probability": 0.47
+        },
+        {
+          "value": 3.0695,
+          "probability": 0.48
+        },
+        {
+          "value": 3.08475,
+          "probability": 0.49
+        },
+        {
+          "value": 3.1,
+          "probability": 0.5
+        },
+        {
+          "value": 3.11525,
+          "probability": 0.51
+        },
+        {
+          "value": 3.1305,
+          "probability": 0.52
+        },
+        {
+          "value": 3.14575,
+          "probability": 0.53
+        },
+        {
+          "value": 3.161,
+          "probability": 0.54
+        },
+        {
+          "value": 3.17625,
+          "probability": 0.55
+        },
+        {
+          "value": 3.1915,
+          "probability": 0.56
+        },
+        {
+          "value": 3.20675,
+          "probability": 0.57
+        },
+        {
+          "value": 3.222,
+          "probability": 0.58
+        },
+        {
+          "value": 3.23725,
+          "probability": 0.59
+        },
+        {
+          "value": 3.2525,
+          "probability": 0.6
+        },
+        {
+          "value": 3.26775,
+          "probability": 0.61
+        },
+        {
+          "value": 3.283,
+          "probability": 0.62
+        },
+        {
+          "value": 3.29825,
+          "probability": 0.63
+        },
+        {
+          "value": 3.3135,
+          "probability": 0.64
+        },
+        {
+          "value": 3.32875,
+          "probability": 0.65
+        },
+        {
+          "value": 3.344,
+          "probability": 0.66
+        },
+        {
+          "value": 3.35925,
+          "probability": 0.67
+        },
+        {
+          "value": 3.3745,
+          "probability": 0.68
+        },
+        {
+          "value": 3.38975,
+          "probability": 0.69
+        },
+        {
+          "value": 3.405,
+          "probability": 0.7
+        },
+        {
+          "value": 3.42025,
+          "probability": 0.71
+        },
+        {
+          "value": 3.4355,
+          "probability": 0.72
+        },
+        {
+          "value": 3.45075,
+          "probability": 0.73
+        },
+        {
+          "value": 3.466,
+          "probability": 0.74
+        },
+        {
+          "value": 3.48125,
+          "probability": 0.75
+        },
+        {
+          "value": 3.4965,
+          "probability": 0.76
+        },
+        {
+          "value": 3.51175,
+          "probability": 0.77
+        },
+        {
+          "value": 3.527,
+          "probability": 0.78
+        },
+        {
+          "value": 3.54225,
+          "probability": 0.79
+        },
+        {
+          "value": 3.5575,
+          "probability": 0.8
+        },
+        {
+          "value": 3.57275,
+          "probability": 0.81
+        },
+        {
+          "value": 3.588,
+          "probability": 0.82
+        },
+        {
+          "value": 3.60325,
+          "probability": 0.83
+        },
+        {
+          "value": 3.6185,
+          "probability": 0.84
+        },
+        {
+          "value": 3.63375,
+          "probability": 0.85
+        },
+        {
+          "value": 3.649,
+          "probability": 0.86
+        },
+        {
+          "value": 3.66425,
+          "probability": 0.87
+        },
+        {
+          "value": 3.6795,
+          "probability": 0.88
+        },
+        {
+          "value": 3.69475,
+          "probability": 0.89
+        },
+        {
+          "value": 3.71,
+          "probability": 0.9
+        },
+        {
+          "value": 3.72525,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 3.7405,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 3.75575,
+          "probability": 0.905
+        },
+        {
+          "value": 3.771,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 3.78625,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 3.8015,
+          "probability": 0.91
+        },
+        {
+          "value": 3.81675,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 3.832,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 3.84725,
+          "probability": 0.915
+        },
+        {
+          "value": 3.8625,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 3.87775,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 3.893,
+          "probability": 0.92
+        },
+        {
+          "value": 3.90825,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 3.9235,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 3.93875,
+          "probability": 0.925
+        },
+        {
+          "value": 3.954,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 3.96925,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 3.9845,
+          "probability": 0.93
+        },
+        {
+          "value": 3.99975,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 4.015,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 4.03025,
+          "probability": 0.935
+        },
+        {
+          "value": 4.0455,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 4.06075,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 4.076,
+          "probability": 0.94
+        },
+        {
+          "value": 4.09125,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 4.1065,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 4.12175,
+          "probability": 0.945
+        },
+        {
+          "value": 4.137,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 4.15225,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 4.1675,
+          "probability": 0.95
+        },
+        {
+          "value": 4.18275,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 4.198,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 4.21325,
+          "probability": 0.955
+        },
+        {
+          "value": 4.2285,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 4.24375,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 4.259,
+          "probability": 0.96
+        },
+        {
+          "value": 4.27425,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 4.2895,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 4.30475,
+          "probability": 0.965
+        },
+        {
+          "value": 4.32,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 4.33525,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 4.3505,
+          "probability": 0.97
+        },
+        {
+          "value": 4.36575,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 4.381,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 4.39625,
+          "probability": 0.975
+        },
+        {
+          "value": 4.4115,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 4.42675,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 4.442,
+          "probability": 0.98
+        },
+        {
+          "value": 4.45725,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 4.4725,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 4.48775,
+          "probability": 0.985
+        },
+        {
+          "value": 4.503,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 4.51825,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 4.5335,
+          "probability": 0.99
+        },
+        {
+          "value": 4.54875,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 4.564,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 4.57925,
+          "probability": 0.995
+        },
+        {
+          "value": 4.5945,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 4.60975,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 4.625,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 3.1,
+        "median": 3.1,
+        "interval80": {
+          "lower": 2.49,
+          "upper": 3.71
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "claude-fable-5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/prompt.md",
+        "sha256": "162125965950ec9be1cf0f5deb6d08f5dda4621ed59d97ab97f44fcfb5707f8d",
+        "bytes": 10474,
+        "createdAt": "2026-10-06T21:36:26Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/command.json",
+        "sha256": "d559dc71039c32a31c3faed384babb340c5fd58fb9f87c8b0abe90cd53c1dcb6",
+        "bytes": 193,
+        "createdAt": "2026-10-06T21:36:26Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/stdout.txt",
+        "sha256": "83b63dbab99bcf050d1c478a5197dc394c303766648c4036f2d5aec40c7d1bcf",
+        "bytes": 9423,
+        "createdAt": "2026-10-06T21:36:26Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/stderr.txt",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "bytes": 1,
+        "createdAt": "2026-10-06T21:36:26Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/raw_response.txt",
+        "sha256": "83b63dbab99bcf050d1c478a5197dc394c303766648c4036f2d5aec40c7d1bcf",
+        "bytes": 9423,
+        "createdAt": "2026-10-06T21:36:26Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/parsed_cells.json",
+        "sha256": "65e76f7b406f8498c41d7a9f7541636331f10a031fb44d37e454303abbf4c502",
+        "bytes": 9881,
+        "createdAt": "2026-10-06T21:36:26Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/normalized_cells.json",
+        "sha256": "2c59242b6239e1de6e8a21f8be0b3d98843340f0460bfc873d73e4d43a2d5d28",
+        "bytes": 27365,
+        "createdAt": "2026-10-06T21:36:26Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/distribution.json",
+        "sha256": "b79d33ba4ff931276a9382b64ab24eb3ea870e6749cd2cef1350df219150bcc0",
+        "bytes": 13700,
+        "createdAt": "2026-10-06T21:36:26Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "experiments/sol61_shadow/runs/web/canada-cpi-annual-rate-october-2026__r1/validation.json",
+        "sha256": "714195cf6a728e2931543831aedcf96bd68d0b4070af1de46b5f67ebe590b7fb",
+        "bytes": 219,
+        "createdAt": "2026-10-06T21:36:26Z"
+      }
+    ]
+  }
+]
