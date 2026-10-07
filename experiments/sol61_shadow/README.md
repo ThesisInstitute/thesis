@@ -129,7 +129,16 @@ event stream (`traces/`, gzipped) and a pruned validation directory
 sealed cell as `normalized_cells.json.gz`, which carries the materialized
 CDF as `predictionDistribution`. The runner's other outputs are pinned
 elsewhere or derived from the response, and `collect --revalidate`
-regenerates them.
+regenerates them. Each row also carries a `forecast` summary (point,
+interval, unit, resolution date) read from the response.
+
+Horizon waves are stored more compactly, because six of them would
+otherwise add over 100 MB. Each wave's responses and validation directories
+are packed into one deterministic archive, `waves/wN.tar.xz`, about 3 MB.
+Members keep their repository paths, and `shadow.py` reads through the
+archive. Their event streams stay in the ops folder, and `results.json`
+keeps each one's SHA-256 (`traceSha256`) so a stream can be checked against
+the record. Wave 1's 600-odd runs stay loose, traces included.
 
 ## Comparisons (fixed before any run)
 

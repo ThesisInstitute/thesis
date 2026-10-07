@@ -780,6 +780,98 @@ def prune_run_dir(run_dir: pathlib.Path) -> None:
             path.unlink()
 
 
+def forecast_summary(response: bytes) -> dict[str, Any] | None:
+    """The response's point, interval and resolution date, for browsing."""
+    try:
+        cell = json.loads(response)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    if not isinstance(cell, dict):
+        return None
+    keys = ("pointEstimate", "ciLow", "ciHigh", "unit", "resolutionDate")
+    return {key: cell.get(key) for key in keys}
+
+
+def wave_members(wave: int) -> list[pathlib.Path]:
+    """A horizon wave's loose responses and validation-directory files."""
+    pattern = f"*__w{wave}r*"
+    members = []
+    for arm in ARMS:
+        members += sorted((EXP / "responses" / arm).glob(f"{pattern}.txt"))
+        for run_dir in sorted((EXP / "runs" / arm).glob(pattern)):
+            members += sorted(path for path in run_dir.rglob("*") if path.is_file())
+    return members
+
+
+def wave_archive(wave: int) -> pathlib.Path:
+    return EXP / "waves" / f"w{wave}.tar.xz"
+
+
+def cmd_pack(args: argparse.Namespace) -> int:
+    """Pack a horizon wave's responses and validation directories into one archive.
+
+    Members keep their repository paths, are sorted, and carry zeroed owners
+    and times, so packing the same files again yields the same archive bytes.
+    Packing merges with an archive already there, so a wave collected in two
+    passes packs into one file.
+    """
+    import io
+    import lzma
+    import tarfile
+
+    if args.wave < 2:
+        raise SystemExit("only horizon waves are packed; wave 1 stays loose")
+    archive = wave_archive(args.wave)
+    files: dict[str, bytes] = {}
+    if archive.is_file():
+        with tarfile.open(archive, "r:xz") as tar:
+            for member in tar.getmembers():
+                handle = tar.extractfile(member)
+                if handle is not None:
+                    files[member.name] = handle.read()
+    loose = wave_members(args.wave)
+    for path in loose:
+        files[rel(path)] = path.read_bytes()
+    if not loose:
+        print(f"wave {args.wave}: nothing loose to pack")
+        return 0
+    buffer = io.BytesIO()
+    with tarfile.open(fileobj=buffer, mode="w", format=tarfile.PAX_FORMAT) as tar:
+        for name in sorted(files):
+            info = tarfile.TarInfo(name)
+            info.size = len(files[name])
+            info.mtime = 0
+            info.mode = 0o644
+            tar.addfile(info, io.BytesIO(files[name]))
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    archive.write_bytes(lzma.compress(buffer.getvalue(), preset=9))
+    for path in loose:
+        path.unlink()
+    for arm in ARMS:
+        for run_dir in sorted((EXP / "runs" / arm).glob(f"*__w{args.wave}r*")):
+            if run_dir.is_dir() and not any(run_dir.iterdir()):
+                run_dir.rmdir()
+    print(f"wave {args.wave}: packed {len(loose)} files into {rel(archive)}")
+    return 0
+
+
+def repo_file(path: pathlib.Path) -> bytes | None:
+    """A repository file, read loose or from its horizon wave's archive."""
+    if path.is_file():
+        return path.read_bytes()
+    match = re.search(r"__w(\d+)r\d+", str(path))
+    if not match or not wave_archive(int(match.group(1))).is_file():
+        return None
+    import tarfile
+
+    with tarfile.open(wave_archive(int(match.group(1))), "r:xz") as tar:
+        try:
+            handle = tar.extractfile(rel(path))
+        except KeyError:
+            return None
+        return handle.read() if handle is not None else None
+
+
 def cmd_prune(args: argparse.Namespace) -> int:
     """Prune every collected validation directory, current and superseded."""
     count = 0
@@ -871,7 +963,10 @@ def transport_stopped(row: dict[str, Any]) -> bool:
     """
     if not row.get("final") or not row.get("response"):
         return False
-    text = (ROOT / row["response"]).read_text(errors="replace")
+    raw = repo_file(ROOT / row["response"])
+    if raw is None:
+        return False
+    text = raw.decode(errors="replace")
     try:
         cell = json.loads(text)
     except json.JSONDecodeError:
@@ -879,6 +974,7 @@ def transport_stopped(row: dict[str, Any]) -> bool:
     if not isinstance(cell, dict) or cell.get("pointEstimate") is not None:
         return False
     if row.get("trace") and (ROOT / row["trace"]).is_file():
+        # ROOT / an absolute ops-folder path is that path.
         text += gzip.decompress((ROOT / row["trace"]).read_bytes()).decode(
             errors="replace"
         )
@@ -996,12 +1092,15 @@ def cmd_collect(args: argparse.Namespace) -> int:
         stream = attempt_stream(job_id, row["acceptedAttempt"])
         if stream is not None:
             lines = redacted_lines(stream)
-            trace = EXP / "traces" / arm / f"{name}.jsonl.gz"
+            # Wave 1 traces live in the repository. Horizon-wave traces stay in
+            # the ops folder, and the repository keeps their SHA-256.
+            trace_root = EXP / "traces" if wave == 1 else ops / "traces"
+            trace = trace_root / arm / f"{name}.jsonl.gz"
             trace.parent.mkdir(parents=True, exist_ok=True)
             payload = ("\n".join(lines) + "\n").encode()
             # mtime=0 keeps the archive byte-identical across re-collections.
             trace.write_bytes(gzip.compress(payload, mtime=0))
-            row["trace"] = rel(trace)
+            row["trace"] = rel(trace) if wave == 1 else str(trace)
             row["traceSha256"] = sha256_bytes(payload)
             row["audit"] = audit_trace(lines)
         else:
@@ -1021,6 +1120,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
                 EXP / "runs" / arm / name,
                 prompt_mode=ARMS[arm]["promptMode"],
             )
+            row["forecast"] = forecast_summary(response.read_bytes())
         else:
             row["validation"] = {
                 "ok": False,
@@ -1049,6 +1149,10 @@ def cmd_collect(args: argparse.Namespace) -> int:
         row["supersededJobs"] = superseded
         row["final"] = True
         results[key] = row
+    for row in results.values():
+        if row.get("response") and "forecast" not in row:
+            raw = repo_file(ROOT / row["response"])
+            row["forecast"] = forecast_summary(raw) if raw is not None else None
     write_json(
         results_path,
         {"schemaVersion": RESULTS_SCHEMA, "collectedAtUtc": utc_now(), "runs": results},
@@ -1134,12 +1238,12 @@ def load_observations(path: pathlib.Path) -> dict[str, dict[str, Any]]:
 
 
 def normalized_cell(run_dir: pathlib.Path) -> dict[str, Any] | None:
-    packed = run_dir / "normalized_cells.json.gz"
-    plain = run_dir / "normalized_cells.json"
-    if packed.is_file():
-        data = json.loads(gzip.decompress(packed.read_bytes()))
-    elif plain.is_file():
-        data = json.loads(plain.read_text())
+    packed = repo_file(run_dir / "normalized_cells.json.gz")
+    plain = repo_file(run_dir / "normalized_cells.json")
+    if packed is not None:
+        data = json.loads(gzip.decompress(packed))
+    elif plain is not None:
+        data = json.loads(plain)
     else:
         return None
     if isinstance(data, list):
@@ -1314,6 +1418,10 @@ def main(argv: list[str] | None = None) -> int:
 
     prune = sub.add_parser("prune")
     prune.set_defaults(func=cmd_prune)
+
+    pack = sub.add_parser("pack")
+    pack.add_argument("--wave", type=int, required=True)
+    pack.set_defaults(func=cmd_pack)
 
     outage = sub.add_parser("outage-retry")
     outage.add_argument("--label-prefix", required=True)

@@ -229,6 +229,7 @@ def collect_wave(ops: pathlib.Path, wave: int, end: datetime) -> None:
         drain(end)
         log(shadow_cli("collect").stdout.strip())
     log(shadow_cli("prune").stdout.strip())
+    log(shadow_cli("pack", "--wave", str(wave)).stdout.strip())
 
 
 def run_wave(ops: pathlib.Path, wave: int, last_wave: int) -> None:

@@ -674,3 +674,40 @@ def test_gate_holds_for_each_limit_and_opens_when_all_clear() -> None:
         {"utilization": None},
     ):
         assert horizon.gate(**{**clear, **change}) is not None, change
+
+
+def test_pack_archives_a_wave_and_reads_back_through_it(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(shadow, "ROOT", tmp_path)
+    monkeypatch.setattr(shadow, "EXP", tmp_path / "exp")
+    exp = tmp_path / "exp"
+    response = exp / "responses" / "web" / "a__w3r1.txt"
+    response.parent.mkdir(parents=True)
+    response.write_text('{"pointEstimate": 1.5, "ciLow": 1, "ciHigh": 2}')
+    run_dir = exp / "runs" / "web" / "a__w3r1"
+    run_dir.mkdir(parents=True)
+    cell = {"predictionDistribution": {"points": [{"value": 0, "probability": 0}]}}
+    (run_dir / "normalized_cells.json.gz").write_bytes(
+        shadow.gzip.compress(json.dumps([cell]).encode(), mtime=0)
+    )
+    (exp / "responses" / "web" / "a__r1.txt").write_text("{}")  # wave 1 stays loose
+    args = shadow.argparse.Namespace(wave=3)
+    assert shadow.cmd_pack(args) == 0
+    archive = shadow.wave_archive(3)
+    first = archive.read_bytes()
+    assert not response.exists() and not run_dir.exists()
+    assert (exp / "responses" / "web" / "a__r1.txt").exists()
+    assert json.loads(shadow.repo_file(response))["pointEstimate"] == 1.5
+    assert shadow.normalized_cell(run_dir) == cell
+    # Packing again with nothing loose leaves the archive byte-identical.
+    assert shadow.cmd_pack(args) == 0 and archive.read_bytes() == first
+    with pytest.raises(SystemExit):
+        shadow.cmd_pack(shadow.argparse.Namespace(wave=1))
+
+
+def test_forecast_summary_reads_the_response_fields() -> None:
+    raw = json.dumps({"pointEstimate": 4.1, "ciLow": 4.0, "ciHigh": 4.3, "unit": "%"})
+    assert shadow.forecast_summary(raw.encode()) == {
+        "pointEstimate": 4.1, "ciLow": 4.0, "ciHigh": 4.3, "unit": "%",
+        "resolutionDate": None,
+    }  # fmt: skip
+    assert shadow.forecast_summary(b"not json") is None
