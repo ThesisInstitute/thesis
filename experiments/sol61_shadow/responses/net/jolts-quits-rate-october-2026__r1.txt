@@ -2,54 +2,107 @@
   "slug": "jolts-quits-rate-october-2026",
   "country": "US",
   "type": "data",
-  "title": "October 2026 JOLTS quits rate: forecast unavailable",
-  "question": "What will the first BLS print of the October 2026 total nonfarm seasonally adjusted quits rate be?",
+  "title": "October 2026 US quits rate",
+  "question": "What will be the first-published October 2026 US total nonfarm seasonally adjusted quits rate in BLS JOLTS series JTS000000000000000QUR, Table 4?",
   "unit": "percent",
-  "pointEstimate": null,
-  "ciLow": null,
-  "ciHigh": null,
+  "pointEstimate": 1.9,
+  "ciLow": 1.72,
+  "ciHigh": 2.08,
   "confidence": 0.8,
   "resolutionDate": "2026-12-01",
-  "resolutionSource": "BLS Job Openings and Labor Turnover Survey, Table 4",
+  "resolutionSource": "US Bureau of Labor Statistics, Job Openings and Labor Turnover Survey",
   "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
-  "resolutionRule": "Resolve to the first official October 2026 value for total nonfarm seasonally adjusted quits rate, series JTS000000000000000QUR, in percent at the published precision. Ignore subsequent revisions.",
+  "resolutionRule": "Resolve to the first officially published value for year 2026, period M10, in BLS API series JTS000000000000000QUR: total nonfarm seasonally adjusted quits rate, corresponding to JOLTS Table 4. Use the published one-decimal percentage value with multiplication factor 1. Freeze the first print; subsequent corrections, monthly revisions, and annual revisions do not change the outcome.",
   "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
-  "historicalContext": [],
-  "drivers": [],
-  "sourceContext": [],
-  "runAt": "2026-10-06T22:16:22Z",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-01"}, "label": "January 2025", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "February 2025", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "March 2025", "value": 2.2},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "April 2025", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "May 2025", "value": 2.1},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "June 2025", "value": 2.1},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "July 2025", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "August 2025", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "September 2025", "value": 1.9},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "October 2025", "value": 1.9},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "November 2025", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "December 2025", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "January 2026", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "February 2026", "value": 1.9},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "March 2026", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "April 2026", "value": 1.9},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "May 2026", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "June 2026", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "July 2026", "value": 1.9},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "August 2026", "value": 1.9}
+  ],
+  "drivers": [
+    "Persistence of the latest 1.9 percent quits rate",
+    "Recent six-month average of 1.95 percent",
+    "Flat July-to-August quits rate",
+    "Two unobserved monthly changes before the October target",
+    "First-print sampling and revision uncertainty"
+  ],
+  "sourceContext": [
+    "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2025&endyear=2026",
+    "https://www.bls.gov/news.release/jolts.t04.htm",
+    "https://www.bls.gov/news.release/jolts.nr0.htm",
+    "https://www.bls.gov/schedule/news_release/jolts.htm",
+    "https://www.bls.gov/schedule/2026/12_sched.htm"
+  ],
+  "runAt": "2026-10-07T12:48:59Z",
   "reasoning": [
     {
       "kind": "heading",
-      "text": "Forecast stopped because the official-source fetch failed"
+      "text": "October 2026 JOLTS quits-rate forecast"
     },
     {
       "kind": "text",
-      "text": "The registered target is October 2026 total nonfarm seasonally adjusted quits rate, BLS series JTS000000000000000QUR, first print."
+      "text": "The exact target is the first October 2026 value of JTS000000000000000QUR, total nonfarm quits rate, seasonally adjusted, in percent. Every quits-rate anchor and historical observation uses this same variant. Table 4 defines the rate as monthly quits divided by employment. API history is the current available vintage, with August marked preliminary; historical observations are not asserted to be original first prints. [BLS Table 4](https://www.bls.gov/news.release/jolts.t04.htm)."
+    },
+    {
+      "kind": "text",
+      "text": "The official calendar explicitly schedules the October 2026 JOLTS release for December 1, 2026, at 10:00 AM Eastern. This verifies the registered resolution date without inferring cadence. [BLS JOLTS calendar](https://www.bls.gov/schedule/news_release/jolts.htm), [December calendar](https://www.bls.gov/schedule/2026/12_sched.htm)."
     },
     {
       "kind": "tool",
       "tool": "official.lookup",
-      "call": "Open https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2024&endyear=2026 and https://www.bls.gov/news.release/jolts.t04.htm.",
-      "result": "The lookup failed with: Fatal error: network error: error sending request. No source response or numerical observations were returned."
+      "call": "curl -sS 'https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2025&endyear=2026'; read the echoed JSON response.",
+      "result": "REQUEST_SUCCEEDED. January-December 2025 quits rates: 2.0, 2.0, 2.2, 2.0, 2.1, 2.1, 2.0, 2.0, 1.9, 1.9, 2.0, 2.0 percent. January-August 2026: 2.0, 1.9, 2.0, 1.9, 2.0, 2.0, 1.9, 1.9 percent. August 2026 is the latest observation and is preliminary."
     },
     {
       "kind": "text",
-      "text": "The mandatory base rate could not be fetched. Following the explicit fetch-failure instruction, the run stopped without substituting remembered values."
+      "text": "The outside-view reference class contains 20 fetched monthly observations from January 2025 through August 2026. Their base rate, measured by the mean level, is 1.99 percent; the latest six-month mean is 1.95 percent. The latest level of 1.9 percent is therefore close to the recent reference-class center. I anchor the forecast on persistence before considering current-release evidence."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.bls.gov/news.release/jolts.t04.htm and read the Total row under seasonally adjusted rates.",
+      "result": "Total quits rates were 2.0 percent in May 2026, 2.0 in June, 1.9 in July, and 1.9 in August. July-to-August rate change was 0.0 percentage points. Quits levels were 3,089 thousand in July and 3,066 thousand in August, a decline of 23 thousand. [BLS Table 4](https://www.bls.gov/news.release/jolts.t04.htm)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.bls.gov/news.release/jolts.nr0.htm and read the August 2026 release summary.",
+      "result": "The September 29 release reported August quits at 3.1 million and 1.9 percent, unchanged over the month. August hires were 5.2 million with a 3.3 percent rate; job openings were 7.1 million with a 4.3 percent rate. The release characterized hires and openings as little changed. [BLS August release](https://www.bls.gov/news.release/jolts.nr0.htm)."
     },
     {
       "kind": "text",
-      "text": "December 1, 2026 is the supplied ledger resolution date; it was not verified from an official calendar in this run."
+      "text": "Level effect: retain the latest 1.9 percent anchor. Momentum effect: the recent decline followed by a flat month does not justify extrapolating a persistent trend, so the point adjustment is zero. One-off effect: offsetting industry movements provide no clear aggregate adjustment. Policy-mechanism effect: the fetched evidence supplies no quantified policy transmission estimate, so the policy adjustment is zero. These are modeling judgments."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a zero-drift persistence prior anchored at August's 1.9 percent, with 20 monthly levels and 19 successive changes from January 2025 through August 2026. Level, momentum, one-off, and policy adjustments sum to 0.00 percentage points, giving point = 1.90. The changes have mean -0.005263 percentage points and sum of squares 0.170000. Sample sigma = sqrt((0.170000 - 19*(-0.005263)^2)/18) = 0.097032 percentage points. The normal-approximation one-month 80% half-width is 1.28*sigma = 0.124201. October is two monthly transitions beyond August, so assuming independent increments gives half-width = 1.28*0.097032*sqrt(2) = 0.175647. Unrounded bounds are 1.724353 and 2.075647 percent; rounding outward to two decimals gives 1.72 and 2.08 percent. This uses current-vintage dispersion as a proxy for first-print uncertainty rather than claiming an original-vintage backtest."
     },
     {
       "kind": "text",
-      "text": "Prior/update/interval: No historical sample was obtained, so sigma, adjustment components, and an 80% interval cannot be calculated. Null forecast fields indicate failure and must not be treated as a valid forecast."
+      "text": "The upside risk is a broad rebound in hiring and voluntary job switching; a first print of 2.1 percent or higher would land above the interval. The downside risk is a sharper hiring slowdown that discourages voluntary departures; a first print of 1.7 percent or lower would land below the interval. Such changes would be outside the interval and would falsify the assumption that recent monthly dispersion remains representative."
     },
     {
       "kind": "forecast",
-      "point": null,
-      "ciLow": null,
-      "ciHigh": null
+      "point": 1.9,
+      "ciLow": 1.72,
+      "ciHigh": 2.08
     }
   ]
 }

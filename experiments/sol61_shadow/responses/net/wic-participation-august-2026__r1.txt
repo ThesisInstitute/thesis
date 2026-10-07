@@ -1,0 +1,38 @@
+{
+  "slug": "wic-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "August 2026 WIC participation",
+  "question": "What will USDA FNS report for national total WIC participation in August 2026 in its first official monthly print?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first official monthly print of national total WIC participation for August 2026, expressed in millions and retaining the published precision after conversion. Exclude subsequent revisions.",
+  "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program",
+    "https://www.fns.usda.gov/pd/data-release-schedule"
+  ],
+  "runAt": "2026-10-07T10:31:45Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official-source fetch failure"
+    },
+    {
+      "kind": "text",
+      "text": "The official WIC program page fetch returned HTTP 403. The attempted official release-schedule endpoint was inaccessible through the web tool and returned an empty body through curl."
+    },
+    {
+      "kind": "text",
+      "text": "Stopped under the required failed-fetch rule. No participation history or official release date was successfully fetched. The supplied release window does not verify an exact resolutionDate. Null forecast fields indicate a failed run; no remembered values, inferred release date, or invented interval were substituted."
+    }
+  ]
+}

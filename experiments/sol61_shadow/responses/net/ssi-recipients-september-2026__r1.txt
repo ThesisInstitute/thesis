@@ -1,0 +1,143 @@
+{
+  "slug": "ssi-recipients-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 SSI recipients: forecast not issued",
+  "question": "What will SSA first publish for September 2026 end-of-month total SSI recipients receiving all federally administered payments, without seasonal adjustment, in Table 2 of SSI Monthly Statistics?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Social Security Administration SSI Monthly Statistics, Table 2",
+  "resolutionSourceUrl": "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-09/table02.html",
+  "resolutionRule": "Resolve using the September 2026 Total column under Number of recipients in the first official publication of SSI Monthly Statistics Table 2, All Federally Administered Payments. Convert the whole-person count to millions by dividing by 1,000,000, retaining six decimal places. Exclude subsequent revisions and corrections; no correction grace period applies. The registered factor 0.001 conflicts with the table's person-count units and the registered target unit millions.",
+  "dataPointId": "ssa.ssi.total_recipients.2026-09.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 7.351825
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 7.338132
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 7.322937
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 7.323731
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-07"
+      },
+      "label": "July 2026",
+      "value": 7.300297
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-08"
+      },
+      "label": "August 2026",
+      "value": 7.306182
+    }
+  ],
+  "drivers": [
+    "Recent decline in total recipients",
+    "Small August rebound",
+    "Mixed historical September changes",
+    "Official release date could not be verified"
+  ],
+  "sourceContext": [
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-03/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-04/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-05/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-06/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-07/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-08/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/index.html",
+    "https://www.ssa.gov/policy/pub_schedule.html",
+    "https://ssa.gov/policy/pub_schedule.html"
+  ],
+  "runAt": "2026-10-07T10:31:44Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 SSI recipients: run stopped without issuing a forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first official September 2026 end-of-month total recipient count in SSA SSI Monthly Statistics Table 2, All Federally Administered Payments. Every historical anchor below uses that same unadjusted variant."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the March and April 2026 SSA Table 2 issue pages.",
+      "result": "March 2026 total recipients: 7,351,825. April 2026 total recipients: 7,338,132."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the May and June 2026 SSA Table 2 issue pages.",
+      "result": "May 2026 total recipients: 7,322,937. June 2026 total recipients: 7,323,731."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the July and August 2026 SSA Table 2 issue pages.",
+      "result": "July 2026 total recipients: 7,300,297. August 2026 total recipients: 7,306,182."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched six-month reference class supplies the base rate: the level declined from March through August, with small increases in June and August. These are official fetched observations, not remembered values."
+    },
+    {
+      "kind": "math",
+      "text": "The source publishes whole-person counts: 7,306,182 / 1,000,000 = 7.306182 millions. The registered multiplier 0.001 instead produces 7,306.182, which represents thousands of recipients. This is a concrete ledger conversion discrepancy; the target identity and unit millions are retained."
+    },
+    {
+      "kind": "text",
+      "text": "The official publishing schedule was fetched, but its SSI Monthly Statistics row supplied monthly frequency without an anticipated release date. The current official publication index identified August 2026 as released September 2026 and also omitted a next-update date. Neither verifies a September 2026 release day."
+    },
+    {
+      "kind": "text",
+      "text": "A curl fetch of the www.ssa.gov schedule returned Access Denied HTML, and https://ssa.gov/policy/pub_schedule.html returned an empty body. Following the instruction to stop on a failed or empty fetch, this run stops here. The registered expected window is not substituted for an officially verified resolutionDate."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: A persistence prior anchored on August and informed by the six fetched March-August observations would be the starting model, followed by separate momentum and September adjustments. No model update, sigma-based interval, or final implied bounds are issued because the mandatory release-date verification failed."
+    },
+    {
+      "kind": "text",
+      "text": "Potential upside risk is accelerated awards or reinstatements; potential downside risk is greater terminations or suspensions. An administrative processing discontinuity could land outside the interval of a completed forecast, but this stopped run establishes no interval."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

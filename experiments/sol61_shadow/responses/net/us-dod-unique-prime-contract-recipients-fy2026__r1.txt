@@ -1,10 +1,9 @@
 {
   "slug": "us-dod-unique-prime-contract-recipients-fy2026",
-  "status": "refused",
   "country": "US",
   "type": "data",
-  "title": "DoD unique prime-contract recipients, FY2026",
-  "question": "How many distinct non-null recipient_id values appear in the registered USAspending FY2026 DoD prime-contract transactions query snapshot, expressed in thousands?",
+  "title": "FY2026 DoD recipient forecast refused",
+  "question": "What will the registered USAspending query snapshot report for distinct non-null recipient_id values among FY2026 Department of Defense prime-contract transactions, award types A, B, C and D, expressed in thousands?",
   "unit": "thousands",
   "pointEstimate": null,
   "ciLow": null,
@@ -13,52 +12,77 @@
   "resolutionDate": null,
   "resolutionSource": "USAspending API registered query snapshot",
   "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
-  "resolutionRule": "Count distinct non-null results[].recipient_id across all pages of the registered FY2026 transactions-level query, with awarding agency Department of Defense, toptier, award types A/B/C/D, and page size 100; multiply by 0.001. Resolve using the registered query snapshot without substituting later revisions. An official snapshot date could not be verified.",
+  "resolutionRule": "Use the registered_query_snapshot with awarding agency Department of Defense, contract award types A/B/C/D, spending_level transactions, FY2026 transaction dates, and page size 100. Count distinct non-null results[].recipient_id across all pages and multiply by 0.001. Preserve the registered snapshot against later revisions. The exact snapshot date could not be verified from an official schedule in this run.",
   "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
   "historicalContext": [],
-  "drivers": [],
+  "drivers": [
+    "Daily source updates",
+    "Delayed DoD contract reporting",
+    "Unverified snapshot date"
+  ],
   "sourceContext": [
     "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
-    "https://www.usaspending.gov/data/about-the-data-download.pdf",
-    "https://www.usaspending.gov/data/data-sources-download.pdf"
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/"
   ],
-  "runAt": "2026-10-06T22:16:28Z",
+  "runAt": "2026-10-07T12:49:07Z",
   "reasoning": [
     {
       "kind": "heading",
-      "text": "Forecast refused: required historical query failed"
+      "text": "Forecast refused: required evidence remains unverified"
     },
     {
       "kind": "text",
-      "text": "The target is the registered distinct-recipient query snapshot. Agency profile totals and broader contract aggregates cannot supply its historical reference class."
+      "text": "The target remains the exact registered recipient query. A valid forecast requires six complete historical query counts and an officially verified resolution date. Neither requirement was established. Null values record refusal, not a numerical forecast."
     },
     {
       "kind": "tool",
       "tool": "official.lookup",
-      "call": "POST https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/ with body {\"filters\":{\"time_period\":[{\"start_date\":\"2024-10-01\",\"end_date\":\"2025-09-30\"}],\"agencies\":[{\"name\":\"Department of Defense\",\"tier\":\"toptier\",\"type\":\"awarding\"}],\"award_type_codes\":[\"A\",\"B\",\"C\",\"D\"]},\"spending_level\":\"transactions\",\"page\":1,\"limit\":100}",
-      "result": "Fetch failed with exit code 28 and output: curl: (28) SSL connection timeout. No response body or recipient statistics were returned."
+      "call": "POST the registered recipient query for FY2025, page 1, limit 100, to https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/.",
+      "result": "The successful response reported LOCKHEED MARTIN CORPORATION amount 34088390516.22 and hasNext=true. This is a partial recipient page; the dollar amount is not the target recipient count."
     },
     {
       "kind": "tool",
       "tool": "official.lookup",
-      "call": "Open the official USAspending About the Data PDF, page 9.",
-      "result": "The fetched methodology states that contract data generally become available within five days and that publication of DoD and USACE data in FPDS is delayed 90 days. These timing rules do not verify a snapshot date within the registered October 15–22, 2026 window."
+      "call": "POST the same registered FY2025 query at page 101, limit 100.",
+      "result": "The successful response reported EIGHT STAR PARTS LLC amount 1505523.74 and hasNext=true. Pagination remained incomplete, so no annual distinct-recipient value was established."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and read https://www.usaspending.gov/data/data-sources-download.pdf.",
+      "result": "Official documentation states a 90-day delay for DoD and USACE contract-data submission and describes daily publication following the nightly pipeline. It does not establish an October annual recipient-count release date."
     },
     {
       "kind": "text",
-      "text": "No official calendar or announcement confirming the resolution date was fetched. The registered expected window cannot establish a verified resolutionDate."
+      "text": "The official submission-period endpoint was fetched, but its agency submission calendar did not verify a date for this registered recipient-query snapshot. The supplied October 15–22 window is target context, not official schedule verification."
     },
     {
       "kind": "text",
-      "text": "Prior/update/interval: The required six-period base rate could not be fetched. No persistence prior, historical sigma, current-period adjustment, or defensible interval can be calculated. Research stopped after the registered historical query failed."
+      "text": "The recipient-documentation link in the official API endpoint index returned Internal Error. Following the instruction to stop after a failed fetch, this run stopped without substituting another series or remembered history."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate could not be calculated: six complete historical registered-query counts were not established. Partial pages are not historical prints, and their spending amounts cannot substitute for recipient counts."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or historical adjustment was estimated. Without complete fetched historical counts, sigma and the 1.28*sigma interval half-width cannot be calculated; final implied bounds remain null."
     },
     {
       "kind": "math",
-      "text": "No historical counts were returned, so sigma and 1.28*sigma are undefined. Estimates and bounds are null rather than invented."
+      "text": "The registered transformation is 0.001 times the number of distinct non-null recipient_id values across every result page. Missing pages prevent evaluation of that count and its historical successive-change dispersion."
     },
     {
       "kind": "text",
-      "text": "This is a refusal record, not a normalized forecast. The required historicalContext, verified resolution date, and numerical forecast remain unavailable."
+      "text": "An upside risk is additional recipients becoming visible through delayed reporting. A downside risk is recipient identity consolidation or record removal. Their likelihood and what would land outside the interval cannot be quantified without the required history and snapshot date."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
     }
   ]
 }

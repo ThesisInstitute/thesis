@@ -1,0 +1,150 @@
+{
+  "slug": "canada-monthly-gdp-growth-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, October 2026",
+  "question": "What will Statistics Canada's first full October 2026 release report for month-over-month growth in Canada's all-industries real GDP at basic prices, seasonally adjusted at annual rates, in chained 2017 dollars, using Table 36-10-0434-01 vector v65201210?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.15,
+  "ciLow": -0.11,
+  "ciHigh": 0.41,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-23",
+  "resolutionSource": "Statistics Canada, GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Resolve on the first full official October 2026 publication of vector v65201210. Calculate 100*(October level/September level-1), using both levels from that initial publication. The growth rate is monthly, not annualized. Retain the calculated percentage from the published level precision without additional rounding; the Daily's one-decimal headline is a cross-check. Exclude advance estimates and all subsequent revisions or corrections.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 0.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "Positive recent first-print average",
+    "Flat July output tempers persistence",
+    "August employment decline",
+    "Possible payback after pre-tariff export shipments",
+    "Construction support versus manufacturing weakness",
+    "Unchanged policy rate adds no new easing impulse"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm?indgeo=0&indid=3569-1",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm",
+    "https://www.bankofcanada.ca/2026/09/fad-press-release-2026-09-02/"
+  ],
+  "runAt": "2026-10-07T11:56:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October growth forecast: 0.15%, with an 80% interval of -0.11% to 0.41%"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is vector v65201210 in Table 36-10-0434-01: Canada, all industries, basic prices, chained 2017 dollars, seasonally adjusted at annual rates. All GDP historical observations and persistence anchors use this same variant and the first full monthly release. Historical headline rates are published to one decimal; the registered resolver computes growth from published levels. Identity verified against the [official vector definition](https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm)."
+    },
+    {
+      "kind": "text",
+      "text": "The [official release calendar](https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf) explicitly pairs the October 2026 GDP-by-industry reference period with December 23, 2026. This verifies the registered resolution date."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada contemporaneous GDP-by-industry releases for January, February and March 2026.",
+      "result": "First full monthly prints: [January](https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm) +0.1%; [February](https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm) +0.2%; [March](https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm) -0.1%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada contemporaneous GDP-by-industry releases for April, May and June 2026.",
+      "result": "First full monthly prints: [April](https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm) +0.5%; [May](https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm) +0.3%; [June](https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm?indgeo=0&indid=3569-1) +0.3%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the September 29 release covering July 2026 GDP by industry.",
+      "result": "July's first full monthly print was 0.0%. Construction grew 1.3%, manufacturing fell 0.9%, and 10 of 20 sectors expanded. [Statistics Canada July release](https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm)."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the seven January-July first prints: their mean is 0.185714%, with five positive months, one flat month and one negative month. This reference class anchors modest expansion. Its short span makes the dispersion estimate uncertain."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada's August 2026 Labour Force Survey, released September 4.",
+      "result": "Employment declined 42,000, or 0.2%, while unemployment remained 6.4%. [Statistics Canada August labour release](https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada's August merchandise-trade release through official-source web search.",
+      "result": "Real exports rose 2.5% in August; exports to the United States rose 8.1%. Statistics Canada says anticipated tariffs taking effect at August's end may have encouraged earlier shipments. [Statistics Canada August trade release](https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the Bank of Canada's September 2, 2026 policy announcement.",
+      "result": "The overnight-rate target was held at 2.25%; the Bank Rate was 2.5% and the deposit rate 2.20%. [Bank of Canada announcement](https://www.bankofcanada.ca/2026/09/fad-press-release-2026-09-02/)."
+    },
+    {
+      "kind": "text",
+      "text": "Separate effects before combining: the GDP level adds no adjustment to monthly growth. Momentum receives a small persistence adjustment toward flat July output. The employment decline supports a modest demand discount. Possible export pull-forward supports a separate one-off payback discount; this is an inference, not an observed October contraction. The policy hold adds no new easing impulse, and lagged transmission warrants no separate immediate adjustment. Construction strength offsets some industrial weakness."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use an empirical-mean prior with weak persistence, based on seven fetched January-July 2026 first prints [0.1, 0.2, -0.1, 0.5, 0.3, 0.3, 0.0]. Mean = 1.3/7 = 0.185714. Momentum adjustment = 0.10*(0.0-0.185714) = -0.018571; judgmental labour-demand adjustment = -0.01; one-off export-payback adjustment = -0.01; level and incremental policy adjustments = 0. Point = 0.147143%, rounded to 0.15%. For this growth series, use dispersion of the values themselves: sigma = 0.203540 percentage points = sqrt(0.248571/(7-1)). Approximate normal predictive half-width = 1.28*sigma = 0.260531. Bounds centered on 0.15 are [-0.110531, 0.410531], reported as [-0.11, 0.41]. This is an approximate 80% predictive interval, not a confidence interval for the historical mean."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is sustained construction growth alongside a manufacturing and refinery rebound. The downside risk is tariff-related export payback combined with weaker hiring and consumption. Broad simultaneous gains in construction, manufacturing and resource production could land above 0.41%, outside the interval; major plant outages or a widespread export contraction could land below -0.11%, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.15,
+      "ciLow": -0.11,
+      "ciHigh": 0.41
+    }
+  ]
+}

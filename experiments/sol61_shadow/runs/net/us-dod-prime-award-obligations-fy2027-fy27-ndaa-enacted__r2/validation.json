@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+      "ok": false,
+      "errors": [
+        "math step does not show interval derivation (sigma = X or 1.28)"
+      ]
+    }
+  ]
+}

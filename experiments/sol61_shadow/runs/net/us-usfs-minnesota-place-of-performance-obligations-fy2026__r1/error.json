@@ -1,5 +1,5 @@
 {
-  "phase": "seal",
-  "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+  "phase": "validate",
+  "message": "TypeError: strptime() argument 1 must be str, not None",
   "command": null
 }

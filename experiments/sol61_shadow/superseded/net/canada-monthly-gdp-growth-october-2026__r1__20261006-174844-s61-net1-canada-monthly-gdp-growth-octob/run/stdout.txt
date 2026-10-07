@@ -1,0 +1,55 @@
+{
+  "slug": "canada-monthly-gdp-growth-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, October 2026",
+  "question": "What will Statistics Canada's first official print show for October 2026 month-over-month real GDP growth by industry, all industries, seasonally adjusted at annual rates, in chained 2017 dollars?",
+  "unit": "percent_growth",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-23",
+  "resolutionSource": "Statistics Canada GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+  "resolutionRule": "Resolve using the first official October 2026 observation for vector v65201210 and its accompanying September observation. Calculate 100 times (October level divided by September level minus 1), retaining the precision implied by the published levels. Exclude subsequent revisions. The registered release date could not be independently verified in this run.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_10.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods"
+  ],
+  "runAt": "2026-10-06T22:16:23Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official evidence fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is October 2026 first-print monthly real GDP growth for Statistics Canada vector v65201210. Target details above come from the supplied contract and were not independently verified."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Search official Statistics Canada pages for GDP releases and vector v65201210.",
+      "result": "Fatal error: network error: error sending request. No source content was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods with [{\"vectorId\":65201210,\"latestN\":31}].",
+      "result": "curl: (7) Failed to connect to www150.statcan.gc.ca port 443 after 4964 ms: Couldn't connect to server. No statistical observations were returned."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory official base rate could not be fetched. Following the instruction to stop on a failed fetch, no historical values, numerical forecast, or interval were invented. This object therefore does not satisfy the successful-forecast validation requirements."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,62 +1,63 @@
 {
-  "status": "refused",
   "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
   "country": "US",
   "type": "data",
-  "title": "DHS Title VI FY2026 award transaction obligations",
-  "question": "What will FY2026 DHS Title VI award transaction obligations equal in the first official registered-query snapshot, using the exact registered Treasury-account and award-type filters?",
+  "title": "DHS Title VI award transaction obligations, FY2026",
+  "question": "What will FY2026 DHS Title VI award transaction obligations equal in USD in the first registered-query snapshot, using the exact registered Treasury-account and award-type filters?",
   "unit": "usd",
+  "status": "refused",
+  "refusalReason": "The required registered-query history could not be fetched. The endpoint requires POST, but the available web tools cannot submit a request body. An official resolution date also could not be verified.",
   "pointEstimate": null,
   "ciLow": null,
   "ciHigh": null,
   "confidence": 0.8,
   "resolutionDate": null,
-  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSource": "U.S. Treasury USAspending API",
   "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
-  "resolutionRule": "Execute the registered POST query unchanged, with spendingLevel transactions and group fiscal_year. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by the registered factor. Preserve official numeric precision and resolve on the registered snapshot, excluding subsequent revisions. The snapshot date could not be verified in this run.",
+  "resolutionRule": "Resolve on the first official registered-query snapshot for FY2026. Execute the exact registered POST query with spendingLevel transactions, group fiscal_year, and all registered Treasury-account and award-type filters. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by the registered factor of 1. Preserve the returned USD precision. Subsequent revisions do not replace the resolving snapshot.",
   "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
   "historicalContext": [],
   "drivers": [],
   "sourceContext": [
     "https://api.usaspending.gov/api/v2/search/spending_over_time/",
-    "https://api.usaspending.gov/docs/endpoints/federal_accounts/",
-    "https://tfx.treasury.gov/data-transparency/resources",
-    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx",
-    "https://www.usaspending.gov/data/data-sources-download.pdf"
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://fiscal.treasury.gov/system/files/files/gtas/fy-2026-reporting-window-schedule.pdf"
   ],
-  "runAt": "2026-10-06T21:52:07Z",
+  "runAt": "2026-10-07T12:44:49Z",
   "reasoning": [
     {
       "kind": "heading",
-      "text": "Forecast refused: required registered-query history could not be fetched"
+      "text": "Forecast refused: required exact-query evidence unavailable"
     },
     {
       "kind": "text",
-      "text": "The target is the exact registered Treasury-account-filtered transaction query, not DHS agency totals or account budget balances. Target identifiers and filters come from the supplied contract, not independently fetched statistical evidence."
+      "text": "The target is usaspending.dhs.title_vi.award_transaction_obligations for FY2026, defined exclusively by the registered transaction query. Broader DHS totals cannot supply its historical anchors."
     },
     {
       "kind": "text",
-      "text": "Official API documentation fetched through web search at https://api.usaspending.gov/docs/endpoints/federal_accounts/ identifies spending_over_time as a POST endpoint returning aggregated transaction amounts."
+      "text": "Fetch evidence: opening https://api.usaspending.gov/api/v2/search/spending_over_time/ with the web tool returned '(405) Method Not Allowed'. This was a URL fetch, not an executed POST query; no obligation values were returned."
     },
     {
       "kind": "text",
-      "text": "Fetch evidence: attempts to open the registered endpoint with the native web tool failed with 'Fatal error: connection failed: error sending request'. The alternate web tool also failed with a transport error. These attempts did not execute the registered POST query."
+      "text": "The official endpoint index lists spending_over_time as POST: https://api.usaspending.gov/docs/endpoints/. Both available web-tool schemas lack request-method and request-body parameters. Shell-based network requests are prohibited by the run instructions, so the exact historical queries could not be executed."
     },
     {
       "kind": "text",
-      "text": "Neither available web tool accepts an HTTP POST body. The run instructions restrict shell use to the UTC date command and short arithmetic, preventing an alternative HTTP client. No required historical query was executed, so historicalContext is empty and this object is explicitly a refusal, not a forecast cell."
+      "text": "The required base rate and reference class cannot be established without fetched registered-query history. The empty historicalContext records a fetch failure, not evidence that the official source exposes fewer than six prints."
     },
     {
       "kind": "text",
-      "text": "No admissible numeric history was fetched. A base rate or reference class therefore cannot be established. Fetch failure does not demonstrate that the official source exposes fewer than six prints, and no history-availability exception is claimed."
+      "text": "No official registered-query snapshot resolution date was verified. The official FY2026 GTAS schedule gives October 6, 2026 as the September reporting-window opening and October 20, 2026 as the Expenditure TAS certification deadline. These are reporting deadlines, not this target's publication date: https://fiscal.treasury.gov/system/files/files/gtas/fy-2026-reporting-window-schedule.pdf."
     },
     {
-      "kind": "text",
-      "text": "The official Treasury resources page links a fiscal-year reporting schedule, but opening https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx returned an unsupported-content-type error. The fetched USAspending data-sources document describes daily updates; this does not verify a particular registered snapshot date. resolutionDate remains null."
+      "kind": "math",
+      "text": "Prior/update/interval: No persistence prior, historical flow dispersion, or adjustment components can be estimated from fetched exact-query observations. sigma is unavailable, so the required half-width calculation of approximately 1.28 times sigma and final implied bounds cannot be computed. Null estimates represent refusal, not zero obligations."
     },
     {
-      "kind": "text",
-      "text": "Prior/update/interval: No persistence prior, historical dispersion, adjustment components, sigma, or interval bounds can be estimated from admissible fetched history. Point and interval fields remain null rather than containing invented numbers."
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
     }
   ]
 }

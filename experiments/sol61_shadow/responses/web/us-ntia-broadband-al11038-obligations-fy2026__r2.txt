@@ -1,0 +1,65 @@
+{
+  "slug": "us-ntia-broadband-al11038-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "NTIA broadband obligations, FY2026",
+  "question": "What are FY2026 financial-assistance transaction obligations for Assistance Listing 11.038 returned by the exact USAspending registered query at its registered-query snapshot?",
+  "unit": "usd_millions",
+  "status": "refused",
+  "refusalReason": "The mandatory registered-query history could not be fetched: the endpoint requires POST, but the available web tools cannot submit a POST body. Opening the endpoint returned 405 Method Not Allowed. An exact official resolution date also could not be verified.",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Preserve the registered_query_snapshot policy. POST the registered filters for Assistance Listing 11.038, award type codes 02 through 11, spending level transactions, and group fiscal_year. Read the FY2026 aggregated_amount and multiply by 1e-06. Later revisions must not replace the registered snapshot. The required official resolution date remains unverified.",
+  "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-07T11:39:57Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Registered-query forecast refused because required evidence is unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the supplied transaction-level registered query for Assistance Listing 11.038. Agency profile totals, program announcements, and broader award aggregates cannot substitute for its historical values."
+    },
+    {
+      "kind": "text",
+      "text": "The official USAspending endpoint documentation fetched this run lists /api/v2/search/spending_over_time/ as POST."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web opening https://api.usaspending.gov/api/v2/search/spending_over_time/ returned 'Failed to fetch https://api.usaspending.gov/api/v2/search/spending_over_time/: (405) Method Not Allowed'. This was an open attempt, not an executed POST query."
+    },
+    {
+      "kind": "text",
+      "text": "Available web-tool schemas provide no HTTP method or request-body parameter. The run instructions prohibit shell network requests. Consequently, no prior-period registered POST queries could be executed and no canonical historical obligation values were fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The required base rate or reference class cannot be established without the mandatory fetched history. The empty historicalContext documents retrieval failure; it does not claim that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No numerical prior, adjustment, sigma, or 80% bounds can be calculated from the required history because it was not retrieved. Supplying those numbers would invent evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Official timing evidence: USAspending's Data Sources document states that data update daily after the nightly pipeline, with financial assistance generally reported within two weeks and loans within 30 days. Those reporting rules do not verify a specific FY2026 snapshot release date. The supplied expected window cannot substitute for an official announcement."
+    },
+    {
+      "kind": "text",
+      "text": "No forecast is issued, pursuant to the prompt's explicit refusal instruction when the registered query cannot be executed. Null estimates and an unverified resolution date make this refusal explicit rather than presenting an unsupported forecast."
+    }
+  ]
+}

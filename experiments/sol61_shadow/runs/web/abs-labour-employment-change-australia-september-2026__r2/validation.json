@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "abs-labour-employment-change-australia-september-2026",
+      "ok": false,
+      "errors": [
+        "resolutionSourceUrl host 'www.abs.gov.au' is not among the preregistered source binding hosts ['data.api.abs.gov.au']"
+      ]
+    }
+  ]
+}

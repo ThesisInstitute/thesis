@@ -1,0 +1,199 @@
+{
+  "slug": "us-eci-private-wages-salaries-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US private wages and salaries growth, Q3 2026",
+  "question": "What will the FIRST PRINT of the U.S. Bureau of Labor Statistics Employment Cost Index, Table 2, Private industry workers / All workers, seasonally adjusted wages and salaries percent change for the 3 months ended September 2026 (2026-Q3), report to one decimal place?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.9,
+  "ciLow": 0.7,
+  "ciHigh": 1.1,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, Employment Cost Index, Table 2",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/eci.t02.htm",
+  "resolutionRule": "Use the first publicly released September 2026 Employment Cost Index Table 2, Employment Cost Index for wages and salaries, by occupational group and industry [Seasonally adjusted], United States, Private industry workers / All workers, Percent changes for 3-months ended September 2026. Resolve to its published one-decimal quarterly percent change. Preserve the original release; ignore all subsequent revisions and corrections. The registered ECIWAG multiply-by-1 binding supplies an index level rather than this named percent-growth outcome; that concrete registration discrepancy is documented in reasoning without changing the registered slug, unit, or dataPointId.",
+  "dataPointId": "bls.eci.private_wages_salaries_qoq.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2023-Q3"},
+      "label": "2023-Q3",
+      "value": 1.1
+    },
+    {
+      "period": {"type": "quarter", "value": "2023-Q4"},
+      "label": "2023-Q4",
+      "value": 0.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q1"},
+      "label": "2024-Q1",
+      "value": 1.1
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q2"},
+      "label": "2024-Q2",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 0.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 1.0
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 0.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 0.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 0.9
+    }
+  ],
+  "drivers": [
+    "Latest quarterly first print: 0.9%",
+    "Persistence ties moving average at published precision",
+    "Soft September hourly earnings and August vacancies",
+    "Existing ECI employment weights apply through Q3"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/eci.htm",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ECIWAG",
+    "https://alfred.stlouisfed.org/series?seid=ECIWAG",
+    "https://www.bls.gov/news.release/eci.t02.htm",
+    "https://www.bls.gov/news.release/archives/eci_10312023.htm",
+    "https://www.bls.gov/news.release/archives/eci_01312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302024.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_10312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_01312025.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302025.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312025.htm",
+    "https://www.bls.gov/news.release/archives/eci_12102025.htm",
+    "https://www.bls.gov/news.release/archives/eci_02102026.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302026.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09292026.htm",
+    "https://www.bls.gov/eci/notices/2026/eci-2025-fixed-weights-and-removing-workers-compensation.htm",
+    "https://www.bls.gov/eci/factsheets/annual-seasonal-adjustment.htm"
+  ],
+  "runAt": "2026-10-07T12:41:17Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Independent first-print forecast: US private-industry ECI wages and salaries, 2026-Q3"
+    },
+    {
+      "kind": "text",
+      "text": "The outcome is the seasonally adjusted quarterly change in the fixed-basket private-industry wages and salaries ECI, not civilian compensation, annual wage growth, or the index level. The quarter ends September 2026. The supplied registered identity fields are retained; the catalog lookup was omitted under the run's independence restriction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/schedule/news_release/eci.htm and https://www.bls.gov/news.release/eci.t02.htm; inspect Third Quarter 2026 calendar entry and Table 2 Private industry workers / All workers.",
+      "result": "BLS calendar explicitly schedules Third Quarter 2026 for October 30, 2026, 08:30 AM. Current Table 2 shows June 2026 quarterly wages and salaries growth 0.9%, with seasonally adjusted index 179.010."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ECIWAG and https://alfred.stlouisfed.org/series?seid=ECIWAG.",
+      "result": "The exact registered CSV was inaccessible through the web tool. The successfully fetched ALFRED series page identifies ECIWAG as Index Dec 2005=100, seasonally adjusted, quarterly: 2026-Q2 179.010; 2026-Q1 177.498; 2025-Q4 176.233; 2025-Q3 174.948; 2025-Q2 173.563."
+    },
+    {
+      "kind": "text",
+      "text": "Concrete ledger error: multiplying ECIWAG by 1 preserves an index, inconsistent with the registered percent_growth unit and private_wages_salaries_qoq concept. This forecast remains attached to the same growth target and explicitly uses its named Table 2 percent-change column. The registered automated transform cannot itself resolve that growth measure as written. No ALFRED CSV history or vintage values were invented; the first-print growth history below was fetched from the original agency releases of that exact Table 2 row."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open original archived ECI releases https://www.bls.gov/news.release/archives/eci_10312023.htm, https://www.bls.gov/news.release/archives/eci_01312024.htm, https://www.bls.gov/news.release/archives/eci_04302024.htm, https://www.bls.gov/news.release/archives/eci_07312024.htm, https://www.bls.gov/news.release/archives/eci_10312024.htm, https://www.bls.gov/news.release/archives/eci_01312025.htm; read Table 2, Private industry workers / All workers, final quarter's 3-month percent-change column.",
+      "result": "Original-release, seasonally adjusted private wages and salaries quarterly percent changes: 2023-Q3 1.1%; 2023-Q4 0.9%; 2024-Q1 1.1%; 2024-Q2 0.8%; 2024-Q3 0.8%; 2024-Q4 0.9%. Each observation comes from its own period's first release, not the revised historical columns of a later release."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open original archived ECI releases https://www.bls.gov/news.release/archives/eci_04302025.htm, https://www.bls.gov/news.release/archives/eci_07312025.htm, https://www.bls.gov/news.release/archives/eci_12102025.htm, https://www.bls.gov/news.release/archives/eci_02102026.htm, https://www.bls.gov/news.release/archives/eci_04302026.htm, https://www.bls.gov/news.release/archives/eci_07312026.htm; read the same Table 2 row and final quarterly percent-change column.",
+      "result": "Original first prints: 2025-Q1 0.8%; 2025-Q2 1.0%; 2025-Q3 0.8%; 2025-Q4 0.7%; 2026-Q1 0.7%; 2026-Q2 0.9%. September 2025 was first released December 10, 2025, and December 2025 on February 10, 2026. Their first-print index levels were 174.954 and 176.233 respectively; the quarterly percentage columns, not cross-vintage index differences, supply the forecast history."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate / reference class: 12 consecutive original-release private-industry wage quarterly changes, 2023-Q3 through 2026-Q2, have mean 0.875%, median 0.85%, sample standard deviation 0.135680 percentage points, range 0.7%-1.1%, and interpolated 10th/90th percentiles 0.71%/1.09%. The initial prior and required persistence benchmark are the latest first print, 0.9%. This is a single US series, so a panel-shrinkage benchmark is inapplicable."
+    },
+    {
+      "kind": "math",
+      "text": "Model candidates were generated in memory from the fetched original-release observations before selecting the agent forecast. Both candidates use fallback-prior Gaussian intervals, not native or demonstrably calibrated model intervals. Interval dispersion uses all 12 fetched first prints; walk-forward point scores use only observations available before each forecast, with six evaluation quarters from 2025-Q1 through 2026-Q2. Candidate set: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"series\":\"bls.eci.private_wages_salaries_qoq\",\"target_period\":\"2026-Q3\",\"unit\":\"percent_growth\",\"point\":0.9,\"unrounded_point\":0.9,\"p10\":0.726119,\"p50\":0.9,\"p90\":1.073881,\"interval80\":{\"low\":0.726119,\"high\":1.073881},\"interval90\":{\"low\":0.676826,\"high\":1.123174},\"interval_method\":\"fallback-prior Gaussian; SD of 12 first-print quarterly changes; intervals centered on published-precision point\",\"calibration_n\":12,\"train_cutoff\":\"2026-Q2\",\"walk_forward\":{\"start\":\"2025-Q1\",\"end\":\"2026-Q2\",\"n\":6,\"scored_precision\":0.1,\"mae\":0.133333,\"rmse\":0.152753,\"unrounded_rmse\":0.152753,\"errors\":[-0.1,0.2,-0.2,-0.1,0,0.2]}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_3_quarter_mean\",\"series\":\"bls.eci.private_wages_salaries_qoq\",\"target_period\":\"2026-Q3\",\"unit\":\"percent_growth\",\"point\":0.8,\"unrounded_point\":0.766667,\"p10\":0.626119,\"p50\":0.8,\"p90\":0.973881,\"interval80\":{\"low\":0.626119,\"high\":0.973881},\"interval90\":{\"low\":0.576826,\"high\":1.023174},\"interval_method\":\"fallback-prior Gaussian; SD of 12 first-print quarterly changes; intervals centered on published-precision point\",\"calibration_n\":12,\"train_cutoff\":\"2026-Q2\",\"walk_forward\":{\"start\":\"2025-Q1\",\"end\":\"2026-Q2\",\"n\":6,\"scored_precision\":0.1,\"mae\":0.133333,\"rmse\":0.152753,\"unrounded_rmse\":0.136761,\"errors\":[0,0.2,-0.1,-0.2,-0.1,0.2]}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select the persistence candidate. At the agency's 0.1-point reporting precision, persistence and the trailing-three-quarter mean both have walk-forward MAE 0.133333 and RMSE 0.152753 percentage points. The moving average's unrounded RMSE is lower, 0.136761, but that advantage disappears for the published forecast precision and rests on only six evaluation prints. Its current unrounded point is (0.7+0.7+0.9)/3 = 0.766667%, published-precision point 0.8%. With no demonstrated scoring advantage at that precision, the default remains persistence at 0.9%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/news.release/archives/empsit_10022026.htm and https://www.bls.gov/news.release/archives/jolts_09292026.htm; inspect earnings paragraph and seasonally adjusted private-industry openings/quits.",
+      "result": "September 2026 private average hourly earnings were $37.81, up 0.1% monthly and 3.0% yearly; unemployment was 4.2%, versus 4.1% in July and August. August private job openings were 6.348 million versus July's 6.562 million, with the openings rate 4.5% versus 4.6%. The private quits rate was 2.1% in both July and August, versus June's 2.2%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/eci/notices/2026/eci-2025-fixed-weights-and-removing-workers-compensation.htm and https://www.bls.gov/eci/factsheets/annual-seasonal-adjustment.htm.",
+      "result": "BLS says 2021 OEWS weights apply from December 2022 through September 2026. New 2025 weights and removal of workers' compensation costs begin with December 2026 data released January 2027. Seasonal factors are recalculated at the beginning of each year and the most recent 5 years are revised."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update components: the September earnings and August vacancies data point toward cooling, but no fetched, calibrated mapping converts composition-sensitive CES earnings or JOLTS vacancies into the fixed-basket ECI. Apply a 0.0-point incremental current-signal adjustment. Recent ECI momentum is already captured by the benchmark candidates and receives no second adjustment. No fetched release-specific wage one-off supports an adjustment. The announced weighting change starts after this target, so its Q3 adjustment is 0.0. Final weighting is 100% selected persistence prior and 0% unsupported discretionary update; delta from the strongest admissible benchmark is 0.0 percentage points."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: selected persistence prior = 0.9%, using the 12 original-release quarterly changes from 2023-Q3 through 2026-Q2. Momentum, current labor signals, one-offs, and announced methodology adjustments each contribute 0.0 percentage points beyond that prior, so point = 0.9 + 0.0 = 0.9%. Because the target is a change series, dispersion uses the fetched changes themselves: mean = 10.5/12 = 0.875; sum((x-0.875)^2) = 0.2025; sigma = 0.135680 percentage points = sqrt(0.2025/(12-1)). Fallback-prior Gaussian 80% half-width = 1.281552*sigma = 0.173881, giving 0.9-0.173881 = 0.726119 and 0.9+0.173881 = 1.073881. Round bounds outward to the published 0.1-point grid: ciLow = 0.7%, ciHigh = 1.1%. The 90% candidate interval is 0.9 +/- 1.644854*sigma = [0.676826,1.123174]. No regime multiplier is applied because the announced weight transition does not affect Q3; final 80% half-width 0.2 reflects outward rounding."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage sanity check: the unrounded 80% band contains 7 of the last 10 first prints, close to the nominal 8; the outward-rounded [0.7%,1.1%] band contains all 10. The discrete reporting grid makes the final interval conservative on this small retrospective sample; this is a sanity check, not proof of 80% out-of-sample calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and tail stress: persistence could overstate growth if the Q2 rebound from 0.7% to 0.9% reverses; the moving-average candidate and soft current labor data support that downside risk. Evidence of broad private-service wage freezes or cancelled incentive pay would move the point down; a sufficiently broad contraction producing 0.6% or less would land below the interval. Evidence of large September private education/healthcare pay settlements and renewed incentive payments would move it up; a broad acceleration to 1.2% or more would land above the interval. These are hypothetical falsification scenarios, not fetched events."
+    },
+    {
+      "kind": "tool",
+      "tool": "exec_command",
+      "call": "date -u +%Y-%m-%dT%H:%M:%SZ",
+      "result": "2026-10-07T12:41:17Z"
+    },
+    {
+      "kind": "forecast",
+      "point": 0.9,
+      "ciLow": 0.7,
+      "ciHigh": 1.1
+    }
+  ]
+}

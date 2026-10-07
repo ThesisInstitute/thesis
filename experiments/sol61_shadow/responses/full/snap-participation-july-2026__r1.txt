@@ -1,0 +1,183 @@
+{
+  "slug": "snap-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation in July 2026",
+  "question": "What will USDA report in the FIRST PRINT of national Supplemental Nutrition Assistance Program participation, Persons, for July 2026, an unadjusted monthly administrative count expressed in millions of people?",
+  "unit": "millions",
+  "pointEstimate": 36.143304,
+  "ciLow": 35.801462,
+  "ciHigh": 36.485146,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service, SNAP Data Tables, national monthly Persons",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Use the earliest official July 2026 entry for Persons in the FNS SNAP data tables, national monthly participation, without seasonal adjustment. Read July 2026 Participation Persons in the national monthly summary, or the identical national TOTAL in the state Persons table's July 2026 Initial column. The registered table descriptor is 'national monthly participation (thousands)' and its transform is thousands multiplied by 0.001 to millions. The fetched official PDFs instead publish actual-person integers: convert those to thousands first, then apply the registered transform, equivalently divide actual persons by 1,000,000. Preserve published person precision, equivalent to six decimal places in millions. Resolve on the FIRST PRINT only; later revisions and corrections do not replace it. The registered URL and target identity are retained despite the current official FNA host. No official scheduled release date was verified; resolutionDate is null and this calendar requirement remains unsatisfied.",
+  "dataPointId": "usda.fns.snap.persons.july_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 41.077607
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 40.395735
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 39.513033
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 38.54773
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 37.870817
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 37.298271
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 37.011096
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 36.562128
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Declining initial monthly participation",
+    "Local drift beats tested simple benchmarks",
+    "Maryland July eligibility-clock reset",
+    "Michigan July immigration eligibility change",
+    "Preliminary reporting and revision uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://www.fna.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fna-bwbufwdzbabpezgc.z01.azurefd.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fna-bwbufwdzbabpezgc.z01.azurefd.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-1.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-2.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://fna-bwbufwdzbabpezgc.z01.azurefd.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://fna-bwbufwdzbabpezgc.z01.azurefd.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://dhs.maryland.gov/snap-benefits-reset/",
+    "https://omh.ny.gov/omhweb/hr-1-changes/",
+    "https://www.michigan.gov/budget/-/media/Project/Websites/budget/Archive/Boilerplate-Reports/FY26-Sec-223-Boilerplate-Report---Federal-Impacts.pdf?hash=FA7299547B0042418C81F1A9CF25226B&rev=0f4a3e23985a456286b4d8050b5891f2"
+  ],
+  "runAt": "2026-10-07T10:44:05Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "July 2026 SNAP Persons: independent first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is national monthly SNAP Persons for July 2026, unadjusted, first print, in millions. Retain the supplied slug, unit, dataPointId and resolver URL. No files or Thesis forecasts were accessed; the catalog lookup was omitted under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the registered FNS URL; search the official FNA SNAP page; open its official CDN data page and Program Data Overview.",
+      "result": "The registered URL returned 403. The official page was updated September 18, 2026 and identifies June 2026 as the latest national monthly observation. The overview says current numbers are preliminary and subject to significant revision. No literal scheduled release date for July 2026 was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar and source discrepancies: the target context supplies an expected window of 2026-11-29 through 2026-12-07, but no resolutionDate or resolve-by-bound basis. That window cannot establish an official release day. resolutionDate remains null, so this object is not fully contract-valid. The live official source is FNA and its linked CDNs, outside the registered allowedHosts. The page's May/December reporting note applies to biannual county data, not this national monthly series."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official PDF table contents at https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-1.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-2.pdf.",
+      "result": "January 23, 2026 vintage: October 2025 Persons 41,077,607. February 13, 2026 vintage: November 2025 Persons 40,395,735. Both are the newest monthly entries in their national summaries. These official artifact contents were fetched through search indexing; direct opens returned 404."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the exact official Persons PDFs https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf; read TOTAL in the Initial column.",
+      "result": "March 13, 2026 vintage: December 2025 Initial TOTAL 39,513,033. April 10, 2026 vintage: January 2026 Initial TOTAL 38,547,730. January's same table reports December Preliminary 39,204,201, which is not substituted for December's initial value."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-5.pdf, https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf.",
+      "result": "May 8, 2026 national summary: February 2026 newest Persons 37,870,817. June 12, 2026 national summary: March 2026 newest Persons 37,298,271. July 10, 2026 Persons table: April 2026 Initial TOTAL 37,011,096. These recover consecutive initial observations rather than later revised history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf and https://fna-bwbufwdzbabpezgc.z01.azurefd.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf; cross-check June in snap-persons-9.pdf.",
+      "result": "August 14, 2026 national summary: May 2026 newest Persons 36,562,128. September 11, 2026 national summary and June Initial TOTAL: June 2026 Persons 36,352,716. The September vintage revises May to 36,685,024; its same-vintage May-June decrease is 332,308 people. The historicalContext preserves May's initial 36,562,128."
+    },
+    {
+      "kind": "text",
+      "text": "Unit discrepancy: the fetched Participation Persons and TOTAL cells report actual people. Each historical value is the fetched integer divided by 1,000,000. This equals people divided by 1,000 to obtain thousands, followed by the registered 0.001 transform. Applying 0.001 directly to these PDF integers would misstate the target by a factor of 1,000."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate/reference class: nine consecutive initial monthly levels, October 2025-June 2026, have mean 38.292126 million, sample level standard deviation 1.706624, and range 36.352716-41.077607. Their eight monthly changes average -0.590611 million, range -0.965303 to -0.209412, with sample standard deviation 0.267064. Initial benchmark: last-print persistence is 36.352716 million. This is a national series, so a panel-shrinkage benchmark does not apply."
+    },
+    {
+      "kind": "text",
+      "text": "In-memory model candidates generated before selecting the forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"unit\":\"millions\",\"point\":36.352716,\"p10\":35.748557,\"p50\":36.352716,\"p90\":36.956875,\"interval80\":[35.748557,36.956875],\"interval90\":[35.576278,37.129154],\"interval_method\":\"normal wrapper using walk-forward error RMS, retaining bias\",\"calibration_n\":5,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"n\":5,\"mae\":0.439003,\"rmse\":0.471999,\"target_periods\":\"2026-02 through 2026-06\",\"unit\":\"millions\"}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"local_drift\",\"unit\":\"millions\",\"point\":36.143304,\"p10\":35.801462,\"p50\":36.143304,\"p90\":36.485146,\"interval80\":[35.801462,36.485146],\"interval90\":[35.703983,36.582625],\"interval_method\":\"normal wrapper using sample standard deviation of successive first-print monthly changes\",\"calibration_n\":8,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"n\":5,\"mae\":0.215895,\"rmse\":0.227623,\"target_periods\":\"2026-02 through 2026-06\",\"unit\":\"millions\"}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_three_change\",\"unit\":\"millions\",\"point\":36.037531,\"p10\":35.695689,\"p50\":36.037531,\"p90\":36.379373,\"interval80\":[35.695689,36.379373],\"interval90\":[35.59821,36.476852],\"interval_method\":\"normal wrapper using sample standard deviation of successive first-print monthly changes\",\"calibration_n\":8,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"n\":5,\"mae\":0.235323,\"rmse\":0.26796,\"target_periods\":\"2026-02 through 2026-06\",\"unit\":\"millions\"}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select local_drift, defined as repeating the latest change between initial prints. On the common February-June 2026 walk-forward window, its MAE is 0.215895 million versus persistence 0.439003 and trailing-three-change 0.235323; respective RMSEs are 0.227623, 0.471999 and 0.267960. Each prediction uses only preceding initial observations. This is a five-target comparison, not a strong general calibration claim. The selected benchmark is 0.209412 million below persistence."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open Maryland DHS SNAP reset guidance, New York OMH H.R.1 guidance and the Michigan September 30, 2026 Federal Impacts report, page 7.",
+      "result": "Maryland's clock reset starts July 1, 2026 and permits eligible returning applicants three new benefit months; no affected-person count was fetched. New York's work-rule clock began March 1, 2026, with time-limit losses starting June 1, 2026. Michigan estimates 18,000 previously eligible people lose eligibility under its July 1, 2026 immigration change; that is 0.018 million potential eligibility losses, not a measured July participation decrease."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view decomposition: level is June's 36.352716 million; momentum is the selected model's -0.209412 million; additional one-off adjustment is zero; additional policy adjustment is zero. Broad work-rule effects are already represented in June history. Maryland's July reinstatement effect is positive but unsized, and Michigan's July eligibility change is negative but does not provide observed removals. Their net effect cannot be estimated reliably from fetched counts, so the forecast retains the strongest benchmark. June's same-vintage decline is steeper than the change between initial prints, providing a downside consideration without replacing original vintages."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = local_drift using nine initial prints from October 2025-June 2026. Latest first-print change = 36.352716 - 36.562128 = -0.209412 million; point = 36.352716 - 0.209412 = 36.143304. Weight is 100% on the selected benchmark, with zero additional policy and one-off adjustment. Eight successive changes are [-0.681872, -0.882702, -0.965303, -0.676913, -0.572546, -0.287175, -0.448968, -0.209412]. Their mean is -0.590611375; sigma = sqrt(sum((change - mean)^2)/7) = 0.267064203 million. Normal dispersion wrapper: 80% half-width = 1.28*sigma = 0.341842180, with widening factor 1.00. Bounds = 36.143304 +/- 0.341842180 = [35.801461820, 36.485146180], rounded to [35.801462, 36.485146] million. The 90% wrapper uses 1.645*sigma = 0.439320614, giving [35.703983, 36.582625]."
+    },
+    {
+      "kind": "text",
+      "text": "Calibration sanity check: all seven available one-step local-drift errors fall inside +/-0.341842 million, including five of five in the common comparison window. There are fewer than ten forecasts, so an eight-of-ten coverage claim is unavailable. The 80% label is a normal-dispersion assumption with sparse empirical validation; no added narrowing is applied despite observed overcoverage."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and tails: upside risk would land above the interval if July's initial count exceeds 36.485146 million, a net increase greater than 0.132430 million from June, through stronger reinstatements, exemption processing or disaster enrollment than the declining trend predicts. Downside risk would land below the interval if July's initial count falls below 35.801462 million, a drop greater than 0.551254 million, through faster work-rule or immigration removals or incomplete initial state reporting. Larger verified reinstatement counts would move the point up; larger verified July disenrollment counts would move it down."
+    },
+    {
+      "kind": "text",
+      "text": "The JSON parses and the numeric, historical-period and trace-depth checks pass. Full contract validation cannot pass because the official release-calendar date is unverified and resolutionDate is null. No activity receipts or first-print values were manufactured."
+    },
+    {
+      "kind": "forecast",
+      "point": 36.143304,
+      "ciLow": 35.801462,
+      "ciHigh": 36.485146
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-co",
+  "country": "US",
+  "type": "data",
+  "title": "Colorado ex parte renewal share, August 2026",
+  "question": "What will Colorado's ex parte renewal share be for the August 2026 reporting period in the first CMS publication of its original (O) submission row in State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, computed to one decimal percent?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Colorado's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.co.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Ex parte processing and data matching",
+    "Composition of the renewal cohort",
+    "Original-report measurement and publication timing"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=5&offset=0",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:18:58Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered slug, unit, dataPointId, date, and resolver text are preserved. This run used only official public web sources and did not access Thesis records or local files. The numerical forecast fields are null because an evidence-grounded cell could not be produced."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the exact CMS dataset identifier; open https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data.",
+      "result": "Official metadata identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified September 25, 2026, with monthly frequency. The indexed CMS dataset page reports 3,876 rows and 22 columns. The official catalog links renewal-dataset-september-2026-release.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6.",
+      "result": "The dictionary maps original_updated to O=Original and U=Updated; beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis to Metric 5a1; beneficiaries_with_a_renewal_due to Metric 5; and beneficiaries_whose_coverage_was_renewed_total to Metric 5a. No Colorado observations were returned by this metadata fetch."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot.",
+      "result": "CMS lists January 2026 released April 24, 2026; February released May 29; March released June 26; April released July 31; May released August 28; and June released September 25, 2026. The fetched page does not list an August 2026 publication date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open and inspect https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf.",
+      "result": "The January 2026 national snapshot reports 65 percent renewed and 47 percent renewed ex parte, both among individuals due for renewal. Specifications Version 4, updated November 2025, set submission deadlines on the 8th and 15th and permit corrections to monthly reports. These are definition and timing evidence, not Colorado historical values."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. The official CSV link returned Cache miss; direct CSV and datastore queries, including Colorado filters and pagination, were inaccessible through the web tool. The indexed table showed Alaska rows only. No usable Colorado original-submission history was fetched. This does not establish that the official source exposes fewer than six prints, and no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Resolver discrepancies: the registered date is retained, but it could not be verified as an official scheduled publication date. No release day is inferred from cadence. The registered rule does not explicitly identify whether the denominator is all renewals due or successfully renewed beneficiaries. CMS's national retention-rate presentation uses renewals due, but that does not resolve the ledger ambiguity. O identifies report type and does not itself authenticate an immutable first-publication vintage."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable for the exact Colorado first-print series. National snapshot percentages and Alaska rows cannot substitute for the required Colorado history. Last-print persistence, a persistence-plus-panel-shrinkage benchmark, and numeric thesis_model_candidate_v1 candidates therefore cannot be grounded."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the required historical sample was not retrieved; persistence prior = unavailable; adjustment components = not estimated; sigma = unavailable; calibrated interval method and implied bounds = unavailable. No numerical forecast or interval arithmetic is asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would include improved automated matching or a renewal cohort easier to verify; downside risk would include matching failures or a harder-to-verify cohort. Without a fitted point and interval, neither scenario can be assigned an evidence-grounded threshold outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "The forecast is dropped under the honesty rule. Null estimates and empty historicalContext explicitly mark this object as an unsuccessful run, not a valid scored forecast cell. Its JSON syntax was checked; it cannot satisfy the numerical and history requirements."
+    }
+  ]
+}

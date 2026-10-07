@@ -1,0 +1,90 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ma",
+  "country": "US",
+  "type": "data",
+  "title": "Massachusetts ex parte renewal share, August 2026",
+  "question": "What is Massachusetts's unadjusted ex parte renewal share for the August 2026 reporting period in the FIRST PRINT of its original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, with the share computed to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Massachusetts's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Required original-submission history unavailable",
+    "First-publication vintage must be preserved",
+    "Registered publication date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:18:19Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered slug, unit, dataPointId, resolutionDate and resolver text are preserved. This object records an unsuccessful run, not a valid numerical forecast. Null estimates explicitly indicate that the cell is dropped under the honesty rule."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact official CMS dataset identifier.",
+      "result": "The official dataset page reports 3,876 rows, 22 columns and an update dated September 25, 2026. O means Original and U means Updated. Ex parte renewals are Metric 5a1; renewals due are Metric 5; total successful renewals are Metric 5a. Indexed data displayed Alaska rows, not Massachusetts history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Fetch official Data.gov metadata for State Medicaid and CHIP Eligibility Processing Data.",
+      "result": "Official metadata identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified 2026-09-25T18:00:00Z, and its distribution https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the official Medicaid and CHIP Eligibility Operations and Enrollment Snapshot publication page.",
+      "result": "The page lists June 2026 released September 25, 2026; May 2026 released August 28, 2026; April 2026 released July 31, 2026; March 2026 released June 26, 2026; February 2026 released May 29, 2026; January 2026 released April 24, 2026. It provides no scheduled August 2026 publication date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the official Eligibility Processing Data Report Specifications and inspect reporting deadlines and correction rules.",
+      "result": "The fetched document is Version 4, updated November 2025. Original monthly reports are due by the 8th day of the following month; updated reports by the 15th. Table 10 illustrates August 2024 original submission due September 8 and updated submission due December 15, 2024. These are state submission deadlines, not CMS publication dates. States may correct original reports."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. The official CSV, datastore API, filtered dataset views and pagination attempts were inaccessible through the web tools. No Massachusetts original-row numerator and denominator history was obtained. Rounded snapshot summaries and adjacent series were not substituted. This is not evidence that the official source exposes fewer than six prints, so no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the required distribution of comparable Massachusetts original first prints could not be computed. Last-print persistence and other thesis_model_candidate_v1 candidates cannot be populated or scored without fetched observations."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The persistence prior and historical sample are unavailable; no numerical adjustment is applied. sigma = unavailable because successive first-print changes were not fetched. The required 80% half-width, approximately 1.28*sigma, and final implied bounds cannot be computed. Point estimate and interval are therefore null rather than invented."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: 2026-12-15 is preserved from the registered target, but no official calendar fetched this run verifies it as the scheduled CMS first-publication date. The registered resolver also does not explicitly identify its denominator column. Neither issue is silently repaired."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: a change in renewal cohort composition or automated eligibility matching could produce upside risk or downside risk, but missing official history prevents quantifying either tail or stating scenarios outside the interval. An O flag alone does not establish an immutable first-publication vintage."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

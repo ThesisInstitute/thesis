@@ -1,19 +1,19 @@
 {
-  "status": "refused",
   "slug": "us-dod-prime-award-transactions-fy2026",
   "country": "US",
   "type": "data",
-  "title": "DoD prime award transactions, FY2026",
-  "question": "What will transaction_count be for FY2026 in the registered USAspending agency 097 awards query snapshot, multiplied by 0.000001 and expressed in millions?",
+  "status": "refused",
+  "title": "DoD FY2026 prime award transactions",
+  "question": "What will USAspending API v2 agency 097 awards transaction_count for FY2026 equal, in millions, at the registered query snapshot?",
   "unit": "millions",
   "pointEstimate": null,
   "ciLow": null,
   "ciHigh": null,
   "confidence": 0.8,
   "resolutionDate": null,
-  "resolutionSource": "USAspending API v2, agency 097 awards summary",
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
   "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
-  "resolutionRule": "Use transaction_count from the registered FY2026 query snapshot and multiply the integer count by 0.000001. Resolve on that snapshot and exclude subsequent revisions. The official snapshot date could not be verified in this run.",
+  "resolutionRule": "Resolve using transaction_count from the exact registered FY2026 query snapshot, multiplied by 0.000001. Preserve the returned count's precision; subsequent API updates do not replace the registered snapshot. The snapshot date could not be verified from an official release calendar during this run.",
   "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
   "historicalContext": [],
   "drivers": [],
@@ -25,38 +25,42 @@
     "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
     "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
     "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
-    "https://api.usaspending.gov/docs/endpoints",
-    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov"
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
   ],
-  "runAt": "2026-10-06T22:01:02Z",
+  "runAt": "2026-10-07T12:44:57Z",
   "reasoning": [
     {
       "kind": "heading",
-      "text": "Forecast refused because the required official history could not be fetched"
+      "text": "Forecast refused because required query evidence is unavailable"
     },
     {
       "kind": "text",
-      "text": "The target is the registered agency 097 awards query, field transaction_count, for FY2026. Agency profile totals and search summaries cannot substitute for this series."
+      "text": "The target remains the registered agency 097 awards transaction_count query for FY2026. Agency profile totals and broader spending aggregates cannot supply its historical anchors."
     },
     {
       "kind": "text",
-      "text": "Fetch evidence: web-tool opens of the exact registered URLs for FY2025, FY2024, and FY2023 each returned 'Internal Error' and 'URL ... is not accessible via this tool.' No transaction_count statistics were returned."
+      "text": "Exact registered-query URLs for FY2020, FY2021, FY2022, FY2023, FY2024, and FY2025 were opened with the web tool. Every request returned Internal Error and 'URL ... is not accessible via this tool.' The FY2025 retry returned the same error. No transaction_count values were fetched."
     },
     {
       "kind": "text",
-      "text": "Fetch evidence: web-tool opens of the exact registered URLs for FY2022, FY2021, and FY2020 returned the same accessibility error. The FY2026 query also failed. A targeted search for the endpoint and transaction_count returned no results."
+      "text": "The exact FY2026 query also returned Internal Error and 'URL ... is not accessible via this tool.' This establishes a retrieval failure, not that the official source exposes insufficient history."
     },
     {
       "kind": "text",
-      "text": "Official schedule verification also failed. USAspending endpoint documentation and Treasury reporting guidance did not establish a publication date for this exact snapshot. Additional schedule requests encountered connection and network errors. The contract's expected window does not independently verify resolutionDate."
+      "text": "The required base rate and reference class cannot be calculated without the fetched historical transaction counts. No remembered values or substitute aggregates were used."
     },
     {
       "kind": "text",
-      "text": "Prior/update/interval: No fetched historical sample is available to establish a base rate or persistence prior, estimate adjustment components, or compute sigma. Consequently, the approximately 1.28*sigma interval half-width and final bounds cannot be calculated."
+      "text": "Official USAspending documentation describes daily updates after a nightly pipeline and a 90-day delay for DoD procurement data. Neither document establishes a scheduled annual release date for this query. No official resolutionDate within the supplied expected window was verified."
     },
     {
       "kind": "text",
-      "text": "Without the required reference class, concrete upside risk, downside risk, and outcomes outside the interval cannot be quantified. The prompt explicitly requires refusal when the registered historical query cannot be executed. Null estimates and empty history record that refusal; they do not constitute a valid forecast."
+      "text": "Prior/update/interval: Historical query retrieval failed, so a persistence prior, historical sigma, adjustment components, and an 80% interval cannot be calculated. Forecast values remain null."
+    },
+    {
+      "kind": "text",
+      "text": "Refusal: The prompt explicitly requires refusal when the registered historical queries cannot be executed. A numeric forecast would lack the mandatory historical anchors and verified resolution date."
     }
   ]
 }

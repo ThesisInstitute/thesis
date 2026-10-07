@@ -1,0 +1,71 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "title": "TY2027 ACTC total claiming returns",
+  "question": "What will IRS SOI Publication 1304, Table 3.3, first report as the total number of returns claiming the additional child tax credit for tax year 2027, expressed in millions, conditional on the registered current-law threshold?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+  "resolutionRule": "Use the first official print of Publication 1304 Table 3.3 for tax year 2027: the all-returns total number of returns at the plain Additional child tax credit concept header, or its equivalent refundable child tax credit total header. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Multiply the published return count by 0.000001 once to express millions, preserving published precision. Ignore subsequent revisions. Apply the registered condition. The resolution date is retained from the target contract but was not verified against an official release schedule in this run.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-whats-new"
+  ],
+  "runAt": "2026-10-06T22:07:06Z",
+  "status": "failed",
+  "failureReason": "Canonical history could not be extracted: the required fetch_source and extract_irs_soi tools are unavailable, and subsequent official-source requests failed with network errors. No ACTC historical counts were obtained. The official release-schedule requirement also remains unverified. Estimates are null because issuing numeric values would require unsupported evidence.",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld because mandatory evidence checks failed"
+    },
+    {
+      "kind": "text",
+      "text": "The target is IRS SOI Publication 1304 Table 3.3 total ACTC claiming returns for tax year 2027. The total concept must be distinguished from its refundable-portion and tax-offset subsets."
+    },
+    {
+      "kind": "text",
+      "text": "The official complete-report page was fetched successfully. It identifies Excel tables and links to Basic Tables Part 3, but the fetched page does not contain the required ACTC counts."
+    },
+    {
+      "kind": "text",
+      "text": "The available tool set does not expose fetch_source or extract_irs_soi. No canonical workbook extraction call IDs or extracted historical values were obtained. Binary excerpts, search summaries, and remembered counts were not substituted."
+    },
+    {
+      "kind": "text",
+      "text": "Subsequent official-source requests failed with 'Fatal error: network error: error sending request' and 'Fatal error: connection failed: error sending request.' Under the prompt's failure rule, evidence collection stopped."
+    },
+    {
+      "kind": "text",
+      "text": "The official IRS What's New page was fetched, but the retrieved announcements did not verify a tax-year-2027 Publication 1304 release schedule. The registered resolutionDate remains unverified; historical cadence was not used as a substitute."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No base rate or reference class could be established from six extracted canonical prints. No persistence prior, adjustment components, sigma, or implied interval bounds were calculated."
+    },
+    {
+      "kind": "math",
+      "text": "Point estimate and 80% interval arithmetic were withheld because the required historical observations were unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and scenarios outside the interval cannot be quantified without an evidence-based forecast and interval."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

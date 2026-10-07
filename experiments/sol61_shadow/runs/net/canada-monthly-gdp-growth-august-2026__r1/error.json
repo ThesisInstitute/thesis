@@ -1,5 +1,5 @@
 {
-  "phase": "seal",
-  "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+  "phase": "normalize",
+  "message": "normalize_spawn_json.py failed:\nstdout:\n\n\nstderr:\nREFUSING: cell 0 (no dataPointId) missing required keys: historicalContext\n",
   "command": null
 }

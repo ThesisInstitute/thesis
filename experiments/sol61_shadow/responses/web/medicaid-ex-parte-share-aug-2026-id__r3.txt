@@ -1,0 +1,168 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-id",
+  "country": "US",
+  "type": "data",
+  "title": "Idaho ex parte renewal share, August 2026",
+  "question": "What percentage of Idaho Medicaid and CHIP beneficiaries due for renewal in August 2026 will have been renewed ex parte in CMS's first published original (O) submission, computed to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 51.0,
+  "ciLow": 11.1,
+  "ciHigh": 90.9,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Idaho's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Following CMS's published renewal-rate presentation, compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the published counts and rounding to one decimal. Subsequent updated submissions and corrections do not change resolution. The ledger does not explicitly identify the denominator; this denominator interpretation and the unverified calendar date are disclosed in reasoning.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.id.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 54
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 54
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 67
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 68
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 66
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 46
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 49
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 95
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 49
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 45
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 46
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 51
+    }
+  ],
+  "drivers": [
+    "Persistence near June's published 51% rate",
+    "Monthly renewal-cohort composition and electronic verification",
+    "February's exceptional print increases measured dispersion",
+    "Announced 2027 expansion requirements begin after the target period"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/dataset/e6205a51-e6d7-4849-9882-4483b8a28c41",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf",
+    "https://healthandwelfare.idaho.gov/news/idaho-department-health-and-welfare-announces-work-requirements-medicaid-expansion-recipients"
+  ],
+  "runAt": "2026-10-07T11:58:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Idaho August 2026 ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "Target: Idaho's August 2026 state row, original (O) submission, first public print in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. This is a state percentage, not a national total or weighted average. The ledger omits the denominator. CMS's state tables and its legacy derived-rate definition use metric 5a1 divided by metric 5, beneficiaries due for renewal; this forecast explicitly adopts that interpretation."
+    },
+    {
+      "kind": "text",
+      "text": "Evidence limitation: raw Idaho O-row counts could not be fetched through the dataset API or CSV. Historical values are the fetched whole-percentage-point rates in archived CMS snapshots' current-reporting-month outcome tables. Updated retrospective tables were excluded. These represent original-period outcomes, but the PDFs lack an O marker and do not independently establish exact first-publication row identity or exclude later PDF corrections. No unobserved counts or exact one-decimal historical rates were invented."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch July, August, September and October 2025 CMS snapshot PDFs; read Idaho in Coverage Retention and Disenrollment Rates by State.",
+      "result": "Published ex parte percentages of renewals due: July 54%, August 54%, September 67%, October 68%. Corresponding beneficiaries due: 19,464; 18,584; 23,647; 24,027."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch November and December 2025 and January and February 2026 CMS snapshot PDFs; read current-period Idaho rows.",
+      "result": "Published ex parte percentages of renewals due: November 66%, December 46%, January 49%, February 95%. Corresponding beneficiaries due: 22,577; 17,312; 18,161; 11,646. February also publishes 95% total renewed, confirming the exceptional ex parte observation."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch March, April, May and June 2026 CMS snapshot PDFs; read current-period Idaho rows and their denominator header.",
+      "result": "Published ex parte percentages of renewals due: March 49%, April 45%, May 46%, June 51%. Corresponding beneficiaries due: 22,141; 24,149; 23,849; 19,476. June publishes 73% total renewed and 51% renewed ex parte, both measured against renewals due."
+    },
+    {
+      "kind": "text",
+      "text": "Reference class and base rate: the 12 fetched monthly Idaho rates from July 2025 through June 2026 have mean 57.5%, median 52.5%, and range 45%-95%. The January-June median is 49%. The recent level is therefore below the full-year base rate, with June's 51% serving as the persistence anchor."
+    },
+    {
+      "kind": "text",
+      "text": "Level adjustment: update the full-sample median of 52.5% downward by 1.5 percentage points to June's 51%. Momentum adjustment: zero; the latest increases do not establish a durable trend amid substantial cohort variation. One-off adjustment: zero to the point estimate; February's 95% is retained in dispersion rather than extrapolated as the usual level."
+    },
+    {
+      "kind": "text",
+      "text": "Policy mechanism: Idaho's July 23, 2026 announcement places new expansion reporting requirements into effect on January 1, 2027, including 80 hours per month of qualifying activity. That implementation date follows August 2026, so the forecast makes no direct downward policy adjustment for the target period."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: persistence model anchored at June's 51%, checked against the July 2025-June 2026 reference class. Point = 52.5 - 1.5 level adjustment + 0 momentum + 0 one-off + 0 policy = 51.0%. Successive changes in the 12 fetched rates are [0,13,1,-2,-20,3,46,-46,-4,1,5] percentage points. Mean change = -0.272727; sum of squared deviations = 4856.181818. Sample sigma = sqrt(4856.181818/10) = 22.036746 percentage points. The one-month normal 80% half-width is 1.28*sigma = 28.207035. For the two-month June-to-August forecast horizon, use sqrt(2) times that half-width = 39.890772, retaining the exceptional February print in uncertainty. Bounds = 51.0 +/- 39.890772 = [11.109228,90.890772], rounded to [11.1,90.9]."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar verification limitation: the official CMS snapshot page supplies retrospective release dates, including May 2026 released August 28, 2026, but no fetched calendar or announcement confirms an August 2026 public release on December 15, 2026. CMS's submission specifications describe state reporting deadlines, which cannot verify public publication dates. The required official-calendar verification remains unsatisfied; resolutionDate 2026-12-15 is retained from the target contract."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a cohort dominated by beneficiaries whose eligibility is readily verified electronically could raise the share; a repeat of February's published 95% would land above the 90.9% upper bound, outside the interval. Downside risk: a major interruption in electronic data matching or a cohort requiring extensive manual verification could depress ex parte renewals; a collapse below 11.1% would land outside the interval. These are forecast scenarios, not observed August outcomes."
+    },
+    {
+      "kind": "forecast",
+      "point": 51.0,
+      "ciLow": 11.1,
+      "ciHigh": 90.9
+    }
+  ]
+}

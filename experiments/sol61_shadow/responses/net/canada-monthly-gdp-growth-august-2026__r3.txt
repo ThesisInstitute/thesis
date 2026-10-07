@@ -1,0 +1,118 @@
+{
+  "slug": "canada-monthly-gdp-growth-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada August 2026 monthly GDP growth",
+  "question": "What will Statistics Canada's first official August 2026 month-over-month growth in real GDP by industry be, calculated from all-industries vector v65201210, seasonally adjusted at annual rates in chained 2017 dollars?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.22,
+  "ciLow": 0.029,
+  "ciHigh": 0.41,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Statistics Canada, GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Resolve using the first official August 2026 release of Table 36-10-0434-01, vector v65201210: Canada, all industries, seasonally adjusted at annual rates, chained 2017 dollars. Calculate 100*(August level/July level-1), using both levels as published in that first release. Preserve published level precision and retain the calculated percentage without imposing the Daily headline's one-decimal rounding. The preliminary advance estimate does not resolve this target. Freeze the first official release values; exclude subsequent corrections and revisions.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": -0.3},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 0},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 0.2},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 0.1},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 0.2},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": -0.1},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 0.5},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 0.3},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 0.3},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": 0}
+  ],
+  "drivers": [
+    "Official August advance estimate of +0.2%",
+    "August mining and retail increases",
+    "August oil and gas extraction weakness",
+    "Small positive historical advance-to-first-print adjustment",
+    "Uncertainty from first-print growth dispersion"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251223/dq251223a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/dq260130a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/t1/wds/rest/getSeriesInfoFromVector",
+    "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods"
+  ],
+  "runAt": "2026-10-07T12:28:31Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Canada August 2026 GDP: modest growth after a flat July"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is the first official monthly percentage change derived from v65201210 in Table 36-10-0434-01. Official vector metadata confirms Canada, all industries, seasonally adjusted at annual rates, chained 2017 dollars. Historical realizations use the same series' first official monthly releases. Their headline growth rates are rounded to one decimal, making them a rounded reference class for the resolver's calculated percentage. Advance estimates enter only as auxiliary predictors; they do not resolve the target."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's original GDP-by-industry releases dated December 23, 2025; January 30, February 27, March 31, April 30, May 29 and June 30, 2026.",
+      "result": "Fetched first-print monthly growth: October 2025 -0.3%; November 2025 0.0%; December 2025 +0.2%; January 2026 +0.1%; February +0.2%; March -0.1%; April +0.5%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the July 31, August 28 and September 29, 2026 original Statistics Canada GDP releases.",
+      "result": "Fetched first-print monthly growth: May 2026 +0.3%; June +0.3%; July 0.0%. July construction grew 1.3%, utilities 1.7%, manufacturing declined 0.9%, and retail trade declined 1.0%."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the mean of ten consecutive first prints, October 2025 through July 2026: +0.12% monthly growth. The reference class ranges from -0.3% to +0.5%. This anchors the forecast before the August-specific update."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the advance-estimate and next-release sections of https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm.",
+      "result": "Statistics Canada reports August 2026 advance GDP growth of +0.2%, with increases in mining and quarrying and retail trade partly offset by decreases in oil and gas extraction. The official announcement explicitly schedules the August release for October 30, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read preceding-release advance estimates and pair them with each subsequent original first-print headline, November 2025 through July 2026.",
+      "result": "Fetched advance/first-print pairs, in percent: November 2025 0.1/0.0; December 0.1/0.2; January 2026 0.0/0.1; February 0.2/0.2; March 0.0/-0.1; April 0.4/0.5; May 0.1/0.3; June 0.2/0.3; July 0.0/0.0. 'Essentially unchanged' is encoded as 0.0. Derived first-minus-advance errors are [-0.1,0.1,0.1,0.0,-0.1,0.1,0.2,0.1,0.0] percentage points."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST [{\"vectorId\":65201210,\"latestN\":13}] to https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods.",
+      "result": "The successful official response reports June 2026 GDP of 2,371,886 and July GDP of 2,371,771, in millions of chained 2017 dollars at seasonally adjusted annual rates, released September 29, 2026. Their calculated July change is -0.004848%, consistent with the rounded 0.0% headline. Earlier observations in this response are revised September-vintage levels; the historical calibration uses the original release headlines."
+    },
+    {
+      "kind": "text",
+      "text": "Level effects enter through the monthly level ratio, whose annual-rate scale cancels. Momentum is captured by the recent first prints and the August-specific advance estimate. One-off refinery downtime and July's heat-driven electricity demand make mechanical sector persistence uncertain. August's reported mining and retail gains and oil-extraction weakness are already reflected in the advance signal. No additional quantified policy contribution is established by these fetched releases, so the separate policy adjustment is zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a judgmental 20% historical-mean prior and 80% bias-adjusted official advance model. For ten first-print growth values, mean = 0.12 and sigma = 0.229976 percentage points, calculated from the growth values themselves: sqrt(0.476/9). The unconditional 80% half-width is 1.28*sigma = 0.294369. Nine advance errors have mean 0.044444 and sample sigma sqrt(0.082222/8) = 0.101379; including estimated-mean uncertainty gives predictive sigma 0.101379*sqrt(1+1/9) = 0.106863. Point = 0.20*0.12 + 0.80*(0.20+0.044444) = 0.219556. Moment-matched predictive variance = 0.20*(0.229976^2) + 0.80*(0.106863^2) + 0.20*0.80*(0.244444-0.12)^2 = 0.0221914. Thus half-width = 1.28*sqrt(0.0221914) = 0.190679, giving bounds 0.028877 and 0.410234. This is 0.648 times the unconditional half-width: narrowing is justified by the official August advance information and its empirically smaller errors, while retaining historical-prior uncertainty. No separate momentum, one-off or policy increment is added. Final rounded point is 0.22%, with approximate 80% bounds [0.029%, 0.410%]."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a larger manufacturing or mining rebound, or less oil-extraction weakness than the advance estimate incorporates, producing growth above 0.410%. The downside risk is broader manufacturing weakness or more severe energy disruption, producing flat or negative growth below 0.029%. Either outcome would land outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "A direct June-release request timed out; the same official release was successfully fetched through the preceding-release link. The annual release-calendar PDF also timed out, so release-date verification uses the successfully opened official next-release announcement. All historical values were fetched from opened official release pages; search summaries supplied no numerical evidence."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.22,
+      "ciLow": 0.029,
+      "ciHigh": 0.41
+    }
+  ]
+}

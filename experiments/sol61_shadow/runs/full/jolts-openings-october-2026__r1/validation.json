@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "jolts-openings-october-2026",
+      "ok": false,
+      "errors": [
+        "resolutionSourceUrl host 'www.bls.gov' is not among the preregistered source binding hosts ['api.bls.gov']"
+      ]
+    }
+  ]
+}

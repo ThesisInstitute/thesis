@@ -1,0 +1,186 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ky",
+  "country": "US",
+  "type": "data",
+  "title": "Kentucky ex parte renewal share, August 2026",
+  "question": "What percentage of Kentucky Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, using the original (O) submission in CMS State Medicaid and CHIP Eligibility Processing Data at its first official publication, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 80.1,
+  "ciLow": 71.3,
+  "ciHigh": 88.8,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Kentucky's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Calculate 100 times beneficiaries renewed on an ex parte basis (Metric 5a1) divided by beneficiaries due for renewal (Metric 5), using numerator and denominator as first published, rounded to one decimal. Later corrections and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ky.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "2025-06",
+      "value": 80
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 75
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 78
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 73
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 81
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 83
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 76
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 78
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 76
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 85
+    }
+  ],
+  "drivers": [
+    "Partial persistence of June's higher ex parte share",
+    "Mean reversion toward Kentucky's historical level",
+    "Renewal-cohort composition and modest seasonal adjustment",
+    "Original-report processing and classification uncertainty",
+    "New eligibility requirements begin after the target period"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-june2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.chfs.ky.gov/agencies/dms/Pages/default.aspx",
+    "https://www.chfs.ky.gov/agencies/dms/member/Pages/default.aspx"
+  ],
+  "runAt": "2026-10-07T11:43:44Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Kentucky August 2026 ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Kentucky's state cohort row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c: ex parte renewals divided by all beneficiaries due for renewal, rather than only beneficiaries successfully renewed. CMS specifications Table 6 defines numerator Metric 5a1 and denominator Metric 5. Resolution uses the original (O) report at first publication and excludes updated pending-renewal outcomes."
+    },
+    {
+      "kind": "text",
+      "text": "History provenance and precision: all historical shares come from the Kentucky current-reporting-month coverage-retention tables in contemporaneous CMS release PDFs, using the original-report variant. CMS presents these percentages rounded to whole percentage points. The web tool could not fetch the dataset's CSV/API rows, so exact historical numerator counts and one-decimal shares were unavailable; no counts were reconstructed from rounded percentages. Current O rows can receive corrections, making the release PDFs preferable for first-print history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch Kentucky coverage-retention rows from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf.",
+      "result": "January 2026: 153,237 beneficiaries due for renewal; ex parte share 76%. February 2026: 139,700 due; ex parte share 78%. Table headers place both percentages over total beneficiaries due for renewal."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch Kentucky coverage-retention rows from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf.",
+      "result": "March 2026: 158,568 beneficiaries due; ex parte share 77%. April 2026: 154,822 due; ex parte share 77%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch Kentucky coverage-retention rows from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf.",
+      "result": "May 2026: 91,933 beneficiaries due; ex parte share 76%; pending share 0.5%. June 2026: 56,235 due; ex parte share 85%; total renewed 91%; pending share 0.5%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch Kentucky summer rows from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-june2025.pdf, https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf, and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf.",
+      "result": "June 2025: 43,078 due; ex parte share 80%; pending 11%; procedural disenrollment 0.0%. July 2025: 48,216 due; ex parte share 75%; pending 1%; procedural disenrollment 7%. August 2025: 46,202 due; ex parte share 77%; pending 1%; procedural disenrollment 7%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch Kentucky rows from the September, October, November, and December 2025 CMS snapshot PDFs at https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf, https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf, https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf, and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf.",
+      "result": "September 2025: ex parte share 78%, 90,922 due. October: 73%, 120,126 due. November: 81%, 61,033 due. December: 83%, 66,573 due."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the 13 consecutive original-release Kentucky shares from June 2025 through June 2026 average 78.153846%, with median 77% and range 73%-85%. This state-specific reference class anchors the forecast before adjustments. The weighting choices below are analyst assumptions, not agency estimates."
+    },
+    {
+      "kind": "text",
+      "text": "Adjustment components: the level adjustment retains half of June's elevation above the historical mean. Momentum receives no additional extrapolation because the June increase coincided with a much smaller renewal cohort. The one-off/cohort component shrinks the jump rather than assuming it persists fully. Seasonality receives half of the previous June-to-August decline; only one seasonal comparison is available, and June 2025's unusual pending and procedural outcomes weaken it. CMS notes that renewals completed using administrative data after a form was sent can be classified as form renewals, adding reporting uncertainty."
+    },
+    {
+      "kind": "text",
+      "text": "Policy mechanism: Kentucky's official Medicaid page places new eligibility and shorter-renewal requirements beginning January 1, 2027. Its member page says outreach starts July 1, 2026 but requires no action at that time. These announcements support a zero direct policy adjustment for August 2026; an operational preparation effect remains possible. Sources: https://www.chfs.ky.gov/agencies/dms/Pages/default.aspx and https://www.chfs.ky.gov/agencies/dms/member/Pages/default.aspx."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification limitation: https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot confirms June 2026 was released September 25, 2026, but provides no prospective announcement confirming August 2026 publication on December 15, 2026. CMS specifications distinguish original state-report submission deadlines from updated-report deadlines; those are not public-release dates. The ledger resolutionDate 2026-12-15 is retained, but could not be officially verified this run. Publication timing was not inferred from cadence."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: use a mean-reverting persistence prior with a damped seasonal adjustment, based on the 13 fetched original-release shares. Base level = 1016/13 = 78.153846. Persistence uplift = 0.5*(85-78.153846) = 3.423077 percentage points; seasonal adjustment = 0.5*(77-80) = -1.5; additional momentum and direct policy adjustments = 0. Point = 80.076923, rounded to 80.1%. Successive changes are [-5,2,1,-5,8,2,-7,2,-1,0,-1,9], with mean 5/12 and sum of squares 259. Sample sigma = sqrt((259-12*(5/12)^2)/11) = 4.832811 percentage points. The normal 80% one-month half-width is 1.28*sigma = 6.185998. Apply sqrt(2) for the June-to-August two-month horizon: half-width = 8.748322, a 1.414-fold widening. This conservatively allows two monthly innovations despite possible mean reversion. Bounds = 80.076923 +/- 8.748322 = [71.328601,88.825245], rounded to [71.3,88.8]. This is a nominal 80% interval estimated from a small, whole-point-rounded historical sample."
+    },
+    {
+      "kind": "text",
+      "text": "Falsification scenarios: upside risk is that June's stronger automated-renewal performance persists and improves across August's cohort. Downside risk is a cohort requiring more beneficiary information or processing delays that leave fewer ex parte renewals completed at month-end. A broad automation improvement producing a share above 88.8%, or a system disruption, classification change, or unusually difficult cohort producing a share below 71.3%, would land outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 80.1,
+      "ciLow": 71.3,
+      "ciHigh": 88.8
+    }
+  ]
+}

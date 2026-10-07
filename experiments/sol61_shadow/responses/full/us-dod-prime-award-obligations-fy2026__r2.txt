@@ -1,0 +1,75 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD prime award obligations, FY2026: forecast refused",
+  "question": "What is the obligations field for DoD agency 097 in the registered USAspending API v2 GET query https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026, converted to billions USD, at the registered FY2026 query snapshot? This is an unadjusted registered-query snapshot target.",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+  "resolutionRule": "Read the obligations field from the exact registered fiscal_year=2026 GET query and multiply the USD value by 1e-09. Preserve the registered_query_snapshot policy; later API updates cannot substitute for that snapshot. The supplied target specifies an expected window of 2026-10-15 through 2026-10-22 but omits the exact resolutionDate and snapshot timing. No resolving day is inferred.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/agency/toptier_code/awards.md",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026"
+  ],
+  "runAt": "2026-10-07T12:10:14Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: required registered-query evidence could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered query defines the target. Agency profile totals, search summaries, budget obligations and eventual complete fiscal-year spending cannot substitute. The registered snapshot policy takes precedence over the generic first-print default."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025 and the corresponding exact URLs for fiscal_year=2024 and fiscal_year=2023.",
+      "result": "Each request returned Internal Error: URL is not accessible via this tool. No response body or obligations value was retrieved for any requested fiscal year."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022 and the corresponding exact URLs for fiscal_year=2021 and fiscal_year=2020.",
+      "result": "Each request returned Internal Error: URL is not accessible via this tool. No response body or obligations value was retrieved for any requested fiscal year."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026.",
+      "result": "Internal Error: URL https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026 is not accessible via this tool. No current obligations value was retrieved."
+    },
+    {
+      "kind": "text",
+      "text": "Official endpoint documentation was fetched successfully and confirms that the agency awards endpoint uses GET. The official API contract confirms that fiscal_year selects the year and obligations is a response field. These documents provide no admissible historical values for the exact registered DoD query. The fiscal-year query URLs in sourceContext record failed fetch attempts, not successful data retrieval."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate cannot be computed because no exact-query historical obligation values were fetched. Consequently persistence, model candidates, sigma and an 80% interval cannot be calculated. Empty historicalContext denotes unavailable fetched evidence, not an assertion that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "The expectedReleaseWindow is supplied registration context, not a verified official release date. The target supplies no resolutionDate. Selecting either window boundary as the resolving day would invent a snapshot rule."
+    },
+    {
+      "kind": "text",
+      "text": "Forecast refused under the explicit instruction to refuse when the registered query cannot be executed. Null point and interval fields represent an unissued forecast, not zero obligations or a valid scored cell. The numerical cell contract cannot be satisfied honestly with the fetched evidence. This JSON object was checked for parsing."
+    }
+  ]
+}

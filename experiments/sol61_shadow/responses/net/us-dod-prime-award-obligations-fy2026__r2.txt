@@ -1,0 +1,151 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 prime award obligations",
+  "question": "What will the USAspending agency 097 awards endpoint report for FY2026 prime award obligations in the first registered query snapshot?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, Bureau of the Fiscal Service",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+  "resolutionRule": "Use the obligations field from the first response preserved by the registered FY2026 query snapshot, multiplied by 1e-9. Preserve the API's dollar precision during conversion and exclude subsequent revisions. An official date for this registered snapshot could not be verified; the supplied October 15–22 window does not specify an exact snapshot date.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 431.88364015745
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 395.33443647687
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 424.50276360528
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 467.27708690212
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 456.6531220443
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 501.6682566824
+    }
+  ],
+  "drivers": [
+    "Current registered-query obligations",
+    "Delayed publication of DoD procurement transactions",
+    "Daily updates and subsequent historical revisions",
+    "Unverified registered snapshot date"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T11:58:05Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required resolution date could not be verified"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is source series usaspending.agency.097.awards.obligations, queried with fiscal_year=2026. All historical anchors use that identical registered endpoint and its obligations field. They are current historical responses, not archived first-print vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the registered agency 097 awards query separately for fiscal_year=2020 and fiscal_year=2021.",
+      "result": "FY2020 obligations: 431883640157.45 USD, or 431.88364015745 billion USD. FY2021 obligations: 395334436476.87 USD, or 395.33443647687 billion USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the registered agency 097 awards query separately for fiscal_year=2022 and fiscal_year=2023.",
+      "result": "FY2022 obligations: 424502763605.28 USD, or 424.50276360528 billion USD. FY2023 obligations: 467277086902.12 USD, or 467.27708690212 billion USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the registered agency 097 awards query separately for fiscal_year=2024 and fiscal_year=2025.",
+      "result": "FY2024 obligations: 456653122044.3 USD, or 456.6531220443 billion USD. FY2025 obligations: 501668256682.4 USD, or 501.6682566824 billion USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026.",
+      "result": "FY2026 obligations: 384219914321.42 USD, or 384.21991432142 billion USD; transaction_count: 3218036; latest_action_date: 2026-09-30T00:00:00."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched FY2020–FY2025 reference class has a base rate mean of 446.21988431140 billion USD. Completed historical fiscal-year totals have more reporting maturity than the current FY2026 snapshot, so their mean cannot directly substitute for the October snapshot target."
+    },
+    {
+      "kind": "math",
+      "text": "Annual obligations are a flow, so dispersion uses the six historical values themselves. Sample sigma = 37.13023096793 billion USD, calculated as sqrt(sum((value - 446.21988431140)^2)/5). The corresponding normal 80% half-width is 1.28*37.13023096793 = 47.52669563894 billion USD. This annual dispersion does not independently calibrate changes between two nearby query snapshots."
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending documentation describes daily updates and a 90-day publication delay for DoD procurement. Financial assistance follows different reporting rules. Consequently, the latest action date does not establish that procurement reporting is complete through fiscal year-end."
+    },
+    {
+      "kind": "text",
+      "text": "The official Treasury resources page lists a FY2026 DATA Act reporting spreadsheet, but the web fetch returned Unsupported content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet. No spreadsheet dates were read. Agency financial submission dates would also require evidence connecting them to this continuously updated prime-award query. No opened official calendar or announcement verified a resolution date within the supplied window."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: A persistence prior would begin with the fetched FY2026 value, using the six historical fiscal-year flows as the outside-view sample. Reporting momentum, exceptional backfills or deobligations, and procurement publication policy would require separate adjustments. The annual interval calculation gives sigma = 37.13023096793 and 1.28*sigma = 47.52669563894 billion USD. No final point or implied bounds are issued because the required snapshot date remains unverified; selecting a date from the expected window would invent unsupported resolver timing."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk is a large delayed procurement backfill; a downside risk is a substantial net deobligation or data correction. Either could put a future snapshot outside the interval of a short-horizon persistence model. These are scenarios, not fetched FY2026 adjustments."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

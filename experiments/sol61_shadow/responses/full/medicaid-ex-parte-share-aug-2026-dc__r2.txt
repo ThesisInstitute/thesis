@@ -1,0 +1,97 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-dc",
+  "country": "US",
+  "type": "data",
+  "title": "DC ex parte renewal share, August 2026",
+  "question": "What is District of Columbia's ex parte renewal share for August 2026 in the FIRST PRINT of the original (O) submission in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, computed as 100 times beneficiaries renewed on an ex parte basis divided by beneficiaries with a renewal due, using the published monthly cohort counts without seasonal adjustment and rounding to one decimal percent?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to District of Columbia's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.dc.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original-submission restriction",
+    "Ex parte renewals relative to renewals due",
+    "Unavailable exact DC history",
+    "Unverified public release date"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://data.medicaid.gov/dataset/e6205a51-e6d7-4849-9882-4483b8a28c41"
+  ],
+  "runAt": "2026-10-07T12:18:13Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: exact official history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered slug, unit, dataPointId, date, and resolver are preserved. Only the first published original O row can resolve this target; updated U submissions and later corrections cannot replace that vintage. The ledger does not explicitly name the denominator; CMS's published ex parte percentage definition uses renewals due, metric 5, with numerator metric 5a1."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Search the exact CMS dataset identifier at https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The official dataset search fetch reports an update on September 25, 2026, 3,876 rows and 22 columns; its dictionary identifies O as original and U as updated. It maps ex parte renewals to metric 5a1 and renewals due to metric 5. The returned table contains Alaska rows, not usable DC history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data.",
+      "result": "Official federal metadata binds identifier 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c to renewal-dataset-september-2026-release.csv; modified timestamp is 2026-09-25T18:00:00Z and issued timestamp is 2024-11-27T19:17:56Z."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf.",
+      "result": "The fetched CMS specifications say Updated November 2025, Version 4. Original monthly reports are due by the 8th of the following month; updates for previously pending renewals are due by the 15th. These are state submission deadlines, not CMS public release dates."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot.",
+      "result": "The official page lists May 2026 released August 28, 2026; April 2026 released July 31, 2026; and March 2026 released June 26, 2026. It provides historical publication dates but no verified scheduled date for the target."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. The exact CSV, CMS datastore endpoints, filtered dataset pages, and attempted official federal mirror did not return DC original-row counts through the available web tools. No exact target-series historical values were fetched. Rounded snapshot percentages and updated submissions were not substituted. This is an access failure, not evidence that the source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Last-print persistence, persistence plus panel shrinkage, and walk-forward comparisons cannot be computed without the exact DC original-submission history. No thesis_model_candidate_v1 numeric candidates were generated, and no inside-view adjustment was applied."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior unavailable; historical sample unavailable; momentum, one-off, and policy adjustments not estimated; sigma = unavailable because successive changes in exact first-print shares were not fetched. Consequently the 1.28*sigma half-width, 80% interval, and coverage check cannot be computed. Point and implied bounds are null rather than invented."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: 2026-12-15 is retained from the registered ledger, but no official calendar fetched this run verifies it as a scheduled public release date. Submission deadlines cannot establish that date. The prohibited catalog lookup was skipped to preserve independence."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would be a cohort with more beneficiaries successfully matched to administrative eligibility records; downside risk would be matching failures or a cohort with fewer ex parte-eligible cases. Without an estimated interval, numerical thresholds for outcomes outside the interval cannot honestly be specified."
+    },
+    {
+      "kind": "text",
+      "text": "The ungrounded forecast is dropped under the honesty rule. Null estimates and empty historicalContext explicitly record failure; this object is not a valid scored forecast and does not satisfy the numeric interval or history-floor requirements. The confidence field preserves the requested contract constant and does not assert a calibrated interval. JSON parsing was validated."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

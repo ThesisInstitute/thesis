@@ -1,0 +1,47 @@
+{
+  "slug": "snap-participation-june-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation, June 2026",
+  "question": "USDA FNS national monthly SNAP Persons participation for June 2026, first official print, converted from thousands to millions.",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS SNAP national monthly participation tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve using the first officially published national monthly Persons value for June 2026, multiplying the reported value in thousands by 0.001. Preserve the published precision and ignore subsequent revisions. The official release date could not be verified in this run.",
+  "dataPointId": "usda.fns.snap.persons.june_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap"
+  ],
+  "runAt": "2026-10-07T11:58:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Run failed: official evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "Opening the registered official USDA FNS SNAP source returned HTTP 403 Forbidden. No participation statistics were fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The production instructions require stopping after a failed fetch. Accordingly, this run stopped without substituting remembered values or search-summary statistics."
+    },
+    {
+      "kind": "text",
+      "text": "The required historical reference class and official release date were not verified. Null estimates indicate that no forecast was produced; they are not numerical predictions."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -131,6 +131,9 @@ CONTAMINATION_RE = re.compile(
     r"ledger-targets|forecast-examples|/ThesisInstitute/",
     re.IGNORECASE,
 )
+# A search operator that excludes a term or site: -site:x, -inurl:x, -"x", -x.
+NEGATED_TERM_RE = re.compile(r'(?:(?<=\s)|^)-(?:[a-z]+:)?(?:"[^"]*"|\S+)')
+
 NET_BRANCH = "sol61-shadow-run"
 
 # Codex records shell calls wrapped as `bash -lc 'curl ...'`, so a quote can
@@ -168,8 +171,28 @@ def git_head() -> str:
     ).strip()
 
 
-def run_key(arm: str, slug: str, rollout: int) -> str:
-    return f"{arm}/{slug}__r{rollout}"
+def run_suffix(rollout: int, wave: int = 1) -> str:
+    """`r2` for wave 1 (the original design), `w3r2` for a later horizon wave."""
+    return f"r{rollout}" if wave == 1 else f"w{wave}r{rollout}"
+
+
+def parse_suffix(suffix: str) -> tuple[int, int]:
+    """(wave, rollout) from a run suffix; the inverse of run_suffix."""
+    match = re.fullmatch(r"(?:w(\d+))?r(\d+)", suffix)
+    if not match:
+        raise ValueError(f"not a run suffix: {suffix!r}")
+    return int(match.group(1) or 1), int(match.group(2))
+
+
+def run_key(arm: str, slug: str, rollout: int, wave: int = 1) -> str:
+    return f"{arm}/{slug}__{run_suffix(rollout, wave)}"
+
+
+def split_run_name(name: str) -> tuple[str, int, int]:
+    """(slug, wave, rollout) from `<slug>__<suffix>` (a file stem or key tail)."""
+    slug, suffix = name.rsplit("__", 1)
+    wave, rollout = parse_suffix(suffix)
+    return slug, wave, rollout
 
 
 # ---------------------------------------------------------------- freeze
@@ -378,14 +401,16 @@ def cmd_prompts(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------- batch
 
 
-def ensure_net_workdir(ops: pathlib.Path, slug: str, rollout: int) -> pathlib.Path:
+def ensure_net_workdir(
+    ops: pathlib.Path, slug: str, rollout: int, wave: int = 1
+) -> pathlib.Path:
     """A private one-commit repository per writable job.
 
     Writable Codex jobs need a repository, and jobs sharing one repository's
     git metadata have hung on its locks; a repository of their own avoids
     that. The job runs in place, so no worktree is made.
     """
-    workdir = ops / "netwd" / f"{slug}__r{rollout}"
+    workdir = ops / "netwd" / f"{slug}__{run_suffix(rollout, wave)}"
     if not (workdir / ".git").exists():
         workdir.mkdir(parents=True, exist_ok=True)
         (workdir / "README.md").write_text(
@@ -408,9 +433,11 @@ def ensure_net_workdir(ops: pathlib.Path, slug: str, rollout: int) -> pathlib.Pa
     return workdir
 
 
-def out_path(ops: pathlib.Path, arm: str, slug: str, rollout: int) -> pathlib.Path:
+def out_path(
+    ops: pathlib.Path, arm: str, slug: str, rollout: int, wave: int = 1
+) -> pathlib.Path:
     """Where Subfleet exports the job's final message (its parent must exist)."""
-    path = ops / "out" / arm / f"{slug}__r{rollout}.txt"
+    path = ops / "out" / arm / f"{slug}__{run_suffix(rollout, wave)}.txt"
     path.parent.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -423,6 +450,7 @@ def batch_manifest(
     ops: pathlib.Path,
     tier: str,
     label: str,
+    wave: int = 1,
 ) -> dict[str, Any]:
     spec = ARMS[arm]
     defaults: dict[str, Any] = {"task": spec["task"], "tier": tier}
@@ -430,11 +458,11 @@ def batch_manifest(
     for row in rows:
         job: dict[str, Any] = {
             "prompt": str(prompt_path(arm, row["slug"])),
-            "out": str(out_path(ops, arm, row["slug"], rollout)),
-            "name": f"s61-{arm}{rollout}-{row['slug']}",
+            "out": str(out_path(ops, arm, row["slug"], rollout, wave)),
+            "name": f"s61-{arm}{run_suffix(rollout, wave)}-{row['slug']}",
         }
         if spec["network"]:
-            job["workdir"] = str(ensure_net_workdir(ops, row["slug"], rollout))
+            job["workdir"] = str(ensure_net_workdir(ops, row["slug"], rollout, wave))
             job["in_place"] = True
             job["no_preamble"] = True
         else:
@@ -459,14 +487,29 @@ def cmd_batch(args: argparse.Namespace) -> int:
     rows = [row for row in rows if validatable(row["target"])]
     if args.exclude:
         rows = [row for row in rows if row["slug"] not in set(args.exclude.split(","))]
+    if args.open_after:
+        # A horizon wave forecasts only targets whose window opens after the
+        # given day, so every run can finish, and be pushed, before any print.
+        closing = [row["slug"] for row in rows if row["windowStart"] <= args.open_after]
+        if closing:
+            day = args.open_after
+            print(f"skipping {len(closing)} targets whose window opens by {day}")
+        rows = [row for row in rows if row["windowStart"] > args.open_after]
     for row in rows:
         if not prompt_path(args.arm, row["slug"]).is_file():
             raise SystemExit(
                 f"missing prompt for {args.arm}/{row['slug']}; run prompts"
             )
-    label = args.label or f"sol61-shadow-{args.arm}-r{args.rollout}"
+    suffix = run_suffix(args.rollout, args.wave)
+    label = args.label or f"sol61-shadow-{args.arm}-{suffix}"
     manifest = batch_manifest(
-        rows, arm=args.arm, rollout=args.rollout, ops=ops, tier=args.tier, label=label
+        rows,
+        arm=args.arm,
+        rollout=args.rollout,
+        ops=ops,
+        tier=args.tier,
+        label=label,
+        wave=args.wave,
     )
     path = ops / "batches" / f"{label}.json"
     write_json(path, manifest)
@@ -529,7 +572,10 @@ def audit_trace(lines: Iterable[str]) -> dict[str, Any]:
             texts.append(str(item.get("query") or ""))
             joined = " | ".join(text for text in texts if text)
             web_searches.append(joined)
-            if CONTAMINATION_RE.search(joined):
+            # A query that excludes Thesis (`-site:thesisinstitute.org`, as the
+            # wrapper invites) is compliance, not a visit; only what remains
+            # after removing excluded terms can reach a Thesis surface.
+            if CONTAMINATION_RE.search(NEGATED_TERM_RE.sub(" ", joined)):
                 hits.append(f"web_search: {joined[:300]}")
         elif item_type == "command_execution":
             command = str(item.get("command") or "")
@@ -697,12 +743,52 @@ def validate_response(
         errors.extend(cell.get("errors", []))
     if not manifest:
         errors.append(f"runner produced no manifest: {completed.stderr[-500:]}")
+    if not errors and manifest.get("error"):
+        # A run that failed before cell validation (for example in the seal
+        # phase on a null forecast) reports its error here, not per cell.
+        error = manifest["error"]
+        errors.append(f"{error.get('phase')}: {error.get('message')}")
+    prune_run_dir(run_dir)
     return {
         "ok": completed.returncode == 0 and bool(manifest.get("ok")),
         "returnCode": completed.returncode,
         "errors": errors,
         "runDir": rel(run_dir),
     }
+
+
+# What a validation directory keeps in the repository: the verdict, any
+# failure, and the sealed cell (gzipped). The rest is pinned elsewhere
+# (prompt.md in prompts/, the response in responses/) or derived from the
+# response (parsed and activity-joined cells, the CDF, which the sealed cell
+# carries as predictionDistribution); `collect --revalidate` regenerates it.
+# custody_root.json and manifest.json go too, since they commit to files no
+# longer kept.
+RUN_DIR_KEEP = frozenset({"validation.json", "error.json", "normalized_cells.json.gz"})
+
+
+def prune_run_dir(run_dir: pathlib.Path) -> None:
+    if not run_dir.is_dir():
+        return
+    cells = run_dir / "normalized_cells.json"
+    if cells.is_file():
+        # mtime=0 keeps the archive byte-identical across re-collections.
+        packed = gzip.compress(cells.read_bytes(), mtime=0)
+        (run_dir / "normalized_cells.json.gz").write_bytes(packed)
+    for path in run_dir.iterdir():
+        if path.is_file() and path.name not in RUN_DIR_KEEP:
+            path.unlink()
+
+
+def cmd_prune(args: argparse.Namespace) -> int:
+    """Prune every collected validation directory, current and superseded."""
+    count = 0
+    for root in (EXP / "runs", EXP / "superseded"):
+        for validation in root.rglob("validation.json"):
+            prune_run_dir(validation.parent)
+            count += 1
+    print(f"pruned {count} run directories")
+    return 0
 
 
 def load_submissions(ops: pathlib.Path) -> list[dict[str, Any]]:
@@ -724,8 +810,8 @@ def load_submissions(ops: pathlib.Path) -> list[dict[str, Any]]:
 
 def receipt_key(receipt: dict[str, Any]) -> str:
     out = pathlib.Path(receipt["out"])
-    slug, rollout = out.stem.rsplit("__r", 1)
-    return run_key(out.parent.name, slug, int(rollout))
+    slug, wave, rollout = split_run_name(out.stem)
+    return run_key(out.parent.name, slug, rollout, wave)
 
 
 def latest_receipts(receipts: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
@@ -742,12 +828,8 @@ def latest_receipts(receipts: list[dict[str, Any]]) -> dict[str, list[dict[str, 
 
 def archive_run(row: dict[str, Any]) -> dict[str, Any]:
     """Move a collected run's artifacts under superseded/ and describe it."""
-    dest = (
-        EXP
-        / "superseded"
-        / row["arm"]
-        / f"{row['slug']}__r{row['rollout']}__{row['jobId']}"
-    )
+    suffix = run_suffix(row["rollout"], row.get("wave", 1))
+    dest = EXP / "superseded" / row["arm"] / f"{row['slug']}__{suffix}__{row['jobId']}"
     dest.mkdir(parents=True, exist_ok=True)
     moved: dict[str, str] = {}
     sources = {
@@ -807,16 +889,21 @@ def cmd_outage_retry(args: argparse.Namespace) -> int:
     """Write retry manifests for runs an outage stopped, per arm and rollout."""
     runs = read_json(EXP / "results.json")["runs"]
     targets = {row["slug"]: row for row in load_targets()}
-    groups: dict[tuple[str, int], list[dict[str, Any]]] = {}
+    groups: dict[tuple[str, int, int], list[dict[str, Any]]] = {}
     for row in runs.values():
         if transport_stopped(row):
-            groups.setdefault((row["arm"], row["rollout"]), []).append(
-                targets[row["slug"]]
-            )
-    for (arm, rollout), rows in sorted(groups.items()):
-        label = f"{args.label_prefix}-{arm}-r{rollout}"
+            group = (row["arm"], row.get("wave", 1), row["rollout"])
+            groups.setdefault(group, []).append(targets[row["slug"]])
+    for (arm, wave, rollout), rows in sorted(groups.items()):
+        label = f"{args.label_prefix}-{arm}-{run_suffix(rollout, wave)}"
         manifest = batch_manifest(
-            rows, arm=arm, rollout=rollout, ops=args.ops, tier="hard", label=label
+            rows,
+            arm=arm,
+            rollout=rollout,
+            ops=args.ops,
+            tier="hard",
+            label=label,
+            wave=wave,
         )
         write_json(args.ops / "batches" / f"{label}.json", manifest)
         print(f"{label} {len(rows)}")
@@ -874,9 +961,9 @@ def cmd_collect(args: argparse.Namespace) -> int:
         receipt = receipts[-1]
         job_id = receipt["job_id"]
         out = pathlib.Path(receipt["out"])
-        slug = out.name.rsplit("__r", 1)[0]
+        slug, wave, rollout = split_run_name(out.stem)
         arm = out.parent.name
-        rollout = int(out.stem.rsplit("__r", 1)[1])
+        name = f"{slug}__{run_suffix(rollout, wave)}"
         prior = results.get(key) or {}
         if prior.get("final") and prior.get("jobId") == job_id and not args.revalidate:
             continue
@@ -889,6 +976,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
         row: dict[str, Any] = {
             "arm": arm,
             "slug": slug,
+            "wave": wave,
             "rollout": rollout,
             "jobId": job_id,
             "state": state,
@@ -908,7 +996,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
         stream = attempt_stream(job_id, row["acceptedAttempt"])
         if stream is not None:
             lines = redacted_lines(stream)
-            trace = EXP / "traces" / arm / f"{slug}__r{rollout}.jsonl.gz"
+            trace = EXP / "traces" / arm / f"{name}.jsonl.gz"
             trace.parent.mkdir(parents=True, exist_ok=True)
             payload = ("\n".join(lines) + "\n").encode()
             # mtime=0 keeps the archive byte-identical across re-collections.
@@ -922,7 +1010,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
         row["launch"] = launch
         row["model"] = (launch or {}).get("model")
         if state == "succeeded" and out.is_file() and out.stat().st_size:
-            response = EXP / "responses" / arm / f"{slug}__r{rollout}.txt"
+            response = EXP / "responses" / arm / f"{name}.txt"
             response.parent.mkdir(parents=True, exist_ok=True)
             response.write_bytes(out.read_bytes())
             row["response"] = rel(response)
@@ -930,7 +1018,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
             row["validation"] = validate_response(
                 target["target"],
                 response,
-                EXP / "runs" / arm / f"{slug}__r{rollout}",
+                EXP / "runs" / arm / name,
                 prompt_mode=ARMS[arm]["promptMode"],
             )
         else:
@@ -1045,14 +1133,24 @@ def load_observations(path: pathlib.Path) -> dict[str, dict[str, Any]]:
     return observations
 
 
-def distribution_of(run_dir: pathlib.Path) -> dict[str, Any] | None:
-    path = run_dir / "distribution.json"
-    if not path.is_file():
+def normalized_cell(run_dir: pathlib.Path) -> dict[str, Any] | None:
+    packed = run_dir / "normalized_cells.json.gz"
+    plain = run_dir / "normalized_cells.json"
+    if packed.is_file():
+        data = json.loads(gzip.decompress(packed.read_bytes()))
+    elif plain.is_file():
+        data = json.loads(plain.read_text())
+    else:
         return None
-    data = json.loads(path.read_text())
     if isinstance(data, list):
         data = data[0] if data else None
     return data
+
+
+def distribution_of(run_dir: pathlib.Path) -> dict[str, Any] | None:
+    """The run's materialized CDF: the sealed cell's predictionDistribution."""
+    cell = normalized_cell(run_dir)
+    return (cell or {}).get("predictionDistribution")
 
 
 def primary_distribution(manifest_path: str | None) -> dict[str, Any] | None:
@@ -1134,33 +1232,39 @@ def cmd_score(args: argparse.Namespace) -> int:
             "arms": {},
         }
         for arm, spec in ARMS.items():
-            eligible = [
-                runs[run_key(arm, slug, r)]
-                for r in range(1, spec["rollouts"] + 1)
-                if runs.get(run_key(arm, slug, r), {}).get("eligible")
-            ]
-            per_run = {
-                f"r{run['rollout']}": score_distribution(
-                    distribution_of(ROOT / run["validation"]["runDir"]), observed
-                )
-                for run in eligible
-            }
-            arm_row: dict[str, Any] = {"runs": per_run}
-            if spec["rollouts"] >= 3 and len(eligible) >= 3:
-                cells = []
-                for run in eligible[:3]:
-                    normalized = json.loads(
-                        (
-                            ROOT / run["validation"]["runDir"] / "normalized_cells.json"
-                        ).read_text()
+            waves = sorted(
+                {
+                    run.get("wave", 1)
+                    for run in runs.values()
+                    if run.get("arm") == arm and run.get("slug") == slug
+                }
+            )
+            row["arms"][arm] = {}
+            for wave in waves:
+                eligible = [
+                    runs[run_key(arm, slug, r, wave)]
+                    for r in range(1, spec["rollouts"] + 1)
+                    if runs.get(run_key(arm, slug, r, wave), {}).get("eligible")
+                ]
+                per_run = {
+                    run_suffix(run["rollout"], wave): score_distribution(
+                        distribution_of(ROOT / run["validation"]["runDir"]), observed
                     )
-                    cells.append(
-                        normalized[0] if isinstance(normalized, list) else normalized
+                    for run in eligible
+                }
+                wave_row: dict[str, Any] = {
+                    "runs": per_run,
+                    "finishedAt": [run.get("finishedAt") for run in eligible],
+                }
+                if spec["rollouts"] >= 3 and len(eligible) >= 3:
+                    cells = [
+                        normalized_cell(ROOT / run["validation"]["runDir"])
+                        for run in eligible[:3]
+                    ]
+                    wave_row["median3"] = score_distribution(
+                        median_distribution(cells), observed
                     )
-                arm_row["median3"] = score_distribution(
-                    median_distribution(cells), observed
-                )
-            row["arms"][arm] = arm_row
+                row["arms"][arm][f"w{wave}"] = wave_row
         scored.append(row)
     write_json(
         EXP / "scores.json",
@@ -1193,6 +1297,11 @@ def main(argv: list[str] | None = None) -> int:
     batch = sub.add_parser("batch")
     batch.add_argument("--arm", choices=sorted(ARMS), required=True)
     batch.add_argument("--rollout", type=int, required=True)
+    batch.add_argument("--wave", type=int, default=1)
+    batch.add_argument(
+        "--open-after",
+        help="YYYY-MM-DD: keep only targets whose window opens after this day",
+    )
     batch.add_argument("--tier", default="hard")
     batch.add_argument("--slugs", help="comma-separated subset (default: all)")
     batch.add_argument("--exclude", help="comma-separated slugs to leave out")
@@ -1202,6 +1311,9 @@ def main(argv: list[str] | None = None) -> int:
     submit = sub.add_parser("submit")
     submit.add_argument("--label", required=True)
     submit.set_defaults(func=cmd_submit)
+
+    prune = sub.add_parser("prune")
+    prune.set_defaults(func=cmd_prune)
 
     outage = sub.add_parser("outage-retry")
     outage.add_argument("--label-prefix", required=True)

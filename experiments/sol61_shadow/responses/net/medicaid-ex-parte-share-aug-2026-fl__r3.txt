@@ -1,0 +1,158 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-fl",
+  "country": "US",
+  "type": "data",
+  "title": "Florida August 2026 ex parte renewal share",
+  "question": "What percentage of Florida Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, calculated from the original (O) submission row when CMS first publishes it?",
+  "unit": "percent",
+  "pointEstimate": 22.5,
+  "ciLow": 18.5,
+  "ciHigh": 26.4,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Florida's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not change resolution.",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 28.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 24.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 26.9
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 23.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 23.6
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 24.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 24.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 23.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 20.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 21.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 22.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 22.4
+    }
+  ],
+  "drivers": [
+    "Recent ex parte share near 22 percent",
+    "Lower recent level than the twelve-month base rate",
+    "Renewal cohort composition and denominator changes",
+    "Automation and renewal classification",
+    "Original submission and first publication uncertainty"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=FL&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&properties%5B0%5D=reporting_period&properties%5B1%5D=original_or_updated&properties%5B2%5D=beneficiaries_with_a_renewal_due&properties%5B3%5D=beneficiaries_whose_coverage_was_renewed_total&properties%5B4%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis&properties%5B5%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_bas_6356&limit=100",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:32:53Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Florida August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the Florida state row for reporting_period=202608 and original_or_updated=O in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. Following CMS's state-table definition, the denominator is all beneficiaries due for renewal, metric 5; the numerator is beneficiaries renewed ex parte, metric 5a1. This is an unadjusted state percentage, resolved from its first official publication."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the CMS datastore API for the registered dataset, filtering state_abbreviation=FL and original_or_updated=O; retrieve reporting period, renewal due, total renewed, ex parte renewed, and ex parte footnotes.",
+      "result": "The response exposes original rows through June 2026. July-December 2025 ex parte counts / renewal-due counts are respectively 54163/188605, 48446/199175, 52442/195239, 45700/192991, 36719/155346, and 39911/165970. Calculated percentages rounded to one decimal are 28.7, 24.3, 26.9, 23.7, 23.6, and 24.0."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Repeat the official CMS datastore query with reporting_period>=202601, retaining Florida original (O) rows.",
+      "result": "January-June 2026 ex parte counts / renewal-due counts are respectively 47094/195466, 46790/197339, 38557/190674, 38476/176275, 38201/172329, and 38444/171927. Calculated percentages rounded to one decimal are 24.1, 23.7, 20.2, 21.8, 22.2, and 22.4."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Query the same official dataset and Florida O variant for reporting_period in [202408,202508] to inspect previous August cohorts.",
+      "result": "August 2024 reports 40849 ex parte renewals and 225974 beneficiaries due, giving 18.1 percent. August 2025 reports 48446 and 199175, giving 24.3 percent. These two August observations do not establish a stable seasonal adjustment."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official June 2026 CMS snapshot, https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf, printed page 31, state renewal-outcomes table.",
+      "result": "Florida's published table reports 171927 beneficiaries due, 67 percent renewed, 18 percent disenrolled, 15 percent pending, and 22 percent renewed ex parte. All percentages use beneficiaries due as the denominator. The whole-percent ex parte figure agrees with the API calculation of 22.360653 percent."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class and base rate are the twelve fetched Florida O monthly observations from July 2025 through June 2026. Their unrounded mean is 23.803817 percent. The April-June mean is 22.118465 percent, reflecting the lower recent level. Every historical percentage uses the same O variant and numerator/denominator definition."
+    },
+    {
+      "kind": "text",
+      "text": "Adjustment components: level receives most weight from the recent three-month mean; momentum receives zero additional adjustment because the recent recovery follows a larger decline; one-off and seasonal adjustments are zero because the prior August cohorts disagree; policy-mechanism adjustment is zero because the fetched evidence provides no quantified Florida change for August. Cohort composition and automation changes remain forecast risks."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a recent-level moving-average prior shrunk toward the twelve-month base rate: point = 0.8*22.118464527 + 0.2*23.803817229 = 22.455535067 percent. Momentum, one-off/seasonal, and policy adjustments each equal zero. From the eleven successive changes in the twelve unrounded monthly percentages, mean change = -0.577912486 percentage points and centered sum of squared changes = 47.413132791. sigma = 2.177455689 percentage points = sqrt(47.413132791/10). The one-month normal 80% half-width is 1.28*sigma = 2.787143282. For the two unobserved months between June and August, assume independent monthly innovations and multiply by sqrt(2), giving half-width 3.941615830. Bounds are 22.455535067 +/- 3.941615830 = [18.513919237,26.397150898], rounded to [18.5,26.4], with point 22.5."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification limitation: the official snapshot index fetched this run lists June 2026 released September 25, May released August 28, and April released July 31. It provides no announced August 2026 publication date and does not verify December 15, 2026. The supplied resolutionDate is retained as the ledger deadline, but the mandatory official-calendar verification requirement could not be satisfied; no release date is inferred from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Vintage limitation: the CMS specifications allow corrections to original submissions. The fetched history consists of currently published O rows; immutable historical first-publication vintages were not established. The forecast therefore uses the correct original-submission variant with a historical-vintage limitation, while the target itself strictly resolves on the first publication and excludes later corrections."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is improved automated matching or an easier August cohort; a share above 26.4 percent would land outside the interval. The downside risk is a harder cohort, renewed decline, or processing disruption that reduces ex parte renewals relative to beneficiaries due; a share below 18.5 percent would land outside the interval. A reporting-classification change could also exceed the dispersion captured by this model."
+    },
+    {
+      "kind": "forecast",
+      "point": 22.5,
+      "ciLow": 18.5,
+      "ciHigh": 26.4
+    }
+  ]
+}

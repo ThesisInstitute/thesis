@@ -1,0 +1,46 @@
+{
+  "status": "refused",
+  "slug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+  "country": "US",
+  "type": "conditional",
+  "unit": "billions USD",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted",
+  "conditionalOn": "An Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress, House Report 119-698) is enacted into law on or before 2026-12-31.",
+  "runAt": "2026-10-07T12:15:55Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Required registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target requires historical observations from the exact agency 097 awards GET query, reading obligations and multiplying by 1e-9. Broader DoD totals are explicitly inadmissible."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025 ; open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024 ; open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+      "result": "Each exact URL returned Internal Error and 'is not accessible via this tool.' No obligations values were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026 ; open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022 ; open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021 ; open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+      "result": "Each exact URL returned Internal Error and 'is not accessible via this tool.' No obligations values were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "mcp__codex_apps__search_service_web_run",
+      "call": "Retry the exact registered URLs for fiscal_year=2020,2021,2022,2023,2024,2025 using open.",
+      "result": "All six exact URLs again returned Internal Error and 'is not accessible via this tool.' No obligations values were returned."
+    },
+    {
+      "kind": "text",
+      "text": "No fetched reference class is available for the registered series. Persistence, model candidates, sigma, a conditional update and an 80% interval cannot be grounded."
+    },
+    {
+      "kind": "text",
+      "text": "Forecast refused as required by the registered-query instruction. No contract-valid forecast cell can be emitted; no history, point estimate, interval or resolution date has been invented."
+    }
+  ]
+}

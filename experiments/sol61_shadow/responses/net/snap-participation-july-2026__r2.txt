@@ -1,0 +1,42 @@
+{
+  "slug": "snap-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "July 2026 SNAP participation",
+  "question": "What will USDA FNS first report for national SNAP Persons, not seasonally adjusted, for July 2026, in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS national monthly SNAP participation tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Use the first official print of July 2026 national SNAP Persons. Multiply the published value in thousands by 0.001 to obtain millions, preserving published precision. Ignore subsequent revisions.",
+  "dataPointId": "usda.fns.snap.persons.july_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://www.fns.usda.gov/pd/data-release-schedule"
+  ],
+  "runAt": "2026-10-07T12:03:19Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld because official evidence could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The official SNAP source-page fetch returned HTTP 403 Forbidden. The attempted official release-schedule page was also inaccessible. Following the instruction to stop after a fetch failure, this run stopped without substituting remembered values."
+    },
+    {
+      "kind": "text",
+      "text": "No official participation history was fetched, so the mandatory six-print base rate, historical sigma, point estimate, and 80% interval cannot be calculated."
+    },
+    {
+      "kind": "text",
+      "text": "The resolution date could not be verified from an official calendar. Null forecast fields and an empty historicalContext report this failure explicitly; this object is not a completed forecast and does not satisfy the forecast validation requirements."
+    }
+  ]
+}

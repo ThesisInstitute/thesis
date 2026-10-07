@@ -1,83 +1,134 @@
 {
-  "status": "refused",
   "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
   "country": "US",
   "type": "data",
-  "title": "Forest Service Minnesota FY2026 obligations: forecast unavailable",
-  "question": "What will the registered USAspending query snapshot report for FY2026 prime-award transaction obligations awarded by the Forest Service with Minnesota place of performance, in USD millions?",
+  "title": "FY2026 Forest Service obligations in Minnesota",
+  "question": "What will USAspending's first registered FY2026 query snapshot report for prime-award transaction obligations awarded by the Forest Service with Minnesota place of performance, in USD millions?",
   "unit": "usd_millions",
-  "pointEstimate": null,
-  "ciLow": null,
-  "ciHigh": null,
+  "pointEstimate": 50.76363639,
+  "ciLow": 32.08079723,
+  "ciHigh": 69.44647555,
   "confidence": 0.8,
   "resolutionDate": null,
   "resolutionSource": "USAspending API v2 registered query snapshot",
   "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
-  "resolutionRule": "Execute the registered POST query for FY2026 using the specified awarding subagency, Minnesota place of performance, award type codes, and transaction spending level. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Resolve against the registered query snapshot; subsequent API revisions do not replace that snapshot. An official resolution date could not be verified.",
+  "resolutionRule": "Use the first official response captured under the registered_query_snapshot policy for FY2026. POST the registered transaction-level query, select results[time_period.fiscal_year=2026].aggregated_amount, and multiply by 0.000001. Preserve dollar-cent precision, equivalent to eight decimal places in USD millions, disregarding floating-point representation noise. Freeze that captured value without subsequent revisions or correction grace periods. The supplied contract gives an expected window but no exact capture date; official sources fetched in this run do not verify one.",
   "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+  "validationStatus": "refused_unverified_resolution_date",
   "historicalContext": [
     {
-      "period": {
-        "type": "fiscal_year",
-        "value": "2025"
-      },
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 27.25941087
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 38.29107807
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 34.0958762
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 49.95892909
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 68.71782809
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
       "label": "FY2025",
       "value": 46.83255679
     }
   ],
   "drivers": [
-    "Required historical reference class unavailable",
-    "Current FY2026 query failed",
-    "Official resolution date unverified"
+    "Observed FY2026 registered-query total",
+    "Delayed fiscal-year-end award postings",
+    "Variable grant and contract obligations",
+    "Corrections and deobligations"
   ],
   "sourceContext": [
-    "https://api.usaspending.gov/api/v2/search/spending_over_time/"
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/",
+    "https://www.nfc.usda.gov/FSS/clientServices/FMS/DATA_Act/documents/USDA_Reporting_Schedules/USDA_DATA_D2_Reporting_Schedule.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov"
   ],
-  "runAt": "2026-10-06T22:16:35Z",
+  "runAt": "2026-10-07T12:51:56Z",
   "reasoning": [
     {
       "kind": "heading",
-      "text": "Forecast refused because the mandatory registered-query history could not be fetched"
+      "text": "FY2026 Minnesota Forest Service obligations: numerical forecast with unresolved snapshot date"
     },
     {
       "kind": "text",
-      "text": "The target is the exact registered transaction query, not an agency profile total or a published headline series. No local files or prior forecasts were accessed."
+      "text": "The exact series is usaspending.search.spending_over_time.usfs.minnesota_obligations. Historical observations and the current observation use the same registered prime-award transaction variant, awarding subagency, place-of-performance filter and award types. Historical values are official query results fetched now, not archived first-release vintages."
+    },
+    {
+      "kind": "text",
+      "text": "For each fiscal year Y, separately POST to https://api.usaspending.gov/api/v2/search/spending_over_time/ with group=fiscal_year, spending_level=transactions, and filters: time_period=[{start_date:(Y-1)-10-01,end_date:Y-09-30}], agencies=[{type:awarding,tier:subtier,name:Forest Service,toptier_name:Department of Agriculture}], place_of_performance_locations=[{country:USA,state:MN}], award_type_codes=[02,03,04,05,06,07,08,09,10,11,A,B,C,D,IDV_A,IDV_B,IDV_B_A,IDV_B_B,IDV_B_C,IDV_C,IDV_D,IDV_E]. Read aggregated_amount for Y and multiply by 0.000001."
     },
     {
       "kind": "tool",
       "tool": "official.lookup",
-      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with group=fiscal_year, spending_level=transactions, time_period=2024-10-01 through 2025-09-30, awarding subtier Forest Service under Department of Agriculture, place_of_performance_locations=[{\"country\":\"USA\",\"state\":\"MN\"}], and every registered award type code.",
-      "result": "The echoed official response reported fiscal_year=2025 and aggregated_amount=46832556.79 USD. Contract_Obligations=15398331.29, Grant_Obligations=21158670.82, and Other_Obligations=10275554.68."
+      "call": "Separately execute the registered POST query for FY2020 and FY2021 at https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "FY2020 aggregated_amount=$27,259,410.87, equivalent to 27.25941087 million. FY2021 aggregated_amount=$38,291,078.07, equivalent to 38.29107807 million. Both responses identify spending_level=transactions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separately execute the registered POST query for FY2022 and FY2023 at https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "FY2022 aggregated_amount=$34,095,876.20, equivalent to 34.09587620 million. FY2023 aggregated_amount=49958929.089999996 dollars, equivalent to 49.95892909 million after removing floating-point representation noise at dollar-cent precision."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separately execute the registered POST query for FY2024 and FY2025 at https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "FY2024 aggregated_amount=$68,717,828.09, equivalent to 68.71782809 million. FY2025 aggregated_amount=$46,832,556.79, equivalent to 46.83255679 million."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the FY2020–FY2025 reference class: six annual flows with mean 44.192613185 million and observed range 27.25941087–68.71782809 million. Annual grant and contract totals vary substantially."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the registered POST query for FY2026, covering 2025-10-01 through 2026-09-30, at https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "FY2026 aggregated_amount=$50,763,636.39. Components are Contract_Obligations=$33,186,357.32, Grant_Obligations=$4,894,753.75 and Other_Obligations=$12,682,525.32; other obligation categories are zero."
+    },
+    {
+      "kind": "text",
+      "text": "Level: the observed FY2026 total updates the historical mean upward by 6.571023205 million. Momentum: the current total exceeds FY2025 by 3.93107960 million, but extrapolating further growth after fiscal-year-end is unsupported. One-off effects: category composition differs across years, and no separately quantified adjustment is warranted. Policy mechanism: late postings, corrections and deobligations can still change the live query; no signed adjustment is supported by fetched evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Official schedule evidence does not establish the target's resolution date. USDA's File D2 schedule specifies processing and subsequent-business-day publication of assistance records, while Treasury describes rolling award reporting. Neither announces an annual first print for this complete registered transaction query. The supplied October 15–22 window lacks an exact snapshot capture date. Accordingly, resolutionDate remains null and this cell fails the mandatory date verification; the numerical forecast is provisional."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/references/submission_periods/ to check official submission schedule evidence.",
+      "result": "The latest displayed FY2026 entry covers August 1–31, fiscal month 11, with submission_due_date=2026-10-02 and certification_due_date=2026-11-17. These DABS account-submission dates do not verify a resolution date for the registered transaction snapshot."
     },
     {
       "kind": "math",
-      "text": "FY2025 registered-query obligations = 46832556.79 × 0.000001 = 46.83255679 usd_millions."
+      "text": "Prior/update/interval: Model is persistence of the observed completed-year query total, anchored initially on the six FY2020–FY2025 annual flows. Prior mean=44.192613185; observed-level adjustment=+6.571023205; additional momentum, one-off and policy adjustments=0; point=50.76363639 million. For this flow series, compute dispersion from annual values: sum of squared deviations=1065.2114225888367; sample variance=1065.2114225888367/(6-1)=213.04228451776734; sigma = 14.595968091146519 million. Normal-reference 80% half-width=1.28*sigma=18.682839156667544 million. Bounds=50.76363639±18.682839156667544=[32.08079723,69.44647555]. Retain the historical half-width because fetched historical snapshots do not calibrate remaining posting errors; coverage is model-based."
     },
     {
       "kind": "text",
-      "text": "Separate requests executed the same registered query for FY2020, FY2021, FY2022, FY2023, FY2024, and FY2026, substituting each fiscal year's October 1 through September 30 dates. Every request failed with curl exit code 35 and the exact error: curl: (35) Recv failure: Connection reset by peer. None returned an official statistic."
-    },
-    {
-      "kind": "text",
-      "text": "The mandatory base rate requires at least six distinct fetched historical fiscal years. Only FY2025 was fetched successfully. This is a retrieval failure, not evidence that the official source exposes fewer than six periods."
-    },
-    {
-      "kind": "text",
-      "text": "Official documentation and data-source web lookups failed with a network error. The supplied expected snapshot window is 2026-10-15 through 2026-10-22, but no official calendar or announcement was successfully retrieved to verify a resolution date."
-    },
-    {
-      "kind": "text",
-      "text": "Prior/update/interval: No model was fitted because the historical sample contains only one successful observation. Historical flow dispersion, sigma, and the required 1.28 × sigma interval half-width cannot be estimated from the required reference class. No point estimate or bounds are asserted."
-    },
-    {
-      "kind": "text",
-      "text": "Upside risk, downside risk, and scenarios outside the interval cannot be quantified without the missing history and current FY2026 observation. The run instructions require stopping after fetch failure rather than substituting remembered values."
+      "text": "Upside risk is delayed positive obligations, particularly large assistance awards. Downside risk is deobligations, duplicate removal or corrected agency/location coding. Net additional postings above 18.68283916 million would land above the interval; net reversals exceeding 18.68283916 million would land below it. Either would be outside the interval."
     },
     {
       "kind": "forecast",
-      "point": null,
-      "ciLow": null,
-      "ciHigh": null
+      "point": 50.76363639,
+      "ciLow": 32.08079723,
+      "ciHigh": 69.44647555
     }
   ]
 }

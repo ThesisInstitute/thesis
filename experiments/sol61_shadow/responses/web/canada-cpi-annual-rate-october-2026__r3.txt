@@ -1,0 +1,162 @@
+{
+  "slug": "canada-cpi-annual-rate-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada CPI annual inflation, October 2026",
+  "question": "What will Statistics Canada first report for the October 2026 Canada all-items Consumer Price Index year-over-year percentage change, not seasonally adjusted?",
+  "unit": "percent",
+  "pointEstimate": 3.1,
+  "ciLow": 2.3,
+  "ciHigh": 3.9,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-16",
+  "resolutionSource": "Statistics Canada, Consumer Price Index, Table 18-10-0004-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+  "resolutionRule": "Resolve to the first officially published October 2026 Canada all-items CPI year-over-year percentage change, not seasonally adjusted, from Table 18-10-0004-01, vector v41690973. Calculate 100 × (October 2026 index / October 2025 index − 1), rounded to one decimal percent, consistent with the official release. Preserve that first print and disregard subsequent corrections or revisions.",
+  "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 2.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 2.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 1.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 2.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 3.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 3.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "August 2026",
+      "value": 3.0
+    }
+  ],
+  "drivers": [
+    "Persistent oil and refining disruptions support fuel inflation",
+    "Low October 2025 gasoline prices strengthen the annual comparison",
+    "October provincial fuel-tax relief moderates inflation",
+    "Federal fuel-tax relief continues through October",
+    "Slower grocery inflation offsets some services pressure",
+    "Economic slack limits broader inflation spillovers"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/pub/62-001-x/2011003/t031-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260119/dq260119a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260217/dq260217a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260316/dq260316a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260519/dq260519a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260720/dq260720a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251117/dq251117a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm",
+    "https://www.bankofcanada.ca/2026/09/navigating-uncertainty-and-adapting-to-change/",
+    "https://www.canada.ca/en/department-finance/news/2026/09/minister-champagne-introduces-legislation-to-extend-the-federal-fuel-excise-tax-relief-for-canadians.html",
+    "https://www.alberta.ca/alberta-energy-rebate",
+    "https://www.princeedwardisland.ca/en/news/province-suspends-provincial-fuel-tax-to-ease-cost-of-living"
+  ],
+  "runAt": "2026-10-07T11:56:18Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 Canada headline CPI forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first-print Canada all-items NSA annual CPI rate for October 2026. All historical headline anchors use that same variant. Statistics Canada's official calendar verifies November 16, 2026 for the October reference period and October 19 for September, which remains unobserved at this run. The registered resolver agrees with the fetched calendar. Table 18-10-0004-01 and the official archived vector mapping identify v41690973 as Canada all-items NSA CPI. Sources: https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf ; https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401 ; https://www150.statcan.gc.ca/n1/pub/62-001-x/2011003/t031-eng.htm"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada original headline releases for December 2025 through April 2026, using the corresponding Daily URLs in sourceContext.",
+      "result": "Fetched annual rates: December 2025 2.4%, January 2026 2.3%, February 1.8%, March 2.4%, April 2.8%. March was verified in the official release PDF; the other rates were fetched from their original Daily releases."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada original Daily releases dated June 22, July 20, August 17 and September 14, 2026.",
+      "result": "Fetched annual rates: May 2026 3.2%, June 2.8%, July 3.0%, August 3.0%. The August original NSA table reports all-items index 169.8 against August 2025 index 164.8, with a published annual rate of 3.0%. Sources: https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260720/dq260720a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm"
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the nine fetched monthly first prints from December 2025 through August 2026 average 2.6333%, range from 1.8% to 3.2%, and have median 2.8%. The persistence prior is the latest 3.0% rate. Its approximately 0.37 percentage-point premium over the sample mean is supported by the current fuel-price regime, so the forecast retains that elevated level rather than applying strong immediate mean reversion."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the original August 2026 release and its NSA component table.",
+      "result": "August gasoline inflation was 22.8%, versus July's 25.7%; CPI excluding gasoline rose 2.4%, versus 2.2%; grocery inflation slowed to 2.8%, versus 3.1%; rent inflation increased to 2.8%, versus 2.5%. Shelter overall rose 1.5%. Sources: https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.pdf ; https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch October 2025's original NSA release and comparison indexes.",
+      "result": "October 2025 all-items CPI was 165.3, compared with September's 164.9; the published monthly increase was 0.2%. Gasoline fell 4.8% monthly and 9.4% annually in October 2025. Holding August 2026's fetched index 169.8 unchanged through October would imply 100 × (169.8 / 165.3 − 1) = 2.7223% annual inflation. Sources: https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251117/dq251117a-eng.htm"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official federal and provincial fuel-tax announcements available by October 7, 2026.",
+      "result": "Finance Canada announced continuation of federal gasoline relief of 10 cents/litre through January 31, 2027. Alberta resumed full fuel-tax relief on October 1, removing 13 cents/litre through year-end. PEI removed 8.47 cents/litre on gasoline from September 26 through January 31. Continued federal relief preserves an existing price effect; provincial changes add fresh October downward pressure. Sources: https://www.canada.ca/en/department-finance/news/2026/09/minister-champagne-introduces-legislation-to-extend-the-federal-fuel-excise-tax-relief-for-canadians.html ; https://www.alberta.ca/alberta-energy-rebate ; https://www.princeedwardisland.ca/en/news/province-suspends-provincial-fuel-tax-to-ease-cost-of-living"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the Bank of Canada's September 21, 2026 public assessment of energy prices and inflation.",
+      "result": "The Bank reported inflation around 3% and expected it to edge upward if oil stayed near $100/barrel. It said refining disruptions made gasoline prices consistent with crude prices almost US$40 higher, and that a normal 10% oil-price increase adds about 0.2 percentage points to CPI inflation. It also described continuing economic excess supply. Source: https://www.bankofcanada.ca/2026/09/navigating-uncertainty-and-adapting-to-change/"
+    },
+    {
+      "kind": "text",
+      "text": "Separate effects before combining: the level remains anchored by elevated fuel prices. Momentum is mixed, with slower groceries offset by firmer rent and non-gasoline inflation. One-off effects include the low October 2025 gasoline comparison and new provincial fuel-tax relief. Monetary policy and economic slack restrain broader pass-through with a lag; they do not imply an immediate mechanical October reduction. The federal extension avoids reinstatement and is not counted as another new price cut."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a two-month persistence model anchored on August's 3.0% and the nine-print December 2025-August 2026 reference class. Judgmental adjustments are +0.15 percentage points for persistent fuel pressure and the low October gasoline comparison, -0.05 for provincial fuel-tax relief, and zero net additional adjustment for mixed non-energy momentum or lagged monetary-policy transmission. These adjustment sizes are analyst assumptions, not published agency estimates. Point = 3.0 + 0.15 - 0.05 = 3.1%. The eight successive annual-rate changes are [-0.1, -0.5, 0.6, 0.4, 0.4, -0.4, 0.2, 0.0] percentage points; their mean is 0.075 and their squared deviations sum to 1.095. sigma = 0.3955 percentage points = sqrt(1.095 / 7). The one-month normal 80% half-width is 1.28 × sigma = 0.5063. With September and October both unobserved, independent-increment horizon scaling gives 0.5063 × sqrt(2) = 0.7160. Thus unrounded bounds are 3.1 ± 0.7160 = [2.3840, 3.8160]; rounding endpoints outward to the release's one-decimal grid gives [2.3, 3.9]. This is an approximate 80% interval based on a small sample and the current energy regime."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is renewed shipping or refinery disruption that raises fuel prices further and spreads costs into transport and food; a sufficiently large shock would land above 3.9%, outside the interval. The downside risk is a rapid energy-price reversal combined with provincial tax relief and stronger grocery disinflation; that combination could land below 2.3%, outside the interval. Using the fetched October 2025 denominator, the interval endpoints correspond approximately to October 2026 indexes of 169.10 and 171.75, compared with August's 169.8."
+    },
+    {
+      "kind": "forecast",
+      "point": 3.1,
+      "ciLow": 2.3,
+      "ciHigh": 3.9
+    }
+  ]
+}

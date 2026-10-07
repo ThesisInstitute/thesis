@@ -502,3 +502,175 @@ def test_archive_run_moves_artifacts_and_keeps_the_record(
     archived = tmp_path / record["archived"]["response"]
     assert archived.read_text() == "{}"
     assert (tmp_path / record["archived"]["runDir"] / "manifest.json").is_file()
+
+
+# ------------------------------------------------------------ horizon waves
+
+
+@given(st.integers(min_value=1, max_value=50), st.integers(min_value=1, max_value=9))
+def test_run_suffix_round_trips_and_keeps_wave_one_names(
+    rollout: int, wave: int
+) -> None:
+    suffix = shadow.run_suffix(rollout, wave)
+    assert shadow.parse_suffix(suffix) == (wave, rollout)
+    assert shadow.split_run_name(f"some-slug__x__{suffix}") == (
+        "some-slug__x",
+        wave,
+        rollout,
+    )
+    if wave == 1:
+        assert suffix == f"r{rollout}"
+
+
+def test_parse_suffix_refuses_other_names() -> None:
+    for bad in ("", "r", "w2", "rx", "w2r", "r1w2", "s1"):
+        with pytest.raises(ValueError):
+            shadow.parse_suffix(bad)
+
+
+def test_wave_jobs_get_their_own_outputs_names_and_workspaces(tmp_path) -> None:
+    rows = [{"slug": "alpha"}]
+    first = shadow.batch_manifest(
+        rows, arm="net", rollout=1, ops=tmp_path, tier="hard", label="a"
+    )
+    later = shadow.batch_manifest(
+        rows, arm="net", rollout=1, ops=tmp_path, tier="hard", label="b", wave=3
+    )
+    a, b = first["jobs"][0], later["jobs"][0]
+    assert a["out"].endswith("out/net/alpha__r1.txt")
+    assert b["out"].endswith("out/net/alpha__w3r1.txt")
+    assert a["workdir"] != b["workdir"] and a["name"] != b["name"]
+    assert shadow.receipt_key({"out": b["out"]}) == "net/alpha__w3r1"
+    assert shadow.receipt_key({"out": a["out"]}) == "net/alpha__r1"
+
+
+def test_open_after_keeps_only_targets_whose_window_opens_later(
+    tmp_path, capsys
+) -> None:
+    targets = shadow.load_targets()
+    day = sorted({t["windowStart"] for t in targets})[len(targets) // 3]
+    args = shadow.argparse.Namespace(
+        ops=tmp_path, arm="web", rollout=1, wave=4, tier="hard", slugs=None,
+        exclude=None, open_after=day, label="horizon-test",
+    )  # fmt: skip
+    assert shadow.cmd_batch(args) == 0
+    manifest = json.loads((tmp_path / "batches" / "horizon-test.json").read_text())
+    kept = {
+        pathlib.Path(job["out"]).stem.rsplit("__", 1)[0] for job in manifest["jobs"]
+    }
+    by_slug = {t["slug"]: t for t in targets}
+    assert kept and all(by_slug[slug]["windowStart"] > day for slug in kept)
+    assert all(job["out"].endswith("__w4r1.txt") for job in manifest["jobs"])
+
+
+def test_prune_run_dir_keeps_the_verdict_and_a_packed_sealed_cell(tmp_path) -> None:
+    cell = [{"slug": "a", "predictionDistribution": {"points": []}}]
+    (tmp_path / "normalized_cells.json").write_text(json.dumps(cell))
+    dropped = ["manifest.json", "prompt.md", "raw_response.txt", "distribution.json"]
+    dropped += ["cells.with_activity.json", "custody_root.json"]
+    for name in ["validation.json", *dropped]:
+        (tmp_path / name).write_text("{}")
+    shadow.prune_run_dir(tmp_path)
+    assert {p.name for p in tmp_path.iterdir()} == {
+        "validation.json", "normalized_cells.json.gz",
+    }  # fmt: skip
+    assert shadow.normalized_cell(tmp_path) == cell[0]
+    shadow.prune_run_dir(tmp_path)  # idempotent
+    assert shadow.normalized_cell(tmp_path) == cell[0]
+
+
+def test_distribution_comes_from_the_sealed_cell(tmp_path) -> None:
+    points = [{"value": 0.0, "probability": 0.0}, {"value": 1.0, "probability": 1.0}]
+    (tmp_path / "normalized_cells.json").write_text(
+        json.dumps([{"predictionDistribution": {"points": points}}])
+    )
+    assert shadow.distribution_of(tmp_path) == {"points": points}
+    assert shadow.distribution_of(tmp_path / "missing") is None
+
+
+def test_audit_treats_excluding_thesis_from_a_search_as_compliance() -> None:
+    query = (
+        "USDA SNAP participation 2026 -site:thesisinstitute.org "
+        '-site:app.thesisinstitute.org -"thesis institute" -Brier'
+    )
+    lines = [_event({"type": "web_search", "query": query,
+                     "action": {"type": "search", "queries": [query]}})]  # fmt: skip
+    assert not shadow.audit_trace(lines)["contaminated"]
+    visit = "thesisinstitute.org forecasts SNAP -site:github.com"
+    lines = [_event({"type": "web_search", "query": visit, "action": {}})]
+    assert shadow.audit_trace(lines)["contaminated"]
+    opened = {"type": "open_page", "url": "https://app.thesisinstitute.org/x"}
+    lines = [_event({"type": "web_search", "query": "", "action": opened})]
+    assert shadow.audit_trace(lines)["contaminated"]
+
+
+# ------------------------------------------------------------ horizon driver
+
+HSPEC = importlib.util.spec_from_file_location(
+    "sol61_horizon", ROOT / "experiments" / "sol61_shadow" / "horizon.py"
+)
+horizon = importlib.util.module_from_spec(HSPEC)
+sys.modules["sol61_horizon"] = horizon
+HSPEC.loader.exec_module(horizon)
+
+
+def test_wave_calendar_runs_daily_and_stops_before_the_reset() -> None:
+    from datetime import date, datetime, timezone
+
+    assert horizon.wave_day(2) == date(2026, 10, 8)
+    assert horizon.wave_day(7) == date(2026, 10, 13)
+    with pytest.raises(ValueError):
+        horizon.wave_day(1)
+    start, end = horizon.wave_window(3, last_wave=7)
+    assert start == datetime(2026, 10, 9, 13, tzinfo=timezone.utc)
+    assert end == datetime(2026, 10, 10, 13, tzinfo=timezone.utc)
+    assert horizon.wave_window(7, last_wave=7)[1] < datetime(
+        2026, 10, 14, 3, 28, tzinfo=timezone.utc
+    )
+
+
+@given(st.datetimes(), st.datetimes())
+def test_budget_is_monotone_floored_and_capped(a, b) -> None:
+    from datetime import timezone
+
+    a, b = sorted([a.replace(tzinfo=timezone.utc), b.replace(tzinfo=timezone.utc)])
+    assert horizon.BUDGET_FLOOR <= horizon.budget(a) <= horizon.budget(b)
+    assert horizon.budget(b) <= horizon.BUDGET_CAP
+
+
+@given(
+    st.lists(st.text(min_size=1), max_size=200), st.integers(min_value=1, max_value=60)
+)
+def test_chunks_partition_in_order_within_size(items, size) -> None:
+    chunks = horizon.chunked(items, size)
+    assert [item for chunk in chunks for item in chunk] == items
+    assert all(1 <= len(chunk) <= size for chunk in chunks)
+
+
+def test_wave_plan_gives_every_arm_rollout_one_before_any_rollout_two() -> None:
+    slugs = [f"s{i}" for i in range(67)]
+    plan = horizon.wave_plan(3, slugs)
+    rollouts = [rollout for _, rollout, _ in plan]
+    assert rollouts == sorted(rollouts)
+    for rollout in (1, 2, 3):
+        for arm in shadow.ARMS:
+            covered = [
+                s for a, r, chunk in plan if a == arm and r == rollout for s in chunk
+            ]
+            assert covered == slugs
+    assert all(len(chunk) <= horizon.MAX_INFLIGHT for _, _, chunk in plan)
+
+
+def test_gate_holds_for_each_limit_and_opens_when_all_clear() -> None:
+    clear = dict(
+        inflight=10, size=30, load5=40.0, free_gb=55.0, utilization=0.2, allowed=0.3
+    )
+    assert horizon.gate(**clear) is None
+    for change in (
+        {"inflight": 31},
+        {"load5": 108.0},
+        {"free_gb": 39.9},
+        {"utilization": 0.3},
+        {"utilization": None},
+    ):
+        assert horizon.gate(**{**clear, **change}) is not None, change

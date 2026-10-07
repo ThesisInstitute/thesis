@@ -1,0 +1,45 @@
+{
+  "status": "refused",
+  "slug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+  "country": "US",
+  "type": "conditional",
+  "unit": "billions USD",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+  "conditionalOn": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+  "runAt": "2026-10-07T10:39:54Z",
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints/"
+  ],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target requires historical obligations from the exact agency awards query. Broader agency totals, authorization amounts, and search-result summaries cannot substitute."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+      "result": "Each request returned Internal Error and stated that the requested URL is not accessible via this tool. No obligations values were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+      "result": "Each request returned Internal Error and stated that the requested URL is not accessible via this tool. No obligations values were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/docs/endpoints/ and retry GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+      "result": "The official documentation identifies the agency awards endpoint as GET. The exact historical-query retry again returned Internal Error; no obligations value was returned."
+    },
+    {
+      "kind": "text",
+      "text": "I cannot ground historicalContext, a base-rate prior, model candidates, or an interval in fetched values for this series. Following the explicit registered-query instruction, I refuse to produce a forecast cell rather than invent history or substitute another aggregate."
+    }
+  ]
+}

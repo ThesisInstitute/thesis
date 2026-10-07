@@ -1,0 +1,65 @@
+{
+  "status": "failed",
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "title": "2027 ACTC claiming returns conditional on threshold reform",
+  "question": "How many millions of returns will claim the additional child tax credit for tax year 2027 in the first official IRS Publication 1304 Table 3.3 print, conditional on the registered legislation?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Use the first official tax-year 2027 Table 3.3 all-returns total for the number of returns under the plain Additional child tax credit or equivalent refundable child tax credit concept header. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Multiply the published return count by 0.000001 to express millions, preserving published precision. Ignore subsequent revisions. The registered resolution deadline remains unverified against an official release schedule.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases",
+    "https://www.irs.gov/statistics/soi-tax-stats-whats-new"
+  ],
+  "runAt": "2026-10-07T12:03:19Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Failed run: canonical history could not be extracted"
+    },
+    {
+      "kind": "text",
+      "text": "The target counts total ACTC claiming returns in the first official Publication 1304 Table 3.3 print, conditional on the exact registered legislation. It does not count children or credit dollars."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official IRS table index lists Table 3.3 workbooks for 2018 through 2023 and earlier years. The source therefore exposes sufficient history; no fewer-than-six-prints exception applies."
+    },
+    {
+      "kind": "text",
+      "text": "The required fetch_source, extract_irs_soi, and calculate tools are unavailable in this session. Opening the latest listed workbook, https://www.irs.gov/pub/irs-soi/23in33ar.xls, returned: Failed to fetch; (400) Unsupported content-type: application/vnd.ms-excel. No claimant count was extracted."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory canonical base rate could not be established. Research stopped after the workbook failure as instructed. No remembered values, rounded bulletin substitutes, or invented historical observations were used."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Without the required extracted historical sample, no persistence prior, policy adjustment, sigma, or 1.28*sigma interval calculation can be supported. The point estimate and interval bounds are null."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched IRS release calendar covers 2026. The fetched What's New page announces tax-year 2023 Publication 1304 tables on March 26, 2026. Neither verifies a tax-year 2027 release date or the registered 2029-12-31 deadline. That deadline is retained as supplied contract metadata."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

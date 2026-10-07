@@ -1,0 +1,174 @@
+{
+  "slug": "snap-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation, September 2026",
+  "question": "What will USDA FNS report on the FIRST PRINT for national SNAP Participation Persons in September 2026, an unadjusted monthly administrative count, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 35.879939,
+  "ciLow": 35.139828,
+  "ciHigh": 36.620049,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS, SNAP Data Tables, national monthly participation",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve from the earliest official SNAP Data Tables publication containing September 2026 national monthly Participation Persons, or the matching Number of Persons Participating table's TOTAL row, Initial column. Use the unadjusted national total, including any disaster assistance included by USDA and excluding territories receiving separate Nutrition Assistance Grants. Later revisions and corrections do not change the outcome. Express the count in thousands, then apply the registered multiplier 0.001 to obtain millions; current PDFs display individual persons, so their equivalent conversion is division by 1000000. Retain six decimal places in millions. The target context does not specify resolutionDate, and no official release date was verified; its expected window, 2027-02-07 through 2027-02-15, is not a scheduled release date.",
+  "dataPointId": "usda.fns.snap.persons.september_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 41.077607
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 40.395735
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 39.513033
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 38.547730
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 37.870817
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 37.298271
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 37.011096
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 36.562128
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Declining first-print participation",
+    "Recent declines have moderated",
+    "Attenuated trend beats persistence in limited backtests",
+    "Work-requirement changes already reflected in history",
+    "Sparse calibration and reporting uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-1.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-2.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://fns-prod.azureedge.us/snap/work-requirements/policies",
+    "https://fns-prod.azureedge.us/snap/waivers/timelimit"
+  ],
+  "runAt": "2026-10-07T12:45:47Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 SNAP participation: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is fns.snap.total_persons, September 2026 national administrative participation, unadjusted, FIRST PRINT. Preserve the registered slug, millions unit, dataPointId and resolver URL. The latest published month is June 2026, making this a three-month projection. Original-vintage history is used rather than revised historical rows."
+    },
+    {
+      "kind": "text",
+      "text": "Target metadata discrepancy: the supplied ledger context contains an expected release window but no resolutionDate or resolutionDateBasis. Official-source searches found no scheduled date. resolutionDate is null rather than inventing a day or treating the window end as a registered bound; consequently this object parses but cannot satisfy the contract's date requirement. The canonical FNS page returned 403; USDA's own linked content server supplied the tables. Current PDFs report persons, whereas the registered table description says thousands; count-to-thousands conversion followed by the registered multiplier preserves the intended millions quantity. The catalog slug check was omitted under the run's independence restriction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official indexed snap-persons-1.pdf, snap-4fymonthly-2.pdf and snap-persons-3.pdf for Initial/latest-month national Persons. URLs are in sourceContext.",
+      "result": "Original publications: January 23, 2026, October 2025 Initial TOTAL 41,077,607 persons; February 13, 2026, November 2025 latest-month Participation Persons 40,395,735; March 13, 2026, December 2025 Initial TOTAL 39,513,033. These original official tables were retrieved through web-search indexing; older direct PDF URLs returned 404."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search site:fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf \"TOTAL\"; search official snap-persons-5.pdf for February 2026 Initial.",
+      "result": "April 10, 2026 publication: January 2026 Initial TOTAL 38,547,730 persons. May 8, 2026 publication: February 2026 Initial TOTAL 37,870,817 persons. The same January table labels December 2025 39,204,201 Preliminary, which is not substituted for December's original print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf; read TOTAL, Initial column.",
+      "result": "June 12, 2026 publication: March 2026 Initial TOTAL 37,298,271 persons. July 10, 2026 publication: April 2026 Initial TOTAL 37,011,096 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf; read TOTAL, Initial column.",
+      "result": "August 14, 2026 publication: May 2026 Initial TOTAL 36,562,128 persons. September 11, 2026 publication: June 2026 Initial TOTAL 36,352,716 persons. Both tables warn that preliminary data are subject to significant revision."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open USDA SNAP Data Tables and Program Data Overview on fns-prod.azureedge.us; follow the national summary PDF link snap-4fymonthly-9.pdf.",
+      "result": "Data-page update September 18, 2026; latest available month June 2026. National summary dated September 11, 2026 reports June 36,352,716 persons but revised May 36,685,024 and revised March 37,531,152; retain original May 36,562,128 and March 37,298,271 for calibration. No September-data scheduled release day is stated on these pages."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate / reference class: nine consecutive original national monthly prints, October 2025 through June 2026, average 38.292126 million, median 37.870817, range 36.352716-41.077607. All eight successive changes are negative; their mean is -0.590611375 million. The latest three changes average -0.315185 million, showing moderation. The initial persistence benchmark is 36.352716 million."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated before selection: [{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"persistence\",\"targetPeriod\":\"2026-09\",\"unit\":\"millions\",\"point\":36.352716,\"p10\":35.612606,\"p50\":36.352716,\"p90\":37.092826,\"interval80\":{\"low\":35.612606,\"high\":37.092826},\"interval90\":{\"low\":35.401559,\"high\":37.303873},\"interval_method\":\"sample standard deviation of eight first-print monthly changes; Gaussian horizon sqrt(3), widened 1.25 for sparse overlapping validation and changing trend\",\"calibration_n\":8,\"train_cutoff\":\"2026-06\",\"walk_forward\":{\"horizon_months\":3,\"n\":3,\"origins\":[\"2026-01\",\"2026-02\",\"2026-03\"],\"mae\":1.263626,\"rmse\":1.286855}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"trailing_three_drift\",\"targetPeriod\":\"2026-09\",\"unit\":\"millions\",\"point\":35.407161,\"p10\":34.667051,\"p50\":35.407161,\"p90\":36.147271,\"interval80\":{\"low\":34.667051,\"high\":36.147271},\"interval90\":{\"low\":34.456004,\"high\":36.358318},\"interval_method\":\"sample standard deviation of eight first-print monthly changes; Gaussian horizon sqrt(3), widened 1.25 for sparse overlapping validation and changing trend\",\"calibration_n\":8,\"train_cutoff\":\"2026-06\",\"walk_forward\":{\"horizon_months\":3,\"n\":3,\"origins\":[\"2026-01\",\"2026-02\",\"2026-03\"],\"mae\":1.15956,\"rmse\":1.165709}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"attenuated_trailing_three_drift\",\"targetPeriod\":\"2026-09\",\"unit\":\"millions\",\"point\":35.879939,\"p10\":35.139828,\"p50\":35.879939,\"p90\":36.620049,\"interval80\":{\"low\":35.139828,\"high\":36.620049},\"interval90\":{\"low\":34.928781,\"high\":36.831096},\"interval_method\":\"sample standard deviation of eight first-print monthly changes; Gaussian horizon sqrt(3), widened 1.25 for sparse overlapping validation and changing trend\",\"calibration_n\":8,\"train_cutoff\":\"2026-06\",\"walk_forward\":{\"horizon_months\":3,\"n\":3,\"origins\":[\"2026-01\",\"2026-02\",\"2026-03\"],\"mae\":0.159917,\"rmse\":0.18452}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select attenuated_trailing_three_drift as the strongest tested prior. Its explicit, unfitted damping coefficient is 0.5. Matched three-month walk-forward forecasts from January, February and March predict April, May and June; its MAE is 0.159917 million versus persistence 1.263626 and undamped trailing-three drift 1.159560. These overlapping tests are sparse and model selection is uncertain. The selected point is 0.4727775 million below persistence; the official declines and this benchmark comparison justify the difference. No additional inside-view adjustment is applied."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/snap/work-requirements/policies and https://fns-prod.azureedge.us/snap/abawd/waivers, which redirects to /snap/waivers/timelimit.",
+      "result": "USDA states the law changed time-limit coverage July 4, 2025. The current rule allows certain individuals three months of SNAP in a 3-year period without satisfying work requirements; ordinary geographic waivers require unemployment over 10%, with Alaska/Hawaii alternatives at 1.5 times the national rate. The pages provide no calibrated national count of additional September losses."
+    },
+    {
+      "kind": "text",
+      "text": "Separate mechanisms: level is anchored to June's original total; momentum is captured only through the selected attenuated trend. Eligibility changes predate the reference class and receive no extra numerical policy effect. Disaster assistance or reporting anomalies have no assumed point adjustment. A new official July/August rebound would raise the point; accelerating first-print declines would lower it."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = attenuated_trailing_three_drift using nine October 2025-June 2026 original prints; weights are 0.5 persistence and 0.5 undamped drift. Point = 0.5*36.352716 + 0.5*(36.352716 + 3*(-0.315185)) = 35.8799385, rounded to 35.879939 million. Additional policy, seasonal and one-off adjustments = 0. Eight monthly changes are [-0.681872,-0.882702,-0.965303,-0.676913,-0.572546,-0.287175,-0.448968,-0.209412]; mean = -0.590611375. sigma = sqrt(0.499263019840/7) = 0.267064203 million. Gaussian three-month 80% half-width = 1.28*sigma*sqrt(3) = 0.592088024; widen by 1.25 for sparse overlapping backtests and changing decline rates, giving 0.740110030. Bounds = 35.8799385 +/- 0.740110030 = [35.139828,36.620049] after rounding. The 90% half-width uses 1.645*sigma*sqrt(3)*1.25 = 0.951157030. All arithmetic derives from the fetched originals."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage check: the selected candidate's three matched horizon-three errors are -0.2716955, -0.046230 and +0.161826 million, all inside the widened band. Three overlapping cases cannot establish nominal 80% calibration, and nine fetched original prints do not permit a last-ten check. Persistence is inside the final interval, allowing participation to flatten."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk outside the interval: disaster enrollment or reversal of benefit terminations raises September's first-print total above 36.620049 million, requiring an increase exceeding 0.267333 million over June. Downside risk outside the interval: recertification closures or time-limit enforcement sustain the earlier reference-class decline of 0.590611375 million per month; three such declines imply 34.580882 million, below 35.139828. These are stress scenarios, not asserted policy-effect counts."
+    },
+    {
+      "kind": "forecast",
+      "point": 35.879939,
+      "ciLow": 35.139828,
+      "ciHigh": 36.620049
+    }
+  ]
+}

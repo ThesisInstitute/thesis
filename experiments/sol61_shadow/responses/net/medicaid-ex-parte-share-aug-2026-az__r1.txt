@@ -2,60 +2,150 @@
   "slug": "medicaid-ex-parte-share-aug-2026-az",
   "country": "US",
   "type": "data",
-  "title": "Arizona ex parte renewal share, August 2026",
-  "question": "What will Arizona's ex parte renewal share be for August 2026 in the original (O) submission row when CMS first publishes it?",
+  "title": "Arizona ex parte renewals: August 2026",
+  "question": "What percentage of Arizona Medicaid and CHIP beneficiaries due for renewal in August 2026 will have been renewed on an ex parte basis, using the original (O) submission row when CMS first publishes it?",
   "unit": "percent",
-  "pointEstimate": null,
-  "ciLow": null,
-  "ciHigh": null,
+  "pointEstimate": 67.1,
+  "ciLow": 57.3,
+  "ciHigh": 76.9,
   "confidence": 0.8,
   "resolutionDate": "2026-12-15",
   "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
   "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
-  "resolutionRule": "Resolves to Arizona's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Numerator and denominator as published; share computed to one decimal. Subsequent revisions do not change resolution.",
-  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.az.aug_2026",
-  "historicalContext": [],
-  "drivers": [],
-  "sourceContext": [
-    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
-    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
-    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  "resolutionRule": "Resolves to Arizona's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using both counts as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not change the outcome.",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 65.4
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 68.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 61.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 66.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 70.4
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 59.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 68.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 62.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 70.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 68.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 73.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 59.6
+    }
   ],
-  "runAt": "2026-10-06T22:17:51Z",
+  "drivers": [
+    "Recent six-month original-submission mean of 67.1%",
+    "Changing renewal cohort composition",
+    "Mean reversion after June's low share",
+    "Automated data matching and renewal classification"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=AZ&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202507&conditions%5B2%5D%5Boperator%5D=%3E%3D&properties%5B0%5D=reporting_period&properties%5B1%5D=original_or_updated&properties%5B2%5D=beneficiaries_with_a_renewal_due&properties%5B3%5D=beneficiaries_whose_coverage_was_renewed_total&properties%5B4%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis&properties%5B5%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_bas_6356&properties%5B6%5D=beneficiaries_disenrolled_at_renewal_total&properties%5B7%5D=beneficiaries_with_a_pending_renewal&limit=20",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:52:50Z",
   "reasoning": [
     {
       "kind": "heading",
-      "text": "Forecast unavailable: required evidence was not established"
+      "text": "Arizona August 2026 original-submission ex parte renewal share"
     },
     {
       "kind": "text",
-      "text": "The target remains Arizona's August 2026 original-submission state row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c."
+      "text": "The target is Arizona's state row for reporting period 202608 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. CMS's renewal-rate presentation uses beneficiaries due for renewal as the denominator. All historical anchors use original (O) submissions, excluding updated (U) submissions. Historical O rows were fetched from the currently published dataset; they are not independently archived first-publication vintages. The target itself resolves strictly on its first published O row."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the CMS datastore API for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, filtering state_abbreviation=AZ, original_or_updated=O, and reporting_period>=202507; echo the response.",
+      "result": "Fetched 12 rows through June 2026. Period: ex parte numerator / beneficiaries due denominator: 202507: 148301/226932; 202508: 129332/189866; 202509: 68192/111492; 202510: 119252/178468; 202511: 124431/176740; 202512: 58263/97996; 202601: 124915/183464; 202602: 71538/113696; 202603: 126345/180456; 202604: 104097/151629; 202605: 133459/181665; 202606: 58656/98446. Ex parte footnotes were blank for these rows. May and June total renewed counts were 147993 and 72126, respectively."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the same CMS datastore API with state_abbreviation=AZ, original_or_updated=O, and reporting_period=202408; echo the response.",
+      "result": "August 2024 original row: 155819 beneficiaries renewed ex parte and 221095 beneficiaries due for renewal. Computed share = 100*155819/221095 = 70.4760%, or 70.5% to one decimal."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's June 2026 Eligibility Operations and Enrollment Snapshot and inspect the Arizona row in the Coverage Retention and Disenrollment Rates by State table.",
+      "result": "The table reports Arizona beneficiaries due = 98446, total renewed = 73%, total disenrolled = 23%, pending = 4%, and renewed ex parte = 60%. Its column heading explicitly makes these percentages shares of beneficiaries due for renewal. The API count ratio 58656/98446 gives 59.5819%, consistent with the table's whole-percent rounding."
     },
     {
       "kind": "text",
-      "text": "The official metadata response identified the September 2026 release CSV and reported modification on September 25, 2026."
+      "text": "The base rate is the equally weighted mean of the 12 fetched monthly Arizona O-row shares, July 2025 through June 2026: 66.1691%. The January-June 2026 mean is 67.1201%. August 2025 was 68.1175% and August 2024 was 70.4760%; these support a rebound from June but provide too little seasonal evidence for a separate numerical seasonal adjustment."
     },
     {
       "kind": "text",
-      "text": "The datastore history request failed with curl exit code 16: Error in the HTTP2 framing layer. The separately requested official CSV returned successfully, but its displayed output was truncated and did not expose the Arizona history needed for this forecast."
+      "text": "Level, momentum, one-off, and policy effects are considered separately. The recent six-month level warrants a +0.9510 percentage-point update from the annual base rate. Momentum receives zero adjustment because the history alternates between high and low shares rather than following a sustained trend. One-off and policy-mechanism adjustments are also zero: the fetched evidence does not quantify an August-specific change. CMS explains that cohort timing and classification of renewals completed after forms are sent can affect reported ex parte shares."
     },
     {
       "kind": "text",
-      "text": "Following the instruction to stop after a failed fetch, no further history requests were made. Six distinct usable Arizona original-submission prints were not established, so no base rate was calculated."
+      "text": "Release-date verification limitation: the official snapshot announcement page confirms June 2026 was released September 25, 2026, but provides no forward announcement verifying December 15, 2026 for August data. The specifications' fifteenth-day deadline concerns states submitting updated reports to CMS, not CMS publishing original reports. The canonical resolutionDate remains 2026-12-15 as instructed, but the required official release-calendar verification is unmet. Resolution remains tied to actual first publication."
     },
     {
       "kind": "text",
-      "text": "The official snapshot index lists June 2026 as released September 25, 2026. It does not verify a December 15, 2026 release for August. The ledger resolutionDate is retained but remains unverified."
+      "text": "Prior/update/interval: Use a rolling-level mean-reversion model, anchored on the 12-month base rate of 66.1691%, updated by +0.9510 points to the latest six-month mean of 67.1201%; separate momentum, one-off, and policy adjustments are each 0. Compute dispersion from the 11 successive changes in unrounded fetched shares. Their mean is -0.524410 points and summed squared deviations are 586.981571; sigma = 7.661472 percentage points = sqrt(586.981571/(11-1)). The approximate normal 80% half-width is 1.28*sigma = 9.806684 points. Thus 67.120054 +/- 9.806684 gives 57.313370 to 76.926739%, rounded to 57.3-76.9%, with point 67.1%. No additional width multiplier is applied; the model forecasts a mean-reverting monthly level rather than accumulating a random walk."
+    },
+    {
+      "kind": "math",
+      "text": "For every historical month, share = 100*ex_parte_count/renewals_due_count. Point = mean(January-June 2026 unrounded shares) = 67.120054 -> 67.1. Lower = 67.120054 - 1.28*7.661472 = 57.313370 -> 57.3. Upper = 67.120054 + 1.28*7.661472 = 76.926739 -> 76.9."
     },
     {
       "kind": "text",
-      "text": "Prior/update/interval: No persistence prior, adjustment, sigma, or 80% interval was calculated because the required fetched reference class was unavailable. Null forecast fields indicate a failed run, not a zero-percent forecast."
+      "text": "Upside risk: August's cohort is easier to verify automatically or matching success improves. Downside risk: a less readily verified cohort or continued movement toward form-based renewals sustains June's weakness. A substantial matching failure could produce a share below 57.3%, outside the interval; unusually broad successful automated renewal could produce a share above 76.9%, outside the interval."
     },
     {
       "kind": "forecast",
-      "point": null,
-      "ciLow": null,
-      "ciHigh": null
+      "point": 67.1,
+      "ciLow": 57.3,
+      "ciHigh": 76.9
     }
   ]
 }

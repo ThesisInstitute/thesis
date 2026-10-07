@@ -1,0 +1,165 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "title": "2027 ACTC claims with a $1 earnings threshold",
+  "question": "How many million returns claim the additional child tax credit or refundable child tax credit for tax year 2027 in the first official IRS SOI Publication 1304 Table 3.3, all returns total row, conditional on the registered legislation?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Conditional on the registered legislation, use the first official tax year 2027 Publication 1304 Table 3.3 all returns total row, number of returns under the total refundable child tax credit or additional child tax credit concept. Exclude the separate refundable-portion and taxes-offset subsets. Multiply the raw number of returns by 0.000001 without intermediate rounding. Ignore subsequent revisions; no correction grace period applies. The registered resolution date is retained but could not be verified from an official announcement schedule this run.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "year",
+        "value": "2017"
+      },
+      "label": "2017",
+      "value": 18.341984
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2018"
+      },
+      "label": "2018",
+      "value": 20.450468
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2019"
+      },
+      "label": "2019",
+      "value": 19.867646
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2020"
+      },
+      "label": "2020",
+      "value": 19.119249
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2021"
+      },
+      "label": "2021",
+      "value": 37.771612
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2022"
+      },
+      "label": "2022",
+      "value": 18.076696
+    }
+  ],
+  "drivers": [
+    "Lower earnings threshold expands eligibility among low positive earners",
+    "Retained earnings phase-in limits the increase in claiming returns",
+    "Temporary full refundability makes 2021 a different policy regime",
+    "Credit limits, filing participation, and identification requirements affect claims"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/pub/irs-prior/p1304--2019.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2020.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2021.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2022.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2024.pdf",
+    "https://www.irs.gov/pub/irs-pdf/p1304.pdf",
+    "https://www.irs.gov/credits-deductions/individuals/child-tax-credit",
+    "https://www.irs.gov/irb/2025-45_IRB",
+    "https://www.irs.gov/irb/2026-38_irb",
+    "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.pdf",
+    "https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases",
+    "https://www.irs.gov/statistics/soi-tax-stats-whats-new"
+  ],
+  "runAt": "2026-10-07T11:56:59Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "2027 conditional ACTC claims: failed run"
+    },
+    {
+      "kind": "text",
+      "text": "Run failed; forecast withheld. The required fetch_source, extract_irs_soi, and calculate tools are unavailable in this environment. Web fetches of the latest six published canonical workbooks, tax years 2018–2023, failed with unsupported Excel content or an internal error. No captured-workbook extraction call IDs exist. The exact official PDF observations retained in historicalContext are supplemental audit evidence and do not satisfy or waive the mandatory adapter workflow. Null forecast fields deliberately preserve this failure."
+    },
+    {
+      "kind": "text",
+      "text": "The target is total claiming returns in Publication 1304 Table 3.3, series irs.actc.total_claims, rather than credit dollars, qualifying children, the refundable portion, or returns using the credit to offset taxes. The PDF observations use the plain total concept header. Their original workbook vintages were not verified."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official Publication 1304 PDFs at https://www.irs.gov/pub/irs-prior/p1304--2019.pdf, https://www.irs.gov/pub/irs-prior/p1304--2020.pdf, and https://www.irs.gov/pub/irs-prior/p1304--2021.pdf; inspect Table 3.3 total ACTC number-of-returns column.",
+      "result": "Exact PDF counts: tax year 2017, 18,341,984 returns = 18.341984 million; 2018, 20,450,468 = 20.450468 million; 2019, 19,867,646 = 19.867646 million. Publication filename years differ from the tax years identified in the table headers."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official Publication 1304 table evidence from https://www.irs.gov/pub/irs-prior/p1304--2022.pdf and https://www.irs.gov/pub/irs-prior/p1304--2024.pdf.",
+      "result": "Table 3.3 total concept counts: tax year 2020, 19,119,249 returns = 19.119249 million; tax year 2021, 37,771,612 returns = 37.771612 million. These are exact PDF table observations, not captured-workbook extractions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Search official https://www.irs.gov/pub/irs-pdf/p1304.pdf for tax year 2022 Table 3.3 total refundable child tax credit or additional child tax credit.",
+      "result": "Tax year 2022 total concept: 18,076,696 returns = 18.076696 million. The separate refundable-portion column reports 16,745,784 returns and is excluded."
+    },
+    {
+      "kind": "text",
+      "text": "The supplemental PDF reference class contains six distinct tax years, 2017–2022. Its mean is 22.27127583 million; excluding the temporary 2021 full-refundability regime gives 19.17120860 million. These diagnostic base rate calculations cannot replace the required latest-six canonical history. The official Table 3.3 page exposes 2023, whose value remains unparsed; no history-availability exception is claimed."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch IRS Child Tax Credit guidance, Revenue Procedure 2025-32 in https://www.irs.gov/irb/2025-45_IRB, and https://www.irs.gov/irb/2026-38_irb.",
+      "result": "IRS describes ACTC as generally 15% of earned income exceeding $2,500. For tax year 2026, the maximum CTC is $2,200 per child and the refundable cap is $1,700. Expanded section 24(h) was made permanent. These are fetched policy parameters, not a verified tax year 2027 claimant forecast."
+    },
+    {
+      "kind": "math",
+      "text": "With the 15% phase-in retained, changing the threshold from $2,500 to $1 raises an uncapped claimant's potential credit by 0.15 × (2500 − 1) = $374.85. This changes payment amounts for existing claimants; it cannot be converted directly into newly claiming returns. No official estimate of the incremental claimant count was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: A prospective model would use persistence within the ordinary ACTC regime, separately adjusting the level, momentum, temporary 2021 expansion, and conditional threshold mechanism. For the six fetched PDF annual-flow observations, sample sigma = 7.64620568 million and 1.28 × sigma = 9.78714327 million. Excluding 2021 gives sigma = 1.00122434 million and half-width 1.28156716 million; any such narrowing requires explicit policy-regime justification and additional forecast uncertainty. These are diagnostic arithmetic only. Mandatory canonical extraction and date verification failed, so no final point, 80% interval, or implied bounds are issued."
+    },
+    {
+      "kind": "text",
+      "text": "Official S.3596 bill text changes the underlying statutory threshold to $1 and removes section 24(h)(6)'s override. A threshold-only change retains the earnings phase-in, so it does not reproduce the temporary full-refundability mechanism observed in 2021. The registered condition also permits legislation with additional changes; the final policy package would matter."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification failed. The fetched IRS upcoming-release page supplies a 2026 schedule and describes dates as tentative. IRS What's New identifies March 26, 2026 as the revised release date for tax year 2023 Publication 1304 tables. Neither source verifies a tax year 2027 release by 2029-12-31. That date is retained solely as the registered contract, without inferring it from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: legislation accompanying the threshold reduction could introduce full refundability or substantially expand eligibility and filing participation. Downside risk: restrictive eligibility rules, weak participation, or fewer eligible working families could reduce claims. A broader full-refundability package could land outside the interval from an ordinary-regime model. This failed run has no issued 80% interval to test."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

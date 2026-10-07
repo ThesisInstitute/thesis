@@ -1,0 +1,167 @@
+{
+  "slug": "abs-labour-employment-change-australia-september-2026",
+  "country": "AU",
+  "type": "data",
+  "title": "Australia employment change, September 2026",
+  "question": "What will ABS Labour Force, Australia report in its FIRST PRINT for the September 2026 month-over-month change in total employed persons, Australia, seasonally adjusted, in thousands, for the registered LF/M3.3.1599.20.AUS.M target?",
+  "unit": "thousands",
+  "pointEstimate": 25.4,
+  "ciLow": -22.8,
+  "ciHigh": 73.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-15",
+  "resolutionSource": "Australian Bureau of Statistics, Labour Force, Australia, September 2026",
+  "resolutionSourceUrl": "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+  "resolutionRule": "Preserve the registered generic-url resolver: ABS dataflow LF, field LF/M3.3.1599.20.AUS.M, registered as employed persons, seasonally adjusted, Australia, month-over-month change; identity transform with factor 1. Resolve using the September 2026 observation in the FIRST PRINT, in thousands to one decimal place. Later revisions and corrections do not change the resolved value. The verified headline release date is 15 October 2026 at 11:30am AEDT. The registered API mapping could not be independently verified in this run; see the evidence limitation in reasoning.",
+  "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2024-09"}, "label": "2024-09", "value": 64.1},
+    {"period": {"type": "month", "value": "2024-10"}, "label": "2024-10", "value": 15.9},
+    {"period": {"type": "month", "value": "2024-11"}, "label": "2024-11", "value": 35.6},
+    {"period": {"type": "month", "value": "2024-12"}, "label": "2024-12", "value": 56.3},
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 44.0},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": -52.8},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 32.2},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 89.0},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": -2.5},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 24.5},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": -5.4},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 14.9},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 42.2},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": -21.3},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 65.2},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 17.8},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 48.9},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 17.9},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": -18.6},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 40.3},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 76.3},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": -15.8},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "2026-08", "value": 39.5}
+  ],
+  "drivers": [
+    "Expanding-mean benchmark outperforms persistence",
+    "Recent annual mean remains near the full-sample mean",
+    "Substantial first-print sampling variability",
+    "August seasonal-adjustment change adds comparison-base uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/sep-2024",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/oct-2024",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/nov-2024",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/dec-2024",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jan-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/feb-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/mar-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/apr-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/may-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jun-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/sep-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/oct-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/nov-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/dec-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jan-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/feb-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/mar-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/apr-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/may-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jun-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026",
+    "https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_labour",
+    "https://www.abs.gov.au/articles/update-labour-force-modernisation-and-future-release-plans",
+    "https://www.abs.gov.au/articles/supplementary-survey-methodology-changes-labour-force-survey"
+  ],
+  "runAt": "2026-10-07T10:38:04Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 Australian employment-change first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the national seasonally adjusted monthly change in total employment, expressed in thousands. Preserve the supplied slug, unit, dataPointId and registered resolver. No conditional policy applies. The catalog lookup was skipped to honor the run's independence restriction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_labour and https://www.abs.gov.au/articles/update-labour-force-modernisation-and-future-release-plans.",
+      "result": "ABS explicitly schedules Labour Force, Australia, September 2026 for Thursday 15 October 2026, 11:30am AEDT. The modernisation article, released 20 August 2026, corroborates 15 October 2026."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar discrepancy: the supplied registration window is 2026-10-20 through 2026-10-28, whereas the official headline calendar says 2026-10-15. This release-calendar target therefore uses the verified official date while retaining the same registered target identity."
+    },
+    {
+      "kind": "text",
+      "text": "Evidence limitation: opening the exact registered ABS API URL and alternative official API formats failed with inaccessible-URL errors. No API observations were fetched. The history below was instead fetched from each month's own official ABS statistical release table, at the exact Employed people / Monthly change cell. These public first-print table observations have not been verified against the pinned API extraction. This is a disclosed provenance gap, not a claim that the exact-artifact validation requirement was satisfied."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official ABS Labour Force, Australia release pages sep-2024, oct-2024, nov-2024, dec-2024, jan-2025 and feb-2025, listed in sourceContext; read each own-period Key statistics - Seasonally adjusted table, Employed people row, Monthly change column.",
+      "result": "2024-09: 64100 persons (64.1 thousand); 2024-10: 15900 persons (15.9 thousand); 2024-11: 35600 persons (35.6 thousand); 2024-12: 56300 persons (56.3 thousand); 2025-01: 44000 persons (44.0 thousand); 2025-02: -52800 persons (-52.8 thousand). These are each release's own-month published changes, not later-vintage history or differences of rounded levels."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official ABS Labour Force, Australia release pages mar-2025, apr-2025, may-2025, jun-2025, jul-2025 and aug-2025, listed in sourceContext; read each own-period Key statistics - Seasonally adjusted table, Employed people row, Monthly change column.",
+      "result": "2025-03: 32200 persons (32.2 thousand); 2025-04: 89000 persons (89.0 thousand); 2025-05: -2500 persons (-2.5 thousand); 2025-06: 2000 persons (2.0 thousand); 2025-07: 24500 persons (24.5 thousand); 2025-08: -5400 persons (-5.4 thousand). These are each release's own-month published changes, not later-vintage history or differences of rounded levels."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official ABS Labour Force, Australia release pages sep-2025, oct-2025, nov-2025, dec-2025, jan-2026 and feb-2026, listed in sourceContext; read each own-period Key statistics - Seasonally adjusted table, Employed people row, Monthly change column.",
+      "result": "2025-09: 14900 persons (14.9 thousand); 2025-10: 42200 persons (42.2 thousand); 2025-11: -21300 persons (-21.3 thousand); 2025-12: 65200 persons (65.2 thousand); 2026-01: 17800 persons (17.8 thousand); 2026-02: 48900 persons (48.9 thousand). These are each release's own-month published changes, not later-vintage history or differences of rounded levels."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official ABS Labour Force, Australia release pages mar-2026, apr-2026, may-2026, jun-2026, jul-2026 and aug-2026, listed in sourceContext; read each own-period Key statistics - Seasonally adjusted table, Employed people row, Monthly change column.",
+      "result": "2026-03: 17900 persons (17.9 thousand); 2026-04: -18600 persons (-18.6 thousand); 2026-05: 40300 persons (40.3 thousand); 2026-06: 76300 persons (76.3 thousand); 2026-07: -15800 persons (-15.8 thousand); 2026-08: 39500 persons (39.5 thousand). These are each release's own-month published changes, not later-vintage history or differences of rounded levels."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the 24 own-period published monthly changes from September 2024 through August 2026 sum to 610.2 thousand, average 25.425, have median 28.35 and sample standard deviation 34.2264, and range from -52.8 to 89.0 thousand. Six are negative. Last-print persistence is 39.5 thousand; the last-12 mean is 25.6083, last-six mean 23.2667, and last-three mean 33.3333. These statistics were calculated in memory from the fetched observations. The reference class is the monthly change itself, so its dispersion uses these values rather than successive differences."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates were generated in memory by transparent arithmetic on the fetched history, before selecting the forecast; no model artifact or activity receipt is fabricated. {\"schema\":\"thesis_model_candidate_v1\",\"series\":\"abs.labour.employment_change.australia\",\"target_period\":\"2026-09\",\"candidates\":[{\"model\":\"persistence\",\"point\":39.5,\"p10\":-4.3,\"p50\":39.5,\"p90\":83.3,\"interval80\":[-4.3,83.3],\"interval90\":[-16.8,95.8],\"interval_method\":\"fallback-prior normal intervals using sample standard deviation of 24 published monthly changes; 80% multiplier 1.28 and 90% multiplier 1.645\",\"calibration_n\":24,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"n\":18,\"first_test_period\":\"2025-03\",\"last_test_period\":\"2026-08\",\"minimum_training_n\":6,\"mae\":48.672,\"rmse\":55.141}},{\"model\":\"expanding_mean\",\"point\":25.4,\"p10\":-18.4,\"p50\":25.4,\"p90\":69.2,\"interval80\":[-18.4,69.2],\"interval90\":[-30.9,81.7],\"interval_method\":\"fallback-prior normal intervals using sample standard deviation of 24 published monthly changes; 80% multiplier 1.28 and 90% multiplier 1.645\",\"calibration_n\":24,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"n\":18,\"first_test_period\":\"2025-03\",\"last_test_period\":\"2026-08\",\"minimum_training_n\":6,\"mae\":27.697,\"rmse\":32.760}},{\"model\":\"trailing_six_mean\",\"point\":23.3,\"p10\":-20.5,\"p50\":23.3,\"p90\":67.1,\"interval80\":[-20.5,67.1],\"interval90\":[-33.0,79.6],\"interval_method\":\"fallback-prior normal intervals using sample standard deviation of 24 published monthly changes; 80% multiplier 1.28 and 90% multiplier 1.645\",\"calibration_n\":24,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"n\":18,\"first_test_period\":\"2025-03\",\"last_test_period\":\"2026-08\",\"minimum_training_n\":6,\"mae\":27.821,\"rmse\":33.439}}]}"
+    },
+    {
+      "kind": "text",
+      "text": "Select expanding_mean as the outside-view prior. On the same 18 walk-forward forecasts, with at least six earlier observations and no future observations in training, its MAE/RMSE are 27.697/32.760 thousand, versus persistence 48.672/55.141 and trailing-six mean 27.821/33.439. Its advantage over the six-month mean is small, so prefer the simpler full-history estimate. The selected rounded point is 25.4, a -14.1-thousand delta from persistence. This is benchmark selection, not a news adjustment; the delta is below one quarter of the un-widened historical 80% band, 21.9049 thousand."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026 and https://www.abs.gov.au/articles/supplementary-survey-methodology-changes-labour-force-survey.",
+      "result": "The August release reports seasonally adjusted employment +39,500 persons, trend employment +24,000, full-time employment -6,300 and part-time employment +45,800. The methodology article was released 24 September 2026 and says supplementary-survey prior corrections are removed from August 2026 onwards, with possible effects smaller than normal sampling variation and caution for surrounding months."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view decomposition: level growth is already in the reference-class mean; momentum receives a zero adjustment because the last-12 mean remains near the full-sample mean and the higher last-three mean is noisy. August's part-time-led increase and lower trend growth offer no demonstrated release-specific predictor, so their point adjustment is zero. The supplementary-survey correction change has no evidenced signed effect, so its point adjustment is zero; September's change nevertheless uses August as its comparison base. No policy effect is asserted. The point weights are 100% selected prior and 0% inside-view additions. A 1.10 uncertainty multiplier is analyst judgment for that methodology uncertainty, not an ABS estimate of increased variance."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The expanding-mean prior uses 24 fetched own-release changes, September 2024-August 2026. Point = round(610.2/24, 1) + 0 momentum + 0 one-off + 0 policy = 25.4 thousand. For this change series, sigma = sqrt(sum((x_i - 25.425)^2)/(24 - 1)) = sqrt(26943.345/23) = 34.22644858 thousand. The fallback-prior normal 80% half-width is 1.28*sigma = 43.80985419; widen by 1.10 for uncertainty from removal of the August supplementary-survey adjustment and its role in September's comparison base: 1.28*34.22644858*1.10 = 48.19083960. Implied bounds are 25.4 - 48.19083960 = -22.79083960 and 25.4 + 48.19083960 = 73.59083960; rounded to published precision, [-22.8, 73.6] thousand. The corresponding 90% half-width is 1.645*sigma*1.10 = 61.93275871, giving [-36.5, 87.3]."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: un-widened expanding-mean intervals using only each training sample's standard deviation covered 14 of 18 walk-forward outcomes. The final widened interval contains 21 of the 24 observed changes and 9 of the last 10; the last-ten miss is June 2026 at 76.3 thousand. These are small-sample checks, not proof of prospective 80% calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk outside the interval: a broad hiring surge or unusually employment-heavy incoming survey rotation group could produce a September increase above 73.6 thousand; observed first prints of 76.3 and 89.0 show that such magnitudes occur. Downside risk outside the interval: widespread net job losses, an employment-light incoming group, or an adverse August-to-September seasonal-adjustment comparison could take the result below -22.8 thousand; the observed -52.8 print demonstrates a larger negative movement. Higher direct September employment evidence would move the point up, while lower direct evidence would move it down. The largest unresolved audit concern is the unavailable registered API extraction."
+    },
+    {
+      "kind": "forecast",
+      "point": 25.4,
+      "ciLow": -22.8,
+      "ciHigh": 73.6
+    }
+  ]
+}

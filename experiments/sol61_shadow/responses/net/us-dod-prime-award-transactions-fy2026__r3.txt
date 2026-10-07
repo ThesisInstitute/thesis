@@ -1,0 +1,133 @@
+{
+  "slug": "us-dod-prime-award-transactions-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 prime award transactions",
+  "question": "What will USAspending API agency 097's FY2026 transaction_count equal, in millions, at the registered query snapshot?",
+  "unit": "millions",
+  "pointEstimate": 3.349735,
+  "ciLow": 3.162925,
+  "ciHigh": 3.536545,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+  "resolutionRule": "Read transaction_count from the exact registered FY2026 query at the registered_query_snapshot capture and multiply by 0.000001. Preserve the integer count's precision as six decimal places in millions. Resolve on that captured response, without substituting later revisions or the eventual complete fiscal-year total. An official announcement establishing the capture date could not be verified; resolutionDate is therefore null and this object cannot satisfy the required official-calendar validation.",
+  "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2019"},
+      "label": "FY2019",
+      "value": 4.359737
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 4.059219
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 4.362094
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 4.377453
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 4.43008
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 4.448038
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 4.516581
+    }
+  ],
+  "drivers": [
+    "Current registered-query count anchors the snapshot level",
+    "DoD procurement publication delay permits further arrivals",
+    "Historical annual flow dispersion sets the interval scale",
+    "Official snapshot date remains unverified"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2019",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T12:24:09Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FY2026 registered-query snapshot projection; official date validation unresolved"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.agency.097.awards.transaction_count, obtained by GET /api/v2/agency/097/awards/?fiscal_year=2026. All historical anchors use that identical query with the fiscal year substituted. These are current historical query responses, not archived October first-print vintages. The target is the registered snapshot, not the eventual complete fiscal-year count."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the registered agency 097 awards query separately for fiscal_year=2019, 2020, and 2021; inspect echoed raw responses.",
+      "result": "transaction_count: FY2019 4359737; FY2020 4059219; FY2021 4362094. Multiplication by 0.000001 gives 4.359737, 4.059219, and 4.362094 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the registered agency 097 awards query separately for fiscal_year=2022, 2023, and 2024; inspect echoed raw responses.",
+      "result": "transaction_count: FY2022 4377453; FY2023 4430080; FY2024 4448038. Transformed values are 4.377453, 4.430080, and 4.448038 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025 and the identical query for fiscal_year=2026; inspect echoed raw responses.",
+      "result": "FY2025 transaction_count=4516581 and latest_action_date=2025-09-30T00:00:00. FY2026 transaction_count=3218036 and latest_action_date=2026-09-30T00:00:00. Transformed counts are 4.516581 and 3.218036 million. The latest action date does not establish complete procurement coverage."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is the seven fetched FY2019-FY2025 annual flows: mean 4.364743 million, minimum 4.059219, maximum 4.516581. These mature annual totals establish scale and dispersion; they do not provide matched historical October snapshots."
+    },
+    {
+      "kind": "text",
+      "text": "USAspending's official About the Data document states that DoD procurement publication is delayed 90 days, while financial assistance has a shorter reporting timetable. This supports a partially populated October snapshot. The document does not establish a dated annual release for this registered query. Source: https://www.usaspending.gov/data/about-the-data-download.pdf."
+    },
+    {
+      "kind": "math",
+      "text": "For the annual flow reference class, sample sigma = sqrt(sum((x-4.364743142857143)^2)/6) = 0.145945363493134 million. The required normal approximation gives half-width 1.28*sigma = 0.186810065271211 million."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use current-snapshot persistence with modeled publication drift, anchored to the seven FY2019-FY2025 annual flows. Level starts at 3.218036 million. Approximate visible time as 371 elapsed fiscal-year days minus the documented 90-day procurement delay, or 281 days. Assuming uniform arrivals, the implied rate is 3.218036/281 million per day; 11.5 additional days to the supplied October 15-22 window midpoint add 0.131698982 million. Separate momentum and one-off adjustments are zero because neither was measured; the publication-delay mechanism supplies the drift. sigma = 0.145945363 million; use the unchanged historical half-width 1.28*sigma = 0.186810065 million. The resulting point is 3.349734982 million and bounds are 3.162924917 to 3.536545047 million, rounded to six decimal places. Uniform arrivals and applying the procurement lag to the combined count are modeling approximations, not fetched statistics."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is a bulk backfill: more than 318509 additional transactions relative to the fetched count would land above the interval. Downside risk is stalled ingestion, which would keep the count near 3.218036 million inside the interval; net deletion exceeding 55111 transactions would land below the interval. Historical annual dispersion does not calibrate these short-horizon backfill risks directly."
+    },
+    {
+      "kind": "text",
+      "text": "Official-date verification failed. Treasury's reporting requirements distinguish DABS financial submission calendars from procurement reporting. Its resources page links financial reporting calendars but does not verify a date for this transaction-count snapshot. Attempts to open the calendar workbooks returned 400 Unsupported content-type, so no workbook dates were used. The supplied October 15-22 window remains registration context, not an independently verified official announcement. I retain the same target and leave resolutionDate null rather than inventing a date; the numerical projection is consequently not a validation-compliant forecast cell."
+    },
+    {
+      "kind": "forecast",
+      "point": 3.349735,
+      "ciLow": 3.162925,
+      "ciHigh": 3.536545
+    }
+  ]
+}

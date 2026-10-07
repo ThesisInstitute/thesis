@@ -1,0 +1,107 @@
+{
+  "slug": "us-dod-new-prime-awards-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD new prime awards, FY2026",
+  "question": "What is the USAspending API v2 agency 097 (DoD) FY2026 new_award_count in the registered query snapshot, expressed in millions? This is an administrative fiscal-year count with no seasonal adjustment; the registered snapshot, rather than a subsequently revised API value, is the resolving print.",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 new award count, registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+  "resolutionRule": "Use the registered FY2026 snapshot of GET https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026; read new_award_count and multiply by 0.000001 to express the integer count in millions, preserving six decimal places. Later API revisions do not replace the registered snapshot. The supplied target context gives an expected window of 2026-10-15 through 2026-10-22 but supplies neither an exact resolutionDate nor the snapshot-selection timestamp; an exact date cannot be inferred from that window.",
+  "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Registered-query history unavailable",
+    "Persistence prior cannot be computed",
+    "Realized-volatility interval cannot be computed"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://api.usaspending.gov/api/v2/agency/012/awards/new/count/",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2019",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2018",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026"
+  ],
+  "runAt": "2026-10-07T12:11:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: the exact registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the supplied FY2026 agency 097 new_award_count query, scaled to millions. The run instructions prohibit repository access, Thesis records, shell networking, and substitute aggregates. Null estimates explicitly denote refusal, not a numeric forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the exact registered agency 097 query separately with fiscal_year=2025, fiscal_year=2024, and fiscal_year=2023.",
+      "result": "Each requested URL returned Internal Error and 'is not accessible via this tool.' No API JSON or new_award_count was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the exact registered agency 097 query separately with fiscal_year=2022, fiscal_year=2021, and fiscal_year=2020.",
+      "result": "Each requested URL returned Internal Error and 'is not accessible via this tool.' No API JSON or new_award_count was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "mcp__codex_apps__search_service_web_run",
+      "call": "Retry the exact registered agency 097 queries for fiscal_year=2025 through fiscal_year=2020 using the alternate web tool.",
+      "result": "All retried URLs returned 'is not accessible via this tool.' The alternate tool supplied no award-count observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the exact registered agency 097 queries with fiscal_year=2019, fiscal_year=2018, and fiscal_year=2026.",
+      "result": "Each requested URL returned Internal Error and 'is not accessible via this tool.' Neither additional history nor a current FY2026 count was obtained."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/docs/endpoints and follow its new-award-count documentation link.",
+      "result": "The official index lists API v2 /agency/<TOPTIER_AGENCY_CODE>/awards/new/count/ as GET for a single fiscal year and says authorization is not required. The link opened agency 012 and showed HTTP 200 with a fiscal_year 2027 example; that different-agency example was excluded from historicalContext and all forecast evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. The exact historical queries yielded no numeric observations. This is a tool-access failure, not evidence that the official source exposes fewer than six prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates: neither last-print persistence nor an alternative thesis_model_candidate_v1 candidate can be grounded without fetched observations. No point, quantiles, calibration sample, or walk-forward scores are fabricated."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior unavailable; historical sample unavailable; no numerical adjustment applied; sigma cannot be computed from missing observations, so 1.28*sigma and the implied 80% bounds cannot be evaluated. Point and interval fields are null."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: the provided ledger context specifies an expected snapshot window but omits an exact resolutionDate and snapshot-selection timestamp. Its window endpoints are not verified release-calendar dates and cannot silently be promoted to a resolution date. The catalog slug is preserved from the supplied context; the prohibited Thesis catalog was not accessed."
+    },
+    {
+      "kind": "text",
+      "text": "Outside the interval: no interval exists to stress. A tail scenario cannot establish bounds without the registered-query reference class. No numeric tail claims are made."
+    },
+    {
+      "kind": "text",
+      "text": "Refuse this forecast under the prompt's exact-query failure rule. This JSON is a refusal record and cannot pass the numeric forecast contract: historicalContext is empty and the point, bounds, and resolutionDate are null. Successful exact-query fetches and a complete snapshot date rule are required to produce a publishable cell."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "slug": "nonfarm-payrolls-october-2026",
+  "country": "US",
+  "type": "data",
+  "title": "October 2026 US nonfarm payroll change",
+  "question": "What will be the FIRST PRINT of the October 2026 over-the-month change in US total nonfarm payroll employment, seasonally adjusted, in thousands, for BLS Current Employment Statistics series CES0000000001, Employment Situation Table B-1?",
+  "unit": "thousands",
+  "pointEstimate": 81,
+  "ciLow": -40,
+  "ciHigh": 202,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-06",
+  "resolutionSource": "US Bureau of Labor Statistics, Employment Situation, Current Employment Statistics, Table B-1",
+  "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+  "resolutionRule": "Resolve to the first published October 2026 minus September 2026 value of BLS CES0000000001, all employees, total nonfarm, United States, seasonally adjusted, in thousands. Use the two monthly levels from the same initial October release vintage, equivalent to the October over-the-month change in Employment Situation Table B-1, Total nonfarm, seasonally adjusted. The official calendar schedules publication for November 6, 2026 at 8:30 a.m. Eastern Time. Preserve the first publication; later monthly revisions, benchmark revisions, and corrections are irrelevant. Round to the nearest 1 thousand, matching the published series. The registered BLS API URL remains the resolver endpoint; the contemporaneous official release preserves the first-print vintage.",
+  "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 130
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": -92
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 178
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 115
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 172
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 57
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": -23
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 162
+    },
+    {
+      "period": {"type": "month", "value": "2026-09"},
+      "label": "2026-09",
+      "value": 29
+    }
+  ],
+  "drivers": [
+    "Current-method first-print mean beats persistence in limited walk-forward checks",
+    "Recent payroll gains fluctuate around a slower hiring pace",
+    "Low unemployment claims do not establish faster hiring",
+    "September strike report provides no October adjustment",
+    "First-print dispersion includes survey and seasonal noise"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/empsit.htm",
+    "https://www.bls.gov/schedule/2026/home.htm",
+    "https://www.bls.gov/bls/news-release/empsit.htm",
+    "https://www.bls.gov/news.release/archives/empsit_02112026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_03062026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_04032026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_05082026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_06052026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_07022026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_08072026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_09042026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+    "https://www.bls.gov/news.release/empsit.nr0.htm",
+    "https://www.bls.gov/news.release/empsit.t17.htm",
+    "https://www.bls.gov/news.release/empsit.tn.htm",
+    "https://www.bls.gov/web/empsit/cesbdqa.htm",
+    "https://www.bls.gov/ces/publications/strike-report.htm",
+    "https://www.dol.gov/ui/data.pdf"
+  ],
+  "runAt": "2026-10-07T12:44:37Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 total nonfarm payrolls: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is a monthly employment change, not the payroll level: US BLS CES0000000001, seasonally adjusted, October 2026, in thousands. The calculation subtracts September from October within the first October release vintage. This run uses only fetched official public evidence. The supplied registered slug and identity are retained; the catalog uniqueness check is skipped because the run's independence instruction prohibits visiting the forecast catalog."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/schedule/news_release/empsit.htm and https://www.bls.gov/schedule/2026/home.htm; verify the October 2026 Employment Situation entry.",
+      "result": "The BLS release calendars explicitly schedule the October 2026 Employment Situation for November 6, 2026, at 08:30 AM Eastern Time. The September release also confirms November 6 at 8:30 a.m. ET. resolutionDate = 2026-11-06 is fetched, not inferred from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Access limitation: the registered BLS API endpoint was inaccessible through the web tool, including a retry with year parameters; no API numbers are claimed. History was fetched from the exact Total nonfarm seasonally adjusted row of original official Employment Situation Table B-1 archives, the table named in the binding. Each historical change subtracts the previous-month level in that same release, preserving first prints rather than revised current history. The registered resolver URL and series are retained."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch original BLS Table B-1 from https://www.bls.gov/news.release/archives/empsit_02112026.htm, https://www.bls.gov/news.release/archives/empsit_03062026.htm, and https://www.bls.gov/news.release/archives/empsit_04032026.htm; open the Total nonfarm row and seasonally adjusted columns.",
+      "result": "Official Table B-1 levels, thousands, from each original release: January 2026 158627 minus December 2025 158497 = +130; February 2026 158466 minus January 2026 158558 = -92; March 2026 158637 minus February 2026 158459 = +178. These are the three original monthly changes, not subsequent revisions."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch original BLS Table B-1 from https://www.bls.gov/news.release/archives/empsit_05082026.htm, https://www.bls.gov/news.release/archives/empsit_06052026.htm, and https://www.bls.gov/news.release/archives/empsit_07022026.htm; open the Total nonfarm row and seasonally adjusted columns.",
+      "result": "Official Table B-1 levels, thousands, from each original release: April 2026 158736 minus March 2026 158621 = +115; May 2026 159001 minus April 2026 158829 = +172; June 2026 158984 minus May 2026 158927 = +57."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch original BLS Table B-1 from https://www.bls.gov/news.release/archives/empsit_08072026.htm, https://www.bls.gov/news.release/archives/empsit_09042026.htm, and https://www.bls.gov/news.release/archives/empsit_10022026.htm; open the Total nonfarm row and seasonally adjusted columns.",
+      "result": "Official Table B-1 levels, thousands, from each original release: July 2026 158858 minus June 2026 158881 = -23; August 2026 159075 minus July 2026 158913 = +162; September 2026 159044 minus August 2026 159015 = +29. July's original -23 differs from its later +21 and -10 vintages; only -23 enters historicalContext."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open and find January 2026 in https://www.bls.gov/web/empsit/cesbdqa.htm; open https://www.bls.gov/news.release/empsit.tn.htm.",
+      "result": "BLS states that January 2026 was the first preliminary monthly estimate using current-sample-informed birth-death forecasts, with the modification used in future monthly releases. The reference pay period includes the 12th; CES counts employees who worked or received pay during any part of it. January-September 2026 therefore supplies 9 comparable original prints under the current method."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the nine January-September 2026 first-print changes are [130, -92, 178, 115, 172, 57, -23, 162, 29] thousand. Their sum is 728, mean 80.8889, median 115, sample standard deviation 94.7582, and range -92 to 178. The default persistence prior is September's +29. The trailing-three-print mean is (-23 + 162 + 29)/3 = 56. Older first prints are excluded from the modeling sample because they preceded the documented birth-death method change; this is a chosen reference class, not a claim that fewer than six official prints exist."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmark selection, computed in this run from fetched first prints: walk forward over April-September 2026, using only preceding observations and a minimum of three training prints. Persistence errors are [-63, 57, -115, -80, 185, -133], giving RMSE = sqrt(78757/6) = 114.5695 and MAE = 105.5. Trailing-three mean RMSE = 92.6115, MAE = 85.5556. Expanding-mean RMSE = 77.3846, MAE = 72.6407. Select expanding_mean as the strongest tested simple prior; its current forecast is 728/9 = 80.8889, rounded to 81. Superiority is provisional because only six forecasts were evaluated."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated before the agent forecast, in thousand-job units. calibration_n counts the first-print values used for the fallback-prior dispersion, while the separate walk_forward_score.n counts forecast evaluations. These simple candidates use no fitted seasonal adapter, given the short current-method history. Candidate set: [{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"persistence\",\"model\":\"persistence\",\"point\":29,\"p10\":-92,\"p50\":29,\"p90\":150,\"interval80\":{\"low\":-92,\"high\":150},\"interval90\":{\"low\":-127,\"high\":185},\"interval_method\":\"fallback-prior normal intervals using sample standard deviation of January-September 2026 first-print changes\",\"calibration_n\":9,\"train_cutoff\":\"2026-09\",\"walk_forward_score\":{\"test_periods\":\"2026-04 through 2026-09\",\"n\":6,\"rmse\":114.56948401152319,\"mae\":105.5}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"trailing_three_mean\",\"model\":\"trailing_three_mean\",\"point\":56,\"p10\":-65,\"p50\":56,\"p90\":177,\"interval80\":{\"low\":-65,\"high\":177},\"interval90\":{\"low\":-100,\"high\":212},\"interval_method\":\"fallback-prior normal intervals using sample standard deviation of January-September 2026 first-print changes\",\"calibration_n\":9,\"train_cutoff\":\"2026-09\",\"walk_forward_score\":{\"test_periods\":\"2026-04 through 2026-09\",\"n\":6,\"rmse\":92.61149436700009,\"mae\":85.55555555555556}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"expanding_mean\",\"model\":\"expanding_mean\",\"point\":81,\"p10\":-40,\"p50\":81,\"p90\":202,\"interval80\":{\"low\":-40,\"high\":202},\"interval90\":{\"low\":-75,\"high\":237},\"interval_method\":\"fallback-prior normal intervals using sample standard deviation of January-September 2026 first-print changes\",\"calibration_n\":9,\"train_cutoff\":\"2026-09\",\"walk_forward_score\":{\"test_periods\":\"2026-04 through 2026-09\",\"n\":6,\"rmse\":77.38460293739418,\"mae\":72.6406746031746}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read current September evidence in https://www.bls.gov/news.release/empsit.nr0.htm and the original https://www.bls.gov/news.release/archives/empsit_10022026.htm.",
+      "result": "September's first print is +29 thousand, with health care +17 thousand versus its prior-12-month average +33 thousand. The private workweek remained 34.4 hours. July was revised from +21 to -10 thousand and August from +162 to +133 thousand, totaling -60 thousand. These describe observed payroll conditions and are not an independent October hiring signal."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.dol.gov/ui/data.pdf and https://www.bls.gov/ces/publications/strike-report.htm.",
+      "result": "DOL's October 1, 2026 release reports September 26 initial claims of 197000, down 1000, with a four-week average of 200000; insured unemployment for September 19 was 1701000, down 11000. BLS's latest fetched strike report covers September 2026: 1300 Wynn Resorts workers, strike beginning September 4, with no ending date listed. No October strike count or quantified October payroll conversion is available in these fetched artifacts."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: level is represented by the selected sample-mean prior; recent momentum is weaker but already present in the history. Latest revisions and stable hours argue against assuming a hiring acceleration. Claims suggest limited layoffs but do not quantify new hiring, so their point adjustment is zero. The strike report gives no confirmed October return-to-work effect, so the one-off adjustment is zero. No fetched new policy mechanism supports a quantified October effect, so the policy adjustment is zero. Weight the selected benchmark 100%; total current-evidence adjustment = 0. The final point equals the strongest benchmark."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = expanding_mean of the 9 January-September 2026 original changes; point = round(728/9 + 0 momentum + 0 one-off + 0 policy) = 81 thousand. Because the target is a change series, compute dispersion from those changes themselves, not differences of the changes: sigma = 94.7582 = sqrt(sum((x - 80.8889)^2)/(9 - 1)) = sqrt(71832.8889/8). The nominal 80% half-width is 1.28*sigma = 121.2905 thousand, with widening factor 1.00: the sample already uses the post-January methodology and includes realized strike, seasonal, and first-print noise. Bounds = round(81 - 121.2905), round(81 + 121.2905) = [-40, 202]. Normal fallback-prior 90% bounds use 1.64485*sigma = 155.8633 and round to [-75, 237]. The delta from persistence is 81 - 29 = 52 thousand; the material-deviation threshold is max(1, 0.25*242.5809) = 60.6452 thousand."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: 8 of the 9 comparable first prints lie within [-40, 202]; February's -92 is outside. This is a retrospective distribution check, not an independently calibrated coverage claim. Only nine current-method prints and six walk-forward tests are available, so a lasting hiring slowdown could make the selected full-sample mean too high. The nominal interval assumes approximately stable first-print dispersion; it does not guarantee empirical 80% coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a broad rebound in restaurant, health-care, and other private hiring, combined with favorable school-calendar adjustment, could put the first print above 202 thousand, outside the interval. Downside risk: a large strike leaving workers unpaid for the entire reference pay period, together with broader layoffs or weaker business births, could put it below -40 thousand, outside the interval. A rising October claims trend, falling workweeks, or a substantial official October strike count would move the point down; falling claims accompanied by stronger hiring-sensitive official measures and confirmed strike returns would move it up. These are prospective scenarios, not asserted current effects."
+    },
+    {
+      "kind": "forecast",
+      "point": 81,
+      "ciLow": -40,
+      "ciHigh": 202
+    }
+  ]
+}

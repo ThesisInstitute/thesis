@@ -1,0 +1,79 @@
+{
+  "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DHS Title VI award transaction obligations, FY2026",
+  "question": "What will USAspending API v2 report, in unadjusted USD, for FY2026 DHS Title VI award transaction obligations under the exact registered spending_over_time query, at the registered query snapshot?",
+  "unit": "usd",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "U.S. Department of the Treasury, USAspending API v2 registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the registered-query snapshot, not a broader DHS aggregate or subsequent database revisions. POST to the specified endpoint with group=fiscal_year and spendingLevel=transactions for FY2026; retain awardTypeCodes [02,03,04,05,06,07,08,09,10,11,A,B,C,D,IDV_A,IDV_B,IDV_B_A,IDV_B_B,IDV_B_C,IDV_C,IDV_D,IDV_E] and the registered Treasury account components: aid=070,bpoa=2025,epoa=2029,main=0530,sub=000; aid=070,bpoa=2025,epoa=2029,main=0532,sub=000; aid=070,bpoa=2025,epoa=2029,main=0509,sub=000; aid=070,bpoa=2025,epoa=2029,main=0510,sub=000; aid=070,bpoa=2025,epoa=2029,main=0413,sub=000; aid=070,main=0722. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by the registered factor 1, retaining API USD precision. The supplied registration does not specify an exact resolutionDate or snapshot-selection time; those cannot be inferred from its expected release window.",
+  "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Exact registered-query history unavailable",
+    "Available web tools cannot execute required POST requests",
+    "Snapshot date and selection time unspecified"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://api.usaspending.gov/docs/intro-tutorial/"
+  ],
+  "runAt": "2026-10-07T12:36:07Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: exact registered-query evidence could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered USAspending transaction-obligations query, not DHS agency totals, appropriations, outlays, or an adjacent Treasury-account aggregate. Its releasePolicy is registered_query_snapshot; replacing that with a generic first-print rule would change the target."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/docs/endpoints/ and https://api.usaspending.gov/docs/intro-tutorial/.",
+      "result": "Official USAspending API documentation lists /api/v2/search/spending_over_time/ as POST. The documentation confirms the request method; it supplies no numeric observations for the registered series."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "The web tool returned Internal Error. No registered-query response or aggregated_amount was returned. This was an endpoint open, not execution of the required POST query."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Click the spending_over_time endpoint link in https://api.usaspending.gov/docs/endpoints/.",
+      "result": "Failed to fetch https://api.usaspending.gov/api/v2/search/spending_over_time/: (405) Method Not Allowed. No historical obligation amount was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Inspection of both available web-tool schemas found no HTTP method or request-body argument, and no dedicated USAspending POST adapter was available. Shell networking is prohibited by the run instructions. Therefore the exact query could not be executed for any prior fiscal year. This is an access limitation, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: persistence prior unavailable because no exact-query historical observations were fetched; historical sample unavailable; adjustment components not estimated; sigma is undefined; 1.28*sigma and the implied 80% bounds cannot be computed. No model candidates, point estimate, or calibrated interval can honestly be supplied."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: the supplied ledger context gives only an expected window, 2026-10-15 through 2026-10-22, with no literal resolutionDate or snapshot-selection rule. These are supplied registration values, not dates verified from an official release calendar. Neither window boundary is a justified substitute for a resolution date, so resolutionDate is unset."
+    },
+    {
+      "kind": "text",
+      "text": "Disposition: refuse the numeric forecast as the registered-query instruction requires when the exact query cannot be executed. Empty historicalContext and null estimate fields explicitly record missing evidence; they are not a normalization-ready forecast. Tail scenarios cannot be evaluated outside the interval because no admissible interval exists. The prohibited catalog check was skipped under the independence override."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

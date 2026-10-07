@@ -2,32 +2,41 @@
   "slug": "jolts-openings-september-2026",
   "country": "US",
   "type": "data",
-  "title": "September 2026 JOLTS job openings",
-  "question": "What will the BLS JOLTS first print report for September 2026 total nonfarm job openings, seasonally adjusted, in millions?",
+  "title": "September 2026 US job openings",
+  "question": "What will the first BLS JOLTS print report for September 2026 total nonfarm job openings, seasonally adjusted, in millions?",
   "unit": "millions",
   "pointEstimate": null,
   "ciLow": null,
   "ciHigh": null,
   "confidence": 0.8,
   "resolutionDate": "2026-11-03",
-  "resolutionSource": "U.S. Bureau of Labor Statistics Job Openings and Labor Turnover Survey",
+  "resolutionSource": "U.S. Bureau of Labor Statistics Job Openings and Labor Turnover Survey release, Table 1",
   "resolutionSourceUrl": "https://www.bls.gov/news.release/jolts.nr0.htm",
-  "resolutionRule": "Use the September 2026 seasonally adjusted total nonfarm job openings level in Table 1 of the first official BLS JOLTS release. Multiply the published level in thousands by 0.001 to obtain millions, preserving the published precision. Ignore subsequent revisions.",
+  "resolutionRule": "Resolve to the September 2026 total nonfarm seasonally adjusted job openings level in Table 1 of the first official BLS JOLTS release. Multiply the published level in thousands by 0.001 to obtain millions, preserving its published precision. Ignore subsequent revisions and corrections.",
   "dataPointId": "bls.jolts.job_openings.september_2026.first_print",
   "historicalContext": [
     {
-      "period": {
-        "type": "month",
-        "value": "2026-01"
-      },
-      "label": "January 2026",
-      "value": 6.946
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 6.919
     },
     {
-      "period": {
-        "type": "month",
-        "value": "2026-08"
-      },
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 7.537
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 7.182
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 7.335
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
       "label": "August 2026",
       "value": 7.079
     }
@@ -36,59 +45,54 @@
   "sourceContext": [
     "https://www.bls.gov/news.release/jolts.nr0.htm",
     "https://www.bls.gov/news.release/jolts.t01.htm",
-    "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
+    "https://www.bls.gov/bls/news-release/jolts.htm",
     "https://www.bls.gov/schedule/news_release/jolts.htm",
-    "https://www.bls.gov/schedule/2026/11_sched.htm"
+    "https://www.bls.gov/schedule/2026/11_sched.htm",
+    "https://www.bls.gov/news.release/empsit.nr0.htm"
   ],
-  "runAt": "2026-10-06T22:00:55Z",
+  "runAt": "2026-10-07T12:48:53Z",
   "reasoning": [
     {
       "kind": "heading",
-      "text": "Forecast unavailable: official-history lookup failed"
+      "text": "Run stopped without issuing a forecast"
     },
     {
       "kind": "text",
-      "text": "The target is the September 2026 first-print seasonally adjusted total nonfarm job openings level in BLS JOLTS Table 1. The official calendar verifies November 3, 2026, at 10:00 a.m. Eastern Time, within the registered release window."
+      "text": "The target is September 2026 total nonfarm seasonally adjusted job openings, first official print, from BLS JOLTS Table 1. All retrieved openings values use that seasonally adjusted variant."
     },
     {
       "kind": "tool",
       "tool": "official.lookup",
-      "call": "Open https://www.bls.gov/news.release/jolts.t01.htm and read the seasonally adjusted Total row.",
-      "result": "The September 29, 2026 release reports August 2026 openings of 7,079 thousand. Its revised historical columns report May 2026 at 7,537 thousand, June at 7,182 thousand, and July at 7,335 thousand."
+      "call": "Open https://www.bls.gov/news.release/jolts.nr0.htm",
+      "result": "The August 2026 release reports job openings of 7.1 million and an openings rate of 4.3 percent. It announces the September release for November 3, 2026, at 10:00 a.m. Eastern Time."
     },
     {
       "kind": "tool",
       "tool": "official.lookup",
-      "call": "Open https://www.bls.gov/news.release/jolts.nr0.htm and read the August 2026 release narrative.",
-      "result": "August openings were reported as 7.1 million with a 4.3 percent openings rate; hires were 5.2 million, quits 3.1 million, and layoffs and discharges 1.6 million."
+      "call": "Open https://www.bls.gov/news.release/jolts.t01.htm and read the seasonally adjusted Total row",
+      "result": "Published levels in thousands: August 2025 6,919; May 2026 7,537; June 2026 7,182; July 2026 7,335; August 2026 preliminary 7,079. These are the current release's historical vintages, not an independently retrieved first-print history."
     },
     {
       "kind": "tool",
       "tool": "official.lookup",
-      "call": "Open https://www.bls.gov/news.release/archives/jolts_03132026.htm and read the original January 2026 seasonally adjusted Table A.",
-      "result": "The March 13, 2026 release reports January 2026 total job openings of 6,946 thousand in the preliminary January column."
+      "call": "Open https://www.bls.gov/news.release/empsit.nr0.htm",
+      "result": "The October 2, 2026 release reports September payroll employment growth of 29,000 and unemployment of 4.2 percent. July payroll growth was revised to -10,000 and August to 133,000."
     },
     {
       "kind": "text",
-      "text": "The required recent first-print reference class was not completed. Only January and August original prints were extracted before the lookup failure; these nonconsecutive observations do not establish the required base rate."
+      "text": "The official JOLTS release calendar and November calendar verify November 3, 2026, at 10:00 a.m. Eastern Time. This falls within the registered release window."
     },
     {
       "kind": "text",
-      "text": "A batched lookup for Table 1 in previously opened official archive pages failed with 'Fatal error: network error: error sending request'. Under the explicit stop-on-fetch-failure instruction, further fetching and forecasting stopped. This is a failed run, not an official-source history-availability exception."
+      "text": "The official archive index was retrieved successfully, but a delegated lookup of https://www.bls.gov/schedule/archives/jolts_nr.htm returned an Internal Error stating that the URL was not accessible through the tool. The instructions require stopping after a failed fetch."
     },
     {
       "kind": "math",
-      "text": "Successful unit conversions: 6,946 × 0.001 = 6.946 million; 7,079 × 0.001 = 7.079 million."
+      "text": "The fetched August level converts as 7,079 thousand × 0.001 = 7.079 million. No forecast or interval was calculated."
     },
     {
       "kind": "text",
-      "text": "Prior/update/interval: No persistence prior or momentum adjustment was estimated because the required consecutive historical sample was not fetched. Sigma and the 1.28 × sigma half-width cannot be calculated from the incomplete first-print history. No point estimate or 80 percent interval is issued; null marks unavailable values."
-    },
-    {
-      "kind": "forecast",
-      "point": null,
-      "ciLow": null,
-      "ciHigh": null
+      "text": "Prior/update/interval: No persistence prior, base rate adjustment, sigma, or interval was estimated because six distinct historical prints were not retrieved before the fetch failure. Null forecast fields explicitly record this failed run rather than substitute invented evidence."
     }
   ]
 }

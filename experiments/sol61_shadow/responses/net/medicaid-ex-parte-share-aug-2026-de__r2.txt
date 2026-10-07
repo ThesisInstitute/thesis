@@ -1,0 +1,152 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-de",
+  "country": "US",
+  "type": "data",
+  "title": "Delaware ex parte renewal share, August 2026",
+  "question": "What percentage of Delaware Medicaid and CHIP beneficiaries due for renewal in August 2026 will CMS report as renewed on an ex parte basis in the first published original (O) submission?",
+  "unit": "percent",
+  "pointEstimate": 43.4,
+  "ciLow": 31.3,
+  "ciHigh": 55.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolve using Delaware's August 2026 original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis divided by beneficiaries_with_a_renewal_due, using the numerator and denominator in that first publication, and round to one decimal. Exclude subsequent corrections and updated (U) submissions.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.de.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2024-08"},
+      "label": "August 2024",
+      "value": 52.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "June 2025",
+      "value": 43.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 51.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 40.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 48.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 40.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 43.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 42.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 36.3
+    }
+  ],
+  "drivers": [
+    "Recent Delaware original-report renewal rates",
+    "June weakness and partial mean reversion",
+    "Possible recurrence of stronger August renewal cohorts",
+    "Administrative matching and renewal reporting practices"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://download.medicaid.gov/data/renewal-dataset-april-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-may-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-june-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-july-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-august-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-november-2024-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2025-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-november-2025-release.csv",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:03:22Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Delaware August 2026 original-report ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is a Delaware state row, not a national total or weighted average. Dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c reports CMS metric 5a(1), ex parte renewals, and metric 5, beneficiaries due for renewal. The ledger leaves the denominator unnamed; this forecast uses CMS's published rate convention, 100 times metric 5a(1) divided by metric 5, confirmed by the June 2026 snapshot's state table."
+    },
+    {
+      "kind": "text",
+      "text": "All historical anchors use original (O) reports from the corresponding archived release CSVs. Current O rows can receive corrections, so the live dataset alone does not establish first-publication history. The target remains strict first print, with later corrections and U reports excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and echo CSV headers and Delaware original rows for January through March 2026 from https://download.medicaid.gov/data/renewal-dataset-april-2026-release.csv, https://download.medicaid.gov/data/renewal-dataset-may-2026-release.csv, and https://download.medicaid.gov/data/renewal-dataset-june-2026-release.csv using curl -sS and short awk arithmetic.",
+      "result": "January: 6,621 ex parte / 16,538 due = 40.035071%. February: 9,585 / 19,732 = 48.575917%. March: 8,103 / 19,890 = 40.739065%. CSV columns 11 and 7 provide numerator and denominator."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and echo Delaware original rows for April through June 2026 from https://download.medicaid.gov/data/renewal-dataset-july-2026-release.csv, https://download.medicaid.gov/data/renewal-dataset-august-2026-release.csv, and https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv.",
+      "result": "April: 8,739 ex parte / 20,186 due = 43.292381%. May: 6,914 / 16,265 = 42.508454%. June: 5,501 / 15,157 = 36.293462%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and echo Delaware original rows from https://download.medicaid.gov/data/renewal-dataset-november-2024-release.csv, https://download.medicaid.gov/data/renewal-dataset-september-2025-release.csv, and https://download.medicaid.gov/data/renewal-dataset-november-2025-release.csv.",
+      "result": "August 2024: 9,033 ex parte / 17,110 due = 52.793688%. June 2025: 6,579 / 15,214 = 43.243066%. August 2025: 9,588 / 18,495 = 51.841038%. The 2025 June-to-August increase was 8.597973 percentage points."
+    },
+    {
+      "kind": "text",
+      "text": "Supplemental fetch https://download.medicaid.gov/data/renewal-dataset-september-2024-release.csv returned 'Not found'; evidence gathering stopped. No June 2024 first-print value is used. The mandatory six recent original prints and the additional historical anchors had already been fetched successfully."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is the January-June 2026 mean of 41.907392%, with observed levels from 36.293462% to 48.575917%. August's original rate exceeded 51% in both fetched prior years, supporting a possible cohort effect. Only one authenticated June-to-August change is available here, so its adjustment is reduced by half."
+    },
+    {
+      "kind": "text",
+      "text": "Level and momentum are separated: June's 36.293462% level is below the six-print mean, and its change from May was -6.214992 percentage points. Half-weighting June against the recent mean allows partial reversal of a possible one-off cohort effect. No additional downward trend extrapolation or quantified policy adjustment is applied. CMS notes that renewal strategies and reporting practices can affect reported ex parte outcomes."
+    },
+    {
+      "kind": "text",
+      "text": "Date verification discrepancy: the official CMS snapshot release list reports June 2026 released September 25, 2026, but provides no August 2026 announcement or future schedule establishing December 15, 2026. resolutionDate is retained from the registered ledger contract; the mandatory official verification of that date could not be satisfied."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a mean-reverting persistence prior based on the six archived January-June 2026 original prints. Blend 50% June level and 50% six-print mean: 0.5*36.293462 + 0.5*41.907392 = 39.100427%. Add half the observed 2025 June-to-August cohort increase: 0.5*(51.841038-43.243066) = 4.298986 percentage points. Additional momentum, one-off, and policy adjustments are zero; partial mean reversion already handles uncertainty about June's weakness. Point = 43.399413%, rounded to 43.4%. For the five successive unrounded monthly changes, sigma = 6.658124 percentage points. The one-month normal 80% half-width is 1.28*sigma = 8.522399; multiply by sqrt(2) for the June-to-August horizon to obtain approximately 12.052493. Final implied bounds are 31.346920% and 55.451906%, rounded to 31.3% and 55.5%. This is a nominal interval estimated from a small historical sample."
+    },
+    {
+      "kind": "math",
+      "text": "Successive changes are [8.540847, -7.836852, 2.553316, -0.783927, -6.214992] percentage points. With mean change -0.748322, sample standard deviation = sqrt(sum((change-mean change)^2)/(5-1)) = 6.658124. Forecast = 39.100427+4.298986 = 43.399413; 80% interval = forecast +/- 1.28*6.658124*sqrt(2), giving rounded bounds [31.3,55.5]."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is a favorable August cohort combined with improved administrative matching; a first-print share above 55.5% would land outside the interval. Downside risk is persistent deterioration in matching or renewal processing after June; a share below 31.3% would land outside the interval. The prior August rates could recur within the upper portion of the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 43.4,
+      "ciLow": 31.3,
+      "ciHigh": 55.5
+    }
+  ]
+}

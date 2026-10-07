@@ -1,0 +1,150 @@
+{
+  "slug": "wic-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation in August 2026",
+  "question": "What will USDA's WIC Data Tables, Monthly Data - National Level, report for total women, infants and children participating nationally in August 2026, not seasonally adjusted, in the FIRST PRINT, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 6.669554,
+  "ciLow": 6.518324,
+  "ciHigh": 6.820784,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service, WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first published August 2026 row, Total Participants column, in WIC Data Tables, Monthly Data - National Level, or the matching TOTAL row of the August 2026 Initial column in WIC PROGRAM: TOTAL PARTICIPATION. This is national monthly participation, not seasonally adjusted, not a fiscal-year average. Express raw participant counts in millions by dividing by 1,000,000, retaining six decimal places. If the resolving table is denominated in thousands, apply the registered multiplication factor 0.001. Preserve the original first print; disregard all later revisions and corrections. The registered source page remains the resolver. No official scheduled release date was verified, and the supplied registration lacks a resolutionDate; the November 18-26 expected window does not establish one.",
+  "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 6.903718
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 6.907512
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 6.752138
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 6.694838
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 6.640819
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 6.701661
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 6.672717
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 6.669554
+    }
+  ],
+  "drivers": [
+    "Latest participation level supports persistence",
+    "Trend extrapolation underperforms in the fetched sample",
+    "Two-month horizon increases uncertainty",
+    "Incomplete first-print verification widens the interval"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program",
+    "https://fns-prod.azureedge.us/pd/wic-program",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-12.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-1.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-2.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-2.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf"
+  ],
+  "runAt": "2026-10-07T12:47:47Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 WIC national participation: persistence forecast with explicit evidence and registration limitations"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the unadjusted monthly national participation count, comprising women, infants and children, on its first publication. Keep the registered slug, unit, series identity and resolver URL. The required catalog check was skipped under the independence instruction. No local files or forecast records were accessed or created."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.fns.usda.gov/pd/wic-program; open USDA's linked-content mirror https://fns-prod.azureedge.us/pd/wic-program and https://fns-prod.azureedge.us/pd/overview.",
+      "result": "The registered host returned 403. USDA's official CDN WIC page lists national monthly data through June 2026 and was updated September 22, 2026. The overview identifies June 2026 as the latest available month, with data as of September 18, 2026, and warns that current numbers are preliminary and subject to significant revision. No scheduled August 2026 publication date was found."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-12.pdf, https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-1.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-2.pdf; cross-check https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-2.pdf.",
+      "result": "Newest monthly rows: September 2025 = 6,903,718 participants in the November 21, 2025 vintage; October 2025 = 6,907,512 in the January 23, 2026 vintage; November 2025 = 6,752,138 in the February 13, 2026 vintage. The latest-month companion explicitly labels November 2025 Initial and repeats 6,752,138."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-3.pdf, https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-5.pdf, https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-6.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-6.pdf.",
+      "result": "December 2025 Initial TOTAL = 6,694,838. February 2026 newest monthly row = 6,640,819, data as of May 8, 2026. March 2026 newest monthly row = 6,701,661, data as of June 12, 2026; its companion explicitly labels March 2026 Initial and agrees. Some latest-month footers retain a stale 2025 year; observation periods are taken from their explicit column headers."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-8.pdf, https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf.",
+      "result": "May 2026 newest monthly row = 6,672,717, data as of August 14, 2026. June 2026 = 6,669,554, data as of September 11, 2026; the latest-month companion labels June 2026 Initial and agrees. The newer monthly vintage revises May to 6,687,977; that revision is excluded from historicalContext."
+    },
+    {
+      "kind": "text",
+      "text": "History limitation: November, December, March and June are explicitly identified as Initial. September, October, February and May are the newest rows of their archived monthly releases and are used as earliest accessible release-vintage proxies; exact first-print status for those four could not be independently certified. January and April 2026 first-print artifacts could not be fetched. They were omitted, without replacing them with revised history or claiming the official source exposes fewer than six prints. Thus this run does not fully establish the mandated first-print calibration history."
+    },
+    {
+      "kind": "text",
+      "text": "Registration limitation: the target supplies an expected November 18-26, 2026 window but no resolutionDate, and no official scheduled day was verified. resolutionDate is therefore null rather than an invented date; this prevents strict contract validation and publication without a corrected date basis. The registered host was inaccessible and the fetched agency artifacts use its official CDN. Their participation values are raw people, so 6,669,554 / 1,000,000 = 6.669554 million; multiplying this raw count by the ledger's 0.001 factor would produce the wrong unit. That factor applies only after expressing counts in thousands."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the eight fetched release-vintage observations from September 2025 through June 2026 have mean 6.742869625 million, sample level standard deviation 0.105411645 million and range 6.640819-6.907512 million. The repeated-series prior is latest-print persistence, 6.669554 million, rather than the mean of older, higher levels. Successive changes are +0.003794, -0.155374, -0.057300, -0.054019, +0.060842, -0.028944 and -0.003163 million, with elapsed-month gaps 1, 1, 1, 2, 1, 2 and 1."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated from the fetched history before selection: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":6.669554,\"p10\":6.518324,\"p50\":6.669554,\"p90\":6.820784,\"interval80\":{\"low\":6.518324,\"high\":6.820784},\"interval90\":{\"low\":6.475452,\"high\":6.863656},\"interval_method\":\"fallback_prior_normal_sample_sd_of_gap_scaled_release_vintage_changes; horizon_sqrt_2; sparse_vintage_factor_1.25\",\"calibration_n\":7,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"n\":6,\"rmse\":0.07625825737365526,\"mae\":0.05994033333333334,\"horizons\":\"next accessible observation, 1 or 2 months\",\"unit\":\"millions\"}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"previous_two_print_mean\",\"point\":6.671136,\"p10\":6.519905,\"p50\":6.671136,\"p90\":6.822366,\"interval80\":{\"low\":6.519905,\"high\":6.822366},\"interval90\":{\"low\":6.477034,\"high\":6.865237},\"interval_method\":\"fallback_prior_normal_sample_sd_of_gap_scaled_release_vintage_changes; horizon_sqrt_2; sparse_vintage_factor_1.25\",\"calibration_n\":7,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"n\":6,\"rmse\":0.0913497455472189,\"mae\":0.0706795833333332,\"horizons\":\"next accessible observation, 1 or 2 months\",\"unit\":\"millions\"}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_elapsed_month_drift\",\"point\":6.617518,\"p10\":6.466288,\"p50\":6.617518,\"p90\":6.768748,\"interval80\":{\"low\":6.466288,\"high\":6.768748},\"interval90\":{\"low\":6.423416,\"high\":6.811619},\"interval_method\":\"fallback_prior_normal_sample_sd_of_gap_scaled_release_vintage_changes; horizon_sqrt_2; sparse_vintage_factor_1.25\",\"calibration_n\":7,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"n\":6,\"rmse\":0.08938870366688548,\"mae\":0.07340576527777747,\"horizons\":\"next accessible observation, 1 or 2 months\",\"unit\":\"millions\"}}]. All uncertainty bounds are explicitly fallback-prior wrappers, not native or independently calibrated model intervals. On six common causal next-observation comparisons, persistence has the lowest RMSE and MAE; the comparison spans irregular one- and two-month horizons and is not a clean August-seasonal backtest. Select persistence."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: level is June's 6.669554 million; momentum, one-off and policy adjustments are each zero. Falling earlier levels are already incorporated in the prior, and extrapolating their drift loses in the available walk-forward comparison. No separately fetched release-specific national signal supports a departure. The forecast carries 100% weight on persistence; its delta from the selected benchmark is zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = June persistence 6.669554 million, using eight archived release-vintage observations and seven successive changes. For each gap g, r = change/sqrt(g); r = [0.003794, -0.155374, -0.057300, -0.038197201, 0.060842, -0.020466499, -0.003163] million. Their mean is -0.029980671; sigma = 0.066753947 million per square-root month, computed as sqrt(sum((r-mean(r))^2)/(7-1)). Adjustment components = 0; point = 1.00*6.669554 = 6.669554. June-to-August horizon = two months, giving sigma_h = 0.066753947*sqrt(2) = 0.094404338. Use a normal fallback-prior interval with a 1.25 widening factor for seven innovations, missing monthly vintages and incomplete first-print verification. The 80% half-width = 1.281551566*0.094404338*1.25 = 0.151230034, approximately 1.28*sigma_h*1.25. Bounds = 6.669554 +/- 0.151230034 = [6.518324, 6.820784] after rounding to one participant in millions. The corresponding 90% half-width = 1.644853627*0.094404338*1.25 = 0.194101647. Six of seven gap-scaled historical changes fall within the analogous 80% band; this is an in-sample check, not proof of prospective coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and tails: the historical negative innovation mean could make persistence too high, while renewed enrollment could make it too low. Downside risk: a repeat of the fetched October-to-November decline of 155,374 participants during the target horizon would produce 6.514180 million, outside the interval below 6.518324. Upside risk: restoring 155,374 net participants through recertification and benefit issuance would produce 6.824928 million, outside the interval above 6.820784. These are stress scenarios, not observed August outcomes."
+    },
+    {
+      "kind": "forecast",
+      "point": 6.669554,
+      "ciLow": 6.518324,
+      "ciHigh": 6.820784
+    }
+  ]
+}

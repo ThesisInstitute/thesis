@@ -1,0 +1,196 @@
+{
+  "slug": "wic-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "August 2026 WIC participation",
+  "question": "What will USDA's first published, not seasonally adjusted national WIC Total Participants count for August 2026 be, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 6.686302,
+  "ciLow": 6.604506,
+  "ciHigh": 6.768098,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA WIC Data Tables, Monthly Data - National Level",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the national Total Participants entry for August 2026 in the first official publication of USDA's WIC monthly participation table. Use the unadjusted monthly count, including women, infants, and children. Normalize the published scale to persons, divide by 1,000,000, and retain published precision. Exclude subsequent revisions, including same-day corrections; do not substitute a fiscal-year average.",
+  "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2024-10"},
+      "label": "2024-10",
+      "value": 6.907747
+    },
+    {
+      "period": {"type": "month", "value": "2024-11"},
+      "label": "2024-11",
+      "value": 6.829501
+    },
+    {
+      "period": {"type": "month", "value": "2024-12"},
+      "label": "2024-12",
+      "value": 6.784735
+    },
+    {
+      "period": {"type": "month", "value": "2025-01"},
+      "label": "2025-01",
+      "value": 6.822876
+    },
+    {
+      "period": {"type": "month", "value": "2025-02"},
+      "label": "2025-02",
+      "value": 6.802175
+    },
+    {
+      "period": {"type": "month", "value": "2025-03"},
+      "label": "2025-03",
+      "value": 6.850836
+    },
+    {
+      "period": {"type": "month", "value": "2025-04"},
+      "label": "2025-04",
+      "value": 6.877215
+    },
+    {
+      "period": {"type": "month", "value": "2025-05"},
+      "label": "2025-05",
+      "value": 6.89461
+    },
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "2025-06",
+      "value": 6.8832
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 6.923325
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 6.911108
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 6.921686
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 6.909938
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 6.771734
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 6.712611
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 6.6963
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 6.664741
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 6.703035
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 6.708518
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 6.687977
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 6.669554
+    }
+  ],
+  "drivers": [
+    "June participation level",
+    "Historical summer participation changes",
+    "Damped recent downward momentum",
+    "Initial reporting and revision uncertainty"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/wic-program",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-1.pdf",
+    "https://fns-prod.azureedge.us/pd/overview"
+  ],
+  "runAt": "2026-10-07T11:52:59Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 WIC first-print participation forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is monthly national Total Participants, without seasonal adjustment. Every participation anchor uses that variant. HistoricalContext contains the fetched current official snapshot, which includes revisions; historical first-print vintages were not reconstructed. Resolution remains strictly the first August publication."
+    },
+    {
+      "kind": "text",
+      "text": "Ledger discrepancies: the registered www.fns.usda.gov page was inaccessible, but its official USDA CDN supplied the tables under Food and Nutrition Administration branding. The registered host restriction may require maintenance; the target identity and resolver are preserved. The fetched PDF reports persons, so the registered multiply-by-0.001 transform requires first expressing counts in thousands; the net conversion to millions is division by 1,000,000."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the national monthly PDF through the WIC Data Tables page: https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf.",
+      "result": "Data as of September 11, 2026. January-June 2026 Total Participants: 6,696,300; 6,664,741; 6,703,035; 6,708,518; 6,687,977; 6,669,554. The same table supplies the October 2024-June 2026 history."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Cross-check initial June participation in https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf.",
+      "result": "The June 2026 Initial column totals 6,669,554 participants. California reports 980,533 and Texas 769,837. The preceding-month total is 6,687,977, matching May 2026 in the national table despite the state table's inconsistent preceding-month and footer year labels."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Compare the January 23, 2026 snapshot at https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-1.pdf with the current monthly table.",
+      "result": "The older snapshot reports August 2025 participation of 6,895,539 and October 2025 of 6,907,512. Current values are 6,911,108 and 6,909,938: revisions of 15,569 and 2,426 participants. These snapshots demonstrate revision uncertainty; neither is asserted to be the original print."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is June persistence. The summer reference class has June-August changes of -0.010254, +0.093402, and +0.027908 million in 2023, 2024, and 2025; its median is +0.027908 million. This is a seasonal proxy, not an identified causal effect."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use persistence plus median summer change and half-weighted March-June drift. Level = 6.669554; seasonal adjustment = +0.027908; momentum = 0.5*2*(6.669554-6.703035)/3 = -0.011160333 million. Quantified one-off and policy adjustments are zero. The 21-month historical sample yields 20 successive changes, mean -0.01190965 and centered squared-deviation sum 0.03879432956255 million squared. sigma = 0.045186356559 million = sqrt(0.03879432956255/19). Normal-approximation 80% half-width = 1.28*sigma*sqrt(2) = 0.081796043 million, allowing two unobserved monthly steps. Final rounded bounds are 6.604506-6.768098 million."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 6.669554 + 0.027908 - 0.011160333 = 6.686301667 million. Bounds = 6.686301667 +/- 0.081796043 = [6.604505624, 6.768097709], rounded to [6.604506, 6.768098]."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification failed: the fetched WIC page and program overview expose current data but no future WIC release calendar. No official August announcement schedule was found. The registered November 18-26 window is planning context, not verified official evidence. resolutionDate is therefore null; this forecast cannot satisfy the mandatory release-date validation."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is a broad enrollment rebound or more complete initial reporting; a gain exceeding 0.098544 million from June would land above the interval. Downside risk is another administrative or enrollment disruption: repeating November 2025's 0.138204 million decline would produce 6.531350 million, outside the interval below its lower bound."
+    },
+    {
+      "kind": "forecast",
+      "point": 6.686302,
+      "ciLow": 6.604506,
+      "ciHigh": 6.768098
+    }
+  ]
+}

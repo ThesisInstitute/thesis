@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "continued-claims-week-2026-09-26",
+      "ok": false,
+      "errors": [
+        "resolutionSourceUrl host 'www.dol.gov' is not among the preregistered source binding hosts ['alfred.stlouisfed.org']"
+      ]
+    }
+  ]
+}

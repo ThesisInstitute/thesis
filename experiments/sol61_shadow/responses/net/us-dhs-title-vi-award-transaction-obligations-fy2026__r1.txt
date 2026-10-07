@@ -2,54 +2,127 @@
   "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
   "country": "US",
   "type": "data",
-  "title": "DHS Title VI FY2026 forecast refused: historical query failed",
-  "question": "What will FY2026 award-transaction obligations in USD equal in the first registered USAspending query snapshot for the specified DHS Treasury accounts?",
+  "title": "DHS Title VI FY2026 transaction obligations",
+  "question": "What will USAspending report for FY2026 award transaction obligations under the exact registered DHS Title VI Treasury-account query at the registered query snapshot?",
   "unit": "usd",
-  "pointEstimate": null,
-  "ciLow": null,
-  "ciHigh": null,
+  "pointEstimate": 34908401624.97,
+  "ciLow": 31406821886.55,
+  "ciHigh": 38409981363.39,
   "confidence": 0.8,
   "resolutionDate": null,
-  "resolutionSource": "U.S. Department of the Treasury USAspending API",
+  "resolutionSource": "USAspending API v2 registered query snapshot",
   "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
-  "resolutionRule": "Use the first official registered-query snapshot under the supplied release policy, reading the FY2026 results[].aggregated_amount with fiscal-year grouping, transaction spending level, the registered award-type codes and Treasury-account components, and factor 1. Preserve the returned USD precision and exclude subsequent revisions. The resolution date could not be verified before the mandatory fetch-failure stop.",
+  "resolutionRule": "Resolve using results[time_period.fiscal_year=2026].aggregated_amount from the first official response retained by the registered_query_snapshot resolver. POST group=fiscal_year, spending_level=transactions, FY2026 action dates, every registered award type code, and the six unchanged registered treasury_account_components. Apply factor 1, preserve the returned dollar precision, and exclude subsequent revisions or corrections. The supplied expected window is October 15–22, 2026, but no official source fetched this run verifies an exact resolution date; resolutionDate is therefore null and this numerical forecast does not satisfy the production date-validation requirement.",
   "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
-  "historicalContext": [],
-  "drivers": [],
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 4628047.15
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 241016385.43
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 498351355.26
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 796066298.53
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 1270763628.14
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 7175144178.55
+    }
+  ],
+  "drivers": [
+    "Observed FY2026 snapshot updates the historical spending level",
+    "Delayed transaction reporting and Treasury-account linkage",
+    "Deobligations, corrections, and account reclassification"
+  ],
   "sourceContext": [
     "https://api.usaspending.gov/api/v2/search/spending_over_time/",
-    "https://api.usaspending.gov/docs/endpoints",
-    "https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/search/spending_over_time.md"
+    "https://raw.githubusercontent.com/fedspendingtransparency/usaspending-api/master/usaspending_api/api_contracts/contracts/v2/search/spending_over_time.md",
+    "https://raw.githubusercontent.com/fedspendingtransparency/usaspending-api/master/usaspending_api/api_contracts/search_filters.md",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/"
   ],
-  "runAt": "2026-10-06T21:59:58Z",
+  "runAt": "2026-10-07T12:53:51Z",
   "reasoning": [
     {
       "kind": "heading",
-      "text": "Forecast refused because the mandatory historical query could not be fetched"
+      "text": "FY2026 registered-query snapshot forecast"
     },
     {
       "kind": "text",
-      "text": "The target is the exact registered transaction-obligations query, not a DHS agency total. The official endpoint documentation confirms POST, fiscal-year grouping, transaction spending level, and the aggregated_amount response field."
+      "text": "The target is the registered Treasury-account-filtered transaction-obligation aggregate. Every historical anchor uses this same variant and unchanged account components, with only the fiscal-year action-date range substituted. Historical values are official query snapshots fetched this run, not reconstructed original vintages. An initial request mistakenly used treasury_accounts; the API explicitly ignored that filter, so its broader aggregate was discarded. All reported values below use the documented treasury_account_components filter."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ for FY2020 and FY2021, using group=fiscal_year, spending_level=transactions, the unchanged registered award_type_codes and treasury_account_components, and respective action-date ranges 2019-10-01 through 2020-09-30 and 2020-10-01 through 2021-09-30.",
+      "result": "FY2020 aggregated_amount = 4628047.15 USD; FY2021 aggregated_amount = 241016385.43 USD. Both responses confirmed spending_level=transactions and contained no ignored-account-filter warning."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate POST requests to the same official endpoint with the unchanged registered filters for FY2022 and FY2023, substituting action-date ranges 2021-10-01 through 2022-09-30 and 2022-10-01 through 2023-09-30.",
+      "result": "FY2022 aggregated_amount = 498351355.26 USD; FY2023 aggregated_amount = 796066298.53 USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate POST requests to the same official endpoint with the unchanged registered filters for FY2024 and FY2025, substituting action-date ranges 2023-10-01 through 2024-09-30 and 2024-10-01 through 2025-09-30.",
+      "result": "FY2024 aggregated_amount = 1270763628.14 USD; FY2025 aggregated_amount = 7175144178.55 USD."
     },
     {
       "kind": "text",
-      "text": "Attempted the registered query for FY2025 using POST https://api.usaspending.gov/api/v2/search/spending_over_time/, group=fiscal_year, spending_level=transactions, and time_period=2024-10-01 through 2025-09-30. Included all 22 registered award-type codes and all six Treasury-account component filters, preserving their registered availability years."
+      "text": "The outside-view base rate is the six exact-query annual flows for FY2020–FY2025. Their mean is 1664328315.51 USD. FY2025 persistence provides a more recent level prior of 7175144178.55 USD, but the fetched FY2026 snapshot supplies substantially stronger information about the completed fiscal year."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with body {\"group\":\"fiscal_year\",\"spending_level\":\"transactions\",\"filters\":{\"time_period\":[{\"start_date\":\"2025-10-01\",\"end_date\":\"2026-09-30\"}],\"award_type_codes\":[\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\",\"A\",\"B\",\"C\",\"D\",\"IDV_A\",\"IDV_B\",\"IDV_B_A\",\"IDV_B_B\",\"IDV_B_C\",\"IDV_C\",\"IDV_D\",\"IDV_E\"],\"treasury_account_components\":[{\"aid\":\"070\",\"bpoa\":\"2025\",\"epoa\":\"2029\",\"main\":\"0530\",\"sub\":\"000\"},{\"aid\":\"070\",\"bpoa\":\"2025\",\"epoa\":\"2029\",\"main\":\"0532\",\"sub\":\"000\"},{\"aid\":\"070\",\"bpoa\":\"2025\",\"epoa\":\"2029\",\"main\":\"0509\",\"sub\":\"000\"},{\"aid\":\"070\",\"bpoa\":\"2025\",\"epoa\":\"2029\",\"main\":\"0510\",\"sub\":\"000\"},{\"aid\":\"070\",\"bpoa\":\"2025\",\"epoa\":\"2029\",\"main\":\"0413\",\"sub\":\"000\"},{\"aid\":\"070\",\"main\":\"0722\"}]}}.",
+      "result": "FY2026 aggregated_amount = 34908401624.97 USD; Contract_Obligations = 34033401624.97 USD; Grant_Obligations = 875000000.00 USD. Direct, IDV, loan, and other obligations were each 0."
     },
     {
       "kind": "text",
-      "text": "The curl response contained no data body and exited with code 35. Exact echoed error: curl: (35) Recv failure: Connection reset by peer."
+      "text": "Separate effects: the current snapshot raises the FY2025 persistence level by 27733257446.42 USD. No momentum extrapolation is added because FY2026 has ended. No additional one-off or policy adjustment is added because recorded obligations are already included. Remaining uncertainty concerns reporting, linkage, and corrections before the registered snapshot."
     },
     {
       "kind": "text",
-      "text": "No historical numeric print was fetched. The required base rate and six-print reference class therefore cannot be established. No remembered values, broader aggregates, or independent forecasts were substituted."
+      "text": "Prior/update/interval: Use a snapshot-persistence model, anchored on the six fetched FY2020–FY2025 annual-flow values and updated to the observed FY2026 level. For these flow values, sample sigma = 2735609170.6435065 USD. The half-width is 1.28*sigma = 3501579738.4236884 USD. Apply zero additional momentum, one-off, or policy adjustments. Retaining this historical dispersion gives an 80% interval of 31406821886.55–38409981363.39 USD. Annual-flow dispersion is an imperfect proxy for changes between snapshots; no historical revision distribution was fetched."
+    },
+    {
+      "kind": "math",
+      "text": "n=6; mean=1664328315.51; sigma=sqrt(sum((value-mean)^2)/5)=2735609170.6435065. Point=34908401624.97. Lower=34908401624.97-3501579738.4236884=31406821886.55; upper=34908401624.97+3501579738.4236884=38409981363.39, rounded to cents."
     },
     {
       "kind": "text",
-      "text": "Prior/update/interval: No prior, adjustment components, sigma, interval half-width, or implied bounds were estimated because the registered historical query failed."
+      "text": "Schedule validation remains unmet. USAspending's official data-sources document describes daily updates and monthly account linkage. Treasury's reporting requirements describe publication following agency verification or certification. The fetched submission-periods API exposes August FY2026 with submission_due_date 2026-10-02 and certification_due_date 2026-11-17; neither is this target's resolution date. No fetched official schedule verifies a registered snapshot date within October 15–22. The target identity is preserved, but a conforming release-resolving cell cannot be issued without that missing date."
     },
     {
       "kind": "text",
-      "text": "Stopped after the failed historical fetch as instructed. Null estimates and an empty historicalContext explicitly represent refusal; this object does not satisfy forecast normalization. A valid forecast requires successful registered-query history and an officially verified resolution date."
+      "text": "The upside risk is a late reporting or linkage batch adding more than 3501579738.42 USD, which would land above the interval. The downside risk is deobligations, corrections, or account reclassification removing more than that amount, which would land below the interval. Either scenario would be outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 34908401624.97,
+      "ciLow": 31406821886.55,
+      "ciHigh": 38409981363.39
     }
   ]
 }

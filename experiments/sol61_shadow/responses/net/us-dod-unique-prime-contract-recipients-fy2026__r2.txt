@@ -1,0 +1,73 @@
+{
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD unique prime-contract recipients FY2026",
+  "question": "How many distinct non-null recipient_id values will the registered USAspending Department of Defense prime-contract transaction query return for FY2026 at its registered snapshot?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "At the registered snapshot, POST the Department of Defense awarding-agency filter, contract award types A/B/C/D, FY2026 dates, spending_level transactions, and page size 100. Retrieve every page, count distinct non-null results[].recipient_id values, and multiply by 0.001. Retain that snapshot and exclude subsequent revisions. The supplied contract does not identify a precise snapshot date, and no official resolution date was verified.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Incomplete exact-query historical evidence",
+    "Unverified snapshot date"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-07T11:58:07Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused because required evidence was not established"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target counts distinct non-null recipient_id values across all registered-query pages. Agency totals, obligation amounts, and recipient names cannot substitute for this count."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST the registered recipient query for FY2020, using 2019-10-01 through 2020-09-30, the Department of Defense awarding-agency filter, award types A/B/C/D, spending_level transactions, limit 100, and page 1.",
+      "result": "The response returned the first 100 recipient groups and page_metadata.hasNext=true. This is an incomplete page-level result, not the annual distinct-recipient count."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate was not established: only the first FY2020 page was fetched, and six complete annual registered-query observations were not obtained. No historicalContext values have been invented."
+    },
+    {
+      "kind": "text",
+      "text": "Fetched official documentation describes daily USAspending updates and a 90-day publication delay for DoD contract data. It does not establish a precise release date for this registered recipient query."
+    },
+    {
+      "kind": "text",
+      "text": "The official FY2026 Data Broker calendar spreadsheet fetch failed with '(400) Unsupported content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'. Following the prompt's fetch-failure instruction, the run stopped. No date from that spreadsheet was read or inferred."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied ledger context specifies an expected release window but omits resolutionDate. A financial submission calendar would also require evidence connecting its date to this exact contract-recipient snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No numerical prior, adjustment, sigma, or 80% interval can be supported without the complete fetched historical sample and a verified snapshot date. Point and bounds are null to make the refusal explicit."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

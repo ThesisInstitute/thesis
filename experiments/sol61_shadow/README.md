@@ -97,6 +97,40 @@ invocation. `net` responses are therefore validated without it, so the
 `prompt.md` in their run directories is the non-network variant; the prompt
 actually sent is the one pinned in `prompts/net/`.
 
+## Horizon waves (added 2026-10-07, before wave 2)
+
+Wave 1 is the three-by-three design above, run 2026-10-06/07. With Codex
+quota to spare until the 2026-10-14 reset, `horizon.py` repeats it once a day
+at 13:00Z, as waves 2 to 7 (2026-10-08 to 2026-10-13). Each wave runs only
+targets whose release window opens after its day, so every run finishes, and
+is pushed, before its target can print. The same model and prompts at
+successive dates show how one forecaster's accuracy changes as release day
+approaches. Run keys carry the wave: `net/<slug>__r2` is wave 1,
+`net/<slug>__w4r2` is wave 4.
+
+The driver submits every arm's rollout 1 before any rollout 2, so a quota
+shortfall trims depth rather than whole arms. It submits a 30-job chunk only
+while all of these hold: this session's unfinished jobs plus the chunk stay
+at or under 60; the 5-minute load average is under 108; at least 40 GB of
+disk is free; and the Codex lanes' mean seven-day utilization is under a
+budget that rises from 0.13 on 2026-10-07 13:00Z by 0.12 a day to a cap of
+0.85. Other work on the lanes, Axiom's first, counts against that budget, so
+it is served first. Chunks still unsubmitted when the next wave starts are
+skipped and logged. When a wave's jobs finish, the driver collects them,
+re-dispatches once any run an outage stopped, prunes, commits and pushes.
+
+## What the repository keeps per run
+
+`results.json` holds every run's record: job, model and launch facts,
+timing, chronology, trace audit, validation verdict, eligibility, and any
+superseded jobs. Beside it are the response (`responses/`), the redacted
+event stream (`traces/`, gzipped) and a pruned validation directory
+(`runs/`): `validation.json`, `error.json` when the runner failed, and the
+sealed cell as `normalized_cells.json.gz`, which carries the materialized
+CDF as `predictionDistribution`. The runner's other outputs are pinned
+elsewhere or derived from the response, and `collect --revalidate`
+regenerates them.
+
 ## Comparisons (fixed before any run)
 
 For each resolved target with an observation whose `source_record_id` equals
@@ -107,7 +141,18 @@ the target's `dataPointId` and whose unit equals the target unit:
   line-for-line port of the site's `scoreNumericCdfDistribution`);
 - PIT, 80% interval coverage and absolute error of the median;
 - per-target CRPS ratio against the primary, summarized by geometric mean
-  (the site's leaderboard statistic) and win share.
+  (the site's leaderboard statistic) and win share;
+- for the horizon waves, the same scores by wave, against days from the run
+  to the target's window opening.
+
+Added after wave 1, so descriptive rather than pre-registered: the share of
+runs in each arm that stop without a forecast. In wave 1, Sol returned a
+null forecast in 22% of `web` runs, 37% of `net` runs and 51% of `full`
+runs, none of them after the outage retries for want of a network. Their
+traces show the hosted search tool's "Cache miss" on data endpoints and 403
+responses from agency bot protection. When it cannot fetch the official
+history, Sol stops under the production prompt's honesty rule instead of
+inventing numbers. Those runs stay as ineligible records.
 
 ## Confounds to read the results with
 
@@ -140,6 +185,7 @@ python3 experiments/sol61_shadow/shadow.py prompts
 python3 experiments/sol61_shadow/shadow.py batch --arm web --rollout 1
 python3 experiments/sol61_shadow/shadow.py submit --label sol61-shadow-web-r1
 python3 experiments/sol61_shadow/shadow.py collect
+python3 experiments/sol61_shadow/horizon.py          # waves 2-7, metered
 python3 experiments/sol61_shadow/shadow.py score --ledger <chronicle official_observations.jsonl>
 ```
 

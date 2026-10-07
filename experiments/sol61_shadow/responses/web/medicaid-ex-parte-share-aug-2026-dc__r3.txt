@@ -1,0 +1,169 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-dc",
+  "country": "US",
+  "type": "data",
+  "title": "DC ex parte renewal share, August 2026",
+  "question": "What percentage of District of Columbia Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, using CMS's first-published original (O) submission in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 72.2,
+  "ciLow": 57.8,
+  "ciHigh": 86.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to District of Columbia's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Calculate 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using numerator and denominator as first published, and round to one decimal. Subsequent corrections, revisions, and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.dc.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 69
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 71
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 85
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 89
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 84
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 86
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 84
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 84
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 67
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 72
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 70
+    }
+  ],
+  "drivers": [
+    "Lower spring and summer passive renewal rates",
+    "Recent DC cohort variability",
+    "Eligibility verification and renewal automation",
+    "Original submission reporting precision"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://dccouncil.gov/wp-content/uploads/2026/02/DHCF-FY25-26-Performance-Oversight-Responses.pdf",
+    "https://dhcf.dc.gov/node/1802596",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf"
+  ],
+  "runAt": "2026-10-07T11:56:35Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "DC August 2026 ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the District of Columbia state row for August 2026 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, original submission O, as first publicly published. It is an unadjusted monthly cohort percentage. The supplied resolver does not explicitly name its denominator; CMS's coverage-retention tables define ex parte percentages using all beneficiaries due for renewal. Accordingly, the calculation is 100 times metric 5a1 divided by metric 5. All historical anchors use the original/preliminary monthly outcome tables, excluding updated outcomes."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS July, August, and September 2025 snapshot PDFs from Medicaid.gov; read Coverage Retention and Disenrollment Rates by State, DC row.",
+      "result": "July 2025: 21,904 beneficiaries due, 69% renewed ex parte. August 2025: 20,662 due, 71% renewed ex parte. September 2025: 18,749 due, 85% renewed ex parte. These are published whole-percent rates."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS October, November, and December 2025 snapshot PDFs from Medicaid.gov; read the DC renewal outcome rows.",
+      "result": "October 2025: 32,663 beneficiaries due, 89% renewed ex parte. November 2025: 24,480 due, 84% renewed ex parte. December 2025: 33,408 due, 86% renewed ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS January, February, and March 2026 snapshot PDFs from Medicaid.gov; read the DC renewal outcome rows.",
+      "result": "January 2026: 18,735 beneficiaries due, 84% renewed ex parte. February 2026: 18,682 due, 84% renewed ex parte. March 2026: 18,078 due, 67% renewed ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS April, May, and June 2026 snapshot PDFs from Medicaid.gov; read the DC renewal outcome rows.",
+      "result": "April 2026: 16,604 beneficiaries due, 72% renewed ex parte. May 2026: 13,652 due, 77% renewed ex parte. June 2026: 16,766 due, 70% renewed ex parte."
+    },
+    {
+      "kind": "text",
+      "text": "History retrieval limitation: the web tool could not fetch the underlying CMS CSV or DC original-row counts through the datastore API. The twelve historical entries therefore retain the whole-percent precision actually published in the contemporaneous CMS snapshots. They are not reconstructed one-decimal ratios, and exact first-vintage raw-count history was not independently verified."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class contains twelve DC monthly prints from July 2025 through June 2026. Their calculated base rate is 78.17%; the latest six average 75.67%. For an August forecast, last August's 71% and the April-June 2026 average of 73% are more relevant than the autumn and winter highs. A judgmental blend gives 60% weight to that recent average and 40% to seasonal persistence."
+    },
+    {
+      "kind": "text",
+      "text": "DHCF's public oversight response, page 21, says passive renewal rates tend to be lower in spring and summer and that an eligibility-system change reduced passive renewals beginning with April 2025 cohorts. This supports the seasonal anchor. DHCF's income eligibility letter lowered limits for affected adults to 138% effective January 1, 2026; recent history already reflects that operating environment. The additional policy adjustment is zero. The March decline is retained in uncertainty rather than projected as a recurring monthly loss; April-May improvement followed by June deterioration provides little support for sustained momentum."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a seasonal-persistence prior of 71%, updated toward the April-June average, (72+77+70)/3 = 73%. Level adjustment = 0.60*(73-71) = +1.2 percentage points; momentum, incremental policy, and one-off adjustments each = 0. Point = 71+1.2 = 72.2%. For the twelve fetched prints, eleven successive changes are [2,14,4,-5,2,-2,0,-17,5,5,-7] percentage points. Their sum is 1 and sum of squares is 637. Sample sigma = sqrt((637-1^2/11)/10) = 7.9807 percentage points; sigma = 7.9807. The normal 80% one-month half-width is 1.28*sigma = 10.2152. Apply sqrt(2) for the two reporting months from June to August, giving half-width 14.4465. Thus 72.2 +/- 14.4465 gives 57.7535 to 86.6465, rounded to 57.8% and 86.6%. This is a dispersion-based predictive approximation using rounded history."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification gap: retain the ledger resolutionDate of 2026-12-15, but it could not be verified as an official public-release date. CMS's fetched announcement archive lists June 2026 released September 25, 2026 and provides no announced August 2026 release date. CMS specifications distinguish state submission deadlines from publication: their August 2024 example has an updated-report deadline of December 15, 2024. That example does not verify this target's publication date. Resolution remains tied to the first official O-row publication whenever it occurs."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: more successful automated verification or an unusually easy renewal cohort could lift the share above the forecast. Downside risk: a harder cohort, verification failures, or processing disruption could reduce ex parte renewals. A substantial automation improvement producing more than 86.6%, or a system failure producing less than 57.8%, would land outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 72.2,
+      "ciLow": 57.8,
+      "ciHigh": 86.6
+    }
+  ]
+}
