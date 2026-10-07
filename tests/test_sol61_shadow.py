@@ -451,3 +451,11 @@ def test_resolve_by_bound_targets_are_not_validatable() -> None:
         "us-crp-enrolled-acres-september-2027-ceiling-27-million-source-recovered-2026-08-13",
         "us-crp-enrolled-acres-september-2027-no-fy2027-31-ceiling-source-recovered-2026-08-13",
     }
+
+
+def test_latest_receipts_orders_a_retry_after_the_job_it_replaces() -> None:
+    first = {"job_id": "20261006-174833-s61-net1-wic", "out": "/o/out/net/wic__r1.txt"}
+    retry = {"job_id": "20261007-101500-s61-net1-wic", "out": "/o/out/net/wic__r1.txt"}
+    other = {"job_id": "20261006-170000-s61-web2-wic", "out": "/o/out/web/wic__r2.txt"}
+    grouped = shadow.latest_receipts([retry, other, first])
+    assert grouped == {"net/wic__r1": [first, retry], "web/wic__r2": [other]}

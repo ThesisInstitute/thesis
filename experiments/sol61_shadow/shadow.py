@@ -69,14 +69,14 @@ ARMS: dict[str, dict[str, Any]] = {
         "sandbox": "workspace-write",
         "network": True,
         "promptMode": "fast",
-        "rollouts": 1,
+        "rollouts": 3,
     },
     "full": {
         "task": "research",
         "sandbox": "read-only",
         "network": False,
         "promptMode": "full",
-        "rollouts": 1,
+        "rollouts": 3,
     },
 }
 
@@ -722,6 +722,24 @@ def load_submissions(ops: pathlib.Path) -> list[dict[str, Any]]:
     return list(rows.values())
 
 
+def receipt_key(receipt: dict[str, Any]) -> str:
+    out = pathlib.Path(receipt["out"])
+    slug, rollout = out.stem.rsplit("__r", 1)
+    return run_key(out.parent.name, slug, int(rollout))
+
+
+def latest_receipts(receipts: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    """Receipts grouped by run key, oldest job first.
+
+    Job ids begin with their UTC creation stamp, so sorting by id orders a
+    run's original job before any re-dispatch of it.
+    """
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for receipt in sorted(receipts, key=lambda row: row["job_id"]):
+        grouped.setdefault(receipt_key(receipt), []).append(receipt)
+    return grouped
+
+
 def cmd_submit(args: argparse.Namespace) -> int:
     """Submit one batch manifest under a stable request id and keep the receipts.
 
@@ -769,14 +787,15 @@ def cmd_collect(args: argparse.Namespace) -> int:
     results_path = EXP / "results.json"
     results = read_json(results_path)["runs"] if results_path.exists() else {}
     pending = 0
-    for receipt in load_submissions(ops):
+    for key, receipts in latest_receipts(load_submissions(ops)).items():
+        receipt = receipts[-1]
         job_id = receipt["job_id"]
         out = pathlib.Path(receipt["out"])
         slug = out.name.rsplit("__r", 1)[0]
         arm = out.parent.name
         rollout = int(out.stem.rsplit("__r", 1)[1])
-        key = run_key(arm, slug, rollout)
-        if key in results and results[key].get("final") and not args.revalidate:
+        prior = results.get(key) or {}
+        if prior.get("final") and prior.get("jobId") == job_id and not args.revalidate:
             continue
         job = subfleet_job(job_id)
         state = job.get("state")
@@ -840,6 +859,15 @@ def cmd_collect(args: argparse.Namespace) -> int:
             and not audit.get("contaminated")
             and row["model"] == EXPECTED_MODEL
         )
+        # A re-dispatched run replaces the record of the job it retried;
+        # the earlier jobs stay listed with their final state.
+        row["supersededJobs"] = [
+            {
+                "jobId": earlier["job_id"],
+                "state": subfleet_job(earlier["job_id"]).get("state"),
+            }
+            for earlier in receipts[:-1]
+        ]
         row["final"] = True
         results[key] = row
     write_json(

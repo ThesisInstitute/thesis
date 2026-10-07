@@ -48,14 +48,16 @@ one respect.
 | Arm | Prompt mode | Sandbox | Tools | Rollouts |
 |---|---|---|---|---|
 | `web` | fast | read-only | hosted web search (the CI default lane) | 3 |
-| `net` | fast | workspace-write with outbound network | web search plus `curl`, with the runner's `--codex-network` fetch-honesty note | 1 |
-| `full` | full | read-only | hosted web search | 1 |
+| `net` | fast | workspace-write with outbound network | web search plus `curl`, with the runner's `--codex-network` fetch-honesty note | 3 |
+| `full` | full | read-only | hosted web search | 3 |
 
-The three `web` rollouts are independent jobs, so their median CDF
+Every rollout is an independent job, so each arm's median CDF
 (`scripts/median_rollout_ensemble.py:median_distribution`) mirrors the
-production median3 strategy. The `full` arm was added before any `full` job
-ran; the `web` and `net` prompts it sits beside are byte-identical to the
-first pre-registration commit.
+production median3 strategy. The design grew twice, each time before any
+affected job ran. The `full` arm was added after the first pre-registration
+commit, whose `web` and `net` prompts it left byte-identical. Rollouts 2 and 3
+of `net` and `full` were added on 2026-10-07, after wave 1, when spare Codex
+quota allowed a symmetric three-by-three design.
 
 **Eligibility.** A run counts only if all four hold:
 
