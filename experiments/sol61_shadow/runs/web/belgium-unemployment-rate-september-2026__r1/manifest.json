@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:05Z",
+  "runStartedAt": "2026-10-07T10:13:05Z",
+  "sealedAt": "2026-10-07T10:13:06Z",
+  "series": "eurostat.unemployment_rate.belgium",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "belgium-unemployment-rate-september-2026",
+    "country": "BE",
+    "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-11-09",
+      "start": "2026-11-01"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-11T19:13:41Z",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "registrationState": "preregistered",
+    "series": "eurostat.unemployment_rate.belgium",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "ec.europa.eu"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-09",
+        "start": "2026-11-01"
+      },
+      "field": "eurostat.unemployment_rate.belgium",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "eurostat.unemployment_rate.belgium",
+      "sourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+      "table": "Eurostat monthly unemployment euro-indicators release / une_rt_m data page",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26",
+    "targetRegistrationPath": "records/targets/2026-09-11-2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "targetContentHash": "2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26",
+  "targetRegistrationPath": "records/targets/2026-09-11-2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26.json",
+  "registeredAtUtc": "2026-09-11T19:13:41Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/prompt.md",
+      "sha256": "bc0a3e755a4fa228b53355f8fc039f48e164e595465cecc0b85bfa8c6400e61c",
+      "bytes": 10561,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/command.json",
+      "sha256": "2941de50bb5f6238e55ded56b0ed44f459d05af890d5749f305d3702609d387c",
+      "bytes": 198,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/stdout.txt",
+      "sha256": "9a914e85ade0a97df1e13f76bacbf3a375c0a6b47b42c4b5f9b38c232c6f2ef0",
+      "bytes": 9930,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/raw_response.txt",
+      "sha256": "9a914e85ade0a97df1e13f76bacbf3a375c0a6b47b42c4b5f9b38c232c6f2ef0",
+      "bytes": 9930,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/parsed_cells.json",
+      "sha256": "e1bb477ab6b3aebdf68bef63e5a2a214dabc624f6719e1e93d1851648af2008a",
+      "bytes": 10618,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/normalized_cells.json",
+      "sha256": "bf9e1fd273e4cec0858ed7c1d6bac08276a8d42e246f2972e31bb4e389e770c5",
+      "bytes": 28070,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/distribution.json",
+      "sha256": "638f4bf3f7293fcccce6cbea0ac670a7a750fa34d8bb9026b5f3a8979127070d",
+      "bytes": 13668,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/validation.json",
+      "sha256": "764b618028316e948cc23114ac5d394fafb8871ca507de3fef538b739a13978a",
+      "bytes": 141,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/cells.with_activity.json",
+      "sha256": "06eaa1757020e5da3eede7c68e99118bcd48fdf349b9edd0d49c9d65c265691e",
+      "bytes": 31021,
+      "createdAt": "2026-10-07T10:13:05Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/belgium-unemployment-rate-september-2026__r1/manifest.json",
+      "sha256": "9c7777f6e7b18117428a0cb18dc0e57f8b33ce89a7dd40ddd7691cc318db69d0",
+      "bytes": 5290,
+      "createdAt": "2026-10-07T10:13:05Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "belgium-unemployment-rate-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "3d9ab4ef4ab13516d7b58af16686ad7b579d96eb5f6448570ba88057c35ee6b7"
+}

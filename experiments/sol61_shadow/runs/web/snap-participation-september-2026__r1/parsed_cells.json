@@ -1,0 +1,187 @@
+[
+  {
+    "slug": "snap-participation-september-2026",
+    "country": "US",
+    "type": "data",
+    "title": "September 2026 SNAP participation",
+    "question": "What will USDA's first official print report for national SNAP monthly Persons participating in September 2026, without seasonal adjustment, expressed in millions?",
+    "unit": "millions",
+    "pointEstimate": 35.17428,
+    "ciLow": 34.69834,
+    "ciHigh": 35.65022,
+    "confidence": 0.8,
+    "resolutionDate": null,
+    "resolutionSource": "USDA national monthly SNAP participation table",
+    "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "resolutionRule": "Resolve on the first official publication containing the September 2026 national monthly Persons total, without seasonal adjustment and including any disaster assistance incorporated in that total. Express the published figure in millions: multiply a value reported in thousands by 0.001, or divide a whole-person count by 1000000. Preserve the source's precision; whole-person counts correspond to six decimal places in millions. Retain the first published value and ignore subsequent corrections and revisions. The exact official publication date remains unverified.",
+    "dataPointId": "usda.fns.snap.persons.september_2026",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        },
+        "label": "2025-09",
+        "value": 41.211631
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        },
+        "label": "2025-10",
+        "value": 40.671594
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        },
+        "label": "2025-11",
+        "value": 39.99989
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        },
+        "label": "2025-12",
+        "value": 39.207898
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        },
+        "label": "2026-01",
+        "value": 38.552133
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        },
+        "label": "2026-02",
+        "value": 37.947123
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "2026-03",
+        "value": 37.531152
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "2026-04",
+        "value": 37.108727
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "2026-05",
+        "value": 36.685024
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "2026-06",
+        "value": 36.352716
+      }
+    ],
+    "drivers": [
+      "Continued national participation declines",
+      "Recent monthly losses have slowed",
+      "Expanded work-related time limits applied through recertification",
+      "California's principal first discontinuance cohort falls after September",
+      "Three unobserved months and uncertain policy-driven momentum"
+    ],
+    "sourceContext": [
+      "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+      "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+      "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+      "https://fns-prod.azureedge.us/pd/overview",
+      "https://www.usda.gov/sites/default/files/guidance-documents/fns.snap-obbb-abawd-exceptions-implementation.pdf",
+      "https://abgt.assembly.ca.gov/system/files/2026-04/april-29-sub-2-agenda-dss-select-issues-csd-calhhs_0.pdf"
+    ],
+    "runAt": "2026-10-06T22:43:30Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "September 2026 SNAP Persons: forecast of 35.17428 million"
+      },
+      {
+        "kind": "text",
+        "text": "The target is fns.snap.total_persons for September 2026, resolving on the first official national monthly Persons print. All historical anchors use that same unadjusted administrative participation variant, including reported disaster assistance. The fetched history is the latest published vintage; fiscal-year 2026 figures are preliminary, and original first-print vintages were not reconstructed."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched USDA's SNAP data page through its official CDN and clicked the national monthly table, snap-4fymonthly-9.pdf.",
+        "result": "The table, dated September 11, 2026, reports Persons: September 2025 41,211,631; October 40,671,594; November 39,999,890; December 39,207,898; January 2026 38,552,133; February 37,947,123; March 37,531,152; April 37,108,727; May 36,685,024; June 36,352,716. Dividing by 1,000,000 gives the historicalContext values."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Clicked USDA's state-level Persons table, snap-persons-9.pdf, to check the national total and initial-print designation.",
+        "result": "TOTAL Persons are 41,678,341 for June 2025, 36,685,024 for May 2026 preliminary, and 36,352,716 for June 2026 initial. Published June changes are -0.9% month over month and -12.8% year over year. California's June 2026 count is 5,111,720. The table warns that current figures are preliminary and subject to significant revision."
+      },
+      {
+        "kind": "text",
+        "text": "The reference class consists of ten monthly national observations from September 2025 through June 2026 and their nine successive changes. The level-persistence base rate is June's 36.352716 million. Every observed change is negative, but recent losses have slowed: the last three average -0.392812 million per month, compared with -0.539879 million across all nine. The forecast uses the recent pace."
+      },
+      {
+        "kind": "text",
+        "text": "USDA's fetched implementation memorandum expands time-limit coverage from ages 18-54 to 18-64 and narrows the dependent-child exception from under 18 to under 14. The changes were effective July 4, 2025 and applied through applications and recertifications. Continued attrition is a plausible mechanism for the observed trend; applying an additional full nationwide policy shock would double-count effects already present in the history."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched the California Assembly's April 29, 2026 hearing document, pages 6-8, for implementation timing in a large SNAP state.",
+        "result": "California estimated 955,000 adults requiring further screening and 665,000 potentially losing eligibility at full implementation. Earliest discontinuances were projected for September 1, 2026, but the principal first cohort of over 55,000 was projected for October 1, after July-September countable benefit months."
+      },
+      {
+        "kind": "text",
+        "text": "Separate components are: level 36.352716 million; momentum -1.178436 million over three months; additional one-off adjustment zero; additional quantified policy adjustment zero. California's principal projected cohort falls after the target month, so its full implementation estimate is not subtracted from September."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: Use a persistence prior updated by the average of the latest three monthly changes, with dispersion estimated from all nine successive changes in the fetched September 2025-June 2026 sample. sigma = 0.151798 million, calculated as the sample standard deviation of those changes. The one-month 80% half-width is 1.28*0.151798 = 0.194302 million. For three unprinted months and drift estimated from three observations, use 1.28*0.151798*sqrt(3+3^2/3) = 0.475940 million. This 2.449-fold widening reflects the forecast horizon and uncertain drift under changing policy implementation. No additional one-off or policy shift is imposed. Final bounds are 34.69834-35.65022 million."
+      },
+      {
+        "kind": "math",
+        "text": "Latest changes are -0.422425, -0.423703 and -0.332308 million. Their mean is -0.392812. Point = 36.352716 + 3*(-0.392812) = 35.174280. Interval = 35.174280 +/- 0.475940 = [34.698340, 35.650220], rounded to six decimals."
+      },
+      {
+        "kind": "text",
+        "text": "Concrete ledger discrepancies: the fetched national PDF reports whole persons, whereas the ledger describes thousands; applying its 0.001 factor directly to these counts would give the wrong scale. The forecast preserves the intended millions unit with the appropriate conversion. Official pages are now branded Food and Nutrition Administration and indexed under www.fna.usda.gov; evidence was retrieved through USDA's official CDN. The registered target identity and canonical FNS resolution URL are retained."
+      },
+      {
+        "kind": "text",
+        "text": "The required exact resolutionDate could not be verified. Official program-data pages fetched this run identify June 2026 as the latest available month, but no official calendar or announcement establishing September 2026's publication date was found. resolutionDate is null. The ledger's February 7-15, 2027 expected window remains unverified, so this object does not satisfy the release-date validation requirement."
+      },
+      {
+        "kind": "text",
+        "text": "The 80% interval is a model-based Gaussian approximation using latest-vintage changes. It does not separately estimate first-print reporting errors, and uncertainty could exceed historical monthly dispersion if implementation or reporting changes abruptly."
+      },
+      {
+        "kind": "text",
+        "text": "upside risk: closures slow further, exemptions retain more recipients, or disaster assistance raises participation. A complete pause in declines near June's 36.352716 million would land above the interval. downside risk: recertification losses accelerate across large states; repeating the full-sample average decline would produce 34.733078 million, inside the interval, while losses exceeding 1.654376 million cumulatively after June would land below the interval. Abrupt reporting omissions or a large disaster-related participation surge could also fall outside the interval."
+      },
+      {
+        "kind": "forecast",
+        "point": 35.17428,
+        "ciLow": 34.69834,
+        "ciHigh": 35.65022
+      }
+    ]
+  }
+]

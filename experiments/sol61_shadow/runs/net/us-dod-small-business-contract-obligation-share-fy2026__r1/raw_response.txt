@@ -1,0 +1,82 @@
+{
+  "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD small-business contract obligation share",
+  "question": "What percentage of FY2026 Department of Defense prime-contract obligations will the first registered USAspending transaction-level query snapshot classify as small-business obligations?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the first registered query snapshot for FY2026. POST fiscal-year grouping and transaction-level spending with Department of Defense as the awarding toptier agency, award types A/B/C/D, and dates 2025-10-01 through 2026-09-30. Compute 100 times the aggregated_amount with recipient_type_names=['small_business'] divided by aggregated_amount without a recipient-type restriction; apply factor 1. Retain returned precision and exclude subsequent revisions. The snapshot date and rounding convention could not be verified from official sources during this run.",
+  "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 20.863437209774663
+    }
+  ],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data-sources"
+  ],
+  "runAt": "2026-10-06T22:01:04Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused because mandatory evidence was not completed"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered USAspending query ratio, not an agency profile total or published small-business scorecard. The target identity and percent unit are preserved. Null forecast fields indicate refusal, not numeric predictions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with JSON {\"group\":\"fiscal_year\",\"spending_level\":\"transactions\",\"filters\":{\"time_period\":[{\"start_date\":\"2024-10-01\",\"end_date\":\"2025-09-30\"}],\"agencies\":[{\"name\":\"Department of Defense\",\"tier\":\"toptier\",\"type\":\"awarding\"}],\"award_type_codes\":[\"A\",\"B\",\"C\",\"D\"],\"recipient_type_names\":[\"small_business\"]}}",
+      "result": "The echoed official response returned FY2025 aggregated_amount=102602666732.99 for the small-business numerator."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with JSON {\"group\":\"fiscal_year\",\"spending_level\":\"transactions\",\"filters\":{\"time_period\":[{\"start_date\":\"2024-10-01\",\"end_date\":\"2025-09-30\"}],\"agencies\":[{\"name\":\"Department of Defense\",\"tier\":\"toptier\",\"type\":\"awarding\"}],\"award_type_codes\":[\"A\",\"B\",\"C\",\"D\"]}}",
+      "result": "The echoed official response returned FY2025 aggregated_amount=491782181916.41 for the unrestricted denominator."
+    },
+    {
+      "kind": "math",
+      "text": "FY2025 share = 100 * 102602666732.99 / 491782181916.41 = 20.863437209774663 percent."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is incomplete: only FY2025 was fetched before stopping. Six distinct historical query results are mandatory. This does not establish that the official source exposes fewer than six periods."
+    },
+    {
+      "kind": "text",
+      "text": "Official schedule verification failed. The fetch of https://www.usaspending.gov/data-sources returned 'curl: (28) Connection timed out after 20073 milliseconds'; official-site web searches also returned connection errors. These failures do not establish that a calendar is absent. The supplied October 15–22 window remains unverified, so no resolutionDate is asserted. Following the instruction to stop after a failed fetch, no additional historical requests were initiated."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: A persistence prior would require the mandatory historical sample before adjustment. Level, momentum, one-off, and policy-mechanism adjustments were not estimated. Sigma and the approximately 1.28*sigma half-width cannot be calculated from one observation; final implied bounds are therefore withheld."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk would be a greater small-business share of recorded obligations; a downside risk would be a greater share assigned to other recipients. Without a calibrated 80% interval, no scenario can honestly be classified as outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

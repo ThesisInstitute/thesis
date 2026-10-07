@@ -1,0 +1,1049 @@
+[
+  {
+    "slug": "us-ondcp-hidta-al95001-obligations-fy2026",
+    "country": "US",
+    "type": "data",
+    "title": "FY2026 HIDTA reported obligations",
+    "question": "What will the first registered USAspending API v2 query snapshot report for FY2026 net financial-assistance transaction obligations under Assistance Listing 95.001, in USD millions?",
+    "unit": "usd_millions",
+    "pointEstimate": 108.82198836,
+    "ciLow": -7.052505,
+    "ciHigh": 276.75937091,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-22",
+    "resolutionSource": "U.S. Treasury USAspending API v2 registered-query snapshot",
+    "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "resolutionRule": "Use the first official response captured under the registered_query_snapshot policy in the registered October 15\u201322, 2026 window. POST to the specified endpoint with group='fiscal_year', spending_level='transactions', filters.time_period=[{'start_date':'2025-10-01','end_date':'2026-09-30'}], filters.program_numbers=['95.001'], and filters.award_type_codes=['02','03','04','05','06','07','08','09','10','11']. Select results[time_period.fiscal_year='2026'].aggregated_amount and multiply by 0.000001. Preserve API dollar-and-cent precision, equivalent to eight decimal places in USD millions. Freeze that snapshot; subsequent corrections and revisions do not change resolution. October 22 is retained as the registered window endpoint; an official release date for this query could not be verified.",
+    "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+    "historicalContext": [
+      {
+        "label": "FY2020",
+        "value": 270.27144368,
+        "period": {
+          "type": "fiscal_year",
+          "value": "2020"
+        }
+      },
+      {
+        "label": "FY2021",
+        "value": 268.60530517,
+        "period": {
+          "type": "fiscal_year",
+          "value": "2021"
+        }
+      },
+      {
+        "label": "FY2022",
+        "value": 252.76050027,
+        "period": {
+          "type": "fiscal_year",
+          "value": "2022"
+        }
+      },
+      {
+        "label": "FY2023",
+        "value": 266.41544691,
+        "period": {
+          "type": "fiscal_year",
+          "value": "2023"
+        }
+      },
+      {
+        "label": "FY2024",
+        "value": 273.95994611,
+        "period": {
+          "type": "fiscal_year",
+          "value": "2024"
+        }
+      },
+      {
+        "label": "FY2025",
+        "value": 271.6576756,
+        "period": {
+          "type": "fiscal_year",
+          "value": "2025"
+        }
+      }
+    ],
+    "drivers": [
+      "Extremely small current FY2026 registered-query total",
+      "Historical annual obligations near $267 million",
+      "Substantial announced FY2026 HIDTA allocations",
+      "Uncertain publication of assistance award transactions",
+      "Registered snapshot timing lacks official release-date verification"
+    ],
+    "sourceContext": [
+      "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "https://api.usaspending.gov/api/v2/awards/last_updated/",
+      "https://api.usaspending.gov/docs/endpoints",
+      "https://www.whitehouse.gov/releases/2026/07/white-house-announces-additional-277-million-to-fight-cartels-and-drug-traffickers/",
+      "https://www.govinfo.gov/content/pkg/PLAW-119publ75/html/PLAW-119publ75.htm",
+      "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+      "https://fiscal.treasury.gov/system/files/files/gtas/fy-2026-reporting-window-schedule.pdf"
+    ],
+    "runAt": "2026-10-07T10:14:08Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "FY2026 HIDTA registered-query snapshot forecast"
+      },
+      {
+        "kind": "text",
+        "text": "The exact series is nominal net financial-assistance transaction obligations filtered solely to Assistance Listing 95.001 and the registered award type codes, grouped by fiscal year. Every historical entry uses this same query variant, executed separately with October 1 through September 30 dates for its fiscal year. These are historical-period values fetched in this run, not archived original vintages. The current FY2026 observation precedes the registered resolution window."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ using the registered filters, group=fiscal_year and spending_level=transactions; FY2020 dates 2019-10-01 to 2020-09-30; FY2021 dates 2020-10-01 to 2021-09-30.",
+        "result": "The echoed official responses returned aggregated_amount=270271443.68 dollars for FY2020 and 268605305.17 dollars for FY2021. Multiplication by 0.000001 gives 270.27144368 and 268.60530517 USD millions."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ using the same registered filters; FY2022 dates 2021-10-01 to 2022-09-30; FY2023 dates 2022-10-01 to 2023-09-30.",
+        "result": "The echoed official responses returned aggregated_amount=252760500.27 dollars for FY2022 and 266415446.91 dollars for FY2023, giving 252.76050027 and 266.41544691 USD millions."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ using the same registered filters; FY2024 dates 2023-10-01 to 2024-09-30; FY2025 dates 2024-10-01 to 2025-09-30.",
+        "result": "The echoed official responses returned aggregated_amount=273959946.11 dollars for FY2024 and 271657675.60 dollars for FY2025, giving 273.95994611 and 271.65767560 USD millions."
+      },
+      {
+        "kind": "text",
+        "text": "The outside-view base rate is the six fetched FY2020\u2013FY2025 annual flows: mean 267.27838629 million, range 252.76050027 to 273.95994611 million. FY2025 persistence provides a normal-reporting prior of 271.65767560 million. Recent annual changes reverse direction, so I add no momentum extrapolation."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "POST the registered FY2026 query to https://api.usaspending.gov/api/v2/search/spending_over_time/ with dates 2025-10-01 to 2026-09-30; GET https://api.usaspending.gov/api/v2/awards/last_updated/.",
+        "result": "The FY2026 response returned aggregated_amount=264863.53 dollars, or 0.26486353 million. The update endpoint returned last_updated='10/06/2026'. The current total is approximately 0.0991% of the historical mean."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open the July 9, 2026 White House HIDTA allocation announcement and the HIDTA appropriation section of https://www.govinfo.gov/content/pkg/PLAW-119publ75/html/PLAW-119publ75.htm.",
+        "result": "The White House FY2026 base-allocation table totals $277,491,415. Public Law 119-75 appropriates $298,579,000 for HIDTA, available through September 30, 2027; at least 51% is directed to state and local entities with a 120-day obligation requirement. Allocations and appropriations are policy evidence, not substitutes for registered-query obligations."
+      },
+      {
+        "kind": "text",
+        "text": "Resolution-date validation discrepancy: Treasury's official FY2026 GTAS calendar gives September accounting reporting from October 6 through October 20, 2026, but this concerns accounting submissions. Treasury's FABS rules require assistance reporting within 30 days of action and at least twice monthly, with agency-selected publication after validation. Neither source verifies October 22 as an official annual release date for this transaction query. I retain the registered October 15\u201322 snapshot window and its October 22 endpoint while explicitly flagging that the requested official release-date verification remains unsatisfied."
+      },
+      {
+        "kind": "text",
+        "text": "Level: retain FY2025 obligations as the normal-reporting center. Momentum: zero adjustment. Policy: zero mechanical level adjustment because announced allocations do not establish this query's obligations. One-off and reporting mechanism: the current FY2026 total is 271.39281207 million below that center. I assign subjective probabilities of 60% to persistence of the small reported total and 40% to historical-scale publication before the snapshot. These probabilities express judgment, not fetched frequencies; partial publication could produce intermediate outcomes."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: Use the FY2025 persistence prior and six fetched FY2020\u2013FY2025 annual flows. Because this is an annual-flow series, calculate dispersion from the values themselves: mean=267.27838629; sum of squared deviations=286.0542016061189; sigma = 7.56378478813509 = sqrt(286.0542016061189/5), in USD millions. The ordinary Gaussian 80% half-width is 1.28*sigma=9.681644528812916. Combine level persistence, zero momentum, zero policy-level adjustment, and the reporting-state update using 0.60*N(0.26486353,sigma^2)+0.40*N(271.65767560,sigma^2). Its mean is 0.60*0.26486353+0.40*271.65767560=108.821988358, rounded to 108.82198836. Approximate central 80% mixture bounds are 0.26486353+sigma*Phi_inverse(0.10/0.60)=-7.052504995393869 and 271.65767560+sigma*Phi_inverse((0.90-0.60)/0.40)=276.75937091228616, rounded to [-7.052505,276.75937091]. The interval's half-span is about 14.66 times the ordinary half-width because an entire annual reporting batch may be absent. The negative lower bound permits net deobligation outcomes; the target sums signed transaction obligations."
+      },
+      {
+        "kind": "text",
+        "text": "The upside risk is a large late publication batch: reported obligations matching the announced 277.491415 million base allocations would land above the interval's 276.75937091 million upper bound. The downside risk is continued publication failure or obligations recorded in another fiscal year, leaving the snapshot near 0.26486353 million. Substantial net deobligations taking the total below -7.052505 million would land outside the interval on the downside. The point is a probability-weighted mean between two separated scenarios."
+      },
+      {
+        "kind": "forecast",
+        "point": 108.82198836,
+        "ciLow": -7.052505,
+        "ciHigh": 276.75937091
+      }
+    ],
+    "agentReportedRunAt": "2026-10-06T22:39:46Z",
+    "runStartedAt": "2026-10-07T10:14:08Z",
+    "promptMode": "fast",
+    "registrationCommit": "49bf9b5726d9faf93b6c96c9d73d4a52dc74c030",
+    "targetContentHash": "eb895fc1e680eab66d27b1046b6df148fa4c00829fc42935f4c36fb1c8a4a42a",
+    "targetRegistrationPath": "records/targets/2026-08-11-eb895fc1e680eab66d27b1046b6df148fa4c00829fc42935f4c36fb1c8a4a42a.json",
+    "registeredAtUtc": "2026-08-11T20:38:09Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": -180.86424504,
+        "upper": 528.665444735
+      },
+      "points": [
+        {
+          "value": -180.86424504,
+          "probability": 0.0
+        },
+        {
+          "value": -177.316596591,
+          "probability": 0.00204108678048
+        },
+        {
+          "value": -173.768948142,
+          "probability": 0.00408217356096
+        },
+        {
+          "value": -170.221299693,
+          "probability": 0.00612326034143
+        },
+        {
+          "value": -166.673651245,
+          "probability": 0.00816434712191
+        },
+        {
+          "value": -163.126002796,
+          "probability": 0.0102054339024
+        },
+        {
+          "value": -159.578354347,
+          "probability": 0.0122465206829
+        },
+        {
+          "value": -156.030705898,
+          "probability": 0.0142876074633
+        },
+        {
+          "value": -152.483057449,
+          "probability": 0.0163286942438
+        },
+        {
+          "value": -148.935409,
+          "probability": 0.0183697810243
+        },
+        {
+          "value": -145.387760551,
+          "probability": 0.0204108678048
+        },
+        {
+          "value": -141.840112102,
+          "probability": 0.0224519545853
+        },
+        {
+          "value": -138.292463654,
+          "probability": 0.0244930413657
+        },
+        {
+          "value": -134.744815205,
+          "probability": 0.0265341281462
+        },
+        {
+          "value": -131.197166756,
+          "probability": 0.0285752149267
+        },
+        {
+          "value": -127.649518307,
+          "probability": 0.0306163017072
+        },
+        {
+          "value": -124.101869858,
+          "probability": 0.0326573884876
+        },
+        {
+          "value": -120.554221409,
+          "probability": 0.0346984752681
+        },
+        {
+          "value": -117.00657296,
+          "probability": 0.0367395620486
+        },
+        {
+          "value": -113.458924511,
+          "probability": 0.0387806488291
+        },
+        {
+          "value": -109.911276063,
+          "probability": 0.0408217356096
+        },
+        {
+          "value": -106.363627614,
+          "probability": 0.04286282239
+        },
+        {
+          "value": -102.815979165,
+          "probability": 0.0449039091705
+        },
+        {
+          "value": -99.2683307159,
+          "probability": 0.046944995951
+        },
+        {
+          "value": -95.720682267,
+          "probability": 0.0489860827315
+        },
+        {
+          "value": -92.1730338181,
+          "probability": 0.0510271695119
+        },
+        {
+          "value": -88.6253853693,
+          "probability": 0.0530682562924
+        },
+        {
+          "value": -85.0777369204,
+          "probability": 0.0551093430729
+        },
+        {
+          "value": -81.5300884715,
+          "probability": 0.0571504298534
+        },
+        {
+          "value": -77.9824400226,
+          "probability": 0.0591915166339
+        },
+        {
+          "value": -74.4347915738,
+          "probability": 0.0612326034143
+        },
+        {
+          "value": -70.8871431249,
+          "probability": 0.0632736901948
+        },
+        {
+          "value": -67.339494676,
+          "probability": 0.0653147769753
+        },
+        {
+          "value": -63.7918462271,
+          "probability": 0.0673558637558
+        },
+        {
+          "value": -60.2441977783,
+          "probability": 0.0693969505362
+        },
+        {
+          "value": -56.6965493294,
+          "probability": 0.0714380373167
+        },
+        {
+          "value": -53.1489008805,
+          "probability": 0.0734791240972
+        },
+        {
+          "value": -49.6012524316,
+          "probability": 0.0755202108777
+        },
+        {
+          "value": -46.0536039828,
+          "probability": 0.0775612976582
+        },
+        {
+          "value": -42.5059555339,
+          "probability": 0.0796023844386
+        },
+        {
+          "value": -38.958307085,
+          "probability": 0.0816434712191
+        },
+        {
+          "value": -35.4106586361,
+          "probability": 0.0836845579996
+        },
+        {
+          "value": -31.8630101873,
+          "probability": 0.0857256447801
+        },
+        {
+          "value": -28.3153617384,
+          "probability": 0.0877667315605
+        },
+        {
+          "value": -24.7677132895,
+          "probability": 0.089807818341
+        },
+        {
+          "value": -21.2200648406,
+          "probability": 0.0918489051215
+        },
+        {
+          "value": -17.6724163918,
+          "probability": 0.093889991902
+        },
+        {
+          "value": -14.1247679429,
+          "probability": 0.0959310786825
+        },
+        {
+          "value": -10.577119494,
+          "probability": 0.0979721654629
+        },
+        {
+          "value": -7.02947104513,
+          "probability": 0.10007951346
+        },
+        {
+          "value": -3.48182259625,
+          "probability": 0.112326034143
+        },
+        {
+          "value": 0.065825852625,
+          "probability": 0.124572554826
+        },
+        {
+          "value": 3.6134743015,
+          "probability": 0.136819075509
+        },
+        {
+          "value": 7.16112275037,
+          "probability": 0.149065596192
+        },
+        {
+          "value": 10.7087711992,
+          "probability": 0.161312116875
+        },
+        {
+          "value": 14.2564196481,
+          "probability": 0.173558637558
+        },
+        {
+          "value": 17.804068097,
+          "probability": 0.185805158241
+        },
+        {
+          "value": 21.3517165459,
+          "probability": 0.198051678923
+        },
+        {
+          "value": 24.8993649947,
+          "probability": 0.210298199606
+        },
+        {
+          "value": 28.4470134436,
+          "probability": 0.222544720289
+        },
+        {
+          "value": 31.9946618925,
+          "probability": 0.234791240972
+        },
+        {
+          "value": 35.5423103414,
+          "probability": 0.247037761655
+        },
+        {
+          "value": 39.0899587902,
+          "probability": 0.259284282338
+        },
+        {
+          "value": 42.6376072391,
+          "probability": 0.271530803021
+        },
+        {
+          "value": 46.185255688,
+          "probability": 0.283777323704
+        },
+        {
+          "value": 49.7329041369,
+          "probability": 0.296023844386
+        },
+        {
+          "value": 53.2805525857,
+          "probability": 0.308270365069
+        },
+        {
+          "value": 56.8282010346,
+          "probability": 0.320516885752
+        },
+        {
+          "value": 60.3758494835,
+          "probability": 0.332763406435
+        },
+        {
+          "value": 63.9234979324,
+          "probability": 0.345009927118
+        },
+        {
+          "value": 67.4711463812,
+          "probability": 0.357256447801
+        },
+        {
+          "value": 71.0187948301,
+          "probability": 0.369502968484
+        },
+        {
+          "value": 74.566443279,
+          "probability": 0.381749489166
+        },
+        {
+          "value": 78.1140917279,
+          "probability": 0.393996009849
+        },
+        {
+          "value": 81.6617401767,
+          "probability": 0.406242530532
+        },
+        {
+          "value": 85.2093886256,
+          "probability": 0.418489051215
+        },
+        {
+          "value": 88.7570370745,
+          "probability": 0.430735571898
+        },
+        {
+          "value": 92.3046855234,
+          "probability": 0.442982092581
+        },
+        {
+          "value": 95.8523339722,
+          "probability": 0.455228613264
+        },
+        {
+          "value": 99.3999824211,
+          "probability": 0.467475133947
+        },
+        {
+          "value": 102.94763087,
+          "probability": 0.479721654629
+        },
+        {
+          "value": 106.495279319,
+          "probability": 0.491968175312
+        },
+        {
+          "value": 110.042927768,
+          "probability": 0.502908082499
+        },
+        {
+          "value": 113.590576217,
+          "probability": 0.511358014003
+        },
+        {
+          "value": 117.138224665,
+          "probability": 0.519807945507
+        },
+        {
+          "value": 120.685873114,
+          "probability": 0.528257877012
+        },
+        {
+          "value": 124.233521563,
+          "probability": 0.536707808516
+        },
+        {
+          "value": 127.781170012,
+          "probability": 0.54515774002
+        },
+        {
+          "value": 131.328818461,
+          "probability": 0.553607671524
+        },
+        {
+          "value": 134.87646691,
+          "probability": 0.562057603029
+        },
+        {
+          "value": 138.424115359,
+          "probability": 0.570507534533
+        },
+        {
+          "value": 141.971763808,
+          "probability": 0.578957466037
+        },
+        {
+          "value": 145.519412257,
+          "probability": 0.587407397541
+        },
+        {
+          "value": 149.067060705,
+          "probability": 0.595857329046
+        },
+        {
+          "value": 152.614709154,
+          "probability": 0.60430726055
+        },
+        {
+          "value": 156.162357603,
+          "probability": 0.612757192054
+        },
+        {
+          "value": 159.710006052,
+          "probability": 0.621207123558
+        },
+        {
+          "value": 163.257654501,
+          "probability": 0.629657055063
+        },
+        {
+          "value": 166.80530295,
+          "probability": 0.638106986567
+        },
+        {
+          "value": 170.352951399,
+          "probability": 0.646556918071
+        },
+        {
+          "value": 173.900599847,
+          "probability": 0.655006849575
+        },
+        {
+          "value": 177.448248296,
+          "probability": 0.66345678108
+        },
+        {
+          "value": 180.995896745,
+          "probability": 0.671906712584
+        },
+        {
+          "value": 184.543545194,
+          "probability": 0.680356644088
+        },
+        {
+          "value": 188.091193643,
+          "probability": 0.688806575592
+        },
+        {
+          "value": 191.638842092,
+          "probability": 0.697256507097
+        },
+        {
+          "value": 195.186490541,
+          "probability": 0.705706438601
+        },
+        {
+          "value": 198.73413899,
+          "probability": 0.714156370105
+        },
+        {
+          "value": 202.281787438,
+          "probability": 0.722606301609
+        },
+        {
+          "value": 205.829435887,
+          "probability": 0.731056233114
+        },
+        {
+          "value": 209.377084336,
+          "probability": 0.739506164618
+        },
+        {
+          "value": 212.924732785,
+          "probability": 0.747956096122
+        },
+        {
+          "value": 216.472381234,
+          "probability": 0.756406027626
+        },
+        {
+          "value": 220.020029683,
+          "probability": 0.764855959131
+        },
+        {
+          "value": 223.567678132,
+          "probability": 0.773305890635
+        },
+        {
+          "value": 227.115326581,
+          "probability": 0.781755822139
+        },
+        {
+          "value": 230.662975029,
+          "probability": 0.790205753643
+        },
+        {
+          "value": 234.210623478,
+          "probability": 0.798655685148
+        },
+        {
+          "value": 237.758271927,
+          "probability": 0.807105616652
+        },
+        {
+          "value": 241.305920376,
+          "probability": 0.815555548156
+        },
+        {
+          "value": 244.853568825,
+          "probability": 0.82400547966
+        },
+        {
+          "value": 248.401217274,
+          "probability": 0.832455411164
+        },
+        {
+          "value": 251.948865723,
+          "probability": 0.840905342669
+        },
+        {
+          "value": 255.496514172,
+          "probability": 0.849355274173
+        },
+        {
+          "value": 259.044162621,
+          "probability": 0.857805205677
+        },
+        {
+          "value": 262.591811069,
+          "probability": 0.866255137181
+        },
+        {
+          "value": 266.139459518,
+          "probability": 0.874705068686
+        },
+        {
+          "value": 269.687107967,
+          "probability": 0.88315500019
+        },
+        {
+          "value": 273.234756416,
+          "probability": 0.891604931694
+        },
+        {
+          "value": 276.782404865,
+          "probability": 0.900009143866
+        },
+        {
+          "value": 280.330053314,
+          "probability": 0.901417465784
+        },
+        {
+          "value": 283.877701763,
+          "probability": 0.902825787701
+        },
+        {
+          "value": 287.425350211,
+          "probability": 0.904234109619
+        },
+        {
+          "value": 290.97299866,
+          "probability": 0.905642431536
+        },
+        {
+          "value": 294.520647109,
+          "probability": 0.907050753453
+        },
+        {
+          "value": 298.068295558,
+          "probability": 0.908459075371
+        },
+        {
+          "value": 301.615944007,
+          "probability": 0.909867397288
+        },
+        {
+          "value": 305.163592456,
+          "probability": 0.911275719205
+        },
+        {
+          "value": 308.711240905,
+          "probability": 0.912684041123
+        },
+        {
+          "value": 312.258889354,
+          "probability": 0.91409236304
+        },
+        {
+          "value": 315.806537802,
+          "probability": 0.915500684958
+        },
+        {
+          "value": 319.354186251,
+          "probability": 0.916909006875
+        },
+        {
+          "value": 322.9018347,
+          "probability": 0.918317328792
+        },
+        {
+          "value": 326.449483149,
+          "probability": 0.91972565071
+        },
+        {
+          "value": 329.997131598,
+          "probability": 0.921133972627
+        },
+        {
+          "value": 333.544780047,
+          "probability": 0.922542294544
+        },
+        {
+          "value": 337.092428496,
+          "probability": 0.923950616462
+        },
+        {
+          "value": 340.640076945,
+          "probability": 0.925358938379
+        },
+        {
+          "value": 344.187725393,
+          "probability": 0.926767260297
+        },
+        {
+          "value": 347.735373842,
+          "probability": 0.928175582214
+        },
+        {
+          "value": 351.283022291,
+          "probability": 0.929583904131
+        },
+        {
+          "value": 354.83067074,
+          "probability": 0.930992226049
+        },
+        {
+          "value": 358.378319189,
+          "probability": 0.932400547966
+        },
+        {
+          "value": 361.925967638,
+          "probability": 0.933808869883
+        },
+        {
+          "value": 365.473616087,
+          "probability": 0.935217191801
+        },
+        {
+          "value": 369.021264536,
+          "probability": 0.936625513718
+        },
+        {
+          "value": 372.568912985,
+          "probability": 0.938033835636
+        },
+        {
+          "value": 376.116561433,
+          "probability": 0.939442157553
+        },
+        {
+          "value": 379.664209882,
+          "probability": 0.94085047947
+        },
+        {
+          "value": 383.211858331,
+          "probability": 0.942258801388
+        },
+        {
+          "value": 386.75950678,
+          "probability": 0.943667123305
+        },
+        {
+          "value": 390.307155229,
+          "probability": 0.945075445222
+        },
+        {
+          "value": 393.854803678,
+          "probability": 0.94648376714
+        },
+        {
+          "value": 397.402452127,
+          "probability": 0.947892089057
+        },
+        {
+          "value": 400.950100575,
+          "probability": 0.949300410975
+        },
+        {
+          "value": 404.497749024,
+          "probability": 0.950708732892
+        },
+        {
+          "value": 408.045397473,
+          "probability": 0.952117054809
+        },
+        {
+          "value": 411.593045922,
+          "probability": 0.953525376727
+        },
+        {
+          "value": 415.140694371,
+          "probability": 0.954933698644
+        },
+        {
+          "value": 418.68834282,
+          "probability": 0.956342020561
+        },
+        {
+          "value": 422.235991269,
+          "probability": 0.957750342479
+        },
+        {
+          "value": 425.783639718,
+          "probability": 0.959158664396
+        },
+        {
+          "value": 429.331288167,
+          "probability": 0.960566986314
+        },
+        {
+          "value": 432.878936615,
+          "probability": 0.961975308231
+        },
+        {
+          "value": 436.426585064,
+          "probability": 0.963383630148
+        },
+        {
+          "value": 439.974233513,
+          "probability": 0.964791952066
+        },
+        {
+          "value": 443.521881962,
+          "probability": 0.966200273983
+        },
+        {
+          "value": 447.069530411,
+          "probability": 0.9676085959
+        },
+        {
+          "value": 450.61717886,
+          "probability": 0.969016917818
+        },
+        {
+          "value": 454.164827309,
+          "probability": 0.970425239735
+        },
+        {
+          "value": 457.712475757,
+          "probability": 0.971833561653
+        },
+        {
+          "value": 461.260124206,
+          "probability": 0.97324188357
+        },
+        {
+          "value": 464.807772655,
+          "probability": 0.974650205487
+        },
+        {
+          "value": 468.355421104,
+          "probability": 0.976058527405
+        },
+        {
+          "value": 471.903069553,
+          "probability": 0.977466849322
+        },
+        {
+          "value": 475.450718002,
+          "probability": 0.978875171239
+        },
+        {
+          "value": 478.998366451,
+          "probability": 0.980283493157
+        },
+        {
+          "value": 482.5460149,
+          "probability": 0.981691815074
+        },
+        {
+          "value": 486.093663348,
+          "probability": 0.983100136992
+        },
+        {
+          "value": 489.641311797,
+          "probability": 0.984508458909
+        },
+        {
+          "value": 493.188960246,
+          "probability": 0.985916780826
+        },
+        {
+          "value": 496.736608695,
+          "probability": 0.987325102744
+        },
+        {
+          "value": 500.284257144,
+          "probability": 0.988733424661
+        },
+        {
+          "value": 503.831905593,
+          "probability": 0.990141746578
+        },
+        {
+          "value": 507.379554042,
+          "probability": 0.991550068496
+        },
+        {
+          "value": 510.927202491,
+          "probability": 0.992958390413
+        },
+        {
+          "value": 514.47485094,
+          "probability": 0.994366712331
+        },
+        {
+          "value": 518.022499388,
+          "probability": 0.995775034248
+        },
+        {
+          "value": 521.570147837,
+          "probability": 0.997183356165
+        },
+        {
+          "value": 525.117796286,
+          "probability": 0.998591678083
+        },
+        {
+          "value": 528.665444735,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 108.82198836,
+        "median": 108.82198836,
+        "interval80": {
+          "lower": -7.052505,
+          "upper": 276.75937091
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "claude-fable-5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/prompt.md",
+        "sha256": "31f784707c683e42c874bf6d9456d95168dfbb8ff39cca320817e44de634e1b6",
+        "bytes": 12108,
+        "createdAt": "2026-10-07T10:14:08Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/command.json",
+        "sha256": "97c106633cc6475405ec3cd8c4df08a3926802193918701dec23aa0219da7156",
+        "bytes": 199,
+        "createdAt": "2026-10-07T10:14:08Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/stdout.txt",
+        "sha256": "0cf88f8b2e87d3623a8a90d196f2c323fa537f14048291424ab2c4df9c8968ea",
+        "bytes": 10341,
+        "createdAt": "2026-10-07T10:14:08Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/stderr.txt",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "bytes": 1,
+        "createdAt": "2026-10-07T10:14:08Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/raw_response.txt",
+        "sha256": "0cf88f8b2e87d3623a8a90d196f2c323fa537f14048291424ab2c4df9c8968ea",
+        "bytes": 10341,
+        "createdAt": "2026-10-07T10:14:08Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/parsed_cells.json",
+        "sha256": "96f112eb508936bdd64b2ab4db1b822be699fef6d3ae1ff0a317184aaebb7aad",
+        "bytes": 10657,
+        "createdAt": "2026-10-07T10:14:08Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/normalized_cells.json",
+        "sha256": "c5d780cd2b37f1519e17122016b06626a7cb4a97705947f55452635e915972df",
+        "bytes": 30746,
+        "createdAt": "2026-10-07T10:14:08Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/distribution.json",
+        "sha256": "5d64658c4e1885e7298e85d699790048dae4fa120ac2d1271b55536935973b59",
+        "bytes": 16305,
+        "createdAt": "2026-10-07T10:14:08Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "experiments/sol61_shadow/runs/net/us-ondcp-hidta-al95001-obligations-fy2026__r1/validation.json",
+        "sha256": "1113794457ff93644ce491242240291d73e66ea1cd3c9a673e7b4dd886bd6fed",
+        "bytes": 142,
+        "createdAt": "2026-10-07T10:14:08Z"
+      }
+    ]
+  }
+]

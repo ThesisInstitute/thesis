@@ -1,0 +1,158 @@
+{
+  "slug": "snap-participation-june-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation, June 2026",
+  "question": "What is USDA FNS national SNAP Persons participation for June 2026, unadjusted, in the first official monthly print, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 36.352716,
+  "ciLow": 36.160638,
+  "ciHigh": 36.544794,
+  "confidence": 0.8,
+  "resolutionDate": "2026-09-18",
+  "resolutionSource": "USDA SNAP monthly participation tables and dated June 2026 report publication",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve to the national Persons total for June 2026 in the first official monthly SNAP participation print linked from the registered USDA SNAP Data Tables page. Use the unadjusted administrative count, including disaster assistance when included by USDA. Convert counts reported in thousands by multiplying by 0.001; convert full person counts by dividing by 1,000,000. Preserve source precision and express the result to six decimal places in millions. Ignore all subsequent revisions and corrections, including same-day corrections. The fetched June column is explicitly marked Initial.",
+  "dataPointId": "usda.fns.snap.persons.june_2026",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2025-10"
+      },
+      "label": "October 2025",
+      "value": 40.671594
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2025-11"
+      },
+      "label": "November 2025",
+      "value": 39.99989
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2025-12"
+      },
+      "label": "December 2025",
+      "value": 39.207898
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 38.552133
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": 37.947123
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 37.531152
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 37.108727
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 36.685024
+    }
+  ],
+  "drivers": [
+    "June initial observation already published",
+    "Declining monthly administrative participation",
+    "Historical revisions affect trend estimates",
+    "Registered release window conflicts with official publication"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-June-2026.pdf",
+    "https://www.fna.usda.gov/documents-resources-compact-view",
+    "https://fns-prod.azureedge.us/pd/overview/keydata-june26"
+  ],
+  "runAt": "2026-10-06T22:42:58Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "June SNAP participation: already published initial observation"
+    },
+    {
+      "kind": "text",
+      "text": "The target is fns.snap.total_persons, June 2026, first official monthly print. USDA already exposes the June Initial observation. This output is retrospective and unsuitable as an independent pre-release forecast. The series is unadjusted administrative Persons throughout, rather than annual quality-control statistics. HistoricalContext contains the current published historical vintage, which includes revisions; those values are not claimed to be original first prints."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "web.open and web.click: official USDA SNAP national monthly table, https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+      "result": "Persons, October 2025 through May 2026: 40,671,594; 39,999,890; 39,207,898; 38,552,133; 37,947,123; 37,531,152; 37,108,727; 36,685,024. June 2026: 36,352,716. Table data cutoff: September 11, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "web.click: official USDA state participation table, https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+      "result": "The June 2026 column is explicitly Initial. National TOTAL: June 2026 36,352,716; May 2026 preliminary 36,685,024; June 2025 41,678,341. Published June changes are -0.9% monthly and -12.8% annually."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "web.open: prior official USDA snapshot, https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+      "result": "May 2026 Initial national TOTAL was 36,562,128 in the August 14, 2026 data vintage. Its subsequently published preliminary value is 36,685,024, an upward revision of 122,896 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "web.click: June Keydata PDF; web.search: official dated USDA publication listing at https://www.fna.usda.gov/documents-resources-compact-view",
+      "result": "June Keydata Table 2 independently reports June Persons 36,352,716 and May Persons 36,685,024. USDA's dated publication listing records both June Keydata and June Performance reports on September 18, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "The official dated June publication supports resolutionDate September 18, 2026, contradicting the registered October 26–November 3 window. The exact earliest posting of the separate SNAP table was not independently established; September 11 is its data cutoff. This discrepancy leaves the target series, period, slug and first-print policy unchanged. The registered FNS page returned an access error, so evidence was fetched through USDA's linked CDN and official FNA publication listings. The fetched tables report full persons, so their conversion is division by 1,000,000; the registered 0.001 factor applies only to thousands."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is the eight-month October–May reference class. All seven successive changes are negative, averaging -0.569510 million. The latest three average -0.420700 million, supporting a slowing-decline trend prior before incorporating the already observed June print."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use May-level persistence plus the latest-three-change mean as the trend prior, with October–May history cross-checked against Keydata Table 2. Level = 36.685024 million; momentum = -0.420699667 million; additional one-off and policy adjustments = 0. Prior = 36.264324333; the observed June Initial print updates it by +0.088391667 to 36.352716. Across seven successive changes, sigma = 0.150061061 million, using sample standard deviation. The normal-reference half-width is 1.28*sigma = 0.192078158 million, yielding bounds 36.160638–36.544794. This required nondegenerate interval represents historical predictive dispersion, not calibrated remaining uncertainty about an already observed first print."
+    },
+    {
+      "kind": "math",
+      "text": "Changes in millions: [-0.671704, -0.791992, -0.655765, -0.605010, -0.415971, -0.422425, -0.423703]. Mean = -0.569510. sigma = sqrt(sum((change - mean)^2)/6) = 0.150061061. Point = 36,352,716/1,000,000 = 36.352716. Bounds = point +/- 1.28*0.150061061 = [36.160637842, 36.544794158], rounded to six decimals."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is discovery of an earlier authentic first print above 36.544794 million; the downside risk is an earlier authentic first print below 36.160638 million. Either would land outside the interval and invalidate the current initial-vintage identification. Future enrollment changes or later revisions cannot alter the strict first-print outcome."
+    },
+    {
+      "kind": "forecast",
+      "point": 36.352716,
+      "ciLow": 36.160638,
+      "ciHigh": 36.544794
+    }
+  ]
+}

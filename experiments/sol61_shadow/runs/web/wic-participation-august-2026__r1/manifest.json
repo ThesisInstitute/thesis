@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:28Z",
+  "runStartedAt": "2026-10-07T10:13:28Z",
+  "series": "fns.wic.total_participation",
+  "period": "2026-08",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "wic-participation-august-2026",
+    "country": "US",
+    "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-11-26",
+      "start": "2026-11-18"
+    },
+    "period": "2026-08",
+    "registeredAt": "2026-08-11T12:50:27Z",
+    "registeredAtUtc": "2026-08-11T12:50:27Z",
+    "registrationCommit": "e8c13ea71f583ab7105a64de5fe4c8594cfcb6d0",
+    "registrationState": "preregistered",
+    "series": "fns.wic.total_participation",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.fns.usda.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-26",
+        "start": "2026-11-18"
+      },
+      "field": "fns.wic.total_participation",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "fns.wic.total_participation",
+      "sourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+      "table": "USDA Food and Nutrition Service WIC Data Tables",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "feba7a565069c13feaf303a049c80f5809cbf7568d04215f7350943843d58995",
+    "targetRegistrationPath": "records/targets/2026-08-11-feba7a565069c13feaf303a049c80f5809cbf7568d04215f7350943843d58995.json",
+    "targetUnit": "millions",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "e8c13ea71f583ab7105a64de5fe4c8594cfcb6d0",
+  "targetContentHash": "feba7a565069c13feaf303a049c80f5809cbf7568d04215f7350943843d58995",
+  "targetRegistrationPath": "records/targets/2026-08-11-feba7a565069c13feaf303a049c80f5809cbf7568d04215f7350943843d58995.json",
+  "registeredAtUtc": "2026-08-11T12:50:27Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/prompt.md",
+      "sha256": "8565f2be08b772231b6a35cdcca7548d93bd3aeb1d2c982703f4c12e015d12ac",
+      "bytes": 10589,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/command.json",
+      "sha256": "0d1145b0e6647fda8cacd8fb9a6a362d3a98645056abe458812cd51a426486e2",
+      "bytes": 187,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/stdout.txt",
+      "sha256": "2057843efe65388838fff71d050c78f79233c66862c6c712cf9eab00f088dc27",
+      "bytes": 10566,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/raw_response.txt",
+      "sha256": "2057843efe65388838fff71d050c78f79233c66862c6c712cf9eab00f088dc27",
+      "bytes": 10566,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/parsed_cells.json",
+      "sha256": "bcec3164c99e3a5dd8daa1fce6cc2778ee43bb799a42abdbf23f705df24c745d",
+      "bytes": 11380,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/normalized_cells.json",
+      "sha256": "b981dc707591d53999d03073604efd7ec9aa5382f481b68cefa517c3d560d7a4",
+      "bytes": 29535,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/distribution.json",
+      "sha256": "b3dcd3f3c55fe7f2facd290f9bf832fcd7ae1fd5fba784bb7fbcec1cc7deb4d3",
+      "bytes": 14371,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/error.json",
+      "sha256": "cc033aa00d699af30f2710a5b5f80a916f33993693044a2db6a9518f642ff4e8",
+      "bytes": 115,
+      "createdAt": "2026-10-07T10:13:28Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-august-2026__r1/manifest.json",
+      "sha256": "f978de837a71464730a4aec834239b08266ff4ca4782bae2b72bdaa7a2f45ef9",
+      "bytes": 4655,
+      "createdAt": "2026-10-07T10:13:28Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "validate",
+    "message": "TypeError: strptime() argument 1 must be str, not None",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "f9ddda62061d269a32847b5483ed438eb604e077e53dd4b7e567be9e4f2cb8d7"
+}

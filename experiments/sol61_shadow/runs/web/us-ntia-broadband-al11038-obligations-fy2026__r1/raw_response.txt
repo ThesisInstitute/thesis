@@ -1,0 +1,66 @@
+{
+  "status": "refused",
+  "slug": "us-ntia-broadband-al11038-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "NTIA broadband obligations FY2026",
+  "question": "What will the registered USAspending query snapshot report for FY2026 financial-assistance transaction obligations under Assistance Listing 11.038, in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the first official registered query snapshot under the supplied target contract: POST to the specified endpoint, filter financial-assistance transactions to Assistance Listing 11.038 and award types 02 through 11, group by fiscal year, select FY2026 aggregated_amount, and multiply by 0.000001. Preserve the returned precision after conversion and exclude subsequent revisions. The snapshot date could not be verified from an official schedule in this run.",
+  "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-06T21:51:48Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: mandatory registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the supplied Assistance Listing 11.038 transaction query for FY2026. Agency totals and published broadband summaries cannot substitute for this series."
+    },
+    {
+      "kind": "text",
+      "text": "Official documentation fetched at https://api.usaspending.gov/docs/endpoints lists /api/v2/search/spending_over_time/ as a POST endpoint for transaction aggregated amounts."
+    },
+    {
+      "kind": "text",
+      "text": "Opening https://api.usaspending.gov/api/v2/search/spending_over_time/ with the web tool returned: Failed to fetch https://api.usaspending.gov/api/v2/search/spending_over_time/: (405) Method Not Allowed. An earlier web request also failed with: Fatal error: connection failed: error sending request."
+    },
+    {
+      "kind": "text",
+      "text": "The available web tools provide no HTTP method or request-body parameters, so the required POST query could not be submitted. This was an unsuccessful endpoint access attempt, not execution of the registered query."
+    },
+    {
+      "kind": "text",
+      "text": "No canonical historical obligation values were fetched. The mandatory reference class and base rate therefore cannot be established. The empty historicalContext records unavailable evidence and does not claim that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical dispersion, adjustment components, sigma, point estimate, or implied interval bounds can be calculated from fetched exact-series history. Supplying numerical estimates would fabricate the required evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Official reporting documentation and submission-period information were fetched, but no official announcement verified a registered snapshot date within the supplied release window. Reporting cadence alone does not establish resolutionDate."
+    },
+    {
+      "kind": "text",
+      "text": "The prompt requires refusal when the registered query cannot be executed. Null estimates and resolutionDate explicitly denote withheld outputs. No valid forecast, numerical tool-result steps, or 80% interval is asserted."
+    }
+  ]
+}

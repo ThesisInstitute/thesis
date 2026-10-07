@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:18Z",
+  "runStartedAt": "2026-10-07T10:13:18Z",
+  "sealedAt": "2026-10-07T10:13:18Z",
+  "series": "bea.core_pce.mom",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-core-pce-mom-september-2026",
+    "country": "US",
+    "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+    "expectedReleaseWindow": {
+      "end": "2026-11-03",
+      "start": "2026-10-26"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-04T19:02:52Z",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "registrationState": "preregistered",
+    "series": "bea.core_pce.mom",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.bea.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-03",
+        "start": "2026-10-26"
+      },
+      "field": "bea.core_pce.mom",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "bea.core_pce.mom",
+      "sourceUrl": "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+      "table": "U.S. Bureau of Economic Analysis, Personal Income and Outlays, August 2026",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558",
+    "targetRegistrationPath": "records/targets/2026-09-04-3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "targetContentHash": "3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558",
+  "targetRegistrationPath": "records/targets/2026-09-04-3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558.json",
+  "registeredAtUtc": "2026-09-04T19:02:52Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/prompt.md",
+      "sha256": "5654a55b251f2fd6565c1c87bd85beed10823d6914ebc0e6206282de6658c3b3",
+      "bytes": 10600,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/command.json",
+      "sha256": "7f75a97d6943bd49548314111c5f54008415b15082705d0f82b6c92b9cfe0039",
+      "bytes": 188,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/stdout.txt",
+      "sha256": "91d1d466f1376781b9116147c47349a7e82760eb4b1eb4092a50adad7769cf96",
+      "bytes": 9199,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/raw_response.txt",
+      "sha256": "91d1d466f1376781b9116147c47349a7e82760eb4b1eb4092a50adad7769cf96",
+      "bytes": 9199,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/parsed_cells.json",
+      "sha256": "efa3f781d118b7290f1a6167180d6dc8ab93cb36f82e1ddb1249df84be260db2",
+      "bytes": 9739,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/normalized_cells.json",
+      "sha256": "a9c9fd027aa3d093196833cc1f25290a3850be563ab5db76274aa98a7ef50c7f",
+      "bytes": 27169,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/distribution.json",
+      "sha256": "85157e9df2ff9cc27a48c65f27aaef7e5378ecb99e31a4be42e079312fac72e4",
+      "bytes": 13646,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/validation.json",
+      "sha256": "9d5cad01c9a5a0abc18120278cbd11b5b823488ed43eab9ef8d504ec2cb19c52",
+      "bytes": 131,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/cells.with_activity.json",
+      "sha256": "29c534885b084cc5891d7777b649a42d5131bf56775813f60ac1f3d494fcdab9",
+      "bytes": 30031,
+      "createdAt": "2026-10-07T10:13:18Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/us-core-pce-mom-september-2026__r1/manifest.json",
+      "sha256": "dc78dfe89f34afb22f5381a1cc54cb0f558d5d962ca3db7762cc7ac84bba8ff8",
+      "bytes": 5079,
+      "createdAt": "2026-10-07T10:13:18Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "us-core-pce-mom-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "cdbf6982e1e3e291180e121c6ab7999ff57b34c4eafeacfcf545dd1f9c97afa1"
+}

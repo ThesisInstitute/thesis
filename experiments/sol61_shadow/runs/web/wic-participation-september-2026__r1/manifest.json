@@ -1,0 +1,169 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:01Z",
+  "runStartedAt": "2026-10-07T10:14:01Z",
+  "sealedAt": "2026-10-07T10:14:01Z",
+  "series": "fns.wic.total_participation",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "wic-participation-september-2026",
+    "country": "US",
+    "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-12-30",
+      "start": "2026-12-22"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-07T20:04:45Z",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "registrationState": "preregistered",
+    "series": "fns.wic.total_participation",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.fns.usda.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-12-30",
+        "start": "2026-12-22"
+      },
+      "field": "fns.wic.total_participation",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "fns.wic.total_participation",
+      "sourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+      "table": "USDA Food and Nutrition Service WIC Data Tables",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "6fab8f5c1804406df2cf90f0e713350509f672a7c5a08d03939b11cdc2ffb88c",
+    "targetRegistrationPath": "records/targets/2026-09-07-6fab8f5c1804406df2cf90f0e713350509f672a7c5a08d03939b11cdc2ffb88c.json",
+    "targetUnit": "millions",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+  "targetContentHash": "6fab8f5c1804406df2cf90f0e713350509f672a7c5a08d03939b11cdc2ffb88c",
+  "targetRegistrationPath": "records/targets/2026-09-07-6fab8f5c1804406df2cf90f0e713350509f672a7c5a08d03939b11cdc2ffb88c.json",
+  "registeredAtUtc": "2026-09-07T20:04:45Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": false,
+  "cellsPath": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/prompt.md",
+      "sha256": "673b766e2193576eae5baac9c09d1aaba79255c7deef5554990b1d659cac0564",
+      "bytes": 10592,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/command.json",
+      "sha256": "423d647e5d5f852fd4bb21daea49c81eeebd0aa9ef86276d68d0e628d0bf4d78",
+      "bytes": 190,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/stdout.txt",
+      "sha256": "c7a3441c12f6c57609ccbb8e1ae115048d66209bb783db69a051e2ba03af1463",
+      "bytes": 8737,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/raw_response.txt",
+      "sha256": "c7a3441c12f6c57609ccbb8e1ae115048d66209bb783db69a051e2ba03af1463",
+      "bytes": 8737,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/parsed_cells.json",
+      "sha256": "57d34a427f73e75d0ca6d9e66a957d00438b2539af17bb3ef97994e1dc426348",
+      "bytes": 9181,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/normalized_cells.json",
+      "sha256": "e30e1dcffe41ac59ea9c7458fd7ac94a8cee71bc1960e20ce36574d57ba2d5e3",
+      "bytes": 27204,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/distribution.json",
+      "sha256": "da472e57f3cb3d0594edae231f36c78dcbf2615684a4dedc5530843e94a6c591",
+      "bytes": 14239,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/validation.json",
+      "sha256": "03459a7c9902fafcf882b586fa1f2243a39d9eb20f124e31a0e08b00de1573b6",
+      "bytes": 216,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/cells.with_activity.json",
+      "sha256": "0bb997ffcf9aca0f737ab0638c3fb218ef981ab74e5d10df6588572535fdc35b",
+      "bytes": 30084,
+      "createdAt": "2026-10-07T10:14:01Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/wic-participation-september-2026__r1/manifest.json",
+      "sha256": "f7c7957a64427732c9e861923e33f104d68478db5c36bad0415f8fdb74bf042d",
+      "bytes": 5157,
+      "createdAt": "2026-10-07T10:14:01Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": false,
+    "cells": [
+      {
+        "slug": "wic-participation-september-2026",
+        "ok": false,
+        "errors": [
+          "math step does not show interval derivation (sigma = X or 1.28)"
+        ]
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "a2ca7d60d69a1632843de554885fd8490ccbd2d71a738dc6aaf3c96ccc9cad1a"
+}

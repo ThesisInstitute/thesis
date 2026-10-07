@@ -1,0 +1,169 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:29Z",
+  "runStartedAt": "2026-10-07T10:13:29Z",
+  "sealedAt": "2026-10-07T10:13:29Z",
+  "series": "statcan.gdp_by_industry.monthly_growth",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "canada-monthly-gdp-growth-september-2026",
+    "country": "CA",
+    "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_09.first_print",
+    "expectedReleaseDate": "2026-11-30",
+    "expectedReleaseWindow": {
+      "end": "2026-11-30",
+      "start": "2026-11-30"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-07T20:04:45Z",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "series": "statcan.gdp_by_industry.monthly_growth",
+    "sourceBinding": {
+      "adapter": "statcan-wds",
+      "allowedHosts": [
+        "www150.statcan.gc.ca"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-30",
+        "start": "2026-11-30"
+      },
+      "field": "v65201210",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "v65201210",
+      "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+      "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+      "transform": {
+        "factor": 1,
+        "operation": "percent_change_previous_period"
+      }
+    },
+    "targetContentHash": "5e66b8f80f1cc6a1847b0462471dc202581372c8d08b343f174d5679b35c89ba",
+    "targetRegistrationPath": "records/targets/2026-09-07-5e66b8f80f1cc6a1847b0462471dc202581372c8d08b343f174d5679b35c89ba.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+  "targetContentHash": "5e66b8f80f1cc6a1847b0462471dc202581372c8d08b343f174d5679b35c89ba",
+  "targetRegistrationPath": "records/targets/2026-09-07-5e66b8f80f1cc6a1847b0462471dc202581372c8d08b343f174d5679b35c89ba.json",
+  "registeredAtUtc": "2026-09-07T20:04:45Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/prompt.md",
+      "sha256": "6a29f59a2bfcb9d699b2ea6dc8f8dc11ca6a2e108b76dea8e11eb582ee8a801b",
+      "bytes": 10555,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/command.json",
+      "sha256": "ef90b429d87790c895822157dec3e7a4da558fca505be7d48d0ddc48a2cc2b48",
+      "bytes": 198,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/stdout.txt",
+      "sha256": "e6a9e181423e5f0d7b42f453d92c3026742dd209703abdefee72e6d69aa7da97",
+      "bytes": 9198,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/raw_response.txt",
+      "sha256": "e6a9e181423e5f0d7b42f453d92c3026742dd209703abdefee72e6d69aa7da97",
+      "bytes": 9198,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/parsed_cells.json",
+      "sha256": "d7584c97303dc16c9d28adcb9ccb5f018f933594336f358e5c7a1f58705bcf18",
+      "bytes": 9696,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/normalized_cells.json",
+      "sha256": "e72dc8d4f0f3f7724ae9440d233e5517497c9472d592450f3c96375f7dfe2553",
+      "bytes": 27100,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/distribution.json",
+      "sha256": "ec6ff66ac43346e4625d50ed04213351c4905895118834be07debec82fe4c209",
+      "bytes": 13620,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/validation.json",
+      "sha256": "4d93fabfae5859d983d01e567cc80da45ef567cc65f657aaaee3e400799a568b",
+      "bytes": 141,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/cells.with_activity.json",
+      "sha256": "1180eb1c6f2a05c6d35d9c6d23019bf2c9f0d229893c66f7245666b6c0a7cdcc",
+      "bytes": 30050,
+      "createdAt": "2026-10-07T10:13:29Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/canada-monthly-gdp-growth-september-2026__r1/manifest.json",
+      "sha256": "f83dbd4d4c0a2fb2c183c2a91a5d844e6eee3ea67760290470c589c8cad201e5",
+      "bytes": 5420,
+      "createdAt": "2026-10-07T10:13:29Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "canada-monthly-gdp-growth-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "7ee588e84072b15376d8d2407462340043e50232127971cd3e1a78f15151562b"
+}

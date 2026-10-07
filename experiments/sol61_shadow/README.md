@@ -78,6 +78,19 @@ after the pilot leave out the four such targets (the CRP and SPM conditional
 pairs), leaving 67 targets. The pilot run stays in `results.json` as an
 ineligible record.
 
+**Runs a network outage stopped.** Wave 1 started at 21:48Z on 2026-10-06,
+just before the host lost its network for most of the night. Sol hit
+"connection failed" on official sources and, as the production prompt
+requires, stopped with a null forecast. A run that returned a null
+`pointEstimate` *and* shows a transport error in its response or trace
+(`shadow.py:transport_stopped`) is re-dispatched (`outage-retry`). When the
+retry is collected, the stopped run's response, trace and validation
+directory move to `superseded/` and stay listed under the retry's
+`supersededJobs`. Runs that forecast anyway, or stopped for another reason,
+keep their result. In wave 1 this re-ran 50 runs (15 `web`, 35 `net`) and
+kept 6 null stops with no transport error. The six jobs that never started
+for the same reason were re-dispatched as well.
+
 **Network-arm validation.** The runner refuses `--codex-network` outside a
 live Codex run, and the flag changes only the prompt text and the Codex
 invocation. `net` responses are therefore validated without it, so the

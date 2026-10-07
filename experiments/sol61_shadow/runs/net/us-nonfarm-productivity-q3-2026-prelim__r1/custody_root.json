@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "prompt.md",
+      "bytes": 10451,
+      "sha256": "7b8587fd069f4fd34514807518f5242a01c4e662632615acb3eb52cc9e43e935"
+    },
+    {
+      "artifactType": "command",
+      "path": "command.json",
+      "bytes": 196,
+      "sha256": "87f69c6f7d9a24d341f02556981931c84ad8b2a7d04c8a49690b3b8420e9d3cc",
+      "canonicalJsonSha256": "b04c580bd37b47c098e2f90d0000412bd7a54036abadae31d7d0de6acf7ce0ce"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "stdout.txt",
+      "bytes": 9690,
+      "sha256": "fde472bc78b486901ea4991b923572aead29198c4b300dd8f785b91780756d90"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "stderr.txt",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "raw_response.txt",
+      "bytes": 9690,
+      "sha256": "fde472bc78b486901ea4991b923572aead29198c4b300dd8f785b91780756d90"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "parsed_cells.json",
+      "bytes": 10242,
+      "sha256": "1aaae5d4e9da8f8a3d2d3e8f93e829c075385e8c8e5884510ea74d54ea1e3369",
+      "canonicalJsonSha256": "95ff1487ce95f15404522c475dfb29d21d98177e84af879d80e813c1773e7565"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "normalized_cells.json",
+      "bytes": 28765,
+      "sha256": "a86e6e20f732f10bfe527196b84ef7b3de01119634d7363b590f06fcfe34e55e",
+      "canonicalJsonSha256": "d47d72bf0ccf7ebf44b39e4dd261ebd626ba8cc987fcfece1ad548423dfe583e"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "distribution.json",
+      "bytes": 14856,
+      "sha256": "2359e49aa3d9c2b1f78875ccfdbd2841129d75cf883cd21b6fb743ba1c3ce9d6",
+      "canonicalJsonSha256": "b8f011d23feed039c254c3e7d671e9b8b085c4a1be3c9bc75d35f21152c5b828"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "validation.json",
+      "bytes": 139,
+      "sha256": "33ad3f275d222f754371c616e831fce66beea05835e3fd46fed4cb90b2c73c9e",
+      "canonicalJsonSha256": "465c853ce9cd7967b1dd8ed3c174a510558e1606c6ef9789002e70123db0b673"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "cells.with_activity.json",
+      "bytes": 31700,
+      "sha256": "2455ac1dea302dfc57ae12f7c7ad72468ac144d3af65f56fb465c3a4c436e14f",
+      "canonicalJsonSha256": "0ee1eaa1267c727611dfe2dbe105d5dbf7858337d80a4bda26288b5f1686aff7"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "1a82728717822e8abef01ac8bfb701a0deb26214654f17302dee49951aa8ab3e"
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:12:49Z",
+  "runStartedAt": "2026-10-07T10:12:49Z",
+  "sealedAt": "2026-10-07T10:12:49Z",
+  "series": "statcan.employment_insurance.regular_beneficiaries",
+  "period": "2026-08",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "canada-ei-regular-beneficiaries-august-2026",
+    "country": "CA",
+    "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.august_2026.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-21",
+      "start": "2026-10-13"
+    },
+    "period": "2026-08",
+    "registeredAt": "2026-08-12T21:16:44Z",
+    "registeredAtUtc": "2026-08-12T21:16:44Z",
+    "registrationCommit": "d50ffb7c957ea27fad25c6e0c6fee0aa2471bc84",
+    "registrationState": "preregistered",
+    "series": "statcan.employment_insurance.regular_beneficiaries",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www150.statcan.gc.ca"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-21",
+        "start": "2026-10-13"
+      },
+      "field": "v64549350",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "v64549350",
+      "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+      "table": "Statistics Canada Table 14-10-0011-01, EI regular beneficiaries, Canada, seasonally adjusted (persons)",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae",
+    "targetRegistrationPath": "records/targets/2026-08-12-344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae.json",
+    "targetUnit": "thousands",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "d50ffb7c957ea27fad25c6e0c6fee0aa2471bc84",
+  "targetContentHash": "344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae",
+  "targetRegistrationPath": "records/targets/2026-08-12-344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae.json",
+  "registeredAtUtc": "2026-08-12T21:16:44Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/prompt.md",
+      "sha256": "926610a564bf2010bf9c88b47bce823a9e0e2fb6a07e94c0cfcb8434e9af4992",
+      "bytes": 10600,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/command.json",
+      "sha256": "506c5d061ecb5b79f8423dd30f8933df6860ad369a30c238dfe264972615f8a8",
+      "bytes": 201,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/stdout.txt",
+      "sha256": "b4b48ef61cc0165af2ca0316b6be675f950552854731f42a6f0c39af1c8fcb5f",
+      "bytes": 9578,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/raw_response.txt",
+      "sha256": "b4b48ef61cc0165af2ca0316b6be675f950552854731f42a6f0c39af1c8fcb5f",
+      "bytes": 9578,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/parsed_cells.json",
+      "sha256": "05352183e0ab7c4db532e0d7445b7ca8654631c4bf18ead5baa24e6c42f94be8",
+      "bytes": 10101,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/normalized_cells.json",
+      "sha256": "fcc37f48a3eafc43c7ab335dc172f70b96739fd0976dc18c4456d769b3f90c1a",
+      "bytes": 27977,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/distribution.json",
+      "sha256": "e7813bdf84179567fcf8a707b6867bbba5b042065b50e9cfdb1c185a11fe319f",
+      "bytes": 14092,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/validation.json",
+      "sha256": "9066c6418d942ca169f2fc0ad72aed97c6b65ba021cbccd75bf1ef252032dfa5",
+      "bytes": 144,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/cells.with_activity.json",
+      "sha256": "e9d4a531b6879709e68de707532ef40b5bcfa2fcfd8b94f9d9d223d481c40268",
+      "bytes": 30955,
+      "createdAt": "2026-10-07T10:12:49Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__r1/manifest.json",
+      "sha256": "1da91f6c03a6f5df2dde21537ba462dcc347c294b2bc226a0c5ad0728783d0f0",
+      "bytes": 5397,
+      "createdAt": "2026-10-07T10:12:49Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "canada-ei-regular-beneficiaries-august-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "89ac473b2e43be3ec91d936bd9f1f6c385581d1dab29a32c25e31f53a0b2cf72"
+}

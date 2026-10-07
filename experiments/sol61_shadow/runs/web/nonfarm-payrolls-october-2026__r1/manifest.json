@@ -1,0 +1,169 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:13Z",
+  "runStartedAt": "2026-10-07T10:13:13Z",
+  "sealedAt": "2026-10-07T10:13:13Z",
+  "series": "bls.ces.nonfarm_payrolls.change",
+  "period": "2026-10",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "nonfarm-payrolls-october-2026",
+    "country": "US",
+    "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+    "expectedReleaseDate": "2026-11-06",
+    "expectedReleaseWindow": {
+      "end": "2026-11-06",
+      "start": "2026-11-06"
+    },
+    "period": "2026-10",
+    "registeredAt": "2026-10-02T20:51:43Z",
+    "registeredAtUtc": "2026-10-02T20:51:43Z",
+    "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+    "series": "bls.ces.nonfarm_payrolls.change",
+    "sourceBinding": {
+      "adapter": "bls-api",
+      "allowedHosts": [
+        "api.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-06",
+        "start": "2026-11-06"
+      },
+      "field": "value",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "CES0000000001",
+      "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+      "table": "Current Employment Statistics, all employees, total nonfarm, seasonally adjusted (Employment Situation, Table B-1)",
+      "transform": {
+        "factor": 1,
+        "operation": "difference_previous_period"
+      }
+    },
+    "targetContentHash": "63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945",
+    "targetRegistrationPath": "records/targets/2026-10-02-63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945.json",
+    "targetUnit": "thousands",
+    "valueScale": 1
+  },
+  "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+  "targetContentHash": "63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945",
+  "targetRegistrationPath": "records/targets/2026-10-02-63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945.json",
+  "registeredAtUtc": "2026-10-02T20:51:43Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/prompt.md",
+      "sha256": "a9b1f3b97ab93795e40a9f4c30db64f7caa91acc629ac3389baa5b76296c954c",
+      "bytes": 10636,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/command.json",
+      "sha256": "b7047cfecf523cc7162a7129cb255b837db10426001d647d040b403f933f8137",
+      "bytes": 187,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/stdout.txt",
+      "sha256": "6ce0e3840ea154639ba725092c53e3589168474a4178921f3118d7a1e9d7571b",
+      "bytes": 8507,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/raw_response.txt",
+      "sha256": "6ce0e3840ea154639ba725092c53e3589168474a4178921f3118d7a1e9d7571b",
+      "bytes": 8507,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/parsed_cells.json",
+      "sha256": "0d7cb026fb91f96be70f143a211609a1deb9d189026ecfee5705f9f4490099ed",
+      "bytes": 8951,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/normalized_cells.json",
+      "sha256": "9372a57f5adcbaa88b51b853b740ef81af13f78ad88d1366dca26415c63da41e",
+      "bytes": 26186,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/distribution.json",
+      "sha256": "cbec32d64ec2febdc708a04b404d9f719436e24055ac4761fef746fbbe9d3e53",
+      "bytes": 13451,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/validation.json",
+      "sha256": "6db12c3513188bf979fa12b65fed8487da33fd6c8a6766c40baa8213a8a9fe36",
+      "bytes": 130,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/cells.with_activity.json",
+      "sha256": "f55a414b372f2387a9bf383169ecf90a9380d3611dd6d3e54e01ad292c971363",
+      "bytes": 29039,
+      "createdAt": "2026-10-07T10:13:13Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/nonfarm-payrolls-october-2026__r1/manifest.json",
+      "sha256": "5c25f2c8592f23ab22f1ddf9a782ab70c7abdc6f2a7ae90d1b677123b2d957c5",
+      "bytes": 5229,
+      "createdAt": "2026-10-07T10:13:13Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "nonfarm-payrolls-october-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "a75d014db4113e50f03fca4384ec8b098f9a7dc7cdb748800b02d0617b8406a4"
+}

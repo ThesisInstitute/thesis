@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:25Z",
+  "runStartedAt": "2026-10-07T10:13:25Z",
+  "sealedAt": "2026-10-07T10:13:26Z",
+  "series": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim",
+  "period": "2026-Q3",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-unit-labor-costs-q3-2026-prelim",
+    "country": "US",
+    "dataPointId": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print",
+    "period": "2026-Q3",
+    "registeredAt": "2026-07-31T18:02:17Z",
+    "registeredAtUtc": "2026-07-31T18:02:17Z",
+    "registrationCommit": "7ecbc85cc4110060218f856d50321ab93db3af3b",
+    "registrationState": "preregistered",
+    "series": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim",
+    "sourceBinding": {
+      "adapter": "alfred-fred",
+      "allowedHosts": [
+        "alfred.stlouisfed.org"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-13",
+        "start": "2026-10-30"
+      },
+      "field": "PRS85006112",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "PRS85006112",
+      "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PRS85006112",
+      "table": "Productivity and Costs, nonfarm business sector",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "5acb920aa1125b4d971bd7b22bdf4bd31f9a5ede261d0e7074400403a66e4391",
+    "targetRegistrationPath": "records/targets/2026-07-31-5acb920aa1125b4d971bd7b22bdf4bd31f9a5ede261d0e7074400403a66e4391.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "7ecbc85cc4110060218f856d50321ab93db3af3b",
+  "targetContentHash": "5acb920aa1125b4d971bd7b22bdf4bd31f9a5ede261d0e7074400403a66e4391",
+  "targetRegistrationPath": "records/targets/2026-07-31-5acb920aa1125b4d971bd7b22bdf4bd31f9a5ede261d0e7074400403a66e4391.json",
+  "registeredAtUtc": "2026-07-31T18:02:17Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": false,
+  "cellsPath": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/prompt.md",
+      "sha256": "bc91ba711c1113c6551386b51ae3b123a0431033a204e08fa02d235f92491106",
+      "bytes": 10555,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/command.json",
+      "sha256": "ecadb0d94e5077adbf36e82dcaab4251448e4f523631179342c26f734b9aee87",
+      "bytes": 192,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/stdout.txt",
+      "sha256": "66b04b4c7451eb33dfaf377a54b40771641e7997df391094f23bcb55eb0d063b",
+      "bytes": 9321,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/raw_response.txt",
+      "sha256": "66b04b4c7451eb33dfaf377a54b40771641e7997df391094f23bcb55eb0d063b",
+      "bytes": 9321,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/parsed_cells.json",
+      "sha256": "2de00df4dcba9f56567e9611eca2f0fe9fb0a09d6fb7a17f9480770f821ab6b4",
+      "bytes": 9853,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/normalized_cells.json",
+      "sha256": "549afb6783dbecf49b4addc5ee5f94fd03037a564e4ac16641246f62e5d82f64",
+      "bytes": 27222,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/distribution.json",
+      "sha256": "edc1c742c46a46c0cc7f11277fa869a869a33aa7f9702499fe88181115c55da0",
+      "bytes": 13585,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/validation.json",
+      "sha256": "fc878f5c362d1196860cc23e5af563082f72fcd8840cfcb279070df483ee004f",
+      "bytes": 346,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/cells.with_activity.json",
+      "sha256": "e9518aad25cf10fc7fa645695f306d771004f06e1236513c66f69a8c5d03e375",
+      "bytes": 30118,
+      "createdAt": "2026-10-07T10:13:25Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/us-unit-labor-costs-q3-2026-prelim__r1/manifest.json",
+      "sha256": "7db03d74be6ddf47bf82675f75dc84f25be0f7a4030ec70fe6f8ddf572874814",
+      "bytes": 5309,
+      "createdAt": "2026-10-07T10:13:25Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": false,
+    "cells": [
+      {
+        "slug": "us-unit-labor-costs-q3-2026-prelim",
+        "ok": false,
+        "errors": [
+          "math step does not show interval derivation (sigma = X or 1.28)",
+          "resolutionSourceUrl host 'www.bls.gov' is not among the preregistered source binding hosts ['alfred.stlouisfed.org']"
+        ]
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "563011a0d9a60d2b34a2b86ded7baf6aaaf158aed86340289f6aabcff0d5754e"
+}

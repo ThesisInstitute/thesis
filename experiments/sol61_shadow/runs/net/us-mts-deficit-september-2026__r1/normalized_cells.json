@@ -1,0 +1,45 @@
+[
+ {
+  "slug": "us-mts-deficit-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US federal deficit, September 2026",
+  "question": "What will September 2026's monthly US federal deficit be in the first official Monthly Treasury Statement Table 1 print, in billions of nominal dollars?",
+  "unit": "usd_billions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "US Treasury Monthly Treasury Statement, Table 1",
+  "resolutionSourceUrl": "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+  "resolutionRule": "Resolve using the September 2026 monthly deficit/surplus in the first official Monthly Treasury Statement Table 1 print, expressed in usd_billions. Preserve the first-print value; exclude subsequent revisions.",
+  "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+   "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+   "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1?filter=record_date:gte:2025-01-01&sort=-record_date&page[size]=100",
+   "https://fiscal.treasury.gov/reports-statements/mts/"
+  ],
+  "runAt": "2026-10-06T22:16:13Z",
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Forecast unavailable: official evidence fetch failed"
+   },
+   {
+    "kind": "text",
+    "text": "The Fiscal Data series-page request failed with a network error. The history API request failed because curl rejected the unescaped bracketed pagination parameter. No historical statistics were fetched."
+   },
+   {
+    "kind": "text",
+    "text": "The independent official release-schedule lookup also failed: web access returned a network error, and the Treasury MTS page fetch produced an HTTP2 error followed by an empty response. The resolution date remains unverified."
+   },
+   {
+    "kind": "text",
+    "text": "Following the instruction to stop after failed evidence fetches, this run produces no forecast. Null estimates and empty history indicate unavailable evidence; no remembered values, inferred release date, or fabricated interval were substituted."
+   }
+  ]
+ }
+]

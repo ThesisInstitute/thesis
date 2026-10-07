@@ -1,0 +1,69 @@
+[
+  {
+    "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+    "country": "US",
+    "type": "data",
+    "title": "FY2026 DoD small-business contract obligation share",
+    "question": "What percentage of FY2026 Department of Defense prime-contract transaction obligations goes to small-business recipients in the first official registered-query snapshot from USAspending?",
+    "unit": "percent",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": null,
+    "resolutionSource": "USAspending API registered-query snapshot",
+    "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "resolutionRule": "Use the registered POST query for FY2026, awarding toptier agency Department of Defense, award types A/B/C/D, transaction spending, and fiscal-year grouping. Apply the registered ratio_percent operation to small_business obligations divided by obligations without recipient-type restrictions. Resolve on the registered official snapshot; later revisions do not replace it. The snapshot date and rounding precision could not be independently verified.",
+    "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+    "historicalContext": [],
+    "drivers": [],
+    "sourceContext": [
+      "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "https://api.usaspending.gov/docs/endpoints",
+      "https://api.usaspending.gov/docs/intro-tutorial",
+      "https://www.usaspending.gov/data/data-sources-download.pdf",
+      "https://www.usaspending.gov/data/about-the-data-download.pdf"
+    ],
+    "runAt": "2026-10-06T22:11:18Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast refused: required historical query could not be executed"
+      },
+      {
+        "kind": "text",
+        "text": "The target is the supplied registered-query snapshot series usaspending.search.spending_over_time.dod.contracts.small_business_obligation_share. Its history must come from executing that exact query for prior fiscal years."
+      },
+      {
+        "kind": "text",
+        "text": "Fetch evidence: opening https://api.usaspending.gov/api/v2/search/spending_over_time/ through the web tool returned '(405) Method Not Allowed'. No obligation amounts or historical shares were returned. This was a failed endpoint fetch, not an executed POST query."
+      },
+      {
+        "kind": "text",
+        "text": "The official endpoint index specifies POST for spending_over_time. Neither available web tool supports an HTTP POST body, and the run instructions prohibit shell-based network requests. See [USAspending API endpoints](https://api.usaspending.gov/docs/endpoints) and [official request tutorial](https://api.usaspending.gov/docs/intro-tutorial)."
+      },
+      {
+        "kind": "text",
+        "text": "The required historical reference class and base rate could not be fetched. Empty historicalContext records missing evidence; it does not assert that the official source exposes fewer than six prints. No broader aggregate or remembered value was substituted."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: A persistence prior requires fetched annual shares. Without them, historical dispersion, sigma, adjustment components, and the required 80% interval cannot be calculated. No point estimate or implied bounds are asserted."
+      },
+      {
+        "kind": "text",
+        "text": "No official announcement or calendar establishing this snapshot's resolutionDate was verified. Official documentation describes daily updates and a 90-day delay for DoD contract data; these do not establish the supplied expected release window. See [USAspending Data Sources](https://www.usaspending.gov/data/data-sources-download.pdf) and [About the Data](https://www.usaspending.gov/data/about-the-data-download.pdf)."
+      },
+      {
+        "kind": "text",
+        "text": "This object is an explicit refusal, not a valid normalized forecast cell. Null estimates and resolutionDate preserve the evidence gaps rather than inventing values to satisfy validation."
+      },
+      {
+        "kind": "forecast",
+        "point": null,
+        "ciLow": null,
+        "ciHigh": null
+      }
+    ]
+  }
+]

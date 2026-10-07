@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:01Z",
+  "runStartedAt": "2026-10-07T10:13:01Z",
+  "sealedAt": "2026-10-07T10:13:01Z",
+  "series": "treasury.mts.monthly_deficit",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-mts-deficit-september-2026",
+    "country": "US",
+    "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-25",
+      "start": "2026-10-17"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-04T19:02:52Z",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "registrationState": "preregistered",
+    "series": "treasury.mts.monthly_deficit",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "fiscaldata.treasury.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-25",
+        "start": "2026-10-17"
+      },
+      "field": "treasury.mts.monthly_deficit",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "treasury.mts.monthly_deficit",
+      "sourceUrl": "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+      "table": "U.S. Department of the Treasury, Bureau of the Fiscal Service, Monthly Treasury Statement Table 1",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "5b66f0d04db219d96734836f2f8e3217def4686b2086654d319a58b4080483a9",
+    "targetRegistrationPath": "records/targets/2026-09-04-5b66f0d04db219d96734836f2f8e3217def4686b2086654d319a58b4080483a9.json",
+    "targetUnit": "usd_billions",
+    "valueScale": 1
+  },
+  "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "targetContentHash": "5b66f0d04db219d96734836f2f8e3217def4686b2086654d319a58b4080483a9",
+  "targetRegistrationPath": "records/targets/2026-09-04-5b66f0d04db219d96734836f2f8e3217def4686b2086654d319a58b4080483a9.json",
+  "registeredAtUtc": "2026-09-04T19:02:52Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/prompt.md",
+      "sha256": "92c3448f49a401a532b026b43013ad35954999879dcec42acf23a2a5a911b5d6",
+      "bytes": 10740,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/command.json",
+      "sha256": "ace5b0dffc2815a7c4533a1b6fcbd05711bc484d350187d48df6d5b511738713",
+      "bytes": 187,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/stdout.txt",
+      "sha256": "f7804afbbfd747c66f747c974d24c8adb642acecbcdad44471c27a688858ed97",
+      "bytes": 10474,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/raw_response.txt",
+      "sha256": "f7804afbbfd747c66f747c974d24c8adb642acecbcdad44471c27a688858ed97",
+      "bytes": 10474,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/parsed_cells.json",
+      "sha256": "ad35cc93fd96b7583b70799ec7411eb0c06f3f6688642d82fa73f3a79c191eab",
+      "bytes": 11176,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/normalized_cells.json",
+      "sha256": "529891e66998b52691714469db64b329f84dac5cfac525730804bb1ad9f5d717",
+      "bytes": 29349,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/distribution.json",
+      "sha256": "edff66da9d399b8d0a830419187a50ba026c2a9a88ee8766c9c8e7c3d98d0ca0",
+      "bytes": 14389,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/validation.json",
+      "sha256": "9cd081ae357dcc14453e6bc36cc7a856fd2fcf94f409792e1fc3ba81bd7c7eb0",
+      "bytes": 130,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/cells.with_activity.json",
+      "sha256": "ec46d9e37fd304b5365495fe7b8940e6096e0890b235a5591c6762e2f7e9eae1",
+      "bytes": 32205,
+      "createdAt": "2026-10-07T10:13:01Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/us-mts-deficit-september-2026__r1/manifest.json",
+      "sha256": "12e1675b6a757de63c2ae09af7a919a329fcf6d6642ed4021aedcfcde55a0ada",
+      "bytes": 5220,
+      "createdAt": "2026-10-07T10:13:01Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "us-mts-deficit-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "319a0957049dd3784ed9eb93d49a9c4ba5a5ce9685deccacdbfee9caaece869e"
+}

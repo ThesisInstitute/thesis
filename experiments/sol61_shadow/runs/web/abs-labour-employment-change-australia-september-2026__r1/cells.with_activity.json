@@ -1,0 +1,1063 @@
+[
+  {
+    "slug": "abs-labour-employment-change-australia-september-2026",
+    "country": "AU",
+    "type": "data",
+    "title": "Australia September 2026 employment change",
+    "question": "What will ABS first report for the September 2026 month-over-month change in employed persons, all persons, Australia, seasonally adjusted, in thousands?",
+    "unit": "thousands",
+    "pointEstimate": 22.8,
+    "ciLow": -27.7,
+    "ciHigh": 73.3,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-15",
+    "resolutionSource": "Australian Bureau of Statistics, Labour Force, Australia",
+    "resolutionSourceUrl": "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/latest-release",
+    "resolutionRule": "Resolve to the first published September 2026 seasonally adjusted monthly change in employed people, all persons, Australia, in Labour Force, Australia, national Table 001. Use ABS's published change calculated from unrounded underlying levels, convert persons to thousands, and record to one decimal place. Freeze the initial print and disregard subsequent corrections, seasonal revisions and rebenchmarking.",
+    "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+    "historicalContext": [
+      {
+        "label": "March 2026",
+        "value": 17.9,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": -18.6,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 40.3,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 76.3,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": -15.8,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "August 2026",
+        "value": 39.5,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      }
+    ],
+    "drivers": [
+      "Positive recent employment-growth base rate",
+      "Stronger three-month employment momentum",
+      "Declining private-sector job vacancies",
+      "Earlier monetary tightening restraining demand",
+      "Public-sector vacancies partly offsetting private weakness",
+      "Survey modernisation and rotation-group variability"
+    ],
+    "sourceContext": [
+      "https://www.abs.gov.au/release-calendar/future-releases/202610",
+      "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/latest-release",
+      "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/mar-2026",
+      "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/apr-2026",
+      "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/may-2026",
+      "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jun-2026",
+      "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2026",
+      "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026",
+      "https://www.abs.gov.au/statistics/labour/jobs/job-vacancies-australia/aug-2026",
+      "https://www.rba.gov.au/media-releases/2026/mr-26-27.html"
+    ],
+    "runAt": "2026-10-07T10:12:57Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "September employment: modest growth with substantial monthly uncertainty"
+      },
+      {
+        "kind": "text",
+        "text": "The target is the first-print national, all-persons, seasonally adjusted employment monthly change. Every employment-history value uses that same variant and comes from its own reference-month release headline. Published changes use unrounded levels; subsequent revised history is excluded."
+      },
+      {
+        "kind": "text",
+        "text": "The [ABS October release calendar](https://www.abs.gov.au/release-calendar/future-releases/202610) explicitly schedules September Labour Force for 15 October 2026 at 11:30am AEDT. This conflicts with the ledger's 20\u201328 October window. Target identity is preserved, and resolutionDate follows the verified official announcement."
+      },
+      {
+        "kind": "text",
+        "text": "The registered series code is LF/M3.3.1599.20.AUS.M. Its API endpoint could not be fetched, so its code semantics and identity transform remain independently unverified. Official release pages provided the required history. The September-specific page was also inaccessible; the verified Labour Force latest-release page provides the stable resolution URL."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the seasonally adjusted employment monthly-change rows in [ABS March 2026](https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/mar-2026) and [ABS April 2026](https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/apr-2026).",
+        "result": "March employment change: +17,900 persons = +17.9 thousand. April: -18,600 persons = -18.6 thousand. April's later underemployment correction explicitly did not affect employment."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the corresponding rows in [ABS May 2026](https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/may-2026) and [ABS June 2026](https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jun-2026).",
+        "result": "May employment change: +40,300 persons = +40.3 thousand. June: +76,300 persons = +76.3 thousand. May's listed underemployment correction did not affect employment."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the corresponding rows in [ABS July 2026](https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2026) and [ABS August 2026](https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026).",
+        "result": "July employment change: -15,800 persons = -15.8 thousand. August: +39,500 persons = +39.5 thousand."
+      },
+      {
+        "kind": "text",
+        "text": "The reference class is the six March\u2013August 2026 first prints. Their base rate is 139.6/6 = +23.2667 thousand per month. Four of six were positive. June\u2013August averaged +33.3333 thousand; this supports a modest momentum update rather than full persistence of August's gain."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read employment composition and survey notes in [ABS August Labour Force](https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026).",
+        "result": "Seasonally adjusted employment was 14,836.6 thousand, up 238.1 thousand over the year. Full-time employment fell 6.3 thousand while part-time rose 45.8 thousand. The unemployment rate reached 4.6%, and participation reached 67.1%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read [ABS Job Vacancies, August 2026](https://www.abs.gov.au/statistics/labour/jobs/job-vacancies-australia/aug-2026), released 1 October.",
+        "result": "Seasonally adjusted vacancies were 325.0 thousand, down 0.9% quarterly and 1.3% annually. Private vacancies fell 2.0% quarterly to 286.3 thousand; public vacancies rose 7.8% to 38.7 thousand."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the [RBA monetary-policy decision of 29 September 2026](https://www.rba.gov.au/media-releases/2026/mr-26-27.html).",
+        "result": "The RBA raised the cash-rate target by 25 basis points to 4.60%, following three earlier increases during 2026. It described easing labour conditions, broadly stable leading indicators and slowing activity."
+      },
+      {
+        "kind": "text",
+        "text": "Separate effects: the employment level receives no additional adjustment; momentum receives partial weight; weaker vacancies support a small demand reduction; earlier monetary tightening supports another small reduction. The September reference weeks ended 12 September in the [ABS survey schedule](https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/may-2026), so the 29 September hike receives no direct contemporaneous adjustment. Survey changes have uncertain direction, giving a zero signed one-off adjustment while remaining a tail risk."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: Use a historical-mean model with partial momentum persistence, estimated from the six March\u2013August first prints. Judgmental updates, in thousands: level 0; momentum 0.25*(33.3333-23.2667) = +2.5167; vacancies -2.0; earlier policy tightening -1.0; one-off 0. Point = 23.2667+2.5167-2.0-1.0 = 22.7833, rounded to 22.8. For this change series, calculate dispersion from the six change values themselves: sum squared deviations = 6674.0133; sigma = 36.535 = sqrt(6674.0133/5). Normal 80% half-width = 1.28*sigma = 46.7647. Inflate for estimated-mean uncertainty by sqrt(1+1/6), giving 50.5117, rounded to 50.5. Final implied bounds = 22.8 +/- 50.5 = [-27.7, 73.3]. This is an approximate predictive interval."
+      },
+      {
+        "kind": "text",
+        "text": "The upside risk is a full-time hiring rebound or a favourable incoming rotation group: a gain exceeding 73.3 thousand would land outside the interval, as June's 76.3 thousand did. The downside risk is weaker private hiring combined with reversal of August's participation and part-time gains: a decline exceeding 27.7 thousand would land below the interval. Survey-composition shifts could amplify either outcome."
+      },
+      {
+        "kind": "forecast",
+        "point": 22.8,
+        "ciLow": -27.7,
+        "ciHigh": 73.3
+      }
+    ],
+    "agentReportedRunAt": "2026-10-06T22:39:04Z",
+    "runStartedAt": "2026-10-07T10:12:56Z",
+    "promptMode": "fast",
+    "registrationCommit": "0f2c009b27e9b65c2aeb9b253934fd8b301b787e",
+    "targetContentHash": "cb50e4f977134dd7052ae03768ee9c2e2d2606387498938baded80a6d1baf32b",
+    "targetRegistrationPath": "records/targets/2026-09-14-cb50e4f977134dd7052ae03768ee9c2e2d2606387498938baded80a6d1baf32b.json",
+    "registeredAtUtc": "2026-09-14T20:23:15Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": -103.45,
+        "upper": 149.05
+      },
+      "points": [
+        {
+          "value": -103.45,
+          "probability": 0.0
+        },
+        {
+          "value": -102.1875,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": -100.925,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": -99.6625,
+          "probability": 0.005
+        },
+        {
+          "value": -98.4,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": -97.1375,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": -95.875,
+          "probability": 0.01
+        },
+        {
+          "value": -94.6125,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": -93.35,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": -92.0875,
+          "probability": 0.015
+        },
+        {
+          "value": -90.825,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": -89.5625,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": -88.3,
+          "probability": 0.02
+        },
+        {
+          "value": -87.0375,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": -85.775,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": -84.5125,
+          "probability": 0.025
+        },
+        {
+          "value": -83.25,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": -81.9875,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": -80.725,
+          "probability": 0.03
+        },
+        {
+          "value": -79.4625,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": -78.2,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": -76.9375,
+          "probability": 0.035
+        },
+        {
+          "value": -75.675,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": -74.4125,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": -73.15,
+          "probability": 0.04
+        },
+        {
+          "value": -71.8875,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": -70.625,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": -69.3625,
+          "probability": 0.045
+        },
+        {
+          "value": -68.1,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": -66.8375,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": -65.575,
+          "probability": 0.05
+        },
+        {
+          "value": -64.3125,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": -63.05,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": -61.7875,
+          "probability": 0.055
+        },
+        {
+          "value": -60.525,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": -59.2625,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": -58.0,
+          "probability": 0.06
+        },
+        {
+          "value": -56.7375,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": -55.475,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": -54.2125,
+          "probability": 0.065
+        },
+        {
+          "value": -52.95,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": -51.6875,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": -50.425,
+          "probability": 0.07
+        },
+        {
+          "value": -49.1625,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": -47.9,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": -46.6375,
+          "probability": 0.075
+        },
+        {
+          "value": -45.375,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": -44.1125,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": -42.85,
+          "probability": 0.08
+        },
+        {
+          "value": -41.5875,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": -40.325,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": -39.0625,
+          "probability": 0.085
+        },
+        {
+          "value": -37.8,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": -36.5375,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": -35.275,
+          "probability": 0.09
+        },
+        {
+          "value": -34.0125,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": -32.75,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": -31.4875,
+          "probability": 0.095
+        },
+        {
+          "value": -30.225,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": -28.9625,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": -27.7,
+          "probability": 0.1
+        },
+        {
+          "value": -26.4375,
+          "probability": 0.11
+        },
+        {
+          "value": -25.175,
+          "probability": 0.12
+        },
+        {
+          "value": -23.9125,
+          "probability": 0.13
+        },
+        {
+          "value": -22.65,
+          "probability": 0.14
+        },
+        {
+          "value": -21.3875,
+          "probability": 0.15
+        },
+        {
+          "value": -20.125,
+          "probability": 0.16
+        },
+        {
+          "value": -18.8625,
+          "probability": 0.17
+        },
+        {
+          "value": -17.6,
+          "probability": 0.18
+        },
+        {
+          "value": -16.3375,
+          "probability": 0.19
+        },
+        {
+          "value": -15.075,
+          "probability": 0.2
+        },
+        {
+          "value": -13.8125,
+          "probability": 0.21
+        },
+        {
+          "value": -12.55,
+          "probability": 0.22
+        },
+        {
+          "value": -11.2875,
+          "probability": 0.23
+        },
+        {
+          "value": -10.025,
+          "probability": 0.24
+        },
+        {
+          "value": -8.7625,
+          "probability": 0.25
+        },
+        {
+          "value": -7.5,
+          "probability": 0.26
+        },
+        {
+          "value": -6.2375,
+          "probability": 0.27
+        },
+        {
+          "value": -4.975,
+          "probability": 0.28
+        },
+        {
+          "value": -3.7125,
+          "probability": 0.29
+        },
+        {
+          "value": -2.45,
+          "probability": 0.3
+        },
+        {
+          "value": -1.1875,
+          "probability": 0.31
+        },
+        {
+          "value": 0.075,
+          "probability": 0.32
+        },
+        {
+          "value": 1.3375,
+          "probability": 0.33
+        },
+        {
+          "value": 2.6,
+          "probability": 0.34
+        },
+        {
+          "value": 3.8625,
+          "probability": 0.35
+        },
+        {
+          "value": 5.125,
+          "probability": 0.36
+        },
+        {
+          "value": 6.3875,
+          "probability": 0.37
+        },
+        {
+          "value": 7.65,
+          "probability": 0.38
+        },
+        {
+          "value": 8.9125,
+          "probability": 0.39
+        },
+        {
+          "value": 10.175,
+          "probability": 0.4
+        },
+        {
+          "value": 11.4375,
+          "probability": 0.41
+        },
+        {
+          "value": 12.7,
+          "probability": 0.42
+        },
+        {
+          "value": 13.9625,
+          "probability": 0.43
+        },
+        {
+          "value": 15.225,
+          "probability": 0.44
+        },
+        {
+          "value": 16.4875,
+          "probability": 0.45
+        },
+        {
+          "value": 17.75,
+          "probability": 0.46
+        },
+        {
+          "value": 19.0125,
+          "probability": 0.47
+        },
+        {
+          "value": 20.275,
+          "probability": 0.48
+        },
+        {
+          "value": 21.5375,
+          "probability": 0.49
+        },
+        {
+          "value": 22.8,
+          "probability": 0.5
+        },
+        {
+          "value": 24.0625,
+          "probability": 0.51
+        },
+        {
+          "value": 25.325,
+          "probability": 0.52
+        },
+        {
+          "value": 26.5875,
+          "probability": 0.53
+        },
+        {
+          "value": 27.85,
+          "probability": 0.54
+        },
+        {
+          "value": 29.1125,
+          "probability": 0.55
+        },
+        {
+          "value": 30.375,
+          "probability": 0.56
+        },
+        {
+          "value": 31.6375,
+          "probability": 0.57
+        },
+        {
+          "value": 32.9,
+          "probability": 0.58
+        },
+        {
+          "value": 34.1625,
+          "probability": 0.59
+        },
+        {
+          "value": 35.425,
+          "probability": 0.6
+        },
+        {
+          "value": 36.6875,
+          "probability": 0.61
+        },
+        {
+          "value": 37.95,
+          "probability": 0.62
+        },
+        {
+          "value": 39.2125,
+          "probability": 0.63
+        },
+        {
+          "value": 40.475,
+          "probability": 0.64
+        },
+        {
+          "value": 41.7375,
+          "probability": 0.65
+        },
+        {
+          "value": 43.0,
+          "probability": 0.66
+        },
+        {
+          "value": 44.2625,
+          "probability": 0.67
+        },
+        {
+          "value": 45.525,
+          "probability": 0.68
+        },
+        {
+          "value": 46.7875,
+          "probability": 0.69
+        },
+        {
+          "value": 48.05,
+          "probability": 0.7
+        },
+        {
+          "value": 49.3125,
+          "probability": 0.71
+        },
+        {
+          "value": 50.575,
+          "probability": 0.72
+        },
+        {
+          "value": 51.8375,
+          "probability": 0.73
+        },
+        {
+          "value": 53.1,
+          "probability": 0.74
+        },
+        {
+          "value": 54.3625,
+          "probability": 0.75
+        },
+        {
+          "value": 55.625,
+          "probability": 0.76
+        },
+        {
+          "value": 56.8875,
+          "probability": 0.77
+        },
+        {
+          "value": 58.15,
+          "probability": 0.78
+        },
+        {
+          "value": 59.4125,
+          "probability": 0.79
+        },
+        {
+          "value": 60.675,
+          "probability": 0.8
+        },
+        {
+          "value": 61.9375,
+          "probability": 0.81
+        },
+        {
+          "value": 63.2,
+          "probability": 0.82
+        },
+        {
+          "value": 64.4625,
+          "probability": 0.83
+        },
+        {
+          "value": 65.725,
+          "probability": 0.84
+        },
+        {
+          "value": 66.9875,
+          "probability": 0.85
+        },
+        {
+          "value": 68.25,
+          "probability": 0.86
+        },
+        {
+          "value": 69.5125,
+          "probability": 0.87
+        },
+        {
+          "value": 70.775,
+          "probability": 0.88
+        },
+        {
+          "value": 72.0375,
+          "probability": 0.89
+        },
+        {
+          "value": 73.3,
+          "probability": 0.9
+        },
+        {
+          "value": 74.5625,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 75.825,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 77.0875,
+          "probability": 0.905
+        },
+        {
+          "value": 78.35,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 79.6125,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 80.875,
+          "probability": 0.91
+        },
+        {
+          "value": 82.1375,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 83.4,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 84.6625,
+          "probability": 0.915
+        },
+        {
+          "value": 85.925,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 87.1875,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 88.45,
+          "probability": 0.92
+        },
+        {
+          "value": 89.7125,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 90.975,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 92.2375,
+          "probability": 0.925
+        },
+        {
+          "value": 93.5,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 94.7625,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 96.025,
+          "probability": 0.93
+        },
+        {
+          "value": 97.2875,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 98.55,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 99.8125,
+          "probability": 0.935
+        },
+        {
+          "value": 101.075,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 102.3375,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 103.6,
+          "probability": 0.94
+        },
+        {
+          "value": 104.8625,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 106.125,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 107.3875,
+          "probability": 0.945
+        },
+        {
+          "value": 108.65,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 109.9125,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 111.175,
+          "probability": 0.95
+        },
+        {
+          "value": 112.4375,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 113.7,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 114.9625,
+          "probability": 0.955
+        },
+        {
+          "value": 116.225,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 117.4875,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 118.75,
+          "probability": 0.96
+        },
+        {
+          "value": 120.0125,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 121.275,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 122.5375,
+          "probability": 0.965
+        },
+        {
+          "value": 123.8,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 125.0625,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 126.325,
+          "probability": 0.97
+        },
+        {
+          "value": 127.5875,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 128.85,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 130.1125,
+          "probability": 0.975
+        },
+        {
+          "value": 131.375,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 132.6375,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 133.9,
+          "probability": 0.98
+        },
+        {
+          "value": 135.1625,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 136.425,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 137.6875,
+          "probability": 0.985
+        },
+        {
+          "value": 138.95,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 140.2125,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 141.475,
+          "probability": 0.99
+        },
+        {
+          "value": 142.7375,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 144.0,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 145.2625,
+          "probability": 0.995
+        },
+        {
+          "value": 146.525,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 147.7875,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 149.05,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 22.8,
+        "median": 22.8,
+        "interval80": {
+          "lower": -27.7,
+          "upper": 73.3
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "claude-fable-5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/prompt.md",
+        "sha256": "1326d4b881b97e829d6d54db38116a670e2cf07a4f00fbe3c4a02418354d05b1",
+        "bytes": 10612,
+        "createdAt": "2026-10-07T10:12:56Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/command.json",
+        "sha256": "b79515a3b0e2bd57af8187c868987709d204f4cf31dbb7cb7dc226d7d7cb1889",
+        "bytes": 211,
+        "createdAt": "2026-10-07T10:12:56Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/stdout.txt",
+        "sha256": "dfa97f5538a577dc9f2c95aa47edc002a7d260c0ec299829a919093b54a85f0f",
+        "bytes": 9894,
+        "createdAt": "2026-10-07T10:12:56Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/stderr.txt",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "bytes": 1,
+        "createdAt": "2026-10-07T10:12:56Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/raw_response.txt",
+        "sha256": "dfa97f5538a577dc9f2c95aa47edc002a7d260c0ec299829a919093b54a85f0f",
+        "bytes": 9894,
+        "createdAt": "2026-10-07T10:12:56Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/parsed_cells.json",
+        "sha256": "8b6557d16d0c8ae270ed66c9c5444c0e6b239f57efb8b68f55ac95057bcc290f",
+        "bytes": 10382,
+        "createdAt": "2026-10-07T10:12:56Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/normalized_cells.json",
+        "sha256": "252f20ffc5a7dded2a578e317d7b602a4da8c6962c657003efb894b6eac2ffc5",
+        "bytes": 27962,
+        "createdAt": "2026-10-07T10:12:56Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/distribution.json",
+        "sha256": "5a97910e744d12b9140164652d73bf61f16baf62b40d624cbe5ea70c748d519b",
+        "bytes": 13796,
+        "createdAt": "2026-10-07T10:12:56Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "experiments/sol61_shadow/runs/web/abs-labour-employment-change-australia-september-2026__r1/validation.json",
+        "sha256": "03f2f261f80aefb87b8254f28887b83c482ae259bd749388cfbe8dab6c1b500d",
+        "bytes": 291,
+        "createdAt": "2026-10-07T10:12:56Z"
+      }
+    ]
+  }
+]

@@ -740,6 +740,89 @@ def latest_receipts(receipts: list[dict[str, Any]]) -> dict[str, list[dict[str, 
     return grouped
 
 
+def archive_run(row: dict[str, Any]) -> dict[str, Any]:
+    """Move a collected run's artifacts under superseded/ and describe it."""
+    dest = (
+        EXP
+        / "superseded"
+        / row["arm"]
+        / f"{row['slug']}__r{row['rollout']}__{row['jobId']}"
+    )
+    dest.mkdir(parents=True, exist_ok=True)
+    moved: dict[str, str] = {}
+    sources = {
+        "response": row.get("response"),
+        "trace": row.get("trace"),
+        "runDir": (row.get("validation") or {}).get("runDir"),
+    }
+    for field, path in sources.items():
+        if not path or not (ROOT / path).exists():
+            continue
+        target = dest / ("run" if field == "runDir" else pathlib.Path(path).name)
+        (ROOT / path).rename(target)
+        moved[field] = rel(target)
+    return {
+        "jobId": row.get("jobId"),
+        "state": row.get("state"),
+        "finishedAt": row.get("finishedAt"),
+        "eligible": bool(row.get("eligible")),
+        "validationErrors": (row.get("validation") or {}).get("errors", []),
+        "archived": moved,
+    }
+
+
+# Evidence, in a stopped run's response or trace, that its fetches failed for
+# want of a network rather than for anything the model did.
+TRANSPORT_RE = re.compile(
+    r"connection failed|error sending request|could not resolve host|"
+    r"network is unreachable|connection (?:refused|reset)|failed to connect",
+    re.IGNORECASE,
+)
+
+
+def transport_stopped(row: dict[str, Any]) -> bool:
+    """A finished run that returned no forecast because the host lost its network.
+
+    Both conditions are required: a null pointEstimate (the production prompt's
+    honest stop) and a transport error in the response or trace. A run that
+    forecast anyway, or stopped for another reason, keeps its result.
+    """
+    if not row.get("final") or not row.get("response"):
+        return False
+    text = (ROOT / row["response"]).read_text(errors="replace")
+    try:
+        cell = json.loads(text)
+    except json.JSONDecodeError:
+        return False
+    if not isinstance(cell, dict) or cell.get("pointEstimate") is not None:
+        return False
+    if row.get("trace") and (ROOT / row["trace"]).is_file():
+        text += gzip.decompress((ROOT / row["trace"]).read_bytes()).decode(
+            errors="replace"
+        )
+    return bool(TRANSPORT_RE.search(text))
+
+
+def cmd_outage_retry(args: argparse.Namespace) -> int:
+    """Write retry manifests for runs an outage stopped, per arm and rollout."""
+    runs = read_json(EXP / "results.json")["runs"]
+    targets = {row["slug"]: row for row in load_targets()}
+    groups: dict[tuple[str, int], list[dict[str, Any]]] = {}
+    for row in runs.values():
+        if transport_stopped(row):
+            groups.setdefault((row["arm"], row["rollout"]), []).append(
+                targets[row["slug"]]
+            )
+    for (arm, rollout), rows in sorted(groups.items()):
+        label = f"{args.label_prefix}-{arm}-r{rollout}"
+        manifest = batch_manifest(
+            rows, arm=arm, rollout=rollout, ops=args.ops, tier="hard", label=label
+        )
+        write_json(args.ops / "batches" / f"{label}.json", manifest)
+        print(f"{label} {len(rows)}")
+    return 0
+
+
 def cmd_submit(args: argparse.Namespace) -> int:
     """Submit one batch manifest under a stable request id and keep the receipts.
 
@@ -797,6 +880,10 @@ def cmd_collect(args: argparse.Namespace) -> int:
         prior = results.get(key) or {}
         if prior.get("final") and prior.get("jobId") == job_id and not args.revalidate:
             continue
+        superseded = list(prior.get("supersededJobs") or [])
+        if prior.get("final") and prior.get("jobId") != job_id:
+            # Archive the run this job retries before its files are reused.
+            superseded.append(archive_run(prior))
         job = subfleet_job(job_id)
         state = job.get("state")
         row: dict[str, Any] = {
@@ -813,7 +900,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
         }
         if state not in {"succeeded", "failed", "cancelled", "abandoned"}:
             pending += 1
-            results[key] = {**row, "final": False}
+            results[key] = {**row, "final": False, "supersededJobs": superseded}
             continue
         target = targets[slug]
         row["windowStart"] = target["windowStart"]
@@ -859,15 +946,19 @@ def cmd_collect(args: argparse.Namespace) -> int:
             and not audit.get("contaminated")
             and row["model"] == EXPECTED_MODEL
         )
-        # A re-dispatched run replaces the record of the job it retried;
-        # the earlier jobs stay listed with their final state.
-        row["supersededJobs"] = [
+        # A re-dispatched run replaces the record of the job it retried. The
+        # earlier jobs stay listed: archived with their artifacts when they
+        # were collected, by final state alone when they never were.
+        listed = {entry["jobId"] for entry in superseded}
+        superseded += [
             {
                 "jobId": earlier["job_id"],
                 "state": subfleet_job(earlier["job_id"]).get("state"),
             }
             for earlier in receipts[:-1]
+            if earlier["job_id"] not in listed
         ]
+        row["supersededJobs"] = superseded
         row["final"] = True
         results[key] = row
     write_json(
@@ -1111,6 +1202,10 @@ def main(argv: list[str] | None = None) -> int:
     submit = sub.add_parser("submit")
     submit.add_argument("--label", required=True)
     submit.set_defaults(func=cmd_submit)
+
+    outage = sub.add_parser("outage-retry")
+    outage.add_argument("--label-prefix", required=True)
+    outage.set_defaults(func=cmd_outage_retry)
 
     collect = sub.add_parser("collect")
     collect.add_argument("--revalidate", action="store_true")

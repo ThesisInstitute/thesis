@@ -1,0 +1,169 @@
+[
+  {
+    "slug": "euro-area-unemployment-rate-september-2026",
+    "country": "EA",
+    "type": "data",
+    "title": "Euro-area unemployment, September 2026",
+    "question": "What will Eurostat first report for September 2026 euro-area EA21 seasonally adjusted total unemployment, as a percentage of the labour force?",
+    "unit": "percent",
+    "pointEstimate": 6.4,
+    "ciLow": 6.25,
+    "ciHigh": 6.55,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-30",
+    "resolutionSource": "Eurostat monthly unemployment release and une_rt_m",
+    "resolutionSourceUrl": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21?format=JSON",
+    "resolutionRule": "Resolve to the earliest official September 2026 observation for une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21: monthly, seasonally adjusted, total age and sex, EA21, percentage of the labour force. Use the published one-decimal percentage without transformation beyond multiplication by 1. Preserve the first published vintage captured between monthly releases; subsequent revisions or corrections do not change resolution, and no grace exception applies.",
+    "dataPointId": "eurostat.unemployment_rate.euro_area.september_2026.first_print",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        },
+        "label": "January 2026",
+        "value": 6.1
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        },
+        "label": "February 2026",
+        "value": 6.2
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "March 2026",
+        "value": 6.2
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "April 2026",
+        "value": 6.3
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "May 2026",
+        "value": 6.2
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "June 2026",
+        "value": 6.3
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        },
+        "label": "July 2026",
+        "value": 6.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        },
+        "label": "August 2026",
+        "value": 6.4
+      }
+    ],
+    "drivers": [
+      "Persistence at the latest official 6.4% level",
+      "Unchanged July-to-August headline rate",
+      "August unemployment increased by 26,000 people",
+      "Observed revisions and limited first-print history"
+    ],
+    "sourceContext": [
+      "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21?format=JSON&startPeriod=2025-01&endPeriod=2026-09",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-04032026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30042026-cp",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01062026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp",
+      "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap"
+    ],
+    "runAt": "2026-10-06T22:36:39Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "September 2026 EA21 unemployment first-print forecast"
+      },
+      {
+        "kind": "text",
+        "text": "The exact target is Eurostat une_rt_m, series M.SA.TOTAL.PC_ACT.T.EA21, for September 2026. All historical entries are original monthly first prints of the same seasonally adjusted total EA21 variant. The latest database vintage is used separately to anchor the current level. January's release explicitly distinguishes EA21 at 6.1% from EA20 at 6.2%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open the original January-April 2026 Eurostat releases: https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-04032026-ap ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30042026-cp ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01062026-ap",
+        "result": "Original EA21 seasonally adjusted total unemployment rates: January 2026 6.1%, February 6.2%, March 6.2%, April 6.3%. Their publication dates were March 4, April 1, April 30, and June 1, respectively."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open the original May-July 2026 Eurostat releases: https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp",
+        "result": "Original EA21 seasonally adjusted total unemployment rates: May 2026 6.2%, June 6.3%, July 6.4%. Their publication dates were July 2, July 30, and September 1, respectively."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open the August 2026 release and its announcement schedule: https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap",
+        "result": "August 2026 unemployment was 6.4%, unchanged from July. Euro-area unemployed persons increased from 11.331 million in July to 11.357 million in August, an increase of 26 thousand. The October 1 release header explicitly announces the next release for October 30, 2026."
+      },
+      {
+        "kind": "text",
+        "text": "Schedule discrepancy: the official announcement verifies resolutionDate 2026-10-30, outside the ledger's expected November 1-9 window. The same September 2026 EA21 first-print target, slug, dataPointId, unit, and first-vintage rule are retained. A later release or revision must not substitute for September's initial print."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch and echo the registered series with curl -sS: https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21?format=JSON&startPeriod=2025-01&endPeriod=2026-09",
+        "result": "The successful API response contains 20 observations through August 2026: January 2025-January 2026 each 6.3%, and February-August 2026 each 6.4%. It was updated October 2, 2026. These are current-vintage values, not the original prints listed in historicalContext. Web-tool access to the API URL failed before the successful direct curl fetch."
+      },
+      {
+        "kind": "text",
+        "text": "The base rate is persistence in the eight fetched January-August first prints. Their seven successive changes contain four increases of 0.1 percentage points, one decrease of 0.1, and two unchanged readings. The mean change is +0.042857 percentage points. The latest unchanged first print and flat recent database history favor anchoring September at 6.4% rather than extrapolating the full earlier increase."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the revision notes in the April 30 and June 1 releases: https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30042026-cp ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01062026-ap",
+        "result": "February 2026 was subsequently revised from 6.2% to 6.3%; March 2026 was subsequently revised from 6.2% to 6.3%. These observed 0.1-percentage-point revisions show why the smoother current-vintage history alone would understate uncertainty about a first print."
+      },
+      {
+        "kind": "text",
+        "text": "Adjustment components: level is the latest 6.4% observation. Momentum leaves the point unchanged: the latest headline is flat, although the increase in unemployed persons gives a mild upward risk. One-off adjustment is zero because no quantified September-specific shock was fetched; EA21 geography and seasonal adjustment are already embedded in the series. Policy-mechanism adjustment is zero because this evidence set does not estimate a separate policy contribution to September unemployment."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: use a one-month persistence prior at 6.4%, calibrated to eight original EA21 first prints for January-August 2026. Level, momentum, one-off, and policy adjustments combine to a point estimate of 6.4%. Successive changes are [0.1, 0, 0.1, -0.1, 0.1, 0.1, 0] percentage points, with mean 0.042857. Sample sigma = 0.07867958 percentage points, calculated as sqrt(sum((change - 0.042857)^2)/6). The normal 80% half-width is 1.28*sigma = 0.10070986. Apply a judgmental 1.5 multiplier for only seven change observations and observed 0.1-point revisions: half-width = 0.15106479. Bounds are 6.4 +/- 0.15106479 = [6.24893521, 6.55106479], reported as [6.25, 6.55]."
+      },
+      {
+        "kind": "text",
+        "text": "The upside risk is broader job losses or rising labour-force participation lifting unemployment to 6.5%. The downside risk is stronger hiring or lower participation bringing it to 6.3%. An abrupt employment contraction or substantial upward estimation change producing 6.6% would land outside the interval; a hiring surge or substantial downward estimation change producing 6.2% would also land outside the interval."
+      },
+      {
+        "kind": "forecast",
+        "point": 6.4,
+        "ciLow": 6.25,
+        "ciHigh": 6.55
+      }
+    ]
+  }
+]

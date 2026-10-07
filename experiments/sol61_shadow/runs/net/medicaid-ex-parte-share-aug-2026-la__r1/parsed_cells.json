@@ -1,0 +1,208 @@
+[
+  {
+    "slug": "medicaid-ex-parte-share-aug-2026-la",
+    "country": "US",
+    "type": "data",
+    "title": "Louisiana ex parte renewal share, August 2026",
+    "question": "What percentage of Louisiana's successful Medicaid and CHIP renewals for August 2026 will have been completed on an ex parte basis, using the original (O) submission in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c at its first official publication, rounded to one decimal?",
+    "unit": "percent",
+    "pointEstimate": 69.5,
+    "ciLow": 54.4,
+    "ciHigh": 84.6,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-15",
+    "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+    "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "resolutionRule": "Resolves to Louisiana's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Interpret share as 100 times beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis divided by beneficiaries_whose_coverage_was_renewed_total, using the numerator and denominator as initially published and rounding to one decimal. Ignore subsequent corrections and updated (U) submissions. The registered resolution date is retained but was not verified as an official publication date.",
+    "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.la.aug_2026",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2024-08"
+        },
+        "label": "2024-08",
+        "value": 85.8
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-07"
+        },
+        "label": "2025-07",
+        "value": 74.9
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-08"
+        },
+        "label": "2025-08",
+        "value": 78.3
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        },
+        "label": "2025-09",
+        "value": 69.0
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        },
+        "label": "2025-10",
+        "value": 62.9
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        },
+        "label": "2025-11",
+        "value": 66.1
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        },
+        "label": "2025-12",
+        "value": 55.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        },
+        "label": "2026-01",
+        "value": 75.1
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        },
+        "label": "2026-02",
+        "value": 69.8
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "2026-03",
+        "value": 67.1
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "2026-04",
+        "value": 70.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "2026-05",
+        "value": 70.2
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "2026-06",
+        "value": 68.8
+      }
+    ],
+    "drivers": [
+      "Recent original-submission shares clustered near 70%",
+      "Partial mean reversion from June toward the recent six-month average",
+      "Substantial historical variation in renewal cohorts",
+      "Louisiana restrictions on reliance on ex parte renewal waivers",
+      "Two reporting months between the latest observation and target"
+    ],
+    "sourceContext": [
+      "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+      "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=LA&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202507&conditions%5B2%5D%5Boperator%5D=%3E%3D&properties%5B0%5D=state_abbreviation&properties%5B1%5D=reporting_period&properties%5B2%5D=original_or_updated&properties%5B3%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis&properties%5B4%5D=beneficiaries_whose_coverage_was_renewed_total&properties%5B5%5D=beneficiaries_with_a_renewal_due&limit=20",
+      "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+      "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/july-2024-national-summary-renewal-outcomes.pdf",
+      "https://www.legis.la.gov/legis/Law.aspx?d=1431202"
+    ],
+    "runAt": "2026-10-06T22:44:48Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Louisiana August 2026 ex parte renewal share"
+      },
+      {
+        "kind": "text",
+        "text": "Target: Louisiana's August 2026 state row, original (O) submission, first official publication, in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. This is a state administrative-count ratio, not a national total or average. All historical anchors use Louisiana O rows."
+      },
+      {
+        "kind": "text",
+        "text": "Ledger ambiguity: the supplied rule does not name the denominator. I interpret renewal share as ex parte renewals divided by successful renewals, CMS metrics 5a(1)/5a. CMS's July 2024 national summary explicitly publishes this denominator alongside its separate rate among all beneficiaries due for renewal. The forecast depends on this interpretation."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch CMS datastore dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c with state_abbreviation=LA, original_or_updated=O, reporting_period>=202507, limit=20.",
+        "result": "Fetched 12 rows. Ex parte/total successful renewals: 2025-07 58734/78435; 2025-08 60340/77083; 2025-09 46727/67714; 2025-10 51296/81515; 2025-11 33083/50022; 2025-12 54061/97611; 2026-01 39341/52372; 2026-02 49252/70580; 2026-03 43328/64572; 2026-04 53461/75935; 2026-05 46111/65674; 2026-06 40381/58729."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch the complete Louisiana original row for reporting_period=202606 from the same CMS datastore.",
+        "result": "June 2026: 40381 ex parte renewals, 18348 renewals based on a form, 58729 total successful renewals, 96868 beneficiaries due, and 15534 pending. The components reconcile: 40381+18348=58729. The target share is 100*40381/58729=68.758194%, rounded to 68.8%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch the complete Louisiana original row for reporting_period=202408 from the same CMS datastore to examine a previous August cohort.",
+        "result": "August 2024: 72691 ex parte renewals, 11995 renewals based on a form, and 84686 total successful renewals. The share is 100*72691/84686=85.835911%, rounded to 85.8%. The fetched August 2025 original row gives 78.3%; these older August observations do not establish stable seasonality."
+      },
+      {
+        "kind": "text",
+        "text": "The outside-view base rate is the arithmetic mean of the 12 monthly Louisiana O shares from July 2025 through June 2026: 68.999304%. The recent January-June reference class averages 70.229045%; the latest three months average 69.791262%. This supports a level near 70%, without extrapolating the older August levels."
+      },
+      {
+        "kind": "text",
+        "text": "Policy mechanism: Louisiana RS 46:440.21 requires withdrawal of ex parte renewal waivers by January 1, 2026 and restricts sole reliance on ex parte processes unless federally required. I infer that the recent January-June observations partly reflect this environment. The fetched law does not establish a new August implementation shock, so the incremental policy adjustment is zero."
+      },
+      {
+        "kind": "text",
+        "text": "Publication-date verification limitation: the official CMS archive lists June 2026 released September 25, May released August 28, and April released July 31, but supplies no future announcement verifying December 15, 2026. State submission deadlines are not publication dates. The registered resolutionDate is retained; the requirement to verify that exact date could not be satisfied."
+      },
+      {
+        "kind": "text",
+        "text": "Historical-vintage limitation: the fetched history uses current O rows. CMS permits corrections to submissions, so these rows establish the original-outcome variant but do not prove archived first-publication values. August 2026 must resolve on its initially published O row without later correction or U substitution. Initial network transport attempts failed; subsequent successful API responses supplied the numerical history."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: use a persistence prior with partial mean reversion, based on the 12 fetched monthly O shares. Level prior=68.758194%; mean-reversion adjustment=0.5*(70.229045-68.758194)=+0.735425 percentage points; momentum=0, one-off=0, incremental policy=0. Point=69.493620%, rounded to 69.5%. For the 11 successive unrounded monthly changes, mean change=-0.556745 and sum of squared deviations=695.148288; sigma = 8.337555 percentage points = sqrt(695.148288/(11-1)). The one-month 80% half-width is 1.28*sigma=10.672071. Scale by sqrt(2) for the June-to-August horizon: half-width=15.092587. Bounds=69.493620 +/- 15.092587=[54.401032,84.586207], rounded to [54.4,84.6]."
+      },
+      {
+        "kind": "math",
+        "text": "Each historical share equals 100*ex_parte/renewed_total. Forecast=0.5*(100*40381/58729)+0.5*mean(January-June 2026 unrounded shares)=69.493620%. The interval uses realized successive-change dispersion, including the December decline and January rebound."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk: improved data matching or a cohort easier to renew automatically could lift the share toward earlier August levels; a return above 84.6% would land outside the interval. Downside risk: stricter verification, greater use of renewal forms, or an operational disruption could reduce ex parte completions; a share below 54.4% would land outside the interval. The point assumes neither abrupt change."
+      },
+      {
+        "kind": "forecast",
+        "point": 69.5,
+        "ciLow": 54.4,
+        "ciHigh": 84.6
+      }
+    ]
+  }
+]

@@ -1,0 +1,165 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:15Z",
+  "runStartedAt": "2026-10-07T10:13:15Z",
+  "sealedAt": "2026-10-07T10:13:15Z",
+  "series": "fns.snap.total_persons",
+  "period": "2026-06",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "snap-participation-june-2026",
+    "country": "US",
+    "dataPointId": "usda.fns.snap.persons.june_2026",
+    "period": "2026-06",
+    "registeredAt": "2026-07-10T17:47:41Z",
+    "registeredAtUtc": "2026-07-10T17:47:41Z",
+    "registrationCommit": "79e7796ea8cde8d3c263a226250346d3aa2c88d9",
+    "registrationState": "preregistered",
+    "series": "fns.snap.total_persons",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.fns.usda.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-03",
+        "start": "2026-10-26"
+      },
+      "field": "Persons",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "fns.snap.total_persons",
+      "sourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+      "table": "FNS SNAP data tables, national monthly participation (thousands)",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "fa0d017e2d4445b343793d95ea532622f4da9946c9dc0ce333ef7298be904a6d",
+    "targetRegistrationPath": "records/targets/2026-07-10-fa0d017e2d4445b343793d95ea532622f4da9946c9dc0ce333ef7298be904a6d.json",
+    "targetUnit": "millions",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "79e7796ea8cde8d3c263a226250346d3aa2c88d9",
+  "targetContentHash": "fa0d017e2d4445b343793d95ea532622f4da9946c9dc0ce333ef7298be904a6d",
+  "targetRegistrationPath": "records/targets/2026-07-10-fa0d017e2d4445b343793d95ea532622f4da9946c9dc0ce333ef7298be904a6d.json",
+  "registeredAtUtc": "2026-07-10T17:47:41Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": false,
+  "cellsPath": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/prompt.md",
+      "sha256": "8e1799ac583fde355b5c3406d65be46f72656074970ce99c64aaf0947539a7b1",
+      "bytes": 10524,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/command.json",
+      "sha256": "24587f62d40d1741a75fc78c3734dcf90d591fc5784a24f1b53bc5b1bd7667d4",
+      "bytes": 186,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/stdout.txt",
+      "sha256": "bb1052afa14545699e983c12d33d10248e7dbb1e5dff950e637fdb977a2193e8",
+      "bytes": 8403,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/raw_response.txt",
+      "sha256": "bb1052afa14545699e983c12d33d10248e7dbb1e5dff950e637fdb977a2193e8",
+      "bytes": 8403,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/parsed_cells.json",
+      "sha256": "fe325dcd9b8384b545f44886e0e34bb909d72d340a73cc7c2ec78096dea10965",
+      "bytes": 8735,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/normalized_cells.json",
+      "sha256": "445afe749446e339cd57f653243203f438d3334d5726c6e2a4b92d4fa66c2708",
+      "bytes": 27098,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/distribution.json",
+      "sha256": "0aa4b2d5f6eb3ba6dd2ec74c309fd45ac09ebc211a5a1e9a603a2303fd417fa6",
+      "bytes": 14579,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/validation.json",
+      "sha256": "d04c45ad1abb5a2571433147b1a3a800289f060b54ce591cf8cf535ba066a82a",
+      "bytes": 246,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/cells.with_activity.json",
+      "sha256": "cfd203a85619dbc484aac9fc2e37cb18032153e1fa9108cafebb42e0aab2ec9e",
+      "bytes": 29942,
+      "createdAt": "2026-10-07T10:13:15Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/snap-participation-june-2026__r1/manifest.json",
+      "sha256": "5c217d754dca4b468701ef596208312d8866a44d10b2337bcc3471bfd117d600",
+      "bytes": 5071,
+      "createdAt": "2026-10-07T10:13:15Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": false,
+    "cells": [
+      {
+        "slug": "snap-participation-june-2026",
+        "ok": false,
+        "errors": [
+          "resolutionDate 2026-09-18 is not after runAt 2026-10-07 \u2014 target already published (leakage)"
+        ]
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "4e5b9de42931831b2f47d904eb1ab2096ae769de3e4d8760dd3f44925ce5cf15"
+}

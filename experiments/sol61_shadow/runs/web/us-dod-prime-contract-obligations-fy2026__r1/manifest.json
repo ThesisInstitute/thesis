@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:12:56Z",
+  "runStartedAt": "2026-10-07T10:12:56Z",
+  "series": "usaspending.dod.prime_contract_obligations",
+  "period": "FY2026",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-dod-prime-contract-obligations-fy2026",
+    "country": "US",
+    "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+    "expectedReleaseWindow": {
+      "end": "2026-10-22",
+      "start": "2026-10-15"
+    },
+    "period": "FY2026",
+    "registeredAt": "2026-08-07T17:54:06Z",
+    "registeredAtUtc": "2026-08-07T17:54:06Z",
+    "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+    "registrationState": "preregistered",
+    "series": "usaspending.dod.prime_contract_obligations",
+    "sourceBinding": {
+      "adapter": "usaspending-api",
+      "allowedHosts": [
+        "api.usaspending.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-22",
+        "start": "2026-10-15"
+      },
+      "field": "results[category=contracts].aggregated_amount",
+      "releasePolicy": "registered_query_snapshot",
+      "sourceSeriesId": "usaspending.agency.097.obligations_by_award_category.contracts",
+      "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year={fiscal_year}",
+      "table": "USAspending API v2, agency 097 (DoD) obligations by award category, contracts row, fiscal year to date",
+      "transform": {
+        "factor": 1e-09,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "8b3a9c297b91e44b81cdda9bca2c64337b021348fba63395c4b5879b6e3e94be",
+    "targetRegistrationPath": "records/targets/2026-08-07-8b3a9c297b91e44b81cdda9bca2c64337b021348fba63395c4b5879b6e3e94be.json",
+    "targetUnit": "billions USD",
+    "valueScale": 1e-09
+  },
+  "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+  "targetContentHash": "8b3a9c297b91e44b81cdda9bca2c64337b021348fba63395c4b5879b6e3e94be",
+  "targetRegistrationPath": "records/targets/2026-08-07-8b3a9c297b91e44b81cdda9bca2c64337b021348fba63395c4b5879b6e3e94be.json",
+  "registeredAtUtc": "2026-08-07T17:54:06Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/prompt.md",
+      "sha256": "a014ef0383053be7f1b0c230edf2cd8f8938078032c429b28abfd69e5b91d903",
+      "bytes": 11575,
+      "createdAt": "2026-10-07T10:12:56Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/command.json",
+      "sha256": "814557a1a0f6a843c348c50069ea5ee50e7a22be596426ae49ea26b3e4acc5ed",
+      "bytes": 198,
+      "createdAt": "2026-10-07T10:12:56Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/stdout.txt",
+      "sha256": "458ff2e2c9437ecd3ac994ab75695dbc81d3e8910a4f973f71824c5d7a598dd8",
+      "bytes": 5182,
+      "createdAt": "2026-10-07T10:12:56Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:12:56Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/raw_response.txt",
+      "sha256": "458ff2e2c9437ecd3ac994ab75695dbc81d3e8910a4f973f71824c5d7a598dd8",
+      "bytes": 5182,
+      "createdAt": "2026-10-07T10:12:56Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/parsed_cells.json",
+      "sha256": "011258c0d2a9eeb58d7e40009fb95dd745f8a6cf5038fb601226f09ee8329c96",
+      "bytes": 5344,
+      "createdAt": "2026-10-07T10:12:56Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/normalized_cells.json",
+      "sha256": "9de2f7ad5c571c20f6ecd4bb3eb90b9eec60b448bf9c308b546b9233fe6b6445",
+      "bytes": 5112,
+      "createdAt": "2026-10-07T10:12:56Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:12:56Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-contract-obligations-fy2026__r1/manifest.json",
+      "sha256": "d8974dc3c09d001ff8ef3acc71d47b4ddc2f6bcfe73756a9644172d2c0ab6853",
+      "bytes": 4763,
+      "createdAt": "2026-10-07T10:12:56Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "ae6c434cc2e06b41d8b37476a138f7cad70f6b30ff31873426f0a00078a74d08"
+}

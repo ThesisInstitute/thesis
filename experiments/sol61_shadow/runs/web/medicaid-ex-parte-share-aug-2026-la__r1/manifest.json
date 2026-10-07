@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:40Z",
+  "runStartedAt": "2026-10-07T10:13:40Z",
+  "sealedAt": "2026-10-07T10:13:40Z",
+  "series": "cms.medicaid_pi.ex_parte_renewal_share.la.aug_2026",
+  "period": "August 2026 reporting period",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "medicaid-ex-parte-share-aug-2026-la",
+    "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.la.aug_2026",
+    "period": "August 2026 reporting period",
+    "resolutionDate": "2026-12-15",
+    "resolutionPolicy": "first_print",
+    "resolutionRule": "Resolves to Louisiana's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+    "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+    "series": "cms.medicaid_pi.ex_parte_renewal_share.la.aug_2026",
+    "targetUnit": "percent"
+  },
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/prompt.md",
+      "sha256": "58e92cec12e4a70174182ce684bc014c88a49d19804b02bf9b61c697d3c3bb1b",
+      "bytes": 10362,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/command.json",
+      "sha256": "07866675ad799c1b5684b8071cc71b7c8c2214e99c257d875c3c6851706ab80a",
+      "bytes": 193,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/stdout.txt",
+      "sha256": "11245eaf2488b27f2d316046c4c34c64433f91e05f31240f7dd54463c3b2e5b6",
+      "bytes": 9974,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/raw_response.txt",
+      "sha256": "11245eaf2488b27f2d316046c4c34c64433f91e05f31240f7dd54463c3b2e5b6",
+      "bytes": 9974,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/parsed_cells.json",
+      "sha256": "2b9de0f2146c18c6a90170bab34975bef1df84c9c81b39524da7fa9f19132b13",
+      "bytes": 10341,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/normalized_cells.json",
+      "sha256": "6cf3da3e704c51f08f6dc127df0c5bdeecb691a9b1c1d563089bf13f4970d878",
+      "bytes": 27220,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/distribution.json",
+      "sha256": "882077c131c0bc6cd262ecc24f4add1a9bcadde669a28545a82ddb75a98f183f",
+      "bytes": 13435,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/validation.json",
+      "sha256": "d09b11046381b575ce6e7c811419277d95d50b65c91d7fa9fffc9b8e66007a54",
+      "bytes": 136,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/cells.with_activity.json",
+      "sha256": "35b35c3bc07b77a4190a62aa3d932e6ae728268fbeada32fb59954080e4383c5",
+      "bytes": 30128,
+      "createdAt": "2026-10-07T10:13:40Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/medicaid-ex-parte-share-aug-2026-la__r1/manifest.json",
+      "sha256": "3f5dc37d9f7b6fc6e47adf85b04d4840de6318b601b97df82c4a5f06877ff3c3",
+      "bytes": 4510,
+      "createdAt": "2026-10-07T10:13:40Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "medicaid-ex-parte-share-aug-2026-la",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "7b6924c0d953d6d0530c0e1eb689019475fbb8ab5289675b64e3d810674b2025"
+}

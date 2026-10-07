@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:55Z",
+  "runStartedAt": "2026-10-07T10:13:55Z",
+  "series": "statcan.employment_insurance.regular_beneficiaries",
+  "period": "2026-08",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "canada-ei-regular-beneficiaries-august-2026",
+    "country": "CA",
+    "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.august_2026.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-21",
+      "start": "2026-10-13"
+    },
+    "period": "2026-08",
+    "registeredAt": "2026-08-12T21:16:44Z",
+    "registeredAtUtc": "2026-08-12T21:16:44Z",
+    "registrationCommit": "d50ffb7c957ea27fad25c6e0c6fee0aa2471bc84",
+    "registrationState": "preregistered",
+    "series": "statcan.employment_insurance.regular_beneficiaries",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www150.statcan.gc.ca"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-21",
+        "start": "2026-10-13"
+      },
+      "field": "v64549350",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "v64549350",
+      "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+      "table": "Statistics Canada Table 14-10-0011-01, EI regular beneficiaries, Canada, seasonally adjusted (persons)",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae",
+    "targetRegistrationPath": "records/targets/2026-08-12-344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae.json",
+    "targetUnit": "thousands",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "d50ffb7c957ea27fad25c6e0c6fee0aa2471bc84",
+  "targetContentHash": "344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae",
+  "targetRegistrationPath": "records/targets/2026-08-12-344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae.json",
+  "registeredAtUtc": "2026-08-12T21:16:44Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/prompt.md",
+      "sha256": "926610a564bf2010bf9c88b47bce823a9e0e2fb6a07e94c0cfcb8434e9af4992",
+      "bytes": 10600,
+      "createdAt": "2026-10-07T10:13:55Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/command.json",
+      "sha256": "e8103daf64aac46429c4c07dd751921d55de4c509f1b4fd39b3c283db2671f76",
+      "bytes": 201,
+      "createdAt": "2026-10-07T10:13:55Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/stdout.txt",
+      "sha256": "f922b395538a5efe38689adf3921b34f5c7526e2f439f45c402a39ed309f2bd1",
+      "bytes": 2746,
+      "createdAt": "2026-10-07T10:13:55Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:55Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/raw_response.txt",
+      "sha256": "f922b395538a5efe38689adf3921b34f5c7526e2f439f45c402a39ed309f2bd1",
+      "bytes": 2746,
+      "createdAt": "2026-10-07T10:13:55Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/parsed_cells.json",
+      "sha256": "360727eafcf095284e75778ca38a1dc391ab37b8f5edad95e1b5e4df4f5aa4b5",
+      "bytes": 2860,
+      "createdAt": "2026-10-07T10:13:55Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/normalized_cells.json",
+      "sha256": "1978f609327b7683410f21385d4d637c0f2e855ef1a0a23b8929b8802e1cf228",
+      "bytes": 2702,
+      "createdAt": "2026-10-07T10:13:55Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:13:55Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/canada-ei-regular-beneficiaries-august-2026__r1/manifest.json",
+      "sha256": "b785968d7af536ef64ba149df1803b19f825e40620b1a5077ad517a58baeb266",
+      "bytes": 4704,
+      "createdAt": "2026-10-07T10:13:55Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "ddc60d5c2d7af285555a5db89e6a318f2f804258168338d613e23175223d4736"
+}

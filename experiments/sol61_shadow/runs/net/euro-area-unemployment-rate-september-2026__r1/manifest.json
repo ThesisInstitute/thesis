@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:17Z",
+  "runStartedAt": "2026-10-07T10:14:17Z",
+  "sealedAt": "2026-10-07T10:14:17Z",
+  "series": "eurostat.unemployment_rate",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "euro-area-unemployment-rate-september-2026",
+    "country": "EA",
+    "dataPointId": "eurostat.unemployment_rate.euro_area.september_2026.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-11-09",
+      "start": "2026-11-01"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-07T20:04:45Z",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "registrationState": "preregistered",
+    "series": "eurostat.unemployment_rate",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "ec.europa.eu"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-09",
+        "start": "2026-11-01"
+      },
+      "field": "PC_ACT",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21",
+      "sourceUrl": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21?format=JSON",
+      "table": "Unemployment by sex and age (une_rt_m), euro area, SA, total; first print captured between monthly releases",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "233992db438bc52d1f79f1d0e676ac61ba4b526f50fbfbcc6e76f4996094e095",
+    "targetRegistrationPath": "records/targets/2026-09-07-233992db438bc52d1f79f1d0e676ac61ba4b526f50fbfbcc6e76f4996094e095.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+  "targetContentHash": "233992db438bc52d1f79f1d0e676ac61ba4b526f50fbfbcc6e76f4996094e095",
+  "targetRegistrationPath": "records/targets/2026-09-07-233992db438bc52d1f79f1d0e676ac61ba4b526f50fbfbcc6e76f4996094e095.json",
+  "registeredAtUtc": "2026-09-07T20:04:45Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/prompt.md",
+      "sha256": "056b52fcad98be2751d07342c1408b653c0d05934255fd414a9eb352727634b4",
+      "bytes": 10589,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/command.json",
+      "sha256": "66af0fbf7334710839e003a79eef7b82e3f61044f8136ff3f8574979c8f93d44",
+      "bytes": 200,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/stdout.txt",
+      "sha256": "f31e1fd25fce40a2a157a2a9228d235b70810116ad76cf0dfaa5235f7363483e",
+      "bytes": 9481,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/raw_response.txt",
+      "sha256": "f31e1fd25fce40a2a157a2a9228d235b70810116ad76cf0dfaa5235f7363483e",
+      "bytes": 9481,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/parsed_cells.json",
+      "sha256": "0d3a7bb1526e0fa7fb04ae84d33e3b0d9eee5891dd64c8dd0179bd572c71e91a",
+      "bytes": 10011,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/normalized_cells.json",
+      "sha256": "1387844c1a35829e5d680326498d48de19508546f83219d8b1e97e5c2ce9c195",
+      "bytes": 27473,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/distribution.json",
+      "sha256": "2b3ed37a167c1da02803f441c0db223f43179aa474173b3cf127cbccc8fbc6f1",
+      "bytes": 13678,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/validation.json",
+      "sha256": "f74a11334aac78ca45cdfb195e4a6b667d07b1d167ec207d4f15aa0ab31422fd",
+      "bytes": 143,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/cells.with_activity.json",
+      "sha256": "1237e70723acff138407c6b5501ba7dfb02f0f4dadff1a75c16f1dba493120a0",
+      "bytes": 30444,
+      "createdAt": "2026-10-07T10:14:17Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/euro-area-unemployment-rate-september-2026__r1/manifest.json",
+      "sha256": "b202b34486498c6cda3e93613f101f4be9533bef06cb873cfdeebf0575d21156",
+      "bytes": 5334,
+      "createdAt": "2026-10-07T10:14:17Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "euro-area-unemployment-rate-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "78dc56c540a3d3c818f76a91873aaa9c2ab398b5b8affe07329e9af2575895be"
+}

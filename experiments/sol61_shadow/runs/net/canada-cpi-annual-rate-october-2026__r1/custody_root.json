@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "prompt.md",
+      "bytes": 10474,
+      "sha256": "162125965950ec9be1cf0f5deb6d08f5dda4621ed59d97ab97f44fcfb5707f8d"
+    },
+    {
+      "artifactType": "command",
+      "path": "command.json",
+      "bytes": 193,
+      "sha256": "bd86c8cf981c3d19309b897d5709d2a5fd9d81829939c01b59f90df1af069fbf",
+      "canonicalJsonSha256": "f51cc48e57554c5968e62d04f1225f8ea004e124a7556c4b8c8613b8ab5e8f33"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "stdout.txt",
+      "bytes": 389,
+      "sha256": "7436ccb997615e4369b5b470d3a78bde3f95d5ca2cb930fef1d615ca91bc2916"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "stderr.txt",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "raw_response.txt",
+      "bytes": 389,
+      "sha256": "7436ccb997615e4369b5b470d3a78bde3f95d5ca2cb930fef1d615ca91bc2916"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "parsed_cells.json",
+      "bytes": 416,
+      "sha256": "4c93df3125f093f06a43229f9b0f812b2ddc0071521556d28794a6f5257faf44",
+      "canonicalJsonSha256": "ffa7cb9b2d6d9f1c713c1ba05dd07c6619e4e92d21469436312afc17ed894702"
+    },
+    {
+      "artifactType": "error",
+      "path": "error.json",
+      "bytes": 204,
+      "sha256": "2f4f68f01ff4796f3debafe6a7e88ca8e7bd34648e417b57559a325bc27dac76",
+      "canonicalJsonSha256": "d6a27baad78e4578a520fccda077913af331bbbe666e8690de6d32e8c9a8095e"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "743c1828d09e67c01944310a307dab480be0732a8c31ee80a9425418c5e8026a"
+  }
+}

@@ -1,0 +1,1089 @@
+[
+  {
+    "slug": "medicaid-ex-parte-share-aug-2026-ak",
+    "country": "US",
+    "type": "data",
+    "title": "Alaska ex parte renewal share, August 2026",
+    "question": "What percentage of Alaska Medicaid and CHIP successful renewals for the August 2026 reporting period will have been completed on an ex parte basis, calculated from CMS's original (O) submission row at first official publication?",
+    "unit": "percent",
+    "pointEstimate": 59.1,
+    "ciLow": 48.0,
+    "ciHigh": 70.1,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-15",
+    "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+    "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "resolutionRule": "Resolves to Alaska's ex parte renewal share for August 2026 from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. This forecast interprets share as 100 times beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis divided by beneficiaries_whose_coverage_was_renewed_total, using the published counts and rounding to one decimal. Subsequent updated submissions and revisions do not change resolution. The supplied ledger does not explicitly identify the denominator, and its December 15 date could not be verified from an official publication schedule.",
+    "historicalContext": [
+      {
+        "label": "June 2025",
+        "value": 72.9,
+        "period": {
+          "type": "month",
+          "value": "2025-06"
+        }
+      },
+      {
+        "label": "July 2025",
+        "value": 63.7,
+        "period": {
+          "type": "month",
+          "value": "2025-07"
+        }
+      },
+      {
+        "label": "August 2025",
+        "value": 66.5,
+        "period": {
+          "type": "month",
+          "value": "2025-08"
+        }
+      },
+      {
+        "label": "September 2025",
+        "value": 63.9,
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        }
+      },
+      {
+        "label": "October 2025",
+        "value": 57.3,
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        }
+      },
+      {
+        "label": "November 2025",
+        "value": 61.5,
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        }
+      },
+      {
+        "label": "December 2025",
+        "value": 63.1,
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        }
+      },
+      {
+        "label": "January 2026",
+        "value": 54.0,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "February 2026",
+        "value": 56.2,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "March 2026",
+        "value": 51.0,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 61.3,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 65.4,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 60.1,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      }
+    ],
+    "drivers": [
+      "Persistence of Alaska's recent original-submission renewal mix",
+      "Recent six-month level below the preceding annual average",
+      "Volatile monthly changes and a two-month forecast horizon",
+      "Published ex parte undercount footnotes and classification risk",
+      "Unspecified ledger denominator and unverified publication date"
+    ],
+    "sourceContext": [
+      "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+      "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=10&conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=AK&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202601&conditions%5B2%5D%5Boperator%5D=%3E%3D&properties%5B0%5D=reporting_period&properties%5B1%5D=beneficiaries_whose_coverage_was_renewed_total&properties%5B2%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis",
+      "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+    ],
+    "runAt": "2026-10-07T10:14:21Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Alaska August 2026 ex parte renewal share"
+      },
+      {
+        "kind": "text",
+        "text": "The target is Alaska's state row for the August 2026 reporting cohort in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using the original O submission at first publication. All historical anchors use O rows and the same calculated share. Updated U submissions, national totals, and national weighted percentages are excluded."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "curl -sS against the CMS datastore query endpoint for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, limit 100, filtered to state_abbreviation=AK and original_or_updated=O; echo original numerator, total renewed, renewals due, and footnotes.",
+        "result": "Fetched ex parte/total-renewed counts: June 2025 6246/8572; July 5742/9014; August 6339/9528; September 5397/8444; October 4587/8004; November 6026/9791; December 5547/8791. Earlier seasonal comparisons were June 2024 10258/12542 and August 2024 6879/9681. The response included Alaska O rows through June 2026."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "curl -sS against the same CMS datastore endpoint, filtered to Alaska O rows with reporting_period>=202601, projecting reporting period, total renewed, and ex parte renewed.",
+        "result": "Fetched six rows: January 2026 ex parte 3782, total renewed 7006; February 4686/8345; March 3712/7272; April 4719/7704; May 5505/8417; June 4303/7158. Calculated shares are 54.0%, 56.2%, 51.0%, 61.3%, 65.4%, and 60.1%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open the official June 2026 Eligibility Operations and Enrollment Snapshot, page index 30, and inspect Alaska's coverage retention and disenrollment table.",
+        "result": "Alaska has 15924 renewals due, 45% total renewed, and 27% renewed on an ex parte basis. The table explicitly uses total renewals due as its percentage denominator. This differs from the successful-renewal share calculated here: 100*4303/7158=60.1146%, versus 100*4303/15924=27.0221%."
+      },
+      {
+        "kind": "text",
+        "text": "Resolver ambiguity: the ledger names an ex parte renewal share but leaves its denominator unspecified. I interpret share as the ex parte fraction of successful renewals. CMS's displayed ex parte rate instead divides by renewals due. These are materially different quantities; the supplied contract does not establish which denominator its automated resolver implements."
+      },
+      {
+        "kind": "text",
+        "text": "Publication-date verification gap: the official CMS release page lists June 2026 as released September 25, 2026, but provides no announcement confirming December 15, 2026 for August's original submission. I retain the registered resolutionDate without inferring a publication date from cadence. This run does not satisfy the requirement for official verification of that date."
+      },
+      {
+        "kind": "text",
+        "text": "The outside-view base rate is the 13 monthly O-row shares from June 2025 through June 2026: their arithmetic mean is 61.3014%. The January\u2013June 2026 mean is 57.9921%, while June is 60.1146%. These fetched state observations anchor the forecast."
+      },
+      {
+        "kind": "text",
+        "text": "Level: blend June persistence with the recent six-month mean. Momentum: apply no extrapolated trend because the spring rise reversed in June. One-off effects: preserve the published counts despite ex parte undercount footnotes; no numerical correction is justified. Policy mechanism: apply no speculative automation adjustment. June-to-August declines in the two preceding years are a downside consideration, but the small seasonal sample does not support a separate adjustment."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: use a persistence prior shrunk equally toward the recent six-month level. Point = 0.5*60.114557 + 0.5*57.992099 = 59.053328%, rounded to 59.1%. Historical sample: 13 unrounded monthly shares, June 2025\u2013June 2026, giving 12 successive changes. Their mean is -1.062549 percentage points and their centered sum of squares is 412.612418; sigma = 6.124559 percentage points = sqrt(412.612418/11). Normal 80% baseline half-width = 1.28*sigma = 7.839435 points. August is two reporting months beyond June, so multiply by sqrt(2), giving 11.086636 points. This is 1.414 times the baseline. Momentum, one-off correction, and policy adjustments are zero. Bounds = 59.053328 +/- 11.086636 = 47.966692 to 70.139963%, rounded to 48.0\u201370.1%."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk: greater automatic matching or classification of renewals as ex parte could lift the successful-renewal share. Downside risk: more form-based renewals or continued ex parte undercounting could lower it. A substantial classification or cohort-composition shift could put the outcome outside the interval, above 70.1% or below 48.0%. A renewals-due denominator would also fall outside this interval because it defines a different statistic."
+      },
+      {
+        "kind": "forecast",
+        "point": 59.1,
+        "ciLow": 48.0,
+        "ciHigh": 70.1
+      }
+    ],
+    "agentReportedRunAt": "2026-10-07T00:07:28Z",
+    "runStartedAt": "2026-10-07T10:14:21Z",
+    "promptMode": "fast",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 31.35,
+        "upper": 86.6
+      },
+      "points": [
+        {
+          "value": 31.35,
+          "probability": 0.0
+        },
+        {
+          "value": 31.62625,
+          "probability": 0.00165915915916
+        },
+        {
+          "value": 31.9025,
+          "probability": 0.00331831831832
+        },
+        {
+          "value": 32.17875,
+          "probability": 0.00497747747748
+        },
+        {
+          "value": 32.455,
+          "probability": 0.00663663663664
+        },
+        {
+          "value": 32.73125,
+          "probability": 0.0082957957958
+        },
+        {
+          "value": 33.0075,
+          "probability": 0.00995495495495
+        },
+        {
+          "value": 33.28375,
+          "probability": 0.0116141141141
+        },
+        {
+          "value": 33.56,
+          "probability": 0.0132732732733
+        },
+        {
+          "value": 33.83625,
+          "probability": 0.0149324324324
+        },
+        {
+          "value": 34.1125,
+          "probability": 0.0165915915916
+        },
+        {
+          "value": 34.38875,
+          "probability": 0.0182507507508
+        },
+        {
+          "value": 34.665,
+          "probability": 0.0199099099099
+        },
+        {
+          "value": 34.94125,
+          "probability": 0.0215690690691
+        },
+        {
+          "value": 35.2175,
+          "probability": 0.0232282282282
+        },
+        {
+          "value": 35.49375,
+          "probability": 0.0248873873874
+        },
+        {
+          "value": 35.77,
+          "probability": 0.0265465465465
+        },
+        {
+          "value": 36.04625,
+          "probability": 0.0282057057057
+        },
+        {
+          "value": 36.3225,
+          "probability": 0.0298648648649
+        },
+        {
+          "value": 36.59875,
+          "probability": 0.031524024024
+        },
+        {
+          "value": 36.875,
+          "probability": 0.0331831831832
+        },
+        {
+          "value": 37.15125,
+          "probability": 0.0348423423423
+        },
+        {
+          "value": 37.4275,
+          "probability": 0.0365015015015
+        },
+        {
+          "value": 37.70375,
+          "probability": 0.0381606606607
+        },
+        {
+          "value": 37.98,
+          "probability": 0.0398198198198
+        },
+        {
+          "value": 38.25625,
+          "probability": 0.041478978979
+        },
+        {
+          "value": 38.5325,
+          "probability": 0.0431381381381
+        },
+        {
+          "value": 38.80875,
+          "probability": 0.0447972972973
+        },
+        {
+          "value": 39.085,
+          "probability": 0.0464564564565
+        },
+        {
+          "value": 39.36125,
+          "probability": 0.0481156156156
+        },
+        {
+          "value": 39.6375,
+          "probability": 0.0497747747748
+        },
+        {
+          "value": 39.91375,
+          "probability": 0.0514339339339
+        },
+        {
+          "value": 40.19,
+          "probability": 0.0530930930931
+        },
+        {
+          "value": 40.46625,
+          "probability": 0.0547522522523
+        },
+        {
+          "value": 40.7425,
+          "probability": 0.0564114114114
+        },
+        {
+          "value": 41.01875,
+          "probability": 0.0580705705706
+        },
+        {
+          "value": 41.295,
+          "probability": 0.0597297297297
+        },
+        {
+          "value": 41.57125,
+          "probability": 0.0613888888889
+        },
+        {
+          "value": 41.8475,
+          "probability": 0.063048048048
+        },
+        {
+          "value": 42.12375,
+          "probability": 0.0647072072072
+        },
+        {
+          "value": 42.4,
+          "probability": 0.0663663663664
+        },
+        {
+          "value": 42.67625,
+          "probability": 0.0680255255255
+        },
+        {
+          "value": 42.9525,
+          "probability": 0.0696846846847
+        },
+        {
+          "value": 43.22875,
+          "probability": 0.0713438438438
+        },
+        {
+          "value": 43.505,
+          "probability": 0.073003003003
+        },
+        {
+          "value": 43.78125,
+          "probability": 0.0746621621622
+        },
+        {
+          "value": 44.0575,
+          "probability": 0.0763213213213
+        },
+        {
+          "value": 44.33375,
+          "probability": 0.0779804804805
+        },
+        {
+          "value": 44.61,
+          "probability": 0.0796396396396
+        },
+        {
+          "value": 44.88625,
+          "probability": 0.0812987987988
+        },
+        {
+          "value": 45.1625,
+          "probability": 0.082957957958
+        },
+        {
+          "value": 45.43875,
+          "probability": 0.0846171171171
+        },
+        {
+          "value": 45.715,
+          "probability": 0.0862762762763
+        },
+        {
+          "value": 45.99125,
+          "probability": 0.0879354354354
+        },
+        {
+          "value": 46.2675,
+          "probability": 0.0895945945946
+        },
+        {
+          "value": 46.54375,
+          "probability": 0.0912537537538
+        },
+        {
+          "value": 46.82,
+          "probability": 0.0929129129129
+        },
+        {
+          "value": 47.09625,
+          "probability": 0.0945720720721
+        },
+        {
+          "value": 47.3725,
+          "probability": 0.0962312312312
+        },
+        {
+          "value": 47.64875,
+          "probability": 0.0978903903904
+        },
+        {
+          "value": 47.925,
+          "probability": 0.0995495495495
+        },
+        {
+          "value": 48.20125,
+          "probability": 0.107252252252
+        },
+        {
+          "value": 48.4775,
+          "probability": 0.117207207207
+        },
+        {
+          "value": 48.75375,
+          "probability": 0.127162162162
+        },
+        {
+          "value": 49.03,
+          "probability": 0.137117117117
+        },
+        {
+          "value": 49.30625,
+          "probability": 0.147072072072
+        },
+        {
+          "value": 49.5825,
+          "probability": 0.157027027027
+        },
+        {
+          "value": 49.85875,
+          "probability": 0.166981981982
+        },
+        {
+          "value": 50.135,
+          "probability": 0.176936936937
+        },
+        {
+          "value": 50.41125,
+          "probability": 0.186891891892
+        },
+        {
+          "value": 50.6875,
+          "probability": 0.196846846847
+        },
+        {
+          "value": 50.96375,
+          "probability": 0.206801801802
+        },
+        {
+          "value": 51.24,
+          "probability": 0.216756756757
+        },
+        {
+          "value": 51.51625,
+          "probability": 0.226711711712
+        },
+        {
+          "value": 51.7925,
+          "probability": 0.236666666667
+        },
+        {
+          "value": 52.06875,
+          "probability": 0.246621621622
+        },
+        {
+          "value": 52.345,
+          "probability": 0.256576576577
+        },
+        {
+          "value": 52.62125,
+          "probability": 0.266531531532
+        },
+        {
+          "value": 52.8975,
+          "probability": 0.276486486486
+        },
+        {
+          "value": 53.17375,
+          "probability": 0.286441441441
+        },
+        {
+          "value": 53.45,
+          "probability": 0.296396396396
+        },
+        {
+          "value": 53.72625,
+          "probability": 0.306351351351
+        },
+        {
+          "value": 54.0025,
+          "probability": 0.316306306306
+        },
+        {
+          "value": 54.27875,
+          "probability": 0.326261261261
+        },
+        {
+          "value": 54.555,
+          "probability": 0.336216216216
+        },
+        {
+          "value": 54.83125,
+          "probability": 0.346171171171
+        },
+        {
+          "value": 55.1075,
+          "probability": 0.356126126126
+        },
+        {
+          "value": 55.38375,
+          "probability": 0.366081081081
+        },
+        {
+          "value": 55.66,
+          "probability": 0.376036036036
+        },
+        {
+          "value": 55.93625,
+          "probability": 0.385990990991
+        },
+        {
+          "value": 56.2125,
+          "probability": 0.395945945946
+        },
+        {
+          "value": 56.48875,
+          "probability": 0.405900900901
+        },
+        {
+          "value": 56.765,
+          "probability": 0.415855855856
+        },
+        {
+          "value": 57.04125,
+          "probability": 0.425810810811
+        },
+        {
+          "value": 57.3175,
+          "probability": 0.435765765766
+        },
+        {
+          "value": 57.59375,
+          "probability": 0.445720720721
+        },
+        {
+          "value": 57.87,
+          "probability": 0.455675675676
+        },
+        {
+          "value": 58.14625,
+          "probability": 0.465630630631
+        },
+        {
+          "value": 58.4225,
+          "probability": 0.475585585586
+        },
+        {
+          "value": 58.69875,
+          "probability": 0.485540540541
+        },
+        {
+          "value": 58.975,
+          "probability": 0.495495495495
+        },
+        {
+          "value": 59.25125,
+          "probability": 0.5055
+        },
+        {
+          "value": 59.5275,
+          "probability": 0.515545454545
+        },
+        {
+          "value": 59.80375,
+          "probability": 0.525590909091
+        },
+        {
+          "value": 60.08,
+          "probability": 0.535636363636
+        },
+        {
+          "value": 60.35625,
+          "probability": 0.545681818182
+        },
+        {
+          "value": 60.6325,
+          "probability": 0.555727272727
+        },
+        {
+          "value": 60.90875,
+          "probability": 0.565772727273
+        },
+        {
+          "value": 61.185,
+          "probability": 0.575818181818
+        },
+        {
+          "value": 61.46125,
+          "probability": 0.585863636364
+        },
+        {
+          "value": 61.7375,
+          "probability": 0.595909090909
+        },
+        {
+          "value": 62.01375,
+          "probability": 0.605954545455
+        },
+        {
+          "value": 62.29,
+          "probability": 0.616
+        },
+        {
+          "value": 62.56625,
+          "probability": 0.626045454545
+        },
+        {
+          "value": 62.8425,
+          "probability": 0.636090909091
+        },
+        {
+          "value": 63.11875,
+          "probability": 0.646136363636
+        },
+        {
+          "value": 63.395,
+          "probability": 0.656181818182
+        },
+        {
+          "value": 63.67125,
+          "probability": 0.666227272727
+        },
+        {
+          "value": 63.9475,
+          "probability": 0.676272727273
+        },
+        {
+          "value": 64.22375,
+          "probability": 0.686318181818
+        },
+        {
+          "value": 64.5,
+          "probability": 0.696363636364
+        },
+        {
+          "value": 64.77625,
+          "probability": 0.706409090909
+        },
+        {
+          "value": 65.0525,
+          "probability": 0.716454545455
+        },
+        {
+          "value": 65.32875,
+          "probability": 0.7265
+        },
+        {
+          "value": 65.605,
+          "probability": 0.736545454545
+        },
+        {
+          "value": 65.88125,
+          "probability": 0.746590909091
+        },
+        {
+          "value": 66.1575,
+          "probability": 0.756636363636
+        },
+        {
+          "value": 66.43375,
+          "probability": 0.766681818182
+        },
+        {
+          "value": 66.71,
+          "probability": 0.776727272727
+        },
+        {
+          "value": 66.98625,
+          "probability": 0.786772727273
+        },
+        {
+          "value": 67.2625,
+          "probability": 0.796818181818
+        },
+        {
+          "value": 67.53875,
+          "probability": 0.806863636364
+        },
+        {
+          "value": 67.815,
+          "probability": 0.816909090909
+        },
+        {
+          "value": 68.09125,
+          "probability": 0.826954545455
+        },
+        {
+          "value": 68.3675,
+          "probability": 0.837
+        },
+        {
+          "value": 68.64375,
+          "probability": 0.847045454545
+        },
+        {
+          "value": 68.92,
+          "probability": 0.857090909091
+        },
+        {
+          "value": 69.19625,
+          "probability": 0.867136363636
+        },
+        {
+          "value": 69.4725,
+          "probability": 0.877181818182
+        },
+        {
+          "value": 69.74875,
+          "probability": 0.887227272727
+        },
+        {
+          "value": 70.025,
+          "probability": 0.897272727273
+        },
+        {
+          "value": 70.30125,
+          "probability": 0.90121969697
+        },
+        {
+          "value": 70.5775,
+          "probability": 0.902893939394
+        },
+        {
+          "value": 70.85375,
+          "probability": 0.904568181818
+        },
+        {
+          "value": 71.13,
+          "probability": 0.906242424242
+        },
+        {
+          "value": 71.40625,
+          "probability": 0.907916666667
+        },
+        {
+          "value": 71.6825,
+          "probability": 0.909590909091
+        },
+        {
+          "value": 71.95875,
+          "probability": 0.911265151515
+        },
+        {
+          "value": 72.235,
+          "probability": 0.912939393939
+        },
+        {
+          "value": 72.51125,
+          "probability": 0.914613636364
+        },
+        {
+          "value": 72.7875,
+          "probability": 0.916287878788
+        },
+        {
+          "value": 73.06375,
+          "probability": 0.917962121212
+        },
+        {
+          "value": 73.34,
+          "probability": 0.919636363636
+        },
+        {
+          "value": 73.61625,
+          "probability": 0.921310606061
+        },
+        {
+          "value": 73.8925,
+          "probability": 0.922984848485
+        },
+        {
+          "value": 74.16875,
+          "probability": 0.924659090909
+        },
+        {
+          "value": 74.445,
+          "probability": 0.926333333333
+        },
+        {
+          "value": 74.72125,
+          "probability": 0.928007575758
+        },
+        {
+          "value": 74.9975,
+          "probability": 0.929681818182
+        },
+        {
+          "value": 75.27375,
+          "probability": 0.931356060606
+        },
+        {
+          "value": 75.55,
+          "probability": 0.93303030303
+        },
+        {
+          "value": 75.82625,
+          "probability": 0.934704545455
+        },
+        {
+          "value": 76.1025,
+          "probability": 0.936378787879
+        },
+        {
+          "value": 76.37875,
+          "probability": 0.938053030303
+        },
+        {
+          "value": 76.655,
+          "probability": 0.939727272727
+        },
+        {
+          "value": 76.93125,
+          "probability": 0.941401515152
+        },
+        {
+          "value": 77.2075,
+          "probability": 0.943075757576
+        },
+        {
+          "value": 77.48375,
+          "probability": 0.94475
+        },
+        {
+          "value": 77.76,
+          "probability": 0.946424242424
+        },
+        {
+          "value": 78.03625,
+          "probability": 0.948098484848
+        },
+        {
+          "value": 78.3125,
+          "probability": 0.949772727273
+        },
+        {
+          "value": 78.58875,
+          "probability": 0.951446969697
+        },
+        {
+          "value": 78.865,
+          "probability": 0.953121212121
+        },
+        {
+          "value": 79.14125,
+          "probability": 0.954795454545
+        },
+        {
+          "value": 79.4175,
+          "probability": 0.95646969697
+        },
+        {
+          "value": 79.69375,
+          "probability": 0.958143939394
+        },
+        {
+          "value": 79.97,
+          "probability": 0.959818181818
+        },
+        {
+          "value": 80.24625,
+          "probability": 0.961492424242
+        },
+        {
+          "value": 80.5225,
+          "probability": 0.963166666667
+        },
+        {
+          "value": 80.79875,
+          "probability": 0.964840909091
+        },
+        {
+          "value": 81.075,
+          "probability": 0.966515151515
+        },
+        {
+          "value": 81.35125,
+          "probability": 0.968189393939
+        },
+        {
+          "value": 81.6275,
+          "probability": 0.969863636364
+        },
+        {
+          "value": 81.90375,
+          "probability": 0.971537878788
+        },
+        {
+          "value": 82.18,
+          "probability": 0.973212121212
+        },
+        {
+          "value": 82.45625,
+          "probability": 0.974886363636
+        },
+        {
+          "value": 82.7325,
+          "probability": 0.976560606061
+        },
+        {
+          "value": 83.00875,
+          "probability": 0.978234848485
+        },
+        {
+          "value": 83.285,
+          "probability": 0.979909090909
+        },
+        {
+          "value": 83.56125,
+          "probability": 0.981583333333
+        },
+        {
+          "value": 83.8375,
+          "probability": 0.983257575758
+        },
+        {
+          "value": 84.11375,
+          "probability": 0.984931818182
+        },
+        {
+          "value": 84.39,
+          "probability": 0.986606060606
+        },
+        {
+          "value": 84.66625,
+          "probability": 0.98828030303
+        },
+        {
+          "value": 84.9425,
+          "probability": 0.989954545455
+        },
+        {
+          "value": 85.21875,
+          "probability": 0.991628787879
+        },
+        {
+          "value": 85.495,
+          "probability": 0.993303030303
+        },
+        {
+          "value": 85.77125,
+          "probability": 0.994977272727
+        },
+        {
+          "value": 86.0475,
+          "probability": 0.996651515152
+        },
+        {
+          "value": 86.32375,
+          "probability": 0.998325757576
+        },
+        {
+          "value": 86.6,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 59.1,
+        "median": 59.1,
+        "interval80": {
+          "lower": 48.0,
+          "upper": 70.1
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "claude-fable-5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/prompt.md",
+        "sha256": "9c1746e60ecdf440311f0d42990bfb4c82528db3c2fc199c5652f507e06849dd",
+        "bytes": 10325,
+        "createdAt": "2026-10-07T10:14:21Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/command.json",
+        "sha256": "3339f5d61a9037f138ada8ab7f723a879204b7c7fcaed27b410d91bbd1fe1d46",
+        "bytes": 193,
+        "createdAt": "2026-10-07T10:14:21Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/stdout.txt",
+        "sha256": "a53120b7707a878651ee0b93bc298eebafb4088152cf38e914e6b6cc63688c85",
+        "bytes": 9553,
+        "createdAt": "2026-10-07T10:14:21Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/stderr.txt",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "bytes": 1,
+        "createdAt": "2026-10-07T10:14:21Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/raw_response.txt",
+        "sha256": "a53120b7707a878651ee0b93bc298eebafb4088152cf38e914e6b6cc63688c85",
+        "bytes": 9553,
+        "createdAt": "2026-10-07T10:14:21Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/parsed_cells.json",
+        "sha256": "d73a28b7b37a4595e61d433977c38e9fa8864e7bca9752f9d8818a80660c8c68",
+        "bytes": 10266,
+        "createdAt": "2026-10-07T10:14:21Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/normalized_cells.json",
+        "sha256": "9084aebf9b01220431dc71707728c34c98d558c56f2198718deace4e2c1e82a0",
+        "bytes": 28739,
+        "createdAt": "2026-10-07T10:14:21Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/distribution.json",
+        "sha256": "a21d8c8d608dcc53b48b47e517b7fd7283fda4deecbf14978e3dd50c09c755ea",
+        "bytes": 15029,
+        "createdAt": "2026-10-07T10:14:21Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "experiments/sol61_shadow/runs/net/medicaid-ex-parte-share-aug-2026-ak__r1/validation.json",
+        "sha256": "270acdcda0c59724b26a21ad74f28d4fcf2081b9ea41d5ba41fb7fb9fddf0a94",
+        "bytes": 298,
+        "createdAt": "2026-10-07T10:14:21Z"
+      }
+    ]
+  }
+]

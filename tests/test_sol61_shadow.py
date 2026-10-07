@@ -459,3 +459,46 @@ def test_latest_receipts_orders_a_retry_after_the_job_it_replaces() -> None:
     other = {"job_id": "20261006-170000-s61-web2-wic", "out": "/o/out/web/wic__r2.txt"}
     grouped = shadow.latest_receipts([retry, other, first])
     assert grouped == {"net/wic__r1": [first, retry], "web/wic__r2": [other]}
+
+
+def _stopped_row(tmp_root: pathlib.Path, point, text: str) -> dict:
+    response = tmp_root / "resp.txt"
+    response.write_text(
+        json.dumps({"pointEstimate": point, "reasoning": [{"text": text}]})
+    )
+    return {"final": True, "response": str(response)}
+
+
+def test_transport_stopped_needs_both_a_null_forecast_and_a_transport_error(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setattr(shadow, "ROOT", pathlib.Path("/"))
+    outage = "The official request failed with: Fatal error: connection failed"
+    assert shadow.transport_stopped(_stopped_row(tmp_path, None, outage))
+    assert not shadow.transport_stopped(_stopped_row(tmp_path, 4.1, outage))
+    assert not shadow.transport_stopped(
+        _stopped_row(tmp_path, None, "The series has fewer than six prints.")
+    )
+    assert not shadow.transport_stopped({"final": False, "response": "x"})
+
+
+def test_archive_run_moves_artifacts_and_keeps_the_record(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setattr(shadow, "ROOT", tmp_path)
+    monkeypatch.setattr(shadow, "EXP", tmp_path / "exp")
+    (tmp_path / "exp" / "responses").mkdir(parents=True)
+    (tmp_path / "exp" / "responses" / "a__r1.txt").write_text("{}")
+    (tmp_path / "exp" / "runs" / "a__r1").mkdir(parents=True)
+    (tmp_path / "exp" / "runs" / "a__r1" / "manifest.json").write_text("{}")
+    row = {
+        "arm": "web", "slug": "a", "rollout": 1, "jobId": "j1", "state": "succeeded",
+        "eligible": False, "response": "exp/responses/a__r1.txt",
+        "validation": {"ok": False, "errors": ["e"], "runDir": "exp/runs/a__r1"},
+    }  # fmt: skip
+    record = shadow.archive_run(row)
+    assert record["jobId"] == "j1" and record["validationErrors"] == ["e"]
+    assert not (tmp_path / "exp" / "responses" / "a__r1.txt").exists()
+    archived = tmp_path / record["archived"]["response"]
+    assert archived.read_text() == "{}"
+    assert (tmp_path / record["archived"]["runDir"] / "manifest.json").is_file()

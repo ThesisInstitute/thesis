@@ -1,0 +1,7 @@
+[
+  {
+    "error": "official_source_fetch_failed",
+    "detail": "The official Statistics Canada annual release-calendar PDF at https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf timed out. CPI history was successfully fetched, but the required resolution date was not verified. Following the instruction to stop after a failed fetch, no forecast was produced.",
+    "runAt": "2026-10-07T00:02:39Z"
+  }
+]

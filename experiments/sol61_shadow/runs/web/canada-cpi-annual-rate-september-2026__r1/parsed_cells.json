@@ -1,0 +1,152 @@
+[
+  {
+    "slug": "canada-cpi-annual-rate-september-2026",
+    "country": "CA",
+    "type": "data",
+    "title": "Canada CPI annual rate, September 2026",
+    "question": "What will Statistics Canada first report for the September 2026 year-over-year percentage change in Canada's all-items Consumer Price Index, not seasonally adjusted?",
+    "unit": "percent",
+    "pointEstimate": 3.1,
+    "ciLow": 2.67,
+    "ciHigh": 3.53,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-19",
+    "resolutionSource": "Statistics Canada, Consumer Price Index, Table 18-10-0004-01 and The Daily",
+    "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "resolutionRule": "Resolve to the first official September 2026 Canada all-items CPI year-over-year percentage change, not seasonally adjusted, rounded to one decimal. Use Table 18-10-0004-01, vector v41690973, applying 100 times the September 2026 index divided by its September 2025 comparison index minus 100, using the values available in the initial release. Subsequent revisions and corrections do not change the outcome; no same-day correction or grace exception applies.",
+    "dataPointId": "statcan.cpi.allitems.yoy.2026_09.first_print",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "March 2026",
+        "value": 2.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "April 2026",
+        "value": 2.8
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "May 2026",
+        "value": 3.2
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "June 2026",
+        "value": 2.8
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        },
+        "label": "July 2026",
+        "value": 3.0
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        },
+        "label": "August 2026",
+        "value": 3.0
+      }
+    ],
+    "drivers": [
+      "Headline inflation persistence near 3.0%",
+      "September US gasoline increase signals renewed regional fuel pressure",
+      "Travel seasonality and September 2025 comparison prices restrain inflation",
+      "Slower grocery inflation offsets firmer rent growth",
+      "Extended fuel excise suspension avoids a September tax increase"
+    ],
+    "sourceContext": [
+      "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+      "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260519/dq260519a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260720/t001a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/251021/dq251021a-eng.htm?HPA=1",
+      "https://www.bts.gov/newsroom/motor-fuel-prices-september-2026-0",
+      "https://www.canada.ca/en/treasury-board-secretariat/news/2026/09/the-government-of-canada-extends-the-federal-fuel-excise-tax-relief-on-gasoline-diesel-and-aviation-fuels-for-canadians.html"
+    ],
+    "runAt": "2026-10-06T22:35:40Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "September 2026 Canada CPI forecast: 3.1%"
+      },
+      {
+        "kind": "text",
+        "text": "The target is the first national all-items CPI annual rate for September 2026. Table 18-10-0004-01 and registered vector v41690973 identify the not seasonally adjusted series. All headline historical prints and index anchors use this same variant. Statistics Canada's official release calendar explicitly schedules September CPI for October 19, 2026; the August announcement independently confirms that date."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch Statistics Canada The Daily releases for March, April and May 2026.",
+        "result": "The official releases report headline year-over-year CPI of 2.4% in March, 2.8% in April and 3.2% in May. Sources: https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260519/dq260519a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm"
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch the June NSA table and July and August 2026 CPI announcements.",
+        "result": "Headline annual rates were June 2.8%, July 3.0% and August 3.0%. The June table gives gasoline a 4.01% basket weight at April 2026 prices. August groceries rose 2.8% versus July 3.1%, while rent rose 2.8% versus 2.5%. Sources: https://www150.statcan.gc.ca/n1/daily-quotidien/260720/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm"
+      },
+      {
+        "kind": "text",
+        "text": "The reference class is the six latest official headline prints, March through August 2026. Their mean is 2.8667%, and the latest two readings are both 3.0%. The outside-view base rate therefore supports a 3.0% rate-persistence prior before September-specific adjustments."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch the August 2026 and September 2025 original NSA tables and September 2025 announcement.",
+        "result": "The August 2026 all-items index is 169.8; September 2025 is 164.9, versus August 2025 at 164.8. September 2025 headline CPI increased 0.1% monthly, gasoline 1.9% and travel tours 4.6%; the travel increase was unusual for September. Sources: https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251021/dq251021a-eng.htm?HPA=1"
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch official September US motor-fuel evidence and Canada's fuel-excise extension announcement.",
+        "result": "US BTS reports September 2026 regular gasoline averaging $4.36 per gallon, up 7.3% monthly. Canada's Treasury Board announcement says the gasoline excise suspension, saving 10 cents per litre, continues through January 31, 2027. Sources: https://www.bts.gov/newsroom/motor-fuel-prices-september-2026-0 ; https://www.canada.ca/en/treasury-board-secretariat/news/2026/09/the-government-of-canada-extends-the-federal-fuel-excise-tax-relief-on-gasoline-diesel-and-aviation-fuels-for-canadians.html"
+      },
+      {
+        "kind": "text",
+        "text": "No numerical September Canadian pump-price observation was accessible in this run. The US increase is an auxiliary regional fuel signal, excluded from the Canadian headline history and dispersion calculation. I assume a smaller 5.0% Canadian gasoline monthly increase. That is a forecast assumption, not a fetched Canadian statistic. Broad non-energy momentum receives zero net adjustment; travel seasonality and the elevated year-earlier travel comparison receive a judgmental -0.10 percentage-point adjustment. Continuing the existing excise suspension contributes zero incremental September policy adjustment."
+      },
+      {
+        "kind": "math",
+        "text": "Flat-index annual inflation = 100*(169.8/164.9-1) = 2.9715%, a -0.0285 percentage-point adjustment to the 3.0% persistence prior. Approximate gasoline adjustment = (169.8/164.9)*0.0401*5.0 = +0.2065 percentage points, using the published basket weight as an approximate exposure. Forecast = 3.0-0.0285+0.2065-0.10+0+0 = 3.0780%, rounded to the agency's one-decimal print grid: 3.1%."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: Model: headline-rate persistence with index-base, fuel-proxy and seasonal updates. Historical sample: six March-August 2026 official NSA annual prints [2.4, 2.8, 3.2, 2.8, 3.0, 3.0]. Updates: -0.0285 percentage points for the comparison index, +0.2065 for assumed fuel pressure, -0.10 for seasonal travel, zero broad non-energy momentum and zero incremental tax effect. Successive changes are [0.4, 0.4, -0.4, 0.2, 0.0], with mean 0.12. Their squared deviations sum to 0.448; sigma = 0.3347 percentage points, calculated as sqrt(0.448/(5-1)). A normal 80% approximation gives half-width 1.28*0.334664 = 0.42837. Around the rounded 3.1% forecast, implied bounds are 2.67163% and 3.52837%, rounded outward to 2.67% and 3.53%. No additional width multiplier is applied. This uses realized rate dispersion rather than independently calibrated forecast errors."
+      },
+      {
+        "kind": "text",
+        "text": "The upside risk is stronger Canadian fuel pass-through combined with persistent rent and travel prices; a 3.6% or higher print would be outside the interval. The downside risk is falling Canadian pump prices despite the US increase, together with a larger travel-price unwind; a 2.6% or lower print would be outside the interval. The principal uncertainty is the unavailable Canadian September fuel observation."
+      },
+      {
+        "kind": "forecast",
+        "point": 3.1,
+        "ciLow": 2.67,
+        "ciHigh": 3.53
+      }
+    ]
+  }
+]

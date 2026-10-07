@@ -1,0 +1,200 @@
+[
+  {
+    "slug": "belgium-unemployment-rate-september-2026",
+    "country": "BE",
+    "type": "data",
+    "title": "Belgium unemployment rate, September 2026",
+    "question": "What will Eurostat first report for Belgium's September 2026 seasonally adjusted total unemployment rate, both sexes, ages 15-74, in une_rt_m?",
+    "unit": "percent",
+    "pointEstimate": 5.9,
+    "ciLow": 5.65,
+    "ciHigh": 6.15,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-30",
+    "resolutionSource": "Eurostat monthly unemployment release and une_rt_m data table",
+    "resolutionSourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+    "resolutionRule": "Resolve to the first official Eurostat numerical print for September 2026 in une_rt_m with freq=M, geo=BE, s_adj=SA, age=TOTAL, sex=T and unit=PC_ACT: seasonally adjusted total unemployment, both sexes, ages 15-74, as a percentage of the labour force. Use the published one-decimal rate with transformation factor 1. Subsequent revisions and corrections do not replace the first print; no release-day grace period applies.",
+    "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        },
+        "label": "2025-09",
+        "value": 5.9
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        },
+        "label": "2025-10",
+        "value": 6.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        },
+        "label": "2025-11",
+        "value": 6.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        },
+        "label": "2025-12",
+        "value": 6.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        },
+        "label": "2026-01",
+        "value": 6.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        },
+        "label": "2026-02",
+        "value": 6.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "2026-03",
+        "value": 6.3
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "2026-04",
+        "value": 6.2
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "2026-05",
+        "value": 6.3
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "2026-06",
+        "value": 6.3
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        },
+        "label": "2026-07",
+        "value": 6.0
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        },
+        "label": "2026-08",
+        "value": 5.9
+      }
+    ],
+    "drivers": [
+      "Persistence of the latest seasonally adjusted unemployment rate",
+      "Recent decline in Belgium's published unemployment rate",
+      "Quarterly LFS benchmarking and monthly registered-unemployment inputs",
+      "Revision effects in successive first prints"
+    ],
+    "sourceContext": [
+      "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30102025-bp",
+      "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02122025-bp",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-08012026-ap",
+      "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30012026-bp?id=1&item=table",
+      "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-04032026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap",
+      "https://ec.europa.eu/eurostat/fr/web/products-euro-indicators/w/3-30042026-cp",
+      "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01062026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp",
+      "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap",
+      "https://ec.europa.eu/eurostat/cache/metadata/en/une_rt_m_esms.htm"
+    ],
+    "runAt": "2026-10-06T22:43:51Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Belgium September 2026 unemployment first-print forecast"
+      },
+      {
+        "kind": "text",
+        "text": "The target is Eurostat series une_rt_m, Belgium, monthly, seasonally adjusted, total ages 15-74, both sexes, percentage of the labour force. Every historical observation and the latest anchor uses this same variant. HistoricalContext records each month's original release value, excluding later revisions. Country BE follows the canonical ledger."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch the original Eurostat seasonally adjusted totals tables for September-December 2025.",
+        "result": "Belgium first prints: September 5.9% ([September release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30102025-bp)); October 6.4% ([October release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02122025-bp)); November 6.4% ([November release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-08012026-ap)); December 6.4% ([December release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30012026-bp?id=1&item=table))."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch the original Eurostat seasonally adjusted totals tables for January-April 2026.",
+        "result": "Belgium first prints: January 6.4% ([January release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-04032026-ap)); February 6.4% ([February release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap)); March 6.3% ([March release](https://ec.europa.eu/eurostat/fr/web/products-euro-indicators/w/3-30042026-cp)); April 6.2% ([April release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01062026-ap))."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch the original Eurostat seasonally adjusted totals tables for May-August 2026 and the latest announcement schedule.",
+        "result": "Belgium first prints: May 6.3% ([May release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap)); June 6.3% ([June release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp)); July 6.0% ([July release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp)); August 5.9%, with 324 thousand unemployed. The October 1 announcement explicitly gives October 30, 2026 as the next release ([August release and schedule](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap))."
+      },
+      {
+        "kind": "text",
+        "text": "The officially announced release date is 2026-10-30, outside the ledger's expected window of 2026-11-01 through 2026-11-09. This is a concrete scheduling discrepancy. The forecast retains the registered September series, slug, unit and dataPointId, and uses the verified announcement date."
+      },
+      {
+        "kind": "text",
+        "text": "The reference class is twelve consecutive original monthly prints from September 2025 through August 2026. Their eleven successive changes have mean 0.0 and median 0.0 percentage points; nine are within 0.1 percentage points of zero. This base rate supports a persistence prior anchored on August's 5.9%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Inspect Belgium's September 2025 revision in the original October 2025 Eurostat release.",
+        "result": "The October release revised Belgium's September rate upward by 0.4 percentage points, from its original 5.9% to 6.3%. Therefore, the 0.5-point increase between September and October original prints partly reflects a vintage change ([official revision note](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02122025-bp))."
+      },
+      {
+        "kind": "text",
+        "text": "Level: August's 5.9% is the anchor. Momentum: July-to-August declined 0.1 percentage points, but the full reference class has zero mean change, so I apply no additional trend adjustment. One-off effects: revision and benchmarking uncertainty enter the dispersion estimate, with no separate point adjustment. Policy mechanism: I assign no quantified adjustment without evidence of transmission into this harmonised rate. Eurostat combines Belgium's quarterly LFS with monthly registered unemployment through Denton disaggregation and forecasts recent benchmark factors with seasonal ARIMA models ([official methodology](https://ec.europa.eu/eurostat/cache/metadata/en/une_rt_m_esms.htm))."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: Use a zero-drift persistence model with twelve original prints from September 2025-August 2026. Point = latest level 5.9 + momentum adjustment 0.0 + one-off adjustment 0.0 + policy adjustment 0.0 = 5.9%. Successive changes in percentage points are [0.5, 0, 0, 0, 0, -0.1, -0.1, 0.1, 0, -0.3, -0.1]. Their mean is 0 and squared deviations sum to 0.38. Sample sigma = 0.194936 percentage points = sqrt(0.38/(11-1)). The approximate central 80% normal interval uses half-width 1.28*sigma = 0.249518 percentage points. Bounds = 5.9 +/- 0.249518 = [5.650482, 6.149518], rounded to [5.65, 6.15]. No further width adjustment is applied; dispersion includes revision effects across original prints."
+      },
+      {
+        "kind": "text",
+        "text": "An upside risk is rising registered unemployment or a higher benchmark-factor estimate producing a first print of 6.2% or more. A downside risk is another 0.3-point decline, like June-to-July's original-print movement, producing 5.6%. Values at or above 6.2%, or at or below 5.6%, would land outside the interval."
+      },
+      {
+        "kind": "forecast",
+        "point": 5.9,
+        "ciLow": 5.65,
+        "ciHigh": 6.15
+      }
+    ]
+  }
+]

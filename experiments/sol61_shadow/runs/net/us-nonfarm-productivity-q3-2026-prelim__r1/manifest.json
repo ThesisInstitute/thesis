@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:14Z",
+  "runStartedAt": "2026-10-07T10:14:14Z",
+  "sealedAt": "2026-10-07T10:14:14Z",
+  "series": "bls.productivity.nonfarm_qoq_prelim",
+  "period": "2026-Q3",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-nonfarm-productivity-q3-2026-prelim",
+    "dataPointId": "bls.productivity.nonfarm_qoq_prelim.2026_q3.first_print",
+    "period": "2026-Q3",
+    "registeredAt": "2026-07-10T00:00:00Z",
+    "registrationState": "preregistered",
+    "series": "bls.productivity.nonfarm_qoq_prelim",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-13",
+        "start": "2026-10-30"
+      },
+      "field": "bls.productivity.nonfarm_qoq_prelim",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "bls.productivity.nonfarm_qoq_prelim",
+      "sourceUrl": "https://www.bls.gov/news.release/prod2.t02.htm",
+      "table": "U.S. Bureau of Labor Statistics Productivity and Costs news release, Table 2",
+      "transform": {
+        "factor": 1.0,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279",
+    "targetRegistrationPath": "records/targets/2026-07-10-e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1.0
+  },
+  "targetContentHash": "e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279",
+  "targetRegistrationPath": "records/targets/2026-07-10-e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279.json",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "preSubmitReview": null,
+  "ok": true,
+  "cellsPath": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/prompt.md",
+      "sha256": "7b8587fd069f4fd34514807518f5242a01c4e662632615acb3eb52cc9e43e935",
+      "bytes": 10451,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/command.json",
+      "sha256": "87f69c6f7d9a24d341f02556981931c84ad8b2a7d04c8a49690b3b8420e9d3cc",
+      "bytes": 196,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/stdout.txt",
+      "sha256": "fde472bc78b486901ea4991b923572aead29198c4b300dd8f785b91780756d90",
+      "bytes": 9690,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/raw_response.txt",
+      "sha256": "fde472bc78b486901ea4991b923572aead29198c4b300dd8f785b91780756d90",
+      "bytes": 9690,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/parsed_cells.json",
+      "sha256": "1aaae5d4e9da8f8a3d2d3e8f93e829c075385e8c8e5884510ea74d54ea1e3369",
+      "bytes": 10242,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/normalized_cells.json",
+      "sha256": "a86e6e20f732f10bfe527196b84ef7b3de01119634d7363b590f06fcfe34e55e",
+      "bytes": 28765,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/distribution.json",
+      "sha256": "2359e49aa3d9c2b1f78875ccfdbd2841129d75cf883cd21b6fb743ba1c3ce9d6",
+      "bytes": 14856,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/validation.json",
+      "sha256": "33ad3f275d222f754371c616e831fce66beea05835e3fd46fed4cb90b2c73c9e",
+      "bytes": 139,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/cells.with_activity.json",
+      "sha256": "2455ac1dea302dfc57ae12f7c7ad72468ac144d3af65f56fb465c3a4c436e14f",
+      "bytes": 31700,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/us-nonfarm-productivity-q3-2026-prelim__r1/manifest.json",
+      "sha256": "064a6ef6e7ef8cd179b222cc9c7e5ec46531141109fc95cf3d774ad06289faed",
+      "bytes": 4946,
+      "createdAt": "2026-10-07T10:14:14Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "us-nonfarm-productivity-q3-2026-prelim",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "00a060266644a31f4b7ea96305b3b859df46b6f27dc65305abd1cbd3c38eb7f1"
+}

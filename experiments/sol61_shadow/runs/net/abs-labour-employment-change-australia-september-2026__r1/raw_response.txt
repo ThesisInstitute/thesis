@@ -1,0 +1,101 @@
+{
+  "slug": "abs-labour-employment-change-australia-september-2026",
+  "country": "AU",
+  "type": "data",
+  "title": "Australia employment change, September 2026",
+  "question": "What is the first official September 2026 month-over-month change in seasonally adjusted employed persons in ABS Labour Force, Australia?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Australian Bureau of Statistics, Labour Force, Australia",
+  "resolutionSourceUrl": "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/latest-release",
+  "resolutionRule": "The registered contract specifies the first September 2026 observation of LF/M3.3.1599.20.AUS.M with an identity transform and no subsequent revisions. The fetched series contains employment levels rather than monthly changes; this discrepancy is reported without changing the registered target. Release-date verification failed.",
+  "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 14736.48843385
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 14698.87739381
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 14734.60890885
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 14812.94821992
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 14797.08376474
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 14836.57710176
+    }
+  ],
+  "drivers": [
+    "Official page lookup failed",
+    "Registered identity transform returns employment levels",
+    "API response identifies its dataflow as non-production"
+  ],
+  "sourceContext": [
+    "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/latest-release"
+  ],
+  "runAt": "2026-10-06T22:19:15Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official lookup failure"
+    },
+    {
+      "kind": "text",
+      "text": "The official ABS release-page request failed with: Fatal error: connection failed: error sending request. Following the run instructions, further research stopped. Null estimates indicate failure, not a numerical forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Retrieve the registered ABS API series with lastNObservations=30 and format=jsondata. This request was already running when the separate page lookup failed.",
+      "result": "The completed response reports seasonally adjusted employed-person levels in thousands: March 2026 14736.48843385; April 14698.87739381; May 14734.60890885; June 14812.94821992; July 14797.08376474; August 14836.57710176."
+    },
+    {
+      "kind": "text",
+      "text": "Concrete ledger discrepancy: LF/M3.3.1599.20.AUS.M is defined as Employed persons, Persons, Total (age), Seasonally Adjusted, Australia, Monthly, with a Thousands multiplier. Its identity transform returns an employment level, whereas the question requests a monthly change. HistoricalContext preserves the fetched levels and does not represent them as changes."
+    },
+    {
+      "kind": "text",
+      "text": "The API response also contains test=true and NonProductionDataflow=true. These flags were not verified against a production release page."
+    },
+    {
+      "kind": "text",
+      "text": "An admissible base rate for the requested first-print employment-change target was not established before the required stop. The fetched current-vintage levels are not a verified archive of first-print monthly changes."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No forecast model, adjustment, sigma, or 80% interval was calculated after the failed fetch. The official resolution date remains unverified; the registered release window was not substituted for calendar evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and outcomes outside the interval cannot be quantified because this stopped run produced no forecast interval."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

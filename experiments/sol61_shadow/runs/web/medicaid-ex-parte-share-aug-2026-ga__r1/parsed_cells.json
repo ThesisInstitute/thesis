@@ -1,0 +1,206 @@
+[
+  {
+    "slug": "medicaid-ex-parte-share-aug-2026-ga",
+    "country": "US",
+    "type": "data",
+    "title": "Georgia ex parte renewal share, August 2026",
+    "question": "What will Georgia's ex parte renewal share be for the August 2026 reporting period in CMS State Medicaid and CHIP Eligibility Processing Data, using the first published original (O) submission, calculated as ex parte renewals divided by beneficiaries due for renewal and rounded to one decimal percent?",
+    "unit": "percent",
+    "pointEstimate": 43.2,
+    "ciLow": 38.8,
+    "ciHigh": 47.6,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-15",
+    "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+    "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "resolutionRule": "Resolves to Georgia's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it, expected roughly three to four months after the period. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Later revisions and updated (U) submissions do not replace the first print.",
+    "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ga.aug_2026",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-07"
+        },
+        "label": "2025-07",
+        "value": 57
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-08"
+        },
+        "label": "2025-08",
+        "value": 53
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        },
+        "label": "2025-09",
+        "value": 54
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        },
+        "label": "2025-10",
+        "value": 54
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        },
+        "label": "2025-11",
+        "value": 56
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        },
+        "label": "2025-12",
+        "value": 52
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        },
+        "label": "2026-01",
+        "value": 54
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        },
+        "label": "2026-02",
+        "value": 53
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "2026-03",
+        "value": 50
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "2026-04",
+        "value": 48
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "2026-05",
+        "value": 47
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "2026-06",
+        "value": 45
+      }
+    ],
+    "drivers": [
+      "June original-period level of 45%",
+      "Five consecutive monthly declines after January",
+      "Renewal cohort composition and electronic verification success",
+      "Established Georgia administrative renewal procedures",
+      "Original month-end outcomes before pending renewals are updated"
+    ],
+    "sourceContext": [
+      "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+      "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+      "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+      "https://pamms.dhs.ga.gov/dfcs/medicaid/2706/"
+    ],
+    "runAt": "2026-10-06T22:44:47Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Georgia August 2026 original-submission ex parte renewal share"
+      },
+      {
+        "kind": "text",
+        "text": "The target is Georgia's state row for reporting period 202608, original submission O, in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. It is a monthly administrative percentage. The ledger does not explicitly name its denominator column; CMS's state renewal tables identify the denominator as all beneficiaries due for renewal. I therefore use Metric 5a1 divided by Metric 5. Resolution remains the first published original row, rounded to one decimal."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch CMS archived July, August, and September 2025 snapshots listed in sourceContext; read Georgia in Coverage Retention and Disenrollment Rates by State.",
+        "result": "July 2025: 187,204 beneficiaries due, 57% renewed ex parte. August 2025: 210,782 due, 53% ex parte. September 2025: 210,677 due, 54% ex parte. These are the original current-month tables, with percentages rounded to whole points."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch CMS archived October, November, and December 2025 snapshots listed in sourceContext; read the original current-month Georgia renewal tables.",
+        "result": "October 2025: 205,312 beneficiaries due, 54% renewed ex parte. November 2025: 184,750 due, 56% ex parte. December 2025: 211,117 due, 52% ex parte."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch CMS January, February, and March 2026 snapshots listed in sourceContext; read the original current-month Georgia renewal tables.",
+        "result": "January 2026: 208,198 beneficiaries due, 54% renewed ex parte. February 2026: 207,977 due, 53% ex parte. March 2026: 226,863 due, 50% ex parte."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetch CMS April, May, and June 2026 snapshots listed in sourceContext; read the original current-month Georgia renewal tables.",
+        "result": "April 2026: 239,136 beneficiaries due, 48% renewed ex parte. May 2026: 233,202 due, 47% ex parte. June 2026: 231,064 due, 45% ex parte; 61% were renewed overall and 11% remained pending. The June snapshot is dated September 25, 2026."
+      },
+      {
+        "kind": "text",
+        "text": "The reference class contains 12 distinct original-period official prints from July 2025 through June 2026. Its mean is 51.92%, with a range of 45% to 57%. This base rate establishes the historical level; June's 45% is the persistence anchor because the recent sequence indicates a lower current level."
+      },
+      {
+        "kind": "text",
+        "text": "Evidence limitation: the web tool could not fetch the raw CSV/API Georgia O rows and their exact ex parte numerators. HistoricalContext therefore contains the whole-percent values printed in archived CMS current-month snapshots, rather than reconstructed one-decimal ratios. These snapshots separate original monthly outcomes from quarterly updated outcomes; all historical anchors use the original-period variant. Final resolution still requires the exact first-published O numerator and denominator."
+      },
+      {
+        "kind": "text",
+        "text": "Level, momentum, one-off, and policy effects are separated. June supplies the level. The five January-to-June changes average -1.8 percentage points per month. I apply half that momentum over the two-month horizon, a judgmental shrinkage toward persistence. One-off and new-policy adjustments are zero: Georgia's policy effective August 2025 already requires using electronic sources and related-case information for administrative MAGI renewals, and no fetched source establishes a new August 2026 automation shock. The July-to-August 2025 decline of 4 points is one seasonal observation, insufficient for a separate seasonal adjustment."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: Model is June persistence plus 50%-damped recent momentum, using the 12 fetched original-period snapshot shares. Point = 45 + 0.5 * 2 * (-1.8) + 0 one-off + 0 policy = 43.2%. The 11 successive changes are [-4, 1, 0, 2, -4, 2, -1, -3, -2, -1, -2] percentage points; their mean is -1.09091 and squared deviations sum to 46.90909. Sample sigma = 2.16585 percentage points = sqrt(46.90909 / 10). The one-month normal 80% half-width is 1.28 * sigma = 2.77229 points. Allowing two unobserved monthly movements gives 2.77229 * sqrt(2) = 3.92061; adding 0.5 point for whole-percent anchor precision gives 4.42061. Bounds = 43.2 +/- 4.42061 = [38.77939, 47.62061], emitted as [38.8, 47.6]."
+      },
+      {
+        "kind": "text",
+        "text": "Release-date verification limitation: official CMS pages fetched this run provide historical publication dates and monthly reporting, but no calendar or announcement verifying December 15, 2026 for the August 2026 release. The registered resolutionDate remains 2026-12-15; it is unverified as an official publication appointment. Actual resolution follows the first publication of the specified O row."
+      },
+      {
+        "kind": "text",
+        "text": "The upside risk is a rebound in electronic verification success or a renewal cohort with more administratively renewable beneficiaries; a recovery above 47.6% would land outside the interval. The downside risk is continued deterioration in cohort matching or more renewals remaining pending at month-end; a fall below 38.8% would land outside the interval. A change in Georgia's treatment of renewals following changed circumstances could also move the published share beyond these bounds."
+      },
+      {
+        "kind": "forecast",
+        "point": 43.2,
+        "ciLow": 38.8,
+        "ciHigh": 47.6
+      }
+    ]
+  }
+]
