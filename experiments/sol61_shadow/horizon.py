@@ -10,10 +10,13 @@ day approaches.
 
 Each wave submits rollout 1 of every arm before rollout 2, and rollout 2
 before rollout 3, so a quota shortfall trims depth rather than whole arms.
-A chunk is submitted only while all of these hold:
+A chunk of at most CHUNK jobs is submitted per check, at most one chunk per
+POLL_S, and only while all of these hold (Fleet ops' limits, 2026-10-09):
 
 - this session's unfinished Subfleet jobs plus the chunk stay at or under
-  MAX_INFLIGHT (Fleet ops' cap);
+  MAX_INFLIGHT;
+- free disk has not fallen more than MAX_DISK_DROP_GB since the previous
+  check;
 - the 5-minute load average is under LOAD_CAP;
 - the data volume has at least MIN_FREE_GB free (the d636 floor);
 - the mean seven-day utilization of the Codex lanes is under budget(now),
@@ -21,7 +24,11 @@ A chunk is submitted only while all of these hold:
   the lanes, Axiom's first, counts against the same budget, so it is served
   first.
 
-Chunks still unsubmitted when the next wave starts are skipped and logged.
+The driver picks work by run, not by batch label: a run whose output path
+already has a submission receipt is done, so a restart, a cancelled batch
+whose receipts were set aside, or a change of chunk size resubmits exactly
+the runs still missing. Runs still unsubmitted when the next wave starts are
+skipped and logged.
 When a wave's jobs finish, the driver collects them, re-dispatches once any
 run a network outage stopped, prunes, commits and pushes, so the branch's
 push time witnesses every forecast before its target's window opens.
@@ -45,8 +52,9 @@ SHADOW = EXP / "shadow.py"
 sys.path.insert(0, str(EXP))
 import shadow  # noqa: E402
 
-MAX_INFLIGHT = 60
-CHUNK = 30
+MAX_INFLIGHT = 15
+CHUNK = 5
+MAX_DISK_DROP_GB = 5.0
 LOAD_CAP = 108.0
 MIN_FREE_GB = 40.0
 BUDGET_START = datetime(2026, 10, 7, 13, tzinfo=timezone.utc)
@@ -102,10 +110,13 @@ def gate(
     free_gb: float,
     utilization: float | None,
     allowed: float,
+    free_drop_gb: float = 0.0,
 ) -> str | None:
     """None when a chunk of `size` may be submitted, else the reason to hold."""
     if inflight + size > MAX_INFLIGHT:
         return f"inflight {inflight}+{size} > {MAX_INFLIGHT}"
+    if free_drop_gb > MAX_DISK_DROP_GB:
+        return f"free disk fell {free_drop_gb:.0f} GB since the last check"
     if load5 >= LOAD_CAP:
         return f"load5 {load5:.0f} >= {LOAD_CAP:.0f}"
     if free_gb < MIN_FREE_GB:
@@ -175,20 +186,45 @@ def submitted(ops: pathlib.Path, label: str) -> bool:
     return receipts.is_file() and '"job_id": "' in receipts.read_text()
 
 
+def pending_batches(
+    wave: int, plan: list[tuple[str, int, list[str]]], done: set[str]
+) -> list[tuple[str, int, list[str]]]:
+    """The plan's runs with no submission yet, rechunked in plan order."""
+    batches: list[tuple[str, int, list[str]]] = []
+    for arm, rollout, chunk in plan:
+        missing = [
+            s for s in chunk if shadow.run_key(arm, s, rollout, wave) not in done
+        ]
+        if batches and batches[-1][:2] == (arm, rollout):
+            missing = batches.pop()[2] + missing
+        for piece in chunked(missing):
+            batches.append((arm, rollout, piece))
+    return batches
+
+
+_last_free: list[float] = []  # free disk at the previous check
+
+
 def submit_when_open(ops: pathlib.Path, label: str, size: int, end: datetime) -> bool:
     while datetime.now(timezone.utc) < end:
         now = datetime.now(timezone.utc)
+        free = free_gb()
+        drop = (_last_free[0] - free) if _last_free else 0.0
+        _last_free[:] = [free]
         reason = gate(
             inflight=inflight(),
             size=size,
             load5=os.getloadavg()[1],
-            free_gb=free_gb(),
+            free_gb=free,
             utilization=lane_utilization(),
             allowed=budget(now),
+            free_drop_gb=drop,
         )
         if reason is None:
             result = shadow_cli("submit", "--label", label)
             log(f"submit {label} ({size} jobs): {result.stdout.strip()}")
+            # Ramp: one chunk per check.
+            time.sleep(POLL_S)
             return True
         log(f"hold {label}: {reason}")
         time.sleep(POLL_S)
@@ -244,11 +280,13 @@ def run_wave(ops: pathlib.Path, wave: int, last_wave: int) -> None:
     ]
     slugs = [row["slug"] for row in targets if row["windowStart"] > day]
     plan = wave_plan(wave, slugs)
-    log(f"wave {wave} ({day}): {len(slugs)} open targets, {len(plan)} chunks")
-    for index, (arm, rollout, chunk) in enumerate(plan, 1):
-        label = f"sol61-shadow-w{wave}-{arm}-r{rollout}-c{index}"
-        if submitted(ops, label):
-            continue
+    done = {shadow.receipt_key(row) for row in shadow.load_submissions(ops)}
+    batches = pending_batches(wave, plan, done)
+    runs = sum(len(chunk) for _, _, chunk in batches)
+    log(f"wave {wave} ({day}): {len(slugs)} open targets, {runs} runs to submit")
+    for index, (arm, rollout, chunk) in enumerate(batches, 1):
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+        label = f"sol61-shadow-w{wave}-{arm}-r{rollout}-{stamp}-b{index}"
         result = shadow_cli(
             "batch", "--arm", arm, "--rollout", str(rollout), "--wave", str(wave),
             "--slugs", ",".join(chunk), "--open-after", day, "--label", label,
@@ -257,8 +295,8 @@ def run_wave(ops: pathlib.Path, wave: int, last_wave: int) -> None:
             log(f"batch {label} failed: {result.stderr[-400:]}")
             continue
         if not submit_when_open(ops, label, len(chunk), end):
-            left = len(plan) - index + 1
-            log(f"wave {wave}: {left} chunks unsubmitted at {end:%FT%TZ}")
+            left = sum(len(c) for _, _, c in batches[index - 1 :])
+            log(f"wave {wave}: {left} runs unsubmitted at {end:%FT%TZ}")
             break
     drain(end)
     collect_wave(ops, wave, end)
