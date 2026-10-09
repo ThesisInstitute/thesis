@@ -22,7 +22,11 @@ POLL_S, and only while all of these hold (Fleet ops' limits, 2026-10-09):
 - the mean seven-day utilization of the Codex lanes is under budget(now),
   which rises linearly to BUDGET_CAP by the 2026-10-14 reset. Other work on
   the lanes, Axiom's first, counts against the same budget, so it is served
-  first.
+  first;
+- Fleet ops' spare-quota gate (~/reviews/fleet-ops/codex-spare) says the
+  week's Codex quota is spare: at the recent pace of all Codex work, the
+  lanes would end the week under its target. Max, 2026-10-09: Thesis runs
+  only on Codex quota the Claude sessions would otherwise leave unused.
 
 The driver picks work by run, not by batch label: a run whose output path
 already has a submission receipt is done, so a restart, a cancelled batch
@@ -60,7 +64,7 @@ MIN_FREE_GB = 40.0
 BUDGET_START = datetime(2026, 10, 7, 13, tzinfo=timezone.utc)
 BUDGET_FLOOR = 0.13  # mean lane utilization when this phase began
 BUDGET_PER_DAY = 0.12
-BUDGET_CAP = 0.85
+BUDGET_CAP = 0.95  # the spare gate's target; it binds first
 FIRST_HORIZON_DAY = date(2026, 10, 8)  # wave 2
 WAVE_HOUR = 13
 LAST_WAVE_END = datetime(2026, 10, 14, 3, tzinfo=timezone.utc)  # before the reset
@@ -171,6 +175,21 @@ def lane_utilization() -> float | None:
     return sum(values) / len(values) if values else None
 
 
+SPARE_GATE = pathlib.Path.home() / "reviews/fleet-ops/codex-spare/codex_spare.py"
+
+
+def spare_quota() -> str | None:
+    """None when Fleet ops' gate says the week's Codex quota is spare, else why not."""
+    out = subprocess.run(
+        [sys.executable, str(SPARE_GATE)], capture_output=True, text=True, check=False
+    )
+    try:
+        info = json.loads(out.stdout)
+    except json.JSONDecodeError:
+        return f"spare gate unreadable: {out.stderr.strip()[-160:]}"
+    return None if info.get("spare") else info.get("reason", "not spare")
+
+
 def free_gb() -> float:
     return shutil.disk_usage("/System/Volumes/Data").free / 1e9
 
@@ -220,6 +239,8 @@ def submit_when_open(ops: pathlib.Path, label: str, size: int, end: datetime) ->
             allowed=budget(now),
             free_drop_gb=drop,
         )
+        if reason is None:
+            reason = spare_quota()
         if reason is None:
             result = shadow_cli("submit", "--label", label)
             log(f"submit {label} ({size} jobs): {result.stdout.strip()}")

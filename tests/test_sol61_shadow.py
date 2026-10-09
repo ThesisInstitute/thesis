@@ -678,6 +678,22 @@ def test_gate_holds_for_each_limit_and_opens_when_all_clear() -> None:
         assert horizon.gate(**{**clear, **change}) is not None, change
 
 
+def test_spare_quota_opens_only_when_fleet_ops_gate_says_spare(monkeypatch) -> None:
+    import subprocess
+
+    def fake(stdout: str, stderr: str = ""):
+        return lambda *a, **k: subprocess.CompletedProcess(a, 1, stdout, stderr)
+
+    monkeypatch.setattr(horizon.subprocess, "run", fake('{"spare": true, "reason": "spare"}'))
+    assert horizon.spare_quota() is None
+    monkeypatch.setattr(
+        horizon.subprocess, "run", fake('{"spare": false, "reason": "not spare: projected 131%"}')
+    )
+    assert horizon.spare_quota() == "not spare: projected 131%"
+    monkeypatch.setattr(horizon.subprocess, "run", fake("", "Traceback: boom"))
+    assert horizon.spare_quota().startswith("spare gate unreadable")
+
+
 def test_fleet_ops_limits_are_the_ones_in_force() -> None:
     assert (horizon.MAX_INFLIGHT, horizon.CHUNK, horizon.MAX_DISK_DROP_GB) == (
         15,
