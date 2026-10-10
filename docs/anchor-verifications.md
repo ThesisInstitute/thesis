@@ -1272,6 +1272,11 @@ periods are deliberately absent from the docket. Each already holds an
 immutable `generic-url` registration, the roller skips a calendar-gated period
 that has no committed date, and leaving them out means this adapter cannot mint
 a second target for a period that is already registered. A test enforces it.
+A period the roller registers from this calendar stays on it: that
+registration is the period's one target (October 2026, registered 2026-10-02,
+for payroll change, job openings and the quits rate), so the test counts only
+registrations made under another adapter and requires a single `bls-api`
+target per period.
 The schedule is finite: when BLS posts later dates, they are added here by a
 reviewed edit.
 
