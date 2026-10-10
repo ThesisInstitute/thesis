@@ -32,7 +32,21 @@ jobs:
     # overlap it, and that day's snapshot would then predate the fresh
     # resolutions. The next snapshot picks them up; a cancelled run loses
     # the publish outright, so the longer cap is the better trade.
-    timeout-minutes: 60
+    # Since 2026-10-01 the SBA loan-performance targets' window is open, and
+    # the first of them verifies the whole witnessed record timeline before
+    # it can refuse or resolve: about 50 minutes on 2026-10-09, when the
+    # resolve step took 58 and the 60-minute cap cancelled the site rebuild
+    # after that day's append had merged (chronicle#327); on 2026-10-10 it
+    # cancelled the resolve step itself. The resolver also waits for
+    # Chronicle's append gates, whose jobs sat queued for a runner 33-68
+    # minutes on 2026-09-22/23 (chronicle #285, #286); that wait has its own
+    # 150-minute budget (DEFAULT_APPEND_GATE_TIMEOUT_MINUTES; override with
+    # LEDGER_APPEND_GATE_TIMEOUT_MINUTES on the resolve step). 240 covers a
+    # 60-minute resolve, the whole gate budget, the pin and witness step,
+    # a 7-minute rebuild and the 12-minute deploy canary. The workflow-level
+    # concurrency group queues a dispatched or next-day run behind a long
+    # one instead of overlapping it.
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v5
         with:
