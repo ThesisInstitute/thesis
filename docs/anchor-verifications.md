@@ -1463,7 +1463,8 @@ to the 2026-09-20 read above. The six docket entries commit:
 
 September 2026 (released 2026-10-02) is left out on purpose. It already holds
 a `generic-url` registration, and a test keeps a docket date from ever naming a
-registered period. The schedule ends with the November 2026 data. The December
+period registered under another adapter. The schedule ends with the November
+2026 data. The December
 date is added by a reviewed edit when BLS posts it. On 2026-11-06, 08:30 ET is
 13:30 UTC, ten minutes before the daily run. A capture that misses that run is
 taken by the next one, while October is still the latest month, which lasts
