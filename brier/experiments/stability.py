@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -19,6 +17,7 @@ except ImportError:
     np = None  # type: ignore
     stats = None  # type: ignore
 
+from brier.experiments import components
 from brier.experiments.cases import DecisionCase
 
 
@@ -455,109 +454,13 @@ class StabilityResult:
         return d
 
 
-def extract_structured(text: str) -> tuple[Optional[float], Optional[float], Optional[float]]:
-    """Extract estimate, CI low, and CI high from structured JSON output.
+# Extraction is shared with the other tracks; see brier.experiments.components.
+# Re-exported under the historical names so callers and tests keep working.
+extract_structured = components.structured_estimate
+extract_estimate = components.numeric_estimate
+extract_ci = components.confidence_interval
 
-    Expects the response to contain a JSON block like:
-    {"estimate": 4.0, "ci_low": 2.5, "ci_high": 7.0}
-
-    Returns: (estimate, ci_low, ci_high) — any may be None if not found.
-    """
-    # Try to find JSON block in response
-    json_patterns = [
-        r'```json\s*(\{[^}]+\})\s*```',  # ```json {...} ```
-        r'```\s*(\{[^}]+\})\s*```',  # ``` {...} ```
-        r'(\{"estimate"[^}]+\})',  # {"estimate": ...}
-    ]
-
-    for pattern in json_patterns:
-        match = re.search(pattern, text, re.DOTALL)
-        if match:
-            try:
-                data = json.loads(match.group(1))
-                estimate = data.get("estimate")
-                ci_low = data.get("ci_low")
-                ci_high = data.get("ci_high")
-                if estimate is not None:
-                    estimate = float(estimate)
-                if ci_low is not None:
-                    ci_low = float(ci_low)
-                if ci_high is not None:
-                    ci_high = float(ci_high)
-                # Swap CI if reversed
-                if ci_low is not None and ci_high is not None and ci_low > ci_high:
-                    ci_low, ci_high = ci_high, ci_low
-                return estimate, ci_low, ci_high
-            except (json.JSONDecodeError, ValueError, TypeError):
-                continue
-
-    return None, None, None
-
-
-def extract_estimate(text: str, unit: str) -> Optional[float]:
-    """Extract numeric estimate from response text.
-
-    First tries structured JSON, then falls back to regex patterns.
-    """
-    # Try structured extraction first
-    estimate, _, _ = extract_structured(text)
-    if estimate is not None:
-        return estimate
-
-    # Fallback to regex
-    patterns = [
-        rf"(?:point estimate|estimate|prediction|forecast)[:\s]+\**(\d+\.?\d*)\**\s*{re.escape(unit)}",
-        rf"\*\*(\d+\.?\d*)\s*{re.escape(unit)}\*\*",  # **4 weeks**
-        rf"(\d+\.?\d*)\s*{re.escape(unit)}",  # "4 weeks"
-        r"(?:point estimate)[:\s]+\**(\d+\.?\d*)\**",
-    ]
-
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
-        if match:
-            return float(match.group(1))
-
-    return None
-
-
-def extract_ci(text: str) -> tuple[Optional[float], Optional[float]]:
-    """Extract confidence interval from response text.
-
-    First tries structured JSON, then falls back to context-aware regex.
-    """
-    # Try structured extraction first
-    _, ci_low, ci_high = extract_structured(text)
-    if ci_low is not None and ci_high is not None:
-        return ci_low, ci_high
-
-    # Fallback: context-aware regex — only match CIs near CI-related keywords
-    ci_patterns = [
-        r"(?:confidence interval|CI|80%\s*CI)[:\s]*\[?\s*(\d+\.?\d*)%?\s*[-–—,]\s*(\d+\.?\d*)%?\s*\]?",
-        r"(?:confidence interval|CI|80%\s*CI)[:\s]*\[?\s*(\d+\.?\d*)%?\s+to\s+(\d+\.?\d*)%?\s*\]?",
-        r"(?:range|interval)[:\s]*\[?\s*(\d+\.?\d*)%?\s*[-–—,]\s*(\d+\.?\d*)%?\s*\]?",
-        r"(?:range|interval)[:\s]*\[?\s*(\d+\.?\d*)%?\s+to\s+(\d+\.?\d*)%?\s*\]?",
-        r"\[(\d+\.?\d*)%?\s*,\s*(\d+\.?\d*)%?\]",  # [2.5, 7]
-    ]
-
-    for pattern in ci_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            low, high = float(match.group(1)), float(match.group(2))
-            if low > high:
-                low, high = high, low
-            return low, high
-
-    return None, None
-
-
-_JSON_INSTRUCTION = """
-
-After your reasoning, output your final answer as a JSON block:
-```json
-{"estimate": <number>, "ci_low": <number>, "ci_high": <number>}
-```
-where ci_low and ci_high are the bounds of your 80% confidence interval.
-Use the same units and scale as the question. If the question asks for a percentage or probability, return 0-100 rather than 0-1."""
+_JSON_INSTRUCTION = components.JSON_ESTIMATE_CONTRACT
 
 
 def format_condition_name(condition: str) -> str:
@@ -572,58 +475,79 @@ def format_probe_battery_name(probe_battery: str) -> str:
     )
 
 
+def _format_control_structure(estimate_step: str) -> list[str]:
+    """The four-part structure the format control asks for.
+
+    Shared by the initial and probe prompts so the control cannot silently
+    change shape mid-conversation; only the estimate step differs, which is
+    why it is a parameter rather than a positional edit of a shared list.
+    """
+    return [
+        components.SITUATION_SUMMARY,
+        components.KEY_OPERATIONAL_CONSIDERATIONS,
+        estimate_step,
+        components.UNCERTAINTY_SOURCES,
+    ]
+
+
 def generate_naive_prompt(case: QuantitativeCase) -> str:
     """Generate naive (non-framework) prompt."""
-    return f"""You are a helpful assistant. Answer directly and concisely.
-
-{case.scenario}
-
-Question: {case.estimate_question} Give a single number and an 80% confidence interval.{_JSON_INSTRUCTION}"""
+    return components.estimate_task(
+        "You are a helpful assistant. Answer directly and concisely.",
+        case.scenario,
+        case.estimate_question,
+        "Give a single number and an 80% confidence interval.",
+    )
 
 
 def generate_estimate_only_prompt(case: QuantitativeCase) -> str:
     """Generate numeric-estimate-only control prompt."""
-    return f"""You are a forecaster. Return only the estimate and confidence interval in JSON.
-
-{case.scenario}
-
-Question: {case.estimate_question} Do not explain your reasoning.{_JSON_INSTRUCTION}"""
+    return components.estimate_task(
+        "You are a forecaster. Return only the estimate and confidence interval in JSON.",
+        case.scenario,
+        case.estimate_question,
+        "Do not explain your reasoning.",
+    )
 
 
 def generate_format_control_prompt(case: QuantitativeCase) -> str:
     """Generate formatting-only control prompt."""
-    return f"""You are a decision analyst. Use a clear four-part structure:
-1. Situation summary
-2. Key operational considerations
-3. Point estimate and 80% confidence interval
-4. Main sources of uncertainty
-
-Do not use any named decision framework. Do not add special instructions about base rates or cognitive biases unless they arise directly from the scenario.
-
-{case.scenario}
-
-Question: {case.estimate_question}{_JSON_INSTRUCTION}"""
+    preamble = components.paragraphs(
+        "You are a decision analyst. Use a clear four-part structure:\n"
+        + components.numbered(
+            _format_control_structure(components.POINT_ESTIMATE_AND_CI)
+        ),
+        components.NO_NAMED_FRAMEWORK,
+    )
+    return components.estimate_task(preamble, case.scenario, case.estimate_question)
 
 
 def generate_cot_prompt(case: QuantitativeCase) -> str:
     """Generate chain-of-thought prompt (structured reasoning, no brier framework)."""
-    return f"""You are a helpful assistant. Think through this step by step.
-
-{case.scenario}
-
-Question: {case.estimate_question} Think through this carefully step by step, then give a single number and an 80% confidence interval.{_JSON_INSTRUCTION}"""
+    return components.estimate_task(
+        "You are a helpful assistant. Think through this step by step.",
+        case.scenario,
+        case.estimate_question,
+        "Think through this carefully step by step, then give a single number "
+        "and an 80% confidence interval.",
+    )
 
 
 def generate_brier_prompt(case: QuantitativeCase) -> str:
     """Generate brier framework prompt."""
-    return f"""You are a decision analyst using the "Brier" framework. This requires:
-1. Cite base rates from research (outside view)
-2. Make numeric forecasts with confidence intervals
-3. Identify cognitive biases in the framing
-
-{case.scenario}
-
-Question: {case.estimate_question} Give a point estimate and 80% confidence interval.{_JSON_INSTRUCTION}"""
+    preamble = 'You are a decision analyst using the "Brier" framework. This requires:\n' + components.numbered(
+        [
+            components.BASE_RATES_FROM_RESEARCH,
+            components.FORECAST_NUMERIC_WITH_CIS,
+            components.COGNITIVE_BIASES_IN_FRAMING,
+        ]
+    )
+    return components.estimate_task(
+        preamble,
+        case.scenario,
+        case.estimate_question,
+        "Give a point estimate and 80% confidence interval.",
+    )
 
 
 def generate_initial_prompt(case: QuantitativeCase, condition: str) -> str:
@@ -656,52 +580,38 @@ def generate_probe_prompt(
     probes = case.get_probes(probe_battery)
     probes_text = "\n\n".join(f"{i+1}. {probe}" for i, probe in enumerate(probes))
 
+    revised = (
+        f"Given this new information, what's your revised estimate "
+        f"({case.estimate_unit})? Also provide an 80% confidence interval."
+    )
+
     if condition == "naive":
-        return f"""You previously estimated {initial_estimate} {case.estimate_unit} for this scenario.
-
-Follow-up information:
-
-{probes_text}
-
-Given this new information, what's your revised estimate ({case.estimate_unit})? Also provide an 80% confidence interval.{_JSON_INSTRUCTION}"""
+        # The naive probe deliberately omits the prior CI: it is the one
+        # condition that never had its interval read back to it.
+        instruction = revised
+        ci_text = ""
     elif condition == "estimate_only":
-        return f"""You previously estimated {initial_estimate} {case.estimate_unit}{ci_text} for this scenario.
-
-Follow-up information:
-
-{probes_text}
-
-Return only the revised estimate and 80% confidence interval in JSON.{_JSON_INSTRUCTION}"""
+        instruction = "Return only the revised estimate and 80% confidence interval in JSON."
     elif condition == "format_control":
-        return f"""You previously estimated {initial_estimate} {case.estimate_unit}{ci_text} for this scenario.
-
-Follow-up information:
-
-{probes_text}
-
-Update your response using the same four-part structure:
-1. Situation summary
-2. Key operational considerations
-3. Revised estimate and 80% confidence interval
-4. Main sources of uncertainty
-
-Do not use any named decision framework or special instructions about base rates or cognitive biases unless they arise directly from the scenario.{_JSON_INSTRUCTION}"""
+        instruction = components.paragraphs(
+            "Update your response using the same four-part structure:\n"
+            + components.numbered(
+                _format_control_structure(components.REVISED_ESTIMATE_AND_CI)
+            ),
+            components.NO_NAMED_FRAMEWORK_INLINE,
+        )
     elif condition == "cot":
-        return f"""You previously estimated {initial_estimate} {case.estimate_unit}{ci_text} for this scenario.
-
-Follow-up information:
-
-{probes_text}
-
-Think through this step by step. Given this new information, what's your revised estimate ({case.estimate_unit})? Also provide an 80% confidence interval.{_JSON_INSTRUCTION}"""
+        instruction = f"Think through this step by step. {revised}"
     else:
-        return f"""You previously estimated {initial_estimate} {case.estimate_unit}{ci_text} for this scenario.
+        instruction = "Given this new information, what's your revised estimate and 80% CI?"
 
-Follow-up information:
-
-{probes_text}
-
-Given this new information, what's your revised estimate and 80% CI?{_JSON_INSTRUCTION}"""
+    return components.probe_task(
+        initial_estimate,
+        case.estimate_unit,
+        ci_text,
+        probes_text,
+        instruction,
+    )
 
 
 # --- Statistical helper functions ---

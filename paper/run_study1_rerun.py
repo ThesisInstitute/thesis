@@ -3,6 +3,17 @@
 This script intentionally freezes the original paper prompt wording so a new
 OpenAI rerun can be compared to the original GPT-5.2 corpus without also
 changing the prompts.
+
+The live tracks compose their prompts from `brier.experiments.components`.
+The `legacy_*` builders below are an archival copy of the Study 1 treatment and
+must keep their own literals even when the shared components move on.
+
+Note that only the *emit* side is frozen. This script still imports
+`extract_estimate`/`extract_ci` from `stability`, which now resolve to the
+shared components — so a change to the parsers does reach this rerun. That is
+the pre-existing arrangement, and arguably the right one (a parser fix should
+apply to old and new corpora alike), but it means "frozen" covers the prompts
+only, not the full pipeline.
 """
 
 from __future__ import annotations
