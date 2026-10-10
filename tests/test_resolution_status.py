@@ -869,8 +869,8 @@ def test_the_verdicts_own_marker_beats_text_interpolated_after_it():
 def test_a_registered_series_spelled_differently_is_shown_not_judged():
     """R25 finding 1: bls.wp.WPSFD4.2026-07 is registered as series
     bls.ppi.final_demand_monthly_change, which ALFRED_ADAPTERS covers. The
-    resolver routes by the reference's spelling, so "no resolver covers this
-    series" was false. The status says only that the reference has no route,
+    resolver routes mostly by the reference's spelling, so "no resolver
+    covers this series" was false. The status says only that the reference has no route,
     and shows the registered series."""
     ref = "bls.wp.WPSFD4.2026-07.first_print"
     registrations = {
@@ -914,7 +914,7 @@ def test_a_registered_series_spelled_differently_is_shown_not_judged():
     "series, noted",
     [
         ("bls.wp.WPSFD4", False),  # the reference's own series
-        ("bls.wp.WPSFD", True),  # a prefix without the dot boundary is not
+        ("bls.wp.WPSFD", True),  # no dot boundary: not the reference's series
         ("bls.wp", False),  # a shorter own prefix
         ("bls.ppi.final_demand_monthly_change", True),
         ("", False),

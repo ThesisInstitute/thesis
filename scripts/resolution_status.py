@@ -10,9 +10,10 @@ one row per overdue target, which the site prints on the forecast.
 
 It reports; it decides nothing. Every row restates a line the resolver
 printed (``detail`` carries the resolver's own words), or the fact that it
-printed none. A row for a reference the resolver has no route for also
-carries ``registration``: the target's registered adapter and series, which
-are registration facts, not resolver output. A line shape this file does not
+printed none. A row for a reference the resolver has no route for may also
+carry ``registration``: registration facts (an adapter other than
+generic-url, a registered series spelled differently from the reference),
+never resolver output. A line shape this file does not
 know becomes ``UNCLASSIFIED`` with the resolver's own words, so a new
 refusal shows up as itself and is never dropped.
 
@@ -156,8 +157,8 @@ REASONS = {
     ),
     "BINDING_MISMATCH": (
         "The resolver reports that this target's registered source binding "
-        "differs from the one it reads for this series, in the fields "
-        "listed, and refuses it."
+        "differs from the one it reads for this series, and refuses it. The "
+        "fields that differ are listed with it."
     ),
     "BINDING_MISMATCH_UNEXPLAINED": (
         "The resolver refused this target as a binding mismatch but named "
