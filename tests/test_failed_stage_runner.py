@@ -17,6 +17,7 @@ import json
 import os
 import shlex
 import shutil
+import stat
 import subprocess
 import sys
 import uuid
@@ -262,6 +263,16 @@ CASES: dict[str, dict[str, Any]] = {
     "run-dir-artifact-made-executable": _hygiene_case(
         "(last_message.parent / 'prompt.md').chmod(0o755)",
     ),
+    "run-dir-locked-down": _hygiene_case(
+        # A directory the runner cannot list, inside a run dir it cannot
+        # write, both left behind once the agent's last message is written.
+        "import atexit",
+        "junk = last_message.parent / 'junk'",
+        "junk.mkdir()",
+        "(junk / 'inner.txt').write_text('x')",
+        "junk.chmod(0)",
+        "atexit.register(lambda: last_message.parent.chmod(0o555))",
+    ),
     "run-dir-link-planted-under-artifact-name": _hygiene_case(
         # A link where the runner will write stdout.txt: without the guard
         # putting the run dir back, the runner writes through it.
@@ -444,46 +455,56 @@ def test_stage_failure_records_every_non_validation_failure(
 
 ARTIFACTS = ("prompt.md", "stdout.txt", "command.json", "draft_stdout.txt")
 ALLOWED = "codex_last_message.txt"
-NAMES = (*ARTIFACTS, ALLOWED, "planted.txt", "nested")
+NAMES = (*ARTIFACTS, ALLOWED, "planted.txt", "nested", ".")
+OPS = ["write", "mkdir", "link_out", "link_in", "delete", "chmod", "nested", "lock"]
 MUTATION = st.tuples(
-    st.sampled_from(
-        ["write", "mkdir", "link_out", "link_in", "delete", "chmod", "nested"]
-    ),
+    st.sampled_from(OPS),
     st.sampled_from(NAMES),
     st.binary(max_size=8),
-    st.sampled_from([0o600, 0o644, 0o755]),
+    st.sampled_from([0o000, 0o200, 0o500, 0o600, 0o644, 0o755]),
 )
 
 
 def _mutate(out_dir: Path, outside: Path, op: str, name: str, data: bytes, mode: int):
+    """One agent write. A write the agent's own permissions refuse is a
+    no-op, as it would be in the sandbox."""
+
     path = out_dir / name
-    if op != "nested" and (path.is_symlink() or path.exists()):
-        if op in {"mkdir", "link_out", "link_in"}:
+    real_dir = path.is_dir() and not path.is_symlink()
+    if name == "." and op != "lock":
+        return
+    try:
+        if op in {"mkdir", "link_out", "link_in"} and (
+            path.is_symlink() or path.exists()
+        ):
             runner._remove_run_dir_entry(path)
-    if op == "write":
-        if path.is_dir() and not path.is_symlink():
-            return
-        path.unlink(missing_ok=True)
-        path.write_bytes(data)
-    elif op == "mkdir":
-        path.mkdir()
-    elif op == "link_out":
-        path.symlink_to(outside)
-    elif op == "link_in":
-        path.symlink_to(out_dir / "prompt.md")
-    elif op == "delete":
-        if path.is_symlink() or path.exists():
+        if op == "write" and not real_dir:
+            path.unlink(missing_ok=True)
+            path.write_bytes(data)
+        elif op == "mkdir":
+            path.mkdir()
+        elif op == "link_out":
+            path.symlink_to(outside)
+        elif op == "link_in":
+            path.symlink_to(out_dir / "prompt.md")
+        elif op == "delete" and (path.is_symlink() or path.exists()):
             runner._remove_run_dir_entry(path)
-    elif op == "chmod":
-        if path.is_file() and not path.is_symlink():
+        elif op == "chmod" and path.is_file() and not path.is_symlink():
             path.chmod(mode)
-    elif op == "nested":
-        if path.is_dir() and not path.is_symlink():
+        elif op == "nested" and real_dir:
             (path / "inner.txt").write_bytes(data)
+        elif op == "lock" and real_dir:
+            path.chmod(mode & 0o700)
+    except PermissionError:
+        pass
+
+
+def _plain(entry: Any) -> bool:
+    return entry is not None and entry[0] is not None and entry[1] & 0o600 == 0o600
 
 
 @settings(
-    max_examples=200,
+    max_examples=300,
     deadline=None,
     suppress_health_check=[HealthCheck.function_scoped_fixture],
 )
@@ -496,10 +517,10 @@ def _mutate(out_dir: Path, outside: Path, op: str, name: str, data: bytes, mode:
 def test_guard_sees_and_undoes_every_run_dir_mutation(
     tmp_path_factory, monkeypatch, contents, mutations
 ):
-    """For any run dir and any sequence of agent writes: the guard reports a
-    violation exactly when the run dir differs from the runner's pre-stage
-    entries plus a regular stage output file, and restoring returns it to
-    exactly that, without writing through any link."""
+    """For any run dir and any sequence of agent writes, links and permission
+    changes: the guard reports a violation exactly when the run dir differs
+    from the runner's pre-stage state plus a plain stage output file, and
+    restoring returns it to exactly that without writing through a link."""
 
     monkeypatch.setattr(runner, "git_porcelain_lines", lambda _out_dir: [])
     root = tmp_path_factory.mktemp("guard")
@@ -513,19 +534,25 @@ def test_guard_sees_and_undoes_every_run_dir_mutation(
     for mutation in mutations:
         _mutate(out_dir, outside, *mutation)
 
-    def comparable(entries: dict[str, Any]) -> dict[str, Any]:
-        visible = dict(entries)
-        if ALLOWED not in pre["outDirEntries"] and visible.get(ALLOWED) is not None:
+    def state() -> tuple[int, dict[str, Any]]:
+        mode = stat.S_IMODE(out_dir.stat().st_mode)
+        out_dir.chmod(0o700)  # observe everything, then put the mode back
+        try:
+            visible = runner.run_dir_entries(out_dir)
+        finally:
+            out_dir.chmod(mode)
+        if _plain(visible.get(ALLOWED)):
             del visible[ALLOWED]
-        return visible
+        return mode, visible
 
-    post = runner.run_dir_entries(out_dir)
+    pristine = (pre["outDirMode"], pre["outDirEntries"])
+    changed = state() != pristine
     violations = runner.workspace_guard_violations(pre, out_dir, {ALLOWED})
-    assert bool(violations) is (comparable(post) != pre["outDirEntries"])
+    assert bool(violations) is changed, violations
     runner.restore_run_dir(pre, out_dir, {ALLOWED})
-    assert comparable(runner.run_dir_entries(out_dir)) == pre["outDirEntries"]
+    assert state() == pristine
     assert outside.read_bytes() == b"untouched"
-    shutil.rmtree(root)
+    shutil.rmtree(root, ignore_errors=True)
 
 
 # --- Custody refuses forged stage-failure records ---------------------------

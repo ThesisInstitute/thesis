@@ -1920,44 +1920,63 @@ def git_porcelain_lines(out_dir: pathlib.Path) -> list[str] | None:
     return sorted(lines)
 
 
-RunDirEntry = tuple[bytes, int] | None
+# A regular file maps to its bytes (None when the runner cannot read them)
+# and permission bits; any other entry maps to None.
+RunDirEntry = tuple[bytes | None, int] | None
 
 
 def run_dir_entries(out_dir: pathlib.Path) -> dict[str, RunDirEntry]:
     """Every entry under the run dir, without following links.
 
-    A regular file maps to its bytes and permission bits. A directory, a
-    symlink or a special file maps to None, so a link planted in the run dir
-    is an entry the guard sees, not one it skips.
+    A directory, a symlink or a special file is an entry too, so a link
+    planted in the run dir is one the guard sees, not one it skips.
     """
     entries: dict[str, RunDirEntry] = {}
-    if out_dir.is_symlink():
+    if out_dir.is_symlink() or not out_dir.is_dir():
         return entries
     for dirpath, dirnames, filenames in os.walk(out_dir):
         base = pathlib.Path(dirpath)
         for name in (*dirnames, *filenames):
             path = base / name
-            info = path.lstat()
-            entries[path.relative_to(out_dir).as_posix()] = (
-                (path.read_bytes(), stat.S_IMODE(info.st_mode))
-                if stat.S_ISREG(info.st_mode)
-                else None
-            )
+            entry: RunDirEntry = None
+            try:
+                info = path.lstat()
+            except OSError:
+                # A directory listable but not searchable: the name is seen,
+                # what it names is not.
+                entries[path.relative_to(out_dir).as_posix()] = entry
+                continue
+            if stat.S_ISREG(info.st_mode):
+                try:
+                    content: bytes | None = path.read_bytes()
+                except OSError:
+                    content = None
+                entry = (content, stat.S_IMODE(info.st_mode))
+            entries[path.relative_to(out_dir).as_posix()] = entry
     return entries
 
 
 def workspace_guard_snapshot(out_dir: pathlib.Path) -> dict[str, Any]:
     return {
+        "outDirMode": stat.S_IMODE(out_dir.lstat().st_mode),
         "outDirEntries": run_dir_entries(out_dir),
         "gitStatus": git_porcelain_lines(out_dir),
     }
 
 
 def _remove_run_dir_entry(path: pathlib.Path) -> None:
-    if path.is_dir() and not path.is_symlink():
-        shutil.rmtree(path)
-    else:
+    if path.is_symlink() or not path.is_dir():
         path.unlink(missing_ok=True)
+        return
+    # The stage may have left directories the runner cannot list or empty.
+    # Open them first, never through a link: chmod follows links.
+    path.chmod(0o700)
+    for dirpath, dirnames, _filenames in os.walk(path):
+        for name in dirnames:
+            child = pathlib.Path(dirpath) / name
+            if not child.is_symlink():
+                child.chmod(0o700)
+    shutil.rmtree(path)
 
 
 def restore_run_dir(
@@ -1966,24 +1985,30 @@ def restore_run_dir(
     allowed_new: set[str],
 ) -> None:
     """Return the run dir to the runner's pre-stage entries plus the stage's
-    own regular output files (``allowed_new``)."""
+    own output files (``allowed_new``) where those are plain files."""
     before: dict[str, RunDirEntry] = pre["outDirEntries"]
-    if out_dir.is_symlink() or out_dir.exists() and not out_dir.is_dir():
+    if out_dir.is_symlink() or (out_dir.exists() and not out_dir.is_dir()):
         out_dir.unlink()
     out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir.chmod(pre["outDirMode"])
     after = run_dir_entries(out_dir)
     # Shallowest first: removing a directory removes everything below it.
     for rel in sorted(set(after) - set(before), key=lambda rel: rel.count("/")):
-        if rel not in allowed_new or after[rel] is None:
+        if rel not in allowed_new or not _plain_stage_output(after[rel]):
             _remove_run_dir_entry(out_dir / rel)
     for rel, entry in before.items():
-        if entry is None or after.get(rel) == entry:
+        if entry is None or entry[0] is None or after.get(rel) == entry:
             continue
         path = out_dir / rel
         _remove_run_dir_entry(path)
         content, mode = entry
         path.write_bytes(content)
         path.chmod(mode)
+
+
+def _plain_stage_output(entry: RunDirEntry) -> bool:
+    """A stage output the runner can read and rewrite in place."""
+    return entry is not None and entry[0] is not None and entry[1] & 0o600 == 0o600
 
 
 def workspace_guard_violations(
@@ -1997,6 +2022,8 @@ def workspace_guard_violations(
     violations = []
     if out_dir.is_symlink() or not out_dir.is_dir():
         violations.append("run directory replaced or removed during agent stage")
+    elif stat.S_IMODE(out_dir.stat().st_mode) != pre["outDirMode"]:
+        violations.append("run directory permissions changed during agent stage")
     for rel, entry in pre_entries.items():
         if rel not in post_entries:
             violations.append(f"run artifact deleted during agent stage: {rel}")
@@ -2009,9 +2036,9 @@ def workspace_guard_violations(
             violations.append(
                 f"unexpected file created in run dir during agent stage: {rel}"
             )
-        elif entry is None:
+        elif not _plain_stage_output(entry):
             violations.append(
-                f"stage output is not a regular file after agent stage: {rel}"
+                f"stage output is not a plain readable file after agent stage: {rel}"
             )
     pre_git = pre["gitStatus"]
     post_git = post["gitStatus"]
@@ -2245,7 +2272,14 @@ def _run_codex_agent_command(
             # Before anything below reads the stage's output or writes an
             # artifact: a link the agent planted under an artifact name
             # must not be read through or written through.
-            restore_run_dir(guard_pre, out_dir, allowed_new={last_message_file.name})
+            try:
+                restore_run_dir(
+                    guard_pre, out_dir, allowed_new={last_message_file.name}
+                )
+            except OSError as exc:
+                workspace_mutations.append(
+                    f"run directory could not be restored after agent stage: {exc}"
+                )
     except FileNotFoundError:
         finished_at = utc_now()
         return {
