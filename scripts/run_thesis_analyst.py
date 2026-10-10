@@ -42,6 +42,7 @@ import pathlib
 import re
 import shlex
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -1887,6 +1888,14 @@ def enforce_ticket_codex_stream_binding(
 # rejects unreferenced files), and mid-run edits to sealed artifacts by the
 # manifest/custody hash mismatch; this guard fails at run time instead and
 # covers the rest of the worktree, which custody never sees.
+#
+# The run dir belongs to the runner, so the guard also puts it back: it
+# removes whatever the stage created there (files, directories, links) and
+# rewrites every artifact the stage changed or deleted from the runner's own
+# bytes and mode. The violations name each path; the agent's bytes are not
+# kept. Without this, a failed run's own directory failed custody and the
+# publisher's file inventory, and one such run refused the whole batch. The
+# rest of the checkout is the operator's and is never touched.
 
 
 def git_porcelain_lines(out_dir: pathlib.Path) -> list[str] | None:
@@ -1911,12 +1920,70 @@ def git_porcelain_lines(out_dir: pathlib.Path) -> list[str] | None:
     return sorted(lines)
 
 
+RunDirEntry = tuple[bytes, int] | None
+
+
+def run_dir_entries(out_dir: pathlib.Path) -> dict[str, RunDirEntry]:
+    """Every entry under the run dir, without following links.
+
+    A regular file maps to its bytes and permission bits. A directory, a
+    symlink or a special file maps to None, so a link planted in the run dir
+    is an entry the guard sees, not one it skips.
+    """
+    entries: dict[str, RunDirEntry] = {}
+    if out_dir.is_symlink():
+        return entries
+    for dirpath, dirnames, filenames in os.walk(out_dir):
+        base = pathlib.Path(dirpath)
+        for name in (*dirnames, *filenames):
+            path = base / name
+            info = path.lstat()
+            entries[path.relative_to(out_dir).as_posix()] = (
+                (path.read_bytes(), stat.S_IMODE(info.st_mode))
+                if stat.S_ISREG(info.st_mode)
+                else None
+            )
+    return entries
+
+
 def workspace_guard_snapshot(out_dir: pathlib.Path) -> dict[str, Any]:
-    hashes: dict[str, str] = {}
-    for path in sorted(out_dir.rglob("*")):
-        if path.is_file() and not path.is_symlink():
-            hashes[str(path.relative_to(out_dir))] = sha256_bytes(path.read_bytes())
-    return {"outDirHashes": hashes, "gitStatus": git_porcelain_lines(out_dir)}
+    return {
+        "outDirEntries": run_dir_entries(out_dir),
+        "gitStatus": git_porcelain_lines(out_dir),
+    }
+
+
+def _remove_run_dir_entry(path: pathlib.Path) -> None:
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    else:
+        path.unlink(missing_ok=True)
+
+
+def restore_run_dir(
+    pre: dict[str, Any],
+    out_dir: pathlib.Path,
+    allowed_new: set[str],
+) -> None:
+    """Return the run dir to the runner's pre-stage entries plus the stage's
+    own regular output files (``allowed_new``)."""
+    before: dict[str, RunDirEntry] = pre["outDirEntries"]
+    if out_dir.is_symlink() or out_dir.exists() and not out_dir.is_dir():
+        out_dir.unlink()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    after = run_dir_entries(out_dir)
+    # Shallowest first: removing a directory removes everything below it.
+    for rel in sorted(set(after) - set(before), key=lambda rel: rel.count("/")):
+        if rel not in allowed_new or after[rel] is None:
+            _remove_run_dir_entry(out_dir / rel)
+    for rel, entry in before.items():
+        if entry is None or after.get(rel) == entry:
+            continue
+        path = out_dir / rel
+        _remove_run_dir_entry(path)
+        content, mode = entry
+        path.write_bytes(content)
+        path.chmod(mode)
 
 
 def workspace_guard_violations(
@@ -1925,18 +1992,26 @@ def workspace_guard_violations(
     allowed_new: set[str],
 ) -> list[str]:
     post = workspace_guard_snapshot(out_dir)
-    pre_hashes: dict[str, str] = pre["outDirHashes"]
-    post_hashes: dict[str, str] = post["outDirHashes"]
+    pre_entries: dict[str, RunDirEntry] = pre["outDirEntries"]
+    post_entries: dict[str, RunDirEntry] = post["outDirEntries"]
     violations = []
-    for rel, digest in pre_hashes.items():
-        if rel not in post_hashes:
+    if out_dir.is_symlink() or not out_dir.is_dir():
+        violations.append("run directory replaced or removed during agent stage")
+    for rel, entry in pre_entries.items():
+        if rel not in post_entries:
             violations.append(f"run artifact deleted during agent stage: {rel}")
-        elif post_hashes[rel] != digest:
+        elif post_entries[rel] != entry:
             violations.append(f"run artifact modified during agent stage: {rel}")
-    for rel in post_hashes:
-        if rel not in pre_hashes and rel not in allowed_new:
+    for rel, entry in post_entries.items():
+        if rel in pre_entries:
+            continue
+        if rel not in allowed_new:
             violations.append(
                 f"unexpected file created in run dir during agent stage: {rel}"
+            )
+        elif entry is None:
+            violations.append(
+                f"stage output is not a regular file after agent stage: {rel}"
             )
     pre_git = pre["gitStatus"]
     post_git = post["gitStatus"]
@@ -2166,6 +2241,11 @@ def _run_codex_agent_command(
             if guard_pre is not None
             else None
         )
+        if workspace_mutations:
+            # Before anything below reads the stage's output or writes an
+            # artifact: a link the agent planted under an artifact name
+            # must not be read through or written through.
+            restore_run_dir(guard_pre, out_dir, allowed_new={last_message_file.name})
     except FileNotFoundError:
         finished_at = utc_now()
         return {
@@ -2749,6 +2829,60 @@ def pin_comparison_contract(
             cell[cell_key] = value
 
 
+FAILED_STAGE_LABELS = {
+    "draft_failed": "draft forecaster",
+    "review_failed": "pre-submit reviewer",
+    "revision_failed": "revision forecaster",
+}
+
+
+def stage_failure(
+    command_result: dict[str, Any] | None,
+    hygiene_mutations: list[str],
+    review_status: str | None,
+) -> tuple[str, str] | None:
+    """The failure phase and message a run records before parsing, if any.
+
+    Only a run whose agent stages all succeeded may seal cells. The publisher
+    replays the validator on every sealed cells payload and refuses the whole
+    batch when the replay disagrees with the run's status, so a run that
+    failed for any reason other than validation must never carry cells that
+    validate. Such a run is recorded as a failed trace instead, before any
+    post-parse artifact exists, and custody verifies it with the
+    parse-failure inventory.
+
+    A stage whose tool evidence failed replay or native binding cannot vouch
+    for its output, nor can one that mutated the workspace (the runner's own
+    validator reads that workspace), nor one that exited nonzero, timed out,
+    or was refused by the ticket stream binding. The stage's output stays in
+    stdout.txt and raw_response.txt.
+    """
+
+    if command_result is None:
+        return None
+    evidence_failure = command_result.get("toolEvidenceFailure")
+    if evidence_failure:
+        return "tool_evidence", str(evidence_failure)
+    if hygiene_mutations:
+        return (
+            "workspace_hygiene",
+            "agent stage mutated the workspace "
+            f"({len(hygiene_mutations)} violation(s)): {hygiene_mutations[0]}",
+        )
+    return_code = command_result["returnCode"]
+    if return_code == 0:
+        return None
+    label = FAILED_STAGE_LABELS.get(review_status or "", "agent command")
+    message = f"{label} exited {return_code}"
+    if command_result.get("timedOut"):
+        message += " after timing out"
+    trace = command_result.get("codexTrace")
+    last_error = trace.get("lastError") if isinstance(trace, dict) else None
+    if isinstance(last_error, str) and last_error:
+        message += f": {last_error}"
+    return "command", message
+
+
 def write_failure_manifest(
     out_dir: pathlib.Path,
     run_at: str,
@@ -2762,6 +2896,7 @@ def write_failure_manifest(
     *,
     checkout_sha: str | None = None,
     generation_ticket: dict[str, str] | None = None,
+    workspace_hygiene: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     error = {
         "phase": phase,
@@ -2795,6 +2930,11 @@ def write_failure_manifest(
         **registration_binding(target_context),
         "promptMode": args.prompt_mode,
         "agent": meta,
+        **(
+            {"workspaceHygiene": workspace_hygiene}
+            if workspace_hygiene is not None
+            else {}
+        ),
         "ok": False,
         "cellsPath": None,
         "artifacts": refs,
@@ -4143,6 +4283,27 @@ def main() -> int:
         refs.append(write_artifact(out_dir, "stderr", "stderr.txt", "\n", run_at))
 
     runtime_meta = stamp_runtime_invocation(meta, command_result)
+    workspace_hygiene = (
+        {"guarded": True, "mutations": hygiene_mutations} if hygiene_guarded else None
+    )
+
+    def record_failure(phase: str, message: str) -> int:
+        manifest = write_failure_manifest(
+            out_dir,
+            run_at,
+            args,
+            runtime_meta,
+            refs,
+            phase,
+            message,
+            command_result,
+            target_context,
+            checkout_sha=checkout_sha,
+            generation_ticket=generation_ticket,
+            workspace_hygiene=workspace_hygiene,
+        )
+        print(json.dumps(manifest, indent=2))
+        return 1
 
     refs.append(
         write_artifact(
@@ -4150,67 +4311,24 @@ def main() -> int:
         )
     )
 
-    evidence_failure = (command_result or {}).get("toolEvidenceFailure")
-    if evidence_failure:
-        # A stage whose tool evidence failed replay or native binding cannot
-        # vouch for the cells it returned, even when they would validate.
-        # Sealing them would leave ok:false beside cells the publisher's
-        # validator replay accepts, and that mismatch refuses the whole
-        # batch. Record a failed trace instead, before any post-parse
-        # artifact exists; custody verifies it with the parse-failure
-        # inventory.
-        manifest = write_failure_manifest(
-            out_dir,
-            run_at,
-            args,
-            runtime_meta,
-            refs,
-            "tool_evidence",
-            evidence_failure,
-            command_result,
-            target_context,
-            checkout_sha=checkout_sha,
-            generation_ticket=generation_ticket,
-        )
-        print(json.dumps(manifest, indent=2))
-        return 1
+    failure = stage_failure(command_result, hygiene_mutations, review_status)
+    if failure is not None:
+        if failure[0] == "workspace_hygiene":
+            print(
+                "workspace hygiene: agent stage mutated the workspace "
+                f"({len(hygiene_mutations)} violation(s)); failing the run",
+                file=sys.stderr,
+            )
+        return record_failure(*failure)
 
     try:
         parsed_cells = extract_json_payload(raw_response)
     except ValueError as exc:
-        manifest = write_failure_manifest(
-            out_dir,
-            run_at,
-            args,
-            runtime_meta,
-            refs,
-            "parse",
-            str(exc),
-            command_result,
-            target_context,
-            checkout_sha=checkout_sha,
-            generation_ticket=generation_ticket,
-        )
-        print(json.dumps(manifest, indent=2))
-        return 1
+        return record_failure("parse", str(exc))
     if not parsed_cells:
         # An empty payload is not a forecast and not a refusal record —
         # letting it through produced a green manifest with zero cells.
-        manifest = write_failure_manifest(
-            out_dir,
-            run_at,
-            args,
-            runtime_meta,
-            refs,
-            "parse",
-            "agent returned an empty cell payload",
-            command_result,
-            target_context,
-            checkout_sha=checkout_sha,
-            generation_ticket=generation_ticket,
-        )
-        print(json.dumps(manifest, indent=2))
-        return 1
+        return record_failure("parse", "agent returned an empty cell payload")
     try:
         # Before parsed_cells.json becomes a custody artifact: canonical
         # hashing of JSON artifacts cannot represent oversized or
@@ -4218,21 +4336,7 @@ def main() -> int:
         # failure path itself and leave no record.
         _reject_unencodable_numbers(parsed_cells, "cell payload")
     except RuntimeError as exc:
-        manifest = write_failure_manifest(
-            out_dir,
-            run_at,
-            args,
-            runtime_meta,
-            refs,
-            "parse",
-            str(exc),
-            command_result,
-            target_context,
-            checkout_sha=checkout_sha,
-            generation_ticket=generation_ticket,
-        )
-        print(json.dumps(manifest, indent=2))
-        return 1
+        return record_failure("parse", str(exc))
     parsed_path = out_dir / "parsed_cells.json"
     refs.append(
         write_artifact(
@@ -4262,21 +4366,7 @@ def main() -> int:
         # failure manifest — the uncaught path left no run record at
         # all, which blocked whole-wave publication ("result N lacks a
         # registration-bound manifest", the B1 rescue failure shape).
-        manifest = write_failure_manifest(
-            out_dir,
-            run_at,
-            args,
-            runtime_meta,
-            refs,
-            "normalize",
-            str(exc),
-            command_result,
-            target_context,
-            checkout_sha=checkout_sha,
-            generation_ticket=generation_ticket,
-        )
-        print(json.dumps(manifest, indent=2))
-        return 1
+        return record_failure("normalize", str(exc))
     normalized_cells = json.loads(normalized_path.read_text())
     # The published runAt is the harness's SEAL time — captured here,
     # after the agent finished — never the agent's claim and never the
@@ -4328,21 +4418,7 @@ def main() -> int:
                 "createdAt": run_at,
             }
         )
-        manifest = write_failure_manifest(
-            out_dir,
-            run_at,
-            args,
-            runtime_meta,
-            refs,
-            "seal",
-            f"{type(exc).__name__}: {exc}",
-            command_result,
-            target_context,
-            checkout_sha=checkout_sha,
-            generation_ticket=generation_ticket,
-        )
-        print(json.dumps(manifest, indent=2))
-        return 1
+        return record_failure("seal", f"{type(exc).__name__}: {exc}")
     normalized_path.write_text(json.dumps(normalized_cells, indent=2) + "\n")
     refs.append(
         {
@@ -4388,21 +4464,7 @@ def main() -> int:
         # Same guarantee as the normalize and seal guards: a cell that
         # crashes validation (rather than failing it) still leaves a
         # registration-bound failure manifest.
-        manifest = write_failure_manifest(
-            out_dir,
-            run_at,
-            args,
-            runtime_meta,
-            refs,
-            "validate",
-            f"{type(exc).__name__}: {exc}",
-            command_result,
-            target_context,
-            checkout_sha=checkout_sha,
-            generation_ticket=generation_ticket,
-        )
-        print(json.dumps(manifest, indent=2))
-        return 1
+        return record_failure("validate", f"{type(exc).__name__}: {exc}")
     validation_ref = write_artifact(
         out_dir,
         "validation_report",
@@ -4446,12 +4508,6 @@ def main() -> int:
         }
     )
 
-    if hygiene_mutations:
-        print(
-            "workspace hygiene: agent stage mutated the workspace "
-            f"({len(hygiene_mutations)} violation(s)); failing the run",
-            file=sys.stderr,
-        )
     manifest = {
         "schemaVersion": "thesis_analyst_run_manifest_v1",
         "createdAt": run_at,
@@ -4466,18 +4522,15 @@ def main() -> int:
         "agent": runtime_meta,
         "preSubmitReview": pre_submit_review,
         **(
-            {
-                "workspaceHygiene": {
-                    "guarded": True,
-                    "mutations": hygiene_mutations,
-                }
-            }
-            if hygiene_guarded
+            {"workspaceHygiene": workspace_hygiene}
+            if workspace_hygiene is not None
             else {}
         ),
-        "ok": validation["ok"]
-        and (not command_result or command_result["returnCode"] == 0)
-        and not hygiene_mutations,
+        # Every other way a run can fail was recorded before parsing (see
+        # stage_failure), so a run that seals cells has exactly its
+        # validation status. The publisher replays the validator on sealed
+        # cells and refuses the whole batch when the two disagree.
+        "ok": validation["ok"],
         "cellsPath": repo_relative(cells_path),
         "artifacts": refs,
         "validation": validation,

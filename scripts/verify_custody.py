@@ -629,6 +629,72 @@ def _verify_invocation_stages(
     return allowed
 
 
+# Failures the runner records before it parses the agent's output: each has
+# exactly the parse-failure inventory, because run_thesis_analyst writes it
+# right after raw_response.txt (see run_thesis_analyst.stage_failure).
+PRE_PARSE_FAILURE_PHASES = {"parse", "tool_evidence", "workspace_hygiene", "command"}
+POST_PARSE_FAILURE_PHASES = {"normalize", "seal", "validate"}
+INVOCATION_STAGE_PREFIXES = ("draft_", "pre_submit_review_", "")
+
+
+def _verify_stage_failure(
+    run_dir: Path,
+    manifest: dict[str, Any],
+    entries: list[dict[str, Any]],
+    phase: str,
+) -> None:
+    """Hold a stage-failure phase to what its stages recorded.
+
+    The runner runs stages in order and stops at the first that exits
+    nonzero, so a command failure is the last stage's own return code with
+    every earlier stage at zero; it takes precedence below a workspace
+    mutation, so it cannot sit beside one. A workspace_hygiene failure is
+    exactly the stages' recorded mutations, in stage order.
+    """
+
+    present = {str(entry["path"]) for entry in entries}
+    commands = [
+        _load_object(run_dir / f"{prefix}command.json")
+        for prefix in INVOCATION_STAGE_PREFIXES
+        if f"{prefix}command.json" in present
+    ]
+    mutations: list[str] = []
+    for command in commands:
+        recorded = command.get("workspaceMutations", [])
+        if not isinstance(recorded, list) or not all(
+            isinstance(item, str) for item in recorded
+        ):
+            raise CustodyError("command.json workspaceMutations must be a string list")
+        mutations.extend(recorded)
+    if phase == "workspace_hygiene":
+        if not mutations or canonical_bytes(
+            manifest.get("workspaceHygiene")
+        ) != canonical_bytes({"guarded": True, "mutations": mutations}):
+            raise CustodyError(
+                "workspace_hygiene-failure manifest disagrees with the stages' "
+                "recorded workspace mutations"
+            )
+        return
+    *earlier, failed = commands
+    return_code = failed.get("returnCode")
+    if (
+        mutations
+        or any(
+            type(command.get("returnCode")) is not int or command["returnCode"] != 0
+            for command in earlier
+        )
+        or type(return_code) is not int
+        or return_code == 0
+        or canonical_bytes(manifest["error"].get("command"))
+        != canonical_bytes(
+            {"returnCode": return_code, "timedOut": failed.get("timedOut", False)}
+        )
+    ):
+        raise CustodyError(
+            "command-failure error disagrees with its failed invocation stage"
+        )
+
+
 def _verify_cells_activity(
     run_dir: Path, manifest_entries: list[dict[str, Any]], entries: list[dict[str, Any]]
 ) -> None:
@@ -672,7 +738,7 @@ def _verify_analyst_v2(
         and "cellsPath" in manifest
         and manifest["cellsPath"] is None
     )
-    if declared_phase in {"parse", "tool_evidence", "normalize", "seal", "validate"}:
+    if declared_phase in PRE_PARSE_FAILURE_PHASES | POST_PARSE_FAILURE_PHASES:
         # A failure phase on a run that otherwise presents as complete
         # would route it through the lighter failure inventories and let
         # it read as succeeded downstream. write_failure_manifest always
@@ -690,10 +756,7 @@ def _verify_analyst_v2(
             raise CustodyError(
                 f"{declared_phase}-failure error artifact disagrees with the manifest"
             )
-    # A stage whose tool evidence failed replay or native binding is recorded
-    # before its output is parsed, so it has exactly the parse-failure
-    # inventory (run_thesis_analyst writes it right after raw_response.txt).
-    parse_failed = declared_phase in {"parse", "tool_evidence"}
+    parse_failed = declared_phase in PRE_PARSE_FAILURE_PHASES
     if parse_failed:
         base = {
             "prompt.md": "prompt",
@@ -720,9 +783,11 @@ def _verify_analyst_v2(
                 f"{declared_phase}-failure inventory contains unexpected artifacts: "
                 + ", ".join(unexpected)
             )
+        if declared_phase in {"workspace_hygiene", "command"}:
+            _verify_stage_failure(run_dir, manifest, entries, declared_phase)
         return
 
-    post_parse_failure = declared_phase in {"normalize", "seal", "validate"}
+    post_parse_failure = declared_phase in POST_PARSE_FAILURE_PHASES
     if post_parse_failure:
         # A run whose agent produced parseable output that failed a later
         # harness stage must still be custody-verifiable: without these
