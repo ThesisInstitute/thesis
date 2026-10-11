@@ -2787,24 +2787,88 @@ def test_staged_generator_environment_keeps_exactly_the_allowlist(
     assert kept["LANG"] == "C.UTF-8" and kept["PATH"] == os.environ["PATH"]
 
 
-def test_every_staged_generator_run_passes_the_minimal_environment() -> None:
-    # Any subprocess that runs this interpreter runs Chronicle's staged
-    # generator; each must pass env= from the allowlist, never inherit.
-    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
-    runs = []
-    for node in ast.walk(ast.parse(source)):
-        if not (
-            isinstance(node, ast.Call)
-            and ast.unparse(node.func) == "subprocess.run"
-            and node.args
-            and isinstance(node.args[0], ast.List)
-            and node.args[0].elts
-            and ast.unparse(node.args[0].elts[0]) == "sys.executable"
+def _staged_generator_run_violations(source: str) -> list[str]:
+    """Ways ``source`` could start this interpreter outside the one helper.
+
+    Running this interpreter in a subprocess means running Chronicle's staged
+    generator, so every such run must go through ``_run_staged_generator``,
+    which always passes the allowlist. The rule is spelling-independent: any
+    ``sys.executable`` outside that helper is a violation, whether it feeds
+    ``subprocess.run``, ``check_output``, ``Popen`` or a variable first.
+    """
+
+    tree = ast.parse(source)
+    helpers = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_run_staged_generator"
+    ]
+    if len(helpers) != 1:
+        return [f"expected one _run_staged_generator, found {len(helpers)}"]
+    [helper] = helpers
+    inside = {id(node) for node in ast.walk(helper)}
+    violations = []
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Attribute)
+            and node.attr == "executable"
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "sys"
+            and id(node) not in inside
         ):
-            continue
-        env = [keyword.value for keyword in node.keywords if keyword.arg == "env"]
-        runs.append([ast.unparse(value) for value in env])
-    assert runs == [["staged_generator_environment()"]] * 2
+            violations.append(f"sys.executable outside the helper (line {node.lineno})")
+        if isinstance(node, ast.ImportFrom) and node.module == "sys":
+            if any(alias.name == "executable" for alias in node.names):
+                violations.append(f"from sys import executable (line {node.lineno})")
+    runs = [
+        node
+        for node in ast.walk(helper)
+        if isinstance(node, ast.Call)
+        and ast.unparse(node.func).startswith("subprocess.")
+    ]
+    envs = [
+        [ast.unparse(k.value) for k in run.keywords if k.arg == "env"] for run in runs
+    ]
+    if envs != [["staged_generator_environment()"]]:
+        violations.append(f"the helper's subprocess env= is {envs}")
+    return violations
+
+
+def test_every_staged_generator_run_passes_the_minimal_environment() -> None:
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    assert _staged_generator_run_violations(source) == []
+    # Both generator call sites go through the helper.
+    assert source.count("_run_staged_generator(stage)") == 2
+
+
+@pytest.mark.parametrize(
+    "addition",
+    [
+        # A second spelling of the same run, outside the helper.
+        "def _extra(stage):\n"
+        "    return subprocess.check_output([sys.executable, 'g.py'], cwd=stage)\n",
+        "def _extra(stage):\n"
+        "    command = [sys.executable, 'g.py']\n"
+        "    subprocess.run(command, cwd=stage, check=True)\n",
+        "def _extra(stage):\n"
+        "    subprocess.Popen([sys.executable, 'g.py'], cwd=stage)\n",
+        "from sys import executable\n",
+    ],
+)
+def test_the_generator_guard_catches_runs_outside_the_helper(addition: str) -> None:
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    assert _staged_generator_run_violations(source + "\n\n" + addition) != []
+
+
+def test_the_generator_guard_requires_the_helper_to_pass_the_allowlist() -> None:
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    inherited = source.replace(
+        "        env=staged_generator_environment(),\n    )\n\n\ndef _regenerate",
+        "    )\n\n\ndef _regenerate",
+        1,
+    )
+    assert inherited != source
+    assert _staged_generator_run_violations(inherited) != []
 
 
 @pytest.mark.parametrize("signing_key", [None, ""])
