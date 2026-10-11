@@ -2857,6 +2857,7 @@ def test_every_staged_generator_run_passes_the_minimal_environment() -> None:
 )
 def test_the_generator_guard_catches_runs_outside_the_helper(addition: str) -> None:
     source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    assert _staged_generator_run_violations(source) == []
     assert _staged_generator_run_violations(source + "\n\n" + addition) != []
 
 
@@ -2868,6 +2869,7 @@ def test_the_generator_guard_requires_the_helper_to_pass_the_allowlist() -> None
         1,
     )
     assert inherited != source
+    assert _staged_generator_run_violations(source) == []
     assert _staged_generator_run_violations(inherited) != []
 
 
