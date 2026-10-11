@@ -758,8 +758,11 @@ export function buildBrierAgentLeaderboard(
 // because it is LINEAR in each CRPS with weights (1 / scale, per target
 // and run count) fixed before the outcome and untouched by the report,
 // and CRPS itself is proper. The geometric mean of raw CRPS ratios it
-// replaces was not: it minimizes E[log CRPS], whose optimal Gaussian
-// "80%" interval is 0.39x the truthful width (38% coverage) whatever the
+// replaces was not: as targets accumulate it minimizes E[log CRPS], which
+// ignores the baseline and rewards narrow reports (under a N(0, 1) belief,
+// Gaussian reports optimize at sigma 0.461, whose stated 80% interval
+// covers 44.5%; interval reports at 0.386 of the truthful width, 37.9%),
+// and on one target it is a raw ratio whose optimum moves with the
 // baseline. Ratio-of-means and mean-of-ratios are improper at small n
 // too, because the baseline's realized CRPS in the denominator reweights
 // outcomes.
@@ -815,6 +818,20 @@ function pairedPersistenceStats(
       row.agent === PERSISTENCE_BASELINE_AGENT &&
       row.reward.components.crps !== null
     ) {
+      // One deterministic baseline exists per target; two that disagree
+      // would make every pair depend on row order (the last one silently
+      // won), so treat it as the integrity anomaly it is.
+      const existing = baselineByTarget.get(row.predictionId);
+      if (
+        existing &&
+        (existing.reward.components.crps !== row.reward.components.crps ||
+          existing.reward.components.normalizedCrps !==
+            row.reward.components.normalizedCrps)
+      ) {
+        throw new Error(
+          `conflicting persistence baselines for ${row.predictionId}`,
+        );
+      }
       baselineByTarget.set(row.predictionId, row);
     }
   }

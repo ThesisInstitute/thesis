@@ -184,14 +184,15 @@ export default async function CalibrationPage() {
           claimed-time-verified, outside the official numbers, alongside
           unverified and violated legacy runs. CRPS is normalized only by
           same-series ledger dispersion frozen at target registration; scores
-          without three pre-cutoff ledger observations, or whose dispersion is
-          only floating-point residue (at most 1e-12 of the series&apos;
-          magnitude), publish raw CRPS and stay out of normalized means and
-          rewards. The agent-versus-persistence headline and the forecaster
-          ranking are the mean per-target difference in normalized CRPS against
-          the paired ledger baseline: linear in every score, so honest
-          distributions minimize it in expectation, and no forecast can move its
-          scale.
+          without three pre-cutoff ledger observations, or whose step dispersion
+          is at most 1e-12 of the series&apos; magnitude (a conservative floor
+          that catches the floating-point residue of exactly linear histories),
+          publish raw CRPS and stay out of normalized means and rewards. The
+          agent-versus-persistence headline and the forecaster ranking are the
+          mean per-target difference in normalized CRPS against the paired
+          ledger baseline: linear in every score, so a forecaster&apos;s honest
+          distribution minimizes its expected value, and no forecast can move
+          its scale.
         </p>
 
         <section className="mt-10 grid grid-cols-4 gap-4 max-md:grid-cols-2">
@@ -398,15 +399,15 @@ export default async function CalibrationPage() {
             baseline&apos;s, over each forecaster&apos;s own matched targets
             with a usable ledger scale (± one standard error; below 0 beats
             persistence), lowest first. The difference is linear in every score,
-            so in expectation no forecaster can improve its rank by reporting
-            anything but its honest distribution. Win rates and unpaired means
-            remain visible for context. The persistence baseline forecasts every
-            target as its last official print with a realized-volatility
-            interval — an agent earns its place by beating it. Forecaster rows
-            score here only when witness-verified; the deterministic baseline is
-            a replayable function of pre-cutoff ledger data and needs no witness
-            of its own. Rows with few scored runs are noisy; read them
-            accordingly.
+            so a forecaster&apos;s honest distribution minimizes its expected
+            value (a property of the statistic, not a promise about expected
+            rank among forecasters). Win rates and unpaired means remain visible
+            for context. The persistence baseline forecasts every target as its
+            last official print with a realized-volatility interval — an agent
+            earns its place by beating it. Forecaster rows score here only when
+            witness-verified; the deterministic baseline is a replayable
+            function of pre-cutoff ledger data and needs no witness of its own.
+            Rows with few scored runs are noisy; read them accordingly.
           </p>
           <div
             className="mt-5 overflow-x-auto rounded-[14px] border"

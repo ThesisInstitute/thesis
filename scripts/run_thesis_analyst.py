@@ -179,7 +179,8 @@ def write_artifact(
 # close 12-digit candidates, takes the larger magnitude: Decimal's ROUND_HALF_UP.
 # The earlier format(value, ".12g") rounded those ties half-to-even, turning
 # 100000.0078125 into 100000.007812 where the site builder writes 100000.007813
-# (2026-09-24 review: 1,174 of 40,000 synthetic interval inputs diverged).
+# (tests/test_distribution_rounding_parity.py: 39,785 legacy rounding calls
+# diverged across 735 of its 1,805 seeded interval inputs).
 JS_TO_PRECISION_12 = Context(prec=12, rounding=ROUND_HALF_UP)
 
 

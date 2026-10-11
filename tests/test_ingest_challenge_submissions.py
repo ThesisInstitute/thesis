@@ -1052,12 +1052,48 @@ def test_repo_root_below_the_git_toplevel_keeps_one_shot(
         b'{"a": "\xff"}',
         b'{"n": 1' + b"0" * 5000 + b"}",
         b"{",
+        b'{"n": NaN}',
+        b'{"n": -Infinity}',
+        b'{"n": 1e400}',
     ],
-    ids=["bom", "utf-16", "invalid-utf-8", "digit-limit", "truncated"],
+    ids=[
+        "bom",
+        "utf-16",
+        "invalid-utf-8",
+        "digit-limit",
+        "truncated",
+        "nan",
+        "infinity",
+        "overflow",
+    ],
 )
 def test_parse_submission_bytes_refuses_unreadable_json(raw: bytes) -> None:
     with pytest.raises(ingest.ChallengeSubmissionError, match="not readable JSON"):
         ingest.parse_submission_bytes(raw)
+
+
+@pytest.mark.parametrize("literal", [b"NaN", b"Infinity", b"1e400"])
+def test_non_finite_extension_values_never_reach_the_records(
+    submission_repo: dict[str, Any],
+    literal: bytes,
+) -> None:
+    # validate_quantiles checks p and value but keeps each rung's other keys
+    # as submitted; a NaN there used to survive into the record and come
+    # back out of json.dump as a literal no JSON parser accepts.
+    raw = payload_bytes(
+        {**submission_repo["submission"], "challenger": "github:nan-user"}
+    )
+    marker = b'"p": 0.05,'
+    assert raw.count(marker) == 1
+    path = submission_repo["inbox_dir"] / "nan-user" / "fixture-rate.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(raw.replace(marker, marker + b' "metadata": ' + literal + b","))
+    commit_all(submission_repo["repo"], "Add a rung carrying a non-finite extra key")
+
+    records = run_ingest(submission_repo)
+    assert challengers_of(records) == ["github:fixture-user"]
+    # Whatever is recorded serializes as strict JSON.
+    json.loads(json.dumps(records, allow_nan=False))
 
 
 def test_recursion_error_is_a_submission_error_not_a_batch_abort(

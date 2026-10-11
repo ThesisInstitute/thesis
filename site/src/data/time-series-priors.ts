@@ -136,11 +136,15 @@ export function buildLedgerPersistenceBaseline(
     ciLow: prior.ciLow,
     ciHigh: prior.ciHigh,
   });
-  // A flat history makes the p80 half-width zero; the interval transform
-  // then spans +/-1.5e-9, and from |value| >= 10 the 201-point grid
-  // collapses under 12-significant-digit rounding, so the CDF fails the
-  // scorer's own contract and scoring would throw mid-build. A baseline
-  // the scorer cannot read is unavailable, with the validator's reasons.
+  // A flat history makes the p80 half-width zero, and the interval
+  // transform then spans only +/-1.5e-9. Whether that survives depends on
+  // magnitude: at 1.5 it is a valid near-point mass; at 9.999999999, 10,
+  // 215, 1e5 or 1e7 the 201-point grid collapses under 12-significant-digit
+  // rounding, the CDF fails the scorer's own contract, and scoring would
+  // throw mid-build; from about 5e7 the 1.5e-9 spread vanishes in binary
+  // floating point and the transform's fallback widens the support to
+  // +/-10% of the value, which validates. A baseline the scorer cannot read
+  // is unavailable, with the validator's reasons.
   const distributionErrors = validateNumericCdfDistribution(distribution);
   if (distributionErrors.length > 0) {
     return unavailable(

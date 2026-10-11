@@ -1494,11 +1494,16 @@ export interface TargetNormalizationScale {
 // magnitude to count as dispersion at all. Equal decimal steps leave
 // binary-float residue that scales with the values (1.814, 1.805, 1.796
 // left 1.57e-16; the same linear shape near 215 leaves 2.0e-14, which
-// passed the old absolute Number.EPSILON gate), bounded by about
-// 2 * n * Number.EPSILON of the magnitude for n steps, so under 1e-12 for
-// any history shorter than ~2,000 prints. Twelve significant digits is
+// passed the old absolute Number.EPSILON gate). Measured on 2026-09-27
+// across 750 exactly linear histories of 3 to 10,001 prints, magnitudes
+// 1e-3 to 3e8 and both signs, the worst residue was 1.3e-16 of the
+// magnitude, four orders under this floor. Twelve significant digits is
 // also all the resolution a materialized distribution keeps
-// (toPrecision(12)); no official series publishes finer.
+// (toPrecision(12)). The floor is conservative, not a pure residue test: it
+// would also refuse genuine variation confined to the 13th significant
+// digit (a series at 1e11 whose one change is 1). No catalog series comes
+// close: on 2026-09-27 the smallest usable scale was 1.6e-3 of its
+// history's magnitude.
 export const NORMALIZATION_SCALE_RELATIVE_FLOOR = 1e-12;
 
 // The denominator is frozen per dataPointId from observations that were in

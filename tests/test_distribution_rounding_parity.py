@@ -8,9 +8,10 @@ which rounds exact decimal ties half-to-even, while ECMAScript toPrecision
 picks the larger magnitude: 100000.0078125 became 100000.007812 in Python and
 100000.007813 in TypeScript. Parity rested on one fixture at magnitude 5
 (test_thesis_analyst_runner.py::test_interval_distribution_matches_typescript_
-fixture), whose 404 rounding calls include no exact tie. The 2026-09-24
-adversarial review found 1,174 of 40,000 synthetic inputs diverging, every one
-at |p| >= 1e5; none of the 390 sealed interval_seeded records had diverged.
+fixture), whose 404 rounding calls include no exact tie. This file's seeded
+corpus reproduces the split: the legacy body rounds 39,785 of its calls
+differently, in 735 of 1,805 inputs. None of the 390 sealed interval_seeded
+records had diverged.
 """
 
 from __future__ import annotations
@@ -49,7 +50,11 @@ def _legacy_round(value: float) -> float:
 def _is_exact_tie(value: float) -> bool:
     # A double sits exactly between two 12-significant-digit neighbours iff
     # its exact decimal expansion has 13 significant digits ending in 5.
-    digits = Decimal(value).as_tuple().digits
+    # Integer-valued doubles expand with trailing zeros (10000000000050 is
+    # 14 digits, 13 significant), so strip them before counting.
+    digits = list(Decimal(value).as_tuple().digits)
+    while len(digits) > 1 and digits[-1] == 0:
+        digits.pop()
     return len(digits) == 13 and digits[-1] == 5
 
 
@@ -93,6 +98,13 @@ EXACT_TIES = [
     # Rounding up carries into the next decade (toPrecision -> "1.00...e+13").
     (9999999999995.0, 10000000000000.0),
     (-9999999999995.0, -10000000000000.0),
+    # From 1e13 up, ties are integers whose exact expansion ends in zeros.
+    (10000000000050.0, 10000000000100.0),
+    (-10000000000050.0, -10000000000100.0),
+    (98765432101250.0, 98765432101300.0),
+    (-98765432101250.0, -98765432101300.0),
+    (1234567890125000.0, 1234567890130000.0),
+    (-1234567890125000.0, -1234567890130000.0),
     # Ties are not confined to large magnitudes: for e <= 11 every odd
     # multiple of 2**(e - 12) inside [10**e, 10**(e + 1)) is one. (Below e = -6
     # no such multiple fits in the decade, so tiny doubles never tie.)
@@ -195,14 +207,20 @@ def test_rounding_matches_javascript_across_the_double_range() -> None:
         if math.isfinite(value):
             values.append(value)
     # Random patterns almost never land on a tie, so add odd multiples of
-    # 2**(e - 12) for decades 1e-6..1e11 (see EXACT_TIES). In the smallest
-    # decades an odd multiple can spill into a neighbouring decade, where it
-    # is no longer a tie, so keep only the ones that are.
+    # 2**(e - 12) for decades 1e-6..1e11 (see EXACT_TIES), and from 1e12 to
+    # 1e15 (still below 2**53, so exact) odd multiples of 5 * 10**(e - 12).
+    # In the smallest decades an odd multiple can spill into a neighbouring
+    # decade, where it is no longer a tie, so keep only the ones that are.
     while len(values) < 40_000:
-        exponent = rng.randint(-6, 11)
-        g = 2.0 ** (exponent - 12)
-        odd = round(rng.uniform(1, 9.9) * 10**exponent / g) | 1
-        value = rng.choice((-1, 1)) * odd * g
+        exponent = rng.randint(-6, 15)
+        if exponent >= 12:
+            unit = 5 * 10 ** (exponent - 12)
+            odd = (rng.randint(10**exponent, 9 * 10**exponent) // unit) | 1
+            value = float(rng.choice((-1, 1)) * odd * unit)
+        else:
+            g = 2.0 ** (exponent - 12)
+            odd = round(rng.uniform(1, 9.9) * 10**exponent / g) | 1
+            value = rng.choice((-1, 1)) * odd * g
         if _is_exact_tie(value):
             values.append(value)
     live = _round_in_javascript(values)

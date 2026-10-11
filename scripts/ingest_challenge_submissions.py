@@ -285,6 +285,22 @@ def validate_quantiles(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return quantiles
 
 
+def _refuse_json_constant(name: str) -> Any:
+    # Python's json accepts NaN and the infinities, which JSON does not;
+    # kept in an unchecked field (a quantile's extra keys), they came back
+    # out of json.dump as literals no JSON parser reads.
+    raise ValueError(f"non-standard JSON constant {name}")
+
+
+def _finite_json_float(text: str) -> float:
+    # An overflowing literal such as 1e400 parses to inf and would be
+    # re-emitted as Infinity, the same defect as the constants above.
+    value = float(text)
+    if not math.isfinite(value):
+        raise ValueError(f"number {text} overflows a double")
+    return value
+
+
 def parse_submission_bytes(raw: bytes) -> Any:
     """Decode one submission's bytes exactly as the intake reads them.
 
@@ -297,10 +313,16 @@ def parse_submission_bytes(raw: bytes) -> Any:
     batch abort: pathological nesting raises RecursionError, and an
     integer past CPython's int-digit limit raises a bare ValueError that
     is not a JSONDecodeError — either escaping would stop the recorder.
+    NaN, the infinities, and overflowing floats are refused too: accepted
+    into an unchecked field, they were re-emitted as invalid JSON.
     """
 
     try:
-        return json.loads(raw.decode("utf-8"))
+        return json.loads(
+            raw.decode("utf-8"),
+            parse_constant=_refuse_json_constant,
+            parse_float=_finite_json_float,
+        )
     except (RecursionError, ValueError) as error:
         # ValueError covers JSONDecodeError and UnicodeDecodeError too.
         raise ChallengeSubmissionError(

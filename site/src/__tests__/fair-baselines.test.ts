@@ -372,6 +372,23 @@ describe("fair ledger-backed baselines", () => {
     expect(summary.agentWinRate).toBe(0.5);
   });
 
+  it("refuses conflicting persistence baselines instead of letting row order pick one", () => {
+    const agent = [pairedRow("a", 0.3, "agent", 1)];
+    const twin = pairedRow("a", 0.5, PERSISTENCE_BASELINE_AGENT, 1);
+    // An exact duplicate is harmless and pairs as one baseline.
+    expect(
+      summarizePairedComparison(agent, [twin, { ...twin }]).normalizedCrpsDelta,
+    ).toBeCloseTo(-0.2, 12);
+    for (const baselines of [
+      [twin, pairedRow("a", 0.9, PERSISTENCE_BASELINE_AGENT, 1)],
+      [pairedRow("a", 0.9, PERSISTENCE_BASELINE_AGENT, 1), twin],
+    ]) {
+      expect(() => summarizePairedComparison(agent, baselines)).toThrow(
+        /conflicting persistence baselines for a/,
+      );
+    }
+  });
+
   it("ranks by the paired difference and compares forecasters head to head on shared targets only", () => {
     const rows = [
       pairedRow("a", 0.4, PERSISTENCE_BASELINE_AGENT, 1, "persistence"),

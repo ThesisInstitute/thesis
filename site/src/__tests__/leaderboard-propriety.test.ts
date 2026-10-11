@@ -29,9 +29,11 @@ import { PERSISTENCE_BASELINE_AGENT } from "@/data/time-series-priors";
 //
 // The same harness convicts the statistics the leaderboard must never use
 // again: the geometric mean of per-target raw CRPS ratios it ranked by
-// until 2026-09-24 (optimum sigma 0.46 whatever the baseline: an "80%"
-// interval with ~38% coverage), ratio-of-means, and mean-of-ratios. Each
-// divides by the baseline's REALIZED CRPS, which reweights outcomes.
+// until 2026-09-24 (as targets accumulate its optimum is sigma 0.461
+// whatever the baseline, an "80%" interval covering 44.5%; on one target
+// it is a raw ratio whose optimum moves with the baseline), ratio-of-means,
+// and mean-of-ratios. Each divides by the baseline's REALIZED CRPS, which
+// reweights outcomes.
 
 const SQRT_2PI = Math.sqrt(2 * Math.PI);
 

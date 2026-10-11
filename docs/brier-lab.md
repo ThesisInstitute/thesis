@@ -61,8 +61,13 @@ histories have zero step dispersion, but binary floating point leaves a residue
 that grows with the values. `1.814, 1.805, 1.796` left `1.57e-16`, which put a
 `-7.08e13` reward in the 2026-09-23 export. The same shape near 215 leaves
 `2.0e-14`, which a fixed `Number.EPSILON` bound let through. The floor sits well
-above that residue for any realistic history length and matches the 12
-significant digits every materialized distribution keeps.
+above that residue (the worst of 750 exactly linear histories of up to
+10,001 prints was `1.3e-16` of the magnitude) and matches the 12
+significant digits every materialized distribution keeps. It is a
+conservative minimum, not a pure residue test: it would also refuse genuine
+variation confined to the 13th significant digit (a series at `1e11` whose one
+change is 1). No catalog series comes close: on 2026-09-27 the smallest usable
+scale was `1.6e-3` of its history's magnitude.
 
 Same-series membership comes from exact target registrations and each
 observation's matching contract hash and source-binding projection;
@@ -80,10 +85,15 @@ record; forecast-supplied `historicalContext` is never a baseline input.
 
 A baseline whose materialized CDF fails the scorer's own validator is also
 unavailable, and the record names the validator errors. A flat history gives
-a zero-width interval. The transform spreads it only `1.5e-9` either side,
-and from `|value| >= 10` the 201-point grid collapses under
-12-significant-digit rounding. Below that magnitude the near-point-mass
-baseline stays valid and available.
+a zero-width interval, which the transform spreads only `1.5e-9` either side.
+Whether that survives depends on magnitude:
+
+- At 1.5 it is a valid near-point mass and the baseline stays available.
+- At 9.999999999, 10, 215, 1e5 or 1e7 the 201-point grid collapses under
+  12-significant-digit rounding, so the baseline is unavailable.
+- From about 5e7 the `1.5e-9` spread vanishes in binary floating point, and
+  the transform's existing fallback widens the support to ±10% of the value.
+  That CDF validates, so the baseline stays available.
 
 ## Leaderboard
 
@@ -114,7 +124,7 @@ Three statistics fail this test, and the leaderboard must not rank by them:
 
 | Statistic | Why it is improper |
 |---|---|
-| Geometric mean of per-target raw CRPS ratios (ranked by until 2026-09-24) | It minimizes `E[log CRPS]`. Under a Gaussian belief its optimal "80%" interval is about 0.39 of the truthful width, whatever the baseline. |
+| Geometric mean of per-target raw CRPS ratios (ranked by until 2026-09-24) | As targets accumulate it minimizes `E[log CRPS]`, whose optimum ignores the baseline and is too narrow. Under a `N(0, 1)` belief, interval reports optimize at 0.386 of the truthful width (37.9% coverage) and Gaussian reports at σ = 0.461 (44.5% coverage of the stated 80%). On a single target it is a raw CRPS ratio, whose optimum moves with the baseline (σ = 0.69, 0.72 and 1.25 against `N(0, 1.2²)`, `N(0.3, 1.2²)` and `N(2, 1.2²)`) and is still not truthful. |
 | Ratio of means | Divides by the baseline's realized CRPS, which reweights outcomes. Proper only in the large-n limit. |
 | Mean of ratios | Same defect as the ratio of means. |
 

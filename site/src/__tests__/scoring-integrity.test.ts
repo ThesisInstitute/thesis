@@ -468,6 +468,32 @@ describe("target normalization scale", () => {
     },
   );
 
+  // The floor is a conservative minimum, not a pure residue detector:
+  // genuine integer variation confined to the 13th significant digit is
+  // refused too. Intended — no catalog series comes within orders of
+  // magnitude — but pinned so the trade-off stays visible.
+  it.each([
+    ["kept at 7.07e-12 of magnitude", 1e11, "ledger_dispersion"],
+    ["refused at 7.07e-13 of magnitude", 1e12, "unavailable"],
+  ] as const)(
+    "draws the relative floor between genuine 12th- and 13th-digit variation (%s)",
+    (_label, level, source) => {
+      const ledger: PolicyEngineLedgerEntry[] = [
+        target,
+        ...historyRegistrations,
+        observation("2022", level, "2026-02-01T00:00:00Z"),
+        observation("2023", level, "2026-03-01T00:00:00Z"),
+        observation("2024", level + 1, "2026-04-01T00:00:00Z"),
+      ];
+      // Steps 0 and 1 are exact integers: sample SD sqrt(0.5), no residue.
+      const normalization = targetNormalizationScale(baseCell, ledger);
+      expect(normalization.source).toBe(source);
+      expect(normalization.scale).toBe(
+        source === "unavailable" ? null : Math.sqrt(0.5),
+      );
+    },
+  );
+
   it("keeps floating-point-zero dispersion out of judge calibration aggregates", () => {
     const degenerateSeries = "census.spm.deep_child_poverty_rate";
     const degenerateDataPointId = `${degenerateSeries}.2025`;
