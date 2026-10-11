@@ -97,7 +97,8 @@ runtime question; whether any code could ever read it is not.
   family: a target that binds `bls-api` routes to the BLS API leg, and every
   other reference for the stem keeps its ALFRED route. A `bls-api` contract
   takes the docket's canonical series as its id stem, and its docket
-  `releaseDates` must never name a period that is already registered. The six
+  `releaseDates` must never name a period that is already registered under
+  another adapter. The six
   Table A-19 stems follow the same rule between the Archive-capture `a19` leg
   and the BLS API family.
 - A resolved fact must not give a Chronicle lineage a second unit: Chronicle's

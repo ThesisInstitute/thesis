@@ -4,8 +4,10 @@
 // at the end of every resolver run (see resolve-and-rebuild.yml). Each row
 // restates what the resolver printed about one pending target whose
 // resolution date has passed (`detail` is the resolver's own words), or
-// the fact that the resolver has no route for its reference, with the
-// target's registered adapter and series in `registration`.
+// the fact that the resolver has no route for its reference. Such a row
+// may also carry `registration`: registration facts (an adapter other than
+// generic-url, a registered series spelled differently from the
+// reference), never resolver output.
 // Nothing here decides anything: a forecast is "overdue" only because it
 // is still pending after the date it said it would resolve.
 import rawStatus from "./resolution-status.json";

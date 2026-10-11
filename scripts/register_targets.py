@@ -108,8 +108,12 @@ CALENDAR_GATED_SOURCE_ADAPTERS = NATIVE_INTL_SOURCE_ADAPTERS | {
 # registered ones, and a canonical ``2026_09`` id never equals an existing
 # ``2026-09`` or ``september_2026`` one. For ``bls-api`` the replacement is
 # period-level: the docket commits no release date for a period that already
-# holds a registration, the roller skips a calendar-gated period with no date,
-# and tests/test_bls_api_registrable.py enforces the first of those.
+# holds a registration under another adapter, the roller skips a
+# calendar-gated period with no date, and tests/test_bls_api_registrable.py
+# enforces the first of those. A period the roller has registered from the
+# calendar keeps its date: its canonical id is then a registered id, which
+# the roller refuses to register again, and the same test requires that
+# period to have that one id and no registration under another adapter.
 CANONICAL_ID_SOURCE_ADAPTERS = NATIVE_INTL_SOURCE_ADAPTERS | {"bls-api"}
 # Adapters whose allowedHosts are exactly the hosts their executor fetches.
 # A previous forecast's research links must not widen that custody boundary.

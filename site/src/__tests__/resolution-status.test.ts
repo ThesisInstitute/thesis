@@ -92,6 +92,26 @@ describe("card wording", () => {
   });
 });
 
+describe("registration facts", () => {
+  it("pass through as registration, never as the resolver's words", () => {
+    // R26/R27: a no-route row's adapter and series are registration facts.
+    // The page prints `detail` after "resolver:", so they must not arrive
+    // there.
+    const noRoute: OverdueStatus = {
+      ...row,
+      code: "NO_ROUTE_ADAPTER_REGISTERED",
+      registration:
+        "adapter alfred-fred, series bls.ppi.final_demand_monthly_change",
+    };
+    const notice = overdueNotice(
+      { slug: row.forecastSlug, status: "pending", resolutionDate: "2026-07-13" },
+      { asOf: "2026-09-19", lookup: () => noRoute },
+    );
+    expect(notice?.registration).toBe(noRoute.registration);
+    expect(notice && "detail" in notice).toBe(false);
+  });
+});
+
 describe("the committed status file", () => {
   // Completeness (one row per overdue pending target, nothing extra) is a
   // property of scripts/resolution_status.py, tested there against the
