@@ -694,6 +694,23 @@ def test_spare_quota_opens_only_when_fleet_ops_gate_says_spare(monkeypatch) -> N
     assert horizon.spare_quota().startswith("spare gate unreadable")
 
 
+def test_override_is_read_only_from_the_gates_override_field(monkeypatch) -> None:
+    import subprocess
+
+    def fake(stdout: str):
+        return lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout, "")
+
+    monkeypatch.setattr(
+        horizon.subprocess, "run", fake('{"spare": true, "override": {"spare_until": "x"}}')
+    )
+    assert horizon.override_active() is True
+    # Spare by projection alone is not an override: the paced budget still applies.
+    monkeypatch.setattr(horizon.subprocess, "run", fake('{"spare": true, "reason": "spare"}'))
+    assert horizon.override_active() is False
+    monkeypatch.setattr(horizon.subprocess, "run", fake("not json"))
+    assert horizon.override_active() is False
+
+
 def test_fleet_ops_limits_are_the_ones_in_force() -> None:
     assert (horizon.MAX_INFLIGHT, horizon.CHUNK, horizon.MAX_DISK_DROP_GB) == (
         15,

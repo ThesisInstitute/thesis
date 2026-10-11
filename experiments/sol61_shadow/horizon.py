@@ -190,6 +190,17 @@ def spare_quota() -> str | None:
     return None if info.get("spare") else info.get("reason", "not spare")
 
 
+def override_active() -> bool:
+    """True while Fleet ops' spare gate reports an override from Max (codex-spare/override.json)."""
+    out = subprocess.run(
+        [sys.executable, str(SPARE_GATE)], capture_output=True, text=True, check=False
+    )
+    try:
+        return bool(json.loads(out.stdout).get("override"))
+    except json.JSONDecodeError:
+        return False
+
+
 def free_gb() -> float:
     return shutil.disk_usage("/System/Volumes/Data").free / 1e9
 
@@ -230,13 +241,17 @@ def submit_when_open(ops: pathlib.Path, label: str, size: int, end: datetime) ->
         free = free_gb()
         drop = (_last_free[0] - free) if _last_free else 0.0
         _last_free[:] = [free]
+        # Fleet ops 2026-10-11 (Max: "lets exhaust it all tonight", ahead of an expected Codex limit reset): while
+        # the spare gate carries an override from Max, the paced weekly budget gives way. Load, disk and in-flight
+        # limits still apply.
+        allowed = 1.0 if override_active() else budget(now)
         reason = gate(
             inflight=inflight(),
             size=size,
             load5=os.getloadavg()[1],
             free_gb=free,
             utilization=lane_utilization(),
-            allowed=budget(now),
+            allowed=allowed,
             free_drop_gb=drop,
         )
         if reason is None:
