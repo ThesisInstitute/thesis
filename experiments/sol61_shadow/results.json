@@ -1,5 +1,5 @@
 {
-  "collectedAtUtc": "2026-10-11T02:41:02Z",
+  "collectedAtUtc": "2026-10-11T10:04:30Z",
   "runs": {
     "full/abs-labour-employment-change-australia-september-2026__r1": {
       "acceptedAttempt": "20261007-061223-s61-full1-abs-labour-employment-change-a/a1",
@@ -50278,6 +50278,88 @@
       "wave": 2,
       "windowStart": "2026-10-13"
     },
+    "web/canada-ei-regular-beneficiaries-august-2026__w4r1": {
+      "acceptedAttempt": "20261010-224106-s61-webw4r1-canada-ei-regular-beneficiar/a1",
+      "arm": "web",
+      "audit": {
+        "commandCount": 3,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -c 'import statistics, math; x=[551.87,551.67,543.74,553.46,565.96,569.11,554.83,542.11,548.00,544.44,543.69,541.96,547.05]; d=[b-a for a,b in zip(x,x[1:])]; m=statistics.mean(d); s=statistics.stdev(d); print({\\\"levels\\\":x,\\\"changes\\\":d,\\\"mean_change\\\":m,\\\"sum_squared_centered_changes\\\":sum((v-m)**2 for v in d),\\\"sigma\\\":s,\\\"half_width\\\":1.28*s,\\\"last_five_change_mean\\\":statistics.mean(d[-5:]),\\\"median_change\\\":statistics.median(d),\\\"recent_six_level_mean\\\":statistics.mean(",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 0,
+        "curlSucceeded": 0,
+        "usage": {
+          "cached_input_tokens": 549120,
+          "input_tokens": 615448,
+          "output_tokens": 6227
+        },
+        "webSearchCount": 8,
+        "webSearches": [
+          "site:www150.statcan.gc.ca \"Employment Insurance\" \"July 2026\" | site:www150.statcan.gc.ca \"Employment Insurance\" \"June 2026\" | site:www150.statcan.gc.ca \"14-10-0011-01\" \"2026\" | search | site:www150.statcan.gc.ca \"Employment Insurance\" \"July 2026\" ...",
+          "open_page | https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350&startRefPeriod=2025-07-01&endReferencePeriod=2026-07-31 | https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350&startRefPeriod=2025-07-01&endReferencePeriod=2026-07-31",
+          "site:www150.statcan.gc.ca \"Employment Insurance, May 2026\" | site:www150.statcan.gc.ca \"Employment Insurance, February 2026\" | site:www150.statcan.gc.ca \"Employment Insurance, March 2026\" | search | site:www150.statcan.gc.ca \"Employment Insurance, May 2026\" ...",
+          "site:www150.statcan.gc.ca \"Employment Insurance, January 2026\" \"beneficiaries \u2014 Canada\" | site:www150.statcan.gc.ca \"Employment Insurance, December 2025\" \"beneficiaries \u2014 Canada\" | site:www150.statcan.gc.ca \"Employment Insurance, November 2025\" \"beneficiaries \u2014 Canada\" | site:www150.statcan.gc.ca \"Employment Insurance, October 2025\" \"beneficiaries \u2014 Canada\" | search | site:www150.statcan.gc.ca \"Employment Insurance, January 2026\" \"beneficiaries \u2014 Canada\" ...",
+          "site:www150.statcan.gc.ca \"Employment Insurance, September 2025\" \"beneficiaries \u2014 Canada\" | site:www150.statcan.gc.ca \"Employment Insurance, August 2025\" \"beneficiaries \u2014 Canada\" | site:www150.statcan.gc.ca \"Employment Insurance, July 2025\" \"beneficiaries \u2014 Canada\" | search | site:www150.statcan.gc.ca \"Employment Insurance, September 2025\" \"beneficiaries \u2014 Canada\" ...",
+          "open_page | https://www150.statcan.gc.ca/n1/daily-quotidien/260904/t001a-eng.htm | https://www150.statcan.gc.ca/n1/daily-quotidien/260904/t001a-eng.htm",
+          "open_page | https://www.canada.ca/en/employment-social-development/news/2026/03/government-of-canada-extending-employment-insurance-temporary-measures-to-ensure-critical-income-support-continues-for-workers-impacted-by-tariffs.html | https://www.canada.ca/en/employment-social-development/news/2026/03/government-of-canada-extending-employment-insurance-temporary-measures-to-ensure-critical-income-support-continues-for-workers-impacted-by-tariffs.html",
+          "other"
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-11T02:41:06Z",
+      "eligible": true,
+      "final": true,
+      "finishedAt": "2026-10-11T02:55:48Z",
+      "forecast": {
+        "ciHigh": 558.21,
+        "ciLow": 536.87,
+        "pointEstimate": 547.54,
+        "resolutionDate": "2026-10-22",
+        "unit": "thousands"
+      },
+      "jobId": "20261010-224106-s61-webw4r1-canada-ei-regular-beneficiar",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": false,
+        "reasoningEffort": "ultra",
+        "sandbox": "read-only"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/web/canada-ei-regular-beneficiaries-august-2026__w4r1.txt",
+      "responseSha256": "610a915b0b4afb00f54007720ef199fb449b80e2f53a73cd9d9d95578f9892b5",
+      "rollout": 1,
+      "slug": "canada-ei-regular-beneficiaries-august-2026",
+      "startedAt": "2026-10-11T02:42:38Z",
+      "state": "succeeded",
+      "supersededJobs": [],
+      "trace": "/Users/maxghenis/ThesisInstitute/_sol61-shadow/traces/web/canada-ei-regular-beneficiaries-august-2026__w4r1.jsonl.gz",
+      "traceSha256": "8855c3346508fa911b78cf26571168eafd31b2057d70e5bd15866b62e6dc2e88",
+      "validation": {
+        "errors": [],
+        "ok": true,
+        "returnCode": 0,
+        "runDir": "experiments/sol61_shadow/runs/web/canada-ei-regular-beneficiaries-august-2026__w4r1"
+      },
+      "wave": 4,
+      "windowStart": "2026-10-13"
+    },
     "web/canada-ei-regular-beneficiaries-september-2026__r1": {
       "acceptedAttempt": "20261006-174819-s61-web1-canada-ei-regular-beneficiaries/a1",
       "arm": "web",
@@ -52181,6 +52263,91 @@
         "runDir": "experiments/sol61_shadow/runs/web/continued-claims-week-2026-09-26__w2r2"
       },
       "wave": 2,
+      "windowStart": "2026-10-14"
+    },
+    "web/continued-claims-week-2026-09-26__w4r1": {
+      "acceptedAttempt": "20261010-224106-s61-webw4r1-continued-claims-week-2026-0/a1",
+      "arm": "web",
+      "audit": {
+        "commandCount": 3,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -c 'import statistics, math; x=[1.799,1.778,1.779,1.774,1.730,1.719,1.701]; d=[round(b-a,6) for a,b in zip(x,x[1:])]; m=statistics.mean(d); ss=sum((v-m)**2 for v in d); s=statistics.stdev(d); print({\\\"levels\\\":x,\\\"changes\\\":d,\\\"level_mean\\\":statistics.mean(x),\\\"change_mean\\\":m,\\\"sum_squared_centered_changes\\\":ss,\\\"sigma\\\":s,\\\"half_width\\\":1.28*s,\\\"history_band\\\":[1.716-1.28*s,1.716+1.28*s],\\\"persistence\\\":x[-1],\\\"shrunk_drift_prior\\\":x[-1]+0.5*m,\\\"schema_bounds\\\":[1.716-0.0",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 0,
+        "curlSucceeded": 0,
+        "usage": {
+          "cached_input_tokens": 558464,
+          "input_tokens": 628081,
+          "output_tokens": 7235
+        },
+        "webSearchCount": 8,
+        "webSearches": [
+          "site.dol.gov unemployment insurance weekly claims October 8 2026 September 26 2026 | site.dol.gov unemployment insurance weekly claims release schedule 2026 calendar | search | site.dol.gov unemployment insurance weekly claims October 8 2026 September 26 2026 ...",
+          "open_page | https://www.dol.gov/ui/data.pdf | https://www.dol.gov/ui/data.pdf",
+          "site.dol.gov \"September 24, 2026\" \"insured\" \"unemployment\" | site.dol.gov \"September 17, 2026\" \"insured\" \"unemployment\" | site.dol.gov \"September 10, 2026\" \"insured\" \"unemployment\" | search | site.dol.gov \"September 24, 2026\" \"insured\" \"unemployment\" ...",
+          "open_page | https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf | https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf",
+          "open_page | https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf?trk=article-ssr-frontend-pulse_little-text-block | https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf?trk=article-ssr-frontend-pulse_little-text-block",
+          "open_page | https://www.dol.gov/index.php/newsroom/releases/eta/eta20260910 | https://www.dol.gov/index.php/newsroom/releases/eta/eta20260910",
+          "open_page | https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf?trk=article-ssr-frontend-pulse_little-text-block | https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf?trk=article-ssr-frontend-pulse_little-text-block",
+          "open_page | https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261413.pdf | https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261413.pdf"
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-11T02:41:06Z",
+      "eligible": false,
+      "final": true,
+      "finishedAt": "2026-10-11T03:00:26Z",
+      "forecast": {
+        "ciHigh": 1.717,
+        "ciLow": 1.715,
+        "pointEstimate": 1.716,
+        "resolutionDate": "2026-10-08",
+        "unit": "millions"
+      },
+      "jobId": "20261010-224106-s61-webw4r1-continued-claims-week-2026-0",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": false,
+        "reasoningEffort": "ultra",
+        "sandbox": "read-only"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/web/continued-claims-week-2026-09-26__w4r1.txt",
+      "responseSha256": "5f47fed3be9edfa7bf68cb622543a710b364b75d8fbf911ce43fe10acb0b66f2",
+      "rollout": 1,
+      "slug": "continued-claims-week-2026-09-26",
+      "startedAt": "2026-10-11T02:42:38Z",
+      "state": "succeeded",
+      "supersededJobs": [],
+      "trace": "/Users/maxghenis/ThesisInstitute/_sol61-shadow/traces/web/continued-claims-week-2026-09-26__w4r1.jsonl.gz",
+      "traceSha256": "8b659025241224fd9defb77546c052096b69b1ba6aa0a567d9c2166b1e13d6a7",
+      "validation": {
+        "errors": [
+          "resolutionDate 2026-10-08 is not after runAt 2026-10-11 \u2014 target already published (leakage)",
+          "resolutionSourceUrl host 'www.dol.gov' is not among the preregistered source binding hosts ['alfred.stlouisfed.org']"
+        ],
+        "ok": false,
+        "returnCode": 1,
+        "runDir": "experiments/sol61_shadow/runs/web/continued-claims-week-2026-09-26__w4r1"
+      },
+      "wave": 4,
       "windowStart": "2026-10-14"
     },
     "web/euro-area-unemployment-rate-september-2026__r1": {
@@ -63807,6 +63974,76 @@
       "wave": 2,
       "windowStart": "2026-10-15"
     },
+    "web/us-cdfi-assistance-transaction-obligations-fy2026__w4r1": {
+      "acceptedAttempt": "20261010-224106-s61-webw4r1-us-cdfi-assistance-transacti/a1",
+      "arm": "web",
+      "audit": {
+        "commandCount": 1,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 0,
+        "curlSucceeded": 0,
+        "usage": {
+          "cached_input_tokens": 278784,
+          "input_tokens": 320572,
+          "output_tokens": 2805
+        },
+        "webSearchCount": 4,
+        "webSearches": [
+          "open_page | https://api.usaspending.gov/api/v2/search/spending_over_time/ | https://api.usaspending.gov/api/v2/search/spending_over_time/",
+          "site.api.usaspending.gov spending_over_time POST transactions fiscal_year | site:api.usaspending.gov \"spending_over_time\" \"spending_level\" | search | site.api.usaspending.gov spending_over_time POST transactions fiscal_year ...",
+          "spending_over_time | find_in_page | 'spending_over_time'",
+          "open_page | https://www.usaspending.gov/data/data-sources-download.pdf | https://www.usaspending.gov/data/data-sources-download.pdf"
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-11T02:41:06Z",
+      "eligible": false,
+      "final": true,
+      "finishedAt": "2026-10-11T02:53:07Z",
+      "forecast": {
+        "ciHigh": null,
+        "ciLow": null,
+        "pointEstimate": null,
+        "resolutionDate": null,
+        "unit": "usd_millions"
+      },
+      "jobId": "20261010-224106-s61-webw4r1-us-cdfi-assistance-transacti",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": false,
+        "reasoningEffort": "ultra",
+        "sandbox": "read-only"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/web/us-cdfi-assistance-transaction-obligations-fy2026__w4r1.txt",
+      "responseSha256": "d8dce1e124420da1f67cadb9d3ed207e9e80b3bf23c658b356f56f128cec54ca",
+      "rollout": 1,
+      "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+      "startedAt": "2026-10-11T02:42:38Z",
+      "state": "succeeded",
+      "supersededJobs": [],
+      "trace": "/Users/maxghenis/ThesisInstitute/_sol61-shadow/traces/web/us-cdfi-assistance-transaction-obligations-fy2026__w4r1.jsonl.gz",
+      "traceSha256": "19543abdce70e6de7b28b89392203317b58929929e06a7a01b4396435550daf8",
+      "validation": {
+        "errors": [
+          "seal: TypeError: float() argument must be a string or a real number, not 'NoneType'"
+        ],
+        "ok": false,
+        "returnCode": 1,
+        "runDir": "experiments/sol61_shadow/runs/web/us-cdfi-assistance-transaction-obligations-fy2026__w4r1"
+      },
+      "wave": 4,
+      "windowStart": "2026-10-15"
+    },
     "web/us-core-pce-mom-september-2026__r1": {
       "acceptedAttempt": "20261006-174819-s61-web1-us-core-pce-mom-september-2026/a1",
       "arm": "web",
@@ -64563,6 +64800,76 @@
         "runDir": "experiments/sol61_shadow/runs/web/us-dhs-title-vi-award-transaction-obligations-fy2026__w2r2"
       },
       "wave": 2,
+      "windowStart": "2026-10-15"
+    },
+    "web/us-dhs-title-vi-award-transaction-obligations-fy2026__w4r1": {
+      "acceptedAttempt": "20261010-224106-s61-webw4r1-us-dhs-title-vi-award-transa/a1",
+      "arm": "web",
+      "audit": {
+        "commandCount": 1,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 0,
+        "curlSucceeded": 0,
+        "usage": {
+          "cached_input_tokens": 237952,
+          "input_tokens": 267798,
+          "output_tokens": 2410
+        },
+        "webSearchCount": 4,
+        "webSearches": [
+          "site.api.usaspending.gov \"spending_over_time\" \"treasury_account_components\" | search | site.api.usaspending.gov \"spending_over_time\" \"treasury_account_components\"",
+          "open_page | https://api.usaspending.gov/docs/ | https://api.usaspending.gov/docs/",
+          "site:api.usaspending.gov \"spending_over_time\" POST | site:github.com/fedspendingtransparency/usaspending-api \"spending_over_time.md\" | search | site:api.usaspending.gov \"spending_over_time\" POST ...",
+          "other"
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-11T02:41:06Z",
+      "eligible": false,
+      "final": true,
+      "finishedAt": "2026-10-11T02:52:51Z",
+      "forecast": {
+        "ciHigh": null,
+        "ciLow": null,
+        "pointEstimate": null,
+        "resolutionDate": null,
+        "unit": "usd"
+      },
+      "jobId": "20261010-224106-s61-webw4r1-us-dhs-title-vi-award-transa",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": false,
+        "reasoningEffort": "ultra",
+        "sandbox": "read-only"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/web/us-dhs-title-vi-award-transaction-obligations-fy2026__w4r1.txt",
+      "responseSha256": "4bc6c72de19e6fc80862155f5094ec354c7d775b515e5c12748865bc74aabb05",
+      "rollout": 1,
+      "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+      "startedAt": "2026-10-11T02:42:38Z",
+      "state": "succeeded",
+      "supersededJobs": [],
+      "trace": "/Users/maxghenis/ThesisInstitute/_sol61-shadow/traces/web/us-dhs-title-vi-award-transaction-obligations-fy2026__w4r1.jsonl.gz",
+      "traceSha256": "f84256ba2e7e971ad217961684d69eb1659d9722b6cdafa82ec8c743b837ab97",
+      "validation": {
+        "errors": [
+          "seal: TypeError: float() argument must be a string or a real number, not 'NoneType'"
+        ],
+        "ok": false,
+        "returnCode": 1,
+        "runDir": "experiments/sol61_shadow/runs/web/us-dhs-title-vi-award-transaction-obligations-fy2026__w4r1"
+      },
+      "wave": 4,
       "windowStart": "2026-10-15"
     },
     "web/us-dod-new-prime-awards-fy2026__r1": {
@@ -72050,6 +72357,91 @@
         "runDir": "experiments/sol61_shadow/runs/web/wic-participation-july-2026__w2r2"
       },
       "wave": 2,
+      "windowStart": "2026-10-14"
+    },
+    "web/wic-participation-july-2026__w4r1": {
+      "acceptedAttempt": "20261010-224106-s61-webw4r1-wic-participation-july-2026/a1",
+      "arm": "web",
+      "audit": {
+        "commandCount": 2,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          },
+          {
+            "command": "/bin/zsh -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'",
+            "curl": false,
+            "exitCode": 0
+          }
+        ],
+        "contaminated": false,
+        "contaminationHits": [],
+        "curlCount": 0,
+        "curlSucceeded": 0,
+        "usage": {
+          "cached_input_tokens": 1521792,
+          "input_tokens": 1589055,
+          "output_tokens": 11190
+        },
+        "webSearchCount": 16,
+        "webSearches": [
+          "open_page | https://www.fns.usda.gov/pd/wic-program | https://www.fns.usda.gov/pd/wic-program",
+          "site.fns.usda.gov WIC monthly data 2026 participation June | site.fns.usda.gov WIC 2026 July national level monthly data | search | site.fns.usda.gov WIC monthly data 2026 participation June ...",
+          "open_page | https://www.fna.usda.gov/pd/wic-program | https://www.fna.usda.gov/pd/wic-program",
+          "site.fns.usda.gov/sites/default/files \"wic\" \"June 2026\" | site.fna.usda.gov \"WIC\" \"6,\" \"Jun\" \"2026\" | search | site.fns.usda.gov/sites/default/files \"wic\" \"June 2026\" ...",
+          "other",
+          "other",
+          "other",
+          "site.fna.usda.gov \"WIC\" \"2026/2027\" \"July 1, 2026\" | site.fns.usda.gov \"WIC\" \"2026/2027\" \"July 1, 2026\" | search | site.fna.usda.gov \"WIC\" \"2026/2027\" \"July 1, 2026\" ...",
+          "open_page | https://fns-prod.azureedge.us/wic/fr-042926 | https://fns-prod.azureedge.us/wic/fr-042926",
+          "open_page | https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-5.pdf | https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-5.pdf",
+          "Table 21 | find_in_page | 'Table 21'",
+          "\"WIC\" \"release calendar\" site:usda.gov | \"program data\" \"October\" \"2026\" \"release\" site:fna.usda.gov | \"FNS\" \"statistical\" \"schedule\" \"2026\" site:usda.gov | search | \"WIC\" \"release calendar\" site:usda.gov ...",
+          "open_page | https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-4.pdf | https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-4.pdf",
+          "open_page | https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-January-2026.pdf | https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-January-2026.pdf",
+          "6,689,525 | find_in_page | '6,689,525'",
+          "open_page | https://www.whitehouse.gov/wp-content/uploads/2025/09/pfei_schedule_release_dates_cy2026.pdf | https://www.whitehouse.gov/wp-content/uploads/2025/09/pfei_schedule_release_dates_cy2026.pdf"
+        ]
+      },
+      "chronologyOk": true,
+      "createdAt": "2026-10-11T02:41:06Z",
+      "eligible": true,
+      "final": true,
+      "finishedAt": "2026-10-11T09:57:12Z",
+      "forecast": {
+        "ciHigh": 6.72869,
+        "ciLow": 6.599716,
+        "pointEstimate": 6.664203,
+        "resolutionDate": "2026-10-22",
+        "unit": "millions"
+      },
+      "jobId": "20261010-224106-s61-webw4r1-wic-participation-july-2026",
+      "launch": {
+        "binary": "codex",
+        "model": "gpt-6.1-sol",
+        "networkAccess": false,
+        "reasoningEffort": "ultra",
+        "sandbox": "read-only"
+      },
+      "model": "gpt-6.1-sol",
+      "response": "experiments/sol61_shadow/responses/web/wic-participation-july-2026__w4r1.txt",
+      "responseSha256": "fe545f3cf9db23179a77d87bbe23eb90fb2395403cd52076a4ae1cf4c4c884f8",
+      "rollout": 1,
+      "slug": "wic-participation-july-2026",
+      "startedAt": "2026-10-11T02:42:38Z",
+      "state": "succeeded",
+      "supersededJobs": [],
+      "trace": "/Users/maxghenis/ThesisInstitute/_sol61-shadow/traces/web/wic-participation-july-2026__w4r1.jsonl.gz",
+      "traceSha256": "963ae75c18b39303e43427348d47b02e76e05df37149d6d0228f09baf40e2863",
+      "validation": {
+        "errors": [],
+        "ok": true,
+        "returnCode": 0,
+        "runDir": "experiments/sol61_shadow/runs/web/wic-participation-july-2026__w4r1"
+      },
+      "wave": 4,
       "windowStart": "2026-10-14"
     },
     "web/wic-participation-september-2026__r1": {

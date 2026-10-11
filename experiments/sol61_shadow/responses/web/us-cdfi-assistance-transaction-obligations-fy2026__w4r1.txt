@@ -1,0 +1,67 @@
+{
+  "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "CDFI FY2026 assistance transaction obligations",
+  "question": "What will USAspending report for FY2026 CDFI Fund awarding-subagency financial-assistance transaction obligations, in USD millions, at the first registered-query snapshot?",
+  "unit": "usd_millions",
+  "status": "refused",
+  "refusalReason": "The exact registered POST query cannot be executed with the available web tools. Required historical observations were not fetched, and an official resolution date was not verified.",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the first official response captured under the registered_query_snapshot policy for FY2026. Execute the registered POST query with awarding agency Community Development Financial Institutions Fund, tier subtier, financial-assistance award type codes 02 through 11, spending level transactions, and group fiscal_year. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001, preserving the API's reported precision. Later revisions do not replace the registered snapshot. The exact snapshot date was not verified in this run.",
+  "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-11T02:46:12Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: exact-query history unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target is defined exclusively by the supplied registered USAspending query. Agency totals, appropriations, and program award announcements cannot substitute for its transaction-obligation results."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web.open requested https://api.usaspending.gov/api/v2/search/spending_over_time/ and returned HTTP 405 Method Not Allowed. This was a GET access attempt, not execution of the registered POST query."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint documentation fetched at https://api.usaspending.gov/docs/endpoints lists spending_over_time as POST. The available web tools expose no POST request body, and the run instructions prohibit shell networking."
+    },
+    {
+      "kind": "text",
+      "text": "No canonical historical observations were fetched. Consequently, no valid base rate or reference class is available. This is an access failure, not evidence that the official source exposes fewer than six observations."
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending documentation states that updates occur daily after the nightly pipeline and that assistance reporting deadlines are 14 days, or 30 days for loans. These requirements do not verify a specific FY2026 registered-query snapshot date. No resolutionDate was inferred from them."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Without fetched exact-series history, a persistence prior, current-release adjustments, sigma, and defensible interval bounds cannot be calculated."
+    },
+    {
+      "kind": "math",
+      "text": "Point estimate and interval arithmetic are unavailable because the required historical inputs were not retrieved. Null values denote refusal, not zero obligations."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}
