@@ -5,6 +5,7 @@ import copy
 import hashlib
 import json
 import pathlib
+import random
 import sys
 from typing import Any
 
@@ -50,17 +51,21 @@ def write_stage(
     arguments: dict[str, Any] | None = None,
     fetcher: Any = None,
     ensure_ascii: bool = True,
+    more_calls: tuple[tuple[str, dict[str, Any]], ...] = (),
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     recorder = evidence.EvidenceRecorder(
         run_dir / f"{prefix}tool_evidence.json",
         **({"fetcher": fetcher} if fetcher is not None else {}),
     )
-    call = recorder.call(
-        tool,
-        arguments
-        if arguments is not None
-        else {"expression": expression, "inputs": {"base": 1711.9, "delta": 4.9}},
-    )
+    calls = [
+        recorder.call(
+            tool,
+            arguments
+            if arguments is not None
+            else {"expression": expression, "inputs": {"base": 1711.9, "delta": 4.9}},
+        ),
+        *(recorder.call(more_tool, more_args) for more_tool, more_args in more_calls),
+    ]
     raw = recorder.output.read_bytes()
     report = evidence.verify_evidence(recorder.payload)
     report["evidenceSha256"] = hashlib.sha256(raw).hexdigest()
@@ -89,7 +94,10 @@ def write_stage(
     (run_dir / f"{prefix}command.json").write_text(json.dumps(command))
     (run_dir / f"{prefix}codex_stdout.jsonl").write_text(
         analyst.redact_stream_text(
-            json.dumps(event_for(call), ensure_ascii=ensure_ascii) + "\n"
+            "".join(
+                json.dumps(event_for(call), ensure_ascii=ensure_ascii) + "\n"
+                for call in calls
+            )
         ),
         encoding="utf-8",
     )
@@ -705,3 +713,317 @@ def test_native_event_lines_with_unicode_line_separators_still_bind(
         "tool_evidence.json",
         "tool_evidence_verification.json",
     }
+
+
+def test_native_tool_events_filters_by_server_and_splits_on_newlines_only() -> None:
+    ours = {
+        "type": "item.completed",
+        "item": {
+            "id": "item_9",
+            "type": "mcp_tool_call",
+            "server": custody.TOOL_EVIDENCE_SERVER,
+            "tool": "fetch_source",
+            "result": {"content": [{"type": "text", "text": "%PDF\u0085\u2028x"}]},
+        },
+    }
+    other = {
+        "type": "item.completed",
+        "item": {"id": "b", "type": "mcp_tool_call", "server": "other_server"},
+    }
+    stream = (
+        "not json\n"
+        + json.dumps(ours, ensure_ascii=False)
+        + "\n"
+        + json.dumps(other)
+        + "\n"
+        + json.dumps({"type": "turn.completed", "usage": {}})
+        + "\n"
+    )
+    assert evidence.native_tool_events(stream) == [ours]
+    assert evidence.native_tool_events(stream, "other_server") == [other]
+
+
+def test_bind_native_events_reports_orphaned_and_incomplete_calls(
+    tmp_path: pathlib.Path,
+) -> None:
+    write_stage(tmp_path)
+    payload = json.loads((tmp_path / "tool_evidence.json").read_text())
+    events = [event_for(payload["calls"][0])]
+
+    assert evidence.bind_native_events(payload, events) == {"call-0001"}
+
+    with pytest.raises(
+        evidence.EvidenceError,
+        match="tool evidence calls lack native completion events: call-0001",
+    ):
+        evidence.bind_native_events(payload, [])
+    # A failed invocation may keep an incomplete stream without promotion.
+    assert evidence.bind_native_events(payload, [], failed_stage=True) == set()
+
+    started = {
+        "type": "item.started",
+        "item": {
+            "id": "mcp-extra",
+            "type": "mcp_tool_call",
+            "server": custody.TOOL_EVIDENCE_SERVER,
+            "tool": "calculate",
+        },
+    }
+    with pytest.raises(
+        evidence.EvidenceError, match="tool evidence has incomplete native calls"
+    ):
+        evidence.bind_native_events(payload, events + [started])
+
+
+def _mutate_native_stream(
+    rng: random.Random, events: list[dict[str, Any]], call_ids: list[str]
+) -> list[str]:
+    """Apply up to three seeded perturbations to native events in place and
+    return the names of those that changed the stream."""
+    applied: list[str] = []
+    for _ in range(rng.randrange(4)):
+        if not events:
+            break
+        index = rng.randrange(len(events))
+        event = events[index]
+        item = event["item"]
+        result = item.get("result")
+        result = result if isinstance(result, dict) else {}
+        structured = result.get("structured_content")
+        structured = structured if isinstance(structured, dict) else {}
+        name, mutate = rng.choice(
+            [
+                ("drop", lambda: events.pop(index)),
+                ("duplicate", lambda: events.insert(index, copy.deepcopy(event))),
+                (
+                    "swap",
+                    lambda: events.insert(
+                        rng.randrange(len(events)), events.pop(index)
+                    ),
+                ),
+                ("started", lambda: event.update(type="item.started")),
+                ("no native ID", lambda: item.pop("id", None)),
+                (
+                    "reused native ID",
+                    lambda: item.update(id=f"mcp-{rng.choice(call_ids)}"),
+                ),
+                ("tool", lambda: item.update(tool="extract_json")),
+                ("status", lambda: item.update(status="failed")),
+                ("arguments", lambda: item.update(arguments={"url": "https://x.gov/"})),
+                (
+                    "redacted arguments",
+                    lambda: item.update(arguments={"url": evidence.REDACTED_URL}),
+                ),
+                ("call ID", lambda: structured.update(callId=rng.choice(call_ids))),
+                ("unknown call ID", lambda: structured.update(callId="call-9999")),
+                (
+                    "camelCase structured content",
+                    lambda: result.update(
+                        structuredContent=result.pop("structured_content", None)
+                    ),
+                ),
+                (
+                    "content",
+                    lambda: result.update(content=[{"type": "text", "text": "{}"}]),
+                ),
+                (
+                    "is_error",
+                    lambda: result.update(is_error=not result.get("is_error")),
+                ),
+                ("result", lambda: item.update(result="not an object")),
+                ("other server", lambda: item.update(server="other_server")),
+                (
+                    "stray start",
+                    lambda: events.append(
+                        {
+                            "type": "item.started",
+                            "item": {
+                                "id": f"mcp-stray-{index}",
+                                "type": "mcp_tool_call",
+                                "server": custody.TOOL_EVIDENCE_SERVER,
+                                "tool": "calculate",
+                            },
+                        }
+                    ),
+                ),
+            ]
+        )
+        before = copy.deepcopy(events)
+        mutate()
+        if events != before:
+            applied.append(name)
+    return applied
+
+
+@pytest.mark.parametrize("prefix", ["", "draft_"])
+def test_generation_binding_and_custody_agree_on_perturbed_streams(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, prefix: str
+) -> None:
+    """Invariants over seeded perturbations of a four-call native stream.
+
+    1. The runner's stage-end check (run_codex_agent_command, driven here with
+       the recorded capture and the perturbed stream) fails the stage exactly
+       when custody refuses the successful stage, and custody's error is the
+       runner's binding error under the stage prefix. The two checks cannot
+       drift.
+    2. A successful bind matches every recorded call.
+    3. A failed stage relaxes only completeness: it accepts exactly what the
+       successful stage accepts or refuses only for completeness, and
+       otherwise raises the successful stage's error.
+    """
+    body = b'{"history":[1711.9,1716.8]}'
+    command, entries = write_stage(
+        tmp_path,
+        prefix=prefix,
+        fetcher=lambda url: {
+            "url": url,
+            "status": 200,
+            "headers": [["content-type", "application/json"]],
+            "bodyBase64": base64.b64encode(body).decode("ascii"),
+            "sha256": hashlib.sha256(body).hexdigest(),
+            "bytes": len(body),
+        },
+        more_calls=(
+            ("fetch_source", {"url": "https://example.gov/series.json"}),
+            ("fetch_source", {"url": "http://example.gov/data.json"}),
+            ("calculate", {"expression": "base +", "inputs": {"base": 1}}),
+        ),
+    )
+    capture = (tmp_path / f"{prefix}tool_evidence.json").read_bytes()
+    payload = json.loads(capture)
+    call_ids = [call["callId"] for call in payload["calls"]]
+    assert [call["status"] for call in payload["calls"]] == [
+        "succeeded",
+        "succeeded",
+        "failed",
+        "failed",
+    ]
+    stream_path = tmp_path / f"{prefix}codex_stdout.jsonl"
+    baseline = [json.loads(line) for line in stream_path.read_text().splitlines()]
+    # The native side of a rejected fetch carries the URL the model sent.
+    baseline[2]["item"]["arguments"] = {"url": "http://example.gov/data.json"}
+    assert evidence.bind_native_events(payload, baseline) == set(call_ids)
+    failed_command = {**command, "returnCode": 1}
+    completeness = ("native completion events", "incomplete native calls")
+    stream = ""
+
+    def fake_stage(**kwargs: Any) -> dict[str, Any]:
+        kwargs["evidence_output"].write_bytes(capture)
+        return {
+            "returnCode": 0,
+            "stderr": "",
+            "codexStdoutRaw": stream,
+            "codexTrace": {"effectiveReturnCode": 0, "lastError": None},
+        }
+
+    monkeypatch.setattr(analyst, "_run_codex_agent_command", fake_stage)
+
+    def runner_error() -> str | None:
+        result = analyst.run_codex_agent_command(
+            prompt="test",
+            timeout_seconds=5,
+            model="test",
+            out_dir=tmp_path / "runner",
+            prefix=prefix,
+            search=True,
+            sandbox="read-only",
+            reasoning_effort=None,
+        )
+        assert result["toolEvidenceVerification"]["valid"] is True
+        failure = result.get("toolEvidenceFailure")
+        assert (result["returnCode"] == 0) is (failure is None)
+        if failure is None:
+            return None
+        return f"{prefix}" + failure.removeprefix(
+            "Tool evidence native binding failed: "
+        )
+
+    def verdict(stage_command: dict[str, Any], succeeded: bool) -> str | None:
+        try:
+            check(
+                tmp_path,
+                stage_command,
+                entries,
+                prefix=prefix,
+                run_succeeded=succeeded,
+            )
+        except custody.CustodyError as exc:
+            return str(exc)
+        return None
+
+    outcomes: set[str] = set()
+    for seed in range(300):
+        rng = random.Random(seed)
+        events = copy.deepcopy(baseline)
+        applied = _mutate_native_stream(rng, events, call_ids)
+        stream = analyst.redact_stream_text(
+            "".join(json.dumps(event) + "\n" for event in events)
+        )
+        stream_path.write_text(stream, encoding="utf-8")
+        context = f"seed {seed}: {applied}"
+
+        succeeded = verdict(command, True)
+        assert succeeded == runner_error(), context
+        if succeeded is None:
+            matched = evidence.bind_native_events(
+                payload, evidence.native_tool_events(stream)
+            )
+            assert matched == set(call_ids), context
+
+        relaxed = succeeded is not None and any(
+            family in succeeded for family in completeness
+        )
+        assert verdict(failed_command, False) == (
+            None if relaxed else succeeded
+        ), context
+        outcomes.add(
+            "ok" if succeeded is None else succeeded.split(" (")[0].split(":")[0]
+        )
+
+    # The seeds reach acceptance and every binding error family.
+    families = {
+        "lacks its native call ID",
+        "repeats a native completion event",
+        "unknown or repeated event call ID",
+        "differs from its native event",
+        *completeness,
+    }
+    assert "ok" in outcomes
+    for family in families:
+        assert any(family in outcome for outcome in outcomes), family
+
+
+def test_oversized_native_arguments_on_a_redacted_fetch_fail_cleanly(
+    tmp_path: pathlib.Path,
+) -> None:
+    """The redacted-fetch escape reprojects native arguments through
+    captured_arguments, which refuses an unbounded object. Custody reports that
+    as a prefixed CustodyError, like every other binding error; main let the
+    bare EvidenceError escape, which callers catching only CustodyError (the
+    docket publisher among them) did not handle."""
+    command, entries = write_stage(
+        tmp_path,
+        prefix="draft_",
+        tool="fetch_source",
+        arguments={"url": "http://example.gov/data.json"},
+    )
+    events_path = tmp_path / "draft_codex_stdout.jsonl"
+    event = json.loads(events_path.read_text())
+    assert event["item"]["arguments"] == {"url": evidence.REDACTED_URL}
+    event["item"]["arguments"] = {
+        "url": "http://example.gov/data.json",
+        "extra": "x" * evidence.MAX_ARGUMENT_BYTES,
+    }
+    stream = json.dumps(event) + "\n"
+    events_path.write_text(stream)
+    payload = json.loads((tmp_path / "draft_tool_evidence.json").read_text())
+
+    with pytest.raises(
+        evidence.EvidenceError, match="^tool arguments must be a bounded JSON object$"
+    ):
+        evidence.bind_native_events(payload, evidence.native_tool_events(stream))
+    with pytest.raises(
+        custody.CustodyError,
+        match="^draft_tool arguments must be a bounded JSON object$",
+    ):
+        check(tmp_path, command, entries, prefix="draft_")

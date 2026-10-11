@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-09-29T11:56:59Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "597c1594bf3649d6482b29efc32431a67f999914",
+  "facts": [
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-09-12",
+      "sourceVintage": "2026-09-29",
+      "retrievedAt": "2026-09-29T11:56:59Z",
+      "targetContentHash": "258f273174f320907d3b0c6615b97556066de9ef341f697df1840f5003c015dc",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/icsa-2026-09-29-b13eb096d14f12e2.csv.gz",
+        "sha256": "b13eb096d14f12e2a292c531f7b281b1a03bc28a7fd8fae1bef7737491f85256",
+        "bytes": 56139,
+        "gzipSha256": "abfb4cfada5d5a56ac85010d4293341d0d5bd6ad19f8fdde407e53b381fa76cc",
+        "gzipBytes": 13685,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-09-05",
+      "sourceVintage": "2026-09-20",
+      "retrievedAt": "2026-09-29T11:57:00Z",
+      "targetContentHash": "309a1b08a210a0e9ba97c3f79d88a28d7e7e84448b1413d351bbbbd5ffab1271",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/icsa-2026-09-20-051e04c05d125f58.csv.gz",
+        "sha256": "051e04c05d125f5838698c234c4ccccee48fb52e629108c5ec8a0094c5087ea9",
+        "bytes": 56121,
+        "gzipSha256": "6441dd5568c1063706942aee94ff155c4232862281e4e8c1e79c8566b911055f",
+        "gzipBytes": 13682,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-05.first_print",
+      "sourceVintage": "2026-09-21",
+      "retrievedAt": "2026-09-29T11:57:02Z",
+      "targetContentHash": "b665b98ad6cd565d23ce2c9701de4b4fbd8fea1034a3ee54ddc96d1c0c16df2d",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/ccsa-2026-09-21-3b93cd193cb36e8f.csv.gz",
+        "sha256": "3b93cd193cb36e8f65af461831f17cee379927f925aff9e41e0d4e7a1c819ed2",
+        "bytes": 59220,
+        "gzipSha256": "63629030ab4eeb5be392ff1a5f9779b455e4354289a60a201ef149a4a6122303",
+        "gzipBytes": 15668,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-08-29",
+      "sourceVintage": "2026-09-11",
+      "retrievedAt": "2026-09-29T11:57:03Z",
+      "targetContentHash": "b49b4c8de44e5d0f9f33d84f31bfef810666ef10c691abffc487cc41c48bbdbc",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/icsa-2026-09-11-48c1604272f69868.csv.gz",
+        "sha256": "48c1604272f69868ad719acd97e0ba5bbc7a1341c51634549408f96320722bc9",
+        "bytes": 56103,
+        "gzipSha256": "33f587b3874c5dd5ea61f46fa2dc3c79df82f602e5400f75950ea65bc82b2e6e",
+        "gzipBytes": 13679,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-08-29.first_print",
+      "sourceVintage": "2026-09-12",
+      "retrievedAt": "2026-09-29T11:57:04Z",
+      "targetContentHash": "ab58a41c310021ec7a48d81d9878f9deae33a02b87c597ed806e2f7e8448ed4d",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/ccsa-2026-09-12-4f4077aebbbb5855.csv.gz",
+        "sha256": "4f4077aebbbb5855c4e0c7256d69710a30d3ab2adccadf143a77740411f59d8e",
+        "bytes": 59201,
+        "gzipSha256": "9a2704b18b7450b2cde7c9e8cb762ac4ca168cd2fa18af9730f3a697f76e2088",
+        "gzipBytes": 15662,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "fed.g19.consumer_credit_total_annual_rate.2026_07.first_print",
+      "sourceVintage": "2026-09-08",
+      "retrievedAt": "2026-09-29T11:57:19Z",
+      "targetContentHash": "e9da62e6d1dd2f607aa873c6707f868a06e2aec454f41f214170fcead022a76d",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/totalslar-2026-09-08-25f5e748f7bb6d13.csv.gz",
+        "sha256": "25f5e748f7bb6d13bf11673adc86af22f1d23357e219ea81f01ebfbd34da626f",
+        "bytes": 16481,
+        "gzipSha256": "07eb939938a5712b9e6d51a04e0ebd0a8fc1f6f6e155bbc693b4a03ee4a78a74",
+        "gzipBytes": 4756,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "fed.g19.consumer_credit_revolving_annual_rate.2026_07.first_print",
+      "sourceVintage": "2026-09-08",
+      "retrievedAt": "2026-09-29T11:57:19Z",
+      "targetContentHash": "e8c422ab399745706c6839ee625f75f62f0b4457d9c926a0c692f68969714c3e",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/revolslar-2026-09-08-76611b7ca19d29b6.csv.gz",
+        "sha256": "76611b7ca19d29b60e80ee29bfc716491b2c85a90b0c02f4f530ed9d620b6576",
+        "bytes": 11698,
+        "gzipSha256": "8de0f6fa576be68059b9952ae86e8f99176dce0a916a98befb3eb38533a165b5",
+        "gzipBytes": 3411,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "fed.g19.consumer_credit_nonrevolving_annual_rate.2026_07.first_print",
+      "sourceVintage": "2026-09-08",
+      "retrievedAt": "2026-09-29T11:57:20Z",
+      "targetContentHash": "e2880f2c437abd35592ae643d333e965a87e319dae0af9372925c7fa8bba1f1d",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/nonrevslar-2026-09-08-190cbee601fc707e.csv.gz",
+        "sha256": "190cbee601fc707ee3b96073362e38808242fd8c1c4967e7fd8007ad970c9e33",
+        "bytes": 16491,
+        "gzipSha256": "c3c0fa4ae7f091178eeac3a7f5403323ab812efdcd388a40c854458bd5ecb6de",
+        "gzipBytes": 4792,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/icsa-2026-09-29-b13eb096d14f12e2.csv.gz",
+      "sha256": "abfb4cfada5d5a56ac85010d4293341d0d5bd6ad19f8fdde407e53b381fa76cc",
+      "bytes": 13685,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/icsa-2026-09-20-051e04c05d125f58.csv.gz",
+      "sha256": "6441dd5568c1063706942aee94ff155c4232862281e4e8c1e79c8566b911055f",
+      "bytes": 13682,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/ccsa-2026-09-21-3b93cd193cb36e8f.csv.gz",
+      "sha256": "63629030ab4eeb5be392ff1a5f9779b455e4354289a60a201ef149a4a6122303",
+      "bytes": 15668,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/icsa-2026-09-11-48c1604272f69868.csv.gz",
+      "sha256": "33f587b3874c5dd5ea61f46fa2dc3c79df82f602e5400f75950ea65bc82b2e6e",
+      "bytes": 13679,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/ccsa-2026-09-12-4f4077aebbbb5855.csv.gz",
+      "sha256": "9a2704b18b7450b2cde7c9e8cb762ac4ca168cd2fa18af9730f3a697f76e2088",
+      "bytes": 15662,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/totalslar-2026-09-08-25f5e748f7bb6d13.csv.gz",
+      "sha256": "07eb939938a5712b9e6d51a04e0ebd0a8fc1f6f6e155bbc693b4a03ee4a78a74",
+      "bytes": 4756,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/revolslar-2026-09-08-76611b7ca19d29b6.csv.gz",
+      "sha256": "8de0f6fa576be68059b9952ae86e8f99176dce0a916a98befb3eb38533a165b5",
+      "bytes": 3411,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/responses/nonrevslar-2026-09-08-190cbee601fc707e.csv.gz",
+      "sha256": "c3c0fa4ae7f091178eeac3a7f5403323ab812efdcd388a40c854458bd5ecb6de",
+      "bytes": 4792,
+      "createdAt": "2026-09-29T11:56:59Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-09-29/2026-09-29t11-56-59z-resolve-pending/manifest.json",
+      "sha256": "af87d548ef90b2298ecddaa8bdfe7011ab0226493e5c5f1ffce2dd08b29ee3f0",
+      "bytes": 7443,
+      "createdAt": "2026-09-29T11:56:59Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "951040d9f5e3dc527387342301d76f67206822cfaef66c992ab9bc691850033f"
+}

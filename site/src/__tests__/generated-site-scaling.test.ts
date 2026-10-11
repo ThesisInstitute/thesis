@@ -19,6 +19,7 @@ describe("generated-site scaling surfaces", () => {
       [
         "country",
         "interval",
+        "overdue",
         "point",
         "publisher",
         "resolutionDate",
@@ -34,6 +35,13 @@ describe("generated-site scaling surfaces", () => {
     expect(Buffer.byteLength(JSON.stringify(listing))).toBeLessThan(
       1024 * 1024,
     );
+    // The overdue notice is one sentence, never the resolver's full report.
+    for (const item of listing) {
+      if (!item.overdue) continue;
+      expect(Object.keys(item.overdue).sort()).toEqual(["reason", "since"]);
+      expect(item.overdue.reason.length).toBeLessThan(200);
+      expect(item.status).toBe("pending");
+    }
   });
 
   it("makes every v2 heavy row reachable through verified v3 chunks", () => {

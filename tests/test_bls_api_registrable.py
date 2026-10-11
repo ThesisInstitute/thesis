@@ -733,19 +733,34 @@ def test_docket_templates_pass_the_prospector_binding_schema() -> None:
         assert prospect_targets._source_binding_errors(binding) == []
 
 
-def test_docket_calendar_never_covers_an_already_registered_period() -> None:
+def test_docket_calendar_never_covers_a_period_another_adapter_registered() -> None:
     # The immutable generic-url registrations for these series stay as they
     # are. The roller skips a calendar-gated period without a committed date,
     # so leaving those periods out means this adapter cannot mint a second
     # target for one of them.
-    registered: dict[str, set[str]] = {}
+    #
+    # A period the roller has registered FROM this calendar is not such a
+    # period: it is the adapter's own target, and the calendar keeps naming
+    # it. The roll of 2026-10-02 registered October 2026 for payroll change,
+    # job openings and the quits rate that way. What must hold for those is
+    # that the period has one target, not two.
+    elsewhere: dict[str, set[str]] = {}
+    own: dict[tuple[str, str], set[str]] = {}
     for path in glob.glob(str(ROOT / "records" / "targets" / "*.json")):
         for contract in json.loads(pathlib.Path(path).read_text()).get("targets", []):
-            registered.setdefault(contract["series"], set()).add(contract["period"])
+            series, period = contract["series"], contract["period"]
+            adapter = contract["sourceBinding"]["adapter"]
+            if adapter == resolve_pending.BLS_API_BINDING_ADAPTER:
+                own.setdefault((series, period), set()).add(contract["dataPointId"])
+            else:
+                elsewhere.setdefault(series, set()).add(period)
     for entry in _bls_api_docket_entries():
         assert entry["releaseDates"]
-        overlap = set(entry["releaseDates"]) & registered.get(entry["series"], set())
+        overlap = set(entry["releaseDates"]) & elsewhere.get(entry["series"], set())
         assert not overlap, (entry["series"], sorted(overlap))
+    for (series, period), ids in sorted(own.items()):
+        assert len(ids) == 1, (series, period, sorted(ids))
+        assert period not in elsewhere.get(series, set()), (series, period)
 
 
 def test_roller_rolls_only_a_period_with_an_official_date(

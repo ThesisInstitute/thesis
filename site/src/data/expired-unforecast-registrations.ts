@@ -94,6 +94,33 @@ export const EXPIRED_UNFORECAST_REGISTRATIONS = [
   // explicitly.
   "ons.awe.regular_pay_yoy_3m_avg.2026_06.first_print",
   "ons.ppi.input_manufacturing_index.2026_07.first_print",
+  // The 2026-09-20T17:30:51Z registration of initial claims for the week
+  // ending 2026-09-26 crossed its seven-day orphan grace on 2026-09-27
+  // unforecast. Its registering roll (run 35526068252) generated a
+  // candidate cell, but the publish leg refused it ("custody verification
+  // failed: draft_tool evidence calls lack native completion events"), so
+  // no cell or batch manifest reached main. The 2026-09-21 and 2026-09-25
+  // rolls (runs 35651332378, 36183523886) skipped it as already
+  // registered, and nothing retried the generation inside grace. DOL
+  // prints that week on 2026-10-01, but a forecast now would run against
+  // the eight-day-stale 2026-09-20 pin, the chronology violation the
+  // entries above terminate on. The registered window (2026-10-13 to
+  // 2026-10-17) is also one of the drifted weekly claims windows.
+  "us.dol.initial_claims.sa.week_2026-09-26",
+  // The 2026-09-28T22:12:52Z registration of continued claims for the week
+  // ending 2026-10-03 crossed its seven-day orphan grace on 2026-10-05
+  // unforecast. Its registering roll (run 36490945941) generated a
+  // candidate cell that passed validation, but the publish leg failed the
+  // site suite before committing anything: `forecasts every registered
+  // ledger target` was red that day on the initial-claims entry above,
+  // which was recorded here the next day (#303). No cell or batch manifest
+  // reached main. The 2026-10-02 roll (run 37063211068), the only one
+  // inside grace, skipped it as already registered, and nothing retried
+  // the generation. The registered window (2026-10-23 to 2026-10-27) has
+  // not opened, but a forecast now would run against the 2026-09-28 pin,
+  // twelve days stale, the chronology violation the entries above
+  // terminate on.
+  "dol.eta.continued_claims.sa.week_2026-10-03.first_print",
 ] as const;
 
 export const EXPIRED_UNFORECAST_SET: ReadonlySet<string> = new Set(

@@ -27,15 +27,23 @@ export function ForecastCard({ forecast }: { forecast: ForecastListingItem }) {
               Resolved
             </Badge>
           )}
+          {forecast.overdue && <Badge>Overdue</Badge>}
         </div>
         <span className="[font-family:var(--font-mono)] text-[0.62rem] text-[var(--theme-text-dim)]">
-          {forecast.status === "resolved" ? "resolved" : "resolves"}{" "}
+          {resolutionVerb(forecast)}{" "}
           {formatResolutionLabel(forecast.resolutionDate)}
         </span>
       </div>
       <h3 className="[font-family:var(--font-display)] text-[1.05rem] font-semibold leading-[1.3] tracking-[-0.01em] text-[var(--theme-text)] group-hover:text-[var(--color-accent)] transition-colors">
         {forecast.title}
       </h3>
+      {forecast.overdue && (
+        // A forecast still pending after its date says why, in the
+        // resolver's terms. The full sentence is on the forecast's page.
+        <p className="-mt-1 text-[0.78rem] leading-[1.45] text-[var(--theme-text-muted)]">
+          {forecast.overdue.reason}
+        </p>
+      )}
       <div className="mt-auto">
         <div className="mb-2 flex items-baseline justify-between">
           <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
@@ -49,6 +57,14 @@ export function ForecastCard({ forecast }: { forecast: ForecastListingItem }) {
       </div>
     </Link>
   );
+}
+
+/** "resolves" is a promise about the future; past the date it is wrong. */
+export function resolutionVerb(
+  forecast: Pick<ForecastListingItem, "status" | "overdue">,
+): string {
+  if (forecast.status === "resolved") return "resolved";
+  return forecast.overdue ? "was due" : "resolves";
 }
 
 function Badge({

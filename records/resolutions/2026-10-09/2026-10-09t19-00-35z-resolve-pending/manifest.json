@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-10-09T19:00:35Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "2ed9bae9472cc41bb24652e037672a76cc9b010a",
+  "facts": [
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-09-19",
+      "sourceVintage": "2026-10-08",
+      "retrievedAt": "2026-10-09T19:00:35Z",
+      "targetContentHash": "6d82b49122ffb4cd1f0060be0af0e24dfc09633440999e0cfaf4d15c45183d94",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-09/2026-10-09t19-00-35z-resolve-pending/responses/icsa-2026-10-08-6e41916aefb26ecf.csv.gz",
+        "sha256": "6e41916aefb26ecf38bc8eaad4535883629037e2bba0789ccecc39a354e1c778",
+        "bytes": 56175,
+        "gzipSha256": "a1022c1ff5d5339bf6b7c6eba444f2a7dc4b766908cabf27918fb8f250b2af19",
+        "gzipBytes": 13694,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-19.first_print",
+      "sourceVintage": "2026-10-09",
+      "retrievedAt": "2026-10-09T19:00:35Z",
+      "targetContentHash": "75a1aa15e93e29e83eb184f6b3af1b67c83c0bd5890038ce9f51827d8afba59e",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-09/2026-10-09t19-00-35z-resolve-pending/responses/ccsa-2026-10-09-d91683b28c58f14d.csv.gz",
+        "sha256": "d91683b28c58f14d06c4bd94ca8d376e38127bdf66c84b55ee00b194d2fed059",
+        "bytes": 59277,
+        "gzipSha256": "a5ce7b8911bf75c16054278122a99e1945068bceb1430958c4758bd11610ea07",
+        "gzipBytes": 15684,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-09/2026-10-09t19-00-35z-resolve-pending/responses/icsa-2026-10-08-6e41916aefb26ecf.csv.gz",
+      "sha256": "a1022c1ff5d5339bf6b7c6eba444f2a7dc4b766908cabf27918fb8f250b2af19",
+      "bytes": 13694,
+      "createdAt": "2026-10-09T19:00:35Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-09/2026-10-09t19-00-35z-resolve-pending/responses/ccsa-2026-10-09-d91683b28c58f14d.csv.gz",
+      "sha256": "a5ce7b8911bf75c16054278122a99e1945068bceb1430958c4758bd11610ea07",
+      "bytes": 15684,
+      "createdAt": "2026-10-09T19:00:35Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-10-09/2026-10-09t19-00-35z-resolve-pending/manifest.json",
+      "sha256": "8bc8074546e701dfa5083ad41da7ae1a681f1e8c2e9d6df1bf71fa137cda14f0",
+      "bytes": 2162,
+      "createdAt": "2026-10-09T19:00:35Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "6ce1997f165bfeb92a30f6f51261226a439c89ce7a30d56511860822859c0406"
+}
