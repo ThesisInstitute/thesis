@@ -13022,6 +13022,39 @@ def _registry_growth_refusal(
     return None
 
 
+# The only environment Chronicle's staged series-catalog generator inherits.
+# The generator is the ledger branch's code, run with this interpreter inside
+# a step whose environment holds GH_TOKEN (a Chronicle write token) and
+# whatever the Actions runner adds. It reads no variable itself. It needs
+# PATH to find git, HOME for git's global config and the user site-packages
+# of a `pip install --user` runtime, the locale, and a scratch directory.
+# SYSTEMROOT lets a Windows interpreter start. Its import path comes from the
+# interpreter (a virtual environment's pyvenv.cfg, or HOME), not from
+# PYTHON* variables, and GIT_* variables would only redirect its git reads.
+STAGED_GENERATOR_ENVIRONMENT = (
+    "PATH",
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "TMPDIR",
+    "TEMP",
+    "TMP",
+    "SYSTEMROOT",
+)
+
+
+def staged_generator_environment(
+    environ: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """The allowlisted part of ``environ`` (default: this process's)."""
+
+    source = os.environ if environ is None else environ
+    return {
+        name: source[name] for name in STAGED_GENERATOR_ENVIRONMENT if name in source
+    }
+
+
 def _regenerate_series_catalog(
     stage: pathlib.Path,
     *,
@@ -13042,6 +13075,7 @@ def _regenerate_series_catalog(
         cwd=stage,
         capture_output=True,
         text=True,
+        env=staged_generator_environment(),
     )
     if completed.returncode != 0:
         detail = completed.stderr.strip() or completed.stdout.strip()
@@ -13856,6 +13890,7 @@ def ledger_catalog_refusals(
                 cwd=stage,
                 capture_output=True,
                 text=True,
+                env=staged_generator_environment(),
             )
         if completed.returncode == 0:
             return None

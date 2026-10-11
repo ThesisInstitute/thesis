@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import base64
 import datetime as dt
 import gzip
@@ -7,6 +8,7 @@ import hashlib
 import json
 import os
 import pathlib
+import random
 import re
 import shutil
 import subprocess
@@ -2637,6 +2639,172 @@ path.write_bytes(path.read_bytes() + b'{"uuid":"new"}\\n')
             now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
             producer_signing_key=signing_key_pem,
         )
+
+
+# What the "Resolve pending cells" step's environment can carry that
+# Chronicle's staged generator must never see: the Chronicle write token under
+# both spellings, the producer signing key, the Actions runtime's OIDC and
+# runtime variables, a cloud key, and git variables that redirect git.
+_RESOLVE_STEP_SECRETS = {
+    "GH_TOKEN": "ghs_fixture_chronicle_write_token",
+    "GITHUB_TOKEN": "ghs_fixture_workflow_token",
+    "LEDGER_PRODUCER_SIGNING_KEY": "fixture-producer-signing-key",
+    "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "fixture-oidc-request-token",
+    "ACTIONS_ID_TOKEN_REQUEST_URL": "https://oidc.invalid/token",
+    "ACTIONS_RUNTIME_TOKEN": "fixture-runtime-token",
+    "ACTIONS_RESULTS_URL": "https://results.invalid/",
+    "AWS_SECRET_ACCESS_KEY": "fixture-cloud-key",
+    "GIT_ASKPASS": "/fixture/askpass",
+    "GIT_DIR": "/fixture/not-a-repository.git",
+}
+# macOS CoreFoundation adds this to every process it starts in, whatever the
+# parent passed; it is the only name a child may hold beyond the allowlist.
+_PLATFORM_ADDED_ENVIRONMENT = {"__CF_USER_TEXT_ENCODING"}
+
+
+def _environment_dump_prelude(dump: pathlib.Path) -> bytes:
+    """Generator lines that append the process environment to ``dump``."""
+
+    return (
+        "import json as _env_json, os as _env_os\n"
+        f"with open({str(dump)!r}, 'a', encoding='utf-8') as _env_dump:\n"
+        "    _env_dump.write(_env_json.dumps(dict(_env_os.environ)) + '\\n')\n"
+    ).encode()
+
+
+def _dumped_environments(dump: pathlib.Path) -> list[dict[str, str]]:
+    return [json.loads(line) for line in dump.read_text().splitlines()]
+
+
+def _assert_generator_environment_is_minimal(seen: dict[str, str]) -> None:
+    assert not set(seen) & set(_RESOLVE_STEP_SECRETS)
+    for secret in _RESOLVE_STEP_SECRETS.values():
+        assert all(secret not in value for value in seen.values())
+    allowed = set(resolve_pending.STAGED_GENERATOR_ENVIRONMENT)
+    assert set(seen) - allowed <= _PLATFORM_ADDED_ENVIRONMENT
+    # What the generator does need arrives unchanged: PATH finds git, HOME
+    # finds git's global config and a `pip install --user` site-packages.
+    assert seen["PATH"] == os.environ["PATH"]
+    assert seen["HOME"] == os.environ["HOME"]
+
+
+def test_append_proposal_generator_inherits_no_secret(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    tree, anchor_dir, requester, signing_key_pem = _release_fixture_tree(tmp_path)
+    dump = tmp_path / "staged-generator-environ.jsonl"
+    generator = "scripts/build_series_catalog.py"
+    tree.files[generator] = _environment_dump_prelude(dump) + tree.files[generator]
+    for name, value in _RESOLVE_STEP_SECRETS.items():
+        monkeypatch.setenv(name, value)
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.environment","value":1}\n'
+    )
+
+    changes = resolve_pending._prepare_release_files(
+        tree,
+        path="ledger/official_observations.jsonl",
+        candidate_ledger=candidate,
+        added=1,
+        requester=requester,
+        timeout_seconds=10,
+        clock_skew_seconds=resolve_pending.DEFAULT_CLOCK_SKEW_SECONDS,
+        anchor_dir=anchor_dir,
+        now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
+        producer_signing_key=signing_key_pem,
+    )
+
+    # The generator still ran to completion and regenerated the catalog.
+    catalog = json.loads(changes["ledger/series_catalog.json"])
+    assert catalog["observation_rows"] == 2
+    assert catalog["observations_sha256"] == hashlib.sha256(candidate).hexdigest()
+    [seen] = _dumped_environments(dump)
+    _assert_generator_environment_is_minimal(seen)
+
+
+def test_catalog_refusal_trials_inherit_no_secret(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    dump = tmp_path / "staged-generator-environ.jsonl"
+    tree = _catalog_tree(_environment_dump_prelude(dump) + _UNIT_CONFLICT_GENERATOR)
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    for name, value in _RESOLVE_STEP_SECRETS.items():
+        monkeypatch.setenv(name, value)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    good = {"source_record_id": "good", "unit": "thousands"}
+    bad = {"source_record_id": "bad", "unit": "millions"}
+
+    refusals = resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, "ledger/official_observations.jsonl", base, [good, bad]
+    )
+
+    # The trials still separate the rows: both together, the base alone,
+    # each row alone, then the kept rows together.
+    assert list(refusals) == ["bad"]
+    seen = _dumped_environments(dump)
+    assert len(seen) == 5
+    for environment in seen:
+        _assert_generator_environment_is_minimal(environment)
+
+
+def test_staged_generator_environment_keeps_exactly_the_allowlist(
+    monkeypatch,
+) -> None:
+    allowlist = resolve_pending.STAGED_GENERATOR_ENVIRONMENT
+    # The allowlist itself names no credential and no redirecting variable.
+    for name in allowlist:
+        assert not name.startswith(("GIT_", "GITHUB_", "ACTIONS_", "RUNNER_"))
+        assert not name.endswith(("TOKEN", "KEY", "SECRET", "PASSWORD"))
+    pool = [
+        *allowlist,
+        *_RESOLVE_STEP_SECRETS,
+        "PYTHONPATH",
+        "VIRTUAL_ENV",
+        "SSH_AUTH_SOCK",
+        "path",
+        "PATH ",
+        "HOMEBREW_GITHUB_API_TOKEN",
+        "LC_FIXTURE_SECRET",
+    ]
+    # Each name alone: kept exactly when allowlisted, value unchanged.
+    for name in pool:
+        kept = resolve_pending.staged_generator_environment({name: "v"})
+        assert kept == ({name: "v"} if name in allowlist else {})
+    # Seeded mixtures: always the allowlisted sub-mapping of the input.
+    rng = random.Random(20260928)
+    for trial in range(500):
+        chosen = rng.sample(pool, rng.randint(0, len(pool)))
+        environ = {name: f"{name}={trial}" for name in chosen}
+        kept = resolve_pending.staged_generator_environment(environ)
+        assert kept == {n: v for n, v in environ.items() if n in allowlist}
+    # With no argument it reads the process environment at call time.
+    for name, value in _RESOLVE_STEP_SECRETS.items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.setenv("LANG", "C.UTF-8")
+    kept = resolve_pending.staged_generator_environment()
+    assert not set(kept) & set(_RESOLVE_STEP_SECRETS)
+    assert kept["LANG"] == "C.UTF-8" and kept["PATH"] == os.environ["PATH"]
+
+
+def test_every_staged_generator_run_passes_the_minimal_environment() -> None:
+    # Any subprocess that runs this interpreter runs Chronicle's staged
+    # generator; each must pass env= from the allowlist, never inherit.
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    runs = []
+    for node in ast.walk(ast.parse(source)):
+        if not (
+            isinstance(node, ast.Call)
+            and ast.unparse(node.func) == "subprocess.run"
+            and node.args
+            and isinstance(node.args[0], ast.List)
+            and node.args[0].elts
+            and ast.unparse(node.args[0].elts[0]) == "sys.executable"
+        ):
+            continue
+        env = [keyword.value for keyword in node.keywords if keyword.arg == "env"]
+        runs.append([ast.unparse(value) for value in env])
+    assert runs == [["staged_generator_environment()"]] * 2
 
 
 @pytest.mark.parametrize("signing_key", [None, ""])
