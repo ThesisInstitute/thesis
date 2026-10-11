@@ -1,0 +1,94 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-id",
+  "country": "US",
+  "type": "data",
+  "title": "Idaho ex parte renewal share, August 2026",
+  "question": "What percentage of Idaho Medicaid and CHIP beneficiaries due for renewal in August 2026 will have coverage renewed on an ex parte basis, using the unadjusted original (O) submission in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c at FIRST PRINT, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Idaho's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal. Select state_abbreviation=ID, reporting_period=202608, original_updated=O; compute 100 times beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis divided by beneficiaries_with_a_renewal_due. Later revisions and updated (U) submissions do not resolve this first-print target.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.id.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original-submission ex parte renewals",
+    "Beneficiaries due for renewal",
+    "Monthly renewal-cohort composition"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:43:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: exact official history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Idaho's August 2026 original-submission ex parte share at first publication. Target identity and the registered resolutionDate are preserved. No Thesis or Brier record was accessed; catalog slug checking was omitted under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Search official CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The [CMS dataset](https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c) was updated September 25, 2026 and reports 3,876 rows and 22 columns. Search returned Alaska rows, not Idaho history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "[Official Data.gov metadata](https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data) records modification at 2026-09-25T18:00:00Z and identifies https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv as the distribution for the registered dataset."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click",
+      "call": "Click dictionary link 17 on the official Data.gov dataset page.",
+      "result": "The [CMS dictionary](https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6) defines original_updated as O=Original/U=Updated, beneficiaries_with_a_renewal_due as Metric 5, and beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis as Metric 5a1. The denominator is beneficiaries due for renewal."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "The [CMS release listing](https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot) gives June 2026 released September 25, 2026; May released August 28; April released July 31; March released June 26; February released May 29; January released April 24. It does not provide a scheduled publication date for August 2026."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed: the official CSV download returned Cache miss; datastore queries, filtered pages, pagination, and alternative official retrieval routes did not return Idaho original-submission values. No historical outcome numbers were fetched. This is an access failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without exact Idaho original-submission history, last-print persistence, panel shrinkage, walk-forward comparisons, and thesis_model_candidate_v1 estimates cannot be computed. Metadata and release dates cannot substitute for outcome observations."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The persistence prior is unavailable because no Idaho original-submission outcome was fetched. No adjustment is applied and no model is selected. Sigma is unavailable; realized successive-change dispersion and the required 1.28*sigma half-width cannot be calculated. Point and interval bounds are therefore null rather than invented."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: 2026-12-15 is retained solely as the supplied ledger date. An official calendar confirming it was not found, so it is not represented as a verified scheduled release date."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: improved automated matching could increase the share, while matching failures or a renewal cohort requiring more manual verification could decrease it. Whether either would land outside the interval cannot be assessed because an evidence-grounded interval is unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "This cell is dropped from forecasting and scoring. Null estimates and empty historicalContext explicitly record the evidence failure; this object does not satisfy the numeric forecast contract."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

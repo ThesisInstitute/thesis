@@ -1,0 +1,84 @@
+{
+  "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "USFS Minnesota obligations, FY2026",
+  "question": "What will USAspending API v2 report for FY2026 prime award transaction obligations, without seasonal adjustment, filtered to the Forest Service awarding subagency within the Department of Agriculture and Minnesota place of performance, using the exact registered spending_over_time query snapshot?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered spending_over_time query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the registered_query_snapshot policy. POST to https://api.usaspending.gov/api/v2/search/spending_over_time/ with group=fiscal_year, spending_level=transactions, FY2026, awarding agency {name: Forest Service, tier: subtier, toptier_name: Department of Agriculture, type: awarding}, place_of_performance_locations=[{country: USA, state: MN}], and award_type_codes=[02,03,04,05,06,07,08,09,10,11,A,B,C,D,IDV_A,IDV_B,IDV_B_A,IDV_B_B,IDV_B_C,IDV_C,IDV_D,IDV_E]. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Preserve the registered snapshot rather than substituting later revisions or an agency profile total. The supplied context specifies an expected snapshot window but does not provide an exact resolutionDate or snapshot-selection and rounding instructions.",
+  "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Exact registered POST query required",
+    "Historical obligation values unavailable",
+    "Registered snapshot timing incomplete"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://api.usaspending.gov/docs/intro-tutorial",
+    "https://api.usaspending.gov/docs/endpoints/federal_accounts/"
+  ],
+  "runAt": "2026-10-07T12:35:14Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: exact registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied ledger identifies FY2026 Forest Service obligations for Minnesota place of performance. Its registered_query_snapshot policy takes precedence over the generic first-print convention. This object records a refusal, not a valid numeric forecast; null estimates denote missing evidence."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "Failed to fetch the exact registered endpoint: HTTP 405 Method Not Allowed. No fiscal-year aggregated_amount was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "search_service.web_run",
+      "call": "Open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "The second available web tool also returned HTTP 405 Method Not Allowed. No historical obligation amount was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official USAspending documentation; open https://api.usaspending.gov/docs/endpoints and https://api.usaspending.gov/docs/intro-tutorial",
+      "result": "The official API v2 endpoint index lists /api/v2/search/spending_over_time/ as POST. The official tutorial describes POST for advanced filters. These are method checks, not numeric series evidence."
+    },
+    {
+      "kind": "text",
+      "text": "The available web-tool schemas have no request-method or request-body argument, and no callable generic HTTP POST tool was found. Shell networking is prohibited by the run instructions. Consequently, the registered query was not executed for any prior fiscal year. Documentation examples and broader agency or state totals cannot substitute for this series."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable because no admissible historical obligation values were fetched. The empty historicalContext records fetch failure; it does not assert that the official source exposes fewer than six prints or claim a history-floor exception."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Persistence, model candidates, realized sigma, interval arithmetic, and tail scenarios cannot be grounded without the exact historical query results. No point estimate or interval is issued; confidence 0.8 is only the contract's requested nominal coverage."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target context gives expectedReleaseWindow 2026-10-15 through 2026-10-22 but omits resolutionDate and resolutionDateBasis. Neither endpoint was treated as a scheduled release date or registered outer deadline. resolutionDate remains null. The catalog check was skipped as required by the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "exec_command",
+      "call": "date -u +%Y-%m-%dT%H:%M:%SZ",
+      "result": "2026-10-07T12:35:14Z"
+    },
+    {
+      "kind": "text",
+      "text": "Disposition: refuse under the explicit registered-query fetch-failure rule. Producing a numeric cell would require inventing evidence."
+    }
+  ]
+}

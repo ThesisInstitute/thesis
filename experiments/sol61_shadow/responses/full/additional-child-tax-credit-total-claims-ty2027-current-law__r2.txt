@@ -1,0 +1,79 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "title": "Additional child tax credit total claims, TY2027, current law",
+  "question": "Conditional on the stated legislation test, what will be the total number of US individual income tax returns claiming the Additional child tax credit for tax year 2027, in millions, in the FIRST PRINT of IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all-returns total row, annual and unadjusted?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS, SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+  "resolutionRule": "Use the first published tax-year-2027 IRS Publication 1304 Table 3.3 all-returns total-row number of returns under the plain total Additional child tax credit or refundable child tax credit concept header, converted to millions using the registered transform and retaining published precision. The separate refundable-portion and used-to-offset-other-taxes columns are different subsets and do not resolve this target. Ignore later revisions. The registered resolutionDate is the outer deadline, not an agency-confirmed release date. Evaluate the exact conditionalOn legislative test as of its specified date; if it fails, mark the conditional unresolved.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "historicalContext": [],
+  "drivers": [
+    "Required canonical workbook extraction unavailable",
+    "Current operative earned-income threshold verified",
+    "Future legislative condition remains unevaluated"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://uscode.house.gov/view.xhtml?req=%28title%3A26+section%3A24+edition%3Aprelim%29",
+    "https://uscode.house.gov/view.xhtml?edition=prelim&num=0&req=granuleid%3AUSC-prelim-title26-section24"
+  ],
+  "runAt": "2026-10-07T12:17:35Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Failed run: required official ACTC history could not be extracted"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is total ACTC claiming returns, rather than either subset column. Preserve the supplied target identity, exact conditional text, and outer deadline. The independence override prohibits the catalog lookup; no Thesis record or local file was accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the registered IRS Publication 1304 source page and follow Basic tables part 3.",
+      "result": "The fetched official IRS page identifies Publication 1304; its linked Basic Tables Part 3 page lists Table 3.3, All Returns: Tax Liability, Tax Credits, and Tax Payments, for tax years 2023, 2022, 2021, 2020, 2019, and 2018, with earlier years also available. These are year identities, not extracted ACTC counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.irs.gov/pub/irs-soi/23in33ar.xls, https://www.irs.gov/pub/irs-soi/22in33ar.xls, https://www.irs.gov/pub/irs-soi/21in33ar.xls, https://www.irs.gov/pub/irs-soi/20in33ar.xls, https://www.irs.gov/pub/irs-soi/19in33ar.xls, and https://www.irs.gov/pub/irs-soi/18in33ar.xls.",
+      "result": "The workbook attempts for the officially listed tax years 2023, 2022, 2021, 2020, 2019, and 2018 all returned '(400) Unsupported content-type: application/vnd.ms-excel'. No workbook table cells or ACTC return counts were returned. The alternate web connector also failed on the 2023 workbook."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search official uscode.house.gov Section 24 text for the earned-income threshold and current special rules.",
+      "result": "Fetched official preliminary-code search results report laws in effect on September 10, 2026. Section 24(d)(1)(B)(i) specifies 15 percent of earned income above $3,000; Section 24(h)(6) substitutes $2,500. Section 24(h)(1) applies to taxable years beginning after December 31, 2017 without the former sunset. This verifies published current parameters, not future legislative compliance or historical claiming-return counts."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: no admissible numeric observations were extracted from the six required official workbooks. The official source exposes enough years; this is an extraction failure, so no fewer-than-six availability declaration or history-floor waiver is justified."
+    },
+    {
+      "kind": "text",
+      "text": "Tool discovery found neither fetch_source nor extract_irs_soi. Therefore the prescribed captured-workbook parser could not run, and there are no extraction call IDs for calculation inputs. Persistence, walk-forward comparisons, and thesis_model_candidate_v1 candidates cannot be grounded; none were fabricated."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the persistence prior is unavailable because the latest canonical count was not extracted; the historical numeric sample is empty; no adjustment components can be quantified. sigma = unavailable. Successive-change dispersion, interval arithmetic, and implied bounds cannot be computed. The point estimate and interval are withheld."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: verified statutory parameters cannot replace observed total claiming-return counts. No statement about an outcome outside the interval is supportable because no calibrated interval exists. The future legislative condition remains unevaluated."
+    },
+    {
+      "kind": "text",
+      "text": "Run failed under the explicit canonical-history extraction rule. Null pointEstimate, ciLow, and ciHigh mark a withheld forecast; they are not numeric predictions. This object parses as JSON but cannot pass the numeric forecast contract. No historical values, model outputs, or activity receipts were invented."
+    }
+  ]
+}

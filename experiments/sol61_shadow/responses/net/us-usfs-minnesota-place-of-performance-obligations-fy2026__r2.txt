@@ -1,0 +1,141 @@
+{
+  "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 Forest Service obligations in Minnesota",
+  "question": "What will the registered USAspending query snapshot report for FY2026 prime-award transaction obligations awarded by the Forest Service with Minnesota place of performance, across all registered award types, in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": 50.76363639,
+  "ciLow": 41.4072051,
+  "ciHigh": 60.12006768,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-22",
+  "resolutionSource": "USAspending.gov, U.S. Department of the Treasury, registered API query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Resolve the designated registered-query snapshot using POST /api/v2/search/spending_over_time/, group fiscal_year, spending_level transactions, action dates 2025-10-01 through 2026-09-30, awarding subtier Forest Service within Department of Agriculture, Minnesota place of performance, and all registered award type codes. Select results[time_period.fiscal_year='2026'].aggregated_amount and multiply by 0.000001, preserving source dollar-cent precision. Freeze that snapshot and exclude subsequent revisions or corrections. The resolutionDate field retains the supplied expected window's endpoint; no official calendar verified that date, and the supplied contract does not specify the snapshot execution date or time.",
+  "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2018"},
+      "label": "FY2018",
+      "value": 25.90502369
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2019"},
+      "label": "FY2019",
+      "value": 28.74167183
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 27.25941087
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 38.29107807
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 34.0958762
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 49.95892909
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 68.71782809
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 46.83255679
+    }
+  ],
+  "drivers": [
+    "Observed FY2026 registered-query obligations",
+    "Late financial-assistance and contract reporting",
+    "Higher contract obligations offset by lower grants",
+    "Potential deobligations and reporting corrections"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/monthly-reporting-requirements",
+    "https://nfc.usda.gov/FSS/clientservices/fms/DATA_Act/index.php"
+  ],
+  "runAt": "2026-10-07T11:58:17Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FY2026 Forest Service Minnesota obligations: persistence forecast with unresolved snapshot scheduling"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered prime-award transaction query, rather than an agency profile total. Every historical value and the current observation uses the same agency, place-of-performance, award-type and transaction-level filters. Historical observations are official API responses fetched in this run for prior fiscal years, not archived original annual vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate curl POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ for FY2018, FY2019 and FY2020. Payload template: {\"group\":\"fiscal_year\",\"filters\":{\"time_period\":[{\"start_date\":\"{year_minus_one}-10-01\",\"end_date\":\"{year}-09-30\"}],\"agencies\":[{\"name\":\"Forest Service\",\"tier\":\"subtier\",\"toptier_name\":\"Department of Agriculture\",\"type\":\"awarding\"}],\"award_type_codes\":[\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\",\"A\",\"B\",\"C\",\"D\",\"IDV_A\",\"IDV_B\",\"IDV_B_A\",\"IDV_B_B\",\"IDV_B_C\",\"IDV_C\",\"IDV_D\",\"IDV_E\"],\"place_of_performance_locations\":[{\"country\":\"USA\",\"state\":\"MN\"}]},\"spending_level\":\"transactions\"}. Raw responses were echoed.",
+      "result": "Returned aggregated_amount dollars: FY2018 25905023.689999998; FY2019 28741671.83; FY2020 27259410.87. Multiplication by 0.000001 gives 25.90502369, 28.74167183 and 27.25941087 USD millions, retaining dollar-cent precision."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate curl POST requests using the identical registered-query payload template for FY2021, FY2022 and FY2023, substituting each fiscal year's October-through-September dates. Raw responses were echoed.",
+      "result": "Returned aggregated_amount dollars: FY2021 38291078.07; FY2022 34095876.2; FY2023 49958929.089999996. Converted values are 38.29107807, 34.0958762 and 49.95892909 USD millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate curl POST requests using the identical registered-query payload template for FY2024 and FY2025. Raw responses were echoed.",
+      "result": "Returned aggregated_amount dollars: FY2024 68717828.09; FY2025 46832556.79. Converted values are 68.71782809 and 46.83255679 USD millions. FY2024 Grant_Obligations were 38307135.4 dollars. FY2025 Contract_Obligations were 15398331.29, Grant_Obligations 21158670.82 and Other_Obligations 10275554.68 dollars."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the eight fetched FY2018-FY2025 annual flows. Their mean is 39.97529682875 USD millions, median 36.193477135, and recent three-year mean 55.16977132333333. This reference class establishes substantial annual dispersion before considering the current FY2026 observation."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl POST to the registered endpoint using the identical filters, group fiscal_year, spending_level transactions, start_date 2025-10-01 and end_date 2026-09-30. Raw response was echoed.",
+      "result": "FY2026 aggregated_amount was 50763636.39 dollars, or 50.76363639 USD millions. Contract_Obligations were 33186357.32 dollars, Grant_Obligations 4894753.75 and Other_Obligations 12682525.32; remaining reported award-type obligation components were zero."
+    },
+    {
+      "kind": "text",
+      "text": "Level: the current observation exceeds the historical mean by 10.78833956125 USD millions. Momentum: it exceeds FY2025 by 3.9310796 million, or 8.39390345%, but that increase is already incorporated in the observed level. Composition: contracts increased by 17.78802603 million while grants declined by 16.26391707 million relative to FY2025; extrapolating the unusually high FY2024 grant amount would require unsupported assumptions. No additional policy adjustment or one-off adjustment is applied."
+    },
+    {
+      "kind": "text",
+      "text": "Reporting mechanisms support residual uncertainty after fiscal-year end. The official documentation says contract data generally appear within five days and financial assistance generally must be reported within two weeks, appearing the following day; exceptions can take longer. These are reporting-lag rules, not an announcement of this query's snapshot date. Source: [USAspending About the Data](https://www.usaspending.gov/data/about-the-data-download.pdf)."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use an annual-flow reference-class prior from eight FY2018-FY2025 registered-query observations, then update its mean of 39.97529682875 by 10.78833956125 to the observed FY2026 snapshot, producing a persistence point of 50.76363639. Further momentum, one-off, policy and directional late-reporting adjustments are zero. Compute dispersion from annual flow values themselves: sigma = 14.619423883961316 USD millions. The unconditional normal 80% half-width is 1.28*sigma = 18.712862571470485. Narrow this by a judgmental factor of 0.5 to 9.356431285735242 because the fiscal year has ended and its transactions are substantially observed; remaining uncertainty concerns late reporting, deobligations and corrections rather than another full year's spending. This narrowing is mechanism-based and lacks a historical revision-vintage backtest. Final implied bounds are 41.4072051 and 60.12006768 USD millions."
+    },
+    {
+      "kind": "math",
+      "text": "With x equal to the eight historical USD-million flows, sigma = sqrt(sum((x-39.97529682875)^2)/7) = 14.619423883961316. Point = 50.76363639. Conditional half-width = 0.5*1.28*14.619423883961316 = 9.356431285735242. Rounded to source-cent-equivalent precision, the 80% interval is [50.76363639-9.356431285735242, 50.76363639+9.356431285735242] = [41.4072051, 60.12006768]."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is delayed positive grant, other-assistance or contract obligations entering the registered snapshot. The downside risk is deobligations, cancellations or downward reporting corrections; the current total is not a strict lower bound. Net additions exceeding 9.35643129 million or net reductions exceeding that amount would land outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar-verification failure: the official Treasury resources page exposes an FY2026 reporting-window spreadsheet, but the web fetch returned an unsupported XLSX content-type error. USDA schedule-document fetches also failed. Successfully fetched Treasury reporting guidance distinguishes monthly accounting submissions from procurement and financial-assistance transaction reporting, and does not identify a first-print event for this exact query. The supplied contract provides an expected window of 2026-10-15 through 2026-10-22 but no exact snapshot execution date or time. The resolutionDate field therefore retains only the supplied window endpoint, 2026-10-22; it is not an official-calendar-verified release date. This forecast cannot satisfy the calendar-verification requirement. Sources: [Treasury resources](https://tfx.treasury.gov/data-transparency/resources), [Treasury reporting requirements](https://tfx.treasury.gov/monthly-reporting-requirements), and [USDA DATA Act resources](https://nfc.usda.gov/FSS/clientservices/fms/DATA_Act/index.php)."
+    },
+    {
+      "kind": "forecast",
+      "point": 50.76363639,
+      "ciLow": 41.4072051,
+      "ciHigh": 60.12006768
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "slug": "us-private-research-development-fixed-investment-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US private R&D investment, Q3 2026",
+  "question": "What will BEA first report for US private research and development fixed investment in 2026-Q3, in current dollars, seasonally adjusted at an annual rate, in NIPA Table 5.3.5, line 18?",
+  "unit": "usd_billions",
+  "pointEstimate": 974.005,
+  "ciLow": 960.278,
+  "ciHigh": 987.733,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "BEA GDP advance release, NIPA Table 5.3.5, line 18",
+  "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+  "resolutionRule": "Resolve to the first official 2026-Q3 current-dollar, seasonally adjusted annual-rate research and development value in NIPA Table 5.3.5, line 18, series T50305:L18, published with the GDP advance estimate. Apply the registered factor of 0.001 to source values expressed in millions of dollars; values already expressed in billions require no further conversion. Preserve the official published precision. Subsequent corrections, second and third estimates, and annual revisions do not change the resolved value.",
+  "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q1"},
+      "label": "2024-Q1",
+      "value": 800.089
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q2"},
+      "label": "2024-Q2",
+      "value": 805.387
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 819.357
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 822.104
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 824.332
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 847.538
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 873.341
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 899.511
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 927.099
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 950.518
+    }
+  ],
+  "drivers": [
+    "Persistent nominal R&D growth",
+    "Recent quarterly momentum above the broader historical mean",
+    "BEA advance-estimate use of judgmental trends and employment data",
+    "September annual-update level incorporated in the anchor",
+    "Risk of changed research payrolls or trend assumptions"
+  ],
+  "sourceContext": [
+    "https://fred.stlouisfed.org/data/Y006RC1Q027SBEA",
+    "https://fred.stlouisfed.org/series/Y006RC1Q027SBEA",
+    "https://www.bea.gov/news/schedule/full",
+    "https://www.bea.gov/index.php/news/2026/gdp-advance-estimate-2nd-quarter-2026",
+    "https://www.bea.gov/index.php/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd",
+    "https://apps.bea.gov/api/_pdf/bea_web_service_api_user_guide.pdf"
+  ],
+  "runAt": "2026-10-07T11:48:09Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast of Q3 2026 private research and development investment"
+    },
+    {
+      "kind": "text",
+      "text": "The target is nominal private R&D investment, seasonally adjusted at an annual rate, rather than real growth or total intellectual-property investment. BEA identifies Table 5.3.5 as T50305, TableID 145; the target is line 18. All numerical anchors and historical levels use this same current-dollar SAAR series. The fetched history shares the September 30 revision vintage; these are revised quarterly observations, not archived advance estimates. The registered million-to-billion conversion must not be applied again to the already-billion FRED mirror. [BEA API guide](https://apps.bea.gov/api/_pdf/bea_web_service_api_user_guide.pdf)"
+    },
+    {
+      "kind": "text",
+      "text": "BEA's official calendar lists GDP (Advance Estimate), 3rd Quarter 2026, for October 29, 2026, at 8:30 AM. The September GDP announcement independently confirms that date and specifies EDT. Resolution remains tied strictly to the first official print. [BEA release calendar](https://www.bea.gov/news/schedule/full)"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the Federal Reserve Bank of St. Louis data table for BEA series Y006RC1Q027SBEA and inspect its update date and quarterly observations.",
+      "result": "The directly opened table reports a September 30, 2026 update and billions of dollars, SAAR: 2024-Q1 800.089; Q2 805.387; Q3 819.357; Q4 822.104; 2025-Q1 824.332; Q2 847.538; Q3 873.341; Q4 899.511; 2026-Q1 927.099; Q2 950.518. Earlier search snippets showed an older vintage; those values were excluded. [BEA history via FRED](https://fred.stlouisfed.org/data/Y006RC1Q027SBEA)"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the FRED series page independently to cross-check the latest BEA R&D observations, units, and account code.",
+      "result": "The page identifies BEA account Y006RC and reports 2026-Q2 950.518, 2026-Q1 927.099, 2025-Q4 899.511, 2025-Q3 873.341, and 2025-Q2 847.538 billion dollars, SAAR, matching the directly fetched history. [BEA series via FRED](https://fred.stlouisfed.org/series/Y006RC1Q027SBEA)"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch BEA's Q2 2026 advance GDP release and its technical explanation of intellectual-property investment estimation.",
+      "result": "The advance release reported real GDP growth of 1.5% SAAR and private domestic final-sales growth of 3.9%. Its technical note attributes rising intellectual-property investment to software and R&D, based primarily on judgmental trends and BLS Current Employment Statistics. These aggregate statistics provide context, not substitute R&D anchors. [BEA Q2 advance release](https://www.bea.gov/index.php/news/2026/gdp-advance-estimate-2nd-quarter-2026)"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch BEA's September 30 Q2 2026 third-estimate announcement to check current economic context and the annual-update vintage.",
+      "result": "BEA reported real GDP growth of 2.2% SAAR, current-dollar GDP growth of 8.5%, and real final sales to private domestic purchasers growth of 4.6%. The release includes the annual update covering 2021-Q1 through 2026-Q1. [BEA Q2 third estimate](https://www.bea.gov/index.php/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd)"
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the ten fetched quarterly R&D levels from 2024-Q1 through 2026-Q2. Their nine successive changes average 16.714333 billion dollars, giving a persistence-with-drift base rate forecast of 950.518 + 16.714333 = 967.232333. The latest four changes average 25.745, supporting an upward momentum update."
+    },
+    {
+      "kind": "text",
+      "text": "Level effect: use the latest revised 950.518 anchor. Momentum effect: shrink the recent-four-quarter mean toward the broader mean, assigning analyst-selected weights of 75% and 25%, respectively. One-off effect: the annual revision is already incorporated in the level and is not repeated as additional growth. Policy-mechanism effect: apply no separate quantified adjustment because the fetched evidence establishes no target-specific magnitude."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence-with-drift prior from ten same-vintage observations and nine quarterly changes. Update the broad mean toward recent momentum: 0.75*(25.745-16.714333) = 6.773; one-off and policy adjustments are zero. The changes are 5.298, 13.970, 2.747, 2.228, 23.206, 25.803, 26.170, 27.588, and 23.419. Their sample dispersion is sigma = 10.724672, calculated as sqrt(920.148698/8). A normal approximation gives an 80% half-width of 1.28*sigma = 13.727580. The resulting bounds are 960.278 and 987.733 billion dollars. Revised-history dispersion is a proxy for uncertainty, not independently calibrated first-print forecast-error coverage."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 950.518 + 0.25*16.714333333 + 0.75*25.745 = 974.005333333. Interval = 974.005333333 +/- 13.727580025 = [960.277753308, 987.732913359]. Rounded to three decimals: point 974.005, low 960.278, high 987.733."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is faster research hiring or a higher BEA trend extrapolation; a quarterly increase exceeding 37.215 billion from the current anchor would land above the interval. The downside risk is research payroll weakness, deferred projects, or a lower extrapolation; an increase below 9.760 billion would land below it. A substantial revision to the preceding-quarter level accompanying the advance release could also put the first print outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 974.005,
+      "ciLow": 960.278,
+      "ciHigh": 987.733
+    }
+  ]
+}

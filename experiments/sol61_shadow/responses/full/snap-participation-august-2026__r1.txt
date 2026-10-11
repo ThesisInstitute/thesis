@@ -1,0 +1,173 @@
+{
+  "slug": "snap-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation in August 2026",
+  "question": "How many million persons participated nationally in USDA FNS SNAP in August 2026, not seasonally adjusted, as reported in the FIRST PRINT of the national monthly Participation Persons table?",
+  "unit": "millions",
+  "pointEstimate": 36.037531,
+  "ciLow": 35.353847,
+  "ciHigh": 36.721215,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS, SNAP Data Tables, national monthly Participation Persons",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve to the August 2026 national monthly Participation Persons entry for fns.snap.total_persons in the FIRST publicly posted USDA FNS SNAP data tables containing that month, not seasonally adjusted. Preserve that first print even if subsequently corrected or revised. The contemporaneous Number of Persons Participating table, TOTAL row, August 2026 Initial column identifies the same national total. Express the result in millions: when published in thousands, multiply by the registered 0.001; when published as raw persons, first divide by 1000 to obtain thousands, then apply 0.001. Round to six decimal places in millions for a whole-person source. No policy condition applies. No verified release-calendar date or explicitly committed resolve-by date was supplied or found; resolutionDate is null and this cell cannot pass the date requirement without that information.",
+  "dataPointId": "usda.fns.snap.persons.august_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 41.077607
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 40.395735
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 39.513033
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 38.54773
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 37.870817
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 37.298271
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 37.011096
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 36.562128
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Nine initial monthly prints show declining participation",
+    "Recent first-print declines are slowing",
+    "Damped trend beats persistence in a small backtest",
+    "Existing work rules receive no additional numerical adjustment",
+    "First-print reporting and disaster assistance create tail risk"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://www.fns.usda.gov/sites/default/files/resource-files/snap-persons-1.pdf",
+    "https://www.fns.usda.gov/sites/default/files/resource-files/snap-persons-2.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://www.fns.usda.gov/sites/default/files/resource-files/snap-4fymonthly-2.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://www.usda.gov/sites/default/files/guidance-documents/fns.snap-obbb-abawd-exceptions-implementation.pdf",
+    "https://www.usda.gov/sites/default/files/guidance-documents/fns.snap-obbb-abawd-waivers-implementation.pdf"
+  ],
+  "runAt": "2026-10-07T10:47:03Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 SNAP national participation: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The forecast concerns persons participating, not households, benefits, or an annual average. Historical values are original Initial national totals, not the latest revised history. The supplied slug, unit, and dataPointId are retained. The supplied target context omits resolutionDate and resolutionDateBasis; its January 3–11, 2027 expected release window does not establish an official scheduled day. No scheduled August-data release day was verified. I record resolutionDate as null rather than manufacture a date; the numerical forecast is grounded, but this metadata gap prevents full contract validation. Catalog access was skipped under the independence instruction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the registered SNAP data page; fetch its official USDA CDN equivalent and Program Data Overview.",
+      "result": "The registered page returned HTTP 403. The official CDN page, updated September 18, 2026, identifies June 2026 as the latest available month. Program Data Overview also identifies June 2026 and warns that current numbers are preliminary and subject to significant revision. Neither fetched page provides an August 2026 scheduled release date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch official snap-persons-1.pdf and snap-persons-2.pdf; read TOTAL under the latest-month Initial column.",
+      "result": "October 2025 Initial = 41,077,607 persons, data as of January 23, 2026; November 2025 Initial = 40,395,735 persons, data as of February 13, 2026. The national snap-4fymonthly-2.pdf November Participation Persons row independently matches 40,395,735. October's first-print table contains North Dakota at 7,130; that published anomaly is retained rather than silently corrected."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the official USDA CDN PDF artifacts snap-persons-3.pdf and snap-persons-4.pdf; read TOTAL Initial values from the returned official-source text.",
+      "result": "December 2025 Initial = 39,513,033 persons, data as of March 13, 2026; January 2026 Initial = 38,547,730 persons, data as of April 10, 2026. These values were retrieved in official-source search text; subsequent direct PDF opens failed. They are not remembered values or substituted revised totals."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-5.pdf and snap-persons-6.pdf; crosscheck corresponding national monthly PDFs.",
+      "result": "February 2026 Initial = 37,870,817 persons, data as of May 8, 2026; March 2026 Initial = 37,298,271 persons, data as of June 12, 2026. National snap-4fymonthly-5.pdf and snap-4fymonthly-6.pdf contain the same respective Participation Persons values."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-7.pdf, snap-persons-8.pdf, and snap-persons-9.pdf; read TOTAL Initial and crosscheck accessible national monthly tables.",
+      "result": "April 2026 Initial = 37,011,096 persons, data as of July 10, 2026; May 2026 Initial = 36,562,128 persons, data as of August 14, 2026; June 2026 Initial = 36,352,716 persons, data as of September 11, 2026. National monthly PDFs -8 and -9 match the May and June initial totals. The September vintage revises May to 36,685,024; that revision is excluded from first-print history. The fetched PDFs report raw persons, whereas the registered binding describes thousands; raw persons / 1000 * 0.001 yields the intended millions."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the nine October 2025–June 2026 first prints have mean 38.292126 million, sample level standard deviation 1.706624 million, and range 36.352716–41.077607 million. All eight successive changes are negative; their mean is -0.590611375 million, range -0.965303 to -0.209412 million, and sample sigma is 0.267064203 million. The last three changes average -0.315185 million. Publish persistence at 36.352716 million before evaluating trend candidates. This is a national series, so a panel shrinkage baseline does not apply. Earlier initial artifacts were not retrievable; revised earlier months were not substituted."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated before selecting the forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"targetPeriod\":\"2026-08\",\"unit\":\"millions\",\"point\":36.352716,\"p10\":35.669032,\"p50\":36.352716,\"p90\":37.0364,\"interval80\":[35.669032,37.0364],\"interval90\":[35.474075,37.231357],\"intervalMethod\":\"First-print successive-change sample sigma; Gaussian wrapper; two-month linear horizon scaling\",\"calibration_n\":8,\"trainCutoff\":\"2026-06\",\"walkForward\":{\"horizonMonths\":2,\"origins\":[\"2026-01\",\"2026-02\",\"2026-03\",\"2026-04\"],\"n\":4,\"mae\":0.875926,\"rmse\":0.904936,\"coverage80\":0.25}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"mean_drift\",\"targetPeriod\":\"2026-08\",\"unit\":\"millions\",\"point\":35.171493,\"p10\":34.487809,\"p50\":35.171493,\"p90\":35.855178,\"interval80\":[34.487809,35.855178],\"interval90\":[34.292852,36.050134],\"intervalMethod\":\"First-print successive-change sample sigma; Gaussian wrapper; two-month linear horizon scaling\",\"calibration_n\":8,\"trainCutoff\":\"2026-06\",\"walkForward\":{\"horizonMonths\":2,\"origins\":[\"2026-01\",\"2026-02\",\"2026-03\",\"2026-04\"],\"n\":4,\"mae\":0.663379,\"rmse\":0.676693,\"coverage80\":0.25}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"last_drift\",\"targetPeriod\":\"2026-08\",\"unit\":\"millions\",\"point\":35.933892,\"p10\":35.250208,\"p50\":35.933892,\"p90\":36.617576,\"interval80\":[35.250208,36.617576],\"interval90\":[35.055251,36.812533],\"intervalMethod\":\"First-print successive-change sample sigma; Gaussian wrapper; two-month linear horizon scaling\",\"calibration_n\":8,\"trainCutoff\":\"2026-06\",\"walkForward\":{\"horizonMonths\":2,\"origins\":[\"2026-01\",\"2026-02\",\"2026-03\",\"2026-04\"],\"n\":4,\"mae\":0.417058,\"rmse\":0.469681,\"coverage80\":1}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"three_drift\",\"targetPeriod\":\"2026-08\",\"unit\":\"millions\",\"point\":35.722346,\"p10\":35.038662,\"p50\":35.722346,\"p90\":36.40603,\"interval80\":[35.038662,36.40603],\"interval90\":[34.843705,36.600987],\"intervalMethod\":\"First-print successive-change sample sigma; Gaussian wrapper; two-month linear horizon scaling\",\"calibration_n\":8,\"trainCutoff\":\"2026-06\",\"walkForward\":{\"horizonMonths\":2,\"origins\":[\"2026-01\",\"2026-02\",\"2026-03\",\"2026-04\"],\"n\":4,\"mae\":0.591773,\"rmse\":0.622787,\"coverage80\":0.5}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"half_three_drift\",\"targetPeriod\":\"2026-08\",\"unit\":\"millions\",\"point\":36.037531,\"p10\":35.353847,\"p50\":36.037531,\"p90\":36.721215,\"interval80\":[35.353847,36.721215],\"interval90\":[35.15889,36.916172],\"intervalMethod\":\"First-print successive-change sample sigma; Gaussian wrapper; two-month linear horizon scaling\",\"calibration_n\":8,\"trainCutoff\":\"2026-06\",\"walkForward\":{\"horizonMonths\":2,\"origins\":[\"2026-01\",\"2026-02\",\"2026-03\",\"2026-04\"],\"n\":4,\"mae\":0.143132,\"rmse\":0.216025,\"coverage80\":1}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select half_three_drift: fixed 50% damping of a two-month extrapolation of the latest three first-print changes toward persistence. Its four-origin two-month MAE is 0.143132 million, compared with 0.875926 for persistence, 0.663379 for historical mean drift, 0.417058 for latest-change drift, and 0.591773 for undamped three-change drift. Origins are January–April 2026, each using only then-available initial totals. The damping coefficient is fixed, not fitted, but selecting among five candidates with four outcomes risks overfitting. These scores are descriptive, not independent validation. The selected benchmark itself becomes the prior; there is no agent override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch USDA October 3, 2025 implementation memoranda on ABAWD exceptions and waivers.",
+      "result": "The exceptions memorandum expands time-limit coverage from ages 18–54 to 18–64, narrows the dependent-child exception from under 18 to under 14, removes several exceptions, and adds Indian exceptions; changes took effect July 4, 2025 and apply at initial applications and recertifications. The waiver memorandum generally requires unemployment over 10% and terminates outdated lack-of-jobs waivers 30 days after issuance, with special Alaska and Hawaii provisions."
+    },
+    {
+      "kind": "text",
+      "text": "Separate mechanisms: level is anchored on June's initial national count; momentum is the damped recent trend; no quantified one-off is identified. The fetched policy memoranda predate the historical sample and do not provide affected-person counts and realized loss rates sufficient for an additional causal adjustment. Their incremental point adjustment is zero to avoid counting the same downward mechanism twice. No other release-specific signal was fetched that warrants moving away from the selected benchmark."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = half_three_drift, trained on nine original monthly prints, October 2025–June 2026. Recent drift d3 = (36.352716 - 37.298271)/3 = -0.315185 million/month. Point = 0.5*36.352716 + 0.5*(36.352716 + 2*d3) = 36.037531 million; this is -0.315185 relative to persistence. Weight on the selected model prior is 100%; separate policy, one-off, and news adjustments are each zero. The eight successive changes are [-0.681872,-0.882702,-0.965303,-0.676913,-0.572546,-0.287175,-0.448968,-0.209412]. Their squared deviations from mean -0.590611375 sum to 0.499263019840 million squared; sigma = sqrt(0.499263019840/7) = 0.267064203 million. One-month Gaussian half-width = 1.28*sigma = 0.341842180 million. Use linear two-month scaling: half-width = 1.28*sigma*2 = 0.683684360 million, rather than the independence-based 0.483437847. Adjacent changes are positively correlated and recertification/reporting losses can persist across months; small-sample model selection also argues against narrowing. Thus 80% bounds = 36.037531 +/- 0.683684360 = [35.353846640,36.721215360], rounded to [35.353847,36.721215] million. Corresponding 90% bounds use 1.645*sigma*2 = 0.878641228 and are [35.158890,36.916172] million."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage check: the selected model's four two-month errors are [-0.406166667,-0.018081667,0.002111,-0.146168667] million. All four fall within the final half-width. A ten-outcome check is unavailable from nine first prints, and four successes cannot establish an 80% calibrated coverage rate. Initial reporting anomalies and substantial subsequent revisions remain relevant because resolution preserves the original release."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: delayed state records, benefit reinstatements, or disaster assistance could make the August initial total exceed 36.721215 million, outside the interval; this requires an increase of more than 0.368499 million from June. Downside risk: additional recertification losses under the existing work rules, or incomplete state reporting, could reduce the initial total below 35.353847 million, outside the interval; this requires a two-month decline exceeding 0.998869 million. A July initial print showing faster losses would lower the point; stabilization or a rebound would raise it. These are scenarios, not asserted current events."
+    },
+    {
+      "kind": "forecast",
+      "point": 36.037531,
+      "ciLow": 35.353847,
+      "ciHigh": 36.721215
+    }
+  ]
+}

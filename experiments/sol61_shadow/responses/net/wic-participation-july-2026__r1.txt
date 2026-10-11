@@ -1,0 +1,64 @@
+{
+  "slug": "wic-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation, July 2026",
+  "question": "What will USDA FNS report for national total WIC participation in July 2026 in its first official monthly print?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official agency release",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using July 2026 national total WIC participation in the first official monthly publication, converted from the table's stated units to millions. Preserve published precision and exclude subsequent revisions.",
+  "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program",
+    "https://www.fns.usda.gov/pd/data-release-calendar"
+  ],
+  "runAt": "2026-10-07T12:49:00Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains July 2026 total monthly national WIC participation, first official print, expressed in millions."
+    },
+    {
+      "kind": "text",
+      "text": "Opening https://www.fns.usda.gov/pd/wic-program with the web tool returned HTTP 403 Forbidden."
+    },
+    {
+      "kind": "text",
+      "text": "curl -sS against the same official page returned an empty body. Following the explicit fetch-failure instruction, the run stopped without substituting remembered values or search-summary numbers."
+    },
+    {
+      "kind": "text",
+      "text": "The official release-calendar lookup was also inaccessible. No resolution date was verified; the registered expected window is not a verified release date."
+    },
+    {
+      "kind": "text",
+      "text": "No official numeric history was fetched, so the mandatory six-print reference class and outside-view base rate could not be established."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sigma, adjustments, or interval bounds could be estimated from fetched evidence. Null estimates indicate a failed run, not a forecast."
+    },
+    {
+      "kind": "math",
+      "text": "The required sigma and 1.28*sigma half-width cannot be calculated without fetched participation observations."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

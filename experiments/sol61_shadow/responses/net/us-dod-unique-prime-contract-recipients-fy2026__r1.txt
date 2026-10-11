@@ -1,0 +1,88 @@
+{
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD recipient forecast refused",
+  "question": "What will the registered USAspending query snapshot report for distinct non-null recipient_id values among FY2026 Department of Defense prime-contract transactions, award types A, B, C and D, expressed in thousands?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "Use the registered_query_snapshot with awarding agency Department of Defense, contract award types A/B/C/D, spending_level transactions, FY2026 transaction dates, and page size 100. Count distinct non-null results[].recipient_id across all pages and multiply by 0.001. Preserve the registered snapshot against later revisions. The exact snapshot date could not be verified from an official schedule in this run.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Daily source updates",
+    "Delayed DoD contract reporting",
+    "Unverified snapshot date"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/"
+  ],
+  "runAt": "2026-10-07T12:49:07Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required evidence remains unverified"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the exact registered recipient query. A valid forecast requires six complete historical query counts and an officially verified resolution date. Neither requirement was established. Null values record refusal, not a numerical forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST the registered recipient query for FY2025, page 1, limit 100, to https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/.",
+      "result": "The successful response reported LOCKHEED MARTIN CORPORATION amount 34088390516.22 and hasNext=true. This is a partial recipient page; the dollar amount is not the target recipient count."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST the same registered FY2025 query at page 101, limit 100.",
+      "result": "The successful response reported EIGHT STAR PARTS LLC amount 1505523.74 and hasNext=true. Pagination remained incomplete, so no annual distinct-recipient value was established."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and read https://www.usaspending.gov/data/data-sources-download.pdf.",
+      "result": "Official documentation states a 90-day delay for DoD and USACE contract-data submission and describes daily publication following the nightly pipeline. It does not establish an October annual recipient-count release date."
+    },
+    {
+      "kind": "text",
+      "text": "The official submission-period endpoint was fetched, but its agency submission calendar did not verify a date for this registered recipient-query snapshot. The supplied October 15–22 window is target context, not official schedule verification."
+    },
+    {
+      "kind": "text",
+      "text": "The recipient-documentation link in the official API endpoint index returned Internal Error. Following the instruction to stop after a failed fetch, this run stopped without substituting another series or remembered history."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate could not be calculated: six complete historical registered-query counts were not established. Partial pages are not historical prints, and their spending amounts cannot substitute for recipient counts."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or historical adjustment was estimated. Without complete fetched historical counts, sigma and the 1.28*sigma interval half-width cannot be calculated; final implied bounds remain null."
+    },
+    {
+      "kind": "math",
+      "text": "The registered transformation is 0.001 times the number of distinct non-null recipient_id values across every result page. Missing pages prevent evaluation of that count and its historical successive-change dispersion."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk is additional recipients becoming visible through delayed reporting. A downside risk is recipient identity consolidation or record removal. Their likelihood and what would land outside the interval cannot be quantified without the required history and snapshot date."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

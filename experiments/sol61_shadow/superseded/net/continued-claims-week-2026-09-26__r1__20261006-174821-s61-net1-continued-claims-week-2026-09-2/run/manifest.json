@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:13:56Z",
+  "runStartedAt": "2026-10-07T10:13:56Z",
+  "series": "dol.eta.continued_claims.sa",
+  "period": "week_2026-09-26",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "continued-claims-week-2026-09-26",
+    "country": "US",
+    "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-18",
+      "start": "2026-10-14"
+    },
+    "period": "week_2026-09-26",
+    "registeredAt": "2026-09-21T20:29:34Z",
+    "registeredAtUtc": "2026-09-21T20:29:34Z",
+    "registrationCommit": "a4d2fa75c5f78e31f1ec50e5ea9d88d326727c95",
+    "registrationState": "preregistered",
+    "series": "dol.eta.continued_claims.sa",
+    "sourceBinding": {
+      "adapter": "alfred-fred",
+      "allowedHosts": [
+        "alfred.stlouisfed.org"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-18",
+        "start": "2026-10-14"
+      },
+      "field": "CCSA",
+      "releasePolicy": "advance_vintage",
+      "sourceSeriesId": "CCSA",
+      "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+      "table": "ALFRED graph CSV",
+      "transform": {
+        "factor": 1e-06,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "bb7989449716310b2815ec2be2cc3cf62f20abaccd2e258bc322bf40721774f2",
+    "targetRegistrationPath": "records/targets/2026-09-21-bb7989449716310b2815ec2be2cc3cf62f20abaccd2e258bc322bf40721774f2.json",
+    "targetUnit": "millions",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "a4d2fa75c5f78e31f1ec50e5ea9d88d326727c95",
+  "targetContentHash": "bb7989449716310b2815ec2be2cc3cf62f20abaccd2e258bc322bf40721774f2",
+  "targetRegistrationPath": "records/targets/2026-09-21-bb7989449716310b2815ec2be2cc3cf62f20abaccd2e258bc322bf40721774f2.json",
+  "registeredAtUtc": "2026-09-21T20:29:34Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/prompt.md",
+      "sha256": "38e637e00545b263f2594385e03f6ac21dca9617cf8f9d26a4ef0113b5e90771",
+      "bytes": 10539,
+      "createdAt": "2026-10-07T10:13:56Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/command.json",
+      "sha256": "3a3be6b259b0b3b1be6fde606dbc77fa5dc5814e2b436f4e8ab3548d6e022699",
+      "bytes": 190,
+      "createdAt": "2026-10-07T10:13:56Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/stdout.txt",
+      "sha256": "b6866625400fe99bd392f01800a6d5e75dca125fe450623a3331ccf0247d755b",
+      "bytes": 4806,
+      "createdAt": "2026-10-07T10:13:56Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:13:56Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/raw_response.txt",
+      "sha256": "b6866625400fe99bd392f01800a6d5e75dca125fe450623a3331ccf0247d755b",
+      "bytes": 4806,
+      "createdAt": "2026-10-07T10:13:56Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/parsed_cells.json",
+      "sha256": "76f26fe96e4a409257b2e255a9c04e77c75d10ea7f3f43a43d8feed01287b658",
+      "bytes": 5235,
+      "createdAt": "2026-10-07T10:13:56Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/normalized_cells.json",
+      "sha256": "efa85cda32af40bd32aa5a630fa02e1aa74195c0ec33497c3b8205a244d59c73",
+      "bytes": 4799,
+      "createdAt": "2026-10-07T10:13:56Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:13:56Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/continued-claims-week-2026-09-26__r1/manifest.json",
+      "sha256": "3aeee370996ada44d1d321521912487b29e80473e66d52c189f09fd228647c35",
+      "bytes": 4420,
+      "createdAt": "2026-10-07T10:13:56Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "2dbef9a842fa7d92112b126cbcb341c56ef5fcb3e67884e096013d49ac9b636b"
+}

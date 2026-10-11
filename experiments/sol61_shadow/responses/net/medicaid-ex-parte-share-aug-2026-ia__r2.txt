@@ -1,0 +1,103 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ia",
+  "country": "US",
+  "type": "data",
+  "title": "Iowa ex parte renewal share, August 2026",
+  "question": "What percentage of Iowa Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed ex parte, calculated to one decimal from the original (O) submission row when CMS first publishes it?",
+  "unit": "percent",
+  "pointEstimate": 58.4,
+  "ciLow": 44.0,
+  "ciHigh": 72.8,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Iowa's ex parte renewal share for the August 2026 reporting period, computed as 100 times metric 5a1 divided by metric 5 from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Use the numerator and denominator as first published and round the share to one decimal. Subsequent corrections and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ia.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 44.9},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 50.6},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 50.6},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 56.5},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 56.4},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 59.0},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 72.9},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 54.1},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 59.0},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 57.5},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 56.7},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 59.0}
+  ],
+  "drivers": [
+    "Recent original-submission rates clustered near 58 percent",
+    "January spike and February reversal increase historical volatility",
+    "Renewal-cohort composition and automated verification success",
+    "Two-month forecast horizon beyond the latest published period",
+    "Iowa workflow modernization has no verified August ex parte impact"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=IA&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&offset=28&limit=12&properties%5B0%5D=reporting_period&properties%5B1%5D=original_or_updated&properties%5B2%5D=beneficiaries_with_a_renewal_due&properties%5B3%5D=beneficiaries_whose_coverage_was_renewed_total&properties%5B4%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis&properties%5B5%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_bas_6356&properties%5B6%5D=beneficiaries_with_a_pending_renewal",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.legis.iowa.gov/docs/publications/DF/1595936.pdf"
+  ],
+  "runAt": "2026-10-07T12:07:08Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Iowa August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Iowa's state row for reporting period 202608 in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, resolved on its first published O submission. The ledger does not explicitly identify the denominator. I interpret the share using CMS's published renewal-outcome tables: metric 5a1 divided by metric 5, covering all beneficiaries due for renewal. All historical anchors use O rows and this same formula; U rows are excluded. Historical values are current published original-submission records, not independently reconstructed immutable first-publication vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the CMS datastore API for Iowa O rows, offset 28 and limit 12, selecting reporting period, renewal counts and footnotes.",
+      "result": "Fetched ex parte count / beneficiaries due: 2025-07 25484/56759; 2025-08 31141/61485; 2025-09 33291/65844; 2025-10 34099/60348; 2025-11 31383/55647; 2025-12 25294/42878; 2026-01 40708/55874; 2026-02 30409/56221; 2026-03 26384/44726; 2026-04 33892/58912; 2026-05 27200/47958; 2026-06 29594/50176. All twelve rows are O, with blank ex parte footnotes."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official May 2026 CMS snapshot and inspect Iowa in the state renewal-outcome table.",
+      "result": "The May table reports Iowa with 47,958 beneficiaries due, 57 percent renewed ex parte, 81 percent renewed in total and 6 percent pending. The API counts imply 100*27200/47958 = 56.716293 percent, consistent with the snapshot's whole-percent rounding."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official June 2026 CMS snapshot and inspect Iowa in the state renewal-outcome table.",
+      "result": "The June table reports Iowa with 50,176 beneficiaries due, 59 percent renewed ex parte, 81 percent renewed in total and 5 percent pending. The API counts imply 100*29594/50176 = 58.980389 percent. The table explicitly expresses the outcome percentages relative to beneficiaries due."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the twelve fetched monthly O shares from July 2025 through June 2026. Their unrounded mean is 56.4300 percent; the latest six-month mean is 59.8603 percent. April-June average 57.7422 percent, and June is 58.9804 percent. These provide the level anchor before operational adjustments."
+    },
+    {
+      "kind": "text",
+      "text": "Separate adjustments: the recent level supports moving above the twelve-month base rate; momentum receives no additional extrapolation because recent monthly changes alternate direction. January's 72.9 percent followed by February's 54.1 percent suggests a temporary spike, but its cause is unverified, so it remains in volatility estimation. Iowa HHS's January report describes workflow and batch automation and processing of renewal forms; it establishes no dated August change in ex parte verification. The quantified policy-mechanism adjustment is therefore zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior blended equally with the latest three-month mean. From the twelve unrounded original-submission shares, base rate 56.4300 + recent-level update 1.3122 + persistence adjustment 0.6191 + momentum 0 + separate one-off adjustment 0 + policy adjustment 0 = 58.3613, rounded to 58.4 percent. For the eleven successive monthly changes, mean change = 1.280162 percentage points and sum of squared deviations = 633.579323; sigma = 7.959770 percentage points = sqrt(633.579323/10). The one-month normal 80% half-width is 1.28*sigma = 10.188505. Under a two-month random-walk approximation from June to August, multiply by sqrt(2), giving 14.408722. Unrounded bounds are 43.952565 and 72.770010; rounding yields 44.0 to 72.8 percent. This is a model-based interval from a small historical sample."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar verification limitation: the official CMS archive lists June 2026 released September 25, May released August 28 and April released July 31, but provides no prospective announcement confirming December 15, 2026 for August. The specifications' fifteenth-day deadlines concern state updated-report submissions, not public release dates. I retain the contractual resolutionDate 2026-12-15 without inferring a publication date from cadence; the required official-calendar verification could not be completed."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is improved automated matching or an easier renewal cohort; another January-sized outcome of 72.9 percent would land above the interval. The downside risk is failed data matches, an automation outage or a cohort requiring more manual verification; an ex parte share below 44.0 percent would land outside the interval. Faster processing of returned forms alone need not increase the ex parte numerator."
+    },
+    {
+      "kind": "forecast",
+      "point": 58.4,
+      "ciLow": 44.0,
+      "ciHigh": 72.8
+    }
+  ]
+}

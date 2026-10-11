@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "us-nonfarm-productivity-q3-2026-prelim",
+      "ok": false,
+      "errors": [
+        "math step does not show interval derivation (sigma = X or 1.28)"
+      ]
+    }
+  ]
+}

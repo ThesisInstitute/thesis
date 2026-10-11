@@ -1,0 +1,158 @@
+{
+  "slug": "wic-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation in August 2026",
+  "question": "What will USDA Food and Nutrition Service's WIC Data Tables, Monthly Data - National Level, report for national Total Participants in August 2026, not seasonally adjusted, in its FIRST PRINT, expressed in millions of participants?",
+  "unit": "millions",
+  "pointEstimate": 6.669554,
+  "ciLow": 6.503877,
+  "ciHigh": 6.835231,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service, WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve fns.wic.total_participation using the August 2026 row and Total Participants column of the national Monthly Data table first publicly released for that month through the registered WIC Data Tables page. The corresponding latest-month participation sheet's TOTAL row, August 2026 Initial column, identifies the initial national count. Include all agencies represented in the national total; the series is not seasonally adjusted. Use the original publication, with no later revisions or correction grace period. The fetched tables report individual participants: divide their integer count by 1,000,000 and retain six decimal places in millions. The registered factor 0.001 yields millions only after the raw count is expressed in thousands; applying it directly to the fetched person counts would give the wrong unit. The supplied expected release window is not a verified scheduled release date.",
+  "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+  "historicalContext": [
+    {
+      "period": { "type": "month", "value": "2025-10" },
+      "label": "October 2025",
+      "value": 6.907512
+    },
+    {
+      "period": { "type": "month", "value": "2025-11" },
+      "label": "November 2025",
+      "value": 6.752138
+    },
+    {
+      "period": { "type": "month", "value": "2025-12" },
+      "label": "December 2025",
+      "value": 6.694838
+    },
+    {
+      "period": { "type": "month", "value": "2026-02" },
+      "label": "February 2026",
+      "value": 6.640819
+    },
+    {
+      "period": { "type": "month", "value": "2026-03" },
+      "label": "March 2026",
+      "value": 6.701661
+    },
+    {
+      "period": { "type": "month", "value": "2026-05" },
+      "label": "May 2026",
+      "value": 6.672717
+    },
+    {
+      "period": { "type": "month", "value": "2026-06" },
+      "label": "June 2026",
+      "value": 6.669554
+    }
+  ],
+  "drivers": [
+    "Latest initial participation count anchors the level",
+    "Recent declines already reflected in the prior",
+    "Persistence beats expanding drift in available comparisons",
+    "Two-month horizon and sparse first-print calibration",
+    "Enrollment and reporting disruptions drive tail uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program",
+    "https://fns-prod.azureedge.us/pd/wic-program",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-1.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-2.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf"
+  ],
+  "runAt": "2026-10-07T10:46:41Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 WIC total participation: persistence forecast with an unresolved publication date"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first national August 2026 monthly WIC total, not an annual average, a participation rate, or a seasonally adjusted series. Preserve the supplied slug, unit, dataPointId and registered resolution URL. No local files or Thesis forecasts were consulted; the catalog lookup was omitted under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.fns.usda.gov/pd/wic-program, https://fns-prod.azureedge.us/pd/wic-program and https://fns-prod.azureedge.us/pd/overview.",
+      "result": "The registered page returned HTTP 403. USDA's accessible content host links national monthly WIC data through June 2026; the WIC page was updated September 22, 2026. Program Data Overview says the latest month is June 2026, data as of September 18, 2026, and current figures are preliminary and subject to significant revision. Neither fetched page supplies a scheduled publication day for August 2026."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: the target context supplies an expected window of 2026-11-18 through 2026-11-26, but no resolutionDate and no resolve-by-bound basis. Official-source searches did not verify a release date. Therefore resolutionDate is null rather than an invented day; this forecast cannot satisfy the contract's calendar-date validation until an official date is verified. The current official page identifies the agency as Food and Nutrition Administration, while the registration names Food and Nutrition Service. Its linked files report persons, requiring normalization to thousands before the registered 0.001 multiplier can produce millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-1.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-2.pdf; read each release's newest monthly Total Participants row.",
+      "result": "The January 23, 2026 vintage ends with October 2025: 6,907,512 participants. The February 13, 2026 vintage ends with November 2025: 6,752,138 participants. Use these archived initial-release observations rather than the revised October and November counts in the latest table."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-3.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-5.pdf.",
+      "result": "The December 2025 Initial column's TOTAL is 6,694,838. The May 8, 2026 national monthly vintage ends with February 2026 Total Participants of 6,640,819. The December sheet's footer incorrectly says March 13, 2025; its December 2025 Initial column unambiguously identifies the observation used."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-6.pdf, https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-6.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-8.pdf.",
+      "result": "The June 12, 2026 national vintage ends with March 2026 Total Participants of 6,701,661, corroborated by the March 2026 Initial TOTAL in the latest-month sheet. The August 14, 2026 national vintage ends with May 2026 Total Participants of 6,672,717. The March latest-month sheet contains inconsistent prior-month and footer years; the national table and Initial column agree on the March 2026 value."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf.",
+      "result": "The September 11, 2026 national vintage reports June 2026 Total Participants of 6,669,554; the June 2026 Initial TOTAL independently agrees. May 2026 is revised to 6,687,977 in this vintage, so retain its archived initial value in history. The June latest-month sheet has inconsistent prior-month and footer years; the national table establishes the vintage and the Initial column establishes the month."
+    },
+    {
+      "kind": "text",
+      "text": "History availability: seven retrieved initial-release observations cover October 2025 through June 2026. January and April 2026 originals could not be fetched; neither missing value was invented or replaced with a revised observation. Consequently use only genuinely adjacent months for monthly volatility and respect elapsed months in model comparisons."
+    },
+    {
+      "kind": "math",
+      "text": "Base rate/reference class: the seven fetched initial-release levels, divided by 1,000,000, have mean 6.719891 million, sample standard deviation 0.089641 million, and range 6.640819-6.907512 million. The repeated-series prior is last-print persistence at June's 6.669554 million. Four observed adjacent-month changes are -0.155374, -0.057300, +0.060842 and -0.003163 million; their mean is -0.03874875 million. Levels establish the reference class; changes establish forecast volatility."
+    },
+    {
+      "kind": "text",
+      "text": "Generated model candidates before choosing the forecast. Each uses schema thesis_model_candidate_v1, unit millions, train_cutoff 2026-06, target_period 2026-08, horizon_months 2, calibration_n 4 and interval_method 'fallback-prior normal intervals from adjacent first-print change volatility with sqrt(horizon) scaling'. Persistence: point 6.669554, p10 6.503877, p50 6.669554, p90 6.835231, interval80 [6.503877,6.835231], interval90 [6.456652,6.882456], walk_forward MAE 0.0408536 and RMSE 0.046369928, score_n 5. Expanding endpoint drift: point 6.610065, p10 6.444387, p50 6.610065, p90 6.775742, interval80 [6.444387,6.775742], interval90 [6.397162,6.822967], walk_forward MAE 0.093603959 and RMSE 0.104713061, score_n 5. Intervals are approximations, not demonstrated nominal coverage."
+    },
+    {
+      "kind": "math",
+      "text": "Walk-forward comparison uses matched origins November 2025, December 2025, February 2026, March 2026 and May 2026, with target horizons 1,2,1,2,1 months respectively. Expanding drift at each origin equals (latest training level - October 2025 level)/elapsed calendar months; predict latest level plus horizon times that drift. Persistence errors, actual minus prediction, are -0.057300,-0.054019,+0.060842,-0.028944,-0.003163 million; drift errors are +0.098074,+0.158655,+0.12751525,+0.0533964,+0.030379143 million. MAE is mean absolute error and RMSE is sqrt(mean squared error). Persistence wins both measures. August drift would be 6.669554 + 2*(6.669554-6.907512)/8 = 6.6100645; reject that downward move because its available walk-forward evidence is weaker."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: level is June's initial count. Momentum contributes zero additional adjustment because recent declines are already reflected in that level and extrapolated drift backtests worse. One-off and policy components each contribute zero: no fetched August-specific causal signal supports a separate adjustment. Select persistence with weight 1; total point delta from the strongest benchmark is zero. No panel-shrinkage benchmark applies to this national single series."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior is June 2026 initial-print persistence, using seven retrieved initial-release levels and four adjacent-month changes. Adjustment components are momentum 0, one-off 0 and policy 0 million; point = 1*6.669554 + 0 = 6.669554. With change mean -0.03874875, sigma = 0.0915246067 million = sqrt(sum((change-mean)^2)/(4-1)). August is two months after the latest observed June level, so 80% half-width = 1.28*sigma*sqrt(2) = 0.1656772353 million, assuming independent monthly innovations. Bounds = 6.669554 +/- 0.1656772353 = [6.5038767647,6.8352312353], rounded to [6.503877,6.835231]. The 90% half-width = 1.644853627*sigma*sqrt(2) = 0.2129021886. No additional subjective widening is applied; missing originals and the small calibration sample limit confidence in nominal coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: retrospectively, five of the six observed transitions fall inside +/-1.28*sigma*sqrt(elapsed months); the October-to-November decline falls outside. This is a full-sample diagnostic, not out-of-sample calibration. Only seven initial releases and four adjacent changes were recovered, so an eight-of-ten coverage claim cannot be established. The large early decline is retained in sigma rather than assumed to disappear."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: broad enrollment gains or state reporting backlogs newly counted in August could create a net increase greater than 0.165677 million from June and land above 6.835231 million, outside the interval. Downside risk: widespread recertification failures or interruptions to issuing benefits could produce a net loss greater than 0.165677 million and land below 6.503877 million. A newly published July initial count materially above June would move the point up; a materially lower count would move it down. No such July signal was available in the fetched official tables."
+    },
+    {
+      "kind": "forecast",
+      "point": 6.669554,
+      "ciLow": 6.503877,
+      "ciHigh": 6.835231
+    }
+  ]
+}

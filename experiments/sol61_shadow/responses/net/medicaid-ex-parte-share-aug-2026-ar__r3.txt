@@ -1,0 +1,183 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ar",
+  "country": "US",
+  "type": "data",
+  "title": "Arkansas August 2026 ex parte renewal share",
+  "question": "What percentage of Arkansas Medicaid and CHIP beneficiaries due for renewal in August 2026 will have coverage renewed on an ex parte basis, computed from the original (O) submission when CMS first publishes it, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 72.8,
+  "ciLow": 69.4,
+  "ciHigh": 76.2,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Arkansas's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Following CMS's published state-table convention, compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, rounded to one decimal. Subsequent corrections and updated (U) submissions do not change resolution. The registered resolutionDate is retained but was not verified as an official publication date.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ar.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-01"},
+      "label": "2025-01",
+      "value": 72.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-02"},
+      "label": "2025-02",
+      "value": 70.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-03"},
+      "label": "2025-03",
+      "value": 70.9
+    },
+    {
+      "period": {"type": "month", "value": "2025-04"},
+      "label": "2025-04",
+      "value": 68.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-05"},
+      "label": "2025-05",
+      "value": 71.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "2025-06",
+      "value": 74.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 73.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 75.4
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 75.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 76.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 77.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 77.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 77.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 74.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 72.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 71.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 71.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 72.2
+    }
+  ],
+  "drivers": [
+    "Persistence near the latest Arkansas original-submission rate",
+    "Modest reversion toward the trailing annual average",
+    "Recent stabilization after an early-2026 decline",
+    "Renewal-cohort composition and administrative data matching",
+    "Two unobserved reporting months between the latest observation and target"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=AR&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202601&conditions%5B2%5D%5Boperator%5D=%3E%3D&limit=30",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:32:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Arkansas August 2026 original-submission ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Arkansas's August 2026 state row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using the original (O) submission at first public release. Every historical anchor uses an O row from that dataset, excluding updated (U) submissions. These historical O rows were fetched from the currently published dataset; their initial publication vintages were not independently archived or verified."
+    },
+    {
+      "kind": "text",
+      "text": "Denominator clarification: the ledger does not identify the denominator. I interpret the target using CMS's current published state-table ex parte rate: 100 times beneficiaries renewed ex parte divided by beneficiaries due for renewal, Metrics 5a1/5. The June 2026 snapshot's state table explicitly uses beneficiaries due as its denominator. The alternative share among successful renewals, 5a1/5a, would measure a different quantity."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET CMS datastore query for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0, filtering state_abbreviation=AR, original_or_updated=O, and reporting_period from 202501 through 202506; read the echoed JSON counts.",
+      "result": "Fetched original-submission counts, expressed as ex parte beneficiaries / beneficiaries due: 2025-01 36106/49781; 2025-02 38308/54702; 2025-03 40339/56921; 2025-04 33987/49645; 2025-05 37247/52233; 2025-06 39645/53097. Computing 100 times these ratios gives 72.5%, 70.0%, 70.9%, 68.5%, 71.3%, and 74.7%, respectively."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET CMS datastore query for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0, filtering state_abbreviation=AR, original_or_updated=O, and reporting_period from 202507 through 202512; read the echoed JSON counts.",
+      "result": "Fetched original-submission counts, expressed as ex parte beneficiaries / beneficiaries due: 2025-07 37569/50949; 2025-08 40524/53723; 2025-09 39251/52006; 2025-10 39424/51893; 2025-11 37902/49192; 2025-12 41824/54096. Computing 100 times these ratios gives 73.7%, 75.4%, 75.5%, 76.0%, 77.0%, and 77.3%, respectively."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the CMS datastore URL listed in sourceContext, filtering state_abbreviation=AR, original_or_updated=O, and reporting_period>=202601; read the echoed JSON counts.",
+      "result": "The query returned six original-submission rows. Ex parte beneficiaries / beneficiaries due: 2026-01 43355/55651; 2026-02 35966/48463; 2026-03 41760/57641; 2026-04 40551/56883; 2026-05 38053/53416; 2026-06 38596/53431. Computing 100 times these ratios gives 77.9%, 74.2%, 72.4%, 71.3%, 71.2%, and 72.2%, respectively. June also reports 44072 total renewed and 131 pending."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is 18 consecutive Arkansas original-submission monthly rates from January 2025 through June 2026. The calculated base rate is an unweighted mean of 73.454%. The latest 12-month mean is 74.526%, and June's unrounded rate is 72.235%. April through June average 71.588%, supporting substantial persistence near the recent lower level."
+    },
+    {
+      "kind": "text",
+      "text": "Adjustment components: level uses 75% weight on June persistence and 25% on the trailing 12-month mean. Momentum adds 0 percentage points: the recent rebound follows a larger decline, making continued directional extrapolation uncertain. One-off and policy-mechanism adjustments each add 0 because no dated implementation evidence was fetched that supports a numerical adjustment. Seasonality adds 0 because the fetched sample contains only one previous August. These weights and zero adjustments are modeling judgments."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification limitation: the official CMS announcement page lists June 2026 released September 25, 2026, but provides no August 2026 future publication date. The fetched reporting specifications distinguish original-report submission deadlines from updated-report deadlines; their August 2024 example gives September 8 for the original submission and December 15 for the updated submission. Those are submission deadlines, not public releases. The registered resolutionDate 2026-12-15 is retained, but the required official publication-schedule verification could not be satisfied."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: use a persistence prior with modest mean reversion, estimated from the 18 fetched O-row rates. Level = 0.75*72.235219 + 0.25*74.525713 = 72.807843%; momentum, one-off, policy-mechanism, and seasonal adjustments are each 0. For the 17 successive monthly changes calculated from unrounded ratios, mean change = -0.017321 percentage points and sum of squared deviations = 56.764146. Thus sigma = 1.883550 percentage points, calculated as sqrt(56.764146/16). The one-month normal 80% half-width is 1.28*sigma = 2.410944 points. July and August are both unobserved, so a two-step independent-increment approximation gives half-width = 1.28*sigma*sqrt(2) = 3.409589 points. Unrounded bounds are 69.398254% and 76.217432%; rounded forecast: 72.8%, with 80% bounds 69.4% to 76.2%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a more readily matched renewal cohort or improved administrative data matching could restore the winter rate near January's 77.9%, landing above 76.2% and outside the interval. Downside risk: a data-matching disruption or more difficult renewal cohort could reproduce April 2025's 68.5%, landing below 69.4% and outside the interval. The interval assumes recent operational behavior and monthly dispersion remain informative."
+    },
+    {
+      "kind": "forecast",
+      "point": 72.8,
+      "ciLow": 69.4,
+      "ciHigh": 76.2
+    }
+  ]
+}

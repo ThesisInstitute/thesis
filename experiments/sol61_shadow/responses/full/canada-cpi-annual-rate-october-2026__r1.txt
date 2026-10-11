@@ -1,0 +1,180 @@
+{
+  "slug": "canada-cpi-annual-rate-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada CPI annual rate, October 2026",
+  "question": "What will Statistics Canada FIRST publish as the October 2026 year-over-year percentage change in Canada's all-items Consumer Price Index, not seasonally adjusted, Table 18-10-0004-01, vector v41690973, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 3.0,
+  "ciLow": 2.4,
+  "ciHigh": 3.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-16",
+  "resolutionSource": "Statistics Canada, Consumer Price Index, October 2026; Table 18-10-0004-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+  "resolutionRule": "Resolve on the FIRST publication of October 2026 Canada all-items CPI, not seasonally adjusted, Table 18-10-0004-01, index vector v41690973 (2002=100). Preserve the registered statcan-wds resolver: POST getDataFromVectorsAndLatestNPeriods to https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods and compute 100*(October 2026 index/October 2025 index-1), rounded to one decimal percent. The corresponding All-items Canada row in the original October 2026 release's numeric data table provides the first-print resolving values. Use the original first publication only; ignore later revisions or corrections. The official calendar schedules this release for November 16, 2026.",
+  "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 2.4
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 2.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 2.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 2.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 2.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 1.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 2.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 3.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 3.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 3.0
+    }
+  ],
+  "drivers": [
+    "Latest headline inflation at 3.0%",
+    "Gasoline volatility already reflected in the prior",
+    "Non-gasoline inflation at 2.4%",
+    "Two-month horizon and limited calibration history"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "https://www150.statcan.gc.ca/n1/pub/62-001-x/2011001/t040-eng.htm",
+    "https://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&SDDS=2301&wbdisable=true",
+    "https://www.statcan.gc.ca/en/developers/wds/user-guide",
+    "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251215/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260119/dq260119a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260217/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260316/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260420/t002a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260519/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260720/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260817/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm",
+    "https://www.bankofcanada.ca/rates/price-indexes/cpi/"
+  ],
+  "runAt": "2026-10-07T10:44:49Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 Canada all-items CPI: first-print annual inflation forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the annual percentage change in the Canada all-items NSA index, vector v41690973, not a seasonally adjusted monthly change or a core inflation measure. The registered slug, percent unit and dataPointId are preserved. The forecast uses the latest published reference month, August 2026, so October is two monthly steps ahead. No Thesis sites, records or local files were accessed; the catalog uniqueness check was omitted under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf and Table 18-10-0004-01.",
+      "result": "The official calendar's CPI section lists September 14, 2026 for August 2026, October 19, 2026 for September 2026, and November 16, 2026 for October 2026. The data table is Consumer Price Index, monthly, not seasonally adjusted, Table 18-10-0004-01, released September 14, 2026. The scheduled November 16 date matches the registered window."
+    },
+    {
+      "kind": "text",
+      "text": "Access limitation: the registered WDS endpoint returned HTTP 405 to the web tool's GET request, and alternate reference-period API requests failed. I could not fetch its numeric history directly. The historical values below were fetched instead from Statistics Canada's original-release numeric data tables, explicitly sourced to Table 18-10-0004-01, at the All-items Canada NSA row and current/prior-year columns. These establish the same series and transform, but do not constitute a successful exact WDS-artifact fetch. The official CPI methodology states NSA CPI is not revised; release-dated PDFs corroborate December and May values. Bank of Canada's public table separately cross-checks the same vector and rates."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open original numeric release tables: 251021/t001a-eng.htm, 251117/t001a-eng.htm, 251215/t001a-eng.htm, 260119/dq260119a-eng.pdf Table 1, 260217/t001a-eng.htm and 260316/t001a-eng.htm under https://www150.statcan.gc.ca/n1/daily-quotidien/.",
+      "result": "Fetched All-items Canada NSA index pairs (current/prior-year), followed by published annual rates: 2025-09 164.9/161.1, 2.4%; 2025-10 165.3/161.8, 2.2%; 2025-11 165.4/161.8, 2.2%; 2025-12 165.0/161.2, 2.4%; 2026-01 165.0/161.3, 2.3%; 2026-02 165.9/163.0, 1.8%. Each rate agrees with rounding 100*(current/prior-year-1) to one decimal."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open original numeric release tables: 260420/t002a-eng.htm Canada row, 260519/t001a-eng.htm All-items row, 260622/dq260622a-eng.pdf Table 1, 260720/t001a-eng.htm, 260817/t001a-eng.htm and 260914/t001a-eng.htm under https://www150.statcan.gc.ca/n1/daily-quotidien/.",
+      "result": "Fetched Canada all-items NSA index pairs (current/prior-year), followed by published annual rates: 2026-03 167.4/163.5, 2.4%; 2026-04 168.0/163.4, 2.8%; 2026-05 169.6/164.3, 3.2%; 2026-06 169.0/164.4, 2.8%; 2026-07 169.9/164.9, 3.0%; 2026-08 169.8/164.8, 3.0%. The May PDF's release-dated Table 1 confirms 169.6 and 3.2%."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the twelve annual first-print rates from September 2025 through August 2026 have mean 2.5417%, median 2.4%, sample level standard deviation 0.4144 percentage points, and range 1.8%-3.2%. Last-print persistence is 3.0%; the trailing-three-print mean is (2.8+3.0+3.0)/3=2.9333%. These benchmarks precede any current-evidence adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Generated model candidates before selecting the forecast, with agency-precision quantiles and intervals: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"targetPeriod\":\"2026-10\",\"point\":3.0,\"p10\":2.4,\"p50\":3.0,\"p90\":3.6,\"interval80\":[2.4,3.6],\"interval90\":[2.2,3.8],\"intervalMethod\":\"Sample standard deviation of successive first-print YoY changes; Gaussian quantiles; sqrt(2) scaling for two-month horizon\",\"calibration_n\":11,\"trainCutoff\":\"2026-08\",\"walkForwardScore\":{\"horizon_months\":2,\"initial_training_prints\":5,\"n\":6,\"rmse\":0.5369667897862337,\"mae\":0.38333333333333347}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing3Mean\",\"targetPeriod\":\"2026-10\",\"point\":2.9,\"p10\":2.3,\"p50\":2.9,\"p90\":3.6,\"interval80\":[2.3,3.6],\"interval90\":[2.1,3.7],\"intervalMethod\":\"Sample standard deviation of successive first-print YoY changes; Gaussian quantiles; sqrt(2) scaling for two-month horizon\",\"calibration_n\":11,\"trainCutoff\":\"2026-08\",\"walkForwardScore\":{\"horizon_months\":2,\"initial_training_prints\":5,\"n\":6,\"rmse\":0.5386883934012179,\"mae\":0.41666666666666674}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select persistence. At a matched two-month horizon, expanding-origin forecasts with five initial training prints produce six scored outcomes. Persistence RMSE is 0.5370 percentage points versus 0.5387 for the trailing-three mean; MAE is 0.3833 versus 0.4167. The difference is tiny and the evaluation sample is short, so this supports retaining the default rather than claiming decisive model superiority. Candidate intervals use a labeled volatility wrapper, not native model intervals."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm and its original NSA numeric Table 1.",
+      "result": "Latest official CPI release: August headline 3.0% YoY, matching July 3.0%; excluding gasoline 2.4% versus July 2.2%; gasoline 22.8% YoY versus July 25.7%; rent 2.8% versus July 2.5%; groceries 2.8% versus July 3.1%. August headline changed -0.1% month over month NSA and +0.2% seasonally adjusted. These signals are already incorporated in the latest print."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view updates: level is the 3.0% persistence prior. Momentum, gasoline normalization, rent acceleration and grocery deceleration are observed in August and receive zero additional adjustment to avoid double-counting. No fetched release-specific September or October signal supplies a calibrated new contribution. Announced-policy and one-off adjustments are also zero. The agent forecast's delta from the selected benchmark is 0.0 percentage points; prior weight is 100%."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = persistence at August's 3.0%; sample = twelve official first-print annual rates, September 2025-August 2026. Adjustment components = momentum 0.0 + energy 0.0 + policy 0.0 + one-offs 0.0; point = 1.00*3.0 = 3.0%. Successive rate changes in percentage points are [-0.2,0.0,0.2,-0.1,-0.5,0.6,0.4,0.4,-0.4,0.2,0.0]. Their sum is 0.6 and squared sum is 1.22. sigma = sqrt((1.22-0.6^2/11)/10) = 0.344568241. Interval method = sample successive-change volatility with Gaussian quantiles, treating monthly innovations as independent. One-month 80% half-width = 1.28*sigma = 0.441047349; two-month half-width = 1.28*sigma*sqrt(2) = 0.623735142 because September and October remain unobserved. Raw bounds = 3.0 +/- 0.623735142 = [2.376264858,3.623735142]; round to one decimal to obtain [2.4,3.6]. The corresponding 90% wrapper is 3.0 +/- 1.644853627*sigma*sqrt(2) = [2.198474211,3.801525789], rounded [2.2,3.8]."
+    },
+    {
+      "kind": "text",
+      "text": "Retrospective interval sanity check: the ten available two-month persistence errors are [-0.2,0.2,0.1,-0.6,0.1,1.0,0.8,0.0,-0.2,0.2] percentage points; eight of ten fall within the published +/-0.6 band. This uses full-sample volatility and is not an out-of-sample coverage claim. Recent energy shocks account for the two large upward misses; serial dependence or another structural shock could make the independence-based interval too narrow."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: renewed fuel supply disruption, combined with stronger rent or travel prices, could lift October above 3.6%, outside the interval. Downside risk: a sharp gasoline-price reversal combined with broad retail discounting could pull October below 2.4%, outside the interval. Evidence of sustained September-October gasoline increases would move the point up; sustained declines without offsetting services inflation would move it down. These are falsifying scenarios, not fetched outcomes or quantified policy effects."
+    },
+    {
+      "kind": "forecast",
+      "point": 3.0,
+      "ciLow": 2.4,
+      "ciHigh": 3.6
+    }
+  ]
+}

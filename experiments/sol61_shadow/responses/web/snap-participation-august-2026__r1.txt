@@ -1,0 +1,152 @@
+{
+  "slug": "snap-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "August 2026 SNAP participation",
+  "question": "What will USDA FNS report in the first official print of national monthly SNAP Persons participation for August 2026, not seasonally adjusted, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 35.598528,
+  "ciLow": 35.072193,
+  "ciHigh": 36.124864,
+  "confidence": 0.8,
+  "resolutionDate": "2027-01-11",
+  "resolutionSource": "USDA FNS SNAP Data Tables, national monthly Participation Persons",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve using the first officially published August 2026 national monthly SNAP Participation Persons total in the SNAP Data Tables, including any disaster participation incorporated in that total. Use the original print and disregard all subsequent revisions, including same-day corrections. Convert thousands of persons to millions by multiplying by 0.001; when the official table supplies whole-person counts, first normalize those counts to thousands, equivalently dividing by 1,000,000. Preserve the precision supplied by the first print without additional rounding. The resolutionDate is the supplied registration window's end, not a verified official publication date.",
+  "dataPointId": "usda.fns.snap.persons.august_2026",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 38.54773
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": 37.870817
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 37.298271
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 37.011096
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 36.562128
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Continued declines in initial monthly participation prints",
+    "Slower recent decline than the full historical sample",
+    "Eligibility restrictions applied through applications and recertifications",
+    "California's announced time-limit exits begin after August",
+    "Initial reporting uncertainty and disaster participation"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://www.usda.gov/sites/default/files/guidance-documents/fns.snap-obbb-abawd-exceptions-implementation.pdf",
+    "https://abgt.assembly.ca.gov/system/files/2026-04/april-29-sub-2-agenda-dss-select-issues-csd-calhhs_0.pdf",
+    "https://fns-prod.azureedge.us/pd/overview"
+  ],
+  "runAt": "2026-10-06T22:43:42Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 SNAP participation: 35.598528 million"
+    },
+    {
+      "kind": "text",
+      "text": "The target is fns.snap.total_persons for August 2026: the original national monthly Persons total, not seasonally adjusted and including disaster participation incorporated by USDA. HistoricalContext uses six consecutive initial monthly prints, rather than their subsequently revised values. These are monthly participation tables, not annual fiscal-year quality-control releases."
+    },
+    {
+      "kind": "text",
+      "text": "The series-specific stable resolver page is the registered SNAP Data Tables URL; the relevant tables are snap-4fymonthly, Participation Persons, and snap-persons, national TOTAL in the Initial column. The fetched PDFs display whole-person counts, whereas the ledger describes thousands: normalize counts to thousands before applying its 0.001 multiplier. The registered FNS host returned an access error; official USDA content was fetched through its CDN, whose pages now identify the agency as Food and Nutrition Administration. These access and unit discrepancies do not change the target."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Search the official indexed snap-persons-4.pdf for TOTAL and open the official snap-4fymonthly-5.pdf and snap-persons-5.pdf.",
+      "result": "The January 2026 Initial column reports 38,547,730 persons in the table dated April 10, 2026. The February 2026 Initial total is 37,870,817 persons in the May 8, 2026 table. January's direct PDF open returned 404, but the official indexed search fetched its table and national total."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf and https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf.",
+      "result": "The June 12, 2026 summary's latest month, March 2026, reports 37,298,271 persons. The July 10, 2026 state participation table explicitly reports April 2026 Initial national TOTAL of 37,011,096 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official snap-4fymonthly-8.pdf, snap-4fymonthly-9.pdf and snap-persons-9.pdf.",
+      "result": "The August 14, 2026 summary's latest month, May 2026, reports 36,562,128 persons. The September 11, 2026 summary reports June 2026 at 36,352,716, matching the June Initial national TOTAL in snap-persons-9.pdf. That table warns that preliminary figures can undergo significant revision."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the six January-June initial prints. All five successive changes are negative: -0.676913, -0.572546, -0.287175, -0.448968 and -0.209412 million. The base rate is a decline of 0.4390028 million per month. Applying that drift for two months to June's level gives an August prior of 35.4747104 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Compare the September snap-4fymonthly-9.pdf with the fetched original March and May tables to assess reporting uncertainty.",
+      "result": "September reports March 2026 at 37,531,152 persons versus its initial 37,298,271, and May at 36,685,024 versus its initial 36,562,128. The respective upward revisions are 232,881 and 122,896 persons. Revised values inform uncertainty only; they do not enter the historicalContext or trend estimate."
+    },
+    {
+      "kind": "text",
+      "text": "USDA's implementation memorandum expands ABAWD time-limit coverage from ages 18-54 to 18-64 and reduces the caregiver exception's child-age cutoff from under 18 to under 14. These mechanisms support continued exits, but their effects already influence observed momentum. California's official April hearing placed its earliest new time-limit exits on September 1, 2026, after the target month, so its projected 665,000 eventual exits are not subtracted from August. No separate quantified August policy cliff, seasonal adjustment or disaster shock is added."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule limitation: No official release calendar or announcement specifying the August 2026 participation publication date was found this run. USDA's fetched overview identifies June 2026 as the latest available month, with its page dated September 18, 2026; this does not verify a future release date. The supplied January 3-11, 2027 window remains registration metadata. resolutionDate retains its end, January 11, as a provisional administrative date; the required official schedule verification remains unsatisfied."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a drift-adjusted persistence model with six January-June initial prints. Level = June's 36.352716 million. Full-sample monthly drift = -0.4390028; recent three-change drift = -0.315185. Their equal-weight blend is -0.3770939, giving 36.352716 + 2*(-0.3770939) = 35.5985282. Relative to the base-rate prior, the momentum adjustment is +0.1238178; additional policy and one-off adjustments are zero. From the five successive changes, sigma = 0.193841411 million, calculated as sqrt(0.150297971/4). The one-month 80% half-width is 1.28*sigma = 0.248117007. Multiply by sqrt(2) for two unreleased monthly innovations and by 1.5 for policy-transition and initial-reporting uncertainty evidenced by the fetched revisions: half-width = 0.526335654. This wider-than-1.75-times band explicitly reflects those mechanisms. Rounded final bounds are 35.072193 and 36.124864 million around 35.598528."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is slower eligibility exits, more successful exemptions or substantial disaster enrollment; participation staying near June's 36.352716 million would land above the interval. The downside risk is faster recertification exits or unusually incomplete initial state reporting; a decline exceeding 1.280523 million from June would land below 35.072193. Either outcome would be outside the interval and would falsify the assumed moderate continuation of recent declines."
+    },
+    {
+      "kind": "forecast",
+      "point": 35.598528,
+      "ciLow": 35.072193,
+      "ciHigh": 36.124864
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "slug": "us-core-pce-mom-september-2026",
+    "country": "US",
+    "type": "data",
+    "title": "September 2026 US core PCE inflation",
+    "question": "What will BEA first report for the seasonally adjusted monthly percentage change in the PCE price index excluding food and energy for September 2026?",
+    "unit": "percent_growth",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-29",
+    "resolutionSource": "BEA Personal Income and Outlays, September 2026",
+    "resolutionSourceUrl": "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+    "resolutionRule": "Resolve to the first officially published seasonally adjusted percent change from the preceding month for September 2026 in the PCE price index excluding food and energy, using BEA's published rounding. Exclude subsequent revisions and corrections. The registered September target governs despite the sourceBinding.table field naming August 2026.",
+    "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        },
+        "label": "August 2026",
+        "value": 0.2
+      }
+    ],
+    "drivers": [
+      "Forecast withheld because the required official history fetch failed"
+    ],
+    "sourceContext": [
+      "https://www.bea.gov/news/schedule/full",
+      "https://www.bea.gov/news/2026/personal-income-and-outlays-august-2026",
+      "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy"
+    ],
+    "runAt": "2026-10-06T22:01:04Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast withheld: required history unavailable"
+      },
+      {
+        "kind": "text",
+        "text": "The target is September 2026 core PCE monthly inflation, seasonally adjusted, first print. BEA identifies the monthly percentage-change series in Table 2.8.7. The ledger's August table label conflicts with its September target; the target period is preserved."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open BEA's official release calendar and verify the September 2026 Personal Income and Outlays announcement.",
+        "result": "The fetched calendar schedules Personal Income and Outlays, September 2026 for October 29, 2026, at 8:30 AM."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open BEA's August 2026 Personal Income and Outlays release.",
+        "result": "August 2026 core PCE increased 0.2 percent from the preceding month. The release independently announces the September report for October 29, 2026."
+      },
+      {
+        "kind": "text",
+        "text": "The official history-page fetch returned a fatal network error: error sending request. No six-month numeric history was obtained from successfully opened sources. Search previews were excluded as evidence. The run stops under the failed-fetch instruction."
+      },
+      {
+        "kind": "text",
+        "text": "The mandatory base rate cannot be established from the single verified monthly print. This is a fetch failure, not evidence that the official source exposes fewer than six prints."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: No persistence prior or historical model was fitted because the required sample could not be fetched. Adjustment components, sigma, interval half-width, and final implied bounds remain uncomputed."
+      },
+      {
+        "kind": "math",
+        "text": "The required calculation is the sample standard deviation of fetched monthly growth values, followed by an approximately 1.28*sigma half-width. Insufficient verified history prevents this calculation."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk, downside risk, and scenarios outside the interval cannot be quantified because no forecast interval was issued."
+      },
+      {
+        "kind": "forecast",
+        "point": null,
+        "ciLow": null,
+        "ciHigh": null
+      }
+    ]
+  }
+]

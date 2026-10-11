@@ -1,0 +1,105 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "title": "ACTC total claims, tax year 2027, threshold $1",
+  "question": "Conditional on the specified legislation, how many million US individual income tax returns claim the total Additional Child Tax Credit for tax year 2027 in the FIRST PRINT of IRS SOI Publication 1304, Table 3.3, all returns total row, plain Additional child tax credit concept, number of returns, not seasonally adjusted?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS, SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+  "resolutionRule": "Use the first published tax-year 2027 Publication 1304 Table 3.3 workbook, all returns total row, number of returns under the plain Additional child tax credit or refundable child tax credit total concept. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Multiply the published number of returns by 0.000001 to express millions, preserving the published count precision. Later revisions or corrections do not replace the first print. Evaluate the exact conditioning event using enacted legislation by 2027-12-31; if it fails, mark unresolved. Preserve the registered 2029-12-31 outer deadline; no official scheduled release date was verified in this run.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "historicalContext": [],
+  "drivers": [
+    "Canonical workbook extraction unavailable",
+    "Claimant-count base rate unavailable",
+    "Conditional policy count effect unestimated"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/pub/irs-irbs/irb26-38.pdf",
+    "https://www.govinfo.gov/content/pkg/BILLS-119hr10282ih/html/BILLS-119hr10282ih.htm"
+  ],
+  "runAt": "2026-10-07T12:40:42Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Failed run: required canonical IRS history could not be extracted."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is total ACTC claiming returns for tax year 2027, first print, in millions. The exact registered slug, identifier, condition and deadline are retained. The deadline is registration metadata, not a fetched agency release date. The catalog check was omitted under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the registered IRS Publication 1304 source URL.",
+      "result": "The official page identifies Publication 1304, its Excel basic tables, and links to Basic tables part 3. Its selected-years Table A link extends through 2023. This page contains no extracted ACTC claimant-count observation."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click",
+      "call": "Follow Basic tables part 3 from the registered IRS page.",
+      "result": "The official page lists Table 3.3, All Returns: Tax Liability, Tax Credits, and Tax Payments, with workbooks for 2023, 2022, 2021, 2020, 2019 and 2018, plus earlier years. Six recent official workbooks are available; no history-floor exception is justified."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.irs.gov/pub/irs-soi/23in33ar.xls and https://www.irs.gov/pub/irs-soi/22in33ar.xls.",
+      "result": "Both requests failed with error 400: Unsupported content-type: application/vnd.ms-excel. No Table 3.3 cell values were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the 21in33ar.xls, 20in33ar.xls, 19in33ar.xls and 18in33ar.xls official IRS workbooks.",
+      "result": "All four requests failed with error 400: Unsupported content-type: application/vnd.ms-excel. No ACTC count was extracted for 2021, 2020, 2019 or 2018. An independent web backend also rejected the 2023 and 2022 workbooks."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open and web.find",
+      "call": "Fetch https://www.irs.gov/pub/irs-irbs/irb26-38.pdf and find the ACTC earned-income formula.",
+      "result": "IRS Bulletin 2026-38 describes ACTC as generally 15% of earned income exceeding $2,500, capped at $1,700 per qualifying child for 2025 with subsequent inflation adjustment. These are policy parameters, not claimant-count history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch https://www.govinfo.gov/content/pkg/BILLS-119hr10282ih/html/BILLS-119hr10282ih.htm.",
+      "result": "H.R.10282 was introduced September 3, 2026. Section 2 replaces the $3,000 statutory text with $1, removes section 24(h)(6), and applies after December 31, 2025. The fetched artifact is introduced legislation and does not establish enactment."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. The required fetch_source and extract_irs_soi tools are absent, and neither web backend can parse the exact workbooks. HistoricalContext is empty because no canonical claimant-count observation was fetched. This is an extraction failure, not evidence that the official source exposes fewer than six prints. No persistence prior or thesis_model_candidate_v1 candidate can be grounded."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the persistence prior and historical successive changes are unavailable; sigma = undefined. Consequently 1.28*sigma, the conditional claimant-count adjustment and final implied bounds cannot be computed. Fetched policy rates do not identify how many returns newly claim ACTC. No numeric estimate or interval is asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would arise from newly eligible low-earning families filing and claiming ACTC; downside risk would arise from weak take-up or tighter eligibility. Without extracted history and a measured affected-return count, neither tail can be quantified or assessed against an interval."
+    },
+    {
+      "kind": "text",
+      "text": "The prompt explicitly requires keeping the run failed when canonical history cannot be extracted. Null estimates denote a dropped, ungrounded forecast, not a scored prediction. JSON syntax was validated; this failed object cannot satisfy the numeric forecast contract or history floor. No activity receipts or model artifacts were manufactured."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

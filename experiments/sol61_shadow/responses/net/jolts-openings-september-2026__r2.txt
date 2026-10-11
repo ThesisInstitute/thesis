@@ -1,0 +1,141 @@
+{
+  "slug": "jolts-openings-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 U.S. job openings",
+  "question": "What will the BLS JOLTS first print report for September 2026 total nonfarm job openings, seasonally adjusted, in millions?",
+  "unit": "millions",
+  "pointEstimate": 7.011,
+  "ciLow": 6.584,
+  "ciHigh": 7.438,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-03",
+  "resolutionSource": "U.S. Bureau of Labor Statistics Job Openings and Labor Turnover Survey",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/jolts.nr0.htm",
+  "resolutionRule": "Resolve to September 2026 total nonfarm job openings, seasonally adjusted, in the first official BLS JOLTS release, using Table 1's Total row and September level. Multiply the published level in thousands by 0.001 to obtain millions, preserving three decimal places. Use the initial published value; exclude subsequent monthly revisions, annual revisions, and later corrections.",
+  "dataPointId": "bls.jolts.job_openings.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 6.946
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 6.882
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 6.866
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 7.618
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 7.594
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 7.359
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 7.271
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 7.079
+    }
+  ],
+  "drivers": [
+    "August vacancy level anchors the persistence prior",
+    "Declining initial estimates since May",
+    "Weak September payroll growth and downward payroll revisions",
+    "Stable unemployment limits the downward adjustment",
+    "Large industry swings and initial-estimate uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/jolts.htm",
+    "https://www.bls.gov/news.release/jolts.nr0.htm",
+    "https://www.bls.gov/news.release/jolts.t01.htm",
+    "https://www.bls.gov/bls/news-release/jolts.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03312026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_05052026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06022026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06302026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_08042026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09012026.htm",
+    "https://www.bls.gov/news.release/empsit.nr0.htm"
+  ],
+  "runAt": "2026-10-07T12:06:37Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 JOLTS job openings forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the initial September estimate of total nonfarm job openings on the last business day of the month. The resolution table is JOLTS Table 1, Total row, seasonally adjusted levels in thousands. All vacancy anchors and historical observations use this same variant. HistoricalContext preserves each month's initial estimate from its original release."
+    },
+    {
+      "kind": "text",
+      "text": "The official calendar at https://www.bls.gov/schedule/news_release/jolts.htm explicitly schedules September 2026 JOLTS for November 3, 2026, at 10:00 AM. The August release at https://www.bls.gov/news.release/jolts.nr0.htm independently confirms November 3 at 10:00 a.m. Eastern. This is within the registered release window."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open original BLS releases and read Table 1 headers and Total levels: https://www.bls.gov/news.release/archives/jolts_03132026.htm; https://www.bls.gov/news.release/archives/jolts_03312026.htm; https://www.bls.gov/news.release/archives/jolts_05052026.htm.",
+      "result": "Initial seasonally adjusted total job openings, in thousands: January 2026 6,946; February 6,882; March 6,866. Converted to millions: 6.946, 6.882, 6.866. January's later revised value of 7,240 is separate from its initial 6,946."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read initial Table 1 Total levels in https://www.bls.gov/news.release/archives/jolts_06022026.htm; https://www.bls.gov/news.release/archives/jolts_06302026.htm; https://www.bls.gov/news.release/archives/jolts_08042026.htm; https://www.bls.gov/news.release/archives/jolts_09012026.htm.",
+      "result": "Initial seasonally adjusted levels, in thousands: April 2026 7,618; May 7,594; June 7,359; July 7,271. Converted to millions: 7.618, 7.594, 7.359, 7.271. April's release reported an increase of 731,000 against revised March, including 668,000 in professional and business services."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the August 2026 seasonally adjusted Table 1 Total row at https://www.bls.gov/news.release/jolts.t01.htm.",
+      "result": "August's initial level was 7,079 thousand, or 7.079 million, with an openings rate of 4.3%. July's revised level was 7,335 thousand; the same-vintage July-to-August decline was 256 thousand. The initial July estimate used in the historical sample remains 7,271 thousand."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate reference class contains eight consecutive initial monthly estimates from January through August 2026. Their mean is 7.201875 million and range is 6.866 to 7.618 million. A persistence model anchored at August's 7.079 million is the level prior; the full sample supplies realized monthly dispersion."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read September's Employment Situation, released October 2, 2026, at https://www.bls.gov/news.release/empsit.nr0.htm.",
+      "result": "September nonfarm payroll growth was 29,000, compared with average monthly growth of 45,000 over the prior twelve months. Unemployment was 4.2%, and the workweek remained 34.4 hours. July and August payroll changes were revised downward by a combined 60,000."
+    },
+    {
+      "kind": "text",
+      "text": "Separate components: level uses August persistence; momentum receives only partial extrapolation of the May-to-August decline; weak payroll growth and negative revisions support a small additional downward judgmental adjustment. Stable unemployment and hours limit that adjustment. The April industry surge receives no assumed repeat in the point forecast but remains in dispersion. No separately evidenced policy-transmission adjustment is added."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use an August persistence prior of 7.079 million and eight January-August initial estimates. Momentum adjustment = 0.25*(7.079-7.594)/3 = -0.042916667 million; judgmental payroll adjustment = -0.025 million; one-off and incremental policy adjustments = 0. Point = 7.079-0.042916667-0.025 = 7.011083333, rounded to 7.011. Successive changes are [-0.064,-0.016,0.752,-0.024,-0.235,-0.088,-0.192] million, with mean 0.019. Their squared deviations sum to 0.667738; sigma = 0.333601 million = sqrt(0.667738/6). Approximate central 80% normal half-width = 1.28*sigma = 0.427009 million. Unrounded bounds are 6.584073978 and 7.438092689; final bounds are 6.584 and 7.438. Seven changes provide limited calibration, and initial-vintage differences include reporting effects; no additional interval scaling is applied."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is renewed recruitment in professional and business services and health services; an industry surge comparable to April could land above 7.438 million, outside the interval. The downside risk is simultaneous vacancy cancellations across business services, manufacturing, and construction, which could land below 6.584 million, outside the interval. Stable unemployment and hours argue against assuming that broad contraction in the central forecast."
+    },
+    {
+      "kind": "forecast",
+      "point": 7.011,
+      "ciLow": 6.584,
+      "ciHigh": 7.438
+    }
+  ]
+}

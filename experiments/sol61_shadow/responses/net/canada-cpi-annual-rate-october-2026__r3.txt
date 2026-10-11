@@ -1,0 +1,84 @@
+{
+  "slug": "canada-cpi-annual-rate-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada CPI annual rate, October 2026",
+  "question": "What will Statistics Canada first report for the October 2026 year-over-year percentage change in Canada's all-items Consumer Price Index, not seasonally adjusted?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-16",
+  "resolutionSource": "Statistics Canada, Consumer Price Index, Table 18-10-0004-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+  "resolutionRule": "Resolve using the first official October 2026 all-items Canada CPI annual percentage change, not seasonally adjusted, corresponding to vector v41690973 in Table 18-10-0004-01. Calculate 100*(October 2026 index/October 2025 index-1), rounded to one decimal percent. Ignore subsequent revisions and corrections.",
+  "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 2.4
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 2.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 3.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "August 2026",
+      "value": 3.0
+    }
+  ],
+  "drivers": [],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf"
+  ],
+  "runAt": "2026-10-07T12:28:52Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: mandatory fetch-stop rule triggered"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first-print annual change in Canada's all-items, not seasonally adjusted CPI, vector v41690973 in Table 18-10-0004-01. Historical annual rates below use that same variant."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's August 2026 CPI Daily release.",
+      "result": "The release reports annual CPI increases of 3.0% in August 2026 and 3.0% in July 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's September 2025 first-release CPI table.",
+      "result": "Canada all-items: September 2025 index 164.9; August 2025 index 164.8; annual change 2.4%; monthly change 0.1%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's October 2025 first-release CPI table.",
+      "result": "Canada all-items: October 2025 index 165.3; September 2025 index 164.9; annual change 2.2%; monthly change 0.2%."
+    },
+    {
+      "kind": "text",
+      "text": "Opening the official 2026 release-calendar PDF failed with a 400 timeout. The November 16 calendar entry appeared in a search summary, which is inadmissible evidence under the run instructions. The resolutionDate retains the registered contract date but was not independently verified."
+    },
+    {
+      "kind": "text",
+      "text": "The instructions require stopping after a failed fetch. A six-print recent reference class and its dispersion were not completed. Null forecast fields explicitly report this failed run; no numerical forecast or interval was invented."
+    }
+  ]
+}

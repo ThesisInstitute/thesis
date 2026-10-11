@@ -1,0 +1,167 @@
+{
+  "slug": "us-mts-deficit-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US Treasury deficit: September 2026",
+  "question": "What will the first official publication of U.S. Treasury Monthly Treasury Statement Table 1 report for September 2026's monthly unified federal deficit, not seasonally adjusted, in billions of nominal US dollars?",
+  "unit": "usd_billions",
+  "pointEstimate": 28.5,
+  "ciLow": -246.39,
+  "ciHigh": 303.4,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-13",
+  "resolutionSource": "U.S. Department of the Treasury, Bureau of the Fiscal Service, Monthly Treasury Statement Table 1",
+  "resolutionSourceUrl": "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+  "resolutionRule": "Resolve to September 2026's monthly Deficit/Surplus (-) amount in Table 1 of the first official September 2026 Monthly Treasury Statement. Deficits are positive and surpluses negative. Include on-budget and off-budget results on Treasury's modified cash basis, without seasonal adjustment. Convert printed millions of dollars to billions by dividing by 1,000, retaining the published precision. Freeze the first published amount; exclude subsequent corrections, revisions, and restated historical rows. If publication is delayed, resolve on the actual first official release.",
+  "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2020-09"},
+      "label": "September 2020",
+      "value": 124.611
+    },
+    {
+      "period": {"type": "month", "value": "2021-09"},
+      "label": "September 2021",
+      "value": 61.544
+    },
+    {
+      "period": {"type": "month", "value": "2022-09"},
+      "label": "September 2022",
+      "value": 429.673
+    },
+    {
+      "period": {"type": "month", "value": "2023-09"},
+      "label": "September 2023",
+      "value": 170.982
+    },
+    {
+      "period": {"type": "month", "value": "2024-09"},
+      "label": "September 2024",
+      "value": -64.263
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": -197.95
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 164.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": -215.02
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 292.65
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 120.305
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 432.308
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "August 2026",
+      "value": 166.797
+    }
+  ],
+  "drivers": [
+    "September estimated-tax collections",
+    "Non-repetition of September 2025 student-loan accounting reduction",
+    "Return of payments shifted into August 2025",
+    "Higher underlying spending and interest costs",
+    "Corporate tax deductions and tariff refunds",
+    "Uncertain fiscal-year-end accounting adjustments"
+  ],
+  "sourceContext": [
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0920.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0921.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0922.pdf",
+    "https://fiscaldata.treasury.gov/static-data/published-reports/mts/MonthlyTreasuryStatement_202309.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0924.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0925.pdf",
+    "https://www.jec.senate.gov/public/index.cfm/republicans/2025/10/u-s-deficit-decreases-2-8-percent-to-1-8-trillion-in-fy2025-september-ends-with-198-billion-surplus",
+    "https://www.jec.senate.gov/public/index.cfm/republicans/newsroom?ID=81FBCEA4-71A1-4218-984C-31E0FA6AC2F7",
+    "https://www.jec.senate.gov/public/index.cfm/republicans/newsroom?id=17EB594E-C7A2-4802-91C0-A2D7F18AEA40",
+    "https://www.jec.senate.gov/public/index.cfm/republicans/newsroom?id=CAC8C22D-306E-4F93-AB1E-B343A57BDD45",
+    "https://www.jec.senate.gov/public/index.cfm/republicans/newsroom?id=467ECE5F-5EFB-4DD8-82B1-6B751C660E17",
+    "https://www.jec.senate.gov/public/index.cfm/republicans/2026/8/july-closes-with-432-billion-deficit-largest-monthly-deficit-since-march-2021",
+    "https://www.jec.senate.gov/public/index.cfm/republicans/newsroom?ID=2FBF6A41-B9D9-47D8-8ACB-31DBDE83E69D",
+    "https://www.cbo.gov/system/files/2026-09/61984-MBR.pdf",
+    "https://www.cbo.gov/system/files/2025-11/61307-MBR-FY25-final.pdf",
+    "https://www.cbo.gov/system/files/2026-07/61982-MBR.pdf",
+    "https://fred.stlouisfed.org/releases/calendar?m=&ob=rd&od=asc&rid=363&ve=2026-12-31&vs=2026-01-01&y="
+  ],
+  "runAt": "2026-10-07T11:53:59Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 monthly federal deficit forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Treasury MTS Table 1's monthly Deficit/Surplus (-), including on-budget and off-budget activity, unadjusted and on a modified cash basis. September historical anchors use current-month rows from their original September reports, avoiding later restatements. Recent figures are contemporaneous official JEC summaries of Treasury monthly actuals; their original-vintage status is inferred from publication timing. CBO preliminary estimates serve only as drivers. Table 1 displays millions; the ledger's identity transform requires normalization to billions first."
+    },
+    {
+      "kind": "text",
+      "text": "The official St. Louis Fed FRED release calendar explicitly schedules MTS for October 13, 2026, at 1:00 pm Central. This conflicts with the ledger's October 17–25 expected window; the target identity is preserved and resolutionDate uses the verified calendar date. Treasury-hosted current-report access failed, so the schedule attribution is FRED rather than a fetched Treasury announcement."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original September 2020, 2021, and 2022 Treasury MTS PDFs and read Table 1 current-month rows.",
+      "result": "Signed monthly deficits in USD billions: September 2020 = 124.611; September 2021 = 61.544; September 2022 = 429.673."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original September 2023, 2024, and 2025 Treasury MTS reports; corroborate September 2025 with the contemporaneous JEC announcement.",
+      "result": "Signed monthly deficits in USD billions: September 2023 = 170.982; September 2024 = -64.263; September 2025 = -197.950. JEC independently reports September 2025 receipts of 543.663 and outlays of 345.713 billion."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch six contemporaneous JEC fiscal releases covering March through August 2026; check May's sign against CBO's subsequent Treasury-actual section.",
+      "result": "Monthly deficits in USD billions: March 164.100; April -215.02; May 292.65; June 120.305; July 432.308; August 166.797. May's JEC prose says surplus, but its title, receipts of 335.512, outlays of 628.161, and CBO's reported actual deficit of 293 billion establish a positive deficit."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate: the six September prints from 2020 through 2025 average a deficit of 87.432833 billion, with deficits in four observations and surpluses in two. This seasonal reference class supplies the dispersion estimate. The point model uses the latest September print as a persistence prior, then adjusts identifiable mechanisms."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CBO's final FY2025 review and August 2026 review to identify accounting, payment-timing, and current fiscal effects.",
+      "result": "CBO identifies a 131 billion reduction in September 2025 outlays from student-loan modifications. Its August 2026 review identifies 88 billion of September 2025 payments shifted into August. The timing-adjusted FY2026 deficit through eleven months increased 82 billion; individual and payroll receipts rose 6%, corporate receipts fell 25%, and tariff refunds totaled about 110 billion through August."
+    },
+    {
+      "kind": "text",
+      "text": "Level: start at September 2025's -197.950 billion deficit. One-off effects: add 131 billion assuming the loan modification does not repeat, and 88 billion for the payment-calendar comparison. Momentum: carry forward the timing-adjusted deterioration at its average monthly pace. Policy effects from tax deductions, refunds, and spending are represented within that aggregate momentum adjustment. These are forecasting assumptions, not September observations."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: seasonal persistence prior = -197.950 billion; historical dispersion sample = six original September flows, 2020–2025. Point = -197.950 + 131 + 88 + 82/11 = 28.504545 billion. For the flow values themselves, mean = 87.432833 and sum of squared deviations = 230616.230111 billion squared; sigma = 214.763232 = sqrt(230616.230111/5). Normal-approximation 80% half-width = 1.28*sigma = 274.896938 billion. Bounds = 28.504545 ± 274.896938 = [-246.392392, 303.401483], rounded to [-246.39, 303.40]. No discretionary width multiplier is applied; the broad interval retains historical year-end accounting dispersion."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk means a larger deficit: weak estimated-tax collections, further tariff refunds, or additional outlays. Downside risk means a smaller deficit or larger surplus: strong tax receipts or negative loan-cost adjustments. A substantial new loan-accounting charge combined with weak receipts could land above 303.40 billion, outside the interval; a large negative accounting adjustment combined with unusually strong collections could land below -246.39 billion. The small sample and changing accounting mechanisms limit calibration."
+    },
+    {
+      "kind": "forecast",
+      "point": 28.5,
+      "ciLow": -246.39,
+      "ciHigh": 303.4
+    }
+  ]
+}

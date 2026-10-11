@@ -1,0 +1,61 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-fl",
+  "country": "US",
+  "type": "data",
+  "title": "Florida ex parte renewal share, August 2026",
+  "question": "What will Florida's ex parte renewal share be for the August 2026 reporting period in CMS's first published original (O) submission?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Florida's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.fl.aug_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=5",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:03:27Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast not issued: required evidence incomplete"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains Florida's August 2026 original (O) submission in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, with first-print resolution and rounding to one decimal."
+    },
+    {
+      "kind": "text",
+      "text": "The initial official API request succeeded but returned Alaska rows, which cannot provide Florida's reference class."
+    },
+    {
+      "kind": "text",
+      "text": "My filtered API request using comma-separated properties returned status 400 and \"Column not found.\" This was a request error and does not establish that CMS lacks the history. Following the instruction to stop after a failed fetch, I did not retry."
+    },
+    {
+      "kind": "text",
+      "text": "The required six distinct Florida original-submission prints were not fetched. No base rate or historical values have been invented."
+    },
+    {
+      "kind": "text",
+      "text": "The opened official snapshot page lists June 2026 as released September 25, 2026, but provides no prospective August 2026 publication date. December 15, 2026 is retained from the target contract and remains unverified by an official release calendar or announcement."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, adjustment, sigma, or 80% interval was calculated because the required history was not fetched. Upside risk, downside risk, and outcomes outside the interval cannot be quantified without that evidence."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

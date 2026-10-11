@@ -1,0 +1,59 @@
+{
+  "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD small-business contract obligation share",
+  "question": "What is the FY2026 Department of Defense small-business share of prime-contract obligations in the first registered USAspending query snapshot?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the first registered-query snapshot: FY2026, awarding Department of Defense at the toptier level, award types A/B/C/D, transaction spending, fiscal-year grouping, and ratio_percent of obligations filtered to recipient_type_names small_business over obligations without a recipient-type restriction, with factor 1. Subsequent revisions do not replace that snapshot. The exact snapshot date and rounding precision could not be verified in this run.",
+  "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-07T12:45:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered USAspending contract-obligation query, rather than an agency profile aggregate or a small-business scorecard."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: opening https://api.usaspending.gov/api/v2/search/spending_over_time/ through the web tool returned HTTP 405 Method Not Allowed. This was a GET-style lookup, not an executed POST query."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint index at https://api.usaspending.gov/docs/endpoints lists spending_over_time as POST. Both available web tool schemas lack HTTP method and request-body parameters, preventing execution of the registered numerator and denominator requests."
+    },
+    {
+      "kind": "text",
+      "text": "No exact-query historical values were fetched. The mandatory history cannot be supplied, and no base rate or reference class can be estimated from admissible fetched observations. This is a fetch limitation, not evidence that the official source exposes too few prints."
+    },
+    {
+      "kind": "text",
+      "text": "The official data-sources document at https://www.usaspending.gov/data/data-sources-download.pdf describes daily publication after the nightly pipeline and a 90-day DoD contract-reporting delay. No official schedule fetched in this run verified the exact registered snapshot date; the supplied expected window alone does not verify resolutionDate."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical dispersion, adjustment components, sigma, or interval bounds can be calculated without the required fetched history. Quantified upside risk, downside risk, and outside the interval scenarios therefore cannot be assessed."
+    },
+    {
+      "kind": "text",
+      "text": "The production prompt explicitly requires refusal when the registered query cannot be executed. Null estimates and an empty historicalContext record that refusal; this object is not a valid normalized forecast cell."
+    }
+  ]
+}

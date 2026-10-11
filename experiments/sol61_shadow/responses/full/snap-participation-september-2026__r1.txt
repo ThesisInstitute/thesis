@@ -1,0 +1,184 @@
+{
+  "slug": "snap-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 SNAP participation",
+  "question": "What will the FIRST PRINT of USDA FNS national SNAP total Persons participation for September 2026 be, not seasonally adjusted, expressed in millions, in the SNAP Data Tables national monthly participation table?",
+  "unit": "millions",
+  "pointEstimate": 35.858931,
+  "ciLow": 34.940788,
+  "ciHigh": 36.777074,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS, SNAP Data Tables, national monthly Persons participation",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve fns.snap.total_persons on the first published September 2026 national monthly Persons total in the FNS SNAP Data Tables. Use the national monthly Participation Persons row for September 2026, equivalently the TOTAL row of the September 2026 Initial column in the Persons table, not a fiscal-year average or a preliminary/revised comparison column. The measure is not seasonally adjusted and may include disaster assistance. Exclude the separate Nutrition Assistance Grant programs for Puerto Rico, American Samoa, and the Northern Marianas. Convert published thousands of persons to millions by multiplying by 0.001. Current official PDFs instead show whole persons: dividing those by 1000000 is the identical unit conversion and preserves the count at six decimals in millions. Later revisions and same-day corrections do not replace the first print. No official scheduled release date was verified, and the supplied target omits resolutionDate and resolutionDateBasis; the expected February 7-15, 2027 window cannot establish a scheduled day or registered outer deadline.",
+  "dataPointId": "usda.fns.snap.persons.september_2026",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2025-12"
+      },
+      "label": "2025-12",
+      "value": 39.513033
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "2026-01",
+      "value": 38.54773
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "2026-02",
+      "value": 37.870817
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "2026-03",
+      "value": 37.298271
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "2026-04",
+      "value": 37.011096
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "2026-05",
+      "value": 36.562128
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "2026-06",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Declining original monthly participation counts",
+    "Smaller recent monthly declines",
+    "Eligibility changes already reflected in history",
+    "Preliminary reporting and disaster-assistance uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://fns-prod.azureedge.us/obbb",
+    "https://www.ers.usda.gov/topics/food-nutrition-assistance/supplemental-nutrition-assistance-program-snap/relevant-data"
+  ],
+  "runAt": "2026-10-07T10:45:18Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 SNAP Persons first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "Target identity comes exclusively from the supplied canonical target: snap-participation-september-2026, unit millions, dataPointId usda.fns.snap.persons.september_2026. Forecast the national monthly count, without seasonal adjustment, including any disaster assistance counted by the agency. June is the latest available outcome month, so September requires a three-month forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the registered FNS SNAP Data Tables URL; search official USDA sources and open https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap.",
+      "result": "The registered URL returned 403. The official agency CDN page says latest available month June 2026 and page updated September 18, 2026. It links the national monthly and Persons PDFs. No scheduled September 2026 publication date appears. [Official SNAP data page](https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap)."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date contract gap: the target supplies expectedReleaseWindow 2027-02-07 through 2027-02-15, but neither a literal resolutionDate nor a resolve-by-bound designation. Official-source searches did not verify a calendar date. resolutionDate is therefore null rather than an invented date. This forecast cannot pass the complete cell contract until the missing date basis is supplied. The requested independence rule also precludes checking the slug against Thesis specs; the supplied canonical slug is retained."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official snap-persons-3.pdf for December 2025 Initial and snap-persons-4.pdf for TOTAL; inspect returned original agency tables.",
+      "result": "[December original table](https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf), data as of March 13, 2026: December 2025 Initial TOTAL 39,513,033 persons. [January original table](https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf), data as of April 10, 2026: January 2026 Initial TOTAL 38,547,730. Direct opens returned 404; official-URL search results exposed the original Initial tables and totals."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-5.pdf, snap-persons-6.pdf and snap-4fymonthly-6.pdf; read national initial Persons totals.",
+      "result": "[February original table](https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf), data as of May 8, 2026: February 2026 Initial 37,870,817 persons. [March original table](https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf), data as of June 12, 2026: March 2026 Initial 37,298,271, corroborated by [the June national summary](https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-7.pdf, snap-persons-8.pdf and snap-persons-9.pdf; compare original Initial totals with later preliminary values.",
+      "result": "[April original table](https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf), July 10, 2026 vintage: April Initial 37,011,096 persons. [May original table](https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf), August 14 vintage: May Initial 36,562,128. [June original table](https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf), September 11 vintage: June Initial 36,352,716 and May Preliminary 36,685,024. The June table warns of significant revisions and possible disaster assistance."
+    },
+    {
+      "kind": "text",
+      "text": "History provenance: historicalContext contains seven consecutive original Initial counts from December 2025 through June 2026, converted from whole persons to millions. Later historical columns in the September national summary are revised and are not substituted. Earlier original months could not all be fetched. The registered description says thousands, while the retrieved PDFs show whole persons; normalization yields the same Persons quantity."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate/reference class: seven original monthly levels have mean 37.593684429 million, median 37.298271, and range 36.352716-39.513033. Their six successive changes are -0.965303, -0.676913, -0.572546, -0.287175, -0.448968, and -0.209412 million; all are negative, with mean -0.5267195. Default persistence is 36.352716. Trend deceleration is observable in this official history, not an extra policy effect."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmark computation from the fetched original counts: latest two-change mean = (36.352716-37.011096)/2 = -0.329190 million/month. September persistence = 36.352716; undamped trailing-two-change drift = 36.352716+3*(-0.329190) = 35.365146; half-damped drift = 36.352716+3*0.5*(-0.329190) = 35.858931. Common three-month backtests use February and March origins: MAE respectively 1.127122, 1.04163425 and 0.042743875 million; RMSE 1.141652565, 1.047745714 and 0.054793900. Common one-month February-May tests have MAE 0.37952525, 0.190970875 and 0.1116489375. These are arithmetic outputs from this run, not fetched outcome values."
+    },
+    {
+      "kind": "text",
+      "text": "Generated model candidates before selecting the agent forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"unit\":\"millions\",\"target_period\":\"2026-09\",\"point\":36.352716,\"p10\":35.434573,\"p50\":36.352716,\"p90\":37.270859,\"interval80\":{\"low\":35.434573,\"high\":37.270859},\"interval90\":{\"low\":35.172864,\"high\":37.532568},\"interval_method\":\"fallback-prior normal interval from sample standard deviation of six first-print monthly changes; sqrt(3) horizon scaling; 1.5 uncertainty multiplier\",\"calibration_n\":2,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"horizon_months\":3,\"n\":2,\"mae\":1.127122,\"rmse\":1.141653}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_two_change_drift\",\"unit\":\"millions\",\"target_period\":\"2026-09\",\"point\":35.365146,\"p10\":34.447003,\"p50\":35.365146,\"p90\":36.283289,\"interval80\":{\"low\":34.447003,\"high\":36.283289},\"interval90\":{\"low\":34.185294,\"high\":36.544998},\"interval_method\":\"fallback-prior normal interval from sample standard deviation of six first-print monthly changes; sqrt(3) horizon scaling; 1.5 uncertainty multiplier\",\"calibration_n\":2,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"horizon_months\":3,\"n\":2,\"mae\":1.041634,\"rmse\":1.047746}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"half_damped_trailing_two_change_drift\",\"unit\":\"millions\",\"target_period\":\"2026-09\",\"point\":35.858931,\"p10\":34.940788,\"p50\":35.858931,\"p90\":36.777074,\"interval80\":{\"low\":34.940788,\"high\":36.777074},\"interval90\":{\"low\":34.679079,\"high\":37.038783},\"interval_method\":\"fallback-prior normal interval from sample standard deviation of six first-print monthly changes; sqrt(3) horizon scaling; 1.5 uncertainty multiplier\",\"calibration_n\":2,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"horizon_months\":3,\"n\":2,\"mae\":0.042744,\"rmse\":0.054794}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select half_damped_trailing_two_change_drift as the tentative strongest benchmark. It wins both common-origin tests, but the three-month comparison has only two errors and the one-month comparison four. Its -0.493785 million difference from persistence is a model-prior difference supported by the fetched first-print history and backtests. The agent adds zero adjustment. The small backtest is a material limitation, not strong evidence of general predictive superiority."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/obbb and the official ERS SNAP Relevant Data page.",
+      "result": "[Agency implementation page](https://fns-prod.azureedge.us/obbb), updated June 11, 2026, lists the July 4, 2025 law, Section 10102 work requirements and Section 10108 alien eligibility. [ERS relevant data](https://www.ers.usda.gov/topics/food-nutrition-assistance/supplemental-nutrition-assistance-program-snap/relevant-data), updated August 31, 2026, identifies FNA as formerly FNS. These fetched facts explain the agency naming discrepancy and existing eligibility regime; they provide no quantified September-specific participation signal."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view decomposition: level comes from June; momentum comes exclusively from the selected damped trend benchmark. Additional policy, seasonal and one-off adjustments are each zero because no fetched evidence quantifies a new September-specific effect beyond the history. Existing eligibility changes are not counted again. The forecast is unconditional."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected half-damped trailing-two-change model, trained on seven December 2025-June 2026 original prints; point = 36.352716 + 3*0.5*(-0.329190) + 0 policy + 0 seasonality + 0 one-off = 35.858931 million. For six fetched first-print changes d, mean(d) = -0.5267195; sigma = 0.276088593 = sqrt(sum((d-mean(d))^2)/(6-1)) million. Fallback-prior normal uncertainty: three-month sigma = sqrt(3)*0.276088593 = 0.478199470; half-width = 1.28*0.478199470*1.5 = 0.918142982. The 1.5 widening allows for uncertain deceleration and the documented significant revisions: May changed from its initial 36.562128 to preliminary 36.685024, a derived +0.122896 million. Implied 80% bounds = 35.858931 +/- 0.918142982 = [34.940788,36.777074] after rounding to whole-person precision in millions. The analogous 90% half-width is 1.644853627*0.478199470*1.5 = 1.179852198, giving [34.679079,37.038783]. This is an explicit judgmental widening, not measured 80% calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage and counter-consideration: both available three-month damped-model errors, -0.077027 and -0.00846075 million as actual minus forecast, are within the proposed half-width. There are too few comparable errors to establish eight-of-ten coverage or validate nominal 80% calibration. Persistence could outperform if the recent decline stops abruptly; the interval includes the June persistence level."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk outside the interval: widespread reinstatements, delayed processing catching up, or disaster assistance could lift September above 36.777074 million. Downside risk outside the interval: renewed eligibility removals across large states or another reporting shortfall could restore monthly losses like the early first-print declines and push September below 34.940788 million. A new initial monthly count showing stabilization would move the point up; renewed acceleration of losses would move it down."
+    },
+    {
+      "kind": "forecast",
+      "point": 35.858931,
+      "ciLow": 34.940788,
+      "ciHigh": 36.777074
+    }
+  ]
+}

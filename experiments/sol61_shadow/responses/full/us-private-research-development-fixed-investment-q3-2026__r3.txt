@@ -1,0 +1,157 @@
+{
+  "slug": "us-private-research-development-fixed-investment-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US private R&D fixed investment, Q3 2026",
+  "question": "What will BEA first publish for US current-dollar private research and development fixed investment in 2026-Q3, seasonally adjusted at annual rates, in NIPA Table 5.3.5, line 18 (T50305:L18), expressed in billions of US dollars?",
+  "unit": "usd_billions",
+  "pointEstimate": 968.3,
+  "ciLow": 940.6,
+  "ciHigh": 996.0,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "Bureau of Economic Analysis, GDP advance release, NIPA Table 5.3.5",
+  "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+  "resolutionRule": "Resolve on the original FIRST PRINT for 2026-Q3 in BEA NIPA Table 5.3.5, Private Fixed Investment by Type, line 18, Research and development (T50305:L18), United States, current dollars, seasonally adjusted at annual rates, published with the GDP advance release scheduled for October 29, 2026. Use the original release vintage, including R&D expenditures for software; exclude government R&D. Express the published amount in USD billions: multiply raw million-dollar data by 0.001, or use already-billion-dollar values directly, preserving the source's published precision. Forecasts are rounded to 0.1 billion, the precision of the fetched BEA PDF. Later revisions do not change resolution.",
+  "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q1"},
+      "label": "2024-Q1",
+      "value": 761.3
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q2"},
+      "label": "2024-Q2",
+      "value": 779.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 802.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 824.5
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 824.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 821.1
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 855.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 886.0
+    }
+  ],
+  "drivers": [
+    "Latest revised private R&D level",
+    "Positive historical first-print drift",
+    "Advance business R&D judgmental trend",
+    "Short calibration sample and vintage uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.bea.gov/news/schedule",
+    "https://apps.bea.gov/national/pdf/SNTables.pdf",
+    "https://www.bea.gov/sites/default/files/2024-04/gdp1q24-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2024-07/gdp2q24-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2024-10/gdp3q24-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2025-01/gdp4q24-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2025-04/gdp1q25-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2025-07/gdp2q25-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2025-12/gdp3q25-ini.pdf",
+    "https://www.bea.gov/sites/default/files/2026-02/gdp4q25-adv.pdf",
+    "https://apps.bea.gov/scb/issues/2026/09-september/0926-nipa-methodologies.htm",
+    "https://www.bea.gov/news/2026/gdp-advance-estimate-4th-quarter-and-year-2025",
+    "https://apps.bea.gov/api/_pdf/bea_web_service_api_user_guide.pdf",
+    "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+    "https://apps.bea.gov/histdata/histChildLevels.html?HMI=7&oldDiv=National+Accounts"
+  ],
+  "runAt": "2026-10-07T12:43:03Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "First-print forecast for US private research and development fixed investment, 2026-Q3"
+    },
+    {
+      "kind": "text",
+      "text": "The target is a nominal private-investment level at a seasonally adjusted annual rate, not quarterly cash spending or total public-plus-private R&D. Preserve the registered slug, unit, dataPointId, source URL, and first-print resolver. BEA's API guide maps T50305 to table ID 145. The fetched table PDF already reports billions; applying the registered million-to-billion factor to those PDF values again would be a unit error."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bea.gov/news/schedule and the exact Table 5.3.5 page in https://apps.bea.gov/national/pdf/SNTables.pdf.",
+      "result": "BEA's calendar schedules GDP (Advance Estimate), 3rd Quarter 2026, for October 29, 2026, at 8:30 AM. Table 5.3.5 also identifies October 29, 2026, 8:30 AM as its next release."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the exact official 2024-Q1 advance PDF and fetch the 2024-Q2, Q3 and Q4 advance PDFs listed in sourceContext; inspect Table 3, line 37, current-dollar target-quarter columns.",
+      "result": "Official first-release nominal private R&D observations, USD billions SAAR: 2024-Q1 761.3 (April 25, 2024); 2024-Q2 779.9 (July 25, 2024); 2024-Q3 802.9 (October 30, 2024); 2024-Q4 824.5 (January 30, 2025). The Q1 PDF timed out on direct open, but its exact official-URL search result displayed the numerical row. These are Table 3 line 37 observations, not retrieved archived Table 5.3.5 cells."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch BEA GDP first-release PDFs for 2025-Q1, Q2, Q3 and Q4 listed in sourceContext; inspect Table 3, line 37, nominal target-quarter columns.",
+      "result": "Official first-release private R&D, USD billions SAAR: 2025-Q1 824.8 (April 30, 2025); 2025-Q2 821.1 (July 30, 2025); 2025-Q3 855.9 (December 23, 2025 initial estimate); 2025-Q4 886.0 (February 20, 2026 advance estimate). The later Q4 release repeats Q3 as 855.6; retain its actual first print of 855.9 instead."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch https://apps.bea.gov/national/pdf/SNTables.pdf and inspect Table 5.3.5, line 18, page 213.",
+      "result": "Exact registered series, revised September 30, 2026 vintage, USD billions SAAR: 2025-Q2 847.5; 2025-Q3 873.3; 2025-Q4 899.5; 2026-Q1 927.1; 2026-Q2 950.5. These five quarterly values are revised observations, not original first prints. Use 950.5 as the latest observed level, while keeping these revisions out of first-print volatility calibration."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch https://apps.bea.gov/scb/issues/2026/09-september/0926-nipa-methodologies.htm and the 2025-Q4 advance release page.",
+      "result": "BEA's September 2026 methodology lists annual 2025 private R&D at $861.2 billion. Business R&D advance estimates use judgmental trend; second estimates use corporate financial statements, and third estimates add Census Quarterly Services Survey data. BEA discontinued static GDP news tables beginning April 9, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "History retrieval limitation: the exact registered interactive endpoint was inaccessible, and BEA's archive exposed only its heading through the web tool. I could not fetch original Table 5.3.5 files or the 2026-Q1 and Q2 first-print values. historicalContext therefore contains eight fetched first-release observations of the same private R&D concept from official GDP Table 3 line 37, rounded to 0.1 billion. This substitution does not satisfy the production prompt's strict exact-artifact history requirement. No missing first-print values or underlying million-dollar digits are invented, and no history-floor exemption or full evidence-validation pass is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the eight comparable first-release levels from 2024-Q1 through 2025-Q4 have mean 819.55, sample SD 39.7021, and range 761.3–886.0 billion. For this level target, use successive changes rather than level dispersion: seven increments have mean +17.8143, sample SD 14.4390, and range -3.7 to +34.8 billion. Publish latest-observed persistence at 950.5 as the baseline; it uses the explicitly revised Q2 anchor because the latest first-print anchor could not be fetched."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmark comparison computed in memory from the eight fetched first-release levels: expanding-window one-quarter forecasts start with three training observations and yield five comparisons. Persistence errors are [21.6, 0.3, -3.7, 34.8, 30.1], giving MAE = 18.100 and RMSE = 22.7921. Expanding-mean-drift errors are [0.8000, -20.7667, -19.5750, 22.8400, 14.3333], giving MAE = 15.663 and RMSE = 17.5624. Select expanding-mean drift, subject to the small sample and unavailable recent first-print vintages."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated before the agent forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"unit\":\"usd_billions\",\"train_cutoff\":\"2026-Q2\",\"calibration_n\":7,\"interval_method\":\"Normal interval from sample SD of seven successive first-print increments, multiplied by 1.5 for short sample and vintage uncertainty; current level anchor is revised.\",\"calibration_cutoff\":\"2025-Q4\",\"anchor_vintage\":\"2026-09-30\",\"model\":\"persistence\",\"point\":950.5,\"p10\":922.8,\"p50\":950.5,\"p90\":978.2,\"interval80\":{\"low\":922.8,\"high\":978.2},\"interval90\":{\"low\":914.9,\"high\":986.1},\"walk_forward\":{\"n\":5,\"mae\":18.1,\"rmse\":22.79206}},{\"schema\":\"thesis_model_candidate_v1\",\"unit\":\"usd_billions\",\"train_cutoff\":\"2026-Q2\",\"calibration_n\":7,\"interval_method\":\"Normal interval from sample SD of seven successive first-print increments, multiplied by 1.5 for short sample and vintage uncertainty; current level anchor is revised.\",\"calibration_cutoff\":\"2025-Q4\",\"anchor_vintage\":\"2026-09-30\",\"model\":\"expanding_mean_drift\",\"point\":968.3,\"p10\":940.6,\"p50\":968.3,\"p90\":996.0,\"interval80\":{\"low\":940.6,\"high\":996.0},\"interval90\":{\"low\":932.7,\"high\":1003.9},\"walk_forward\":{\"n\":5,\"mae\":15.663,\"rmse\":17.562375}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: retain 100% weight on the selected drift benchmark and add zero discretionary adjustment. The exact current table's four successive increases average 25.75 billion, supporting positive momentum, but this is revised history rather than a new Q3 signal. Do not add it again to the historical drift. Level anchor = 950.5; benchmark drift = +17.8143; additional momentum = 0; one-off = 0; policy adjustment = 0. The selected prior is 17.8 billion above persistence. No Q3-specific official signal was fetched that justifies a further move."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = expanding-mean drift, calibrated on eight first-release levels from 2024-Q1 through 2025-Q4, with the latest observed revised Q2 level as anchor. Changes = [18.6, 23.0, 21.6, 0.3, -3.7, 34.8, 30.1]; mean = 124.7/7 = 17.814286. sigma = sqrt(sum((change - 17.814286)^2)/6) = 14.439001 billion. Point = 1.00*(950.5 + 17.814286) + 0 momentum + 0 one-off + 0 policy = 968.314286, rounded to 968.3. Normal 80% half-width = 1.28*sigma = 18.481922; multiply by 1.5 for the short sample, stale first-print calibration, and annual-update vintage gap, giving 27.722883. Bounds = 968.314286 +/- 27.722883 = [940.591403, 996.037168], rounded to [940.6, 996.0]. The analogous 90% half-width is 1.645*sigma*1.5 = 35.628236, giving [932.7, 1003.9]. The unwidened drift band contains six of seven realized increments; the widened band contains seven of seven and five of five walk-forward drift errors. These samples are too short to establish nominal 80% coverage or perform a ten-observation coverage check."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and falsification: upside risk would land above the interval if BEA's advance judgmental trend incorporates a sharp acceleration in technology or pharmaceutical R&D wage costs, taking the level above 996.0, over 45.5 billion above the latest revised Q2 level. Downside risk would land below the interval if company R&D retrenchment or a downward revision to the starting level dominates the trend, taking the result below 940.6. Official Q3 R&D employment and payroll evidence stronger than the existing trend would move the point up; contraction or weaker BEA source assumptions would move it down. The annual-update vintage gap and missing recent first-print observations make these tail assessments less secure."
+    },
+    {
+      "kind": "forecast",
+      "point": 968.3,
+      "ciLow": 940.6,
+      "ciHigh": 996.0
+    }
+  ]
+}

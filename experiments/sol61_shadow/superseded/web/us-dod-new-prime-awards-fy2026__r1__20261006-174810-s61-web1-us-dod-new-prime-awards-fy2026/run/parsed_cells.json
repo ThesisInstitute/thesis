@@ -1,0 +1,73 @@
+[
+  {
+    "slug": "us-dod-new-prime-awards-fy2026",
+    "country": "US",
+    "type": "data",
+    "title": "DoD new prime awards, FY2026",
+    "question": "What will USAspending report for agency 097 FY2026 new_award_count at the registered query snapshot, converted to millions?",
+    "unit": "millions",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": null,
+    "resolutionSource": "USAspending API v2 registered query snapshot",
+    "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+    "resolutionRule": "Read new_award_count from the exact registered FY2026 query at the registered snapshot and multiply by 0.000001. Preserve the converted count without additional rounding. Use the first captured official response for that snapshot and exclude subsequent revisions. The snapshot date could not be verified this run.",
+    "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+    "historicalContext": [],
+    "drivers": [
+      "Required registered-query history could not be fetched",
+      "Official snapshot date could not be verified"
+    ],
+    "sourceContext": [
+      "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2021",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2020",
+      "https://www.usaspending.gov/data/about-the-data-download.pdf",
+      "https://www.usaspending.gov/data/data-sources-download.pdf"
+    ],
+    "runAt": "2026-10-06T22:16:23Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast refused: required official evidence unavailable"
+      },
+      {
+        "kind": "text",
+        "text": "The target is the registered agency 097 new_award_count query for FY2026. Agency profile totals and broader award aggregates cannot substitute for this series. SourceContext lists attempted exact-query URLs and fetched official methodology documents."
+      },
+      {
+        "kind": "text",
+        "text": "The batched web requests for the exact FY2025, FY2024, and FY2023 queries failed with 'Fatal error: network error: error sending request'. No historical statistics were returned."
+      },
+      {
+        "kind": "text",
+        "text": "An individual retry of the exact FY2025 query returned 'Internal Error ()' and 'URL https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025 is not accessible via this tool.'"
+      },
+      {
+        "kind": "text",
+        "text": "Exact-query attempts for FY2022, FY2021, and FY2020 also returned transport failures or 'URL ... is not accessible via this tool.' No new_award_count values were fetched for any requested historical period."
+      },
+      {
+        "kind": "text",
+        "text": "Official USAspending methodology documents were fetched, but neither verified a release or snapshot date for this exact target. The supplied expected window is registration context, not an independently verified official schedule; resolutionDate remains null."
+      },
+      {
+        "kind": "text",
+        "text": "The required base rate and reference class cannot be established without numeric observations from the exact registered historical queries. No substitute history or remembered counts were used."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: No persistence prior can be calibrated because the fetched historical sample is empty. Level, momentum, one-off, and policy adjustments cannot be estimated. Sigma and the required dispersion-based interval are unavailable, so no final implied bounds are reported."
+      },
+      {
+        "kind": "text",
+        "text": "Forecast refused under the registered-query fetch requirement. Null estimates and empty historicalContext explicitly record missing evidence; this object is not a valid normalized forecast."
+      }
+    ]
+  }
+]

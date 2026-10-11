@@ -1,0 +1,64 @@
+{
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD unique prime-contract recipients FY2026",
+  "question": "How many distinct non-null recipient_id values appear in the registered USAspending FY2026 Department of Defense prime-contract transaction query snapshot, expressed in thousands?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "Apply the registered_query_snapshot policy to the registered POST query: FY2026, Department of Defense as awarding toptier agency, award type codes A/B/C/D, transaction spending level, and page size 100. Paginate completely, count distinct non-null results[].recipient_id values, and multiply by 0.001 to express the exact count in thousands. Resolve from the registered snapshot without incorporating subsequent API refreshes or revisions. The official resolution date could not be verified in this run.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/search/spending_by_category/recipient.md",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-07T12:43:41Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the registered FY2026 transaction-level distinct recipient_id count. Agency totals, award counts, documentation examples, and counts grouped by other recipient identifiers cannot substitute for this series."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: opening the exact registered endpoint with the web tool returned HTTP 405, Method Not Allowed. This was a failed URL fetch, not an executed historical POST query. [Registered endpoint](https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/)."
+    },
+    {
+      "kind": "text",
+      "text": "Official documentation specifies POST for this endpoint. Both available web-tool schemas lack HTTP-method and request-body parameters, and the run instructions prohibit shell networking. Consequently, no registered historical POST query was executed and no historical recipient count was obtained. [Official endpoint index](https://api.usaspending.gov/docs/endpoints)."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint contract describes filtered, paginated recipient results. Its illustrative response is documentation, not a fetched historical observation, and was excluded from forecast evidence. [Official recipient endpoint contract](https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/search/spending_by_category/recipient.md)."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate and reference class cannot be established without the exact registered-query historical counts. Empty historicalContext denotes a fetch failure; it does not assert that the official source exposes fewer than six periods."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sample, adjustment components, sigma, or 1.28-times-sigma half-width can be estimated from fetched target observations. The point estimate and interval are therefore withheld."
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending documentation describes daily updates and a 90-day DoD procurement reporting delay. The schedule audit did not establish an official date for this registered-query snapshot. The supplied October 15–22 window is registration context, not independently verified calendar evidence, so resolutionDate is null. [Official data-source documentation](https://www.usaspending.gov/data/data-sources-download.pdf)."
+    },
+    {
+      "kind": "text",
+      "text": "The production prompt explicitly requires refusal when the registered query cannot be executed. Null forecast fields and empty history record that refusal. This object is not a valid normalized numerical forecast; no statistics or numerical tool results were invented."
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "title": "Additional child tax credit claims, tax year 2027",
+  "question": "How many returns claim the total additional or refundable child tax credit for tax year 2027 in the first official IRS Publication 1304 Table 3.3, all returns total row, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Use the first official tax-year 2027 Table 3.3 all returns total count under the total Additional child tax credit or corresponding refundable child tax credit concept. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Multiply the published number of returns by 0.000001 to express millions, retain published precision, and disregard subsequent revisions.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3"
+  ],
+  "runAt": "2026-10-07T12:03:20Z",
+  "status": "failed",
+  "failureReason": "Required captured-workbook extraction tools are unavailable; canonical historical claim counts were not extracted. The attempted PDF fetch also failed. No numerical forecast was produced.",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Failed run: canonical history unavailable to this execution"
+    },
+    {
+      "kind": "text",
+      "text": "The target is IRS series irs.actc.total_claims, tax year 2027, Publication 1304 Table 3.3, total claiming returns rather than either component subset."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official Basic Tables Part 3 page lists Table 3.3 workbooks for 2023, 2022, 2021, 2020, 2019, and 2018, plus earlier years. Six official years exist; no history-availability exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "The required fetch_source and extract_irs_soi tools are not available in this execution. No extraction call IDs or parsed canonical counts could be obtained."
+    },
+    {
+      "kind": "text",
+      "text": "Opening https://www.irs.gov/pub/irs-pdf/p1304.pdf failed with the web tool response: Content length is too large: 14825808. This is a retrieval failure, not evidence that the official history does not exist. The run stopped without substituting remembered or rounded values."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate could not be calculated because no canonical historical claim counts were extracted."
+    },
+    {
+      "kind": "text",
+      "text": "The resolutionDate preserves the registered ledger deadline. An official announcement scheduling the tax-year 2027 release by that deadline was not verified; release cadence is not substituted for schedule evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, numerical adjustment, sigma, or 80% bounds can be calculated without the required fetched history. Point and interval fields are null to record failure honestly."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and scenarios outside the interval cannot be quantified because no forecast interval was produced."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

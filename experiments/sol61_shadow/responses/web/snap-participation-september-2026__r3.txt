@@ -1,0 +1,155 @@
+{
+  "slug": "snap-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation in September 2026",
+  "question": "What will USDA's first official national monthly SNAP Persons count for September 2026 be, without seasonal adjustment, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 35.394648,
+  "ciLow": 34.944935,
+  "ciHigh": 35.84436,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA national monthly SNAP Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve on the first official national monthly SNAP table containing September 2026, using the national Persons participation count without seasonal adjustment. Preserve the table's coverage, including disaster assistance where included. Convert thousands to millions by multiplying by 0.001; if published as raw persons, divide by 1000000. Retain reported precision, equivalent to six decimal places in millions for integer person counts. Ignore every subsequent revision or correction; no correction grace period applies.",
+  "dataPointId": "usda.fns.snap.persons.september_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 41.211631
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 40.671594
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 39.99989
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 39.207898
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 38.552133
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 37.947123
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 37.531152
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 37.108727
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 36.685024
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Sustained participation decline",
+    "Smaller recent monthly losses",
+    "Phased work-rule recertifications",
+    "Initial reporting and revision uncertainty"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://www.cbo.gov/system/files/2025-08/61367-SNAP.pdf",
+    "https://abgt.assembly.ca.gov/system/files/2026-04/april-29-sub-2-agenda-dss-select-issues-csd-calhhs_0.pdf"
+  ],
+  "runAt": "2026-10-07T11:53:04Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 SNAP national participation forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is fns.snap.total_persons, national monthly Persons participation, first official print. All historical anchors use this same unadjusted monthly series, rather than annual participation rates or quality-control statistics. HistoricalContext contains currently published preliminary/revised observations, not a certified original-vintage panel."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch USDA national monthly Persons table: https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+      "result": "Persons for September 2025 through June 2026: 41211631, 40671594, 39999890, 39207898, 38552133, 37947123, 37531152, 37108727, 36685024, 36352716. Table data are as of September 11, 2026; all data are subject to revision."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch USDA June national total and reporting status: https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+      "result": "National total: June 2025 = 41678341 persons; May 2026 = 36685024 preliminary; June 2026 = 36352716 initial. Published June changes are -0.9% monthly and -12.8% annually."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch earlier USDA national release files snap-4fymonthly-5.pdf, snap-4fymonthly-6.pdf and snap-4fymonthly-8.pdf from the official CDN URLs listed in sourceContext.",
+      "result": "Earlier published observations: February 2026 = 37870817 in the May 8 file; March 2026 = 37298271 in the June 12 file; May 2026 = 36562128 in the August 14 file. Differences against the latest table are +76306, +232881 and +122896 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CBO's estimated SNAP participation effects: https://www.cbo.gov/system/files/2025-08/61367-SNAP.pdf",
+      "result": "CBO estimates expanded work requirements reduce average monthly participation by approximately 2.4 million over 2025-2034 relative to its pre-law baseline. Estimated components include 800000 older childless adults, 300000 adults with older children, approximately 1000000 affected by waiver restrictions, and a net 300000 from changed exemptions."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the ten fetched monthly levels and nine successive changes. Every change is negative; their mean is -0.539879 million. The latest three changes average -0.392812 million, supporting continued decline with damping. The June level already incorporates substantial policy effects, so CBO's long-run counterfactual reduction is not deducted again."
+    },
+    {
+      "kind": "text",
+      "text": "Policy timing limits an additional September adjustment. The fetched California Assembly agenda places the earliest work-rule losses in September but the first broad redetermination cohort in October. No quantified national September disaster adjustment was established. Earlier-file comparisons measure reporting-vintage variability but do not certify first prints; June is already initial, so no separate downward vintage correction is applied."
+    },
+    {
+      "kind": "text",
+      "text": "Ledger discrepancies: the fetched national PDF reports raw persons, requiring division by 1000000, whereas the binding describes thousands multiplied by 0.001. The fetched USDA pages are headed Food and Nutrition Administration and accessible through its official CDN; the registered FNS URL returned 403. The registered series, identifier, resolver and millions unit remain preserved."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar verification failed: no fetched official release calendar or announcement established the September 2026 first-print date. The supplied February 7-15, 2027 window is registration metadata, not verified schedule evidence. resolutionDate is therefore null; this forecast cannot satisfy the mandatory release-date validation."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a damped-drift persistence prior with ten monthly observations and nine changes. sigma = 0.151798 million, calculated as the sample standard deviation of successive changes; 1.28*sigma = 0.194302 million. Level = 36.352716; momentum = -0.392812*(0.9+0.81+0.729) = -0.958068. Additional policy, one-off and vintage-location adjustments are zero. Damping 0.9 is a modeling assumption. Reporting-vintage differences have sample sigma 0.080398 million. Half-width = 1.28*sqrt(3*0.151798^2+(2.439*0.151798/sqrt(3))^2+(1+1/3)*0.080398^2) = 0.449712 million. The 2.3145-fold widening over the one-month half-width accounts for the three-month horizon, estimated drift and reporting-vintage uncertainty. Final point = 35.394648; bounds = [34.944935, 35.844360] million."
+    },
+    {
+      "kind": "math",
+      "text": "36.352716 - 0.392812*2.439 = 35.394647532 million. Combined predictive sigma = 0.351337615; nominal central 80% half-width = 1.28*0.351337615 = 0.449712148. Round point and bounds to six decimal places. Approximate independent innovations and transferable revision dispersion are assumptions; this interval is not empirically calibrated from first-print forecast errors."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is stalled eligibility exits or increased enrollment: a plateau near June's 36.352716 million would land above the interval. The downside risk is renewed losses at February's 0.605010 million monthly pace: three such losses imply 34.537686 million, outside the interval below its lower bound. Large disaster enrollment or reporting discontinuities could also breach either bound."
+    },
+    {
+      "kind": "forecast",
+      "point": 35.394648,
+      "ciLow": 34.944935,
+      "ciHigh": 35.84436
+    }
+  ]
+}

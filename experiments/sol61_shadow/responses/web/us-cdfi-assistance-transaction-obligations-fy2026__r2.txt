@@ -1,0 +1,67 @@
+{
+  "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 CDFI assistance obligations — forecast refused",
+  "question": "What will USAspending report for FY2026 financial-assistance transaction obligations awarded by the Community Development Financial Institutions Fund in the registered-query snapshot?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the registered-query snapshot from POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with group fiscal_year, spending_level transactions, awarding subtier Community Development Financial Institutions Fund, award_type_codes 02 through 11, and the FY2026 time filter. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001 to obtain usd_millions. Preserve returned precision after conversion. Resolve on the registered snapshot rather than subsequent revisions. The exact snapshot date could not be verified this run.",
+  "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://api.usaspending.gov/docs/intro-tutorial",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov"
+  ],
+  "runAt": "2026-10-07T11:41:29Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: mandatory registered-query evidence could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is defined exclusively by the registered spending_over_time transaction query. USAspending's official endpoint documentation at https://api.usaspending.gov/docs/endpoints/ lists POST as its supported method. Agency totals and award announcements cannot supply the required history."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: opening https://api.usaspending.gov/api/v2/search/spending_over_time/ with the available web tools failed. One returned Internal Error; the other explicitly returned HTTP 405 Method Not Allowed. Neither available web tool exposes an HTTP POST method or request-body parameter. No registered POST query was successfully executed."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory historical reference class and base rate could not be fetched. historicalContext is empty because no qualifying values were obtained, not because the official source was shown to expose fewer than six prints. This object records a refusal and is not a valid normalized forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The exact resolutionDate remains unverified. The official USAspending data guide and Treasury reporting manual describe rolling publication of financial-assistance records; neither establishes the registered FY2026 snapshot date. The supplied expected release window cannot substitute for an official schedule."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or empirical model was fitted because the required historical sample is unavailable. Level, momentum, one-off, and policy adjustments cannot be estimated. sigma = unavailable; no defensible final interval bounds can be derived."
+    },
+    {
+      "kind": "math",
+      "text": "The required flow-series calculation would estimate sigma from fetched annual obligation values and derive an approximate 80% half-width of 1.28*sigma. Without those values, the point estimate and bounds remain null."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and outcomes outside the interval cannot be quantified without the registered-query history and a defensible interval. The prompt explicitly requires refusal when that query cannot be executed."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

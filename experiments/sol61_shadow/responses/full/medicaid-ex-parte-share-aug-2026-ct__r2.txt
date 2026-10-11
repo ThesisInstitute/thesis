@@ -1,0 +1,91 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ct",
+  "country": "US",
+  "type": "data",
+  "title": "Connecticut ex parte renewal share, August 2026",
+  "question": "What percentage of Connecticut Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, calculated as 100 times Metric 5a1 divided by Metric 5 in the original (O) submission row of CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS FIRST publishes that period, without seasonal adjustment and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Connecticut's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ct.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Connecticut history fetch failed",
+    "Original rows require first-publication vintage checks",
+    "Official publication date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://data.medicaid.gov/dataset/e6205a51-e6d7-4849-9882-4483b8a28c41"
+  ],
+  "runAt": "2026-10-07T12:18:58Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official Connecticut history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Connecticut's August reporting-period ex parte share at first CMS publication. The ledger dataset takes precedence over the different general performance-indicator dataset in the attached skill. Later updates and corrections cannot resolve this first-print target."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the official registered CMS dataset page at https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "Fetched metadata: updated September 25, 2026; 3,876 rows; 22 columns. Indexed table content exposed Alaska rows, not the required Connecticut history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data.",
+      "result": "Fetched official metadata: modified 2026-09-25T18:00:00Z; identifier 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c; distribution URL https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. Opening that CSV returned an accessibility error."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the official data dictionary at https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6 and search the official renewal-outcomes dataset at https://data.medicaid.gov/dataset/e6205a51-e6d7-4849-9882-4483b8a28c41.",
+      "result": "Fetched definitions: original_updated uses O for original and U for updated; renewal-due denominator is Metric 5; ex parte numerator is Metric 5a1. CMS's derived renewal-outcomes dictionary defines ex parte share as Metric 5a1 / 5. No Connecticut observations were obtained."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open and inspect https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf.",
+      "result": "Fetched specifications, updated November 2025: states submit original monthly reports by the 8th day of the following month and pending-renewal updates by the 15th; updates reflect outcomes three months after the reporting period. Original submissions can be corrected. These are state submission deadlines, not CMS publication dates."
+    },
+    {
+      "kind": "text",
+      "text": "History retrieval failed: both web tools returned errors for the official CSV, datastore queries, Connecticut filters, pagination, and documented format variants. I could not fetch the required Connecticut original-submission numeric history. This does not establish that the official source exposes fewer than the required history floor."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without fetched comparable Connecticut first prints, last-print persistence, cross-state shrinkage, historical dispersion, and walk-forward model comparisons cannot be computed. No historical values or model candidates are invented."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The persistence prior and historical sample are unavailable. No momentum, one-off, or policy adjustment is applied. Sigma and interval bounds cannot be computed from the fetched evidence; the estimate and bounds are therefore null."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: the registered date is preserved, but no official CMS publication calendar confirming it was found. It must not be described as a verified scheduled release. The prohibited catalog lookup was skipped under the run's independence override."
+    },
+    {
+      "kind": "text",
+      "text": "Outside the interval scenarios cannot be evaluated because no evidence-based interval exists. No forecast is issued. Null estimates and empty history intentionally fail the numeric cell contract rather than manufacture evidence; confidence is only the contract's fixed setting."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

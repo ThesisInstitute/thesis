@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:11Z",
+  "runStartedAt": "2026-10-07T10:14:11Z",
+  "series": "nbb.gdp.flash_qoq",
+  "period": "2026-Q3",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "belgium-gdp-flash-q3-2026",
+    "country": "BE",
+    "dataPointId": "nbb.gdp.flash_qoq.2026_q3.first_print",
+    "period": "2026-Q3",
+    "registeredAt": "2026-07-10T00:00:00Z",
+    "registrationState": "preregistered",
+    "series": "nbb.gdp.flash_qoq",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.nbb.be"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-06",
+        "start": "2026-10-23"
+      },
+      "field": "nbb.gdp.flash_qoq",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "nbb.gdp.flash_qoq",
+      "sourceUrl": "https://www.nbb.be/en/statistics/nationalregional-accounts",
+      "table": "National Bank of Belgium national accounts flash estimate release",
+      "transform": {
+        "factor": 1.0,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279",
+    "targetRegistrationPath": "records/targets/2026-07-10-e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1.0
+  },
+  "targetContentHash": "e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279",
+  "targetRegistrationPath": "records/targets/2026-07-10-e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279.json",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/prompt.md",
+      "sha256": "16d238f294e202ab41763ddd264d4789d08d775a890c43353ef151ce6b0832c1",
+      "bytes": 10278,
+      "createdAt": "2026-10-07T10:14:11Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/command.json",
+      "sha256": "76c57e7d0df6ce5cae0a1b59225c58d4c312258e9f8fd64eea2e4eff10c17a08",
+      "bytes": 183,
+      "createdAt": "2026-10-07T10:14:11Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/stdout.txt",
+      "sha256": "5e70dab9df44b8397d459a385ac46a9b70539682163c4c0de3192b87670da8e0",
+      "bytes": 2480,
+      "createdAt": "2026-10-07T10:14:11Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:11Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/raw_response.txt",
+      "sha256": "5e70dab9df44b8397d459a385ac46a9b70539682163c4c0de3192b87670da8e0",
+      "bytes": 2480,
+      "createdAt": "2026-10-07T10:14:11Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/parsed_cells.json",
+      "sha256": "f4b550378188f87710a1cb3dca2447b4e4f35b5d181f9f1bae953a8abb1aea4f",
+      "bytes": 2572,
+      "createdAt": "2026-10-07T10:14:11Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/normalized_cells.json",
+      "sha256": "ede6ae85a3e8cb9c9be12eb67beb9bb75fb85a8a235bf1e493a908601de4545c",
+      "bytes": 2458,
+      "createdAt": "2026-10-07T10:14:11Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:11Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/belgium-gdp-flash-q3-2026__r1/manifest.json",
+      "sha256": "c1a5c8e3451aeba6d79763d6d8525facd4760f98ea1f154fda30ad8ca1899260",
+      "bytes": 4081,
+      "createdAt": "2026-10-07T10:14:11Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "613283cd3dfbabde97fd4317770c4d028867f3ddc385a3bf35fb107f221a0dc3"
+}

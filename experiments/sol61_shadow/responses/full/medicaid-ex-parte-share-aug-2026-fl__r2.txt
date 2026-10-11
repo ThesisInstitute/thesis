@@ -1,0 +1,95 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-fl",
+  "country": "US",
+  "type": "data",
+  "title": "Florida ex parte renewal share, August 2026",
+  "question": "What percentage of Florida Medicaid and CHIP beneficiaries due for renewal in the August 2026 reporting period were renewed on an ex parte basis, using the first published original (O) submission in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, without seasonal adjustment, computed to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Florida's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.fl.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Ex parte verification success",
+    "Composition of beneficiaries due for renewal",
+    "Original-submission reporting vintage"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf"
+  ],
+  "runAt": "2026-10-07T12:18:47Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required Florida history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Florida's August 2026 first-print original submission. CMS's outcome-share convention uses ex parte renewals divided by beneficiaries due for renewal, as shown in its [official snapshot table](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf). The registered resolver is preserved."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact CMS dataset identifier on data.medicaid.gov.",
+      "result": "The [official dataset](https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c) reports an update on September 25, 2026, 3,876 rows and 22 columns. Its accessible preview contains Alaska rows, not Florida history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data.",
+      "result": "The [official federal catalog](https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data) identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified 2026-09-25T18:00:00Z, and links https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click",
+      "call": "Follow the data-dictionary link from the official federal catalog.",
+      "result": "The [CMS dictionary](https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6) defines original_updated as O=Original or U=Updated; beneficiaries_with_a_renewal_due is Metric 5; beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis is Metric 5a1. It supplies definitions, not Florida observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot.",
+      "result": "The [CMS publication index](https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot) lists June 2026 released September 25, 2026; May released August 28; April released July 31; March released June 26; February released May 29; January released April 24. It does not announce an August 2026 release date."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed: clicking the September CSV returned Cache miss. Direct CSV requests, datastore queries and Florida-filtered dataset requests returned not accessible; the unfiltered dataset opened with no readable content. No exact Florida numerator/denominator history was recovered. Rounded snapshot summaries and Alaska observations cannot replace the required exact-series history."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Last-print persistence, panel shrinkage and walk-forward model comparisons cannot be calculated without Florida observations. No thesis_model_candidate_v1 candidate is fabricated. This is a tool-access failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: persistence prior unavailable; historical sample unavailable; no quantified adjustments applied. Intended calculation is share = 100*ex_parte/renewals_due, sigma = sample standard deviation of successive monthly share changes, and an initial 80% half-width = 1.28*sigma, adjusted for forecast horizon only with stated evidence. Neither sigma nor bounds can be computed from fetched Florida data; all forecast fields remain null."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: retain the registered 2026-12-15, but it was not verified as an official scheduled release date. The retrospective publication index does not authorize inferring a future date from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would be a cohort with substantially greater successful automatic verification; downside risk would be failed data matches or a cohort requiring more renewal forms. Whether either would land outside the interval cannot be assessed because no interval was issued."
+    },
+    {
+      "kind": "text",
+      "text": "This object records a failed run, not a valid numeric forecast cell. The required historical floor and numeric interval checks are unmet. Nulls explicitly mark withheld estimates; confidence retains the prescribed contract constant. JSON parsing was checked. No files or artifact receipts were created. The catalog check was omitted under the independence override."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

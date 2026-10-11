@@ -1,0 +1,165 @@
+{
+  "slug": "us-mts-deficit-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US federal deficit, September 2026",
+  "question": "What is the September 2026 monthly total in U.S. Department of the Treasury, Bureau of the Fiscal Service, Monthly Treasury Statement Table 1, September row, Deficit/Surplus (-) column, on its FIRST PRINT, not seasonally adjusted, in USD billions, with positive values denoting deficits and negative values denoting surpluses?",
+  "unit": "usd_billions",
+  "pointEstimate": -20.680,
+  "ciLow": -251.035,
+  "ciHigh": 209.676,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "U.S. Department of the Treasury, Bureau of the Fiscal Service, Monthly Treasury Statement, Table 1",
+  "resolutionSourceUrl": "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+  "resolutionRule": "Resolve solely from the first published September 2026 Monthly Treasury Statement, Table 1, FY 2026 September row, Deficit/Surplus (-) column. Use the unadjusted monthly total for the United States, including on-budget and off-budget entities, on the statement's modified cash basis. Preserve Table 1's sign: positive deficit, negative surplus. Convert published USD millions to USD billions by dividing by 1,000 and retain three decimal places. Do not use the cumulative fiscal-year deficit, Table 2's opposite sign convention, or any later revision or correction. The exact Treasury release date could not be verified; resolutionDate remains null and this metadata does not satisfy the publication contract.",
+  "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2016-09"},
+      "label": "September 2016",
+      "value": -33.359
+    },
+    {
+      "period": {"type": "month", "value": "2017-09"},
+      "label": "September 2017",
+      "value": -8.000
+    },
+    {
+      "period": {"type": "month", "value": "2018-09"},
+      "label": "September 2018",
+      "value": -119.116
+    },
+    {
+      "period": {"type": "month", "value": "2019-09"},
+      "label": "September 2019",
+      "value": -82.768
+    },
+    {
+      "period": {"type": "month", "value": "2020-09"},
+      "label": "September 2020",
+      "value": 124.611
+    },
+    {
+      "period": {"type": "month", "value": "2021-09"},
+      "label": "September 2021",
+      "value": 61.544
+    },
+    {
+      "period": {"type": "month", "value": "2022-09"},
+      "label": "September 2022",
+      "value": 429.673
+    },
+    {
+      "period": {"type": "month", "value": "2023-09"},
+      "label": "September 2023",
+      "value": 170.982
+    },
+    {
+      "period": {"type": "month", "value": "2024-09"},
+      "label": "September 2024",
+      "value": -64.263
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": -197.950
+    }
+  ],
+  "drivers": [
+    "September tax-receipt seasonality",
+    "Year-end credit-accounting volatility",
+    "Benefit-payment timing shifts",
+    "Corporate-tax weakness and tariff refunds"
+  ],
+  "sourceContext": [
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0916.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0917.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0918.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0919.pdf",
+    "https://home.treasury.gov/system/files/206/mts0920.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0921.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0922.pdf",
+    "https://fiscaldata.treasury.gov/static-data/published-reports/mts/MonthlyTreasuryStatement_202309.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0924.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0925.pdf",
+    "https://www.cbo.gov/about/press-center",
+    "https://www.cbo.gov/system/files/2026-09/61984-MBR.pdf",
+    "https://www.jec.senate.gov/public/vendor/_accounts/JEC-R/fiscal/Monthly%20Fiscal%20Update.html",
+    "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+    "https://fiscaldata.treasury.gov/static-data/published-reports/mts/MonthlyTreasuryStatement_202608.pdf"
+  ],
+  "runAt": "2026-10-07T12:39:27Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 MTS first-print forecast; release-date metadata unverified"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the monthly September Table 1 flow, not the fiscal-year total. The series is not seasonally adjusted. Positive numbers are deficits; negative numbers are surpluses. September seasonality requires a same-calendar-month reference class. Registered slug, unit and dataPointId are preserved. The supplied registration gives an expected October 17-25 window but no literal resolutionDate and no resolve-by-bound basis. Official Treasury searches and calendar fetch attempts did not establish an exact date. I leave resolutionDate null rather than infer a release day; consequently this object is not contract-valid for publication. The catalog uniqueness check was omitted under the run's explicit independence restriction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened and searched the original Treasury September PDFs mts0916.pdf, mts0917.pdf, mts0918.pdf and mts0919.pdf at the official migrated Fiscal Service URLs in sourceContext; read each own-year September Table 1 Deficit/Surplus (-) cell.",
+      "result": "Published USD millions: September 2016 -33,359; September 2017 -8,000; September 2018 -119,116; September 2019 -82,768. Converted USD billions: -33.359, -8.000, -119.116, -82.768. These are original own-period reports, not later comparative rows."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened Treasury's original September 2020 report at home.treasury.gov/system/files/206/mts0920.pdf and original mts0921.pdf and mts0922.pdf at migrated Fiscal Service URLs. Searched the exact official MonthlyTreasuryStatement_202309.pdf URL for its September Table 1 row.",
+      "result": "Own-year September Table 1 deficits in USD millions: 2020 124,611; 2021 61,544; 2022 429,673; 2023 170,982. Converted USD billions: 124.611, 61.544, 429.673, 170.982. The 2023 official search extract also supplied receipts 467,473 and outlays 638,455 million; its direct PDF fetch returned 403. Original 2022 Education outlays were 445,657 million, illustrating year-end accounting volatility."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0924.pdf and https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0925.pdf; read own-year September Table 1 and report highlights.",
+      "result": "September 2024 receipts 527,620 million, outlays 463,357 million, deficit -64,263 million (-64.263 billion). September 2025 receipts 543,663 million, outlays 345,713 million, deficit -197,950 million (-197.950 billion). Both reports say September-start benefit payments accelerated into August. September 2025 Education outlays were -105,279 million. The 2025 report's comparative September 2024 deficit is revised to -80,289 million; that comparative value was excluded."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: ten original September monthly first prints, 2016-2025, total 281.354 billion; mean 28.1354, median -20.6795, sample standard deviation 179.747728, range -197.950 to 429.673 billion. Six of ten were surpluses. These are flow values, so dispersion is measured across the values themselves. All ten are retained, including pandemic and credit-accounting outliers."
+    },
+    {
+      "kind": "text",
+      "text": "Benchmarks precede the forecast. Seasonal last-print persistence is September 2025's -197.950 billion. Expanding same-month mean gives 28.1354; expanding median gives -20.6795. For ordinary monthly persistence, the official Senate JEC reproduction reports August 2026 at 166.797 billion; its exact Treasury PDF could not be fetched, so this is a qualified current-context benchmark and is excluded from historicalContext. Adjacent-month persistence does not account for September seasonality."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated by arithmetic from the fetched history, all in USD billions: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"seasonal_persistence\",\"point\":-197.950,\"p10\":-428.306,\"p50\":-197.950,\"p90\":32.406,\"interval_80\":[-428.306,32.406],\"interval_90\":[-493.609,97.709],\"interval_method\":\"fallback_prior_normal_from_same_month_first_print_flow_dispersion\",\"calibration_n\":10,\"train_cutoff\":\"2025-09-30\",\"walk_forward\":{\"n\":7,\"mae\":186.078,\"rmse\":215.126903}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_september_mean\",\"point\":28.135,\"p10\":-202.221,\"p50\":28.135,\"p90\":258.491,\"interval_80\":[-202.221,258.491],\"interval_90\":[-267.523,323.794],\"interval_method\":\"fallback_prior_normal_from_same_month_first_print_flow_dispersion\",\"calibration_n\":10,\"train_cutoff\":\"2025-09-30\",\"walk_forward\":{\"n\":7,\"mae\":177.189514,\"rmse\":217.073125}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_september_median\",\"point\":-20.680,\"p10\":-251.035,\"p50\":-20.680,\"p90\":209.676,\"interval_80\":[-251.035,209.676],\"interval_90\":[-316.338,274.979],\"interval_method\":\"fallback_prior_normal_from_same_month_first_print_flow_dispersion\",\"calibration_n\":10,\"train_cutoff\":\"2025-09-30\",\"walk_forward\":{\"n\":7,\"mae\":176.758,\"rmse\":215.153801}}]. Walk-forward evaluation uses expanding training samples starting with September 2016-2018, then predicts September 2019-2025 without using each held-out value. Select expanding_september_median by minimum MAE. Its advantage is small: RMSE is effectively tied with seasonal persistence, and there are only seven validation cases. Intervals are explicitly fallback-prior normal approximations, not native fitted-model intervals."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetched CBO's press center and August 2026 Monthly Budget Review, plus the official Senate JEC Monthly Fiscal Update URLs in sourceContext.",
+      "result": "CBO's September 2026 review is scheduled for October 8, 2026 and was unavailable at this run. CBO August estimates: receipts 359 billion, outlays 527 billion, deficit 168 billion; timing-adjusted deficit 267 billion versus 257 billion a year earlier. Through August, corporate receipts fell 96 billion (25%), and estimated tariff refunds totaled 110 billion. JEC reports August Treasury receipts 360.033 billion, outlays 526.830 billion and deficit 166.797 billion. CBO estimates and JEC calculations are current evidence, not replacements for original Treasury first-print history."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view assessment separates the components. Level: the selected seasonal median is the prior. Momentum: August's timing-adjusted deterioration points toward a larger deficit, but supplies no calibrated September-specific update. One-offs: September 2025's negative Education outlays and shifted benefit payments make literal seasonal persistence fragile; their recurrence cannot be quantified from the fetched current evidence. Policy mechanisms: corporate-tax weakness and tariff refunds favor a higher deficit, but the report measures cumulative effects and does not identify September amounts. Each numerical adjustment is therefore zero. The point is unchanged from the selected candidate; it is 177.2705 billion above seasonal persistence because of benchmark selection, not a discretionary news adjustment."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = expanding_september_median fitted to ten original September first prints, 2016-2025. Point = (-33.359 + -8.000)/2 + 0 momentum + 0 one-off + 0 policy = -20.6795 billion; selected-prior weight is 1 and news weight is 0. With mean = 281.354/10 = 28.1354, sum((x-mean)^2) = 290783.2110084, sigma = sqrt(290783.2110084/9) = 179.747728 billion. This monthly deficit is a flow, so use values rather than successive changes. Fallback-prior normal 80% half-width = 1.281551566*sigma = 230.355982 billion, with widening factor 1; year-end accounting shocks remain in the sample. Bounds = -20.6795 +/- 230.355982 = [-251.035482, 209.676482]. Round to the publication's million-dollar precision expressed in billions: point -20.680, ciLow -251.035, ciHigh 209.676. The 90% half-width = 1.644853627*sigma = 295.658702, giving [-316.338202, 274.979202]."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage sanity check: the final unrounded 80% band contains nine of ten historical September first prints; September 2022 is the exception. This is descriptive in-sample coverage, not proof of calibrated 80% predictive coverage. The small sample, changing fiscal scale and skew from credit-accounting shocks limit the normal approximation. No narrow interval is justified by the fetched evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a large positive student-loan or other credit subsidy reestimate, resembling the Education-heavy September 2022 print, combined with continuing tariff refunds or weak quarterly corporate receipts, could produce a deficit above 209.676 billion, outside the interval. Downside risk: a larger downward loan-cost reestimate than the negative Education outlays seen in September 2025, together with strong quarterly receipts, could produce a surplus exceeding 251.035 billion, below the interval. September-specific CBO receipts, outlays and credit-accounting estimates would move the point up for a larger estimated deficit and down for a larger surplus."
+    },
+    {
+      "kind": "text",
+      "text": "Audit limitation: numerical history and the forecast computation are grounded, but the official Treasury release date remains unverified. Failed official Fiscal Data dataset and August-report fetches are disclosed in sourceContext. No files or activity receipts were created; activityLog is reserved for the harness. JSON parsing and numerical consistency were checked, but the required YYYY-MM-DD resolutionDate check cannot pass with null."
+    },
+    {
+      "kind": "forecast",
+      "point": -20.680,
+      "ciLow": -251.035,
+      "ciHigh": 209.676
+    }
+  ]
+}

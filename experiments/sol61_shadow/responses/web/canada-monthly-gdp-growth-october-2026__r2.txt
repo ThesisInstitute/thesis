@@ -1,0 +1,183 @@
+{
+  "slug": "canada-monthly-gdp-growth-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, October 2026",
+  "question": "What will Statistics Canada's first official monthly release report for October 2026 growth versus September 2026 in all-industries real GDP at basic prices, chained 2017 dollars, seasonally adjusted, using Table 36-10-0434-01 vector v65201210?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.12,
+  "ciLow": -0.19,
+  "ciHigh": 0.43,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-23",
+  "resolutionSource": "Statistics Canada The Daily and Table 36-10-0434-01, vector v65201210",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Resolve on the first official full October 2026 monthly GDP-by-industry release, scheduled for December 23, 2026. Calculate 100 * (October 2026 v65201210 / September 2026 v65201210 - 1), taking both seasonally adjusted chained-2017-dollar levels from that first October release vintage. The levels are at annual rates, but the monthly percentage change is not annualized. Preserve the calculated percentage-change precision because the registered transform specifies no additional rounding; The Daily's one-decimal headline is display rounding. Exclude advance estimates and all subsequent corrections or revisions, with no correction grace period.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 0.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 0.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "Positive recent GDP momentum",
+    "Construction growth and possible recovery from production disruptions",
+    "Tariff-related export front-loading may unwind",
+    "August employment decline tempers demand",
+    "Unchanged monetary policy provides no fresh rate-change impulse"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm",
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251031/dq251031a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251128/dq251128b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251223/dq251223a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/dq260130a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm",
+    "https://www.bankofcanada.ca/2026/09/fad-press-release-2026-09-02/"
+  ],
+  "runAt": "2026-10-07T11:47:00Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 Canada GDP: modest positive growth"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is the first full monthly October release of all-industries GDP at basic prices, seasonally adjusted, chained 2017 dollars: Table 36-10-0434-01, vector v65201210. The official vector definition confirms the registered variant. Numerical priors and historical observations use this same GDP variant and full monthly first prints. Advance GDP, trade, employment and policy observations are separately identified auxiliary evidence. Resolution uses October and September levels from the same first October vintage, preserving the registered percentage-change transform."
+    },
+    {
+      "kind": "text",
+      "text": "The official Statistics Canada 2026 release calendar fetched this run explicitly pairs October 2026 GDP by industry with December 23, 2026. It also schedules August GDP for October 30 and September GDP for November 30. The registered resolution date therefore matches the announcement schedule. Source: https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original Statistics Canada The Daily GDP releases dated 2025-10-31, 2025-11-28, 2025-12-23 and 2026-01-30, corresponding to August through November 2025.",
+      "result": "Original first-print monthly real GDP growth: August 2025 -0.3%; September 2025 +0.2%; October 2025 -0.3%; November 2025 0.0%. These values come from the original release headlines, not subsequently revised historical tables."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original Statistics Canada The Daily GDP releases dated 2026-02-27, 2026-03-31, 2026-04-30 and 2026-05-29, corresponding to December 2025 through March 2026.",
+      "result": "Original first-print monthly real GDP growth: December 2025 +0.2%; January 2026 +0.1%; February 2026 +0.2%; March 2026 -0.1%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original Statistics Canada The Daily GDP releases dated 2026-06-30, 2026-07-31, 2026-08-28 and 2026-09-29, corresponding to April through July 2026.",
+      "result": "Original first-print monthly real GDP growth: April 2026 +0.5%; May 2026 +0.3%; June 2026 +0.3%; July 2026 0.0%. June's original +0.3% is retained rather than its later +0.4% revision."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched history consists of one-decimal headline prints, used as rounded proxies for the resolver's unrounded level transform. Unrounded same-vintage historical level pairs were not recovered, so successive first-print levels are not divided. The September 2025 release incorporated NAICS 2022 and updated weights; the sample spans that methodology update while retaining the same all-industries real seasonally adjusted concept."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the 12 original monthly prints from August 2025 through July 2026. Their arithmetic mean is +0.091667%, median +0.15%, with seven increases, three decreases and two unchanged prints. The latest six first prints average +0.20%. This supports positive but modest growth, with recent momentum stronger than the full-sample mean."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the September 29, 2026 GDP release at https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm.",
+      "result": "July GDP was unchanged, with 10 of 20 sectors expanding. Construction grew 1.3%, utilities 1.7%, and manufacturing contracted 0.9%. Unplanned refinery downtime contributed to manufacturing weakness. The separately labeled August advance estimate was +0.2%; it is neither an October observation nor part of the first-print reference class."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official August trade evidence from https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm and August employment from https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm.",
+      "result": "August exports to the United States increased 8.1%. Statistics Canada identified possible front-loading before tariffs took effect at August's end. August employment declined 42,000, or 0.2%, following an April-July cumulative increase of 181,000; unemployment remained 6.4%. These support small downward judgment adjustments rather than a mechanical conversion into GDP growth."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the September 2, 2026 Bank of Canada decision at https://www.bankofcanada.ca/2026/09/fad-press-release-2026-09-02/.",
+      "result": "The overnight policy rate was held at 2.25%, with the Bank Rate at 2.5% and deposit rate at 2.20%. The unchanged decision supplies no fresh rate-change shock for this forecast."
+    },
+    {
+      "kind": "text",
+      "text": "Separate effects before combining: the GDP level is not itself a monthly-growth predictor; momentum receives partial persistence through the recent-six mean. Heat-related utilities demand and refinery downtime are transient, so their October adjustment is zero. Tariff-related front-loading receives a -0.02 percentage-point adjustment and weaker employment -0.01, both judgmental in size. Monetary policy receives zero additional adjustment. No future policy decision is assumed."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a shrinkage momentum model combining the August 2025-July 2026 first-print mean with the February-July 2026 mean at equal weights. Prior 0.091667 + momentum 0.5*(0.20-0.091667) = 0.145833; subtract judgment adjustments 0.02 for tariff/front-loading and 0.01 for employment, with level, transient one-off and monetary-policy adjustments zero. The result 0.115833 rounds to pointEstimate 0.12%. For this change series, calculate dispersion from the growth values themselves: sum(x)=1.1, mean=1.1/12=0.091667, sum((x-mean)^2)=0.6491667; sigma = 0.242930 percentage points = sqrt(0.6491667/11). A normal predictive approximation gives an 80% half-width of 1.28*sigma = 0.310951. Center on the rounded point: 0.12 +/- 0.310951 = [-0.190951, 0.430951], rounded to final bounds [-0.19, 0.43]. No extra widening or narrowing is applied; coverage is nominal given the short, rounded sample."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: simultaneous recovery in refineries and mining, continued construction expansion and stronger consumer activity could lift October growth above 0.43%, outside the interval. Downside risk: an unwind of pre-tariff shipments combined with renewed manufacturing shutdowns, energy-production disruptions and weaker employment could push growth below -0.19%, outside the interval. Broad simultaneous sector moves would falsify the modest-growth central case."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.12,
+      "ciLow": -0.19,
+      "ciHigh": 0.43
+    }
+  ]
+}

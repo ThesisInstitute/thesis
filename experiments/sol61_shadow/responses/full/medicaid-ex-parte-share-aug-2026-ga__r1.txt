@@ -1,0 +1,78 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ga",
+  "country": "US",
+  "type": "data",
+  "title": "Georgia ex parte renewal share, August 2026",
+  "question": "What will Georgia's ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using reported monthly counts without an additional seasonal adjustment and computing the published numerator/denominator share to one decimal percent?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Georgia's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ga.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original-submission renewal cohort composition",
+    "Ex parte processing and data matching",
+    "Georgia change-in-circumstances reporting"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T10:40:39Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: official Georgia history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target identity and original-row first-print resolver are preserved. Later updated submissions cannot resolve this target. The registered resolutionDate is retained, but no official schedule verifying that date was found. The prohibited Thesis catalog check was skipped under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact CMS dataset identifier on data.medicaid.gov.",
+      "result": "Official dataset metadata: updated September 25, 2026; 3,876 rows; 22 columns. The retrieved table exposes only its first 25 Alaska rows, with no Georgia historical observations. [CMS dataset](https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c)."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the official Data.gov catalog entry and follow its CMS CSV distribution link.",
+      "result": "Official catalog: dataset updated September 25, 2026; issued November 27, 2024. Distribution URL is https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. The CSV fetch failed with Cache miss; no Georgia counts were returned. [Official catalog](https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data)."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the official CMS monthly snapshot release index and June snapshot.",
+      "result": "June 2026 was released September 25, 2026; May 2026 was released August 28, 2026; April 2026 was released July 31, 2026. No future August publication date is listed. These are release-timing observations, not Georgia ex parte history. [CMS release index](https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot), [June snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf)."
+    },
+    {
+      "kind": "text",
+      "text": "History retrieval failed: direct CMS datastore requests, official CSV retrieval, pagination, and Georgia/reporting-period filtered views did not return the required original Georgia rows. This is an access failure, not evidence that the official source exposes fewer than six prints. No history-floor exception is claimed, and no remembered or adjacent-series values are substituted."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without fetched Georgia original-print numerator and denominator histories, neither last-print persistence nor persistence-plus-panel-shrinkage can be grounded. No numeric model candidates or walk-forward scores can honestly be generated."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no admissible numeric prior, adjustments, sigma, or implied bounds can be computed from the retrieved evidence. A numeric estimate or purported 80% interval would be invented. No math derivation is asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: processing automation or cohort changes could create upside risk; data-matching failures or reporting changes could create downside risk. Without the mandatory reference class, these mechanisms cannot be sized or used to claim outcomes outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "Cell dropped for forecasting purposes: pointEstimate, ciLow, and ciHigh are null because the required official history was not fetched. This object is an auditable failure record, not a valid scored forecast cell. JSON syntax was checked; forecast-contract validation cannot pass."
+    }
+  ]
+}

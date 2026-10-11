@@ -1,0 +1,37 @@
+{
+  "slug": "snap-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 SNAP participation",
+  "question": "What will USDA FNS first report for national SNAP Persons participation in September 2026, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS national monthly SNAP participation table",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Use the first official September 2026 national monthly Persons value, converting thousands to millions by multiplying by 0.001. Retain the published precision and exclude subsequent revisions. The release date was not verified.",
+  "dataPointId": "usda.fns.snap.persons.september_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap"
+  ],
+  "runAt": "2026-10-07T12:48:59Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The official USDA FNS SNAP source-page fetch returned HTTP 403 Forbidden. The run instructions require stopping after a failed fetch."
+    },
+    {
+      "kind": "text",
+      "text": "No official participation history was fetched, so the base rate, successive-change sigma, point estimate, and 80% interval cannot be calculated. The official release date also remains unverified. Null fields denote unavailable results; no remembered or invented statistics were substituted."
+    }
+  ]
+}

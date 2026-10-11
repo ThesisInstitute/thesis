@@ -1,0 +1,148 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ak",
+  "country": "US",
+  "type": "data",
+  "title": "Alaska ex parte renewal share, August 2026",
+  "question": "What percentage of Alaska Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, measured as 100 times Metric 5a1 divided by Metric 5 in the FIRST PUBLISHED original (O) submission row for AK and reporting period 202608 in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, not seasonally adjusted and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 27.0,
+  "ciLow": 13.8,
+  "ciHigh": 40.2,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Alaska's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal. Select State Abbreviation AK, Reporting Period 202608, Original or Updated O. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis (Metric 5a1) divided by Beneficiaries with a Renewal Due (Metric 5), rounding to the nearest 0.1 percentage point. Use the values at first publication; subsequent corrections and U rows do not affect resolution. This is an unadjusted state cohort measure. The registered 2026-12-15 date is retained, but was not corroborated as a scheduled CMS publication date.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ak.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2023-05"}, "label": "2023-05", "value": 18.2},
+    {"period": {"type": "month", "value": "2023-06"}, "label": "2023-06", "value": 24.8},
+    {"period": {"type": "month", "value": "2023-07"}, "label": "2023-07", "value": 28.1},
+    {"period": {"type": "month", "value": "2023-08"}, "label": "2023-08", "value": 28.2},
+    {"period": {"type": "month", "value": "2023-09"}, "label": "2023-09", "value": 23.7},
+    {"period": {"type": "month", "value": "2023-10"}, "label": "2023-10", "value": 27.4},
+    {"period": {"type": "month", "value": "2023-11"}, "label": "2023-11", "value": 27.4},
+    {"period": {"type": "month", "value": "2023-12"}, "label": "2023-12", "value": 25.8},
+    {"period": {"type": "month", "value": "2024-01"}, "label": "2024-01", "value": 28.0},
+    {"period": {"type": "month", "value": "2024-02"}, "label": "2024-02", "value": 29.7},
+    {"period": {"type": "month", "value": "2024-03"}, "label": "2024-03", "value": 34.5}
+  ],
+  "drivers": [
+    "June 2026 official snapshot anchor of 27%",
+    "Large recent monthly cohort variation",
+    "Limited comparability across states",
+    "Recent exact O-row history unavailable"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=25&offset=25",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T12:24:10Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Alaska August 2026 ex parte renewal share: forecast with explicit evidence limitations"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first published AK/202608/O row in the registered CMS dataset. The numerator is Metric 5a1 and the denominator is all beneficiaries due for renewal, Metric 5. The measure is not seasonally adjusted. Preserve the registered slug, unit, dataPointId, and date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the exact official CMS dataset and inspect Alaska O rows for May-July 2023.",
+      "result": "Exact dataset O-row ex parte/due counts: 202305 1193/6539; 202306 1867/7530; 202307 4011/14250. Source: https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the same official dataset and inspect Alaska O rows for August-October 2023.",
+      "result": "Exact dataset O-row ex parte/due counts: 202308 5634/19995; 202309 3055/12884; 202310 3232/11813. Source: https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the same official dataset and inspect Alaska O rows for November 2023-March 2024.",
+      "result": "Exact dataset O-row ex parte/due counts: 202311 2956/10781; 202312 3288/12729; 202401 4376/15619; 202402 4572/15385; 202403 5598/16229. Source: https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch limitation: the indexed exact dataset exposes these old O rows, while API, pagination, filtered-page, and current CSV fetches failed. Data.gov identifies the September 2026 CSV and dataset update, but its bytes could not be retrieved. Recent exact-artifact history and archived initial-publication vintages could not be verified. historicalContext contains only shares calculated from fetched exact-dataset O counts, not rounded snapshot substitutes. This output does not fully satisfy the requested recent exact-first-print history audit; no fewer-than-six availability exception is claimed."
+    },
+    {
+      "kind": "math",
+      "text": "Base rate/reference class: for the 11 fetched O reports, May 2023-March 2024, x = 100*ex_parte/due. Using unrounded ratios gives mean 26.9011%, median 27.4186%, sample level SD 4.0147 pp, and range 18.2444%-34.4938%. Stale last-observed persistence is 34.5%; this is the initial outside-view prior before current evidence. O denotes original submission, without independently establishing an unchanged archived first-publication vintage."
+    },
+    {
+      "kind": "text",
+      "text": "Original-row model candidate before the current update: {\"schema\":\"thesis_model_candidate_v1\",\"model\":\"stale_original_o_persistence\",\"target_period\":\"2026-08\",\"point\":34.5,\"p10\":12.2,\"p50\":34.5,\"p90\":56.8,\"interval80\":{\"low\":12.2,\"high\":56.8},\"interval90\":{\"low\":5.9,\"high\":63.1},\"interval_method\":\"Normal random-walk wrapper: old O-row change sigma times sqrt(29-month horizon); rounded bounds\",\"calibration_n\":10,\"train_cutoff\":\"2024-03\",\"walk_forward_score\":{\"horizon_months\":1,\"n\":10,\"mae\":2.8356}}. The long training gap makes this an audit benchmark with weak current relevance."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch January-March 2026 CMS snapshots; inspect Coverage Retention and Disenrollment Rates by State, AK row, Renewed on an Ex Parte Basis column (PDF indexes 27, 27, 30).",
+      "result": "Official rounded Alaska snapshot signals: January 2026 22%, 17354 due; February 2026 23%, 20000 due; March 2026 21%, 17809 due. Sources: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf. These are whole-point percentages, not fetched exact O numerator/denominator pairs."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch April-June 2026 CMS snapshots and inspect AK renewal rows; inspect June state panel and total (PDF indexes 27, 27, 30-31).",
+      "result": "April 2026 Alaska: 27% ex parte, 17318 due. May: 18%, 30712 due. June: 27%, 15924 due, 45% total renewed, 32% disenrolled, 23% pending. June national ex parte share: 47%; state shares range 8%-85%. Sources: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf. Denominator is all renewals due; percentages are rounded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the official CMS snapshot index and Eligibility Processing Data Report specifications to verify publication timing and submission rules.",
+      "result": "CMS index: January-June 2026 snapshots released April 24, May 29, June 26, July 31, August 28, September 25, 2026, respectively. Specifications require original state reports by day 8 and updated reports by day 15; the example August 2024 updated submission deadline is December 15, 2024. These submission deadlines do not verify a CMS release day. Sources: https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot; https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: no fetched official calendar establishes the registered 2026-12-15 as the August first-publication date. Retain that contract field without claiming agency verification or inventing a more specific release date. The resolver continues to use the actual first publication."
+    },
+    {
+      "kind": "math",
+      "text": "Current supplemental reference class: the six rounded January-June 2026 shares are [22,23,21,27,18,27]%, mean 23%, median 22.5%, level SD 3.5214 pp, range 18%-27%. Latest-snapshot persistence is 27%. For the June 51-jurisdiction panel, equal-jurisdiction mean = 2699/51 = 52.9216%, SD = 18.7113 pp. Persistence-plus-panel-shrinkage benchmark = 0.90*27 + 0.10*52.9216 = 29.5922%, rounded 29.6%. The 10% shrinkage weight is a stated benchmark choice, not an estimated parameter."
+    },
+    {
+      "kind": "text",
+      "text": "Updated model-candidate set generated before the final forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"current_snapshot_persistence\",\"target_period\":\"2026-08\",\"point\":27,\"p10\":13.8,\"p50\":27,\"p90\":40.2,\"interval80\":{\"low\":13.8,\"high\":40.2},\"interval90\":{\"low\":10.1,\"high\":43.9},\"interval_method\":\"Fallback normal interval anchored to original-O successive-change sigma, widened by recent rounded-snapshot volatility ratio and sqrt(2) horizon, plus 0.5 pp rounding allowance; exact recent first-print calibration unavailable\",\"calibration_n\":5,\"train_cutoff\":\"2026-06\",\"input_vintage\":\"CMS original monthly snapshot percentages rounded to whole points; recent exact O rows not verified\",\"walk_forward_score\":{\"horizon_months\":2,\"n\":2,\"mae\":1.5,\"rmse\":2.1213}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"current_snapshot_trailing_three_mean\",\"target_period\":\"2026-08\",\"point\":24,\"p10\":10.8,\"p50\":24,\"p90\":37.2,\"interval80\":{\"low\":10.8,\"high\":37.2},\"interval90\":{\"low\":7.1,\"high\":40.9},\"interval_method\":\"Fallback normal interval anchored to original-O successive-change sigma, widened by recent rounded-snapshot volatility ratio and sqrt(2) horizon, plus 0.5 pp rounding allowance; exact recent first-print calibration unavailable\",\"calibration_n\":5,\"train_cutoff\":\"2026-06\",\"input_vintage\":\"CMS original monthly snapshot percentages rounded to whole points; recent exact O rows not verified\",\"walk_forward_score\":{\"horizon_months\":2,\"n\":2,\"mae\":3.6667,\"rmse\":3.6818}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"current_snapshot_expanding_mean\",\"target_period\":\"2026-08\",\"point\":23,\"p10\":9.8,\"p50\":23,\"p90\":36.2,\"interval80\":{\"low\":9.8,\"high\":36.2},\"interval90\":{\"low\":6.1,\"high\":39.9},\"interval_method\":\"Fallback normal interval anchored to original-O successive-change sigma, widened by recent rounded-snapshot volatility ratio and sqrt(2) horizon, plus 0.5 pp rounding allowance; exact recent first-print calibration unavailable\",\"calibration_n\":5,\"train_cutoff\":\"2026-06\",\"input_vintage\":\"CMS original monthly snapshot percentages rounded to whole points; recent exact O rows not verified\",\"walk_forward_score\":{\"horizon_months\":2,\"n\":2,\"mae\":3.875,\"rmse\":3.877}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence_plus_panel_shrinkage\",\"target_period\":\"2026-08\",\"point\":29.6,\"p10\":16.4,\"p50\":29.6,\"p90\":42.8,\"interval80\":{\"low\":16.4,\"high\":42.8},\"interval90\":{\"low\":12.7,\"high\":46.5},\"interval_method\":\"Fallback normal interval anchored to original-O successive-change sigma, widened by recent rounded-snapshot volatility ratio and sqrt(2) horizon, plus 0.5 pp rounding allowance; exact recent first-print calibration unavailable\",\"calibration_n\":5,\"train_cutoff\":\"2026-06\",\"input_vintage\":\"CMS original monthly snapshot percentages rounded to whole points; recent exact O rows not verified\",\"walk_forward_score\":null}]. Two-month walk-forward scores use the common March-to-May and April-to-June origins; persistence forecasts 21 and 27 against outcomes 18 and 27. Select current_snapshot_persistence. Two validation outcomes provide weak discrimination; no panel walk-forward score is available. State-level operational differences limit the case for shrinkage toward other states."
+    },
+    {
+      "kind": "text",
+      "text": "Current level update: replace the stale 34.4938% March 2024 anchor with the directly observed June 2026 rounded 27%, delta -7.4938 pp. The newer same-measure official signal was absent from the old history and justifies this material move. Additional momentum adjustment = 0: the May-June rebound is already represented by persistence. Additional one-off adjustment = 0: the May cohort spike is used to assess uncertainty, without projecting another spike. Additional policy adjustment = 0: no fetched release-specific mechanism supports one. Final delta versus the panel-shrinkage benchmark is -2.6 pp."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected June snapshot persistence, 27%; weights = 100% latest direct level, 0% additional momentum/one-off/policy. Historical calibration anchor is the 11 exact-dataset O reports, with 10 successive changes: sigma = 3.2317839 pp, computed as sqrt(sum((delta-mean_delta)^2)/(10-1)), mean_delta = 1.6249428 pp. The newer rounded snapshot changes [1,-2,6,-9,9] have mean 1 and sample sigma = sqrt(198/4) = 7.0356236 pp. Treat this as a current volatility diagnostic, not authenticated exact-first-print calibration. Widen the old sigma by 7.0356236/3.2317839 = 2.1770093 because current cohort outcomes vary much more than the old unwinding sample; May due volume was 30712 versus June 15924. Two unobserved reporting months add sqrt(2), and unavailable one-decimal microdata add 0.5 pp for snapshot rounding. Half-width = 1.28*3.2317839*2.1770093*sqrt(2)+0.5 = 13.2358392 pp. Raw 80% bounds = 27-13.2358392 = 13.7641608 and 27+13.2358392 = 40.2358392; round to [13.8%,40.2%]. The corresponding 90% wrapper uses 1.6448536 and gives [10.1%,43.9%]."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage checks: the old one-month 1.28*sigma band covers 7 of 10 moves, near the eight-in-ten aim. The final wider band covers all 9 available old two-month moves and all 4 recent rounded two-month moves, including the latest 9 pp rebound. This is conservative in those small samples; empirical 80% coverage on recent exact original first prints is unverified. The much wider cross-state distribution reflects heterogeneous state levels and reinforces limited panel exchangeability."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: expanded automated eligibility matching, or a cohort with substantially more readily verifiable beneficiaries, could push the share above 40.2%, outside the interval. Downside risk: a large cohort due for renewal combined with a data-matching outage or delayed batch processing could push it below 13.8%, outside the interval. A newly published July O share above 27% would raise the point; one below 27% would lower it. These are falsification scenarios, not asserted events."
+    },
+    {
+      "kind": "text",
+      "text": "Independence and custody: the registered slug was copied from the supplied target; the catalog collision check was omitted under the run's prohibition on Thesis sources. No files or activity artifacts were created, and activityLog is empty rather than containing manufactured receipts. SourceContext includes failed official fetch endpoints used to establish the evidence limitation."
+    },
+    {
+      "kind": "forecast",
+      "point": 27.0,
+      "ciLow": 13.8,
+      "ciHigh": 40.2
+    }
+  ]
+}

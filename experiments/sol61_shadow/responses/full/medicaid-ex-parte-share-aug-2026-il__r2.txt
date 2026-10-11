@@ -1,0 +1,101 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-il",
+  "country": "US",
+  "type": "data",
+  "title": "Illinois ex parte renewal share, August 2026",
+  "question": "What will Illinois's ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of the original (O) submission row of CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, without seasonal adjustment, computed to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Illinois's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.il.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original Illinois submission history unavailable",
+    "Exact numerator and denominator required",
+    "Registered release date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T12:17:49Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast dropped: required official history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Illinois's August 2026 original-submission ex parte renewal share, resolving on first publication. Preserve the supplied slug, unit, dataPointId, date, and resolver. Later U submissions and subsequent corrections do not resolve this target."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search official data.medicaid.gov for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The official indexed dataset page reports 3,876 rows, 22 columns, and an update on September 25, 2026. Its dictionary defines O as Original and U as Updated; ex parte renewals are Metric 5a1 and renewals due are Metric 5. Only the first 25 Alaska rows were exposed; no Illinois counts were fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "The official federal catalog identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified 2026-09-25T18:00:00Z, and its CSV distribution at https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. Opening that distribution failed; catalog metadata supplies no Illinois observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "CMS lists January 2026 released April 24, February released May 29, March released June 26, April released July 31, May released August 28, and June released September 25, 2026. This page did not establish an August 2026 future publication date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf",
+      "result": "CMS specifications updated November 2025 state that original monthly reports are due by the 8th calendar day of the following month and updates to previously pending renewals by the 15th calendar day. These are state submission deadlines, not public release-calendar dates."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar discrepancy: the registered resolutionDate is retained verbatim, but no fetched official calendar verifies it as the first publication date. Observed release cadence cannot establish a scheduled day."
+    },
+    {
+      "kind": "text",
+      "text": "The official June snapshot helped identify the published rate convention, which uses all beneficiaries due for renewal as denominator. Its rounded summary rates are not substituted for the exact original-submission counts required by the registered dataset resolver."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed: the datastore API, filtered dataset pages, and official CSV distribution were inaccessible through the web tool. historicalContext is empty because no admissible Illinois original-submission observations were obtained. This is an access failure, not evidence that the source exposes fewer than the required history floor."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without the required Illinois history, last-print persistence, panel shrinkage, and walk-forward model comparisons cannot be computed. No thesis_model_candidate_v1 candidate is fabricated."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the persistence prior and historical sample are unavailable; no momentum, one-off, or policy adjustment is applied. sigma cannot be computed from unfetched successive first-print changes, so neither 1.28*sigma nor final implied bounds can be calculated. Null estimates explicitly indicate a dropped forecast."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would be a larger share of renewals completed automatically; downside risk would be more renewals requiring forms or remaining pending. Without a grounded point or interval, no numerical outside-the-interval scenario can honestly be specified."
+    },
+    {
+      "kind": "text",
+      "text": "This object is a failure record, not a valid scored forecast cell. Null estimates and empty history intentionally fail the numeric forecast contract rather than invent evidence. The JSON parses successfully. No Thesis site, record, forecast, or local file was accessed; no files were created or modified."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

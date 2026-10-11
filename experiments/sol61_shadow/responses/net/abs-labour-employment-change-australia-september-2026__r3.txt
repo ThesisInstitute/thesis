@@ -1,0 +1,155 @@
+{
+  "slug": "abs-labour-employment-change-australia-september-2026",
+  "country": "AU",
+  "type": "data",
+  "title": "Australia September employment: registered resolver",
+  "question": "What will the first-print September 2026 seasonally adjusted Australian employed-persons level returned by LF/M3.3.1599.20.AUS.M be, in thousands, under the registered identity transform?",
+  "unit": "thousands",
+  "pointEstimate": 14860.0,
+  "ciLow": 14809.3,
+  "ciHigh": 14910.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-15",
+  "resolutionSource": "Australian Bureau of Statistics, Labour Force, Australia, ABS Data API",
+  "resolutionSourceUrl": "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+  "resolutionRule": "Use the September 2026 observation of LF/M3.3.1599.20.AUS.M at its first official publication, applying the registered identity transform with factor 1. This series measures employed persons, both sexes, total age, Australia, seasonally adjusted, in thousands. Round to the published precision of one decimal thousand. Ignore subsequent revisions and corrections, including same-day corrections. The registered identity resolver returns an employment level despite the employment_change target name; do not introduce an unregistered differencing transform.",
+  "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 14598.47016009
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 14610.98800683
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 14643.3047896
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 14602.00541269
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 14659.83407589
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 14693.94105678
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 14715.55875676
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 14736.48843385
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 14698.87739381
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 14734.60890885
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 14812.94821992
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 14797.08376474
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 14836.57710176
+    }
+  ],
+  "drivers": [
+    "Positive trailing employment growth",
+    "Stronger recent quarterly momentum",
+    "Survey modernisation and seasonal adjustment uncertainty",
+    "First-print exposure to level revisions"
+  ],
+  "sourceContext": [
+    "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2026",
+    "https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_labour"
+  ],
+  "runAt": "2026-10-07T12:27:30Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 Australian employment forecast under the registered resolver"
+    },
+    {
+      "kind": "text",
+      "text": "Concrete ledger discrepancy: the question spec names employment change, but the registered API series contains employed-persons levels and the transform is identity. Preserve the same slug, dataPointId and literal automatic resolver by forecasting the level. All employment anchors and historical observations use the seasonally adjusted Australian series."
+    },
+    {
+      "kind": "text",
+      "text": "The web reader could not access the API query. A subsequent curl -sS request to that official endpoint succeeded and echoed its complete JSON response, providing the history used here."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+      "result": "Fetched 30 monthly observations. Selected August 2025 through August 2026 levels, in thousands: 14598.47016009, 14610.98800683, 14643.3047896, 14602.00541269, 14659.83407589, 14693.94105678, 14715.55875676, 14736.48843385, 14698.87739381, 14734.60890885, 14812.94821992, 14797.08376474, 14836.57710176."
+    },
+    {
+      "kind": "text",
+      "text": "The official ABS calendar at https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_labour schedules September 2026 Labour Force, Australia for 15 October 2026 at 11:30am AEDT. This conflicts with the registered 20-28 October window; resolutionDate follows the verified announcement while retaining the registered target."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026, seasonally adjusted key statistics and employment section.",
+      "result": "August employment was 14,836,600 people, increasing 39,500. Full-time employment decreased 6,300 and part-time employment increased 45,800. The unemployment rate was 4.6% and participation was 67.1%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2026, seasonally adjusted employment table and embedded graph observations.",
+      "result": "July's release reported employment of 14,807,200 people and a monthly decrease of 15,800. Its embedded July seasonally adjusted level was 14807.24315 thousand, compared with 14797.08376474 thousand in the subsequently fetched API vintage."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is the 12 successive monthly changes from September 2025 through August 2026, calculated from 13 fetched levels. Their base rate is +19.842245 thousand per month; the last three changes average +33.989398 thousand. HistoricalContext contains the currently available revised vintage, rather than archived first prints. That distinction motivates an interval allowance for revisions."
+    },
+    {
+      "kind": "text",
+      "text": "Separate components: the August level supplies the persistence anchor; recent momentum receives a modest positive adjustment. ABS identifies possible seasonal effects from supplementary-survey changes but expects their impact to be smaller than normal sampling variability, so the directional one-off adjustment is zero. No separately quantified policy effect is supported by the fetched evidence, so the policy adjustment is zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a random walk with drift prior anchored at August's 14836.57710176 thousand. The historical sample is 12 monthly changes derived from August 2025-August 2026 levels. Prior drift = 238.10694167/12 = 19.84224514. Momentum adjustment = 0.25*(33.98939764-19.84224514) = 3.53678812; one-off and policy adjustments = 0. Point = 14836.57710176+19.84224514+3.53678812 = 14859.95613502. For this level series, use successive changes: sigma = 35.97313859 thousand, calculated as sqrt(14234.73369726/11). Normal 80% half-width = 1.28*sigma = 46.04561739. Multiply by 1.10 to allow for first-print revisions and survey changes, giving 50.65017913. Final implied bounds are 14809.30595589 and 14910.60631415; rounded forecast = 14860.0, interval [14809.3, 14910.6]."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: stronger hiring or a positive sample-composition surprise could lift the level above 14910.6 thousand, outside the interval. Downside risk: hiring weakness, reversal of August's part-time increase, or a negative seasonal or benchmark revision could push the level below 14809.3 thousand, outside the interval. Relative to the current August anchor, these bounds correspond approximately to gains above 74.0 thousand or losses exceeding 27.3 thousand."
+    },
+    {
+      "kind": "forecast",
+      "point": 14860.0,
+      "ciLow": 14809.3,
+      "ciHigh": 14910.6
+    }
+  ]
+}

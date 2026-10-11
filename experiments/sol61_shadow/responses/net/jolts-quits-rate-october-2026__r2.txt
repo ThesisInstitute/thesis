@@ -1,0 +1,137 @@
+{
+  "slug": "jolts-quits-rate-october-2026",
+  "country": "US",
+  "type": "data",
+  "title": "October 2026 US quits rate",
+  "question": "What will BLS report as the total nonfarm, seasonally adjusted quits rate for October 2026 in its first official JOLTS release?",
+  "unit": "percent",
+  "pointEstimate": 1.9,
+  "ciLow": 1.737,
+  "ciHigh": 2.063,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-01",
+  "resolutionSource": "Bureau of Labor Statistics JOLTS, Table 4 and Public Data API",
+  "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+  "resolutionRule": "Resolve to the first officially published October 2026 total nonfarm, seasonally adjusted quits rate, bound to BLS series JTS000000000000000QUR, year 2026, period M10, field value. Use the original reported percentage at BLS's published one-decimal precision, with multiplication factor 1 and no additional rounding. Freeze the first print; subsequent revisions and corrections do not change resolution.",
+  "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 1.9
+    }
+  ],
+  "drivers": [
+    "Persistence of the latest 1.9% quits rate",
+    "Recent first prints confined to 1.9%-2.0%",
+    "Stable hiring and subdued payroll growth",
+    "Two-month horizon and first-print uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/jolts.htm",
+    "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2025&endyear=2026",
+    "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03312026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_05052026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06022026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06302026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_08042026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09012026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09292026.htm",
+    "https://www.bls.gov/news.release/jolts.t04.htm",
+    "https://www.bls.gov/news.release/jolts.tn.htm",
+    "https://www.bls.gov/news.release/empsit.nr0.htm"
+  ],
+  "runAt": "2026-10-07T12:05:57Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 quits rate: persistence at 1.9%"
+    },
+    {
+      "kind": "text",
+      "text": "The target is BLS series JTS000000000000000QUR: total nonfarm quits rate, seasonally adjusted, Table 4, October 2026 first print. All quits-rate anchors and historical observations use this same variant. Quits are voluntary separations excluding retirements and transfers; the rate is quits divided by employment, multiplied by 100. The official BLS JOLTS calendar fetched this run explicitly schedules October 2026 data for December 1, 2026, at 10:00 AM Eastern Time, matching the registered resolution date."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Opened BLS archived JOLTS releases dated March 13, March 31, May 5, June 2, June 30, August 4, September 1, and September 29, 2026; read the current-month preliminary Total rate in seasonally adjusted Table 4.",
+      "result": "Fetched first prints, in percent: January 2026 2.0; February 1.9; March 2.0; April 1.9; May 1.9; June 2.0; July 1.9; August 1.9. These eight distinct monthly observations populate historicalContext."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the eight January-August 2026 first prints. Their mean is 1.9375%, and 1.9% occurred in five of eight months. The latest two prints both equal 1.9%. This supports a persistence forecast near 1.9% before considering current labor-market evidence."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2025&endyear=2026 and compared its latest-vintage observations with the archived first prints.",
+      "result": "The API returned January-August 2026 rates of 2.0, 1.9, 2.0, 1.9, 2.0, 2.0, 1.9, and 1.9 percent. August was marked preliminary. May's current value is 2.0%, compared with its archived first print of 1.9%; the forecast's historical dispersion uses the archived first prints."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Opened https://www.bls.gov/news.release/archives/jolts_09292026.htm and https://www.bls.gov/news.release/jolts.t04.htm for August labor demand and quits.",
+      "result": "August quits were 3.066 million and 1.9%; July quits were 3.089 million and 1.9%. August's job openings rate was 4.3%, the hires rate was 3.3%, and the layoffs and discharges rate was 1.0%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Opened https://www.bls.gov/news.release/empsit.nr0.htm, the October 2, 2026 Employment Situation release covering September.",
+      "result": "September nonfarm payroll employment increased by 29,000, compared with an average monthly increase of 45,000 over the preceding 12 months. The unemployment rate was 4.2%, within the reported 4.1%-4.3% range since March."
+    },
+    {
+      "kind": "text",
+      "text": "Level: retain August's 1.9% anchor. Momentum: the unchanged July-August rate supports no extrapolated drift. One-off effects: August's industry changes do not establish a persistent aggregate shift, so their point adjustment is zero. Policy mechanism: no quantified near-term effect is established by the fetched evidence, so its adjustment is zero. Subdued payroll growth and stable hiring support retaining the persistence prior; this is an inference, not a fitted relationship."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a zero-drift persistence prior at 1.9%, with zero momentum, one-off, and policy adjustments. The historical sample is eight fetched January-August 2026 first prints. Their seven successive changes are [-0.1, +0.1, -0.1, 0, +0.1, -0.1, 0] percentage points, with mean change -0.014286. Sample sigma = 0.089974 percentage points, calculated as sqrt((0.05 - 0.01/7)/6). The one-month normal 80% half-width is 1.28*0.089974 = 0.115166. October is two reference months beyond August; assuming independent monthly innovations, multiply by sqrt(2), giving a half-width of 0.162870. Thus 1.9 +/- 0.162870 gives [1.737130, 2.062870], rounded to final bounds [1.737, 2.063] percent. This is a nominal normal approximation with limited calibration from seven changes."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a broad hiring rebound that raises voluntary job switching, producing a 2.1% or higher first print outside the interval. The downside risk is an abrupt deterioration in job opportunities that suppresses quits to 1.7% or lower, also outside the interval. Survey noise or seasonal-factor changes could produce either tail even without a comparable economic shift."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.9,
+      "ciLow": 1.737,
+      "ciHigh": 2.063
+    }
+  ]
+}

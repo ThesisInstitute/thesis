@@ -1,0 +1,66 @@
+{
+  "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "USFS Minnesota FY2026 obligations",
+  "question": "What will the first registered official USAspending query snapshot report for FY2026 prime award transaction obligations awarded by the Forest Service, Department of Agriculture, with Minnesota place of performance, grouped by fiscal year and expressed in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Resolve using the registered FY2026 query snapshot: POST the exact registered filters, award type codes, transaction spending level, and fiscal-year grouping to the specified endpoint; select results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Preserve the returned amount's precision after conversion. Later revisions must not replace the registered snapshot. The exact snapshot date could not be verified from an official schedule in this run.",
+  "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-07T11:40:08Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required registered-query history unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the exact registered Forest Service awarding-subagency query for Minnesota place-of-performance prime award transaction obligations. Agency totals and state summaries cannot supply this series."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web.open requested https://api.usaspending.gov/api/v2/search/spending_over_time/ and returned 'Failed to fetch https://api.usaspending.gov/api/v2/search/spending_over_time/: (405) Method Not Allowed'. This was a GET lookup, not an executed registered POST query; no obligation amount was returned."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official endpoint documentation at https://api.usaspending.gov/docs/endpoints/ lists spending_over_time as POST. The available web tools expose no POST method or request-body parameter, and the run instructions prohibit shell networking. Consequently, the exact historical requests could not be executed."
+    },
+    {
+      "kind": "text",
+      "text": "The required base rate and reference class could not be fetched. No historical obligation values are asserted. An empty historicalContext records missing evidence, not a claim that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or other model was fitted because the mandatory historical sample is unavailable. Level, momentum, one-off, and policy adjustments cannot be estimated from fetched series evidence. Sigma and the corresponding interval half-width cannot be computed; point and bounds remain null."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched USAspending data-sources document describes daily award-data updates and reporting lags, but does not establish an exact release date for this registered query snapshot. The supplied October 15–22 expected window remains unverified; resolutionDate is null."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and outcomes outside the interval cannot be quantified without the required observations and an estimated interval. The prompt expressly requires refusal when the registered query cannot be executed."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null,
+      "text": "Refused with fetch evidence. No numeric forecast is issued."
+    }
+  ]
+}

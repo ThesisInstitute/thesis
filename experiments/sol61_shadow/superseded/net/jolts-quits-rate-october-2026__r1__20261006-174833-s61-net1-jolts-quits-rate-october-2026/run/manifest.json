@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:20Z",
+  "runStartedAt": "2026-10-07T10:14:20Z",
+  "series": "bls.jolts.quits_rate",
+  "period": "2026-10",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "jolts-quits-rate-october-2026",
+    "country": "US",
+    "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
+    "expectedReleaseDate": "2026-12-01",
+    "expectedReleaseWindow": {
+      "end": "2026-12-01",
+      "start": "2026-12-01"
+    },
+    "period": "2026-10",
+    "registeredAt": "2026-10-02T20:51:43Z",
+    "registeredAtUtc": "2026-10-02T20:51:43Z",
+    "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
+    "series": "bls.jolts.quits_rate",
+    "sourceBinding": {
+      "adapter": "bls-api",
+      "allowedHosts": [
+        "api.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-12-01",
+        "start": "2026-12-01"
+      },
+      "field": "value",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "JTS000000000000000QUR",
+      "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+      "table": "Job Openings and Labor Turnover Survey, quits rate, total nonfarm, seasonally adjusted (JOLTS news release, Table 4)",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "e34e567dd22af66b8a7fd7522759f16c936e8c17fc330767dc31316fd36ef905",
+    "targetRegistrationPath": "records/targets/2026-10-02-e34e567dd22af66b8a7fd7522759f16c936e8c17fc330767dc31316fd36ef905.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+  "targetContentHash": "e34e567dd22af66b8a7fd7522759f16c936e8c17fc330767dc31316fd36ef905",
+  "targetRegistrationPath": "records/targets/2026-10-02-e34e567dd22af66b8a7fd7522759f16c936e8c17fc330767dc31316fd36ef905.json",
+  "registeredAtUtc": "2026-10-02T20:51:43Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/prompt.md",
+      "sha256": "06b49d4faf68346572be5a741a8157411bfa9cc3a0775f103454f1f49efadc70",
+      "bytes": 10612,
+      "createdAt": "2026-10-07T10:14:20Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/command.json",
+      "sha256": "1ab2d69398bb9cb568afc715a9fab35802282821891ec0064673afb46a3747dc",
+      "bytes": 187,
+      "createdAt": "2026-10-07T10:14:20Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/stdout.txt",
+      "sha256": "41e9faa1566c9eda049941a417eec9bfc4950e27d8d28c22b72ca71894d7b439",
+      "bytes": 2407,
+      "createdAt": "2026-10-07T10:14:20Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:20Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/raw_response.txt",
+      "sha256": "41e9faa1566c9eda049941a417eec9bfc4950e27d8d28c22b72ca71894d7b439",
+      "bytes": 2407,
+      "createdAt": "2026-10-07T10:14:20Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/parsed_cells.json",
+      "sha256": "b1fcc9cd64c1592731d3d93a6fee5347ef5524344bae6ce06833beb8141470d1",
+      "bytes": 2521,
+      "createdAt": "2026-10-07T10:14:20Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/normalized_cells.json",
+      "sha256": "7df9c716bd18e00da4920f1c96a2a36f00f9aeff8c3da0beb7ba8f34674dd8db",
+      "bytes": 2363,
+      "createdAt": "2026-10-07T10:14:20Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:20Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/jolts-quits-rate-october-2026__r1/manifest.json",
+      "sha256": "f20ff3c45109c5a5300d26bdcad40eb640cf4797d0260b7069bb47edf3d4caf4",
+      "bytes": 4557,
+      "createdAt": "2026-10-07T10:14:20Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "867b8dd3806f01f7a828ace34d79b5bfc13e3f283353f0e7ed8619fbbf7c8530"
+}

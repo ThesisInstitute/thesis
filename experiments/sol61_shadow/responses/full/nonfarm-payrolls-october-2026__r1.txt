@@ -1,0 +1,199 @@
+{
+  "slug": "nonfarm-payrolls-october-2026",
+  "country": "US",
+  "type": "data",
+  "title": "October 2026 nonfarm payroll change",
+  "question": "What will be the FIRST PRINT of the October 2026 monthly change in US total nonfarm payroll employment, seasonally adjusted, BLS Current Employment Statistics series CES0000000001, in thousands, in Employment Situation Table B-1?",
+  "unit": "thousands",
+  "pointEstimate": 61,
+  "ciLow": -75,
+  "ciHigh": 197,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-06",
+  "resolutionSource": "US Bureau of Labor Statistics, Employment Situation, Table B-1",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+  "resolutionRule": "Resolve on the first publication of October 2026 US Current Employment Statistics series CES0000000001, all employees, total nonfarm, seasonally adjusted. Use Employment Situation Table B-1, Total nonfarm row, October 2026 seasonally adjusted level minus the September 2026 seasonally adjusted level in that SAME first release vintage, equivalently its published September-to-October change. Values are in thousands and rounded to the nearest integer thousand. The registered BLS API source is https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001; capture its original release vintage and corroborate with the agency release. Do not subtract the originally released September level from October's level. Subsequent monthly, benchmark, seasonal-factor revisions and corrections do not change the first-print outcome. BLS's official calendar fetched this run schedules publication for November 6, 2026, at 8:30 a.m. ET.",
+  "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": -105
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 64
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 50
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 130
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": -92
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 178
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 115
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 172
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 57
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": -23
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 162
+    },
+    {
+      "period": {"type": "month", "value": "2026-09"},
+      "label": "2026-09",
+      "value": 29
+    }
+  ],
+  "drivers": [
+    "Historical mean outperforms last-print persistence",
+    "Weak payroll growth and stable workweek",
+    "Low claims provide indirect support",
+    "Birth-death model change already present in recent prints",
+    "First-print volatility and government-employment shocks"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/empSit.htm",
+    "https://www.bls.gov/schedule/2026/11_sched.htm",
+    "https://www.bls.gov/bls/news-release/empsit.htm",
+    "https://www.bls.gov/news.release/empsit.nr0.htm",
+    "https://www.bls.gov/news.release/empsit.t17.htm",
+    "https://www.bls.gov/news.release/archives/empsit_12162025.htm",
+    "https://www.bls.gov/news.release/archives/empsit_01092026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_02112026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_03062026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_04032026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_05082026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_06052026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_07022026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_08072026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_09042026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf",
+    "https://www.bls.gov/news.release/archives/jolts_09292026.htm"
+  ],
+  "runAt": "2026-10-07T10:41:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 nonfarm payrolls: first-print forecast from official BLS vintages"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the monthly change in seasonally adjusted US total nonfarm employment, not the payroll level. Preserve the supplied slug, unit and dataPointId. Each historical change below is calculated from adjacent monthly levels within the same initial release, so revisions and annual benchmark level shifts cannot create spurious changes."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://www.bls.gov/schedule/news_release/empSit.htm; find October 2026; open https://www.bls.gov/news.release/empsit.nr0.htm",
+      "result": "The BLS calendar lists October 2026 -> Nov. 06, 2026, 08:30 AM. The September Employment Situation, released October 2, 2026, also announces the October release for November 6, 2026, 8:30 a.m. ET. This verifies resolutionDate=2026-11-06 directly."
+    },
+    {
+      "kind": "text",
+      "text": "The registered API endpoint was attempted through the web tool but was inaccessible. History was successfully fetched instead from official archived Employment Situation Table B-1 for the identical CES series, preserving original publication vintages. No revised API or mirror history was substituted. The BLS archive says no dedicated October 2025 release was published; its December 16 release explicitly identifies both October and November as initial establishment estimates."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open/find Table B-1 in https://www.bls.gov/news.release/archives/empsit_12162025.htm and https://www.bls.gov/news.release/archives/empsit_01092026.htm",
+      "result": "Official Table B-1 Total nonfarm SA levels, thousands: December 16, 2025 vintage September=159593, October=159488, November=159552, giving October first print -105 and November +64. January 9, 2026 vintage November=159476, December=159526, giving December first print +50. October's -105 is confirmed in Summary Table B and was its first publication."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open/find Table B-1 in https://www.bls.gov/news.release/archives/empsit_02112026.htm, https://www.bls.gov/news.release/archives/empsit_03062026.htm and https://www.bls.gov/news.release/archives/empsit_04032026.htm",
+      "result": "Official Table B-1 Total nonfarm SA levels, thousands: February 11 vintage December=158497, January=158627 -> January +130; March 6 vintage January=158558, February=158466 -> February -92; April 3 vintage February=158459, March=158637 -> March +178. The January release states that the birth-death model now incorporates current sample information monthly."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open/find Table B-1 in https://www.bls.gov/news.release/archives/empsit_05082026.htm, https://www.bls.gov/news.release/archives/empsit_06052026.htm and https://www.bls.gov/news.release/archives/empsit_07022026.htm",
+      "result": "Official Table B-1 Total nonfarm SA levels, thousands: May 8 vintage March=158621, April=158736 -> April +115; June 5 vintage April=158829, May=159001 -> May +172; July 2 vintage May=158927, June=158984 -> June +57. These are initial target-month changes, not their later revisions."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open/find Table B-1 in https://www.bls.gov/news.release/archives/empsit_08072026.htm, https://www.bls.gov/news.release/archives/empsit_09042026.htm and https://www.bls.gov/news.release/archives/empsit_10022026.htm; corroborate https://www.bls.gov/news.release/empsit.t17.htm",
+      "result": "Official Table B-1 Total nonfarm SA levels, thousands: August 7 vintage June=158881, July=158858 -> July -23; September 4 vintage July=158913, August=159075 -> August +162; October 2 vintage August=159015, September=159044 -> September +29. October 2 also reports revised July -10 and August +133; those revised changes are excluded from historicalContext. September workweek=34.4 hours, unemployment=4.2%, health-care growth=17 thousand, government change=-17 thousand."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: 12 monthly first-print changes from October 2025 through September 2026 are [-105,64,50,130,-92,178,115,172,57,-23,162,29] thousand. Their mean is +61.416667, median +60.5, sample standard deviation 96.802008 and range -105 to +178; 9 of 12 are positive. The mandatory last-print persistence benchmark is +29. Trailing-three-month mean is +56. No panel shrinkage is applicable."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmark comparison computed in memory from the fetched first prints: for each January-September 2026 outcome, forecast using only earlier first prints, with at least three training observations. Over the same 9 evaluation months, persistence MAE=133.888889 and RMSE=151.782373; trailing-three mean MAE=106.925926 and RMSE=115.343234; expanding mean MAE=95.473826 and RMSE=106.525950, all thousands. The expanding mean is the strongest tested simple benchmark on both scores. These are descriptive walk-forward scores; candidate selection reuses this small evaluation sample."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated before the agent forecast, in memory, with integer-thousand rounding of the point and half-width. Their normal predictive wrappers use scale=max(first-print sample standard deviation, candidate walk-forward RMSE); calibration_n counts walk-forward errors. Candidate set: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":29,\"p10\":-165,\"p50\":29,\"p90\":223,\"interval80\":{\"low\":-165,\"high\":223},\"interval90\":{\"low\":-221,\"high\":279},\"interval_method\":\"normal_predictive_wrapper_with_scale_max(first_print_sample_sd,walk_forward_rmse)\",\"calibration_n\":9,\"train_cutoff\":\"2026-09\",\"walk_forward_score\":{\"n\":9,\"start\":\"2026-01\",\"end\":\"2026-09\",\"mae\":133.888889,\"rmse\":151.782373}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_3_mean\",\"point\":56,\"p10\":-92,\"p50\":56,\"p90\":204,\"interval80\":{\"low\":-92,\"high\":204},\"interval90\":{\"low\":-134,\"high\":246},\"interval_method\":\"normal_predictive_wrapper_with_scale_max(first_print_sample_sd,walk_forward_rmse)\",\"calibration_n\":9,\"train_cutoff\":\"2026-09\",\"walk_forward_score\":{\"n\":9,\"start\":\"2026-01\",\"end\":\"2026-09\",\"mae\":106.925926,\"rmse\":115.343234}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_mean\",\"point\":61,\"p10\":-75,\"p50\":61,\"p90\":197,\"interval80\":{\"low\":-75,\"high\":197},\"interval90\":{\"low\":-114,\"high\":236},\"interval_method\":\"normal_predictive_wrapper_with_scale_max(first_print_sample_sd,walk_forward_rmse)\",\"calibration_n\":9,\"train_cutoff\":\"2026-09\",\"walk_forward_score\":{\"n\":9,\"start\":\"2026-01\",\"end\":\"2026-09\",\"mae\":95.473826,\"rmse\":106.525950}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select expanding_mean as the outside-view prior. Its unrounded point is 737/12=61.416667 thousand; rounded point +61 is 32 thousand above persistence. This change comes from the benchmark comparison rather than a current-news adjustment. The historical material-deviation threshold is max(1,0.25*2*1.28*96.802008)=61.953285 thousand, so that departure is below the threshold."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open/find https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf and https://www.bls.gov/news.release/archives/jolts_09292026.htm",
+      "result": "DOL October 1 release: September 26 initial claims SA=197000, prior revised=198000; four-week average=200000 versus 202500; September 19 insured unemployment SA=1701000 versus 1712000. BLS August JOLTS: openings=7079 thousand versus July 7335; hires=5192 thousand versus 5146; separations=5070 thousand versus 5128; quits rate=1.9%, layoffs rate=1.0%. These are official late-September publications about earlier periods, not October payroll observations."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view components: level adjustment 0 because the target is a change; momentum adjustment 0 because weak September hiring and stable hours already enter the benchmark history; claims adjustment 0 because lower claims are supportive but no fetched, calibrated payroll conversion justifies a point shift; JOLTS adjustment 0 because the signal is lagged and mixed; policy and one-off adjustments 0 because no direct October-specific official mechanism has been established. No strike-count adjustment is applied. All weights remain on the selected history benchmark."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior=expanding_mean of the 12 fetched October 2025-September 2026 first prints; sum=737, point=round(737/12)=61 thousand. Weight on prior=100%; level, momentum, claims, JOLTS, policy and one-off updates each=0. For this change/flow target, use the first-print changes themselves: sigma = 96.802008 = sqrt(103076.916667/(12-1)). Historical 80% half-width=1.28*sigma=123.906570. Widen by 106.525950/96.802008=1.100452 to include the selected benchmark's realized walk-forward forecast error, giving 136.353217; round half-width to 136. This also avoids narrowing away heterogeneity from the January birth-death model change and October 2025 government-payroll shock; neither receives a separate mean adjustment. Normal predictive wrapper implies bounds 61-136=-75 and 61+136=197 thousand. For the candidate's 90% interval, 1.644853627*106.525950=175.219596, rounded half-width175, giving [-114,236]."
+    },
+    {
+      "kind": "text",
+      "text": "Calibration check: the final 80% band contains 10 of the 12 reference prints and 9 of the latest 10. The same constant half-width contains 8 of the 9 selected-model walk-forward errors. These checks reuse calibration data and do not prove independent 80% coverage. The selected model's mean historical error is +38.732524 thousand, a possible underprediction concern; no automatic bias correction is added without separate validation. Only 9 of the 12 reference months use the current birth-death procedure."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a broad rebound in health care, leisure and hospitality and holiday retail hiring, accompanied by continued low claims, could produce more than +197 thousand and land outside the interval. Downside risk: a large new government-payroll exit or widespread unpaid strike or disruption during the pay period including October 12, combined with private-sector layoffs, could produce less than -75 thousand and land outside the interval. The December 2025 release documents an October 2025 federal-government loss of 162 thousand, establishing a fetched precedent for such a downside mechanism. These are stress scenarios, not assumed policy effects. Strong October reference-period hiring evidence would move the point up; an official count of payroll exits or a sharp claims increase would move it down."
+    },
+    {
+      "kind": "text",
+      "text": "Independence and provenance: no repository or other local files were inspected or changed, and no Thesis or Brier forecast or record was accessed. The requested catalog slug was retained from the supplied target context; the prohibited catalog lookup was skipped under the run override. Candidate computations and JSON validation occurred in memory. Activity artifacts and recorder receipts are left to the harness."
+    },
+    {
+      "kind": "forecast",
+      "point": 61,
+      "ciLow": -75,
+      "ciHigh": 197
+    }
+  ]
+}

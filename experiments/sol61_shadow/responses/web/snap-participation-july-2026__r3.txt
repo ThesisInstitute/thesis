@@ -1,0 +1,130 @@
+{
+  "slug": "snap-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation in July 2026",
+  "question": "What will USDA first officially publish for national SNAP Participation Persons in July 2026, unadjusted, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 35.975622,
+  "ciLow": 35.603447,
+  "ciHigh": 36.347798,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA SNAP national monthly participation tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve to the July 2026 Participation Persons value in the first official publication of USDA's national monthly SNAP table. Use the unadjusted national total, including disaster assistance incorporated by the agency. Convert published thousands to millions by multiplying by 0.001; if published as individual persons, divide by 1000000. Preserve published precision after conversion. Ignore subsequent revisions and corrections, including same-day corrections.",
+  "dataPointId": "usda.fns.snap.persons.july_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 38.54773
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 37.870817
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 37.298271
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 37.011096
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 36.562128
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Persistent participation decline",
+    "Slower recent declines",
+    "Eligibility changes applied at recertification",
+    "Variation in initial state reporting"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://www.usda.gov/sites/default/files/guidance-documents/fns.snap-obbb-abawd-exceptions-implementation.pdf"
+  ],
+  "runAt": "2026-10-07T11:56:38Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "July 2026 SNAP national participation forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is fns.snap.total_persons, July 2026, first print. HistoricalContext uses the national TOTAL from the Initial column of each archived SNAP Number of Persons Participating table, snap-persons-4.pdf through snap-persons-9.pdf. These are unadjusted participation counts for the same national concept; revised values are excluded from the forecasting sample. This is monthly participation, not annual fiscal-year quality-control data or biannual county participation."
+    },
+    {
+      "kind": "text",
+      "text": "Two concrete ledger discrepancies remain. The registered FNS URL returned an access error, while the official table page identifies Food and Nutrition Administration and links to the fetched USDA CDN documents. The current national table publishes individual persons rather than thousands. Dividing those counts by 1000000 produces the registered millions unit; equivalently, first convert persons to thousands and then apply the ledger's 0.001 factor. The target identifier and registered resolution URL are retained."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the January Initial national TOTAL through official search results for snap-persons-4.pdf and open the February table snap-persons-5.pdf.",
+      "result": "January 2026 Initial: 38,547,730 persons, in the table dated April 10, 2026. February 2026 Initial: 37,870,817 persons, in the table dated May 8, 2026. Converted values: 38.547730 and 37.870817 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open official archived snap-persons-6.pdf and snap-persons-7.pdf and read their Initial national TOTAL columns.",
+      "result": "March 2026 Initial: 37,298,271 persons, data as of June 12, 2026. April 2026 Initial: 37,011,096 persons, data as of July 10, 2026. Converted values: 37.298271 and 37.011096 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open official archived snap-persons-8.pdf and follow the official SNAP table-page link to snap-persons-9.pdf.",
+      "result": "May 2026 Initial: 36,562,128 persons, data as of August 14, 2026. June 2026 Initial: 36,352,716 persons, data as of September 11, 2026. Converted values: 36.562128 and 36.352716 million."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is declining participation: all five successive changes in the six-print January-June Initial reference class are negative. Their mean is -0.4390028 million per month. The latest three changes average -0.315185 million, supporting partial adjustment toward a slower decline."
+    },
+    {
+      "kind": "text",
+      "text": "The official USDA ABAWD implementation memorandum expands the affected age range from 18-54 to 18-64 and changes the dependent-child exception from under 18 to under 14. It directs screening at initial applications and recertification. Continued attrition as cases recertify is an inference from this mechanism. Its effect is already represented in the observed drift, so no additional policy subtraction is imposed. No separately quantified July one-off or seasonal adjustment is added."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use June Initial participation of 36.352716 million as the persistence level and the six January-June Initial prints as the historical sample. Successive changes are -0.676913, -0.572546, -0.287175, -0.448968 and -0.209412 million. Sample sigma = 0.193841411 million, calculated as sqrt(0.150297971 / 4). Add full-sample drift of -0.4390028 and a momentum adjustment of 0.5 * (-0.315185 - (-0.4390028)) = +0.0619089; separate one-off and incremental policy adjustments are zero. The normal 80% half-width is 1.28 * sigma = 0.248117007 million. Multiply by an analyst-chosen 1.5 to accommodate the small sample, changing drift and initial-reporting uncertainty, giving 0.372175510 million and final bounds of 35.603447 to 36.347798 million. This is a nominal model interval, not an independently calibrated coverage estimate."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 36.352716 - 0.4390028 + 0.0619089 = 35.9756221 million. Half-width = 1.5 * 1.28 * 0.193841411364 = 0.372175509819 million. Bounds = 35.9756221 +/- 0.372175509819 = [35.603446590181, 36.347797609819], rounded to six decimal places."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is slower recertification attrition or reporting catch-up: participation unchanged from June would land above the interval's 36.347798 million upper bound. The downside risk is concentrated state case closures or incomplete initial reporting: a decline of more than approximately 0.749269 million from June would land below 35.603447 million. These mechanisms could put the first print outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar verification failed: no official release calendar or announcement schedule establishing the July national monthly release date was fetched. The official overview identifies June 2026 as the latest available month and is updated September 18, 2026. The table page's December reporting note applies to biannual county/project-area data and cannot verify this target's date. resolutionDate is therefore null rather than an inferred date; this object does not satisfy the required release-date validation."
+    },
+    {
+      "kind": "forecast",
+      "point": 35.975622,
+      "ciLow": 35.603447,
+      "ciHigh": 36.347798
+    }
+  ]
+}

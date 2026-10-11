@@ -1,0 +1,137 @@
+{
+  "slug": "us-unit-labor-costs-q3-2026-prelim",
+  "country": "US",
+  "type": "data",
+  "title": "US unit labor costs, Q3 2026 preliminary",
+  "question": "What will BLS report for nonfarm business sector unit labor costs in 2026-Q3, seasonally adjusted percent change from the previous quarter at an annual rate, in the first preliminary Productivity and Costs release?",
+  "unit": "percent_growth",
+  "pointEstimate": 1.9,
+  "ciLow": -1.2,
+  "ciHigh": 5.0,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-05",
+  "resolutionSource": "BLS Productivity and Costs, Table 2",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/prod2.t02.htm",
+  "resolutionRule": "Resolve to the 2026-Q3 observation for PRS85006112 in the earliest ALFRED vintage containing that observation, corresponding to the first official BLS preliminary nonfarm business sector unit labor costs print: seasonally adjusted percent change from the previous quarter at an annual rate, as shown in Table 2. Apply the registered multiplication factor of 1 and retain the published one-decimal precision. Ignore subsequent corrections and revisions; there is no release-day grace period.",
+  "dataPointId": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 3.0
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 5.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 1.6
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": -1.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 2.3
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 1.3
+    }
+  ],
+  "drivers": [
+    "Recent first-print base rate near 2.1%",
+    "Weak persistence toward the latest 1.3% print",
+    "Slower compensation growth and stronger productivity in recent preliminary releases",
+    "Volatile quarterly productivity and preliminary source data"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/prod2.htm",
+    "https://www.bls.gov/news.release/prod2.t02.htm",
+    "https://alfred.stlouisfed.org/series?seid=PRS85006112",
+    "https://www.bls.gov/news.release/archives/prod2_11072024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02062025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05082025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08072025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_01082026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_03052026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05072026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08062026.htm"
+  ],
+  "runAt": "2026-10-07T12:23:53Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Q3 2026 preliminary nonfarm business unit labor costs"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is BLS Table 2 unit labor costs, series PRS85006112: seasonally adjusted quarter-on-quarter percent change at an annual rate, first preliminary print. All historical values and component anchors below use that preliminary release variant. Revised, year-over-year, index-level, business-sector, and manufacturing-sector figures are excluded from the forecast calculation."
+    },
+    {
+      "kind": "text",
+      "text": "The official BLS Productivity and Costs calendar fetched this run schedules Third Quarter 2026 (P) for November 5, 2026 at 08:30 AM Eastern. Its December 8 revision does not resolve this target. The verified preliminary date falls within the registered release window."
+    },
+    {
+      "kind": "text",
+      "text": "An optional BLS archive-index lookup returned a web-tool internal error and supplied no evidence. Direct official release archive fetches succeeded for all eight historical prints used below; no missing history was replaced with remembered values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open BLS preliminary archives https://www.bls.gov/news.release/archives/prod2_11072024.htm and https://www.bls.gov/news.release/archives/prod2_02062025.htm; read release headings and nonfarm business results.",
+      "result": "First-print unit labor costs: 2024-Q3 1.9%, released November 7, 2024; 2024-Q4 3.0%, released February 6, 2025. Corresponding hourly compensation/productivity growth: 4.2%/2.2% and 4.2%/1.2%. Both releases explicitly identify quarterly changes as seasonally adjusted annualized rates."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open BLS preliminary archives prod2_05082025.htm, prod2_08072025.htm, prod2_01082026.htm, and prod2_03052026.htm under https://www.bls.gov/news.release/archives/; read nonfarm business release results.",
+      "result": "First-print unit labor costs: 2025-Q1 5.7%, 2025-Q2 1.6%, 2025-Q3 -1.9%, and 2025-Q4 2.8%. Corresponding hourly compensation/productivity growth: 4.8%/-0.8%, 4.0%/2.4%, 2.9%/4.9%, and 5.7%/2.8%. Q3's preliminary print was released January 8, 2026; Q4's was released March 5, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open BLS preliminary archives https://www.bls.gov/news.release/archives/prod2_05072026.htm and https://www.bls.gov/news.release/archives/prod2_08062026.htm; read release results and Table A1.",
+      "result": "First-print unit labor costs: 2026-Q1 2.3%, released May 7, 2026; 2026-Q2 1.3%, released August 6, 2026. Hourly compensation growth was 3.1% and 2.7%; productivity growth was 0.8% and 1.4%, respectively."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is eight consecutive preliminary first prints from 2024-Q3 through 2026-Q2. Their sum is 16.7 and their arithmetic mean, the base rate, is 2.0875%. Their observed range is -1.9% to 5.7%; preliminary quarterly growth is materially volatile."
+    },
+    {
+      "kind": "text",
+      "text": "Level: positive hourly compensation growth supports a positive unit-cost center. Momentum: the latest preliminary releases show compensation slowing from 3.1% to 2.7% while productivity strengthens from 0.8% to 1.4%, supporting a modest downward update. One-off effects: the earlier 4.9% productivity surge and negative unit-cost print are retained in dispersion but are not assumed to recur. Policy mechanism: no separately quantified policy effect is established by the fetched evidence, so its explicit adjustment is zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a judgmental shrinkage model with 75% weight on the eight-print historical mean and 25% on the latest first print. The base-rate prior is 2.0875%; the momentum adjustment is 0.25*(1.3-2.0875) = -0.196875 percentage point; separate one-off and policy adjustments are zero. Point = 2.0875-0.196875 = 1.890625%, rounded to 1.9%. Because the target is a growth measure, calculate dispersion from the eight growth values themselves: sum((x-2.0875)^2) = 31.22875; sigma = 2.112167 = sqrt(31.22875/7). Baseline 80% half-width = 1.28*sigma = 2.703574 percentage points. Apply a judgmental 1.15 multiplier for the short sample and uncertainty in preliminary output, hours, and compensation: half-width = 3.109110. Bounds = 1.9 +/- 3.109110 = [-1.209110, 5.009110], rounded to [-1.2%, 5.0%]. This is a nominal 80% predictive interval, not an empirically guaranteed coverage rate."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is strong compensation growth with weak productivity; the downside risk is a productivity surge with softer compensation. Hypothetically combining the fetched 5.7% compensation rate with -0.8% productivity gives 100*(1.057/0.992-1) = 6.6%, above the interval. Combining fetched 2.7% compensation with 4.9% productivity gives 100*(1.027/1.049-1) = -2.1%, below the interval. These hypothetical component combinations would land outside the interval; they are scenarios rather than observed joint outcomes."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.9,
+      "ciLow": -1.2,
+      "ciHigh": 5.0
+    }
+  ]
+}

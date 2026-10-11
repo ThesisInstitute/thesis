@@ -1,0 +1,60 @@
+{
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD unique prime contract recipients, FY2026",
+  "question": "What is the count, in thousands, of distinct non-null results[].recipient_id values returned by the registered USAspending API v2 recipient-category query for FY2026 Department of Defense prime-contract transactions, using awarding-agency filters and award type codes A, B, C, and D, at the first registered query snapshot? The count is not seasonally adjusted.",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered recipient-category query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "Preserve the registered_query_snapshot resolver: POST the registered query to the specified endpoint for FY2026, filter the awarding toptier agency to Department of Defense and award type codes to A, B, C, and D, use transactions spending level, paginate with page size 100 through all results, exclude null recipient_id identities, count distinct results[].recipient_id values, and multiply by 0.001 to report thousands to three decimal places. Later snapshots do not replace the registered resolving snapshot. The supplied target does not specify a resolutionDate or an exact snapshot capture date; its expectedReleaseWindow does not establish either.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+    "https://api.usaspending.gov/docs/endpoints"
+  ],
+  "runAt": "2026-10-07T10:33:18Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target is defined by the registered recipient-category POST query. Agency totals, published contractor counts, and search summaries cannot substitute for its distinct recipient_id count."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+      "result": "The web tool reported: Failed to fetch https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/: (405) Method Not Allowed. This was web open, not execution of the required POST query; no recipient records or historical counts were obtained."
+    },
+    {
+      "kind": "text",
+      "text": "Official endpoint documentation fetched at https://api.usaspending.gov/docs/endpoints lists POST for the recipient-category endpoint. The available web tools expose no HTTP method or request-body parameter. Shell networking is prohibited by the run instructions, so the registered query cannot be executed with the permitted tools."
+    },
+    {
+      "kind": "text",
+      "text": "No historicalContext values were fetched. This is a tool-access failure, not evidence that the official source exposes fewer than six prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate, persistence benchmark, model candidates, sigma, and forecast interval cannot be computed without the exact-query historical counts. Null estimates record refusal and are not a scored forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target context omits resolutionDate and resolutionDateBasis. Its expectedReleaseWindow is not a verified agency calendar date or a registered outer deadline. No resolution date has been inferred."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied slug, unit, dataPointId, and resolver endpoint are preserved. The catalog check was skipped under the explicit independence prohibition. This object intentionally cannot satisfy numeric forecast or history validation; fabricating those fields would violate the evidence requirements."
+    }
+  ]
+}

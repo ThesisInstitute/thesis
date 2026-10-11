@@ -1,0 +1,66 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ky",
+  "country": "US",
+  "type": "data",
+  "title": "Kentucky August 2026 ex parte renewal share",
+  "question": "Kentucky's ex parte renewal share for August 2026, from the original (O) submission in CMS State Medicaid and CHIP Eligibility Processing Data, first official publication, rounded to one decimal.",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Kentucky's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "resolutionPolicy": "first_print",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ky.aug_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=KY&conditions%5B0%5D%5Boperator%5D=%3D&limit=100",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data"
+  ],
+  "runAt": "2026-10-07T00:02:40Z",
+  "status": "failed",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Run stopped without a forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The initial official API fetch succeeded and exposed Kentucky original-submission history. No local files or prohibited forecast sources were accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Kentucky rows from CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c through its datastore API; read the echoed JSON response.",
+      "result": "Original rows, reporting period: ex parte renewed / total renewed / renewal due. 202601: 117179 / 130740 / 153237; 202602: 108463 / 120604 / 139700; 202603: 122481 / 136787 / 158568; 202604: 119284 / 134761 / 154822; 202605: 70076 / 77737 / 91933; 202606: 47629 / 50982 / 56235."
+    },
+    {
+      "kind": "text",
+      "text": "A subsequent request intended to narrow the successful history response returned status 400 with 'JSON Schema validation failed.' Following the instruction to stop after a failed fetch, no retry or further evidence fetch was performed."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched CMS publication page listed retrospective releases but did not verify an August 2026 publication date. The supplied resolutionDate, 2026-12-15, is preserved as ledger context and remains unverified. CMS specifications describe state submission deadlines, which do not establish a public release date."
+    },
+    {
+      "kind": "text",
+      "text": "The ledger does not explicitly identify the share denominator. CMS distinguishes renewals due, Metric 5, from total renewed, Metric 5a; ex parte renewals are Metric 5a1. The stopped run did not establish which denominator the registered share requires."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No base rate, persistence prior, sigma, or 80% interval was finalized because the run stopped and the exact share denominator and official release date were not verified. Null estimates indicate failure, not numerical forecasts."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "slug": "continued-claims-week-2026-09-26",
+  "country": "US",
+  "type": "data",
+  "title": "US continued claims, week ending September 26",
+  "question": "What will the US Department of Labor ETA first advance print of seasonally adjusted continued claims (insured unemployment) be for the week ending September 26, 2026, in millions?",
+  "unit": "millions",
+  "pointEstimate": 1.696,
+  "ciLow": 1.669,
+  "ciHigh": 1.722,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-08",
+  "resolutionSource": "US Department of Labor, Unemployment Insurance Weekly Claims",
+  "resolutionSourceUrl": "https://www.dol.gov/ui/data.pdf",
+  "resolutionRule": "Resolve to the first official advance seasonally adjusted insured unemployment count for the week ending 2026-09-26, using the earliest ALFRED CCSA advance vintage containing that observation and corroborating it against DOL's release. Multiply the published count by 0.000001 to express millions, preserving published precision: 1,000 claims equals 0.001 million. Subsequent corrections, revisions, and seasonal-factor updates do not change the resolved value. Preserve the registered observation period even though its expected release window appears one week late.",
+  "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "week_ending",
+        "value": "2026-08-01"
+      },
+      "label": "week ending 2026-08-01",
+      "value": 1.777
+    },
+    {
+      "period": {
+        "type": "week_ending",
+        "value": "2026-08-08"
+      },
+      "label": "week ending 2026-08-08",
+      "value": 1.799
+    },
+    {
+      "period": {
+        "type": "week_ending",
+        "value": "2026-08-15"
+      },
+      "label": "week ending 2026-08-15",
+      "value": 1.778
+    },
+    {
+      "period": {
+        "type": "week_ending",
+        "value": "2026-08-22"
+      },
+      "label": "week ending 2026-08-22",
+      "value": 1.779
+    },
+    {
+      "period": {
+        "type": "week_ending",
+        "value": "2026-08-29"
+      },
+      "label": "week ending 2026-08-29",
+      "value": 1.774
+    },
+    {
+      "period": {
+        "type": "week_ending",
+        "value": "2026-09-05"
+      },
+      "label": "week ending 2026-09-05",
+      "value": 1.73
+    },
+    {
+      "period": {
+        "type": "week_ending",
+        "value": "2026-09-12"
+      },
+      "label": "week ending 2026-09-12",
+      "value": 1.719
+    },
+    {
+      "period": {
+        "type": "week_ending",
+        "value": "2026-09-19"
+      },
+      "label": "week ending 2026-09-19",
+      "value": 1.701
+    }
+  ],
+  "drivers": [
+    "Persistence of the latest continued-claims level",
+    "Recent downward momentum in original seasonally adjusted prints",
+    "Weekly seasonal-adjustment and advance-reporting variability",
+    "Uncertain benefit exits and state reporting timing"
+  ],
+  "sourceContext": [
+    "https://www.dol.gov/ui/data.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261413.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261430.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf?trk=article-ssr-frontend-pulse_little-text-block",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261529.pdf",
+    "https://oui.doleta.gov/unemploy/claims_arch.asp",
+    "https://fred.stlouisfed.org/series/CCSA",
+    "https://alfred.stlouisfed.org/releases/calendar?rid=180&y=2026"
+  ],
+  "runAt": "2026-10-07T12:48:52Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast of first-print continued claims for September 26, 2026"
+    },
+    {
+      "kind": "text",
+      "text": "The target is DOL ETA's regular-state-program Insured Unemployment (SA) row, mirrored as series CCSA. Every historical anchor below is an original seasonally adjusted continued-claims print. August 1 and September 12 originals are recovered from explicit revision prose in later official releases. The target remains the September 26 observation and its first advance vintage."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open DOL's August 20 and August 27 archived releases: https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261413.pdf and https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261430.pdf.",
+      "result": "The August 20 release reports August 8 advance SA insured unemployment of 1,799,000 and explicitly revises August 1 from its original 1,777,000 to 1,781,000. The August 27 release reports August 15 advance SA insured unemployment of 1,778,000."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open DOL's September 3 and September 10 archived releases: https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf and https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf?trk=article-ssr-frontend-pulse_little-text-block.",
+      "result": "September 3 reports August 22 advance SA insured unemployment of 1,779,000. September 10 reports August 29 advance SA insured unemployment of 1,774,000."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open DOL's September 17 release at https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261529.pdf.",
+      "result": "September 5 advance SA insured unemployment was 1,730,000. The release separately identifies the prior August 29 original as 1,774,000, revised to 1,769,000."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open DOL's October 1 release at https://www.dol.gov/ui/data.pdf.",
+      "result": "September 19 advance SA insured unemployment was 1,701,000. September 12 was revised down 7,000 from its original 1,719,000 to 1,712,000. The forecast sample uses the original 1,719,000."
+    },
+    {
+      "kind": "text",
+      "text": "Release timing: DOL's claims archive publishes its Thursday morning schedule and holiday exceptions. ALFRED's release calendar explicitly lists October 8 and October 15, 2026, and says dates are supplied by data sources. The CCSA page explicitly names October 8 as its next release date. Correspondence of that release to September 26 continued claims is prospective inference from the latest published September 19 observation. The registered October 14-18 window appears one week late; resolutionDate reflects the verified October 8 schedule while preserving the registered target."
+    },
+    {
+      "kind": "text",
+      "text": "The optional ALFRED graph CSV lookup failed with an Internal Error, and the direct DOL economic-data calendar returned 403 Forbidden. Those fetch efforts were stopped. Successful official DOL PDFs supplied the eight-print history; the fetched DOL publication schedule and explicit Federal Reserve calendar supplied release timing."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is eight consecutive original prints from August 1 through September 19. Their mean level is 1.757125 million, but the latest level is 1.701 million. The seven successive changes average -0.010857143 million per week. Persistence therefore provides the level anchor, with a modest downward momentum adjustment."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior at 1.701 million and the eight-print original-vintage sample. Successive changes in millions are [0.022, -0.021, 0.001, -0.005, -0.044, -0.011, -0.018], with mean -0.010857143. Apply half that mean as momentum: -0.005428571; impose one-off and policy-mechanism adjustments of zero. Point = 1.701 - 0.005428571 = 1.695571429 million. Sample sigma = 0.0204403895 million, calculated as sqrt(0.002506857143 / (7 - 1)). A normal-approximation 80% half-width is 1.28*sigma = 0.026163699 million, without additional widening or narrowing. Unrounded bounds are 1.669407730 and 1.721735127; rounding to 0.001 million gives point 1.696 and bounds [1.669, 1.722]."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: slower exits from benefits or a catch-up in delayed state reporting could reverse the recent decline; a print above 1.722 million would land outside the interval. Downside risk: faster benefit exits, exhaustion, or another unusually large weekly decline could produce a print below 1.669 million, outside the interval. The empirical interval is approximate because it uses seven weekly changes."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.696,
+      "ciLow": 1.669,
+      "ciHigh": 1.722
+    }
+  ]
+}

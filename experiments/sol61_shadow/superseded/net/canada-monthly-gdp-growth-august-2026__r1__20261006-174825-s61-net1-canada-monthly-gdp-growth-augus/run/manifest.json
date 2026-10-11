@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:13Z",
+  "runStartedAt": "2026-10-07T10:14:13Z",
+  "series": "statcan.gdp_by_industry.monthly_growth",
+  "period": "2026-08",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "canada-monthly-gdp-growth-august-2026",
+    "country": "CA",
+    "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+    "expectedReleaseDate": "2026-10-30",
+    "expectedReleaseWindow": {
+      "end": "2026-10-30",
+      "start": "2026-10-30"
+    },
+    "period": "2026-08",
+    "registeredAt": "2026-08-12T21:16:44Z",
+    "registeredAtUtc": "2026-08-12T21:16:44Z",
+    "registrationCommit": "d50ffb7c957ea27fad25c6e0c6fee0aa2471bc84",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "series": "statcan.gdp_by_industry.monthly_growth",
+    "sourceBinding": {
+      "adapter": "statcan-wds",
+      "allowedHosts": [
+        "www150.statcan.gc.ca"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-30",
+        "start": "2026-10-30"
+      },
+      "field": "v65201210",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "v65201210",
+      "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+      "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+      "transform": {
+        "factor": 1,
+        "operation": "percent_change_previous_period"
+      }
+    },
+    "targetContentHash": "778113191d1d7e73b43cd7e74053741e8877f59bae7e55d100ed2fc1206efee3",
+    "targetRegistrationPath": "records/targets/2026-08-12-778113191d1d7e73b43cd7e74053741e8877f59bae7e55d100ed2fc1206efee3.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "d50ffb7c957ea27fad25c6e0c6fee0aa2471bc84",
+  "targetContentHash": "778113191d1d7e73b43cd7e74053741e8877f59bae7e55d100ed2fc1206efee3",
+  "targetRegistrationPath": "records/targets/2026-08-12-778113191d1d7e73b43cd7e74053741e8877f59bae7e55d100ed2fc1206efee3.json",
+  "registeredAtUtc": "2026-08-12T21:16:44Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/prompt.md",
+      "sha256": "d2ef774d94917234844e559851ac048eaf449a0162d41badd8e42629784ed703",
+      "bytes": 10552,
+      "createdAt": "2026-10-07T10:14:13Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/command.json",
+      "sha256": "9ba8471d1b50e53ee7999117332f4d2b9f295e3430a1c1cb988651ace2b9c01a",
+      "bytes": 195,
+      "createdAt": "2026-10-07T10:14:13Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/stdout.txt",
+      "sha256": "738210928680a8156fbcf7cc2e61d191b232f630eb08109dfd0bb22f124b96da",
+      "bytes": 5259,
+      "createdAt": "2026-10-07T10:14:13Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:13Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/raw_response.txt",
+      "sha256": "738210928680a8156fbcf7cc2e61d191b232f630eb08109dfd0bb22f124b96da",
+      "bytes": 5259,
+      "createdAt": "2026-10-07T10:14:13Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/parsed_cells.json",
+      "sha256": "4ceed746ddaac34f3d0df31984510b248f43203fa1af6b072d513ee631d83b5c",
+      "bytes": 5467,
+      "createdAt": "2026-10-07T10:14:13Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/normalized_cells.json",
+      "sha256": "be16b942a521cf19da7fdeda7a4e98abb91bf1898e037cc31a62137ba23ca0d4",
+      "bytes": 5143,
+      "createdAt": "2026-10-07T10:14:13Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:13Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/canada-monthly-gdp-growth-august-2026__r1/manifest.json",
+      "sha256": "321481b4c92cb492219dc8e8ea497522d609ca141ec253e092bb64dc3fc64aad",
+      "bytes": 4713,
+      "createdAt": "2026-10-07T10:14:13Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "e991a21ac0d3477c5d822d08d6a283f6da1081be8dca4d08ac7f64047de5eb59"
+}

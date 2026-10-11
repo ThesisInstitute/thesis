@@ -1,0 +1,57 @@
+[
+ {
+  "slug": "canada-ei-regular-beneficiaries-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "August 2026 EI forecast unavailable",
+  "question": "What will Statistics Canada's first official print report for August 2026 Employment Insurance regular beneficiaries in Canada, seasonally adjusted, in thousands?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Statistics Canada",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+  "resolutionRule": "Resolve using the first official August 2026 observation for vector v64549350 in Statistics Canada Table 14-10-0011-01, Canada Employment Insurance regular beneficiaries, seasonally adjusted. Multiply the published persons value by 0.001 to express thousands, preserving published precision. Exclude subsequent revisions; apply no correction or release-day grace exception.",
+  "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.august_2026.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [],
+  "runAt": "2026-10-06T21:51:08Z",
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Forecast stopped because the official history fetch failed"
+   },
+   {
+    "kind": "text",
+    "text": "The registered target is August 2026 Canada EI regular beneficiaries, seasonally adjusted, vector v64549350, Table 14-10-0011-01. The required unit is thousands."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "Fetch https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350&startRefPeriod=20250101&endReferencePeriod=20260831",
+    "result": "Fetch failed: Fatal error: network error: error sending request. No official statistical observations were returned."
+   },
+   {
+    "kind": "text",
+    "text": "The mandatory base rate and reference class could not be fetched. Following the instruction to stop after a failed fetch, no remembered or invented values were substituted."
+   },
+   {
+    "kind": "text",
+    "text": "The official release date was not verified before the run stopped. resolutionDate is therefore null."
+   },
+   {
+    "kind": "math",
+    "text": "Prior/update/interval: No persistence prior, historical sample, adjustment components, or realized-dispersion interval could be estimated without fetched observations. Sigma and the 1.28*sigma half-width are unavailable; the point estimate and bounds remain null."
+   },
+   {
+    "kind": "forecast",
+    "point": null,
+    "ciLow": null,
+    "ciHigh": null
+   }
+  ]
+ }
+]
