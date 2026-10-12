@@ -999,11 +999,13 @@ fold described in the next subsection, and left `waivers.json`
 The docket pins each series to one Chronicle lineage
 (`scripts/docket_series.json` `ledger.uuid`), and
 `tests/test_docket_ledger_containment.py` re-derives that pin from the series
-catalog. Catalog identity is concept, geography and entity. Once a docket entry
-declares a `sourceSeriesId`, that id must appear in the `source_concepts` of
-exactly one candidate lineage; when several lineages survive the filters and
-none lists it, the gate refuses (`declared binding ... needed but matched
-nothing`), and `scripts/stamp_docket_ledger_refs.py` applies the same rule.
+catalog. Catalog identity is concept, geography and entity. When several
+candidate lineages survive the geography, cadence and unit filters and the
+docket entry declares a `sourceSeriesId`, that id must appear in the
+`source_concepts` of exactly one of them; if none lists it, the gate refuses
+(`declared binding ... needed but matched nothing`). A sole surviving
+candidate is pinned whether or not its source labels include the id yet.
+`scripts/stamp_docket_ledger_refs.py` applies the same rule.
 
 Until October 2026 each of these three concepts had two observed lineages in
 Chronicle's catalog: the hand-recorded May 2026 print with a bespoke entity,
