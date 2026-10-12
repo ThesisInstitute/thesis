@@ -994,7 +994,7 @@ The unemployment rate and the two CPI series have verified specs and anchors
 but no docket template, because of a Chronicle lineage conflict described in
 the next subsection. They stay in `waivers.json` `templateless_docket_series`.
 
-## Three series wait on a Chronicle lineage decision
+## Three series took their templates after a Chronicle lineage fold
 
 The docket pins each series to one Chronicle lineage
 (`scripts/docket_series.json` `ledger.uuid`), and
@@ -1005,36 +1005,41 @@ exactly one candidate lineage; when several lineages survive the filters and
 none lists it, the gate refuses (`declared binding ... needed but matched
 nothing`), and `scripts/stamp_docket_ledger_refs.py` applies the same rule.
 
-In the frozen catalog fixture each of these three concepts has two observed
-lineages:
+Until October 2026 each of these three concepts had two observed lineages in
+Chronicle's catalog: the hand-recorded May 2026 print with a bespoke entity,
+and every resolver print with `economy/aggregate`, the entity
+`generic_fact` writes when a spec sets none. The BLS series id was in neither,
+so the templates could not be committed without loosening the rule, and this
+repository did not loosen it.
 
-| Series | Lineage the docket pins | Other lineage |
+Max ruled on 2026-09-27 (d353) that the `economy/aggregate` lineage survives.
+Chronicle's catalog builder gained curated entity folds
+(`ledger/seeds/entity_folds.json`, PolicyEngine/chronicle#344), which read the
+absorbed entity's rows as the survivor's when identities are grouped, without
+changing the observation file. Seven entity-drift families were folded; the
+catalog went from 228 to 221 series.
+
+| Series | Pin before | Pin after (`economy/aggregate`) |
 |---|---|---|
-| `bls.cps.unemployment_rate` | `8dbbd54f`, entity `person/civilian_labor_force`, 1 observation from 2026-05, source `bls.cps.unemployment_rate` | `db2f3857`, entity `economy/aggregate`, 2 observations from 2026-06, source `UNRATE` |
-| `bls.cpi.u.headline_mom` | `3e796803`, entity `household/cpi_u_all_items`, 1 observation from 2026-05, source `bls.cpi.u.headline_mom.may_2026` | `70ca2ecf`, entity `economy/aggregate`, 2 observations from 2026-06, source `CPIAUCSL` |
-| `bls.cpi.u.core_mom` | `d85c3c7f`, entity `household/cpi_u_less_food_energy`, 1 observation from 2026-05, source `bls.cpi.u.core_mom.may_2026` | `e5e402d5`, entity `economy/aggregate`, 2 observations from 2026-06, source `CPILFESL` |
+| `bls.cps.unemployment_rate` | `8dbbd54f` (`person/civilian_labor_force`) | `db2f3857` |
+| `bls.cpi.u.headline_mom` | `3e796803` (`household/cpi_u_all_items`) | `70ca2ecf` |
+| `bls.cpi.u.core_mom` | `d85c3c7f` (`household/cpi_u_less_food_energy`) | `e5e402d5` |
 
-With these docket templates in place, three containment tests failed; without
-them all 14 pass. The conflict predates this work: with no declared binding
-the gate falls back to the earliest lineage, which is the pinned one, while the
-ALFRED leg has been writing to the other. `generic_fact` gives every BLS API
-spec the default entity `economy/aggregate`, so a `bls-api` observation would
-also join the lineage the docket does **not** pin.
+With one lineage per concept the rule pins the survivor whatever the source
+binding says, so the three series carry their `bls-api` templates and left the
+`templateless_docket_series` waiver. The resolver specs set no `entity`, so a
+`bls-api` fact lands in the pinned lineage;
+`test_bls_api_facts_join_the_lineage_the_docket_pins` checks that against the
+catalog fixture for all three. Forecast scoring joins facts to targets on
+`source_record_id`, so no score and no registration moved.
 
-This is a Chronicle identity decision and is not made here. Loosening the
-containment rule locally would hide the mismatch. The way through is to settle
-in Chronicle which lineage is canonical for each concept (merging the duplicate,
-or recording the BLS series id on the surviving lineage), re-stamp
-`ledger.uuid` if the survivor changes, set `entity` on the three specs if the
-survivor is not `economy/aggregate`, and then commit the docket templates and
-the Employment Situation and CPI calendar rows recorded below.
-`test_lineage_blocked_series_stay_templateless_until_chronicle_is_fixed`
-asserts the blocking condition itself, so it fails, on purpose, as soon as the
-catalog fixture no longer shows it.
+Two Thesis-side changes came first (ThesisInstitute/thesis#342): the resolver
+stages Chronicle's fold seed in every catalog regeneration, and the frozen
+catalog schema accepts the catalog's `entity_folds_sha256` commitment.
 
-The other three are unaffected. `bls.jolts.job_openings` has one observed
-lineage, `economy/aggregate`, which is where a `bls-api` fact lands.
-`bls.jolts.quits_rate` and `bls.ces.nonfarm_payrolls.change` are docket-only
+The other BLS series were unaffected. `bls.jolts.job_openings` had one
+observed lineage, `economy/aggregate`, which is where a `bls-api` fact lands.
+`bls.jolts.quits_rate` and `bls.ces.nonfarm_payrolls.change` were docket-only
 placeholders that take their first observation through the resolver's
 placeholder enrichment.
 
@@ -1259,13 +1264,16 @@ verification in the table above.
 ## Calendar
 
 The docket records exact period-to-date mappings from BLS's own schedule
-pages, read 2026-09-20. No date is inferred from cadence.
+pages, read 2026-09-20; the Employment Situation and CPI pages were read again
+on 2026-10-12 for the three series above. No date is inferred from cadence.
 
 | Release | `releaseCalendarUrl` | Bytes | SHA-256 | Periods read | Committed in the docket for |
 |---|---|---:|---|---|---|
-| Employment Situation | https://www.bls.gov/schedule/news_release/empsit.htm | 55,578 | `8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04 | payroll change, and since 2026-09-25 the six Table A-19 rows (see that section) (the unemployment rate is lineage-blocked) |
-| Consumer Price Index | https://www.bls.gov/schedule/news_release/cpi.htm | 55,572 | `36b83ba3723ac4e1d96431214b22f22bb4240718dab1ec2b6289fef9e7829580` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10 | nothing yet (both CPI series are lineage-blocked) |
+| Employment Situation | https://www.bls.gov/schedule/news_release/empsit.htm | 55,578 | `8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04 | payroll change, and since 2026-09-25 the six Table A-19 rows (see that section) |
+| Consumer Price Index | https://www.bls.gov/schedule/news_release/cpi.htm | 55,572 | `36b83ba3723ac4e1d96431214b22f22bb4240718dab1ec2b6289fef9e7829580` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10 | nothing until 2026-10-12 (see the next two rows) |
 | JOLTS | https://www.bls.gov/schedule/news_release/jolts.htm | 55,620 | `b7f2ded2873b885c72548e4f269755f65a1df5409e34709ded85518e41d29bc9` | 2026-10 → 2026-12-01 | job openings, quits rate |
+| Employment Situation, read 2026-10-12 | https://www.bls.gov/schedule/news_release/empsit.htm | 55,395 | `939d7d01d2d4e136e54f7fec49ea3108e73dfcf9f50dba383fc7c723e21a556e` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04; 2026-12 → 2027-01-08 | unemployment rate |
+| Consumer Price Index, read 2026-10-12 | https://www.bls.gov/schedule/news_release/cpi.htm | 55,389 | `cece37b1f964eed1cd51215764a55fb26e310da31b441ab9c65758989c9afc17` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10; 2026-12 → 2027-01-13 | CPI-U headline and core one-month changes |
 
 The schedule also lists September 2026 (and, for JOLTS, August 2026). Those
 periods are deliberately absent from the docket. Each already holds an
