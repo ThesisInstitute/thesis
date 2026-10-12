@@ -528,9 +528,11 @@ def source_binding_seed(
 def _thursday_federal_holiday(day: dt.date) -> str | None:
     """Name the federal holiday (5 U.S.C. 6103) falling on this Thursday.
 
-    Only the fixed-date holidays and Thanksgiving can land on a Thursday: the
-    other statutory holidays are Mondays, and an observed day moves a weekend
-    holiday to Friday or Monday.
+    Only the fixed-date holidays, Thanksgiving and Inauguration Day can land
+    on a Thursday: the other statutory holidays are Mondays, and an observed
+    day moves a weekend holiday to Friday or Monday. Inauguration Day
+    (January 20 after a presidential election, 6103(c)) is a holiday for
+    federal employees in the Washington area, where DOL publishes.
     """
 
     fixed = {
@@ -543,6 +545,8 @@ def _thursday_federal_holiday(day: dt.date) -> str | None:
     name = fixed.get((day.month, day.day))
     if name:
         return name
+    if (day.month, day.day) == (1, 20) and day.year % 4 == 1:
+        return "Inauguration Day"
     if day.month == 11 and 22 <= day.day <= 28:
         return "Thanksgiving"
     return None

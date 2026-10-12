@@ -135,23 +135,29 @@ The per-row audit, with the vintage bisection script, is kept at
 
 `ledger/official_observations.jsonl` on `codex/thesis-ledger-facts` held 27
 weekly initial and continued claims observations on 2026-10-12. Twenty-three
-equal ALFRED's first print. The four above do not: no `resolve-and-rebuild` run has finished
-successfully since 2026-08-31, but runs that fail or are cancelled still
-append what they resolved before stopping, and those runs read the late
-vintages. Each of the four rows carries an `assertionVersion` id and
+equal ALFRED's first print. The four above do not. No `resolve-and-rebuild`
+run has finished successfully since 2026-08-31, but a run's resolve step
+appends what it resolved through a reviewed proposal before later steps
+(refused rows, pin advance, site rebuild) fail it or it is cancelled. Those
+appends read the late vintages. A run that stops during the resolve step
+itself appends nothing. Each of the four rows carries an `assertionVersion` id and
 `supersedes: null`; no superseding row exists in the ledger yet.
 
 ## Other code that reads the window or the late date
 
 - `scripts/ingest_challenge_submissions.py` accepts a submission when
-  `generatedAtUtc` is before `expectedReleaseWindow.start`. For the week
-  ending 2026-09-26 that admits a forecast made up to 12 days after DOL
-  prints the number. `challenge/inbox` holds no claims submission today.
+  `generatedAtUtc` is before `expectedReleaseWindow.start`, after refusing
+  any expired-unforecast registration. Initial claims week 2026-09-26 is
+  expired, so it is refused. Continued claims week 2026-09-26 is not: DOL
+  printed it on 2026-10-08 and its window starts 2026-10-14, so a forecast
+  made up to six days after the print would be admitted.
+  `challenge/inbox` held no claims submission on 2026-10-12.
 - `scripts/strategy_targets.py` treats a target as open until its published
   `resolutionDate`. A strategy-docket dispatch between the print and that
-  date would run web-search agents on a published number. None has: of 32
-  claims forecast and run rows in the public log, none was generated at or
-  after the scheduled print.
+  date would run web-search agents on a published number. None has: on
+  2026-10-12 the public log held 43 claims forecasts (23 analyst, 20
+  time-series prior) and their 43 runs, and none was generated at or after
+  the scheduled print.
 - `scripts/generation_tickets.py` clamps ticket expiry to the earliest
   window start. The claims series run in the scheduled lane, not the
   ticketed lane.

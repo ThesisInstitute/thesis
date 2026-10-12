@@ -176,6 +176,41 @@ def registered_weekly_claims_targets() -> list[tuple[str, dict]]:
     return rows
 
 
+def window_is_on_schedule(contract: dict) -> bool:
+    """The derived +/- 2-day window, or an exact window on the scheduled day.
+
+    A reviewed seed or calendar path may register the exact official day
+    (expectedReleaseDate), which is as correct as the derived window.
+    """
+
+    release = register_targets.weekly_claims_release_day(
+        contract["series"], contract["period"]
+    )
+    window = contract["sourceBinding"]["expectedReleaseWindow"]
+    derived = {
+        "start": (release - dt.timedelta(days=2)).isoformat(),
+        "end": (release + dt.timedelta(days=2)).isoformat(),
+    }
+    exact = {"start": release.isoformat(), "end": release.isoformat()}
+    return window in (derived, exact)
+
+
+def test_an_exact_scheduled_day_window_is_on_schedule() -> None:
+    target = weekly_target(INITIAL, "2026-10-17", None)
+    target["expectedReleaseDate"] = "2026-10-22"
+    contract = register_targets.build_contract(target, dt.date(2026, 10, 12))
+    assert contract["sourceBinding"]["expectedReleaseWindow"] == {
+        "start": "2026-10-22",
+        "end": "2026-10-22",
+    }
+    assert window_is_on_schedule(contract)
+    late = weekly_target(INITIAL, "2026-10-17", None)
+    late["expectedReleaseDate"] = "2026-10-23"
+    assert not window_is_on_schedule(
+        register_targets.build_contract(late, dt.date(2026, 10, 12))
+    )
+
+
 def test_registered_windows_outside_the_schedule_only_shrink() -> None:
     """Records are immutable, so the drifted population is frozen history.
 
@@ -185,17 +220,11 @@ def test_registered_windows_outside_the_schedule_only_shrink() -> None:
     waiver = json.loads((ROOT / "waivers.json").read_text())["waivers"][
         "weekly_claims_windows_off_schedule"
     ]
-    off_schedule = set()
-    for _name, contract in registered_weekly_claims_targets():
-        release = register_targets.weekly_claims_release_day(
-            contract["series"], contract["period"]
-        )
-        expected = {
-            "start": (release - dt.timedelta(days=2)).isoformat(),
-            "end": (release + dt.timedelta(days=2)).isoformat(),
-        }
-        if contract["sourceBinding"]["expectedReleaseWindow"] != expected:
-            off_schedule.add(contract["dataPointId"])
+    off_schedule = {
+        contract["dataPointId"]
+        for _name, contract in registered_weekly_claims_targets()
+        if not window_is_on_schedule(contract)
+    }
 
     joined = sorted(off_schedule - set(waiver["members"]))
     assert not joined, (
@@ -333,3 +362,59 @@ def test_derived_release_day_is_alfreds_first_vintage(
         register_targets.weekly_claims_release_day(series, f"week_{week}").isoformat()
         == first_vintage
     )
+
+
+def federal_holidays(year: int) -> dict[dt.date, str]:
+    """Independent oracle: every 5 U.S.C. 6103 holiday in `year`, by rule."""
+
+    def nth_weekday(month: int, weekday: int, n: int) -> dt.date:
+        day = dt.date(year, month, 1)
+        day += dt.timedelta(days=(weekday - day.weekday()) % 7)
+        return day + dt.timedelta(weeks=n - 1)
+
+    def last_weekday(month: int, weekday: int) -> dt.date:
+        day = dt.date(year, month + 1, 1) - dt.timedelta(days=1)
+        return day - dt.timedelta(days=(day.weekday() - weekday) % 7)
+
+    holidays = {
+        dt.date(year, 1, 1): "New Year's Day",
+        nth_weekday(1, 0, 3): "Birthday of Martin Luther King, Jr.",
+        nth_weekday(2, 0, 3): "Washington's Birthday",
+        last_weekday(5, 0): "Memorial Day",
+        dt.date(year, 6, 19): "Juneteenth",
+        dt.date(year, 7, 4): "Independence Day",
+        nth_weekday(9, 0, 1): "Labor Day",
+        nth_weekday(10, 0, 2): "Columbus Day",
+        dt.date(year, 11, 11): "Veterans Day",
+        nth_weekday(11, 3, 4): "Thanksgiving",
+        dt.date(year, 12, 25): "Christmas Day",
+    }
+    if year % 4 == 1:  # the January after a presidential election
+        holidays[dt.date(year, 1, 20)] = "Inauguration Day"
+    return holidays
+
+
+def test_holiday_helper_agrees_with_an_independent_oracle_on_every_thursday() -> None:
+    """Differential: the helper flags exactly the oracle's Thursday holidays."""
+
+    day = dt.date(2026, 1, 1)
+    day += dt.timedelta(days=(3 - day.weekday()) % 7)
+    flagged = 0
+    while day.year <= 2060:
+        expected = federal_holidays(day.year).get(day)
+        assert register_targets._thursday_federal_holiday(day) == expected, day
+        flagged += expected is not None
+        day += dt.timedelta(days=7)
+    # Five fixed-date holidays each fall on a Thursday about once in seven
+    # years, plus 35 Thanksgivings and two Thursday Inauguration Days.
+    assert flagged > 35 + 2
+
+
+@pytest.mark.parametrize("series", [INITIAL, CONTINUED])
+def test_a_thursday_inauguration_day_refuses_until_dol_lists_a_date(series) -> None:
+    # 2033-01-20 is a Thursday Inauguration Day.
+    week = dt.date(2033, 1, 20) - dt.timedelta(days=LAGS[series])
+    with pytest.raises(register_targets.RegistrationError, match="Inauguration Day"):
+        window_for(
+            weekly_target(series, week.isoformat(), None), week - dt.timedelta(days=5)
+        )
