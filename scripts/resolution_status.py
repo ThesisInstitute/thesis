@@ -217,9 +217,9 @@ REASONS = {
     ),
     "NO_RESOLVER_RUN": ("No resolver log was available when this status was written."),
     "RECEIPT_PIN_STOP": (
-        "The resolver's last run stopped before it fetched any figure, because "
-        "Chronicle's ledger branch and the resolver lock different versions of "
-        "the receipt package. It tries again on its next run."
+        "The resolver's last run stopped before it fetched any figure: it would "
+        "not run Chronicle's series-catalog generator under its own receipt "
+        "package, for the reason in the detail. It tries again on its next run."
     ),
 }
 

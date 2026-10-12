@@ -69,7 +69,8 @@ _SHA_RE = re.compile(r"[0-9a-f]{40}")
 # refused, so text from Chronicle's branch never reaches a log or an issue
 # unless it is one of these shapes (no newline, no workflow command).
 _VERSION_RE = re.compile(r"[0-9][0-9A-Za-z.+!_-]{0,63}")
-_HASH_RE = re.compile(r"sha(?:256|384|512):[0-9a-f]{64,128}")
+_HASH_RE = re.compile(r"sha256:[0-9a-f]{64}|sha384:[0-9a-f]{96}|sha512:[0-9a-f]{128}")
+_PARSE_WHERE_RE = re.compile(r"\(at line ([0-9]{1,9}), column ([0-9]{1,9})\)")
 
 GhApi = Callable[..., str]
 
@@ -106,12 +107,18 @@ def locked_pin(lock: bytes, *, label: str, name: str = RECEIPT) -> LockedPin | N
         raise ReceiptPinError(f"reading {label} needs Python 3.11+") from exc
     try:
         data = tomllib.loads(lock.decode("utf-8"))
-    except (UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
-        raise ReceiptPinError(f"{label} is not a readable uv.lock: {exc}") from exc
     except RecursionError as exc:
         # tomllib recurses once per nesting level; a few hundred nested
         # arrays exhaust the stack.
         raise ReceiptPinError(f"{label} nests too deeply to read") from exc
+    except Exception as exc:
+        # TOMLDecodeError, UnicodeDecodeError, and the plain ValueError an
+        # integer over Python's 4300-digit limit raises. Parser messages quote
+        # the input (a duplicate key, say), so only the error's type and
+        # position are reported, never its text.
+        raise ReceiptPinError(
+            f"{label} is not a readable uv.lock ({_parse_error(exc)})"
+        ) from exc
     packages = data.get("package")
     if not isinstance(packages, list):
         raise ReceiptPinError(f"{label} has no [[package]] entries")
@@ -160,13 +167,26 @@ def locked_pin(lock: bytes, *, label: str, name: str = RECEIPT) -> LockedPin | N
     return LockedPin(version=version, artifacts=frozenset(artifacts))
 
 
+def _parse_error(exc: Exception) -> str:
+    where = _PARSE_WHERE_RE.search(str(exc))
+    kind = type(exc).__name__
+    return f"{kind} at line {where[1]}, column {where[2]}" if where else kind
+
+
+def without_commands(text: str) -> str:
+    """``text`` with neither Actions workflow-command marker left in it.
+
+    The runner reads ``::name::`` at the start of a line and the legacy
+    ``##[name]`` anywhere in one (actions/runner ActionCommand.TryParse)."""
+
+    return text.replace("##[", "# #[").replace("::", ": :")
+
+
 def one_line(text: str) -> str:
-    """``text`` with no line break, safe to print as one Actions log line.
+    """``text`` safe to print as one Actions log line: no line break and no
+    workflow-command marker."""
 
-    GitHub reads a workflow command only at the start of a line, so a
-    message without line breaks cannot carry one."""
-
-    return text.replace("\r", " ").replace("\n", " ")
+    return without_commands(text.replace("\r", " ").replace("\n", " "))
 
 
 def installed_version(name: str = RECEIPT) -> str | None:
@@ -191,8 +211,32 @@ def receipt_pin_refusal(
     """Why Chronicle's staged code must not run here, or ``None`` when it may.
 
     Pass ``installed`` (from :func:`installed_version`) to also require this
-    interpreter's receipt; leave it out to compare the two locks only.
+    interpreter's receipt; leave it out to compare the two locks only. It
+    never raises: anything unexpected is a refusal that names only the
+    error's type.
     """
+
+    try:
+        return _receipt_pin_refusal(
+            chronicle_lock,
+            chronicle_label=chronicle_label,
+            thesis_lock=thesis_lock,
+            installed=installed,
+        )
+    except Exception as exc:
+        return (
+            f"cannot compare the {RECEIPT} pins for {chronicle_label} "
+            f"({type(exc).__name__})"
+        )
+
+
+def _receipt_pin_refusal(
+    chronicle_lock: bytes | None,
+    *,
+    chronicle_label: str,
+    thesis_lock: bytes,
+    installed: str | None | object,
+) -> str | None:
 
     if chronicle_lock is None:
         return (
@@ -242,6 +286,11 @@ def receipt_pin_refusal(
         )
     if installed is _UNCHECKED:
         return None
+    if isinstance(installed, str) and not _VERSION_RE.fullmatch(installed):
+        return (
+            f"{sys.executable} has a {RECEIPT} whose version is not one, but "
+            f"thesis and {chronicle_label} both lock {RECEIPT} {thesis.version}"
+        )
     if installed is None:
         return (
             f"{RECEIPT} is not installed for {sys.executable}; thesis and "
@@ -418,7 +467,8 @@ def main(argv: list[str] | None = None, *, gh: GhApi = _gh_api) -> int:
     try:
         status, line = _compare(args, gh)
     except Exception as exc:  # anything unexpected is not evidence of drift
-        status, line = EXIT_UNREADABLE, f"cannot compare the receipt pins: {exc!r}"
+        status = EXIT_UNREADABLE
+        line = f"cannot compare the receipt pins: {type(exc).__name__}"
     print(one_line(line))
     return status
 

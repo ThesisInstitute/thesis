@@ -5910,12 +5910,68 @@ def test_the_refusal_prints_as_one_line_and_an_escaped_annotation(
     monkeypatch, capsys
 ) -> None:
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    resolve_pending.announce_receipt_pin_refusal("50% off\r\n::warning::x")
+    resolve_pending.announce_receipt_pin_refusal("50% off\r\n::warning::x ##[error]y")
     lines = capsys.readouterr().out.splitlines()
+    # Neither command format survives: ``::`` (read at a line's start) nor
+    # the legacy ``##[`` (read anywhere in a line).
     assert lines == [
-        "RECEIPT PIN REFUSED: 50% off  ::warning::x",
-        "::error title=Receipt pin mismatch::50%25 off%0D%0A::warning::x",
+        "RECEIPT PIN REFUSED: 50% off  : :warning: :x # #[error]y",
+        "::error title=Receipt pin mismatch::50%25 off%0D%0A: :warning: :x # #[error]y",
     ]
+
+
+@pytest.mark.parametrize(
+    ("lock", "reason"),
+    [
+        # tomllib's plain ValueError past Python's 4300-digit integer limit.
+        (b"x = " + b"1" * 5000 + b"\n", "is not a readable uv.lock (ValueError)"),
+        # A duplicate key the parser would quote, carrying a legacy command.
+        (
+            b'["##[warning]injected"]\n["##[warning]injected"]\n',
+            "is not a readable uv.lock (TOMLDecodeError",
+        ),
+    ],
+    ids=["integer-past-digit-limit", "duplicate-key-with-command"],
+)
+def test_main_refuses_a_chronicle_lock_it_cannot_parse_without_crashing(
+    monkeypatch, capsys, lock: bytes, reason: str
+) -> None:
+    # Round 2 of the #304 review, findings 1 and 2: exit 4 and one clean
+    # line, never a crash (exit 1, which skips publishing) or a command.
+    captures = _install_one_pending_claim(monkeypatch)
+    monkeypatch.setattr(resolve_pending, "chronicle_receipt_lock", lambda *_: lock)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    assert captures == []
+    out = capsys.readouterr().out
+    assert reason in out
+    assert "injected" not in out and "##[" not in out
+
+
+@pytest.mark.parametrize("broken", ["thesis_lock", "installed"])
+def test_main_refuses_when_its_own_side_cannot_be_read(
+    monkeypatch, capsys, tmp_path: pathlib.Path, broken: str
+) -> None:
+    captures = _install_one_pending_claim(monkeypatch)
+    if broken == "thesis_lock":
+        monkeypatch.setattr(
+            chronicle_receipt_pin, "THESIS_LOCK", tmp_path / "missing" / "uv.lock"
+        )
+        reason = "cannot read thesis's uv.lock (FileNotFoundError)"
+    else:
+
+        def unreadable() -> str:
+            raise ValueError("malformed METADATA")
+
+        monkeypatch.setattr(resolve_pending, "installed_receipt_version", unreadable)
+        reason = "cannot read this interpreter's receipt (ValueError)"
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    assert captures == []
+    assert f"RECEIPT PIN REFUSED: {reason}" in capsys.readouterr().out
 
 
 def test_the_preflight_reads_chronicles_lock_through_the_verified_gh_client(
