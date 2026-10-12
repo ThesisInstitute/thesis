@@ -2593,6 +2593,7 @@ def test_catalog_regeneration_inputs_cover_the_fixture_stage(
         "ledger/series_catalog.json",
         "ledger/series_uuid_registry.jsonl",
         "ledger/seeds/thesis_docket_series.json",
+        "ledger/seeds/entity_folds.json",
     )
     tree, _anchor_dir, _requester, _signing_key = _release_fixture_tree(tmp_path)
     allowed = {
@@ -3483,6 +3484,115 @@ def test_fetch_repository_tree_binds_commit_trees_and_blobs(monkeypatch) -> None
         ledger_path: blobs["official_observations.jsonl"],
         "ledger/immutable_prefix.json": blobs["immutable_prefix.json"],
     }
+
+
+def _git_blob_sha(raw: bytes) -> str:
+    return hashlib.sha1(
+        f"blob {len(raw)}\0".encode("ascii") + raw,
+        usedforsecurity=False,
+    ).hexdigest()
+
+
+def _fake_tree_api(
+    monkeypatch: pytest.MonkeyPatch,
+    commit_sha: str,
+    layout: dict[str, dict[str, bytes]],
+) -> None:
+    """Serve a two-level tree (root dirs -> files, plus ledger/seeds) over _gh_api."""
+    blobs: dict[str, bytes] = {}
+    trees: dict[str, list[dict[str, str]]] = {}
+
+    def tree_sha_for(files: dict[str, bytes], subtrees: dict[str, str]) -> str:
+        entries = []
+        for name, raw in files.items():
+            sha = _git_blob_sha(raw)
+            blobs[sha] = raw
+            entries.append({"path": name, "mode": "100644", "type": "blob", "sha": sha})
+        for name, sha in subtrees.items():
+            entries.append({"path": name, "mode": "040000", "type": "tree", "sha": sha})
+        entries.sort(key=lambda entry: entry["path"])
+        sha = resolve_pending._git_tree_object_sha(entries)
+        trees[sha] = entries
+        return sha
+
+    seeds = layout.get("ledger/seeds", {})
+    seeds_sha = tree_sha_for(seeds, {}) if seeds else None
+    ledger_sha = tree_sha_for(
+        layout["ledger"], {"seeds": seeds_sha} if seeds_sha else {}
+    )
+    root_sha = tree_sha_for({}, {"ledger": ledger_sha})
+
+    def api(*args: str, input_body=None) -> str:
+        del input_body
+        endpoint = args[-1]
+        if endpoint.endswith(f"/git/commits/{commit_sha}"):
+            return json.dumps({"sha": commit_sha, "tree": {"sha": root_sha}})
+        for sha, entries in trees.items():
+            if endpoint.endswith(f"/git/trees/{sha}"):
+                return json.dumps({"sha": sha, "tree": entries, "truncated": False})
+        for sha, raw in blobs.items():
+            if endpoint.endswith(f"/git/blobs/{sha}"):
+                return json.dumps(
+                    {
+                        "sha": sha,
+                        "encoding": "base64",
+                        "content": base64.b64encode(raw).decode(),
+                        "size": len(raw),
+                    }
+                )
+        raise AssertionError(endpoint)
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+
+
+def test_fetch_repository_tree_stages_the_entity_fold_seed_when_present(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Once Chronicle commits curated entity folds, the staged regeneration
+    # must see them; otherwise it re-splits the folded lineages and every
+    # append proposes revive events that _registry_growth_refusal refuses.
+    commit_sha = "b" * 40
+    ledger_path = "ledger/official_observations.jsonl"
+    folds = b'{"schemaVersion": "chronicle_entity_folds_v1", "folds": []}\n'
+    docket_seed = b"[]\n"
+    _fake_tree_api(
+        monkeypatch,
+        commit_sha,
+        {
+            "ledger": {"official_observations.jsonl": b'{"source_record_id":"x"}\n'},
+            "ledger/seeds": {
+                "entity_folds.json": folds,
+                "thesis_docket_series.json": docket_seed,
+            },
+        },
+    )
+    tree = resolve_pending._fetch_repository_tree(
+        "PolicyEngine/chronicle", commit_sha, ledger_path
+    )
+    assert tree.files["ledger/seeds/entity_folds.json"] == folds
+    assert tree.files["ledger/seeds/thesis_docket_series.json"] == docket_seed
+
+
+def test_fetch_repository_tree_tolerates_a_base_without_entity_folds(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Before Chronicle adds the seed, the base simply has no folds; listing
+    # the path first must not break any proposal.
+    commit_sha = "c" * 40
+    ledger_path = "ledger/official_observations.jsonl"
+    _fake_tree_api(
+        monkeypatch,
+        commit_sha,
+        {
+            "ledger": {"official_observations.jsonl": b'{"source_record_id":"x"}\n'},
+            "ledger/seeds": {"thesis_docket_series.json": b"[]\n"},
+        },
+    )
+    tree = resolve_pending._fetch_repository_tree(
+        "PolicyEngine/chronicle", commit_sha, ledger_path
+    )
+    assert "ledger/seeds/entity_folds.json" not in tree.files
+    assert "ledger/seeds/thesis_docket_series.json" in tree.files
 
 
 def test_fetch_repository_tree_rejects_swapped_commit_response(monkeypatch) -> None:

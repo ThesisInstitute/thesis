@@ -33,7 +33,10 @@ CATALOG_TOP_LEVEL_KEYS = {
     "ambiguous_aliases",
     "series",
 }
-CATALOG_OPTIONAL_TOP_LEVEL_KEYS = {"comment"}
+# entity_folds_sha256: Chronicle's commitment to its curated cross-entity
+# fold seed (ledger/seeds/entity_folds.json, Max's ruling d353, 2026-09-27).
+# Absent on catalogs built without a seed.
+CATALOG_OPTIONAL_TOP_LEVEL_KEYS = {"comment", "entity_folds_sha256"}
 CADENCE_MAP = {
     "weekly": "week_ending",
     "monthly": "month",
@@ -151,6 +154,10 @@ def _assert_containment(
         assert type(catalog[digest_key]) is str and re.fullmatch(
             r"[0-9a-f]{64}", catalog[digest_key]
         ), f"{label}.{digest_key} must be a SHA-256 digest"
+    if "entity_folds_sha256" in catalog:
+        assert type(catalog["entity_folds_sha256"]) is str and re.fullmatch(
+            r"[0-9a-f]{64}", catalog["entity_folds_sha256"]
+        ), f"{label}.entity_folds_sha256 must be a SHA-256 digest when present"
     assert (
         type(catalog["observation_rows"]) is int and catalog["observation_rows"] >= 0
     ), f"{label}.observation_rows must be a non-negative integer"
@@ -613,6 +620,46 @@ def test_containment_rejects_unrelated_catalog_reference(
     )
     catalog = _catalog_shell([_catalog_row()])
     with pytest.raises(AssertionError, match="neither canonical concept nor alias"):
+        _assert_containment(catalog, "test catalog", docket_path=docket_path)
+
+
+def _single_series_docket(tmp_path: pathlib.Path) -> pathlib.Path:
+    return _docket_file(
+        tmp_path,
+        [
+            {
+                "series": "unrelated.series",
+                "cadence": "monthly",
+                "slug": "unrelated-series-{month}-{year}",
+                "ledger": {
+                    "uuid": "00000000-0000-4000-8000-000000000001",
+                    "concept": "unrelated.series",
+                },
+            }
+        ],
+    )
+
+
+def test_containment_accepts_an_entity_fold_commitment(
+    tmp_path: pathlib.Path,
+) -> None:
+    # A catalog built with Chronicle's curated entity-fold seed commits to
+    # it; the key is optional so catalogs built without a seed still pass.
+    docket_path = _single_series_docket(tmp_path)
+    catalog = _catalog_shell([_catalog_row()])
+    _assert_containment(catalog, "catalog without folds", docket_path=docket_path)
+    catalog["entity_folds_sha256"] = "3" * 64
+    _assert_containment(catalog, "catalog with folds", docket_path=docket_path)
+
+
+@pytest.mark.parametrize("digest", [None, "", "3" * 63, "G" * 64, 3])
+def test_containment_rejects_a_malformed_entity_fold_commitment(
+    tmp_path: pathlib.Path, digest: object
+) -> None:
+    docket_path = _single_series_docket(tmp_path)
+    catalog = _catalog_shell([_catalog_row()])
+    catalog["entity_folds_sha256"] = digest
+    with pytest.raises(AssertionError, match="entity_folds_sha256 must be a SHA-256"):
         _assert_containment(catalog, "test catalog", docket_path=docket_path)
 
 

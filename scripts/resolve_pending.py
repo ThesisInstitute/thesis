@@ -13478,11 +13478,19 @@ def _collect_release_tree_files(
 
 
 # Same-commit inputs the staged catalog regeneration needs beyond the ledger
-# itself: the generator, the gate module it imports, and the generator's three
+# itself: the generator, the gate module it imports, and the generator's four
 # data inputs (prior catalog for identity carry-over, UUID registry, docket
-# seed). _prepare_release_files refuses the witnessed append when any of these
-# is absent from the base commit, so dropping one here fails closed rather
-# than silently skipping regeneration.
+# seed, curated entity folds). _prepare_release_files refuses the witnessed
+# append when any required one is absent from the base commit, so dropping
+# one here fails closed rather than silently skipping regeneration.
+#
+# The entity-fold seed is Chronicle's curated list of lineages whose rows
+# carry different entities but are one series (Max's ruling d353,
+# 2026-09-27). A base commit without it stages without it, which means no
+# folds. A base commit with it must stage it: regenerating without the seed
+# would split the folded lineages again, the generator would record revive
+# events for the absorbed identities, and _registry_growth_refusal would
+# refuse every append.
 CATALOG_REGENERATION_INPUTS = (
     "scripts/build_series_catalog.py",
     "scripts/check_thesis_facts_append.py",
@@ -13490,6 +13498,7 @@ CATALOG_REGENERATION_INPUTS = (
     "ledger/series_catalog.json",
     "ledger/series_uuid_registry.jsonl",
     "ledger/seeds/thesis_docket_series.json",
+    "ledger/seeds/entity_folds.json",
 )
 
 
