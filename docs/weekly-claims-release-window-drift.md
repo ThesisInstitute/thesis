@@ -98,44 +98,47 @@ then reads the ALFRED vintage dated that day
 `scripts/resolve_pending.py`). It never reads the window. DOL revises each
 week's figure in the next release, 7 days later.
 
-| Target | Registered window | Scheduled release | Window holds it | Published `resolutionDate` | What the resolver does |
-| --- | --- | --- | --- | --- | --- |
-| initial, week 2026-07-11 to 2026-08-08 (5 weeks) | centered | Thursday | yes | Thursday, then 2026-08-15 | Resolved. Advance print. |
-| initial, week 2026-08-15 | 08-20 to 08-24 | 08-20 | yes, off center | 08-24 | Resolved 206.0. Advance print. |
-| initial, week 2026-08-22 | 08-29 to 09-02 | 08-27 | **no** | 09-02 | In the ledger: 203.0, advance. One day before the 09-03 revision to 204.0. |
-| initial, week 2026-08-29 | 09-07 to 09-11 | 09-03 | **no** | 09-11 | Due now. Reads vintage 09-11 and records **207.0, the revised figure**. The advance print was 206.0. |
-| initial, week 2026-09-05 | 09-16 to 09-20 | 09-10 | **no** | 09-20 | Due now. Reads the revised vintage. The value is 206.0 in both vintages. |
-| initial, week 2026-09-12 | 09-25 to 09-29 | 09-17 | **no** | 09-29 | Waits 12 days, then reads a vintage after the 09-24 revision. Advance print was 196.0. |
-| initial, week 2026-09-19 | 10-04 to 10-08 | 09-24 | **no** | 10-08 | Waits 14 days, then reads a vintage after the 10-01 revision. |
-| initial, week 2026-09-26 | 10-13 to 10-17 | 10-01 | **no** | not yet published | If the forecast carries the window end, waits 16 days and reads a vintage after two later releases. |
-| continued, week 2026-07-11 to 2026-08-29 (8 weeks) | centered | Thursday | yes | Thursday, then 2026-09-12 | Resolved or due. Advance print. |
-| continued, week 2026-09-05 | 09-17 to 09-21 | 09-17 | yes, off center | 09-21 | Reads vintage 09-21. Advance print, 1.730. |
-| continued, week 2026-09-12 | 09-26 to 09-30 | 09-24 | **no** | 09-30 | Reads vintage 09-30. Advance print, one day before the 10-01 revision. |
-| continued, week 2026-09-19 | 10-05 to 10-09 | 10-01 | **no** | 10-09 | Reads a vintage after the 10-08 revision. **Revised figure.** |
+Status as of 2026-10-12. "First print" is the first ALFRED vintage that
+holds the week, found by bisecting ALFRED itself.
 
-Eight registrations exclude the scheduled release day: six initial and two
-continued. Two more hold it off center. Those ten are the waiver members.
-Six of them resolve to a revised figure if nothing changes: initial weeks
-2026-08-29 through 2026-09-26, and continued week 2026-09-19.
+| Target | Registered window | First print | Window holds it | `resolutionDate` | Ledger row | Matches first print |
+| --- | --- | --- | --- | --- | --- | --- |
+| initial, weeks 2026-07-11 to 2026-08-08 | centered | Thursday | yes | Thursday, then 08-15 | advance values | yes |
+| initial, week 2026-08-15 | 08-20 to 08-24 | 206.0 on 08-20 | yes, off center | 08-24 | 206.0 from vintage 08-24 | yes |
+| initial, week 2026-08-22 | 08-29 to 09-02 | 203.0 on 08-27 | **no** | 09-02 | 203.0 from vintage 09-02 | yes |
+| initial, week 2026-08-29 | 09-07 to 09-11 | 206.0 on 09-03 | **no** | 09-11 | **207.0** from vintage 09-11 | **no, revised** |
+| initial, week 2026-09-05 | 09-16 to 09-20 | 206.0 on 09-10 | **no** | 09-20 | 206.0 from vintage 09-20 | value yes, vintage late |
+| initial, week 2026-09-12 | 09-25 to 09-29 | 196.0 on 09-17 | **no** | 09-29 | **198.0** from vintage 09-29 | **no, revised** |
+| initial, week 2026-09-19 | 10-04 to 10-08 | 197.0 on 09-24 | **no** | 10-08 | **198.0** from vintage 10-08 | **no, revised** |
+| initial, week 2026-09-26 | 10-13 to 10-17 | 10-01 | **no** | none | expired unforecast (#303) | n/a |
+| continued, weeks 2026-07-11 to 2026-08-22 | centered | Thursday | yes | Thursday | advance values | yes |
+| continued, week 2026-08-29 | 09-08 to 09-12 | 1.774 on 09-10 | yes | 09-12 | 1.774 from vintage 09-12 | yes |
+| continued, week 2026-09-05 | 09-17 to 09-21 | 1.730 on 09-17 | yes, off center | 09-21 | 1.730 from vintage 09-21 | yes |
+| continued, week 2026-09-12 | 09-26 to 09-30 | 1.719 on 09-24 | **no** | 09-30 | 1.719 from vintage 09-30 | yes |
+| continued, week 2026-09-19 | 10-05 to 10-09 | 1.701 on 10-01 | **no** | 10-09 | **1.699** from vintage 10-09 | **no, revised** |
+| continued, week 2026-09-26 | 10-14 to 10-18 | 10-08 | **no** | 10-18 | **pending** | see below |
+| continued, week 2026-10-03 | 10-23 to 10-27 | 10-15 | **no** | none | expired unforecast (`94609afb`) | n/a |
 
-Values are from `alfred.stlouisfed.org/graph/alfredgraph.csv`, fetched
-2026-09-20.
+Twelve registrations are off schedule; they are the waiver members. Four
+ledger rows record DOL's revised figure under the advance label. One
+forecast is still pending: continued claims, week ending 2026-09-26. DOL
+printed it on 2026-10-08 and revises it on 2026-10-15, so the first resolver
+run to succeed on or after its `resolutionDate`, 2026-10-18, would record the
+revised figure unless the guard in the companion pull request has merged.
+
+The per-row audit, with the vintage bisection script, is kept at
+`~/reviews/thesis-weekly-claims-2026-10/` (`first_vintage_audit.py`,
+`first_vintage_audit.json`).
 
 ## The ledger so far
 
-`ledger/official_observations.jsonl` on `codex/thesis-ledger-facts` holds 19
-weekly claims observations. Each equals ALFRED's value on the scheduled
-release Thursday. Each was revised the following Thursday, by 1 to 3
-thousand for initial claims and 0.002 to 0.007 million for continued claims.
-No revised figure has been recorded. The ledger was not changed.
-
-No scheduled `resolve-and-rebuild` run has succeeded since 2026-08-31; every
-run from 2026-09-01 through 2026-09-20 failed or was cancelled. That outage
-is the only reason no revised figure has been recorded yet. Pull requests
-#255 and #258, which address it, merged at 2026-09-20 19:44 UTC, so the next
-scheduled run may append. Initial-claims weeks 2026-08-29 and 2026-09-05 are past
-their published `resolutionDate` and would be recorded from revised
-vintages on that run.
+`ledger/official_observations.jsonl` on `codex/thesis-ledger-facts` held 29
+weekly claims observations on 2026-10-12. Twenty-five equal ALFRED's first
+print. The four above do not: no `resolve-and-rebuild` run has finished
+successfully since 2026-08-31, but runs that fail or are cancelled still
+append what they resolved before stopping, and those runs read the late
+vintages. Each of the four rows carries an `assertionVersion` id and
+`supersedes: null`; no superseding row exists in the ledger yet.
 
 ## Other code that reads the window or the late date
 
@@ -152,40 +155,30 @@ vintages on that run.
   window start. The claims series run in the scheduled lane, not the
   ticketed lane.
 
-## Options for the registered drifted weeks
+## Decision
 
-The registrations are immutable, and their content hash covers the window.
-The registered `releasePolicy` is `advance_vintage`. The window and the
-published `resolutionDate` disagree with that policy for six targets.
+Max ruled on 2026-09-27 (d352): land the guard and this fix now, then
+resolve the drifted weeks at the first ALFRED vintage, with a note on each
+resolution. The rows above were appended after that ruling and before the
+guard merged. Carrying out the ruling now means two things:
 
-1. **Hold.** The claims leg refuses a vintage that already held the week 7
-   days earlier, prints the reason, and leaves the forecast pending. Nothing
-   wrong is recorded, and every other option stays open. The companion pull
-   request implements this. It needs a ruling later, or the six forecasts
-   stay pending.
-2. **Resolve at the first vintage.** Read `advance_vintage` as the contract
-   and resolve each week from the first ALFRED vintage that holds it. This
-   scores the forecast against what it said it was forecasting. The
-   observation's `observed_at` would precede the published
-   `resolutionDate`, and splits use `resolutionDate`, so the six rows sit up
-   to 16 days late in the split order. It needs resolver work and a note on
-   each resolution.
-3. **Resolve as registered.** Let the resolver record what the late vintage
-   returns. No code. The ledger then labels revised figures as advance
-   prints, in a signed append-only file, and six forecasts score against a
-   number they did not forecast. Not recommended.
-4. **Void.** Mark the six terminal and unscored, and re-register nothing for
-   those weeks. Clean, but it discards six forecasts whose only defect is a
-   date.
+1. The pending week, and any later drifted cell, resolves from its first
+   vintage. The guard in the companion pull request holds such a cell
+   rather than record a revised figure; a follow-up replaces the hold with
+   first-vintage resolution.
+2. The four wrong rows are corrected by appending first-vintage rows whose
+   `assertionVersion.supersedes` names the wrong row's id. Chronicle's
+   append gate (`receipt.append_gate.check_rows`) accepts a second row for
+   a `source_record_id` only when it supersedes that id's active version,
+   and its current view (`effective_current_rows`) drops the replaced row.
+   The Thesis site does not read `supersedes` yet, so the follow-up also
+   has to make scoring use the current row.
 
-Recommended: option 1 now, because a recorded observation cannot be
-withdrawn, then option 2. Options 2 and 4 both need the hold first.
-
-Two smaller decisions ride along. Challenge intake could refuse claims
-submissions after the scheduled print rather than the registered start. The
-bind step could refuse a weekly claims contract whose window is off
-schedule; that would also stop a retry of the unpublished week 2026-09-26
-registration, which is a way to carry out option 4 for that week.
+Two smaller items stay open. Challenge intake admits a submission until
+`expectedReleaseWindow.start`, which for the drifted registrations is after
+DOL prints the number. And the docket roll proposes only the successor of
+the latest published week, so it skips the two expired weeks on every run:
+neither weekly series has registered a new week since 2026-09-28.
 
 ## The same ratchet on monthly series
 

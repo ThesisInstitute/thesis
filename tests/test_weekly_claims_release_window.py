@@ -208,3 +208,128 @@ def test_registered_windows_outside_the_schedule_only_shrink() -> None:
         "records/targets is append-only, so the frozen off-schedule "
         "population cannot shrink either"
     )
+
+
+# Invariants, executed for every input in a bounded domain rather than sampled.
+# The domain is every Saturday from 2026 through 2030 for both series.
+def every_saturday(start: dt.date, end: dt.date):
+    day = start + dt.timedelta(days=(5 - start.weekday()) % 7)
+    while day <= end:
+        yield day
+        day += dt.timedelta(days=7)
+
+
+SATURDAYS = list(every_saturday(dt.date(2026, 1, 1), dt.date(2030, 12, 31)))
+
+
+def scheduled_thursday(series: str, week: dt.date) -> dt.date:
+    return week + dt.timedelta(days=LAGS[series])
+
+
+@pytest.mark.parametrize("series", [INITIAL, CONTINUED])
+def test_every_week_gets_a_centred_window_or_a_named_holiday_refusal(series) -> None:
+    exceptions = register_targets.WEEKLY_CLAIMS_RELEASE_EXCEPTIONS
+    derived = 0
+    for week in SATURDAYS:
+        thursday = scheduled_thursday(series, week)
+        holiday = register_targets._thursday_federal_holiday(thursday)
+        registration_date = week - dt.timedelta(days=5)
+        target = weekly_target(series, week.isoformat(), None)
+        if holiday and thursday.isoformat() not in exceptions:
+            with pytest.raises(register_targets.RegistrationError, match=holiday):
+                window_for(target, registration_date)
+            continue
+        window = window_for(target, registration_date)
+        start = dt.date.fromisoformat(window["start"])
+        end = dt.date.fromisoformat(window["end"])
+        release = start + dt.timedelta(days=2)
+        # Width: always the reviewed +/- 2 days.
+        assert (end - start).days == 4
+        # Center: DOL's Thursday, or exactly the day DOL lists instead.
+        assert release.isoformat() == exceptions.get(
+            thursday.isoformat(), thursday.isoformat()
+        )
+        # A print can never precede the end of its own reference week.
+        assert release > week
+        derived += 1
+    # The holiday refusals are the exception, not the rule.
+    assert derived >= len(SATURDAYS) - 5 * 3
+
+
+@pytest.mark.parametrize("series", [INITIAL, CONTINUED])
+def test_window_is_independent_of_any_previous_resolution_date(series) -> None:
+    for week in SATURDAYS[:60]:
+        if register_targets._thursday_federal_holiday(scheduled_thursday(series, week)):
+            continue
+        registration_date = week - dt.timedelta(days=5)
+        seeded = window_for(
+            weekly_target(series, week.isoformat(), None), registration_date
+        )
+        for offset in (-30, -1, 0, 1, 2, 9, 16, 365):
+            previous = (week + dt.timedelta(days=offset)).isoformat()
+            rolled = window_for(
+                weekly_target(series, week.isoformat(), previous), registration_date
+            )
+            assert rolled == seeded, (week, previous)
+
+
+def test_one_release_carries_initial_week_w_and_continued_week_w_minus_7() -> None:
+    """Differential: the two series are two columns of the same DOL release."""
+
+    for week in SATURDAYS[1:]:
+        thursday = scheduled_thursday(INITIAL, week)
+        if register_targets._thursday_federal_holiday(thursday) and (
+            thursday.isoformat()
+            not in register_targets.WEEKLY_CLAIMS_RELEASE_EXCEPTIONS
+        ):
+            continue
+        assert register_targets.weekly_claims_release_day(
+            INITIAL, f"week_{week.isoformat()}"
+        ) == register_targets.weekly_claims_release_day(
+            CONTINUED, f"week_{(week - dt.timedelta(days=7)).isoformat()}"
+        )
+
+
+# Differential against the source: the first ALFRED vintage holding each week
+# in the Chronicle ledger, found 2026-10-12 by bisecting
+# alfred.stlouisfed.org/graph/alfredgraph.csv?id={ICSA,CCSA}&vintage_date=...
+# (the earliest vintage whose CSV holds the week; presence is monotone).
+ALFRED_FIRST_VINTAGES = [
+    (CONTINUED, "2026-06-27", "2026-07-09"),
+    (CONTINUED, "2026-07-04", "2026-07-16"),
+    (CONTINUED, "2026-07-11", "2026-07-23"),
+    (CONTINUED, "2026-07-18", "2026-07-30"),
+    (CONTINUED, "2026-07-25", "2026-08-06"),
+    (CONTINUED, "2026-08-01", "2026-08-13"),
+    (CONTINUED, "2026-08-08", "2026-08-20"),
+    (CONTINUED, "2026-08-15", "2026-08-27"),
+    (CONTINUED, "2026-08-22", "2026-09-03"),
+    (CONTINUED, "2026-08-29", "2026-09-10"),
+    (CONTINUED, "2026-09-05", "2026-09-17"),
+    (CONTINUED, "2026-09-12", "2026-09-24"),
+    (CONTINUED, "2026-09-19", "2026-10-01"),
+    (INITIAL, "2026-06-13", "2026-06-18"),
+    (INITIAL, "2026-06-20", "2026-06-25"),
+    (INITIAL, "2026-07-04", "2026-07-09"),
+    (INITIAL, "2026-07-11", "2026-07-16"),
+    (INITIAL, "2026-07-18", "2026-07-23"),
+    (INITIAL, "2026-07-25", "2026-07-30"),
+    (INITIAL, "2026-08-01", "2026-08-06"),
+    (INITIAL, "2026-08-08", "2026-08-13"),
+    (INITIAL, "2026-08-15", "2026-08-20"),
+    (INITIAL, "2026-08-22", "2026-08-27"),
+    (INITIAL, "2026-08-29", "2026-09-03"),
+    (INITIAL, "2026-09-05", "2026-09-10"),
+    (INITIAL, "2026-09-12", "2026-09-17"),
+    (INITIAL, "2026-09-19", "2026-09-24"),
+]
+
+
+@pytest.mark.parametrize(("series", "week", "first_vintage"), ALFRED_FIRST_VINTAGES)
+def test_derived_release_day_is_alfreds_first_vintage(
+    series, week, first_vintage
+) -> None:
+    assert (
+        register_targets.weekly_claims_release_day(series, f"week_{week}").isoformat()
+        == first_vintage
+    )
