@@ -2371,12 +2371,10 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
     # docket calendar across a series' annual revision therefore means
     # re-verifying and re-committing its anchors in the same change.
     #
-    # Three of the six have no docket template yet, so nothing can register
-    # them: the unemployment rate and the two CPI series. Chronicle holds two
-    # lineages for each concept (an ``economy/aggregate`` one the ALFRED leg
-    # wrote, and an older one the docket pins), a declared ``sourceSeriesId``
-    # matches neither, and the docket-to-Ledger containment gate refuses the
-    # pin. That is a Chronicle identity decision; see the docs section.
+    # The unemployment rate and the two CPI series took their docket
+    # templates after Chronicle folded each concept's two lineages into the
+    # ``economy/aggregate`` one these specs write (Max's ruling d353,
+    # PolicyEngine/chronicle#344); see the docs section.
     "bls.cps.unemployment_rate": {
         "series_id": "LNS14000000",
         "period_type": "month",

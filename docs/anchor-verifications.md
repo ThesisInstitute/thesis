@@ -988,11 +988,11 @@ binding a registration can carry, the transforms two of the series need, and
 calendar gating. The registration-time execution-plan gate admits only the six
 specs that declare a `binding_transform`.
 
-**Three of the six can mint targets now; three cannot yet.** JOLTS job
-openings, the JOLTS quits rate and the payroll change have docket templates.
-The unemployment rate and the two CPI series have verified specs and anchors
-but no docket template, because of a Chronicle lineage conflict described in
-the next subsection. They stay in `waivers.json` `templateless_docket_series`.
+**All six can mint targets.** JOLTS job openings, the JOLTS quits rate and
+the payroll change took their docket templates first. The unemployment rate
+and the two CPI series took theirs on 2026-10-12, after the Chronicle lineage
+fold described in the next subsection, and left `waivers.json`
+`templateless_docket_series`.
 
 ## Three series took their templates after a Chronicle lineage fold
 
@@ -1272,8 +1272,8 @@ on 2026-10-12 for the three series above. No date is inferred from cadence.
 | Employment Situation | https://www.bls.gov/schedule/news_release/empsit.htm | 55,578 | `8a61955edcbf086a560c43004ed0613fec2ae25e646e04e512472e2175cb3c47` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04 | payroll change, and since 2026-09-25 the six Table A-19 rows (see that section) |
 | Consumer Price Index | https://www.bls.gov/schedule/news_release/cpi.htm | 55,572 | `36b83ba3723ac4e1d96431214b22f22bb4240718dab1ec2b6289fef9e7829580` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10 | nothing until 2026-10-12 (see the next two rows) |
 | JOLTS | https://www.bls.gov/schedule/news_release/jolts.htm | 55,620 | `b7f2ded2873b885c72548e4f269755f65a1df5409e34709ded85518e41d29bc9` | 2026-10 → 2026-12-01 | job openings, quits rate |
-| Employment Situation, read 2026-10-12 | https://www.bls.gov/schedule/news_release/empsit.htm | 55,395 | `939d7d01d2d4e136e54f7fec49ea3108e73dfcf9f50dba383fc7c723e21a556e` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04; 2026-12 → 2027-01-08 | unemployment rate |
-| Consumer Price Index, read 2026-10-12 | https://www.bls.gov/schedule/news_release/cpi.htm | 55,389 | `cece37b1f964eed1cd51215764a55fb26e310da31b441ab9c65758989c9afc17` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10; 2026-12 → 2027-01-13 | CPI-U headline and core one-month changes |
+| Employment Situation, read 2026-10-12 | https://www.bls.gov/schedule/news_release/empsit.htm | 55,395 | `939d7d01d2d4e136e54f7fec49ea3108e73dfcf9f50dba383fc7c723e21a556e` | 2026-10 → 2026-11-06; 2026-11 → 2026-12-04; 2026-12 → 2027-01-08 | unemployment rate, 2026-10 and 2026-11 only: the December estimates carry the year-end CPS revision, so 2026-12 waits for re-verified anchors |
+| Consumer Price Index, read 2026-10-12 | https://www.bls.gov/schedule/news_release/cpi.htm | 55,389 | `cece37b1f964eed1cd51215764a55fb26e310da31b441ab9c65758989c9afc17` | 2026-10 → 2026-11-10; 2026-11 → 2026-12-10; 2026-12 → 2027-01-13 | CPI-U headline and core one-month changes, all three months (the February seasonal revision comes with January data) |
 
 The schedule also lists September 2026 (and, for JOLTS, August 2026). Those
 periods are deliberately absent from the docket. Each already holds an
