@@ -13069,7 +13069,7 @@ def _run_staged_generator(stage: pathlib.Path) -> subprocess.CompletedProcess[st
     """Run the stage's own series-catalog generator under the allowlist.
 
     Every run of Chronicle's generator goes through here: a test requires
-    that ``sys.executable`` appear nowhere else in this module.
+    that a literal ``sys.executable`` appear nowhere else in this module.
     """
 
     return subprocess.run(

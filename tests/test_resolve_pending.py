@@ -2832,9 +2832,10 @@ def _staged_generator_run_violations(source: str) -> list[str]:
 
     Running this interpreter in a subprocess means running Chronicle's staged
     generator, so every such run must go through ``_run_staged_generator``,
-    which always passes the allowlist. The rule is spelling-independent: any
-    ``sys.executable`` outside that helper is a violation, whether it feeds
-    ``subprocess.run``, ``check_output``, ``Popen`` or a variable first.
+    which always passes the allowlist. Any literal ``sys.executable`` outside
+    that helper is a violation, whether it feeds ``subprocess.run``,
+    ``check_output``, ``Popen`` or a variable first. Aliases of ``sys``,
+    ``getattr`` and in-process execution are out of its reach.
     """
 
     tree = ast.parse(source)
