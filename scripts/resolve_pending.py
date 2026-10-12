@@ -12442,9 +12442,17 @@ def claims_vintage_holds_next_week(
     release day so holiday shifts resolve correctly.
     """
 
-    following = dt.date.fromisoformat(week) + dt.timedelta(days=7)
-    rows = parse_fred_vintage_csv(raw, series_id, vintage.isoformat())
-    return following.isoformat() in rows
+    following = (dt.date.fromisoformat(week) + dt.timedelta(days=7)).isoformat()
+    column = f"{series_id}_{vintage.isoformat().replace('-', '')}"
+    # Read only the following week's cell, the way fred_advance_value reads
+    # the target's: unrelated history is never converted, so a malformed
+    # historical value cannot raise here.
+    for row in csv.DictReader(io.StringIO(raw.decode())):
+        date = row.get("observation_date") or row.get("DATE")
+        if date == following:
+            value = row.get(column) or row.get(series_id)
+            return value not in (None, "", ".")
+    return False
 
 
 def resolve_claims_ref(
@@ -12468,9 +12476,10 @@ def resolve_claims_ref(
         # resolutionDate trails DOL's print by a release or more would put
         # the revised figure in an append-only ledger as the advance print.
         print(
-            f"  REFUSED {ref}: ALFRED vintage {release_day} already holds the "
-            f"week after {week}, so it is a later release than the first "
-            "print and carries the revised figure; left pending"
+            f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — ALFRED vintage "
+            f"{release_day} already holds the week after {week}, so it is a "
+            "later release than the first print and carries the revised "
+            "figure; left pending"
         )
         return None
     row = claims_fact(ref, week, value, kind, release_day)

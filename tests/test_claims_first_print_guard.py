@@ -24,6 +24,7 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import resolution_status  # noqa: E402
 import resolve_pending  # noqa: E402
 
 REF = "us.dol.initial_claims.sa.week_2026-08-29"
@@ -83,9 +84,14 @@ def test_a_later_release_is_refused_and_left_pending(alfred, vintage, capsys) ->
 
     assert fetched is None
     out = capsys.readouterr().out
-    assert f"REFUSED {REF}" in out
+    assert f"FIRST-PRINT WINDOW MISSED (refusing): {REF}" in out
     assert "left pending" in out
     assert "resolve us.dol" not in out
+    # The status surface must name the refusal, not report the target silent.
+    targets, _summary = resolution_status.parse_resolver_log(out, {REF})
+    assert targets[REF]["state"] == "refused"
+    assert targets[REF]["code"] == "FIRST_PRINT_WINDOW_MISSED"
+    assert "left pending" in targets[REF]["detail"]
 
 
 def test_guard_reads_the_vintage_not_an_offset_from_the_week() -> None:
@@ -134,3 +140,18 @@ def test_unreached_and_unpublished_cells_still_wait(alfred, capsys) -> None:
         is None
     )
     assert "not yet published" in capsys.readouterr().out
+
+
+def test_unrelated_malformed_history_does_not_raise() -> None:
+    # SYNTHETIC: a malformed value in an unrelated historical row. The guard
+    # reads only the following week's cell, as fred_advance_value reads only
+    # the target's.
+    raw = (
+        b"observation_date,ICSA_20260903\n2026-08-22,not-a-number\n2026-08-29,206000\n"
+    )
+    assert not resolve_pending.claims_vintage_holds_next_week(
+        raw, "ICSA", "2026-08-29", dt.date(2026, 9, 3)
+    )
+    assert resolve_pending.claims_vintage_holds_next_week(
+        raw + b"2026-09-05,1\n", "ICSA", "2026-08-29", dt.date(2026, 9, 3)
+    )
