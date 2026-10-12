@@ -70,7 +70,9 @@ _SHA_RE = re.compile(r"[0-9a-f]{40}")
 # unless it is one of these shapes (no newline, no workflow command).
 _VERSION_RE = re.compile(r"[0-9][0-9A-Za-z.+!_-]{0,63}")
 _HASH_RE = re.compile(r"sha256:[0-9a-f]{64}|sha384:[0-9a-f]{96}|sha512:[0-9a-f]{128}")
-_PARSE_WHERE_RE = re.compile(r"\(at line ([0-9]{1,9}), column ([0-9]{1,9})\)")
+# tomllib ends every message with its position; anchoring to the end keeps a
+# position quoted inside the input from being reported instead.
+_PARSE_WHERE_RE = re.compile(r"\(at line ([0-9]{1,9}), column ([0-9]{1,9})\)\Z")
 
 GhApi = Callable[..., str]
 
@@ -168,7 +170,7 @@ def locked_pin(lock: bytes, *, label: str, name: str = RECEIPT) -> LockedPin | N
 
 
 def _parse_error(exc: Exception) -> str:
-    where = _PARSE_WHERE_RE.search(str(exc))
+    where = _PARSE_WHERE_RE.search(str(exc).rstrip())
     kind = type(exc).__name__
     return f"{kind} at line {where[1]}, column {where[2]}" if where else kind
 
@@ -179,12 +181,16 @@ def without_commands(text: str) -> str:
     The runner reads ``::name::`` at the start of a line and the legacy
     ``##[name]`` anywhere in one (actions/runner ActionCommand.TryParse)."""
 
-    return text.replace("##[", "# #[").replace("::", ": :")
+    # A space after every colon that another colon follows, so a run of
+    # colons keeps no "::" ("::::" becomes ": : : :").
+    return re.sub(r":(?=:)", ": ", text.replace("##[", "# #["))
 
 
 def one_line(text: str) -> str:
-    """``text`` safe to print as one Actions log line: no line break and no
-    workflow-command marker."""
+    """``text`` safe to print as one Actions log line: no CR or LF, the only
+    characters the runner ends a line on (``StreamReader.ReadLine``), and no
+    workflow-command marker. Other separators Python's ``splitlines`` knows
+    (U+2028, U+0085, VT, FF) stay, since the runner does not split on them."""
 
     return without_commands(text.replace("\r", " ").replace("\n", " "))
 

@@ -834,6 +834,30 @@ def test_one_line_leaves_no_workflow_command_marker() -> None:
     assert line == "x # #[warning]y : :error: :z : :notice: :w"
 
 
+def test_one_line_leaves_no_double_colon_in_a_run_of_colons() -> None:
+    # Round 3, nit 2: "::::" used to become ": :: :".
+    assert pin.one_line("::::") == ": : : :"
+    assert pin.one_line(":::") == ": : :"
+
+
+@settings(max_examples=500, deadline=None)
+@given(st.text(alphabet=st.sampled_from(list(":#[]\r\nab \u2028")), max_size=60))
+def test_property_one_line_never_leaves_a_command_marker_or_cr_lf(text) -> None:
+    line = pin.one_line(text)
+    assert "::" not in line and "##[" not in line
+    assert "\r" not in line and "\n" not in line
+
+
+def test_a_position_quoted_in_the_input_is_not_reported_as_the_error_position() -> None:
+    # Round 3, nit 1: tomllib's own position is the message's suffix.
+    lock = b'["(at line 888, column 999)"]\n' * 2
+    refusal = pin.receipt_pin_refusal(
+        lock, chronicle_label=LABEL, thesis_lock=THESIS_LOCK
+    )
+    assert refusal is not None and "888" not in refusal and "999" not in refusal
+    assert refusal.endswith("(TOMLDecodeError at line 2, column 29)")
+
+
 # --- review of #304, round 2 -----------------------------------------------------
 
 
