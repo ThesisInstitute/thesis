@@ -50,9 +50,10 @@ lists each off-Thursday date. It listed one: Wednesday 2026-11-25.
 A reference week ends on a Saturday. The release carries the advance
 initial-claims figure for the week that ended 5 days earlier and the
 insured-unemployment figure for the week that ended 12 days earlier. Those
-are the two `releaseLagDays` values. All 19 claims observations in the
-Chronicle ledger match ALFRED's vintage on that Thursday, and none has a
-value one day earlier.
+are the two `releaseLagDays` values. For all 27 weekly claims weeks in the
+Chronicle ledger, the first ALFRED vintage that holds the week is that
+Thursday; `test_derived_release_day_is_alfreds_first_vintage` pins the 27
+dates.
 
 The OMB schedule of principal federal economic indicators for 2026 does not
 list the weekly claims release, so it is not evidence here.
@@ -132,9 +133,9 @@ The per-row audit, with the vintage bisection script, is kept at
 
 ## The ledger so far
 
-`ledger/official_observations.jsonl` on `codex/thesis-ledger-facts` held 29
-weekly claims observations on 2026-10-12. Twenty-five equal ALFRED's first
-print. The four above do not: no `resolve-and-rebuild` run has finished
+`ledger/official_observations.jsonl` on `codex/thesis-ledger-facts` held 27
+weekly initial and continued claims observations on 2026-10-12. Twenty-three
+equal ALFRED's first print. The four above do not: no `resolve-and-rebuild` run has finished
 successfully since 2026-08-31, but runs that fail or are cancelled still
 append what they resolved before stopping, and those runs read the late
 vintages. Each of the four rows carries an `assertionVersion` id and
