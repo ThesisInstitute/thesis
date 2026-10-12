@@ -8,7 +8,6 @@ import hashlib
 import json
 import os
 import pathlib
-import random
 import re
 import shutil
 import subprocess
@@ -16,6 +15,8 @@ import sys
 from types import SimpleNamespace
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -2680,10 +2681,10 @@ def _assert_generator_environment_is_minimal(seen: dict[str, str]) -> None:
     assert not set(seen) & set(_RESOLVE_STEP_SECRETS)
     for secret in _RESOLVE_STEP_SECRETS.values():
         assert all(secret not in value for value in seen.values())
-    allowed = set(resolve_pending.STAGED_GENERATOR_ENVIRONMENT)
+    allowed = set(_EXPECTED_GENERATOR_ENVIRONMENT)
     assert set(seen) - allowed <= _PLATFORM_ADDED_ENVIRONMENT
-    # What the generator does need arrives unchanged: PATH finds git, HOME
-    # finds git's global config and a `pip install --user` site-packages.
+    # HOME, which a `pip install --user` runtime needs to find receipt, and
+    # PATH arrive unchanged.
     assert seen["PATH"] == os.environ["PATH"]
     assert seen["HOME"] == os.environ["HOME"]
 
@@ -2748,37 +2749,76 @@ def test_catalog_refusal_trials_inherit_no_secret(
         _assert_generator_environment_is_minimal(environment)
 
 
-def test_staged_generator_environment_keeps_exactly_the_allowlist(
-    monkeypatch,
-) -> None:
-    allowlist = resolve_pending.STAGED_GENERATOR_ENVIRONMENT
+# The allowlist, pinned: changing what reaches Chronicle's code takes a
+# deliberate edit here as well as in resolve_pending.py.
+_EXPECTED_GENERATOR_ENVIRONMENT = (
+    "PATH",
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "TMPDIR",
+    "TEMP",
+    "TMP",
+    "SYSTEMROOT",
+)
+_ENVIRONMENT_NAME_POOL = (
+    *_EXPECTED_GENERATOR_ENVIRONMENT,
+    *_RESOLVE_STEP_SECRETS,
+    "PYTHONPATH",
+    "VIRTUAL_ENV",
+    "SSH_AUTH_SOCK",
+    "path",
+    "PATH ",
+    "HOMEBREW_GITHUB_API_TOKEN",
+    "LC_FIXTURE_SECRET",
+)
+
+
+def test_staged_generator_allowlist_is_pinned() -> None:
+    assert resolve_pending.STAGED_GENERATOR_ENVIRONMENT == (
+        _EXPECTED_GENERATOR_ENVIRONMENT
+    )
+
+
+def test_staged_generator_allowlist_names_no_credential() -> None:
     # The allowlist itself names no credential and no redirecting variable.
-    for name in allowlist:
+    for name in resolve_pending.STAGED_GENERATOR_ENVIRONMENT:
         assert not name.startswith(("GIT_", "GITHUB_", "ACTIONS_", "RUNNER_"))
         assert not name.endswith(("TOKEN", "KEY", "SECRET", "PASSWORD"))
-    pool = [
-        *allowlist,
-        *_RESOLVE_STEP_SECRETS,
-        "PYTHONPATH",
-        "VIRTUAL_ENV",
-        "SSH_AUTH_SOCK",
-        "path",
-        "PATH ",
-        "HOMEBREW_GITHUB_API_TOKEN",
-        "LC_FIXTURE_SECRET",
-    ]
-    # Each name alone: kept exactly when allowlisted, value unchanged.
-    for name in pool:
-        kept = resolve_pending.staged_generator_environment({name: "v"})
-        assert kept == ({name: "v"} if name in allowlist else {})
-    # Seeded mixtures: always the allowlisted sub-mapping of the input.
-    rng = random.Random(20260928)
-    for trial in range(500):
-        chosen = rng.sample(pool, rng.randint(0, len(pool)))
-        environ = {name: f"{name}={trial}" for name in chosen}
-        kept = resolve_pending.staged_generator_environment(environ)
-        assert kept == {n: v for n, v in environ.items() if n in allowlist}
-    # With no argument it reads the process environment at call time.
+
+
+@pytest.mark.parametrize("name", _ENVIRONMENT_NAME_POOL)
+def test_staged_generator_environment_keeps_a_name_exactly_when_listed(
+    name: str,
+) -> None:
+    kept = resolve_pending.staged_generator_environment({name: "v"})
+    listed = name in _EXPECTED_GENERATOR_ENVIRONMENT
+    assert kept == ({name: "v"} if listed else {})
+
+
+@settings(max_examples=500, deadline=None)
+@given(
+    environ=st.dictionaries(
+        keys=st.one_of(st.sampled_from(_ENVIRONMENT_NAME_POOL), st.text(max_size=40)),
+        values=st.text(max_size=40),
+        max_size=30,
+    )
+)
+def test_staged_generator_environment_is_the_allowlisted_submapping(
+    environ: dict[str, str],
+) -> None:
+    allowlist = set(_EXPECTED_GENERATOR_ENVIRONMENT)
+    kept = resolve_pending.staged_generator_environment(environ)
+    # Exactly the listed names the input holds, with their values unchanged.
+    assert kept == {n: v for n, v in environ.items() if n in allowlist}
+    assert kept.items() <= environ.items()
+    assert set(kept) <= allowlist
+
+
+def test_staged_generator_environment_reads_the_process_environment(
+    monkeypatch,
+) -> None:
     for name, value in _RESOLVE_STEP_SECRETS.items():
         monkeypatch.setenv(name, value)
     monkeypatch.setenv("LANG", "C.UTF-8")
