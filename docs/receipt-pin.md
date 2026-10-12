@@ -24,22 +24,33 @@ cannot import name 'PinnedSigner' from 'receipt.release_chain'
 `scripts/chronicle_receipt_pin.py` compares three versions: the receipt
 installed for the resolver's interpreter, the one thesis's `uv.lock` names, and
 the one Chronicle's `uv.lock` names at one commit. When the locks name the same
-version, they must also name the same artifact hashes. The check runs in four
-places:
+version, they must also name the same artifact hashes. A lock it cannot read, a
+lock with no receipt, one with two receipt entries, and one whose version or
+hashes are not well formed are all refused. The check never raises.
+
+It runs in four places:
 
 - `resolve_pending.py`, right after it reads the ledger branch head and before
-  any capture work. The step "Resolve pending cells against official prints"
-  exits 4 with `RECEIPT PIN REFUSED: <reason>`, the run summary shows it as an
-  error annotation, and the "Resolution loop failed" issue quotes it.
+  any capture work. It prints one line, `RECEIPT PIN REFUSED: <reason>`, and an
+  error annotation on the run's summary page, and exits 4. The workflow treats
+  4 like 3 (refused rows): the ledger may have moved upstream, so the pin,
+  witness and deploy steps still publish it, and then "Fail the run on refused
+  rows" fails the job. The failure issue is titled "Resolution stopped on a
+  receipt pin mismatch <date>" and quotes the reason
+  (`scripts/resolution_alert.py`). On the resolution-status page each overdue
+  cell the resolver routes says `RECEIPT_PIN_STOP`: the run stopped before it
+  fetched any figure.
 - Again at the staged base, just before Chronicle's generator runs (in the
   catalog preflight and in the proposal itself). No caller can run the
-  generator unchecked.
+  generator unchecked. These refusals raise with the same prefix.
 - `receipt-pin-drift.yml`, every three hours and on pull requests that change
   `pyproject.toml` or `uv.lock`. It opens an issue titled "Receipt pin drift:
   thesis and Chronicle's ledger branch lock different receipts" while the locks
-  differ, and closes it once they agree.
+  differ (exit 1), and closes it once they agree. Exit 2 (Chronicle's lock could
+  not be read, or the comparison crashed) fails the run without an issue: it
+  says nothing about drift.
 - The CI job `resolver-runtime`. It runs the resolver's install on the runner's
-  own `python3` and imports what the resolution run imports.
+  own `python3` and imports every script the resolution run starts.
 
 To run the comparison locally:
 
@@ -65,19 +76,36 @@ When Chronicle moves first:
 [ThesisInstitute/thesis#302](https://github.com/ThesisInstitute/thesis/pull/302)
 is the last such bump. The resolver workflow has no version to edit. It
 installs `uv.lock`'s `resolver` and `custody` extras through
-`.github/actions/install-resolver-python`, which runs `uv export --locked` and
-then `uv pip install --require-hashes`. So an artifact that differs from the
-lock's hash, or a dependency the lock does not pin, fails the install.
+`.github/actions/install-resolver-python`. That action pins uv, turns off
+setup-uv's cache, runs `uv export --locked`, and then
+`uv pip install --require-hashes --no-cache --no-build`. So every artifact is
+downloaded and hashed in the run, an artifact that differs from the lock's hash
+or a dependency the lock does not pin fails the install, and nothing is built
+from source with unhashed build tools.
 
 ## Why thesis's lock decides
 
 The resolver could instead install whatever receipt Chronicle's lock names. That
-would give Chronicle's ledger branch no new power: its head's code already runs
-in the resolver's step, as the same user, with that step's environment
-(`GH_TOKEN` included). But thesis's own code in the same process imports
-`receipt.sign` too (`resolve_pending.py` → `witnessed_timeline.py` →
-`verify_record_chain.py`). If Chronicle's lock chose the receipt, that code
-would run under a version thesis's suite never ran, chosen outside thesis's
-review, and a run's installed code could no longer be recovered from a thesis
-commit. So thesis's lock chooses, and a disagreement stops the run rather than
-changing what it executes.
+would give Chronicle's ledger branch no new power. Its head's code already runs
+in the resolver's step, as the same user. Until
+[ThesisInstitute/thesis#337](https://github.com/ThesisInstitute/thesis/pull/337)
+lands it inherits the step's environment, `GH_TOKEN` included, and
+[#338](https://github.com/ThesisInstitute/thesis/issues/338) tracks how the
+step's secrets, the producer signing key among them, stay readable to it
+through `/proc` even after that.
+
+But thesis's own code in the same process imports `receipt.sign` too
+(`resolve_pending.py` → `witnessed_timeline.py` → `verify_record_chain.py`). If
+Chronicle's lock chose the receipt, that code would run under a version thesis's
+suite never ran, chosen outside thesis's review. A run's installed code could
+also no longer be recovered from a thesis commit. So thesis's lock chooses, and
+a disagreement stops the run rather than changing what it executes.
+
+## Limits
+
+- Only receipt is compared. The generator also runs under thesis's
+  `cryptography` (which receipt imports, and which `ledger_release_chain.py`
+  imports directly), `cffi`, `pycparser` and Python version. Those can differ
+  from what Chronicle's CI uses. A mismatch there is not refused.
+- The check proves the locks agree, not that Chronicle's generator works under
+  them. The append gate in Chronicle still judges every proposal.

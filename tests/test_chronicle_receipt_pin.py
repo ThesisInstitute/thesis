@@ -12,6 +12,9 @@ import subprocess
 import sys
 
 import pytest
+import yaml
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 tomllib = pytest.importorskip("tomllib")
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -566,9 +569,19 @@ def test_the_install_action_exports_the_lock_and_requires_hashes() -> None:
     assert 'uv venv --python "$(command -v python3)" "$venv"' in action
     assert "--system-site-packages" not in action
     assert re.search(
-        r"uv pip install --python \"\$venv/bin/python\" --require-hashes", action
+        r"uv pip install --python \"\$venv/bin/python\" --require-hashes \\\n"
+        r"\s+--no-cache --no-build --requirements",
+        action,
     )
     assert 'echo "$venv/bin" >> "$GITHUB_PATH"' in action
+    # A restored cache could hand uv an artifact it does not re-hash; a
+    # floating uv could change what --require-hashes means.
+    setup = yaml.safe_load(action)["runs"]["steps"][0]
+    assert setup["uses"].startswith("astral-sh/setup-uv@")
+    assert setup["with"]["enable-cache"] is False
+    assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", setup["with"]["version"])
+    # The exported hash list stays out of the log.
+    assert '--output-file "$requirements" > /dev/null' in action
 
 
 def test_the_lock_export_pins_and_hashes_everything_the_resolver_imports(
@@ -612,14 +625,46 @@ def test_ci_runs_the_same_install_on_every_pull_request() -> None:
     job = ci.split("\n  resolver-runtime:\n", 1)[1].split("\n  # ", 1)[0]
     assert "uses: ./.github/actions/install-resolver-python" in job
     assert "python3 scripts/chronicle_receipt_pin.py --installed-only" in job
-    assert "import resolve_pending" in job and "receipt.release_chain" in job
+    smoke = re.search(r'python3 -c "import ([^"]+)"', job)
+    assert smoke is not None
+    imported = {name.strip() for name in smoke.group(1).split(",")}
+    # Every script the resolution run starts, and the attest action, is
+    # imported in the smoke, so an undeclared import fails a pull request.
+    started = set(
+        re.findall(
+            r"python3 (?:-u )?scripts/([a-z_]+)\.py",
+            RESOLVER_WORKFLOW.read_text()
+            + (ROOT / ".github/actions/attest-records-push/action.yml").read_text(),
+        )
+    )
+    assert started and started <= imported, started - imported
+    assert {"receipt.release_chain", "receipt.sign", "cryptography"} <= imported
 
 
-def test_the_resolvers_failure_issue_carries_a_receipt_refusal() -> None:
-    alert = _step(RESOLVER_WORKFLOW.read_text(), "Alert on failure")
-    assert "grep -m1 '^RECEIPT PIN REFUSED: ' /tmp/resolve-out.log" in alert
-    assert 'gh issue create --title "$title" --body "$body"' in alert
-    assert 'title="Resolution loop failed $(date -u +%F)"' in alert
+def test_a_receipt_refusal_is_published_then_failed_like_refused_rows() -> None:
+    # Exit 4 stops capture, not publishing: the ledger may have moved
+    # upstream, and the pin/witness/deploy steps never run Chronicle's code.
+    workflow = RESOLVER_WORKFLOW.read_text()
+    resolve = _step(workflow, "Resolve pending cells against official prints")
+    assert '[ "$resolver_rc" -ne 3 ]' in resolve
+    assert '[ "$resolver_rc" -ne 4 ]' in resolve
+    assert 'echo "resolver_rc=$resolver_rc" >> "$GITHUB_OUTPUT"' in resolve
+    gate = yaml.safe_load(workflow)["jobs"]["resolve"]["steps"]
+    gate = next(
+        step for step in gate if step.get("name") == "Fail the run on refused rows"
+    )
+    assert gate["if"] == (
+        "steps.resolve.outputs.resolver_rc == '3' || "
+        "steps.resolve.outputs.resolver_rc == '4'"
+    )
+    assert "exit 1" in gate["run"]
+
+
+def test_ci_alerts_when_the_resolver_runtime_job_fails_on_main() -> None:
+    needs = yaml.safe_load(CI_WORKFLOW.read_text())["jobs"]["alert-on-main-failure"][
+        "needs"
+    ]
+    assert "resolver-runtime" in needs
 
 
 def test_the_drift_monitor_compares_on_a_schedule_and_on_lock_changes() -> None:
@@ -653,3 +698,203 @@ def test_the_drift_monitor_compares_on_a_schedule_and_on_lock_changes() -> None:
     names = re.findall(r"^      - name: (.+)$", workflow, flags=re.MULTILINE)
     assert names[-1] == "Fail unless the locks agree"
     assert "permissions:\n  contents: read\n  issues: write\n" in workflow
+
+
+# --- review of #304: inputs that once raised or slipped through ----------------
+
+
+def test_a_deeply_nested_lock_is_refused_not_raised() -> None:
+    # A 997-byte lock of arrays nested 496 deep raised RecursionError inside
+    # tomllib on Python 3.12 and 3.14 (review finding 2).
+    nested = b"x = " + b"[" * 496 + b"]" * 496 + b"\n"
+    refusal = pin.receipt_pin_refusal(
+        nested, chronicle_label=LABEL, thesis_lock=THESIS_LOCK
+    )
+    assert refusal == f"{LABEL} uv.lock nests too deeply to read"
+
+
+@pytest.mark.parametrize(
+    "version",
+    ["0.6.2\n::error::injected", "", "latest", "0.6.2 ; rm", "v0.6.2", "1" * 80],
+)
+def test_a_version_that_is_not_one_is_refused_without_echoing_it(version) -> None:
+    lock = _lock(
+        f'[[package]]\nname = "receipt"\nversion = {json.dumps(version)}\n'
+        f'wheels = [{{ url = "u", hash = "sha256:{"a" * 64}" }}]\n'
+    )
+    refusal = pin.receipt_pin_refusal(
+        lock, chronicle_label=LABEL, thesis_lock=THESIS_LOCK
+    )
+    assert refusal is not None and "\n" not in refusal
+    if version:
+        assert "injected" not in refusal and "rm" not in refusal.split(LABEL)[1]
+
+
+@pytest.mark.parametrize(
+    "digest",
+    ["md5:" + "a" * 32, "sha256:" + "A" * 64, "sha256:zz", "sha256:" + "a" * 63],
+)
+def test_an_artifact_hash_that_is_not_a_hex_digest_is_refused(digest) -> None:
+    lock = _lock(_package("receipt", "0.6.2", digest))
+    refusal = pin.receipt_pin_refusal(
+        lock, chronicle_label=LABEL, thesis_lock=THESIS_LOCK
+    )
+    assert refusal == (
+        f"{LABEL} uv.lock locks receipt 0.6.2 with an artifact hash that is not "
+        "a hex digest"
+    )
+
+
+def test_installed_refusal_names_a_thesis_lock_without_receipt() -> None:
+    bare = _lock(_package("xlrd", "2.0.1", "sha256:" + "f" * 64))
+    assert pin.installed_refusal(bare, "0.6.2") == "thesis's uv.lock locks no receipt"
+
+
+def test_installed_version_reads_a_distribution_other_than_the_locked_one(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    # A real distribution on the path, at a version no lock names: the check
+    # must report it, not the locked version (review finding 3, mutant W2).
+    dist = tmp_path / "receipt-0.0.1.dist-info"
+    dist.mkdir()
+    (dist / "METADATA").write_text(
+        "Metadata-Version: 2.1\nName: receipt\nVersion: 0.0.1\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    assert pin.installed_version() == "0.0.1"
+    refusal = pin.receipt_pin_refusal(
+        THESIS_LOCK,
+        chronicle_label=LABEL,
+        thesis_lock=THESIS_LOCK,
+        installed=pin.installed_version(),
+    )
+    assert refusal is not None and f"has receipt 0.0.1, but thesis and {LABEL}" in (
+        refusal
+    )
+
+
+def test_fetch_lock_refuses_a_truncated_tree_listing() -> None:
+    gh = FakeGitHub({"uv.lock": CHRONICLE_062.read_bytes()})
+    listing = gh
+
+    def truncated(*args: str) -> str:
+        out = listing(*args)
+        if "/git/trees/" in args[0]:
+            body = json.loads(out)
+            body["truncated"] = True
+            return json.dumps(body)
+        return out
+
+    with pytest.raises(pin.ReceiptPinError, match="no complete root tree"):
+        pin.fetch_lock("PolicyEngine/chronicle", "c" * 40, gh=truncated)
+
+
+def test_fetch_lock_refuses_a_different_commit_than_it_asked_for() -> None:
+    gh = FakeGitHub({"uv.lock": CHRONICLE_062.read_bytes()})
+
+    def other_commit(*args: str) -> str:
+        out = gh(*args)
+        if "/git/commits/" in args[0]:
+            body = json.loads(out)
+            body["sha"] = "d" * 40
+            return json.dumps(body)
+        return out
+
+    with pytest.raises(pin.ReceiptPinError, match=f"did not return commit {'c' * 40}"):
+        pin.fetch_lock("PolicyEngine/chronicle", "c" * 40, gh=other_commit)
+
+
+def test_cli_exits_2_not_1_when_the_comparison_itself_crashes(
+    monkeypatch, capsys
+) -> None:
+    # Exit 1 opens a drift issue; a crash says nothing about drift.
+    def boom(*args, **kwargs):
+        raise RecursionError("maximum recursion depth exceeded")
+
+    monkeypatch.setattr(pin, "receipt_pin_refusal", boom)
+    assert pin.main([], gh=FakeGitHub({"uv.lock": THESIS_LOCK})) == 2
+    out = capsys.readouterr().out
+    assert out.startswith("cannot compare the receipt pins: RecursionError(")
+    assert out.count("\n") == 1
+
+
+def test_one_line_removes_every_line_break() -> None:
+    assert pin.one_line("a\r\nb\nc\rd") == "a  b c d"
+
+
+# --- properties (Hypothesis) ----------------------------------------------------
+
+_VERSIONS = st.from_regex(r"[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}", fullmatch=True)
+_DIGESTS = st.from_regex(r"sha256:[0-9a-f]{64}", fullmatch=True)
+_ARTIFACTS = st.frozensets(_DIGESTS, min_size=1, max_size=3)
+
+
+@settings(max_examples=300, deadline=None)
+@given(
+    chronicle=st.tuples(_VERSIONS, _ARTIFACTS),
+    thesis=st.tuples(_VERSIONS, _ARTIFACTS),
+    installed=st.one_of(st.none(), _VERSIONS, st.just("unchecked")),
+    same=st.booleans(),
+)
+def test_property_the_check_allows_only_identical_pins_and_the_locked_install(
+    chronicle, thesis, installed, same
+) -> None:
+    if same:
+        chronicle = thesis
+    kwargs = {} if installed == "unchecked" else {"installed": installed}
+    refusal = pin.receipt_pin_refusal(
+        _lock(_package("receipt", chronicle[0], *sorted(chronicle[1]))),
+        chronicle_label=LABEL,
+        thesis_lock=_lock(_package("receipt", thesis[0], *sorted(thesis[1]))),
+        **kwargs,
+    )
+    allowed = chronicle == thesis and installed in ("unchecked", thesis[0])
+    assert (refusal is None) == allowed
+    assert refusal is None or ("\n" not in refusal and "\r" not in refusal)
+
+
+@settings(max_examples=300, deadline=None)
+@given(st.binary(max_size=2048))
+def test_property_any_chronicle_bytes_give_a_one_line_refusal_or_a_pass(raw) -> None:
+    refusal = pin.receipt_pin_refusal(
+        raw, chronicle_label=LABEL, thesis_lock=THESIS_LOCK
+    )
+    if refusal is None:
+        assert pin.locked_pin(raw, label="raw") == _thesis()
+    else:
+        assert refusal and "\n" not in refusal and "\r" not in refusal
+
+
+_TOML_TOKENS = st.sampled_from(
+    [
+        "[[package]]\n",
+        'name = "receipt"\n',
+        'name = "Receipt"\n',
+        'version = "0.6.2"\n',
+        'version = ["0.6.2"]\n',
+        "wheels = [",
+        'sdist = { hash = "sha256:' + "a" * 64 + '" }\n',
+        '{ hash = "sha256:' + "b" * 64 + '" },',
+        "{ hash = 1 },",
+        "]\n",
+        "[",
+        "]",
+        "{",
+        "}",
+        '"',
+        "=",
+        ",",
+        "\n",
+        "#",
+        "package = 3\n",
+    ]
+)
+
+
+@settings(max_examples=300, deadline=None)
+@given(st.lists(_TOML_TOKENS, max_size=40).map("".join))
+def test_property_toml_shaped_text_never_raises(text) -> None:
+    refusal = pin.receipt_pin_refusal(
+        text.encode(), chronicle_label=LABEL, thesis_lock=THESIS_LOCK
+    )
+    assert refusal is None or isinstance(refusal, str)

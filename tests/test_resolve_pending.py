@@ -6813,6 +6813,42 @@ def test_main_refuses_an_interpreter_without_the_locked_receipt(
     )
 
 
+def test_main_refuses_an_installed_receipt_other_than_the_locked_one(
+    monkeypatch, capsys, tmp_path: pathlib.Path
+) -> None:
+    # The real probe, not the conftest stub: a distribution at a version no
+    # lock names must be what main() compares (review of #304, finding 3).
+    dist = tmp_path / "receipt-0.0.1.dist-info"
+    dist.mkdir()
+    (dist / "METADATA").write_text(
+        "Metadata-Version: 2.1\nName: receipt\nVersion: 0.0.1\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setattr(
+        resolve_pending, "installed_receipt_version", _REAL_INSTALLED_RECEIPT_VERSION
+    )
+    captures = _install_one_pending_claim(monkeypatch)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    assert captures == []
+    assert f"{sys.executable} has receipt 0.0.1, but thesis and" in (
+        capsys.readouterr().out
+    )
+
+
+def test_the_refusal_prints_as_one_line_and_an_escaped_annotation(
+    monkeypatch, capsys
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    resolve_pending.announce_receipt_pin_refusal("50% off\r\n::warning::x")
+    lines = capsys.readouterr().out.splitlines()
+    assert lines == [
+        "RECEIPT PIN REFUSED: 50% off  ::warning::x",
+        "::error title=Receipt pin mismatch::50%25 off%0D%0A::warning::x",
+    ]
+
+
 def test_the_preflight_reads_chronicles_lock_through_the_verified_gh_client(
     monkeypatch,
 ) -> None:
@@ -6891,7 +6927,8 @@ def test_append_proposal_refuses_a_base_locking_another_receipt_before_its_gener
             producer_signing_key=signing_key_pem,
         )
     assert str(refused.value).startswith(
-        "refusing to run the staged series-catalog generator: thesis locks "
+        "RECEIPT PIN REFUSED: refusing to run the staged series-catalog "
+        "generator: thesis locks "
         f"receipt {_thesis_receipt_version()} but the staged Chronicle base "
         f"(tree 111111111111) locks receipt {chronicle_version}."
     )
@@ -6938,8 +6975,8 @@ def test_ledger_catalog_refusals_name_a_receipt_mismatch_instead_of_trying_rows(
     with pytest.raises(
         resolve_pending.LedgerProposalError,
         match=re.escape(
-            "refusing to run the staged series-catalog generator: thesis locks "
-            f"receipt {_thesis_receipt_version()} but "
+            "RECEIPT PIN REFUSED: refusing to run the staged series-catalog "
+            f"generator: thesis locks receipt {_thesis_receipt_version()} but "
             f"PolicyEngine/chronicle@{'b' * 12} locks receipt {chronicle_version}."
         ),
     ):
