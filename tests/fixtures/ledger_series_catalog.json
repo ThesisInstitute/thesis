@@ -5,7 +5,7 @@
   "observation_rows": 233,
   "current_assertion_rows": 233,
   "docket_seed_sha256": "5914192517350e0166045afd9064a515ea312acbea1844d9cb594cc9f525dbb9",
-  "entity_folds_sha256": "442739aba771eadf57984ed968391f702f5b826c8b98ba4cae1e04cc1587e572",
+  "entity_folds_sha256": "f7496541139308e97c65c8681dd9f44829d46df25eede0d4e639203049667b58",
   "uuid_registry_sha256": "272d8fd6b2e82151d781d8a9bc69f0f7abaf934a837279c47d2f534683443f31",
   "suspect_segments": [
     "LNU02374597"

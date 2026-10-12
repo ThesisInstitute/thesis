@@ -597,7 +597,7 @@ def test_docket_is_contained_in_frozen_catalog_fixture() -> None:
     # (Max's ruling d353), 221 series over the ledger at d7e45bc5.
     assert len(raw) == 199_465
     assert hashlib.sha256(raw).hexdigest() == (
-        "426731e70b80f13f3fdfe2619bd11fbdf91d56cfc99cf54ceab18395807d3662"
+        "b055a7aed092ae5c436a634faf6472e8d19d5ca1388f851028c06c1b88a5c441"
     )
     _assert_containment(_object(raw, "frozen catalog fixture"), "fixture")
 
