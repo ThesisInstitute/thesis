@@ -24,9 +24,12 @@ cannot import name 'PinnedSigner' from 'receipt.release_chain'
 `scripts/chronicle_receipt_pin.py` compares three versions: the receipt
 installed for the resolver's interpreter, the one thesis's `uv.lock` names, and
 the one Chronicle's `uv.lock` names at one commit. When the locks name the same
-version, they must also name the same artifact hashes. A lock it cannot read, a
+version, they must also name the same artifact hashes. A lock it cannot parse, a
 lock with no receipt, one with two receipt entries, and one whose version or
-hashes are not well formed are all refused. The check never raises.
+hashes are not well formed (a hash must be a full SHA-256, SHA-384 or SHA-512
+hex digest) are all refused. The check never raises. Its printed lines carry no
+line break and neither Actions command marker (`::`, `##[`), and a parser
+error is reported by type and position only, never by the text it quotes.
 
 It runs in four places:
 
@@ -45,10 +48,11 @@ It runs in four places:
   generator unchecked. These refusals raise with the same prefix.
 - `receipt-pin-drift.yml`, every three hours and on pull requests that change
   `pyproject.toml` or `uv.lock`. It opens an issue titled "Receipt pin drift:
-  thesis and Chronicle's ledger branch lock different receipts" while the locks
-  differ (exit 1), and closes it once they agree. Exit 2 (Chronicle's lock could
-  not be read, or the comparison crashed) fails the run without an issue: it
-  says nothing about drift.
+  thesis and Chronicle's ledger branch lock different receipts" while the
+  resolver would refuse (exit 1, which includes a fetched lock it cannot parse),
+  and closes it once they agree. Exit 2 (Chronicle's lock could not be fetched,
+  or the comparison itself crashed) fails the run without an issue: it says
+  nothing about drift.
 - The CI job `resolver-runtime`. It runs the resolver's install on the runner's
   own `python3` and imports every script the resolution run starts.
 

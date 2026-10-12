@@ -687,6 +687,11 @@ def test_the_drift_monitor_compares_on_a_schedule_and_on_lock_changes() -> None:
         "if: steps.compare.outputs.rc == '1' && github.event_name != 'pull_request'"
         in opener
     )
+    # The comparison's words reach the issue only inside a code block.
+    assert "echo '```text'" in opener
+    assert opener.index("echo '```text'") < opener.index(
+        'cat "$RUNNER_TEMP/receipt-pin.txt"'
+    )
     closer = _step(workflow, "Close a drift issue once the locks agree")
     assert (
         "if: steps.compare.outputs.rc == '0' && github.event_name != 'pull_request'"
@@ -814,12 +819,83 @@ def test_cli_exits_2_not_1_when_the_comparison_itself_crashes(
     monkeypatch.setattr(pin, "receipt_pin_refusal", boom)
     assert pin.main([], gh=FakeGitHub({"uv.lock": THESIS_LOCK})) == 2
     out = capsys.readouterr().out
-    assert out.startswith("cannot compare the receipt pins: RecursionError(")
-    assert out.count("\n") == 1
+    assert out == "cannot compare the receipt pins: RecursionError\n"
 
 
 def test_one_line_removes_every_line_break() -> None:
     assert pin.one_line("a\r\nb\nc\rd") == "a  b c d"
+
+
+def test_one_line_leaves_no_workflow_command_marker() -> None:
+    # The runner reads ``::name::`` at a line's start and the legacy
+    # ``##[name]`` anywhere in a line (round 2, finding 2).
+    line = pin.one_line("x ##[warning]y ::error::z\n::notice::w")
+    assert "##[" not in line and "::" not in line
+    assert line == "x # #[warning]y : :error: :z : :notice: :w"
+
+
+# --- review of #304, round 2 -----------------------------------------------------
+
+
+def test_an_integer_past_pythons_digit_limit_is_refused_not_raised() -> None:
+    # tomllib raises a plain ValueError (not TOMLDecodeError) for an integer
+    # over 4300 digits; it escaped the parser's handler (round 2, finding 1).
+    huge = b"x = " + b"1" * 5000 + b"\n"
+    assert (
+        pin.receipt_pin_refusal(huge, chronicle_label=LABEL, thesis_lock=THESIS_LOCK)
+        == f"{LABEL} uv.lock is not a readable uv.lock (ValueError)"
+    )
+
+
+def test_a_parser_error_never_quotes_chronicles_text() -> None:
+    key = '"##[warning]injected ::warning:: by Chronicle"'
+    lock = f"[{key}]\n[{key}]\n".encode()
+    refusal = pin.receipt_pin_refusal(
+        lock, chronicle_label=LABEL, thesis_lock=THESIS_LOCK
+    )
+    assert refusal is not None
+    assert "injected" not in refusal and "##[" not in refusal and "::" not in refusal
+    assert re.fullmatch(
+        re.escape(f"{LABEL} uv.lock is not a readable uv.lock (TOMLDecodeError")
+        + r"( at line \d+, column \d+)?\)",
+        refusal,
+    )
+
+
+def test_anything_unexpected_in_the_comparison_is_a_refusal(monkeypatch) -> None:
+    def boom(*args, **kwargs):
+        raise KeyError("##[warning]from somewhere")
+
+    monkeypatch.setattr(pin, "_receipt_pin_refusal", boom)
+    assert (
+        pin.receipt_pin_refusal(
+            THESIS_LOCK, chronicle_label=LABEL, thesis_lock=THESIS_LOCK
+        )
+        == f"cannot compare the receipt pins for {LABEL} (KeyError)"
+    )
+
+
+@pytest.mark.parametrize(
+    "digest",
+    ["sha256:" + "a" * 65, "sha384:" + "a" * 64, "sha512:" + "a" * 96],
+)
+def test_a_digest_of_the_wrong_length_for_its_algorithm_is_refused(digest) -> None:
+    # Round 2, nit 5: the length must match the algorithm, in both locks.
+    lock = _lock(_package("receipt", "0.6.2", digest))
+    assert pin.receipt_pin_refusal(lock, chronicle_label=LABEL, thesis_lock=lock) == (
+        f"{LABEL} uv.lock locks receipt 0.6.2 with an artifact hash that is not "
+        "a hex digest"
+    )
+
+
+def test_an_installed_version_that_is_not_one_is_refused_without_echoing_it() -> None:
+    refusal = pin.receipt_pin_refusal(
+        THESIS_LOCK,
+        chronicle_label=LABEL,
+        thesis_lock=THESIS_LOCK,
+        installed="0.6.2\n##[warning]x",
+    )
+    assert refusal is not None and "##[" not in refusal and "\n" not in refusal
 
 
 # --- properties (Hypothesis) ----------------------------------------------------
@@ -863,6 +939,8 @@ def test_property_any_chronicle_bytes_give_a_one_line_refusal_or_a_pass(raw) -> 
         assert pin.locked_pin(raw, label="raw") == _thesis()
     else:
         assert refusal and "\n" not in refusal and "\r" not in refusal
+        printed = pin.one_line(f"RECEIPT PIN REFUSED: {refusal}")
+        assert "##[" not in printed and "::" not in printed
 
 
 _TOML_TOKENS = st.sampled_from(
@@ -887,6 +965,8 @@ _TOML_TOKENS = st.sampled_from(
         "\n",
         "#",
         "package = 3\n",
+        '["##[warning]x ::error::y"]\n',
+        "x = " + "9" * 4400 + "\n",
     ]
 )
 
@@ -898,3 +978,5 @@ def test_property_toml_shaped_text_never_raises(text) -> None:
         text.encode(), chronicle_label=LABEL, thesis_lock=THESIS_LOCK
     )
     assert refusal is None or isinstance(refusal, str)
+    if refusal is not None:
+        assert "##[" not in refusal and "\n" not in refusal

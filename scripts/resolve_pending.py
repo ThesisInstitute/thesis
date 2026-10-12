@@ -13363,13 +13363,24 @@ def installed_receipt_version() -> str | None:
 def receipt_pin_refusal(
     chronicle_lock: bytes | None, *, chronicle_label: str
 ) -> str | None:
-    """Why Chronicle's staged generator must not run under this interpreter."""
+    """Why Chronicle's staged generator must not run under this interpreter.
 
+    Never raises: a thesis lock or an installed receipt that cannot be read
+    is a refusal too."""
+
+    try:
+        thesis_lock = chronicle_receipt_pin.THESIS_LOCK.read_bytes()
+    except Exception as exc:
+        return f"cannot read thesis's uv.lock ({type(exc).__name__})"
+    try:
+        installed = installed_receipt_version()
+    except Exception as exc:
+        return f"cannot read this interpreter's receipt ({type(exc).__name__})"
     return chronicle_receipt_pin.receipt_pin_refusal(
         chronicle_lock,
         chronicle_label=chronicle_label,
-        thesis_lock=chronicle_receipt_pin.THESIS_LOCK.read_bytes(),
-        installed=installed_receipt_version(),
+        thesis_lock=thesis_lock,
+        installed=installed,
     )
 
 
@@ -13402,7 +13413,12 @@ def announce_receipt_pin_refusal(refusal: str) -> None:
     if os.environ.get("GITHUB_ACTIONS") == "true":
         # A workflow-command annotation puts the reason on the run's summary
         # page, not only in the step log.
-        message = refusal.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        message = (
+            chronicle_receipt_pin.without_commands(refusal)
+            .replace("%", "%25")
+            .replace("\r", "%0D")
+            .replace("\n", "%0A")
+        )
         print(f"::error title=Receipt pin mismatch::{message}")
 
 

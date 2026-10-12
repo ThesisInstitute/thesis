@@ -62,10 +62,14 @@ jobs:
             echo "drift issue #$existing is already open"
             exit 0
           fi
+          # The comparison's own words go in a code block, so nothing in them
+          # can mention, link or format.
           {
             echo "The resolver will refuse to open a Chronicle append proposal until these agree ($RUN_URL):"
             echo
+            echo '```text'
             cat "$RUNNER_TEMP/receipt-pin.txt"
+            echo '```'
           } > "$RUNNER_TEMP/issue.md"
           gh issue create --title "$ISSUE_TITLE" --body-file "$RUNNER_TEMP/issue.md"
 
