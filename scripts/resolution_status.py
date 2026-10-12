@@ -216,6 +216,11 @@ REASONS = {
         "line it printed names this one."
     ),
     "NO_RESOLVER_RUN": ("No resolver log was available when this status was written."),
+    "RECEIPT_PIN_STOP": (
+        "The resolver's last run stopped before it fetched any figure, because "
+        "Chronicle's ledger branch and the resolver lock different versions of "
+        "the receipt package. It tries again on its next run."
+    ),
 }
 
 # A line the rules do not know keeps its code, UNCLASSIFIED, and the
@@ -272,6 +277,9 @@ _ENVIRONMENT_STOP = "environment failures left admitted references unresolvable"
 # RESOLVER_FINISHED; a test holds the spellings together).
 _LOOP_COMPLETE = "resolution loop complete:"
 _FINISHED = "resolver finished with exit code"
+# resolve_pending.main prints this, then stops before any capture
+# (EXIT_RECEIPT_PIN_REFUSED): it fetched nothing and appended nothing.
+_RECEIPT_STOP = "RECEIPT PIN REFUSED:"
 # resolve_pending.main prints this after the reviewed proposal merged; every
 # row it resolved and did not refuse afterwards is then in the ledger.
 _APPENDED_RE = re.compile(
@@ -399,12 +407,15 @@ def parse_resolver_log(
     stopped = any(line.startswith(_ENVIRONMENT_STOP) for line in lines)
     loop_completed = any(line.startswith(_LOOP_COMPLETE) for line in lines)
     finished = any(line.startswith(_FINISHED) for line in lines)
+    receipt_stop = next((line for line in lines if line.startswith(_RECEIPT_STOP)), "")
     error = ""
     if crashed:
         tail_lines = [line for line in lines if line and not line.startswith(" ")]
         error = _plain(tail_lines[-1] if tail_lines else "", 300)
     elif stopped:
         error = _plain(_ENVIRONMENT_STOP, 300)
+    elif receipt_stop:
+        error = _plain(receipt_stop, 300)
     if any(_APPENDED_RE.match(line) for line in lines):
         for row in targets.values():
             if row["code"] == "RESOLVED_AWAITING_RECORD":
@@ -414,11 +425,20 @@ def parse_resolver_log(
                 )
     run = {
         "logAvailable": bool(text.strip()),
-        "completed": bool(text.strip()) and finished and not crashed and not stopped,
+        "completed": bool(text.strip())
+        and finished
+        and not crashed
+        and not stopped
+        and not receipt_stop,
         "loopCompleted": bool(text.strip()) and loop_completed,
         "error": error,
     }
     return targets, run
+
+
+def stopped_on_receipt_pin(run: dict[str, Any]) -> bool:
+    """Whether the run stopped before capture on a receipt pin refusal."""
+    return str(run.get("error", "")).startswith(_plain(_RECEIPT_STOP))
 
 
 def build_status(
@@ -452,6 +472,9 @@ def build_status(
                 code = "RESOLVED_BUT_RUN_FAILED"
         elif not run["logAvailable"]:
             state, code = "unknown", "NO_RESOLVER_RUN"
+        elif ref in claimed_refs and stopped_on_receipt_pin(run):
+            # The run stopped before the loop that would have named it.
+            state, code, detail = "deferred", "RECEIPT_PIN_STOP", run["error"]
         elif ref in claimed_refs:
             # A routed target with no line was passed over only if the loop
             # finished; a run that stopped first may never have reached it.

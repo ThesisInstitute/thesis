@@ -89,7 +89,12 @@ jobs:
           # Exit 3 (EXIT_REFUSED_ROWS) means the resolver finished cleanly
           # but refused some rows: what it appended must still be committed
           # and published, so the step goes on and the job fails at the end
-          # ("Fail the run on refused rows"). Any other failure stops here.
+          # ("Fail the run on refused rows"). Exit 4
+          # (EXIT_RECEIPT_PIN_REFUSED) means it stopped before any capture
+          # because Chronicle's ledger branch locks a different receipt
+          # (docs/receipt-pin.md). It appended nothing, but the ledger may
+          # have moved upstream, so 4 is published and failed the same way.
+          # Any other failure stops here.
           set +e
           python3 -u scripts/resolve_pending.py 2>&1 | tee /tmp/resolve-out.log
           statuses=("${PIPESTATUS[@]}")
@@ -98,7 +103,8 @@ jobs:
           if [ "${statuses[1]}" -ne 0 ]; then
             exit "${statuses[1]}"
           fi
-          if [ "$resolver_rc" -ne 0 ] && [ "$resolver_rc" -ne 3 ]; then
+          if [ "$resolver_rc" -ne 0 ] && [ "$resolver_rc" -ne 3 ] \
+              && [ "$resolver_rc" -ne 4 ]; then
             exit "$resolver_rc"
           fi
           echo "resolver_rc=$resolver_rc" >> "$GITHUB_OUTPUT"
@@ -336,10 +342,18 @@ jobs:
 
       - name: Fail the run on refused rows
         id: refused_gate
-        if: steps.resolve.outputs.resolver_rc == '3'
+        if: steps.resolve.outputs.resolver_rc == '3' || steps.resolve.outputs.resolver_rc == '4'
+        env:
+          RESOLVER_RC: ${{ steps.resolve.outputs.resolver_rc }}
         run: |
-          echo "The resolver refused one or more rows (see 'Resolve pending" >&2
-          echo "cells'); everything it appended was committed and published." >&2
+          if [ "$RESOLVER_RC" = "4" ]; then
+            echo "The resolver refused to run Chronicle's code under a receipt" >&2
+            echo "Chronicle did not lock (see 'Resolve pending cells' and" >&2
+            echo "docs/receipt-pin.md); it fetched nothing this run." >&2
+          else
+            echo "The resolver refused one or more rows (see 'Resolve pending" >&2
+            echo "cells'); everything it appended was committed and published." >&2
+          fi
           exit 1
 
       - name: Alert on failure

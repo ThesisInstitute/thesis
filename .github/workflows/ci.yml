@@ -116,7 +116,7 @@ jobs:
           set -euo pipefail
           python3 scripts/chronicle_receipt_pin.py --installed-only
           cd scripts
-          python3 -c "import resolve_pending, pin_ledger, witness_upstream_ledger, verify_witnessed_pin, official_browser_fetch, attest_subject, xlrd, pypdf, cryptography, playwright.sync_api, receipt.sign, receipt.release_chain, receipt.append_gate"
+          python3 -c "import resolve_pending, pin_ledger, witness_upstream_ledger, verify_witnessed_pin, official_browser_fetch, attest_subject, resolution_status, resolution_alert, xlrd, pypdf, cryptography, playwright.sync_api, receipt.sign, receipt.release_chain, receipt.append_gate"
 
   # Give the bill extraction and paired-publication boundary fast feedback
   # while the complete Python suite continues to verify the entire archive.
@@ -198,8 +198,8 @@ jobs:
   alert-on-main-failure:
     runs-on: ubuntu-latest
     needs:
-      [build-and-test, forecast-api, python-tests, wave-reproducibility,
-       packaged-smoke, hook-guard, bill-pipeline]
+      [build-and-test, forecast-api, python-tests, resolver-runtime,
+       wave-reproducibility, packaged-smoke, hook-guard, bill-pipeline]
     if: failure() && github.ref == 'refs/heads/main'
     permissions:
       issues: write

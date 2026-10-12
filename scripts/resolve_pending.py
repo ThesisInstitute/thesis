@@ -242,8 +242,11 @@ EXIT_REFUSED_ROWS = 3
 # main's exit status when Chronicle's ledger branch locks a different receipt
 # than this interpreter runs. Every append proposal runs Chronicle's own
 # series-catalog generator under this interpreter, so main stops before any
-# capture work (see chronicle_receipt_pin.py).
+# capture work (see chronicle_receipt_pin.py). It appended nothing, but the
+# ledger may have moved upstream, so the workflow treats this like
+# EXIT_REFUSED_ROWS: publish, then fail the job so the alert fires.
 EXIT_RECEIPT_PIN_REFUSED = 4
+RECEIPT_PIN_REFUSED = "RECEIPT PIN REFUSED: "
 
 
 class LedgerProposalError(RuntimeError):
@@ -13183,7 +13186,8 @@ def _prepare_release_files(
     )
     if receipt_refusal:
         raise LedgerProposalError(
-            f"refusing to run the staged series-catalog generator: {receipt_refusal}"
+            f"{RECEIPT_PIN_REFUSED}refusing to run the staged series-catalog "
+            f"generator: {receipt_refusal}"
         )
 
     timeout = _validate_timestamp_timeout(timeout_seconds)
@@ -13357,11 +13361,7 @@ def chronicle_receipt_preflight(repo: str, branch: str, commit_sha: str) -> str 
     label = chronicle_receipt_pin.chronicle_label(repo, commit_sha, branch)
     try:
         chronicle_lock = chronicle_receipt_lock(repo, commit_sha)
-    except (
-        chronicle_receipt_pin.ReceiptPinError,
-        RuntimeError,
-        json.JSONDecodeError,
-    ) as exc:
+    except Exception as exc:  # a lock that cannot be read cannot be trusted
         return f"cannot read {label} {chronicle_receipt_pin.LOCK_PATH}: {exc}"
     return receipt_pin_refusal(chronicle_lock, chronicle_label=label)
 
@@ -13373,7 +13373,7 @@ def _staged_receipt_pin_refusal(tree: RepositoryTree, label: str) -> str | None:
 
 
 def announce_receipt_pin_refusal(refusal: str) -> None:
-    print(f"RECEIPT PIN REFUSED: {refusal}")
+    print(chronicle_receipt_pin.one_line(f"{RECEIPT_PIN_REFUSED}{refusal}"))
     if os.environ.get("GITHUB_ACTIONS") == "true":
         # A workflow-command annotation puts the reason on the run's summary
         # page, not only in the step log.
@@ -13965,8 +13965,8 @@ def ledger_catalog_refusals(
             # Every trial below would fail the same way and read as "the base
             # alone fails", which hides the reason; say it instead.
             raise LedgerProposalError(
-                "refusing to run the staged series-catalog generator: "
-                f"{receipt_refusal}"
+                f"{RECEIPT_PIN_REFUSED}refusing to run the staged series-catalog "
+                f"generator: {receipt_refusal}"
             )
     lines = [json.dumps(row, separators=(",", ":")) for row in rows]
 

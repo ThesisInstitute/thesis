@@ -34,6 +34,10 @@ Usage:
     python3 scripts/chronicle_receipt_pin.py [--ledger-repo R] \
         [--ledger-branch B | --ledger-sha SHA] [--check-installed]
     python3 scripts/chronicle_receipt_pin.py --installed-only
+
+It prints one line and exits 0 when the pins agree, 1 when they do not, and
+2 when it could not compare them (an unreadable lock, a GitHub error, a
+crash), which says nothing about drift.
 """
 
 from __future__ import annotations
@@ -61,6 +65,11 @@ DEFAULT_LEDGER_BRANCH = "codex/thesis-ledger-facts"
 BUMP_DOC = "docs/receipt-pin.md"
 BUMP_EXAMPLE = "https://github.com/ThesisInstitute/thesis/pull/302"
 _SHA_RE = re.compile(r"[0-9a-f]{40}")
+# What a lock may say for a version and an artifact hash. Anything else is
+# refused, so text from Chronicle's branch never reaches a log or an issue
+# unless it is one of these shapes (no newline, no workflow command).
+_VERSION_RE = re.compile(r"[0-9][0-9A-Za-z.+!_-]{0,63}")
+_HASH_RE = re.compile(r"sha(?:256|384|512):[0-9a-f]{64,128}")
 
 GhApi = Callable[..., str]
 
@@ -99,6 +108,10 @@ def locked_pin(lock: bytes, *, label: str, name: str = RECEIPT) -> LockedPin | N
         data = tomllib.loads(lock.decode("utf-8"))
     except (UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
         raise ReceiptPinError(f"{label} is not a readable uv.lock: {exc}") from exc
+    except RecursionError as exc:
+        # tomllib recurses once per nesting level; a few hundred nested
+        # arrays exhaust the stack.
+        raise ReceiptPinError(f"{label} nests too deeply to read") from exc
     packages = data.get("package")
     if not isinstance(packages, list):
         raise ReceiptPinError(f"{label} has no [[package]] entries")
@@ -112,7 +125,10 @@ def locked_pin(lock: bytes, *, label: str, name: str = RECEIPT) -> LockedPin | N
     if not entries:
         return None
     if len(entries) > 1:
-        versions = ", ".join(str(entry.get("version")) for entry in entries)
+        versions = ", ".join(
+            version if _VERSION_RE.fullmatch(version) else "?"
+            for version in (str(entry.get("version")) for entry in entries)
+        )
         raise ReceiptPinError(
             f"{label} locks {len(entries)} {name} entries ({versions}), so it "
             f"does not say which {name} its code runs under"
@@ -121,17 +137,36 @@ def locked_pin(lock: bytes, *, label: str, name: str = RECEIPT) -> LockedPin | N
     version = entry.get("version")
     if not isinstance(version, str) or not version:
         raise ReceiptPinError(f"{label} locks {name} without a version")
+    if not _VERSION_RE.fullmatch(version):
+        raise ReceiptPinError(f"{label} locks {name} at a version that is not one")
     artifacts: set[str] = set()
     sdist = entry.get("sdist")
-    if isinstance(sdist, dict) and isinstance(sdist.get("hash"), str):
-        artifacts.add(sdist["hash"])
     wheels = entry.get("wheels")
-    for wheel in wheels if isinstance(wheels, list) else []:
-        if isinstance(wheel, dict) and isinstance(wheel.get("hash"), str):
-            artifacts.add(wheel["hash"])
+    for artifact in [
+        sdist,
+        *(wheels if isinstance(wheels, list) else []),
+    ]:
+        if not isinstance(artifact, dict) or "hash" not in artifact:
+            continue
+        digest = artifact["hash"]
+        if not isinstance(digest, str) or not _HASH_RE.fullmatch(digest):
+            raise ReceiptPinError(
+                f"{label} locks {name} {version} with an artifact hash that is "
+                "not a hex digest"
+            )
+        artifacts.add(digest)
     if not artifacts:
         raise ReceiptPinError(f"{label} locks {name} {version} without artifact hashes")
     return LockedPin(version=version, artifacts=frozenset(artifacts))
+
+
+def one_line(text: str) -> str:
+    """``text`` with no line break, safe to print as one Actions log line.
+
+    GitHub reads a workflow command only at the start of a line, so a
+    message without line breaks cannot carry one."""
+
+    return text.replace("\r", " ").replace("\n", " ")
 
 
 def installed_version(name: str = RECEIPT) -> str | None:
@@ -319,7 +354,50 @@ def chronicle_label(repo: str, commit_sha: str, branch: str | None = None) -> st
     return f"{repo}@{commit_sha[:12]}{where}"
 
 
+EXIT_AGREE = 0
+EXIT_REFUSED = 1  # the pins disagree; receipt-pin-drift.yml opens an issue
+EXIT_UNREADABLE = 2  # nothing could be compared; that says nothing about drift
+
+
+def _compare(args: argparse.Namespace, gh: GhApi) -> tuple[int, str]:
+    thesis_lock = args.thesis_lock.read_bytes()
+    if args.installed_only:
+        installed = installed_version()
+        refusal = installed_refusal(thesis_lock, installed)
+        if refusal:
+            return EXIT_REFUSED, f"RECEIPT PIN REFUSED: {refusal}"
+        return (
+            EXIT_AGREE,
+            f"{sys.executable} has {RECEIPT} {installed}, as thesis's lock names",
+        )
+    try:
+        if args.ledger_sha:
+            sha = _commit_sha(args.ledger_sha, "--ledger-sha")
+            label = chronicle_label(args.ledger_repo, sha)
+        else:
+            sha = branch_head(args.ledger_repo, args.ledger_branch, gh=gh)
+            label = chronicle_label(args.ledger_repo, sha, args.ledger_branch)
+        chronicle_lock = fetch_lock(args.ledger_repo, sha, gh=gh)
+    except (ReceiptPinError, json.JSONDecodeError) as exc:
+        return EXIT_UNREADABLE, f"cannot read Chronicle's lock: {exc}"
+    kwargs = {"installed": installed_version()} if args.check_installed else {}
+    refusal = receipt_pin_refusal(
+        chronicle_lock, chronicle_label=label, thesis_lock=thesis_lock, **kwargs
+    )
+    if refusal:
+        return EXIT_REFUSED, f"RECEIPT PIN REFUSED: {refusal}"
+    # A missing lock, or one without receipt, is a refusal above.
+    chronicle = locked_pin(chronicle_lock or b"", label=label)
+    assert chronicle is not None
+    return EXIT_AGREE, (
+        f"thesis and {label} both lock {RECEIPT} {chronicle.version} "
+        f"({len(chronicle.artifacts)} identical artifact hashes)"
+    )
+
+
 def main(argv: list[str] | None = None, *, gh: GhApi = _gh_api) -> int:
+    """Print one line and exit 0 (agree), 1 (refused) or 2 (unreadable)."""
+
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n", 1)[0])
     parser.add_argument("--ledger-repo", default=DEFAULT_LEDGER_REPO)
     target = parser.add_mutually_exclusive_group()
@@ -337,43 +415,12 @@ def main(argv: list[str] | None = None, *, gh: GhApi = _gh_api) -> int:
     )
     parser.add_argument("--thesis-lock", type=pathlib.Path, default=THESIS_LOCK)
     args = parser.parse_args(argv)
-    thesis_lock = args.thesis_lock.read_bytes()
-
-    if args.installed_only:
-        installed = installed_version()
-        refusal = installed_refusal(thesis_lock, installed)
-        if refusal:
-            print(f"RECEIPT PIN REFUSED: {refusal}")
-            return 1
-        print(f"{sys.executable} has {RECEIPT} {installed}, as thesis's lock names")
-        return 0
-
     try:
-        if args.ledger_sha:
-            sha = _commit_sha(args.ledger_sha, "--ledger-sha")
-            label = chronicle_label(args.ledger_repo, sha)
-        else:
-            sha = branch_head(args.ledger_repo, args.ledger_branch, gh=gh)
-            label = chronicle_label(args.ledger_repo, sha, args.ledger_branch)
-        chronicle_lock = fetch_lock(args.ledger_repo, sha, gh=gh)
-    except (ReceiptPinError, json.JSONDecodeError) as exc:
-        print(f"cannot read Chronicle's lock: {exc}")
-        return 2
-    kwargs = {"installed": installed_version()} if args.check_installed else {}
-    refusal = receipt_pin_refusal(
-        chronicle_lock, chronicle_label=label, thesis_lock=thesis_lock, **kwargs
-    )
-    if refusal:
-        print(f"RECEIPT PIN REFUSED: {refusal}")
-        return 1
-    # A missing lock, or one without receipt, is a refusal above.
-    chronicle = locked_pin(chronicle_lock or b"", label=label)
-    assert chronicle is not None
-    print(
-        f"thesis and {label} both lock {RECEIPT} {chronicle.version} "
-        f"({len(chronicle.artifacts)} identical artifact hashes)"
-    )
-    return 0
+        status, line = _compare(args, gh)
+    except Exception as exc:  # anything unexpected is not evidence of drift
+        status, line = EXIT_UNREADABLE, f"cannot compare the receipt pins: {exc!r}"
+    print(one_line(line))
+    return status
 
 
 if __name__ == "__main__":
