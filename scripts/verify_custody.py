@@ -12,7 +12,7 @@ import stat
 import sys
 import urllib.parse
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -63,7 +63,19 @@ FIRST_PRINT_EVIDENCE_ROLES = {
     "vintage_before_release",
     "vintage_before_release_reread",
     "vintage_after_release",
+    "superseded_row_vintage",
 }
+FIRST_PRINT_REQUIRED_ROLES = (
+    "vintage_before_release",
+    "vintage_before_release_reread",
+    "vintage_after_release",
+)
+# Weekly claims record ids, with the ALFRED series each resolves from.
+CLAIMS_RECORD_RE = re.compile(
+    r"(?:us\.dol\.initial_claims\.sa\.week_(?P<icsa>\d{4}-\d{2}-\d{2})"
+    r"|dol\.eta\.continued_claims\.sa\.week_(?P<ccsa>\d{4}-\d{2}-\d{2})"
+    r"(?:\.first_print)?)$"
+)
 RESOLVER_RESPONSE_RE = re.compile(
     # One archived source response per fetched document: a lowercase series
     # or page identifier, the first-print vintage date, and a content-hash
@@ -844,12 +856,8 @@ def _verify_resolver_v2(
         if not isinstance(evidence, list):
             raise CustodyError("resolver fact firstPrintEvidence must be a list")
         for item in evidence:
-            if (
-                not isinstance(item, dict)
-                or item.get("role") not in FIRST_PRINT_EVIDENCE_ROLES
-                or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(item.get("vintageDate")))
-                or not isinstance(item.get("retrievedAt"), str)
-                or not isinstance(item.get("responseArchive"), dict)
+            if not isinstance(item, dict) or not isinstance(
+                item.get("responseArchive"), dict
             ):
                 raise CustodyError(
                     f"invalid resolver firstPrintEvidence entry: {item!r}"
@@ -907,6 +915,122 @@ def _verify_resolver_v2(
             "resolver response inventory mismatch: "
             f"rooted={sorted(rooted_responses)}, "
             f"manifest={sorted(manifest_responses)}"
+        )
+    required = manifest.get("firstPrintEvidenceRequired") is True
+    for fact in facts:
+        match = CLAIMS_RECORD_RE.match(str(fact.get("dataPointId", "")))
+        if "firstPrintEvidence" in fact:
+            if match is None:
+                raise CustodyError(
+                    "firstPrintEvidence on a fact that is not a weekly claims "
+                    f"record: {fact.get('dataPointId')!r}"
+                )
+            _verify_first_print_evidence(run_dir, fact, match)
+        elif required and match is not None:
+            raise CustodyError(
+                f"weekly claims fact lacks firstPrintEvidence: {fact['dataPointId']}"
+            )
+
+
+def _claims_vintage_rows(
+    run_dir: Path, archive: dict[str, Any], series: str, day: str, label: str
+) -> tuple[bytes, dict[str, str]]:
+    """The archived ALFRED body for one vintage date and its rows by week."""
+
+    relative = _manifest_relative(run_dir, str(archive.get("path", "")), legacy=False)
+    if not PurePosixPath(relative).name.startswith(f"{series.lower()}-{day}-"):
+        raise CustodyError(f"{label} archive {relative} is not {series} {day}")
+    raw = gzip.decompress(_safe_artifact_path(run_dir, relative).read_bytes())
+    lines = [line.rstrip("\r") for line in raw.decode("utf-8").split("\n") if line]
+    if not lines or lines[0] != f"observation_date,{series}_{day.replace('-', '')}":
+        raise CustodyError(f"{label} archive {relative} is not an ALFRED vintage CSV")
+    rows = dict(line.split(",", 1) for line in lines[1:])
+    return raw, rows
+
+
+def _verify_first_print_evidence(
+    run_dir: Path, fact: dict[str, Any], match: re.Match[str]
+) -> None:
+    """Replay a weekly claims first print from its archived reads.
+
+    The fact's own response is the vintage of DOL's release day; the evidence
+    must be the day before (twice, byte-identical, without the week) and the
+    day after (the same value), each archived under its own series and date.
+    A correction adds the vintage its superseded row was read from, which
+    must be a later release.
+    """
+
+    series, week = ("ICSA", match["icsa"]) if match["icsa"] else ("CCSA", match["ccsa"])
+    evidence = fact["firstPrintEvidence"]
+    roles = [item.get("role") for item in evidence]
+    extra = [role for role in roles if role not in FIRST_PRINT_EVIDENCE_ROLES]
+    if (
+        extra
+        or len(roles) != len(set(roles))
+        or not set(FIRST_PRINT_REQUIRED_ROLES) <= set(roles)
+    ):
+        raise CustodyError(
+            f"firstPrintEvidence for {fact['dataPointId']} must hold each of "
+            f"{list(FIRST_PRINT_REQUIRED_ROLES)} once (got {roles})"
+        )
+    try:
+        release = datetime.strptime(str(fact.get("sourceVintage")), "%Y-%m-%d")
+    except ValueError as exc:
+        raise CustodyError(
+            f"weekly claims fact {fact['dataPointId']} has no release-day sourceVintage"
+        ) from exc
+    day = {
+        "vintage_before_release": release.date() - timedelta(days=1),
+        "vintage_before_release_reread": release.date() - timedelta(days=1),
+        "vintage_after_release": release.date() + timedelta(days=1),
+    }
+    bodies: dict[str, tuple[bytes, dict[str, str]]] = {}
+    for item in evidence:
+        role = item["role"]
+        stated = str(item.get("vintageDate"))
+        if role in day and stated != day[role].isoformat():
+            raise CustodyError(
+                f"firstPrintEvidence {role} for {fact['dataPointId']} is dated "
+                f"{stated}, not {day[role].isoformat()}"
+            )
+        if role == "superseded_row_vintage" and not stated > release.date().isoformat():
+            raise CustodyError(
+                f"superseded_row_vintage {stated} is not after the release day"
+            )
+        try:
+            datetime.fromisoformat(str(item.get("retrievedAt")).replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise CustodyError(
+                f"firstPrintEvidence {role} has no retrievedAt instant"
+            ) from exc
+        bodies[role] = _claims_vintage_rows(
+            run_dir, item["responseArchive"], series, stated, f"{role} evidence"
+        )
+    _raw, primary = _claims_vintage_rows(
+        run_dir,
+        fact["responseArchive"],
+        series,
+        release.date().isoformat(),
+        "first-print response",
+    )
+    before, reread, after = (bodies[role] for role in FIRST_PRINT_REQUIRED_ROLES)
+    if week not in primary:
+        raise CustodyError(f"first-print response does not hold week {week}")
+    if before[0] != reread[0] or week in before[1]:
+        raise CustodyError(
+            f"the day before {fact['sourceVintage']} must lack week {week} on "
+            "two byte-identical reads"
+        )
+    if after[1].get(week) != primary[week]:
+        raise CustodyError(
+            f"the day after {fact['sourceVintage']} does not print week {week} "
+            "as the first print does"
+        )
+    if "superseded_row_vintage" in bodies and not max(
+        bodies["superseded_row_vintage"][1]
+    ) > max(primary):
+        raise CustodyError(
+            "superseded_row_vintage is not a later release than the first print"
         )
 
 

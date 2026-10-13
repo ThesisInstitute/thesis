@@ -12705,7 +12705,9 @@ class ClaimsVintages:
                 series_id,
                 ClaimsVintageError(
                     f"ALFRED {series_id} vintage {before} already holds week "
-                    f"{week}, before DOL's scheduled release day {scheduled}"
+                    f"{week}, before DOL's scheduled release day {scheduled}; "
+                    "an early release needs DOL's day in "
+                    "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
                 ),
             )
         reread, reread_at = self._request(series_id, before)
@@ -12881,7 +12883,12 @@ def claims_corrections(
             f"vintage that holds the week, {first_day}, DOL's release day. "
             f"See {CLAIMS_DRIFT_RECORD_URL}."
         )
-        vintages.evidence[ref] = evidence
+        _rows, read_raw, read_at = vintages.read(series_id, read_day)
+        # The read that shows the superseded row came from a later release.
+        vintages.evidence[ref] = [
+            *evidence,
+            ("superseded_row_vintage", read_day, read_raw, read_at),
+        ]
         corrected = claims_fact(ref, week, raw_value, kind, first_day, note=note)
         print(
             f"  correct: {ref} — {row.get('value')} (vintage {read_day}) -> "
@@ -17429,6 +17436,9 @@ def main() -> int:
         {
             "schemaVersion": "thesis_resolution_run_v1",
             "retrievedAt": run_retrieved_at,
+            # Every weekly claims fact carries the ALFRED reads its first
+            # print rests on; verify_custody refuses one without them.
+            "firstPrintEvidenceRequired": True,
             "ledgerRepo": args.ledger_repo,
             "ledgerBranch": args.ledger_branch,
             "ledgerRepoSha": ledger_repo_sha,

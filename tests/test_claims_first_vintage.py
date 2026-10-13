@@ -22,6 +22,7 @@ Tests that need releases outside that range build SYNTHETIC vintages and say so.
 from __future__ import annotations
 
 import datetime as dt
+import gzip
 import json
 import pathlib
 import sys
@@ -121,7 +122,7 @@ def fetch_from(
         attempts[(series_id, vintage)] = attempt + 1
         if corrupt is not None:
             raw = corrupt(series_id, vintage, raw, attempt)
-        return raw, "t"
+        return raw, "2026-10-13T00:00:00Z"
 
     return fetch
 
@@ -139,7 +140,7 @@ def synthetic_vintages(week: dt.date, first: dt.date) -> resolve_pending.ClaimsV
         rows = filled({}, previous)
         if vintage >= first.isoformat():
             rows[week.isoformat()] = 1000.0
-        return csv_bytes(series_id, vintage, rows), "t"
+        return csv_bytes(series_id, vintage, rows), "2026-10-13T00:00:00Z"
 
     return resolve_pending.ClaimsVintages(fetch)
 
@@ -957,6 +958,7 @@ def build_claims_run(tmp_path, monkeypatch, mutate=None):
     manifest = {
         "schemaVersion": "thesis_resolution_run_v1",
         "retrievedAt": "2026-10-13T03:00:00Z",
+        "firstPrintEvidenceRequired": True,
         "ledgerRepo": "PolicyEngine/chronicle",
         "ledgerBranch": "codex/thesis-ledger-facts",
         "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
@@ -991,14 +993,110 @@ def test_a_claims_run_seals_its_evidence_and_custody_verifies(
     assert verify_run(run_dir).run_mode == "resolver"
 
 
-def test_custody_refuses_a_malformed_evidence_entry(tmp_path, monkeypatch) -> None:
+def evidence_mutation(change):
+    """Edit the manifest before sealing, then drop archives it no longer names,
+    so custody judges the evidence rule rather than an orphaned file."""
+
+    def mutate(run_dir, manifest):
+        change(manifest["facts"][0], manifest)
+        named = {
+            archive["path"].rsplit("/", 1)[1]
+            for fact in manifest["facts"]
+            for archive in (
+                fact["responseArchive"],
+                *(
+                    item["responseArchive"]
+                    for item in fact.get("firstPrintEvidence", [])
+                ),
+            )
+        }
+        for path in (run_dir / "responses").iterdir():
+            if path.name not in named:
+                path.unlink()
+
+    return mutate
+
+
+@pytest.mark.parametrize(
+    ("label", "change", "message"),
+    [
+        (
+            "an unknown role",
+            lambda fact, m: fact["firstPrintEvidence"][0].update(role="anything"),
+            "must hold each",
+        ),
+        (
+            "the re-read dropped",
+            lambda fact, m: fact["firstPrintEvidence"].pop(1),
+            "must hold each",
+        ),
+        (
+            "a role repeated",
+            lambda fact, m: fact["firstPrintEvidence"][1].update(
+                role="vintage_before_release"
+            ),
+            "must hold each",
+        ),
+        (
+            "a wrong date",
+            lambda fact, m: fact["firstPrintEvidence"][2].update(
+                vintageDate="9999-99-99"
+            ),
+            "is dated",
+        ),
+        (
+            "no retrieval instant",
+            lambda fact, m: fact["firstPrintEvidence"][0].update(retrievedAt=""),
+            "retrievedAt",
+        ),
+        (
+            "the day after standing in for the day before",
+            lambda fact, m: fact["firstPrintEvidence"][0].update(
+                vintageDate="2026-09-02",
+                responseArchive=fact["firstPrintEvidence"][2]["responseArchive"],
+            ),
+            "is not ICSA 2026-09-02",
+        ),
+        (
+            "the primary response standing in for the day after",
+            lambda fact, m: fact["firstPrintEvidence"][2].update(
+                responseArchive=fact["responseArchive"]
+            ),
+            "is not ICSA 2026-09-04",
+        ),
+        (
+            "no evidence at all on a new run",
+            lambda fact, m: fact.pop("firstPrintEvidence"),
+            "lacks firstPrintEvidence",
+        ),
+    ],
+)
+def test_custody_replays_and_refuses_bad_evidence(
+    label, change, message, tmp_path, monkeypatch
+) -> None:
     from verify_custody import CustodyError
 
-    def bad_role(run_dir, manifest):
-        manifest["facts"][0]["firstPrintEvidence"][0]["role"] = "anything"
+    with pytest.raises(CustodyError, match=message):
+        build_claims_run(tmp_path, monkeypatch, evidence_mutation(change))
 
-    with pytest.raises(CustodyError, match="firstPrintEvidence"):
-        build_claims_run(tmp_path, monkeypatch, bad_role)
+
+def test_custody_still_accepts_a_historical_claims_run_without_evidence(
+    tmp_path, monkeypatch
+) -> None:
+    def historical(run_dir, manifest):
+        fact = manifest["facts"][0]
+        for item in fact.pop("firstPrintEvidence"):
+            path = resolve_pending.ROOT / item["responseArchive"]["path"]
+            if (
+                path.exists()
+                and path.resolve()
+                != (resolve_pending.ROOT / fact["responseArchive"]["path"]).resolve()
+            ):
+                path.unlink()
+        manifest.pop("firstPrintEvidenceRequired")
+
+    _run_dir, manifest = build_claims_run(tmp_path, monkeypatch, historical)
+    assert "firstPrintEvidenceRequired" not in manifest
 
 
 def test_custody_refuses_an_unlisted_evidence_response(tmp_path, monkeypatch) -> None:
@@ -1010,3 +1108,147 @@ def test_custody_refuses_an_unlisted_evidence_response(tmp_path, monkeypatch) ->
 
     with pytest.raises(CustodyError, match="inventory mismatch"):
         build_claims_run(tmp_path, monkeypatch, unlisted)
+
+
+def test_a_correction_archives_the_vintage_its_row_was_read_from() -> None:
+    vintages = real_vintages()
+    resolve_pending.claims_corrections(LATE_ROWS, vintages)
+    ref = "us.dol.initial_claims.sa.week_2026-09-12"
+    assert [
+        (role, day.isoformat()) for role, day, _raw, _at in vintages.evidence[ref]
+    ] == [
+        ("vintage_before_release", "2026-09-16"),
+        ("vintage_before_release_reread", "2026-09-16"),
+        ("vintage_after_release", "2026-09-18"),
+        ("superseded_row_vintage", "2026-09-29"),
+    ]
+
+
+def test_a_later_date_ending_earlier_is_refused() -> None:
+    releases = {"ICSA": ALFRED["series"]["ICSA"]}
+
+    def stale_later(series_id, vintage, raw, attempt):
+        if vintage == "2026-09-20":
+            older = ALFRED["series"]["ICSA"]["2026-09-03"]
+            return csv_bytes("ICSA", vintage, filled(older))
+        return raw
+
+    vintages = resolve_pending.ClaimsVintages(fetch_from(releases, stale_later))
+    vintages.read("ICSA", dt.date(2026, 9, 18))
+    with pytest.raises(resolve_pending.ClaimsVintageError, match="vintages disagree"):
+        vintages.read("ICSA", dt.date(2026, 9, 20))
+
+
+def test_two_dates_ending_at_one_week_must_print_it_the_same() -> None:
+    def changed(series_id, vintage, raw, attempt):
+        if vintage == "2026-09-05":
+            return raw.replace(b"2026-08-29,206000", b"2026-08-29,205000")
+        return raw
+
+    vintages = real_vintages(changed)
+    vintages.read("ICSA", dt.date(2026, 9, 4))
+    with pytest.raises(resolve_pending.ClaimsVintageError, match="print it as"):
+        vintages.read("ICSA", dt.date(2026, 9, 5))
+
+
+def test_a_correction_run_seals_and_replays_its_four_reads(
+    tmp_path, monkeypatch
+) -> None:
+    from verify_custody import verify_run
+
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    vintages = real_vintages()
+    fetched, supersedes, refusals = resolve_pending.claims_corrections(
+        LATE_ROWS, vintages
+    )
+    assert refusals == [] and len(fetched) == 5
+    run_dir = resolve_pending.resolution_run_dir("2026-10-13T04:00:00Z")
+    run_dir.mkdir(parents=True)
+    facts = []
+    for row, series_id, vintage, raw, _at, extension in fetched:
+        attached = resolve_pending.attach_resolution_provenance(
+            row,
+            run_dir=run_dir,
+            series_id=series_id,
+            vintage=vintage,
+            raw=raw,
+            retrieved_at="2026-10-13T04:00:00Z",
+            ledger_repo_sha="d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+            target_contracts={},
+            extension=extension,
+        )
+        facts.append(
+            {
+                "dataPointId": row["source_record_id"],
+                "sourceVintage": attached["sourceVintage"],
+                "retrievedAt": attached["retrievedAt"],
+                "targetContentHash": None,
+                "responseArchive": attached["responseArchive"],
+                "firstPrintEvidence": [
+                    {
+                        "role": role,
+                        "vintageDate": day.isoformat(),
+                        "retrievedAt": "2026-10-13T04:00:00Z",
+                        "responseArchive": resolve_pending.archive_response(
+                            run_dir,
+                            series_id=series_id,
+                            vintage=day.isoformat(),
+                            raw=body,
+                        ),
+                    }
+                    for role, day, body, _at in vintages.evidence[
+                        row["source_record_id"]
+                    ]
+                ],
+            }
+        )
+    resolve_pending.finalize_resolution_manifest(
+        run_dir,
+        {
+            "schemaVersion": "thesis_resolution_run_v1",
+            "retrievedAt": "2026-10-13T04:00:00Z",
+            "firstPrintEvidenceRequired": True,
+            "ledgerRepo": "PolicyEngine/chronicle",
+            "ledgerBranch": "codex/thesis-ledger-facts",
+            "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+            "facts": facts,
+        },
+    )
+    assert verify_run(run_dir).run_mode == "resolver"
+
+
+def test_an_early_print_names_the_exception_table(capsys) -> None:
+    week = dt.date(2026, 9, 26)
+    vintages = synthetic_vintages(week, dt.date(2026, 9, 30))
+    assert (
+        resolve_pending.resolve_claims_ref(
+            "ref",
+            week.isoformat(),
+            "initial",
+            "2026-10-01",
+            dt.date(2026, 10, 5),
+            vintages,
+        )
+        is None
+    )
+    assert "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS" in capsys.readouterr().out
+
+
+def test_custody_refuses_a_day_after_that_prints_another_value(
+    tmp_path, monkeypatch
+) -> None:
+    from verify_custody import CustodyError
+
+    def other_value(run_dir, manifest):
+        item = manifest["facts"][0]["firstPrintEvidence"][2]
+        path = resolve_pending.ROOT / item["responseArchive"]["path"]
+        body = gzip.decompress(path.read_bytes()).replace(
+            b"2026-08-29,206000", b"2026-08-29,205000"
+        )
+        path.unlink()
+        item["responseArchive"] = resolve_pending.archive_response(
+            run_dir, series_id="ICSA", vintage="2026-09-04", raw=body
+        )
+
+    with pytest.raises(CustodyError, match="does not print week"):
+        build_claims_run(tmp_path, monkeypatch, other_value)

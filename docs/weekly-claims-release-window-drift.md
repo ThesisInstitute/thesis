@@ -75,7 +75,7 @@ list the weekly claims release, so it is not evidence here.
 
 What the fix does not change:
 
-- An explicit `expectedReleaseWindow` or `expectedReleaseDate` still wins.
+- An explicit `expectedReleaseWindow` still wins. An explicit `expectedReleaseDate` for these two series wins only when it is DOL's scheduled day or a listed exception; any other day is refused at registration.
   `rebuild_registered_target` replays a snapshot's stored window, so a retry
   of a drifted registration reproduces it byte for byte. No registration or
   record is modified.
@@ -170,17 +170,27 @@ resolve the drifted weeks at the first ALFRED vintage, with a note on each
 resolution. The rows above were appended after that ruling and before the
 guard merged. Carrying out the ruling now means two things:
 
-1. The pending week, and any later drifted cell, resolves from its first
-   vintage. The guard in the companion pull request holds such a cell
-   rather than record a revised figure; a follow-up replaces the hold with
-   first-vintage resolution.
-2. The four wrong rows are corrected by appending first-vintage rows whose
-   `assertionVersion.supersedes` names the wrong row's id. Chronicle's
-   append gate (`receipt.append_gate.check_rows`) accepts a second row for
-   a `source_record_id` only when it supersedes that id's active version,
-   and its current view (`effective_current_rows`) drops the replaced row.
-   The Thesis site does not read `supersedes` yet, so the follow-up also
-   has to make scoring use the current row.
+1. Every weekly claims cell resolves from its first print: ALFRED's vintage
+   of DOL's scheduled release day (`weekly_claims_release_day`, exceptions
+   included), confirmed by four reads. The day before must lack the week on
+   two byte-identical reads; the release day must hold it; the day after
+   must print the same value. The day comes from DOL's schedule, so no single
+   ALFRED response can move it; a faulty response makes the cell defer. A
+   release DOL makes off schedule defers until its day is listed in
+   `WEEKLY_CLAIMS_RELEASE_EXCEPTIONS`. The three reads are archived with the
+   run as `firstPrintEvidence`, and `verify_custody` replays them.
+2. The five rows read from a later release (the four above, and initial
+   claims week 2026-09-05, whose value was unchanged) are corrected by
+   appending first-print rows whose `assertionVersion.supersedes` names the
+   replaced row's id (`CLAIMS_FIRST_PRINT_CORRECTIONS`). Chronicle's append
+   gate (`receipt.append_gate.check_rows`) accepts a second row for a
+   `source_record_id` only when it supersedes that id's active version, and
+   its current view (`effective_current_rows`) drops the replaced row. The
+   site scores the earliest `observedAt` per `dataPointId`, which is the
+   correction, dated at the release day.
+
+The guard in #344 holds a cell rather than record a revised figure until
+this resolution lands.
 
 Two smaller items stay open. Challenge intake admits a submission until
 `expectedReleaseWindow.start`, which for the drifted registrations is after
