@@ -50,6 +50,39 @@ GATE_SPEC = types.SimpleNamespace(
 )
 
 
+FIXTURE_FIRST_WEEK = "2026-08-08"
+
+
+@pytest.fixture(autouse=True)
+def fixture_series_start(monkeypatch):
+    """The fixture holds weeks from 2026-08-08: treat that as the first week.
+
+    A real ALFRED vintage starts at 1967-01-07; parse_claims_vintage requires
+    every response to run weekly from the series' first week.
+    """
+
+    monkeypatch.setattr(
+        resolve_pending,
+        "CLAIMS_SERIES_FIRST_WEEK",
+        {"ICSA": FIXTURE_FIRST_WEEK, "CCSA": FIXTURE_FIRST_WEEK},
+    )
+
+
+def weeks_through(last: str) -> list[str]:
+    day, out = dt.date.fromisoformat(FIXTURE_FIRST_WEEK), []
+    while day.isoformat() <= last:
+        out.append(day.isoformat())
+        day += dt.timedelta(days=7)
+    return out
+
+
+def filled(rows: dict[str, float], through: str | None = None) -> dict[str, float]:
+    """SYNTHETIC filler (value 1) for weeks a synthetic release does not set."""
+
+    last = max([*rows, *([through] if through else [])])
+    return {week: rows.get(week, 1.0) for week in weeks_through(last)}
+
+
 def csv_bytes(series_id: str, vintage: str, rows: dict[str, float]) -> bytes:
     header = f"observation_date,{series_id}_{vintage.replace('-', '')}\n"
     return (
@@ -57,36 +90,63 @@ def csv_bytes(series_id: str, vintage: str, rows: dict[str, float]) -> bytes:
     ).encode()
 
 
-def fetch_from(releases_by_series: dict[str, dict[str, dict[str, float]]]):
-    """An ALFRED stand-in: a vintage date returns the latest release on or before it."""
+def fetch_from(
+    releases_by_series: dict[str, dict[str, dict[str, float]]],
+    corrupt=None,
+    before_first_release: str = FIXTURE_FIRST_WEEK,
+):
+    """An ALFRED stand-in: a vintage date returns the latest release on or before it.
+
+    Before its first release a series holds the weeks through
+    ``before_first_release`` (the earliest real release's rows for those
+    weeks, else SYNTHETIC filler). ``corrupt(series, vintage, raw, attempt)``
+    may replace a response.
+    """
+
+    attempts: dict[tuple[str, str], int] = {}
 
     def fetch(series_id: str, vintage: str):
         releases = releases_by_series[series_id]
         printed = [day for day in sorted(releases) if day <= vintage]
-        rows = dict(releases[printed[-1]]) if printed else {}
+        if printed:
+            rows = filled(dict(releases[printed[-1]]))
+        else:
+            earliest = releases[min(releases)]
+            rows = {
+                week: earliest.get(week, 1.0)
+                for week in weeks_through(before_first_release)
+            }
         raw = csv_bytes(series_id, vintage, rows)
-        parsed = resolve_pending.parse_fred_vintage_csv(raw, series_id, vintage)
-        return parsed, raw, f"https://alfred.example/{series_id}/{vintage}", "t"
+        attempt = attempts.get((series_id, vintage), 0)
+        attempts[(series_id, vintage)] = attempt + 1
+        if corrupt is not None:
+            raw = corrupt(series_id, vintage, raw, attempt)
+        return raw, "t"
 
     return fetch
 
 
-def real_vintages() -> resolve_pending.ClaimsVintages:
-    return resolve_pending.ClaimsVintages(fetch_from(ALFRED["series"]))
+def real_vintages(corrupt=None) -> resolve_pending.ClaimsVintages:
+    return resolve_pending.ClaimsVintages(fetch_from(ALFRED["series"], corrupt))
 
 
 def synthetic_vintages(week: dt.date, first: dt.date) -> resolve_pending.ClaimsVintages:
     """SYNTHETIC: `week` is present from `first` on, with the value 1000."""
 
+    previous = (week - dt.timedelta(days=7)).isoformat()
+
     def fetch(series_id: str, vintage: str):
-        rows = {week.isoformat(): 1000.0} if vintage >= first.isoformat() else {}
-        return rows, csv_bytes(series_id, vintage, rows), "u", "t"
+        rows = filled({}, previous)
+        if vintage >= first.isoformat():
+            rows[week.isoformat()] = 1000.0
+        return csv_bytes(series_id, vintage, rows), "t"
 
     return resolve_pending.ClaimsVintages(fetch)
 
 
 # Invariant 1: bisection returns the first vintage that holds the week, the
-# same day a linear scan finds, in at most 2 + ceil(log2(span)) requests.
+# same day a linear scan finds, in at most 3 + ceil(log2(span)) requests
+# (one is the second read of the day before the first print).
 def test_bisection_equals_a_linear_scan_for_every_span_and_first_day() -> None:
     week = dt.date(2026, 9, 26)
     for first_offset in range(1, 22):
@@ -103,7 +163,7 @@ def test_bisection_equals_a_linear_scan_for_every_span_and_first_day() -> None:
             )
             assert found[0] == linear == first
             span = (upper - week).days
-            assert vintages.requests <= 2 + math.ceil(math.log2(span))
+            assert vintages.requests <= 3 + math.ceil(math.log2(span))
 
 
 def test_first_vintage_is_none_until_the_week_is_printed() -> None:
@@ -265,7 +325,9 @@ def test_a_catch_up_release_still_yields_each_weeks_first_print() -> None:
         "initial",
         "2026-12-10",
         dt.date(2026, 12, 10),
-        resolve_pending.ClaimsVintages(fetch_from(releases)),
+        resolve_pending.ClaimsVintages(
+            fetch_from(releases, before_first_release="2026-11-21")
+        ),
     )
     assert fetched is not None
     assert (fetched[0]["value"], fetched[0]["observed_at"]) == (220.0, "2026-12-10")
@@ -415,3 +477,177 @@ def test_a_correction_row_passes_chronicles_append_gate(tmp_path, monkeypatch) -
         append_gate.check_rows([old_line, unlinked], 1, GATE_SPEC)
     current = append_gate.effective_current_rows([old, attached], GATE_SPEC)
     assert [(r["value"], r["observed_at"]) for r in current] == [(206.0, "2026-09-03")]
+
+
+HTML = b"<!DOCTYPE html><html><body>Service temporarily unavailable</body></html>"
+
+
+def complete_vintage(series_id: str, vintage: str, through: str) -> bytes:
+    return csv_bytes(series_id, vintage, filled({}, through))
+
+
+@pytest.mark.parametrize(
+    ("label", "raw"),
+    [
+        ("an error page", HTML),
+        ("another vintage date", complete_vintage("ICSA", "2026-09-02", "2026-08-22")),
+        ("another series", complete_vintage("CCSA", "2026-09-03", "2026-08-22")),
+        (
+            "a missing week",
+            b"observation_date,ICSA_20260903\n2026-08-08,1\n2026-08-22,1\n",
+        ),
+        (
+            "a late first week",
+            b"observation_date,ICSA_20260903\n2026-08-15,1\n2026-08-22,1\n",
+        ),
+        (
+            "a non-numeric value",
+            b"observation_date,ICSA_20260903\n2026-08-08,1\n2026-08-15,.\n",
+        ),
+        ("a cut row", b"observation_date,ICSA_20260903\n2026-08-08,1\n2026-08-1"),
+        ("no rows", b"observation_date,ICSA_20260903\n"),
+    ],
+)
+def test_parse_refuses_anything_but_a_complete_vintage(label, raw) -> None:
+    with pytest.raises(resolve_pending.ClaimsVintageError):
+        resolve_pending.parse_claims_vintage(raw, "ICSA", dt.date(2026, 9, 3))
+
+
+def test_parse_reads_a_complete_vintage() -> None:
+    raw = complete_vintage("ICSA", "2026-09-03", "2026-08-29").replace(b"\n", b"\r\n")
+    rows = resolve_pending.parse_claims_vintage(raw, "ICSA", dt.date(2026, 9, 3))
+    assert list(rows) == weeks_through("2026-08-29")
+
+
+def corrupt_at(day: str, replace):
+    """Replace every response for one vintage date (a deterministic fault)."""
+
+    def corrupt(series_id, vintage, raw, attempt):
+        return replace(raw) if vintage == day else raw
+
+    return corrupt
+
+
+# Review of #345 (GPT-6.1 Sol), P1: an HTML body at one probe read as absence
+# made initial claims week 2026-08-29 resolve to the revised 207.0.
+def test_an_error_page_at_a_probe_defers_instead_of_recording_207(capsys) -> None:
+    fetched = resolve_pending.resolve_claims_ref(
+        "us.dol.initial_claims.sa.week_2026-08-29",
+        "2026-08-29",
+        "initial",
+        "2026-09-11",
+        dt.date(2026, 9, 20),
+        real_vintages(corrupt_at("2026-09-09", lambda raw: HTML)),
+    )
+    out = capsys.readouterr().out
+    assert fetched is None or fetched[0]["value"] == 206.0
+    if fetched is None:
+        assert "ALFRED RESPONSE REFUSED (deferring)" in out
+
+
+def test_error_pages_during_a_correction_refuse_it() -> None:
+    ref = "us.dol.initial_claims.sa.week_2026-09-19"
+    pages = {"2026-09-28", "2026-09-30"}
+
+    def corrupt(series_id, vintage, raw, attempt):
+        return HTML if vintage in pages else raw
+
+    fetched, supersedes, refusals = resolve_pending.claims_corrections(
+        LATE_ROWS,
+        real_vintages(corrupt),
+        {ref: resolve_pending.CLAIMS_FIRST_PRINT_CORRECTIONS[ref]},
+    )
+    rows = {row["source_record_id"]: row for row, *_ in fetched}
+    assert ref not in rows or rows[ref]["value"] == 197.0
+    if ref not in rows:
+        assert supersedes == {} and len(refusals) == 1
+
+
+def test_a_boundary_that_answers_two_ways_is_refused() -> None:
+    # The day before the first print (2026-09-02) answers an error page once,
+    # then the real vintage: a decision must not rest on either reading alone.
+    def flapping(series_id, vintage, raw, attempt):
+        if vintage != "2026-09-02":
+            return raw
+        return complete_vintage(series_id, vintage, "2026-08-15") if attempt else raw
+
+    vintages = real_vintages(flapping)
+    with pytest.raises(resolve_pending.ClaimsVintageError):
+        vintages.first_vintage("ICSA", "2026-08-29", dt.date(2026, 9, 20))
+
+
+CORRUPTIONS = {
+    "error page": lambda raw: HTML,
+    "last row dropped": lambda raw: (
+        b"\n".join(raw.rstrip(b"\n").split(b"\n")[:-1]) + b"\n"
+    ),
+    "two rows dropped": lambda raw: (
+        b"\n".join(raw.rstrip(b"\n").split(b"\n")[:-2]) + b"\n"
+    ),
+    "middle row dropped": lambda raw: (
+        b"\n".join((lines := raw.rstrip(b"\n").split(b"\n"))[:2] + lines[3:]) + b"\n"
+    ),
+    "cut mid-row": lambda raw: raw[: len(raw) - 4],
+}
+
+
+# Invariant 5: no single vintage date answering wrongly, in any of these ways,
+# can make the leg record a value other than the first print. It records the
+# first print or defers. Exhaustive over every vintage date bisection can read.
+@pytest.mark.parametrize(
+    ("kind", "week", "resolution_date", "today", "first_value", "revised_on"),
+    [
+        ("initial", "2026-08-29", "2026-09-11", "2026-09-20", 206.0, "2026-09-10"),
+        ("initial", "2026-09-12", "2026-09-29", "2026-10-01", 196.0, "2026-09-24"),
+        ("continued", "2026-09-19", "2026-10-09", "2026-10-12", 1.701, "2026-10-08"),
+    ],
+)
+def test_no_single_faulty_vintage_records_a_revised_value(
+    kind, week, resolution_date, today, first_value, revised_on, capsys
+) -> None:
+    deferred = recorded = 0
+    start = dt.date.fromisoformat(week)
+    end = dt.date.fromisoformat(today)
+    for offset in range((end - start).days + 1):
+        day = (start + dt.timedelta(days=offset)).isoformat()
+        for name, replace in CORRUPTIONS.items():
+            fetched = resolve_pending.resolve_claims_ref(
+                f"ref.{week}",
+                week,
+                kind,
+                resolution_date,
+                end,
+                real_vintages(corrupt_at(day, replace)),
+            )
+            if fetched is None:
+                deferred += 1
+                continue
+            recorded += 1
+            row = fetched[0]
+            assert row["value"] == first_value, (day, name, row["value"])
+            assert row["observed_at"] < revised_on, (day, name, row["observed_at"])
+    capsys.readouterr()
+    # Both outcomes occur: faults off the bisection path change nothing.
+    assert deferred > 0 and recorded > 0
+
+
+def test_a_deferral_names_the_target_in_the_status_surface(capsys) -> None:
+    import resolution_status
+
+    ref = "us.dol.initial_claims.sa.week_2026-08-29"
+    assert (
+        resolve_pending.resolve_claims_ref(
+            ref,
+            "2026-08-29",
+            "initial",
+            "2026-09-11",
+            dt.date(2026, 9, 20),
+            real_vintages(corrupt_at("2026-09-02", lambda raw: HTML)),
+        )
+        is None
+    )
+    targets, _summary = resolution_status.parse_resolver_log(
+        capsys.readouterr().out, {ref}
+    )
+    assert targets[ref]["state"] == "deferred"
+    assert "not a vintage CSV" in targets[ref]["detail"]

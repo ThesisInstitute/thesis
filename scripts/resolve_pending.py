@@ -12501,34 +12501,133 @@ class ClaimsVintageError(ValueError):
     """ALFRED answered, but not in a shape a first print can come from."""
 
 
+# Every ALFRED vintage of both series runs weekly, without a gap, from this
+# week (checked 2026-10-12 against the 2026-09-03 vintages). A response that
+# starts later or skips a week is not a complete vintage.
+CLAIMS_SERIES_FIRST_WEEK = {"ICSA": "1967-01-07", "CCSA": "1967-01-07"}
+
+
+def fetch_claims_vintage(series_id: str, vintage: str) -> tuple[bytes | None, str]:
+    """Raw ALFRED CSV for one vintage date; None when ALFRED refuses it."""
+    url = FRED_CSV.format(series=series_id, vintage=vintage)
+    retrieved_at = utc_now()
+    try:
+        with urllib.request.urlopen(url, timeout=120) as response:
+            return response.read(), retrieved_at
+    except urllib.error.HTTPError:
+        return None, retrieved_at
+
+
+def parse_claims_vintage(raw: bytes, series_id: str, day: dt.date) -> dict[str, float]:
+    """{week: value} from one complete ALFRED claims vintage, or refuse.
+
+    Absence of a week is evidence only from a complete vintage: the exact
+    header ALFRED writes for this series and date, then one numeric row per
+    week from the series' first week with no gap. An error page, another
+    series or date, a malformed row, or a body that stops early is refused.
+    """
+
+    try:
+        lines = raw.decode("utf-8").split("\n")
+    except UnicodeDecodeError as exc:
+        raise ClaimsVintageError(f"ALFRED {series_id} {day} is not UTF-8") from exc
+    lines = [line.rstrip("\r") for line in lines]
+    while lines and not lines[-1]:
+        lines.pop()
+    header = f"observation_date,{series_id}_{day.isoformat().replace('-', '')}"
+    if not lines or lines[0] != header:
+        raise ClaimsVintageError(
+            f"ALFRED {series_id} {day} is not a vintage CSV (header "
+            f"{(lines[0] if lines else '')[:60]!r})"
+        )
+    rows: dict[str, float] = {}
+    expected = dt.date.fromisoformat(CLAIMS_SERIES_FIRST_WEEK[series_id])
+    for number, line in enumerate(lines[1:], start=2):
+        date, separator, value = line.partition(",")
+        try:
+            if not separator or dt.date.fromisoformat(date) != expected:
+                raise ValueError
+            parsed = float(value)
+            if not math.isfinite(parsed):
+                raise ValueError
+        except ValueError as exc:
+            raise ClaimsVintageError(
+                f"ALFRED {series_id} {day} line {number} breaks the weekly "
+                f"series ({line[:40]!r}, expected week {expected})"
+            ) from exc
+        rows[date] = parsed
+        expected += dt.timedelta(days=7)
+    if not rows:
+        raise ClaimsVintageError(f"ALFRED {series_id} {day} holds no weeks")
+    return rows
+
+
 class ClaimsVintages:
     """One run's ALFRED reads for the claims leg: one request per series-day.
 
     A vintage date between two releases returns the earlier release, and a
     week, once printed, stays in every later vintage. So the vintage dates on
     which a week is present form one unbroken run, and its first day is the
-    week's first print.
+    week's first print. Every response is validated as a complete vintage,
+    the vintages read in a run must agree that later dates end no earlier,
+    and the day before a first print is read twice before it counts.
     """
 
     def __init__(self, fetch: Callable[..., Any] | None = None) -> None:
-        self._fetch = fetch or fred_vintage_series
+        self._fetch = fetch or fetch_claims_vintage
         self._reads: dict[
             tuple[str, dt.date], tuple[dict[str, float], bytes | None, str]
         ] = {}
         self.requests = 0
+
+    def _request(self, series_id: str, day: dt.date) -> tuple[bytes | None, str]:
+        self.requests += 1
+        try:
+            return self._fetch(series_id, day.isoformat())
+        except (http.client.HTTPException, OSError):
+            return None, utc_now()
 
     def read(
         self, series_id: str, day: dt.date
     ) -> tuple[dict[str, float], bytes | None, str]:
         key = (series_id, day)
         if key not in self._reads:
-            self.requests += 1
-            try:
-                rows, raw, _url, retrieved_at = self._fetch(series_id, day.isoformat())
-            except (http.client.HTTPException, OSError, ValueError):
-                rows, raw, retrieved_at = {}, None, utc_now()
+            raw, retrieved_at = self._request(series_id, day)
+            rows = {} if raw is None else parse_claims_vintage(raw, series_id, day)
             self._reads[key] = (rows, raw, retrieved_at)
+            self._require_consistent(series_id)
         return self._reads[key]
+
+    def _require_consistent(self, series_id: str) -> None:
+        """Refuse reads that cannot all be honest vintages of one series.
+
+        A later vintage date never ends at an earlier week. Each release adds
+        one week, and any revisions to earlier weeks ride on it, so two
+        vintages that end at the same week are the same release and hold the
+        same rows. A body cut short of its last rows would end where an older
+        release ends, but would carry the newer release's revisions.
+        """
+
+        reads = [
+            (day, rows)
+            for (series, day), (rows, raw, _) in sorted(self._reads.items())
+            if series == series_id and raw is not None
+        ]
+        for (early, early_rows), (late, late_rows) in zip(reads, reads[1:]):
+            if max(late_rows) < max(early_rows):
+                raise ClaimsVintageError(
+                    f"ALFRED {series_id} vintages disagree: {late} ends at "
+                    f"{max(late_rows)} but the earlier {early} ends at "
+                    f"{max(early_rows)}"
+                )
+        by_last_week: dict[str, tuple[dt.date, dict[str, float]]] = {}
+        for day, rows in reads:
+            seen = by_last_week.setdefault(max(rows), (day, rows))
+            if seen[1] != rows:
+                raise ClaimsVintageError(
+                    f"ALFRED {series_id} vintages {seen[0]} and {day} both end "
+                    f"at {max(rows)} but hold different values"
+                )
 
     def first_vintage(
         self, series_id: str, week: str, upper: dt.date
@@ -12563,6 +12662,16 @@ class ClaimsVintages:
                 upper = middle
             else:
                 lower = middle
+        # The absence that decides the answer must not rest on one response.
+        _rows, first_reading, _ = self.read(series_id, lower)
+        second_reading, _ = self._request(series_id, lower)
+        if second_reading is None:
+            return None
+        if second_reading != first_reading:
+            raise ClaimsVintageError(
+                f"ALFRED {series_id} answered vintage {lower}, the day before "
+                f"the first print of week {week}, two different ways"
+            )
         rows, raw, retrieved_at = self.read(series_id, upper)
         assert raw is not None
         return upper, rows[week], raw, retrieved_at
@@ -12596,7 +12705,7 @@ def resolve_claims_ref(
     try:
         first = vintages.first_vintage(series_id, week, today)
     except ClaimsVintageError as exc:
-        print(f"  REFUSED {ref}: {exc}; left pending")
+        print(f"  ALFRED RESPONSE REFUSED (deferring): {ref} — {exc}")
         return None
     if first is None:
         print(f"  not yet published: {ref}")
@@ -12656,8 +12765,8 @@ def claims_corrections(
         active_id = ((row or {}).get("assertionVersion") or {}).get("id")
         if match is None or active_id != version_id:
             refusals.append(
-                f"{ref}: listed version {version_id} is not the record's active "
-                f"row (active: {active_id})"
+                f"{ref} — listed version {version_id} is not the record's "
+                f"active row (active: {active_id})"
             )
             continue
         kind = "initial" if match.group("initial") else "continued"
@@ -12668,21 +12777,22 @@ def claims_corrections(
         )
         try:
             first = vintages.first_vintage(series_id, week, read_day)
+            if first is not None:
+                read_release = vintages.latest_week(series_id, read_day)
+                first_release = vintages.latest_week(series_id, first[0])
         except ClaimsVintageError as exc:
-            refusals.append(f"{ref}: {exc}")
+            refusals.append(f"{ref} — {exc}")
             continue
         if first is None:
             print(f"  correction waits, ALFRED did not answer: {ref}")
             continue
         first_day, raw_value, raw, retrieved_at = first
-        read_release = vintages.latest_week(series_id, read_day)
-        first_release = vintages.latest_week(series_id, first_day)
         if read_release is None or first_release is None:
             print(f"  correction waits, ALFRED did not answer: {ref}")
             continue
         if read_release <= first_release:
             refusals.append(
-                f"{ref}: the listed row was read from vintage {read_day}, the "
+                f"{ref} — the listed row was read from vintage {read_day}, the "
                 f"same DOL release as the first print ({first_day}); nothing "
                 "to correct"
             )
@@ -12696,7 +12806,7 @@ def claims_corrections(
         )
         corrected = claims_fact(ref, week, raw_value, kind, first_day, note=note)
         print(
-            f"  correct {ref}: {row.get('value')} (vintage {read_day}) -> "
+            f"  correct: {ref} — {row.get('value')} (vintage {read_day}) -> "
             f"{corrected['value']} (first vintage {first_day})"
         )
         fetched.append(
@@ -15313,7 +15423,7 @@ def main() -> int:
     )
     fetched_rows.extend(correction_rows)
     for line in claims_correction_refusals:
-        print(f"  CLAIMS CORRECTION REFUSED: {line}")
+        print(f"  CLAIMS CORRECTION REFUSED (refusing): {line}")
     # A refused correction is a reviewed table that no longer matches the
     # ledger: the rest of the run still appends, then exits EXIT_REFUSED_ROWS.
 
