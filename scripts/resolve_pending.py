@@ -118,7 +118,13 @@ from sba_loan_performance import (
     PARTIAL_REFUSAL as SBA_PARTIAL_REFUSAL,
 )
 from thesis_log_client import load_thesis_log
-from verify_custody import CustodyError, parse_alfred_claims_vintage, verify_run
+from verify_custody import (
+    CustodyError,
+    claims_vintages_consistent,
+    judge_claims_first_print,
+    parse_alfred_claims_vintage,
+    verify_run,
+)
 from witnessed_timeline import TimelineError, extract_timeline
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -12598,36 +12604,19 @@ class ClaimsVintages:
     def _require_consistent(self, series_id: str) -> None:
         """Refuse reads that cannot all be honest vintages of one series.
 
-        A later vintage date never ends at an earlier week. Two vintages that
-        end at the same week agree on that week's value: each release adds
-        one week, and ALFRED may later correct history without adding one
-        (on 2017-03-24 it re-issued 238 ICSA rows back to 2012, keeping week
-        2017-03-18 at 258000), but not by changing the week it just printed.
-        A body cut short of its last rows ends where an older release ends,
-        but carries the newer release's revision of that week.
+        The rules are verify_custody.claims_vintages_consistent, applied to
+        every vintage this run has read of the series.
         """
 
         reads = [
             (day, rows)
-            for (series, day), (rows, raw, _) in sorted(self._reads.items())
+            for (series, day), (rows, raw, _) in self._reads.items()
             if series == series_id and raw is not None
         ]
-        for (early, early_rows), (late, late_rows) in zip(reads, reads[1:]):
-            if max(late_rows) < max(early_rows):
-                raise ClaimsVintageError(
-                    f"ALFRED {series_id} vintages disagree: {late} ends at "
-                    f"{max(late_rows)} but the earlier {early} ends at "
-                    f"{max(early_rows)}"
-                )
-        by_last_week: dict[str, tuple[dt.date, float]] = {}
-        for day, rows in reads:
-            last = max(rows)
-            seen = by_last_week.setdefault(last, (day, rows[last]))
-            if seen[1] != rows[last]:
-                raise ClaimsVintageError(
-                    f"ALFRED {series_id} vintages {seen[0]} and {day} both end "
-                    f"at {last} but print it as {seen[1]:g} and {rows[last]:g}"
-                )
+        try:
+            claims_vintages_consistent(series_id, reads)
+        except ValueError as exc:
+            raise ClaimsVintageError(str(exc)) from exc
 
     def first_print(
         self, kind: str, week: str, limit: dt.date
@@ -12710,7 +12699,16 @@ class ClaimsVintages:
             ("vintage_before_release_reread", before, reread, reread_at),
             ("vintage_after_release", following, later_raw, later_at),
         ]
-        return scheduled, rows[week], raw, retrieved_at, evidence
+        # The value is the one judge_claims_first_print decides from exactly
+        # the reads archived as evidence: custody replays the same function,
+        # so what the archive supports and what the ledger records agree.
+        reads = {role: (day, body) for role, day, body, _at in evidence}
+        reads["release_day"] = (scheduled, raw)
+        try:
+            judged_day, value = judge_claims_first_print(series_id, week, reads)
+        except ValueError as exc:
+            self._refuse(series_id, ClaimsVintageError(str(exc)))
+        return judged_day, value, raw, retrieved_at, evidence
 
     def latest_week(self, series_id: str, day: dt.date) -> str | None:
         rows, raw, _ = self.read(series_id, day)

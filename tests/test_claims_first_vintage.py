@@ -1043,7 +1043,7 @@ def evidence_mutation(change):
             lambda fact, m: fact["firstPrintEvidence"][2].update(
                 vintageDate="9999-99-99"
             ),
-            "is dated",
+            "no valid date",
         ),
         (
             "no retrieval instant",
@@ -1288,7 +1288,7 @@ def replace_archive(run_dir, item, series, day, body):
                 for item in m["facts"][0]["firstPrintEvidence"]
                 if item["role"] == "superseded_row_vintage"
             ],
-            "is not after the release day",
+            "is not a later release",
         ),
         (
             "a date-only retrieval instant",
@@ -1367,18 +1367,133 @@ def test_an_early_print_names_the_exception_table(capsys) -> None:
 def test_custody_refuses_a_day_after_that_prints_another_value(
     tmp_path, monkeypatch
 ) -> None:
-    from verify_custody import CustodyError
-
-    def other_value(run_dir, manifest):
-        item = manifest["facts"][0]["firstPrintEvidence"][2]
-        path = resolve_pending.ROOT / item["responseArchive"]["path"]
-        body = gzip.decompress(path.read_bytes()).replace(
-            b"2026-08-29,206000", b"2026-08-29,205000"
+    # The day after serving a later release (September 10's rows, which add
+    # week September 5 and revise week August 29 to 207000) under its own
+    # header: no consistency rule applies, so only the day-after check can
+    # refuse it.
+    def later_release(run_dir, manifest):
+        after = manifest["facts"][0]["firstPrintEvidence"][2]
+        rows = filled(ALFRED["series"]["ICSA"]["2026-09-10"])
+        replace_archive(
+            run_dir, after, "ICSA", "2026-09-04", csv_bytes("ICSA", "2026-09-04", rows)
         )
-        path.unlink()
-        item["responseArchive"] = resolve_pending.archive_response(
-            run_dir, series_id="ICSA", vintage="2026-09-04", raw=body
+        prune(run_dir, manifest)
+
+    with pytest.raises(verify_custody.CustodyError, match="next day's vintage"):
+        build_claims_run(tmp_path, monkeypatch, later_release)
+
+
+def seal_claims_fact(tmp_path, monkeypatch, ref, series, release_day, bodies):
+    """Seal a run holding one weekly claims fact built from the given bodies.
+
+    ``bodies`` maps each role (release_day included) to (vintage date, raw).
+    """
+
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    run_dir = resolve_pending.resolution_run_dir("2026-10-13T05:00:00Z")
+    run_dir.mkdir(parents=True)
+
+    def archive(day, raw):
+        return resolve_pending.archive_response(
+            run_dir, series_id=series, vintage=day, raw=raw
         )
 
-    with pytest.raises(CustodyError, match="does not print week"):
-        build_claims_run(tmp_path, monkeypatch, other_value)
+    manifest = {
+        "schemaVersion": "thesis_resolution_run_v1",
+        "retrievedAt": "2026-10-13T05:00:00Z",
+        "firstPrintEvidenceRequired": True,
+        "ledgerRepo": "PolicyEngine/chronicle",
+        "ledgerBranch": "codex/thesis-ledger-facts",
+        "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+        "facts": [
+            {
+                "dataPointId": ref,
+                "sourceVintage": release_day,
+                "retrievedAt": "2026-10-13T05:00:00Z",
+                "targetContentHash": None,
+                "responseArchive": archive(*bodies["release_day"]),
+                "firstPrintEvidence": [
+                    {
+                        "role": role,
+                        "vintageDate": day,
+                        "retrievedAt": "2026-10-13T05:00:00Z",
+                        "responseArchive": archive(day, raw),
+                    }
+                    for role, (day, raw) in bodies.items()
+                    if role != "release_day"
+                ],
+            }
+        ],
+    }
+    return resolve_pending.finalize_resolution_manifest(run_dir, manifest)
+
+
+def icsa_body(day, release, extra=None):
+    rows = filled(dict(ALFRED["series"]["ICSA"][release], **(extra or {})))
+    return day, csv_bytes("ICSA", day, rows)
+
+
+# Review of #345, round 6 (GPT-6.1 Sol): custody replayed each body alone and
+# trusted the fact's release day. It now re-decides with the resolver's judge.
+def test_custody_refuses_a_release_body_ending_after_the_day_after(
+    tmp_path, monkeypatch
+) -> None:
+    bodies = {
+        "vintage_before_release": icsa_body("2026-09-02", "2026-08-27"),
+        "vintage_before_release_reread": icsa_body("2026-09-02", "2026-08-27"),
+        "release_day": icsa_body("2026-09-03", "2026-09-03", {"2026-09-05": 1.0}),
+        "vintage_after_release": icsa_body("2026-09-04", "2026-09-03"),
+    }
+    with pytest.raises(verify_custody.CustodyError, match="vintages disagree"):
+        seal_claims_fact(
+            tmp_path,
+            monkeypatch,
+            "us.dol.initial_claims.sa.week_2026-08-29",
+            "ICSA",
+            "2026-09-03",
+            bodies,
+        )
+
+
+def test_custody_refuses_two_bodies_printing_one_last_week_two_ways(
+    tmp_path, monkeypatch
+) -> None:
+    bodies = {
+        "vintage_before_release": icsa_body("2026-09-02", "2026-08-27"),
+        "vintage_before_release_reread": icsa_body("2026-09-02", "2026-08-27"),
+        "release_day": icsa_body("2026-09-03", "2026-09-03", {"2026-09-05": 1.0}),
+        "vintage_after_release": icsa_body(
+            "2026-09-04", "2026-09-03", {"2026-09-05": 2.0}
+        ),
+    }
+    with pytest.raises(verify_custody.CustodyError, match="print it as"):
+        seal_claims_fact(
+            tmp_path,
+            monkeypatch,
+            "us.dol.initial_claims.sa.week_2026-08-29",
+            "ICSA",
+            "2026-09-03",
+            bodies,
+        )
+
+
+def test_custody_refuses_a_release_day_off_dols_schedule(tmp_path, monkeypatch) -> None:
+    # SYNTHETIC: week 2026-09-26 first printed a day late, 2026-10-02, with
+    # honest reads around that day. DOL's schedule says 2026-10-01, and no
+    # exception is listed, so the resolver defers and custody must refuse.
+    late = {"2026-09-26": 197000.0}
+    bodies = {
+        "vintage_before_release": icsa_body("2026-10-01", "2026-09-24"),
+        "vintage_before_release_reread": icsa_body("2026-10-01", "2026-09-24"),
+        "release_day": icsa_body("2026-10-02", "2026-09-24", late),
+        "vintage_after_release": icsa_body("2026-10-03", "2026-09-24", late),
+    }
+    with pytest.raises(verify_custody.CustodyError, match="DOL's release of week"):
+        seal_claims_fact(
+            tmp_path,
+            monkeypatch,
+            "us.dol.initial_claims.sa.week_2026-09-26",
+            "ICSA",
+            "2026-10-02",
+            bodies,
+        )
