@@ -195,6 +195,32 @@ def window_is_on_schedule(contract: dict) -> bool:
     return window in (derived, exact)
 
 
+def test_an_off_schedule_exact_date_must_be_a_listed_exception(monkeypatch) -> None:
+    """Admission and the waiver ratchet read one schedule.
+
+    DOL released on Wednesday 2025-01-08 (a national day of mourning closed
+    Thursday 2025-01-09; https://oui.doleta.gov/press/2025/010825.pdf). An
+    exact date that differs from the schedule is refused until the day is in
+    WEEKLY_CLAIMS_RELEASE_EXCEPTIONS; then it registers and is on schedule.
+    """
+
+    target = weekly_target(INITIAL, "2025-01-04", None)
+    target["expectedReleaseDate"] = "2025-01-08"
+    with pytest.raises(
+        register_targets.RegistrationError, match="WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+    ):
+        register_targets.build_contract(target, dt.date(2024, 12, 31))
+    monkeypatch.setitem(
+        register_targets.WEEKLY_CLAIMS_RELEASE_EXCEPTIONS, "2025-01-09", "2025-01-08"
+    )
+    contract = register_targets.build_contract(target, dt.date(2024, 12, 31))
+    assert contract["sourceBinding"]["expectedReleaseWindow"] == {
+        "start": "2025-01-08",
+        "end": "2025-01-08",
+    }
+    assert window_is_on_schedule(contract)
+
+
 def test_an_exact_scheduled_day_window_is_on_schedule() -> None:
     target = weekly_target(INITIAL, "2026-10-17", None)
     target["expectedReleaseDate"] = "2026-10-22"
@@ -206,8 +232,14 @@ def test_an_exact_scheduled_day_window_is_on_schedule() -> None:
     assert window_is_on_schedule(contract)
     late = weekly_target(INITIAL, "2026-10-17", None)
     late["expectedReleaseDate"] = "2026-10-23"
-    assert not window_is_on_schedule(
+    with pytest.raises(register_targets.RegistrationError, match="not the scheduled"):
         register_targets.build_contract(late, dt.date(2026, 10, 12))
+    # A replayed explicit window (a retry of an existing registration) still
+    # wins, and the ratchet still calls a wrong exact day off schedule.
+    late_window = weekly_target(INITIAL, "2026-10-17", None)
+    late_window["expectedReleaseWindow"] = {"start": "2026-10-23", "end": "2026-10-23"}
+    assert not window_is_on_schedule(
+        register_targets.build_contract(late_window, dt.date(2026, 10, 12))
     )
 
 
@@ -406,8 +438,8 @@ def test_holiday_helper_agrees_with_an_independent_oracle_on_every_thursday() ->
         flagged += expected is not None
         day += dt.timedelta(days=7)
     # Five fixed-date holidays each fall on a Thursday about once in seven
-    # years, plus 35 Thanksgivings and two Thursday Inauguration Days.
-    assert flagged > 35 + 2
+    # years, plus 35 Thanksgivings and one Thursday Inauguration Day (2033).
+    assert flagged > 35 + 1
 
 
 @pytest.mark.parametrize("series", [INITIAL, CONTINUED])

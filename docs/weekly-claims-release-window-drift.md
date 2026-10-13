@@ -139,8 +139,9 @@ equal ALFRED's first print. The four above do not. No `resolve-and-rebuild`
 run has finished successfully since 2026-08-31, but a run's resolve step
 appends what it resolved through a reviewed proposal before later steps
 (refused rows, pin advance, site rebuild) fail it or it is cancelled. Those
-appends read the late vintages. A run that stops during the resolve step
-itself appends nothing. Each of the four rows carries an `assertionVersion` id and
+appends read the late vintages. A run that fails while fetching, before
+the proposal merges, appends nothing; a failure after the merge (its
+verification or the proposal-ref cleanup) still leaves the rows appended. Each of the four rows carries an `assertionVersion` id and
 `supersedes: null`; no superseding row exists in the ledger yet.
 
 ## Other code that reads the window or the late date

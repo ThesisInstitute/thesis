@@ -614,6 +614,21 @@ def expected_release_window(
         start, end = _iso_date(str(supplied["start"])), _iso_date(str(supplied["end"]))
     elif target.get("expectedReleaseDate"):
         start = end = _iso_date(str(target["expectedReleaseDate"]))
+        if target.get("series") in SERIES_BINDINGS:
+            # One schedule for admission and the waiver ratchet: a weekly
+            # claims release day off DOL's Thursday must be the day DOL lists,
+            # recorded in WEEKLY_CLAIMS_RELEASE_EXCEPTIONS with its source.
+            scheduled = weekly_claims_release_day(
+                str(target["series"]), str(target["period"])
+            )
+            if start != scheduled:
+                raise RegistrationError(
+                    f"{target['series']} {target['period']} expectedReleaseDate "
+                    f"{start.isoformat()} is not the scheduled release day "
+                    f"{scheduled.isoformat()}; add the day DOL lists at "
+                    f"{WEEKLY_CLAIMS_SCHEDULE_URL} to "
+                    "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+                )
     elif target.get("series") in SERIES_BINDINGS:
         # Ahead of the previous-target branch on purpose: a roll always
         # carries previousTarget.resolutionDate, and stepping that forward
