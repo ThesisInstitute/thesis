@@ -59,6 +59,11 @@ REVIEWED_STAGE_INVENTORY = {
     "pre_submit_review_prompt.md": "review_prompt",
     "revision_prompt.md": "revision_prompt",
 }
+FIRST_PRINT_EVIDENCE_ROLES = {
+    "vintage_before_release",
+    "vintage_before_release_reread",
+    "vintage_after_release",
+}
 RESOLVER_RESPONSE_RE = re.compile(
     # One archived source response per fetched document: a lowercase series
     # or page identifier, the first-print vintage date, and a content-hash
@@ -827,10 +832,30 @@ def _verify_resolver_v2(
         )
     manifest_responses: set[str] = set()
     manifest_response_claims: dict[str, tuple] = {}
+    archives: list[Any] = []
     for fact in facts:
         archive = fact.get("responseArchive") if isinstance(fact, dict) else None
         if not isinstance(archive, dict):
             raise CustodyError("resolver fact lacks responseArchive")
+        archives.append(archive)
+        # Weekly claims facts also carry the ALFRED reads their first print
+        # rests on; each is an archived response under the same rules.
+        evidence = fact.get("firstPrintEvidence", [])
+        if not isinstance(evidence, list):
+            raise CustodyError("resolver fact firstPrintEvidence must be a list")
+        for item in evidence:
+            if (
+                not isinstance(item, dict)
+                or item.get("role") not in FIRST_PRINT_EVIDENCE_ROLES
+                or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(item.get("vintageDate")))
+                or not isinstance(item.get("retrievedAt"), str)
+                or not isinstance(item.get("responseArchive"), dict)
+            ):
+                raise CustodyError(
+                    f"invalid resolver firstPrintEvidence entry: {item!r}"
+                )
+            archives.append(item["responseArchive"])
+    for archive in archives:
         declared = str(archive.get("path", ""))
         relative = _manifest_relative(run_dir, declared, legacy=False)
         if not RESOLVER_RESPONSE_RE.fullmatch(relative):
@@ -1386,9 +1411,7 @@ def _verify_ledger_witness_v2(
             # Newline-only splitting, matching pin_ledger._lines and the
             # witness writer: an observation row containing U+0085 or U+2028
             # must count as one line on both sides of the commitment.
-            lines = [
-                line for line in raw.decode("utf-8").split("\n") if line.strip()
-            ]
+            lines = [line for line in raw.decode("utf-8").split("\n") if line.strip()]
             if type(jsonl_claim.get("bytes")) is not int or jsonl_claim["bytes"] < 0:
                 raise CustodyError(
                     "ledger witness jsonl bytes must be a non-negative integer"

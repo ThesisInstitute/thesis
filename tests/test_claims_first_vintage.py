@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import datetime as dt
 import json
-import math
 import pathlib
 import sys
 import types
@@ -33,6 +32,7 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import register_targets  # noqa: E402
 import resolve_pending  # noqa: E402
 from receipt import append_gate  # noqa: E402
 
@@ -144,50 +144,50 @@ def synthetic_vintages(week: dt.date, first: dt.date) -> resolve_pending.ClaimsV
     return resolve_pending.ClaimsVintages(fetch)
 
 
-# Invariant 1: bisection returns the first vintage that holds the week, the
-# same day a linear scan finds, in at most 4 + ceil(log2(span)) requests
-# (a second read of the day before the first print, and the next day's
-# vintage that corroborates it).
-def test_bisection_equals_a_linear_scan_for_every_span_and_first_day() -> None:
-    week = dt.date(2026, 9, 26)
-    for first_offset in range(1, 22):
-        for extra in range(0, 15):
-            first = week + dt.timedelta(days=first_offset)
-            upper = first + dt.timedelta(days=extra)
-            vintages = synthetic_vintages(week, first)
-            if extra == 0:
-                # Nothing after the first vintage can corroborate it yet.
-                with pytest.raises(resolve_pending.ClaimsFirstPrintUncorroboratedError):
-                    vintages.first_vintage("ICSA", week.isoformat(), upper)
-                continue
-            found = vintages.first_vintage("ICSA", week.isoformat(), upper)
-            assert found is not None
-            linear = next(
-                week + dt.timedelta(days=offset)
-                for offset in range(1, (upper - week).days + 1)
-                if week + dt.timedelta(days=offset) >= first
-            )
-            assert found[0] == linear == first
-            span = (upper - week).days
-            assert vintages.requests <= 4 + math.ceil(math.log2(span))
+# Invariant 1: the first print is ALFRED's vintage of DOL's scheduled release
+# day, for every week, found in exactly four requests (the day before, read
+# twice; the day; the day after). The schedule decides the day; ALFRED only
+# confirms it.
+def test_every_week_resolves_on_dols_scheduled_day_in_four_requests() -> None:
+    week = dt.date(2026, 8, 15)
+    checked = 0
+    while week <= dt.date(2026, 12, 26):
+        scheduled = register_targets.weekly_claims_release_day(
+            "us.dol.initial_claims.sa", f"week_{week.isoformat()}"
+        )
+        vintages = synthetic_vintages(week, scheduled)
+        found = vintages.first_print(
+            "initial", week.isoformat(), scheduled + dt.timedelta(days=1)
+        )
+        assert found is not None and found[0] == scheduled, week
+        assert vintages.requests == 4
+        assert [(role, day) for role, day, _raw, _at in found[4]] == [
+            ("vintage_before_release", scheduled - dt.timedelta(days=1)),
+            ("vintage_before_release_reread", scheduled - dt.timedelta(days=1)),
+            ("vintage_after_release", scheduled + dt.timedelta(days=1)),
+        ]
+        checked += 1
+        week += dt.timedelta(days=7)
+    assert checked == 20  # includes Thanksgiving week's Wednesday release
 
 
-def test_first_vintage_is_none_until_the_week_is_printed() -> None:
+def test_nothing_before_the_scheduled_day_and_a_wait_on_it() -> None:
     week = dt.date(2026, 9, 26)
-    vintages = synthetic_vintages(week, dt.date(2026, 10, 1))
+    scheduled = dt.date(2026, 10, 1)
+    vintages = synthetic_vintages(week, scheduled)
     assert (
-        vintages.first_vintage("ICSA", week.isoformat(), dt.date(2026, 9, 30)) is None
+        vintages.first_print("initial", week.isoformat(), dt.date(2026, 9, 30)) is None
     )
-    assert vintages.first_vintage("ICSA", week.isoformat(), week) is None
+    assert vintages.requests == 0
+    with pytest.raises(resolve_pending.ClaimsFirstPrintUncorroboratedError):
+        vintages.first_print("initial", week.isoformat(), scheduled)
 
 
-def test_a_week_present_on_the_day_it_ends_is_refused() -> None:
+def test_a_week_printed_before_dols_scheduled_day_is_refused() -> None:
     week = dt.date(2026, 9, 26)
-    vintages = synthetic_vintages(week, week)
-    with pytest.raises(
-        resolve_pending.ClaimsVintageError, match="the day the week ends"
-    ):
-        vintages.first_vintage("ICSA", week.isoformat(), dt.date(2026, 10, 1))
+    vintages = synthetic_vintages(week, dt.date(2026, 9, 30))
+    with pytest.raises(resolve_pending.ClaimsVintageError, match="before DOL's"):
+        vintages.first_print("initial", week.isoformat(), dt.date(2026, 10, 5))
 
 
 def first_release(series_id: str, week: str) -> tuple[str, int]:
@@ -318,23 +318,33 @@ def test_a_holiday_wednesday_release_is_the_first_vintage() -> None:
     assert fetched is not None and fetched[0]["observed_at"] == "2026-11-25"
 
 
-def test_a_catch_up_release_still_yields_each_weeks_first_print() -> None:
-    # SYNTHETIC: one release prints two weeks at once (as after the
-    # Oct-Nov 2025 lapse in appropriations). It is the first print of both,
-    # though it already holds the following week.
+def test_a_catch_up_release_waits_for_dols_listed_day(monkeypatch, capsys) -> None:
+    # SYNTHETIC: one release prints two weeks at once, a week late (as after
+    # the Oct-Nov 2025 lapse in appropriations). The schedule says 2026-12-03,
+    # so the week defers, naming the exception table; once DOL's day is
+    # listed, it resolves to that release's value.
     releases = {
         "ICSA": {"2026-12-10": {"2026-11-28": 220000.0, "2026-12-05": 230000.0}}
     }
-    fetched = resolve_pending.resolve_claims_ref(
-        "ref",
-        "2026-11-28",
-        "initial",
-        "2026-12-10",
-        dt.date(2026, 12, 11),
-        resolve_pending.ClaimsVintages(
-            fetch_from(releases, before_first_release="2026-11-21")
-        ),
+
+    def resolve():
+        return resolve_pending.resolve_claims_ref(
+            "ref",
+            "2026-11-28",
+            "initial",
+            "2026-12-10",
+            dt.date(2026, 12, 11),
+            resolve_pending.ClaimsVintages(
+                fetch_from(releases, before_first_release="2026-11-21")
+            ),
+        )
+
+    assert resolve() is None
+    assert "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS" in capsys.readouterr().out
+    monkeypatch.setitem(
+        register_targets.WEEKLY_CLAIMS_RELEASE_EXCEPTIONS, "2026-12-03", "2026-12-10"
     )
+    fetched = resolve()
     assert fetched is not None
     assert (fetched[0]["value"], fetched[0]["observed_at"]) == (220.0, "2026-12-10")
 
@@ -578,8 +588,8 @@ def test_a_boundary_that_answers_two_ways_is_refused() -> None:
         return complete_vintage(series_id, vintage, "2026-08-15") if attempt else raw
 
     vintages = real_vintages(flapping)
-    with pytest.raises(resolve_pending.ClaimsVintageError):
-        vintages.first_vintage("ICSA", "2026-08-29", dt.date(2026, 9, 20))
+    with pytest.raises(resolve_pending.ClaimsVintageError, match="two different"):
+        vintages.first_print("initial", "2026-08-29", dt.date(2026, 9, 20))
 
 
 CORRUPTIONS = {
@@ -622,45 +632,55 @@ def corrupt_once(day: str, replace):
 
 
 # Invariant 5: no single vintage date answering wrongly, in any of these ways,
-# once or on every read, can make the leg record a value other than the first
-# print. It records the first print or defers. Exhaustive over every vintage
-# date bisection or corroboration can read.
+# once or on every read, on any run date, can make the leg record anything but
+# the first print on DOL's release day. It records exactly that, or defers.
+# Exhaustive over every vintage date from the week's end to the run date.
 @pytest.mark.parametrize(
-    ("kind", "week", "resolution_date", "today", "first_value", "revised_on"),
+    ("kind", "week", "resolution_date", "first_value"),
     [
-        ("initial", "2026-08-29", "2026-09-11", "2026-09-20", 206.0, "2026-09-10"),
-        ("initial", "2026-09-12", "2026-09-29", "2026-10-01", 196.0, "2026-09-24"),
-        ("continued", "2026-09-19", "2026-10-09", "2026-10-12", 1.701, "2026-10-08"),
+        ("initial", "2026-08-29", "2026-09-11", 206.0),
+        ("initial", "2026-09-12", "2026-09-29", 196.0),
+        ("continued", "2026-09-19", "2026-10-09", 1.701),
     ],
 )
-def test_no_single_faulty_vintage_records_a_revised_value(
-    kind, week, resolution_date, today, first_value, revised_on, capsys
+def test_no_single_faulty_vintage_records_anything_but_the_first_print(
+    kind, week, resolution_date, first_value, capsys
 ) -> None:
-    deferred = recorded = 0
+    scheduled = register_targets.weekly_claims_release_day(
+        resolve_pending.CLAIMS_SERIES_NAMES[kind], f"week_{week}"
+    )
     start = dt.date.fromisoformat(week)
-    end = dt.date.fromisoformat(today)
-    faults = [
-        (f"{name}, {when}, {day}", make(day, replace))
-        for name, replace in CORRUPTIONS.items()
-        for when, make in (("every read", corrupt_at), ("first read", corrupt_once))
-        for day in [
-            (start + dt.timedelta(days=offset)).isoformat()
-            for offset in range((end - start).days + 1)
-        ]
-    ]
-    for name, corrupt in faults:
-        fetched = resolve_pending.resolve_claims_ref(
-            f"ref.{week}", week, kind, resolution_date, end, real_vintages(corrupt)
+    deferred = recorded = 0
+    for today_offset in (1, 2, 6, 7, 8, 14):
+        today = max(
+            scheduled + dt.timedelta(days=today_offset),
+            dt.date.fromisoformat(resolution_date),
         )
-        if fetched is None:
-            deferred += 1
-            continue
-        recorded += 1
-        row = fetched[0]
-        assert row["value"] == first_value, (name, row["value"])
-        assert row["observed_at"] < revised_on, (name, row["observed_at"])
+        days = [
+            (start + dt.timedelta(days=offset)).isoformat()
+            for offset in range((today - start).days + 1)
+        ]
+        for name, replace in CORRUPTIONS.items():
+            for make in (corrupt_at, corrupt_once):
+                for day in days:
+                    fetched = resolve_pending.resolve_claims_ref(
+                        f"ref.{week}",
+                        week,
+                        kind,
+                        resolution_date,
+                        today,
+                        real_vintages(make(day, replace)),
+                    )
+                    if fetched is None:
+                        deferred += 1
+                        continue
+                    recorded += 1
+                    row = fetched[0]
+                    label = (name, make.__name__, day, today)
+                    assert row["value"] == first_value, (label, row["value"])
+                    assert row["observed_at"] == scheduled.isoformat(), label
     capsys.readouterr()
-    # Both outcomes occur: faults off the bisection path change nothing.
+    # Both outcomes occur: faults away from the four reads change nothing.
     assert deferred > 0 and recorded > 0
 
 
@@ -773,7 +793,7 @@ def test_a_history_correction_without_a_new_week_is_consistent() -> None:
     vintages = resolve_pending.ClaimsVintages(
         fetch_from(releases, before_first_release="2026-08-22")
     )
-    found = vintages.first_vintage("ICSA", "2026-08-29", dt.date(2026, 9, 6))
+    found = vintages.first_print("initial", "2026-08-29", dt.date(2026, 9, 6))
     assert found is not None
     assert (found[0], found[1]) == (dt.date(2026, 9, 3), 206000.0)
 
@@ -816,4 +836,177 @@ def test_a_revision_on_the_very_next_day_refuses_rather_than_choosing() -> None:
         fetch_from(releases, before_first_release="2026-08-22")
     )
     with pytest.raises(resolve_pending.ClaimsVintageError, match="next day's vintage"):
-        vintages.first_vintage("ICSA", "2026-08-29", dt.date(2026, 9, 6))
+        vintages.first_print("initial", "2026-08-29", dt.date(2026, 9, 6))
+
+
+# Review of #345, round 3 (GPT-6.1 Sol). Each faulted one date persistently
+# and steered bisection; the schedule-anchored check never reads those dates
+# or refuses on them.
+def test_a_stale_older_release_on_one_date_cannot_steer_the_answer() -> None:
+    def stale(series_id, vintage, raw, attempt):
+        if series_id == "ICSA" and vintage == "2026-09-09":
+            header = raw.split(b"\n", 1)[0]
+            older = filled(ALFRED["series"]["ICSA"]["2026-08-27"])
+            return header + b"\n" + csv_bytes("ICSA", vintage, older).split(b"\n", 1)[1]
+        return raw
+
+    fetched = resolve_pending.resolve_claims_ref(
+        "us.dol.initial_claims.sa.week_2026-08-29",
+        "2026-08-29",
+        "initial",
+        "2026-09-11",
+        dt.date(2026, 9, 20),
+        real_vintages(stale),
+    )
+    assert fetched is not None
+    assert (fetched[0]["value"], fetched[0]["observed_at"]) == (206.0, "2026-09-03")
+
+
+def test_a_truncated_altered_body_on_one_date_cannot_steer_the_answer() -> None:
+    def altered(series_id, vintage, raw, attempt):
+        if series_id == "ICSA" and vintage == "2026-09-23":
+            lines = raw.rstrip(b"\n").split(b"\n")[:-1]
+            return (
+                b"\n".join(lines).replace(b"2026-08-08,212000", b"2026-08-08,211000")
+                + b"\n"
+            )
+        return raw
+
+    fetched = resolve_pending.resolve_claims_ref(
+        "us.dol.initial_claims.sa.week_2026-09-12",
+        "2026-09-12",
+        "initial",
+        "2026-09-29",
+        dt.date(2026, 10, 4),
+        real_vintages(altered),
+    )
+    assert fetched is not None
+    assert (fetched[0]["value"], fetched[0]["observed_at"]) == (196.0, "2026-09-17")
+
+
+def test_an_early_presence_cannot_move_the_correction_date() -> None:
+    def early(series_id, vintage, raw, attempt):
+        if series_id == "CCSA" and vintage == "2026-09-30" and attempt == 0:
+            return raw + b"2026-09-19,1701000\n"
+        return raw
+
+    ref = "dol.eta.continued_claims.sa.week_2026-09-19.first_print"
+    fetched, supersedes, refusals = resolve_pending.claims_corrections(
+        LATE_ROWS, real_vintages(early)
+    )
+    rows = {row["source_record_id"]: row for row, *_ in fetched}
+    assert ref not in rows
+    assert ref not in supersedes
+    assert any(ref in line and "before DOL's" in line for line in refusals)
+
+
+def test_the_supporting_reads_are_kept_for_the_run() -> None:
+    vintages = real_vintages()
+    ref = "us.dol.initial_claims.sa.week_2026-08-29"
+    resolve_pending.resolve_claims_ref(
+        ref, "2026-08-29", "initial", "2026-09-11", dt.date(2026, 9, 20), vintages
+    )
+    assert [
+        (role, day.isoformat()) for role, day, _raw, _at in vintages.evidence[ref]
+    ] == [
+        ("vintage_before_release", "2026-09-02"),
+        ("vintage_before_release_reread", "2026-09-02"),
+        ("vintage_after_release", "2026-09-04"),
+    ]
+    _fetched, _supersedes, _refusals = resolve_pending.claims_corrections(
+        LATE_ROWS, vintages
+    )
+    assert set(resolve_pending.CLAIMS_FIRST_PRINT_CORRECTIONS) <= set(vintages.evidence)
+
+
+def build_claims_run(tmp_path, monkeypatch, mutate=None):
+    """A sealed resolver run for one claims fact and its first-print evidence."""
+
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    vintages = real_vintages()
+    ref = "us.dol.initial_claims.sa.week_2026-08-29"
+    row, series_id, vintage, raw, retrieved_at, extension = (
+        resolve_pending.resolve_claims_ref(
+            ref, "2026-08-29", "initial", "2026-09-11", dt.date(2026, 9, 20), vintages
+        )
+    )
+    run_dir = resolve_pending.resolution_run_dir("2026-10-13T03:00:00Z")
+    run_dir.mkdir(parents=True)
+    attached = resolve_pending.attach_resolution_provenance(
+        row,
+        run_dir=run_dir,
+        series_id=series_id,
+        vintage=vintage,
+        raw=raw,
+        retrieved_at="2026-10-13T03:00:00Z",
+        ledger_repo_sha="d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+        target_contracts={},
+        extension=extension,
+    )
+    evidence = [
+        {
+            "role": role,
+            "vintageDate": day.isoformat(),
+            "retrievedAt": at,
+            "responseArchive": resolve_pending.archive_response(
+                run_dir, series_id=series_id, vintage=day.isoformat(), raw=body
+            ),
+        }
+        for role, day, body, at in vintages.evidence[ref]
+    ]
+    manifest = {
+        "schemaVersion": "thesis_resolution_run_v1",
+        "retrievedAt": "2026-10-13T03:00:00Z",
+        "ledgerRepo": "PolicyEngine/chronicle",
+        "ledgerBranch": "codex/thesis-ledger-facts",
+        "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+        "facts": [
+            {
+                "dataPointId": ref,
+                "sourceVintage": attached["sourceVintage"],
+                "retrievedAt": attached["retrievedAt"],
+                "targetContentHash": None,
+                "responseArchive": attached["responseArchive"],
+                "firstPrintEvidence": evidence,
+            }
+        ],
+    }
+    if mutate is not None:
+        mutate(run_dir, manifest)
+    return run_dir, resolve_pending.finalize_resolution_manifest(run_dir, manifest)
+
+
+def test_a_claims_run_seals_its_evidence_and_custody_verifies(
+    tmp_path, monkeypatch
+) -> None:
+    from verify_custody import verify_run
+
+    run_dir, manifest = build_claims_run(tmp_path, monkeypatch)
+    archived = sorted(path.name for path in (run_dir / "responses").iterdir())
+    # The day-before read twice is one archive: identical bytes, one file.
+    assert len(archived) == 3
+    assert {a["path"].rsplit("/", 1)[1] for a in manifest["artifacts"][:-1]} == set(
+        archived
+    )
+    assert verify_run(run_dir).run_mode == "resolver"
+
+
+def test_custody_refuses_a_malformed_evidence_entry(tmp_path, monkeypatch) -> None:
+    from verify_custody import CustodyError
+
+    def bad_role(run_dir, manifest):
+        manifest["facts"][0]["firstPrintEvidence"][0]["role"] = "anything"
+
+    with pytest.raises(CustodyError, match="firstPrintEvidence"):
+        build_claims_run(tmp_path, monkeypatch, bad_role)
+
+
+def test_custody_refuses_an_unlisted_evidence_response(tmp_path, monkeypatch) -> None:
+    from verify_custody import CustodyError
+
+    def unlisted(run_dir, manifest):
+        dropped = manifest["facts"][0]["firstPrintEvidence"].pop()
+        assert (resolve_pending.ROOT / dropped["responseArchive"]["path"]).exists()
+
+    with pytest.raises(CustodyError, match="inventory mismatch"):
+        build_claims_run(tmp_path, monkeypatch, unlisted)

@@ -96,6 +96,7 @@ from register_targets import (
     LEGACY_BOUNDED_CONDITIONAL_IDS,
     RegistrationError,
     registration_content_hash,
+    weekly_claims_release_day,
 )
 from sba_loan_performance import (
     CHARGE_OFF_AMOUNT_SERIES,
@@ -12460,6 +12461,10 @@ def pending_claims_refs(log: dict) -> list[tuple[str, str, str, str]]:
 
 
 CLAIMS_SERIES_IDS = {"initial": "ICSA", "continued": "CCSA"}
+CLAIMS_SERIES_NAMES = {
+    "initial": "us.dol.initial_claims.sa",
+    "continued": "dol.eta.continued_claims.sa",
+}
 CLAIMS_REF = re.compile(
     r"(?:us\.dol\.initial_claims\.sa\.week_(?P<initial>\d{4}-\d{2}-\d{2})"
     r"|dol\.eta\.continued_claims\.sa\.week_(?P<continued>\d{4}-\d{2}-\d{2})"
@@ -12502,7 +12507,11 @@ class ClaimsVintageError(ValueError):
 
 
 class ClaimsFirstPrintUncorroboratedError(ClaimsVintageError):
-    """The week is printed, but no later vintage day can corroborate it yet."""
+    """DOL's release day has come; the next day, which corroborates it, has not."""
+
+
+# role, vintage date, raw response, retrieval instant
+ClaimsEvidence = tuple[str, dt.date, bytes, str]
 
 
 # Every ALFRED vintage of both series runs weekly, without a gap, from this
@@ -12588,6 +12597,9 @@ class ClaimsVintages:
         ] = {}
         self._refused: dict[str, str] = {}
         self.requests = 0
+        # Supporting reads behind each record id's first print, archived with
+        # the run so its decision can be replayed.
+        self.evidence: dict[str, list[ClaimsEvidence]] = {}
 
     def _request(self, series_id: str, day: dt.date) -> tuple[bytes | None, str]:
         self.requests += 1
@@ -12654,80 +12666,86 @@ class ClaimsVintages:
                     f"at {last} but print it as {seen[1]:g} and {rows[last]:g}"
                 )
 
-    def first_vintage(
-        self, series_id: str, week: str, upper: dt.date
-    ) -> tuple[dt.date, float, bytes, str] | None:
-        """The first vintage on or before ``upper`` that holds ``week``.
+    def first_print(
+        self, kind: str, week: str, limit: dt.date
+    ) -> tuple[dt.date, float, bytes, str, list[ClaimsEvidence]] | None:
+        """The week's first print: ALFRED's vintage of DOL's scheduled release day.
 
-        Bisection over vintage dates, from the day the week ends (which can
-        never hold it) to ``upper``. None when ALFRED does not answer or
-        ``upper`` does not hold the week yet. Raises
-        ClaimsFirstPrintUncorroboratedError when the first vintage is
-        ``upper`` itself, so no later day can corroborate it yet.
+        The day comes from DOL's stated schedule and its listed exceptions
+        (register_targets.weekly_claims_release_day), never from ALFRED, so no
+        ALFRED response can move it. ALFRED must agree at four reads: the day
+        before holds no such week (read twice, byte-identical); the scheduled
+        day holds it; the day after prints the same value. Returns that
+        value with the three supporting reads as evidence; None when the day
+        has not come or ALFRED does not answer. A week ALFRED did not print on
+        the scheduled day defers until DOL's day is listed as an exception.
         """
 
-        limit = upper
-        lower = dt.date.fromisoformat(week)
-        if upper <= lower:
+        series_id = CLAIMS_SERIES_IDS[kind]
+        try:
+            scheduled = weekly_claims_release_day(
+                CLAIMS_SERIES_NAMES[kind], f"week_{week}"
+            )
+        except RegistrationError as exc:
+            raise ClaimsVintageError(str(exc)) from exc
+        if limit < scheduled:
             return None
-        rows, raw, _ = self.read(series_id, upper)
-        if raw is None or week not in rows:
-            return None
-        rows, raw, _ = self.read(series_id, lower)
-        if raw is None:
+        following = scheduled + dt.timedelta(days=1)
+        if limit < following:
+            raise ClaimsFirstPrintUncorroboratedError(
+                f"DOL's scheduled release of week {week} is {scheduled}; "
+                f"ALFRED's vintage of {following} must corroborate it"
+            )
+        before = scheduled - dt.timedelta(days=1)
+        rows, before_raw, before_at = self.read(series_id, before)
+        if before_raw is None:
             return None
         if week in rows:
             self._refuse(
                 series_id,
                 ClaimsVintageError(
-                    f"ALFRED {series_id} vintage {lower} already holds week "
-                    f"{week}, the day the week ends"
+                    f"ALFRED {series_id} vintage {before} already holds week "
+                    f"{week}, before DOL's scheduled release day {scheduled}"
                 ),
             )
-        while (upper - lower).days > 1:
-            middle = lower + dt.timedelta(days=(upper - lower).days // 2)
-            rows, raw, _ = self.read(series_id, middle)
-            if raw is None:
-                return None
-            if week in rows:
-                upper = middle
-            else:
-                lower = middle
-        # The absence that decides the answer must not rest on one response.
-        _rows, first_reading, _ = self.read(series_id, lower)
-        second_reading, _ = self._request(series_id, lower)
-        if second_reading is None:
+        reread, reread_at = self._request(series_id, before)
+        if reread is None:
             return None
-        if second_reading != first_reading:
+        if reread != before_raw:
             self._refuse(
                 series_id,
                 ClaimsVintageError(
-                    f"ALFRED {series_id} answered vintage {lower}, the day "
-                    f"before the first print of week {week}, two different ways"
+                    f"ALFRED {series_id} answered vintage {before}, the day "
+                    f"before DOL's release of week {week}, two different ways"
                 ),
             )
-        # Nor may the presence and value: the next day's vintage must agree.
-        following = upper + dt.timedelta(days=1)
-        if following > limit:
-            raise ClaimsFirstPrintUncorroboratedError(
-                f"ALFRED {series_id} first holds week {week} on {upper}; the "
-                f"vintage of {following} must corroborate it"
+        rows, raw, retrieved_at = self.read(series_id, scheduled)
+        if raw is None:
+            return None
+        if week not in rows:
+            raise ClaimsVintageError(
+                f"ALFRED {series_id} vintage {scheduled}, DOL's scheduled "
+                f"release day, does not hold week {week}; an off-schedule "
+                f"release needs DOL's day in WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
             )
-        rows, raw, retrieved_at = self.read(series_id, upper)
-        later, later_raw, _ = self.read(series_id, following)
+        later, later_raw, later_at = self.read(series_id, following)
         if later_raw is None:
             return None
         if later.get(week) != rows[week]:
             self._refuse(
                 series_id,
                 ClaimsVintageError(
-                    f"ALFRED {series_id} vintage {upper} prints week {week} as "
-                    f"{rows[week]:g} but the next day's vintage {following} "
+                    f"ALFRED {series_id} vintage {scheduled} prints week {week} "
+                    f"as {rows[week]:g} but the next day's vintage {following} "
                     f"prints {later.get(week)}"
                 ),
             )
-        assert raw is not None
-        return upper, rows[week], raw, retrieved_at
+        evidence: list[ClaimsEvidence] = [
+            ("vintage_before_release", before, before_raw, before_at),
+            ("vintage_before_release_reread", before, reread, reread_at),
+            ("vintage_after_release", following, later_raw, later_at),
+        ]
+        return scheduled, rows[week], raw, retrieved_at, evidence
 
     def latest_week(self, series_id: str, day: dt.date) -> str | None:
         rows, raw, _ = self.read(series_id, day)
@@ -12745,8 +12763,10 @@ def resolve_claims_ref(
     """One pending weekly claims cell -> its first-print ledger row, or None.
 
     The registered releasePolicy is advance_vintage, so the value is the one
-    in the first ALFRED vintage that holds the week, wherever the forecast's
+    ALFRED holds as of DOL's scheduled release day, verified as its first
+    print (ClaimsVintages.first_print), wherever the forecast's
     resolutionDate fell. The leg still waits for that date before acting.
+    The supporting reads are kept in ``vintages.evidence[ref]``.
     """
 
     release_day = dt.date.fromisoformat(source_vintage)
@@ -12756,7 +12776,7 @@ def resolve_claims_ref(
     vintages = vintages or ClaimsVintages()
     series_id = CLAIMS_SERIES_IDS[kind]
     try:
-        first = vintages.first_vintage(series_id, week, today)
+        first = vintages.first_print(kind, week, today)
     except ClaimsFirstPrintUncorroboratedError as exc:
         print(f"  FIRST PRINT AWAITS A SECOND VINTAGE DAY (deferring): {ref} — {exc}")
         return None
@@ -12766,13 +12786,14 @@ def resolve_claims_ref(
     if first is None:
         print(f"  not yet published: {ref}")
         return None
-    first_day, raw_value, raw, retrieved_at = first
+    first_day, raw_value, raw, retrieved_at, evidence = first
+    vintages.evidence[ref] = evidence
     note = None
     if first_day != release_day:
         note = (
             f"Resolved at the first ALFRED vintage that holds the week, "
-            f"{first_day}; the forecast's resolutionDate is {release_day}. "
-            f"See {CLAIMS_DRIFT_RECORD_URL}."
+            f"{first_day}, DOL's release day; the forecast's resolutionDate "
+            f"is {release_day}. See {CLAIMS_DRIFT_RECORD_URL}."
         )
     row = claims_fact(ref, week, raw_value, kind, first_day, note=note)
     print(
@@ -12832,7 +12853,7 @@ def claims_corrections(
             str(row.get("sourceVintage") or row["observed_at"])
         )
         try:
-            first = vintages.first_vintage(series_id, week, read_day)
+            first = vintages.first_print(kind, week, read_day)
             if first is not None:
                 read_release = vintages.latest_week(series_id, read_day)
                 first_release = vintages.latest_week(series_id, first[0])
@@ -12842,7 +12863,7 @@ def claims_corrections(
         if first is None:
             print(f"  correction waits, ALFRED did not answer: {ref}")
             continue
-        first_day, raw_value, raw, retrieved_at = first
+        first_day, raw_value, raw, retrieved_at, evidence = first
         if read_release is None or first_release is None:
             print(f"  correction waits, ALFRED did not answer: {ref}")
             continue
@@ -12857,9 +12878,10 @@ def claims_corrections(
             f"Supersedes {version_id}, which was read from ALFRED vintage "
             f"{read_day}, a later DOL release than the first print, and "
             f"recorded {row.get('value')}. Resolved at the first ALFRED "
-            f"vintage that holds the week, {first_day}. See "
-            f"{CLAIMS_DRIFT_RECORD_URL}."
+            f"vintage that holds the week, {first_day}, DOL's release day. "
+            f"See {CLAIMS_DRIFT_RECORD_URL}."
         )
+        vintages.evidence[ref] = evidence
         corrected = claims_fact(ref, week, raw_value, kind, first_day, note=note)
         print(
             f"  correct: {ref} — {row.get('value')} (vintage {read_day}) -> "
@@ -15365,8 +15387,15 @@ def finalize_resolution_manifest(
     refs: list[dict[str, Any]] = []
     rooted: list[dict[str, Any]] = []
     seen_paths: set[str] = set()
-    for fact in manifest["facts"]:
-        archive = fact["responseArchive"]
+    archives = [
+        archive
+        for fact in manifest["facts"]
+        for archive in (
+            fact["responseArchive"],
+            *(item["responseArchive"] for item in fact.get("firstPrintEvidence", [])),
+        )
+    ]
+    for archive in archives:
         path = repository / archive["path"]
         relative = path.resolve().relative_to(run_dir.resolve()).as_posix()
         ref = {
@@ -15378,7 +15407,8 @@ def finalize_resolution_manifest(
         }
         # Several facts can legitimately share one archived response (two
         # dataPointId dialects of the same series resolve from the same
-        # vintage bytes); the inventory lists each archive exactly once.
+        # vintage bytes, and a claims evidence read can be another fact's
+        # response); the inventory lists each archive exactly once.
         if ref["path"] in seen_paths:
             continue
         seen_paths.add(ref["path"])
@@ -17322,6 +17352,7 @@ def main() -> int:
     target_contracts = registration_contracts()
     new_rows = []
     provenance_refusals: list[str] = []
+    claims_evidence_archives: dict[str, list[dict[str, Any]]] = {}
     for row, series_id, vintage, raw, retrieved_at, extension in fetched_rows:
         try:
             attached = attach_resolution_provenance(
@@ -17335,7 +17366,26 @@ def main() -> int:
                 target_contracts=target_contracts,
                 extension=extension,
             )
-            supersedes = claims_supersedes.get(str(row.get("source_record_id")))
+            record_id = str(row.get("source_record_id"))
+            evidence = claims_vintages.evidence.get(record_id)
+            if evidence:
+                # The reads behind a claims first print: the day before DOL's
+                # release (twice) and the day after it.
+                claims_evidence_archives[record_id] = [
+                    {
+                        "role": role,
+                        "vintageDate": day.isoformat(),
+                        "retrievedAt": evidence_retrieved_at,
+                        "responseArchive": archive_response(
+                            run_dir,
+                            series_id=series_id,
+                            vintage=day.isoformat(),
+                            raw=evidence_raw,
+                        ),
+                    }
+                    for role, day, evidence_raw, evidence_retrieved_at in evidence
+                ]
+            supersedes = claims_supersedes.get(record_id)
             if supersedes:
                 # The version id is a content address that excludes this
                 # link, so setting it after provenance keeps the id valid.
@@ -17389,6 +17439,15 @@ def main() -> int:
                     "retrievedAt": row["retrievedAt"],
                     "targetContentHash": row.get("targetContentHash"),
                     "responseArchive": row["responseArchive"],
+                    **(
+                        {
+                            "firstPrintEvidence": claims_evidence_archives[
+                                row["source_record_id"]
+                            ]
+                        }
+                        if row["source_record_id"] in claims_evidence_archives
+                        else {}
+                    ),
                 }
                 for row in new_rows
             ],
