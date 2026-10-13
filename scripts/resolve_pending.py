@@ -94,6 +94,8 @@ from ledger_release_chain import (
 from pin_ledger import PinError, _validate_catalog_binding
 from register_targets import (
     LEGACY_BOUNDED_CONDITIONAL_IDS,
+    WEEKLY_CLAIMS_RELEASE_EXCEPTIONS,
+    WEEKLY_CLAIMS_SCHEDULE_URL,
     RegistrationError,
     registration_content_hash,
     weekly_claims_release_day,
@@ -17400,6 +17402,12 @@ def main() -> int:
             # Every weekly claims fact carries the ALFRED reads its first
             # print rests on; verify_custody refuses one without them.
             "firstPrintEvidenceRequired": True,
+            # Provenance only: the DOL schedule the run decided with.
+            # Custody re-derives release days from the reviewed table.
+            "weeklyClaimsSchedule": {
+                "source": WEEKLY_CLAIMS_SCHEDULE_URL,
+                "releaseExceptions": dict(WEEKLY_CLAIMS_RELEASE_EXCEPTIONS),
+            },
             "ledgerRepo": args.ledger_repo,
             "ledgerBranch": args.ledger_branch,
             "ledgerRepoSha": ledger_repo_sha,

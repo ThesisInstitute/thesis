@@ -921,6 +921,7 @@ def _verify_resolver_v2(
             f"manifest={sorted(manifest_responses)}"
         )
     required = manifest.get("firstPrintEvidenceRequired") is True
+    run_reads: dict[str, dict[date, bytes]] = {}
     for fact in facts:
         match = CLAIMS_RECORD_RE.match(str(fact.get("dataPointId", "")))
         if "firstPrintEvidence" in fact:
@@ -929,11 +930,46 @@ def _verify_resolver_v2(
                     "firstPrintEvidence on a fact that is not a weekly claims "
                     f"record: {fact.get('dataPointId')!r}"
                 )
-            _verify_first_print_evidence(run_dir, fact, match)
+            series, reads = _verify_first_print_evidence(run_dir, fact, match)
+            # The resolver reads each series-date once per run and reuses the
+            # body, so two archives of one series and date must be the same.
+            by_day = run_reads.setdefault(series, {})
+            for day, raw in reads.values():
+                if by_day.setdefault(day, raw) != raw:
+                    raise CustodyError(
+                        f"two archived ALFRED {series} vintages of {day} differ"
+                    )
         elif required and match is not None:
             raise CustodyError(
                 f"weekly claims fact lacks firstPrintEvidence: {fact['dataPointId']}"
             )
+    # And every read of a series in the run must agree with every other, as
+    # the resolver requires of its whole run, not of one fact at a time.
+    for series, by_day in run_reads.items():
+        try:
+            claims_vintages_consistent(
+                series,
+                [
+                    (day, parse_alfred_claims_vintage(raw, series, day.isoformat()))
+                    for day, raw in by_day.items()
+                ],
+            )
+        except ValueError as exc:
+            raise CustodyError(
+                f"the run's ALFRED {series} reads do not agree: {exc}"
+            ) from exc
+    schedule = manifest.get("weeklyClaimsSchedule")
+    if schedule is not None and not (
+        isinstance(schedule, dict)
+        and isinstance(schedule.get("source"), str)
+        and isinstance(schedule.get("releaseExceptions"), dict)
+        and all(
+            re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(key))
+            and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(value))
+            for key, value in schedule["releaseExceptions"].items()
+        )
+    ):
+        raise CustodyError("weeklyClaimsSchedule is malformed")
 
 
 def parse_alfred_claims_vintage(
@@ -1116,7 +1152,7 @@ def _claims_vintage_raw(
 
 def _verify_first_print_evidence(
     run_dir: Path, fact: dict[str, Any], match: re.Match[str]
-) -> None:
+) -> tuple[str, dict[str, tuple[date, bytes]]]:
     """Replay a weekly claims first print from its archived reads.
 
     The fact's own response is ALFRED's vintage of DOL's release day; the
@@ -1180,6 +1216,7 @@ def _verify_first_print_evidence(
         raise CustodyError(
             f"firstPrintEvidence for {fact['dataPointId']} does not replay: {exc}"
         ) from exc
+    return series, reads
 
 
 def _named_ledger_archive(

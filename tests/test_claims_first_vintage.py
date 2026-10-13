@@ -1497,3 +1497,154 @@ def test_custody_refuses_a_release_day_off_dols_schedule(tmp_path, monkeypatch) 
             "2026-10-02",
             bodies,
         )
+
+
+def seal_claims_facts(tmp_path, monkeypatch, facts):
+    """Seal a run of claims facts, each (ref, release_day, bodies, supersedes)."""
+
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    run_dir = resolve_pending.resolution_run_dir("2026-10-13T06:00:00Z")
+    run_dir.mkdir(parents=True)
+
+    def archive(day, raw):
+        return resolve_pending.archive_response(
+            run_dir, series_id="ICSA", vintage=day, raw=raw
+        )
+
+    entries = []
+    for ref, release_day, bodies, supersedes in facts:
+        entry = {
+            "dataPointId": ref,
+            "sourceVintage": release_day,
+            "retrievedAt": "2026-10-13T06:00:00Z",
+            "targetContentHash": None,
+            "responseArchive": archive(*bodies["release_day"]),
+            "firstPrintEvidence": [
+                {
+                    "role": role,
+                    "vintageDate": day,
+                    "retrievedAt": "2026-10-13T06:00:00Z",
+                    "responseArchive": archive(day, raw),
+                }
+                for role, (day, raw) in bodies.items()
+                if role != "release_day"
+            ],
+        }
+        if supersedes:
+            entry["supersedes"] = supersedes
+        entries.append(entry)
+    return resolve_pending.finalize_resolution_manifest(
+        run_dir,
+        {
+            "schemaVersion": "thesis_resolution_run_v1",
+            "retrievedAt": "2026-10-13T06:00:00Z",
+            "firstPrintEvidenceRequired": True,
+            "ledgerRepo": "PolicyEngine/chronicle",
+            "ledgerBranch": "codex/thesis-ledger-facts",
+            "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+            "facts": entries,
+        },
+    )
+
+
+WEEK_0829 = "us.dol.initial_claims.sa.week_2026-08-29"
+WEEK_0905 = "us.dol.initial_claims.sa.week_2026-09-05"
+
+
+def week_0829_bodies(**extra):
+    return {
+        "vintage_before_release": icsa_body("2026-09-02", "2026-08-27"),
+        "vintage_before_release_reread": icsa_body("2026-09-02", "2026-08-27"),
+        "release_day": icsa_body("2026-09-03", "2026-09-03"),
+        "vintage_after_release": icsa_body("2026-09-04", "2026-09-03"),
+        **extra,
+    }
+
+
+def week_0905_bodies(**changes):
+    bodies = {
+        "vintage_before_release": icsa_body("2026-09-09", "2026-09-03"),
+        "vintage_before_release_reread": icsa_body("2026-09-09", "2026-09-03"),
+        "release_day": icsa_body("2026-09-10", "2026-09-10"),
+        "vintage_after_release": icsa_body("2026-09-11", "2026-09-10"),
+    }
+    bodies.update(changes)
+    return bodies
+
+
+def test_custody_accepts_a_consistent_run_of_two_claims_facts(
+    tmp_path, monkeypatch
+) -> None:
+    seal_claims_facts(
+        tmp_path,
+        monkeypatch,
+        [
+            (WEEK_0829, "2026-09-03", week_0829_bodies(), None),
+            (WEEK_0905, "2026-09-10", week_0905_bodies(), None),
+        ],
+    )
+
+
+# Review of #345, round 7 (GPT-6.1 Sol): each fact replayed alone, so two
+# facts could disagree with each other. The resolver checks its whole run.
+def test_custody_refuses_facts_whose_reads_disagree_across_the_run(
+    tmp_path, monkeypatch
+) -> None:
+    # September 9 read as the August 27 release (ending August 22): fine for
+    # the September 5 fact alone, but the August 29 fact's September 4 read
+    # already ends at August 29.
+    stale = icsa_body("2026-09-09", "2026-08-27")
+    bodies = week_0905_bodies(
+        vintage_before_release=stale, vintage_before_release_reread=stale
+    )
+    with pytest.raises(verify_custody.CustodyError, match="reads do not agree"):
+        seal_claims_facts(
+            tmp_path,
+            monkeypatch,
+            [
+                (WEEK_0829, "2026-09-03", week_0829_bodies(), None),
+                (WEEK_0905, "2026-09-10", bodies, None),
+            ],
+        )
+
+
+def test_custody_refuses_two_archives_of_one_series_date_that_differ(
+    tmp_path, monkeypatch
+) -> None:
+    # The August 29 correction archives September 11 as read; the September
+    # 5 fact archives a September 11 that differs only in old history, so
+    # both end at September 5 with the same value and pass consistency.
+    genuine = icsa_body("2026-09-11", "2026-09-10")
+    altered = (
+        "2026-09-11",
+        genuine[1].replace(b"2026-08-08,212000", b"2026-08-08,211000"),
+    )
+    with pytest.raises(
+        verify_custody.CustodyError, match="vintages of 2026-09-11 differ"
+    ):
+        seal_claims_facts(
+            tmp_path,
+            monkeypatch,
+            [
+                (
+                    WEEK_0829,
+                    "2026-09-03",
+                    week_0829_bodies(superseded_row_vintage=genuine),
+                    "av2:" + "a" * 64,
+                ),
+                (
+                    WEEK_0905,
+                    "2026-09-10",
+                    week_0905_bodies(vintage_after_release=altered),
+                    None,
+                ),
+            ],
+        )
+
+
+def test_the_run_records_the_schedule_it_decided_with() -> None:
+    import inspect
+
+    source = inspect.getsource(resolve_pending.main)
+    assert '"weeklyClaimsSchedule"' in source
+    assert "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS" in source
