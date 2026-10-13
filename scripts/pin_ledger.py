@@ -814,10 +814,70 @@ def _require_listing_is_head_ancestry(
         )
 
 
+def _is_ancestor_of(candidate: str, descendant: str) -> bool:
+    """Whether GitHub reports ``candidate`` as an ancestor of ``descendant``."""
+    payload = _api(f"compare/{candidate}...{descendant}?per_page=100&page=1")
+    if type(payload) is not dict:
+        return False
+    merge_base = payload.get("merge_base_commit")
+    merge_base_sha = merge_base.get("sha") if isinstance(merge_base, dict) else None
+    return payload.get("status") == "ahead" and merge_base_sha == candidate
+
+
+def _pre_pin_parent_states(
+    commits: list[dict[str, Any]],
+    payloads: dict[str, Any],
+    pin_sha: str,
+) -> dict[str, "_WalkedState"]:
+    """Recorded states for parents the walk reaches below the pin.
+
+    The compare listing holds only commits the pin does not already reach.
+    A pull request forked from a commit older than the pin and merged after
+    it brings commits whose parent is one of the pin's own ancestors: part
+    of history that an earlier refresh already walked, but absent from this
+    listing. Those parents are seeded here with their real ledger bytes and
+    release inventory, so every content rule (line-for-line extension of
+    each parent, byte-identical merges, linear appends, inventory progress)
+    judges the branch exactly as it would a branch forked at the pin. Only a
+    parent GitHub proves to be an ancestor of the pin is seeded; any other
+    parent stays unknown and `_require_walk_parent` refuses it by name.
+    (PolicyEngine/chronicle#309 merged such a branch on 2026-10-12; the pin
+    refused to advance at e1f2fc6d, whose parent 598f394d precedes the pin.)
+    """
+    listed = {str(commit["sha"]) for commit in commits}
+    outside: set[str] = set()
+    for commit in commits:
+        payload = payloads.get(str(commit["sha"]))
+        parents = payload.get("parents") if type(payload) is dict else None
+        if type(parents) is not list:
+            continue
+        for parent in parents:
+            sha = str(parent.get("sha")) if type(parent) is dict else ""
+            if sha and sha != pin_sha and sha not in listed:
+                outside.add(sha)
+    states: dict[str, _WalkedState] = {}
+    for sha in sorted(outside):
+        if not re.fullmatch(r"[0-9a-f]{40}", sha) or not _is_ancestor_of(sha, pin_sha):
+            continue
+        payload = _api(f"commits/{sha}")
+        if type(payload) is not dict or payload.get("sha") != sha:
+            raise PinError(f"commit response does not describe requested SHA {sha}")
+        raw = _jsonl_at(sha)
+        inventory, _immutable_prefix = _remote_release_inventory_at_commit(
+            sha,
+            payload,
+            raw,
+            require_complete_siblings=False,
+        )
+        states[sha] = _WalkedState(_lines(raw), raw, inventory)
+    return states
+
+
 def _parents_first(
     commits: list[dict[str, Any]],
     payloads: dict[str, Any],
     pin_sha: str,
+    recorded: Collection[str] = (),
 ) -> list[dict[str, Any]]:
     """Order the listed commits so every commit follows all of its parents.
 
@@ -836,7 +896,7 @@ def _parents_first(
     satisfied (a parent outside the pin and the listing) is left in listed
     order at the end, where `_require_walk_parent` refuses it by name.
     """
-    done = {pin_sha}
+    done = {pin_sha, *recorded}
     remaining = list(commits)
     ordered: list[dict[str, Any]] = []
     while remaining:
@@ -2009,7 +2069,9 @@ def refresh(*, require_catalog: bool = False) -> None:
         for commit in commits
     }
     _require_listing_is_head_ancestry(commits, payloads, pin["sha"], head_sha)
-    for commit in _parents_first(commits, payloads, pin["sha"]):
+    pre_pin = _pre_pin_parent_states(commits, payloads, pin["sha"])
+    walked.update(pre_pin)
+    for commit in _parents_first(commits, payloads, pin["sha"], pre_pin):
         commit_sha = str(commit["sha"])
         commit_payload = payloads[commit_sha]
         parent_shas = _require_walk_parent(commit_payload, commit_sha, walked)

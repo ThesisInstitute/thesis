@@ -2719,3 +2719,97 @@ def test_lineage_scan_unchanged_without_replacement_objects(
     )
     declared_sha = _git(repo, "rev-parse", "HEAD")
     assert pin_ledger._walked_lineage_declares_registry(repo, declared_sha) is True
+
+
+def test_refresh_walks_a_pull_request_forked_before_the_pin(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    """The shape that stopped the pin on 2026-10-12: PolicyEngine/chronicle
+    merged a pull request (#309) forked from a commit older than the pinned
+    one. Its first commit's parent is an ancestor of the pin, so it is not in
+    the compare listing, and the walk refused ("skips or reorders a parent")
+    although that parent is history an earlier refresh already walked."""
+    repo = release_repo.repo
+    mainline = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    _side_branch(repo, "pr-old-fork", release_repo.base, {"docs/old.md": "old\n"})
+    head = _merge(repo, mainline, "pr-old-fork")
+    first_side = _git(
+        repo, "rev-list", "--reverse", f"{release_repo.base}..pr-old-fork"
+    )
+    assert _git(repo, "rev-list", "--parents", "-n", "1", first_side).split()[1] == (
+        release_repo.base
+    )
+    pin_path, _availability, _generated, _requests = _prepare_refresh(
+        monkeypatch, tmp_path, release_repo
+    )
+    # Pin at genesis: the side branch forks below it, at pre-genesis.
+    _seed_outputs(monkeypatch, tmp_path, release_repo, pin_sha=release_repo.genesis)
+    pin_ledger.refresh()
+    assert json.loads(pin_path.read_text())["sha"] == head
+
+
+def test_refresh_refuses_a_pre_pin_fork_that_appends(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    """Seeding a pre-pin parent admits its history, not what a branch from it
+    carries: an append made on a branch forked below the pin is a parallel
+    append line and still refuses, whatever the merge resolves to."""
+    repo = release_repo.repo
+    mainline = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    ledger = repo / pin_ledger.LEDGER_JSONL_PATH
+    _git(repo, "checkout", "-q", "-b", "pr-old-append", release_repo.base)
+    ledger.write_bytes(ledger.read_bytes() + _row_bytes("row-side"))
+    _commit(repo, "append on an old fork")
+    _git(repo, "checkout", "-q", mainline)
+    mainline_ledger = ledger.read_bytes()
+    subprocess.run(
+        ["git", "merge", "-q", "--no-ff", "-m", "merge old append", "pr-old-append"],
+        cwd=repo, check=False, capture_output=True,
+    )
+    ledger.write_bytes(mainline_ledger)
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "--no-edit")
+    pin_path, availability_path, generated_path, _requests = _prepare_refresh(
+        monkeypatch, tmp_path, release_repo
+    )
+    _seed_outputs(monkeypatch, tmp_path, release_repo, pin_sha=release_repo.genesis)
+    before = {p: p.read_bytes() for p in (pin_path, availability_path, generated_path)}
+    with pytest.raises(pin_ledger.PinError, match="refusing parallel append lines"):
+        pin_ledger.refresh()
+    assert {p: p.read_bytes() for p in before} == before
+
+
+def test_refresh_refuses_a_merge_of_unrelated_history(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    release_repo: ReleaseRepo,
+) -> None:
+    """Only a proven ancestor of the pin is seeded. A merge that brings in a
+    root commit from unrelated history still refuses by name. (An omitted
+    commit after the pin is not an ancestor of it either, so it is never
+    seeded: test_refresh_parent_chain_cannot_skip_an_omitted_commit.)"""
+    repo = release_repo.repo
+    mainline = _git(repo, "rev-parse", "--abbrev-ref", "HEAD")
+    _git(repo, "checkout", "-q", "--orphan", "stranger")
+    _git(repo, "rm", "-rq", "--cached", ".")
+    (repo / "stranger.md").write_text("stranger\n")
+    _git(repo, "add", "stranger.md")
+    _commit(repo, "unrelated root")
+    _git(repo, "checkout", "-q", "-f", mainline)
+    _git(
+        repo, "merge", "-q", "--no-ff", "--allow-unrelated-histories",
+        "-m", "merge unrelated", "stranger",
+    )
+    pin_path, availability_path, generated_path, _requests = _prepare_refresh(
+        monkeypatch, tmp_path, release_repo
+    )
+    before = {p: p.read_bytes() for p in (pin_path, availability_path, generated_path)}
+    with pytest.raises(
+        pin_ledger.PinError, match="linear single-parent|unwalked history"
+    ):
+        pin_ledger.refresh()
+    assert {p: p.read_bytes() for p in before} == before
