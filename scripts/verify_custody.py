@@ -959,6 +959,8 @@ def _verify_resolver_v2(
                 f"the run's ALFRED {series} reads do not agree: {exc}"
             ) from exc
     schedule = manifest.get("weeklyClaimsSchedule")
+    if required and run_reads and schedule is None:
+        raise CustodyError("a run with weekly claims facts lacks weeklyClaimsSchedule")
     if schedule is not None and not (
         isinstance(schedule, dict)
         and isinstance(schedule.get("source"), str)

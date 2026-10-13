@@ -14327,32 +14327,47 @@ def apply_catalog_refusals(
     rows: list[dict[str, Any]],
     refusals: dict[str, str],
     refused: list[str],
+    evidence: dict[str, list[dict[str, Any]]] | None = None,
 ) -> list[dict[str, Any]]:
     """Report each catalog refusal, add it to ``refused``, return the rest."""
 
     for ref, reason in refusals.items():
         refused.append(f"{ref}: {reason}")
         print(f"  CATALOG REFUSED (excluded from append): {ref} — {reason}")
-    return exclude_catalog_refusals(rows, refusals)
+    return exclude_catalog_refusals(rows, refusals, evidence)
 
 
 def exclude_catalog_refusals(
-    rows: list[dict[str, Any]], refusals: dict[str, str]
+    rows: list[dict[str, Any]],
+    refusals: dict[str, str],
+    evidence: dict[str, list[dict[str, Any]]] | None = None,
 ) -> list[dict[str, Any]]:
     """The rows the catalog accepts; refused rows' archives are removed.
 
-    A refused row's response archive is deleted unless a kept row shares it,
-    so an excluded row leaves no orphan archive in the run directory.
+    A refused row's response archive, and the archives of its first-print
+    evidence (``evidence`` by record id, whose refused entries are dropped),
+    are deleted unless a kept row's response or evidence shares the file, so
+    an excluded row leaves no orphan archive and takes none a kept row needs.
     """
 
+    evidence = evidence if evidence is not None else {}
+
+    def archives(row: dict[str, Any]) -> set[str]:
+        record_id = str(row["source_record_id"])
+        return {
+            row["responseArchive"]["path"],
+            *(item["responseArchive"]["path"] for item in evidence.get(record_id, [])),
+        }
+
     kept = [row for row in rows if str(row["source_record_id"]) not in refusals]
-    kept_archives = {row["responseArchive"]["path"] for row in kept}
+    kept_archives = set().union(*(archives(row) for row in kept))
     for row in rows:
-        if str(row["source_record_id"]) not in refusals:
+        record_id = str(row["source_record_id"])
+        if record_id not in refusals:
             continue
-        archive = row["responseArchive"]["path"]
-        if archive not in kept_archives:
+        for archive in archives(row) - kept_archives:
             (ROOT / archive).unlink(missing_ok=True)
+        evidence.pop(record_id, None)
     return kept
 
 
@@ -17381,6 +17396,7 @@ def main() -> int:
             args.ledger_repo, ledger_repo_sha, args.ledger_path, content, new_rows
         ),
         provenance_refusals,
+        claims_evidence_archives,
     )
     if not new_rows:
         print("every fetched row was refused; nothing to append")

@@ -47,6 +47,10 @@ LATE_ROWS = [
     .splitlines()
     if line.strip()
 ]
+SCHEDULE_PROVENANCE = {
+    "source": register_targets.WEEKLY_CLAIMS_SCHEDULE_URL,
+    "releaseExceptions": dict(register_targets.WEEKLY_CLAIMS_RELEASE_EXCEPTIONS),
+}
 GATE_SPEC = types.SimpleNamespace(
     assertion_content_keys=resolve_pending.ASSERTION_CONTENT_KEYS
 )
@@ -960,6 +964,7 @@ def build_claims_run(tmp_path, monkeypatch, mutate=None):
         "schemaVersion": "thesis_resolution_run_v1",
         "retrievedAt": "2026-10-13T03:00:00Z",
         "firstPrintEvidenceRequired": True,
+        "weeklyClaimsSchedule": SCHEDULE_PROVENANCE,
         "ledgerRepo": "PolicyEngine/chronicle",
         "ledgerBranch": "codex/thesis-ledger-facts",
         "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
@@ -1206,6 +1211,7 @@ def build_correction_run(tmp_path, monkeypatch, mutate=None):
         "schemaVersion": "thesis_resolution_run_v1",
         "retrievedAt": "2026-10-13T04:00:00Z",
         "firstPrintEvidenceRequired": True,
+        "weeklyClaimsSchedule": SCHEDULE_PROVENANCE,
         "ledgerRepo": "PolicyEngine/chronicle",
         "ledgerBranch": "codex/thesis-ledger-facts",
         "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
@@ -1402,6 +1408,7 @@ def seal_claims_fact(tmp_path, monkeypatch, ref, series, release_day, bodies):
         "schemaVersion": "thesis_resolution_run_v1",
         "retrievedAt": "2026-10-13T05:00:00Z",
         "firstPrintEvidenceRequired": True,
+        "weeklyClaimsSchedule": SCHEDULE_PROVENANCE,
         "ledgerRepo": "PolicyEngine/chronicle",
         "ledgerBranch": "codex/thesis-ledger-facts",
         "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
@@ -1539,6 +1546,7 @@ def seal_claims_facts(tmp_path, monkeypatch, facts):
             "schemaVersion": "thesis_resolution_run_v1",
             "retrievedAt": "2026-10-13T06:00:00Z",
             "firstPrintEvidenceRequired": True,
+            "weeklyClaimsSchedule": SCHEDULE_PROVENANCE,
             "ledgerRepo": "PolicyEngine/chronicle",
             "ledgerBranch": "codex/thesis-ledger-facts",
             "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
@@ -1648,3 +1656,118 @@ def test_the_run_records_the_schedule_it_decided_with() -> None:
     source = inspect.getsource(resolve_pending.main)
     assert '"weeklyClaimsSchedule"' in source
     assert "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS" in source
+
+
+# Review of #345, round 8: a catalog-refused claims row left its evidence
+# archives in the run, so the run's custody check failed and every other
+# resolution was lost; and deleting a refused row's archive could remove a
+# file a kept row's evidence used.
+def test_a_catalog_refused_claims_row_takes_its_evidence_and_nothing_else(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    vintages = real_vintages()
+    refused_ref = "us.dol.initial_claims.sa.week_2026-08-29"
+    kept_ref = "us.dol.initial_claims.sa.week_2026-09-05"
+    fetched = [
+        resolve_pending.resolve_claims_ref(
+            ref, week, "initial", release, dt.date(2026, 9, 20), vintages
+        )
+        for ref, week, release in (
+            (refused_ref, "2026-08-29", "2026-09-03"),
+            (kept_ref, "2026-09-05", "2026-09-10"),
+        )
+    ]
+    run_dir = resolve_pending.resolution_run_dir("2026-10-13T07:00:00Z")
+    run_dir.mkdir(parents=True)
+    rows, evidence = [], {}
+    for row, series_id, vintage, raw, _at, extension in fetched:
+        rows.append(
+            resolve_pending.attach_resolution_provenance(
+                row,
+                run_dir=run_dir,
+                series_id=series_id,
+                vintage=vintage,
+                raw=raw,
+                retrieved_at="2026-10-13T07:00:00Z",
+                ledger_repo_sha="d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+                target_contracts={},
+                extension=extension,
+            )
+        )
+        record_id = row["source_record_id"]
+        evidence[record_id] = [
+            {
+                "role": role,
+                "vintageDate": day.isoformat(),
+                "retrievedAt": at,
+                "responseArchive": resolve_pending.archive_response(
+                    run_dir, series_id=series_id, vintage=day.isoformat(), raw=body
+                ),
+            }
+            for role, day, body, at in vintages.evidence[record_id]
+        ]
+    refused_archives = {rows[0]["responseArchive"]["path"]} | {
+        item["responseArchive"]["path"] for item in evidence[refused_ref]
+    }
+    kept = resolve_pending.exclude_catalog_refusals(
+        rows, {refused_ref: "unit conflict"}, evidence
+    )
+    assert [row["source_record_id"] for row in kept] == [kept_ref]
+    assert refused_ref not in evidence
+    assert not any((tmp_path / path).exists() for path in refused_archives)
+    for item in evidence[kept_ref]:
+        assert (tmp_path / item["responseArchive"]["path"]).exists()
+    manifest = resolve_pending.finalize_resolution_manifest(
+        run_dir,
+        {
+            "schemaVersion": "thesis_resolution_run_v1",
+            "retrievedAt": "2026-10-13T07:00:00Z",
+            "firstPrintEvidenceRequired": True,
+            "weeklyClaimsSchedule": SCHEDULE_PROVENANCE,
+            "ledgerRepo": "PolicyEngine/chronicle",
+            "ledgerBranch": "codex/thesis-ledger-facts",
+            "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+            "facts": [
+                {
+                    "dataPointId": row["source_record_id"],
+                    "sourceVintage": row["sourceVintage"],
+                    "retrievedAt": row["retrievedAt"],
+                    "targetContentHash": None,
+                    "responseArchive": row["responseArchive"],
+                    "firstPrintEvidence": evidence[row["source_record_id"]],
+                }
+                for row in kept
+            ],
+        },
+    )
+    assert manifest["ok"] is True
+    assert verify_custody.verify_run(run_dir).run_mode == "resolver"
+
+
+def test_a_shared_archive_survives_its_refused_owner(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    (tmp_path / "a.csv.gz").write_bytes(b"x")
+    (tmp_path / "b.csv.gz").write_bytes(b"y")
+    rows = [
+        {"source_record_id": "refused", "responseArchive": {"path": "a.csv.gz"}},
+        {"source_record_id": "kept", "responseArchive": {"path": "b.csv.gz"}},
+    ]
+    evidence = {
+        "refused": [{"responseArchive": {"path": "b.csv.gz"}}],
+        "kept": [{"responseArchive": {"path": "a.csv.gz"}}],
+    }
+    resolve_pending.exclude_catalog_refusals(rows, {"refused": "r"}, evidence)
+    # a.csv.gz is the refused row's response but the kept row's evidence.
+    assert (tmp_path / "a.csv.gz").exists() and (tmp_path / "b.csv.gz").exists()
+    assert list(evidence) == ["kept"]
+
+
+def test_custody_requires_the_schedule_on_a_new_claims_run(
+    tmp_path, monkeypatch
+) -> None:
+    def no_schedule(run_dir, manifest):
+        manifest.pop("weeklyClaimsSchedule")
+
+    with pytest.raises(verify_custody.CustodyError, match="weeklyClaimsSchedule"):
+        build_claims_run(tmp_path, monkeypatch, no_schedule)
