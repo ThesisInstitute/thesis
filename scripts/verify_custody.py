@@ -7,12 +7,13 @@ import copy
 import gzip
 import hashlib
 import json
+import math
 import re
 import stat
 import sys
 import urllib.parse
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -59,6 +60,26 @@ REVIEWED_STAGE_INVENTORY = {
     "pre_submit_review_prompt.md": "review_prompt",
     "revision_prompt.md": "revision_prompt",
 }
+FIRST_PRINT_EVIDENCE_ROLES = {
+    "vintage_before_release",
+    "vintage_before_release_reread",
+    "vintage_after_release",
+    "superseded_row_vintage",
+}
+FIRST_PRINT_REQUIRED_ROLES = (
+    "vintage_before_release",
+    "vintage_before_release_reread",
+    "vintage_after_release",
+)
+# Every ALFRED vintage of both weekly claims series runs weekly, without a
+# gap, from this week (checked 2026-10-12 against the 2026-09-03 vintages).
+CLAIMS_SERIES_FIRST_WEEK = {"ICSA": "1967-01-07", "CCSA": "1967-01-07"}
+# Weekly claims record ids, with the ALFRED series each resolves from.
+CLAIMS_RECORD_RE = re.compile(
+    r"(?:us\.dol\.initial_claims\.sa\.week_(?P<icsa>\d{4}-\d{2}-\d{2})"
+    r"|dol\.eta\.continued_claims\.sa\.week_(?P<ccsa>\d{4}-\d{2}-\d{2})"
+    r"(?:\.first_print)?)$"
+)
 RESOLVER_RESPONSE_RE = re.compile(
     # One archived source response per fetched document: a lowercase series
     # or page identifier, the first-print vintage date, and a content-hash
@@ -827,10 +848,26 @@ def _verify_resolver_v2(
         )
     manifest_responses: set[str] = set()
     manifest_response_claims: dict[str, tuple] = {}
+    archives: list[Any] = []
     for fact in facts:
         archive = fact.get("responseArchive") if isinstance(fact, dict) else None
         if not isinstance(archive, dict):
             raise CustodyError("resolver fact lacks responseArchive")
+        archives.append(archive)
+        # Weekly claims facts also carry the ALFRED reads their first print
+        # rests on; each is an archived response under the same rules.
+        evidence = fact.get("firstPrintEvidence", [])
+        if not isinstance(evidence, list):
+            raise CustodyError("resolver fact firstPrintEvidence must be a list")
+        for item in evidence:
+            if not isinstance(item, dict) or not isinstance(
+                item.get("responseArchive"), dict
+            ):
+                raise CustodyError(
+                    f"invalid resolver firstPrintEvidence entry: {item!r}"
+                )
+            archives.append(item["responseArchive"])
+    for archive in archives:
         declared = str(archive.get("path", ""))
         relative = _manifest_relative(run_dir, declared, legacy=False)
         if not RESOLVER_RESPONSE_RE.fullmatch(relative):
@@ -883,6 +920,305 @@ def _verify_resolver_v2(
             f"rooted={sorted(rooted_responses)}, "
             f"manifest={sorted(manifest_responses)}"
         )
+    required = manifest.get("firstPrintEvidenceRequired") is True
+    run_reads: dict[str, dict[date, bytes]] = {}
+    for fact in facts:
+        match = CLAIMS_RECORD_RE.match(str(fact.get("dataPointId", "")))
+        if "firstPrintEvidence" in fact:
+            if match is None:
+                raise CustodyError(
+                    "firstPrintEvidence on a fact that is not a weekly claims "
+                    f"record: {fact.get('dataPointId')!r}"
+                )
+            series, reads = _verify_first_print_evidence(run_dir, fact, match)
+            # The resolver reads each series-date once per run and reuses the
+            # body, so two archives of one series and date must be the same.
+            by_day = run_reads.setdefault(series, {})
+            for day, raw in reads.values():
+                if by_day.setdefault(day, raw) != raw:
+                    raise CustodyError(
+                        f"two archived ALFRED {series} vintages of {day} differ"
+                    )
+        elif required and match is not None:
+            raise CustodyError(
+                f"weekly claims fact lacks firstPrintEvidence: {fact['dataPointId']}"
+            )
+    # And every read of a series in the run must agree with every other, as
+    # the resolver requires of its whole run, not of one fact at a time.
+    for series, by_day in run_reads.items():
+        try:
+            claims_vintages_consistent(
+                series,
+                [
+                    (day, parse_alfred_claims_vintage(raw, series, day.isoformat()))
+                    for day, raw in by_day.items()
+                ],
+            )
+        except ValueError as exc:
+            raise CustodyError(
+                f"the run's ALFRED {series} reads do not agree: {exc}"
+            ) from exc
+    schedule = manifest.get("weeklyClaimsSchedule")
+    if required and run_reads and schedule is None:
+        raise CustodyError("a run with weekly claims facts lacks weeklyClaimsSchedule")
+    if schedule is not None and not (
+        isinstance(schedule, dict)
+        and isinstance(schedule.get("source"), str)
+        and isinstance(schedule.get("releaseExceptions"), dict)
+        and all(
+            re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(key))
+            and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(value))
+            for key, value in schedule["releaseExceptions"].items()
+        )
+    ):
+        raise CustodyError("weeklyClaimsSchedule is malformed")
+
+
+def parse_alfred_claims_vintage(
+    raw: bytes, series_id: str, day: str
+) -> dict[str, float]:
+    """{week: value} from one complete ALFRED claims vintage; ValueError if not.
+
+    The one parser the resolver and custody both use. Absence of a week is
+    evidence only from a complete vintage: the exact header ALFRED writes for
+    this series and date, then one finite numeric row per week from the
+    series' first week with no gap. An error page, another series or date, a
+    malformed row, or a body that stops early is refused.
+    """
+
+    try:
+        lines = raw.decode("utf-8").split("\n")
+    except UnicodeDecodeError as exc:
+        raise ValueError(f"ALFRED {series_id} {day} is not UTF-8") from exc
+    lines = [line.rstrip("\r") for line in lines]
+    while lines and not lines[-1]:
+        lines.pop()
+    header = f"observation_date,{series_id}_{day.replace('-', '')}"
+    if not lines or lines[0] != header:
+        raise ValueError(
+            f"ALFRED {series_id} {day} is not a vintage CSV (header "
+            f"{(lines[0] if lines else '')[:60]!r})"
+        )
+    rows: dict[str, float] = {}
+    expected = date.fromisoformat(CLAIMS_SERIES_FIRST_WEEK[series_id])
+    for number, line in enumerate(lines[1:], start=2):
+        week, separator, value = line.partition(",")
+        try:
+            if not separator or date.fromisoformat(week) != expected:
+                raise ValueError
+            parsed = float(value)
+            if not math.isfinite(parsed):
+                raise ValueError
+        except ValueError as exc:
+            raise ValueError(
+                f"ALFRED {series_id} {day} line {number} breaks the weekly "
+                f"series ({line[:40]!r}, expected week {expected})"
+            ) from exc
+        rows[week] = parsed
+        expected += timedelta(days=7)
+    if not rows:
+        raise ValueError(f"ALFRED {series_id} {day} holds no weeks")
+    return rows
+
+
+CLAIMS_SERIES_NAMES = {
+    "ICSA": "us.dol.initial_claims.sa",
+    "CCSA": "dol.eta.continued_claims.sa",
+}
+
+
+def claims_vintages_consistent(
+    series_id: str, reads: list[tuple[date, dict[str, float]]]
+) -> None:
+    """ValueError unless these vintages can all be honest reads of one series.
+
+    A later vintage date never ends at an earlier week. Two vintages that end
+    at the same week print that week the same: each release adds one week,
+    and ALFRED may later correct history without adding one (its 2017-03-24
+    ICSA vintage re-issued 238 rows back to 2012 and kept week 2017-03-18 at
+    258000), but not by changing the week it just printed.
+    """
+
+    ordered = sorted(reads, key=lambda item: item[0])
+    for (early, early_rows), (late, late_rows) in zip(ordered, ordered[1:]):
+        if max(late_rows) < max(early_rows):
+            raise ValueError(
+                f"ALFRED {series_id} vintages disagree: {late} ends at "
+                f"{max(late_rows)} but the earlier {early} ends at {max(early_rows)}"
+            )
+    by_last_week: dict[str, tuple[date, float]] = {}
+    for day, rows in ordered:
+        last = max(rows)
+        seen = by_last_week.setdefault(last, (day, rows[last]))
+        if seen[1] != rows[last]:
+            raise ValueError(
+                f"ALFRED {series_id} vintages {seen[0]} and {day} both end "
+                f"at {last} but print it as {seen[1]:g} and {rows[last]:g}"
+            )
+
+
+def judge_claims_first_print(
+    series_id: str,
+    week: str,
+    reads: dict[str, tuple[date, bytes]],
+) -> tuple[date, float]:
+    """The weekly claims first print these ALFRED reads support; ValueError if none.
+
+    The one decision the resolver makes and custody replays. The release day
+    is DOL's scheduled day for the week (register_targets.
+    weekly_claims_release_day, its listed exceptions included); the reads are
+    ALFRED's vintages of that day ("release_day"), the day before it, twice
+    ("vintage_before_release", "vintage_before_release_reread"), the day
+    after it ("vintage_after_release"), and, for a correction, the vintage
+    the superseded row was read from ("superseded_row_vintage"). The day
+    before must lack the week on two byte-identical reads, the release day
+    must hold it, the day after must print the same value, every read must
+    be a complete vintage and all must be mutually consistent, and a
+    superseded row's vintage must be a later release.
+    """
+
+    from register_targets import weekly_claims_release_day
+
+    release = weekly_claims_release_day(CLAIMS_SERIES_NAMES[series_id], f"week_{week}")
+    expected = {
+        "release_day": release,
+        "vintage_before_release": release - timedelta(days=1),
+        "vintage_before_release_reread": release - timedelta(days=1),
+        "vintage_after_release": release + timedelta(days=1),
+    }
+    for role, day in expected.items():
+        if role not in reads:
+            raise ValueError(f"no {role} read for week {week}")
+        if reads[role][0] != day:
+            raise ValueError(
+                f"{role} read is dated {reads[role][0]}, not {day} (DOL's release "
+                f"of week {week} is {release})"
+            )
+    extra = set(reads) - set(expected) - {"superseded_row_vintage"}
+    if extra:
+        raise ValueError(f"unexpected reads for week {week}: {sorted(extra)}")
+    rows = {
+        role: parse_alfred_claims_vintage(raw, series_id, day.isoformat())
+        for role, (day, raw) in reads.items()
+    }
+    claims_vintages_consistent(
+        series_id, [(reads[role][0], rows[role]) for role in rows]
+    )
+    if reads["vintage_before_release"][1] != reads["vintage_before_release_reread"][1]:
+        raise ValueError(
+            f"ALFRED {series_id} answered vintage "
+            f"{expected['vintage_before_release']}, the day before DOL's "
+            f"release of week {week}, two different ways"
+        )
+    if week in rows["vintage_before_release"]:
+        raise ValueError(
+            f"ALFRED {series_id} vintage {expected['vintage_before_release']} already "
+            f"holds week {week}, before DOL's scheduled release day {release}; "
+            "an early release needs DOL's day in WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+        )
+    if week not in rows["release_day"]:
+        raise ValueError(
+            f"ALFRED {series_id} vintage {release}, DOL's scheduled release day, "
+            f"does not hold week {week}; an off-schedule release needs DOL's day "
+            "in WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+        )
+    value = rows["release_day"][week]
+    if rows["vintage_after_release"].get(week) != value:
+        raise ValueError(
+            f"ALFRED {series_id} vintage {release} prints week {week} as {value:g} "
+            f"but the next day's vintage {expected['vintage_after_release']} prints "
+            f"{rows['vintage_after_release'].get(week)}"
+        )
+    if "superseded_row_vintage" in reads:
+        superseded_day = reads["superseded_row_vintage"][0]
+        if superseded_day <= release or not (
+            max(rows["superseded_row_vintage"]) > max(rows["release_day"])
+        ):
+            raise ValueError(
+                f"superseded row's vintage {superseded_day} is not a later release "
+                f"than DOL's release of week {week} on {release}"
+            )
+    return release, value
+
+
+def _claims_vintage_raw(
+    run_dir: Path, archive: dict[str, Any], series: str, day: str, role: str
+) -> bytes:
+    """The archived ALFRED body for one vintage date, named for it."""
+
+    relative = _manifest_relative(run_dir, str(archive.get("path", "")), legacy=False)
+    if not PurePosixPath(relative).name.startswith(f"{series.lower()}-{day}-"):
+        raise CustodyError(f"{role} archive {relative} is not {series} {day}")
+    return gzip.decompress(_safe_artifact_path(run_dir, relative).read_bytes())
+
+
+def _verify_first_print_evidence(
+    run_dir: Path, fact: dict[str, Any], match: re.Match[str]
+) -> tuple[str, dict[str, tuple[date, bytes]]]:
+    """Replay a weekly claims first print from its archived reads.
+
+    The fact's own response is ALFRED's vintage of DOL's release day; the
+    evidence holds the other reads. Custody re-decides the first print with
+    judge_claims_first_print, the function the resolver decided it with, so
+    the two cannot disagree about what the archive supports.
+    """
+
+    series, week = ("ICSA", match["icsa"]) if match["icsa"] else ("CCSA", match["ccsa"])
+    evidence = fact["firstPrintEvidence"]
+    roles = [item.get("role") for item in evidence]
+    corrects = fact.get("supersedes")
+    if corrects is not None and (not isinstance(corrects, str) or not corrects):
+        raise CustodyError(f"fact {fact['dataPointId']} has an invalid supersedes")
+    if bool(corrects) != ("superseded_row_vintage" in roles):
+        raise CustodyError(
+            f"firstPrintEvidence for {fact['dataPointId']} must hold "
+            "superseded_row_vintage exactly when the fact supersedes a row"
+        )
+    if (
+        any(role not in FIRST_PRINT_EVIDENCE_ROLES for role in roles)
+        or len(roles) != len(set(roles))
+        or not set(FIRST_PRINT_REQUIRED_ROLES) <= set(roles)
+    ):
+        raise CustodyError(
+            f"firstPrintEvidence for {fact['dataPointId']} must hold each of "
+            f"{list(FIRST_PRINT_REQUIRED_ROLES)} once (got {roles})"
+        )
+    reads: dict[str, tuple[date, bytes]] = {}
+    for item in evidence:
+        role = item["role"]
+        try:
+            day = datetime.strptime(str(item.get("vintageDate")), "%Y-%m-%d").date()
+        except ValueError as exc:
+            raise CustodyError(
+                f"firstPrintEvidence {role} has no valid date: "
+                f"{item.get('vintageDate')!r}"
+            ) from exc
+        _instant(item.get("retrievedAt"), f"firstPrintEvidence {role} retrievedAt")
+        reads[role] = (
+            day,
+            _claims_vintage_raw(
+                run_dir, item["responseArchive"], series, day.isoformat(), role
+            ),
+        )
+    try:
+        release = datetime.strptime(str(fact.get("sourceVintage")), "%Y-%m-%d").date()
+    except ValueError as exc:
+        raise CustodyError(
+            f"weekly claims fact {fact['dataPointId']} has no release-day sourceVintage"
+        ) from exc
+    reads["release_day"] = (
+        release,
+        _claims_vintage_raw(
+            run_dir, fact["responseArchive"], series, release.isoformat(), "release_day"
+        ),
+    )
+    try:
+        judge_claims_first_print(series, week, reads)
+    except Exception as exc:
+        raise CustodyError(
+            f"firstPrintEvidence for {fact['dataPointId']} does not replay: {exc}"
+        ) from exc
+    return series, reads
 
 
 def _named_ledger_archive(
@@ -1386,9 +1722,7 @@ def _verify_ledger_witness_v2(
             # Newline-only splitting, matching pin_ledger._lines and the
             # witness writer: an observation row containing U+0085 or U+2028
             # must count as one line on both sides of the commitment.
-            lines = [
-                line for line in raw.decode("utf-8").split("\n") if line.strip()
-            ]
+            lines = [line for line in raw.decode("utf-8").split("\n") if line.strip()]
             if type(jsonl_claim.get("bytes")) is not int or jsonl_claim["bytes"] < 0:
                 raise CustodyError(
                     "ledger witness jsonl bytes must be a non-negative integer"
