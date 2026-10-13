@@ -12501,6 +12501,10 @@ class ClaimsVintageError(ValueError):
     """ALFRED answered, but not in a shape a first print can come from."""
 
 
+class ClaimsFirstPrintUncorroboratedError(ClaimsVintageError):
+    """The week is printed, but no later vintage day can corroborate it yet."""
+
+
 # Every ALFRED vintage of both series runs weekly, without a gap, from this
 # week (checked 2026-10-12 against the 2026-09-03 vintages). A response that
 # starts later or skips a week is not a complete vintage.
@@ -12568,9 +12572,13 @@ class ClaimsVintages:
     A vintage date between two releases returns the earlier release, and a
     week, once printed, stays in every later vintage. So the vintage dates on
     which a week is present form one unbroken run, and its first day is the
-    week's first print. Every response is validated as a complete vintage,
-    the vintages read in a run must agree that later dates end no earlier,
-    and the day before a first print is read twice before it counts.
+    week's first print.
+
+    No single response decides the answer. Every response must be a complete
+    vintage; the reads of a run must agree with each other; the absence the
+    answer rests on is read twice; and the first vintage's value must be
+    corroborated by the next day's vintage. Any disagreement refuses the
+    series for the rest of the run.
     """
 
     def __init__(self, fetch: Callable[..., Any] | None = None) -> None:
@@ -12578,6 +12586,7 @@ class ClaimsVintages:
         self._reads: dict[
             tuple[str, dt.date], tuple[dict[str, float], bytes | None, str]
         ] = {}
+        self._refused: dict[str, str] = {}
         self.requests = 0
 
     def _request(self, series_id: str, day: dt.date) -> tuple[bytes | None, str]:
@@ -12587,25 +12596,40 @@ class ClaimsVintages:
         except (http.client.HTTPException, OSError):
             return None, utc_now()
 
+    def _refuse(self, series_id: str, exc: ClaimsVintageError) -> None:
+        self._refused.setdefault(series_id, str(exc))
+        raise exc
+
     def read(
         self, series_id: str, day: dt.date
     ) -> tuple[dict[str, float], bytes | None, str]:
+        if series_id in self._refused:
+            raise ClaimsVintageError(
+                f"ALFRED {series_id} refused for the rest of this run: "
+                f"{self._refused[series_id]}"
+            )
         key = (series_id, day)
         if key not in self._reads:
             raw, retrieved_at = self._request(series_id, day)
-            rows = {} if raw is None else parse_claims_vintage(raw, series_id, day)
-            self._reads[key] = (rows, raw, retrieved_at)
-            self._require_consistent(series_id)
+            try:
+                rows = {} if raw is None else parse_claims_vintage(raw, series_id, day)
+                self._reads[key] = (rows, raw, retrieved_at)
+                self._require_consistent(series_id)
+            except ClaimsVintageError as exc:
+                self._reads.pop(key, None)
+                self._refuse(series_id, exc)
         return self._reads[key]
 
     def _require_consistent(self, series_id: str) -> None:
         """Refuse reads that cannot all be honest vintages of one series.
 
-        A later vintage date never ends at an earlier week. Each release adds
-        one week, and any revisions to earlier weeks ride on it, so two
-        vintages that end at the same week are the same release and hold the
-        same rows. A body cut short of its last rows would end where an older
-        release ends, but would carry the newer release's revisions.
+        A later vintage date never ends at an earlier week. Two vintages that
+        end at the same week agree on that week's value: each release adds
+        one week, and ALFRED may later correct history without adding one
+        (on 2017-03-24 it re-issued 238 ICSA rows back to 2012, keeping week
+        2017-03-18 at 258000), but not by changing the week it just printed.
+        A body cut short of its last rows ends where an older release ends,
+        but carries the newer release's revision of that week.
         """
 
         reads = [
@@ -12620,13 +12644,14 @@ class ClaimsVintages:
                     f"{max(late_rows)} but the earlier {early} ends at "
                     f"{max(early_rows)}"
                 )
-        by_last_week: dict[str, tuple[dt.date, dict[str, float]]] = {}
+        by_last_week: dict[str, tuple[dt.date, float]] = {}
         for day, rows in reads:
-            seen = by_last_week.setdefault(max(rows), (day, rows))
-            if seen[1] != rows:
+            last = max(rows)
+            seen = by_last_week.setdefault(last, (day, rows[last]))
+            if seen[1] != rows[last]:
                 raise ClaimsVintageError(
                     f"ALFRED {series_id} vintages {seen[0]} and {day} both end "
-                    f"at {max(rows)} but hold different values"
+                    f"at {last} but print it as {seen[1]:g} and {rows[last]:g}"
                 )
 
     def first_vintage(
@@ -12636,9 +12661,12 @@ class ClaimsVintages:
 
         Bisection over vintage dates, from the day the week ends (which can
         never hold it) to ``upper``. None when ALFRED does not answer or
-        ``upper`` does not hold the week yet.
+        ``upper`` does not hold the week yet. Raises
+        ClaimsFirstPrintUncorroboratedError when the first vintage is
+        ``upper`` itself, so no later day can corroborate it yet.
         """
 
+        limit = upper
         lower = dt.date.fromisoformat(week)
         if upper <= lower:
             return None
@@ -12649,9 +12677,12 @@ class ClaimsVintages:
         if raw is None:
             return None
         if week in rows:
-            raise ClaimsVintageError(
-                f"ALFRED {series_id} vintage {lower} already holds week {week}, "
-                "the day the week ends"
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} vintage {lower} already holds week "
+                    f"{week}, the day the week ends"
+                ),
             )
         while (upper - lower).days > 1:
             middle = lower + dt.timedelta(days=(upper - lower).days // 2)
@@ -12668,11 +12699,33 @@ class ClaimsVintages:
         if second_reading is None:
             return None
         if second_reading != first_reading:
-            raise ClaimsVintageError(
-                f"ALFRED {series_id} answered vintage {lower}, the day before "
-                f"the first print of week {week}, two different ways"
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} answered vintage {lower}, the day "
+                    f"before the first print of week {week}, two different ways"
+                ),
+            )
+        # Nor may the presence and value: the next day's vintage must agree.
+        following = upper + dt.timedelta(days=1)
+        if following > limit:
+            raise ClaimsFirstPrintUncorroboratedError(
+                f"ALFRED {series_id} first holds week {week} on {upper}; the "
+                f"vintage of {following} must corroborate it"
             )
         rows, raw, retrieved_at = self.read(series_id, upper)
+        later, later_raw, _ = self.read(series_id, following)
+        if later_raw is None:
+            return None
+        if later.get(week) != rows[week]:
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} vintage {upper} prints week {week} as "
+                    f"{rows[week]:g} but the next day's vintage {following} "
+                    f"prints {later.get(week)}"
+                ),
+            )
         assert raw is not None
         return upper, rows[week], raw, retrieved_at
 
@@ -12704,6 +12757,9 @@ def resolve_claims_ref(
     series_id = CLAIMS_SERIES_IDS[kind]
     try:
         first = vintages.first_vintage(series_id, week, today)
+    except ClaimsFirstPrintUncorroboratedError as exc:
+        print(f"  FIRST PRINT AWAITS A SECOND VINTAGE DAY (deferring): {ref} — {exc}")
+        return None
     except ClaimsVintageError as exc:
         print(f"  ALFRED RESPONSE REFUSED (deferring): {ref} — {exc}")
         return None
