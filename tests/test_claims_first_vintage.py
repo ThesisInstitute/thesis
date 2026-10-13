@@ -35,6 +35,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import register_targets  # noqa: E402
 import resolve_pending  # noqa: E402
+import verify_custody  # noqa: E402
 from receipt import append_gate  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures"
@@ -63,7 +64,7 @@ def fixture_series_start(monkeypatch):
     """
 
     monkeypatch.setattr(
-        resolve_pending,
+        verify_custody,
         "CLAIMS_SERIES_FIRST_WEEK",
         {"ICSA": FIXTURE_FIRST_WEEK, "CCSA": FIXTURE_FIRST_WEEK},
     )
@@ -1151,10 +1152,8 @@ def test_two_dates_ending_at_one_week_must_print_it_the_same() -> None:
         vintages.read("ICSA", dt.date(2026, 9, 5))
 
 
-def test_a_correction_run_seals_and_replays_its_four_reads(
-    tmp_path, monkeypatch
-) -> None:
-    from verify_custody import verify_run
+def build_correction_run(tmp_path, monkeypatch, mutate=None):
+    """A sealed resolver run holding all five corrections and their evidence."""
 
     monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
     vintages = real_vintages()
@@ -1184,6 +1183,7 @@ def test_a_correction_run_seals_and_replays_its_four_reads(
                 "retrievedAt": attached["retrievedAt"],
                 "targetContentHash": None,
                 "responseArchive": attached["responseArchive"],
+                "supersedes": supersedes[row["source_record_id"]],
                 "firstPrintEvidence": [
                     {
                         "role": role,
@@ -1202,19 +1202,149 @@ def test_a_correction_run_seals_and_replays_its_four_reads(
                 ],
             }
         )
-    resolve_pending.finalize_resolution_manifest(
-        run_dir,
-        {
-            "schemaVersion": "thesis_resolution_run_v1",
-            "retrievedAt": "2026-10-13T04:00:00Z",
-            "firstPrintEvidenceRequired": True,
-            "ledgerRepo": "PolicyEngine/chronicle",
-            "ledgerBranch": "codex/thesis-ledger-facts",
-            "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
-            "facts": facts,
-        },
+    manifest = {
+        "schemaVersion": "thesis_resolution_run_v1",
+        "retrievedAt": "2026-10-13T04:00:00Z",
+        "firstPrintEvidenceRequired": True,
+        "ledgerRepo": "PolicyEngine/chronicle",
+        "ledgerBranch": "codex/thesis-ledger-facts",
+        "ledgerRepoSha": "d7e45bc5751357fdac1cfc182e1abaa414b675f3",
+        "facts": facts,
+    }
+    if mutate is not None:
+        mutate(run_dir, manifest)
+    resolve_pending.finalize_resolution_manifest(run_dir, manifest)
+    return run_dir
+
+
+def test_a_correction_run_seals_and_replays_its_four_reads(
+    tmp_path, monkeypatch
+) -> None:
+    run_dir = build_correction_run(tmp_path, monkeypatch)
+    assert verify_custody.verify_run(run_dir).run_mode == "resolver"
+
+
+def prune(run_dir, manifest):
+    named = {
+        archive["path"].rsplit("/", 1)[1]
+        for fact in manifest["facts"]
+        for archive in (
+            fact["responseArchive"],
+            *(item["responseArchive"] for item in fact.get("firstPrintEvidence", [])),
+        )
+    }
+    for path in (run_dir / "responses").iterdir():
+        if path.name not in named:
+            path.unlink()
+
+
+def replace_archive(run_dir, item, series, day, body):
+    path = resolve_pending.ROOT / item["responseArchive"]["path"]
+    if path.exists():
+        path.unlink()
+    item["responseArchive"] = resolve_pending.archive_response(
+        run_dir, series_id=series, vintage=day, raw=body
     )
-    assert verify_run(run_dir).run_mode == "resolver"
+
+
+@pytest.mark.parametrize(
+    ("label", "change", "message"),
+    [
+        (
+            "a correction without the superseded row's read",
+            lambda run_dir, m: [
+                fact.update(
+                    firstPrintEvidence=[
+                        item
+                        for item in fact["firstPrintEvidence"]
+                        if item["role"] != "superseded_row_vintage"
+                    ]
+                )
+                for fact in m["facts"]
+            ],
+            "exactly when the fact supersedes",
+        ),
+        (
+            "the read without a supersedes",
+            lambda run_dir, m: m["facts"][0].pop("supersedes"),
+            "exactly when the fact supersedes",
+        ),
+        (
+            "an unparseable superseded date",
+            lambda run_dir, m: [
+                item.update(vintageDate="9999-99-99")
+                for item in m["facts"][0]["firstPrintEvidence"]
+                if item["role"] == "superseded_row_vintage"
+            ],
+            "no valid date",
+        ),
+        (
+            "the superseded read dated on the release day",
+            lambda run_dir, m: [
+                item.update(
+                    vintageDate=m["facts"][0]["sourceVintage"],
+                    responseArchive=m["facts"][0]["responseArchive"],
+                )
+                for item in m["facts"][0]["firstPrintEvidence"]
+                if item["role"] == "superseded_row_vintage"
+            ],
+            "is not after the release day",
+        ),
+        (
+            "a date-only retrieval instant",
+            lambda run_dir, m: m["facts"][0]["firstPrintEvidence"][0].update(
+                retrievedAt="2026-10-13"
+            ),
+            "retrievedAt",
+        ),
+        (
+            "a retrieval instant without an offset",
+            lambda run_dir, m: m["facts"][0]["firstPrintEvidence"][0].update(
+                retrievedAt="2026-10-13T04:00:00"
+            ),
+            "retrievedAt",
+        ),
+    ],
+)
+def test_custody_refuses_a_correction_missing_its_proof(
+    label, change, message, tmp_path, monkeypatch
+) -> None:
+    def mutate(run_dir, manifest):
+        change(run_dir, manifest)
+        prune(run_dir, manifest)
+
+    with pytest.raises(verify_custody.CustodyError, match=message):
+        build_correction_run(tmp_path, monkeypatch, mutate)
+
+
+def test_custody_replays_bodies_by_the_resolvers_rules(tmp_path, monkeypatch) -> None:
+    # Review of #345, round 5: an empty day-before body and a non-numeric
+    # target both sealed. Custody now parses with the resolver's own parser.
+    def empty_before(run_dir, manifest):
+        fact = manifest["facts"][0]
+        for item in fact["firstPrintEvidence"][:2]:
+            stamp = item["vintageDate"].replace("-", "")
+            header_only = f"observation_date,ICSA_{stamp}\n".encode()
+            replace_archive(run_dir, item, "ICSA", item["vintageDate"], header_only)
+        prune(run_dir, manifest)
+
+    with pytest.raises(verify_custody.CustodyError, match="holds no weeks"):
+        build_claims_run(tmp_path, monkeypatch, empty_before)
+
+
+def test_custody_refuses_a_non_numeric_target(tmp_path, monkeypatch) -> None:
+    def not_a_number(run_dir, manifest):
+        fact = manifest["facts"][0]
+        after = fact["firstPrintEvidence"][2]
+        path = resolve_pending.ROOT / after["responseArchive"]["path"]
+        body = gzip.decompress(path.read_bytes()).replace(
+            b"2026-08-29,206000", b"2026-08-29,not-a-number"
+        )
+        replace_archive(run_dir, after, "ICSA", "2026-09-04", body)
+        prune(run_dir, manifest)
+
+    with pytest.raises(verify_custody.CustodyError, match="breaks the weekly"):
+        build_claims_run(tmp_path, monkeypatch, not_a_number)
 
 
 def test_an_early_print_names_the_exception_table(capsys) -> None:

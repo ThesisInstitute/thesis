@@ -118,7 +118,7 @@ from sba_loan_performance import (
     PARTIAL_REFUSAL as SBA_PARTIAL_REFUSAL,
 )
 from thesis_log_client import load_thesis_log
-from verify_custody import CustodyError, verify_run
+from verify_custody import CustodyError, parse_alfred_claims_vintage, verify_run
 from witnessed_timeline import TimelineError, extract_timeline
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -12514,12 +12514,6 @@ class ClaimsFirstPrintUncorroboratedError(ClaimsVintageError):
 ClaimsEvidence = tuple[str, dt.date, bytes, str]
 
 
-# Every ALFRED vintage of both series runs weekly, without a gap, from this
-# week (checked 2026-10-12 against the 2026-09-03 vintages). A response that
-# starts later or skips a week is not a complete vintage.
-CLAIMS_SERIES_FIRST_WEEK = {"ICSA": "1967-01-07", "CCSA": "1967-01-07"}
-
-
 def fetch_claims_vintage(series_id: str, vintage: str) -> tuple[bytes | None, str]:
     """Raw ALFRED CSV for one vintage date; None when ALFRED refuses it."""
     url = FRED_CSV.format(series=series_id, vintage=vintage)
@@ -12534,45 +12528,14 @@ def fetch_claims_vintage(series_id: str, vintage: str) -> tuple[bytes | None, st
 def parse_claims_vintage(raw: bytes, series_id: str, day: dt.date) -> dict[str, float]:
     """{week: value} from one complete ALFRED claims vintage, or refuse.
 
-    Absence of a week is evidence only from a complete vintage: the exact
-    header ALFRED writes for this series and date, then one numeric row per
-    week from the series' first week with no gap. An error page, another
-    series or date, a malformed row, or a body that stops early is refused.
+    The rules live in verify_custody.parse_alfred_claims_vintage, so custody
+    replays an archived run by the same rules the resolver read it with.
     """
 
     try:
-        lines = raw.decode("utf-8").split("\n")
-    except UnicodeDecodeError as exc:
-        raise ClaimsVintageError(f"ALFRED {series_id} {day} is not UTF-8") from exc
-    lines = [line.rstrip("\r") for line in lines]
-    while lines and not lines[-1]:
-        lines.pop()
-    header = f"observation_date,{series_id}_{day.isoformat().replace('-', '')}"
-    if not lines or lines[0] != header:
-        raise ClaimsVintageError(
-            f"ALFRED {series_id} {day} is not a vintage CSV (header "
-            f"{(lines[0] if lines else '')[:60]!r})"
-        )
-    rows: dict[str, float] = {}
-    expected = dt.date.fromisoformat(CLAIMS_SERIES_FIRST_WEEK[series_id])
-    for number, line in enumerate(lines[1:], start=2):
-        date, separator, value = line.partition(",")
-        try:
-            if not separator or dt.date.fromisoformat(date) != expected:
-                raise ValueError
-            parsed = float(value)
-            if not math.isfinite(parsed):
-                raise ValueError
-        except ValueError as exc:
-            raise ClaimsVintageError(
-                f"ALFRED {series_id} {day} line {number} breaks the weekly "
-                f"series ({line[:40]!r}, expected week {expected})"
-            ) from exc
-        rows[date] = parsed
-        expected += dt.timedelta(days=7)
-    if not rows:
-        raise ClaimsVintageError(f"ALFRED {series_id} {day} holds no weeks")
-    return rows
+        return parse_alfred_claims_vintage(raw, series_id, day.isoformat())
+    except ValueError as exc:
+        raise ClaimsVintageError(str(exc)) from exc
 
 
 class ClaimsVintages:
@@ -17449,6 +17412,11 @@ def main() -> int:
                     "retrievedAt": row["retrievedAt"],
                     "targetContentHash": row.get("targetContentHash"),
                     "responseArchive": row["responseArchive"],
+                    **(
+                        {"supersedes": row["assertionVersion"]["supersedes"]}
+                        if row["assertionVersion"].get("supersedes")
+                        else {}
+                    ),
                     **(
                         {
                             "firstPrintEvidence": claims_evidence_archives[

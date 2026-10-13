@@ -7,12 +7,13 @@ import copy
 import gzip
 import hashlib
 import json
+import math
 import re
 import stat
 import sys
 import urllib.parse
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -70,6 +71,9 @@ FIRST_PRINT_REQUIRED_ROLES = (
     "vintage_before_release_reread",
     "vintage_after_release",
 )
+# Every ALFRED vintage of both weekly claims series runs weekly, without a
+# gap, from this week (checked 2026-10-12 against the 2026-09-03 vintages).
+CLAIMS_SERIES_FIRST_WEEK = {"ICSA": "1967-01-07", "CCSA": "1967-01-07"}
 # Weekly claims record ids, with the ALFRED series each resolves from.
 CLAIMS_RECORD_RE = re.compile(
     r"(?:us\.dol\.initial_claims\.sa\.week_(?P<icsa>\d{4}-\d{2}-\d{2})"
@@ -932,20 +936,66 @@ def _verify_resolver_v2(
             )
 
 
+def parse_alfred_claims_vintage(
+    raw: bytes, series_id: str, day: str
+) -> dict[str, float]:
+    """{week: value} from one complete ALFRED claims vintage; ValueError if not.
+
+    The one parser the resolver and custody both use. Absence of a week is
+    evidence only from a complete vintage: the exact header ALFRED writes for
+    this series and date, then one finite numeric row per week from the
+    series' first week with no gap. An error page, another series or date, a
+    malformed row, or a body that stops early is refused.
+    """
+
+    try:
+        lines = raw.decode("utf-8").split("\n")
+    except UnicodeDecodeError as exc:
+        raise ValueError(f"ALFRED {series_id} {day} is not UTF-8") from exc
+    lines = [line.rstrip("\r") for line in lines]
+    while lines and not lines[-1]:
+        lines.pop()
+    header = f"observation_date,{series_id}_{day.replace('-', '')}"
+    if not lines or lines[0] != header:
+        raise ValueError(
+            f"ALFRED {series_id} {day} is not a vintage CSV (header "
+            f"{(lines[0] if lines else '')[:60]!r})"
+        )
+    rows: dict[str, float] = {}
+    expected = date.fromisoformat(CLAIMS_SERIES_FIRST_WEEK[series_id])
+    for number, line in enumerate(lines[1:], start=2):
+        week, separator, value = line.partition(",")
+        try:
+            if not separator or date.fromisoformat(week) != expected:
+                raise ValueError
+            parsed = float(value)
+            if not math.isfinite(parsed):
+                raise ValueError
+        except ValueError as exc:
+            raise ValueError(
+                f"ALFRED {series_id} {day} line {number} breaks the weekly "
+                f"series ({line[:40]!r}, expected week {expected})"
+            ) from exc
+        rows[week] = parsed
+        expected += timedelta(days=7)
+    if not rows:
+        raise ValueError(f"ALFRED {series_id} {day} holds no weeks")
+    return rows
+
+
 def _claims_vintage_rows(
     run_dir: Path, archive: dict[str, Any], series: str, day: str, label: str
-) -> tuple[bytes, dict[str, str]]:
+) -> tuple[bytes, dict[str, float]]:
     """The archived ALFRED body for one vintage date and its rows by week."""
 
     relative = _manifest_relative(run_dir, str(archive.get("path", "")), legacy=False)
     if not PurePosixPath(relative).name.startswith(f"{series.lower()}-{day}-"):
         raise CustodyError(f"{label} archive {relative} is not {series} {day}")
     raw = gzip.decompress(_safe_artifact_path(run_dir, relative).read_bytes())
-    lines = [line.rstrip("\r") for line in raw.decode("utf-8").split("\n") if line]
-    if not lines or lines[0] != f"observation_date,{series}_{day.replace('-', '')}":
-        raise CustodyError(f"{label} archive {relative} is not an ALFRED vintage CSV")
-    rows = dict(line.split(",", 1) for line in lines[1:])
-    return raw, rows
+    try:
+        return raw, parse_alfred_claims_vintage(raw, series, day)
+    except ValueError as exc:
+        raise CustodyError(f"{label} archive {relative}: {exc}") from exc
 
 
 def _verify_first_print_evidence(
@@ -964,6 +1014,14 @@ def _verify_first_print_evidence(
     evidence = fact["firstPrintEvidence"]
     roles = [item.get("role") for item in evidence]
     extra = [role for role in roles if role not in FIRST_PRINT_EVIDENCE_ROLES]
+    corrects = fact.get("supersedes")
+    if corrects is not None and (not isinstance(corrects, str) or not corrects):
+        raise CustodyError(f"fact {fact['dataPointId']} has an invalid supersedes")
+    if bool(corrects) != ("superseded_row_vintage" in roles):
+        raise CustodyError(
+            f"firstPrintEvidence for {fact['dataPointId']} must hold "
+            "superseded_row_vintage exactly when the fact supersedes a row"
+        )
     if (
         extra
         or len(roles) != len(set(roles))
@@ -993,16 +1051,18 @@ def _verify_first_print_evidence(
                 f"firstPrintEvidence {role} for {fact['dataPointId']} is dated "
                 f"{stated}, not {day[role].isoformat()}"
             )
-        if role == "superseded_row_vintage" and not stated > release.date().isoformat():
-            raise CustodyError(
-                f"superseded_row_vintage {stated} is not after the release day"
-            )
-        try:
-            datetime.fromisoformat(str(item.get("retrievedAt")).replace("Z", "+00:00"))
-        except ValueError as exc:
-            raise CustodyError(
-                f"firstPrintEvidence {role} has no retrievedAt instant"
-            ) from exc
+        if role == "superseded_row_vintage":
+            try:
+                read_day = datetime.strptime(stated, "%Y-%m-%d").date()
+            except ValueError as exc:
+                raise CustodyError(
+                    f"superseded_row_vintage has no valid date: {stated!r}"
+                ) from exc
+            if read_day <= release.date():
+                raise CustodyError(
+                    f"superseded_row_vintage {stated} is not after the release day"
+                )
+        _instant(item.get("retrievedAt"), f"firstPrintEvidence {role} retrievedAt")
         bodies[role] = _claims_vintage_rows(
             run_dir, item["responseArchive"], series, stated, f"{role} evidence"
         )

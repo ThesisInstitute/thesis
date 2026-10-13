@@ -176,9 +176,14 @@ guard merged. Carrying out the ruling now means two things:
    two byte-identical reads; the release day must hold it; the day after
    must print the same value. The day comes from DOL's schedule, so no single
    ALFRED response can move it; a faulty response makes the cell defer. A
-   release DOL makes off schedule defers until its day is listed in
-   `WEEKLY_CLAIMS_RELEASE_EXCEPTIONS`. The three reads are archived with the
-   run as `firstPrintEvidence`, and `verify_custody` replays them.
+   release DOL makes off schedule (early or late) defers until its day is
+   listed in `WEEKLY_CLAIMS_RELEASE_EXCEPTIONS`, provided ALFRED answers
+   honestly on the scheduled day and the day before it. If an unlisted
+   off-schedule release and a faulty ALFRED answer on one of those days
+   coincide, the cell can resolve on the scheduled day: the right value,
+   the wrong date. The three reads are archived with the run as
+   `firstPrintEvidence`, and `verify_custody` replays them by the same
+   parser the resolver uses.
 2. The five rows read from a later release (the four above, and initial
    claims week 2026-09-05, whose value was unchanged) are corrected by
    appending first-print rows whose `assertionVersion.supersedes` names the
