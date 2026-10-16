@@ -349,9 +349,13 @@ jobs:
         # cancelled after publishing (the resolver succeeded, and there was
         # nothing to publish or the deployed-ledger record succeeded) has
         # nothing to alert about: only the always-run status page was cut.
+        # The ledger step must itself have succeeded before its output says
+        # "nothing to publish": an output a cancelled step never wrote is
+        # null, and GitHub evaluates null == '0' as true.
         if: >-
           failure() || (cancelled() && !(steps.resolve.outcome == 'success'
-          && (steps.ledger.outputs.needs_publish == '0'
+          && ((steps.ledger.outcome == 'success'
+          && steps.ledger.outputs.needs_publish == '0')
           || steps.deployed_ledger.outcome == 'success')))
         env:
           GH_TOKEN: ${{ github.token }}

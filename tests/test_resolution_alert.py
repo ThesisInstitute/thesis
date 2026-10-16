@@ -440,8 +440,12 @@ def test_the_alert_reads_the_refused_gate_and_keeps_its_place() -> None:
     # A cancellation alerts only when publication had not completed.
     assert alert["if"] == (
         "failure() || (cancelled() && !(steps.resolve.outcome == 'success' "
-        "&& (steps.ledger.outputs.needs_publish == '0' "
+        "&& ((steps.ledger.outcome == 'success' "
+        "&& steps.ledger.outputs.needs_publish == '0') "
         "|| steps.deployed_ledger.outcome == 'success')))"
+    )
+    assert _step("Compare ledger branch with the last successful deployment")["id"] == (
+        "ledger"
     )
     deployed = _step("Record the successfully deployed ledger SHA")
     assert deployed["id"] == "deployed_ledger"
