@@ -172,12 +172,12 @@ type NormalizedForecastScore = ResolvedForecastScore & {
 };
 
 // Eligibility gate for every normalized-metric aggregate in this module,
-// delegated to the shared brier-lab predicate: a sub-epsilon
-// ledger-dispersion scale is numerical zero left over from equal decimal
-// steps, never a usable denominator, and scores carrying one must stay out
-// of normalized aggregates. The normalizedAbsoluteError check only narrows
-// the local type — every normalized field is null exactly when the scale
-// is null.
+// delegated to the shared brier-lab predicate. Float residue from equal
+// decimal steps is refused where the scale is computed
+// (targetNormalizationScale's relative floor), so its scores already carry
+// null normalized fields; this gate keeps any other unusable scale out too.
+// The normalizedAbsoluteError check only narrows the local type — every
+// normalized field is null exactly when the scale is null.
 function isAggregateEligibleNormalizedScore(
   score: ResolvedForecastScore,
 ): score is NormalizedForecastScore {
