@@ -337,6 +337,7 @@ def test_every_code_the_rules_can_emit_has_a_reason():
             "NO_REPORT",
             "NOT_REACHED",
             "NO_RESOLVER_RUN",
+            "RECEIPT_PIN_STOP",
         }
     )
     assert emitted - {"UNCLASSIFIED"} <= set(rs.REASONS)
@@ -683,7 +684,9 @@ def _worlds(draw):
         "logAvailable": draw(st.booleans()),
         "completed": draw(st.booleans()),
         "loopCompleted": draw(st.booleans()),
-        "error": "",
+        "error": draw(
+            st.sampled_from(["", "", "RECEIPT PIN REFUSED thesis locks receipt 0.6.1"])
+        ),
     }
     claimed = set(draw(st.lists(st.sampled_from(refs), unique=True))) if refs else set()
     registrations = {
@@ -737,9 +740,14 @@ def test_the_status_file_has_one_explained_row_per_overdue_pending_target(world,
         # A routed target no line names was passed over only if the loop
         # finished; otherwise the run may never have reached it.
         if ref not in said and run["logAvailable"] and ref in claimed:
-            assert row["code"] == (
-                "NO_REPORT" if run["loopCompleted"] else "NOT_REACHED"
-            )
+            # A receipt pin stop is the more specific reason: the run stopped
+            # before the loop, so it never reached any target.
+            if rs.stopped_on_receipt_pin(run):
+                assert row["code"] == "RECEIPT_PIN_STOP"
+            else:
+                assert row["code"] == (
+                    "NO_REPORT" if run["loopCompleted"] else "NOT_REACHED"
+                )
         assert row["code"] != "NOT_REACHED" or not run["loopCompleted"]
         # With no log at all nothing was reached or passed over; that comes
         # first, whatever routing claims (mutant S5 of the 10-16 review).
@@ -849,6 +857,47 @@ def test_a_target_with_no_line_naming_it_is_not_said_to_have_none_printed():
     ]
     assert row["code"] == "NO_REPORT"
     assert "printed no line naming this target" in row["reason"]
+
+
+# What resolve_pending prints, and nothing else about any target, when it
+# stops before capture on a receipt pin refusal (exit 4).
+RECEIPT_STOP_LOG = (
+    "RECEIPT PIN REFUSED: thesis locks receipt 0.6.1 but "
+    "PolicyEngine/chronicle@4b4395b07dcf (codex/thesis-ledger-facts) locks "
+    "receipt 0.6.2.\n"
+)
+
+
+def test_a_receipt_pin_stop_explains_every_routed_overdue_target():
+    routed, unrouted = "a.b.2026_07.first_print", "c.d.2026_07.first_print"
+    status = _status(
+        _log((routed, "s1", "2026-09-01"), (unrouted, "s2", "2026-09-01")),
+        text=RECEIPT_STOP_LOG,
+        claimed=[routed],
+    )
+    run = status["run"]
+    assert run["logAvailable"] and not run["completed"]
+    # _plain turns the colon into a space.
+    assert run["error"].startswith("RECEIPT PIN REFUSED  thesis locks receipt 0.6.1")
+    row = status["targets"][routed]
+    assert (row["state"], row["code"]) == ("deferred", "RECEIPT_PIN_STOP")
+    assert row["reason"] == rs.REASONS["RECEIPT_PIN_STOP"]
+    assert row["detail"] == run["error"]
+    # A reference the resolver has no route for is unaffected by the stop.
+    assert status["targets"][unrouted]["state"] == "no_route"
+
+
+def test_a_receipt_pin_line_inside_a_target_line_is_not_a_stop():
+    ref = "a.b.2026_07.first_print"
+    text = (
+        f"  not yet published: {ref} RECEIPT PIN REFUSED: x\n"
+        f"{rs._LOOP_COMPLETE} 1 reference(s) examined\n"
+        f"{rs._FINISHED} 0\n"
+    )
+    _targets, run = rs.parse_resolver_log(text)
+    assert run["completed"] and not run["error"]
+    row = _status(_log((ref, "s", "2026-09-01")), text=text, claimed=[ref])
+    assert row["targets"][ref]["code"] != "RECEIPT_PIN_STOP"
 
 
 def test_release_day_not_reached_says_only_that_the_run_came_first():

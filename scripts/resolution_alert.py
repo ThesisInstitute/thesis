@@ -15,7 +15,10 @@ issue; the other three runs added nothing to it.
 
 This keeps the red and the issue, and says which kind of red it is:
 "Resolution rows refused <date>" names each row that set exit 3 and the
-resolver's reason; "Resolution loop failed <date>" keeps its title, adds
+resolver's reason; "Resolution stopped on a receipt pin mismatch <date>"
+quotes why the resolver refused to run Chronicle's code before fetching
+anything (exit 4, docs/receipt-pin.md), which the workflow publishes and
+fails like exit 3; "Resolution loop failed <date>" keeps its title, adds
 the resolver's last error, and still names any exit-3 rows the resolver
 printed before the loop broke. The workflow comments on an open issue of the
 same title, so a second run on the same day is recorded too.
@@ -53,6 +56,11 @@ from resolution_status import _plain, parse_resolver_log  # noqa: E402
 
 REFUSED_TITLE = "Resolution rows refused"
 FAILED_TITLE = "Resolution loop failed"
+RECEIPT_TITLE = "Resolution stopped on a receipt pin mismatch"
+# resolve_pending.main prints a line starting with this and returns
+# EXIT_RECEIPT_PIN_REFUSED before any capture (scripts/chronicle_receipt_pin.py).
+_RECEIPT_PREFIX = "RECEIPT PIN REFUSED:"
+RECEIPT_DOC = "docs/receipt-pin.md"
 # The resolver lines whose rows make resolve_pending.main return
 # EXIT_REFUSED_ROWS, by the code resolution_status gives them.
 EXIT_REFUSED_CODES = frozenset(
@@ -149,11 +157,40 @@ def build_alert(
         raise ValueError(f"not an Actions run URL: {run_url!r}")
     targets, run = parse_resolver_log(log_text)
     rows = refused_rows(targets)
+    receipt = next(
+        (line for line in log_text.splitlines() if line.startswith(_RECEIPT_PREFIX)),
+        None,
+    )
+    receipt_reason = ""
+    if receipt is not None:
+        receipt_reason = f"`{_plain(receipt[len(_RECEIPT_PREFIX):], 800) or '(none)'}`"
     appended = None
     for line in log_text.splitlines():
         match = _APPENDED_RE.match(line)
         if match:
             appended = match
+    if refused_gate == "failure" and receipt is not None:
+        if needs_publish == "1":
+            head = "The resolve run published what was new"
+        else:
+            head = "The resolve run had nothing new to publish"
+        lines = [
+            f"{head}, then failed: it fetched no official figure, because it "
+            "would not run Chronicle's series-catalog generator under this "
+            f"runner's receipt: {run_url}",
+            "",
+            f"The resolver's reason: {receipt_reason}",
+            "",
+            "Every pending cell stays pending until the two agree. "
+            f"{RECEIPT_DOC} has the checklist; the receipt-pin-drift workflow "
+            "closes its own issue once thesis's and Chronicle's locks agree.",
+        ]
+        return {
+            "kind": "receipt_pin",
+            "title": f"{RECEIPT_TITLE} {date}",
+            "body": _bounded(lines),
+            "refused": [],
+        }
     if refused_gate == "failure":
         if needs_publish == "1":
             head = "The resolve run published what was new"
@@ -220,6 +257,12 @@ def build_alert(
         )
     else:
         lines.append("Read the run's log for the step that failed.")
+    if receipt is not None:
+        lines += [
+            "",
+            "Before that, the resolver stopped before any capture: "
+            f"{receipt_reason} ({RECEIPT_DOC})",
+        ]
     if rows:
         lines += ["", f"Before that, the resolver refused {len(rows)} row(s):"]
         lines += _row_lines(rows)
