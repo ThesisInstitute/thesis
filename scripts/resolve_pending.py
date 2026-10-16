@@ -13524,6 +13524,7 @@ def _collect_release_tree_files(
 # would split the folded lineages again, the generator would record revive
 # events for the absorbed identities, and _registry_growth_refusal would
 # refuse every append.
+_SERIES_UUID_REGISTRY = "ledger/series_uuid_registry.jsonl"
 CATALOG_REGENERATION_INPUTS = (
     "scripts/build_series_catalog.py",
     "scripts/check_thesis_facts_append.py",
@@ -13873,12 +13874,23 @@ def ledger_catalog_refusals(
     passes, is each row tried alone, and a row that fails alone is refused
     with the generator's reason. Rows that fail only together are not
     separated: the append then fails as before.
+
+    "Fails" also covers a generator that exits cleanly but grows the UUID
+    registry beyond the append's own first observations, the check
+    _regenerate_series_catalog applies to the real append. Without it one
+    such row raised there and held every other row hostage (2026-10-16: the
+    FY2026 USAspending CDFI snapshot retired a non-placeholder identity, and
+    run 38962977031 appended nothing and never reached the ledger pin).
     """
 
     if not rows:
         return {}
     tree = _fetch_repository_tree(repo, base_sha, path)
     lines = [json.dumps(row, separators=(",", ":")) for row in rows]
+    base_registry = tree.files.get(_SERIES_UUID_REGISTRY)
+
+    def row_ids(selected: list[str]) -> list[str]:
+        return [str(json.loads(line).get("source_record_id", "")) for line in selected]
 
     def failure(selected: list[str]) -> str | None:
         candidate = base_content.rstrip("\n") + "\n"
@@ -13899,8 +13911,21 @@ def ledger_catalog_refusals(
                 capture_output=True,
                 text=True,
             )
+            growth = None
+            if completed.returncode == 0 and base_registry is not None:
+                try:
+                    regenerated = (stage / _SERIES_UUID_REGISTRY).read_bytes()
+                except OSError:
+                    growth = "the generator removed the UUID registry"
+                else:
+                    if regenerated != base_registry:
+                        growth = _registry_growth_refusal(
+                            base_registry, regenerated, row_ids(selected)
+                        )
         if completed.returncode == 0:
-            return None
+            if growth is None:
+                return None
+            return f"series-catalog registry growth refused: {growth}"
         output = completed.stderr.strip() or completed.stdout.strip()
         detail = " ".join(
             line for line in output.splitlines() if not line.startswith("note:")
