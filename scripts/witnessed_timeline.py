@@ -8,7 +8,7 @@ import gzip
 import hashlib
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, Iterable
@@ -35,6 +35,26 @@ RUN_MANIFEST_SCHEMAS = {
 
 class TimelineError(ValueError):
     pass
+
+
+@dataclass
+class VerificationMemo:
+    """What one extract_timeline call has already verified.
+
+    Each recorder snapshot recommits every earlier custody root, so on
+    2026-10-16 the chain's 212 snapshots carried 84,652 root commitments of
+    only 591 runs, and verify_run re-verified each run once per commitment
+    (up to 208 times): about 50 minutes per call in CI, growing with the
+    square of the history. verify_run and registration validation are pure
+    functions of bytes on disk, which a single call does not see change,
+    so a run is verified once and a registration once per expectation. The
+    per-commitment checks (paths, root and manifest file digests and sizes,
+    root identity, inventory version) still run against every commitment.
+    A memo lives for one call only; nothing is cached across calls.
+    """
+
+    runs: dict[Path, Any] = field(default_factory=dict)
+    registrations: set[tuple[str, Any, Any, Any]] = field(default_factory=set)
 
 
 @dataclass(frozen=True)
@@ -146,7 +166,11 @@ def _validate_registration(
     raw_sha256: str | None = None,
     size: int | None = None,
     canonical_hash: str | None = None,
+    memo: VerificationMemo | None = None,
 ) -> None:
+    key = (logical, raw_sha256, size, canonical_hash)
+    if memo is not None and key in memo.registrations:
+        return
     _safe_logical(logical)
     path = physical_path(records, logical)
     if not path.is_file() or path.is_symlink():
@@ -173,6 +197,8 @@ def _validate_registration(
             pass
         if canonical_hash not in accepted:
             raise TimelineError(f"registration canonical SHA-256 mismatch: {logical}")
+    if memo is not None:
+        memo.registrations.add(key)
 
 
 def _registration_from_manifest(
@@ -180,6 +206,7 @@ def _registration_from_manifest(
     run_dir: Path,
     proof: ProofCandidate | None,
     registrations: dict[str, dict[str, str]],
+    memo: VerificationMemo | None = None,
 ) -> None:
     manifest = json.loads((run_dir / "manifest.json").read_bytes())
     context = manifest.get("targetContext")
@@ -191,7 +218,7 @@ def _registration_from_manifest(
         return
     if not isinstance(logical, str) or not isinstance(content_hash, str):
         raise TimelineError(f"incomplete target registration reference in {run_dir}")
-    _validate_registration(records, logical, canonical_hash=content_hash)
+    _validate_registration(records, logical, canonical_hash=content_hash, memo=memo)
     _put(registrations, logical, proof)
 
 
@@ -203,6 +230,7 @@ def _commit_root(
     runs: dict[str, dict[str, str]],
     roots: dict[str, dict[str, Any]],
     registrations: dict[str, dict[str, str]],
+    memo: VerificationMemo | None = None,
 ) -> None:
     run_logical = str(commitment.get("runDirectory", ""))
     root_logical = str(commitment.get("custodyRootPath", ""))
@@ -223,12 +251,16 @@ def _commit_root(
         "manifestSha256"
     ) or manifest_path.stat().st_size != commitment.get("manifestSize"):
         raise TimelineError(f"committed custody manifest mismatch: {manifest_logical}")
-    try:
-        verified = verify_run(run_dir)
-    except CustodyError as exc:
-        raise TimelineError(
-            f"covered custody root does not verify: {run_logical}: {exc}"
-        ) from exc
+    verified = memo.runs.get(run_dir) if memo is not None else None
+    if verified is None:
+        try:
+            verified = verify_run(run_dir)
+        except CustodyError as exc:
+            raise TimelineError(
+                f"covered custody root does not verify: {run_logical}: {exc}"
+            ) from exc
+        if memo is not None:
+            memo.runs[run_dir] = verified
     root_hash = str(commitment.get("custodyRootSha256", ""))
     if verified.custody_root_sha256 != root_hash:
         raise TimelineError(f"custody root identity mismatch: {run_logical}")
@@ -246,7 +278,9 @@ def _commit_root(
             }
         )
     _put(runs, run_logical, contents_proof)
-    _registration_from_manifest(records, run_dir, contents_proof, registrations)
+    _registration_from_manifest(
+        records, run_dir, contents_proof, registrations, memo=memo
+    )
 
 
 def _walk_objects(value: Any) -> Iterable[dict[str, Any]]:
@@ -419,6 +453,7 @@ def extract_timeline(records: Path) -> dict[str, Any]:
     roots: dict[str, dict[str, Any]] = {}
     registrations: dict[str, dict[str, str]] = {}
     genesis = json.loads((records / "CHAIN_GENESIS.json").read_bytes())
+    memo = VerificationMemo()
     for index, snapshot_path in enumerate(verification.ordered):
         digest = json.loads(snapshot_path.read_bytes())
         direct_proof = _winner(
@@ -455,6 +490,7 @@ def extract_timeline(records: Path) -> dict[str, Any]:
                 runs,
                 roots,
                 registrations,
+                memo=memo,
             )
         for commitment in registrations_committed:
             if not isinstance(commitment, dict):
@@ -466,6 +502,7 @@ def extract_timeline(records: Path) -> dict[str, Any]:
                 raw_sha256=commitment.get("sha256"),
                 size=commitment.get("size"),
                 canonical_hash=commitment.get("canonicalJsonSha256"),
+                memo=memo,
             )
             _put(registrations, logical, direct_proof)
 
@@ -520,6 +557,7 @@ def extract_timeline(records: Path) -> dict[str, Any]:
                         logical,
                         raw_sha256=entry.get("sha256"),
                         size=entry.get("size"),
+                        memo=memo,
                     )
                     _put(registrations, logical, container_proof)
 
@@ -532,6 +570,7 @@ def extract_timeline(records: Path) -> dict[str, Any]:
                 runs,
                 roots,
                 registrations,
+                memo=memo,
             )
     return {
         "schemaVersion": "thesis_witnessed_timeline_v1",
