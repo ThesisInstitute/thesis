@@ -143,6 +143,12 @@ DEFAULT_APPEND_GATE_TIMEOUT_MINUTES = 150.0
 APPEND_GATE_TIMEOUT_ENV = "LEDGER_APPEND_GATE_TIMEOUT_MINUTES"
 APPEND_GATE_MAX_POLL_SECONDS = 120.0
 APPEND_GATE_MAX_READ_FAILURES = 5
+# GitHub lists check runs 100 to a page. Ten pages is far beyond any
+# proposal seen so far; a listing longer than that is refused, not truncated.
+APPEND_GATE_CHECK_RUN_PAGE_SIZE = 100
+APPEND_GATE_MAX_CHECK_RUN_PAGES = 10
+# One `gh api` read may take at most this long, and never past the budget.
+APPEND_GATE_MAX_READ_SECONDS = 120.0
 # Both are required checks on the ledger branch, but the resolver's token is
 # a repository admin and enforce_admins is off: its merges have gone through
 # with checks that are required today failing (chronicle #240) or still
@@ -13289,18 +13295,28 @@ def ledger_state(repo: str, branch: str, path: str) -> tuple[str, str, str]:
     return base64.b64decode(payload["content"]).decode(), payload["sha"], repo_sha
 
 
-def _gh_api(*args: str, input_body: dict[str, Any] | None = None) -> str:
+def _gh_api(
+    *args: str,
+    input_body: dict[str, Any] | None = None,
+    timeout: float | None = None,
+) -> str:
     # Without `--input -` gh ignores stdin and sends an empty request body
     # (GitHub answers 422 "nil is not an object"); the flag precedes the
     # endpoint so callers' path arguments stay the trailing tokens.
     body_flags = ["--input", "-"] if input_body is not None else []
     command = ["gh", "api", *body_flags, *args]
-    completed = subprocess.run(
-        command,
-        input=json.dumps(input_body) if input_body is not None else None,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            input=json.dumps(input_body) if input_body is not None else None,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            f"gh api {' '.join(args)} timed out after {timeout:g} s"
+        ) from exc
     if completed.returncode != 0:
         raise RuntimeError(
             f"gh api {' '.join(args)} failed: {completed.stderr.strip()[:500]}"
@@ -14021,6 +14037,59 @@ def _validate_gate_timeout(value: float) -> float:
     return result
 
 
+class CheckRunsIncompleteError(RuntimeError):
+    """A check-run listing that cannot be shown to be the whole set."""
+
+
+def read_check_runs(
+    repo: str, commit_sha: str, *, read_timeout: float | None = None
+) -> list[dict]:
+    """Every check run on ``commit_sha``, or an error; never a partial list.
+
+    GitHub pages this listing. Reading page one alone would let a rejecting
+    run on page two go unseen while both gates' successes sat on page one,
+    and the resolver's admin token would then merge past it. So every page
+    is read, ``total_count`` must be the same integer on each, and the runs
+    must add up to it. Anything else raises CheckRunsIncompleteError, which
+    await_append_gates treats as a failed read and retries; an incomplete
+    listing is never classified.
+    """
+
+    runs: list[dict] = []
+    total: int | None = None
+    for page in range(1, APPEND_GATE_MAX_CHECK_RUN_PAGES + 1):
+        payload = json.loads(
+            _gh_api(
+                f"repos/{repo}/commits/{commit_sha}/check-runs"
+                f"?per_page={APPEND_GATE_CHECK_RUN_PAGE_SIZE}&page={page}",
+                timeout=read_timeout,
+            )
+        )
+        page_runs = payload.get("check_runs") if type(payload) is dict else None
+        page_total = payload.get("total_count") if type(payload) is dict else None
+        if type(page_runs) is not list or type(page_total) is not int:
+            raise CheckRunsIncompleteError(
+                f"check-runs page {page} lacks a list or an integer total_count"
+            )
+        if total is None:
+            total = page_total
+        elif page_total != total:
+            # Runs were added between pages; positions shifted, so a run can
+            # have been skipped. Read the whole listing again.
+            raise CheckRunsIncompleteError(
+                f"check-run total_count moved from {total} to {page_total} "
+                "between pages"
+            )
+        runs.extend(page_runs)
+        if len(runs) >= total or len(page_runs) < APPEND_GATE_CHECK_RUN_PAGE_SIZE:
+            break
+    if total is None or len(runs) != total:
+        raise CheckRunsIncompleteError(
+            f"check-run listing returned {len(runs)} of {total} runs"
+        )
+    return runs
+
+
 def await_append_gates(
     repo: str,
     commit_sha: str,
@@ -14053,17 +14122,15 @@ def await_append_gates(
     last_seen: dict[str, list[dict]] = {gate: [] for gate in gates}
     while True:
         attempts += 1
+        # A hung read must not outlive the budget the caller gave us.
+        read_timeout = min(APPEND_GATE_MAX_READ_SECONDS, max(1.0, deadline - clock()))
         try:
-            payload = json.loads(
-                _gh_api(f"repos/{repo}/commits/{commit_sha}/check-runs?per_page=100")
-            )
-            runs = payload.get("check_runs") if type(payload) is dict else None
-            if type(runs) is not list:
-                raise LedgerProposalError("GitHub check-runs response has no list")
+            runs = read_check_runs(repo, commit_sha, read_timeout=read_timeout)
         except (RuntimeError, json.JSONDecodeError) as exc:
             # Reading check runs has no side effects, so a transient API
-            # error (5xx, secondary rate limit) retries inside the budget
-            # rather than closing a proposal whose gate may be about to pass.
+            # error (5xx, secondary rate limit, a timeout, a listing that
+            # moved between pages) retries inside the budget rather than
+            # closing a proposal whose gate may be about to pass.
             read_failures += 1
             last_read_error = exc
             if read_failures >= APPEND_GATE_MAX_READ_FAILURES:
@@ -14090,6 +14157,9 @@ def await_append_gates(
                     + "; refusing to merge"
                 )
             if all(states[gate] == "passed" for gate in gates):
+                # The budget bounds how long to wait, not which verdicts
+                # count: both gates passed on this exact head, so a pass
+                # read just after the deadline still stands.
                 return
         now = clock()
         if now >= deadline or (poll_attempts is not None and attempts >= poll_attempts):
