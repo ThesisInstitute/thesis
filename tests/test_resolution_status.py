@@ -740,9 +740,14 @@ def test_the_status_file_has_one_explained_row_per_overdue_pending_target(world,
         # A routed target no line names was passed over only if the loop
         # finished; otherwise the run may never have reached it.
         if ref not in said and run["logAvailable"] and ref in claimed:
-            assert row["code"] == (
-                "NO_REPORT" if run["loopCompleted"] else "NOT_REACHED"
-            )
+            # A receipt pin stop is the more specific reason: the run stopped
+            # before the loop, so it never reached any target.
+            if rs.stopped_on_receipt_pin(run):
+                assert row["code"] == "RECEIPT_PIN_STOP"
+            else:
+                assert row["code"] == (
+                    "NO_REPORT" if run["loopCompleted"] else "NOT_REACHED"
+                )
         assert row["code"] != "NOT_REACHED" or not run["loopCompleted"]
         # With no log at all nothing was reached or passed over; that comes
         # first, whatever routing claims (mutant S5 of the 10-16 review).
@@ -884,7 +889,11 @@ def test_a_receipt_pin_stop_explains_every_routed_overdue_target():
 
 def test_a_receipt_pin_line_inside_a_target_line_is_not_a_stop():
     ref = "a.b.2026_07.first_print"
-    text = f"  not yet published: {ref} RECEIPT PIN REFUSED: x\n"
+    text = (
+        f"  not yet published: {ref} RECEIPT PIN REFUSED: x\n"
+        f"{rs._LOOP_COMPLETE} 1 reference(s) examined\n"
+        f"{rs._FINISHED} 0\n"
+    )
     _targets, run = rs.parse_resolver_log(text)
     assert run["completed"] and not run["error"]
     row = _status(_log((ref, "s", "2026-09-01")), text=text, claimed=[ref])
