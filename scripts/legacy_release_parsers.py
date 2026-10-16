@@ -1,11 +1,12 @@
 """Fail-closed parsers for the reviewed legacy BLS release contracts.
 
-The cells below are pinned from the questions, not inferred from a series id.
-Historical layout reference (never the target releases): BLS's archived
-cpi_08122026.htm, empsit_08072026.htm and jolts_08042026.htm. Raw Archive
-fixtures were unavailable during implementation; tests label their synthetic
-HTML honestly. In particular A-41's markup still needs a safe historical
-capture check before this held change is admitted.
+Each cell is pinned from its forecast's own question (QUESTIONS below,
+quoted from site/src/data/forecast-examples and tied to it by a test), not
+inferred from a series id. Layout reference (never a target release): BLS's
+archived cpi_08122026.htm, empsit_08072026.htm and jolts_08042026.htm, and
+the real June 2026 CPI capture in tests/fixtures/release_capture/. The
+Employment Situation and JOLTS parsers are tested on synthetic layouts only
+until verified non-target captures of those pages are added.
 
 These parsers return the number printed by the page. Registered transforms
 (including JOLTS thousands to millions) belong to the caller.
@@ -19,33 +20,121 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from html.parser import HTMLParser
 
-QUESTION_TEXT = {
+# The forecast question each reviewed reference answers, verbatim, and the
+# parser that reads the one cell it names (dataPointId -> (parser, question)).
+QUESTIONS: dict[str, tuple[str, str]] = {
+    "bls.ces.total_nonfarm.payroll_employment.change.sa.2026-08.first_print": (
+        "empsit_payroll_change",
+        (
+            "What will the U.S. Bureau of Labor Statistics report as the "
+            "first-print seasonally adjusted month-over-month change in total "
+            "nonfarm payroll employment for August 2026, in thousands?"
+        ),
+    ),
+    "bls.ces.total_nonfarm.payroll_employment.change.sa.2026-09.first_print": (
+        "empsit_payroll_change",
+        (
+            "What will the BLS first-print seasonally adjusted change in total "
+            "nonfarm payroll employment be for September 2026?"
+        ),
+    ),
+    "bls.cpi.u.core_mom.august_2026.first_print": (
+        "cpi_core_mom",
+        (
+            "What will the BLS first print report for seasonally adjusted CPI-U "
+            "all items less food and energy month-over-month percent change in "
+            "August 2026?"
+        ),
+    ),
+    "bls.cpi.u.core_mom.september_2026.first_print": (
+        "cpi_core_mom",
+        (
+            "What will the U.S. Bureau of Labor Statistics report as the "
+            "September 2026 seasonally adjusted 1-month percent change in CPI-U "
+            "all items less food and energy in the first CPI news release?"
+        ),
+    ),
+    "bls.cpi.u.headline_mom.august_2026.first_print": (
+        "cpi_headline_mom",
+        (
+            "What will the BLS first print for the seasonally adjusted "
+            "month-over-month percent change in U.S. CPI-U all items, U.S. city "
+            "average, for August 2026?"
+        ),
+    ),
+    "bls.cpi.u.headline_mom.september_2026.first_print": (
+        "cpi_headline_mom",
+        (
+            "What will the U.S. Bureau of Labor Statistics first print report "
+            "for CPI-U all items, U.S. city average, seasonally adjusted "
+            "month-over-month percent change for September 2026?"
+        ),
+    ),
+    "bls.cps.unemployment_rate.august_2026.first_print": (
+        "empsit_unemployment_rate",
+        (
+            "What will the BLS Current Population Survey U-3 unemployment rate, "
+            "seasonally adjusted, be for August 2026 in the first Employment "
+            "Situation print?"
+        ),
+    ),
+    "bls.cps.unemployment_rate.september_2026.first_print": (
+        "empsit_unemployment_rate",
+        (
+            "What will the U.S. Bureau of Labor Statistics report as the "
+            "seasonally adjusted civilian unemployment rate for September 2026 "
+            "in the Current Population Survey, first print?"
+        ),
+    ),
+    "bls.jolts.job_openings.august_2026.first_print": (
+        "jolts_job_openings",
+        (
+            "What will the U.S. Bureau of Labor Statistics first report for "
+            "seasonally adjusted total nonfarm job openings in the Job Openings "
+            "and Labor Turnover Survey for August 2026, in millions?"
+        ),
+    ),
+    "bls.jolts.job_openings.july_2026.first_print": (
+        "jolts_job_openings",
+        (
+            "What will BLS first report for total nonfarm job openings, "
+            "seasonally adjusted, in the July 2026 Job Openings and Labor "
+            "Turnover Survey release?"
+        ),
+    ),
+    "bls.jolts.quits_rate.2026-07.first_print": (
+        "jolts_quits_rate",
+        (
+            "BLS Job Openings and Labor Turnover Survey Table 4 total quits "
+            "rate, seasonally adjusted, July 2026, first print"
+        ),
+    ),
+    "bls.jolts.quits_rate.2026-08.first_print": (
+        "jolts_quits_rate",
+        (
+            "What will the U.S. Bureau of Labor Statistics JOLTS Table 4 "
+            "seasonally adjusted Total nonfarm quits rate be for August 2026 in "
+            "the first print?"
+        ),
+    ),
+}
+
+# A distinct, human-readable label per parser for the facts it produces.
+LABELS = {
     "cpi_headline_mom": (
-        "What will the BLS first print for the seasonally adjusted month-over-month "
-        "percent change in U.S. CPI-U all items, U.S. city average, for August 2026?"
+        "US CPI-U all items, seasonally adjusted, 1-month percent change"
     ),
     "cpi_core_mom": (
-        "What will the BLS first print report for seasonally adjusted CPI-U all "
-        "items less food and energy month-over-month percent change in August 2026?"
+        "US CPI-U all items less food and energy, "
+        "seasonally adjusted, 1-month percent change"
     ),
-    "empsit_unemployment_rate": (
-        "What will the BLS Current Population Survey U-3 unemployment rate, "
-        "seasonally adjusted, be for August 2026 in the first Employment "
-        "Situation print?"
-    ),
+    "empsit_unemployment_rate": "US unemployment rate (CPS), seasonally adjusted",
     "empsit_payroll_change": (
-        "What will the U.S. Bureau of Labor Statistics report as the first-print "
-        "seasonally adjusted month-over-month change in total nonfarm payroll "
-        "employment for August 2026, in thousands?"
+        "US total nonfarm payroll employment (CES), "
+        "seasonally adjusted, over-the-month change"
     ),
-    "jolts_job_openings": (
-        "What will BLS first report for total nonfarm job openings, seasonally "
-        "adjusted, in the July 2026 Job Openings and Labor Turnover Survey release?"
-    ),
-    "jolts_quits_rate": (
-        "BLS Job Openings and Labor Turnover Survey Table 4 total quits rate, "
-        "seasonally adjusted, July 2026, first print"
-    ),
+    "jolts_job_openings": "US total nonfarm job openings (JOLTS), seasonally adjusted",
+    "jolts_quits_rate": "US total nonfarm quits rate (JOLTS), seasonally adjusted",
 }
 
 _MONTHS = {
@@ -234,7 +323,7 @@ _EMPSIT = r"Employment Situation (?:Summary|News Release)"
 _JOLTS = r"Job Openings and Labor Turnover (?:Summary|Survey News Release)"
 _QUITS = r"Table 4\. Quits levels and rates by industry and region, seasonally adjusted"
 SPECS = {
-    # QUESTION_TEXT['cpi_headline_mom'/'cpi_core_mom']: Table A, the named row,
+    # CPI questions: Table A, the named row,
     # SA changes from preceding month, latest displayed month (not 12-month NSA).
     "cpi_headline_mom": _Spec(
         _CPI,
@@ -252,7 +341,7 @@ SPECS = {
         group="Seasonally adjusted changes from preceding month",
         table_id="cpi_pressa",
     ),
-    # QUESTION_TEXT['empsit_unemployment_rate']: Summary A, Employment status /
+    # empsit_unemployment_rate questions: Summary A, Employment status /
     # Unemployment rate, latest month. The adjacent change column is excluded.
     "empsit_unemployment_rate": _Spec(
         _EMPSIT,
@@ -261,7 +350,7 @@ SPECS = {
         "Unemployment rate",
         section="Employment status",
     ),
-    # QUESTION_TEXT['empsit_payroll_change']: Summary B, Total nonfarm in the
+    # empsit_payroll_change questions: Summary B, Total nonfarm in the
     # Over-the-month change (thousands) section; never the 3-month average.
     "empsit_payroll_change": _Spec(
         _EMPSIT,
@@ -270,7 +359,7 @@ SPECS = {
         section="EMPLOYMENT BY SELECTED INDUSTRY (Over-the-month change, in thousands)",
         preliminary=True,
     ),
-    # QUESTION_TEXT['jolts_job_openings']: Summary Table A on jolts.nr0.htm,
+    # jolts_job_openings questions: Summary Table A on jolts.nr0.htm,
     # LEVELS BY INDUSTRY (in thousands) / Total / Job openings / latest month.
     # The same table's RATES BY INDUSTRY Total row is a different measure.
     # Caller applies the registered 0.001 factor exactly once.
@@ -283,7 +372,7 @@ SPECS = {
         section="LEVELS BY INDUSTRY (in thousands)",
         preliminary=True,
     ),
-    # QUESTION_TEXT['jolts_quits_rate']: Table 4 Total, Rates (not levels), latest
+    # jolts_quits_rate questions: Table 4 Total, Rates (not levels), latest
     # month, not the change-from column. (2) is this header's known note.
     "jolts_quits_rate": _Spec(
         rf"(?:{_JOLTS}|{_QUITS})",

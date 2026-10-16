@@ -87,7 +87,7 @@ def test_each_of_twelve_refs_reaches_capture_leg(monkeypatch, capsys, content_ha
         assert kwargs["request_capture"] is False
         assert kwargs["require_digest"] is True
         assert kwargs["source_url"] == binding["sourceUrl"]
-        assert kwargs["parser"]("synthetic") == (period, 1234.0)
+        assert kwargs["parser"]("synthetic") == (period, 5004.0)
         return rp.A19Discovery(
             f"https://web.archive.org/web/{stamp}/{binding['sourceUrl']}",
             raw,
@@ -96,7 +96,9 @@ def test_each_of_twelve_refs_reaches_capture_leg(monkeypatch, capsys, content_ha
         )
 
     monkeypatch.setattr(rp, "a19_registered_capture", discover)
-    monkeypatch.setattr(rp, "parse_release", lambda html, parser_id: (period, 1234.0))
+    # 5004 is a level float multiplication gets wrong (5.0040000000000004);
+    # the leg converts with Decimal, so JOLTS thousands become exactly 5.004.
+    monkeypatch.setattr(rp, "parse_release", lambda html, parser_id: (period, 5004.0))
     facts = []
     fact_builder = rp.legacy_release_capture_fact
 
@@ -112,7 +114,7 @@ def test_each_of_twelve_refs_reaches_capture_leg(monkeypatch, capsys, content_ha
     assert "dry-run: would append 1 row(s)" in output
     assert len(calls) == len(facts) == 1
     fact = facts[0]
-    expected = 1.234 if binding["transform"]["factor"] == 0.001 else 1234.0
+    expected = 5.004 if binding["transform"]["factor"] == 0.001 else 5004.0
     assert fact["value"] == expected
     assert fact["source"]["url"] == binding["sourceUrl"]
     assert fact["measure"]["concept"] == contract["series"]
@@ -243,3 +245,113 @@ def test_capture_provenance_binds_publisher_host_and_verified_stored_digest(
     assert enriched["sourceVintage"] == "2026-09-09"
     assert enriched["responseArchive"]["path"].endswith(".html.gz")
     assert enriched["targetContentHash"] == content_hash
+
+
+def _by_ref() -> dict[str, str]:
+    return {entry["contract"]["dataPointId"]: h for h, entry in CAPTURE.items()}
+
+
+def test_a_cross_wired_registration_is_refused_by_its_routed_reference():
+    """An August reference carrying the September registration of the same
+    series: every contract key matches the September entry, so only the
+    routed-reference check stands between it and the wrong window."""
+    by_ref = _by_ref()
+    aug = "bls.cpi.u.headline_mom.august_2026.first_print"
+    sep_hash = by_ref["bls.cpi.u.headline_mom.september_2026.first_print"]
+    refusal = rp.legacy_release_refusal(aug, registration(sep_hash), sep_hash)
+    assert refusal == "dataPointId (routed reference)"
+    assert (
+        rp.legacy_release_refusal(
+            "bls.cpi.u.headline_mom.september_2026.first_print",
+            registration(sep_hash),
+            sep_hash,
+        )
+        is None
+    )
+
+
+def test_the_committed_registrations_route_each_reference_by_its_listed_hash():
+    contracts = rp.registration_contracts()
+    for content_hash, entry in REVIEWED.items():
+        ref = entry["contract"]["dataPointId"]
+        assert contracts[ref]["targetContentHash"] == content_hash, ref
+
+
+def _fact_inputs(stamp: str, digest: str | None):
+    content_hash = next(iter(CAPTURE))
+    contract = CAPTURE[content_hash]["contract"]
+    _kind, spec = rp.legacy_release_spec(content_hash)
+    raw = b"synthetic decoded HTML; no official outcome"
+    url = (
+        f"https://web.archive.org/web/{stamp}/{contract['sourceBinding']['sourceUrl']}"
+    )
+    discovery = rp.A19Discovery(url, raw, "", digest=digest)
+    return contract, spec, discovery, raw
+
+
+@pytest.mark.parametrize("edge", ["before", "after"])
+def test_the_fact_refuses_a_capture_outside_its_registered_window(edge):
+    content_hash = next(iter(CAPTURE))
+    window = CAPTURE[content_hash]["contract"]["sourceBinding"]["expectedReleaseWindow"]
+    day = dt.date.fromisoformat(window["start" if edge == "before" else "end"])
+    day += dt.timedelta(days=-1 if edge == "before" else 1)
+    contract, spec, discovery, _raw = _fact_inputs(
+        f"{day:%Y%m%d}120000", rp.a19_digest(b"x")
+    )
+    with pytest.raises(ValueError, match="outside its registered window"):
+        rp.legacy_release_capture_fact(
+            contract["dataPointId"], spec, contract["period"], 1.0, discovery
+        )
+
+
+def test_the_fact_refuses_a_capture_without_a_verified_digest():
+    content_hash = next(iter(CAPTURE))
+    window = CAPTURE[content_hash]["contract"]["sourceBinding"]["expectedReleaseWindow"]
+    stamp = window["start"].replace("-", "") + "120000"
+    contract, spec, discovery, _raw = _fact_inputs(stamp, None)
+    with pytest.raises(ValueError, match="lacks a verified index digest"):
+        rp.legacy_release_capture_fact(
+            contract["dataPointId"], spec, contract["period"], 1.0, discovery
+        )
+
+
+def test_a_fact_guard_refuses_one_cell_and_the_run_goes_on(monkeypatch, capsys):
+    content_hash = next(iter(CAPTURE))
+    reg = registration(content_hash)
+    install_main(monkeypatch, reg)
+    contract = reg["contract"]
+    binding = contract["sourceBinding"]
+    raw = b"synthetic local test response; no official outcome"
+    outside = dt.date.fromisoformat(binding["expectedReleaseWindow"]["start"])
+    outside -= dt.timedelta(days=1)
+
+    def discover(_period, _window, _today, _read, **_kwargs):
+        return rp.A19Discovery(
+            f"https://web.archive.org/web/{outside:%Y%m%d}120000/"
+            f"{binding['sourceUrl']}",
+            raw,
+            "",
+            digest=rp.a19_digest(raw),
+        )
+
+    monkeypatch.setattr(rp, "a19_registered_capture", discover)
+    monkeypatch.setattr(
+        rp, "parse_release", lambda html, parser_id: (contract["period"], 5004.0)
+    )
+    assert rp.main() == 0
+    output = capsys.readouterr().out
+    assert "LEGACY RELEASE CAPTURE REFUSED (refusing)" in output
+    assert "outside its registered window" in output
+    assert "would append" not in output
+    assert "nothing new to record" in output
+
+
+def test_each_parser_gives_its_facts_a_distinct_label():
+    labels = {}
+    for content_hash, entry in CAPTURE.items():
+        _kind, spec = rp.legacy_release_spec(content_hash)
+        labels.setdefault(entry["parser"], set()).add(spec["label"])
+    assert all(len(found) == 1 for found in labels.values())
+    flat = [next(iter(found)) for found in labels.values()]
+    assert len(set(flat)) == len(flat)
+    assert not any(label == "Official agency release" for label in flat)

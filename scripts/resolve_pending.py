@@ -96,6 +96,7 @@ from legacy_release_contracts import (
     LEGACY_RELEASE_CAPTURE_CONTRACTS,
     legacy_release_contract_mismatches,
 )
+from legacy_release_parsers import LABELS as LEGACY_RELEASE_LABELS
 from legacy_release_parsers import parse_release
 from pin_ledger import PinError, _validate_catalog_binding
 from register_targets import (
@@ -12487,7 +12488,7 @@ def legacy_release_spec(content_hash: str) -> tuple[str, dict[str, Any]] | None:
             "legacy_release_hash": content_hash,
             "parser": parser_id,
             "unit": contract["unit"],
-            "label": binding["table"],
+            "label": LEGACY_RELEASE_LABELS[parser_id],
             "source_name": "bls_" + parser_id.split("_")[0],
             "source_table": binding["table"],
             "source_concept": binding["field"],
@@ -17109,7 +17110,13 @@ def main() -> int:
             assert qcew_row is not None
             row = qcew_row
         elif kind == "legacy_release_capture":
-            row = legacy_release_capture_fact(ref, spec, period, value, discovery)
+            # Discovery already holds these; a failure here refuses this one
+            # cell and never takes the rest of the run down with it.
+            try:
+                row = legacy_release_capture_fact(ref, spec, period, value, discovery)
+            except ValueError as exc:
+                print(f"  LEGACY RELEASE CAPTURE REFUSED (refusing): {ref} — {exc}")
+                continue
         elif kind == "a19":
             row = a19_fact(
                 ref,
