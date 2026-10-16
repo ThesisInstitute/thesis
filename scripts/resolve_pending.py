@@ -91,6 +91,12 @@ from ledger_release_chain import (
     verify_producer_signature_bytes,
     verify_release_chain,
 )
+from legacy_release_contracts import (
+    LEGACY_RELEASE_ALFRED_CONTRACTS,
+    LEGACY_RELEASE_CAPTURE_CONTRACTS,
+    legacy_release_contract_mismatches,
+)
+from legacy_release_parsers import parse_release
 from pin_ledger import PinError, _validate_catalog_binding
 from register_targets import (
     LEGACY_BOUNDED_CONDITIONAL_IDS,
@@ -8098,15 +8104,17 @@ class A19Row:
     """The index's content digest, or None when it is not of the observed form."""
     original: str = A19_SOURCE_URL
     """The URL the Archive stored it under."""
+    source_url: str = A19_SOURCE_URL
+    """The publisher URL this index was queried for (A-19 by default)."""
 
     @property
     def exact(self) -> bool:
         """Stored under exactly the bound URL, so a capture this resolver reads."""
-        return self.original == A19_SOURCE_URL
+        return self.original == self.source_url
 
     @property
     def url(self) -> str:
-        return f"https://web.archive.org/web/{self.stamp}/{A19_SOURCE_URL}"
+        return f"https://web.archive.org/web/{self.stamp}/{self.source_url}"
 
 
 @dataclass
@@ -8183,8 +8191,10 @@ def a19_read_capture(
     capture_url: str,
     read: Callable[[str], tuple[bytes, str]] = _wayback_read,
     digest: str | None = None,
+    *,
+    source_url: str = A19_SOURCE_URL,
 ) -> bytes:
-    """BLS's own bytes for exactly one capture of the A-19 page.
+    """The publisher's own bytes for exactly one capture of ``source_url``.
 
     With ``digest`` (the index's digest for the row), the stored bytes must
     hash to it, so what is read is exactly what the index lists: a truncated,
@@ -8201,14 +8211,14 @@ def a19_read_capture(
     """
 
     capture = a19_capture(capture_url)
-    if capture is None or capture[1] != A19_SOURCE_URL:
-        raise A19CaptureError(f"not a capture of {A19_SOURCE_URL}: {capture_url}")
+    if capture is None or capture[1] != source_url:
+        raise A19CaptureError(f"not a capture of {source_url}: {capture_url}")
     stamp = f"{capture[0]:%Y%m%d%H%M%S}"
-    raw, final_url = read(f"https://web.archive.org/web/{stamp}id_/{A19_SOURCE_URL}")
+    raw, final_url = read(f"https://web.archive.org/web/{stamp}id_/{source_url}")
     served = re.fullmatch(
         r"https?://web\.archive\.org/web/(\d{14})id_/(https://.+)", final_url
     )
-    if not served or served.groups() != (stamp, A19_SOURCE_URL):
+    if not served or served.groups() != (stamp, source_url):
         raise A19CaptureError(
             f"asked the Archive for capture {stamp} and was served {final_url}"
         )
@@ -8227,8 +8237,10 @@ def a19_read_capture(
 def a19_window_captures(
     window: Mapping[str, Any],
     read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+    *,
+    source_url: str = A19_SOURCE_URL,
 ) -> A19Index:
-    """Internet Archive captures of the A-19 page dated inside ``window``.
+    """Internet Archive captures of ``source_url`` dated inside ``window``.
 
     The Archive's own index supplies the timestamps, so a registered target
     needs no per-period hand pin. A body that is not the index's requested
@@ -8239,7 +8251,7 @@ def a19_window_captures(
     end = dt.date.fromisoformat(str(window["end"]))
     body, _ = read(
         WAYBACK_CDX_URL.format(
-            url=urllib.parse.quote(A19_SOURCE_URL, safe=""),
+            url=urllib.parse.quote(source_url, safe=""),
             start=f"{start:%Y%m%d}000000",
             end=f"{end:%Y%m%d}235959",
         )
@@ -8291,18 +8303,18 @@ def a19_window_captures(
     result = A19Index(rows=[], listed=0, other_status=0, other_form=0)
     for (stamp, original), (status, listed_digest) in sorted(rows.items()):
         digest = listed_digest if _A19_DIGEST.fullmatch(listed_digest) else None
-        capture = a19_capture(f"https://web.archive.org/web/{stamp}/{A19_SOURCE_URL}")
+        capture = a19_capture(f"https://web.archive.org/web/{stamp}/{source_url}")
         if capture is None:
             raise ValueError(f"impossible Archive index timestamp {stamp!r}")
         if not start <= capture[0].date() <= end:
             continue
         result.listed += 1
-        if original != A19_SOURCE_URL:
+        if original != source_url:
             result.other_form += 1
         elif status not in ("200", "-"):
             result.other_status += 1
         if status in ("200", "-"):
-            result.rows.append(A19Row(stamp, status, digest, original))
+            result.rows.append(A19Row(stamp, status, digest, original, source_url))
     return result
 
 
@@ -8327,6 +8339,9 @@ class A19Discovery:
     verified at its own timestamp, or it is stored under another form of the
     URL."""
 
+    digest: str | None = None
+    """The verified stored-byte digest, before any gzip decompression."""
+
     def __iter__(self) -> Iterator[Any]:
         return iter((self.url, self.raw, self.verdict))
 
@@ -8338,8 +8353,17 @@ def a19_registered_capture(
     read: Callable[[str], tuple[bytes, str]] = _wayback_read,
     *,
     request_capture: bool = True,
+    source_url: str = A19_SOURCE_URL,
+    parser: Callable[[str], tuple[str, Any] | None] = a19_table,
+    parser_name: str = "Table A-19",
+    require_digest: bool = False,
 ) -> A19Discovery:
-    """The capture a registered A-19 target resolves from, or why not yet.
+    """The capture a registered target resolves from, or why not yet.
+
+    Defaults preserve the A-19 discovery contract and its verdicts. Other
+    reviewed legacy pages supply their own exact source URL and parser.
+    ``require_digest`` refuses an unverifiable candidate before reading it;
+    A-19's existing unknown-digest behavior remains the default.
 
     Takes the EARLIEST row dated inside the registered window that prints
     ``period``, walking the index in order. The index's digest is the SHA-1
@@ -8378,7 +8402,7 @@ def a19_registered_capture(
             None, None, f"release window opens {window['start']} (deferring)"
         )
     try:
-        index = a19_window_captures(window, read)
+        index = a19_window_captures(window, read, source_url=source_url)
     except (*_WAYBACK_READ_ERRORS, ValueError) as exc:
         return A19Discovery(
             None,
@@ -8392,8 +8416,8 @@ def a19_registered_capture(
     # What each read capture printed, by stamp, and by digest once the
     # digest's read captures agree; raw bytes by stamp; why each unread row
     # is unread.
-    table_by_stamp: dict[str, tuple[str, dict[str, float]]] = {}
-    table_by_digest: dict[str, tuple[tuple[str, dict[str, float]], str]] = {}
+    table_by_stamp: dict[str, tuple[str, Any]] = {}
+    table_by_digest: dict[str, tuple[tuple[str, Any], str]] = {}
     raw_by_stamp: dict[str, bytes] = {}
     unread: dict[str, str] = {
         row.stamp: "which is stored under another form of the URL and not read"
@@ -8418,14 +8442,17 @@ def a19_registered_capture(
             if month != period:
                 continue
             if row.exact and row.stamp in raw_by_stamp:
-                return A19Discovery(row.url, raw_by_stamp[row.stamp], "")
+                return A19Discovery(
+                    row.url, raw_by_stamp[row.stamp], "", digest=row.digest
+                )
             source = table_by_digest[row.digest][1]
             return A19Discovery(
-                f"https://web.archive.org/web/{source}/{A19_SOURCE_URL}",
+                f"https://web.archive.org/web/{source}/{source_url}",
                 raw_by_stamp[source],
                 "",
                 witness=row.stamp,
                 witness_reason=unread[row.stamp],
+                digest=row.digest,
             )
         return None
 
@@ -8444,8 +8471,21 @@ def a19_registered_capture(
             capped = True
             break
         reads += 1
+        if require_digest and row.digest is None:
+            if row.status != "200":
+                unread[row.stamp] = "which has no verifiable index digest"
+                continue
+            return A19Discovery(
+                None,
+                None,
+                (
+                    f"CAPTURE READ FAILED (deferring): {row.url} has no "
+                    "verifiable index digest, and an unread earlier capture "
+                    "cannot be skipped"
+                ),
+            )
         try:
-            raw = a19_read_capture(row.url, read, row.digest)
+            raw = a19_read_capture(row.url, read, row.digest, source_url=source_url)
         except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
             if row.status != "200":
                 unread[row.stamp] = (
@@ -8461,7 +8501,7 @@ def a19_registered_capture(
                     "earlier capture cannot be skipped"
                 ),
             )
-        table = a19_table(raw.decode(errors="replace"))
+        table = parser(raw.decode(errors="replace"))
         if table is None:
             # Not "a different month": an error page, a changed layout or an
             # empty body says nothing about what the page printed.
@@ -8476,7 +8516,7 @@ def a19_registered_capture(
                 None,
                 (
                     f"CAPTURE UNIDENTIFIED (deferring): {row.url} does not parse as "
-                    "Table A-19, and an unidentified earlier capture cannot be "
+                    f"{parser_name}, and an unidentified earlier capture cannot be "
                     "skipped"
                 ),
             )
@@ -8583,7 +8623,7 @@ def a19_registered_capture(
     # a19_read_capture. So a failed request still counts as this run's one
     # request, and the verdict does not say the capture failed.
     try:
-        read(WAYBACK_SAVE_URL.format(url=A19_SOURCE_URL))
+        read(WAYBACK_SAVE_URL.format(url=source_url))
         requested = A19_CAPTURE_REQUESTED
     except _WAYBACK_READ_ERRORS as exc:
         requested = (
@@ -12430,6 +12470,130 @@ def pending_claims_refs(log: dict) -> list[tuple[str, str, str, str]]:
     return out
 
 
+def legacy_release_spec(content_hash: str) -> tuple[str, dict[str, Any]] | None:
+    """Route a reviewed hash without widening any series-stem executor.
+
+    These twelve Archive dispositions are held for founder ruling d1633.
+    Nothing here admits a new registration; generic-url is still refused by
+    execution_plan_refusal. The full immutable contract is checked separately
+    before the main loop makes any request.
+    """
+    entry = LEGACY_RELEASE_CAPTURE_CONTRACTS.get(content_hash)
+    if entry is not None:
+        contract = entry["contract"]
+        binding = contract["sourceBinding"]
+        parser_id = entry["parser"]
+        return "legacy_release_capture", {
+            "legacy_release_hash": content_hash,
+            "parser": parser_id,
+            "unit": contract["unit"],
+            "label": binding["table"],
+            "source_name": "bls_" + parser_id.split("_")[0],
+            "source_table": binding["table"],
+            "source_concept": binding["field"],
+            "concept_authority": "bls",
+            "target_series": contract["series"],
+        }
+    entry = LEGACY_RELEASE_ALFRED_CONTRACTS.get(content_hash)
+    if entry is not None:
+        return "alfred", {
+            **ALFRED_ADAPTERS[entry["stem"]],
+            "legacy_release_hash": content_hash,
+            "target_series": entry["contract"]["series"],
+        }
+    return None
+
+
+def legacy_release_refusal(
+    ref: str, registration: Mapping[str, Any] | None, content_hash: str
+) -> str | None:
+    """Authenticate every key before a reviewed legacy route can execute."""
+    entry = LEGACY_RELEASE_CAPTURE_CONTRACTS.get(
+        content_hash
+    ) or LEGACY_RELEASE_ALFRED_CONTRACTS.get(content_hash)
+    if entry is None:
+        return "targetContentHash"
+    differences = legacy_release_contract_mismatches(registration or {}, entry)
+    if ref != entry["contract"]["dataPointId"]:
+        differences.append("dataPointId (routed reference)")
+    return ", ".join(differences) if differences else None
+
+
+def legacy_release_capture_fact(
+    ref: str,
+    spec: dict[str, Any],
+    period: str,
+    value: float,
+    discovery: A19Discovery,
+) -> dict[str, Any]:
+    """BLS is the publisher; verified Archive bytes are the custody evidence.
+
+    Like a19_fact, the source URL satisfies the registration's publisher-only
+    allowedHosts, while concept_evidence_url retains the exact capture URL.
+    """
+    assert discovery.url is not None and discovery.raw is not None
+    entry = LEGACY_RELEASE_CAPTURE_CONTRACTS[spec["legacy_release_hash"]]
+    binding = entry["contract"]["sourceBinding"]
+    capture = a19_capture(discovery.url)
+    if capture is None or capture[1] != binding["sourceUrl"]:
+        raise ValueError("legacy release capture does not archive its registered URL")
+    if (
+        snapshot_window_state(capture[0].date(), binding["expectedReleaseWindow"])
+        != "open"
+    ):
+        raise ValueError("legacy release capture is outside its registered window")
+    stamp = f"{capture[0]:%Y%m%d%H%M%S}"
+    # The index hashes stored id_ bytes, possibly still gzip-encoded. The
+    # shared discovery verifies before decompression; retain that index digest
+    # separately from attach_resolution_provenance's decoded-response SHA-256.
+    digest = discovery.digest
+    if digest is None:
+        raise ValueError("legacy release capture lacks a verified index digest")
+    filename = posixpath.basename(urlparse(binding["sourceUrl"]).path)
+    source_file = f"{filename} (Wayback capture {stamp}; digest {digest}"
+    if discovery.witness:
+        source_file += (
+            f"; the Archive's index lists the same digest at {discovery.witness}, "
+            f"{discovery.witness_reason}"
+        )
+    source_file += ")"
+    notes = (
+        "Value for {period} read from {source_url}, the earliest indexed "
+        "in-window capture identified as printing the registered period; "
+        f"capture {stamp}, index digest {digest}. This establishes Archive "
+        "custody, not the exact bytes BLS served at release time."
+    )
+    if discovery.witness:
+        notes += (
+            f" The same digest is indexed at {discovery.witness} "
+            f"({discovery.witness_reason})."
+        )
+    row = generic_fact(
+        ref,
+        {**spec, "evidence_notes": notes},
+        "month",
+        period,
+        value,
+        capture[0].date(),
+        discovery.url,
+        source_file,
+    )
+    row["source"]["url"] = binding["sourceUrl"]
+    row["source"]["extraction_method"] = (
+        "Automated read of a digest-verified, registered-window Internet "
+        "Archive capture of the BLS page by scripts/resolve_pending.py"
+    )
+    row["captureProvenance"] = {
+        "captureUrl": discovery.url,
+        "captureStamp": stamp,
+        "indexDigest": digest,
+        "witness": discovery.witness,
+        "witnessReason": discovery.witness_reason,
+        "parser": entry["parser"],
+    }
+    return row
+
+
 def pending_adapter_refs(
     log: dict,
     registrations: Mapping[str, Mapping[str, Any]] | None = None,
@@ -12449,6 +12613,13 @@ def pending_adapter_refs(
     out = []
     sba_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
     bls_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
+    legacy_refs = {
+        entry["contract"]["dataPointId"]
+        for entry in (
+            *LEGACY_RELEASE_CAPTURE_CONTRACTS.values(),
+            *LEGACY_RELEASE_ALFRED_CONTRACTS.values(),
+        )
+    }
     for link in log["resolutionLinks"]:
         if link.get("status") != "pending":
             continue
@@ -12459,6 +12630,47 @@ def pending_adapter_refs(
         release_date = str(forecast.get("resolutionDate") or "")
         if not release_date:
             continue
+        # Only these exact published identities need a registration lookup
+        # here. The hash, never the CES stem, selects the new leg.
+        if ref in legacy_refs:
+            if bls_registrations is None:
+                bls_registrations = registration_contracts()
+            legacy_registration = bls_registrations.get(ref) or {}
+            content_hash = str(legacy_registration.get("targetContentHash"))
+            route = legacy_release_spec(content_hash)
+            if route is not None:
+                kind, spec = route
+                entry = (
+                    LEGACY_RELEASE_CAPTURE_CONTRACTS.get(content_hash)
+                    or LEGACY_RELEASE_ALFRED_CONTRACTS[content_hash]
+                )
+                # Keep the literal family names visible to the registration
+                # gate's router-coverage audit, just like every other branch.
+                if kind == "legacy_release_capture":
+                    out.append(
+                        (
+                            ref,
+                            "legacy_release_capture",
+                            spec,
+                            "month",
+                            entry["contract"]["period"],
+                            release_date,
+                            forecast,
+                        )
+                    )
+                else:
+                    out.append(
+                        (
+                            ref,
+                            "alfred",
+                            spec,
+                            "month",
+                            entry["contract"]["period"],
+                            release_date,
+                            forecast,
+                        )
+                    )
+                continue
         sba_stem = longest_adapter_stem(ref, SBA_PDF_ADAPTERS)
         if sba_stem:
             parsed = parse_ref_period(ref, sba_stem)
@@ -14505,6 +14717,7 @@ FAMILY_ADAPTERS = {
     # A-19 has no adapter of its own: its registrations are generic-url
     # contracts that a19_execution_spec pins field by field.
     "a19": {"generic-url"},
+    "legacy_release_capture": {"generic-url"},
     "alfred": {"alfred-fred"},
     "bea_release": {"bea-release", "bea-ita-itable"},
     "bls_api": {"bls-api"},
@@ -14801,7 +15014,7 @@ EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
 # routes to it, and every other A-19 contract still routes here and is
 # refused.
 EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
-    {"a19", "cms_provider_data", "ssa_official", "va_mmwr"}
+    {"a19", "cms_provider_data", "ssa_official", "va_mmwr", "legacy_release_capture"}
 )
 _CLAIMS_PLAN = {
     "initial": ("ICSA", "thousands"),
@@ -15089,6 +15302,7 @@ def main() -> int:
     qcew_contracts: dict[str, dict[str, Any]] | None = None
     a19_cache: dict[str, tuple[dict[str, float], bytes | None, str, str]] = {}
     a19_discovered: dict[str, tuple[str | None, bytes | None, str]] = {}
+    release_discovered: dict[tuple[str, str, str, str], A19Discovery] = {}
     a19_capture_requested = False
     a19_reads: dict[str, tuple[bytes, str]] = {}
 
@@ -15130,6 +15344,16 @@ def main() -> int:
             continue
         release_day = dt.date.fromisoformat(source_vintage)
         registration = loop_contracts.get(ref)
+        if "legacy_release_hash" in spec:
+            refusal = legacy_release_refusal(
+                ref, registration, spec["legacy_release_hash"]
+            )
+            if refusal:
+                print(
+                    "  BINDING/ADAPTER MISMATCH (refusing, registered legacy "
+                    f"release contract differs in {refusal}): {ref}"
+                )
+                continue
         resolution_date_basis, basis_refusal = effective_resolution_date_basis(
             ref, registration, spec
         )
@@ -15607,7 +15831,66 @@ def main() -> int:
                 table_retrieved_at,
             )
             extension = "json"
+        elif kind == "legacy_release_capture":
+            # These closed-window dispositions make no live BLS or Archive
+            # capture requests. The shared A-19 walk authenticates every read
+            # and refuses to skip an unidentified earlier HTTP 200 row.
+            parser_id = spec["parser"]
+            window = source_binding["expectedReleaseWindow"]
+            registered_url = source_binding["sourceUrl"]
+            discovery_key = (
+                period,
+                canonical_sha256(window),
+                registered_url,
+                parser_id,
+            )
+            if discovery_key not in release_discovered:
+                release_discovered[discovery_key] = a19_registered_capture(
+                    period,
+                    window,
+                    dt.date.fromisoformat(utc_now()[:10]),
+                    a19_wayback_read,
+                    request_capture=False,
+                    source_url=registered_url,
+                    parser=lambda html: parse_release(html, parser_id),
+                    parser_name=f"BLS release table ({parser_id})",
+                    require_digest=True,
+                )
+            discovery = release_discovered[discovery_key]
+            if discovery.url is None or discovery.raw is None:
+                print(f"  LEGACY RELEASE {discovery.verdict}: {ref}")
+                continue
+            reading = parse_release(discovery.raw.decode(errors="replace"), parser_id)
+            if reading is None or reading[0] != period:
+                print(f"  LEGACY RELEASE PERIOD MISMATCH (refusing): {ref}")
+                continue
+            # Decimal multiplication preserves the published thousands to
+            # millions conversion without inventing additional precision.
+            factor = source_binding["transform"]["factor"]
+            value = float(Decimal(str(reading[1])) * Decimal(str(factor)))
+            raw = discovery.raw
+            source_url = discovery.url
+            retrieved_at = utc_now()
+            capture = a19_capture(source_url)
+            assert capture is not None
+            release_day = capture[0].date()
+            series_id = parser_id
+            source_file = "registered BLS release capture"
+            extension = "html"
         elif kind == "alfred":
+            if (
+                "legacy_release_hash" in spec
+                and snapshot_window_state(
+                    release_day, source_binding["expectedReleaseWindow"]
+                )
+                != "open"
+            ):
+                print(
+                    "  FORECAST/REGISTERED RELEASE DATE MISMATCH "
+                    f"(refusing): {ref} — forecast {release_day} is outside "
+                    f"{source_binding['expectedReleaseWindow']!r}"
+                )
+                continue
             cache_key = (spec["fred"], release_day.isoformat())
             if cache_key not in alfred_cache:
                 alfred_cache[cache_key] = fred_vintage_series(*cache_key)
@@ -16825,6 +17108,8 @@ def main() -> int:
         elif kind == "qcew":
             assert qcew_row is not None
             row = qcew_row
+        elif kind == "legacy_release_capture":
+            row = legacy_release_capture_fact(ref, spec, period, value, discovery)
         elif kind == "a19":
             row = a19_fact(
                 ref,
