@@ -741,6 +741,10 @@ def test_the_status_file_has_one_explained_row_per_overdue_pending_target(world,
                 "NO_REPORT" if run["loopCompleted"] else "NOT_REACHED"
             )
         assert row["code"] != "NOT_REACHED" or not run["loopCompleted"]
+        # With no log at all nothing was reached or passed over; that comes
+        # first, whatever routing claims (mutant S5 of the 10-16 review).
+        if ref not in said and not run["logAvailable"]:
+            assert row["code"] == "NO_RESOLVER_RUN"
     # Ordered by (date, reference), and independent of input order.
     keys = [(row["resolutionDate"], ref) for ref, row in status["targets"].items()]
     assert keys == sorted(keys)
@@ -1183,3 +1187,21 @@ def test_completion_is_read_from_the_run_s_own_lines_and_nothing_else(lines, mar
     )
     if run["completed"]:
         assert FINISHED.rstrip("\n") in has
+
+
+def test_a_sentinel_phrase_inside_another_line_is_not_the_sentinel():
+    """Only a line that starts with the loop or finish line counts (mutant S8
+    of the 10-16 review): a refusal can quote upstream text, and an error
+    line can mention the finish line, without the run having printed it."""
+    ref = "a.b.2026_07.first_print"
+    text = (
+        f"  SOMETHING NEW (refusing): {ref} — upstream says resolution loop "
+        "complete: 3 reference(s) examined\n"
+        "error: expected 'resolver finished with exit code 0' and got nothing\n"
+    )
+    _targets, run = rs.parse_resolver_log(text)
+    assert run["logAvailable"]
+    assert not run["loopCompleted"]
+    assert not run["completed"]
+    row = _status(_log((ref, "s", "2026-09-01")), text=text)["targets"][ref]
+    assert row["code"] == "UNCLASSIFIED"
