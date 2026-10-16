@@ -437,7 +437,15 @@ def test_the_alert_reads_the_refused_gate_and_keeps_its_place() -> None:
     # step succeeded or was skipped.
     assert gate["if"] == "steps.resolve.outputs.resolver_rc == '3'"
     alert = _step("Alert on failure")
-    assert alert["if"] == "failure() || cancelled()"
+    # A cancellation alerts only when publication had not completed.
+    assert alert["if"] == (
+        "failure() || (cancelled() && !(steps.resolve.outcome == 'success' "
+        "&& (steps.ledger.outputs.needs_publish == '0' "
+        "|| steps.deployed_ledger.outcome == 'success')))"
+    )
+    deployed = _step("Record the successfully deployed ledger SHA")
+    assert deployed["id"] == "deployed_ledger"
+    assert _step("Resolve pending cells against official prints")["id"] == "resolve"
     assert alert["env"]["REFUSED_GATE"] == "${{ steps.refused_gate.outcome }}"
     assert alert["env"]["RESOLVE_OUTCOME"] == "${{ steps.resolve.outcome }}"
     assert alert["env"]["NEEDS_PUBLISH"] == "${{ steps.ledger.outputs.needs_publish }}"
