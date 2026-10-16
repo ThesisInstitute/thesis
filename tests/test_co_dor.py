@@ -26,6 +26,7 @@ import resolve_pending  # noqa: E402
 sys.path.insert(0, str(ROOT / "tests"))
 from co_fixtures import (  # noqa: E402
     corrupt_member_crc,
+    corrupt_member_data,
     dor_figures,
     dor_workbook,
     shift,
@@ -106,14 +107,14 @@ def test_official_workbook_rows_add_up_in_every_month() -> None:
 
 def test_the_leg_refuses_july_2026_because_the_file_changed_after_its_date() -> None:
     """The download's Last-Modified (2026-09-28) is after the cell's
-    resolution date (2026-08-31), so the bytes a capture on that date would
-    have read cannot be shown to be these."""
+    resolution date (2026-08-31), so the bytes served at the end of that date
+    cannot be shown to be these."""
     line = verdict("2026-07", OFFICIAL)
     assert line == (
         f"  FIRST-PRINT WINDOW MISSED (refusing): {REF} — the workbook was last "
         "modified 2026-09-28 21:09 UTC, after the cell's resolution date "
-        "2026-08-31; the bytes a capture on 2026-08-31 would have read cannot "
-        "be shown to be these"
+        "2026-08-31; the bytes served at the end of 2026-08-31 cannot be shown "
+        "to be these"
     )
     # Never the figure itself: the leg records nothing and prints no value.
     assert "984" not in line
@@ -163,6 +164,7 @@ def test_synthetic_workbook_reads_like_the_official_one() -> None:
             "exactly one 'Total Net Individual Income' cell .* found 0",
         ),
         (corrupt_member_crc(OFFICIAL, "xl/workbook.xml"), "BadZipFile"),
+        (corrupt_member_data(OFFICIAL, "xl/worksheets/sheet1.xml"), "collections"),
         (OFFICIAL[: len(OFFICIAL) // 2], "collections workbook"),
     ],
     ids=[
@@ -171,6 +173,7 @@ def test_synthetic_workbook_reads_like_the_official_one() -> None:
         "renamed-row",
         "row-replaced",
         "bad-crc",
+        "damaged-member",
         "truncated",
     ],
 )

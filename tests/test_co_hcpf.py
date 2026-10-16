@@ -28,6 +28,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 from co_fixtures import (  # noqa: E402
     HCPF_CATEGORIES,
     corrupt_member_crc,
+    corrupt_member_data,
     hcpf_file_url,
     hcpf_landing,
     hcpf_pdf_text,
@@ -342,6 +343,10 @@ def test_a_damaged_workbook_archive_is_an_adapter_error() -> None:
         damaged = corrupt_member_crc(official, member)
         with pytest.raises(co_hcpf.CoHcpfError, match="BadZipFile"):
             co_hcpf.caseload_table_from_workbook(damaged)
+        # Damaged compressed bytes fail in zlib or on the CRC; either way the
+        # caller sees an adapter error.
+        with pytest.raises(co_hcpf.CoHcpfError, match="report workbook"):
+            co_hcpf.caseload_table_from_workbook(corrupt_member_data(official, member))
     with pytest.raises(co_hcpf.CoHcpfError):
         co_hcpf.caseload_table_from_workbook(official[: len(official) // 2])
 

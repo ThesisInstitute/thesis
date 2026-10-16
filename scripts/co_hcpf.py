@@ -112,6 +112,10 @@ class CoHcpfError(ValueError):
     """The source exists but cannot be read without guessing."""
 
 
+class ReportNotListedError(CoHcpfError):
+    """No link on the page matches the report name asked for."""
+
+
 def parse_period(period: str) -> tuple[int, int]:
     match = re.fullmatch(r"(\d{4})-(\d{2})", period)
     if not match or not 1 <= int(match.group(2)) <= 12:
@@ -212,7 +216,8 @@ def landing_report_links(landing_html: bytes | str, report_period: str) -> Repor
     books = [url for ext, url in mine if ext == "xlsx"]
     label = period_label(report_period)
     if len(pdfs) != 1:
-        raise CoHcpfError(
+        error = ReportNotListedError if not pdfs else CoHcpfError
+        raise error(
             f"expected exactly one report PDF link for the {label} report, "
             f"found {len(pdfs)}"
         )

@@ -1587,24 +1587,24 @@ the other is refused, with its reason on the status page.
 
 Neither source lets this resolver establish when a figure was first
 published: no capture of either file from its release period was found, and
-the files carry no publication history. What the response does carry is a
+neither file carries a version history. What the response does carry is a
 `Last-Modified` header, and the resolver's own schedule gives that header a
 meaning:
 
 - The main loop skips a release-calendar cell while its `resolutionDate` is
   later than the runner's date (`release … not reached`), so no capture by
   this resolver predates the resolution date by the runner's clock.
-- So a file whose `Last-Modified` is no later than the end of the resolution
-  date (UTC) holds the bytes a capture on that date would have read, if the
-  header is accurate. `served_unchanged_since_resolution_date` accepts
-  exactly that case.
+- So the leg records against the bytes being served at the end of the
+  resolution date (UTC): a file whose `Last-Modified` is no later than that
+  instant holds those bytes, if the header is accurate.
+  `served_unchanged_since_resolution_date` accepts exactly that case.
 - A later `Last-Modified` means the file changed after the resolution date,
   or was first posted after it. The response cannot tell the two apart, so
   the read is refused as `FIRST-PRINT WINDOW MISSED`. A missing or unreadable
   header is refused as custody unknown.
 
-What the rule does not establish, by design: a change made before the
-resolution date cannot be detected (the test
+What the rule does not establish, by design: a change made before the end
+of the resolution date cannot be detected (the test
 `test_a_correction_made_before_the_resolution_date_is_read_as_served` labels
 this residual as intended), the header is taken at the server's word, and a
 report first posted after its cell's resolution date is refused even if it
@@ -1621,8 +1621,9 @@ WITHOUT RETROACTIVITY" (page 4 of each PDF; the `Medicaid Caseload` sheet of
 the workbook). The September workbook also has a separate `CBHP Caseload`
 sheet, which the leg does not read.
 
-Read 2026-10-09 from the files the page linked, PDF and workbook agreeing on
-every month both print:
+Read 2026-10-09 from the files the page linked. For each report the PDF and
+the workbook carried the same `Last-Modified` and agreed on every month both
+print (the workbooks' hashes are in the fixture README):
 
 | Report named for | HTTP Last-Modified (PDF and workbook) | PDF CreationDate | Newest populated month | Its TOTAL |
 |---|---|---|---|---|
@@ -1685,10 +1686,11 @@ so it is not a runtime anchor.
 **Dry runs** against the live site (2026-10-09 and 2026-10-16): the three
 anchors reproduced, and August 2026 resolved to 1,247,588 members, recorded
 as 1247.588 thousand with `observed_at` 2026-09-14, the UTC date of the PDF's
-`Last-Modified`. On 2026-10-09, Chronicle's catalog generator on its ledger
-head `d7e45bc5` accepted the row (one new series:
-`co.hcpf.medicaid.total_caseload`, Colorado, thousands, monthly) and its
-append-gate row checks accepted it.
+`Last-Modified`. Chronicle's catalog generator accepted the row on its ledger
+head `d7e45bc5` (2026-10-09) and again on `8c4a0f86` (2026-10-16), minting one
+new series (`co.hcpf.medicaid.total_caseload`, Colorado, thousands, monthly);
+a copy in a second unit made it fail. Its append-gate row checks accepted the
+row both times.
 
 Fixtures: `tests/fixtures/co_hcpf/` (the landing page, page 4 of each of the
 four PDFs with its `pdftotext` text, and the September workbook).
@@ -1717,8 +1719,7 @@ false`, and only the head revision.
 
 **Why nothing is recorded.** The July cell's resolution date is 2026-08-31,
 and the file's `Last-Modified` is 2026-09-28, so the custody rule refuses
-it: the bytes a capture on 2026-08-31 would have read cannot be shown to be
-these. Nothing checked establishes when July 2026 first appeared in this
+it: the bytes served at the end of 2026-08-31 cannot be shown to be these. Nothing checked establishes when July 2026 first appeared in this
 file or what was first published for it. Looked for on 2026-10-09 and not
 found:
 

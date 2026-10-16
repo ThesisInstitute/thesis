@@ -3729,14 +3729,14 @@ def va_mmwr_capture_envelope(
 # Custody rule, shared by both legs (served_unchanged_since_resolution_date):
 # the main loop skips a release-calendar cell while its resolutionDate is
 # later than the runner's date (``release ... not reached``), so no capture
-# by this resolver predates that date by the runner's clock. A
-# file whose Last-Modified is no later than the end of that date (UTC) holds
-# the bytes a capture on that date would have read, provided the server's
-# header is accurate. A later Last-Modified means the file changed after
-# that date or was first posted after it; the two cannot be told apart from
-# the response, so the read is refused. Changes made before the resolution
-# date cannot be detected, and neither leg establishes when a figure was
-# first published.
+# by this resolver predates that date by the runner's clock. A file whose
+# Last-Modified is no later than the end of that date (UTC) holds the bytes
+# that were being served at the end of that date, provided the server's
+# header is accurate, and the leg records against those. A later
+# Last-Modified means the file changed after that date or was first posted
+# after it; the two cannot be told apart from the response, so the read is
+# refused. Changes made before the end of the resolution date cannot be
+# detected, and neither leg establishes when a figure was first published.
 #
 # HCPF: the leg takes the report named for the month after the activity
 # month from the page's own link, requires that report to print the
@@ -3793,10 +3793,10 @@ CO_HCPF_ADAPTERS: dict[str, dict[str, Any]] = {
             "{period} is that table's newest populated month and the row's "
             "eligibility categories sum to its TOTAL. The PDF's Last-Modified "
             "header ({last_modified}) is no later than the cell's resolution "
-            "date ({resolution_date}), and the resolver does not attempt the "
-            "cell before that date, so these are the bytes a capture on that "
-            "date would have read, if the header is accurate. Changes made "
-            "before that date cannot be detected, and when the figure was "
+            "date ({resolution_date}), so these are the bytes served at the end "
+            "of that date (UTC), if the header is accurate; the resolver does "
+            "not attempt the cell before that date. Changes made before the "
+            "end of that date cannot be detected, and when the figure was "
             "first published is not established. Three earlier reports' "
             "newest-month totals were re-read from the live files at capture "
             "time. {workbook_note}"
@@ -3858,15 +3858,15 @@ def served_unchanged_since_resolution_date(
         )
     try:
         modified = parsedate_to_datetime(last_modified)
-    except (TypeError, ValueError) as exc:
+        if modified.tzinfo is None:
+            modified = modified.replace(tzinfo=dt.timezone.utc)
+        stamp = modified.astimezone(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    except (TypeError, ValueError, OverflowError) as exc:
         return CustodyVerdict(
             "unknown",
             None,
             f"the {what}'s Last-Modified {last_modified!r} is unreadable: {exc}",
         )
-    if modified.tzinfo is None:
-        modified = modified.replace(tzinfo=dt.timezone.utc)
-    stamp = modified.astimezone(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     end = dt.datetime.combine(
         resolution_day + dt.timedelta(days=1), dt.time(), tzinfo=dt.timezone.utc
     )
@@ -3875,8 +3875,8 @@ def served_unchanged_since_resolution_date(
             "changed",
             modified,
             f"the {what} was last modified {stamp}, after the cell's resolution "
-            f"date {resolution_day}; the bytes a capture on {resolution_day} "
-            "would have read cannot be shown to be these",
+            f"date {resolution_day}; the bytes served at the end of "
+            f"{resolution_day} cannot be shown to be these",
         )
     return CustodyVerdict(
         "unchanged",
@@ -4008,9 +4008,10 @@ def co_hcpf_capture_report(
     report_period = co_hcpf.report_period_for(period)
     try:
         links = co_hcpf.landing_report_links(landing_raw, report_period)
+    except co_hcpf.ReportNotListedError as exc:
+        return None, CoHcpfRefusal("not_listed", str(exc))
     except co_hcpf.CoHcpfError as exc:
-        kind = "not_listed" if str(exc).endswith("found 0") else "parse"
-        return None, CoHcpfRefusal(kind, str(exc))
+        return None, CoHcpfRefusal("parse", str(exc))
     if links.pdf_url not in file_cache:
         file_cache[links.pdf_url] = co_hcpf_http_get(links.pdf_url)
     raw, headers, retrieved_at, final_url = file_cache[links.pdf_url]
@@ -4066,15 +4067,22 @@ def co_hcpf_capture_report(
 
 
 def co_hcpf_refusal_line(ref: str, refusal: CoHcpfRefusal) -> tuple[str, bool]:
-    """(resolver line, environment failure?) for a refused target report."""
-    heads = {
-        "environment": "CO HCPF ENVIRONMENT FAILURE (fatal)",
-        "not_listed": "REPORT NOT LISTED (deferring)",
-        "custody_changed": "FIRST-PRINT WINDOW MISSED (refusing)",
-        "custody_unknown": "CO HCPF CUSTODY UNKNOWN (refusing)",
-    }
-    head = heads.get(refusal.kind, "CO HCPF PARSE REFUSAL (refusing)")
-    return f"  {head}: {ref} — {refusal.text}", refusal.kind == "environment"
+    """(resolver line, environment failure?) for a refused target report.
+
+    Each heading is a literal: the status page attributes a line by the text
+    before the reference (tests/test_resolution_status.py renders every
+    interpolated field as free text).
+    """
+    text = refusal.text
+    if refusal.kind == "environment":
+        return f"  CO HCPF ENVIRONMENT FAILURE (fatal): {ref} — {text}", True
+    if refusal.kind == "not_listed":
+        return f"  REPORT NOT LISTED (deferring): {ref} — {text}", False
+    if refusal.kind == "custody_changed":
+        return f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {text}", False
+    if refusal.kind == "custody_unknown":
+        return f"  CO HCPF CUSTODY UNKNOWN (refusing): {ref} — {text}", False
+    return f"  CO HCPF PARSE REFUSAL (refusing): {ref} — {text}", False
 
 
 def co_hcpf_workbook_note(workbook: Mapping[str, Any]) -> str:

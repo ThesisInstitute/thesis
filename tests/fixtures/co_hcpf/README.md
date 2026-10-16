@@ -33,6 +33,20 @@ poppler 26.09.0. The tests read the table from that text, and, where
 `pdftotext` is installed, render the page again and require the same table,
 so a different poppler build is checked against this one.
 
+## Workbooks read but not committed
+
+The June to August workbooks were read on 2026-10-09 to check the PDFs and
+are not in the repo (about 450 KB each). Each carried the same
+`Last-Modified` as its PDF, and agreed with its PDF on every month both
+print, totals and categories.
+
+| Official file (`/sites/hcpf/files/…`) | HTTP Last-Modified | Bytes | SHA-256 | Months both print |
+| --- | --- | ---: | --- | ---: |
+| `2026 June, Joint Budget Committee Monthly Premiums Report.xlsx` | Mon, 15 Jun 2026 20:20:16 GMT | 463,246 | `169389f9225f138e61caeb9faff500fb7d549e0643963c2114d6277423ba8504` | 59 |
+| `2026 July, Joint Budget Committee Monthly Premiums Report no links.xlsx` | Wed, 15 Jul 2026 18:53:51 GMT | 468,003 | `0a630c922dff20a566201d32b789e074d8b895eb14a69493cd841a3686bb9172` | 60 |
+| `2026 August, Joint Budget Committee Monthly Premiums Report.xlsx` | Mon, 17 Aug 2026 18:00:45 GMT | 450,544 | `98ab446690db7ea43b2910ee9d0178f03f12378620a1f654ee6f970b419fad1f` | 49 |
+| `2026 September, Joint Budget Committee Monthly Premiums Report.xlsx` (committed) | Mon, 14 Sep 2026 17:35:17 GMT | 447,580 | `ac0f211eb5ce892340db35f5ae371636a399a9758980810407a0550a2a8fc56f` | 50 |
+
 ## What the files show
 
 These describe the four inspected reports, not HCPF's process.

@@ -57,6 +57,8 @@ HCPF_NEXT = "co.hcpf.medicaid.total_caseload.2026-09.first_print"
 DOR = "co.dor.individual_income_tax.net_collections.2026_07.first_print"
 DOR_NEWEST = "co.dor.individual_income_tax.net_collections.2026_08.first_print"
 DOR_NEXT = "co.dor.individual_income_tax.net_collections.2026_09.first_print"
+HCPF_FUTURE = "co.hcpf.medicaid.total_caseload.2098-12.first_print"
+DOR_FUTURE = "co.dor.individual_income_tax.net_collections.2098_12.first_print"
 # Last-Modified of each report PDF as served 2026-10-09 (report month -> header).
 OFFICIAL_MODIFIED = {
     "2026-06": "Mon, 15 Jun 2026 20:20:16 GMT",
@@ -70,7 +72,8 @@ SYNTHETIC_PDF = b"%PDF-synthetic\n"
 
 def _log() -> dict:
     """The two published cells (resolution dates and intervals as published)
-    and three synthetic later-period cells of the same series."""
+    and five synthetic later-period cells of the same series, two of them
+    with resolution dates in 2099."""
     cells = [
         # slug, ref, resolutionDate, unit, 80% interval
         ("co-medicaid", HCPF, "2026-09-15", "thousands", 1225.6, 1268.6),
@@ -78,6 +81,8 @@ def _log() -> dict:
         ("co-income-tax", DOR, "2026-08-31", "usd_billions", 0.42, 1.54),
         ("co-income-tax-newest", DOR_NEWEST, "2026-09-30", "usd_billions", 0.4, 1.5),
         ("co-income-tax-next", DOR_NEXT, "2026-10-01", "usd_billions", 0.4, 1.5),
+        ("co-medicaid-future", HCPF_FUTURE, "2099-01-15", "thousands", 1000, 1500),
+        ("co-income-tax-future", DOR_FUTURE, "2099-01-31", "usd_billions", 0.4, 1.5),
     ]
     return {
         "entries": [
@@ -348,6 +353,19 @@ def test_no_new_registration_can_bind_either_colorado_family(
     assert "no registration-time admission predicate" in refusal(adapter)
 
 
+def test_neither_leg_is_attempted_before_its_resolution_date(
+    monkeypatch, capsys
+) -> None:
+    """The premise of the custody rule: the main loop skips a cell whose
+    resolution date is later than the runner's date, before any fetch."""
+    served = _install(monkeypatch, [HCPF_FUTURE, DOR_FUTURE])
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert f"  release 2099-01-15 not reached: {HCPF_FUTURE}" in out
+    assert f"  release 2099-01-31 not reached: {DOR_FUTURE}" in out
+    assert served == []
+
+
 # --- the custody rule --------------------------------------------------------
 
 
@@ -363,6 +381,7 @@ def test_no_new_registration_can_bind_either_colorado_family(
         ("Thu, 15 Oct 2026 16:00:00 GMT", "changed"),
         (None, "unknown"),
         ("yesterday", "unknown"),
+        ("Fri, 31 Dec 9999 23:00:00 -0500", "unknown"),  # overflows in UTC
     ],
 )
 def test_custody_rule_compares_the_header_with_the_end_of_the_resolution_date(
@@ -389,7 +408,7 @@ def test_custody_rule_is_exactly_an_instant_comparison(
     moment, day, offset_minutes
 ) -> None:
     """Accepted iff the header's instant is before midnight UTC after the
-    resolution date, whatever offset the server writes the header in; an
+    resolution date, for headers written at the six offsets generated; an
     accepted file is never dated after the resolution date."""
     zone = dt.timezone(dt.timedelta(minutes=offset_minutes))
     local = moment.replace(microsecond=0).astimezone(zone)
@@ -528,8 +547,8 @@ def test_a_same_month_correction_after_the_resolution_date_is_refused(
     assert (
         f"  FIRST-PRINT WINDOW MISSED (refusing): {HCPF} — the report PDF was "
         "last modified 2026-09-20 15:00 UTC, after the cell's resolution date "
-        "2026-09-15; the bytes a capture on 2026-09-15 would have read cannot be "
-        "shown to be these"
+        "2026-09-15; the bytes served at the end of 2026-09-15 cannot be shown "
+        "to be these"
     ) in out
     assert "resolve " not in out
 
@@ -537,10 +556,10 @@ def test_a_same_month_correction_after_the_resolution_date_is_refused(
 def test_a_correction_made_before_the_resolution_date_is_read_as_served(
     monkeypatch, capsys
 ) -> None:
-    """INTENDED, the rule's stated residual: a replacement before the
-    resolution date is indistinguishable from the first file, and it is what
-    a capture on the resolution date would have read. The value recorded is
-    the replacement's."""
+    """INTENDED, the rule's stated residual: a replacement before the end of
+    the resolution date is indistinguishable from the first file, and it is
+    what was being served at the end of that date. The value recorded is the
+    replacement's."""
     _install(
         monkeypatch,
         [HCPF],
@@ -573,7 +592,7 @@ def test_a_report_modified_before_the_month_it_is_named_for_is_not_refused(
 ) -> None:
     """The custody rule bounds the header from above only. A September report
     last modified in August still leads with August and predates the
-    resolution date, so it is what a capture on that date would have read."""
+    resolution date, so it is what was being served at the end of that date."""
     _install(monkeypatch, [HCPF], modified={"2026-09": "Mon, 31 Aug 2026 23:00:00 GMT"})
     assert resolve_pending.main() == 0
     assert f"  resolve {HCPF} -> 1247.588 thousands" in capsys.readouterr().out
@@ -910,27 +929,30 @@ def test_members_to_thousands_keeps_every_digit(total: int) -> None:
     assert Decimal(repr(value)) == Decimal(total) / 1000
 
 
-@settings(max_examples=80, deadline=None)
+@settings(max_examples=200, deadline=None)
 @given(
-    newest=st.integers(2024 * 12, 2030 * 12),
     asked=st.integers(2024 * 12, 2030 * 12),
+    lead=st.sampled_from([0, 0, 0, -1, 1, -2]),
+    listed=st.sampled_from([True, True, True, False]),
     hours=st.integers(-24 * 45, 24 * 45),
     total=st.integers(600_000, 2_900_000),
 )
 def test_a_value_is_recorded_only_for_a_newest_month_unchanged_since_its_date(
-    newest, asked, hours, total
+    asked, lead, listed, hours, total
 ) -> None:
-    """``co_hcpf_capture_report`` returns a figure exactly when the report
-    named for the month after ``asked`` is listed, leads with ``asked``, and
-    carries a Last-Modified no later than the end of the resolution date
-    (UTC); a returned figure is never dated after that date."""
+    """For generated single-report pages: ``co_hcpf_capture_report`` returns
+    a figure exactly when the page lists the report named for the month
+    after ``asked`` (``listed``), that report's newest populated month is
+    ``asked`` (``lead == 0``), and its Last-Modified is before midnight UTC
+    after the resolution date; a returned figure is never dated after that
+    date. Each condition is drawn on its own, so each can fail alone."""
 
     def period(index: int) -> str:
         return f"{index // 12:04d}-{index % 12 + 1:02d}"
 
-    newest_period, asked_period = period(newest), period(asked)
-    listed_report = period(newest + 1)
-    resolution_day = dt.date((newest + 1) // 12, (newest + 1) % 12 + 1, 15)
+    asked_period, newest = period(asked), asked + lead
+    report = asked + 1 if listed else asked + 2
+    resolution_day = dt.date((asked + 1) // 12, (asked + 1) % 12 + 1, 15)
     end = dt.datetime.combine(
         resolution_day + dt.timedelta(days=1), dt.time(), dt.timezone.utc
     )
@@ -939,11 +961,11 @@ def test_a_value_is_recorded_only_for_a_newest_month_unchanged_since_its_date(
     text = hcpf_pdf_text(
         [
             (period(newest - 1), split_total(total - 5), total - 5),
-            (newest_period, split_total(total), total),
+            (period(newest), split_total(total), total),
         ]
     )
-    landing = hcpf_landing([listed_report])
-    url = co_hcpf.landing_report_links(landing, listed_report).pdf_url
+    landing = hcpf_landing([period(report)])
+    url = co_hcpf.landing_report_links(landing, period(report)).pdf_url
     cache = {
         url: (
             _synthetic_pdf(text),
@@ -967,7 +989,7 @@ def test_a_value_is_recorded_only_for_a_newest_month_unchanged_since_its_date(
         )
     finally:
         resolve_pending.co_hcpf_pdf_text = original
-    should_read = asked == newest and modified < end
+    should_read = listed and lead == 0 and modified < end
     assert (capture is not None) == should_read, refusal
     assert (refusal is None) == should_read
     if capture is not None:
@@ -975,3 +997,9 @@ def test_a_value_is_recorded_only_for_a_newest_month_unchanged_since_its_date(
         assert capture.custody is not None and capture.custody.state == "unchanged"
         assert capture.custody.last_modified is not None
         assert capture.custody.last_modified.date() <= resolution_day
+    elif not listed:
+        assert refusal is not None and refusal.kind == "not_listed"
+    elif modified >= end:
+        assert refusal is not None and refusal.kind == "custody_changed"
+    else:
+        assert refusal is not None and refusal.kind == "parse"

@@ -141,6 +141,27 @@ def corrupt_member_crc(raw: bytes, member: str) -> bytes:
     raise ValueError(f"{member} is not in the archive")
 
 
+def corrupt_member_data(raw: bytes, member: str) -> bytes:
+    """``raw`` with bytes in the middle of ``member``'s compressed data
+    flipped. The archive still opens and lists its members; reading that
+    member fails inside the decompressor or on its CRC."""
+    data = bytearray(raw)
+    name = member.encode()
+    index = data.find(b"PK\x03\x04")
+    while index != -1:
+        name_length = int.from_bytes(data[index + 26 : index + 28], "little")
+        extra_length = int.from_bytes(data[index + 28 : index + 30], "little")
+        size = int.from_bytes(data[index + 18 : index + 22], "little")
+        start = index + 30 + name_length + extra_length
+        if bytes(data[index + 30 : index + 30 + name_length]) == name and size > 8:
+            middle = start + size // 2
+            for offset in range(-2, 3):
+                data[middle + offset] ^= 0x5A
+            return bytes(data)
+        index = data.find(b"PK\x03\x04", index + 4)
+    raise ValueError(f"{member} is not in the archive")
+
+
 # ---------------------------------------------------------------------------
 # HCPF Joint Budget Committee Monthly Premiums Report
 
