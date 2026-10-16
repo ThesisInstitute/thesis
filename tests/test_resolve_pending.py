@@ -2335,21 +2335,32 @@ def _gate_check_runs(
 
     def real(name: str, conclusion: str | None, run_id: int) -> dict:
         return {
+            "id": run_id,
             "name": name,
             "status": "queued" if conclusion is None else "completed",
             "conclusion": conclusion,
             "html_url": f"https://github.com/PolicyEngine/chronicle/actions/runs/{run_id}",
         }
 
-    def twin(name: str) -> dict:
-        return {"name": name, "status": "completed", "conclusion": "skipped"}
+    def twin(name: str, run_id: int) -> dict:
+        return {
+            "id": run_id,
+            "name": name,
+            "status": "completed",
+            "conclusion": "skipped",
+        }
 
     return [
-        twin("Append gate"),
+        twin("Append gate", 11),
         real("Append gate", append_conclusion, 1),
-        twin("Trusted base append gate"),
+        twin("Trusted base append gate", 12),
         real("Trusted base append gate", trusted_conclusion, 2),
-        {"name": "Arch checks", "status": "completed", "conclusion": "failure"},
+        {
+            "id": 13,
+            "name": "Arch checks",
+            "status": "completed",
+            "conclusion": "failure",
+        },
     ]
 
 
@@ -3334,9 +3345,14 @@ def _paged_check_runs_api(pages: list[list[dict]], *, totals=None, calls=None):
     return api
 
 
-def _filler_runs(count: int) -> list[dict]:
+def _filler_runs(count: int, *, first_id: int = 1000) -> list[dict]:
     return [
-        {"name": f"Arch checks {index}", "status": "completed", "conclusion": "success"}
+        {
+            "id": first_id + index,
+            "name": f"Arch checks {index}",
+            "status": "completed",
+            "conclusion": "success",
+        }
         for index in range(count)
     ]
 
@@ -3361,6 +3377,7 @@ def test_a_rejecting_run_on_page_two_fails_the_gate(monkeypatch) -> None:
     first += _filler_runs(100 - len(first))
     second = [
         {
+            "id": 3,
             "name": "Trusted base append gate",
             "status": "completed",
             "conclusion": "failure",
@@ -3391,7 +3408,7 @@ def test_a_rejecting_run_on_page_two_fails_the_gate(monkeypatch) -> None:
 def test_a_queued_run_on_page_two_keeps_the_gate_pending(monkeypatch) -> None:
     first = _gate_check_runs("success", "success")
     first += _filler_runs(100 - len(first))
-    second = [{"name": "Append gate", "status": "queued", "conclusion": None}]
+    second = [{"id": 4, "name": "Append gate", "status": "queued", "conclusion": None}]
     monkeypatch.setattr(
         resolve_pending, "_gh_api", _paged_check_runs_api([first, second])
     )
@@ -3423,9 +3440,22 @@ def test_an_incomplete_listing_is_a_failed_read_never_a_verdict(monkeypatch) -> 
         "moved": (
             [
                 passing + _filler_runs(100 - len(passing)),
-                _filler_runs(1),
+                _filler_runs(1, first_id=5000),
             ],
             [101, 102],
+        ),
+        # total_count lower than the runs returned.
+        "overfull": ([passing], [len(passing) - 1]),
+        # A boolean is not a count.
+        "boolean": ([passing], [True]),
+        # An empty page in the middle: the listing stops short of its count.
+        "gap": (
+            [
+                passing + _filler_runs(100 - len(passing)),
+                [],
+                _filler_runs(1, first_id=6000),
+            ],
+            [101, 101, 101],
         ),
         # total_count missing or not an integer.
         "untyped": ([passing], ["5"]),
@@ -3455,6 +3485,57 @@ def test_an_incomplete_listing_is_a_failed_read_never_a_verdict(monkeypatch) -> 
         assert label
 
 
+def test_a_listing_that_adds_up_by_repeating_a_run_is_refused(monkeypatch) -> None:
+    """Review of 80041473: runs reorder between page reads, so page two
+    repeats a run from page one and the failing run F is never served,
+    yet the listing's length still equals total_count."""
+
+    first = _gate_check_runs("success", "success")
+    first += _filler_runs(100 - len(first))
+    repeated = dict(first[-1])
+    monkeypatch.setattr(
+        resolve_pending, "_gh_api", _paged_check_runs_api([first, [repeated]])
+    )
+    with pytest.raises(resolve_pending.CheckRunsIncompleteError, match="appears twice"):
+        resolve_pending.read_check_runs("o/r", "c" * 40)
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="could not read append gate status",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=150 * 60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+        )
+
+
+def test_a_page_larger_than_requested_is_refused(monkeypatch) -> None:
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api([_filler_runs(150)]),
+    )
+    with pytest.raises(
+        resolve_pending.CheckRunsIncompleteError, match="holds 150 runs"
+    ):
+        resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
+def test_a_run_without_an_integer_id_is_refused(monkeypatch) -> None:
+    for bad_id in (None, "7", True, 7.0):
+        run = {"name": "Append gate", "status": "completed", "conclusion": "success"}
+        if bad_id is not None:
+            run["id"] = bad_id
+        monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api([[run]]))
+        with pytest.raises(
+            resolve_pending.CheckRunsIncompleteError, match="without an integer id"
+        ):
+            resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
 def test_a_listing_longer_than_the_page_cap_is_refused(monkeypatch) -> None:
     cap = resolve_pending.APPEND_GATE_MAX_CHECK_RUN_PAGES
     runs = _filler_runs(100 * cap + 1)
@@ -3481,12 +3562,40 @@ def test_each_gate_read_is_bounded_by_the_remaining_budget(monkeypatch) -> None:
             sleep=clock.sleep,
         )
     timeouts = [kwargs["timeout"] for _endpoint, kwargs in calls]
-    assert timeouts[0] == resolve_pending.APPEND_GATE_MAX_READ_SECONDS
-    assert all(
-        0 < value <= resolve_pending.APPEND_GATE_MAX_READ_SECONDS for value in timeouts
+    floor = resolve_pending.APPEND_GATE_MIN_READ_SECONDS
+    cap = resolve_pending.APPEND_GATE_MAX_READ_SECONDS
+    assert timeouts[0] == cap
+    assert all(floor <= value <= cap for value in timeouts)
+    # The last read happens at the deadline; it still gets the floor, so a
+    # gate that passes in the final interval is not lost to a 1-second read.
+    assert timeouts[-1] == floor
+
+
+def test_each_page_read_gets_its_own_share_of_the_budget(monkeypatch) -> None:
+    """The bound is recomputed per page, not once per poll."""
+
+    clock = _FakeClock()
+    runs = _filler_runs(250)
+    pages = [runs[start : start + 100] for start in range(0, 250, 100)]
+    served = _paged_check_runs_api(pages)
+    timeouts: list[float] = []
+
+    def slow(*args: str, input_body=None, **kwargs) -> str:
+        timeouts.append(kwargs["timeout"])
+        clock.now += 50  # each page read takes 50 s
+        return served(*args, input_body=input_body, **kwargs)
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", slow)
+    assert (
+        len(
+            resolve_pending.read_check_runs(
+                "o/r", "c" * 40, deadline=clock.now + 130, clock=clock
+            )
+        )
+        == 250
     )
-    # The last reads come near the deadline, so their bound shrinks with it.
-    assert timeouts[-1] < resolve_pending.APPEND_GATE_MAX_READ_SECONDS
+    # 130 s left, then 80, then 30: each page sees what the budget has left.
+    assert timeouts == [120.0, 80.0, 30.0]
 
 
 def test_gh_api_timeout_becomes_a_runtime_error(monkeypatch) -> None:

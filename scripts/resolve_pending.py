@@ -147,8 +147,11 @@ APPEND_GATE_MAX_READ_FAILURES = 5
 # proposal seen so far; a listing longer than that is refused, not truncated.
 APPEND_GATE_CHECK_RUN_PAGE_SIZE = 100
 APPEND_GATE_MAX_CHECK_RUN_PAGES = 10
-# One `gh api` read may take at most this long, and never past the budget.
+# One `gh api` page read may take at most this long, and no longer than the
+# budget has left, but never less than the floor: a read always gets long
+# enough to finish, even the one at the deadline.
 APPEND_GATE_MAX_READ_SECONDS = 120.0
+APPEND_GATE_MIN_READ_SECONDS = 15.0
 # Both are required checks on the ledger branch, but the resolver's token is
 # a repository admin and enforce_admins is off: its merges have gone through
 # with checks that are required today failing (chronicle #240) or still
@@ -14042,22 +14045,38 @@ class CheckRunsIncompleteError(RuntimeError):
 
 
 def read_check_runs(
-    repo: str, commit_sha: str, *, read_timeout: float | None = None
+    repo: str,
+    commit_sha: str,
+    *,
+    deadline: float | None = None,
+    clock: Callable[[], float] = time.monotonic,
 ) -> list[dict]:
     """Every check run on ``commit_sha``, or an error; never a partial list.
 
     GitHub pages this listing. Reading page one alone would let a rejecting
     run on page two go unseen while both gates' successes sat on page one,
     and the resolver's admin token would then merge past it. So every page
-    is read, ``total_count`` must be the same integer on each, and the runs
-    must add up to it. Anything else raises CheckRunsIncompleteError, which
-    await_append_gates treats as a failed read and retries; an incomplete
-    listing is never classified.
+    is read, ``total_count`` must be the same integer on each, every run
+    must carry an integer ``id`` seen once, no page may exceed the page
+    size, and the distinct runs must add up to ``total_count``. A listing
+    that reordered between page reads can repeat one run and skip another
+    while its length still adds up; counting distinct ids refuses that.
+    Anything else raises CheckRunsIncompleteError, which await_append_gates
+    treats as a failed read and retries; an incomplete listing is never
+    classified. With a ``deadline``, each page read is bounded by what the
+    budget has left, between the read floor and cap.
     """
 
     runs: list[dict] = []
+    seen: set[int] = set()
     total: int | None = None
     for page in range(1, APPEND_GATE_MAX_CHECK_RUN_PAGES + 1):
+        read_timeout = None
+        if deadline is not None:
+            read_timeout = min(
+                APPEND_GATE_MAX_READ_SECONDS,
+                max(APPEND_GATE_MIN_READ_SECONDS, deadline - clock()),
+            )
         payload = json.loads(
             _gh_api(
                 f"repos/{repo}/commits/{commit_sha}/check-runs"
@@ -14071,6 +14090,11 @@ def read_check_runs(
             raise CheckRunsIncompleteError(
                 f"check-runs page {page} lacks a list or an integer total_count"
             )
+        if len(page_runs) > APPEND_GATE_CHECK_RUN_PAGE_SIZE:
+            raise CheckRunsIncompleteError(
+                f"check-runs page {page} holds {len(page_runs)} runs, more than "
+                f"the {APPEND_GATE_CHECK_RUN_PAGE_SIZE} requested"
+            )
         if total is None:
             total = page_total
         elif page_total != total:
@@ -14080,7 +14104,18 @@ def read_check_runs(
                 f"check-run total_count moved from {total} to {page_total} "
                 "between pages"
             )
-        runs.extend(page_runs)
+        for run in page_runs:
+            run_id = run.get("id") if type(run) is dict else None
+            if type(run_id) is not int:
+                raise CheckRunsIncompleteError(
+                    f"check-runs page {page} has a run without an integer id"
+                )
+            if run_id in seen:
+                raise CheckRunsIncompleteError(
+                    f"check run {run_id} appears twice in one listing"
+                )
+            seen.add(run_id)
+            runs.append(run)
         if len(runs) >= total or len(page_runs) < APPEND_GATE_CHECK_RUN_PAGE_SIZE:
             break
     if total is None or len(runs) != total:
@@ -14122,10 +14157,9 @@ def await_append_gates(
     last_seen: dict[str, list[dict]] = {gate: [] for gate in gates}
     while True:
         attempts += 1
-        # A hung read must not outlive the budget the caller gave us.
-        read_timeout = min(APPEND_GATE_MAX_READ_SECONDS, max(1.0, deadline - clock()))
         try:
-            runs = read_check_runs(repo, commit_sha, read_timeout=read_timeout)
+            # Each page read is bounded by what the budget has left.
+            runs = read_check_runs(repo, commit_sha, deadline=deadline, clock=clock)
         except (RuntimeError, json.JSONDecodeError) as exc:
             # Reading check runs has no side effects, so a transient API
             # error (5xx, secondary rate limit, a timeout, a listing that
