@@ -1,0 +1,93 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ca",
+  "country": "US",
+  "type": "data",
+  "title": "California ex parte renewal share, August 2026",
+  "question": "What will California's ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, computed from the published numerator and denominator to one decimal percent? These are administrative monthly data with no seasonal adjustment specified.",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to California's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ca.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Official California original-row history could not be fetched",
+    "No computable persistence benchmark or calibrated interval",
+    "Registered publication date could not be verified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=10&offset=0",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv"
+  ],
+  "runAt": "2026-10-07T12:42:02Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: official history fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is California's August 2026 original-submission first print. The registered identity, unit, deadline and resolver text are preserved. Later updated submissions must not substitute for the resolving original first print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact dataset ID on data.medicaid.gov.",
+      "result": "The official dataset search response reports an update on September 25, 2026, with 3,876 rows and 22 columns. It exposes initial Alaska rows, but no California original-submission renewal counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+      "result": "The fetched official dictionary defines original_updated as O=Original and U=Updated; beneficiaries_with_a_renewal_due is metric 5, renewed_total is metric 5a, and renewed_on_an_ex_parte_basis is metric 5a1. These definitions are not numeric California observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open; web.click",
+      "call": "Open https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data and click its CSV distribution; also open the registered datastore API.",
+      "result": "Official metadata reports modified 2026-09-25T18:00:00Z and identifies renewal-dataset-september-2026-release.csv. The CSV fetch returned Cache miss; the datastore API returned inaccessible. Correctly filtered original_updated=O and California queries also failed. No California numerator or denominator was fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "The official index lists June 2026 released September 25, 2026; May 2026 released August 28, 2026; and April 2026 released July 31, 2026. It supplies no scheduled release date for August 2026."
+    },
+    {
+      "kind": "text",
+      "text": "History availability: I could not fetch the required California original-row history from the exact resolving dataset. This is an access failure, not evidence that the official source exposes fewer than six prints. No historical values are invented or substituted from snapshots, other states, or updated rows."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable because no admissible California original-print observations were fetched. Last-print persistence, alternative time-series candidates, walk-forward scores and realized dispersion cannot be computed. No model candidate is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: the intended prior is last-original-print persistence, with no evidence-based adjustment established. The historical sample is unavailable; sigma and the 1.28-times-sigma half-width cannot be computed. Point estimate and implied bounds are withheld rather than fabricated."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: 2026-12-15 is retained solely because it is the registered ledger value; it was not verified as an official scheduled release date and is not inferred from cadence. The registered resolver also does not explicitly name the denominator field. That ambiguity cannot be silently resolved by changing the target."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: upside risk and downside risk cannot be quantified without the original-row reference class. No claim about landing outside the interval is made because no interval has been estimated. This object parses as JSON but does not satisfy the numeric forecast or history-floor validation requirements."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

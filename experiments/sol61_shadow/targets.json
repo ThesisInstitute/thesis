@@ -1,0 +1,3352 @@
+{
+  "checkoutSha": "17b62a1a205d3009c5944f9fa7f3c13712cd85c9",
+  "cutoff": "2026-10-13",
+  "frozenAtUtc": "2026-10-06T20:48:40Z",
+  "schemaVersion": "thesis_sol61_shadow_targets_v1",
+  "targets": [
+    {
+      "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.august_2026.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-12/auto-roll-31639434204-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-12/2026-08-12t21-45-21z-statcan-employment-insurance-regular-beneficiaries-2026-08/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-12/2026-08-12t21-45-21z-statcan-employment-insurance-regular-beneficiaries-2026-08/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-12T21:45:21Z"
+      },
+      "slug": "canada-ei-regular-beneficiaries-august-2026",
+      "target": {
+        "catalogSlug": "canada-ei-regular-beneficiaries-august-2026",
+        "country": "CA",
+        "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.august_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-21",
+          "start": "2026-10-13"
+        },
+        "period": "2026-08",
+        "registeredAt": "2026-08-12T21:16:44Z",
+        "registeredAtUtc": "2026-08-12T21:16:44Z",
+        "registrationCommit": "d50ffb7c957ea27fad25c6e0c6fee0aa2471bc84",
+        "registrationState": "preregistered",
+        "series": "statcan.employment_insurance.regular_beneficiaries",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-21",
+            "start": "2026-10-13"
+          },
+          "field": "v64549350",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v64549350",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+          "table": "Statistics Canada Table 14-10-0011-01, EI regular beneficiaries, Canada, seasonally adjusted (persons)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae",
+        "targetRegistrationPath": "records/targets/2026-08-12-344f246b5a7e25a6522342402468dc23cbb2592215d9c743b69b27c43600ffae.json",
+        "targetUnit": "thousands",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-10-13"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-21/auto-roll-35651332378-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-21/2026-09-21t20-32-57z-dol-eta-continued-claims-sa-week-2026-09-26/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-21/2026-09-21t20-32-57z-dol-eta-continued-claims-sa-week-2026-09-26/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-21T20:32:57Z"
+      },
+      "slug": "continued-claims-week-2026-09-26",
+      "target": {
+        "catalogSlug": "continued-claims-week-2026-09-26",
+        "country": "US",
+        "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-18",
+          "start": "2026-10-14"
+        },
+        "period": "week_2026-09-26",
+        "registeredAt": "2026-09-21T20:29:34Z",
+        "registeredAtUtc": "2026-09-21T20:29:34Z",
+        "registrationCommit": "a4d2fa75c5f78e31f1ec50e5ea9d88d326727c95",
+        "registrationState": "preregistered",
+        "series": "dol.eta.continued_claims.sa",
+        "sourceBinding": {
+          "adapter": "alfred-fred",
+          "allowedHosts": [
+            "alfred.stlouisfed.org"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-18",
+            "start": "2026-10-14"
+          },
+          "field": "CCSA",
+          "releasePolicy": "advance_vintage",
+          "sourceSeriesId": "CCSA",
+          "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+          "table": "ALFRED graph CSV",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "bb7989449716310b2815ec2be2cc3cf62f20abaccd2e258bc322bf40721774f2",
+        "targetRegistrationPath": "records/targets/2026-09-21-bb7989449716310b2815ec2be2cc3cf62f20abaccd2e258bc322bf40721774f2.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-10-14"
+    },
+    {
+      "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-10/auto-roll-29129793879-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-07-10/2026-07-10t23-14-28z-fns-wic-total-participation-2026-07/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-10/2026-07-10t23-14-28z-fns-wic-total-participation-2026-07/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-10T23:14:28Z"
+      },
+      "slug": "wic-participation-july-2026",
+      "target": {
+        "catalogSlug": "wic-participation-july-2026",
+        "country": "US",
+        "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+        "period": "2026-07",
+        "registeredAt": "2026-07-10T23:13:40Z",
+        "registeredAtUtc": "2026-07-10T23:13:40Z",
+        "registrationCommit": "a6aa0d72352081ffa58d0615c5daf6c7c553e4ee",
+        "registrationState": "preregistered",
+        "series": "fns.wic.total_participation",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.fns.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-14"
+          },
+          "field": "fns.wic.total_participation",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "fns.wic.total_participation",
+          "sourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+          "table": "Official agency release",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "2ba8026886b427a404d89a563455b451f1cd5006cc7827154f75996ef3307a63",
+        "targetRegistrationPath": "records/targets/2026-07-10-2ba8026886b427a404d89a563455b451f1cd5006cc7827154f75996ef3307a63.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-10-14"
+    },
+    {
+      "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-12/auto-roll-31639421680-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-12/2026-08-12t20-50-08z-usaspending-cdfi-assistance-transaction-obligations-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-12/2026-08-12t20-50-08z-usaspending-cdfi-assistance-transaction-obligations-fy2026/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-12T20:50:08Z"
+      },
+      "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+      "target": {
+        "anchors": {
+          "2025": 319.455176
+        },
+        "catalogSlug": "us-cdfi-assistance-transaction-obligations-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-11T20:38:09Z",
+        "registeredAtUtc": "2026-08-11T20:38:09Z",
+        "registrationCommit": "49bf9b5726d9faf93b6c96c9d73d4a52dc74c030",
+        "registrationState": "preregistered",
+        "series": "usaspending.cdfi.assistance_transaction_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.search.spending_over_time.cdfi.program_obligations",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+          "table": "USAspending API v2 advanced search, CDFI Fund awarding-subagency financial-assistance award transactions, obligations by fiscal year",
+          "transform": {
+            "agency": {
+              "name": "Community Development Financial Institutions Fund",
+              "tier": "subtier",
+              "type": "awarding"
+            },
+            "awardTypeCodes": [
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11"
+            ],
+            "factor": 1e-06,
+            "fiscalYear": "{fiscal_year}",
+            "group": "fiscal_year",
+            "operation": "multiply",
+            "requestMethod": "POST",
+            "spendingLevel": "transactions"
+          }
+        },
+        "targetContentHash": "6e45cb2f4898f951845f89900e3c0befff43d9dc3bc3a0f7749231020fb88f32",
+        "targetRegistrationPath": "records/targets/2026-08-11-6e45cb2f4898f951845f89900e3c0befff43d9dc3bc3a0f7749231020fb88f32.json",
+        "targetUnit": "usd_millions",
+        "valueScale": 1e-06
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-07/auto-roll-31209278963-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-28-48z-usaspending-dhs-title-vi-award-transaction-obligations-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-28-48z-usaspending-dhs-title-vi-award-transaction-obligations-fy2026/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-07T19:28:48Z"
+      },
+      "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+      "target": {
+        "catalogSlug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-07T17:54:06Z",
+        "registeredAtUtc": "2026-08-07T17:54:06Z",
+        "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+        "registrationState": "preregistered",
+        "series": "usaspending.dhs.title_vi.award_transaction_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.search.spending_over_time.dhs.title_vi.award_transaction_obligations",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+          "table": "USAspending API v2 advanced search, DHS Title VI award transactions filtered to named Treasury accounts, obligations by fiscal year",
+          "transform": {
+            "awardTypeCodes": [
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "A",
+              "B",
+              "C",
+              "D",
+              "IDV_A",
+              "IDV_B",
+              "IDV_B_A",
+              "IDV_B_B",
+              "IDV_B_C",
+              "IDV_C",
+              "IDV_D",
+              "IDV_E"
+            ],
+            "factor": 1,
+            "fiscalYear": "{fiscal_year}",
+            "group": "fiscal_year",
+            "operation": "multiply",
+            "requestMethod": "POST",
+            "spendingLevel": "transactions",
+            "treasuryAccountComponents": [
+              {
+                "aid": "070",
+                "bpoa": "2025",
+                "epoa": "2029",
+                "main": "0530",
+                "sub": "000"
+              },
+              {
+                "aid": "070",
+                "bpoa": "2025",
+                "epoa": "2029",
+                "main": "0532",
+                "sub": "000"
+              },
+              {
+                "aid": "070",
+                "bpoa": "2025",
+                "epoa": "2029",
+                "main": "0509",
+                "sub": "000"
+              },
+              {
+                "aid": "070",
+                "bpoa": "2025",
+                "epoa": "2029",
+                "main": "0510",
+                "sub": "000"
+              },
+              {
+                "aid": "070",
+                "bpoa": "2025",
+                "epoa": "2029",
+                "main": "0413",
+                "sub": "000"
+              },
+              {
+                "aid": "070",
+                "main": "0722"
+              }
+            ]
+          }
+        },
+        "targetContentHash": "50f66b4f2d7088ad7e74b611f9286b87c6ad34463a87fea873bbcbb15ddddf46",
+        "targetRegistrationPath": "records/targets/2026-08-07-50f66b4f2d7088ad7e74b611f9286b87c6ad34463a87fea873bbcbb15ddddf46.json",
+        "targetUnit": "usd",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-07/auto-roll-31209278963-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-12-58z-usaspending-dod-new-prime-awards-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-12-58z-usaspending-dod-new-prime-awards-fy2026/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-07T19:12:58Z"
+      },
+      "slug": "us-dod-new-prime-awards-fy2026",
+      "target": {
+        "catalogSlug": "us-dod-new-prime-awards-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-07T17:54:06Z",
+        "registeredAtUtc": "2026-08-07T17:54:06Z",
+        "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+        "registrationState": "preregistered",
+        "series": "usaspending.dod.new_prime_awards",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "new_award_count",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.agency.097.awards.new_award_count",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year={fiscal_year}",
+          "table": "USAspending API v2, agency 097 (DoD) new award count, fiscal year to date",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "e6964d48e8a09276874f5990a6155deca11583fde07f94e731a8355b70cb4f47",
+        "targetRegistrationPath": "records/targets/2026-08-07-e6964d48e8a09276874f5990a6155deca11583fde07f94e731a8355b70cb4f47.json",
+        "targetUnit": "millions",
+        "valueScale": 1e-06
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-11/auto-roll-31521464486-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-11/2026-08-11t18-13-55z-usaspending-dod-prime-award-obligations-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-11/2026-08-11t18-13-55z-usaspending-dod-prime-award-obligations-fy2026/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-11T18:13:55Z"
+      },
+      "slug": "us-dod-prime-award-obligations-fy2026",
+      "target": {
+        "catalogSlug": "us-dod-prime-award-obligations-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-07T17:54:06Z",
+        "registeredAtUtc": "2026-08-07T17:54:06Z",
+        "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+        "registrationState": "preregistered",
+        "series": "usaspending.dod.prime_award_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "obligations",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.agency.097.awards.obligations",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+          "table": "USAspending API v2, agency 097 (DoD) award summary, prime award obligations, fiscal year to date",
+          "transform": {
+            "factor": 1e-09,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "59b334c6612eaf1c20be70ad587590901539f4fc2a11749e9f6a8f1ef2927907",
+        "targetRegistrationPath": "records/targets/2026-08-07-59b334c6612eaf1c20be70ad587590901539f4fc2a11749e9f6a8f1ef2927907.json",
+        "targetUnit": "billions USD",
+        "valueScale": 1e-09
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-07/auto-roll-31209278963-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-16-18z-usaspending-dod-prime-award-transactions-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-16-18z-usaspending-dod-prime-award-transactions-fy2026/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-07T19:16:18Z"
+      },
+      "slug": "us-dod-prime-award-transactions-fy2026",
+      "target": {
+        "catalogSlug": "us-dod-prime-award-transactions-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-07T17:54:06Z",
+        "registeredAtUtc": "2026-08-07T17:54:06Z",
+        "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+        "registrationState": "preregistered",
+        "series": "usaspending.dod.prime_award_transactions",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "transaction_count",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.agency.097.awards.transaction_count",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+          "table": "USAspending API v2, agency 097 (DoD) award summary, transaction count, fiscal year to date",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "41dd79f388ca4e5be3ffe71c6c375afc0cc75e0393ae1cb4d6347241b5637d8c",
+        "targetRegistrationPath": "records/targets/2026-08-07-41dd79f388ca4e5be3ffe71c6c375afc0cc75e0393ae1cb4d6347241b5637d8c.json",
+        "targetUnit": "millions",
+        "valueScale": 1e-06
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-11/auto-roll-31521464486-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-11/2026-08-11t18-17-53z-usaspending-dod-prime-contract-obligations-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-11/2026-08-11t18-17-53z-usaspending-dod-prime-contract-obligations-fy2026/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-11T18:17:53Z"
+      },
+      "slug": "us-dod-prime-contract-obligations-fy2026",
+      "target": {
+        "catalogSlug": "us-dod-prime-contract-obligations-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-07T17:54:06Z",
+        "registeredAtUtc": "2026-08-07T17:54:06Z",
+        "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+        "registrationState": "preregistered",
+        "series": "usaspending.dod.prime_contract_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "results[category=contracts].aggregated_amount",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.agency.097.obligations_by_award_category.contracts",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year={fiscal_year}",
+          "table": "USAspending API v2, agency 097 (DoD) obligations by award category, contracts row, fiscal year to date",
+          "transform": {
+            "factor": 1e-09,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "8b3a9c297b91e44b81cdda9bca2c64337b021348fba63395c4b5879b6e3e94be",
+        "targetRegistrationPath": "records/targets/2026-08-07-8b3a9c297b91e44b81cdda9bca2c64337b021348fba63395c4b5879b6e3e94be.json",
+        "targetUnit": "billions USD",
+        "valueScale": 1e-09
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-07/auto-roll-31209278963-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-24-07z-usaspending-dod-small-business-contract-obligation-share-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-24-07z-usaspending-dod-small-business-contract-obligation-share-fy2026/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-07T19:24:07Z"
+      },
+      "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+      "target": {
+        "catalogSlug": "us-dod-small-business-contract-obligation-share-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-07T17:54:06Z",
+        "registeredAtUtc": "2026-08-07T17:54:06Z",
+        "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+        "registrationState": "preregistered",
+        "series": "usaspending.dod.small_business_contract_obligation_share",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.search.spending_over_time.dod.contracts.small_business_obligation_share",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+          "table": "USAspending API v2 advanced search, small-business share of DoD prime-contract obligations, fiscal year to date",
+          "transform": {
+            "agency": {
+              "name": "Department of Defense",
+              "tier": "toptier",
+              "type": "awarding"
+            },
+            "awardTypeCodes": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "denominatorRecipientTypeNames": [],
+            "factor": 1,
+            "fiscalYear": "{fiscal_year}",
+            "group": "fiscal_year",
+            "numeratorRecipientTypeNames": [
+              "small_business"
+            ],
+            "operation": "ratio_percent",
+            "requestMethod": "POST",
+            "spendingLevel": "transactions"
+          }
+        },
+        "targetContentHash": "b7ebec1228518b70de1c1c2f93d0b0084f260ea989d72d0b12968b776082e8cf",
+        "targetRegistrationPath": "records/targets/2026-08-07-b7ebec1228518b70de1c1c2f93d0b0084f260ea989d72d0b12968b776082e8cf.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-07/auto-roll-31209278963-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-19-30z-usaspending-dod-unique-prime-contract-recipients-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-07/2026-08-07t19-19-30z-usaspending-dod-unique-prime-contract-recipients-fy2026/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-07T19:19:30Z"
+      },
+      "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+      "target": {
+        "catalogSlug": "us-dod-unique-prime-contract-recipients-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-07T17:54:06Z",
+        "registeredAtUtc": "2026-08-07T17:54:06Z",
+        "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+        "registrationState": "preregistered",
+        "series": "usaspending.dod.unique_prime_contract_recipients",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "results[].recipient_id",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.search.spending_by_category.recipient.dod.contracts.distinct",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+          "table": "USAspending API v2 advanced search, DoD prime-contract obligations grouped by recipient, fiscal year to date",
+          "transform": {
+            "agency": {
+              "name": "Department of Defense",
+              "tier": "toptier",
+              "type": "awarding"
+            },
+            "awardTypeCodes": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "excludeNullIdentity": true,
+            "factor": 0.001,
+            "fiscalYear": "{fiscal_year}",
+            "identityField": "recipient_id",
+            "operation": "count_distinct",
+            "pageSize": 100,
+            "requestMethod": "POST",
+            "spendingLevel": "transactions"
+          }
+        },
+        "targetContentHash": "41650d52985f5a06fb5d4757aff12dff8b07f6451c3e7add3159b0791b50a391",
+        "targetRegistrationPath": "records/targets/2026-08-07-41650d52985f5a06fb5d4757aff12dff8b07f6451c3e7add3159b0791b50a391.json",
+        "targetUnit": "thousands",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-11/auto-roll-31533876109-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-11/2026-08-11t20-47-59z-usaspending-ntia-broadband-al11038-obligations-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-11/2026-08-11t20-47-59z-usaspending-ntia-broadband-al11038-obligations-fy2026/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-11T20:47:59Z"
+      },
+      "slug": "us-ntia-broadband-al11038-obligations-fy2026",
+      "target": {
+        "anchors": {
+          "2025": 409.85240647
+        },
+        "catalogSlug": "us-ntia-broadband-al11038-obligations-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-11T20:38:09Z",
+        "registeredAtUtc": "2026-08-11T20:38:09Z",
+        "registrationCommit": "49bf9b5726d9faf93b6c96c9d73d4a52dc74c030",
+        "registrationState": "preregistered",
+        "series": "usaspending.ntia.broadband_al11038_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.search.spending_over_time.ntia.broadband_program_obligations",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+          "table": "USAspending API v2 advanced search, financial-assistance award transactions filtered to Assistance Listing 11.038, obligations by fiscal year",
+          "transform": {
+            "awardTypeCodes": [
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11"
+            ],
+            "factor": 1e-06,
+            "fiscalYear": "{fiscal_year}",
+            "group": "fiscal_year",
+            "operation": "multiply",
+            "programNumbers": [
+              "11.038"
+            ],
+            "requestMethod": "POST",
+            "spendingLevel": "transactions"
+          }
+        },
+        "targetContentHash": "e04d264d1888de22891b4b0a6aa7e0f8f3ae8b937613de7e3ee9242f726e37e9",
+        "targetRegistrationPath": "records/targets/2026-08-11-e04d264d1888de22891b4b0a6aa7e0f8f3ae8b937613de7e3ee9242f726e37e9.json",
+        "targetUnit": "usd_millions",
+        "valueScale": 1e-06
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-12/auto-roll-31639421680-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-12/2026-08-12t20-54-08z-usaspending-ondcp-hidta-al95001-obligations-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-12/2026-08-12t20-54-08z-usaspending-ondcp-hidta-al95001-obligations-fy2026/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-12T20:54:08Z"
+      },
+      "slug": "us-ondcp-hidta-al95001-obligations-fy2026",
+      "target": {
+        "anchors": {
+          "2025": 271.6576756
+        },
+        "catalogSlug": "us-ondcp-hidta-al95001-obligations-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-11T20:38:09Z",
+        "registeredAtUtc": "2026-08-11T20:38:09Z",
+        "registrationCommit": "49bf9b5726d9faf93b6c96c9d73d4a52dc74c030",
+        "registrationState": "preregistered",
+        "series": "usaspending.ondcp.hidta_al95001_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.search.spending_over_time.ondcp.hidta_program_obligations",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+          "table": "USAspending API v2 advanced search, financial-assistance award transactions filtered to Assistance Listing 95.001, obligations by fiscal year",
+          "transform": {
+            "awardTypeCodes": [
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11"
+            ],
+            "factor": 1e-06,
+            "fiscalYear": "{fiscal_year}",
+            "group": "fiscal_year",
+            "operation": "multiply",
+            "programNumbers": [
+              "95.001"
+            ],
+            "requestMethod": "POST",
+            "spendingLevel": "transactions"
+          }
+        },
+        "targetContentHash": "eb895fc1e680eab66d27b1046b6df148fa4c00829fc42935f4c36fb1c8a4a42a",
+        "targetRegistrationPath": "records/targets/2026-08-11-eb895fc1e680eab66d27b1046b6df148fa4c00829fc42935f4c36fb1c8a4a42a.json",
+        "targetUnit": "usd_millions",
+        "valueScale": 1e-06
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-12/auto-roll-31639421680-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-12/2026-08-12t20-57-24z-usaspending-usfs-minnesota-place-of-performance-obligations-fy2026/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-12/2026-08-12t20-57-24z-usaspending-usfs-minnesota-place-of-performance-obligations-fy2026/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-12T20:57:24Z"
+      },
+      "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+      "target": {
+        "anchors": {
+          "2025": 46.83255679
+        },
+        "catalogSlug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+        "country": "US",
+        "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+        "expectedReleaseWindow": {
+          "end": "2026-10-22",
+          "start": "2026-10-15"
+        },
+        "period": "FY2026",
+        "registeredAt": "2026-08-11T20:38:09Z",
+        "registeredAtUtc": "2026-08-11T20:38:09Z",
+        "registrationCommit": "49bf9b5726d9faf93b6c96c9d73d4a52dc74c030",
+        "registrationState": "preregistered",
+        "series": "usaspending.usfs.minnesota_place_of_performance_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-22",
+            "start": "2026-10-15"
+          },
+          "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.search.spending_over_time.usfs.minnesota_obligations",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+          "table": "USAspending API v2 advanced search, prime award transactions filtered to the Forest Service awarding subagency and Minnesota place of performance, obligations by fiscal year",
+          "transform": {
+            "agency": {
+              "name": "Forest Service",
+              "tier": "subtier",
+              "toptier_name": "Department of Agriculture",
+              "type": "awarding"
+            },
+            "awardTypeCodes": [
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "A",
+              "B",
+              "C",
+              "D",
+              "IDV_A",
+              "IDV_B",
+              "IDV_B_A",
+              "IDV_B_B",
+              "IDV_B_C",
+              "IDV_C",
+              "IDV_D",
+              "IDV_E"
+            ],
+            "factor": 1e-06,
+            "fiscalYear": "{fiscal_year}",
+            "group": "fiscal_year",
+            "operation": "multiply",
+            "placeOfPerformanceLocations": [
+              {
+                "country": "USA",
+                "state": "MN"
+              }
+            ],
+            "requestMethod": "POST",
+            "spendingLevel": "transactions"
+          }
+        },
+        "targetContentHash": "c9df27cac6ec6a78de1e5b7db1e881dacef14cb4d0f607f328e49f5b8cf836c3",
+        "targetRegistrationPath": "records/targets/2026-08-11-c9df27cac6ec6a78de1e5b7db1e881dacef14cb4d0f607f328e49f5b8cf836c3.json",
+        "targetUnit": "usd_millions",
+        "valueScale": 1e-06
+      },
+      "windowStart": "2026-10-15"
+    },
+    {
+      "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-04/auto-roll-33909022340-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-20-07z-treasury-mts-monthly-deficit-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-20-07z-treasury-mts-monthly-deficit-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-04T19:20:07Z"
+      },
+      "slug": "us-mts-deficit-september-2026",
+      "target": {
+        "catalogSlug": "us-mts-deficit-september-2026",
+        "country": "US",
+        "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-25",
+          "start": "2026-10-17"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-04T19:02:52Z",
+        "registeredAtUtc": "2026-09-04T19:02:52Z",
+        "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+        "registrationState": "preregistered",
+        "series": "treasury.mts.monthly_deficit",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "fiscaldata.treasury.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-25",
+            "start": "2026-10-17"
+          },
+          "field": "treasury.mts.monthly_deficit",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "treasury.mts.monthly_deficit",
+          "sourceUrl": "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+          "table": "U.S. Department of the Treasury, Bureau of the Fiscal Service, Monthly Treasury Statement Table 1",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "5b66f0d04db219d96734836f2f8e3217def4686b2086654d319a58b4080483a9",
+        "targetRegistrationPath": "records/targets/2026-09-04-5b66f0d04db219d96734836f2f8e3217def4686b2086654d319a58b4080483a9.json",
+        "targetUnit": "usd_billions",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-17"
+    },
+    {
+      "dataPointId": "statcan.cpi.allitems.yoy.2026_09.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-07/auto-roll-34157957310-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-22-46z-statcan-cpi-allitems-yoy-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-07T20:22:46Z"
+      },
+      "slug": "canada-cpi-annual-rate-september-2026",
+      "target": {
+        "catalogSlug": "canada-cpi-annual-rate-september-2026",
+        "country": "CA",
+        "dataPointId": "statcan.cpi.allitems.yoy.2026_09.first_print",
+        "expectedReleaseDate": "2026-10-19",
+        "expectedReleaseWindow": {
+          "end": "2026-10-19",
+          "start": "2026-10-19"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-07T20:04:45Z",
+        "registeredAtUtc": "2026-09-07T20:04:45Z",
+        "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.cpi.allitems.yoy",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-19",
+            "start": "2026-10-19"
+          },
+          "field": "v41690973",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v41690973",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "Consumer Price Index, Table 18-10-0004-01 (all-items, Canada)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_year_ago"
+          }
+        },
+        "targetContentHash": "30e18f817d32a7f592e96369a07833d40974bb0a480ea38e5a77847b642a9af6",
+        "targetRegistrationPath": "records/targets/2026-09-07-30e18f817d32a7f592e96369a07833d40974bb0a480ea38e5a77847b642a9af6.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-19"
+    },
+    {
+      "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-14/auto-roll-34892499251-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-35-22z-abs-labour-employment-change-australia-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-35-22z-abs-labour-employment-change-australia-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-14T20:35:22Z"
+      },
+      "slug": "abs-labour-employment-change-australia-september-2026",
+      "target": {
+        "catalogSlug": "abs-labour-employment-change-australia-september-2026",
+        "country": "AU",
+        "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-28",
+          "start": "2026-10-20"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-14T20:23:15Z",
+        "registeredAtUtc": "2026-09-14T20:23:15Z",
+        "registrationCommit": "0f2c009b27e9b65c2aeb9b253934fd8b301b787e",
+        "registrationState": "preregistered",
+        "series": "abs.labour.employment_change.australia",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "data.api.abs.gov.au"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-28",
+            "start": "2026-10-20"
+          },
+          "field": "LF/M3.3.1599.20.AUS.M",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LF/M3.3.1599.20.AUS.M",
+          "sourceUrl": "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+          "table": "Labour Force, Australia (dataflow LF: employed persons, seasonally adjusted, Australia; month-over-month change)",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "targetContentHash": "cb50e4f977134dd7052ae03768ee9c2e2d2606387498938baded80a6d1baf32b",
+        "targetRegistrationPath": "records/targets/2026-09-14-cb50e4f977134dd7052ae03768ee9c2e2d2606387498938baded80a6d1baf32b.json",
+        "targetUnit": "thousands",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-20"
+    },
+    {
+      "dataPointId": "nbb.gdp.flash_qoq.2026_q3.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-10/auto-roll-r12.json",
+        "cellsPath": "records/thesis-analyst/2026-07-10/2026-07-10t04-46-03z-nbb-gdp-flash-qoq-2026-q3/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-10/2026-07-10t04-46-03z-nbb-gdp-flash-qoq-2026-q3/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-10T04:46:03Z"
+      },
+      "slug": "belgium-gdp-flash-q3-2026",
+      "target": {
+        "catalogSlug": "belgium-gdp-flash-q3-2026",
+        "country": "BE",
+        "dataPointId": "nbb.gdp.flash_qoq.2026_q3.first_print",
+        "period": "2026-Q3",
+        "registeredAt": "2026-07-10T00:00:00Z",
+        "registrationState": "preregistered",
+        "series": "nbb.gdp.flash_qoq",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.nbb.be"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-06",
+            "start": "2026-10-23"
+          },
+          "field": "nbb.gdp.flash_qoq",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "nbb.gdp.flash_qoq",
+          "sourceUrl": "https://www.nbb.be/en/statistics/nationalregional-accounts",
+          "table": "National Bank of Belgium national accounts flash estimate release",
+          "transform": {
+            "factor": 1.0,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279",
+        "targetRegistrationPath": "records/targets/2026-07-10-e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1.0
+      },
+      "windowStart": "2026-10-23"
+    },
+    {
+      "dataPointId": "bls.eci.private_wages_salaries_qoq.2026_q3.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-31/auto-roll-30653471614-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-07-31/2026-07-31t18-14-25z-bls-eci-private-wages-salaries-qoq-2026-q3/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-31/2026-07-31t18-14-25z-bls-eci-private-wages-salaries-qoq-2026-q3/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-31T18:14:25Z"
+      },
+      "slug": "us-eci-private-wages-salaries-q3-2026",
+      "target": {
+        "catalogSlug": "us-eci-private-wages-salaries-q3-2026",
+        "country": "US",
+        "dataPointId": "bls.eci.private_wages_salaries_qoq.2026_q3.first_print",
+        "period": "2026-Q3",
+        "registeredAt": "2026-07-31T18:02:17Z",
+        "registeredAtUtc": "2026-07-31T18:02:17Z",
+        "registrationCommit": "7ecbc85cc4110060218f856d50321ab93db3af3b",
+        "registrationState": "preregistered",
+        "series": "bls.eci.private_wages_salaries_qoq",
+        "sourceBinding": {
+          "adapter": "alfred-fred",
+          "allowedHosts": [
+            "alfred.stlouisfed.org"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-07",
+            "start": "2026-10-24"
+          },
+          "field": "ECIWAG",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "ECIWAG",
+          "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ECIWAG",
+          "table": "Employment Cost Index, Table 2",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "2c36c5c31274178a05853fc5716e0ea00060cceeb591cc495a2f9dd286451d0c",
+        "targetRegistrationPath": "records/targets/2026-07-31-2c36c5c31274178a05853fc5716e0ea00060cceeb591cc495a2f9dd286451d0c.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-24"
+    },
+    {
+      "dataPointId": "bls.jolts.quits_rate.2026-09.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-04/auto-roll-33909022340-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-13-33z-bls-jolts-quits-rate-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-13-33z-bls-jolts-quits-rate-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-04T19:13:33Z"
+      },
+      "slug": "jolts-quits-rate-september-2026",
+      "target": {
+        "catalogSlug": "jolts-quits-rate-september-2026",
+        "country": "US",
+        "dataPointId": "bls.jolts.quits_rate.2026-09.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-11-02",
+          "start": "2026-10-25"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-04T19:02:52Z",
+        "registeredAtUtc": "2026-09-04T19:02:52Z",
+        "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+        "registrationState": "preregistered",
+        "series": "bls.jolts.quits_rate",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-02",
+            "start": "2026-10-25"
+          },
+          "field": "bls.jolts.quits_rate",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "bls.jolts.quits_rate",
+          "sourceUrl": "https://www.bls.gov/news.release/jolts.t04.htm",
+          "table": "U.S. Bureau of Labor Statistics Job Openings and Labor Turnover Survey Table 4",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "74e02458a389a50401eff733c388f7e2276c14828bb9b452fa18bab5db1d8860",
+        "targetRegistrationPath": "records/targets/2026-09-04-74e02458a389a50401eff733c388f7e2276c14828bb9b452fa18bab5db1d8860.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-25"
+    },
+    {
+      "dataPointId": "usda.fns.snap.persons.june_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-10/auto-roll-29112206394-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-07-10/2026-07-10t17-50-44z-fns-snap-total-persons-2026-06/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-10/2026-07-10t17-50-44z-fns-snap-total-persons-2026-06/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-10T17:50:44Z"
+      },
+      "slug": "snap-participation-june-2026",
+      "target": {
+        "catalogSlug": "snap-participation-june-2026",
+        "country": "US",
+        "dataPointId": "usda.fns.snap.persons.june_2026",
+        "period": "2026-06",
+        "registeredAt": "2026-07-10T17:47:41Z",
+        "registeredAtUtc": "2026-07-10T17:47:41Z",
+        "registrationCommit": "79e7796ea8cde8d3c263a226250346d3aa2c88d9",
+        "registrationState": "preregistered",
+        "series": "fns.snap.total_persons",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.fns.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-03",
+            "start": "2026-10-26"
+          },
+          "field": "Persons",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "fns.snap.total_persons",
+          "sourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+          "table": "FNS SNAP data tables, national monthly participation (thousands)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "fa0d017e2d4445b343793d95ea532622f4da9946c9dc0ce333ef7298be904a6d",
+        "targetRegistrationPath": "records/targets/2026-07-10-fa0d017e2d4445b343793d95ea532622f4da9946c9dc0ce333ef7298be904a6d.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-10-26"
+    },
+    {
+      "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-04/auto-roll-33909022340-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-04T19:18:12Z"
+      },
+      "slug": "us-core-pce-mom-september-2026",
+      "target": {
+        "catalogSlug": "us-core-pce-mom-september-2026",
+        "country": "US",
+        "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+        "expectedReleaseWindow": {
+          "end": "2026-11-03",
+          "start": "2026-10-26"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-04T19:02:52Z",
+        "registeredAtUtc": "2026-09-04T19:02:52Z",
+        "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+        "registrationState": "preregistered",
+        "series": "bea.core_pce.mom",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.bea.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-03",
+            "start": "2026-10-26"
+          },
+          "field": "bea.core_pce.mom",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "bea.core_pce.mom",
+          "sourceUrl": "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+          "table": "U.S. Bureau of Economic Analysis, Personal Income and Outlays, August 2026",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558",
+        "targetRegistrationPath": "records/targets/2026-09-04-3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-26"
+    },
+    {
+      "dataPointId": "bea.private_nonresidential_fixed_investment.2026_q3.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-17/auto-roll-32047744265-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-17/2026-08-17t16-56-30z-bea-private-nonresidential-fixed-investment-2026-q3/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-17/2026-08-17t16-56-30z-bea-private-nonresidential-fixed-investment-2026-q3/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-17T16:56:30Z"
+      },
+      "slug": "us-private-nonresidential-fixed-investment-q3-2026",
+      "target": {
+        "catalogSlug": "us-private-nonresidential-fixed-investment-q3-2026",
+        "country": "US",
+        "dataPointId": "bea.private_nonresidential_fixed_investment.2026_q3.first_print",
+        "expectedReleaseDate": "2026-10-29",
+        "expectedReleaseWindow": {
+          "end": "2026-10-29",
+          "start": "2026-10-29"
+        },
+        "period": "2026-Q3",
+        "registeredAt": "2026-08-17T16:54:17Z",
+        "registeredAtUtc": "2026-08-17T16:54:17Z",
+        "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
+        "seedPeriod": "2026-Q3",
+        "series": "bea.private_nonresidential_fixed_investment",
+        "sourceBinding": {
+          "adapter": "bea-release",
+          "allowedHosts": [
+            "apps.bea.gov",
+            "www.bea.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-29",
+            "start": "2026-10-29"
+          },
+          "field": "Line 2: Nonresidential",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "T50305:L2",
+          "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+          "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 2 (Nonresidential)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "78ab7e77198fa656ee058e98fa6d3e8743b3f9f24714b851883bee7fff4d2114",
+        "targetRegistrationPath": "records/targets/2026-08-17-78ab7e77198fa656ee058e98fa6d3e8743b3f9f24714b851883bee7fff4d2114.json",
+        "targetUnit": "usd_billions",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-29"
+    },
+    {
+      "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-17/auto-roll-32047744265-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-17/2026-08-17t16-58-57z-bea-research-and-development-fixed-investment-2026-q3/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-17/2026-08-17t16-58-57z-bea-research-and-development-fixed-investment-2026-q3/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-17T16:58:57Z"
+      },
+      "slug": "us-private-research-development-fixed-investment-q3-2026",
+      "target": {
+        "catalogSlug": "us-private-research-development-fixed-investment-q3-2026",
+        "country": "US",
+        "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+        "expectedReleaseDate": "2026-10-29",
+        "expectedReleaseWindow": {
+          "end": "2026-10-29",
+          "start": "2026-10-29"
+        },
+        "period": "2026-Q3",
+        "registeredAt": "2026-08-17T16:54:17Z",
+        "registeredAtUtc": "2026-08-17T16:54:17Z",
+        "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
+        "seedPeriod": "2026-Q3",
+        "series": "bea.research_and_development_fixed_investment",
+        "sourceBinding": {
+          "adapter": "bea-release",
+          "allowedHosts": [
+            "apps.bea.gov",
+            "www.bea.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-29",
+            "start": "2026-10-29"
+          },
+          "field": "Line 18: Research and development",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "T50305:L18",
+          "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+          "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 18 (Research and development)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1",
+        "targetRegistrationPath": "records/targets/2026-08-17-a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1.json",
+        "targetUnit": "usd_billions",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-29"
+    },
+    {
+      "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-12/auto-roll-31639434204-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-12/2026-08-12t21-39-34z-statcan-gdp-by-industry-monthly-growth-2026-08/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-12/2026-08-12t21-39-34z-statcan-gdp-by-industry-monthly-growth-2026-08/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-12T21:39:34Z"
+      },
+      "slug": "canada-monthly-gdp-growth-august-2026",
+      "target": {
+        "catalogSlug": "canada-monthly-gdp-growth-august-2026",
+        "country": "CA",
+        "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+        "expectedReleaseDate": "2026-10-30",
+        "expectedReleaseWindow": {
+          "end": "2026-10-30",
+          "start": "2026-10-30"
+        },
+        "period": "2026-08",
+        "registeredAt": "2026-08-12T21:16:44Z",
+        "registeredAtUtc": "2026-08-12T21:16:44Z",
+        "registrationCommit": "d50ffb7c957ea27fad25c6e0c6fee0aa2471bc84",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.gdp_by_industry.monthly_growth",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-30",
+            "start": "2026-10-30"
+          },
+          "field": "v65201210",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v65201210",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_previous_period"
+          }
+        },
+        "targetContentHash": "778113191d1d7e73b43cd7e74053741e8877f59bae7e55d100ed2fc1206efee3",
+        "targetRegistrationPath": "records/targets/2026-08-12-778113191d1d7e73b43cd7e74053741e8877f59bae7e55d100ed2fc1206efee3.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-30"
+    },
+    {
+      "dataPointId": "bls.productivity.nonfarm_qoq_prelim.2026_q3.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-10/auto-roll-r12.json",
+        "cellsPath": "records/thesis-analyst/2026-07-10/2026-07-10t04-48-53z-bls-productivity-nonfarm-qoq-prelim-2026-q3/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-10/2026-07-10t04-48-53z-bls-productivity-nonfarm-qoq-prelim-2026-q3/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-10T04:48:53Z"
+      },
+      "slug": "us-nonfarm-productivity-q3-2026-prelim",
+      "target": {
+        "catalogSlug": "us-nonfarm-productivity-q3-2026-prelim",
+        "dataPointId": "bls.productivity.nonfarm_qoq_prelim.2026_q3.first_print",
+        "period": "2026-Q3",
+        "registeredAt": "2026-07-10T00:00:00Z",
+        "registrationState": "preregistered",
+        "series": "bls.productivity.nonfarm_qoq_prelim",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-13",
+            "start": "2026-10-30"
+          },
+          "field": "bls.productivity.nonfarm_qoq_prelim",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "bls.productivity.nonfarm_qoq_prelim",
+          "sourceUrl": "https://www.bls.gov/news.release/prod2.t02.htm",
+          "table": "U.S. Bureau of Labor Statistics Productivity and Costs news release, Table 2",
+          "transform": {
+            "factor": 1.0,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279",
+        "targetRegistrationPath": "records/targets/2026-07-10-e4d03ea8e19f087e9b0fa5aa3d9d383f37dec65bd1f08792d781e21a09cd6279.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1.0
+      },
+      "windowStart": "2026-10-30"
+    },
+    {
+      "dataPointId": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-31/auto-roll-30653471614-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-07-31/2026-07-31t18-16-29z-bls-productivity-nonfarm-unit-labor-costs-qoq-prelim-2026-q3/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-31/2026-07-31t18-16-29z-bls-productivity-nonfarm-unit-labor-costs-qoq-prelim-2026-q3/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-31T18:16:29Z"
+      },
+      "slug": "us-unit-labor-costs-q3-2026-prelim",
+      "target": {
+        "catalogSlug": "us-unit-labor-costs-q3-2026-prelim",
+        "country": "US",
+        "dataPointId": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print",
+        "period": "2026-Q3",
+        "registeredAt": "2026-07-31T18:02:17Z",
+        "registeredAtUtc": "2026-07-31T18:02:17Z",
+        "registrationCommit": "7ecbc85cc4110060218f856d50321ab93db3af3b",
+        "registrationState": "preregistered",
+        "series": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim",
+        "sourceBinding": {
+          "adapter": "alfred-fred",
+          "allowedHosts": [
+            "alfred.stlouisfed.org"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-13",
+            "start": "2026-10-30"
+          },
+          "field": "PRS85006112",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "PRS85006112",
+          "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PRS85006112",
+          "table": "Productivity and Costs, nonfarm business sector",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "5acb920aa1125b4d971bd7b22bdf4bd31f9a5ede261d0e7074400403a66e4391",
+        "targetRegistrationPath": "records/targets/2026-07-31-5acb920aa1125b4d971bd7b22bdf4bd31f9a5ede261d0e7074400403a66e4391.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "windowStart": "2026-10-30"
+    },
+    {
+      "dataPointId": "ssa.ssi.total_recipients.2026-09.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-07/auto-roll-34157957310-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-07T20:16:41Z"
+      },
+      "slug": "ssi-recipients-september-2026",
+      "target": {
+        "catalogSlug": "ssi-recipients-september-2026",
+        "country": "US",
+        "dataPointId": "ssa.ssi.total_recipients.2026-09.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-11-08",
+          "start": "2026-10-31"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-07T20:04:45Z",
+        "registeredAtUtc": "2026-09-07T20:04:45Z",
+        "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+        "registrationState": "preregistered",
+        "series": "ssa.ssi.total_recipients",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.ssa.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-08",
+            "start": "2026-10-31"
+          },
+          "field": "ssa.ssi.total_recipients",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "ssa.ssi.total_recipients",
+          "sourceUrl": "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-07/table02.html",
+          "table": "Social Security Administration SSI Monthly Statistics",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "9509b1552284e3dcd59b3e1c6a6752efb3be2cf74e57824022343f3a837dde2f",
+        "targetRegistrationPath": "records/targets/2026-09-07-9509b1552284e3dcd59b3e1c6a6752efb3be2cf74e57824022343f3a837dde2f.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-10-31"
+    },
+    {
+      "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-11/auto-roll-34637582097-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-19-53z-eurostat-unemployment-rate-belgium-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-19-53z-eurostat-unemployment-rate-belgium-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-11T19:19:53Z"
+      },
+      "slug": "belgium-unemployment-rate-september-2026",
+      "target": {
+        "catalogSlug": "belgium-unemployment-rate-september-2026",
+        "country": "BE",
+        "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-11-09",
+          "start": "2026-11-01"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-11T19:13:41Z",
+        "registeredAtUtc": "2026-09-11T19:13:41Z",
+        "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+        "registrationState": "preregistered",
+        "series": "eurostat.unemployment_rate.belgium",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "ec.europa.eu"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-09",
+            "start": "2026-11-01"
+          },
+          "field": "eurostat.unemployment_rate.belgium",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "eurostat.unemployment_rate.belgium",
+          "sourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+          "table": "Eurostat monthly unemployment euro-indicators release / une_rt_m data page",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26",
+        "targetRegistrationPath": "records/targets/2026-09-11-2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2026-11-01"
+    },
+    {
+      "dataPointId": "eurostat.unemployment_rate.euro_area.september_2026.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-07/auto-roll-34157957310-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-07T20:18:27Z"
+      },
+      "slug": "euro-area-unemployment-rate-september-2026",
+      "target": {
+        "catalogSlug": "euro-area-unemployment-rate-september-2026",
+        "country": "EA",
+        "dataPointId": "eurostat.unemployment_rate.euro_area.september_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-11-09",
+          "start": "2026-11-01"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-07T20:04:45Z",
+        "registeredAtUtc": "2026-09-07T20:04:45Z",
+        "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+        "registrationState": "preregistered",
+        "series": "eurostat.unemployment_rate",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "ec.europa.eu"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-09",
+            "start": "2026-11-01"
+          },
+          "field": "PC_ACT",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21",
+          "sourceUrl": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21?format=JSON",
+          "table": "Unemployment by sex and age (une_rt_m), euro area, SA, total; first print captured between monthly releases",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "233992db438bc52d1f79f1d0e676ac61ba4b526f50fbfbcc6e76f4996094e095",
+        "targetRegistrationPath": "records/targets/2026-09-07-233992db438bc52d1f79f1d0e676ac61ba4b526f50fbfbcc6e76f4996094e095.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2026-11-01"
+    },
+    {
+      "dataPointId": "bls.jolts.job_openings.september_2026.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-04/auto-roll-33909022340-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-11-49z-bls-jolts-job-openings-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-11-49z-bls-jolts-job-openings-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-04T19:11:49Z"
+      },
+      "slug": "jolts-openings-september-2026",
+      "target": {
+        "catalogSlug": "jolts-openings-september-2026",
+        "country": "US",
+        "dataPointId": "bls.jolts.job_openings.september_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-11-09",
+          "start": "2026-11-01"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-04T19:02:52Z",
+        "registeredAtUtc": "2026-09-04T19:02:52Z",
+        "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+        "registrationState": "preregistered",
+        "series": "bls.jolts.job_openings",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-09",
+            "start": "2026-11-01"
+          },
+          "field": "bls.jolts.job_openings",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "bls.jolts.job_openings",
+          "sourceUrl": "https://www.bls.gov/news.release/jolts.nr0.htm",
+          "table": "U.S. Bureau of Labor Statistics Job Openings and Labor Turnover Survey first-print release",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "25f383726a59f3170ab6359a0393aae5291197c2654c5e5ad362fcc4e0fef3f9",
+        "targetRegistrationPath": "records/targets/2026-09-04-25f383726a59f3170ab6359a0393aae5291197c2654c5e5ad362fcc4e0fef3f9.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-11-01"
+    },
+    {
+      "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-10-02/auto-roll-37063211068-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-54-52z-bls-ces-nonfarm-payrolls-change-2026-10/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-54-52z-bls-ces-nonfarm-payrolls-change-2026-10/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-10-02T20:54:52Z"
+      },
+      "slug": "nonfarm-payrolls-october-2026",
+      "target": {
+        "catalogSlug": "nonfarm-payrolls-october-2026",
+        "country": "US",
+        "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+        "expectedReleaseDate": "2026-11-06",
+        "expectedReleaseWindow": {
+          "end": "2026-11-06",
+          "start": "2026-11-06"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.ces.nonfarm_payrolls.change",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-06",
+            "start": "2026-11-06"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "CES0000000001",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+          "table": "Current Employment Statistics, all employees, total nonfarm, seasonally adjusted (Employment Situation, Table B-1)",
+          "transform": {
+            "factor": 1,
+            "operation": "difference_previous_period"
+          }
+        },
+        "targetContentHash": "63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945",
+        "targetRegistrationPath": "records/targets/2026-10-02-63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945.json",
+        "targetUnit": "thousands",
+        "valueScale": 1
+      },
+      "windowStart": "2026-11-06"
+    },
+    {
+      "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-10-02/auto-roll-37063211068-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t21-02-07z-statcan-cpi-allitems-yoy-2026-10/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-10-02T21:02:07Z"
+      },
+      "slug": "canada-cpi-annual-rate-october-2026",
+      "target": {
+        "catalogSlug": "canada-cpi-annual-rate-october-2026",
+        "country": "CA",
+        "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+        "expectedReleaseDate": "2026-11-16",
+        "expectedReleaseWindow": {
+          "end": "2026-11-16",
+          "start": "2026-11-16"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.cpi.allitems.yoy",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-16",
+            "start": "2026-11-16"
+          },
+          "field": "v41690973",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v41690973",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "Consumer Price Index, Table 18-10-0004-01 (all-items, Canada)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_year_ago"
+          }
+        },
+        "targetContentHash": "0e09b18f90e7854e6dcb76a0fa5559f39add1130f2cd2a9dab1511711e58115f",
+        "targetRegistrationPath": "records/targets/2026-10-02-0e09b18f90e7854e6dcb76a0fa5559f39add1130f2cd2a9dab1511711e58115f.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2026-11-16"
+    },
+    {
+      "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.september_2026.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-07/auto-roll-34157957310-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-24-55z-statcan-employment-insurance-regular-beneficiaries-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-24-55z-statcan-employment-insurance-regular-beneficiaries-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-07T20:24:55Z"
+      },
+      "slug": "canada-ei-regular-beneficiaries-september-2026",
+      "target": {
+        "catalogSlug": "canada-ei-regular-beneficiaries-september-2026",
+        "country": "CA",
+        "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.september_2026.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-11-25",
+          "start": "2026-11-17"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-07T20:04:45Z",
+        "registeredAtUtc": "2026-09-07T20:04:45Z",
+        "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+        "registrationState": "preregistered",
+        "series": "statcan.employment_insurance.regular_beneficiaries",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-25",
+            "start": "2026-11-17"
+          },
+          "field": "v64549350",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v64549350",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+          "table": "Statistics Canada Table 14-10-0011-01, EI regular beneficiaries, Canada, seasonally adjusted (persons)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "54ad6d16226c9310945c5efeefea0290b3f8b71030b550c33a55127968ff3fd9",
+        "targetRegistrationPath": "records/targets/2026-09-07-54ad6d16226c9310945c5efeefea0290b3f8b71030b550c33a55127968ff3fd9.json",
+        "targetUnit": "thousands",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-11-17"
+    },
+    {
+      "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-11/auto-roll-31493108623-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-11/2026-08-11t13-17-20z-fns-wic-total-participation-2026-08/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-11/2026-08-11t13-17-20z-fns-wic-total-participation-2026-08/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-11T13:17:20Z"
+      },
+      "slug": "wic-participation-august-2026",
+      "target": {
+        "catalogSlug": "wic-participation-august-2026",
+        "country": "US",
+        "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-11-26",
+          "start": "2026-11-18"
+        },
+        "period": "2026-08",
+        "registeredAt": "2026-08-11T12:50:27Z",
+        "registeredAtUtc": "2026-08-11T12:50:27Z",
+        "registrationCommit": "e8c13ea71f583ab7105a64de5fe4c8594cfcb6d0",
+        "registrationState": "preregistered",
+        "series": "fns.wic.total_participation",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.fns.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-26",
+            "start": "2026-11-18"
+          },
+          "field": "fns.wic.total_participation",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "fns.wic.total_participation",
+          "sourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+          "table": "USDA Food and Nutrition Service WIC Data Tables",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "feba7a565069c13feaf303a049c80f5809cbf7568d04215f7350943843d58995",
+        "targetRegistrationPath": "records/targets/2026-08-11-feba7a565069c13feaf303a049c80f5809cbf7568d04215f7350943843d58995.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-11-18"
+    },
+    {
+      "dataPointId": "usda.fns.snap.persons.july_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-10/auto-roll-29129793879-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-07-10/2026-07-10t23-16-15z-fns-snap-total-persons-2026-07/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-10/2026-07-10t23-16-15z-fns-snap-total-persons-2026-07/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-10T23:16:15Z"
+      },
+      "slug": "snap-participation-july-2026",
+      "target": {
+        "catalogSlug": "snap-participation-july-2026",
+        "country": "US",
+        "dataPointId": "usda.fns.snap.persons.july_2026",
+        "period": "2026-07",
+        "registeredAt": "2026-07-10T23:13:40Z",
+        "registeredAtUtc": "2026-07-10T23:13:40Z",
+        "registrationCommit": "a6aa0d72352081ffa58d0615c5daf6c7c553e4ee",
+        "registrationState": "preregistered",
+        "series": "fns.snap.total_persons",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.fns.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-07",
+            "start": "2026-11-29"
+          },
+          "field": "Persons",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "fns.snap.total_persons",
+          "sourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+          "table": "FNS SNAP data tables, national monthly participation (thousands)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "9a15e6578b701e805a6459126176e230c3d057077fa7f2b829d129dfa24dae30",
+        "targetRegistrationPath": "records/targets/2026-07-10-9a15e6578b701e805a6459126176e230c3d057077fa7f2b829d129dfa24dae30.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-11-29"
+    },
+    {
+      "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_09.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-07/auto-roll-34157957310-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-07T20:20:29Z"
+      },
+      "slug": "canada-monthly-gdp-growth-september-2026",
+      "target": {
+        "catalogSlug": "canada-monthly-gdp-growth-september-2026",
+        "country": "CA",
+        "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_09.first_print",
+        "expectedReleaseDate": "2026-11-30",
+        "expectedReleaseWindow": {
+          "end": "2026-11-30",
+          "start": "2026-11-30"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-07T20:04:45Z",
+        "registeredAtUtc": "2026-09-07T20:04:45Z",
+        "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.gdp_by_industry.monthly_growth",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-11-30",
+            "start": "2026-11-30"
+          },
+          "field": "v65201210",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v65201210",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_previous_period"
+          }
+        },
+        "targetContentHash": "5e66b8f80f1cc6a1847b0462471dc202581372c8d08b343f174d5679b35c89ba",
+        "targetRegistrationPath": "records/targets/2026-09-07-5e66b8f80f1cc6a1847b0462471dc202581372c8d08b343f174d5679b35c89ba.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "windowStart": "2026-11-30"
+    },
+    {
+      "dataPointId": "bls.jolts.job_openings.2026_10.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-10-02/auto-roll-37063211068-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-56-30z-bls-jolts-job-openings-2026-10/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-56-30z-bls-jolts-job-openings-2026-10/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-10-02T20:56:30Z"
+      },
+      "slug": "jolts-openings-october-2026",
+      "target": {
+        "catalogSlug": "jolts-openings-october-2026",
+        "country": "US",
+        "dataPointId": "bls.jolts.job_openings.2026_10.first_print",
+        "expectedReleaseDate": "2026-12-01",
+        "expectedReleaseWindow": {
+          "end": "2026-12-01",
+          "start": "2026-12-01"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
+        "series": "bls.jolts.job_openings",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-01",
+            "start": "2026-12-01"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "JTS000000000000000JOL",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL",
+          "table": "Job Openings and Labor Turnover Survey, job openings level, total nonfarm, seasonally adjusted (JOLTS news release, Table 1)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "e464aa5ffca1a660d0e89b375382c6a8f4d6a61203d7a6743f7fcebe3896a2fc",
+        "targetRegistrationPath": "records/targets/2026-10-02-e464aa5ffca1a660d0e89b375382c6a8f4d6a61203d7a6743f7fcebe3896a2fc.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-12-01"
+    },
+    {
+      "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-10-02/auto-roll-37063211068-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-57-55z-bls-jolts-quits-rate-2026-10/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-57-55z-bls-jolts-quits-rate-2026-10/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-10-02T20:57:55Z"
+      },
+      "slug": "jolts-quits-rate-october-2026",
+      "target": {
+        "catalogSlug": "jolts-quits-rate-october-2026",
+        "country": "US",
+        "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
+        "expectedReleaseDate": "2026-12-01",
+        "expectedReleaseWindow": {
+          "end": "2026-12-01",
+          "start": "2026-12-01"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
+        "series": "bls.jolts.quits_rate",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-01",
+            "start": "2026-12-01"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "JTS000000000000000QUR",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+          "table": "Job Openings and Labor Turnover Survey, quits rate, total nonfarm, seasonally adjusted (JOLTS news release, Table 4)",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "e34e567dd22af66b8a7fd7522759f16c936e8c17fc330767dc31316fd36ef905",
+        "targetRegistrationPath": "records/targets/2026-10-02-e34e567dd22af66b8a7fd7522759f16c936e8c17fc330767dc31316fd36ef905.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2026-12-01"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ak.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-27-cms-ex-parte-wave-1-runs-v2.json",
+        "cellsPath": "records/thesis-analyst/2026-06-27/2026-06-27t23-55-05z-cms-medicaid-pi-ex-parte-renewal-share-ak-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-27/2026-06-27t23-55-05z-cms-medicaid-pi-ex-parte-renewal-share-ak-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-27T23:55:05Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ak",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ak",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ak.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionRule": "Resolves to Alaska's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ak.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.al.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-27-cms-ex-parte-wave-1-runs-v2.json",
+        "cellsPath": "records/thesis-analyst/2026-06-27/2026-06-27t23-57-39z-cms-medicaid-pi-ex-parte-renewal-share-al-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-27/2026-06-27t23-57-39z-cms-medicaid-pi-ex-parte-renewal-share-al-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-27T23:57:39Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-al",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-al",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.al.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionRule": "Resolves to Alabama's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.al.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ar.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-27-cms-ex-parte-wave-1-runs-v2.json",
+        "cellsPath": "records/thesis-analyst/2026-06-27/2026-06-27t23-59-59z-cms-medicaid-pi-ex-parte-renewal-share-ar-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-27/2026-06-27t23-59-59z-cms-medicaid-pi-ex-parte-renewal-share-ar-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-27T23:59:59Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ar",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ar",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ar.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionRule": "Resolves to Arkansas's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ar.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.az.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-27-cms-ex-parte-wave-1-runs-v2.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-02-36z-cms-medicaid-pi-ex-parte-renewal-share-az-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-02-36z-cms-medicaid-pi-ex-parte-renewal-share-az-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:02:35Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-az",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-az",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.az.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionRule": "Resolves to Arizona's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.az.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ca.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-27-cms-ex-parte-wave-1-runs-v2.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-05-55z-cms-medicaid-pi-ex-parte-renewal-share-ca-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-05-55z-cms-medicaid-pi-ex-parte-renewal-share-ca-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:05:55Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ca",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ca",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ca.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionRule": "Resolves to California's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ca.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.co.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-27-cms-ex-parte-wave-1-runs-v2.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-08-32z-cms-medicaid-pi-ex-parte-renewal-share-co-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-08-32z-cms-medicaid-pi-ex-parte-renewal-share-co-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:08:32Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-co",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-co",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.co.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionRule": "Resolves to Colorado's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.co.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ct.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-27-cms-ex-parte-wave-1-runs-v2.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-11-40z-cms-medicaid-pi-ex-parte-renewal-share-ct-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-11-40z-cms-medicaid-pi-ex-parte-renewal-share-ct-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:11:40Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ct",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ct",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ct.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionRule": "Resolves to Connecticut's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ct.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.dc.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-27-cms-ex-parte-wave-1-runs-v2.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-14-32z-cms-medicaid-pi-ex-parte-renewal-share-dc-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-14-32z-cms-medicaid-pi-ex-parte-renewal-share-dc-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:14:32Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-dc",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-dc",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.dc.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionRule": "Resolves to District of Columbia's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.dc.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.de.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-28-cms-ex-parte-wave-2-runs.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-24-13z-cms-medicaid-pi-ex-parte-renewal-share-de-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-24-13z-cms-medicaid-pi-ex-parte-renewal-share-de-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:24:13Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-de",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-de",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.de.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Delaware's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.de.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.fl.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-28-cms-ex-parte-wave-2-runs.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-27-51z-cms-medicaid-pi-ex-parte-renewal-share-fl-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-27-51z-cms-medicaid-pi-ex-parte-renewal-share-fl-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:27:51Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-fl",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-fl",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.fl.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Florida's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.fl.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ga.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-28-cms-ex-parte-wave-2-runs.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-31-57z-cms-medicaid-pi-ex-parte-renewal-share-ga-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-31-57z-cms-medicaid-pi-ex-parte-renewal-share-ga-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:31:56Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ga",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ga",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ga.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Georgia's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ga.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.hi.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-28-cms-ex-parte-wave-2-runs.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-34-42z-cms-medicaid-pi-ex-parte-renewal-share-hi-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-34-42z-cms-medicaid-pi-ex-parte-renewal-share-hi-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:34:42Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-hi",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-hi",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.hi.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Hawaii's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.hi.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ia.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-28-cms-ex-parte-wave-2-runs.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-37-43z-cms-medicaid-pi-ex-parte-renewal-share-ia-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-37-43z-cms-medicaid-pi-ex-parte-renewal-share-ia-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:37:43Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ia",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ia",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ia.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Iowa's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ia.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.id.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-28-cms-ex-parte-wave-2-runs.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-41-23z-cms-medicaid-pi-ex-parte-renewal-share-id-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-41-23z-cms-medicaid-pi-ex-parte-renewal-share-id-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:41:23Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-id",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-id",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.id.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Idaho's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.id.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.il.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-28-cms-ex-parte-wave-2-runs.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-43-53z-cms-medicaid-pi-ex-parte-renewal-share-il-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-43-53z-cms-medicaid-pi-ex-parte-renewal-share-il-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:43:53Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-il",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-il",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.il.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Illinois's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.il.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.in.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-06-28-cms-ex-parte-wave-2-runs.json",
+        "cellsPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-46-48z-cms-medicaid-pi-ex-parte-renewal-share-in-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-06-28/2026-06-28t00-46-48z-cms-medicaid-pi-ex-parte-renewal-share-in-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-06-28T00:46:48Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-in",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-in",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.in.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Indiana's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.in.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ks.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-01-more-forecasts-no-review.json",
+        "cellsPath": "records/thesis-analyst/2026-07-01/2026-07-01t05-19-22z-cms-medicaid-pi-ex-parte-renewal-share-ks-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-01/2026-07-01t05-19-22z-cms-medicaid-pi-ex-parte-renewal-share-ks-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-01T05:19:22Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ks",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ks",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ks.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Kansas's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ks.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ky.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-01-more-forecasts-no-review.json",
+        "cellsPath": "records/thesis-analyst/2026-07-01/2026-07-01t05-21-04z-cms-medicaid-pi-ex-parte-renewal-share-ky-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-01/2026-07-01t05-21-04z-cms-medicaid-pi-ex-parte-renewal-share-ky-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-01T05:21:04Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ky",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ky",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ky.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Kentucky's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ky.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.la.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-01-more-forecasts-no-review.json",
+        "cellsPath": "records/thesis-analyst/2026-07-01/2026-07-01t05-22-59z-cms-medicaid-pi-ex-parte-renewal-share-la-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-01/2026-07-01t05-22-59z-cms-medicaid-pi-ex-parte-renewal-share-la-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-01T05:22:59Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-la",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-la",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.la.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Louisiana's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.la.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-07-01-more-forecasts-no-review.json",
+        "cellsPath": "records/thesis-analyst/2026-07-01/2026-07-01t05-24-50z-cms-medicaid-pi-ex-parte-renewal-share-ma-aug-2026-august-2026-reporting-period/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-07-01/2026-07-01t05-24-50z-cms-medicaid-pi-ex-parte-renewal-share-ma-aug-2026-august-2026-reporting-period/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-07-01T05:24:50Z"
+      },
+      "slug": "medicaid-ex-parte-share-aug-2026-ma",
+      "target": {
+        "catalogSlug": "medicaid-ex-parte-share-aug-2026-ma",
+        "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026",
+        "period": "August 2026 reporting period",
+        "resolutionDate": "2026-12-15",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolves to Massachusetts's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+        "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+        "series": "cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026",
+        "targetUnit": "percent"
+      },
+      "windowStart": "2026-12-15"
+    },
+    {
+      "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-07/auto-roll-34157957310-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-11-41z-fns-wic-total-participation-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-11-41z-fns-wic-total-participation-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-07T20:11:41Z"
+      },
+      "slug": "wic-participation-september-2026",
+      "target": {
+        "catalogSlug": "wic-participation-september-2026",
+        "country": "US",
+        "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-12-30",
+          "start": "2026-12-22"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-07T20:04:45Z",
+        "registeredAtUtc": "2026-09-07T20:04:45Z",
+        "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+        "registrationState": "preregistered",
+        "series": "fns.wic.total_participation",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.fns.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-30",
+            "start": "2026-12-22"
+          },
+          "field": "fns.wic.total_participation",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "fns.wic.total_participation",
+          "sourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+          "table": "USDA Food and Nutrition Service WIC Data Tables",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "6fab8f5c1804406df2cf90f0e713350509f672a7c5a08d03939b11cdc2ffb88c",
+        "targetRegistrationPath": "records/targets/2026-09-07-6fab8f5c1804406df2cf90f0e713350509f672a7c5a08d03939b11cdc2ffb88c.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2026-12-22"
+    },
+    {
+      "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_10.first_print",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-10-02/auto-roll-37063211068-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-59-28z-statcan-gdp-by-industry-monthly-growth-2026-10/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-10-02/2026-10-02t20-59-28z-statcan-gdp-by-industry-monthly-growth-2026-10/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-10-02T20:59:28Z"
+      },
+      "slug": "canada-monthly-gdp-growth-october-2026",
+      "target": {
+        "catalogSlug": "canada-monthly-gdp-growth-october-2026",
+        "country": "CA",
+        "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_10.first_print",
+        "expectedReleaseDate": "2026-12-23",
+        "expectedReleaseWindow": {
+          "end": "2026-12-23",
+          "start": "2026-12-23"
+        },
+        "period": "2026-10",
+        "registeredAt": "2026-10-02T20:51:43Z",
+        "registeredAtUtc": "2026-10-02T20:51:43Z",
+        "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.gdp_by_industry.monthly_growth",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-23",
+            "start": "2026-12-23"
+          },
+          "field": "v65201210",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v65201210",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_previous_period"
+          }
+        },
+        "targetContentHash": "34a059b60ed2afd5a7adae2667732292a90e8bd0d6387703ec4e9941108bc9b8",
+        "targetRegistrationPath": "records/targets/2026-10-02-34a059b60ed2afd5a7adae2667732292a90e8bd0d6387703ec4e9941108bc9b8.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "windowStart": "2026-12-23"
+    },
+    {
+      "dataPointId": "usda.fns.snap.persons.august_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-11/auto-roll-31493108623-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-11/2026-08-11t13-22-29z-fns-snap-total-persons-2026-08/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-11/2026-08-11t13-22-29z-fns-snap-total-persons-2026-08/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-08-11T13:22:29Z"
+      },
+      "slug": "snap-participation-august-2026",
+      "target": {
+        "catalogSlug": "snap-participation-august-2026",
+        "country": "US",
+        "dataPointId": "usda.fns.snap.persons.august_2026",
+        "expectedReleaseWindow": {
+          "end": "2027-01-11",
+          "start": "2027-01-03"
+        },
+        "period": "2026-08",
+        "registeredAt": "2026-08-11T12:50:27Z",
+        "registeredAtUtc": "2026-08-11T12:50:27Z",
+        "registrationCommit": "e8c13ea71f583ab7105a64de5fe4c8594cfcb6d0",
+        "registrationState": "preregistered",
+        "series": "fns.snap.total_persons",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.fns.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2027-01-11",
+            "start": "2027-01-03"
+          },
+          "field": "Persons",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "fns.snap.total_persons",
+          "sourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+          "table": "FNS SNAP data tables, national monthly participation (thousands)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "bc941c534dcbaf1f13d1b9ba88a016f9cf51fde91019bc90beea1873ced2f0a2",
+        "targetRegistrationPath": "records/targets/2026-08-11-bc941c534dcbaf1f13d1b9ba88a016f9cf51fde91019bc90beea1873ced2f0a2.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2027-01-03"
+    },
+    {
+      "dataPointId": "usda.fns.snap.persons.september_2026",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-09-07/auto-roll-34157957310-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-14-02z-fns-snap-total-persons-2026-09/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-14-02z-fns-snap-total-persons-2026-09/manifest.json",
+        "promptMode": "fast",
+        "startedAt": "2026-09-07T20:14:02Z"
+      },
+      "slug": "snap-participation-september-2026",
+      "target": {
+        "catalogSlug": "snap-participation-september-2026",
+        "country": "US",
+        "dataPointId": "usda.fns.snap.persons.september_2026",
+        "expectedReleaseWindow": {
+          "end": "2027-02-15",
+          "start": "2027-02-07"
+        },
+        "period": "2026-09",
+        "registeredAt": "2026-09-07T20:04:45Z",
+        "registeredAtUtc": "2026-09-07T20:04:45Z",
+        "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+        "registrationState": "preregistered",
+        "series": "fns.snap.total_persons",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.fns.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2027-02-15",
+            "start": "2027-02-07"
+          },
+          "field": "Persons",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "fns.snap.total_persons",
+          "sourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+          "table": "FNS SNAP data tables, national monthly participation (thousands)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "c75aaa27f9ca01b95b9261fe1d397216de66021ff374c9ad807e6ca69dca9672",
+        "targetRegistrationPath": "records/targets/2026-09-07-c75aaa27f9ca01b95b9261fe1d397216de66021ff374c9ad807e6ca69dca9672.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "windowStart": "2027-02-07"
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-13/auto-roll-31739902356-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-13/2026-08-13t20-17-14z-usaspending-dod-prime-award-obligations-2027/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-13/2026-08-13t20-17-14z-usaspending-dod-prime-award-obligations-2027/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-13T20:17:14Z"
+      },
+      "slug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+      "target": {
+        "catalogSlug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+        "conditionDeadline": "2026-12-31",
+        "conditionId": "cond.fy27-ndaa-enactment.enacted",
+        "conditional": "An Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress, House Report 119-698) is enacted into law on or before 2026-12-31.",
+        "country": "US",
+        "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted",
+        "expectedReleaseWindow": {
+          "end": "2027-10-22",
+          "start": "2027-10-15"
+        },
+        "period": "2027",
+        "registeredAt": "2026-08-13T16:32:19Z",
+        "registeredAtUtc": "2026-08-13T16:32:19Z",
+        "registrationCommit": "27d485d528684bbe8281fa349cfbb9587169dd5b",
+        "registrationState": "preregistered",
+        "series": "usaspending.dod.prime_award_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2027-10-22",
+            "start": "2027-10-15"
+          },
+          "field": "obligations",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.agency.097.awards.obligations",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+          "table": "USAspending API v2, agency 097 (DoD) award summary, prime award obligations, fiscal year to date",
+          "transform": {
+            "factor": 1e-09,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "d3e164666cfec76acc158c22d6e10fdb9af935f4eac09a0486ea434862212132",
+        "targetRegistrationPath": "records/targets/2026-08-13-d3e164666cfec76acc158c22d6e10fdb9af935f4eac09a0486ea434862212132.json",
+        "targetUnit": "billions USD",
+        "valueScale": 1e-09
+      },
+      "windowStart": "2027-10-15"
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-13/auto-roll-31725798534-a1.json",
+        "cellsPath": "records/thesis-analyst/2026-08-13/2026-08-13t17-33-12z-usaspending-dod-prime-award-obligations-2027/cells.with_activity.json",
+        "codexModel": null,
+        "manifestPath": "records/thesis-analyst/2026-08-13/2026-08-13t17-33-12z-usaspending-dod-prime-award-obligations-2027/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-13T17:33:12Z"
+      },
+      "slug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+      "target": {
+        "catalogSlug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+        "conditionDeadline": "2026-12-31",
+        "conditionId": "cond.fy27-ndaa-enactment.not-enacted",
+        "conditional": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+        "country": "US",
+        "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+        "expectedReleaseWindow": {
+          "end": "2027-10-22",
+          "start": "2027-10-15"
+        },
+        "period": "2027",
+        "registeredAt": "2026-08-13T16:32:19Z",
+        "registeredAtUtc": "2026-08-13T16:32:19Z",
+        "registrationCommit": "27d485d528684bbe8281fa349cfbb9587169dd5b",
+        "registrationState": "preregistered",
+        "series": "usaspending.dod.prime_award_obligations",
+        "sourceBinding": {
+          "adapter": "usaspending-api",
+          "allowedHosts": [
+            "api.usaspending.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2027-10-22",
+            "start": "2027-10-15"
+          },
+          "field": "obligations",
+          "releasePolicy": "registered_query_snapshot",
+          "sourceSeriesId": "usaspending.agency.097.awards.obligations",
+          "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+          "table": "USAspending API v2, agency 097 (DoD) award summary, prime award obligations, fiscal year to date",
+          "transform": {
+            "factor": 1e-09,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "7d60648441d141998baeb2414745ac6c362240c575cb0c305c27ccd3c85a558b",
+        "targetRegistrationPath": "records/targets/2026-08-13-7d60648441d141998baeb2414745ac6c362240c575cb0c305c27ccd3c85a558b.json",
+        "targetUnit": "billions USD",
+        "valueScale": 1e-09
+      },
+      "windowStart": "2027-10-15"
+    },
+    {
+      "dataPointId": "usda.fsa.crp.enrolled_acres_total.2027_09.first_print.ceiling_27_million_source_recovered_2026_08_13",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-15/attested-2026-08-15-ac01a361fb2e4ef75e6b4320dd5c0c4a8dc777eb69717d0f3ef3c9abd24d7f22.json",
+        "cellsPath": "records/thesis-analyst/2026-08-15/2026-08-15t15-16-02z-usda-fsa-crp-enrolled-acres-total-2027-09/cells.with_activity.json",
+        "codexModel": "gpt-5.5",
+        "manifestPath": "records/thesis-analyst/2026-08-15/2026-08-15t15-16-02z-usda-fsa-crp-enrolled-acres-total-2027-09/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-15T15:16:02Z"
+      },
+      "slug": "us-crp-enrolled-acres-september-2027-ceiling-27-million-source-recovered-2026-08-13",
+      "target": {
+        "anchors": {
+          "2025-11": 26317011,
+          "2026-03": 26203615,
+          "2026-04": 26182019
+        },
+        "catalogSlug": "us-crp-enrolled-acres-september-2027-ceiling-27-million-source-recovered-2026-08-13",
+        "conditionDeadline": "2027-09-30",
+        "conditionId": "cond.crp-acreage-ceiling-fy2027-31.enacted",
+        "conditional": "an enacted farm bill sets the CRP acreage ceiling at 27,000,000 acres for FY2027-31",
+        "country": "US",
+        "dataPointId": "usda.fsa.crp.enrolled_acres_total.2027_09.first_print.ceiling_27_million_source_recovered_2026_08_13",
+        "expectedReleaseWindow": {
+          "end": "2027-12-31",
+          "start": "2027-12-01"
+        },
+        "period": "2027-09",
+        "registeredAt": "2026-08-13T22:43:51Z",
+        "registeredAtUtc": "2026-08-13T22:43:51Z",
+        "registrationCommit": "f816f33e1cea6e50d33bd0314c88a7e901b77e17",
+        "registrationState": "preregistered",
+        "resolutionDate": "2027-12-31",
+        "resolutionDateBasis": "resolve-by-bound",
+        "series": "usda.fsa.crp.enrolled_acres_total",
+        "sourceBinding": {
+          "adapter": "fsa-crp-monthly-summary",
+          "allowedHosts": [
+            "www.fsa.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2027-12-31",
+            "start": "2027-12-01"
+          },
+          "field": "enrolled_acres_total",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "usda.fsa.crp.enrolled_acres_total",
+          "sourceUrl": "https://www.fsa.usda.gov/tools/informational/reports/conservation-statistics/crp",
+          "table": "USDA FSA Conservation Reserve Program Statistics, CRP Monthly Summary, total row",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "targetContentHash": "3b4f941cc92555b67700fdb1edf99b3c5d38378a53a6243aefb5663a9cde87f7",
+        "targetRegistrationPath": "records/targets/2026-08-13-3b4f941cc92555b67700fdb1edf99b3c5d38378a53a6243aefb5663a9cde87f7.json",
+        "targetUnit": "count",
+        "valueScale": 1
+      },
+      "windowStart": "2027-12-01"
+    },
+    {
+      "dataPointId": "usda.fsa.crp.enrolled_acres_total.2027_09.first_print.no_fy2027_31_ceiling_source_recovered_2026_08_13",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-15/attested-2026-08-15-ac01a361fb2e4ef75e6b4320dd5c0c4a8dc777eb69717d0f3ef3c9abd24d7f22.json",
+        "cellsPath": "records/thesis-analyst/2026-08-15/2026-08-15t15-24-08z-usda-fsa-crp-enrolled-acres-total-2027-09/cells.with_activity.json",
+        "codexModel": "gpt-5.5",
+        "manifestPath": "records/thesis-analyst/2026-08-15/2026-08-15t15-24-08z-usda-fsa-crp-enrolled-acres-total-2027-09/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-15T15:24:08Z"
+      },
+      "slug": "us-crp-enrolled-acres-september-2027-no-fy2027-31-ceiling-source-recovered-2026-08-13",
+      "target": {
+        "anchors": {
+          "2025-11": 26317011,
+          "2026-03": 26203615,
+          "2026-04": 26182019
+        },
+        "catalogSlug": "us-crp-enrolled-acres-september-2027-no-fy2027-31-ceiling-source-recovered-2026-08-13",
+        "conditionDeadline": "2027-09-30",
+        "conditionId": "cond.crp-acreage-ceiling-fy2027-31.current-law",
+        "conditional": "No farm bill enacted by 2027-09-30 sets a CRP acreage ceiling for fiscal years 2027 through 2031; current law holds.",
+        "country": "US",
+        "dataPointId": "usda.fsa.crp.enrolled_acres_total.2027_09.first_print.no_fy2027_31_ceiling_source_recovered_2026_08_13",
+        "expectedReleaseWindow": {
+          "end": "2027-12-31",
+          "start": "2027-12-01"
+        },
+        "period": "2027-09",
+        "registeredAt": "2026-08-13T22:43:51Z",
+        "registeredAtUtc": "2026-08-13T22:43:51Z",
+        "registrationCommit": "f816f33e1cea6e50d33bd0314c88a7e901b77e17",
+        "registrationState": "preregistered",
+        "resolutionDate": "2027-12-31",
+        "resolutionDateBasis": "resolve-by-bound",
+        "series": "usda.fsa.crp.enrolled_acres_total",
+        "sourceBinding": {
+          "adapter": "fsa-crp-monthly-summary",
+          "allowedHosts": [
+            "www.fsa.usda.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2027-12-31",
+            "start": "2027-12-01"
+          },
+          "field": "enrolled_acres_total",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "usda.fsa.crp.enrolled_acres_total",
+          "sourceUrl": "https://www.fsa.usda.gov/tools/informational/reports/conservation-statistics/crp",
+          "table": "USDA FSA Conservation Reserve Program Statistics, CRP Monthly Summary, total row",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "targetContentHash": "f5ea9392285b625e5558aa894a21a5107751b4cebd51e3f680726e3e476e5bbd",
+        "targetRegistrationPath": "records/targets/2026-08-13-f5ea9392285b625e5558aa894a21a5107751b4cebd51e3f680726e3e476e5bbd.json",
+        "targetUnit": "count",
+        "valueScale": 1
+      },
+      "windowStart": "2027-12-01"
+    },
+    {
+      "dataPointId": "census.spm.child_poverty_rate.2027.first_print.current_law",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-06/attested-2026-08-06-a8c720af9064965ffcbccb9a434b7303cfa40a8ff247b20b278e745b50a71a05.json",
+        "cellsPath": "records/thesis-analyst/2026-08-06/2026-08-06t00-32-20z-census-spm-child-poverty-rate-2027/cells.with_activity.json",
+        "codexModel": "gpt-5.6-sol",
+        "manifestPath": "records/thesis-analyst/2026-08-06/2026-08-06t00-32-20z-census-spm-child-poverty-rate-2027/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-06T00:32:20Z"
+      },
+      "slug": "spm-child-poverty-rate-cy2027-current-law",
+      "target": {
+        "catalogSlug": "spm-child-poverty-rate-cy2027-current-law",
+        "conditionDeadline": "2027-12-31",
+        "conditionId": "cond.s3596-actc-threshold.current-law",
+        "conditional": "For the CY2027 Census Supplemental Poverty Measure child-poverty outcome, no legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+        "country": "US",
+        "dataPointId": "census.spm.child_poverty_rate.2027.first_print.current_law",
+        "expectedReleaseWindow": {
+          "end": "2028-12-31",
+          "start": "2028-08-01"
+        },
+        "period": "2027",
+        "registeredAt": "2026-08-05T23:10:13Z",
+        "registeredAtUtc": "2026-08-05T23:10:13Z",
+        "registrationCommit": "8b58fab29b2593537430443eb9dc9ca69dff7e2e",
+        "registrationState": "preregistered",
+        "resolutionDate": "2028-12-31",
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionRule": "Resolve to the first Census annual income-and-poverty release artifact for CY2027 using the revised SPM methodology whose identity is authenticated by the registered 2026-07-17 Census announcement: Poverty in the United States: 2027, Supplemental Poverty Measure Table B-2, ALL RACES 2027 row, Under 18 years / Below Poverty / Percent column. The 2028-08-01 through 2028-12-31 expected release window and 2028-12-31 resolve-by deadline are Thesis lab commitments; the announcement does not establish either timing value. Record the published percent without scaling or rounding and ignore later revisions.",
+        "resolutionSource": "U.S. Census Bureau revised-SPM methodology announcement (identity) and Poverty in the United States: 2027, Supplemental Poverty Measure Table B-2 (resolving artifact)",
+        "resolutionSourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+        "series": "census.spm.child_poverty_rate",
+        "sourceBinding": {
+          "adapter": "census-spm-annual-report",
+          "allowedHosts": [
+            "www.census.gov",
+            "www2.census.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2028-12-31",
+            "start": "2028-08-01"
+          },
+          "field": "under_18_percent_in_poverty",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "census.spm.child_poverty_rate",
+          "sourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+          "table": "Poverty in the United States annual income-and-poverty release, revised-methodology Supplemental Poverty Measure Table B-2, ALL RACES year row, Under 18 years / Below Poverty / Percent column",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "targetContentHash": "cfde77fe3c3a53a3404a01811dbb779c71bb0728e2562e6e63da7ce30acf9389",
+        "targetRegistrationPath": "records/targets/2026-08-05-cfde77fe3c3a53a3404a01811dbb779c71bb0728e2562e6e63da7ce30acf9389.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2028-08-01"
+    },
+    {
+      "dataPointId": "census.spm.child_poverty_rate.2027.first_print.threshold_one_dollar",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-06/attested-2026-08-06-a8c720af9064965ffcbccb9a434b7303cfa40a8ff247b20b278e745b50a71a05.json",
+        "cellsPath": "records/thesis-analyst/2026-08-06/2026-08-06t00-27-18z-census-spm-child-poverty-rate-2027/cells.with_activity.json",
+        "codexModel": "gpt-5.6-sol",
+        "manifestPath": "records/thesis-analyst/2026-08-06/2026-08-06t00-27-18z-census-spm-child-poverty-rate-2027/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-06T00:27:18Z"
+      },
+      "slug": "spm-child-poverty-rate-cy2027-threshold-one-dollar",
+      "target": {
+        "catalogSlug": "spm-child-poverty-rate-cy2027-threshold-one-dollar",
+        "conditionDeadline": "2027-12-31",
+        "conditionId": "cond.s3596-actc-threshold.enacted",
+        "conditional": "For the CY2027 Census Supplemental Poverty Measure child-poverty outcome, legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+        "country": "US",
+        "dataPointId": "census.spm.child_poverty_rate.2027.first_print.threshold_one_dollar",
+        "expectedReleaseWindow": {
+          "end": "2028-12-31",
+          "start": "2028-08-01"
+        },
+        "period": "2027",
+        "registeredAt": "2026-08-05T23:10:13Z",
+        "registeredAtUtc": "2026-08-05T23:10:13Z",
+        "registrationCommit": "8b58fab29b2593537430443eb9dc9ca69dff7e2e",
+        "registrationState": "preregistered",
+        "resolutionDate": "2028-12-31",
+        "resolutionDateBasis": "resolve-by-bound",
+        "resolutionRule": "Resolve to the first Census annual income-and-poverty release artifact for CY2027 using the revised SPM methodology whose identity is authenticated by the registered 2026-07-17 Census announcement: Poverty in the United States: 2027, Supplemental Poverty Measure Table B-2, ALL RACES 2027 row, Under 18 years / Below Poverty / Percent column. The 2028-08-01 through 2028-12-31 expected release window and 2028-12-31 resolve-by deadline are Thesis lab commitments; the announcement does not establish either timing value. Record the published percent without scaling or rounding and ignore later revisions.",
+        "resolutionSource": "U.S. Census Bureau revised-SPM methodology announcement (identity) and Poverty in the United States: 2027, Supplemental Poverty Measure Table B-2 (resolving artifact)",
+        "resolutionSourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+        "series": "census.spm.child_poverty_rate",
+        "sourceBinding": {
+          "adapter": "census-spm-annual-report",
+          "allowedHosts": [
+            "www.census.gov",
+            "www2.census.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2028-12-31",
+            "start": "2028-08-01"
+          },
+          "field": "under_18_percent_in_poverty",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "census.spm.child_poverty_rate",
+          "sourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+          "table": "Poverty in the United States annual income-and-poverty release, revised-methodology Supplemental Poverty Measure Table B-2, ALL RACES year row, Under 18 years / Below Poverty / Percent column",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "targetContentHash": "1da9aeb900cf33a57a256b6c550ab8da7f7e286ae81153fc60b9ec57aefb1b27",
+        "targetRegistrationPath": "records/targets/2026-08-05-1da9aeb900cf33a57a256b6c550ab8da7f7e286ae81153fc60b9ec57aefb1b27.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "windowStart": "2028-08-01"
+    },
+    {
+      "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-04/attested-2026-08-04-d0e9df19ed153b0736ccd7e0b4266144160e7a5198cacfa4242bce7c0d5e253b.json",
+        "cellsPath": "records/thesis-analyst/2026-08-04/2026-08-04t14-57-45z-irs-actc-total-claims-2027/cells.with_activity.json",
+        "codexModel": "gpt-5.6-sol",
+        "manifestPath": "records/thesis-analyst/2026-08-04/2026-08-04t14-57-45z-irs-actc-total-claims-2027/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-04T14:57:45Z"
+      },
+      "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+      "target": {
+        "anchors": {
+          "2020": 19.119,
+          "2021": 37.772,
+          "2022": 18.077,
+          "2023": 17.626
+        },
+        "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+        "conditionDeadline": "2027-12-31",
+        "conditionId": "cond.s3596-actc-threshold.current-law",
+        "conditional": "No legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+        "country": "US",
+        "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+        "expectedReleaseWindow": {
+          "end": "2029-12-31",
+          "start": "2029-01-01"
+        },
+        "period": "2027",
+        "registeredAt": "2026-08-03T20:13:09Z",
+        "registeredAtUtc": "2026-08-03T20:13:09Z",
+        "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+        "registrationState": "preregistered",
+        "resolutionDate": "2029-12-31",
+        "series": "irs.actc.total_claims",
+        "sourceBinding": {
+          "adapter": "irs-soi-pub1304",
+          "allowedHosts": [
+            "www.irs.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2029-12-31",
+            "start": "2029-01-01"
+          },
+          "field": "refundable_child_tax_credit_returns",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "irs.actc.total_claims",
+          "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+          "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "b92e9752beaf38a9e2e735c5066e7c741e29436546e7fab2c8d0568f05355909",
+        "targetRegistrationPath": "records/targets/2026-08-03-b92e9752beaf38a9e2e735c5066e7c741e29436546e7fab2c8d0568f05355909.json",
+        "targetUnit": "millions",
+        "valueScale": 1e-06
+      },
+      "windowStart": "2029-01-01"
+    },
+    {
+      "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+      "primary": {
+        "batch": "records/thesis-analyst/batches/2026-08-04/attested-2026-08-04-d0e9df19ed153b0736ccd7e0b4266144160e7a5198cacfa4242bce7c0d5e253b.json",
+        "cellsPath": "records/thesis-analyst/2026-08-04/2026-08-04t14-52-20z-irs-actc-total-claims-2027/cells.with_activity.json",
+        "codexModel": "gpt-5.6-sol",
+        "manifestPath": "records/thesis-analyst/2026-08-04/2026-08-04t14-52-20z-irs-actc-total-claims-2027/manifest.json",
+        "promptMode": "full",
+        "startedAt": "2026-08-04T14:52:20Z"
+      },
+      "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+      "target": {
+        "anchors": {
+          "2020": 19.119,
+          "2021": 37.772,
+          "2022": 18.077,
+          "2023": 17.626
+        },
+        "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+        "conditionDeadline": "2027-12-31",
+        "conditionId": "cond.s3596-actc-threshold.enacted",
+        "conditional": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+        "country": "US",
+        "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+        "expectedReleaseWindow": {
+          "end": "2029-12-31",
+          "start": "2029-01-01"
+        },
+        "period": "2027",
+        "registeredAt": "2026-08-03T20:13:09Z",
+        "registeredAtUtc": "2026-08-03T20:13:09Z",
+        "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+        "registrationState": "preregistered",
+        "resolutionDate": "2029-12-31",
+        "series": "irs.actc.total_claims",
+        "sourceBinding": {
+          "adapter": "irs-soi-pub1304",
+          "allowedHosts": [
+            "www.irs.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2029-12-31",
+            "start": "2029-01-01"
+          },
+          "field": "refundable_child_tax_credit_returns",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "irs.actc.total_claims",
+          "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+          "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+        "targetRegistrationPath": "records/targets/2026-08-03-6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6.json",
+        "targetUnit": "millions",
+        "valueScale": 1e-06
+      },
+      "windowStart": "2029-01-01"
+    }
+  ]
+}

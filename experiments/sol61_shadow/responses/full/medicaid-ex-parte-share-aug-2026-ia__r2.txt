@@ -1,0 +1,97 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ia",
+  "country": "US",
+  "type": "data",
+  "title": "Iowa ex parte renewal share, August 2026",
+  "question": "What will Iowa's ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of the original (O) submission in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using unadjusted administrative counts and rounding the computed percentage to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Iowa's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Select state_abbreviation=IA, reporting_period=202608, original_updated=O. Compute 100 times beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis divided by beneficiaries_with_a_renewal_due, rounded to one decimal. Use the numerator and denominator at first publication; disregard subsequent corrections and updated submissions. The registered resolutionDate is retained but could not be verified as an official scheduled publication date.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ia.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Automated eligibility verification",
+    "Composition of the renewal cohort",
+    "Processing completion by reporting month-end",
+    "Reporting and classification changes"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:19:22Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Iowa August 2026 ex parte renewal share: forecast withheld because exact history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered dataset controls target identity. The attached general CMS skill names a different dataset, which cannot substitute for the eligibility-processing renewal series. No Thesis records or local files were accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the official CMS renewal dataset data dictionary.",
+      "result": "Metric 5 is beneficiaries_with_a_renewal_due; metric 5a1 is beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis. original_updated distinguishes O=Original from U=Updated. These definitions were fetched from the dictionary URL in sourceContext."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the exact CMS dataset and open its official Data.gov catalog entry.",
+      "result": "CMS's dataset page reports 3,876 rows and an update on September 25, 2026. The official catalog identifies its distribution as https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the official CMS monthly snapshot publication page.",
+      "result": "The page lists January 2026 released April 24, February released May 29, March released June 26, April released July 31, May released August 28, and June released September 25, 2026. No scheduled August 2026 publication date is listed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the June 2026 official CMS snapshot, Coverage Retention and Disenrollment Rates by State table.",
+      "result": "Iowa has 50,176 renewals due and a rounded ex parte rate of 59%, with 81% renewed, 14% disenrolled and 5% pending. The table defines these rates relative to all renewals due. It supplies no raw ex parte numerator or exact one-decimal share."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failure: the official CSV, filtered CMS data pages, datastore API queries and HHS data-mirror endpoints returned inaccessible responses or cache misses. No exact Iowa O-row numerator/denominator history was retrieved. Rounded snapshot percentages cannot replace the required exact resolving-artifact observations. historicalContext is empty because no qualifying values were fetched; this is not a claim that CMS exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable for the exact first-print series. Last-print persistence, walk-forward comparisons and thesis_model_candidate_v1 candidates cannot be computed from the required history. The rounded June snapshot corroborates the concept but does not establish an exact persistence estimate."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the intended prior is exact last-print persistence, using recent Iowa original-submission shares. That historical sample is unavailable. No momentum, one-off or policy adjustment is quantified. sigma cannot be computed from successive first-print changes, so the required 1.28*sigma half-width and implied bounds cannot be derived. Point and interval fields are null rather than invented."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: retain the registered 2026-12-15, but do not claim it is agency-calendar verified. CMS's fetched specifications distinguish state submission deadlines from public release dates. Original-report status also does not independently prove immutable first-publication vintage; archived initial counts would be needed for first-print calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would arise from improved automatic data matching or a renewal cohort easier to verify. Downside risk would arise from a matching outage, delayed processing or more cases requiring forms. Without a computed interval, no numerical outside-the-interval thresholds can honestly be stated."
+    },
+    {
+      "kind": "text",
+      "text": "The forecast is dropped under the hard honesty rule. This JSON records an evidence failure and does not satisfy numeric-cell validation. The prohibited catalog slug check was skipped under the independence override; the supplied registered slug was preserved."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

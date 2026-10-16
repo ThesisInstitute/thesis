@@ -1,0 +1,179 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-dc",
+  "country": "US",
+  "type": "data",
+  "title": "DC ex parte renewal share, August 2026",
+  "question": "What percentage of District of Columbia Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, calculated from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c at first publication and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 72.8,
+  "ciLow": 58.4,
+  "ciHigh": 87.3,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to District of Columbia's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Calculate 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not change the resolved value.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.dc.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 69
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 71
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 85
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 89
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 84
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 86
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 84
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 84
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 67
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 72
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 70
+    }
+  ],
+  "drivers": [
+    "Latest original monthly share of 70%",
+    "Partial reversion toward the recent six-month mean",
+    "Renewal-cohort composition and automated data matching",
+    "Two-month horizon from the latest published reporting period",
+    "Original outcomes exclude later completion of pending renewals"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T11:44:22Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast of DC's August 2026 original ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is a District of Columbia state row, not a national total or weighted average. CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c defines the numerator as Metric 5a1 and the denominator as Metric 5, beneficiaries due for renewal. O denotes original reporting; U denotes updated reporting. All historical anchors below use contemporaneous monthly original-outcome snapshot tables, excluding updated-outcome tables."
+    },
+    {
+      "kind": "text",
+      "text": "History precision limitation: I fetched twelve official monthly snapshot prints, but could not retrieve the underlying DC numerator counts through the dataset API or CSV using the web tool. The snapshots publish these shares rounded to whole percentage points. HistoricalContext preserves that fetched precision; no one-decimal historical ratios or ex parte numerator counts have been invented. Resolution still uses the first-published underlying counts to one decimal."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch DC's Coverage Retention and Disenrollment Rates by State rows from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf.",
+      "result": "July 2025: 21,904 beneficiaries due for renewal; ex parte share 69%. August 2025: 20,662 due; ex parte share 71%. Both shares are percentages of total due."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same DC original-outcome table column from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf.",
+      "result": "September 2025: 18,749 beneficiaries due; ex parte share 85%. October 2025: 32,663 due; ex parte share 89%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same DC original-outcome table column from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf.",
+      "result": "November 2025: 24,480 beneficiaries due; ex parte share 84%. December 2025: 33,408 due; ex parte share 86%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same DC original-outcome table column from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf.",
+      "result": "January 2026: 18,735 beneficiaries due; ex parte share 84%. February 2026: 18,682 due; ex parte share 84%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same DC original-outcome table column from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf.",
+      "result": "March 2026: 18,078 beneficiaries due; ex parte share 67%. April 2026: 16,604 due; ex parte share 72%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same DC original-outcome table column from https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf.",
+      "result": "May 2026: 13,652 beneficiaries due; ex parte share 77%. June 2026: 16,766 due; ex parte share 70%, with total renewed 75%, disenrolled 15%, and pending 9%, at published rounding precision."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is twelve consecutive DC original monthly prints, July 2025 through June 2026, ranging from 67% to 89%. The outside-view base rate for the more recent January-June 2026 sample is (84+84+67+72+77+70)/6 = 75.6667%. June's 70% is the persistence anchor. August 2025's 71% provides a seasonal comparison, but a single comparison cannot establish a seasonal adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Level effect: partially shrink the latest 70% toward the recent six-month mean. Momentum effect: zero additional adjustment because recent increases reversed in June. One-off effect: zero quantified adjustment; cohort swings remain in the dispersion estimate. Policy-mechanism effect: CMS reports that DC's Basic Health Program began in January 2026, which may alter renewal-cohort composition; the recent anchors already cover that period, and the fetched sources do not quantify an additional August effect."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior with 50% shrinkage toward the January-June 2026 mean: point = 0.5*70 + 0.5*75.6667 = 72.8333%, rounded to 72.8%. Momentum, seasonal, one-off, and additional policy adjustments are each zero. For the twelve fetched July 2025-June 2026 shares, successive changes are [2,14,4,-5,2,-2,0,-17,5,5,-7] percentage points. Their mean is 0.0909 and centered squared sum is 636.9091. Sample sigma = 7.9807 percentage points = sqrt(636.9091/10). The normal 80% one-month half-width is 1.28*sigma = 10.2152 points. Assuming independent monthly innovations, expand by sqrt(2) for the June-to-August horizon: half-width = 14.4465 points, a 1.4142 multiplier. Bounds are 72.8333 +/- 14.4465 = [58.3868,87.2799], rounded to [58.4,87.3]. This is an approximate predictive interval calculated from rounded official history."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification gap: CMS's official snapshot announcement page fetched this run lists June 2026 as released September 25, 2026, but does not announce an August 2026 publication date. I could not verify the registered resolutionDate of 2026-12-15 from an official public-release calendar or announcement schedule. That ledger date is retained as instructed; it is not represented as a verified CMS release date, and no cadence-derived replacement is used."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: an easier-to-match renewal cohort or improved automated matching could return the share to October 2025's published 89%, outside the interval above 87.3%. Downside risk: an automated matching outage, larger pending backlog, or shift toward form-based renewals could push the original share below 58.4%, outside the interval. Later completion of pending renewals would not rescue the original first-print outcome."
+    },
+    {
+      "kind": "forecast",
+      "point": 72.8,
+      "ciLow": 58.4,
+      "ciHigh": 87.3
+    }
+  ]
+}

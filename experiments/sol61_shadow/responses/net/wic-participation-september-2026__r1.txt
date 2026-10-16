@@ -1,0 +1,53 @@
+{
+  "slug": "wic-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 WIC participation",
+  "question": "What will USDA FNS first report for total monthly WIC participation in September 2026, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first official publication of September 2026 total monthly WIC participation, converted to millions at the source's published precision. Exclude subsequent revisions and corrections.",
+  "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program"
+  ],
+  "runAt": "2026-10-07T12:49:00Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains September 2026 total monthly WIC participation, first official print, in millions."
+    },
+    {
+      "kind": "text",
+      "text": "Opening the official WIC program-data page with the web tool returned HTTP 403 Forbidden."
+    },
+    {
+      "kind": "text",
+      "text": "A curl -sS request to the same official page returned an empty response body."
+    },
+    {
+      "kind": "text",
+      "text": "The official participation history could not be fetched. No numeric base rate or reference class was established, and remembered values were not substituted."
+    },
+    {
+      "kind": "text",
+      "text": "The resolution date could not be verified from an official release calendar. The registered expected window was not treated as a verified date."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sigma, adjustment components, or interval bounds can be calculated without fetched observations. Following the required fetch-failure rule, this run stops without a numeric forecast."
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD unique prime contract recipients — forecast refused",
+  "question": "At the registered FY2026 query snapshot, how many distinct non-null recipient_id values will the USAspending API v2 recipient-category search return for transaction-level Department of Defense prime-contract obligations, with awarding agency Department of Defense at the toptier level and award type codes A, B, C and D, expressed in thousands? This is an unadjusted administrative count governed by the registered_query_snapshot resolver.",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered recipient-category query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "Use the registered query snapshot, not an agency profile or search summary. POST the FY2026 filter to the registered endpoint with spending_level transactions, awarding agency Department of Defense, tier toptier, award type codes A/B/C/D, and page size 100. Paginate completely; count distinct non-null results[].recipient_id and multiply by the registered factor 0.001. The supplied context does not specify a resolutionDate or exact snapshot capture time; its expected release window does not establish a scheduled release day. No substitute date or rounding rule is invented.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://api.usaspending.gov/docs/"
+  ],
+  "runAt": "2026-10-07T12:09:37Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: mandatory exact-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target requires historical recipient counts from execution of the exact POST query for each prior fiscal year. Broader agency totals, adjacent series, documentation examples and remembered counts are inadmissible."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+      "result": "Failed to fetch the exact registered endpoint: (405) Method Not Allowed. This was a web open attempt, not execution of the required filtered POST query; no recipient observations were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open and find spending_by_category/recipient in https://api.usaspending.gov/docs/endpoints",
+      "result": "The official endpoint index identifies /api/v2/search/spending_by_category/recipient as POST. It documents 200 for successful requests, 400 for malformed requests and 500 for server errors. These are HTTP codes, not historical recipient counts. See [USAspending endpoint documentation](https://api.usaspending.gov/docs/endpoints)."
+    },
+    {
+      "kind": "text",
+      "text": "Both available web-tool schemas lack HTTP method and request-body parameters. No permitted tool can execute the registered filtered POST or paginate its response. Shell networking is prohibited by the run instructions."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. No exact-query historical count was fetched, so persistence, model candidates, walk-forward scores, sigma and interval arithmetic cannot be grounded. The empty history records a failed fetch, not an official-source history-floor exception."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: the supplied ledger context contains an expected release window but no resolutionDate or exact snapshot capture time. Choosing a window endpoint as a scheduled release date would invent target metadata."
+    },
+    {
+      "kind": "text",
+      "text": "Forecast refused under the explicit registered-query fetch-failure rule. Null estimates and bounds denote no prediction; this object is a refusal record and cannot pass forecast-cell validation. No numerical forecast, calibrated interval or tail scenario is claimed, and no activity receipts are manufactured."
+    }
+  ]
+}

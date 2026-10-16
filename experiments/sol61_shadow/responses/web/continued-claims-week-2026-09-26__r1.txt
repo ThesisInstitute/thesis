@@ -1,0 +1,139 @@
+{
+  "slug": "continued-claims-week-2026-09-26",
+  "country": "US",
+  "type": "data",
+  "title": "US continued claims: September 26, 2026",
+  "question": "What will the U.S. Department of Labor's first advance print of seasonally adjusted continued claims (insured unemployment) be for the week ending September 26, 2026, in millions?",
+  "unit": "millions",
+  "pointEstimate": 1.688,
+  "ciLow": 1.663,
+  "ciHigh": 1.713,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-08",
+  "resolutionSource": "U.S. Department of Labor, Employment and Training Administration, Unemployment Insurance Weekly Claims",
+  "resolutionSourceUrl": "https://www.dol.gov/ui/data.pdf",
+  "resolutionRule": "Resolve the week-ending 2026-09-26 observation of CCSA using its first nonmissing ALFRED advance vintage, corresponding to DOL's first published advance seasonally adjusted insured-unemployment count for regular state programs. Cite the agency release, scheduled for 2026-10-08. Multiply the count by 0.000001 to express millions and round to three decimal places. Retain the original vintage; exclude subsequent revisions and apply no correction grace period.",
+  "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "week_ending", "value": "2026-07-25"},
+      "label": "week ending 2026-07-25",
+      "value": 1.801
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-01"},
+      "label": "week ending 2026-08-01",
+      "value": 1.777
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-08"},
+      "label": "week ending 2026-08-08",
+      "value": 1.799
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-15"},
+      "label": "week ending 2026-08-15",
+      "value": 1.778
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-22"},
+      "label": "week ending 2026-08-22",
+      "value": 1.779
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-29"},
+      "label": "week ending 2026-08-29",
+      "value": 1.774
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-05"},
+      "label": "week ending 2026-09-05",
+      "value": 1.73
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-12"},
+      "label": "week ending 2026-09-12",
+      "value": 1.719
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-19"},
+      "label": "week ending 2026-09-19",
+      "value": 1.701
+    }
+  ],
+  "drivers": [
+    "Latest advance level of 1.701 million",
+    "Declining recent first-print momentum",
+    "Seasonal-adjustment and state-reporting volatility"
+  ],
+  "sourceContext": [
+    "https://oui.doleta.gov/unemploy/archive.asp",
+    "https://fred.stlouisfed.org/releases/calendar?m=&ob=n&od=&pageID=1&rid=180&ve=2026-12-31&vs=2026-01-01&y=2026",
+    "https://fred.stlouisfed.org/series/CCSA",
+    "https://alfred.stlouisfed.org/series?seid=CCSA",
+    "https://oui.doleta.gov/press/2026/080626.pdf",
+    "https://oui.doleta.gov/press/2026/081326.pdf",
+    "https://oui.doleta.gov/press/2026/082026.pdf",
+    "https://oui.doleta.gov/press/2026/082726.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf",
+    "https://oui.doleta.gov/press/2026/091026.pdf",
+    "https://oui.doleta.gov/press/2026/091726.pdf",
+    "https://oui.doleta.gov/press/2026/092426.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf"
+  ],
+  "runAt": "2026-10-06T22:38:19Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast of September 26 continued claims"
+    },
+    {
+      "kind": "text",
+      "text": "The target is DOL's advance seasonally adjusted insured-unemployment count for week ending 2026-09-26, mirrored as CCSA. Every historical entry and level anchor uses this same variant and its original first print. The fetched October 1 agency release ends at September 19, so the target remains unpublished."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification: ETA's official announcement schedule at https://oui.doleta.gov/unemploy/archive.asp specifies Thursday publication at 8:30 Eastern, with November 25 the listed 2026 exception. The official Federal Reserve release-180 calendar explicitly lists October 8, 2026 at 7:30 Central and states that dates are published by data sources; https://fred.stlouisfed.org/series/CCSA also names October 8 as the next release. An exact October 8 ETA calendar row was not exposed. The ledger's October 14-18 window appears one week late; the forecast retains the registered September 26 target."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original DOL releases dated August 6, August 13, and August 20 at https://oui.doleta.gov/press/2026/080626.pdf, https://oui.doleta.gov/press/2026/081326.pdf, and https://oui.doleta.gov/press/2026/082026.pdf.",
+      "result": "Advance SA continued claims: week ending 2026-07-25 = 1,801,000; 2026-08-01 = 1,777,000; 2026-08-08 = 1,799,000."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original DOL releases dated August 27, September 3, and September 10 at https://oui.doleta.gov/press/2026/082726.pdf, https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf, and https://oui.doleta.gov/press/2026/091026.pdf.",
+      "result": "Advance SA continued claims: week ending 2026-08-15 = 1,778,000; 2026-08-22 = 1,779,000; 2026-08-29 = 1,774,000."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original DOL releases dated September 17, September 24, and October 1 at https://oui.doleta.gov/press/2026/091726.pdf, https://oui.doleta.gov/press/2026/092426.pdf, and https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf.",
+      "result": "Advance SA continued claims: week ending 2026-09-05 = 1,730,000; 2026-09-12 = 1,719,000; 2026-09-19 = 1,701,000. Revision audit: September 5 was subsequently revised to 1,717,000 and September 12 to 1,712,000; these revised figures are excluded from the first-print historical sample."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is nine consecutive first prints from July 25 through September 19. Their eight successive changes average -0.0125 million, giving a drift-adjusted base rate of 1.701 - 0.0125 = 1.6885 million before the current momentum adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Level: anchor on the latest advance count, 1.701 million. Momentum: the latest two first-print changes average -0.0145 million; partially weight this slightly faster decline. One-off effects receive zero separate adjustment because no target-week shock was established. Policy-mechanism effects also receive zero separate adjustment because the fetched evidence does not establish a relevant eligibility change. First-print changes already incorporate the effect of reporting revisions on the sequence of advance releases."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a random walk with drift, anchored at 1.701 million, with nine original DOL prints and eight changes: [-0.024, 0.022, -0.021, 0.001, -0.005, -0.044, -0.011, -0.018] million. Mean change = -0.0125. Momentum adjustment = 0.5 * (-0.0145 - (-0.0125)) = -0.001; one-off adjustment = 0; policy adjustment = 0. Point = 1.701 - 0.0125 - 0.001 = 1.6875, rounded to 1.688 million. The sample standard deviation of successive changes is sigma = 0.019486 million, calculated as sqrt(0.002658 / (8 - 1)). The normal-approximation 80% half-width is 1.28 * sigma = 0.024942 million, rounded to 0.025. Final bounds = 1.688 +/- 0.025 = [1.663, 1.713] million."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is slower benefit exits or delayed state reports catching up; a repeat of the fetched +0.022 million weekly move would produce 1.723 million and land above the interval. The downside risk is faster exits or a reporting shortfall; a repeat of the fetched -0.044 million move would produce 1.657 million and land below the interval. Both scenarios are outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.688,
+      "ciLow": 1.663,
+      "ciHigh": 1.713
+    }
+  ]
+}

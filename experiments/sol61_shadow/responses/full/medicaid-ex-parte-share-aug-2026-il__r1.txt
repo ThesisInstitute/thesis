@@ -1,0 +1,94 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-il",
+  "country": "US",
+  "type": "data",
+  "title": "Illinois ex parte renewal share, August 2026",
+  "question": "What is Illinois's ex parte renewal share for the August 2026 reporting period in the FIRST PRINT of the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using the reported counts without seasonal adjustment and rounding the share to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Illinois's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.il.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original-submission evidence unavailable",
+    "Registered denominator not explicitly identified",
+    "Registered publication date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T10:41:20Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: official Illinois history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target identity, unit, date, and resolver are retained. No Illinois original-submission counts or shares were fetched. The numeric forecast is therefore dropped; null fields indicate missing evidence, not a zero forecast. This object records a failed run and does not satisfy the numeric forecast contract."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search official data.medicaid.gov for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The exact dataset page reports an update on September 25, 2026, 3,876 rows and 22 columns; O means Original and U means Updated. Search exposed only the first 25 Alaska rows, not Illinois history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "Official catalog metadata matches identifier 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, issued 2024-11-27T19:17:56Z and modified 2026-09-25T18:00:00Z. Its exact distribution is https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "CMS lists June 2026 released September 25, 2026; May 2026 released August 28, 2026; and April 2026 released July 31, 2026. The fetched page supplies no scheduled August 2026 publication date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+      "result": "The fetched specifications are updated November 2025. Table 6 defines metric 5 as beneficiaries due for renewal, metric 5a as total renewed, and metric 5a(1) as renewed ex parte. Monthly state submissions are due by the 8th calendar day; updates by the 15th. These are submission deadlines, not CMS release dates."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failure: the official CSV download, datastore API, Illinois-filtered dataset page, and healthdata.gov export attempts were inaccessible through the web tool. No historicalContext values are supplied. This is an access failure, not evidence that the official source exposes fewer than six prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancies: the registered date 2026-12-15 could not be verified against an official release calendar and is retained without claiming it is scheduled. The supplied rule also does not explicitly identify the denominator column; beneficiaries due and total renewed are distinct official metrics. No denominator is silently substituted."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable because the exact Illinois original-submission history could not be fetched. Last-print persistence, persistence plus panel shrinkage, and walk-forward comparisons cannot be computed. No numerical model candidates are generated or selected."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: persistence prior unavailable; historical sample unavailable; no numerical adjustments applied. Sigma and the required dispersion-based half-width cannot be computed without fetched successive Illinois shares. Point and implied interval bounds remain null; no interval or calibration statistics are invented."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would be a higher ex parte completion share in the August renewal cohort; downside risk would be a lower share. Whether either would land outside the interval cannot be assessed because no evidence-based interval was produced."
+    },
+    {
+      "kind": "text",
+      "text": "Independence restrictions were observed: no Thesis or Brier records were consulted, no files were read or modified, and the catalog-slug website check was omitted as explicitly required. The runAt timestamp is the actual output of the authorized UTC date command."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

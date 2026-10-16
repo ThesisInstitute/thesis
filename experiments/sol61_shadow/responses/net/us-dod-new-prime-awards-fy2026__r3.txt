@@ -1,0 +1,109 @@
+{
+  "status": "refused",
+  "slug": "us-dod-new-prime-awards-fy2026",
+  "country": "US",
+  "type": "data",
+  "unit": "millions",
+  "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+  "error": {
+    "code": "UNVERIFIED_RESOLUTION_DATE",
+    "detail": "The registered query and historical counts were fetched successfully, but no official release calendar or announcement fetched in this run verified a resolutionDate. Official documentation describes daily updates. The supplied October 15–22 window does not specify an exact snapshot capture date and time. Assigning a date would therefore violate the required calendar verification; no compliant forecast is issued."
+  },
+  "resolutionDate": null,
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 3.454745
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 3.771749
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 3.797153
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 3.840407
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 3.833879
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 3.882327
+    }
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-07T12:27:55Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FY2026 DoD registered-query forecast: resolution-date verification failed"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is agency 097, field new_award_count, returned by the registered GET query with fiscal_year=2026. Historical queries used the identical endpoint and defaults, substituting only fiscal_year. Each integer count was multiplied by 0.000001."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the exact registered query for FY2020 and FY2021 using curl -sS; read the echoed JSON responses.",
+      "result": "new_award_count: FY2020=3454745; FY2021=3771749. Transformed values: 3.454745 and 3.771749 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the exact registered query for FY2022 and FY2023 using curl -sS; read the echoed JSON responses.",
+      "result": "new_award_count: FY2022=3797153; FY2023=3840407. Transformed values: 3.797153 and 3.840407 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the exact registered query for FY2024 and FY2025 using curl -sS; read the echoed JSON responses.",
+      "result": "new_award_count: FY2024=3833879; FY2025=3882327. Transformed values: 3.833879 and 3.882327 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026 using curl -sS; read the echoed JSON response.",
+      "result": "new_award_count=2806655, equivalent to 2.806655 million at this run's snapshot."
+    },
+    {
+      "kind": "math",
+      "text": "The FY2020–FY2025 reference class has six annual flow values. Its base rate mean is 22.580260/6 = 3.763376667 million. Sample sigma = 0.155896039 million, calculated from the values themselves; 1.28*sigma = 0.199546930 million."
+    },
+    {
+      "kind": "text",
+      "text": "USAspending's Data Sources documentation states that data update daily after the nightly pipeline. Its About the Data documentation reports a 90-day delay for DoD procurement data. Consequently, the current FY2026 count and an October registered snapshot remain subject to delayed additions."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The fetched annual reference class establishes a level prior and realized dispersion, but it does not provide historical October snapshot vintages. The current count supplies a snapshot anchor; subsequent additions require a reporting-lag assumption. No final point estimate or 80% bounds are issued because the required resolutionDate remains unverified."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied expectedReleaseWindow is registration metadata. No fetched official source establishes a scheduled annual release for this query within that window. The supplied contract also omits an exact capture date and time. The target identity is preserved, and the date is left null rather than presented as officially verified."
+    }
+  ]
+}

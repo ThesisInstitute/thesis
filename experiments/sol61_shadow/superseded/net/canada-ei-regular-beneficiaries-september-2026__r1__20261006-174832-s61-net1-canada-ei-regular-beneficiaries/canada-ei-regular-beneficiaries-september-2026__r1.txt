@@ -1,0 +1,70 @@
+{
+  "slug": "canada-ei-regular-beneficiaries-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada EI regular beneficiaries, September 2026",
+  "question": "What will Statistics Canada first report for September 2026 Employment Insurance regular beneficiaries in Canada, seasonally adjusted, expressed in thousands?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Statistics Canada Table 14-10-0011-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+  "resolutionRule": "Resolve using the first official September 2026 print of seasonally adjusted Canadian EI regular beneficiaries, vector v64549350, in Table 14-10-0011-01. Multiply the published persons count by 0.001 to express thousands, preserving published precision. Ignore subsequent revisions; apply no correction grace period.",
+  "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.september_2026.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350&startRefPeriod=2025-01-01&endReferencePeriod=2026-09-01",
+    "https://www150.statcan.gc.ca/n1/dai-quo/cal3-eng.htm"
+  ],
+  "runAt": "2026-10-06T22:16:22Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official-source fetches failed"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is the first official September 2026 print of seasonally adjusted Canadian EI regular beneficiaries, vector v64549350. Target identity comes from the supplied contract; no official observations were retrieved."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the registered Statistics Canada vector for recent monthly history.",
+      "result": "Failed with a fatal network error. No response body or historical statistics were fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the official Statistics Canada release calendar through web access and curl.",
+      "result": "Web access failed. curl failed to connect to www150.statcan.gc.ca. No release date was verified."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Search official Statistics Canada Labour Force Survey releases for current context.",
+      "result": "Failed with a fatal connection error. No contextual statistics were retrieved."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate and six distinct historical prints could not be fetched. The sourceContext URLs record attempted lookups, not successfully retrieved evidence. The run stops without substituting remembered values."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sample, adjustment components, sigma, or implied bounds can be estimated from fetched evidence. Upside risk, downside risk, and scenarios outside the interval cannot be quantified without that evidence."
+    },
+    {
+      "kind": "math",
+      "text": "The successive-change sigma and 1.28*sigma interval half-width are unavailable because no historical observations were fetched. No numerical forecast is issued."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

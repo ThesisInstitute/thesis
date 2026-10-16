@@ -1,0 +1,198 @@
+{
+  "slug": "canada-monthly-gdp-growth-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, August 2026",
+  "question": "What will Canada's August 2026 month-over-month real GDP growth be in the first official monthly GDP by industry print, using Statistics Canada Table 36-10-0434-01, all industries [T001], vector v65201210, chained 2017 dollars, seasonally adjusted at annual rates, rounded to one decimal percent?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.2,
+  "ciLow": -0.1,
+  "ciHigh": 0.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Statistics Canada, Gross domestic product by industry, August 2026; Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+  "resolutionRule": "Resolve on the FIRST official August 2026 monthly GDP by industry release, scheduled October 30, 2026 in Statistics Canada's official calendar. Use Canada, All industries [T001], Table 36-10-0434-01, vector v65201210, chained 2017 dollars, seasonally adjusted at annual rates. From that first-release vintage compute 100 * (August 2026 level / July 2026 level - 1), using both levels from the same vintage, and round to one decimal percent. The annual-rate level convention does not annualize the monthly growth rate. The September 29 advance estimate is excluded from resolution. Later revisions and corrections are irrelevant. The corresponding All industries monthly-change cell in that release's Table 1 is the published exhibit of this series and transformation.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 0.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 0.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "Trailing three-month first-print mean of +0.2%",
+    "Official August advance estimate of +0.2%",
+    "Mining and quarrying and retail gains in the advance estimate",
+    "Oil and gas contraction offsets part of the advance growth",
+    "First-print volatility and incomplete August source data"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/en/release-diffusion/2026-eng.pdf?st=JwXqPj0_",
+    "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401&request_locale=en",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610049101",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251031/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251128/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251223/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251031/dq251031a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251128/dq251128b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251223/dq251223a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/dq260130a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www.statcan.gc.ca/en/developers/wds/user-guide"
+  ],
+  "runAt": "2026-10-07T12:39:35Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 Canada GDP: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is monthly percentage growth of all-industry real GDP, not quarterly expenditure GDP or annualized monthly growth. The first official August release resolves the target; the earlier advance estimate is a predictor. The registered slug, unit and dataPointId are retained verbatim. No forecast catalog was accessed under the run's independence restriction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official release calendar https://www150.statcan.gc.ca/n1/en/release-diffusion/2026-eng.pdf?st=JwXqPj0_",
+      "result": "The [Statistics Canada calendar](https://www150.statcan.gc.ca/n1/en/release-diffusion/2026-eng.pdf?st=JwXqPj0_) lists October 30, 2026 for Gross domestic product by industry, reference period August 2026; September 29, 2026 covers July 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch vector attributes https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm and current table https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401&request_locale=en",
+      "result": "[Vector attributes](https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm) identify v65201210 as Canada All industries, chained 2017 dollars, from cube 36100434. The [current table](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401&request_locale=en) identifies seasonally adjusted at annual rates and reports July 2026 level 2,371,771 and contemporaneous June level 2,371,886, in millions of chained 2017 dollars."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the current-month All industries monthly-change cell from the five official first-release Table 1 artifacts for August-December 2025.",
+      "result": "[2025-08 table](https://www150.statcan.gc.ca/n1/daily-quotidien/251031/t001a-eng.htm): -0.3%; [2025-09 table](https://www150.statcan.gc.ca/n1/daily-quotidien/251128/t001b-eng.htm): 0.2%; [2025-10 table](https://www150.statcan.gc.ca/n1/daily-quotidien/251223/t001a-eng.htm): -0.3%; [2025-11 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260130/t001a-eng.htm): 0.0%; [2025-12 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260227/t001b-eng.htm): 0.2%. These are the first-release current-month cells, not revised trailing columns."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the current-month All industries monthly-change cell from the seven official first-release Table 1 artifacts for January-July 2026.",
+      "result": "[2026-01 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260331/t001a-eng.htm): 0.1%; [2026-02 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260430/t001a-eng.htm): 0.2%; [2026-03 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260529/t001b-eng.htm): -0.1%; [2026-04 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260630/t001a-eng.htm): 0.5%; [2026-05 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260731/t001a-eng.htm): 0.3%; [2026-06 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260828/t001b-eng.htm): 0.3%; [2026-07 table](https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm): 0.0%. July negative zero is normalized to 0.0."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the official real-time archive https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610049101 for All industries, 2026; inspect same-release numerator and denominator.",
+      "result": "[Real-time archive](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610049101): May 29 vintage has March 2026 2,339,731 and February 2,343,219; June 30 vintage has April 2,352,903 and March 2,340,099; July 31 vintage has May 2,362,482 and April 2,354,483; August 28 vintage has June 2,369,309 and May 2,363,056. All are Canada T001, chained 2017 dollars, seasonally adjusted at annual rates."
+    },
+    {
+      "kind": "text",
+      "text": "The registered WDS endpoint could not be read with this web tool, and a complete native API vintage history was unavailable. HistoricalContext therefore uses the official per-release Table 1 exhibits sourced from Table 36-10-0434-01, rather than bulletin prose. The real-time archive independently reproduces March-June first prints after the registered transformation and rounding. This fallback's limitation is explicit: all twelve entries were not independently extracted from captured WDS response bytes. Consecutive first-release levels across vintages must not be divided; each release revises its denominator."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the twelve first prints from August 2025 through July 2026 have mean +0.091667%, median +0.15%, sample standard deviation 0.242930 percentage points and range -0.3% to +0.5%; seven are positive, three negative and two zero. Last-print persistence forecasts 0.0%. The trailing three-month mean forecasts (0.3 + 0.3 + 0.0)/3 = +0.2%. It becomes the prior because its common-window walk-forward error is lower than persistence."
+    },
+    {
+      "kind": "text",
+      "text": "Generated in memory before the agent forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":0.0,\"p10\":-0.3,\"p50\":0.0,\"p90\":0.3,\"interval80\":[-0.3,0.3],\"interval90\":[-0.4,0.4],\"intervalMethod\":\"normal_fallback_prior_first_print_growth_sigma\",\"calibration_n\":12,\"trainCutoff\":\"2026-07\",\"walkForward\":{\"n\":9,\"mae\":0.233333,\"rmse\":0.284800}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_mean\",\"point\":0.1,\"p10\":-0.2,\"p50\":0.1,\"p90\":0.4,\"interval80\":[-0.2,0.4],\"interval90\":[-0.3,0.5],\"intervalMethod\":\"normal_fallback_prior_first_print_growth_sigma\",\"calibration_n\":12,\"trainCutoff\":\"2026-07\",\"walkForward\":{\"n\":9,\"mae\":0.218748,\"rmse\":0.248448}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_mean_3\",\"point\":0.2,\"p10\":-0.1,\"p50\":0.2,\"p90\":0.5,\"interval80\":[-0.1,0.5],\"interval90\":[-0.2,0.6],\"intervalMethod\":\"normal_fallback_prior_first_print_growth_sigma\",\"calibration_n\":12,\"trainCutoff\":\"2026-07\",\"walkForward\":{\"n\":9,\"mae\":0.203704,\"rmse\":0.237528}}]. Arithmetic adapters use the fetched rounded first prints. Walk-forward predictions are evaluated over the same nine target months, November 2025-July 2026, using only earlier observations. Interval wrappers use the full twelve-print calibration distribution; walk-forward scores evaluate points, not interval coverage. Select trailing_mean_3, which beats persistence and expanding_mean on both MAE and RMSE."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch next-month advance sections from the eleven official releases dated October 31, 2025-August 28, 2026, then the September 29, 2026 release; match advances to subsequent first-release tables.",
+      "result": "Fetched advances for September 2025-July 2026, in chronological order: +0.1, -0.3, +0.1, +0.1, 0.0, +0.2, 0.0, +0.4, +0.1, +0.2, 0.0 percent. Their official release URLs are in sourceContext in matching chronological order. The [September 29 release](https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm) gives August 2026 advance growth +0.2%, citing mining and quarrying and retail gains partly offset by oil and gas decreases. It states that the official August release follows October 30, 2026."
+    },
+    {
+      "kind": "math",
+      "text": "Advance-signal check, calculated from the eleven fetched pairs: mean absolute advance error = 0.9/11 = 0.081818 percentage points; RMSE = sqrt(0.11/11) = 0.100000; mean first-minus-advance bias = 0.5/11 = +0.045455. Persistence on those same eleven months has MAE 0.281818 and RMSE 0.334392. On the common nine-month model window, advance MAE is 0.088889 and RMSE 0.105409. Thus the target-specific +0.2% advance is credible corroboration; adding the full estimated bias gives 0.245455%, which still rounds to +0.2%."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: the official August advance equals the selected +0.2% history prior, so the point adjustment is 0.0 percentage points. Level adjustment is zero because the target is growth. Momentum is already in the three-month prior. Mining/retail gains and the oil/gas offset are already in the official advance, so no extra one-off adjustment is added. No separate policy adjustment is supported or required. The final delta from selected trailing_mean_3 is zero; its +0.2-point delta from persistence is supported by walk-forward evidence and the direct August signal."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = trailing_mean_3 trained through July 2026, with twelve August 2025-July 2026 first prints for dispersion. Point = 1.0 * ((0.3 + 0.3 + 0.0)/3) + 0.0 current-signal adjustment = 0.2%. Since the target is a change series, compute sigma from the growth values themselves: sum((y - 0.0916667)^2) = 0.6491667; sigma = sqrt(0.6491667/(12 - 1)) = 0.242930 percentage points. Normal fallback-prior 80% half-width = 1.28*sigma = 0.310951, with widening factor 1.0. Bounds = 0.2 - 0.310951 = -0.110951 and 0.2 + 0.310951 = 0.510951, rounded to published precision: [-0.1%, 0.5%]. The 90% half-width = 1.645*sigma = 0.399620, rounded bounds [-0.2%, 0.6%]. I retain the full first-print dispersion despite the smaller observed advance errors. As a distribution sanity check, the mean-centered rounded band [-0.2%, 0.4%] contains eight of the last ten first prints; the final shifted band contains nine of ten. These are retrospective sanity checks, not independently validated coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: August manufacturing and wholesale source data could show a broad rebound that combines with stronger mining and retail recovery, putting growth above +0.5%, outside the interval. Downside risk: oil and gas weakness could deepen while complete retail data overturn the preliminary rebound, putting growth below -0.1%, outside the interval. Stronger August output and retail volumes would move the point up; weaker volumes or larger oil production losses would move it down. The advance is preliminary, so its historical accuracy does not eliminate these tails."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.2,
+      "ciLow": -0.1,
+      "ciHigh": 0.5
+    }
+  ]
+}

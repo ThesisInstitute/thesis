@@ -1,0 +1,138 @@
+{
+  "slug": "continued-claims-week-2026-09-26",
+  "country": "US",
+  "type": "data",
+  "title": "Continued claims for September 26, 2026",
+  "question": "What will DOL ETA report as the first advance seasonally adjusted continued-claims count for the week ending September 26, 2026, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 1.695,
+  "ciLow": 1.670,
+  "ciHigh": 1.720,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-08",
+  "resolutionSource": "U.S. Department of Labor, Unemployment Insurance Weekly Claims Report",
+  "resolutionSourceUrl": "https://www.dol.gov/ui/data.pdf",
+  "resolutionRule": "Resolve to the first advance seasonally adjusted insured-unemployment count for the week ending 2026-09-26 in the DOL ETA weekly claims release, represented by the first available advance vintage of ALFRED series CCSA. Multiply the published count by 0.000001 to express it in millions, preserving the published precision. Ignore subsequent weekly revisions and seasonal re-estimates. The verified expected release date is 2026-10-08; retain this target despite the ledger's later release window.",
+  "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "week_ending", "value": "2026-07-25"},
+      "label": "week ending 2026-07-25",
+      "value": 1.801
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-01"},
+      "label": "week ending 2026-08-01",
+      "value": 1.777
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-08"},
+      "label": "week ending 2026-08-08",
+      "value": 1.799
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-15"},
+      "label": "week ending 2026-08-15",
+      "value": 1.778
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-22"},
+      "label": "week ending 2026-08-22",
+      "value": 1.779
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-29"},
+      "label": "week ending 2026-08-29",
+      "value": 1.774
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-05"},
+      "label": "week ending 2026-09-05",
+      "value": 1.730
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-12"},
+      "label": "week ending 2026-09-12",
+      "value": 1.719
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-19"},
+      "label": "week ending 2026-09-19",
+      "value": 1.701
+    }
+  ],
+  "drivers": [
+    "Latest advance SA level of 1.701 million",
+    "Negative weekly first-print momentum",
+    "Partial persistence of the recent decline",
+    "Residual seasonal and reporting variation"
+  ],
+  "sourceContext": [
+    "https://www.dol.gov/ui/data.pdf",
+    "https://oui.doleta.gov/unemploy/claims_arch.asp",
+    "https://fred.stlouisfed.org/releases/calendar?m=&ob=n&od=desc&pageID=1&rid=180&ve=2026-12-31&vs=2026-01-01&y=",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261307.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261413.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261430.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf?trk=article-ssr-frontend-pulse_little-text-block",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261529.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf",
+    "https://alfred.stlouisfed.org/series?seid=CCSA"
+  ],
+  "runAt": "2026-10-07T11:51:42Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 26 continued-claims first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is DOL ETA regular-state-program insured unemployment, seasonally adjusted, for the week ending 2026-09-26. The corresponding ALFRED series is CCSA. All numerical level anchors and historical observations use this same SA variant, and historicalContext records advance first prints rather than subsequently revised observations."
+    },
+    {
+      "kind": "text",
+      "text": "DOL's publication schedule at https://oui.doleta.gov/unemploy/claims_arch.asp specifies Thursday publication at 8:30 a.m. Eastern, with November 25 the listed 2026 exception. The official FRED release calendar explicitly lists October 8, 2026 at 7:30 a.m. Central and states that release dates are published by data sources. The October 1 DOL release reports continued claims through September 19, leaving September 26 unreleased. Therefore October 8 is the verified expected release date. The ledger window October 14-18 is one week late; the September 26 first-print target remains unchanged."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch DOL releases dated August 6 and August 20: https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261307.pdf and https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261413.pdf.",
+      "result": "August 6 reports advance SA insured unemployment for July 25 of 1,801,000. August 20 reports August 8 of 1,799,000 and explicitly identifies August 1's original print as 1,777,000, subsequently revised to 1,781,000. The August 1 historical value is recovered from that explicit revision statement."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch DOL releases dated August 27, September 3 and September 10: https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261430.pdf ; https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf ; https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/20261503.pdf?trk=article-ssr-frontend-pulse_little-text-block.",
+      "result": "Advance SA insured-unemployment first prints were 1,778,000 for August 15, 1,779,000 for August 22 and 1,774,000 for August 29."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch DOL releases dated September 17 and October 1: https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261529.pdf and https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf; cross-check https://alfred.stlouisfed.org/series?seid=CCSA.",
+      "result": "September 17 reports September 5 advance SA insured unemployment of 1,730,000. October 1 reports September 19 advance SA insured unemployment of 1,701,000 and explicitly identifies September 12's original print as 1,719,000, revised to 1,712,000. Its SA four-week average is 1,723,750. ALFRED CCSA also shows September 19 at 1,701,000."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class consists of nine consecutive advance SA prints from July 25 through September 19. Their mean level is 1.762 million, and their eight successive changes average -0.0125 million. A persistence base rate anchored on the latest 1.701 million is more appropriate than reverting immediately to the sample's higher mean level."
+    },
+    {
+      "kind": "text",
+      "text": "Level effect: anchor on 1.701 million. Momentum effect: retain half the reference-class mean decline as a modeling choice. One-off effect: apply no separate point adjustment; the unusually large September 5 decline contributes to measured dispersion and argues for shrinking momentum. Policy-mechanism effect: apply no separate adjustment because the fetched evidence does not establish a quantified eligibility or duration shock for the target week."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior with half-strength drift, based on nine fetched advance prints and eight successive changes. Changes in millions are [-0.024, 0.022, -0.021, 0.001, -0.005, -0.044, -0.011, -0.018], with mean -0.0125. Their centered squared deviations sum to 0.002658, so sigma = 0.019486259 million = sqrt(0.002658/7). Point = 1.701 + 0.5*(-0.0125) + 0 one-off adjustment + 0 policy adjustment = 1.694750 million. A normal one-step 80% interval uses half-width 1.28*sigma = 0.024942411 million, giving unrounded bounds [1.669807589, 1.719692411]. Rounding the point and bounds to 0.001 million gives 1.695 and [1.670, 1.720]. No additional widening or narrowing is applied."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: slower exits from insured unemployment or a reversal of recent seasonal/reporting weakness could produce a rebound exceeding 19,000 from the latest 1,701,000, landing above 1.720 million. Downside risk: faster benefit exits or another sharp decline exceeding 31,000 could land below 1.670 million. Either outcome would be outside the interval; the historical 44,000 first-print decline shows that such a downside move is plausible."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.695,
+      "ciLow": 1.670,
+      "ciHigh": 1.720
+    }
+  ]
+}

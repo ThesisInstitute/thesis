@@ -1,0 +1,155 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-al",
+  "country": "US",
+  "type": "data",
+  "title": "Alabama August 2026 ex parte renewal share",
+  "question": "What percentage of Alabama Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, calculated from the original (O) submission row when CMS first publishes that reporting period?",
+  "unit": "percent",
+  "pointEstimate": 37.6,
+  "ciLow": 26.8,
+  "ciHigh": 48.4,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Alabama's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, rounded to one decimal. Exclude updated (U) submissions and subsequent revisions; no correction grace period applies.",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 37.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 39.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 39.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 40.6
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 40.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 41.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 42.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 42.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 41.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 20.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 36.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 35.7
+    }
+  ],
+  "drivers": [
+    "June initiation cohort provides an August denominator estimate",
+    "Recent ex parte renewal counts below their twelve-month average",
+    "Large due cohorts can temporarily depress the share",
+    "Partial reversion toward the historical renewal-count average"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=AL&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&limit=60",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:07:10Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Alabama August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Alabama's state row, not a national total or weighted average. Dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c distinguishes original (O) from updated (U) reports. Historical anchors use O rows retained in the fetched September 2026 export; U rows are excluded. These retained original submissions are not independently authenticated archival publication vintages."
+    },
+    {
+      "kind": "text",
+      "text": "The ledger does not explicitly identify the denominator. CMS's June 2026 snapshot, Coverage Retention and Disenrollment Rates by State, defines the ex parte percentage relative to all beneficiaries due for renewal. Accordingly, use metric 5a1 divided by metric 5, rather than dividing by total successful renewals. The official dictionary corroborates those metric definitions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv with curl -sS and echoed the header and Alabama rows. Extracted July-December 2025 original submissions.",
+      "result": "Reporting period: ex parte numerator / beneficiaries due. 202507: 45342/120819; 202508: 43661/110647; 202509: 42363/106479; 202510: 40942/100725; 202511: 38805/96927; 202512: 46978/112157. Computed one-decimal shares are 37.5%, 39.5%, 39.8%, 40.6%, 40.0%, and 41.9%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched the same official CSV again with curl -sS and echoed Alabama's 2025 original rows to examine earlier large-cohort episodes.",
+      "result": "March 2025 had 172855 beneficiaries due and 37535 ex parte renewals, giving 21.7%. May 2025 had 147477 due and 37957 ex parte renewals, giving 25.7%. June 2025 had 107356 due and 38735 ex parte renewals, giving 36.1%. Large denominator cohorts previously depressed the share despite similar ex parte counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched and echoed the official datastore API query for Alabama original rows in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, including January-June 2026.",
+      "result": "Reporting period: initiated, due, ex parte. 202601: 94392, 99200, 42135; 202602: 201219, 105413, 45186; 202603: 101259, 94392, 39348; 202604: 105959, 201219, 41404; 202605: 111567, 101259, 36867; 202606: 105218, 105959, 37848. Computed shares are 42.5%, 42.9%, 41.7%, 20.6%, 36.4%, and 35.7%."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is twelve consecutive Alabama O reporting periods, July 2025-June 2026. Their unrounded mean share is 38.2561%, establishing the outside-view base rate. Mean ex parte renewals are 41739.9167 beneficiaries, compared with 37357.5 over May-June 2026."
+    },
+    {
+      "kind": "text",
+      "text": "The administrative mechanism supplies a useful denominator inference: February's 201219 initiated renewals equal April's 201219 due; March's 101259 equal May's due; April's 105959 equal June's due. Assuming this observed two-month mapping continues, June's 105218 initiated renewals imply approximately 105218 due in August. April's low share chiefly reflects its unusually large denominator, so it does not justify extrapolating a persistent collapse in automatic renewals."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a partially pooled renewal-count persistence model anchored on the July 2025-June 2026 reference class. Level: its mean share is 38.2561%; conditioning the twelve-month mean numerator on the inferred August denominator gives 100*41739.9167/105218 = 39.6699%, a +1.4138-point cohort adjustment. Momentum: blend that numerator equally with the recent two-month mean, giving (41739.9167+37357.5)/2 = 39548.7083 and a -2.0825-point adjustment. One-off effect: do not extrapolate April's denominator spike. Seasonal and announced-policy adjustments are zero because fetched evidence does not establish a stable seasonal increment or an Alabama policy change for August. Point = 100*39548.7083/105218 = 37.5874%, rounded to 37.6%. For eleven successive changes in the twelve unrounded shares, mean change = -0.1644899 and sum of squared changes = 706.9928479. sigma = 8.4065 percentage points, calculated as sqrt((706.9928479-11*(-0.1644899)^2)/10). The 80% half-width is 1.28*8.4065 = 10.7603 points. The observed initiation cohort and stationary count model support this half-width without an additional two-month random-walk multiplier. Unrounded bounds are 26.8271%-48.3477%; rounding outward gives 26.8%-48.4%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is more successful ex parte processing or a smaller realized due cohort. Downside risk is weaker processing or additional cases enlarging the due cohort. With 105218 due, fewer than approximately 28198 ex parte renewals or more than 50926 would land outside the interval. Another April-sized denominator spike could also produce a result below the interval even with an ordinary ex parte numerator."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar verification limitation: the official CMS publication page lists June 2026 released September 25, May released August 28, and April released July 31, but provides no future August 2026 publication announcement. I could not verify December 15, 2026 from an official calendar. The registered resolutionDate is preserved as required, but it is not presented as a verified CMS release date; this run therefore does not satisfy the prompt's calendar-verification requirement."
+    },
+    {
+      "kind": "text",
+      "text": "The web reader returned no parsed dataset-page content and could not access the dictionary endpoint. Separate official CSV, dictionary curl, and datastore API fetches succeeded and exposed the evidence used here; no unavailable history was replaced with remembered values."
+    },
+    {
+      "kind": "forecast",
+      "point": 37.6,
+      "ciLow": 26.8,
+      "ciHigh": 48.4
+    }
+  ]
+}

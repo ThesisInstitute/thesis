@@ -1,0 +1,184 @@
+{
+  "slug": "wic-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 WIC participation",
+  "question": "What will USDA report as national total WIC participation for September 2026, not seasonally adjusted, in its first official monthly print?",
+  "unit": "millions",
+  "pointEstimate": 6.675605,
+  "ciLow": 6.571357,
+  "ciHigh": 6.779852,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-30",
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables, Monthly Data - National Level",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the September 2026 Total Participants value in the first official publication of USDA's national monthly WIC Participation and Costs table. Use the unadjusted monthly count, including the table's full national coverage, rather than an annual average or participant subgroup. Divide counts expressed in persons by 1,000,000 and retain six decimal places in millions; multiply counts expressed in thousands by 0.001. Ignore all subsequent revisions and corrections, including same-day corrections. The resolutionDate field is an unverified registration-window placeholder, not a verified announcement date.",
+  "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2023-06"},
+      "label": "2023-06",
+      "value": 6.732424
+    },
+    {
+      "period": {"type": "month", "value": "2023-09"},
+      "label": "2023-09",
+      "value": 6.677019
+    },
+    {
+      "period": {"type": "month", "value": "2024-06"},
+      "label": "2024-06",
+      "value": 6.736885
+    },
+    {
+      "period": {"type": "month", "value": "2024-09"},
+      "label": "2024-09",
+      "value": 6.83825
+    },
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "2025-06",
+      "value": 6.8832
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 6.923325
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 6.911108
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 6.921686
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 6.909938
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 6.771734
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 6.712611
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 6.6963
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 6.664741
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 6.703035
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 6.708518
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 6.687977
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 6.669554
+    }
+  ],
+  "drivers": [
+    "Persistence near the latest reported participation level",
+    "Mild negative momentum during early 2026",
+    "Variable historical summer participation changes",
+    "Continuing virtual-service waivers",
+    "First-print reporting and revision uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program",
+    "https://fns-prod.azureedge.us/pd/wic-program",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-June-2026.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-January-2026.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-February-2026.pdf",
+    "https://fns-prod.azureedge.us/wic/modernization/flexibilities"
+  ],
+  "runAt": "2026-10-07T11:53:09Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 WIC total participation forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is September national monthly total WIC participation, unadjusted, resolved strictly on its first official print. The relevant column is Total Participants in WIC Participation and Costs, cross-checked against National Data Bank Table 21. HistoricalContext contains the latest fetched official vintages of this same unadjusted series; these historical values are not certified original first prints."
+    },
+    {
+      "kind": "text",
+      "text": "Resolver discrepancies: the registered FNS page returned HTTP 403, while accessible USDA pages now use Food and Nutrition Administration branding. The registered target identity and resolver URL are retained. The fetched national table reports persons, so the ledger's 0.001 multiplier would be incorrect if applied directly to these raw counts; conversion to millions requires division by 1,000,000. See [USDA WIC Data Tables](https://fns-prod.azureedge.us/pd/wic-program)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch national WIC participation from the [June 2026 Keydata Report, Table 21](https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-June-2026.pdf).",
+      "result": "Persons: June 2025 6,883,200; July 6,923,325; August 6,911,108; September 6,921,686; October 6,909,938; November 6,771,734; December 6,712,611; January 2026 6,696,300; February 6,664,741; March 6,703,035; April 6,708,518; May 6,687,977; June 6,669,554. July through September 2026 are unreported."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch historical summer endpoints from [USDA WIC Participation and Costs](https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf).",
+      "result": "Persons: June/September 2023 6,732,424/6,677,019; June/September 2024 6,736,885/6,838,250; June/September 2025 6,883,200/6,921,686. The table identifies FY 2026 data as preliminary."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Check reporting-vintage sensitivity in the archived [January Keydata Report](https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-January-2026.pdf) and [February Keydata Report](https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-February-2026.pdf), Table 21.",
+      "result": "The January report records January participation of 6,689,525 persons; the February report records February participation of 6,640,819. The latest fetched totals are respectively 6,696,300 and 6,664,741, showing subsequent increases of 6,775 and 23,922 persons."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the thirteen consecutive monthly totals from June 2025 through June 2026, supplemented by three historical summer paths. The base rate favors persistence near the latest observed level. Recent momentum is mildly negative; divergent summer paths warrant shrinking their average adjustment. The earlier abrupt decline remains in dispersion rather than being extrapolated as a recurring level shock."
+    },
+    {
+      "kind": "text",
+      "text": "Policy mechanism: USDA says most modernization waivers continue until September 30, 2026, or the end of evaluation efforts, whichever is later. This supports continuity without assuming a universal September waiver-expiry shock. Assign no separately quantified policy or one-off increment. See [USDA modernization flexibilities](https://fns-prod.azureedge.us/wic/modernization/flexibilities)."
+    },
+    {
+      "kind": "math",
+      "text": "All calculations use millions. Summer changes are -0.055405, +0.101365 and +0.038486; their mean is +0.028148667. Monthly January-to-June momentum is (6.669554 - 6.696300)/5 = -0.0053492. Point = 6.669554 + 0.5*0.028148667 + 0.5*3*(-0.0053492) = 6.675604533. The twelve successive monthly changes have mean -0.017803833 and sum of squared deviations 0.024321189808."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Damped persistence prior, using thirteen fetched monthly levels and three summer paths. Level anchor 6.669554; seasonal adjustment +0.014074333; momentum adjustment -0.0080238; separate one-off and policy adjustments zero. Sample standard deviation of twelve successive changes: sigma = 0.047021455 millions, calculated as sqrt(0.024321189808/11). Baseline 80% half-width = 1.28*sigma = 0.060189063; three unreported months give 1.28*sigma*sqrt(3) = 0.104247743. Retain the abrupt historical decline in dispersion. The nominal normal random-walk bounds are 6.571356790–6.779852277, emitted as 6.571357–6.779852; vintage uncertainty limits calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar limitation: no official calendar or announcement establishing the exact September 2026 release date was fetched. The [official overview](https://fns-prod.azureedge.us/pd/overview) provides current reporting information but no forthcoming release day. resolutionDate 2026-12-30 is solely the supplied registration-window end, an unverified placeholder. This object therefore does not satisfy the mandatory official schedule-verification check."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: stronger summer enrollment or a reporting-backlog recovery could push participation above 6.779852 million, outside the interval. Downside risk: broad certification disruptions or incomplete state reporting could push the first print below 6.571357 million, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 6.675605,
+      "ciLow": 6.571357,
+      "ciHigh": 6.779852
+    }
+  ]
+}

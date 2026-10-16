@@ -1,0 +1,101 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ky",
+  "country": "US",
+  "type": "data",
+  "title": "Kentucky ex parte renewal share, August 2026",
+  "question": "What will Kentucky's ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT original (O) submission row of CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using published counts without seasonal adjustment and rounding the share to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Kentucky's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ky.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Kentucky original-submission history unavailable",
+    "First-publication vintage required",
+    "Registered release date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:18:54Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Kentucky ex parte renewal share: numeric forecast withheld because exact history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Kentucky's August 2026 original submission, resolved on its FIRST PRINT. Registered target identity and resolver text are preserved. The dataset does not specify seasonal adjustment."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search official CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The official dataset page reports 3,876 rows and 22 columns, modified September 25, 2026. Search-accessible rows were Alaska records, not Kentucky history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "Federal metadata gives modified 2026-09-25T18:00:00Z and identifies the CMS distribution as https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. Opening that CSV failed with Cache miss."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+      "result": "CMS identifies ex parte renewed beneficiaries as Metric 5a1, renewals due as Metric 5, and total renewed beneficiaries as Metric 5a. original_updated distinguishes O=Original from U=Updated. This dictionary supplies definitions, not Kentucky counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "CMS lists June 2026 released September 25, 2026; May 2026 released August 28, 2026; April 2026 released July 31, 2026; and March 2026 released June 26, 2026. The page provides no scheduled release date for the target reporting period."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+      "result": "The fetched specification is Version 4, updated November 2025. Original monthly reports are due by the 8th of the following month; updates are due by the 15th. CMS permits corrections to submitted reports, so an O flag alone does not establish an archived first-publication vintage."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. The CMS datastore endpoint https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0 and filtered variants were inaccessible through the web tool; the official CSV could not be fetched. No admissible Kentucky original-submission numerator and denominator history was obtained. Rounded snapshot summaries are not substituted for the exact resolving artifact. This is an access failure, not evidence that the official source exposes too few prints."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without numeric Kentucky history, last-print persistence, panel shrinkage, walk-forward comparisons, and thesis_model_candidate_v1 candidates cannot be calculated. No numerical prior or current-evidence adjustment is asserted."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior unavailable; historical sample empty; adjustment components not estimated; sigma unavailable. Consequently neither the point nor empirical interval arithmetic can be computed. The point and interval fields are null rather than fabricated."
+    },
+    {
+      "kind": "text",
+      "text": "The registered resolutionDate is preserved. Its status as an official scheduled release date could not be verified from CMS this run. The registered resolver also does not explicitly name the denominator field, and no alternative denominator is silently imposed."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would be improved Kentucky data matching that raises ex parte completion; downside risk would be a matching failure or renewal-cohort change that lowers it. Without fetched dispersion, no claim can be made about outcomes outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "The numeric forecast is dropped under the honesty rule. This object was verified to parse as JSON but cannot pass the contract's numeric-estimate and historical-print requirements. Catalog lookup was omitted under the run's independence override. No files or activity receipts were created."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

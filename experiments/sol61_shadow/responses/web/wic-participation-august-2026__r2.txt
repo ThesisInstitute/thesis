@@ -1,0 +1,134 @@
+{
+  "slug": "wic-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation in August 2026",
+  "question": "What will USDA's first official, not seasonally adjusted national total WIC participation print for August 2026 be, in millions of participants?",
+  "unit": "millions",
+  "pointEstimate": 6.66556,
+  "ciLow": 6.58956,
+  "ciHigh": 6.74156,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-26",
+  "resolutionSource": "USDA WIC Data Tables, Monthly Data - National Level",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first official publication of August 2026 national Total Participants in USDA's WIC monthly tables, not seasonally adjusted and initially preliminary. Use the national total as published, including covered territories. Convert persons to millions by dividing by 1,000,000; if the source reports thousands, multiply by 0.001. Preserve the published count's precision, expressing person counts to six decimal places in millions. Ignore subsequent revisions and corrections, including same-day corrections; no grace period applies. The resolutionDate is a provisional registered-window endpoint, not a verified official release date.",
+  "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 6.689525
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 6.640819
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 6.701661
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 6.7049
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 6.672717
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 6.669554
+    }
+  ],
+  "drivers": [
+    "June initial participation anchors the level",
+    "Recent initial prints imply mildly negative momentum",
+    "Higher July income limits support enrollment",
+    "Remote access supports retention",
+    "Initial reporting omissions and anticipatory disenrollment create downside risk"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/wic-program",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-January-2026.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-April-2026.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf",
+    "https://fns-prod.azureedge.us/wic/fr-042926",
+    "https://fns-prod.azureedge.us/wic/modernization/flexibilities",
+    "https://www.govinfo.gov/content/pkg/FR-2026-07-20/pdf/2026-14539.pdf",
+    "https://usda.azureedge.us/about-usda/reports-and-data/agency-reports?page=0"
+  ],
+  "runAt": "2026-10-07T11:46:36Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 WIC participation: initial-print persistence forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is national monthly total participation, not an annual eligibility estimate or fiscal-year average. The historicalContext uses archived initial-release vintages, and the June anchor is explicitly labeled Initial. All model observations use the same unadjusted monthly participation concept. Keydata Table 21 provides the January and April observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch January and April 2026 Keydata reports, Table 21, from the official USDA CDN PDFs listed in sourceContext.",
+      "result": "January 2026: 6,689,525 participants. April 2026: 6,704,900 participants. These are the target-month observations in their respective archived release reports."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch archived national WIC monthly PDFs 37wic-monthly-5.pdf, 37wic-monthly-6.pdf, and 37wic-monthly-8.pdf.",
+      "result": "The newly reported monthly totals are February 2026: 6,640,819; March 2026: 6,701,661; May 2026: 6,672,717 participants."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch 27wilatest-9.pdf, WIC PROGRAM: TOTAL PARTICIPATION, national TOTAL row.",
+      "result": "June 2026 Initial: 6,669,554 participants. The table also reports June 2025: 6,883,200 and the preceding-month total: 6,687,977. Its preceding-month year and footer contain stale dates; only the explicitly labeled June 2026 Initial column supplies the model anchor."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is six consecutive January-June initial monthly prints. The base rate is persistence around June's 6.669554 million. Their five monthly changes average -0.0039942 million. I damp that drift because the sample is small and includes both declines and rebounds. Original-vintage summer history could not be fetched, so no numerical seasonal adjustment is imposed."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch USDA WIC Income Eligibility Guidelines 2026-2027 at https://fns-prod.azureedge.us/wic/fr-042926.",
+      "result": "Effective July 1, 2026, the contiguous-state family-of-four income ceiling is $61,050 annually or $5,088 monthly, at 185% of poverty guidelines."
+    },
+    {
+      "kind": "text",
+      "text": "Policy mechanisms support competing risks. Higher income limits and continuing remote-access waivers support participation. The official waiver page says most waivers continue through September 30, 2026 or the evaluation's end, whichever is later. DHS's public-charge rule was published July 20 and becomes effective September 18; August exposure is anticipatory chilling rather than a mechanical August eligibility change. No separately quantified policy or one-off adjustment is added."
+    },
+    {
+      "kind": "text",
+      "text": "Binding discrepancies: the registered FNS page failed to fetch, while USDA's accessible CDN identifies the agency as Food and Nutrition Administration. The retrieved CDN and FNA hosts differ from the registered allowedHosts. The tables report persons, so the registered factor 0.001 requires prior normalization to thousands; applying it directly to raw person counts would be incorrect. The forecast retains the registered target identity and unit."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification failed: no fetched official calendar or announcement specified the August WIC release date. The USDA calendar inspected did not provide that release. November 18-26 is supplied registration context. November 26 is retained solely as its provisional endpoint; it is not independently verified, and this run does not satisfy the prompt's calendar-verification requirement."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a June persistence prior with 50% damped drift over two months, estimated from six January-June initial prints. Changes in millions are [-0.048706, 0.060842, 0.003239, -0.032183, -0.003163]; mean = -0.019971/5 = -0.0039942. Point = 6.669554 + 0.5*2*(-0.0039942) + 0 policy + 0 one-off = 6.6655598. Sample sigma = 0.041983617 million, calculated as sqrt(0.0070504964108/4). The normal 80% one-month half-width is 1.28*sigma = 0.053739030; scale by sqrt(2) for two months to obtain 0.075998465. Implied bounds are 6.589561335 and 6.741558265, rounded to 6.58956 and 6.74156. This assumes independent monthly innovations; the small sample limits calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is stronger enrollment and retention following July's income-limit update and remote access. Downside risk is accelerated disenrollment or incomplete initial state reporting. A broad enrollment rebound would land above the interval at 6.74156 million; a substantial reporting omission or renewed participation contraction would land below 6.58956 million, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 6.66556,
+      "ciLow": 6.58956,
+      "ciHigh": 6.74156
+    }
+  ]
+}

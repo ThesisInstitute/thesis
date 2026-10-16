@@ -1,0 +1,140 @@
+{
+  "slug": "canada-ei-regular-beneficiaries-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada EI regular beneficiaries, September 2026",
+  "question": "What will Statistics Canada first publish for September 2026 for Canada regular Employment Insurance beneficiaries, both sexes, ages 15 years and over, seasonally adjusted, Table 14-10-0011-01, vector v64549350, expressed in thousands of persons?",
+  "unit": "thousands",
+  "pointEstimate": 547.05,
+  "ciLow": 531.23,
+  "ciHigh": 562.87,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Statistics Canada, Employment Insurance, September 2026; Table 14-10-0011-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+  "resolutionRule": "Resolve on the FIRST PRINT of September 2026 for Statistics Canada Table 14-10-0011-01, Canada, regular benefits, both sexes, ages 15 years and over, seasonally adjusted, vector v64549350. Multiply the initially published persons count by 0.001 and retain the table's published precision, observed as 0.01 thousand persons. Ignore all subsequent revisions and corrections. The official September reference-period release date could not be verified this run; resolutionDate is null rather than an invented scheduled day. The registered November 17-25, 2026 window is not an official scheduled date or an authorized resolve-by-bound rule.",
+  "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.september_2026.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 551.67},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 543.74},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 553.46},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 565.96},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 569.11},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 554.83},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 542.11},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 548},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 544.44},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 543.69},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 541.96},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": 547.05}
+  ],
+  "drivers": [
+    "July first-print persistence",
+    "Recent first-print volatility and revisions",
+    "Two unobserved monthly transitions",
+    "August unemployment unchanged",
+    "Existing temporary EI measures"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251023/dq251023b-eng.htm?HPA=1",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251120/dq251120a-eng.htm?HPA=1",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251218/dq251218b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260122/dq260122a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260219/dq260219b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260325/dq260325a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260423/dq260423c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260522/dq260522b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260618/dq260618d-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260723/dq260723c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260819/dq260819d-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101&request_locale=en",
+    "https://www150.statcan.gc.ca/n1/dai-quo/cal2-eng.htm",
+    "https://www150.statcan.gc.ca/n1/dai-quo/cal3-eng.htm",
+    "https://www150.statcan.gc.ca/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm?HPA=1&indgeo=0&indid=3587-2",
+    "https://www.canada.ca/en/employment-social-development/programs/ei/ei-list/reports/premium/rates2027.html"
+  ],
+  "runAt": "2026-10-07T12:46:08Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 Canada EI forecast: persistence, with unresolved publication checks"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is the national seasonally adjusted regular-beneficiary stock, not total benefits, claims received, or unemployment. Preserve the supplied slug, unit, vector, and dataPointId. No policy condition applies. The numeric forecast is grounded in fetched official first-release indicators, but this cell cannot satisfy the complete production contract: the official target release date and six historical first prints from the exact registered table/API artifact were not retrievable. No catalog lookup was performed because the independence override prohibits Thesis sources."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search and open Statistics Canada's Table 14-10-0011-01 and registered vector endpoint; inspect the original July release.",
+      "result": "The exact table's September 17, 2026 vintage reports March 550,440, April 547,590, May 547,760, June 544,190, and July 547,050 persons. Filters are Canada, regular benefits, both sexes, ages 15 years and over, seasonally adjusted. The original July release also reports 547,050 persons. The API and customized historical ranges could not be fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official original monthly releases for August-December 2025: https://www150.statcan.gc.ca/n1/daily-quotidien/251023/dq251023b-eng.htm?HPA=1; https://www150.statcan.gc.ca/n1/daily-quotidien/251120/dq251120a-eng.htm?HPA=1; https://www150.statcan.gc.ca/n1/daily-quotidien/251218/dq251218b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260122/dq260122a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260219/dq260219b-eng.htm",
+      "result": "The original Canada regular-EI indicators attributed to Table 14-10-0011-01 report August 2025 551,670; September 543,740; October 553,460; November 565,960; December 569,110 persons. Multiplication by the registered factor gives 551.67, 543.74, 553.46, 565.96, and 569.11 thousand."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official original monthly releases for January-March 2026: https://www150.statcan.gc.ca/n1/daily-quotidien/260325/dq260325a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260423/dq260423c-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260522/dq260522b-eng.htm",
+      "result": "The original Canada regular-EI indicators attributed to Table 14-10-0011-01 report January 2026 554,830; February 542,110; March 548,000 persons, or 554.83, 542.11, and 548.00 thousand."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official original monthly releases for April-July 2026: https://www150.statcan.gc.ca/n1/daily-quotidien/260618/dq260618d-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260723/dq260723c-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260819/dq260819d-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm",
+      "result": "The original Canada regular-EI indicators attributed to Table 14-10-0011-01 report April 2026 544,440; May 543,690; June 541,960; July 547,050 persons, or 544.44, 543.69, 541.96, and 547.05 thousand. The June release states that the series was revised back to January 2023 for seasonal patterns and geographical allocation; its later table value is 544,190 rather than its initial 541,960 persons."
+    },
+    {
+      "kind": "text",
+      "text": "History provenance limitation: historicalContext records the 12 original official release-indicator values, not revised live-table history. These are fetched agency numbers, but the literal contract requires history parsed from the exact registered artifact and forbids substituting bulletin values. Only five revised-vintage columns of the exact table were obtainable. This is a retrieval limitation, not evidence that the agency exposes fewer than six prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Inspect official cal2 and cal3 release schedules and the 2026 annual release-calendar PDF.",
+      "result": "The current cal2 schedule covers October 5-16, 2026 and lists the September Labour Force Survey on October 9. The annual 2026 calendar contains no Employment Insurance entry, and cal3 yielded calendar controls without a target date. The July EI release explicitly schedules August EI for October 22, 2026, not September EI. No exact September EI release date was verified; the supplied November 17-25 registration window cannot establish one."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the 12 original monthly Canada EI indicators from August 2025 through July 2026 have mean 550.5017 thousand, sample level standard deviation 9.0679, and range 541.96-569.11. Their 11 successive first-print differences average -0.4200 thousand with sample standard deviation 8.7415. The last-print persistence prior is 547.05 thousand for September. This is a two-month forecast from the latest observed July print."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated before selecting the forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"unit\":\"thousands\",\"target_period\":\"2026-09\",\"horizon_months\":2,\"point\":547.05,\"p10\":531.23,\"p50\":547.05,\"p90\":562.87,\"interval80\":{\"low\":531.23,\"high\":562.87},\"interval90\":{\"low\":526.71,\"high\":567.39},\"interval_method\":\"fallback_prior: normal first-difference dispersion times sqrt(horizon); 1.28 and 1.645 quantile multipliers\",\"calibration_n\":11,\"train_cutoff\":\"2026-07\",\"walk_forward_score\":{\"horizon_months\":2,\"n\":8,\"mae\":9.13624999999999,\"rmse\":12.17524794408721}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_three_mean\",\"unit\":\"thousands\",\"target_period\":\"2026-09\",\"horizon_months\":2,\"point\":544.23,\"p10\":528.41,\"p50\":544.23,\"p90\":560.06,\"interval80\":{\"low\":528.41,\"high\":560.06},\"interval90\":{\"low\":523.9,\"high\":564.57},\"interval_method\":\"fallback_prior: normal first-difference dispersion times sqrt(horizon); 1.28 and 1.645 quantile multipliers\",\"calibration_n\":11,\"train_cutoff\":\"2026-07\",\"walk_forward_score\":{\"horizon_months\":2,\"n\":8,\"mae\":9.507500000000007,\"rmse\":12.224173228121048}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_drift\",\"unit\":\"thousands\",\"target_period\":\"2026-09\",\"horizon_months\":2,\"point\":546.21,\"p10\":530.39,\"p50\":546.21,\"p90\":562.03,\"interval80\":{\"low\":530.39,\"high\":562.03},\"interval90\":{\"low\":525.87,\"high\":566.55},\"interval_method\":\"fallback_prior: normal first-difference dispersion times sqrt(horizon); 1.28 and 1.645 quantile multipliers\",\"calibration_n\":11,\"train_cutoff\":\"2026-07\",\"walk_forward_score\":{\"horizon_months\":2,\"n\":8,\"mae\":11.614324404761888,\"rmse\":15.922086109303219}}]. On eight common expanding-window origins with at least three training observations and a two-month horizon, persistence MAE/RMSE are 9.13625/12.17525 thousand, trailing-three-mean 9.50750/12.22417, and expanding drift 11.61432/15.92209. Select persistence. These small, overlapping backtests are benchmark comparisons, not proof of calibrated coverage."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch official August 2026 Labour Force Survey and ESDC's summary of the 2027 EI actuarial report.",
+      "result": "August employment fell 42,000 persons while unemployment remained 6.4%; the layoff rate was 0.8%, versus 1.0% twelve months earlier. ESDC reports that the waiting-period waiver, suspension of separation-payment treatment, and 20 extra regular-benefit weeks for long-tenured workers were extended in March 2026 through October 10, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "Update components: level is July's 547.05-thousand first print. Momentum is mixed; the trailing-three mean is 544.23 thousand but performs worse than persistence at the target horizon, so its added adjustment is zero. August employment weakness points upward, while unchanged unemployment and the lower layoff rate offset that signal; no fetched eligible-claimant conversion establishes a numeric EI-stock increment, so the adjustment is zero. The temporary policies already operated before July, so their incremental policy adjustment is zero. Revision effects remain in the observed first-print dispersion; no one-off point adjustment is asserted."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected persistence candidate, 547.05 thousand, using 12 original official release indicators, August 2025-July 2026. Prior weight = 1; momentum, labour-market, one-off, and incremental policy adjustments each = 0. Successive differences are [-7.93, 9.72, 12.50, 3.15, -14.28, -12.72, 5.89, -3.56, -0.75, -1.73, 5.09] thousand; mean = -0.42. sigma = sqrt(sum((difference + 0.42)^2)/(11-1)) = sqrt(764.1414/10) = 8.741518 thousand. Interval method = normal first-difference fallback-prior dispersion. Widen by sqrt(2) for the two unobserved July-to-August-to-September transitions: half-width = 1.28 * 8.741518 * sqrt(2) = 15.823838 thousand. Thus point = 547.05; 80% bounds = 547.05 +/- 15.823838 = [531.226162, 562.873838], rounded to [531.23, 562.87]. No additional regime multiplier is applied: seasonal/geographical revisions are already represented in the original-print differences. The corresponding 90% half-width is 1.645 * 8.741518 * sqrt(2) = 20.336105, giving [526.71, 567.39]."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage sanity check: eight of the ten observed two-month first-print changes have absolute magnitude no greater than 15.823838 thousand. This is descriptive in-sample coverage; the two exceptions are +22.22 and -27.00 thousand. The normal square-root-horizon assumption and limited history remain material uncertainty."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a large wave of insured manufacturing layoffs, together with continued long-tenured benefit payments, could produce a net July-to-September beneficiary increase greater than 15.82 thousand and land above 562.87. Downside risk: strong rehiring or concentrated benefit exhaustion could produce a net fall greater than 15.82 thousand and land below 531.23. Higher or lower August EI counts and September insured layoff evidence would move the point upward or downward; unemployment alone lacks a fetched conversion to this stock."
+    },
+    {
+      "kind": "forecast",
+      "point": 547.05,
+      "ciLow": 531.23,
+      "ciHigh": 562.87
+    }
+  ]
+}

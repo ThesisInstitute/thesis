@@ -1,0 +1,185 @@
+{
+  "slug": "us-unit-labor-costs-q3-2026-prelim",
+  "country": "US",
+  "type": "data",
+  "title": "US unit labor costs, Q3 2026 preliminary",
+  "question": "What will the FIRST preliminary BLS Productivity and Costs print report for U.S. nonfarm business sector unit labor costs (PRS85006112), seasonally adjusted percent change from the previous quarter at a compound annual rate, for 2026-Q3?",
+  "unit": "percent_growth",
+  "pointEstimate": 1.1,
+  "ciLow": -4.4,
+  "ciHigh": 6.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-05",
+  "resolutionSource": "Bureau of Labor Statistics, Productivity and Costs, Third Quarter 2026, Preliminary",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/prod2.nr0.htm",
+  "resolutionRule": "Resolve to the originally published 2026 III row in Table 2, Nonfarm business sector, Unit labor costs column, Percent change from previous quarter at annual rate, seasonally adjusted, in the FIRST preliminary BLS Productivity and Costs release for third-quarter 2026, scheduled November 5, 2026 at 8:30 AM Eastern. The rate is annualized, not year-over-year and not an unannualized quarterly change; use the published one-decimal percentage. Preserve the registered ALFRED PRS85006112 resolver semantics: observation date 2026-07-01, earliest vintage with its first numeric quarterly value, multiply by 1. The underlying original BLS preliminary release and its archived Table 2 are the authoritative agency print. Later revisions, corrected reissues, and subsequent annual updates do not replace the original first print.",
+  "dataPointId": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print",
+  "historicalContext": [
+    {"period": {"type": "quarter", "value": "2020-Q3"}, "label": "2020-Q3", "value": -8.9},
+    {"period": {"type": "quarter", "value": "2020-Q4"}, "label": "2020-Q4", "value": 6.8},
+    {"period": {"type": "quarter", "value": "2021-Q1"}, "label": "2021-Q1", "value": -0.3},
+    {"period": {"type": "quarter", "value": "2021-Q2"}, "label": "2021-Q2", "value": 1},
+    {"period": {"type": "quarter", "value": "2021-Q3"}, "label": "2021-Q3", "value": 8.3},
+    {"period": {"type": "quarter", "value": "2021-Q4"}, "label": "2021-Q4", "value": 0.3},
+    {"period": {"type": "quarter", "value": "2022-Q1"}, "label": "2022-Q1", "value": 11.6},
+    {"period": {"type": "quarter", "value": "2022-Q2"}, "label": "2022-Q2", "value": 10.8},
+    {"period": {"type": "quarter", "value": "2022-Q3"}, "label": "2022-Q3", "value": 3.5},
+    {"period": {"type": "quarter", "value": "2022-Q4"}, "label": "2022-Q4", "value": 1.1},
+    {"period": {"type": "quarter", "value": "2023-Q1"}, "label": "2023-Q1", "value": 6.3},
+    {"period": {"type": "quarter", "value": "2023-Q2"}, "label": "2023-Q2", "value": 1.6},
+    {"period": {"type": "quarter", "value": "2023-Q3"}, "label": "2023-Q3", "value": -0.8},
+    {"period": {"type": "quarter", "value": "2023-Q4"}, "label": "2023-Q4", "value": 0.5},
+    {"period": {"type": "quarter", "value": "2024-Q1"}, "label": "2024-Q1", "value": 4.7},
+    {"period": {"type": "quarter", "value": "2024-Q2"}, "label": "2024-Q2", "value": 0.9},
+    {"period": {"type": "quarter", "value": "2024-Q3"}, "label": "2024-Q3", "value": 1.9},
+    {"period": {"type": "quarter", "value": "2024-Q4"}, "label": "2024-Q4", "value": 3},
+    {"period": {"type": "quarter", "value": "2025-Q1"}, "label": "2025-Q1", "value": 5.7},
+    {"period": {"type": "quarter", "value": "2025-Q2"}, "label": "2025-Q2", "value": 1.6},
+    {"period": {"type": "quarter", "value": "2025-Q3"}, "label": "2025-Q3", "value": -1.9},
+    {"period": {"type": "quarter", "value": "2025-Q4"}, "label": "2025-Q4", "value": 2.8},
+    {"period": {"type": "quarter", "value": "2026-Q1"}, "label": "2026-Q1", "value": 2.3},
+    {"period": {"type": "quarter", "value": "2026-Q2"}, "label": "2026-Q2", "value": 1.3}
+  ],
+  "drivers": [
+    "Rolling-four first-print average selected by walk-forward RMSE",
+    "Restrained September earnings growth; no calibrated adjustment",
+    "Compensation growth relative to output per hour",
+    "Full 24-print volatility retained in interval"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/2026/11_sched.htm",
+    "https://www.bls.gov/schedule/2026/home.htm",
+    "https://alfred.stlouisfed.org/series?seid=PRS85006112",
+    "https://www.bls.gov/bls/news-release/prod.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11052020.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02042021.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05062021.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08102021.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11042021.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02032022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05052022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08092022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11032022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02022023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05042023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08032023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11022023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05022024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11072024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02062025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05082025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08072025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_01082026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_03052026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05072026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08062026.htm",
+    "https://alfred.stlouisfed.org/release?ob=pv&od=desc&rd=2025-05-08&rid=47",
+    "https://alfred.stlouisfed.org/release?et=&pageID=1&rd=2025-08-07&rid=47&t=",
+    "https://alfred.stlouisfed.org/release?rd=2026-01-08&rid=47",
+    "https://alfred.stlouisfed.org/release?ob=pv&od=desc&rd=2026-03-05&rid=47&t=unit+labor+cost",
+    "https://alfred.stlouisfed.org/release?rd=2026-05-07&rid=47",
+    "https://alfred.stlouisfed.org/release?et=&pageID=1&rd=2026-08-06&rid=47&t=",
+    "https://www.bls.gov/news.release/prod2.nr0.htm",
+    "https://www.bls.gov/news.release/prod2.t02.htm",
+    "https://www.bls.gov/news.release/empsit.nr0.htm"
+  ],
+  "runAt": "2026-10-07T12:39:29Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Q3 2026 preliminary nonfarm unit labor costs: first-print history, benchmark selection, and 80% interval"
+    },
+    {
+      "kind": "text",
+      "text": "The target is BLS PRS85006112: U.S. nonfarm business sector unit labor costs, seasonally adjusted percent change from the previous quarter at a compound annual rate, for 2026-Q3. Resolve on the original preliminary print at one decimal place. Preserve the registered slug, unit, and dataPointId. The official calendar establishes the release date; the registered release window is not itself a scheduled date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.bls.gov/schedule/2026/11_sched.htm and https://www.bls.gov/news.release/prod2.nr0.htm.",
+      "result": "BLS lists November 5, 2026, 08:30 AM Eastern, Productivity and Costs (P), Third Quarter 2026. The September 3 release independently announces November 5, 2026 at 8:30 AM ET. Resolution date: 2026-11-05."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Fetch https://alfred.stlouisfed.org/series?seid=PRS85006112 and official BLS archive index https://www.bls.gov/bls/news-release/prod.htm.",
+      "result": "ALFRED identifies PRS85006112 as Nonfarm Business Sector: Unit Labor Costs for All Workers, quarterly, seasonally adjusted, percent change at annual rate, sourced to BLS. Its currently revised Q2 2026 observation is 1.2, updated September 3, 2026. BLS archives identify the separate preliminary releases."
+    },
+    {
+      "kind": "text",
+      "text": "The registered ALFRED CSV endpoint and attempted vintage-specific CSV request were inaccessible to the web tool. History was fetched from the underlying original BLS preliminary releases, exact Table 2 nonfarm business Unit labor costs column under Percent change from previous quarter at annual rate. Official ALFRED first-release search extracts independently verify the latest six observations. No current revised historical row is substituted. No Thesis catalog or forecast was accessed; slug uniqueness was not checked because the run instructions prohibit that access."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch the six original preliminary BLS release artifacts and inspect exact Table 2 target-quarter Unit labor costs rows: https://www.bls.gov/news.release/archives/prod2_11052020.htm ; https://www.bls.gov/news.release/archives/prod2_02042021.htm ; https://www.bls.gov/news.release/archives/prod2_05062021.htm ; https://www.bls.gov/news.release/archives/prod2_08102021.htm ; https://www.bls.gov/news.release/archives/prod2_11042021.htm ; https://www.bls.gov/news.release/archives/prod2_02032022.htm",
+      "result": "First preliminary seasonally adjusted annualized quarterly changes (%): 2020-Q3=-8.9; 2020-Q4=6.8; 2021-Q1=-0.3; 2021-Q2=1; 2021-Q3=8.3; 2021-Q4=0.3. Values come from each quarter's own initial release, not later revised history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch the six original preliminary BLS release artifacts and inspect exact Table 2 target-quarter Unit labor costs rows: https://www.bls.gov/news.release/archives/prod2_05052022.htm ; https://www.bls.gov/news.release/archives/prod2_08092022.htm ; https://www.bls.gov/news.release/archives/prod2_11032022.htm ; https://www.bls.gov/news.release/archives/prod2_02022023.htm ; https://www.bls.gov/news.release/archives/prod2_05042023.htm ; https://www.bls.gov/news.release/archives/prod2_08032023.htm",
+      "result": "First preliminary seasonally adjusted annualized quarterly changes (%): 2022-Q1=11.6; 2022-Q2=10.8; 2022-Q3=3.5; 2022-Q4=1.1; 2023-Q1=6.3; 2023-Q2=1.6. Values come from each quarter's own initial release, not later revised history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch the six original preliminary BLS release artifacts and inspect exact Table 2 target-quarter Unit labor costs rows: https://www.bls.gov/news.release/archives/prod2_11022023.htm ; https://www.bls.gov/news.release/archives/prod2_02012024.htm ; https://www.bls.gov/news.release/archives/prod2_05022024.htm ; https://www.bls.gov/news.release/archives/prod2_08012024.htm ; https://www.bls.gov/news.release/archives/prod2_11072024.htm ; https://www.bls.gov/news.release/archives/prod2_02062025.htm",
+      "result": "First preliminary seasonally adjusted annualized quarterly changes (%): 2023-Q3=-0.8; 2023-Q4=0.5; 2024-Q1=4.7; 2024-Q2=0.9; 2024-Q3=1.9; 2024-Q4=3. Values come from each quarter's own initial release, not later revised history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch the six original preliminary BLS release artifacts and inspect exact Table 2 target-quarter Unit labor costs rows: https://www.bls.gov/news.release/archives/prod2_05082025.htm ; https://www.bls.gov/news.release/archives/prod2_08072025.htm ; https://www.bls.gov/news.release/archives/prod2_01082026.htm ; https://www.bls.gov/news.release/archives/prod2_03052026.htm ; https://www.bls.gov/news.release/archives/prod2_05072026.htm ; https://www.bls.gov/news.release/archives/prod2_08062026.htm",
+      "result": "First preliminary seasonally adjusted annualized quarterly changes (%): 2025-Q1=5.7; 2025-Q2=1.6; 2025-Q3=-1.9; 2025-Q4=2.8; 2026-Q1=2.3; 2026-Q2=1.3. Values come from each quarter's own initial release, not later revised history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Search official ALFRED Productivity and Costs release-date tables for PRS85006112: https://alfred.stlouisfed.org/release?ob=pv&od=desc&rd=2025-05-08&rid=47 ; https://alfred.stlouisfed.org/release?et=&pageID=1&rd=2025-08-07&rid=47&t= ; https://alfred.stlouisfed.org/release?rd=2026-01-08&rid=47 ; https://alfred.stlouisfed.org/release?ob=pv&od=desc&rd=2026-03-05&rid=47&t=unit+labor+cost ; https://alfred.stlouisfed.org/release?rd=2026-05-07&rid=47 ; https://alfred.stlouisfed.org/release?et=&pageID=1&rd=2026-08-06&rid=47&t=",
+      "result": "Official ALFRED indexed first-release tables independently match 2025-Q1=5.7 (2025-05-08), 2025-Q2=1.6 (2025-08-07), 2025-Q3=-1.9 (2026-01-08), 2025-Q4=2.8 (2026-03-05), 2026-Q1=2.3 (2026-05-07), and 2026-Q2=1.3 (2026-08-06). These are successful web-search extracts, not a successful CSV download."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate / reference class: 24 consecutive original preliminary growth prints, 2020-Q3 through 2026-Q2, have mean 2.670833%, median 1.75%, range -8.9% to 11.6%, and sample standard deviation 4.278915 percentage points. The latest 12 have mean 1.833333% and standard deviation 2.122320. Publish last-print persistence at 1.3% before selection; current-revised persistence at 1.2% is a separate informational baseline. This is a single series, so panel shrinkage does not apply."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmark computation precedes current-information adjustments. One-step chronological walk-forward forecasts use only earlier original preliminary prints. With six initial observations and 18 common evaluation quarters, RMSE is persistence 4.332949, expanding mean 3.829310, rolling-four mean 3.669383, and rolling-six mean 4.065118. MAE is respectively 3.444444, 2.743101, 2.752778, and 3.072222. Across the 12 most recent common evaluation quarters, RMSE is respectively 2.907318, 2.426077, 2.300091, and 3.007556; rolling-twelve mean is 2.501118. Select rolling-four mean by lowest RMSE on both comparable windows. Its point is (-1.9+2.8+2.3+1.3)/4=1.125%, rounded to 1.1%. The expanding mean marginally wins full-window MAE; candidate selection remains uncertain in this small sample."
+    },
+    {
+      "kind": "math",
+      "text": "Model candidates were generated in memory from fetched original prints before selecting the agent forecast. Each uses the same historical first-print Gaussian fallback dispersion wrapper; calibration_n counts 24 dispersion observations, while walk-forward n separately counts scored predictions. No native fitted-model intervals or external adapter execution is claimed. Candidate set: [{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"persistence\",\"seriesId\":\"PRS85006112\",\"targetPeriod\":\"2026-Q3\",\"point\":1.3,\"p10\":-4.2,\"p50\":1.3,\"p90\":6.8,\"interval80\":{\"low\":-4.2,\"high\":6.8},\"interval90\":{\"low\":-5.7,\"high\":8.3},\"intervalMethod\":\"fallback-prior Gaussian band from sample standard deviation of 24 original preliminary growth prints; not a standard error of the mean\",\"calibration_n\":24,\"trainCutoff\":\"2026-Q2\",\"trainCutoffReleaseDate\":\"2026-08-06\",\"walkForwardScore\":{\"metric\":\"RMSE\",\"n\":18,\"value\":4.332949,\"mae\":3.444444},\"commonRecentScore\":{\"metric\":\"RMSE\",\"n\":12,\"value\":2.907318,\"mae\":2.525}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"expanding_mean\",\"seriesId\":\"PRS85006112\",\"targetPeriod\":\"2026-Q3\",\"point\":2.7,\"p10\":-2.8,\"p50\":2.7,\"p90\":8.2,\"interval80\":{\"low\":-2.8,\"high\":8.2},\"interval90\":{\"low\":-4.4,\"high\":9.7},\"intervalMethod\":\"fallback-prior Gaussian band from sample standard deviation of 24 original preliminary growth prints; not a standard error of the mean\",\"calibration_n\":24,\"trainCutoff\":\"2026-Q2\",\"trainCutoffReleaseDate\":\"2026-08-06\",\"walkForwardScore\":{\"metric\":\"RMSE\",\"n\":18,\"value\":3.82931,\"mae\":2.743101},\"commonRecentScore\":{\"metric\":\"RMSE\",\"n\":12,\"value\":2.426077,\"mae\":1.926828}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"rolling4_mean\",\"seriesId\":\"PRS85006112\",\"targetPeriod\":\"2026-Q3\",\"point\":1.1,\"p10\":-4.4,\"p50\":1.1,\"p90\":6.6,\"interval80\":{\"low\":-4.4,\"high\":6.6},\"interval90\":{\"low\":-5.9,\"high\":8.2},\"intervalMethod\":\"fallback-prior Gaussian band from sample standard deviation of 24 original preliminary growth prints; not a standard error of the mean\",\"calibration_n\":24,\"trainCutoff\":\"2026-Q2\",\"trainCutoffReleaseDate\":\"2026-08-06\",\"walkForwardScore\":{\"metric\":\"RMSE\",\"n\":18,\"value\":3.669383,\"mae\":2.752778},\"commonRecentScore\":{\"metric\":\"RMSE\",\"n\":12,\"value\":2.300091,\"mae\":1.733333}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"rolling6_mean\",\"seriesId\":\"PRS85006112\",\"targetPeriod\":\"2026-Q3\",\"point\":2,\"p10\":-3.5,\"p50\":2,\"p90\":7.5,\"interval80\":{\"low\":-3.5,\"high\":7.5},\"interval90\":{\"low\":-5.1,\"high\":9},\"intervalMethod\":\"fallback-prior Gaussian band from sample standard deviation of 24 original preliminary growth prints; not a standard error of the mean\",\"calibration_n\":24,\"trainCutoff\":\"2026-Q2\",\"trainCutoffReleaseDate\":\"2026-08-06\",\"walkForwardScore\":{\"metric\":\"RMSE\",\"n\":18,\"value\":4.065118,\"mae\":3.072222},\"commonRecentScore\":{\"metric\":\"RMSE\",\"n\":12,\"value\":3.007556,\"mae\":2.3125}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"rolling12_mean\",\"seriesId\":\"PRS85006112\",\"targetPeriod\":\"2026-Q3\",\"point\":1.8,\"p10\":-3.7,\"p50\":1.8,\"p90\":7.3,\"interval80\":{\"low\":-3.7,\"high\":7.3},\"interval90\":{\"low\":-5.2,\"high\":8.9},\"intervalMethod\":\"fallback-prior Gaussian band from sample standard deviation of 24 original preliminary growth prints; not a standard error of the mean\",\"calibration_n\":24,\"trainCutoff\":\"2026-Q2\",\"trainCutoffReleaseDate\":\"2026-08-06\",\"walkForwardScore\":{\"metric\":\"RMSE\",\"n\":12,\"value\":2.501118,\"mae\":2.027778},\"commonRecentScore\":{\"metric\":\"RMSE\",\"n\":12,\"value\":2.501118,\"mae\":2.027778}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.bls.gov/news.release/prod2.nr0.htm and https://www.bls.gov/news.release/empsit.nr0.htm.",
+      "result": "September 3, 2026 revised productivity release: Q2 nonfarm hourly compensation +2.6%, productivity +1.4%, and unit labor costs +1.2%, versus original unit labor costs +1.3%. October 2, 2026 September Employment Situation: private nonfarm average hourly earnings +0.1% monthly, $37.81, and +3.0% over 12 months; average workweek 34.4 hours; payroll change +29,000."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view decomposition: level is represented by the selected rolling-four prior; momentum is already included in those four prints, so additional momentum adjustment is zero. September earnings suggest restrained wage pressure, but earnings exclude parts of compensation and do not determine nonfarm business output or all-worker hours; no fetched, calibrated mapping justifies a numerical update. Compensation adjustment zero; productivity adjustment zero; one-off adjustment zero; policy adjustment zero. Retain the benchmark with 100% weight. The rounded forecast is 0.2 percentage point below original-print persistence and 0.1 below current-revised persistence, well below the 2.75-point material-deviation threshold from one-quarter of the rounded 80% band."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected rolling-four mean of 2025-Q3, 2025-Q4, 2026-Q1, 2026-Q2 = 4.5/4 = 1.125%; weights are 100% prior and 0% uncalibrated current signals; momentum, compensation, productivity, one-off, and policy updates each equal zero. Dispersion sample = all 24 fetched original preliminary growth prints from 2020-Q3 through 2026-Q2. Because the target is a growth/change series, use the published growth values themselves, not changes in growth rates. Sum = 64.1, mean = 64.1/24 = 2.670833; sum of squared deviations = 421.109583; sigma = 4.278915 = sqrt(421.109583/23). Historical first-print Gaussian fallback 80% half-width = 1.2815516*sigma = 5.483650 percentage points, with regime multiplier 1.0. Unrounded bounds = 1.125-5.483650 = -4.358650 and 1.125+5.483650 = 6.608650; published-precision rounding gives point 1.1%, ciLow -4.4%, ciHigh 6.6%. Pandemic and inflation-era volatility stays in the dispersion sample; there is no discretionary narrowing."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: the final band contains 19 of the 24 reference-class first prints and all 10 most recent prints. Recomputing the rolling-four forecast and expanding-history sigma at each of the 18 walk-forward origins covers 17 outcomes. These small-sample checks indicate conservatism for the recent regime and are not a guarantee of future 80% calibration. The interval describes uncertainty in one future first print, not uncertainty in the mean; no division of sigma by sqrt(n) is used."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and falsification: the current regime may be less volatile than the full pandemic-containing reference class, and the first-print/revised difference can be large. Upside risk outside the interval: a sharp output slowdown while hours remain high, combined with unusually large compensation accruals, could push unit labor cost growth above 6.6%; the fetched 2022-Q1 first print of 11.6% is an observed tail precedent. Downside risk outside the interval: strong output growth with flat labor hours and restrained compensation could push growth below -4.4%; the fetched 2020-Q3 first print of -8.9% is an observed tail precedent. New official Q3 business-output evidence substantially above hours growth would move the point down; unexpectedly strong comprehensive compensation evidence without matching productivity would move it up."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.1,
+      "ciLow": -4.4,
+      "ciHigh": 6.6
+    }
+  ]
+}

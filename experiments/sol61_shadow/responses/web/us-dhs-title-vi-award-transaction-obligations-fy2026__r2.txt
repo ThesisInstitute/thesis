@@ -1,0 +1,62 @@
+{
+  "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DHS Title VI FY2026 award-transaction obligations",
+  "question": "What will USAspending report for FY2026 DHS Title VI award-transaction obligations under the exact registered Treasury-account and award-type filters, at the registered query snapshot?",
+  "unit": "usd",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Execute the exact registered POST request with spendingLevel transactions, group fiscal_year, and the supplied Treasury-account and award-type filters. Resolve on results[time_period.fiscal_year=2026].aggregated_amount, applying the registered factor and preserving API precision. Use the registered snapshot; subsequent revisions do not change its outcome. The exact snapshot date could not be verified from an official schedule in this run.",
+  "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov"
+  ],
+  "runAt": "2026-10-07T11:40:03Z",
+  "status": "refused",
+  "refusalReason": "The exact historical POST queries cannot be executed through the available web tools. Mandatory historical values were not fetched, and the exact resolution date remains unverified.",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: mandatory registered-query history unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the supplied FY2026 registered-query series. Agency totals, search summaries, and other account aggregates cannot supply its historical anchors."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: opening https://api.usaspending.gov/api/v2/search/spending_over_time/ through the web tool returned '(405) Method Not Allowed'. This was a web-open request, not execution of the required POST query."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint documentation at https://api.usaspending.gov/docs/endpoints confirms that spending_over_time requires POST. The available web tools expose no request-method or request-body parameter."
+    },
+    {
+      "kind": "text",
+      "text": "No numeric historical print from the exact query was fetched. A base rate or reference class cannot be established. This is an execution limitation, not evidence that the official source exposes fewer historical prints."
+    },
+    {
+      "kind": "text",
+      "text": "The official USAspending data-sources document describes daily updates, and Treasury reporting guidance describes publication after certification. Neither verifies the exact registered-query snapshot date. The supplied expected release window is not an independently verified release date."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: No prior or adjustment model was fitted because the mandatory historical sample is unavailable. Flow-value dispersion, sigma, the corresponding interval half-width, and final bounds cannot be calculated without inventing evidence."
+    },
+    {
+      "kind": "text",
+      "text": "As instructed when the registered query cannot be executed, this run refuses to issue a numerical forecast. Null estimates and empty history explicitly mark missing evidence rather than substituting invented values."
+    }
+  ]
+}

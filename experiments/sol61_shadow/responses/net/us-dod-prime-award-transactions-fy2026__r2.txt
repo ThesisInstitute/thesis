@@ -1,0 +1,122 @@
+{
+  "slug": "us-dod-prime-award-transactions-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD prime award transactions, FY2026",
+  "question": "USAspending agency 097 FY2026 transaction_count, multiplied by 0.000001, at the registered query snapshot",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official USAspending API",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+  "resolutionRule": "Resolve using transaction_count from the exact registered FY2026 query, multiplied by 0.000001, preserving integer-count precision as six decimal places in millions and excluding subsequent revisions. A resolving snapshot date could not be established: the supplied contract contains a window but no exact snapshot date, and no official dated release schedule was verified.",
+  "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+  "status": "refused",
+  "failureReason": "The mandatory resolutionDate verification could not be completed. Choosing the registered window's endpoint would substitute an assumption for official schedule evidence. Historical queries succeeded; this refusal concerns the unresolved snapshot date.",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 4.059219
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 4.362094
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 4.377453
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 4.43008
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 4.448038
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 4.516581
+    }
+  ],
+  "drivers": [
+    "Daily updates to the resolving query",
+    "Delayed publication of DoD procurement transactions",
+    "Missing exact registered snapshot date"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-07T12:01:11Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Registered-query evidence obtained; resolution date unverified"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.agency.097.awards.transaction_count. All historical values below came from GET requests to the registered endpoint with the fiscal year substituted, followed by multiplication by 0.000001. These are query observations fetched this run, not archived original vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the registered agency 097 awards query for FY2020 and FY2021.",
+      "result": "FY2020 transaction_count = 4059219; FY2021 transaction_count = 4362094. Transformed values are 4.059219 and 4.362094 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the registered agency 097 awards query for FY2022 and FY2023.",
+      "result": "FY2022 transaction_count = 4377453; FY2023 transaction_count = 4430080. Transformed values are 4.377453 and 4.430080 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET the registered agency 097 awards query for FY2024 and FY2025.",
+      "result": "FY2024 transaction_count = 4448038; FY2025 transaction_count = 4516581. Transformed values are 4.448038 and 4.516581 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026.",
+      "result": "FY2026 transaction_count = 3218036; latest_action_date = 2026-09-30T00:00:00. The current observed count is 3.218036 million."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate uses the six fetched FY2020–FY2025 annual transaction flows. Their mean is 4.3655775 million. Official USAspending documentation states that data update daily after the nightly pipeline and that DoD procurement publication is delayed 90 days. Consequently, historical annual totals have greater reporting maturity than the current FY2026 observation."
+    },
+    {
+      "kind": "math",
+      "text": "For the six annual flow values, sample sigma = sqrt(sum((value - 4.3655775)^2)/5) = 0.1598568462 million. The prescribed dispersion-based half-width is 1.28 × 0.1598568462 = 0.2046167631 million."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The available prior is the six-year annual-flow reference class, updated by the fetched FY2026 observation and the documented reporting delay. sigma = 0.1598568462 million; a normal approximation gives a half-width of 0.2046167631 million. No final point or bounds are issued because the elapsed reporting horizon depends on an unverified resolving snapshot date."
+    },
+    {
+      "kind": "text",
+      "text": "The concrete target-contract discrepancy is that the October 15–22 window does not identify a single resolving observation. Official documentation establishes daily updates, but no official announcement or calendar confirming an exact resolutionDate for this query was found. Monthly agency account reporting schedules concern a different dataset."
+    },
+    {
+      "kind": "text",
+      "text": "Refused rather than presenting an assumed date as verified. The null forecast fields indicate that no compliant, automatically resolvable forecast was completed."
+    }
+  ]
+}

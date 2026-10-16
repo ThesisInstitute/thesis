@@ -1,0 +1,141 @@
+{
+  "slug": "us-ntia-broadband-al11038-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 NTIA AL11.038 obligations",
+  "question": "What will the registered USAspending query snapshot report for FY2026 net financial-assistance transaction obligations under Assistance Listing 11.038, in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "POST the registered query using group fiscal_year, spending_level transactions, award_type_codes 02 through 11, program_numbers [11.038], and FY2026 dates 2025-10-01 through 2026-09-30. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001, preserving negative amounts and source precision. Resolution must use the registered snapshot rather than a later revision. The exact snapshot date could not be verified.",
+  "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+  "status": "refused",
+  "refusalReason": "The history query succeeded, but the mandatory resolutionDate could not be verified from an official release calendar or announcement. The supplied October 15–22 window is not a verified date. Official documentation describes ongoing transaction publication. Attempts to open Treasury's official reporting-calendar spreadsheets failed with unsupported-content-type errors. A valid forecast cannot be completed without inventing required schedule evidence.",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 0
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 0
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 0
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 5.482052
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 134.96116587
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 409.85240647
+    }
+  ],
+  "drivers": [
+    "Current FY2026 snapshot shows net deobligations",
+    "Financial-assistance records continue to be published",
+    "Exact registered snapshot date remains unverified"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://fpi.omb.gov/program/11.038.html",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-07T12:24:07Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld because the official resolution date is unverified"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the exact registered transaction query for Assistance Listing 11.038. The fetched OMB program inventory identifies this listing as the Public Wireless Supply Chain Innovation Fund Grant Program. The catalog slug's broadband wording is imprecise; the query was not changed. All history uses the same net-obligation variant and registered filters."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ separately for FY2020, FY2021 and FY2022, substituting each fiscal year's dates into the registered filters.",
+      "result": "The echoed official responses returned aggregated_amount 0 USD for FY2020, 0 USD for FY2021 and 0 USD for FY2022; transformed values are 0, 0 and 0 USD millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the same registered POST query separately for FY2023 and FY2024.",
+      "result": "The echoed official responses returned FY2023 aggregated_amount 5482052.0 USD and FY2024 aggregated_amount 134961165.87 USD, equivalent to 5.482052 and 134.96116587 USD millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the same registered POST query separately for FY2025 and FY2026.",
+      "result": "The echoed official responses returned FY2025 aggregated_amount 409852406.47 USD and current FY2026 aggregated_amount -30077198.21 USD, equivalent to 409.85240647 and -30.07719821 USD millions. The current FY2026 observation is not the future registered resolution snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched reference class contains six distinct prior fiscal-year query results. These are current official API snapshots, not archived original vintages. Their base rate is a mean annual net obligation flow of 91.71593739 USD millions."
+    },
+    {
+      "kind": "math",
+      "text": "For annual flow values [0, 0, 0, 5.482052, 134.96116587, 409.85240647], the sample standard deviation is sqrt(sum((x-91.71593739)^2)/5): sigma = 164.77420019433384 USD millions. The historical 80% normal half-width benchmark is 1.28*sigma = 210.91097624874732 USD millions."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The candidate prior is the six-year mean annual flow. The observed FY2026 level is -30.07719821 USD millions; late reporting and deobligation corrections are the adjustment mechanisms. Historical flow dispersion supplies the interval benchmark, but no final adjustment or implied bounds are issued because the required resolution date is unverified."
+    },
+    {
+      "kind": "text",
+      "text": "USAspending's official documentation describes financial-assistance submission within two weeks and publication the following day. Treasury distinguishes monthly account submissions from financial-assistance transaction publication. Neither establishes an official annual first print for this query or verifies a date within the supplied October 15–22 window."
+    },
+    {
+      "kind": "text",
+      "text": "The official FY2026 reporting-calendar spreadsheet fetch failed with HTTP 400 and Unsupported content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet. The schedule requirement remains unsatisfied; no date is substituted from cadence or the expected window."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is late publication of positive FY2026 obligations; downside risk is additional negative adjustments. Large backfilled awards or deobligations could fall outside an eventual 80% interval. These scenarios do not justify inventing an interval or resolution date."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

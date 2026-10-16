@@ -1,0 +1,146 @@
+{
+  "slug": "us-mts-deficit-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US September 2026 budget deficit",
+  "question": "What will U.S. Treasury Monthly Treasury Statement Table 1 first report for the September 2026 monthly deficit, not seasonally adjusted, in billions of nominal dollars, with deficits positive and surpluses negative?",
+  "unit": "usd_billions",
+  "pointEstimate": 44.98,
+  "ciLow": -113.49,
+  "ciHigh": 203.44,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-13",
+  "resolutionSource": "U.S. Department of the Treasury, Bureau of the Fiscal Service, Monthly Treasury Statement Table 1",
+  "resolutionSourceUrl": "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+  "resolutionRule": "Resolve to the September 2026 monthly Deficit/Surplus (-) amount in Table 1 of the first official September 2026 Monthly Treasury Statement release. Positive values denote deficits; negative values denote surpluses. Use the published deficit cell if rounded receipts and outlays imply a slightly different amount. Convert reported millions of dollars to billions by dividing by 1,000, retaining three decimal places. Include on-budget and off-budget results. Ignore subsequent corrections, revisions, and comparative-table restatements; no same-day correction exception applies.",
+  "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2019-09"},
+      "label": "2019-09",
+      "value": -82.768
+    },
+    {
+      "period": {"type": "month", "value": "2020-09"},
+      "label": "2020-09",
+      "value": 124.611
+    },
+    {
+      "period": {"type": "month", "value": "2021-09"},
+      "label": "2021-09",
+      "value": 61.544
+    },
+    {
+      "period": {"type": "month", "value": "2022-09"},
+      "label": "2022-09",
+      "value": 429.673
+    },
+    {
+      "period": {"type": "month", "value": "2023-09"},
+      "label": "2023-09",
+      "value": 170.982
+    },
+    {
+      "period": {"type": "month", "value": "2024-09"},
+      "label": "2024-09",
+      "value": -64.263
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": -197.95
+    }
+  ],
+  "drivers": [
+    "September quarterly tax receipts",
+    "Different September payment timing from 2025",
+    "Nonrecurrence assumed for the 2025 student-loan accounting reduction",
+    "Underlying spending growth relative to receipts",
+    "Tariff refunds and weaker corporate tax collections",
+    "Uncertain fiscal-year-end credit adjustments"
+  ],
+  "sourceContext": [
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0919.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0920.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0921.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0922.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0923.pdf",
+    "https://fiscaldata.treasury.gov/static-data/published-reports/mts/MonthlyTreasuryStatement_202309.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0924.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0925.pdf",
+    "https://www.cbo.gov/system/files/2025-10/60306-MBR.pdf",
+    "https://www.cbo.gov/system/files/2026-09/61984-MBR.pdf",
+    "https://www.cbo.gov/publication/59544/html",
+    "https://www.cbo.gov/about/press-center",
+    "https://fred.stlouisfed.org/releases/calendar?m=&ob=rd&od=asc&rid=363&ve=2026-12-31&vs=2026-01-01&y=",
+    "https://home.treasury.gov/news/press-releases/jy2657",
+    "https://www.cbo.gov/system/files/2025-11/61307-MBR-FY25-final.pdf"
+  ],
+  "runAt": "2026-10-07T11:45:53Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 monthly deficit forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Treasury MTS Table 1's total monthly deficit on a modified cash basis, including off-budget activity, without seasonal adjustment. Historical entries use each year's own September issue. Refunds reduce receipts. Calendar and credit-accounting adjustments below are forecast components; the resolver retains the published unadjusted monthly amount."
+    },
+    {
+      "kind": "text",
+      "text": "The official Federal Reserve Bank of St. Louis release calendar fetched this run schedules the Monthly Treasury Statement for October 13, 2026, at 1:00 pm US Central. This verifies the scheduled resolutionDate through an official public calendar, rather than an issuer announcement. It conflicts with the registered October 17-25 expected window; the target identity and first-print rule are preserved. Calendar URL: https://fred.stlouisfed.org/releases/calendar?m=&ob=rd&od=asc&rid=363&ve=2026-12-31&vs=2026-01-01&y="
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Table 1 from Treasury's September 2019, 2020, and 2021 issues: https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0919.pdf ; https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0920.pdf ; https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0921.pdf",
+      "result": "Published monthly deficits in millions of dollars: September 2019 -82,768; September 2020 124,611; September 2021 61,544. Dividing by 1,000 gives -82.768, 124.611, and 61.544 billion."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Table 1 from Treasury's September 2022, 2023, and 2024 issues: https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0922.pdf ; https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0923.pdf ; https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0924.pdf . Confirm garbled September 2023 PDF extraction using the official search result for https://fiscaldata.treasury.gov/static-data/published-reports/mts/MonthlyTreasuryStatement_202309.pdf",
+      "result": "Published monthly deficits in millions: September 2022 429,673; September 2023 170,982; September 2024 -64,263. These convert to 429.673, 170.982, and -64.263 billion."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch September 2025 Treasury Table 1 at https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0925.pdf",
+      "result": "September 2025 receipts were 543,663 million, outlays 345,713 million, and the deficit was -197,950 million, equivalent to a 197.950 billion surplus. This issue restates September 2024 to -80,289 million; the historical sample instead retains September 2024's own issue value of -64,263 million."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is the seven September monthly flows for 2019-2025: four deficits and three surpluses, with mean 63.1184 billion and median 61.544 billion. The median supplies a robust seasonal level prior. Each historical value comes from its own September publication; an immutable first-publication archive for the 2025 PDF could not be independently verified. The fiscal-year closing issue's 'Final' title is consistent with Treasury's October 2024 release terminology."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the September 2025 mechanism explanation at https://www.cbo.gov/system/files/2025-10/60306-MBR.pdf and the September 2022 explanation at https://www.cbo.gov/publication/59544/html",
+      "result": "CBO reports a 131 billion September 2025 outlay reduction from modifications to outstanding student loans. Its preliminary September surplus was 164 billion, or 76 billion without payment timing shifts, implying 88 billion of payments accelerated into August. CBO identifies a 379 billion student-loan cancellation charge in September 2022."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the latest available CBO Monthly Budget Review at https://www.cbo.gov/system/files/2026-09/61984-MBR.pdf",
+      "result": "For October-August 2026, CBO estimates receipts of 4,845 billion and outlays of 6,812 billion. Year-over-year receipts increased 154 billion; timing-adjusted outlays increased 235 billion. Corporate income taxes fell 96 billion, or 25%. Approximately 110 billion of IEEPA tariff refunds had been issued through August; August customs revenue fell 17 billion year over year."
+    },
+    {
+      "kind": "text",
+      "text": "Recent Treasury PDFs and September Daily Treasury Statement endpoints were inaccessible through the web tool, so no September cash totals are invented. CBO's official press schedule lists its September 2026 review for October 8, after this run: https://www.cbo.gov/about/press-center . The current adjustment therefore extrapolates observed fiscal-year momentum. Tariff refunds and corporate weakness are already represented in observed net receipts; no separate additive policy shock is applied."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a robust September persistence model with the seven fetched September flows from 2019-2025. Level prior = median = 61.544. Removing the identified 2025 loan reduction and payment acceleration gives a model comparator of -197.950 + 131 + 88 = 21.050. Momentum adjustment = (235 - 154)/11 = 7.3636, giving an updated comparator of 28.4136. Equal-weight shrinkage gives point = (61.544 + 28.4136)/2 = 44.9788. For this flow series, compute dispersion on the fetched values themselves: mean = 63.1184; sum of squared deviations = 255446.221826; sigma = 206.3356 = sqrt(255446.221826/6). The unconditional normal 80% half-width is 1.28*sigma = 264.1095. Apply a judgmental 0.60 multiplier, giving 158.4657, because the raw sample includes the identified 379 billion cancellation charge and 131 billion loan reduction, whose recurrence is excluded from the central scenario. This substantial narrowing is conditional on that mechanism assumption, not empirically calibrated. Bounds = 44.9788 +/- 158.4657 = [-113.4869, 203.4445]; rounded forecast = 44.98 with bounds [-113.49, 203.44] billion."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk means a larger deficit: a new student-loan charge comparable to the fetched 379 billion 2022 charge, or an unusually concentrated tariff-refund wave, could put the result above 203.44 billion, outside the interval. Downside risk means a smaller deficit: a large new negative credit-subsidy reestimate combined with unusually strong quarterly tax payments could produce a surplus exceeding 113.49 billion, placing the deficit below -113.49 billion, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 44.98,
+      "ciLow": -113.49,
+      "ciHigh": 203.44
+    }
+  ]
+}

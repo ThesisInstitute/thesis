@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:18Z",
+  "runStartedAt": "2026-10-07T10:14:18Z",
+  "series": "bls.jolts.job_openings",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "jolts-openings-september-2026",
+    "country": "US",
+    "dataPointId": "bls.jolts.job_openings.september_2026.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-11-09",
+      "start": "2026-11-01"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-04T19:02:52Z",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "registrationState": "preregistered",
+    "series": "bls.jolts.job_openings",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-09",
+        "start": "2026-11-01"
+      },
+      "field": "bls.jolts.job_openings",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "bls.jolts.job_openings",
+      "sourceUrl": "https://www.bls.gov/news.release/jolts.nr0.htm",
+      "table": "U.S. Bureau of Labor Statistics Job Openings and Labor Turnover Survey first-print release",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "25f383726a59f3170ab6359a0393aae5291197c2654c5e5ad362fcc4e0fef3f9",
+    "targetRegistrationPath": "records/targets/2026-09-04-25f383726a59f3170ab6359a0393aae5291197c2654c5e5ad362fcc4e0fef3f9.json",
+    "targetUnit": "millions",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "targetContentHash": "25f383726a59f3170ab6359a0393aae5291197c2654c5e5ad362fcc4e0fef3f9",
+  "targetRegistrationPath": "records/targets/2026-09-04-25f383726a59f3170ab6359a0393aae5291197c2654c5e5ad362fcc4e0fef3f9.json",
+  "registeredAtUtc": "2026-09-04T19:02:52Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/prompt.md",
+      "sha256": "5282ea35dde5c16971488bedc674d9d1c1ac02f2557279a41605d33ed6125092",
+      "bytes": 10600,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/command.json",
+      "sha256": "cd5d5835e9d7a438f9e36330ac8b5a0042572a4f9be5df8d1bad4e8bf9adab12",
+      "bytes": 187,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/stdout.txt",
+      "sha256": "7348891a3e044ed3e458ead99d44468e85b237a0ec5b4519b2299282cf1406e9",
+      "bytes": 4409,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/raw_response.txt",
+      "sha256": "7348891a3e044ed3e458ead99d44468e85b237a0ec5b4519b2299282cf1406e9",
+      "bytes": 4409,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/parsed_cells.json",
+      "sha256": "7f3271a3938ed535bd414506eec0945cd01445789fa21f807c80dc45b7ea0862",
+      "bytes": 4613,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/normalized_cells.json",
+      "sha256": "d4eb190871daac39c5e895d7eddc6e45b8f5f8ad361e9d622b6d853cf29e853f",
+      "bytes": 4314,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/jolts-openings-september-2026__r1/manifest.json",
+      "sha256": "b6b6fa35def2214fb34a1c2d569e875ff3998cc6b4ef1e77f80ed7afda101e09",
+      "bytes": 4441,
+      "createdAt": "2026-10-07T10:14:18Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "3542bb918d991f077d66bfef64e3b117c15b9c28fcc1b38e04944bc84a88b9c4"
+}

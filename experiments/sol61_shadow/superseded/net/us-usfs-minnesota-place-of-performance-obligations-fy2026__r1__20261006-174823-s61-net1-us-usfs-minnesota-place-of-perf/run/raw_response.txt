@@ -1,0 +1,83 @@
+{
+  "status": "refused",
+  "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "Forest Service Minnesota FY2026 obligations: forecast unavailable",
+  "question": "What will the registered USAspending query snapshot report for FY2026 prime-award transaction obligations awarded by the Forest Service with Minnesota place of performance, in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Execute the registered POST query for FY2026 using the specified awarding subagency, Minnesota place of performance, award type codes, and transaction spending level. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Resolve against the registered query snapshot; subsequent API revisions do not replace that snapshot. An official resolution date could not be verified.",
+  "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 46.83255679
+    }
+  ],
+  "drivers": [
+    "Required historical reference class unavailable",
+    "Current FY2026 query failed",
+    "Official resolution date unverified"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/"
+  ],
+  "runAt": "2026-10-06T22:16:35Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused because the mandatory registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the exact registered transaction query, not an agency profile total or a published headline series. No local files or prior forecasts were accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with group=fiscal_year, spending_level=transactions, time_period=2024-10-01 through 2025-09-30, awarding subtier Forest Service under Department of Agriculture, place_of_performance_locations=[{\"country\":\"USA\",\"state\":\"MN\"}], and every registered award type code.",
+      "result": "The echoed official response reported fiscal_year=2025 and aggregated_amount=46832556.79 USD. Contract_Obligations=15398331.29, Grant_Obligations=21158670.82, and Other_Obligations=10275554.68."
+    },
+    {
+      "kind": "math",
+      "text": "FY2025 registered-query obligations = 46832556.79 × 0.000001 = 46.83255679 usd_millions."
+    },
+    {
+      "kind": "text",
+      "text": "Separate requests executed the same registered query for FY2020, FY2021, FY2022, FY2023, FY2024, and FY2026, substituting each fiscal year's October 1 through September 30 dates. Every request failed with curl exit code 35 and the exact error: curl: (35) Recv failure: Connection reset by peer. None returned an official statistic."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate requires at least six distinct fetched historical fiscal years. Only FY2025 was fetched successfully. This is a retrieval failure, not evidence that the official source exposes fewer than six periods."
+    },
+    {
+      "kind": "text",
+      "text": "Official documentation and data-source web lookups failed with a network error. The supplied expected snapshot window is 2026-10-15 through 2026-10-22, but no official calendar or announcement was successfully retrieved to verify a resolution date."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No model was fitted because the historical sample contains only one successful observation. Historical flow dispersion, sigma, and the required 1.28 × sigma interval half-width cannot be estimated from the required reference class. No point estimate or bounds are asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and scenarios outside the interval cannot be quantified without the missing history and current FY2026 observation. The run instructions require stopping after fetch failure rather than substituting remembered values."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+[
+  {
+    "slug": "belgium-gdp-flash-q3-2026",
+    "country": "BE",
+    "type": "data",
+    "title": "Belgium GDP flash estimate, Q3 2026",
+    "question": "What will the NBB's first flash estimate report for Belgium's real GDP growth in 2026-Q3 compared with the previous quarter, adjusted for seasonal and calendar effects?",
+    "unit": "percent_growth",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": null,
+    "resolutionSource": "National Bank of Belgium / National Accounts Institute flash estimate",
+    "resolutionSourceUrl": null,
+    "resolutionRule": "Resolve on the first official NBB flash estimate of seasonally and calendar-adjusted real GDP quarter-on-quarter growth for 2026-Q3, at the agency's published precision. Exclude subsequent revisions; apply no correction grace period.",
+    "dataPointId": "nbb.gdp.flash_qoq.2026_q3.first_print",
+    "historicalContext": [],
+    "drivers": [],
+    "sourceContext": [
+      "https://www.nbb.be/en/statistics/latest-figures/nai-flash-estimate-2026q2",
+      "https://www.nbb.be/en/statistical-updates?calendar_timestamp=2679692400&current=2682370800&date_format=custom&date_pattern=F&display_reset=0&next=2685049200&page=10&pager_type=calendar_month&previous=2679692400&scope=2&use_previous_next=1",
+      "https://www.nbb.be/en/publications-research/publications/economic-and-financial-publications/business-cycle-monitor",
+      "https://www.nbb.be/en/statistics/latest-figures/business-confidence-indicator-2026m9"
+    ],
+    "runAt": "2026-10-06T22:05:25Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast run failed: official-source fetches unavailable"
+      },
+      {
+        "kind": "text",
+        "text": "Official NBB release, calendar, and current-indicator page fetches returned HTTP 520. Following the explicit instruction to stop after a failed fetch, this run stopped without issuing a forecast."
+      },
+      {
+        "kind": "text",
+        "text": "Search summaries were excluded from numerical evidence. No admissible historical base rate was established, and the official resolution date was not verified."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: No historical sample or sigma could be computed from admissible fetched evidence. The point estimate, interval bounds, resolution date, and specific resolution URL remain null rather than being invented. This object is a failed-run record and does not satisfy forecast validation."
+      }
+    ]
+  }
+]

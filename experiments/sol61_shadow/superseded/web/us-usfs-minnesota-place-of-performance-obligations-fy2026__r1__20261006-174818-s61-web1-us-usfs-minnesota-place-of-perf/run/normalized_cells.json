@@ -1,0 +1,68 @@
+[
+ {
+  "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 Forest Service obligations in Minnesota",
+  "question": "What are FY2026 prime-award transaction obligations for the Forest Service awarding subagency and Minnesota place of performance, measured by the first official registered-query snapshot?",
+  "unit": "usd_millions",
+  "status": "refused",
+  "refusalReason": "The exact registered POST query could not be executed using the available permitted tools. Required historical values were not fetched, and an official resolution date was not verified.",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the first official snapshot under the registered_query_snapshot policy for the exact registered query: prime-award transactions, Forest Service awarding subagency within the Department of Agriculture, Minnesota place of performance, and all registered award-type codes. Select the FY2026 aggregated_amount and convert dollars to usd_millions using the registered factor. Preserve the API's reported precision; subsequent revisions do not replace the resolving snapshot. The snapshot date remains unverified.",
+  "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+   "https://api.usaspending.gov/docs/endpoints/federal_accounts/",
+   "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+   "https://www.usaspending.gov/data/data-sources-download.pdf",
+   "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-06T22:34:46Z",
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Required registered-query evidence unavailable"
+   },
+   {
+    "kind": "text",
+    "text": "The target is defined by the registered transaction query. Agency profiles, federal-account totals, and search summaries cannot supply eligible historical observations."
+   },
+   {
+    "kind": "text",
+    "text": "Official API documentation fetched through web search identifies /api/v2/search/spending_over_time/ as a POST endpoint returning aggregated transaction amounts. Source: https://api.usaspending.gov/docs/endpoints/federal_accounts/."
+   },
+   {
+    "kind": "text",
+    "text": "The available web tool does not expose an HTTP POST method or request-body parameter. The run instructions prohibit shell-based network requests, so the exact registered query could not be executed."
+   },
+   {
+    "kind": "text",
+    "text": "Fetch evidence: web opening https://api.usaspending.gov/api/v2/search/spending_over_time/ failed with 'Fatal error: network error: error sending request'. Opening https://api.usaspending.gov/docs/endpoints/spending_over_time/ failed with 'Fatal error: connection failed: error sending request'. Neither attempt returned historical amounts."
+   },
+   {
+    "kind": "text",
+    "text": "The required base rate and reference class could not be established because no eligible historical prints were fetched. Empty historicalContext records retrieval failure, not a claim that the official source exposes insufficient history."
+   },
+   {
+    "kind": "math",
+    "text": "Prior/update/interval: No persistence prior or historical dispersion estimate can be fitted without the registered-query history. Sigma and the corresponding interval half-width cannot be computed. Point estimate and interval bounds are therefore null."
+   },
+   {
+    "kind": "text",
+    "text": "Official USAspending timing documents describe daily pipeline updates and separate reporting requirements for different award sources. They do not establish this registered snapshot's release date. The supplied expected window was not substituted for an officially verified date."
+   },
+   {
+    "kind": "text",
+    "text": "Forecast refused under the prompt's explicit fetch-failure rule. No historical amounts, numeric forecast, or resolution date were invented."
+   }
+  ]
+ }
+]

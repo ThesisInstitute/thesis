@@ -1,0 +1,5 @@
+{
+  "phase": "validate",
+  "message": "TypeError: strptime() argument 1 must be str, not None",
+  "command": null
+}

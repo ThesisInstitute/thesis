@@ -1,0 +1,165 @@
+{
+  "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "CDFI Fund FY2026 assistance obligations",
+  "question": "What will USAspending report for FY2026 net financial-assistance transaction obligations awarded by the Community Development Financial Institutions Fund in the first registered-query snapshot within the registered resolution window?",
+  "unit": "usd_millions",
+  "pointEstimate": 237.73253811,
+  "ciLow": -62.96018178,
+  "ciHigh": 538.425258,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-22",
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Resolve from the first successful registered-query snapshot captured within 2026-10-15 through 2026-10-22. POST to the specified endpoint with group=fiscal_year, spending_level=transactions, time_period=2025-10-01 through 2026-09-30, awarding subtier agency Community Development Financial Institutions Fund, and award_type_codes 02,03,04,05,06,07,08,09,10,11. Select results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Preserve the returned monetary precision; do not substitute award-level, account-level, appropriation, outlay, or headline award totals. Retain signed deobligations. Freeze the captured result without subsequent revisions or correction grace periods. October 22 is retained as the registered window's deadline; it was not verified as an official agency release date.",
+  "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2015"},
+      "label": "FY2015",
+      "value": 232.190329
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2016"},
+      "label": "FY2016",
+      "value": 3.525
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2017"},
+      "label": "FY2017",
+      "value": 498.977799
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2018"},
+      "label": "FY2018",
+      "value": 341.830155
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2019"},
+      "label": "FY2019",
+      "value": 201.446413
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 544.34114872
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 1457.58697844
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 577.03832827
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 1986.065187
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 782.042553
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 319.455176
+    }
+  ],
+  "drivers": [
+    "September award announcements awaiting transaction reporting",
+    "Announced programs' funding pools",
+    "Observed FY2026 net deobligations",
+    "Posting delays and fiscal-year action-date assignment",
+    "Pandemic programs winding down",
+    "Additional Capital Magnet Fund or carryover transactions"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/api/v2/awards/last_updated/",
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.cdfifund.gov/news/740",
+    "https://www.cdfifund.gov/news/727",
+    "https://www.cdfifund.gov/news/726",
+    "https://www.cdfifund.gov/system/files/2026-02/CDFI_AFR_FY_2025_FINAL_(508c).pdf",
+    "https://www.cdfifund.gov/programs-training/programs/rrp",
+    "https://www.cdfifund.gov/programs-training/programs/erp"
+  ],
+  "runAt": "2026-10-07T12:03:09Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FY2026 CDFI Fund registered transaction-obligation snapshot"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.search.spending_over_time.cdfi.program_obligations. Every historical value comes from a separate execution of the registered agency, assistance-code, transaction-level query for that fiscal year. These are official query snapshots fetched this run, not reconstructed original historical vintages. The target is signed net obligations, with no seasonal adjustment."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ separately for FY2015-FY2018. Body: group=fiscal_year; spending_level=transactions; filters.agencies=[{\"type\":\"awarding\",\"tier\":\"subtier\",\"name\":\"Community Development Financial Institutions Fund\"}]; filters.award_type_codes=[\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\"]; filters.time_period covers October 1 of the preceding year through September 30 of each requested year. Read aggregated_amount from the matching fiscal_year row.",
+      "result": "Raw aggregated_amount in dollars: FY2015 232190329.0; FY2016 3525000.0; FY2017 498977799.0; FY2018 341830155.0. Multiplication by 0.000001 produces the historicalContext values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the identical registered POST separately for FY2019-FY2022, substituting each fiscal year's date range.",
+      "result": "Raw aggregated_amount in dollars: FY2019 201446413.0; FY2020 544341148.72; FY2021 1457586978.44; FY2022 577038328.27."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the identical registered POST separately for FY2023-FY2025, substituting each fiscal year's date range.",
+      "result": "Raw aggregated_amount in dollars: FY2023 1986065187.0; FY2024 782042553.0; FY2025 319455176.0."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the registered FY2026 POST for 2025-10-01 through 2026-09-30; repeat with group=month as a reporting cross-check; GET https://api.usaspending.gov/api/v2/awards/last_updated/.",
+      "result": "FY2026 aggregated_amount was -7917461.89 dollars, or -7.91746189 million. Every monthly net total was zero or negative; fiscal month 12 returned 0. The metadata endpoint returned last_updated=10/07/2026. This does not establish that all FY2026 awards have been reported."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is eleven annual flows from FY2015-FY2025: mean 631.318097 million and median 498.977799 million. Excluding only FY2021 and FY2023, whose exceptional pandemic rounds are documented officially, leaves nine observations with mean 388.982989 million and median 341.830155 million. FY2025 persistence at 319.455176 million is the initial level prior."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official FY2025 CDFI Agency Financial Report, program descriptions on printed pages 3-5 and emergency-program discussion on pages 7-8; cross-check BEA and SDL funding announcements at https://www.cdfifund.gov/news/727 and https://www.cdfifund.gov/news/726.",
+      "result": "FY2025 new appropriations were CDFI Program 212.0 million, NACA 28.0 million, BEA 40.0 million, and SDL 9.0 million, totaling 289.0 million. The FY2026 BEA and SDL announcements independently specified up to 40 million and 9 million. These are funding pools, not verified pending transaction obligations. The report identifies FY2021 and FY2023 as the only RRP and ERP application rounds and reports 2.8 million of recaptured or deobligated RRP funds due back to Treasury in FY2026."
+    },
+    {
+      "kind": "text",
+      "text": "The September 15, 2026 official announcement covers FY2025 CDFI/NACA and FY2026 BEA/SDL awards, funded by appropriations expiring September 30, 2026, with notifications promised by that date. It supplies no actual award total. USAspending documentation requires financial-assistance reporting within two weeks, except loans within 30 days, and describes daily publication. Thus September obligations could enter after today's query; notification alone does not establish their action dates or inclusion."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar discrepancy: no official calendar or announcement retrieved this run verifies October 22, 2026 as a release date for this continuously updated query. The linked Treasury reporting workbook could not be read because the web tool rejected its spreadsheet content type; no workbook dates are used. The registered October 15-22 window is preserved, with October 22 treated solely as its contractual deadline. Official release-date verification remains unsatisfied."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Begin with FY2025 persistence of 319.455176 million and the eleven-year reference class. Adjust the level to the 289.0 million funding-pool proxy, a -30.455176 million change. Apply a subjective 15% haircut, or -43.35 million, for unused funding, delayed posting, and assignment to another fiscal year; this is an analyst assumption, not a fetched probability. Add the already observed -7.91746189 million net transactions. Momentum contributes no extrapolated trend, and exceptional pandemic programs contribute no renewed positive award round. For annual flows, compute dispersion from values themselves: full-sample sigma = 590.599831 million and 1.28*sigma = 755.967784 million. For the nine observations excluding documented pandemic-round years, sigma = 234.916187 million and 1.28*sigma = 300.692720 million. Use that ordinary-flow half-width, approximately 0.398 times the full-sample half-width, because the exceptional rounds have ended; retain FY2024's elevated flow and FY2016's very low flow. This nominal 80% normal-approximation interval is not calibrated from historical snapshot forecast errors. Final implied bounds are -62.96018178 to 538.425258 million."
+    },
+    {
+      "kind": "math",
+      "text": "Sample sigma = sqrt(sum((x-mean)^2)/(n-1)); n=11 for the full sample and n=9 after excluding FY2021/FY2023. Point = 319.455176 - 30.455176 - 43.35 - 7.91746189 = 237.73253811. Half-width = 1.28*234.9161874171148 = 300.69271989390694. Lower = 237.73253811 - 300.69271989390694 = -62.96018178; upper = 237.73253811 + 300.69271989390694 = 538.425258, rounded to eight decimal places in millions."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is additional Capital Magnet Fund or carryover obligations beyond the announced-program proxy; a sufficiently large additional batch would land above 538.425258 million, outside the interval. The downside risk is failed or differently dated posting plus substantial award recapture; net deobligations exceeding 62.96018178 million would land below the interval. If no positive batch enters the FY2026 query, the current -7.91746189 million outcome remains inside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 237.73253811,
+      "ciLow": -62.96018178,
+      "ciHigh": 538.425258
+    }
+  ]
+}

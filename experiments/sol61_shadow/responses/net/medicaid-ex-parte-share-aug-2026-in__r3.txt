@@ -1,0 +1,74 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-in",
+  "country": "US",
+  "type": "data",
+  "title": "Indiana ex parte renewal share, August 2026",
+  "question": "What percentage of Indiana beneficiaries due for Medicaid or CHIP renewal in August 2026 were renewed on an ex parte basis, using CMS's first-published original (O) submission?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Indiana's ex parte renewal share for the August 2026 reporting period, computed as 100 times beneficiaries renewed on an ex parte basis divided by beneficiaries with a renewal due, using the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Use numerator and denominator as published and round the share to one decimal. Subsequent updated submissions or revisions do not replace the first print.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.in.aug_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf"
+  ],
+  "runAt": "2026-10-07T12:28:52Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld following an official-data query failure"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Indiana's August 2026 state row, original submission O, in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. The first-print resolver is retained."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched CMS dictionary defines beneficiaries renewed on an ex parte basis as Metric 5a1 and beneficiaries with a renewal due as Metric 5. CMS renewal-outcome tables express the ex parte percentage among beneficiaries due for renewal."
+    },
+    {
+      "kind": "text",
+      "text": "The official dataset metadata was fetched successfully and identified https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv as its current distribution."
+    },
+    {
+      "kind": "text",
+      "text": "The subsequent official datastore query filtering state_abbreviation=IN and original_updated=O returned {\"message\":\"Column not found.\",\"status\":400,\"timestamp\":\"2026-10-07T08:29:44-04:00\"}. The run instructions require stopping after a failed fetch. No replacement history or remembered values were used."
+    },
+    {
+      "kind": "text",
+      "text": "The required base rate of at least six distinct original-submission prints was not fetched. This run therefore cannot produce a valid numeric forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The official announcement page and reporting specifications did not verify December 15, 2026 as the CMS publication date. The specifications describe state submission deadlines, which cannot establish a public-release date. The supplied ledger date is retained but remains unverified."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or adjustment was estimated because the historical sample was not obtained. Sigma and the 1.28*sigma half-width cannot be calculated; pointEstimate, ciLow, and ciHigh are null."
+    },
+    {
+      "kind": "math",
+      "text": "The eventual resolved statistic is round(100 * Metric 5a1 / Metric 5, 1). No historical dispersion or forecast interval was calculated."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and outcomes outside the interval cannot be assessed because this failed run emits no interval. The null values indicate unavailable estimates, not a zero forecast."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

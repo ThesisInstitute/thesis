@@ -1,0 +1,77 @@
+{
+  "slug": "us-dod-prime-contract-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 prime contract obligations",
+  "question": "What will the FY2026 contracts aggregated_amount be in the first official USAspending agency 097 response captured under the registered_query_snapshot resolution policy, converted to billions USD?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official USAspending API registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+  "resolutionRule": "Resolve using the first official response designated by the registered_query_snapshot policy for FY2026. Extract results[category=contracts].aggregated_amount and multiply by 1e-09, preserving the API value's precision. Exclude later revisions and add no correction grace period. The exact snapshot date could not be verified from an official schedule in this run.",
+  "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Officially documented DoD contract-reporting delay",
+    "Daily publication pipeline",
+    "Unavailable registered-query history"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2019",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-07T11:49:24Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the registered agency 097 obligations_by_award_category contracts row for FY2026. No agency-profile totals, search summaries, or alternative aggregates were substituted."
+    },
+    {
+      "kind": "text",
+      "text": "Exact registered-query GET attempts for FY2023, FY2024, and FY2025 each failed twice. The web tool returned 'Internal Error' and 'URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=YYYY is not accessible via this tool.' No aggregated_amount values were returned."
+    },
+    {
+      "kind": "text",
+      "text": "Exact registered-query GET attempts for FY2019, FY2020, FY2021, and FY2022 also each failed twice with the same inaccessible-URL error. Searches did not expose executable query results. This is a fetch failure, not evidence that the official source exposes fewer historical periods."
+    },
+    {
+      "kind": "text",
+      "text": "The exact FY2026 query also returned the inaccessible-URL error. No current-period contract-obligation statistic was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Official documentation states that USAspending publishes updates daily after its nightly pipeline and that DoD contract submissions to FPDS have a 90-day delay. It does not establish an exact FY2026 registered-query snapshot date. [USAspending Data Sources](https://www.usaspending.gov/data/data-sources-download.pdf)"
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or historical base rate can be estimated from fetched registered-query values because none were obtained. Level, momentum, one-off, and policy adjustments cannot be quantified. Sigma and the required dispersion-based interval half-width cannot be calculated; final implied bounds remain null."
+    },
+    {
+      "kind": "math",
+      "text": "The registered conversion is aggregated_amount multiplied by 1e-09. No fetched aggregated_amount is available to transform, and no historical sample is available for interval arithmetic."
+    },
+    {
+      "kind": "text",
+      "text": "Earlier reporting of obligations is an upside risk, while delayed reporting or deobligations are downside risks for a fixed snapshot. Without fetched history or numeric bounds, scenarios outside the interval cannot be quantified."
+    },
+    {
+      "kind": "text",
+      "text": "The production prompt explicitly requires refusal when the registered historical query cannot be executed. No numeric forecast is issued. Null estimates, an empty historicalContext, and a null resolutionDate record the missing evidence without inventing values, fetched-number tool results, or an official release date."
+    }
+  ]
+}

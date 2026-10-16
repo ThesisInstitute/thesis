@@ -1,0 +1,132 @@
+{
+  "slug": "snap-participation-june-2026",
+  "country": "US",
+  "type": "data",
+  "title": "June 2026 SNAP participation",
+  "question": "What is USDA FNS national monthly SNAP Persons participation, without seasonal adjustment, for June 2026 in the first official print, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 36.352716,
+  "ciLow": 36.3527155,
+  "ciHigh": 36.3527165,
+  "confidence": 0.8,
+  "resolutionDate": "2026-09-18",
+  "resolutionSource": "USDA monthly SNAP Persons initial release",
+  "resolutionSourceUrl": "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+  "resolutionRule": "Resolve fns.snap.total_persons using national TOTAL Persons for June 2026 in the first official monthly participation release. Include disaster assistance as included in that table. Convert a value expressed in thousands to millions by multiplying by 0.001; for integer-person tables, divide by 1,000,000, which is equivalent after normalization to thousands. Preserve printed precision. Exclude all subsequent revisions and corrections, including same-day corrections; apply no grace period.",
+  "dataPointId": "usda.fns.snap.persons.june_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 39.513033
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 38.54773
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 37.870817
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 37.298271
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 37.011096
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 36.562128
+    }
+  ],
+  "drivers": [
+    "June initial participation already officially published",
+    "Declining participation across preceding initial prints",
+    "First-print vintage and source-host discrepancies"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://www.fna.usda.gov/documents-resources-compact-view",
+    "https://fns-prod.azureedge.us/pd/overview/keydata-june26"
+  ],
+  "runAt": "2026-10-07T11:43:24Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "June 2026 SNAP participation: target already published"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the registered June 2026 national monthly Persons first print. Official evidence fetched during this run already exposes that initial print. Consequently, this object reports an observed outcome and cannot serve as an independent prospective forecast in the research comparison."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Search USDA's indexed snap-persons-3.pdf and snap-persons-4.pdf tables for national TOTAL in the Initial column.",
+      "result": "December 2025 Initial = 39,513,033 persons, data as of March 13, 2026; January 2026 Initial = 38,547,730 persons, data as of April 10, 2026. Both official indexed tables were fetched through web search; direct retrieval of these older PDFs returned 404."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open USDA snap-persons-5.pdf and snap-persons-6.pdf and read national TOTAL in the Initial column.",
+      "result": "February 2026 Initial = 37,870,817 persons; March 2026 Initial = 37,298,271 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open USDA snap-persons-7.pdf and snap-persons-8.pdf and read national TOTAL in the Initial column.",
+      "result": "April 2026 Initial = 37,011,096 persons; May 2026 Initial = 36,562,128 persons."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class consists of six distinct monthly Initial Persons prints from December 2025 through May 2026. Every historical entry uses this original-vintage monthly variant, including disaster assistance where reported, rather than revised history or annual fiscal-year quality-control statistics. The base rate is five declines in five successive changes; the mean change is -0.590181 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read USDA snap-persons-9.pdf, cross-check snap-4fymonthly-9.pdf, and inspect the dated June Keydata publication announcement.",
+      "result": "The Persons table explicitly labels June 2026 Initial and reports national TOTAL = 36,352,716 persons. The national summary independently reports the same 36,352,716. Both tables carry a September 11, 2026 data-generation date. USDA's dated publication listing places June 2026 Keydata and Performance reports on September 18, 2026; the June Keydata release page also shows September 18, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "Concrete ledger discrepancies: the verified September 18 publication precedes the registered October 26-November 3 expected release window. The registered www.fns.usda.gov endpoint was inaccessible; fetched official pages use www.fna.usda.gov and USDA's linked CDN, outside the adapter's registered allowedHosts. The specific resolutionSourceUrl therefore identifies the accessible official initial table, snap-persons-9.pdf. Its integer-person units also differ from the ledger's assumed thousands. These discrepancies require resolver metadata repair while preserving the target period, series, slug, unit, dataPointId, and strict first-print policy."
+    },
+    {
+      "kind": "text",
+      "text": "Separate components before observation: the persistence level anchor is May Initial at 36.562128 million; momentum is negative, with the latest initial-to-initial change of -0.448968 million. No independent numerical one-off or policy-mechanism adjustment is justified by the fetched participation tables. Their effects are already embodied in the observed June initial count."
+    },
+    {
+      "kind": "math",
+      "text": "Successive changes in millions are -0.965303, -0.676913, -0.572546, -0.287175, and -0.448968. Their sample standard deviation is sqrt(sum((change - (-0.590181))^2)/4) = 0.255099831. A conventional historical 80% half-width is 1.28 * 0.255099831 = 0.326527784 million. The observed target converts as 36,352,716 / 1,000,000 = 36.352716 million, equivalently 36,352.716 thousand * 0.001."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior at May Initial 36.562128 million and the six December-May initial prints for dispersion: sigma = 0.255099831; 1.28*sigma = 0.326527784, giving prior bounds [36.235600216, 36.888655784]. Momentum is negative; independent one-off and policy additions are zero pending quantified evidence. Observing June Initial updates the point by -0.209412 million to 36.352716. Publication eliminates prospective uncertainty about the displayed first print. The final bounds [36.3527155, 36.3527165] use a half-person numerical envelope solely to satisfy the required positive-width schema. This exceptionally large narrowing reflects an already observed target; the envelope is not a calibrated statistical 80% prediction interval, and confidence 0.8 is retained only as the required schema value."
+    },
+    {
+      "kind": "text",
+      "text": "The remaining upside risk is an authenticated earlier first-print document showing that the current Initial table omitted participants; the downside risk is an earlier document showing that the current table included participants absent from the actual first print. A discrepancy of even one person would land outside the interval. Later eligibility changes, disaster enrollment, or statistical revisions cannot alter resolution under the strict first-print rule."
+    },
+    {
+      "kind": "forecast",
+      "point": 36.352716,
+      "ciLow": 36.3527155,
+      "ciHigh": 36.3527165
+    }
+  ]
+}

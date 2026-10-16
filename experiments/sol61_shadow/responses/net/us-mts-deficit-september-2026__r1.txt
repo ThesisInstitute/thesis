@@ -1,0 +1,152 @@
+{
+  "slug": "us-mts-deficit-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US September 2026 budget deficit",
+  "question": "What will the first official Monthly Treasury Statement Table 1 report for the US government's unadjusted monthly deficit, defined as outlays minus receipts, for September 2026, in billions of nominal dollars?",
+  "unit": "usd_billions",
+  "pointEstimate": 30.4,
+  "ciLow": -195.8,
+  "ciHigh": 256.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-13",
+  "resolutionSource": "U.S. Department of the Treasury, Bureau of the Fiscal Service, Monthly Treasury Statement Table 1",
+  "resolutionSourceUrl": "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+  "resolutionRule": "Resolve to the signed September 2026 monthly deficit in the current fiscal-year September row of Table 1 in the first official public Monthly Treasury Statement print. Deficit equals outlays minus receipts; a surplus is negative. Convert amounts reported in millions of dollars to usd_billions by dividing by 1,000 and retain the precision of that first print. Do not use fiscal-year-to-date totals. Ignore subsequent corrections and revisions, including same-day corrections.",
+  "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2020-09"
+      },
+      "label": "2020-09",
+      "value": 124.61055841919
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2021-09"
+      },
+      "label": "2021-09",
+      "value": 61.54425121268
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2022-09"
+      },
+      "label": "2022-09",
+      "value": 429.67347896184
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2023-09"
+      },
+      "label": "2023-09",
+      "value": 170.98220087478
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2024-09"
+      },
+      "label": "2024-09",
+      "value": -64.26300886774
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2025-09"
+      },
+      "label": "2025-09",
+      "value": -197.94963036216
+    }
+  ],
+  "drivers": [
+    "Completed September Treasury cash flows",
+    "Seasonal September estimated-tax receipts",
+    "Cash-to-budget accounting differences",
+    "Student-loan modifications and credit reestimates",
+    "Corporate tax deductions and tariff refunds"
+  ],
+  "sourceContext": [
+    "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1?fields=record_date,classification_desc,sequence_number_cd,current_month_gross_rcpt_amt,current_month_gross_outly_amt,current_month_dfct_sur_amt&filter=classification_desc:eq:September,record_calendar_month:eq:09,sequence_number_cd:eq:2.12,record_date:gte:2016-01-01&sort=record_date&page%5Bsize%5D=100",
+    "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/deposits_withdrawals_operating_cash?filter=record_date:eq:2026-09-30&fields=record_date,account_type,transaction_type,transaction_catg,transaction_mtd_amt&page%5Bsize%5D=250",
+    "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/deposits_withdrawals_operating_cash?filter=record_date:in:(2019-09-30,2020-09-30,2021-09-30,2022-09-30,2023-09-29,2024-09-30,2025-09-30),account_type:in:(Treasury%20General%20Account%20Total%20Deposits,Treasury%20General%20Account%20Total%20Withdrawals)&fields=record_date,account_type,transaction_type,transaction_mtd_amt&page%5Bsize%5D=100",
+    "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/operating_cash_balance?filter=record_date:in:(2020-09-30,2021-09-30)&page%5Bsize%5D=100",
+    "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/deposits_withdrawals_operating_cash?filter=record_date:in:(2020-09-30,2021-09-30),transaction_catg:eq:Public%20Debt%20Cash%20Issues%20%28Table%20III-B%29&fields=record_date,transaction_type,transaction_catg,transaction_mtd_amt&page%5Bsize%5D=100",
+    "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/deposits_withdrawals_operating_cash?filter=record_date:in:(2020-09-30,2021-09-30),transaction_catg:eq:Public%20Debt%20Cash%20Redemp.%20%28Table%20III-B%29&fields=record_date,transaction_type,transaction_catg,transaction_mtd_amt&page%5Bsize%5D=100",
+    "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/deposits_withdrawals_operating_cash?filter=record_date:in:(2020-09-30,2021-09-30,2022-09-30,2023-09-29,2024-09-30,2025-09-30),transaction_catg:eq:Public%20Debt%20Cash%20Issues%20%28Table%20IIIB%29&fields=record_date,transaction_type,transaction_catg,transaction_mtd_amt&page%5Bsize%5D=100",
+    "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/deposits_withdrawals_operating_cash?filter=record_date:in:(2020-09-30,2021-09-30,2022-09-30,2023-09-29,2024-09-30,2025-09-30),transaction_catg:eq:Public%20Debt%20Cash%20Redemp.%20%28Table%20IIIB%29&fields=record_date,transaction_type,transaction_catg,transaction_mtd_amt&page%5Bsize%5D=100",
+    "https://www.cbo.gov/system/files/2026-09/61984-MBR.pdf",
+    "https://www.cbo.gov/system/files/2025-11/61307-MBR-FY25-final.pdf",
+    "https://fred.stlouisfed.org/releases/calendar?m=&ob=rd&od=asc&rid=363&ve=2026-12-31&vs=2026-01-01&y="
+  ],
+  "runAt": "2026-10-07T12:55:21Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September cash flows imply a modest deficit, with substantial accounting uncertainty"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the nominal, unadjusted monthly deficit in MTS Table 1, including on-budget and off-budget totals. Positive values denote deficits and negative values denote surpluses. The target history uses September rows from each year's original accounting-month snapshot, identified by sequence_number_cd 2.12, rather than later statements repeating revised prior-year amounts. DTS modified-cash figures are auxiliary indicators, not target prints or the resolution series."
+    },
+    {
+      "kind": "text",
+      "text": "The official Federal Reserve Bank of St. Louis release calendar fetched this run lists Monthly Treasury Statement on October 13, 2026 at 1:00 pm Central. Accordingly, resolutionDate is 2026-10-13. This conflicts with the registered October 17–25 expected window; the forecast remains tied to the same September 2026 first-print target. Fiscal-year-end rescheduling remains possible."
+    },
+    {
+      "kind": "text",
+      "text": "Source availability: the FiscalData display page returned HTTP 403. An optional cash-balance field projection returned Invalid Query Param. Those responses supplied no statistical evidence. The history and cash-flow calculations below use successful official Treasury API responses, including the full cash-balance endpoint; no remembered figures were substituted."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch MTS API mts_table_1 September current-year rows, with September record dates and sequence_number_cd 2.12, for 2016 onward.",
+      "result": "The response exposed ten September observations through 2025. The six most recent monthly deficits, converted from fetched dollars to billions, were: 2020-09 124.61055841919; 2021-09 61.54425121268; 2022-09 429.67347896184; 2023-09 170.98220087478; 2024-09 -64.26300886774; 2025-09 -197.94963036216. For 2025-09, fetched receipts were $543,662,987,461.22 and outlays were $345,713,357,099.06."
+    },
+    {
+      "kind": "text",
+      "text": "The seasonal reference class and outside-view base rate are the six September MTS observations from 2020 through 2025. Their mean is a deficit of $87.432975 billion. September-specific history captures estimated-tax seasonality and fiscal-year-end accounting effects more directly than persistence from August."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch September 30, 2026 DTS deposits_withdrawals_operating_cash, using month-to-date TGA totals and public-debt cash transactions.",
+      "result": "Fetched amounts in USD millions: total TGA deposits 3,548,368; public debt cash issues 2,898,950; total TGA withdrawals 3,587,877; public debt cash redemptions 2,913,614. Nondebt deposits therefore equal 649,418 and nondebt withdrawals equal 674,263. The derived September cash deficit proxy is (674,263 - 649,418)/1,000 = $24.845 billion."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch September-end DTS cash totals, debt issues and redemptions for 2020–2025. For 2020 and 2021, use operating cash balances because the older deposits/withdrawals table omits total rows.",
+      "result": "Fetched USD-million tuples [total deposits, debt issues, total withdrawals, debt redemptions] were: 2022 [1,921,667, 1,377,056, 1,955,585, 1,362,645]; 2023 [2,316,532, 1,797,378, 2,201,486, 1,541,307]; 2024 [2,987,524, 2,400,594, 2,811,311, 2,285,443]; 2025 [3,572,481, 2,950,337, 3,236,880, 2,664,835]. For 2020, debt issues were 1,758,804, redemptions 1,572,746, closing cash 1,781,679 and opening-month cash 1,705,982. For 2021, the corresponding values were 1,419,756, 1,495,611, 215,160 and 355,984. Derived September cash deficit proxies in billions were respectively 110.361, 64.969, 48.329, 141.025, -61.062 and -50.099 for 2020–2025."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read CBO's official August 2026 budget review and fiscal-year 2025 final budget review for timing, tax and credit-accounting mechanisms.",
+      "result": "CBO's August 2026 review reports corporate tax receipts down $96 billion, or 25%, through August; approximately $110 billion in tariff refunds; and a $53 billion reduction in estimated student-loan costs recorded in June 2026. The September 2025 holiday payment shift made the current-year YTD deficit $6 billion smaller unadjusted but $82 billion larger after timing adjustment. CBO's FY2025 final review identifies a $131 billion reduction in September 2025 outlays from student-loan modifications. Treasury's September 2025 surplus was $198 billion, $34 billion above CBO's preliminary estimate, demonstrating that DTS-based estimates can miss agency accounting transactions."
+    },
+    {
+      "kind": "text",
+      "text": "Separate adjustments: the level prior is the September mean of $87.433 billion. Completed September cash flows update that level to $24.845 billion. Tax momentum, tariff refunds and payment timing already affect those observed flows, so no additional cash adjustment is applied. The 2025 student-loan modification is not assumed to recur. Remaining one-off and budget-classification effects are represented by the historical MTS-minus-DTS bridge, whose median is used for the point and whose full dispersion is retained for uncertainty."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Model = September seasonal-mean prior updated by completed-month DTS cash flows plus the median historical budget-accounting bridge. Historical sample = six original September MTS observations, 2020–2025. For these flow values, mean = 87.432975 and sigma = 214.763282 USD billion, computed as sqrt(230616.337389/5); the outside-view 80% half-width is 1.28*214.763282 = 274.897002. MTS-minus-DTS bridges are [14.249558, -3.424749, 381.344479, 29.957201, -3.201009, -147.850630] billion; their median is 5.524275, mean is 45.179142 and sample standard deviation is sqrt(sum((bridge - 45.179142)^2)/5) = 176.725182. Point update = 87.432975 + (24.845 - 87.432975) + 5.524275 = 30.369275. Momentum and policy cash effects receive zero additional adjustment because they are already observed. Conditioning on completed cash flows gives an approximate normal 80% half-width of 1.28*176.725182 = 226.208234, or 0.822884 times the outside-view half-width, while retaining accounting outliers. Bounds = 30.369275 +/- 226.208234 = [-195.838959, 256.577508]. Rounded forecast: 30.4, with bounds [-195.8, 256.6] USD billion."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk means a larger deficit: a major positive credit-subsidy charge or omitted agency spending could overwhelm the cash signal. Repeating the observed 2022 positive bridge of $381.344 billion would imply approximately $406.189 billion, outside the interval above $256.6 billion. Downside risk means a larger surplus: a substantial student-loan cost reduction or offsetting receipt could lower the print. A net budget-accounting bridge below -$220.645 billion would land below the interval's -$195.8 billion lower bound."
+    },
+    {
+      "kind": "forecast",
+      "point": 30.4,
+      "ciLow": -195.8,
+      "ciHigh": 256.6
+    }
+  ]
+}

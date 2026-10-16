@@ -1,0 +1,68 @@
+{
+  "slug": "us-dod-prime-contract-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 prime contract obligations",
+  "question": "What will FY2026 DoD contract obligations equal, in billions USD, in the first official registered-query snapshot of USAspending agency 097 obligations_by_award_category, contracts row?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "U.S. Treasury USAspending API v2",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+  "resolutionRule": "Resolve the first official registered-query snapshot designated for this target using results[category=contracts].aggregated_amount multiplied by 1e-09. Preserve returned numerical precision and exclude subsequent revisions. The official snapshot date could not be verified in this run.",
+  "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-07T11:42:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the supplied registered-query series usaspending.agency.097.obligations_by_award_category.contracts. Agency profile totals and other contract aggregates cannot substitute for its historical observations."
+    },
+    {
+      "kind": "text",
+      "text": "The successfully fetched official endpoint documentation at https://api.usaspending.gov/docs/endpoints identifies obligations_by_award_category as a GET endpoint returning obligations by award category within a fiscal year. Documentation provides no historical contract-obligation values."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: exact registered URLs for fiscal_year=2020, fiscal_year=2021, and fiscal_year=2022 were opened with the web tool. Each failed with Internal Error; repeated attempts reported that the requested URL was not accessible via this tool. No contracts-row statistic was returned."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: exact registered URLs for fiscal_year=2023, fiscal_year=2024, and fiscal_year=2025 each returned Internal Error and 'is not accessible via this tool.' Retrying fiscal_year=2025 also failed. The fiscal_year=2026 query likewise returned Internal Error."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule evidence: the official submission_periods API was fetched, but supplied no verified release date for this registered snapshot. Treasury's resources page linked the FY26 reporting schedule, whose XLSX fetch failed with '(400) Unsupported content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'. The supplied expected window is not sufficient verification of a resolutionDate."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The required base rate or reference class cannot be estimated without fetched registered-query history. No persistence prior, historical dispersion, sigma, adjustment components, or interval bounds can be calculated defensibly."
+    },
+    {
+      "kind": "text",
+      "text": "This is a fetch failure, not evidence that the official source exposes fewer historical prints. Per the prompt's explicit refusal instruction, no numerical forecast is issued. Null estimates and an empty historicalContext record unavailable evidence rather than invented values; this object does not constitute a valid forecast cell."
+    }
+  ]
+}

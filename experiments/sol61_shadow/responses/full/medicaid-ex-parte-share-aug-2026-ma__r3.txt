@@ -1,0 +1,95 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ma",
+  "country": "US",
+  "type": "data",
+  "title": "Massachusetts ex parte renewal share, August 2026",
+  "question": "What will be Massachusetts's seasonally unadjusted ex parte renewal share for the August 2026 reporting period in the first public print of CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using its original (O) submission row and rounding the computed percentage to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Massachusetts's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Required Massachusetts original-submission counts not fetched",
+    "First-publication vintage must be preserved",
+    "Registered resolution date lacks official calendar confirmation"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T12:42:35Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast dropped: required exact-series history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Massachusetts, August 2026, original submission O, first public print, percentage rounded to one decimal. The ledger dataset takes precedence over the different dataset named in the general CMS skill. Null estimate and interval fields disclose that no auditable numeric forecast was issued; this object does not satisfy the numeric cell validation requirements."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the official data.medicaid.gov page for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The official indexed dataset page was updated September 25, 2026 and exposes 3,876 rows and 22 columns. Its displayed rows cover Alaska, not Massachusetts; no target-series historical values were obtained."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "The official catalog identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified 2026-09-25T18:00:00Z, issued 2024-11-27T19:17:56Z, with 1 CSV distribution: https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click",
+      "call": "Follow the official catalog's data-dictionary link to https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6.",
+      "result": "The fetched dictionary identifies original_updated as the O/U field, beneficiaries_with_a_renewal_due as metric 5, beneficiaries_whose_coverage_was_renewed_total as metric 5a, and beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis as metric 5a1. These are definitions, not Massachusetts counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "CMS lists January 2026 released 2026-04-24, February 2026 released 2026-05-29, March 2026 released 2026-06-26, April 2026 released 2026-07-31, May 2026 released 2026-08-28, and June 2026 released 2026-09-25. This page does not verify an August 2026 release scheduled for 2026-12-15."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failure: direct CSV access and the official catalog download link returned an accessibility error or Cache miss. Small-limit datastore API requests and filtered dataset pages also failed, including filters using the verified original_updated field. No Massachusetts original-submission numerator/denominator history was fetched. This is a retrieval failure, not evidence that the official source exposes fewer than the required prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Resolver discrepancies: preserve the registered resolutionDate of 2026-12-15, but it is not verified as an official scheduled publication date and the target supplies no resolve-by-bound basis. The supplied rule also omits the denominator field. CMS's June snapshot expresses ex parte renewals relative to all beneficiaries due for renewal, supporting metric 5a1 divided by metric 5; the total-renewed denominator would define a different quantity. CMS specifications allow corrections to submissions, so the O flag alone does not prove a frozen first-publication vintage."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable for the exact registered series because the Massachusetts counts could not be fetched. Last-print persistence and persistence-plus-panel-shrinkage benchmarks cannot be quantified. Rounded snapshot summaries and other states' data are not substituted for the required original-submission history."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates: no thesis_model_candidate_v1 candidate was generated because the required numeric training history is unavailable. Publishing candidate points, quantiles, calibration counts or walk-forward scores would invent evidence."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: persistence prior unavailable; exact Massachusetts historical sample unavailable; no momentum, policy or one-off adjustment quantified; sigma = unavailable. The required half-width calculation, approximately 1.28 times the standard deviation of successive first-print share changes, cannot be evaluated. No point or implied bounds are asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: greater successful automated matching would create upside risk, while verification failures or a cohort requiring more renewal forms would create downside risk. Neither effect is quantified from fetched target history, and scenarios outside the interval cannot be assigned numerical thresholds because no interval was estimated."
+    },
+    {
+      "kind": "text",
+      "text": "The prohibited catalog and prior-forecast lookup was skipped to preserve independence. No files were read, created or modified. Final disposition: drop the numeric forecast rather than invent historical values, a base rate or interval; pointEstimate, ciLow and ciHigh are null."
+    }
+  ]
+}

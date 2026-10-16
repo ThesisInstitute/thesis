@@ -1,0 +1,75 @@
+{
+  "slug": "us-ondcp-hidta-al95001-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 HIDTA program obligations",
+  "question": "What will FY2026 financial-assistance transaction obligations for Assistance Listing 95.001 equal, in USD millions, in the first official registered-query snapshot from USAspending?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the first official snapshot designated by the registered_query_snapshot policy for the registered POST query: transaction spending, fiscal-year grouping, Assistance Listing 95.001, and award type codes 02 through 11. Select results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001, preserving the returned precision. Subsequent revisions do not change resolution. An exact snapshot date was not verified in this run.",
+  "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Financial-assistance transaction reporting",
+    "Timing of submissions and nightly publication",
+    "Registered snapshot timing"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-07T11:49:48Z",
+  "status": "refused",
+  "refusalReason": "The required registered POST query could not be executed with the available web tools. No canonical historical obligation values were fetched, and no exact official snapshot date was verified. Numeric estimates would therefore be unsupported.",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Registered-query forecast refused"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the supplied FY2026 Assistance Listing 95.001 transaction-obligations query. Agency totals, appropriations, and search summaries cannot substitute for this series."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: opening https://api.usaspending.gov/api/v2/search/spending_over_time/ returned HTTP 405 Method Not Allowed. Following the endpoint link from the official API documentation returned the same error. Neither attempt returned an aggregated_amount."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint documentation at https://api.usaspending.gov/docs/endpoints specifies POST for spending_over_time. Both available web tools lack HTTP-method and request-body parameters. Shell network requests are prohibited by the run instructions, so the required historical POST queries could not be executed."
+    },
+    {
+      "kind": "text",
+      "text": "No canonical historical prints were fetched. Consequently, the required base rate and reference class cannot be established. The empty historicalContext records a fetch failure, not a claim that the official source exposes insufficient history."
+    },
+    {
+      "kind": "text",
+      "text": "The official data-sources document at https://www.usaspending.gov/data/data-sources-download.pdf describes nightly daily updates and transaction-dependent financial-assistance publication. It does not verify an exact registered-query snapshot date within the supplied release window. resolutionDate therefore remains null."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior can be estimated from fetched canonical history. Level, momentum, one-off, and policy adjustments remain unestimated. Historical dispersion, sigma, and final implied bounds cannot be calculated."
+    },
+    {
+      "kind": "math",
+      "text": "No point or interval arithmetic is supported because the mandatory historical observations were not fetched. Null estimates represent refusal rather than zero obligations."
+    },
+    {
+      "kind": "text",
+      "text": "Additional reported obligations could create upside risk; deobligations could create downside risk. Without fetched history and a quantified interval, outcomes outside the interval cannot be assessed."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}
