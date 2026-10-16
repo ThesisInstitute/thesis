@@ -1,10 +1,11 @@
 """Synthetic Colorado HCPF and DOR sources shared by the resolver tests.
 
 The builders mirror the layouts of the official files committed under
-``tests/fixtures/co_hcpf`` and ``tests/fixtures/co_dor`` (the September 2026
-HCPF report and the DOR workbook published that month), so a test can vary
-one fact at a time: which month is newest, what a row sums to, when a file
-was posted.
+``tests/fixtures/co_hcpf`` and ``tests/fixtures/co_dor`` (the HCPF report
+named for September 2026, and the DOR workbook downloaded 2026-10-09 whose
+publish-date line says September 2026), so a test can vary one fact at a
+time: which month is newest, what a row sums to. Tests vary the mocked
+response's Last-Modified header separately.
 """
 
 from __future__ import annotations
@@ -122,6 +123,24 @@ def xlsx_from_cells(
     return buffer.getvalue()
 
 
+def corrupt_member_crc(raw: bytes, member: str) -> bytes:
+    """``raw`` with ``member``'s CRC in the ZIP central directory flipped.
+
+    The archive still opens and lists its members; reading that member
+    raises ``zipfile.BadZipFile: Bad CRC-32``.
+    """
+    data = bytearray(raw)
+    name = member.encode()
+    index = data.find(b"PK\x01\x02")
+    while index != -1:
+        name_length = int.from_bytes(data[index + 28 : index + 30], "little")
+        if bytes(data[index + 46 : index + 46 + name_length]) == name:
+            data[index + 16] ^= 0xFF
+            return bytes(data)
+        index = data.find(b"PK\x01\x02", index + 46)
+    raise ValueError(f"{member} is not in the archive")
+
+
 # ---------------------------------------------------------------------------
 # HCPF Joint Budget Committee Monthly Premiums Report
 
@@ -235,7 +254,8 @@ def hcpf_file_url(report_period: str, ext: str, *, variant: str = "") -> str:
 def hcpf_landing(
     report_periods: list[str], *, workbooks: bool = True, extra: str = ""
 ) -> bytes:
-    """Landing page listing one report (letter, PDF, workbook) per month."""
+    """Synthetic landing page: a letter, a PDF and (unless ``workbooks`` is
+    False) a workbook link for each report month given."""
     items = []
     for report_period in report_periods:
         pdf = hcpf_file_url(report_period, "pdf")

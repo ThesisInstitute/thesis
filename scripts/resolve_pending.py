@@ -24,11 +24,11 @@ Statistical Snapshot editions and the OHO workload XML
 ssa.gov refuses every non-browser client. See docs/anchor-verifications.md.
 
 Colorado state batch (2026-10-09): the HCPF Joint Budget Committee Monthly
-Premiums Report (CO_HCPF_ADAPTERS; the report in which a month is the newest
-caseload month, read from the PDF under a Last-Modified first-posting gate)
-and the DOR General Fund Net Collections workbook (CO_DOR_ADAPTERS; one
-Drive file DOR replaces in place, so this leg only ever reports whether a
-month's first print is still the one being served, and records no value).
+Premiums Report (CO_HCPF_ADAPTERS; the newest populated month of the report
+named for the following month, read from the PDF) and the DOR General Fund
+Net Collections workbook (CO_DOR_ADAPTERS; records no value). Both apply one
+custody rule, served_unchanged_since_resolution_date: a file whose
+Last-Modified is after the cell's resolution date is refused.
 
 Usage:
     python3 scripts/resolve_pending.py [--dry-run]
@@ -71,6 +71,7 @@ import zlib
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass, replace
 from decimal import ROUND_HALF_UP, Decimal
+from email.utils import parsedate_to_datetime
 from html import unescape
 from html.parser import HTMLParser
 from typing import Any
@@ -3719,31 +3720,35 @@ def va_mmwr_capture_envelope(
 
 # ---------------------------------------------------------------------------
 # Colorado state agencies (wired 2026-10-09): HCPF Medicaid caseload and DOR
-# net individual income tax collections. Both cells are from the July 2026
-# Colorado chain, published before either source had an executor, and
-# neither is registered; like the VA and SSA legs these resolve only such
-# cells.
+# net individual income tax collections. Neither family accepts a new
+# registration (EXECUTION_PLAN_UNREGISTRABLE_FAMILIES); the routers claim
+# only ``<stem>.YYYY-MM.first_print`` references (or ``YYYY_MM``). The two
+# cells they were written for, from the July 2026 Colorado chain, are not
+# registered.
 #
-# HCPF publishes one Joint Budget Committee Monthly Premiums Report a month,
-# as a PDF and a workbook, each under its own file name. Every report
-# restates earlier months, so a month's first print is the figure in the one
-# report where it is the newest month: the leg takes the report dated the
-# following month from the page's own link, requires that report to print
-# the requested month as its newest, and requires the PDF's Last-Modified to
-# fall in the month the report is dated (as it does, mid-month, for the four
-# reports observed). The forecast's rule makes the PDF the controlling
-# print; the workbook is read as a cross-check and never decides. Anchors
-# are three earlier reports' newest-month totals, re-read from the live
-# files at every run.
+# Custody rule, shared by both legs (served_unchanged_since_resolution_date):
+# the main loop does not attempt a release-calendar cell before its
+# resolutionDate, so no capture by this resolver can predate that date. A
+# file whose Last-Modified is no later than the end of that date (UTC) holds
+# the bytes a capture on that date would have read, provided the server's
+# header is accurate. A later Last-Modified means the file changed after
+# that date or was first posted after it; the two cannot be told apart from
+# the response, so the read is refused. Changes made before the resolution
+# date cannot be detected, and neither leg establishes when a figure was
+# first published.
 #
-# DOR publishes one workbook, "July 2019 to Date", by replacing a single
-# Google Drive file. Readers are served only its current revision and no
-# earlier one was found in a web archive (docs/anchor-verifications.md), so
-# a month's first print can be identified only while that month is still
-# the newest column. This leg therefore records nothing: it reports whether
-# the month is not yet published, is the newest month (refused: the leg
-# holds no verified anchors and no reviewed capture path), or has been
-# overwritten (refused as a missed first-print window).
+# HCPF: the leg takes the report named for the month after the activity
+# month from the page's own link, requires that report to print the
+# activity month as its newest populated month with categories summing to
+# TOTAL, and applies the custody rule to the PDF. The forecast's rule makes
+# the PDF the controlling print; the workbook is read as a cross-check and
+# never decides. Anchors are three earlier reports' newest-month totals,
+# re-read from the live files at every run; their Last-Modified is not
+# judged, because they test the reader, not custody.
+#
+# DOR: the leg reads the one Drive workbook and applies the custody rule. It
+# records no value in any case: it has no verified anchors and no reviewed
+# capture path.
 COLORADO_GEOGRAPHY = {
     "level": "state",
     "id": "0400000US08",
@@ -3770,9 +3775,9 @@ CO_HCPF_ADAPTERS: dict[str, dict[str, Any]] = {
         "concept_authority": "co_hcpf",
         "source_concept": "Medicaid Caseload without Retroactivity: TOTAL",
         "source_url": co_hcpf.LANDING_URL,
-        # Activity month -> whole members, each reproduced 2026-10-09 from
-        # the report in which that month is the newest (the June, July and
-        # August 2026 reports), PDF and workbook agreeing.
+        # Activity month -> whole members: the newest populated month's TOTAL
+        # in the June, July and August 2026 reports as downloaded 2026-10-09,
+        # PDF and workbook agreeing.
         "anchors": {
             "2026-05": 1238720,
             "2026-06": 1237772,
@@ -3780,15 +3785,20 @@ CO_HCPF_ADAPTERS: dict[str, dict[str, Any]] = {
         },
         "sanity_range": (500_000, 3_000_000),
         "evidence_notes": (
-            "First print for {period}: the Medicaid Caseload without "
-            "Retroactivity TOTAL in the Joint Budget Committee Monthly Premiums "
-            "Report dated {report_month} ({source_url}), reached through the "
-            "Premiums, Expenditures and Caseload Reports page's own link. "
-            "{period} is the newest month that report prints, the row's "
-            "eligibility categories sum to its TOTAL, and the PDF's "
-            "Last-Modified header ({last_modified}) falls in the month the "
-            "report is dated. Three earlier reports' newest-month totals were "
-            "re-read from the live files at capture time. {workbook_note}"
+            "Value for {period}: the Medicaid Caseload without Retroactivity "
+            "TOTAL in the Joint Budget Committee Monthly Premiums Report named "
+            "for {report_month}, the PDF the Premiums, Expenditures and "
+            "Caseload Reports page links for that report ({source_url}). "
+            "{period} is that table's newest populated month and the row's "
+            "eligibility categories sum to its TOTAL. The PDF's Last-Modified "
+            "header ({last_modified}) is no later than the cell's resolution "
+            "date ({resolution_date}), and the resolver does not attempt the "
+            "cell before that date, so these are the bytes a capture on that "
+            "date would have read, if the header is accurate. Changes made "
+            "before that date cannot be detected, and when the figure was "
+            "first published is not established. Three earlier reports' "
+            "newest-month totals were re-read from the live files at capture "
+            "time. {workbook_note}"
         ),
     },
 }
@@ -3807,6 +3817,72 @@ CO_DOR_ADAPTERS: dict[str, dict[str, Any]] = {
         "source_url": co_dor.LANDING_URL,
     },
 }
+
+
+def parse_first_print_month_ref(ref: str, stem: str) -> str | None:
+    """``<stem>.YYYY-MM.first_print`` or ``<stem>.YYYY_MM.first_print`` ->
+    ``YYYY-MM``; any other release policy or period shape -> None."""
+    match = re.fullmatch(
+        rf"{re.escape(stem)}\.(\d{{4}})[-_](\d{{2}})\.first_print", ref
+    )
+    if not match or not 1 <= int(match.group(2)) <= 12:
+        return None
+    return f"{match.group(1)}-{match.group(2)}"
+
+
+@dataclass(frozen=True)
+class CustodyVerdict:
+    """What the Last-Modified header lets a Colorado leg say about a file."""
+
+    # "unchanged" (no later than the end of the resolution date), "changed"
+    # (later), or "unknown" (no readable header).
+    state: str
+    last_modified: dt.datetime | None
+    text: str
+
+
+def served_unchanged_since_resolution_date(
+    last_modified: str | None, resolution_day: dt.date, *, what: str
+) -> CustodyVerdict:
+    """The Colorado legs' custody rule (see the comment above the specs).
+
+    ``state`` is "unchanged" when the header's instant is no later than
+    ``resolution_day`` 23:59:59 UTC, "changed" when it is later, and
+    "unknown" when the header is missing or unreadable. ``what`` names the
+    file in the text ("report PDF", "workbook").
+    """
+    if not last_modified:
+        return CustodyVerdict(
+            "unknown", None, f"the {what} response carries no Last-Modified header"
+        )
+    try:
+        modified = parsedate_to_datetime(last_modified)
+    except (TypeError, ValueError) as exc:
+        return CustodyVerdict(
+            "unknown",
+            None,
+            f"the {what}'s Last-Modified {last_modified!r} is unreadable: {exc}",
+        )
+    if modified.tzinfo is None:
+        modified = modified.replace(tzinfo=dt.timezone.utc)
+    stamp = modified.astimezone(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    end = dt.datetime.combine(
+        resolution_day + dt.timedelta(days=1), dt.time(), tzinfo=dt.timezone.utc
+    )
+    if modified >= end:
+        return CustodyVerdict(
+            "changed",
+            modified,
+            f"the {what} was last modified {stamp}, after the cell's resolution "
+            f"date {resolution_day}; the bytes a capture on {resolution_day} "
+            "would have read cannot be shown to be these",
+        )
+    return CustodyVerdict(
+        "unchanged",
+        modified,
+        f"the {what} was last modified {stamp}, no later than the cell's "
+        f"resolution date {resolution_day}",
+    )
 
 
 def _official_http_get(
@@ -3848,15 +3924,24 @@ class CoHcpfCapture:
     pdf_raw: bytes
     pdf_headers: dict[str, str]
     retrieved_at: str
-    last_modified: dt.datetime
+    # None for anchor reads, whose Last-Modified is not judged.
+    custody: CustodyVerdict | None
     newest_month: str
     total: int
     populated_months: int
     # The workbook the page links for the same report: a cross-check that is
     # recorded and never decides. ``status`` is one of agrees, disagrees,
-    # absent, unreadable.
+    # absent (no matching link), unreadable, or not_read (anchor reads).
     workbook: dict[str, Any]
     workbook_raw: bytes | None
+
+
+@dataclass(frozen=True)
+class CoHcpfRefusal:
+    # "not_listed", "custody_changed", "custody_unknown", "environment" or
+    # "parse".
+    kind: str
+    text: str
 
 
 def _co_hcpf_workbook_check(
@@ -3865,6 +3950,7 @@ def _co_hcpf_workbook_check(
     total: int,
     file_cache: dict[str, tuple[bytes, dict[str, str], str, str]],
 ) -> tuple[dict[str, Any], bytes | None]:
+    """Read the report's workbook as a cross-check. Never raises."""
     if url is None:
         return {"status": "absent"}, None
     try:
@@ -3888,11 +3974,12 @@ def _co_hcpf_workbook_check(
             "reason": f"request landed on {final_url}",
         }, raw
     try:
-        workbook_total = co_hcpf.first_print_total(
+        workbook_total = co_hcpf.newest_month_total(
             co_hcpf.caseload_table_from_workbook(raw), period
         )
-    except co_hcpf.CoHcpfError as exc:
-        return {**block, "status": "unreadable", "reason": str(exc)[:200]}, raw
+    except Exception as exc:  # noqa: BLE001 - the workbook never decides
+        reason = f"{type(exc).__name__}: {exc}"
+        return {**block, "status": "unreadable", "reason": reason[:200]}, raw
     return {
         **block,
         "status": "agrees" if workbook_total == total else "disagrees",
@@ -3906,40 +3993,51 @@ def co_hcpf_capture_report(
     file_cache: dict[str, tuple[bytes, dict[str, str], str, str]],
     *,
     read_workbook: bool,
-) -> tuple[CoHcpfCapture | None, str | None]:
-    """Resolve one activity month to the report that first prints it.
+    resolution_day: dt.date | None,
+) -> tuple[CoHcpfCapture | None, CoHcpfRefusal | None]:
+    """Read the report named for the month after ``period``.
 
-    (capture, refusal): identity refusals (no or several links, a response
-    that is not the PDF, a failed posting gate, a report whose newest month
-    is another month, a restructured table) come back as text; transport
-    failures of the PDF propagate.
+    (capture, refusal). The report must be the one PDF the page links under
+    that name, served as a PDF from the URL asked for, and must print
+    ``period`` as its newest populated month with categories summing to
+    TOTAL. With ``resolution_day`` (the target read), the PDF must also pass
+    the custody rule; anchor reads pass None. Transport failures of the PDF
+    propagate.
     """
     report_period = co_hcpf.report_period_for(period)
     try:
         links = co_hcpf.landing_report_links(landing_raw, report_period)
     except co_hcpf.CoHcpfError as exc:
-        return None, str(exc)
+        kind = "not_listed" if str(exc).endswith("found 0") else "parse"
+        return None, CoHcpfRefusal(kind, str(exc))
     if links.pdf_url not in file_cache:
         file_cache[links.pdf_url] = co_hcpf_http_get(links.pdf_url)
     raw, headers, retrieved_at, final_url = file_cache[links.pdf_url]
     if final_url != links.pdf_url:
-        return None, f"report request for {links.pdf_url} landed on {final_url}"
+        return None, CoHcpfRefusal(
+            "parse", f"report request for {links.pdf_url} landed on {final_url}"
+        )
     if "pdf" not in headers.get("content-type", "").lower():
-        return None, (f"report response is {headers.get('content-type')!r}, not a PDF")
-    last_modified, gate = co_hcpf.posting_gate(
-        headers.get("last-modified"), report_period=report_period
-    )
-    if gate:
-        return None, gate
-    assert last_modified is not None
+        return None, CoHcpfRefusal(
+            "parse", f"report response is {headers.get('content-type')!r}, not a PDF"
+        )
+    custody: CustodyVerdict | None = None
+    if resolution_day is not None:
+        custody = served_unchanged_since_resolution_date(
+            headers.get("last-modified"), resolution_day, what="report PDF"
+        )
+        if custody.state != "unchanged":
+            return None, CoHcpfRefusal(f"custody_{custody.state}", custody.text)
     text, refusal = co_hcpf_pdf_text(raw)
     if refusal or text is None:
-        return None, refusal or "pdftotext returned no text"
+        refusal = refusal or "pdftotext returned no text"
+        kind = "environment" if "pdftotext is unavailable" in refusal else "parse"
+        return None, CoHcpfRefusal(kind, refusal)
     try:
         table = co_hcpf.caseload_table_from_pdf_text(text)
-        total = co_hcpf.first_print_total(table, period)
+        total = co_hcpf.newest_month_total(table, period)
     except co_hcpf.CoHcpfError as exc:
-        return None, str(exc)
+        return None, CoHcpfRefusal("parse", str(exc))
     workbook: dict[str, Any] = {"status": "not_read"}
     workbook_raw: bytes | None = None
     if read_workbook:
@@ -3955,7 +4053,7 @@ def co_hcpf_capture_report(
             pdf_raw=raw,
             pdf_headers=headers,
             retrieved_at=retrieved_at,
-            last_modified=last_modified,
+            custody=custody,
             newest_month=table.latest,
             total=total,
             populated_months=len(table.rows),
@@ -3966,17 +4064,16 @@ def co_hcpf_capture_report(
     )
 
 
-def co_hcpf_refusal_line(ref: str, refusal: str) -> tuple[str, bool]:
+def co_hcpf_refusal_line(ref: str, refusal: CoHcpfRefusal) -> tuple[str, bool]:
     """(resolver line, environment failure?) for a refused target report."""
-    if "pdftotext is unavailable" in refusal:
-        return f"  CO HCPF ENVIRONMENT FAILURE (fatal): {ref} — {refusal}", True
-    if "expected exactly one report PDF link" in refusal and refusal.endswith(
-        "found 0"
-    ):
-        return f"  not yet published (deferring): {ref} — {refusal}", False
-    if "re-post" in refusal:
-        return f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {refusal}", False
-    return f"  CO HCPF PARSE REFUSAL (refusing): {ref} — {refusal}", False
+    heads = {
+        "environment": "CO HCPF ENVIRONMENT FAILURE (fatal)",
+        "not_listed": "REPORT NOT LISTED (deferring)",
+        "custody_changed": "FIRST-PRINT WINDOW MISSED (refusing)",
+        "custody_unknown": "CO HCPF CUSTODY UNKNOWN (refusing)",
+    }
+    head = heads.get(refusal.kind, "CO HCPF PARSE REFUSAL (refusing)")
+    return f"  {head}: {ref} — {refusal.text}", refusal.kind == "environment"
 
 
 def co_hcpf_workbook_note(workbook: Mapping[str, Any]) -> str:
@@ -3989,7 +4086,7 @@ def co_hcpf_workbook_note(workbook: Mapping[str, Any]) -> str:
             f"{workbook.get('total')}; the PDF controls under the forecast's rule."
         )
     if status == "absent":
-        return "The page links no workbook for this report."
+        return "No matching workbook link was found for this report."
     return (
         "The workbook the page links for the same report could not be read; "
         "the PDF controls under the forecast's rule."
@@ -4005,7 +4102,8 @@ def co_hcpf_capture_envelope(
     anchors: list[CoHcpfCapture],
     value: float,
 ) -> bytes:
-    """Archive every response that authenticated the monthly first print."""
+    """Archive the landing page, the target PDF and its workbook (with their
+    bodies), and each anchor read's metadata, hash and reading (no body)."""
 
     def report_block(capture: CoHcpfCapture, *, include_body: bool) -> dict[str, Any]:
         block: dict[str, Any] = {
@@ -4056,41 +4154,49 @@ def co_hcpf_capture_envelope(
     )
 
 
-def co_dor_verdict(ref: str, period: str, raw: bytes) -> str:
-    """The one line this leg prints for a target; it never records a value.
-
-    Each detail is kept under the 240 characters the status page reprints.
-    """
+def co_dor_verdict(
+    ref: str,
+    period: str,
+    raw: bytes,
+    headers: Mapping[str, str],
+    resolution_day: dt.date,
+) -> str:
+    """The one line this leg prints for a target; it never records a value."""
     try:
         workbook = co_dor.read_collections(raw)
-        status = co_dor.first_print_status(workbook, period)
-        if status != "not_yet_published":
-            co_dor.check_identities(workbook.net_individual_income(period))
     except co_dor.CoDorError as exc:
         return f"  CO DOR PARSE REFUSAL (refusing): {ref} — {exc}"
-    newest = co_dor.period_label(workbook.newest)
     published = (
-        f"publish date {co_dor.period_label(workbook.publish_period)}"
+        f"its publish-date line says {co_dor.period_label(workbook.publish_period)}"
         if workbook.publish_period
-        else "no publish date"
+        else "it has no publish-date line"
     )
-    if status == "not_yet_published":
+    if period not in workbook.months:
+        if period > workbook.newest:
+            return (
+                f"  MONTH NOT IN WORKBOOK (deferring): {ref} — the workbook's "
+                f"newest month is {co_dor.period_label(workbook.newest)} "
+                f"({published})"
+            )
         return (
-            f"  not yet published (deferring): {ref} — the workbook's newest "
-            f"month is {newest} ({published})"
+            f"  CO DOR PARSE REFUSAL (refusing): {ref} — the workbook has no "
+            f"{period} column (its oldest month is {workbook.months[-1]})"
         )
-    if status == "overwritten":
-        return (
-            f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — the workbook's "
-            f"newest month is {newest} ({published}); DOR replaces this one "
-            "file in place and readers get only the current revision, so its "
-            f"{co_dor.period_label(period)} figure cannot be shown to be the "
-            "first print"
-        )
+    custody = served_unchanged_since_resolution_date(
+        headers.get("last-modified"), resolution_day, what="workbook"
+    )
+    if custody.state == "changed":
+        return f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {custody.text}"
+    if custody.state == "unknown":
+        return f"  CO DOR CUSTODY UNKNOWN (refusing): {ref} — {custody.text}"
+    try:
+        co_dor.check_identities(workbook.net_individual_income(period))
+    except co_dor.CoDorError as exc:
+        return f"  CO DOR PARSE REFUSAL (refusing): {ref} — {exc}"
     return (
-        f"  CO DOR ADAPTER UNVERIFIED (refusing): {ref} — {newest} is the "
-        f"workbook's newest month ({published}), but this leg holds no "
-        "verified anchors or reviewed capture path and records no value"
+        f"  CO DOR ADAPTER UNVERIFIED (refusing): {ref} — {custody.text}, but "
+        "this leg holds no verified anchors or reviewed capture path and "
+        "records no value"
     )
 
 
@@ -12976,15 +13082,15 @@ def pending_adapter_refs(
             continue
         co_hcpf_stem = longest_adapter_stem(ref, CO_HCPF_ADAPTERS)
         if co_hcpf_stem:
-            parsed = parse_ref_period(ref, co_hcpf_stem)
-            if parsed and parsed[0] == "month":
+            month = parse_first_print_month_ref(ref, co_hcpf_stem)
+            if month is not None:
                 out.append(
                     (
                         ref,
                         "co_hcpf",
                         CO_HCPF_ADAPTERS[co_hcpf_stem],
-                        parsed[0],
-                        parsed[1],
+                        "month",
+                        month,
                         release_date,
                         forecast,
                     )
@@ -12992,15 +13098,15 @@ def pending_adapter_refs(
             continue
         co_dor_stem = longest_adapter_stem(ref, CO_DOR_ADAPTERS)
         if co_dor_stem:
-            parsed = parse_ref_period(ref, co_dor_stem)
-            if parsed and parsed[0] == "month":
+            month = parse_first_print_month_ref(ref, co_dor_stem)
+            if month is not None:
                 out.append(
                     (
                         ref,
                         "co_dor",
                         CO_DOR_ADAPTERS[co_dor_stem],
-                        parsed[0],
-                        parsed[1],
+                        "month",
+                        month,
                         release_date,
                         forecast,
                     )
@@ -15546,7 +15652,7 @@ def main() -> int:
     co_hcpf_landing: tuple[bytes, str] | None = None
     co_hcpf_landing_failed = False
     co_hcpf_file_cache: dict[str, tuple[bytes, dict[str, str], str, str]] = {}
-    co_dor_workbook: bytes | None = None
+    co_dor_workbook: tuple[bytes, dict[str, str]] | None = None
     co_dor_workbook_failed = False
     # SSA official pages: one headless-browser capture per URL per run.
     ssa_capture_cache: dict[str, Any] = {}
@@ -16597,6 +16703,7 @@ def main() -> int:
                         anchor_period,
                         co_hcpf_file_cache,
                         read_workbook=False,
+                        resolution_day=None,
                     )
                 except Exception as exc:  # noqa: BLE001 - defer, don't crash
                     anchor_verdict = (
@@ -16604,19 +16711,21 @@ def main() -> int:
                         f"{ref} — anchor {anchor_period}: {exc}"
                     )
                     break
-                if anchor_refusal and "pdftotext is unavailable" in anchor_refusal:
-                    anchor_verdict = (
-                        f"  CO HCPF ENVIRONMENT FAILURE (fatal): {ref} — "
-                        f"{anchor_refusal}"
-                    )
-                    environment_failures.append(f"{ref}: {anchor_refusal}")
+                if anchor_refusal is not None:
+                    if anchor_refusal.kind == "environment":
+                        anchor_verdict = (
+                            f"  CO HCPF ENVIRONMENT FAILURE (fatal): {ref} — "
+                            f"{anchor_refusal.text}"
+                        )
+                        environment_failures.append(f"{ref}: {anchor_refusal.text}")
+                    else:
+                        anchor_verdict = (
+                            "  ANCHOR MISMATCH (refusing, wrong HCPF report "
+                            f"table?): {ref} — anchor {anchor_period}: "
+                            f"{anchor_refusal.text}"
+                        )
                     break
-                if hcpf_anchor is None:
-                    anchor_verdict = (
-                        "  ANCHOR MISMATCH (refusing, wrong HCPF report table?): "
-                        f"{ref} — anchor {anchor_period}: {anchor_refusal}"
-                    )
-                    break
+                assert hcpf_anchor is not None
                 if hcpf_anchor.total != expected:
                     anchor_verdict = (
                         "  ANCHOR MISMATCH (refusing, wrong HCPF report table?): "
@@ -16628,19 +16737,25 @@ def main() -> int:
             if anchor_verdict:
                 print(anchor_verdict)
                 continue
+            resolution_day = release_day
             try:
                 hcpf_target, target_refusal = co_hcpf_capture_report(
-                    landing_raw, period, co_hcpf_file_cache, read_workbook=True
+                    landing_raw,
+                    period,
+                    co_hcpf_file_cache,
+                    read_workbook=True,
+                    resolution_day=resolution_day,
                 )
             except Exception as exc:  # noqa: BLE001 - defer, don't crash
                 print(f"  CO HCPF report fetch failed (deferring): {ref} — {exc}")
                 continue
-            if target_refusal or hcpf_target is None:
-                line, fatal = co_hcpf_refusal_line(ref, str(target_refusal))
+            if target_refusal is not None:
+                line, fatal = co_hcpf_refusal_line(ref, target_refusal)
                 print(line)
                 if fatal:
-                    environment_failures.append(f"{ref}: {target_refusal}")
+                    environment_failures.append(f"{ref}: {target_refusal.text}")
                 continue
+            assert hcpf_target is not None and hcpf_target.custody is not None
             low, high = spec["sanity_range"]
             if not low <= hcpf_target.total <= high:
                 print(
@@ -16657,11 +16772,12 @@ def main() -> int:
                 anchors=hcpf_anchors,
                 value=value,
             )
-            # The PDF's Last-Modified (Denver day, the zone the gate judged
-            # it in) is the posting vintage the gate just authenticated as
-            # first; the capture stamp is the fetch time.
-            release_day = hcpf_target.last_modified.astimezone(
-                co_hcpf.POSTING_ZONE
+            # observed_at: the UTC date of the PDF's Last-Modified header, the
+            # latest date the custody rule lets the row vouch for. It is not
+            # an observed publication date; the capture stamp is the fetch.
+            assert hcpf_target.custody.last_modified is not None
+            release_day = hcpf_target.custody.last_modified.astimezone(
+                dt.timezone.utc
             ).date()
             source_url = hcpf_target.pdf_url
             source_file = urllib.parse.unquote(
@@ -16680,6 +16796,7 @@ def main() -> int:
                     "{last_modified}",
                     str(hcpf_target.pdf_headers.get("last-modified")),
                 )
+                .replace("{resolution_date}", resolution_day.isoformat())
                 .replace(
                     "{workbook_note}", co_hcpf_workbook_note(hcpf_target.workbook)
                 ),
@@ -16691,22 +16808,28 @@ def main() -> int:
                         co_dor.WORKBOOK_URL
                     )
                     if not dor_raw.startswith(b"PK\x03\x04"):
-                        # Drive answers some clients with a sign-in or
-                        # interstitial page and HTTP 200. That is the source
-                        # not being served, not a restructured workbook.
+                        # A response that is not a ZIP archive is treated as
+                        # a failed fetch of the workbook, not as a verdict on
+                        # its content.
                         raise ValueError(
-                            "Drive answered with "
-                            f"{dor_headers.get('content-type')!r}, not the workbook"
+                            "the response is "
+                            f"{dor_headers.get('content-type')!r}, not a workbook"
                         )
-                    co_dor_workbook = dor_raw
+                    co_dor_workbook = (dor_raw, dor_headers)
                 except Exception as exc:  # noqa: BLE001 - defer, don't crash
                     print(f"  CO DOR workbook fetch failed (deferring): {ref} — {exc}")
                     co_dor_workbook_failed = True
             if co_dor_workbook is None:
                 continue
-            # This leg reports the state of the first print and records
-            # nothing: every verdict is a deferral or a refusal.
-            print(co_dor_verdict(ref, period, co_dor_workbook))
+            # This leg records nothing: every verdict is a deferral or a
+            # refusal, and an unexpected error stays with this reference.
+            try:
+                print(co_dor_verdict(ref, period, *co_dor_workbook, release_day))
+            except Exception as exc:  # noqa: BLE001 - one reference, not the run
+                print(
+                    f"  CO DOR PARSE REFUSAL (refusing): {ref} — "
+                    f"{type(exc).__name__}: {str(exc)[:160]}"
+                )
             continue
         elif kind == "ssa_official":
             if ssa_browser_unavailable:

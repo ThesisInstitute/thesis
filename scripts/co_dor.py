@@ -5,33 +5,36 @@ Pure standard library (plus the hardened OOXML reader in ``va_mmwr``). Used
 by ``scripts/resolve_pending.py`` for the
 ``co.dor.individual_income_tax.net_collections`` family and by its tests.
 
-Source facts (verified 2026-10-09; see "Colorado DOR net individual income
-tax collections" in docs/anchor-verifications.md):
+What was observed (2026-10-09; see "Colorado DOR net individual income tax
+collections" in docs/anchor-verifications.md):
 
-* The General Fund Collections Reports page
+* The Wayback Machine's 2026-05-05 capture of the General Fund Collections
+  Reports page
   (https://cdor.colorado.gov/data-and-reports/general-fund-collections-reports)
-  links its current data as one workbook, "General Fund Collections Report,
-  July 2019 to Date", stored in Google Drive. Drive reports that file id as
-  created on 2023-12-14 and last modified on 2026-09-28. The page itself
-  answers non-browser clients with a Cloudflare challenge (HTTP 403), so the
-  adapter reads the Drive file by its reviewed id and never the page.
-* The workbook has one sheet, ``Report``: a title cell ("General Fund (GF)
-  and Other Miscellaneous Net Collections by Month / Dollar Amounts in
-  Thousands / July 2019 to Date"), a header row of months with the NEWEST
-  month in the first data column, one row per revenue category, and a
-  "Publish date: <Month YYYY>" line.
-* DOR publishes by replacing that file in place. Drive serves readers only
-  the current revision (``canReadRevisions`` is false), and no copy of an
-  earlier one was found in a web archive. A month's first print can
-  therefore be identified only while that month is still the newest column:
-  once a newer month is there, the figure first published can no longer be
-  told apart from a restated one, and the read is refused.
+  links the label "General Fund Collections Report, July 2019 to Date" to a
+  Google Drive file id, ``WORKBOOK_FILE_ID`` below. A curl request for the
+  live page with a browser User-Agent got a Cloudflare challenge (HTTP 403),
+  so the adapter reads the Drive file by that reviewed id and not the page.
+* For a signed-in reader, Drive reported the file as created 2023-12-14 and
+  last modified 2026-09-28, ``canReadRevisions`` as false, and only the head
+  revision. The download served on 2026-10-09 has one sheet, ``Report``: a
+  title cell ("General Fund (GF) and Other Miscellaneous Net Collections by
+  Month / Dollar Amounts in Thousands / July 2019 to Date"), a header row of
+  months with the newest month in the first data column (August 2026), one
+  row per revenue category, and the line "Publish date: September 2026".
+* Nothing observed establishes how or when DOR changes the file, or when a
+  given month first appeared in it. The resolver's custody rule
+  (``served_unchanged_since_resolution_date`` in ``resolve_pending``) works
+  from the download's Last-Modified header alone.
 """
 
 from __future__ import annotations
 
 import re
+import zipfile
+import zlib
 from dataclasses import dataclass
+from xml.etree import ElementTree as ET
 
 import va_mmwr
 
@@ -68,6 +71,21 @@ MONTH_NAMES = (
 _MONTH_NUMBER = {name: number for number, name in enumerate(MONTH_NAMES, start=1)}
 _MONTH_LABEL = re.compile(rf"^({'|'.join(MONTH_NAMES)}) (\d{{4}})$")
 _PUBLISH_DATE = re.compile(rf"^Publish date: ({'|'.join(MONTH_NAMES)}) (\d{{4}})$")
+# What a damaged workbook can raise from the stdlib ZIP and XML readers that
+# ``va_mmwr.sheet_cells`` does not already turn into its own error.
+WORKBOOK_ARCHIVE_ERRORS = (
+    va_mmwr.VaMmwrError,
+    zipfile.BadZipFile,
+    zipfile.LargeZipFile,
+    zlib.error,
+    EOFError,
+    OSError,
+    NotImplementedError,
+    RuntimeError,
+    KeyError,
+    ValueError,
+    ET.ParseError,
+)
 # Footnote markers DOR appends to row labels ("Less: Individual Refunds ²").
 _FOOTNOTE_MARKS = "¹²³⁴⁵⁶⁷⁸⁹⁰"
 
@@ -101,8 +119,9 @@ class NetIndividualIncome:
     net: int
     gross: int
     refunds: int
-    # Rows DOR lists between the gross line and the refunds line (TABOR
-    # refund mechanisms), summed; they are added to gross before refunds.
+    # The rows listed between the gross line and the refunds line, summed (in
+    # the inspected file, TABOR refund and rate-reduction lines); they are
+    # added to gross before refunds.
     adjustments: int
     components: tuple[int, int, int]
 
@@ -135,18 +154,22 @@ def _label(value: object) -> str:
 
 
 def read_collections(raw: bytes) -> CollectionsWorkbook:
-    """Parse the ``Report`` sheet and check the rows it will be read by.
+    """Parse the ``Report`` sheet.
 
-    Every label is matched in place and must be unique. For every month the
-    two accounting identities the sheet prints are recomputed: gross is the
-    sum of withholding, estimated payments and cash, and net is gross plus
-    the listed adjustments less refunds. ``check_identities`` refuses a month
-    where either fails.
+    The identity cells (title, units, source line, header label) and the
+    selected row labels must each appear exactly once, and the selected rows
+    must sit where the checks below expect them. Every month column is parsed;
+    a month whose selected cells are not whole numbers is kept as unreadable
+    and refused only when asked for. This function does not check the
+    accounting identities; ``check_identities`` does, for one month. A
+    damaged archive raises ``CoDorError``, never a ZIP or XML error.
     """
     try:
         cells = va_mmwr.sheet_cells(raw, SHEET_NAME)
-    except va_mmwr.VaMmwrError as exc:
-        raise CoDorError(f"collections workbook: {exc}") from exc
+    except WORKBOOK_ARCHIVE_ERRORS as exc:
+        raise CoDorError(
+            f"collections workbook: {type(exc).__name__}: {str(exc)[:160]}"
+        ) from exc
     labels = {key: _label(cell.value) for key, cell in cells.items()}
 
     def one(text: str, *, prefix: bool = False) -> tuple[int, int]:
@@ -259,10 +282,12 @@ def read_collections(raw: bytes) -> CollectionsWorkbook:
 def check_identities(figure: NetIndividualIncome) -> None:
     """Refuse a month whose printed lines do not add up.
 
-    Checked on all 86 months of the workbook published in September 2026:
-    net equals gross plus adjustments less refunds exactly in every month,
-    and the three separately rounded components are within one thousand of
-    the gross line in every month (28 months differ by exactly one).
+    Net must equal gross plus the listed adjustments less refunds exactly,
+    and withholding, estimated payments and cash must sum to within one
+    thousand of gross. In the workbook downloaded 2026-10-09 (publish-date
+    line September 2026) net holds exactly in all 86 months, and the
+    component sum differs from gross by one thousand in 28 of them and by
+    nothing in the rest. Why those 28 differ is not established.
     """
     if abs(sum(figure.components) - figure.gross) > 1:
         raise CoDorError(
@@ -275,17 +300,3 @@ def check_identities(figure: NetIndividualIncome) -> None:
             f"{figure.period}: gross plus adjustments less refunds is {expected}, "
             f"not the net line {figure.net}"
         )
-
-
-def first_print_status(workbook: CollectionsWorkbook, period: str) -> str:
-    """``"first_print"``, ``"not_yet_published"`` or ``"overwritten"``.
-
-    ``period`` is a first print only while it is the workbook's newest
-    month. Before that it is unpublished; after it, the file has been
-    replaced at least once since the month first appeared.
-    """
-    if not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", period):
-        raise CoDorError(f"period {period!r} is not YYYY-MM")
-    if period == workbook.newest:
-        return "first_print"
-    return "not_yet_published" if period > workbook.newest else "overwritten"

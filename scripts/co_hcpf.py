@@ -5,34 +5,33 @@ Pure standard library (plus the hardened OOXML reader in ``va_mmwr``). Used
 by ``scripts/resolve_pending.py`` for the ``co.hcpf.medicaid.total_caseload``
 family and by its tests.
 
-Source facts (verified 2026-10-09 against the live site; see "Colorado HCPF
-Medicaid caseload" in docs/anchor-verifications.md):
+What the inspected files show (read 2026-10-09; see "Colorado HCPF Medicaid
+caseload" in docs/anchor-verifications.md). These are observations of the
+June to September 2026 reports, not a description of HCPF's process:
 
 * The Premiums, Expenditures and Caseload Reports page
   (https://hcpf.colorado.gov/budget/FY-Premiums-Expenditures-Caseload-Reports)
-  links one report per month as a PDF and a workbook, both stored as
+  listed June to September 2026 report sets, each a PDF and a workbook under
   ``/sites/hcpf/files/<YYYY> <Month>, Joint Budget Committee Monthly Premiums
-  Report.<ext>``. The month in the file name is the month the report is
-  dated, and the report's newest caseload month is the month before it: the
-  ``2026 September`` report was posted 2026-09-14 and its newest month is
-  August 2026. The page's own note describes the opposite convention ("a
-  report with the link August will reference August activity"), so this
-  reader never trusts the name alone: the report it is handed must itself
-  print the requested month as its newest month.
-* Page 4 of the PDF, and the ``Medicaid Caseload`` sheet of the workbook,
-  carry the table "MEDICAID CASELOAD WITHOUT RETROACTIVITY": one row per
-  month, seventeen eligibility categories and a ``TOTAL`` column. Months the
-  fiscal year has not reached yet are listed with no figures.
-* Every report restates earlier months (January 2026 printed 1,236,302 in
-  the February 2026 report and 1,236,285 in the June 2026 report), and the
-  table's own note says so: "The data presented in this report is
-  preliminary ... and may be restated in future reports". A month's first
-  print is therefore the figure in the one report where it is the newest
-  month.
-* The server sends ``Last-Modified`` for each file, and the four reports
-  observed each carry one in the middle of the month they are dated (06-15,
-  07-15, 08-17, 09-14). That header is the first-posting evidence: a file
-  modified outside its own month is refused.
+  Report<suffix>.<ext>``. Observed suffixes: none, `` no links`` (July's
+  workbook) and ``_0`` (the February PDF, no longer listed).
+* In each inspected report the newest populated month is the month before
+  the month in the file name: the ``2026 September`` PDF leads with August
+  2026. The page's own note describes a different convention ("a report with
+  the link August will reference August activity"), so the reader selects a
+  report by file name and then also requires it to print the requested month
+  as its newest populated month.
+* Page 4 of each PDF, and the ``Medicaid Caseload`` sheet of the September
+  workbook, carry the table "MEDICAID CASELOAD WITHOUT RETROACTIVITY": one row
+  per month, seventeen eligibility categories and a ``TOTAL`` column. Later
+  months are listed without figures.
+* The reports reprint earlier months, and values can change between reports:
+  January 2026 is 1,236,302 in the February report and 1,236,285 in the June
+  report. The table's note says the data "may be restated in future reports".
+  The reader therefore returns only the newest populated month's TOTAL. That
+  selection does not by itself establish when the figure was first published;
+  the resolver's custody rule (``served_unchanged_since_resolution_date`` in
+  ``resolve_pending``) decides whether the bytes may be recorded.
 """
 
 from __future__ import annotations
@@ -40,11 +39,12 @@ from __future__ import annotations
 import datetime as dt
 import posixpath
 import re
+import zipfile
+import zlib
 from dataclasses import dataclass
-from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 from urllib.parse import unquote, urljoin, urlparse
-from zoneinfo import ZoneInfo
+from xml.etree import ElementTree as ET
 
 import va_mmwr
 
@@ -69,9 +69,9 @@ MONTH_NAMES = (
 )
 _MONTH_NUMBER = {name: number for number, name in enumerate(MONTH_NAMES, start=1)}
 _MONTH_ALTERNATION = "|".join(MONTH_NAMES)
-# ``variant`` admits the two spellings HCPF has used for a second file of the
-# same report (" no links", Drupal's "_0" collision suffix). The cover letter
-# is a different name ("... Monthly Premiums Cover Letter") and never matches.
+# ``variant`` accepts suffixes, including the observed " no links" and "_0".
+# The cover letter has a different name ("... Monthly Premiums Cover Letter")
+# and never matches.
 REPORT_FILE = re.compile(
     rf"^(?P<year>\d{{4}}) (?P<month>{_MONTH_ALTERNATION}), Joint Budget "
     r"Committee Monthly Premiums Report(?P<variant>(?: [A-Za-z ]+)?(?:_\d+)?)"
@@ -88,8 +88,24 @@ COUNT = re.compile(r"^\d{1,3}(?:,\d{3})*$")
 SHEET_NAME = "Medicaid Caseload"
 # Seventeen eligibility categories and TOTAL, in every report read at wiring.
 PDF_COLUMNS = 18
-POSTING_ZONE = ZoneInfo("America/Denver")
 _EXCEL_EPOCH = dt.date(1899, 12, 30)
+# What a damaged workbook can raise from the stdlib ZIP and XML readers that
+# ``va_mmwr.sheet_cells`` does not already turn into its own error (a bad
+# CRC raises ``zipfile.BadZipFile`` on read, a truncated member ``EOFError``
+# or ``zlib.error``).
+WORKBOOK_ARCHIVE_ERRORS = (
+    va_mmwr.VaMmwrError,
+    zipfile.BadZipFile,
+    zipfile.LargeZipFile,
+    zlib.error,
+    EOFError,
+    OSError,
+    NotImplementedError,
+    RuntimeError,
+    KeyError,
+    ValueError,
+    ET.ParseError,
+)
 
 
 class CoHcpfError(ValueError):
@@ -113,7 +129,11 @@ def next_period(period: str) -> str:
 
 
 def report_period_for(period: str) -> str:
-    """The month the report that first prints ``period`` is dated."""
+    """Candidate report month for activity month ``period``: the month after.
+
+    That is the relation seen in the inspected reports; the reader still
+    requires the report to print ``period`` as its newest populated month.
+    """
     return next_period(period)
 
 
@@ -180,8 +200,10 @@ def landing_report_links(landing_html: bytes | str, report_period: str) -> Repor
     """The files the page binds to the report dated ``report_period``.
 
     Exactly one PDF may carry that month's report name; at most one workbook
-    may. Links are judged by the stored file name, never by their label or
-    position, and never inferred from cadence.
+    may. Links are judged by the stored file name, not by their label or
+    position, and no file name is built from a cadence. Links on another host
+    or path, or with a query or fragment, are ignored, so "found 0" means no
+    link matched these filters, not that no report exists.
     """
     parse_period(report_period)
     files = _report_files(landing_html)
@@ -207,44 +229,6 @@ def landing_report_links(landing_html: bytes | str, report_period: str) -> Repor
     )
 
 
-def posting_gate(
-    last_modified: str | None, *, report_period: str
-) -> tuple[dt.datetime | None, str | None]:
-    """(parsed Last-Modified, refusal).
-
-    The file must have been last modified during the month its report is
-    dated (Denver time). A later date is a re-post; an earlier one cannot be
-    the report that month names. Either way the served bytes are not shown to
-    be the first posting, and the read is refused.
-    """
-    if not last_modified:
-        return None, (
-            "report response carries no Last-Modified header; first posting "
-            "cannot be established"
-        )
-    try:
-        modified = parsedate_to_datetime(last_modified)
-    except (TypeError, ValueError) as exc:
-        return None, f"Last-Modified {last_modified!r} unreadable: {exc}"
-    if modified.tzinfo is None:
-        modified = modified.replace(tzinfo=dt.timezone.utc)
-    local = modified.astimezone(POSTING_ZONE).date()
-    posted = format_period(local.year, local.month)
-    if posted > report_period:
-        return modified, (
-            f"report file was modified {local}, after "
-            f"{period_label(report_period)}, the month the report is dated; the "
-            "served file is a re-post, not the first print"
-        )
-    if posted < report_period:
-        return modified, (
-            f"report file was modified {local}, before "
-            f"{period_label(report_period)}, the month the report is dated; it is "
-            "not the report that month names"
-        )
-    return modified, None
-
-
 # ---------------------------------------------------------------------------
 # The caseload table
 
@@ -255,9 +239,10 @@ class CaseloadRow:
     # Category figures in column order; ``None`` where the report prints "-".
     categories: tuple[int | None, ...]
     total: int
-    # Why the row cannot be read, when it carries a figure that is not a
-    # whole count. Only the workbook's old history has such rows (September
-    # 2014 holds 0.0084 in one category); a row like that is never read.
+    # Why the row cannot be returned, when it carries a figure that is not a
+    # whole count. In the inspected workbook such rows occur only in older
+    # history (September 2014 holds about 0.0084 in one category); the row is
+    # parsed and kept, and ``newest_month_total`` refuses it if asked.
     irregular: str | None = None
 
     @property
@@ -298,10 +283,10 @@ def caseload_table_from_pdf_text(text: str) -> CaseloadTable:
     """Parse ``pdftotext -layout`` output of the report.
 
     The table is the block from the one line that reads "MEDICAID CASELOAD
-    WITHOUT RETROACTIVITY" to its "FY ... YTD Average" line. A month row is
-    the month name and year followed by exactly eighteen figures; a listed
-    month with no figures has not been reported yet. Anything else on a
-    month row is refused.
+    WITHOUT RETROACTIVITY" to its "FY ... YTD Average" (or "Year-to-Date
+    Average") line. A month row is the month name and year followed by exactly
+    eighteen figures; a listed month with no figures is recorded as
+    unpopulated. Anything else on a month row is refused.
     """
     lines = [re.sub(r"\s+", " ", line).strip() for line in text.splitlines()]
     titles = [index for index, line in enumerate(lines) if TABLE_TITLE.fullmatch(line)]
@@ -375,11 +360,16 @@ def _serial_period(value: object) -> str | None:
 
 
 def caseload_table_from_workbook(raw: bytes) -> CaseloadTable:
-    """Parse the ``Medicaid Caseload`` sheet (cached values, stdlib OOXML)."""
+    """Parse the ``Medicaid Caseload`` sheet (cached values, stdlib OOXML).
+
+    A damaged archive raises ``CoHcpfError``, never a ZIP or XML error.
+    """
     try:
         cells = va_mmwr.sheet_cells(raw, SHEET_NAME)
-    except va_mmwr.VaMmwrError as exc:
-        raise CoHcpfError(f"report workbook: {exc}") from exc
+    except WORKBOOK_ARCHIVE_ERRORS as exc:
+        raise CoHcpfError(
+            f"report workbook: {type(exc).__name__}: {str(exc)[:160]}"
+        ) from exc
 
     def text_at(key: tuple[int, int]) -> str:
         value = cells[key].value
@@ -449,18 +439,19 @@ def caseload_table_from_workbook(raw: bytes) -> CaseloadTable:
     return _finish_table(rows, unpopulated, "workbook")
 
 
-def first_print_total(table: CaseloadTable, period: str) -> int:
-    """The TOTAL the report first prints for ``period``.
+def newest_month_total(table: CaseloadTable, period: str) -> int:
+    """The TOTAL of the table's newest populated month, which must be ``period``.
 
-    Refuses unless ``period`` is the report's newest month (so the figure is
-    not a restatement) and the row's categories add up to its TOTAL (so the
-    figure is the row's total and not a neighbouring column).
+    Refuses when ``period`` is not the newest populated month, when that row
+    holds a figure that is not a whole count, or when its categories do not
+    sum to its TOTAL (so the figure is the row's total, not a neighbouring
+    column). None of this establishes when the figure was first published.
     """
     parse_period(period)
     if table.latest != period:
         raise CoHcpfError(
-            f"the report's newest caseload month is {table.latest}, not {period}; "
-            "it does not first print that month"
+            f"the report's newest populated month is {table.latest}, not "
+            f"{period}; this adapter reads only the newest populated month"
         )
     row = table.rows[-1]
     if row.irregular:

@@ -1,4 +1,5 @@
-"""Colorado HCPF Monthly Premiums Report reader: first prints only, fail-closed.
+"""Colorado HCPF Monthly Premiums Report reader: newest populated month only,
+fail-closed.
 
 Official fixtures (``tests/fixtures/co_hcpf``, see its README): the landing
 page as served 2026-10-09, the caseload page of the June to September 2026
@@ -9,11 +10,9 @@ fact at a time.
 
 from __future__ import annotations
 
-import datetime as dt
 import pathlib
 import shutil
 import sys
-from zoneinfo import ZoneInfo
 
 import pytest
 from hypothesis import given, settings
@@ -28,6 +27,7 @@ import resolve_pending  # noqa: E402
 sys.path.insert(0, str(ROOT / "tests"))
 from co_fixtures import (  # noqa: E402
     HCPF_CATEGORIES,
+    corrupt_member_crc,
     hcpf_file_url,
     hcpf_landing,
     hcpf_pdf_text,
@@ -40,7 +40,7 @@ from co_fixtures import (  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures" / "co_hcpf"
 LANDING = (FIXTURES / "landing_2026-10-09.html").read_bytes()
-# Report month -> (activity month it first prints, TOTAL, months with figures).
+# Report month -> (newest populated month, its TOTAL, months with figures).
 OFFICIAL = {
     "2026-06": ("2026-05", 1238720, 59),
     "2026-07": ("2026-06", 1237772, 60),
@@ -79,35 +79,37 @@ def test_official_landing_binds_each_report_month_to_its_own_files() -> None:
 
 
 @pytest.mark.parametrize("report_period", sorted(OFFICIAL))
-def test_official_reports_first_print_the_month_before_they_are_dated(
+def test_official_reports_lead_with_the_month_before_the_one_they_are_named_for(
     report_period: str,
 ) -> None:
     period, total, populated = OFFICIAL[report_period]
     assert co_hcpf.report_period_for(period) == report_period
     table = co_hcpf.caseload_table_from_pdf_text(_official_text(report_period))
     assert (table.latest, len(table.rows)) == (period, populated)
-    assert co_hcpf.first_print_total(table, period) == total
-    # Every month the PDF prints is a row whose categories add up.
+    assert co_hcpf.newest_month_total(table, period) == total
+    # Every populated month row has 17 categories that sum to its TOTAL.
     assert all(len(row.categories) == HCPF_CATEGORIES for row in table.rows)
     assert all(row.categories_sum == row.total for row in table.rows)
-    # A month the report merely restates is never read from it.
-    with pytest.raises(co_hcpf.CoHcpfError, match=f"newest caseload month is {period}"):
-        co_hcpf.first_print_total(table, shift(period, -1))
-    with pytest.raises(co_hcpf.CoHcpfError, match="does not first print"):
-        co_hcpf.first_print_total(table, shift(period, 1))
+    # The value-selection function refuses any month but the newest.
+    with pytest.raises(
+        co_hcpf.CoHcpfError, match=f"newest populated month is {period}"
+    ):
+        co_hcpf.newest_month_total(table, shift(period, -1))
+    with pytest.raises(co_hcpf.CoHcpfError, match="reads only the newest"):
+        co_hcpf.newest_month_total(table, shift(period, 1))
 
 
 def test_official_reports_restate_earlier_months() -> None:
-    """Why a month is read only from the report where it is the newest.
+    """Why only the newest populated month is read.
 
-    The forecast's own history records the February 2026 report's first
-    print of January 2026, 1,236,302; the June report prints 1,236,285.
+    The forecast's recorded history matches the downloaded February report's
+    January 2026 figure, 1,236,302; the June report prints 1,236,285.
     """
     june = co_hcpf.caseload_table_from_pdf_text(_official_text("2026-06"))
     january = june.row("2026-01")
     assert january is not None and january.total == 1236285 != 1236302
-    # Not every month moves: the next three reports left their predecessors'
-    # newest month as first printed.
+    # Not every month moves: the next three reports print the same total for
+    # their predecessor's newest populated month as the predecessor did.
     for report_period in ("2026-07", "2026-08", "2026-09"):
         table = co_hcpf.caseload_table_from_pdf_text(_official_text(report_period))
         previous_period, previous_total, _ = OFFICIAL[shift(report_period, -1)]
@@ -137,7 +139,7 @@ def test_official_workbook_agrees_with_the_pdf_on_every_month_both_print() -> No
         (FIXTURES / "report_2026-09.xlsx").read_bytes()
     )
     assert (book.latest, book.unpopulated) == (pdf.latest, pdf.unpopulated)
-    assert co_hcpf.first_print_total(book, "2026-08") == 1247588
+    assert co_hcpf.newest_month_total(book, "2026-08") == 1247588
     by_period = {row.period: row for row in book.rows}
     for row in pdf.rows:
         other = by_period[row.period]
@@ -145,7 +147,8 @@ def test_official_workbook_agrees_with_the_pdf_on_every_month_both_print() -> No
         # The PDF prints "-" where the workbook holds an empty cell or zero.
         assert [v or 0 for v in other.categories] == [v or 0 for v in row.categories]
     # The workbook reaches back to July 2009; three months of that older
-    # history hold a figure that is not a whole count and are never read.
+    # history hold a figure that is not a whole count. They are parsed and
+    # flagged, and the value-selection function refuses such a row.
     assert book.rows[0].period == "2009-07" and pdf.rows[0].period == "2022-07"
     assert [row.period for row in book.rows if row.irregular] == [
         "2014-09",
@@ -218,54 +221,6 @@ def test_a_report_is_found_exactly_when_the_page_lists_it(listed, target) -> Non
             co_hcpf.landing_report_links(page, period(target))
 
 
-# --- first-posting gate --------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("header", "refusal"),
-    [
-        ("Mon, 14 Sep 2026 17:35:17 GMT", None),  # the official September file
-        # Denver is UTC-6 in September: 05:30 GMT on 1 October is still
-        # 30 September there, and 05:30 GMT on 1 September is still August.
-        ("Thu, 01 Oct 2026 05:30:00 GMT", None),
-        ("Tue, 01 Sep 2026 05:30:00 GMT", "before September 2026"),
-        ("Thu, 15 Oct 2026 16:00:00 GMT", "re-post"),
-        ("Mon, 17 Aug 2026 18:00:45 GMT", "before September 2026"),
-        (None, "no Last-Modified header"),
-        ("yesterday", "unreadable"),
-    ],
-)
-def test_posting_gate_accepts_only_the_month_the_report_is_dated(
-    header, refusal
-) -> None:
-    modified, verdict = co_hcpf.posting_gate(header, report_period="2026-09")
-    if refusal is None:
-        assert verdict is None and modified is not None
-    else:
-        assert verdict is not None and refusal in verdict
-
-
-@settings(max_examples=300, deadline=None)
-@given(
-    moment=st.datetimes(
-        min_value=dt.datetime(2020, 1, 1),
-        max_value=dt.datetime(2035, 1, 1),
-        timezones=st.just(dt.timezone.utc),
-    ),
-    report=st.integers(2020 * 12, 2035 * 12),
-)
-def test_posting_gate_is_exactly_the_denver_month_test(moment, report) -> None:
-    report_period = f"{report // 12:04d}-{report % 12 + 1:02d}"
-    header = moment.strftime("%a, %d %b %Y %H:%M:%S GMT")
-    local = moment.astimezone(ZoneInfo("America/Denver"))
-    _modified, verdict = co_hcpf.posting_gate(header, report_period=report_period)
-    same_month = (local.year, local.month) == (report // 12, report % 12 + 1)
-    assert (verdict is None) == same_month
-    if verdict is not None:
-        later = (local.year, local.month) > (report // 12, report % 12 + 1)
-        assert ("re-post" in verdict) == later
-
-
 # --- the caseload table ------------------------------------------------------
 
 ROWS = hcpf_rows("2026-08", [1_230_001, 1_240_002, 1_247_588])
@@ -283,7 +238,7 @@ def test_synthetic_report_reads_like_the_official_one() -> None:
             ("2026-08", 1_247_588),
         ]
         assert table.unpopulated == tuple(AHEAD)
-        assert co_hcpf.first_print_total(table, "2026-08") == 1_247_588
+        assert co_hcpf.newest_month_total(table, "2026-08") == 1_247_588
     # The FY 2025-26 reports close the table with the longer spelling.
     older = hcpf_pdf_text(ROWS, closing="FY 2025-26 Year-to-Date Average")
     assert co_hcpf.caseload_table_from_pdf_text(older).latest == "2026-08"
@@ -347,8 +302,8 @@ def test_pdf_table_refuses_what_it_cannot_read_without_guessing(
 
 
 def test_pdf_table_ends_before_the_by_program_table() -> None:
-    """The next page repeats every month under another title, with
-    suppressed ("<30") figures; none of it belongs to the statewide table."""
+    """The following program table has overlapping month labels and
+    suppressed ("<30") figures; it is outside the statewide table."""
     text = hcpf_pdf_text(ROWS)
     assert "MEDICAID CASELOAD BY PROGRAM" in text and "<30" in text
     assert co_hcpf.caseload_table_from_pdf_text(text).latest == "2026-08"
@@ -379,13 +334,25 @@ def test_workbook_refuses_a_restructured_sheet() -> None:
         co_hcpf.caseload_table_from_workbook(no_total)
 
 
+def test_a_damaged_workbook_archive_is_an_adapter_error() -> None:
+    """A bad CRC raises ``zipfile.BadZipFile`` inside the stdlib reader; the
+    caller must only ever see ``CoHcpfError``."""
+    official = (FIXTURES / "report_2026-09.xlsx").read_bytes()
+    for member in ("xl/workbook.xml", "xl/sharedStrings.xml"):
+        damaged = corrupt_member_crc(official, member)
+        with pytest.raises(co_hcpf.CoHcpfError, match="BadZipFile"):
+            co_hcpf.caseload_table_from_workbook(damaged)
+    with pytest.raises(co_hcpf.CoHcpfError):
+        co_hcpf.caseload_table_from_workbook(official[: len(official) // 2])
+
+
 def test_a_newest_row_that_is_not_whole_counts_is_refused_when_read() -> None:
     period, categories, total = ROWS[-1]
     raw = hcpf_workbook([*ROWS[:-1], (period, (0.5, *categories[1:]), total)])
     table = co_hcpf.caseload_table_from_workbook(raw)
     assert table.latest == period and table.rows[-1].irregular
     with pytest.raises(co_hcpf.CoHcpfError, match="non-count figure 0.5"):
-        co_hcpf.first_print_total(table, period)
+        co_hcpf.newest_month_total(table, period)
 
 
 def test_a_total_that_its_categories_do_not_add_up_to_is_refused() -> None:
@@ -398,7 +365,7 @@ def test_a_total_that_its_categories_do_not_add_up_to_is_refused() -> None:
             else co_hcpf.caseload_table_from_workbook(off)
         )
         with pytest.raises(co_hcpf.CoHcpfError, match="categories sum to 1247588"):
-            co_hcpf.first_print_total(table, period)
+            co_hcpf.newest_month_total(table, period)
 
 
 # --- properties --------------------------------------------------------------
@@ -444,8 +411,8 @@ def test_both_prints_round_trip_and_agree(table) -> None:
 def test_only_the_newest_month_is_read_and_only_when_it_adds_up(
     table, offset, delta
 ) -> None:
-    """No restatement is ever read, and a figure is returned only when it is
-    the row's own total."""
+    """For generated tables, only the newest populated month is returned, and
+    only when its TOTAL equals its category sum."""
     rows, unpopulated = table
     newest, categories, total = rows[-1]
     if total + delta < 0:
@@ -454,7 +421,7 @@ def test_only_the_newest_month_is_read_and_only_when_it_adds_up(
     parsed = co_hcpf.caseload_table_from_pdf_text(hcpf_pdf_text(printed, unpopulated))
     asked = shift(newest, offset)
     if offset == 0 and delta == 0:
-        assert co_hcpf.first_print_total(parsed, asked) == total
+        assert co_hcpf.newest_month_total(parsed, asked) == total
     else:
         with pytest.raises(co_hcpf.CoHcpfError):
-            co_hcpf.first_print_total(parsed, asked)
+            co_hcpf.newest_month_total(parsed, asked)

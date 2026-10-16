@@ -4,8 +4,9 @@ HCPF Medicaid caseload replays the official files committed under
 ``tests/fixtures/co_hcpf`` (landing page, the caseload page of four report
 PDFs with their ``pdftotext`` text, the September 2026 workbook) with the
 ``Last-Modified`` headers the live site sent on 2026-10-09. DOR net
-individual income tax collections replays the workbook DOR published in
-September 2026. No test touches the network or needs poppler.
+individual income tax collections replays the workbook downloaded on
+2026-10-09 (publish-date line: September 2026) with the Last-Modified it
+carried. No test touches the network or needs poppler.
 """
 
 from __future__ import annotations
@@ -34,11 +35,13 @@ import resolve_pending  # noqa: E402
 
 sys.path.insert(0, str(ROOT / "tests"))
 from co_fixtures import (  # noqa: E402
+    corrupt_member_crc,
     dor_workbook,
     hcpf_landing,
     hcpf_pdf_text,
     hcpf_rows,
     hcpf_workbook,
+    split_total,
 )
 
 HCPF_FIXTURES = ROOT / "tests" / "fixtures" / "co_hcpf"
@@ -61,13 +64,15 @@ OFFICIAL_MODIFIED = {
     "2026-08": "Mon, 17 Aug 2026 18:00:45 GMT",
     "2026-09": "Mon, 14 Sep 2026 17:35:17 GMT",
 }
+DOR_MODIFIED = "Mon, 28 Sep 2026 21:09:16 GMT"
 SYNTHETIC_PDF = b"%PDF-synthetic\n"
 
 
 def _log() -> dict:
-    """The two published cells, and later months of each series."""
+    """The two published cells (resolution dates and intervals as published)
+    and three synthetic later-period cells of the same series."""
     cells = [
-        # slug, ref, resolutionDate, unit, 80% interval (as published)
+        # slug, ref, resolutionDate, unit, 80% interval
         ("co-medicaid", HCPF, "2026-09-15", "thousands", 1225.6, 1268.6),
         ("co-medicaid-next", HCPF_NEXT, "2026-10-01", "thousands", 1225.6, 1268.6),
         ("co-income-tax", DOR, "2026-08-31", "usd_billions", 0.42, 1.54),
@@ -114,6 +119,7 @@ def _install(
     modified: dict[str, str | None] | None = None,
     workbook: bytes | Exception | None = None,
     dor: bytes | Exception | None = None,
+    dor_modified: str | None = DOR_MODIFIED,
     pdftotext: bool = True,
     no_pdftotext_for: frozenset[str] = frozenset(),
     content_types: dict[str, str] | None = None,
@@ -121,13 +127,13 @@ def _install(
 ) -> list[str]:
     """Wire ``main()`` to the fixtures; returns the list of URLs it fetched.
 
-    Defaults replay the official files. ``pdfs`` and ``modified`` replace
-    single report PDFs and their Last-Modified headers by report month;
-    ``workbook`` replaces the report workbook (an exception makes the fetch
-    fail); ``dor`` replaces the DOR workbook the same way. ``content_types``
-    and ``landed`` replace a report PDF's Content-Type and the URL its
-    request ends on; ``no_pdftotext_for`` makes ``pdftotext`` unavailable for
-    those reports only.
+    Defaults replay the official files and headers. ``pdfs`` and ``modified``
+    replace single report PDFs and their Last-Modified headers by report
+    month; ``workbook`` replaces the report workbook (an exception makes the
+    fetch fail); ``dor`` and ``dor_modified`` replace the DOR workbook and its
+    header. ``content_types`` and ``landed`` replace a report PDF's
+    Content-Type and the URL its request ends on; ``no_pdftotext_for`` makes
+    ``pdftotext`` unavailable for those reports only.
     """
     log = _log()
     monkeypatch.setattr(resolve_pending, "load_thesis_log", lambda _url: log)
@@ -210,7 +216,8 @@ def _install(
         assert url == co_dor.WORKBOOK_URL
         if isinstance(dor, Exception):
             raise dor
-        return dor, {"last-modified": "Mon, 28 Sep 2026 21:09:16 GMT"}, "t", url
+        headers = {"last-modified": dor_modified} if dor_modified else {}
+        return dor, headers, "2026-10-09T23:57:48Z", url
 
     monkeypatch.setattr(resolve_pending, "co_hcpf_http_get", hcpf_get)
     monkeypatch.setattr(resolve_pending, "co_hcpf_pdf_text", pdf_text)
@@ -239,6 +246,21 @@ def _capture(monkeypatch) -> tuple[list[dict], list[dict]]:
     return rows, envelopes
 
 
+def _corrected_september(total_delta: int) -> bytes:
+    """The September report's caseload page with August's TOTAL and its
+    first category moved by ``total_delta``, so the row still adds up."""
+    text = _official_text("2026-09")
+    old = "1,247,588"
+    assert text.count(old) == 1
+    first_category = "51,684"
+    line = next(line for line in text.splitlines() if "August 2026" in line)
+    assert line.count(first_category) == 1
+    new_line = line.replace(first_category, f"{51684 + total_delta:,}").replace(
+        old, f"{1247588 + total_delta:,}"
+    )
+    return _synthetic_pdf(text.replace(line, new_line))
+
+
 # --- routing -----------------------------------------------------------------
 
 
@@ -257,16 +279,36 @@ def test_router_claims_the_two_colorado_cells_and_nothing_else_of_theirs() -> No
     _ref, kind, spec, period_type, period, _release, forecast = todo[DOR]
     assert (kind, period_type, period) == ("co_dor", "month", "2026-07")
     assert resolve_pending.adapter_unit_matches(spec, forecast)
-    # Another period shape under either stem is claimed by no family.
-    log = _log()
-    log["resolutionLinks"][0]["targetFactRef"] = (
-        "co.hcpf.medicaid.total_caseload.fy2026.first_print"
-    )
-    log["resolutionLinks"][2]["targetFactRef"] = (
-        "co.dor.individual_income_tax.net_collections.q3_2026.first_print"
-    )
-    refs = {item[0] for item in resolve_pending.pending_adapter_refs(log)}
-    assert not {ref for ref in refs if "fy2026" in ref or "q3_2026" in ref}
+
+
+@pytest.mark.parametrize(
+    "tail",
+    [
+        "fy2026.first_print",
+        "q3_2026.first_print",
+        "2026-08.second",
+        "2026-08.advance",
+        "2026-08.preliminary",
+        "2026-08",
+        "august_2026.first_print",
+        "2026-13.first_print",
+        "2026-08.first_print.extra",
+    ],
+)
+def test_router_claims_only_monthly_first_print_references(tail: str) -> None:
+    """Both legs read one kind of figure, a monthly first print; any other
+    release policy or period shape under their stems is claimed by neither."""
+    for stem in (
+        "co.hcpf.medicaid.total_caseload",
+        "co.dor.individual_income_tax.net_collections",
+    ):
+        log = _log()
+        log["resolutionLinks"][0]["targetFactRef"] = f"{stem}.{tail}"
+        claimed = {item[0] for item in resolve_pending.pending_adapter_refs(log)}
+        assert f"{stem}.{tail}" not in claimed
+        assert (
+            resolve_pending.parse_first_print_month_ref(f"{stem}.{tail}", stem) is None
+        )
 
 
 @pytest.mark.parametrize(
@@ -279,7 +321,8 @@ def test_router_claims_the_two_colorado_cells_and_nothing_else_of_theirs() -> No
 def test_no_new_registration_can_bind_either_colorado_family(
     kind: str, ref: str, unit: str, adapter: str
 ) -> None:
-    """Both legs serve only the cells published before they had an executor."""
+    """Neither family accepts a new registration through the registration
+    gate (``execution_plan_refusal``)."""
     assert kind in resolve_pending.EXECUTION_PLAN_UNREGISTRABLE_FAMILIES
     assert kind not in resolve_pending.EXECUTION_PLAN_FAMILY_CHECKS
     mismatch = resolve_pending.binding_adapter_mismatch
@@ -303,6 +346,63 @@ def test_no_new_registration_can_bind_either_colorado_family(
 
     assert "names a page, not an executor" in refusal("generic-url")
     assert "no registration-time admission predicate" in refusal(adapter)
+
+
+# --- the custody rule --------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("header", "state"),
+    [
+        ("Mon, 14 Sep 2026 17:35:17 GMT", "unchanged"),  # the official file
+        ("Tue, 15 Sep 2026 23:59:59 GMT", "unchanged"),  # last second of the day
+        ("Wed, 16 Sep 2026 00:00:00 GMT", "changed"),  # first second after
+        # 16 Sep 01:00 in Paris is still 15 Sep 23:00 UTC.
+        ("Wed, 16 Sep 2026 01:00:00 +0200", "unchanged"),
+        ("Mon, 17 Aug 2026 18:00:45 GMT", "unchanged"),  # no lower bound
+        ("Thu, 15 Oct 2026 16:00:00 GMT", "changed"),
+        (None, "unknown"),
+        ("yesterday", "unknown"),
+    ],
+)
+def test_custody_rule_compares_the_header_with_the_end_of_the_resolution_date(
+    header, state
+) -> None:
+    verdict = resolve_pending.served_unchanged_since_resolution_date(
+        header, dt.date(2026, 9, 15), what="report PDF"
+    )
+    assert verdict.state == state
+    assert (verdict.last_modified is None) == (state == "unknown")
+
+
+@settings(max_examples=400, deadline=None)
+@given(
+    moment=st.datetimes(
+        min_value=dt.datetime(2020, 1, 1),
+        max_value=dt.datetime(2035, 1, 1),
+        timezones=st.just(dt.timezone.utc),
+    ),
+    day=st.dates(min_value=dt.date(2020, 1, 1), max_value=dt.date(2034, 12, 31)),
+    offset_minutes=st.sampled_from([0, -420, -360, 60, 120, 330]),
+)
+def test_custody_rule_is_exactly_an_instant_comparison(
+    moment, day, offset_minutes
+) -> None:
+    """Accepted iff the header's instant is before midnight UTC after the
+    resolution date, whatever offset the server writes the header in; an
+    accepted file is never dated after the resolution date."""
+    zone = dt.timezone(dt.timedelta(minutes=offset_minutes))
+    local = moment.replace(microsecond=0).astimezone(zone)
+    header = local.strftime("%a, %d %b %Y %H:%M:%S %z")
+    verdict = resolve_pending.served_unchanged_since_resolution_date(
+        header, day, what="workbook"
+    )
+    end = dt.datetime.combine(day + dt.timedelta(days=1), dt.time(), dt.timezone.utc)
+    expected = "unchanged" if local < end else "changed"
+    assert verdict.state == expected
+    if expected == "unchanged":
+        assert verdict.last_modified is not None
+        assert verdict.last_modified.astimezone(dt.timezone.utc).date() <= day
 
 
 # --- HCPF: the official files ------------------------------------------------
@@ -331,8 +431,8 @@ def test_main_resolves_the_august_2026_caseload_from_the_official_files(
     (row,) = rows
     assert row["value"] == 1247.588
     assert row["period"] == {"type": "month", "value": "2026-08"}
-    # The publisher's date is the day the PDF was posted, not the fetch day
-    # and not the forecast's by-date.
+    # observed_at is the UTC date of the PDF's Last-Modified header, not the
+    # fetch day and not the forecast's resolution date.
     assert row["observed_at"] == "2026-09-14"
     assert row["geography"] == {
         "level": "state",
@@ -348,8 +448,14 @@ def test_main_resolves_the_august_2026_caseload_from_the_official_files(
         "2026 September, Joint Budget Committee Monthly Premiums Report.pdf"
     )
     notes = row["measure"]["concept_evidence_notes"]
-    assert "Report dated September 2026" in notes
-    assert "Last-Modified header (Mon, 14 Sep 2026 17:35:17 GMT)" in notes
+    assert notes.startswith("Value for 2026-08: ")
+    assert "First print" not in notes
+    assert "Report named for September 2026" in notes
+    assert (
+        "Last-Modified header (Mon, 14 Sep 2026 17:35:17 GMT) is no later than "
+        "the cell's resolution date (2026-09-15)"
+    ) in notes
+    assert "when the figure was first published is not established" in notes
     assert "prints the same TOTAL" in notes
     assert "{" not in notes
     (envelope,) = envelopes
@@ -373,6 +479,7 @@ def test_main_resolves_the_august_2026_caseload_from_the_official_files(
         "populatedMonths": 50,
         "total": 1247588,
     }
+    assert report["lastModified"] == OFFICIAL_MODIFIED["2026-09"]
     # The archived bytes are the bytes that were read.
     body = base64.b64decode(report["bodyBase64"])
     assert hashlib.sha256(body).hexdigest() == report["sha256"]
@@ -389,49 +496,93 @@ def test_main_resolves_the_august_2026_caseload_from_the_official_files(
     assert all("bodyBase64" not in anchor for anchor in envelope["anchors"])
 
 
-def test_main_defers_a_month_whose_report_the_page_does_not_list_yet(
+def test_main_defers_a_month_whose_report_the_page_does_not_list(
     monkeypatch, capsys
 ) -> None:
     _install(monkeypatch, [HCPF_NEXT])
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
-    assert f"  not yet published (deferring): {HCPF_NEXT} — " in out
+    assert f"  REPORT NOT LISTED (deferring): {HCPF_NEXT} — " in out
     assert "October 2026 report, found 0" in out
     assert "nothing new to record" in out
 
 
-# --- HCPF: what it refuses -----------------------------------------------------
+# --- HCPF: custody -------------------------------------------------------------
 
 
-def test_main_refuses_a_reposted_report_as_a_missed_first_print(
+def test_a_same_month_correction_after_the_resolution_date_is_refused(
     monkeypatch, capsys
 ) -> None:
-    _install(monkeypatch, [HCPF], modified={"2026-09": "Thu, 15 Oct 2026 16:00:00 GMT"})
+    """Review finding P1. The September report is replaced on 20 September
+    with August's TOTAL one member higher; August is still the newest month,
+    the row still adds up, and the anchors are untouched. The replacement's
+    Last-Modified is after the cell's resolution date, so it is refused."""
+    _install(
+        monkeypatch,
+        [HCPF],
+        pdfs={"2026-09": _corrected_september(1)},
+        modified={"2026-09": "Sun, 20 Sep 2026 15:00:00 GMT"},
+    )
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
-    assert f"  FIRST-PRINT WINDOW MISSED (refusing): {HCPF} — " in out
-    assert "modified 2026-10-15" in out and "re-post" in out
+    assert (
+        f"  FIRST-PRINT WINDOW MISSED (refusing): {HCPF} — the report PDF was "
+        "last modified 2026-09-20 15:00 UTC, after the cell's resolution date "
+        "2026-09-15; the bytes a capture on 2026-09-15 would have read cannot be "
+        "shown to be these"
+    ) in out
     assert "resolve " not in out
+
+
+def test_a_correction_made_before_the_resolution_date_is_read_as_served(
+    monkeypatch, capsys
+) -> None:
+    """INTENDED, the rule's stated residual: a replacement before the
+    resolution date is indistinguishable from the first file, and it is what
+    a capture on the resolution date would have read. The value recorded is
+    the replacement's."""
+    _install(
+        monkeypatch,
+        [HCPF],
+        pdfs={"2026-09": _corrected_september(1)},
+        modified={"2026-09": "Mon, 14 Sep 2026 18:00:00 GMT"},
+    )
+    assert resolve_pending.main() == 0
+    assert f"  resolve {HCPF} -> 1247.589 thousands" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize(
-    ("modified", "says"),
+    ("header", "says"),
     [
         (None, "no Last-Modified header"),
-        ("Mon, 31 Aug 2026 23:00:00 GMT", "before September 2026"),
+        ("yesterday", "is unreadable"),
     ],
 )
-def test_main_refuses_a_report_whose_posting_cannot_be_placed(
-    monkeypatch, capsys, modified, says
+def test_main_refuses_a_report_whose_header_cannot_be_read(
+    monkeypatch, capsys, header, says
 ) -> None:
-    _install(monkeypatch, [HCPF], modified={"2026-09": modified})
+    _install(monkeypatch, [HCPF], modified={"2026-09": header})
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
-    assert f"  CO HCPF PARSE REFUSAL (refusing): {HCPF} — " in out and says in out
+    assert f"  CO HCPF CUSTODY UNKNOWN (refusing): {HCPF} — " in out and says in out
     assert "resolve " not in out
 
 
-def test_main_refuses_a_report_that_first_prints_another_month(
+def test_a_report_modified_before_the_month_it_is_named_for_is_not_refused(
+    monkeypatch, capsys
+) -> None:
+    """The custody rule bounds the header from above only. A September report
+    last modified in August still leads with August and predates the
+    resolution date, so it is what a capture on that date would have read."""
+    _install(monkeypatch, [HCPF], modified={"2026-09": "Mon, 31 Aug 2026 23:00:00 GMT"})
+    assert resolve_pending.main() == 0
+    assert f"  resolve {HCPF} -> 1247.588 thousands" in capsys.readouterr().out
+
+
+# --- HCPF: what else it refuses ------------------------------------------------
+
+
+def test_main_refuses_a_report_that_leads_with_another_month(
     monkeypatch, capsys
 ) -> None:
     """The file the page links for September must itself lead with August:
@@ -440,14 +591,13 @@ def test_main_refuses_a_report_that_first_prints_another_month(
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
     assert f"  CO HCPF PARSE REFUSAL (refusing): {HCPF} — " in out
-    assert "newest caseload month is 2026-07, not 2026-08" in out
-    # And a report that already carries the following month is a restatement
-    # of the one asked for.
+    assert "newest populated month is 2026-07, not 2026-08" in out
+    # A report that already carries the following month fails the same check.
     later = hcpf_pdf_text(hcpf_rows("2026-09", [1_242_335, 1_247_000, 1_250_000]))
     _install(monkeypatch, [HCPF], pdfs={"2026-09": _synthetic_pdf(later)})
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
-    assert "newest caseload month is 2026-09, not 2026-08" in out
+    assert "newest populated month is 2026-09, not 2026-08" in out
     assert "resolve " not in out
 
 
@@ -466,13 +616,14 @@ def test_main_refuses_when_an_anchor_report_no_longer_reads_as_recorded(
     assert "anchor 2026-05=1238720 (recorded 1238721)" in out
     # The target report is not even fetched.
     assert not [url for url in served if "September" in url]
-    # An anchor report that fails its own gate is the same refusal.
-    monkeypatch.undo()
+
+
+def test_an_anchor_reports_last_modified_is_not_judged(monkeypatch, capsys) -> None:
+    """Anchors test the reader, not custody: a re-posted anchor report with
+    the same figures leaves the target resolvable."""
     _install(monkeypatch, [HCPF], modified={"2026-07": "Thu, 15 Oct 2026 16:00:00 GMT"})
     assert resolve_pending.main() == 0
-    out = capsys.readouterr().out
-    assert "ANCHOR MISMATCH (refusing, wrong HCPF report table?)" in out
-    assert "anchor 2026-06: report file was modified 2026-10-15" in out
+    assert f"  resolve {HCPF} -> 1247.588 thousands" in capsys.readouterr().out
 
 
 def test_main_refuses_a_total_outside_the_sanity_range(monkeypatch, capsys) -> None:
@@ -538,6 +689,8 @@ def test_main_defers_when_the_site_cannot_be_reached(monkeypatch, capsys) -> Non
 
 # --- HCPF: the workbook never decides ------------------------------------------
 
+OFFICIAL_WORKBOOK = (HCPF_FIXTURES / "report_2026-09.xlsx").read_bytes()
+
 
 @pytest.mark.parametrize(
     ("workbook", "status", "note"),
@@ -554,8 +707,19 @@ def test_main_defers_when_the_site_cannot_be_reached(monkeypatch, capsys) -> Non
         ),
         (b"<html>not found</html>", "unreadable", "could not be read"),
         (OSError("timed out"), "unreadable", "could not be read"),
+        (
+            corrupt_member_crc(OFFICIAL_WORKBOOK, "xl/workbook.xml"),
+            "unreadable",
+            "could not be read",
+        ),
     ],
-    ids=["another-total", "another-newest-month", "not-a-workbook", "unreachable"],
+    ids=[
+        "another-total",
+        "another-newest-month",
+        "not-a-workbook",
+        "unreachable",
+        "bad-crc",
+    ],
 )
 def test_main_records_the_pdf_whatever_the_workbook_says(
     monkeypatch, capsys, workbook, status, note
@@ -580,25 +744,30 @@ def test_main_resolves_from_a_page_that_links_no_workbook(monkeypatch, capsys) -
     assert f"  resolve {HCPF} -> 1247.588 thousands" in capsys.readouterr().out
     assert not [url for url in served if url.endswith(".xlsx")]
     assert envelopes[0]["workbook"] == {"status": "absent"}
-    assert "links no workbook" in rows[0]["measure"]["concept_evidence_notes"]
+    assert (
+        "No matching workbook link was found"
+        in rows[0]["measure"]["concept_evidence_notes"]
+    )
 
 
-# --- DOR: a leg that only reports ----------------------------------------------
+# --- DOR: a leg that records nothing -------------------------------------------
 
 
-def test_main_refuses_the_july_2026_collections_as_a_missed_first_print(
+def test_main_refuses_the_july_2026_collections_on_the_custody_rule(
     monkeypatch, capsys
 ) -> None:
     served = _install(monkeypatch, [DOR, DOR_NEWEST, DOR_NEXT])
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
     assert (
-        f"  FIRST-PRINT WINDOW MISSED (refusing): {DOR} — the workbook's newest "
-        "month is August 2026 (publish date September 2026)"
+        f"  FIRST-PRINT WINDOW MISSED (refusing): {DOR} — the workbook was last "
+        "modified 2026-09-28 21:09 UTC, after the cell's resolution date "
+        "2026-08-31"
     ) in out
-    # August is the newest month, and the leg still records nothing.
+    # August's synthetic cell resolves on 2026-09-30, after the file's
+    # Last-Modified; the leg still records nothing.
     assert f"  CO DOR ADAPTER UNVERIFIED (refusing): {DOR_NEWEST} — " in out
-    assert f"  not yet published (deferring): {DOR_NEXT} — " in out
+    assert f"  MONTH NOT IN WORKBOOK (deferring): {DOR_NEXT} — " in out
     assert "resolve " not in out and "nothing new to record" in out
     # One read of the one workbook serves every DOR cell.
     assert served == [co_dor.WORKBOOK_URL]
@@ -611,24 +780,59 @@ def test_main_defers_or_refuses_when_the_dor_workbook_cannot_be_read(
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
     assert f"  CO DOR workbook fetch failed (deferring): {DOR} — " in out
-    # Drive can answer HTTP 200 with a sign-in or interstitial page: the
-    # source is not being served, which is a deferral, not a verdict on it.
+    # A response that is not a ZIP archive is treated as a failed fetch.
     _install(monkeypatch, [DOR], dor=b"<html>Sign in</html>")
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
-    assert f"  CO DOR workbook fetch failed (deferring): {DOR} — Drive answered" in out
-    assert "FIRST-PRINT WINDOW MISSED" not in out
+    assert f"  CO DOR workbook fetch failed (deferring): {DOR} — " in out
+    assert "not a workbook" in out and "FIRST-PRINT WINDOW MISSED" not in out
     # A workbook that is served but restructured is refused.
     _install(monkeypatch, [DOR], dor=dor_workbook("2026-08", sheet_name="Sheet1"))
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
     assert f"  CO DOR PARSE REFUSAL (refusing): {DOR} — " in out
-    # Even a workbook in which July is the newest month records nothing.
-    _install(monkeypatch, [DOR], dor=dor_workbook("2026-07"))
+    # Even a workbook served unchanged since before the resolution date
+    # records nothing.
+    _install(
+        monkeypatch,
+        [DOR],
+        dor=dor_workbook("2026-07"),
+        dor_modified="Fri, 28 Aug 2026 16:00:00 GMT",
+    )
     assert resolve_pending.main() == 0
     out = capsys.readouterr().out
-    assert f"  CO DOR ADAPTER UNVERIFIED (refusing): {DOR} — July 2026 is" in out
+    assert f"  CO DOR ADAPTER UNVERIFIED (refusing): {DOR} — " in out
     assert "resolve " not in out
+
+
+def test_a_damaged_dor_workbook_does_not_stop_a_healthy_resolution(
+    monkeypatch, capsys
+) -> None:
+    """Review finding P2: a bad CRC in the DOR workbook used to escape as
+    ``zipfile.BadZipFile`` and end the run before any row was appended."""
+    damaged = corrupt_member_crc(DOR_FIXTURE.read_bytes(), "xl/workbook.xml")
+    _install(monkeypatch, [DOR, HCPF], dor=damaged)
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert f"  CO DOR PARSE REFUSAL (refusing): {DOR} — " in out
+    assert "BadZipFile" in out
+    assert f"  resolve {HCPF} -> 1247.588 thousands" in out
+    assert "dry-run: would append 1 row(s)" in out
+
+
+def test_an_unexpected_error_in_the_dor_leg_stays_with_its_reference(
+    monkeypatch, capsys
+) -> None:
+    _install(monkeypatch, [DOR, HCPF])
+
+    def broken(_raw: bytes):
+        raise RuntimeError("unforeseen")
+
+    monkeypatch.setattr(co_dor, "read_collections", broken)
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert f"  CO DOR PARSE REFUSAL (refusing): {DOR} — RuntimeError: unforeseen" in out
+    assert f"  resolve {HCPF} -> 1247.588 thousands" in out
 
 
 # --- what the status page will say ---------------------------------------------
@@ -645,7 +849,7 @@ def test_the_status_page_reads_both_cells_verdicts(monkeypatch, capsys) -> None:
         "FIRST_PRINT_WINDOW_MISSED",
     )
     # The page reprints the whole reason, not a cut-off one.
-    assert targets[DOR]["detail"].endswith("cannot be shown to be the first print")
+    assert targets[DOR]["detail"].endswith("cannot be shown to be these")
 
 
 @pytest.mark.parametrize(
@@ -657,6 +861,7 @@ def test_the_status_page_reads_both_cells_verdicts(monkeypatch, capsys) -> None:
             "refused",
             "FIRST_PRINT_WINDOW_MISSED",
         ),
+        ({"modified": {"2026-09": None}}, HCPF, "refused", "UNCLASSIFIED"),
         (
             {"pdfs": {"2026-09": _official_page("2026-08")}},
             HCPF,
@@ -664,18 +869,21 @@ def test_the_status_page_reads_both_cells_verdicts(monkeypatch, capsys) -> None:
             "UNCLASSIFIED",
         ),
         ({"pdftotext": False}, HCPF, "fetch_failed", "ENVIRONMENT_FAILURE"),
-        ({}, HCPF_NEXT, "deferred", "NOT_YET_PUBLISHED"),
+        ({}, HCPF_NEXT, "deferred", "UNCLASSIFIED"),
         ({}, DOR_NEWEST, "refused", "UNCLASSIFIED"),
-        ({}, DOR_NEXT, "deferred", "NOT_YET_PUBLISHED"),
+        ({}, DOR_NEXT, "deferred", "UNCLASSIFIED"),
+        ({"dor_modified": None}, DOR, "refused", "UNCLASSIFIED"),
         ({"dor": OSError("reset")}, DOR, "fetch_failed", "SOURCE_UNREACHABLE"),
     ],
     ids=[
-        "hcpf-repost",
+        "hcpf-changed-after",
+        "hcpf-no-header",
         "hcpf-other-month",
         "hcpf-no-pdftotext",
         "hcpf-not-listed",
-        "dor-newest-month",
-        "dor-not-published",
+        "dor-unverified",
+        "dor-month-absent",
+        "dor-no-header",
         "dor-unreachable",
     ],
 )
@@ -693,49 +901,57 @@ def test_every_other_verdict_is_read_in_the_state_it_was_printed_in(
 
 @settings(max_examples=300, deadline=None)
 @given(total=st.integers(500_000, 3_000_000))
-def test_members_to_thousands_is_exact_at_three_decimals(total: int) -> None:
-    """Whole members divided by 1,000 need exactly three decimals; the
-    recorded float is that decimal, with nothing rounded away."""
+def test_members_to_thousands_keeps_every_digit(total: int) -> None:
+    """Whole members divided by 1,000 need at most three fractional digits;
+    for every total in the sanity range the recorded float's shortest
+    decimal representation equals that quotient."""
     spec = resolve_pending.CO_HCPF_ADAPTERS["co.hcpf.medicaid.total_caseload"]
     value = round(total * spec["scale"], spec["round"]) + 0.0
     assert Decimal(repr(value)) == Decimal(total) / 1000
 
 
-@settings(max_examples=60, deadline=None)
+@settings(max_examples=80, deadline=None)
 @given(
     newest=st.integers(2024 * 12, 2030 * 12),
     asked=st.integers(2024 * 12, 2030 * 12),
-    posted_day=st.integers(1, 28),
-    posted_month_offset=st.integers(-2, 2),
+    hours=st.integers(-24 * 45, 24 * 45),
     total=st.integers(600_000, 2_900_000),
 )
-def test_a_value_is_recorded_only_for_the_newest_month_of_a_report_posted_in_its_month(
-    newest, asked, posted_day, posted_month_offset, total
+def test_a_value_is_recorded_only_for_a_newest_month_unchanged_since_its_date(
+    newest, asked, hours, total
 ) -> None:
-    """The first-print discipline as one statement: ``co_hcpf_capture_report``
-    returns a figure exactly when the report dated the month after ``asked``
-    is listed, leads with ``asked``, and was last modified in that month."""
+    """``co_hcpf_capture_report`` returns a figure exactly when the report
+    named for the month after ``asked`` is listed, leads with ``asked``, and
+    carries a Last-Modified no later than the end of the resolution date
+    (UTC); a returned figure is never dated after that date."""
 
     def period(index: int) -> str:
         return f"{index // 12:04d}-{index % 12 + 1:02d}"
 
     newest_period, asked_period = period(newest), period(asked)
     listed_report = period(newest + 1)
-    posted = newest + 1 + posted_month_offset
-    stamp = dt.datetime(
-        posted // 12, posted % 12 + 1, posted_day, 18, tzinfo=dt.timezone.utc
-    ).strftime("%a, %d %b %Y %H:%M:%S GMT")
-    text = hcpf_pdf_text(hcpf_rows(newest_period, [total - 5, total]))
-    files = {
-        co_hcpf.landing_report_links(
-            hcpf_landing([listed_report]), listed_report
-        ).pdf_url: (
+    resolution_day = dt.date((newest + 1) // 12, (newest + 1) % 12 + 1, 15)
+    end = dt.datetime.combine(
+        resolution_day + dt.timedelta(days=1), dt.time(), dt.timezone.utc
+    )
+    modified = end + dt.timedelta(hours=hours) - dt.timedelta(seconds=1)
+    stamp = modified.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    text = hcpf_pdf_text(
+        [
+            (period(newest - 1), split_total(total - 5), total - 5),
+            (newest_period, split_total(total), total),
+        ]
+    )
+    landing = hcpf_landing([listed_report])
+    url = co_hcpf.landing_report_links(landing, listed_report).pdf_url
+    cache = {
+        url: (
             _synthetic_pdf(text),
             {"content-type": "application/pdf", "last-modified": stamp},
             "2026-10-09T23:57:46Z",
+            url,
         )
     }
-    cache = {url: (*parts, url) for url, parts in files.items()}
     original = resolve_pending.co_hcpf_pdf_text
     resolve_pending.co_hcpf_pdf_text = lambda raw: (
         raw[len(SYNTHETIC_PDF) :].decode(),
@@ -743,12 +959,19 @@ def test_a_value_is_recorded_only_for_the_newest_month_of_a_report_posted_in_its
     )
     try:
         capture, refusal = resolve_pending.co_hcpf_capture_report(
-            hcpf_landing([listed_report]), asked_period, cache, read_workbook=False
+            landing,
+            asked_period,
+            cache,
+            read_workbook=False,
+            resolution_day=resolution_day,
         )
     finally:
         resolve_pending.co_hcpf_pdf_text = original
-    should_read = asked == newest and posted_month_offset == 0
+    should_read = asked == newest and modified < end
     assert (capture is not None) == should_read, refusal
     assert (refusal is None) == should_read
     if capture is not None:
         assert (capture.total, capture.newest_month) == (total, asked_period)
+        assert capture.custody is not None and capture.custody.state == "unchanged"
+        assert capture.custody.last_modified is not None
+        assert capture.custody.last_modified.date() <= resolution_day
