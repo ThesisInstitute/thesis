@@ -14155,6 +14155,8 @@ def await_append_gates(
     read_failures = 0
     last_read_error: BaseException | None = None
     last_seen: dict[str, list[dict]] = {gate: [] for gate in gates}
+    # The ids of the last multi-page listing that read as passed.
+    passed_ids: frozenset[int] | None = None
     while True:
         attempts += 1
         try:
@@ -14191,10 +14193,19 @@ def await_append_gates(
                     + "; refusing to merge"
                 )
             if all(states[gate] == "passed" for gate in gates):
-                # The budget bounds how long to wait, not which verdicts
-                # count: both gates passed on this exact head, so a pass
-                # read just after the deadline still stands.
-                return
+                ids = frozenset(run["id"] for run in runs)
+                # One page is one snapshot. Across pages, a run re-run
+                # between two page reads can swap a new attempt onto a page
+                # already read while the total holds, so a multi-page pass
+                # stands only when the next read returns the same runs.
+                if len(runs) <= APPEND_GATE_CHECK_RUN_PAGE_SIZE or ids == passed_ids:
+                    # The budget bounds how long to wait, not which verdicts
+                    # count: both gates passed on this exact head, so a pass
+                    # read just after the deadline still stands.
+                    return
+                passed_ids = ids
+            else:
+                passed_ids = None
         now = clock()
         if now >= deadline or (poll_attempts is not None and attempts >= poll_attempts):
             waiting = [
@@ -14203,6 +14214,11 @@ def await_append_gates(
             detail = "; ".join(
                 _describe_gate_runs(gate, last_seen[gate]) for gate in waiting
             )
+            if not waiting and passed_ids is not None:
+                detail = (
+                    "both gates passed on a multi-page listing that no second "
+                    "read has confirmed yet"
+                )
             if last_read_error is not None:
                 detail += f"; last status read failed: {last_read_error}"
             raise LedgerProposalError(

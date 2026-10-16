@@ -3525,15 +3525,120 @@ def test_a_page_larger_than_requested_is_refused(monkeypatch) -> None:
 
 
 def test_a_run_without_an_integer_id_is_refused(monkeypatch) -> None:
-    for bad_id in (None, "7", True, 7.0):
-        run = {"name": "Append gate", "status": "completed", "conclusion": "success"}
-        if bad_id is not None:
-            run["id"] = bad_id
+    good = {"name": "Append gate", "status": "completed", "conclusion": "success"}
+    bad_runs = [
+        good,
+        *({**good, "id": bad_id} for bad_id in ("7", True, 7.0)),
+        # A run that is not an object at all.
+        "x",
+        ["x"],
+    ]
+    for run in bad_runs:
         monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api([[run]]))
         with pytest.raises(
             resolve_pending.CheckRunsIncompleteError, match="without an integer id"
         ):
             resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
+def test_an_empty_listing_keeps_both_gates_pending(monkeypatch) -> None:
+    monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api([[]]))
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"did not complete .*Append gate: no check run yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=1,
+        )
+
+
+def _multi_page_passing_listing(first_filler_id: int = 1000) -> list[list[dict]]:
+    runs = _gate_check_runs("success", "success")
+    runs += _filler_runs(150 - len(runs), first_id=first_filler_id)
+    return [runs[:100], runs[100:]]
+
+
+def test_a_multi_page_pass_stands_only_once_a_second_read_agrees(
+    monkeypatch,
+) -> None:
+    calls: list = []
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api(_multi_page_passing_listing(), calls=calls),
+    )
+    clock = _FakeClock()
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    # Two full listings of two pages each, one poll interval apart.
+    assert len(calls) == 4
+    assert clock.sleeps == [20]
+
+
+def test_a_multi_page_pass_whose_runs_changed_is_read_again(monkeypatch) -> None:
+    """Review of ebdee131 (P4): a run re-run between page reads can swap a
+    new attempt onto a page already read while the total holds. A pass is
+    confirmed only by two consecutive reads with the same run ids."""
+
+    listings = iter(
+        [
+            _multi_page_passing_listing(1000),
+            _multi_page_passing_listing(2000),
+            _multi_page_passing_listing(2000),
+        ]
+    )
+    pages: list[list[dict]] = []
+
+    def api(*args: str, input_body=None, **kwargs) -> str:
+        if args[-1].endswith("&page=1"):
+            pages[:] = next(listings)
+        return _paged_check_runs_api(pages)(*args, input_body=input_body, **kwargs)
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+    clock = _FakeClock()
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    # Read 1 (ids A) and read 2 (ids B) disagree; read 3 (ids B) confirms.
+    assert clock.sleeps == [20, 40]
+
+
+def test_an_unconfirmed_multi_page_pass_at_the_deadline_says_so(monkeypatch) -> None:
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api(_multi_page_passing_listing()),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="no second read has confirmed yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=1,
+        )
 
 
 def test_a_listing_longer_than_the_page_cap_is_refused(monkeypatch) -> None:
