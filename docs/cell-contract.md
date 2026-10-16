@@ -148,6 +148,13 @@ floor without the matching reviewed docket entry from the sealed checkout.
   result, prose citation, or `sourceContext` entry is not fetch evidence.
   Never derive a more specific day from cadence.
 
+For fast and full conditional runs, one reasoning step beginning exactly
+`Policy chain:` must decompose the touched population (with a fetched count),
+propagation to the measured quantity, offsetting responses, and timing/lag.
+The pre-submit reviewer checks those four components and whether the policy
+effect's direction and size are consistent with its cited precedent. The
+runner's literal evidence gate is specified below.
+
 Machine-checked requirements (CI-validated literally, not approximately;
 a trace missing any is rejected):
 
@@ -157,6 +164,13 @@ a trace missing any is rejected):
 - the falsification step must use one of the literal phrasings
   "upside risk", "downside risk", "outside the interval", or
   "would land above/below the interval";
+- fast and full conditional cells must include a reasoning step whose text
+  begins exactly `Policy chain:` and either cites at least one fetched
+  precedent URL that also appears exactly in `sourceContext`, or contains the
+  exact phrase `no fetched precedent`, states a numeric policy-term bound, and
+  labels that term `low-confidence`. The runner applies this gate only to
+  fast/full runs; the dispatch-only `ladder` and `ladder_v2` contracts and
+  validators remain sealed;
 - one math step must begin "Prior/update/interval:" and SHOW the interval
   arithmetic: compute sigma from the fetched history (successive changes
   for level/rate series; the values themselves for change/flow series),
