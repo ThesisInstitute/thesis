@@ -354,7 +354,11 @@ def test_main_removes_signing_secret_before_any_resolver_work(
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
 
     assert resolve_pending.main() == 0
-    assert capsys.readouterr().out == "no pending adapter-covered cells\n"
+    assert capsys.readouterr().out == (
+        "no pending adapter-covered cells\n"
+        f"{resolve_pending.RESOLUTION_LOOP_COMPLETE} 0 reference(s) examined\n"
+        f"{resolve_pending.RESOLVER_FINISHED} 0\n"
+    )
     assert resolve_pending.PRODUCER_SIGNING_KEY_ENV not in os.environ
 
 

@@ -6780,28 +6780,53 @@ def _replay_sba_candidate(
     )
 
 
+class _MemoizedTimeline:
+    """`extract_timeline(records)` for one run: read at most once, and only
+    when a caller asks. A failure is kept and raised again to every later
+    caller, so a chain that does not verify is not re-verified per target."""
+
+    def __init__(self, records: pathlib.Path) -> None:
+        self._records = records
+        self._timeline: Mapping[str, Any] | None = None
+        self._error: Exception | None = None
+        self.loads = 0
+
+    def __call__(self) -> Mapping[str, Any]:
+        if self._error is not None:
+            raise self._error
+        if self._timeline is None:
+            self.loads += 1
+            try:
+                self._timeline = extract_timeline(self._records)
+            except (OSError, TimelineError, ValueError) as exc:
+                self._error = exc
+                raise
+        return self._timeline
+
+
 def resolve_sba_pdf_first_print(
     records: pathlib.Path,
     *,
     series: str,
     fiscal_year: int,
     timeline: Mapping[str, Any] | None = None,
+    timeline_loader: Callable[[], Mapping[str, Any]] | None = None,
 ) -> tuple[SbaPdfResolution | None, str | None]:
-    """Replay the earliest witnessed covered SBA ZIP, never later/live bytes."""
+    """Replay the earliest witnessed covered SBA ZIP, never later/live bytes.
+
+    The witnessed record timeline is read only once some retained capture
+    covers `fiscal_year`, from `timeline`, else `timeline_loader`, else
+    `extract_timeline(records)`. No candidate is judged without it, and a
+    year no capture covers is refused without it: re-verifying the whole
+    record chain took 49 minutes on 2026-10-12 and stopped every scheduled
+    resolver run at its timeout, before the references after it.
+    """
 
     if series not in SBA_PDF_ADAPTERS:
         raise ValueError(f"unsupported SBA loan-performance series {series!r}")
     if type(fiscal_year) is not int:
         raise TypeError("fiscal_year must be an integer")
     records = records.resolve()
-    if timeline is None:
-        try:
-            timeline = extract_timeline(records)
-        except (OSError, TimelineError, ValueError) as exc:
-            return _sba_refusal(
-                SBA_CUSTODY_INVALID,
-                f"witnessed record timeline does not verify: {exc}",
-            )
     run_dirs = _sba_capture_directories(records)
     if not run_dirs:
         return _sba_refusal(
@@ -6871,6 +6896,14 @@ def resolve_sba_pdf_first_print(
             SBA_CUSTODY_ABSENT,
             f"no retained capture covers {series} fiscal year {fiscal_year}",
         )
+    if timeline is None:
+        try:
+            timeline = (timeline_loader or (lambda: extract_timeline(records)))()
+        except (OSError, TimelineError, ValueError) as exc:
+            return _sba_refusal(
+                SBA_CUSTODY_INVALID,
+                f"witnessed record timeline does not verify: {exc}",
+            )
 
     candidates: list[_SbaPdfCandidate] = []
     try:
@@ -15000,7 +15033,25 @@ def finalize_resolution_manifest(
     return manifest
 
 
+# resolution_status.py reads both lines. Without the first, the run stopped
+# (a timeout, a cancellation, a crash) before every routed reference had its
+# verdict line, so a reference with no line was not reached rather than
+# passed over. Without the second, main() never returned.
+RESOLUTION_LOOP_COMPLETE = "resolution loop complete:"
+RESOLVER_FINISHED = "resolver finished with exit code"
+
+
 def main() -> int:
+    """Run the resolver, then say it returned (resolution_status.py reads it).
+
+    A run that crashes prints its traceback instead, and one that is
+    cancelled prints nothing more, so neither can be read as finished."""
+    code = _main()
+    print(f"{RESOLVER_FINISHED} {code}")
+    return code
+
+
+def _main() -> int:
     # Remove the secret before any network client or subprocess can inherit it.
     # The value remains only as an in-memory string until proposal signing.
     producer_signing_key = os.environ.pop(PRODUCER_SIGNING_KEY_ENV, None)
@@ -15016,6 +15067,7 @@ def main() -> int:
     adapter_todo = pending_adapter_refs(log)
     if not todo and not adapter_todo:
         print("no pending adapter-covered cells")
+        print(f"{RESOLUTION_LOOP_COMPLETE} 0 reference(s) examined")
         return 0
 
     content, sha, ledger_repo_sha = ledger_state(
@@ -15119,9 +15171,7 @@ def main() -> int:
     # SSA official pages: one headless-browser capture per URL per run.
     ssa_capture_cache: dict[str, Any] = {}
     ssa_browser_unavailable: str | None = None
-    sba_timeline_cache: Mapping[str, Any] | None = None
-    sba_timeline_error: str | None = None
-    sba_timeline_loaded = False
+    sba_timeline = _MemoizedTimeline(ROOT / "records")
     loop_contracts = registration_contracts()
     for ref, kind, spec, period_type, period, source_vintage, forecast in adapter_todo:
         qcew_row: dict[str, Any] | None = None
@@ -15269,24 +15319,11 @@ def main() -> int:
         sba_resolution: SbaPdfResolution | None = None
         archive_vintage = release_day.isoformat()
         if kind == "sba_pdf":
-            if not sba_timeline_loaded:
-                try:
-                    sba_timeline_cache = extract_timeline(ROOT / "records")
-                except (OSError, TimelineError, ValueError) as exc:
-                    sba_timeline_error = str(exc)
-                sba_timeline_loaded = True
-            if sba_timeline_error is not None:
-                print(
-                    f"  {SBA_CUSTODY_INVALID} witnessed record timeline does "
-                    f"not verify: {sba_timeline_error}"
-                )
-                continue
-            assert sba_timeline_cache is not None
             sba_resolution, refusal = resolve_sba_pdf_first_print(
                 ROOT / "records",
                 series=spec["series_id"],
                 fiscal_year=int(period),
-                timeline=sba_timeline_cache,
+                timeline_loader=sba_timeline,
             )
             if refusal:
                 if refusal.startswith(SBA_PARSER_REFUSAL):
@@ -16867,6 +16904,10 @@ def main() -> int:
         )
         print(f"  resolve {ref} -> {row['value']} {row['measure']['unit']}")
 
+    print(
+        f"{RESOLUTION_LOOP_COMPLETE} {len(todo) + len(adapter_todo)} "
+        "reference(s) examined"
+    )
     if environment_failures:
         print(
             "environment failures left admitted references unresolvable "

@@ -343,8 +343,10 @@ jobs:
         # of vanishing. If the script fails, the old title and one-line body
         # go out; if the issue call fails, a one-line issue under the same
         # title does (a call that failed only on our side can then post
-        # twice, which beats posting nothing).
-        if: failure()
+        # twice, which beats posting nothing). A run cancelled by the job's
+        # timeout alerts too: from 2026-10-01 every scheduled run hit the
+        # 60-minute cap, and none of them opened an issue.
+        if: failure() || cancelled()
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
