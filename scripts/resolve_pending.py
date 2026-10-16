@@ -3727,8 +3727,9 @@ def va_mmwr_capture_envelope(
 # registered.
 #
 # Custody rule, shared by both legs (served_unchanged_since_resolution_date):
-# the main loop does not attempt a release-calendar cell before its
-# resolutionDate, so no capture by this resolver can predate that date. A
+# the main loop skips a release-calendar cell while its resolutionDate is
+# later than the runner's date (``release ... not reached``), so no capture
+# by this resolver predates that date by the runner's clock. A
 # file whose Last-Modified is no later than the end of that date (UTC) holds
 # the bytes a capture on that date would have read, provided the server's
 # header is accurate. A later Last-Modified means the file changed after

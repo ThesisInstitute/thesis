@@ -18,9 +18,9 @@ The report PDFs are 1.4 to 2.0 MB and stay out of the repo. Each
 that carries the table "MEDICAID CASELOAD WITHOUT RETROACTIVITY", cut out
 with `pdfseparate -f 4 -l 4` (poppler 26.09.0). It is not the official file
 and does not hash to it; the table below records the file it came from.
-`<YYYY-MM>` is the month the report is dated.
+`<YYYY-MM>` is the month in the report's file name.
 
-| Fixture | Official file (`/sites/hcpf/files/…`) | HTTP Last-Modified | Official bytes | Official SHA-256 | PDF CreationDate | Newest caseload month | TOTAL |
+| Fixture | Official file (`/sites/hcpf/files/…`) | HTTP Last-Modified | Official bytes | Official SHA-256 | PDF CreationDate | Newest populated month | Its TOTAL |
 | --- | --- | --- | ---: | --- | --- | --- | ---: |
 | `report_2026-06_caseload_page.pdf` | `2026 June, Joint Budget Committee Monthly Premiums Report.pdf` | Mon, 15 Jun 2026 20:20:16 GMT | 1,596,164 | `75d80effcf78f6b77846eb772b419cd0c7393f3e2513815658591b23cb3c40a6` | 2026-06-15 09:46:39 -06:00 | May 2026 | 1,238,720 |
 | `report_2026-07_caseload_page.pdf` | `2026 July, Joint Budget Committee Monthly Premiums Report.pdf` | Wed, 15 Jul 2026 18:53:51 GMT | 2,040,809 | `82af6af443a55615e5b050c866f35a19f0fc55fa52766afcf9d30015061eec99` | 2026-07-14 15:26:43 -06:00 | June 2026 | 1,237,772 |
@@ -35,14 +35,20 @@ so a different poppler build is checked against this one.
 
 ## What the files show
 
-- The month in a report's file name is the month the report is dated; its
-  newest caseload month is the month before. The page's own note says the
-  opposite ("a report with the link August will reference August activity"),
-  which is why the reader checks the report's content and never its name.
+These describe the four inspected reports, not HCPF's process.
+
+- In each, the newest populated month is the month before the one in the
+  file name. The page's own note describes a different convention ("a report
+  with the link August will reference August activity"), so the reader
+  selects a report by file name and then also requires it to print the
+  requested month as its newest populated month.
 - The workbook and the PDF of the September 2026 report agree on every month
   the PDF prints (July 2022 to August 2026), category by category.
-- Reports restate earlier months: the June 2026 report prints 1,236,285 for
-  January 2026, where the February 2026 report had first printed 1,236,302
-  (the value the forecast recorded as history).
-- The workbook's history before the PDF's range holds three months
+- Values can differ between reports: the downloaded June 2026 report prints
+  1,236,285 for January 2026, and the downloaded February 2026 report (no
+  longer linked) prints 1,236,302, the value the forecast recorded as history.
+- The September workbook's history before the PDF's range holds three months
   (September to November 2014) with a figure that is not a whole count.
+- The Last-Modified headers are what the server sent on 2026-10-09. They say
+  when each file was last modified, as the server reports it; they do not
+  say when it was first posted.
