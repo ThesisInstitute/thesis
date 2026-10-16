@@ -133,13 +133,6 @@ MAX_TIMESTAMP_TOKEN_BYTES = 1024 * 1024
 DEFAULT_TIMESTAMP_TIMEOUT_SECONDS = 45.0
 PRODUCER_SIGNING_KEY_ENV = "LEDGER_PRODUCER_SIGNING_KEY"
 
-# resolution_status.py reads both lines. Without the first, the run stopped
-# (a timeout, a cancellation, a crash) before every routed reference had its
-# verdict line, so a reference with no line was not reached rather than
-# passed over. Without the second, main() never returned.
-RESOLUTION_LOOP_COMPLETE = "resolution loop complete:"
-RESOLVER_FINISHED = "resolver finished with exit code"
-
 SBA_CUSTODY_ABSENT = "SBA CUSTODY ABSENT (refusing):"
 SBA_CUSTODY_UNWITNESSED = "SBA CUSTODY UNWITNESSED (refusing):"
 SBA_CUSTODY_UNATTESTED = "SBA CUSTODY UNATTESTED (refusing):"
@@ -15038,6 +15031,14 @@ def finalize_resolution_manifest(
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     verify_run(run_dir)
     return manifest
+
+
+# resolution_status.py reads both lines. Without the first, the run stopped
+# (a timeout, a cancellation, a crash) before every routed reference had its
+# verdict line, so a reference with no line was not reached rather than
+# passed over. Without the second, main() never returned.
+RESOLUTION_LOOP_COMPLETE = "resolution loop complete:"
+RESOLVER_FINISHED = "resolver finished with exit code"
 
 
 def main() -> int:
