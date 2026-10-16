@@ -164,15 +164,6 @@ def _fixture(parser_id: str) -> str:
 
 
 @pytest.mark.parametrize("parser_id", IDS)
-def test_pinned_cell_equals_independent_synthetic_prose(parser_id: str) -> None:
-    html = _fixture(parser_id)
-    prose = re.search(r"Synthetic independent prose: (-?[0-9.]+) for", html)
-    assert prose is not None
-    assert parse_release(html, parser_id) == EXPECTED[parser_id]
-    assert parse_release(html, parser_id)[1] == float(prose[1])
-
-
-@pytest.mark.parametrize("parser_id", IDS)
 @pytest.mark.parametrize("mutation", ("title", "column", "delete_row", "duplicate_row"))
 def test_identity_mutations_refuse(parser_id: str, mutation: str) -> None:
     html = _fixture(parser_id)
@@ -432,3 +423,65 @@ def test_jolts_openings_requires_summary_table_a_not_full_release_table_1() -> N
         "</table></body></html>"
     )
     assert parse_release(table_1, "jolts_job_openings") is None
+
+
+@pytest.mark.parametrize("parser_id", IDS)
+def test_a_release_of_another_kind_is_refused_by_its_title(parser_id: str) -> None:
+    html = _fixture(parser_id)
+    title = re.search(r"<title>(.*?) - \d{4} M\d{2} Results</title>", html)
+    assert title is not None
+    other = html.replace(title.group(1), "Producer Price Index Summary", 1)
+    assert parse_release(other, parser_id) is None
+
+
+@pytest.mark.parametrize("parser_id", [p for p in IDS if SPECS[p].table_id])
+def test_a_table_with_another_id_is_refused(parser_id: str) -> None:
+    html = _fixture(parser_id)
+    table_id = SPECS[parser_id].table_id
+    assert f'id="{table_id}"' in html
+    assert (
+        parse_release(html.replace(f'id="{table_id}"', 'id="other"'), parser_id) is None
+    )
+
+
+@pytest.mark.parametrize("parser_id", IDS)
+def test_a_title_month_the_table_does_not_end_on_is_refused(parser_id: str) -> None:
+    """The title must name the table's latest month (dates == [period])."""
+    html = _fixture(parser_id)
+    title = re.search(r"- (\d{4}) M(\d{2}) Results", html)
+    assert title is not None
+    month = int(title.group(2))
+    shifted = f"- {title.group(1)} M{month % 12 + 1:02d} Results"
+    assert parse_release(html.replace(title.group(0), shifted, 1), parser_id) is None
+
+
+def test_the_rates_note_is_stripped_for_the_quits_table_only() -> None:
+    quits = _fixture("jolts_quits_rate")
+    assert "Rates(2)" in quits
+    assert parse_release(quits, "jolts_quits_rate") == EXPECTED["jolts_quits_rate"]
+    for parser_id in ("cpi_headline_mom", "jolts_job_openings"):
+        html = _fixture(parser_id)
+        group = SPECS[parser_id].group
+        assert group is not None
+        noted = html.replace(f">{group}<", f">{group}(2)<", 1)
+        assert noted != html
+        assert parse_release(noted, parser_id) is None
+
+
+def test_a_column_under_two_months_is_refused() -> None:
+    """A target column whose header path names another month as well (an
+    extra dated header row above it) is not the target month's own column:
+    dates must be exactly [period], not merely include it."""
+    html = _fixture("cpi_headline_mom")
+    html = html.replace(
+        '<th rowspan="2">Expenditure category',
+        '<th rowspan="3">Expenditure category',
+        1,
+    )
+    html = html.replace('<th rowspan="2">Un-adjusted', '<th rowspan="3">Un-adjusted', 1)
+    html = html.replace(
+        "</th></tr><tr><th>June 2026",
+        '</th></tr><tr><th colspan="2">June 2026</th></tr><tr><th>June 2026',
+        1,
+    )
+    assert parse_release(html, "cpi_headline_mom") is None

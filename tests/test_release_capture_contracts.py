@@ -230,3 +230,22 @@ def test_new_generic_url_registration_stays_refused_without_network(
     registration["targetContentHash"] = None
     with pytest.raises(register_targets.RegistrationError, match="generic-url"):
         register_targets.require_execution_plan(registration)
+
+
+def test_each_reference_quotes_its_own_forecast_question_verbatim() -> None:
+    """QUESTIONS is the reviewed reading of what each forecast asked; it must
+    be that forecast's own text, for every reference and no other."""
+    from legacy_release_parsers import QUESTIONS
+
+    parsers = {
+        entry["contract"]["dataPointId"]: entry["parser"]
+        for entry in LEGACY_RELEASE_CAPTURE_CONTRACTS.values()
+    }
+    assert set(QUESTIONS) == set(parsers)
+    texts = [
+        path.read_text(errors="replace")
+        for path in (ROOT / "site" / "src" / "data" / "forecast-examples").glob("*.ts")
+    ]
+    for ref, (parser_id, question) in QUESTIONS.items():
+        assert parser_id == parsers[ref], ref
+        assert any(ref in text and question in text for text in texts), ref
