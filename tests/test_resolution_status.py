@@ -4,7 +4,10 @@ scheduled runs: 2026-09-18 (Actions run 35372945335), which resolved five
 cells and then died on an unpinned DigiCert responder, and 2026-09-27
 (Actions run 36338749942), which printed the A-19 archive verdicts that put
 the reference after a message with colons of its own, then died when
-Chronicle's append gate refused the same responder.
+Chronicle's append gate refused the same responder. A third, 2026-10-15
+(Actions run 38780983215), is the resolver's output up to the moment the
+job's 60-minute cap cancelled it inside the SBA leg: no traceback, no
+environment stop, and the targets after it never reached.
 """
 
 from __future__ import annotations
@@ -29,7 +32,12 @@ import resolution_status as rs  # noqa: E402
 FIXTURES = ROOT / "tests" / "fixtures" / "resolution_status"
 REAL_LOG = (FIXTURES / "resolver-run-35372945335.log").read_text()
 GATE_LOG = (FIXTURES / "resolver-run-36338749942.log").read_text()
+CANCELLED_LOG = (FIXTURES / "resolver-run-38780983215.log").read_text()
 AS_OF = dt.date(2026, 9, 19)
+# What resolve_pending prints once every routed reference has had its turn,
+# and when main() returns (spellings held together by a test below).
+LOOP_DONE = "resolution loop complete: 3 reference(s) examined\n"
+FINISHED = "resolver finished with exit code 0\n"
 
 
 def _log(*targets: tuple[str, str, str]) -> dict:
@@ -141,6 +149,7 @@ def test_a_target_the_resolver_never_mentions_is_explained_by_its_registration()
     }
     status = _status(
         _log(*[(ref, f"slug-{i}", "2026-07-13") for i, ref in enumerate(refs)]),
+        text=REAL_LOG + LOOP_DONE,
         claimed=["y.covered.series.2026_06.first_print"],
         registrations=registrations,
     )
@@ -219,7 +228,9 @@ def test_a_resolved_row_the_run_refused_is_not_called_recorded():
 
 def test_without_append_evidence_the_status_does_not_claim_the_ledger_lacks_it():
     ref = "a.b.2026_07.first_print"
-    text = f"  resolve {ref} -> 4.2 percent\nnothing new to record\n"
+    text = (
+        f"  resolve {ref} -> 4.2 percent\n{LOOP_DONE}nothing new to record\n{FINISHED}"
+    )
     row = _status(_log((ref, "s", "2026-09-01")), text=text)["targets"][ref]
     assert row["code"] == "RESOLVED_AWAITING_RECORD"
     assert "not yet recorded" not in row["reason"]
@@ -324,6 +335,7 @@ def test_every_code_the_rules_can_emit_has_a_reason():
             "NO_ROUTE_UNREGISTERED",
             "NO_ROUTE_ADAPTER_REGISTERED",
             "NO_REPORT",
+            "NOT_REACHED",
             "NO_RESOLVER_RUN",
         }
     )
@@ -379,11 +391,13 @@ def test_rows_are_ordered_and_an_unchanged_backlog_rewrites_nothing(tmp_path):
         ),
         (
             # "A-19 CAPTURE READ FAILED (deferring): https://web.archive.org/
-            # ... could not be read (URLError: ...), and ...: <ref>"
+            # ... could not be read (URLError: ...), and ...: <ref>". Read
+            # as UNCLASSIFIED until 2026-10-16; it is the Archive not serving
+            # the capture, a read failure.
             "bls.cps.employed_people_by_occupation.production.august_2026.first_print",
-            "deferred",
-            "UNCLASSIFIED",
-            "A-19 CAPTURE READ FAILED (deferring)",
+            "fetch_failed",
+            "SOURCE_UNREACHABLE",
+            "could not be read",
         ),
         (
             "bls.cps.employed_people_by_occupation.production.september_2026"
@@ -668,6 +682,7 @@ def _worlds(draw):
     run = {
         "logAvailable": draw(st.booleans()),
         "completed": draw(st.booleans()),
+        "loopCompleted": draw(st.booleans()),
         "error": "",
     }
     claimed = set(draw(st.lists(st.sampled_from(refs), unique=True))) if refs else set()
@@ -719,6 +734,13 @@ def test_the_status_file_has_one_explained_row_per_overdue_pending_target(world,
             and not run["completed"]
         ):
             assert row["code"] == "RESOLVED_BUT_RUN_FAILED"
+        # A routed target no line names was passed over only if the loop
+        # finished; otherwise the run may never have reached it.
+        if ref not in said and run["logAvailable"] and ref in claimed:
+            assert row["code"] == (
+                "NO_REPORT" if run["loopCompleted"] else "NOT_REACHED"
+            )
+        assert row["code"] != "NOT_REACHED" or not run["loopCompleted"]
     # Ordered by (date, reference), and independent of input order.
     keys = [(row["resolutionDate"], ref) for ref, row in status["targets"].items()]
     assert keys == sorted(keys)
@@ -817,7 +839,7 @@ def test_a_target_with_no_line_naming_it_is_not_said_to_have_none_printed():
     text = (
         "  SBA CUSTODY ABSENT (refusing): no dedicated capture exists for "
         "sba.7a fiscal year 2026\n"
-    )
+    ) + LOOP_DONE
     row = _status(_log((ref, "s", "2026-09-01")), text=text, claimed=[ref])["targets"][
         ref
     ]
@@ -993,3 +1015,171 @@ def test_the_verdicts_head_decides_whatever_follows_it(head, ref, fill):
         # R26: the code picks the printed reason, so it must follow the
         # head too, not only the state.
         assert (targets[ref]["state"], targets[ref]["code"]) == (state, code), line
+
+
+# --- A run that stopped early (2026-10-16) ---
+
+
+def test_the_resolver_prints_the_lines_this_file_reads_for_completion():
+    source = _RESOLVER.read_text()
+    assert f'RESOLUTION_LOOP_COMPLETE = "{rs._LOOP_COMPLETE}"' in source
+    assert f'RESOLVER_FINISHED = "{rs._FINISHED}"' in source
+    assert LOOP_DONE.startswith(rs._LOOP_COMPLETE)
+    assert FINISHED.startswith(rs._FINISHED)
+
+
+def test_the_run_cancelled_at_its_timeout_is_not_read_as_completed():
+    """Run 38780983215 printed its last line at 17:57:06, sat in the SBA
+    leg's record-chain check until the cap cancelled it at 18:53:14, and
+    was published as completed, with every routed target after it as
+    NO_REPORT."""
+    _targets, run = rs.parse_resolver_log(CANCELLED_LOG)
+    assert run == {
+        "logAvailable": True,
+        "completed": False,
+        "loopCompleted": False,
+        "error": "",
+    }
+    ref = "bea.pce.core_mom.june_2026.first_print"
+    row = _status(
+        _log((ref, "s", "2026-07-30")),
+        text=CANCELLED_LOG,
+        claimed=[ref],
+        as_of=dt.date(2026, 10, 15),
+    )["targets"][ref]
+    assert (row["state"], row["code"]) == ("unknown", "NOT_REACHED")
+    assert row["reason"] == rs.REASONS["NOT_REACHED"]
+    assert "stopped before" in row["reason"]
+
+
+@pytest.mark.parametrize(
+    "ref, state, code",
+    [
+        (
+            "bls.cps.employed_people_by_occupation.computer_mathematical."
+            "august_2026.first_print",
+            "fetch_failed",
+            "SOURCE_UNREACHABLE",
+        ),
+        (
+            "bls.cps.employed_people_by_occupation.production.august_2026.first_print",
+            "fetch_failed",
+            "SOURCE_UNREACHABLE",
+        ),
+        (
+            "usaspending.ondcp.hidta_al95001_obligations.fy2026."
+            "registered_query_snapshot",
+            "refused",
+            "IMPLAUSIBLE_VALUE",
+        ),
+        (
+            "bls.cpi.u.headline_mom.august_2026.first_print",
+            "refused",
+            "REGISTERED_WITHOUT_EXECUTOR",
+        ),
+        (
+            "statcan.cpi.allitems.yoy.2026_08.first_print",
+            "refused",
+            "FIRST_PRINT_WINDOW_MISSED",
+        ),
+    ],
+)
+def test_the_cancelled_runs_lines_classify(ref, state, code):
+    row = _status(
+        _log((ref, "s", "2026-09-01")),
+        text=CANCELLED_LOG,
+        as_of=dt.date(2026, 10, 15),
+    )["targets"][ref]
+    assert (row["state"], row["code"]) == (state, code)
+    assert row["reason"] == rs.REASONS[code]
+
+
+def test_no_line_of_the_cancelled_run_is_left_unclassified():
+    """The two shapes it printed that no rule knew (an A-19 capture the
+    Archive would not serve, a value outside the plausible range) now have
+    codes; every target line keeps its reference."""
+    lines = [line for line in CANCELLED_LOG.splitlines() if line.startswith("  ")]
+    targets, _run = rs.parse_resolver_log(CANCELLED_LOG)
+    assert len(lines) == 51
+    refs = {
+        line.split()[1]
+        if line.strip().startswith("resolve ")
+        else rs._locate_ref(line.strip(), None)[2]
+        for line in lines
+    }
+    assert set(targets) == refs
+    assert not [ref for ref, row in targets.items() if row["code"] == "UNCLASSIFIED"]
+
+
+def test_a_capture_read_failure_is_a_read_never_a_parse():
+    ref = "bls.cps.employed_people_by_occupation.production.august_2026.first_print"
+    text = (
+        "  A-19 CAPTURE READ FAILED (deferring): https://web.archive.org/web/"
+        "20260904170006/https://www.bls.gov/web/empsit/cpseea19.htm could not "
+        "be read (A19CaptureError: capture 20260904170006 is not valid gzip), "
+        f"and an unread earlier capture cannot be skipped: {ref}\n"
+    )
+    row = _status(_log((ref, "s", "2026-09-05")), text=text)["targets"][ref]
+    assert (row["state"], row["code"]) == ("fetch_failed", "SOURCE_UNREACHABLE")
+    assert "did not return usable data" in row["reason"]
+
+
+def test_an_implausible_value_says_only_what_the_gate_checked():
+    ref = "usaspending.x.fy2026.registered_query_snapshot"
+    text = f"  IMPLAUSIBLE VALUE (refusing, wrong series/transform?): {ref} -> 0.26\n"
+    row = _status(_log((ref, "s", "2026-09-01")), text=text)["targets"][ref]
+    assert (row["state"], row["code"]) == ("refused", "IMPLAUSIBLE_VALUE")
+    # value_plausible and intl_value_valid bound the value; neither says the
+    # source is wrong or the figure is false.
+    assert "outside the range the resolver accepts" in row["reason"]
+    for overclaim in ("is wrong", "incorrect", "false"):
+        assert overclaim not in row["reason"]
+
+
+_SENTINELS = st.sampled_from(
+    [
+        LOOP_DONE.rstrip("\n"),
+        FINISHED.rstrip("\n"),
+        "Traceback (most recent call last):",
+        "environment failures left admitted references unresolvable "
+        "(fix the runner, do not wait):",
+    ]
+)
+
+
+@settings(max_examples=300, deadline=None)
+@given(
+    lines=st.lists(
+        st.one_of(
+            st.tuples(
+                st.sampled_from(TARGET_TEMPLATES), _REFS, _FILLER, st.integers(0, 99)
+            ).map(lambda t: _render(t[0], t[1], t[2], random.Random(t[3]))),
+            _FILLER,
+        ),
+        max_size=12,
+    ),
+    marks=st.lists(st.tuples(st.integers(0, 12), _SENTINELS), max_size=4),
+)
+def test_completion_is_read_from_the_run_s_own_lines_and_nothing_else(lines, marks):
+    """Metamorphic: inserting the loop and finish lines anywhere changes no
+    target row; the run is completed exactly when it printed the finish line
+    with no traceback and no environment stop, and its loop completed
+    exactly when it printed the loop line."""
+    plain_targets, _ = rs.parse_resolver_log("\n".join(lines))
+    marked = list(lines)
+    for index, mark in marks:
+        marked.insert(min(index, len(marked)), mark)
+    text = "\n".join(marked)
+    targets, run = rs.parse_resolver_log(text)
+    has = {mark for _index, mark in marks}
+    assert targets == plain_targets
+    available = bool(text.strip())
+    assert run["loopCompleted"] == (available and LOOP_DONE.rstrip("\n") in has)
+    assert run["completed"] == (
+        available
+        and any(line.startswith(rs._FINISHED) for line in text.splitlines())
+        and "Traceback (most recent call last):" not in text
+        and not any(line.startswith(rs._ENVIRONMENT_STOP) for line in text.splitlines())
+    )
+    if run["completed"]:
+        assert FINISHED.rstrip("\n") in has
