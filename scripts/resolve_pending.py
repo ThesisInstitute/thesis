@@ -3921,16 +3921,18 @@ def co_hcpf_pdf_text(raw: bytes) -> tuple[str | None, CoHcpfRefusal | None]:
     """(``pdftotext -layout`` text, refusal) for one report PDF.
 
     A runner without ``pdftotext`` is an ``environment`` refusal, decided here
-    from the lookup itself; every other failure to get text is ``parse``.
+    from the one lookup, whose result the extraction then runs; every other
+    failure to get text is ``parse``.
     """
     if not raw.startswith(b"%PDF-"):
         return None, CoHcpfRefusal("parse", "report response is not a PDF")
-    if shutil.which("pdftotext") is None:
+    executable = shutil.which("pdftotext")
+    if executable is None:
         return None, CoHcpfRefusal(
             "environment",
             "pdftotext is unavailable in the bare-Python resolver runtime",
         )
-    text, refusal = fsa_crp_pdf_text(raw)
+    text, refusal = fsa_crp_pdf_text(raw, executable=executable)
     if refusal is not None or text is None:
         return None, CoHcpfRefusal("parse", refusal or "pdftotext returned no text")
     return text, None
@@ -10247,12 +10249,18 @@ def fsa_crp_value_from_text(text: str, period: str) -> tuple[float | None, str |
     return value, None
 
 
-def fsa_crp_pdf_text(raw: bytes) -> tuple[str | None, str | None]:
-    """Extract PDF text with the runner's external tool, failing closed."""
+def fsa_crp_pdf_text(
+    raw: bytes, *, executable: str | None = None
+) -> tuple[str | None, str | None]:
+    """Extract PDF text with the runner's external tool, failing closed.
+
+    A caller that has already looked ``pdftotext`` up passes ``executable``,
+    so the tool is looked up once per extraction."""
 
     if not raw.startswith(b"%PDF-"):
         return None, "CRP Monthly Summary response is not a PDF"
-    executable = shutil.which("pdftotext")
+    if executable is None:
+        executable = shutil.which("pdftotext")
     if executable is None:
         return (
             None,

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import pathlib
 import shutil
+import subprocess
 import sys
 
 import pytest
@@ -142,10 +143,37 @@ def test_every_other_failure_to_get_text_is_a_parse_refusal(
     monkeypatch, raw, parser_says
 ) -> None:
     monkeypatch.setattr(resolve_pending.shutil, "which", lambda name: "/bin/pdftotext")
-    monkeypatch.setattr(resolve_pending, "fsa_crp_pdf_text", lambda raw: parser_says)
+    monkeypatch.setattr(
+        resolve_pending, "fsa_crp_pdf_text", lambda raw, **_: parser_says
+    )
     text, refusal = resolve_pending.co_hcpf_pdf_text(raw)
     assert text is None and refusal is not None
     assert refusal.kind == "parse"
+
+
+def test_the_parser_is_looked_up_once_and_that_lookup_is_what_runs(
+    monkeypatch,
+) -> None:
+    """A second lookup could disagree with the first and turn a missing
+    parser into a parse refusal; there is no second lookup to disagree."""
+    answers = iter(["/opt/poppler/pdftotext", None])
+    lookups: list[str] = []
+    ran: list[list[str]] = []
+
+    def which(name: str):
+        lookups.append(name)
+        return next(answers)
+
+    def run(argv, **kwargs):
+        ran.append(list(argv))
+        return subprocess.CompletedProcess(argv, 0, stdout=b"page text", stderr=b"")
+
+    monkeypatch.setattr(resolve_pending.shutil, "which", which)
+    monkeypatch.setattr(resolve_pending.subprocess, "run", run)
+    text, refusal = resolve_pending.co_hcpf_pdf_text(b"%PDF-1.7 anything")
+    assert (text, refusal) == ("page text", None)
+    assert lookups == ["pdftotext"]
+    assert [argv[0] for argv in ran] == ["/opt/poppler/pdftotext"]
 
 
 @pytest.mark.skipif(shutil.which("pdftotext") is None, reason="needs poppler")
