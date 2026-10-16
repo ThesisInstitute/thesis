@@ -3909,11 +3909,31 @@ def co_dor_http_get(url: str) -> tuple[bytes, dict[str, str], str, str]:
     return _official_http_get(url, co_dor.ALLOWED_HOSTS)
 
 
-def co_hcpf_pdf_text(raw: bytes) -> tuple[str | None, str | None]:
-    """(``pdftotext -layout`` text, refusal) for one report PDF."""
+@dataclass(frozen=True)
+class CoHcpfRefusal:
+    # "not_listed", "custody_changed", "custody_unknown", "environment" or
+    # "parse".
+    kind: str
+    text: str
+
+
+def co_hcpf_pdf_text(raw: bytes) -> tuple[str | None, CoHcpfRefusal | None]:
+    """(``pdftotext -layout`` text, refusal) for one report PDF.
+
+    A runner without ``pdftotext`` is an ``environment`` refusal, decided here
+    from the lookup itself; every other failure to get text is ``parse``.
+    """
     if not raw.startswith(b"%PDF-"):
-        return None, "report response is not a PDF"
-    return fsa_crp_pdf_text(raw)
+        return None, CoHcpfRefusal("parse", "report response is not a PDF")
+    if shutil.which("pdftotext") is None:
+        return None, CoHcpfRefusal(
+            "environment",
+            "pdftotext is unavailable in the bare-Python resolver runtime",
+        )
+    text, refusal = fsa_crp_pdf_text(raw)
+    if refusal is not None or text is None:
+        return None, CoHcpfRefusal("parse", refusal or "pdftotext returned no text")
+    return text, None
 
 
 @dataclass(frozen=True)
@@ -3935,14 +3955,6 @@ class CoHcpfCapture:
     # absent (no matching link), unreadable, or not_read (anchor reads).
     workbook: dict[str, Any]
     workbook_raw: bytes | None
-
-
-@dataclass(frozen=True)
-class CoHcpfRefusal:
-    # "not_listed", "custody_changed", "custody_unknown", "environment" or
-    # "parse".
-    kind: str
-    text: str
 
 
 def _co_hcpf_workbook_check(
@@ -4030,11 +4042,9 @@ def co_hcpf_capture_report(
         )
         if custody.state != "unchanged":
             return None, CoHcpfRefusal(f"custody_{custody.state}", custody.text)
-    text, refusal = co_hcpf_pdf_text(raw)
-    if refusal or text is None:
-        refusal = refusal or "pdftotext returned no text"
-        kind = "environment" if "pdftotext is unavailable" in refusal else "parse"
-        return None, CoHcpfRefusal(kind, refusal)
+    text, pdf_refusal = co_hcpf_pdf_text(raw)
+    if pdf_refusal is not None or text is None:
+        return None, pdf_refusal or CoHcpfRefusal("parse", "pdftotext returned no text")
     try:
         table = co_hcpf.caseload_table_from_pdf_text(text)
         total = co_hcpf.newest_month_total(table, period)

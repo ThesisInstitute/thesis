@@ -118,6 +118,36 @@ def test_official_reports_restate_earlier_months() -> None:
         assert row is not None and row.total == previous_total
 
 
+def test_a_runner_without_pdftotext_is_an_environment_refusal(monkeypatch) -> None:
+    """The kind comes from the lookup, not from the wording of a message."""
+    monkeypatch.setattr(resolve_pending.shutil, "which", lambda name: None)
+    text, refusal = resolve_pending.co_hcpf_pdf_text(b"%PDF-1.7 anything")
+    assert text is None and refusal is not None
+    assert refusal.kind == "environment"
+
+
+@pytest.mark.parametrize(
+    ("raw", "parser_says"),
+    [
+        (b"<html>not a pdf</html>", None),
+        (b"%PDF-1.7", (None, "pdftotext exited 1: Syntax Error")),
+        # Wording that resembles the environment message is still a parse
+        # failure when the parser was found.
+        (b"%PDF-1.7", (None, "pdftotext is unavailable, says the PDF")),
+        (b"%PDF-1.7", (None, None)),
+    ],
+    ids=["not-a-pdf", "parser-error", "lookalike-text", "no-text"],
+)
+def test_every_other_failure_to_get_text_is_a_parse_refusal(
+    monkeypatch, raw, parser_says
+) -> None:
+    monkeypatch.setattr(resolve_pending.shutil, "which", lambda name: "/bin/pdftotext")
+    monkeypatch.setattr(resolve_pending, "fsa_crp_pdf_text", lambda raw: parser_says)
+    text, refusal = resolve_pending.co_hcpf_pdf_text(raw)
+    assert text is None and refusal is not None
+    assert refusal.kind == "parse"
+
+
 @pytest.mark.skipif(shutil.which("pdftotext") is None, reason="needs poppler")
 @pytest.mark.parametrize("report_period", sorted(OFFICIAL))
 def test_official_pdf_pages_read_the_same_through_this_machines_pdftotext(

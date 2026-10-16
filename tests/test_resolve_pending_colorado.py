@@ -211,7 +211,10 @@ def _install(
 
     def pdf_text(raw: bytes):
         if not pdftotext or hashlib.sha256(raw).hexdigest() in unreadable:
-            return None, "pdftotext is unavailable in the bare-Python resolver runtime"
+            return None, resolve_pending.CoHcpfRefusal(
+                "environment",
+                "pdftotext is unavailable in the bare-Python resolver runtime",
+            )
         if raw.startswith(SYNTHETIC_PDF):
             return raw[len(SYNTHETIC_PDF) :].decode(), None
         return texts[hashlib.sha256(raw).hexdigest()], None
