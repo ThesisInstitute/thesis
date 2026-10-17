@@ -451,7 +451,13 @@ def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
     else:
         assert alert["kind"] == "loop_failed"
         assert alert["title"] == f"Resolution loop failed {DATE}"
-        assert ("receipt-pin.md" in alert["body"]) == receipt
+        # The alert's own line, not text it quotes: a refusal reason can
+        # mention docs/receipt-pin.md inside a code span (round 7 of the review).
+        stopped = any(
+            line.startswith("Before that, the resolver stopped before any capture: ")
+            for line in alert["body"].splitlines()
+        )
+        assert stopped == receipt
 
 
 def _outside_code_spans(body: str) -> str:
