@@ -6632,3 +6632,131 @@ def test_exactly_the_rows_that_fail_alone_are_refused(kinds: list[str]) -> None:
             assert reason.startswith("series-catalog registry growth refused: ")
         else:
             assert reason.startswith("series-catalog generator exit 1: ")
+
+
+def _registry_program_refusals(
+    monkeypatch,
+    rows: list[dict[str, str]],
+    program: str,
+    *,
+    base_registry: bytes | None = _BASE_REGISTRY,
+) -> dict[str, str]:
+    generator = (
+        """import json, pathlib
+ledger = pathlib.Path("ledger/official_observations.jsonl")
+ids = {json.loads(line)["source_record_id"] for line in ledger.read_text().splitlines()}
+registry = pathlib.Path("ledger/series_uuid_registry.jsonl")
+def emit(concept, uuid, **fields):
+    entry = {"concept": concept, "uuid": uuid,
+             "geography": ["country", "0100000US", "current"],
+             "entity": ["economy", "aggregate"]}
+    entry.update(fields)
+    with registry.open("a") as handle:
+        handle.write(json.dumps(entry) + "\\n")
+"""
+        + program
+    )
+    tree = _catalog_tree(generator.encode())
+    if base_registry is not None:
+        relative = "ledger/series_uuid_registry.jsonl"
+        tree.files[relative] = base_registry
+        tree.modes[relative] = "100644"
+        tree.blob_shas[relative] = "b" * 40
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    return resolve_pending.ledger_catalog_refusals(
+        "r",
+        "b" * 40,
+        "ledger/official_observations.jsonl",
+        tree.files["ledger/official_observations.jsonl"].decode(),
+        rows,
+    )
+
+
+def test_catalog_trial_cannot_borrow_a_refused_peers_identity(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "cross.series.a.2026_09.first_print"},
+        {"source_record_id": "foreign.series.b.2026_09.first_print"},
+        {"source_record_id": "plain.series.c.2026_09.first_print"},
+    ]
+    program = """if "cross.series.a.2026_09.first_print" in ids:
+    emit("foreign.series.b", "foreign-fresh")
+if "foreign.series.b.2026_09.first_print" in ids:
+    emit("foreign.series.b", "foreign-existing", retired=True)
+"""
+    refusals = _registry_program_refusals(monkeypatch, rows, program)
+    assert set(refusals) == {row["source_record_id"] for row in rows[:2]}
+    assert "belongs to no observation" in refusals[rows[0]["source_record_id"]]
+    assert "retires a non-placeholder" in refusals[rows[1]["source_record_id"]]
+
+
+def test_placeholder_enrichment_survives_a_refused_peer(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "census.housing.completions_saar.2026_09.first_print"},
+        {"source_record_id": "retire.series.bad.2026_09.first_print"},
+    ]
+    registry = _BASE_REGISTRY + _registry_line(
+        concept="census.housing.completions_saar",
+        uuid="placeholder-1",
+        geography=None,
+        entity=None,
+    )
+    program = """if "census.housing.completions_saar.2026_09.first_print" in ids:
+    emit("census.housing.completions_saar", "placeholder-1",
+         geography=None, entity=None, retired=True)
+    emit("census.housing.completions_saar", "placeholder-1",
+         succeeds={"concept": "census.housing.completions_saar",
+                   "geography": None, "entity": None})
+if "retire.series.bad.2026_09.first_print" in ids:
+    emit("retire.series.bad", "old-bad", retired=True)
+"""
+    refusals = _registry_program_refusals(
+        monkeypatch, rows, program, base_registry=registry
+    )
+    assert list(refusals) == [rows[1]["source_record_id"]]
+    assert "retires a non-placeholder" in refusals[rows[1]["source_record_id"]]
+
+
+def test_base_only_registry_drift_is_not_attributed_to_new_rows(monkeypatch) -> None:
+    rows = [{"source_record_id": "plain.series.a.2026_09.first_print"}]
+    # The generator also emits this unrelated identity for the base alone.
+    assert (
+        _registry_program_refusals(
+            monkeypatch, rows, 'emit("base.series.level", "base-drift")\n'
+        )
+        == {}
+    )
+
+
+@pytest.mark.parametrize("retired", [False, True])
+def test_joint_only_registry_growth_obeys_the_final_growth_policy(
+    monkeypatch, retired: bool
+) -> None:
+    rows = [
+        {"source_record_id": "joint.series.a.2026_09.first_print"},
+        {"source_record_id": "joint.series.b.2026_09.first_print"},
+    ]
+    program = f"""if {{"joint.series.a.2026_09.first_print",
+     "joint.series.b.2026_09.first_print"}} <= ids:
+    emit("joint.series.a", "joint-1", retired={retired!r})
+"""
+    if retired:
+        with pytest.raises(
+            resolve_pending.LedgerProposalError,
+            match="one by one fail it together: .*retires a non-placeholder",
+        ):
+            _registry_program_refusals(monkeypatch, rows, program)
+    else:
+        assert _registry_program_refusals(monkeypatch, rows, program) == {}
+
+
+def test_absent_base_registry_preserves_exit_code_only_preflight(monkeypatch) -> None:
+    rows = [{"source_record_id": "retire.series.bad.2026_09.first_print"}]
+    assert (
+        _registry_program_refusals(
+            monkeypatch,
+            rows,
+            'emit("retire.series.bad", "old-bad", retired=True)\n',
+            base_registry=None,
+        )
+        == {}
+    )
