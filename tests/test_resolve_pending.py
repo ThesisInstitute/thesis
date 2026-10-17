@@ -4,6 +4,7 @@ import base64
 import datetime as dt
 import gzip
 import hashlib
+import itertools
 import json
 import os
 import pathlib
@@ -14,6 +15,8 @@ import sys
 from types import SimpleNamespace
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -1530,6 +1533,7 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         )
 
     appended: dict[str, str] = {}
+    propose_kwargs: dict[str, object] = {}
 
     def fake_propose(
         _repo,
@@ -1542,6 +1546,7 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         **_kwargs,
     ):
         appended["content"] = content
+        propose_kwargs.update(_kwargs)
         return "d" * 40
 
     monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
@@ -1599,6 +1604,7 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
     )
     monkeypatch.setattr(resolve_pending, "propose_ledger_append", fake_propose)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+    monkeypatch.delenv(resolve_pending.APPEND_GATE_TIMEOUT_ENV, raising=False)
 
     if catalog_refuses:
         # A row the ledger's catalog refuses is excluded, its archive with it,
@@ -1610,6 +1616,10 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         ]
         return
     assert resolve_pending.main() == 0
+    # main forwards the wall-clock gate budget, not an attempt count.
+    assert propose_kwargs["gate_timeout_seconds"] == (
+        resolve_pending.DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60
+    )
     rows = [
         json.loads(line) for line in appended["content"].splitlines() if line.strip()
     ]
@@ -2318,10 +2328,59 @@ def _pre_genesis_tree() -> resolve_pending.RepositoryTree:
     )
 
 
+def _gate_check_runs(
+    append_conclusion: str | None,
+    trusted_conclusion: str | None,
+) -> list[dict]:
+    """Check runs as chronicle's gate workflow leaves them on a proposal head.
+
+    Each required gate has one real run (the delivering event) and one
+    skipped twin (the other event's job-level condition). None models a real
+    run still queued for a runner.
+    """
+
+    def real(name: str, conclusion: str | None, run_id: int) -> dict:
+        return {
+            "id": run_id,
+            "name": name,
+            "status": "queued" if conclusion is None else "completed",
+            "conclusion": conclusion,
+            "html_url": f"https://github.com/PolicyEngine/chronicle/actions/runs/{run_id}",
+        }
+
+    def twin(name: str, run_id: int) -> dict:
+        return {
+            "id": run_id,
+            "name": name,
+            "status": "completed",
+            "conclusion": "skipped",
+        }
+
+    return [
+        twin("Append gate", 11),
+        real("Append gate", append_conclusion, 1),
+        twin("Trusted base append gate", 12),
+        real("Trusted base append gate", trusted_conclusion, 2),
+        {
+            "id": 13,
+            "name": "Arch checks",
+            "status": "completed",
+            "conclusion": "failure",
+        },
+    ]
+
+
+def _check_runs_page(runs: list[dict]) -> dict:
+    """One complete check-runs page, as GitHub returns it."""
+
+    return {"total_count": len(runs), "check_runs": runs}
+
+
 def _proposal_api_stub(
-    gate_conclusion: str,
+    gate_conclusion: str | None,
     calls: list[tuple[tuple[str, ...], dict | None]],
     *,
+    trusted_conclusion: str | None = "success",
     fail_ref_creation: bool = False,
     fail_pr_creation: bool = False,
     recover_pr_number: int | None = None,
@@ -2329,7 +2388,7 @@ def _proposal_api_stub(
 ):
     merged = False
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         nonlocal merged
         calls.append((args, input_body))
         joined = " ".join(args)
@@ -2349,15 +2408,7 @@ def _proposal_api_stub(
             return json.dumps({"number": 7})
         if "/check-runs" in joined:
             return json.dumps(
-                {
-                    "check_runs": [
-                        {
-                            "name": "Append gate",
-                            "status": "completed",
-                            "conclusion": gate_conclusion,
-                        }
-                    ]
-                }
+                _check_runs_page(_gate_check_runs(gate_conclusion, trusted_conclusion))
             )
         if "/merge" in joined:
             result = (
@@ -2392,7 +2443,8 @@ def _install_proposal_transport(
     tree: resolve_pending.RepositoryTree,
     calls: list[tuple[tuple[str, ...], dict | None]],
     *,
-    gate_conclusion: str = "success",
+    gate_conclusion: str | None = "success",
+    trusted_conclusion: str | None = "success",
     fail_ref_creation: bool = False,
     fail_pr_creation: bool = False,
     recover_pr_number: int | None = None,
@@ -2419,6 +2471,7 @@ def _install_proposal_transport(
         _proposal_api_stub(
             gate_conclusion,
             calls,
+            trusted_conclusion=trusted_conclusion,
             fail_ref_creation=fail_ref_creation,
             fail_pr_creation=fail_pr_creation,
             recover_pr_number=recover_pr_number,
@@ -3034,6 +3087,763 @@ def test_append_proposal_refuses_to_merge_and_cleans_gate_failure(
     assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
 
 
+class _FakeClock:
+    """Monotonic clock and sleep that advance together, without waiting."""
+
+    def __init__(self) -> None:
+        self.now = 0.0
+        self.sleeps: list[float] = []
+
+    def __call__(self) -> float:
+        return self.now
+
+    def sleep(self, seconds: float) -> None:
+        self.sleeps.append(seconds)
+        self.now += seconds
+
+
+def test_append_gate_state_separates_queued_failed_and_passed() -> None:
+    state = resolve_pending.append_gate_state
+    twin = {"status": "completed", "conclusion": "skipped"}
+    queued = {"status": "queued", "conclusion": None}
+    # The 2026-09-22/23 shape: a skipped twin beside a real run still queued
+    # for a runner. Not a verdict either way, so keep waiting.
+    assert state([twin, queued]) == "pending"
+    assert state([twin, {"status": "in_progress", "conclusion": None}]) == "pending"
+    assert state([twin, {"status": "completed", "conclusion": "success"}]) == "passed"
+    assert state([twin, {"status": "completed", "conclusion": "failure"}]) == "failed"
+    # An adverse conclusion fails at once, whatever is still queued.
+    assert state([queued, {"status": "completed", "conclusion": "cancelled"}]) == (
+        "failed"
+    )
+    # A lone twin is not a verdict and not yet a failure: the delivering
+    # event's real run lives in a separate workflow run and may not exist yet.
+    assert state([twin]) == "pending"
+    assert state([]) == "pending"
+
+
+# Every check-run shape GitHub reports, as (status, conclusion).
+_RUN_SHAPES = [
+    ("queued", None),
+    ("in_progress", None),
+    *(
+        ("completed", conclusion)
+        for conclusion in (
+            "success",
+            "skipped",
+            "neutral",
+            "failure",
+            "cancelled",
+            "timed_out",
+            "action_required",
+            "stale",
+        )
+    ),
+]
+
+
+def test_append_gate_state_invariants_hold_for_every_run_set() -> None:
+    """Exhaustive over every multiset of up to three runs of one gate.
+
+    I1 "passed" only when every run completed, at least one succeeded and
+       none concluded against the proposal: exactly what append_gate_verdict
+       accepted before, so no run set the old poll refused can pass now.
+    I2 "failed" exactly when some run completed with a conclusion other than
+       success, skipped or neutral, whatever else is still queued.
+    I3 otherwise "pending": waiting, never a verdict.
+    I4 order never matters.
+    """
+
+    adverse = {"failure", "cancelled", "timed_out", "action_required", "stale"}
+    checked = 0
+    for size in range(0, 4):
+        for shapes in itertools.combinations_with_replacement(_RUN_SHAPES, size):
+            runs = [{"status": s, "conclusion": c} for s, c in shapes]
+            state = resolve_pending.append_gate_state(runs)
+            completed = all(s == "completed" for s, _ in shapes)
+            any_adverse = any(s == "completed" and c in adverse for s, c in shapes)
+            if any_adverse:
+                assert state == "failed", shapes
+            elif runs and completed and resolve_pending.append_gate_verdict(runs):
+                assert state == "passed", shapes
+                assert any(c == "success" for _, c in shapes), shapes
+            else:
+                assert state == "pending", shapes
+            for order in itertools.permutations(runs):
+                assert resolve_pending.append_gate_state(list(order)) == state
+            checked += 1
+    assert checked == 1 + 10 + 55 + 220
+
+
+def test_await_append_gates_outlasts_a_long_runner_queue(monkeypatch) -> None:
+    clock = _FakeClock()
+    reads: list[str] = []
+
+    def api(*args: str, input_body=None, **_kwargs) -> str:
+        reads.append(" ".join(args))
+        # Chronicle #286's real queue times: trusted base started after 47
+        # minutes, the pull_request Append gate after 68.
+        return json.dumps(
+            _check_runs_page(
+                _gate_check_runs(
+                    "success" if clock.now >= 68 * 60 else None,
+                    "success" if clock.now >= 47 * 60 else None,
+                )
+            )
+        )
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        286,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+
+    # The old loop (30 reads x 20 s) gave up after ten minutes.
+    assert clock.now >= 68 * 60 > 30 * 20
+    # Backoff doubles from 20 s and is capped, so the pass is noticed within
+    # one capped interval of the gate finishing.
+    assert clock.sleeps[:3] == [20, 40, 80]
+    assert max(clock.sleeps) == resolve_pending.APPEND_GATE_MAX_POLL_SECONDS
+    assert clock.now < 68 * 60 + resolve_pending.APPEND_GATE_MAX_POLL_SECONDS
+    expected_read = f"repos/PolicyEngine/chronicle/commits/{'c' * 40}/check-runs"
+    assert reads and all(
+        read == expected_read + "?per_page=100&page=1" for read in reads
+    )
+
+
+def test_await_append_gates_timeout_names_queued_jobs_not_a_failure(
+    monkeypatch,
+) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            _check_runs_page(_gate_check_runs(None, "success"))
+        ),
+    )
+
+    with pytest.raises(resolve_pending.LedgerProposalError) as info:
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            286,
+            timeout_seconds=150 * 60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    message = str(info.value)
+    assert "append gate did not complete for PolicyEngine/chronicle#286" in message
+    assert "after 150.0 of 150 allowed minutes; no verdict yet" in message
+    assert (
+        "Append gate: queued "
+        "(https://github.com/PolicyEngine/chronicle/actions/runs/1)" in message
+    )
+    # The gate that passed is not listed, and nothing reads as a rejection.
+    assert "Trusted base" not in message
+    assert "failed" not in message and "did not pass" not in message
+    # The last read lands exactly on the deadline, never past it.
+    assert clock.now == 150 * 60
+
+
+def test_await_append_gates_fails_fast_while_twin_is_queued(monkeypatch) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            _check_runs_page(_gate_check_runs("failure", None))
+        ),
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=re.escape(
+            "append gate failed for PolicyEngine/chronicle#283: Append gate: "
+            "failure (https://github.com/PolicyEngine/chronicle/actions/runs/1); "
+            "refusing to merge"
+        ),
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            283,
+            timeout_seconds=150 * 60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    assert clock.sleeps == []
+
+
+def test_await_append_gates_requires_the_trusted_base_gate(monkeypatch) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            _check_runs_page(_gate_check_runs("success", "failure"))
+        ),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"append gate failed .*Trusted base append gate: failure",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    # A passing Append gate alone never merges: with no trusted-base run at
+    # all the wait runs out instead.
+    only_append = [
+        run
+        for run in _gate_check_runs("success", "success")
+        if run["name"] != "Trusted base append gate"
+    ]
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(_check_runs_page(only_append)),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"did not complete .*Trusted base append gate: no check run yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=3,
+        )
+
+
+def _paged_check_runs_api(pages: list[list[dict]], *, totals=None, calls=None):
+    """A fake ``gh api`` serving ``pages`` by ``&page=N``, 1-based.
+
+    ``totals`` overrides each page's total_count (default: all runs).
+    """
+
+    total = sum(len(page) for page in pages)
+
+    def api(*args: str, input_body=None, **kwargs) -> str:
+        endpoint = args[-1]
+        if calls is not None:
+            calls.append((endpoint, kwargs))
+        number = int(re.search(r"[?&]page=(\d+)", endpoint).group(1))
+        runs = pages[number - 1] if number <= len(pages) else []
+        page_total = totals[number - 1] if totals is not None else total
+        return json.dumps({"total_count": page_total, "check_runs": runs})
+
+    return api
+
+
+def _filler_runs(count: int, *, first_id: int = 1000) -> list[dict]:
+    return [
+        {
+            "id": first_id + index,
+            "name": f"Arch checks {index}",
+            "status": "completed",
+            "conclusion": "success",
+        }
+        for index in range(count)
+    ]
+
+
+def test_read_check_runs_returns_every_run_across_pages(monkeypatch) -> None:
+    for total in (0, 1, 99, 100, 101, 250, 1000):
+        runs = _filler_runs(total)
+        pages = [runs[start : start + 100] for start in range(0, total, 100)] or [[]]
+        calls: list = []
+        monkeypatch.setattr(
+            resolve_pending, "_gh_api", _paged_check_runs_api(pages, calls=calls)
+        )
+        assert resolve_pending.read_check_runs("o/r", "c" * 40) == runs, total
+        assert len(calls) == max(1, -(-total // 100)), total
+
+
+def test_a_rejecting_run_on_page_two_fails_the_gate(monkeypatch) -> None:
+    """The review's reproduction: both successes on page one, a failed
+    trusted-gate duplicate on page two, total_count 101."""
+
+    first = _gate_check_runs("success", "success")
+    first += _filler_runs(100 - len(first))
+    second = [
+        {
+            "id": 3,
+            "name": "Trusted base append gate",
+            "status": "completed",
+            "conclusion": "failure",
+            "html_url": "https://github.com/PolicyEngine/chronicle/actions/runs/3",
+        }
+    ]
+    calls: list = []
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api([first, second], calls=calls),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"append gate failed .*Trusted base append gate: failure",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=150 * 60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+        )
+    assert [endpoint.rsplit("&", 1)[1] for endpoint, _ in calls] == ["page=1", "page=2"]
+
+
+def test_a_queued_run_on_page_two_keeps_the_gate_pending(monkeypatch) -> None:
+    first = _gate_check_runs("success", "success")
+    first += _filler_runs(100 - len(first))
+    second = [{"id": 4, "name": "Append gate", "status": "queued", "conclusion": None}]
+    monkeypatch.setattr(
+        resolve_pending, "_gh_api", _paged_check_runs_api([first, second])
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"did not complete .*Append gate: queued",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=2,
+        )
+
+
+def test_an_incomplete_listing_is_a_failed_read_never_a_verdict(monkeypatch) -> None:
+    """Both gates pass on the pages served, but the listing does not add up;
+    the waiter must refuse to merge on it."""
+
+    passing = _gate_check_runs("success", "success")
+    shapes = {
+        # total_count promises a run that no page returns.
+        "short": ([passing], [len(passing) + 1]),
+        # Runs were added between pages: total_count moved from 101 to 102,
+        # so positions shifted and a run can have been skipped.
+        "moved": (
+            [
+                passing + _filler_runs(100 - len(passing)),
+                _filler_runs(1, first_id=5000),
+            ],
+            [101, 102],
+        ),
+        # total_count lower than the runs returned.
+        "overfull": ([passing], [len(passing) - 1]),
+        # A boolean is not a count.
+        "boolean": ([passing], [True]),
+        # An empty page in the middle: the listing stops short of its count.
+        "gap": (
+            [
+                passing + _filler_runs(100 - len(passing)),
+                [],
+                _filler_runs(1, first_id=6000),
+            ],
+            [101, 101, 101],
+        ),
+        # total_count missing or not an integer.
+        "untyped": ([passing], ["5"]),
+    }
+    for label, (pages, totals) in shapes.items():
+        monkeypatch.setattr(
+            resolve_pending,
+            "_gh_api",
+            _paged_check_runs_api(pages, totals=totals),
+        )
+        with pytest.raises(
+            resolve_pending.CheckRunsIncompleteError,
+        ):
+            resolve_pending.read_check_runs("o/r", "c" * 40)
+        with pytest.raises(
+            resolve_pending.LedgerProposalError,
+            match="could not read append gate status .*5 consecutive failures",
+        ):
+            resolve_pending.await_append_gates(
+                "PolicyEngine/chronicle",
+                "c" * 40,
+                7,
+                timeout_seconds=150 * 60,
+                clock=_FakeClock(),
+                sleep=lambda _seconds: None,
+            )
+        assert label
+
+
+def test_a_listing_that_adds_up_by_repeating_a_run_is_refused(monkeypatch) -> None:
+    """Review of 80041473: runs reorder between page reads, so page two
+    repeats a run from page one and the failing run F is never served,
+    yet the listing's length still equals total_count."""
+
+    first = _gate_check_runs("success", "success")
+    first += _filler_runs(100 - len(first))
+    repeated = dict(first[-1])
+    monkeypatch.setattr(
+        resolve_pending, "_gh_api", _paged_check_runs_api([first, [repeated]])
+    )
+    with pytest.raises(resolve_pending.CheckRunsIncompleteError, match="appears twice"):
+        resolve_pending.read_check_runs("o/r", "c" * 40)
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="could not read append gate status",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=150 * 60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+        )
+
+
+def test_a_page_larger_than_requested_is_refused(monkeypatch) -> None:
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api([_filler_runs(150)]),
+    )
+    with pytest.raises(
+        resolve_pending.CheckRunsIncompleteError, match="holds 150 runs"
+    ):
+        resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
+def test_a_run_without_an_integer_id_is_refused(monkeypatch) -> None:
+    good = {"name": "Append gate", "status": "completed", "conclusion": "success"}
+    bad_runs = [
+        good,
+        *({**good, "id": bad_id} for bad_id in ("7", True, 7.0)),
+        # A run that is not an object at all.
+        "x",
+        ["x"],
+    ]
+    for run in bad_runs:
+        monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api([[run]]))
+        with pytest.raises(
+            resolve_pending.CheckRunsIncompleteError, match="without an integer id"
+        ):
+            resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
+def test_an_empty_listing_keeps_both_gates_pending(monkeypatch) -> None:
+    monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api([[]]))
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"did not complete .*Append gate: no check run yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=1,
+        )
+
+
+def _multi_page_passing_listing(first_filler_id: int = 1000) -> list[list[dict]]:
+    runs = _gate_check_runs("success", "success")
+    runs += _filler_runs(150 - len(runs), first_id=first_filler_id)
+    return [runs[:100], runs[100:]]
+
+
+def test_a_multi_page_pass_stands_only_once_a_second_read_agrees(
+    monkeypatch,
+) -> None:
+    calls: list = []
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api(_multi_page_passing_listing(), calls=calls),
+    )
+    clock = _FakeClock()
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    # Two full listings of two pages each, one poll interval apart.
+    assert len(calls) == 4
+    assert clock.sleeps == [20]
+
+
+def test_a_multi_page_pass_whose_runs_changed_is_read_again(monkeypatch) -> None:
+    """Review of ebdee131 (P4): a run re-run between page reads can swap a
+    new attempt onto a page already read while the total holds. A pass is
+    confirmed only by two consecutive reads with the same run ids."""
+
+    listings = iter(
+        [
+            _multi_page_passing_listing(1000),
+            _multi_page_passing_listing(2000),
+            _multi_page_passing_listing(2000),
+        ]
+    )
+    pages: list[list[dict]] = []
+
+    def api(*args: str, input_body=None, **kwargs) -> str:
+        if args[-1].endswith("&page=1"):
+            pages[:] = next(listings)
+        return _paged_check_runs_api(pages)(*args, input_body=input_body, **kwargs)
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+    clock = _FakeClock()
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    # Read 1 (ids A) and read 2 (ids B) disagree; read 3 (ids B) confirms.
+    assert clock.sleeps == [20, 40]
+
+
+def test_an_unconfirmed_multi_page_pass_at_the_deadline_says_so(monkeypatch) -> None:
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api(_multi_page_passing_listing()),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="no second read has confirmed yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=1,
+        )
+
+
+def test_a_listing_longer_than_the_page_cap_is_refused(monkeypatch) -> None:
+    cap = resolve_pending.APPEND_GATE_MAX_CHECK_RUN_PAGES
+    runs = _filler_runs(100 * cap + 1)
+    pages = [runs[start : start + 100] for start in range(0, len(runs), 100)]
+    monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api(pages))
+    with pytest.raises(
+        resolve_pending.CheckRunsIncompleteError, match=f"returned {100 * cap} of"
+    ):
+        resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
+def test_each_gate_read_is_bounded_by_the_remaining_budget(monkeypatch) -> None:
+    clock = _FakeClock()
+    calls: list = []
+    api = _paged_check_runs_api([_gate_check_runs(None, None)], calls=calls)
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+    with pytest.raises(resolve_pending.LedgerProposalError, match="did not complete"):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=5 * 60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+    timeouts = [kwargs["timeout"] for _endpoint, kwargs in calls]
+    floor = resolve_pending.APPEND_GATE_MIN_READ_SECONDS
+    cap = resolve_pending.APPEND_GATE_MAX_READ_SECONDS
+    assert timeouts[0] == cap
+    assert all(floor <= value <= cap for value in timeouts)
+    # The last read happens at the deadline; it still gets the floor, so a
+    # gate that passes in the final interval is not lost to a 1-second read.
+    assert timeouts[-1] == floor
+
+
+def test_each_page_read_gets_its_own_share_of_the_budget(monkeypatch) -> None:
+    """The bound is recomputed per page, not once per poll."""
+
+    clock = _FakeClock()
+    runs = _filler_runs(250)
+    pages = [runs[start : start + 100] for start in range(0, 250, 100)]
+    served = _paged_check_runs_api(pages)
+    timeouts: list[float] = []
+
+    def slow(*args: str, input_body=None, **kwargs) -> str:
+        timeouts.append(kwargs["timeout"])
+        clock.now += 50  # each page read takes 50 s
+        return served(*args, input_body=input_body, **kwargs)
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", slow)
+    assert (
+        len(
+            resolve_pending.read_check_runs(
+                "o/r", "c" * 40, deadline=clock.now + 130, clock=clock
+            )
+        )
+        == 250
+    )
+    # 130 s left, then 80, then 30: each page sees what the budget has left.
+    assert timeouts == [120.0, 80.0, 30.0]
+
+
+def test_gh_api_timeout_becomes_a_runtime_error(monkeypatch) -> None:
+    def hung(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr(resolve_pending.subprocess, "run", hung)
+    with pytest.raises(RuntimeError, match=r"gh api repos/o/r timed out after 7 s"):
+        resolve_pending._gh_api("repos/o/r", timeout=7)
+
+
+def test_await_append_gates_retries_transient_read_failures(monkeypatch) -> None:
+    clock = _FakeClock()
+    outcomes = iter(
+        [
+            RuntimeError("gh api check-runs failed: HTTP 502"),
+            RuntimeError("gh api check-runs failed: HTTP 502"),
+            None,
+        ]
+    )
+
+    def flaky(*_args, **_kwargs) -> str:
+        outcome = next(outcomes)
+        if outcome is not None:
+            raise outcome
+        return json.dumps(_check_runs_page(_gate_check_runs("success", "success")))
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", flaky)
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    assert clock.sleeps == [20, 40]
+
+    reads: list[int] = []
+
+    def down(*_args, **_kwargs) -> str:
+        reads.append(1)
+        raise RuntimeError("gh api check-runs failed: HTTP 503")
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", down)
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="could not read append gate status .*5 consecutive failures",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=150 * 60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+        )
+    assert len(reads) == resolve_pending.APPEND_GATE_MAX_READ_FAILURES
+
+
+def test_append_proposal_gate_timeout_closes_pr_without_a_rejection_message(
+    monkeypatch,
+) -> None:
+    tree = _pre_genesis_tree()
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, tree, calls, gate_conclusion=None)
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.queue","value":1}\n'
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError, match="did not complete"
+    ) as info:
+        resolve_pending.propose_ledger_append(
+            "PolicyEngine/chronicle",
+            "codex/thesis-ledger-facts",
+            "ledger/official_observations.jsonl",
+            candidate.decode(),
+            "a" * 40,
+            "b" * 40,
+            1,
+            poll_seconds=0,
+            poll_attempts=3,
+        )
+
+    assert "Append gate: queued" in str(info.value)
+    joined = [" ".join(args) for args, _ in calls]
+    assert sum("/check-runs" in call for call in joined) == 3
+    assert not any("/merge" in call for call in joined)
+    assert any("PATCH" in call and "/pulls/7" in call for call in joined)
+    assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
+
+
+@pytest.mark.parametrize("budget", [0, -1, float("inf"), float("nan"), True, "90"])
+def test_append_proposal_bad_gate_budget_has_no_remote_mutation(
+    monkeypatch, budget
+) -> None:
+    tree = _pre_genesis_tree()
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, tree, calls)
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.budget","value":1}\n'
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError, match="gate_timeout_seconds"
+    ):
+        resolve_pending.propose_ledger_append(
+            "PolicyEngine/chronicle",
+            "codex/thesis-ledger-facts",
+            "ledger/official_observations.jsonl",
+            candidate.decode(),
+            "a" * 40,
+            "b" * 40,
+            1,
+            gate_timeout_seconds=budget,
+        )
+
+    assert calls == []
+
+
+def test_append_gate_timeout_prefers_flag_then_environment_then_default() -> None:
+    budget = resolve_pending.append_gate_timeout_seconds
+    env = resolve_pending.APPEND_GATE_TIMEOUT_ENV
+    assert budget(None, {}) == resolve_pending.DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60
+    assert budget(None, {env: " "}) == 150 * 60
+    assert budget(None, {env: "90"}) == 90 * 60
+    assert budget(45.0, {env: "90"}) == 45 * 60
+    for bad in ("soon", "0", "-5", "inf", "nan"):
+        with pytest.raises(resolve_pending.LedgerProposalError):
+            budget(None, {env: bad})
+    with pytest.raises(resolve_pending.LedgerProposalError):
+        budget(0.0, {})
+
+
 def test_append_proposal_cleans_pr_and_branch_when_merge_is_refused(
     monkeypatch,
 ) -> None:
@@ -3111,7 +3921,7 @@ def test_append_proposal_recovers_ambiguous_successful_merge(monkeypatch) -> Non
     base_api = resolve_pending._gh_api
     merge_attempted = False
 
-    def ambiguous_api(*args: str, input_body=None) -> str:
+    def ambiguous_api(*args: str, input_body=None, **_kwargs) -> str:
         nonlocal merge_attempted
         joined = " ".join(args)
         if "/merge" in joined:
@@ -3165,7 +3975,7 @@ def test_append_proposal_rejects_retarget_after_normal_merge_response(
     base_api = resolve_pending._gh_api
     pr_reads = 0
 
-    def retargeting_api(*args: str, input_body=None) -> str:
+    def retargeting_api(*args: str, input_body=None, **_kwargs) -> str:
         nonlocal pr_reads
         joined = " ".join(args)
         if joined.endswith("/pulls/7") and "PATCH" not in args:
@@ -3348,7 +4158,7 @@ def test_publish_proposal_uses_one_tree_and_one_commit(monkeypatch) -> None:
     calls: list[tuple[tuple[str, ...], dict | None]] = []
     blob_number = 0
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         nonlocal blob_number
         calls.append((args, input_body))
         endpoint = args[-1]
@@ -3449,7 +4259,7 @@ def test_fetch_repository_tree_binds_commit_trees_and_blobs(monkeypatch) -> None
     ]
     root_tree_sha = resolve_pending._git_tree_object_sha(root_entries)
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         del input_body
         endpoint = args[-1]
         if endpoint.endswith(f"/git/commits/{commit_sha}"):
@@ -3526,7 +4336,7 @@ def _fake_tree_api(
     )
     root_sha = tree_sha_for({}, {"ledger": ledger_sha})
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         del input_body
         endpoint = args[-1]
         if endpoint.endswith(f"/git/commits/{commit_sha}"):
@@ -3620,7 +4430,7 @@ def test_fetch_repository_tree_rejects_partial_tree_with_claimed_sha(
     commit_sha = "a" * 40
     claimed_tree_sha = "c" * 40
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         del input_body
         if "/git/commits/" in args[-1]:
             return json.dumps({"sha": commit_sha, "tree": {"sha": claimed_tree_sha}})
@@ -5701,3 +6511,124 @@ def test_the_workflow_publishes_before_failing_on_refused_rows() -> None:
     assert fail_step == names.index("Alert on failure") - 1
     assert fail_step > names.index("Record the successfully deployed ledger SHA")
     assert "if: steps.resolve.outputs.resolver_rc == '3'" in workflow
+
+
+# --- Registry growth is a per-row catalog refusal (2026-10-16) ---
+#
+# Run 38962977031 reached the append for the first time in two weeks and
+# raised there: the FY2026 USAspending CDFI snapshot's row made the staged
+# generator retire a non-placeholder identity, which _regenerate_series_catalog
+# refuses for the whole append. The per-row preflight only looked at the
+# generator's exit code, so it could not exclude that one row.
+
+_REGISTRY_GENERATOR = b"""import json, pathlib, sys
+text = pathlib.Path("ledger/official_observations.jsonl").read_text()
+rows = [json.loads(line) for line in text.splitlines() if line.strip()]
+registry = pathlib.Path("ledger/series_uuid_registry.jsonl")
+ids = [row["source_record_id"] for row in rows]
+if any(ref.startswith("conflict.") for ref in ids):
+    sys.exit("unit conflict within identity")
+if any(ref.startswith("unlink.") for ref in ids):
+    registry.unlink()
+    sys.exit(0)
+added = []
+for ref in ids:
+    concept = ".".join(ref.split(".")[:3])
+    full = {"geography": ["country", "0100000US", "current"],
+            "entity": ["economy", "aggregate"]}
+    if ref.startswith("retire."):
+        added.append({"concept": concept, "uuid": "old-" + concept, **full,
+                      "retired": True})
+    elif ref.startswith("mint."):
+        added.append({"concept": concept, "uuid": "fresh-" + ref, **full})
+if added:
+    with registry.open("a") as handle:
+        for entry in added:
+            handle.write(json.dumps(entry) + "\\n")
+"""
+_BASE_REGISTRY = (
+    b'{"concept":"base.series.level","uuid":"base-1",'
+    b'"geography":["country","0100000US","current"],'
+    b'"entity":["economy","aggregate"]}\n'
+)
+
+
+def _registry_tree() -> resolve_pending.RepositoryTree:
+    tree = _catalog_tree(_REGISTRY_GENERATOR)
+    tree.files["ledger/series_uuid_registry.jsonl"] = _BASE_REGISTRY
+    tree.modes["ledger/series_uuid_registry.jsonl"] = "100644"
+    tree.blob_shas["ledger/series_uuid_registry.jsonl"] = "b" * 40
+    return tree
+
+
+def _refuse(monkeypatch, rows: list[dict[str, str]]) -> dict[str, str]:
+    tree = _registry_tree()
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    return resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, "ledger/official_observations.jsonl", base, rows
+    )
+
+
+def test_a_row_that_retires_an_identity_is_refused_alone(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "mint.series.a.fy2026.snapshot"},
+        {"source_record_id": "retire.cdfi.obligations.fy2026.snapshot"},
+        {"source_record_id": "plain.series.b.2026_09.first_print"},
+    ]
+    refusals = _refuse(monkeypatch, rows)
+    assert list(refusals) == ["retire.cdfi.obligations.fy2026.snapshot"]
+    reason = refusals["retire.cdfi.obligations.fy2026.snapshot"]
+    assert reason.startswith("series-catalog registry growth refused: ")
+    assert "retires a non-placeholder identity 'retire.cdfi.obligations'" in reason
+
+
+def test_a_first_observations_own_fresh_identity_is_not_refused(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "mint.series.a.fy2026.snapshot"},
+        {"source_record_id": "mint.series.b.fy2026.snapshot"},
+    ]
+    assert _refuse(monkeypatch, rows) == {}
+
+
+def test_a_generator_that_removes_the_registry_is_a_refusal(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "plain.series.b.2026_09.first_print"},
+        {"source_record_id": "unlink.series.c.2026_09.first_print"},
+    ]
+    refusals = _refuse(monkeypatch, rows)
+    assert refusals == {
+        "unlink.series.c.2026_09.first_print": (
+            "series-catalog registry growth refused: the generator removed the "
+            "UUID registry"
+        )
+    }
+
+
+@settings(max_examples=15, deadline=None)
+@given(
+    kinds=st.lists(
+        st.sampled_from(["plain", "mint", "retire", "conflict"]), min_size=1, max_size=4
+    )
+)
+def test_exactly_the_rows_that_fail_alone_are_refused(kinds: list[str]) -> None:
+    """Every row whose own append the generator refuses, by exit code or by
+    registry growth, is refused with that reason; every other row is kept,
+    and the kept rows pass together (no rows fail only together here)."""
+    rows = [
+        {"source_record_id": f"{kind}.series.s{index}.2026_09.first_print"}
+        for index, kind in enumerate(kinds)
+    ]
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        refusals = _refuse(monkeypatch, rows)
+    expected = {
+        row["source_record_id"]
+        for row, kind in zip(rows, kinds)
+        if kind in {"retire", "conflict"}
+    }
+    assert set(refusals) == expected
+    for ref, reason in refusals.items():
+        if ref.startswith("retire."):
+            assert reason.startswith("series-catalog registry growth refused: ")
+        else:
+            assert reason.startswith("series-catalog generator exit 1: ")
