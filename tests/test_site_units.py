@@ -58,8 +58,13 @@ def test_site_units_parse_includes_the_registered_dod_spelling() -> None:
 
 
 def test_every_unit_literal_in_the_resolver_is_a_site_unit() -> None:
-    literals = set(re.findall(r'"unit": "([^"]+)"', RESOLVER.read_text()))
-    assert literals, "no unit literals found; the pattern is stale"
+    source = RESOLVER.read_text()
+    matches = re.findall(r'"unit": "([^"]+)"', source)
+    # Every literal `"unit": "` opening must be read, so a narrowed pattern
+    # cannot skip a spelling.
+    assert len(matches) == source.count('"unit": "'), "the pattern skips literals"
+    literals = set(matches)
+    assert "billions USD" in literals
     assert literals <= site_units(), sorted(literals - site_units())
 
 

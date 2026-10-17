@@ -10,9 +10,10 @@ export const UNITS = [
   "usd",
   "usd_millions",
   "usd_billions",
-  // Non-canonical variant admitted by the 2026-08-03 auto-roll — registered
-  // snapshots are immutable, so the site tolerates it. Canonical is
-  // "usd_billions" and registration-side enum validation is the follow-up.
+  // Non-canonical variant, tolerated since 2026-08-03 (5c6bc9d1). The DoD
+  // USAspending targets registered 2026-08-07 and 2026-08-13 carry it, and
+  // registrations are immutable. Canonical is "usd_billions";
+  // registration-side enum validation is the follow-up.
   "billions USD",
   "usd_monthly",
   "thousands",
