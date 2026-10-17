@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import base64
 import datetime as dt
 import gzip
@@ -14,6 +15,8 @@ import sys
 from types import SimpleNamespace
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -2642,6 +2645,278 @@ path.write_bytes(path.read_bytes() + b'{"uuid":"new"}\\n')
             now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
             producer_signing_key=signing_key_pem,
         )
+
+
+# What the "Resolve pending cells" step's environment can carry that
+# Chronicle's staged generator must never see: the Chronicle write token under
+# both spellings, the producer signing key, the Actions runtime's OIDC and
+# runtime variables, a cloud key, and git variables that redirect git.
+_RESOLVE_STEP_SECRETS = {
+    "GH_TOKEN": "ghs_fixture_chronicle_write_token",
+    "GITHUB_TOKEN": "ghs_fixture_workflow_token",
+    "LEDGER_PRODUCER_SIGNING_KEY": "fixture-producer-signing-key",
+    "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "fixture-oidc-request-token",
+    "ACTIONS_ID_TOKEN_REQUEST_URL": "https://oidc.invalid/token",
+    "ACTIONS_RUNTIME_TOKEN": "fixture-runtime-token",
+    "ACTIONS_RESULTS_URL": "https://results.invalid/",
+    "AWS_SECRET_ACCESS_KEY": "fixture-cloud-key",
+    "GIT_ASKPASS": "/fixture/askpass",
+    "GIT_DIR": "/fixture/not-a-repository.git",
+}
+# macOS CoreFoundation adds this to every process it starts in, whatever the
+# parent passed; it is the only name a child may hold beyond the allowlist.
+_PLATFORM_ADDED_ENVIRONMENT = {"__CF_USER_TEXT_ENCODING"}
+
+
+def _environment_dump_prelude(dump: pathlib.Path) -> bytes:
+    """Generator lines that append the process environment to ``dump``."""
+
+    return (
+        "import json as _env_json, os as _env_os\n"
+        f"with open({str(dump)!r}, 'a', encoding='utf-8') as _env_dump:\n"
+        "    _env_dump.write(_env_json.dumps(dict(_env_os.environ)) + '\\n')\n"
+    ).encode()
+
+
+def _dumped_environments(dump: pathlib.Path) -> list[dict[str, str]]:
+    return [json.loads(line) for line in dump.read_text().splitlines()]
+
+
+def _assert_generator_environment_is_minimal(seen: dict[str, str]) -> None:
+    assert not set(seen) & set(_RESOLVE_STEP_SECRETS)
+    for secret in _RESOLVE_STEP_SECRETS.values():
+        assert all(secret not in value for value in seen.values())
+    allowed = set(_EXPECTED_GENERATOR_ENVIRONMENT)
+    assert set(seen) - allowed <= _PLATFORM_ADDED_ENVIRONMENT
+    # HOME, which a `pip install --user` runtime needs to find receipt, and
+    # PATH arrive unchanged.
+    assert seen["PATH"] == os.environ["PATH"]
+    assert seen["HOME"] == os.environ["HOME"]
+
+
+def test_append_proposal_generator_inherits_no_secret(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    tree, anchor_dir, requester, signing_key_pem = _release_fixture_tree(tmp_path)
+    dump = tmp_path / "staged-generator-environ.jsonl"
+    generator = "scripts/build_series_catalog.py"
+    tree.files[generator] = _environment_dump_prelude(dump) + tree.files[generator]
+    for name, value in _RESOLVE_STEP_SECRETS.items():
+        monkeypatch.setenv(name, value)
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.environment","value":1}\n'
+    )
+
+    changes = resolve_pending._prepare_release_files(
+        tree,
+        path="ledger/official_observations.jsonl",
+        candidate_ledger=candidate,
+        added=1,
+        requester=requester,
+        timeout_seconds=10,
+        clock_skew_seconds=resolve_pending.DEFAULT_CLOCK_SKEW_SECONDS,
+        anchor_dir=anchor_dir,
+        now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
+        producer_signing_key=signing_key_pem,
+    )
+
+    # The generator still ran to completion and regenerated the catalog.
+    catalog = json.loads(changes["ledger/series_catalog.json"])
+    assert catalog["observation_rows"] == 2
+    assert catalog["observations_sha256"] == hashlib.sha256(candidate).hexdigest()
+    [seen] = _dumped_environments(dump)
+    _assert_generator_environment_is_minimal(seen)
+
+
+def test_catalog_refusal_trials_inherit_no_secret(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    dump = tmp_path / "staged-generator-environ.jsonl"
+    tree = _catalog_tree(_environment_dump_prelude(dump) + _UNIT_CONFLICT_GENERATOR)
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    for name, value in _RESOLVE_STEP_SECRETS.items():
+        monkeypatch.setenv(name, value)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    good = {"source_record_id": "good", "unit": "thousands"}
+    bad = {"source_record_id": "bad", "unit": "millions"}
+
+    refusals = resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, "ledger/official_observations.jsonl", base, [good, bad]
+    )
+
+    # The trials still separate the rows: both together, the base alone,
+    # each row alone, then the kept rows together.
+    assert list(refusals) == ["bad"]
+    seen = _dumped_environments(dump)
+    assert len(seen) == 5
+    for environment in seen:
+        _assert_generator_environment_is_minimal(environment)
+
+
+# The allowlist, pinned: changing what reaches Chronicle's code takes a
+# deliberate edit here as well as in resolve_pending.py.
+_EXPECTED_GENERATOR_ENVIRONMENT = (
+    "PATH",
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "TMPDIR",
+    "TEMP",
+    "TMP",
+    "SYSTEMROOT",
+)
+_ENVIRONMENT_NAME_POOL = (
+    *_EXPECTED_GENERATOR_ENVIRONMENT,
+    *_RESOLVE_STEP_SECRETS,
+    "PYTHONPATH",
+    "VIRTUAL_ENV",
+    "SSH_AUTH_SOCK",
+    "path",
+    "PATH ",
+    "HOMEBREW_GITHUB_API_TOKEN",
+    "LC_FIXTURE_SECRET",
+)
+
+
+def test_staged_generator_allowlist_is_pinned() -> None:
+    assert resolve_pending.STAGED_GENERATOR_ENVIRONMENT == (
+        _EXPECTED_GENERATOR_ENVIRONMENT
+    )
+
+
+def test_staged_generator_allowlist_names_no_credential() -> None:
+    # The allowlist itself names no credential and no redirecting variable.
+    for name in resolve_pending.STAGED_GENERATOR_ENVIRONMENT:
+        assert not name.startswith(("GIT_", "GITHUB_", "ACTIONS_", "RUNNER_"))
+        assert not name.endswith(("TOKEN", "KEY", "SECRET", "PASSWORD"))
+
+
+@pytest.mark.parametrize("name", _ENVIRONMENT_NAME_POOL)
+def test_staged_generator_environment_keeps_a_name_exactly_when_listed(
+    name: str,
+) -> None:
+    kept = resolve_pending.staged_generator_environment({name: "v"})
+    listed = name in _EXPECTED_GENERATOR_ENVIRONMENT
+    assert kept == ({name: "v"} if listed else {})
+
+
+@settings(max_examples=500, deadline=None)
+@given(
+    environ=st.dictionaries(
+        keys=st.one_of(st.sampled_from(_ENVIRONMENT_NAME_POOL), st.text(max_size=40)),
+        values=st.text(max_size=40),
+        max_size=30,
+    )
+)
+def test_staged_generator_environment_is_the_allowlisted_submapping(
+    environ: dict[str, str],
+) -> None:
+    allowlist = set(_EXPECTED_GENERATOR_ENVIRONMENT)
+    kept = resolve_pending.staged_generator_environment(environ)
+    # Exactly the listed names the input holds, with their values unchanged.
+    assert kept == {n: v for n, v in environ.items() if n in allowlist}
+    assert kept.items() <= environ.items()
+    assert set(kept) <= allowlist
+
+
+def test_staged_generator_environment_reads_the_process_environment(
+    monkeypatch,
+) -> None:
+    for name, value in _RESOLVE_STEP_SECRETS.items():
+        monkeypatch.setenv(name, value)
+    monkeypatch.setenv("LANG", "C.UTF-8")
+    kept = resolve_pending.staged_generator_environment()
+    assert not set(kept) & set(_RESOLVE_STEP_SECRETS)
+    assert kept["LANG"] == "C.UTF-8" and kept["PATH"] == os.environ["PATH"]
+
+
+def _staged_generator_run_violations(source: str) -> list[str]:
+    """Ways ``source`` could start this interpreter outside the one helper.
+
+    Running this interpreter in a subprocess means running Chronicle's staged
+    generator, so every such run must go through ``_run_staged_generator``,
+    which always passes the allowlist. Any literal ``sys.executable`` outside
+    that helper is a violation, whether it feeds ``subprocess.run``,
+    ``check_output``, ``Popen`` or a variable first. Aliases of ``sys``,
+    ``getattr`` and in-process execution are out of its reach.
+    """
+
+    tree = ast.parse(source)
+    helpers = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_run_staged_generator"
+    ]
+    if len(helpers) != 1:
+        return [f"expected one _run_staged_generator, found {len(helpers)}"]
+    [helper] = helpers
+    inside = {id(node) for node in ast.walk(helper)}
+    violations = []
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Attribute)
+            and node.attr == "executable"
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "sys"
+            and id(node) not in inside
+        ):
+            violations.append(f"sys.executable outside the helper (line {node.lineno})")
+        if isinstance(node, ast.ImportFrom) and node.module == "sys":
+            if any(alias.name == "executable" for alias in node.names):
+                violations.append(f"from sys import executable (line {node.lineno})")
+    runs = [
+        node
+        for node in ast.walk(helper)
+        if isinstance(node, ast.Call)
+        and ast.unparse(node.func).startswith("subprocess.")
+    ]
+    envs = [
+        [ast.unparse(k.value) for k in run.keywords if k.arg == "env"] for run in runs
+    ]
+    if envs != [["staged_generator_environment()"]]:
+        violations.append(f"the helper's subprocess env= is {envs}")
+    return violations
+
+
+def test_every_staged_generator_run_passes_the_minimal_environment() -> None:
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    assert _staged_generator_run_violations(source) == []
+    # Both generator call sites go through the helper.
+    assert source.count("_run_staged_generator(stage)") == 2
+
+
+@pytest.mark.parametrize(
+    "addition",
+    [
+        # A second spelling of the same run, outside the helper.
+        "def _extra(stage):\n"
+        "    return subprocess.check_output([sys.executable, 'g.py'], cwd=stage)\n",
+        "def _extra(stage):\n"
+        "    command = [sys.executable, 'g.py']\n"
+        "    subprocess.run(command, cwd=stage, check=True)\n",
+        "def _extra(stage):\n"
+        "    subprocess.Popen([sys.executable, 'g.py'], cwd=stage)\n",
+        "from sys import executable\n",
+    ],
+)
+def test_the_generator_guard_catches_runs_outside_the_helper(addition: str) -> None:
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    assert _staged_generator_run_violations(source) == []
+    assert _staged_generator_run_violations(source + "\n\n" + addition) != []
+
+
+def test_the_generator_guard_requires_the_helper_to_pass_the_allowlist() -> None:
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    inherited = source.replace(
+        "        env=staged_generator_environment(),\n    )\n\n\ndef _regenerate",
+        "    )\n\n\ndef _regenerate",
+        1,
+    )
+    assert inherited != source
+    assert _staged_generator_run_violations(source) == []
+    assert _staged_generator_run_violations(inherited) != []
 
 
 @pytest.mark.parametrize("signing_key", [None, ""])

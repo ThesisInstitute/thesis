@@ -13055,6 +13055,65 @@ def _registry_growth_refusal(
     return None
 
 
+# The only environment Chronicle's staged series-catalog generator inherits.
+# The generator is the ledger branch's code, run with this interpreter in a
+# step whose environment holds GH_TOKEN (a Chronicle write token), the
+# producer signing key (until main() pops it) and the Actions OIDC request
+# variables. The generator's own code reads no variable. HOME is the one name
+# it depends on: a `pip install --user` runtime finds receipt under HOME. It
+# decodes its inputs as UTF-8, uses no temporary files, and runs in a stage
+# with no .git, so PATH (git), the locale and the temp names are only
+# harmless defaults. The list targets POSIX runners; SYSTEMROOT only lets a
+# Windows interpreter start.
+#
+# receipt must come from the interpreter's own site-packages (a virtual
+# environment, or HOME's user site). PYTHONPATH, PYTHONUSERBASE and
+# PYTHONHOME do not reach the generator, so a receipt supplied through them
+# could differ from, or be missing in, the one the generator imports.
+#
+# This closes inheritance, not access: on Linux the generator runs as the
+# same user and can still read this process's and the step shell's
+# /proc/<pid>/environ, which keep every secret the step started with.
+STAGED_GENERATOR_ENVIRONMENT = (
+    "PATH",
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "TMPDIR",
+    "TEMP",
+    "TMP",
+    "SYSTEMROOT",
+)
+
+
+def staged_generator_environment(
+    environ: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """The allowlisted part of ``environ`` (default: this process's)."""
+
+    source = os.environ if environ is None else environ
+    return {
+        name: source[name] for name in STAGED_GENERATOR_ENVIRONMENT if name in source
+    }
+
+
+def _run_staged_generator(stage: pathlib.Path) -> subprocess.CompletedProcess[str]:
+    """Run the stage's own series-catalog generator under the allowlist.
+
+    Every run of Chronicle's generator goes through here: a test requires
+    that a literal ``sys.executable`` appear nowhere else in this module.
+    """
+
+    return subprocess.run(
+        [sys.executable, str(stage / "scripts" / "build_series_catalog.py")],
+        cwd=stage,
+        capture_output=True,
+        text=True,
+        env=staged_generator_environment(),
+    )
+
+
 def _regenerate_series_catalog(
     stage: pathlib.Path,
     *,
@@ -13070,12 +13129,7 @@ def _regenerate_series_catalog(
             "base commit is missing series-catalog generator "
             "scripts/build_series_catalog.py"
         )
-    completed = subprocess.run(
-        [sys.executable, str(generator)],
-        cwd=stage,
-        capture_output=True,
-        text=True,
-    )
+    completed = _run_staged_generator(stage)
     if completed.returncode != 0:
         detail = completed.stderr.strip() or completed.stdout.strip()
         suffix = f": {detail[:500]}" if detail else ""
@@ -13893,12 +13947,7 @@ def ledger_catalog_refusals(
             (stage / _validated_repository_path(path)).write_text(
                 candidate, encoding="utf-8"
             )
-            completed = subprocess.run(
-                [sys.executable, str(generator)],
-                cwd=stage,
-                capture_output=True,
-                text=True,
-            )
+            completed = _run_staged_generator(stage)
         if completed.returncode == 0:
             return None
         output = completed.stderr.strip() or completed.stdout.strip()
