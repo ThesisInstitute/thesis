@@ -19,18 +19,20 @@ from hypothesis import strategies as st
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import roll_docket  # noqa: E402
 import stamp_docket_ledger_refs as stamper  # noqa: E402
 
 from tests.test_docket_ledger_containment import (  # noqa: E402
     CADENCE_MAP,
+    DOCKET_CADENCES,
     _derive_expected_pin,
     _observed_cadence,
 )
 
 CONCEPT = "usaspending.parity.series"
-DOCKET_CADENCES = ["weekly", "monthly", "quarterly", "annual", "fiscal_year", "daily"]
+CADENCE_DRAWS = ["weekly", "monthly", "quarterly", "annual", "fiscal_year", "daily"]
 CATALOG_CADENCES = ["week_ending", "month", "quarter", "year", "fiscal_year", None]
-PERIODS = [
+PERIODS: list[object] = [
     None,
     "2026",
     "FY2026",
@@ -43,6 +45,12 @@ PERIODS = [
     "2025-2026",
     "FY_2026",
     "fy__2026",
+    "_2027",
+    "²⁰²⁷",
+    "fy_²⁰²⁷",
+    2026,
+    True,
+    ["2026"],
 ]
 POLICIES = [None, "registered_query_snapshot", "first_print"]
 UNITS = [None, "percent", "millions", "thousands", "billions USD"]
@@ -74,7 +82,7 @@ def entries(draw: st.DrawFn) -> dict[str, Any]:
         extras["country"] = country
     entry: dict[str, Any] = {
         "series": CONCEPT,
-        "cadence": draw(st.sampled_from(DOCKET_CADENCES)),
+        "cadence": draw(st.sampled_from(CADENCE_DRAWS)),
         "slug": "s",
     }
     period = draw(st.sampled_from(PERIODS))
@@ -117,16 +125,28 @@ def catalog_rows(draw: st.DrawFn) -> list[dict[str, Any]]:
 
 
 def _is_fiscal_year_snapshot(entry: dict[str, Any]) -> bool:
-    """An independent spelling of the rule, for the property below."""
+    """An independent spelling of the rule's period grammar, for C1 below.
 
-    binding = (entry.get("extras") or {}).get("sourceBinding") or {}
-    period = entry.get("period")
+    A fiscal-year period is four decimal digits (what ``\\d`` matches, i.e.
+    ``str.isdecimal``), optionally after a case-insensitive ``fy`` prefix,
+    which may itself be followed by one underscore.
+    """
+
+    extras = entry.get("extras")
+    binding = extras.get("sourceBinding") if isinstance(extras, dict) else None
+    if not isinstance(binding, dict):
+        return False
     if binding.get("releasePolicy") != "registered_query_snapshot":
         return False
+    period = entry.get("period")
     if not isinstance(period, str):
         return False
-    digits = period.lower().removeprefix("fy").removeprefix("_")
-    return len(digits) == 4 and digits.isdigit()
+    rest = period
+    if rest[:2].lower() == "fy":
+        rest = rest[2:]
+        if rest[:1] == "_":
+            rest = rest[1:]
+    return len(rest) == 4 and rest.isdecimal()
 
 
 @settings(max_examples=2000, deadline=None)
@@ -141,24 +161,69 @@ def test_only_annual_fiscal_year_snapshots_change_cadence(
         assert _observed_cadence(entry) == docket_cadence
 
 
+EXTRAS_SHAPES: list[object] = [
+    "absent",
+    None,
+    {},
+    "policy",
+    "binding-list",
+    [1],
+    "x",
+]
+
+
+def _entry(cadence: object, period: object, policy: object, shape: object) -> dict:
+    entry: dict[str, Any] = {"series": CONCEPT, "cadence": cadence}
+    if period is not None:
+        entry["period"] = period
+    if shape == "policy":
+        entry["extras"] = {"sourceBinding": {"releasePolicy": policy}}
+    elif shape == "binding-list":
+        entry["extras"] = {"sourceBinding": [policy]}
+    elif shape != "absent":
+        entry["extras"] = shape
+    return entry
+
+
 def test_gate_and_stamper_expect_the_same_cadence() -> None:
-    # Exhaustive over every cadence x period x release policy x extras shape.
+    # Exhaustive over cadence x period x release policy x extras shape,
+    # including non-string cadences and periods and non-dict extras and
+    # bindings. Also checks the rule against the independent oracle.
     assert CADENCE_MAP == stamper.CADENCE_TO_PERIOD_TYPE
+    cadences: list[object] = [*CADENCE_DRAWS, None, ["annual"]]
     checked = 0
-    for cadence in DOCKET_CADENCES:
+    for cadence in cadences:
         for period in PERIODS:
             for policy in POLICIES:
-                for extras in (None, {}, {"sourceBinding": {"releasePolicy": policy}}):
-                    entry: dict[str, Any] = {"series": CONCEPT, "cadence": cadence}
-                    if period is not None:
-                        entry["period"] = period
-                    if extras is not None:
-                        entry["extras"] = extras
-                    assert _observed_cadence(entry) == stamper.observed_period_type(
-                        entry
-                    ), entry
+                for shape in EXTRAS_SHAPES:
+                    entry = _entry(cadence, period, policy, shape)
+                    gate = _observed_cadence(entry)
+                    assert gate == stamper.observed_period_type(entry), entry
+                    if cadence == "annual" and _is_fiscal_year_snapshot(entry):
+                        assert gate == "fiscal_year", entry
+                    elif isinstance(cadence, str):
+                        assert gate == CADENCE_MAP.get(cadence), entry
+                    else:
+                        assert gate is None, entry
                     checked += 1
-    assert checked == len(DOCKET_CADENCES) * len(PERIODS) * len(POLICIES) * 3
+    assert checked == len(cadences) * len(PERIODS) * len(POLICIES) * len(EXTRAS_SHAPES)
+
+
+def test_gate_docket_cadences_are_the_ones_the_roller_rolls() -> None:
+    sample = {
+        "weekly": "week_2026-10-05",
+        "monthly": "2026-10",
+        "quarterly": "2026-Q3",
+        "annual": "2026",
+        "fiscal_year": "2026",
+    }
+    rolled = {
+        cadence
+        for cadence, period in sample.items()
+        if roll_docket.period_key(period, cadence) is not None
+    }
+    assert DOCKET_CADENCES == rolled
+    assert set(DOCKET_CADENCES) < set(CADENCE_MAP)
 
 
 @settings(max_examples=3000, deadline=None)

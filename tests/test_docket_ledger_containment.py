@@ -37,6 +37,8 @@ CATALOG_TOP_LEVEL_KEYS = {
 # fold seed (ledger/seeds/entity_folds.json, Max's ruling d353, 2026-09-27).
 # Absent on catalogs built without a seed.
 CATALOG_OPTIONAL_TOP_LEVEL_KEYS = {"comment", "entity_folds_sha256"}
+# Docket cadence -> Ledger period type. Equal to the stamper's
+# CADENCE_TO_PERIOD_TYPE, which also names fiscal_year.
 CADENCE_MAP = {
     "weekly": "week_ending",
     "monthly": "month",
@@ -44,6 +46,10 @@ CADENCE_MAP = {
     "annual": "year",
     "fiscal_year": "fiscal_year",
 }
+# The docket cadences scripts/roll_docket.py can roll. Being in CADENCE_MAP
+# does not make a cadence a valid docket cadence: the roller has no
+# fiscal_year step, so a docket entry may not declare it.
+DOCKET_CADENCES = frozenset({"weekly", "monthly", "quarterly", "annual"})
 CATALOG_ROW_KEYS = {
     "uuid",
     "concept",
@@ -119,7 +125,8 @@ def _observed_cadence(entry: dict[str, Any]) -> str | None:
     from this entry, not from rows.
     """
 
-    expected = CADENCE_MAP.get(entry.get("cadence"))
+    cadence = entry.get("cadence")
+    expected = CADENCE_MAP.get(cadence) if isinstance(cadence, str) else None
     if (
         expected == "year"
         and _target_period_identity(entry)[0] == "registered_query_snapshot_fiscal_year"
@@ -289,7 +296,11 @@ def _assert_containment(
             )
 
         docket_cadence = entry.get("cadence")
-        expected_cadence = CADENCE_MAP.get(docket_cadence)
+        expected_cadence = (
+            CADENCE_MAP.get(docket_cadence)
+            if isinstance(docket_cadence, str) and docket_cadence in DOCKET_CADENCES
+            else None
+        )
         if expected_cadence is None:
             cadence_mismatches.append(
                 f"{series}: unsupported docket cadence {docket_cadence!r}"
@@ -1235,3 +1246,32 @@ def test_usaspending_snapshots_are_contained_in_the_dd929cba_rows(
         "dd929cba usaspending rows",
         docket_path=_docket_file(tmp_path, entries),
     )
+
+
+@pytest.mark.parametrize("cadence", ["fiscal_year", "daily", None, ["annual"]])
+def test_docket_cadence_must_be_one_the_roller_rolls(
+    tmp_path: pathlib.Path, cadence: object
+) -> None:
+    # Review of #368: CADENCE_MAP names fiscal_year (to match the stamper),
+    # but roll_docket has no fiscal_year step, so a docket entry declaring it
+    # must still be refused even against a matching fiscal_year row.
+    row = _catalog_row(
+        uuid="00000000-0000-4000-8000-0000000000f5",
+        concept="test.fiscal.series",
+        cadence="fiscal_year",
+        first_observed_period="2027",
+        last_observed_period="2027",
+    )
+    entry = {
+        "series": "test.fiscal.series",
+        "cadence": cadence,
+        "period": "2027",
+        "slug": "test-{year}",
+        "ledger": {"uuid": row["uuid"], "concept": row["concept"]},
+    }
+    with pytest.raises(AssertionError, match="unsupported docket cadence"):
+        _assert_containment(
+            _catalog_shell([row]),
+            "test catalog",
+            docket_path=_docket_file(tmp_path, [entry]),
+        )

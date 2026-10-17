@@ -85,7 +85,10 @@ def observed_period_type(entry: dict[str, Any]) -> str | None:
     tests/test_docket_ledger_containment.py.
     """
 
-    expected = CADENCE_TO_PERIOD_TYPE.get(entry.get("cadence"))
+    cadence = entry.get("cadence")
+    expected = (
+        CADENCE_TO_PERIOD_TYPE.get(cadence) if isinstance(cadence, str) else None
+    )
     extras = entry.get("extras")
     binding = extras.get("sourceBinding") if isinstance(extras, dict) else None
     period = entry.get("period")
