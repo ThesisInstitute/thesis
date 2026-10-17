@@ -11,6 +11,7 @@ import type {
   Unit,
 } from "./forecast-cells";
 import { getForecastRunEntries } from "./forecast-cells";
+import { isUnit } from "./units";
 import { verifyForecastRun } from "@/lib/forecast-publication";
 import {
   conditionForCell,
@@ -695,24 +696,6 @@ function assertPolicyEngineFactShape(
       `Ledger fact ${fact.source_record_id} has unsupported unit ${fact.measure.unit}`,
     );
   }
-}
-
-function isUnit(unit: string): unit is Unit {
-  return [
-    "percent",
-    "count",
-    "gbp_billions",
-    "usd",
-    "usd_millions",
-    "usd_billions",
-    "usd_monthly",
-    "thousands",
-    "millions",
-    "million_cubic_feet",
-    "per_1000_live_births",
-    "ratio",
-    "percent_growth",
-  ].includes(unit);
 }
 
 function formatLedgerSource(source: PolicyEngineAggregateFactRow["source"]) {
