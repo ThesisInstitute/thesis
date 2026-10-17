@@ -5808,8 +5808,12 @@ def test_main_refuses_a_chronicle_receipt_mismatch_before_any_capture(
     )
     assert f"RECEIPT PIN REFUSED: {reason}" in out
     assert f"::error title=Receipt pin mismatch::{reason}" in out
-    # Any status but 0 and EXIT_REFUSED_ROWS stops the workflow step at once,
-    # before the commit/publish steps, and the failure alert opens its issue.
+    # main()'s wrapper still prints the finish line; the loop never ran.
+    assert f"{resolve_pending.RESOLVER_FINISHED} 4" in out
+    assert resolve_pending.RESOLUTION_LOOP_COMPLETE not in out
+    # Exit 4 is its own status, but the workflow treats it like
+    # EXIT_REFUSED_ROWS: it publishes what moved upstream, then fails the job
+    # ("Fail the run on refused rows"), and the alert opens its issue.
     assert resolve_pending.EXIT_RECEIPT_PIN_REFUSED not in (
         0,
         resolve_pending.EXIT_REFUSED_ROWS,

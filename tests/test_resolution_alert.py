@@ -151,7 +151,12 @@ RECEIPT_LOG = (
     "generator under thesis's receipt, and Chronicle has tested that code only "
     "under 0.6.2. Make the two locks name the same receipt before the resolver "
     "runs again.\n"
+    "resolver finished with exit code 4\n"
 )
+
+
+def test_the_alert_reads_the_receipt_line_the_status_page_reads() -> None:
+    assert ra._RECEIPT_PREFIX == rs._RECEIPT_STOP
 
 
 @pytest.mark.parametrize(
