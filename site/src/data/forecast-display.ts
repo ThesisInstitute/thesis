@@ -158,6 +158,9 @@ export function formatValue(value: number, unit: Unit): string {
     case "usd_millions":
       return `$${value.toLocaleString(undefined, { maximumFractionDigits: 3 })}M`;
     case "usd_billions":
+    // The registered DoD USAspending targets spell this unit "billions USD"
+    // (dollars × 1e-9, per their resolution rules); same display.
+    case "billions USD":
       return `$${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}B`;
     case "usd_monthly":
       return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}/mo`;
@@ -179,8 +182,12 @@ export function formatValue(value: number, unit: Unit): string {
       return `${value >= 0 ? "+" : ""}${value.toFixed(1)}`;
     case "minutes":
       return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })} min`;
-    default:
+    default: {
+      // Every Unit has a case above; a new unit fails type-checking here.
+      const unformatted: never = unit;
+      void unformatted;
       return value.toString();
+    }
   }
 }
 
