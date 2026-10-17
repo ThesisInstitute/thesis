@@ -294,6 +294,7 @@ jobs:
           echo "pushed_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Attest the deployed-ledger push
+        id: attest_deployed
         if: steps.deployed_ledger.outputs.pushed_sha != ''
         uses: ./.github/actions/attest-records-push
         with:
@@ -357,10 +358,24 @@ jobs:
         # of vanishing. If the script fails, the old title and one-line body
         # go out; if the issue call fails, a one-line issue under the same
         # title does (a call that failed only on our side can then post
-        # twice, which beats posting nothing). A run cancelled by the job's
-        # timeout alerts too: from 2026-10-01 every scheduled run hit the
-        # 60-minute cap, and none of them opened an issue.
-        if: failure() || cancelled()
+        # twice, which beats posting nothing). A run cancelled before it
+        # finished publishing alerts too: from 2026-10-01 every scheduled run
+        # hit the 60-minute cap, and none of them opened an issue. A cancel
+        # turns failure() false and skips "Fail the run on refused rows", so
+        # a cancelled run stays silent only when the resolver exited 0 (no
+        # refused rows) and publication completed: the ledger step said there
+        # was nothing to publish, or the deployed-ledger record succeeded and
+        # its attestation did not fail. The status page still runs on a
+        # cancel. A step output that a cancelled step never wrote is null, and
+        # GitHub evaluates null == '0' as true, so each output is trusted only
+        # beside its own step's success.
+        if: >-
+          failure() || (cancelled() && !(steps.resolve.outcome == 'success'
+          && steps.resolve.outputs.resolver_rc == '0'
+          && ((steps.ledger.outcome == 'success'
+          && steps.ledger.outputs.needs_publish == '0')
+          || (steps.deployed_ledger.outcome == 'success'
+          && steps.attest_deployed.outcome != 'failure'))))
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
