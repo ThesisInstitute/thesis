@@ -367,18 +367,18 @@
     "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error  Errno 111  Connection refused"
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.computer_mathematical', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curati"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-august-2026",
       "resolutionDate": "2026-09-04",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error  Errno 111  Connection refused"
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.healthcare_support', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curation"
     },
     "bls.cps.telework_share.2026-08.first_print": {
       "forecastSlug": "us-telework-rate-august-2026",
@@ -415,7 +415,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error  Errno 111  Connection refused"
+      "detail": "URLError   urlopen error timed out"
     },
     "bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print": {
       "forecastSlug": "cps-transport-material-moving-employment-august-2026",
@@ -423,7 +423,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error  Errno 111  Connection refused"
+      "detail": "URLError   urlopen error timed out"
     },
     "bls.cpi.u.core_mom.august_2026.first_print": {
       "forecastSlug": "us-core-cpi-mom-august-2026",
@@ -442,18 +442,18 @@
     "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print": {
       "forecastSlug": "cps-business-financial-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error  Errno 111  Connection refused"
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.business_financial_operations', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve b"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-august-2026",
       "resolutionDate": "2026-09-11",
-      "state": "fetch_failed",
-      "code": "SOURCE_UNREACHABLE",
-      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error  Errno 111  Connection refused"
+      "state": "refused",
+      "code": "LEDGER_CATALOG_REFUSED",
+      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
+      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.office_administrative_support', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve b"
     },
     "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
@@ -755,6 +755,6 @@
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
     }
   },
-  "generatedAtUtc": "2026-10-17T14:01:07Z",
-  "workflowRun": "39036692785"
+  "generatedAtUtc": "2026-10-17T16:57:43Z",
+  "workflowRun": "39050310798"
 }
