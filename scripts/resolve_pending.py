@@ -12992,10 +12992,81 @@ def _identity_belongs_to_rows(concept: str, appended_row_ids: list[str]) -> bool
     return False
 
 
+def _registry_geography_key(geography: Any) -> tuple[str, str]:
+    """A geography as Chronicle's registry keys it: (level, id, vintage), with
+    a missing vintage read as none (`_geo_key` in scripts/build_series_catalog.py).
+    Any other value keys as its canonical JSON, tagged so it never equals a
+    dict's key. Keys are hashable whatever a line holds."""
+    if type(geography) is dict:
+        return (
+            "dict",
+            json.dumps(
+                [geography.get("level"), geography.get("id"), geography.get("vintage")]
+            ),
+        )
+    return ("raw", json.dumps(geography, sort_keys=True))
+
+
+def _registry_entity_key(entity: Any) -> tuple[str, str]:
+    """An entity as Chronicle's registry keys it: (name, role)."""
+    if type(entity) is dict:
+        return ("dict", json.dumps([entity.get("name"), entity.get("role")]))
+    return ("raw", json.dumps(entity, sort_keys=True))
+
+
+def _registry_identity_key(entry: dict[str, Any]) -> tuple[Any, Any, Any]:
+    """The identity a registry line binds: (concept, geography, entity)."""
+    return (
+        entry.get("concept"),
+        _registry_geography_key(entry.get("geography")),
+        _registry_entity_key(entry.get("entity")),
+    )
+
+
+def _placeholder_geography_admits(placeholder: Any, observed: Any) -> bool:
+    """Whether a placeholder's geography lets the observed identity enrich it.
+
+    Chronicle's rule (scripts/build_series_catalog.py, `_plan_enrichment`,
+    since a93fa9d3 on 2026-08-02): the placeholder has no geography yet, or
+    it has the observed identity's level and id, with no vintage or the same
+    vintage.
+    """
+    if placeholder is None:
+        return True
+    if type(placeholder) is not dict or type(observed) is not dict:
+        return False
+    return (placeholder.get("level"), placeholder.get("id")) == (
+        observed.get("level"),
+        observed.get("id"),
+    ) and placeholder.get("vintage") in (None, observed.get("vintage"))
+
+
+def _docket_placeholder_uuids(base_catalog: bytes) -> set[tuple[Any, Any]] | None:
+    """(concept, uuid) of every docket-only catalog row without an entity, or
+    None when the catalog cannot be read as one."""
+    try:
+        catalog = json.loads(base_catalog)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    rows = catalog.get("series") if type(catalog) is dict else None
+    if type(rows) is not list:
+        return None
+    return {
+        (row["concept"], row["uuid"])
+        for row in rows
+        if type(row) is dict
+        and isinstance(row.get("concept"), str)
+        and isinstance(row.get("uuid"), str)
+        and row.get("status") == "docket-only"
+        and row.get("entity") is None
+    }
+
+
 def _registry_growth_refusal(
     base_registry: bytes,
     regenerated_registry: bytes,
     appended_row_ids: list[str],
+    base_catalog: bytes | None = None,
 ) -> str | None:
     """Why the regenerated UUID registry exceeds this append's own lifecycle.
 
@@ -13014,30 +13085,58 @@ def _registry_growth_refusal(
     observation backs — and a seeded placeholder's first observation is
     exactly the enrichment the byte-compare refused; resolve loop failures
     2026-08-18 through 2026-08-22, issues #202-#206).
+
+    A committed placeholder is what Chronicle's generator enriches: a live
+    binding without an entity, whose catalog row is docket-only. Live means
+    the latest registry line for that identity is not a retire, which is how
+    Chronicle's registry binds each identity to its latest line; identities
+    are compared as Chronicle keys them, geography by (level, id, vintage)
+    and entity by (name, role). The placeholder's geography may be unknown
+    or already known. Until 2026-10-17 only placeholders with neither were
+    accepted. But the generator also enriches a docket-only row whose
+    geography is set, when the observation has the same level and id, so
+    26 of the 44 docket placeholders could never take a first observation.
+    The run of 2026-10-16 refused usaspending.cdfi.assistance_transaction_
+    obligations this way (resolve-and-rebuild run 38962977031). The
+    enrichment pair must be exactly what the generator writes: one retire of
+    the live placeholder, then one succeeds-mint that keeps its concept and
+    UUID, names that placeholder as its predecessor, and lands on a full
+    identity whose geography the placeholder admits.
+
+    ``base_catalog`` is the staged catalog as committed, before the
+    generator runs. With it, a retired placeholder must also be a docket-only
+    row there, as the generator itself requires; without it that check is
+    skipped and only the registry is consulted.
     """
 
     if not regenerated_registry.startswith(base_registry):
         return "the regenerated registry rewrites committed lines"
-    base_entries: list[dict[str, Any]] = []
+    latest: dict[tuple[Any, Any, Any], dict[str, Any]] = {}
+    base_uuids: set[Any] = set()
     for line in base_registry.decode("utf-8", "replace").splitlines():
         try:
             entry = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if isinstance(entry, dict):
-            base_entries.append(entry)
-    base_uuids = {entry.get("uuid") for entry in base_entries}
+        # A line whose concept or UUID is not a string can match no appended
+        # line (those are checked to be strings), so it is skipped.
+        if (
+            isinstance(entry, dict)
+            and isinstance(entry.get("concept"), str)
+            and isinstance(entry.get("uuid"), str)
+        ):
+            base_uuids.add(entry["uuid"])
+            latest[_registry_identity_key(entry)] = entry
     committed_placeholders = {
-        (entry.get("concept"), entry.get("uuid"))
-        for entry in base_entries
-        if entry.get("geography") is None
-        and entry.get("entity") is None
-        and not any(
-            marker in entry
-            for marker in (*REGISTRY_FORBIDDEN_EVENT_FIELDS, "retired", "succeeds")
-        )
+        (*_registry_identity_key(entry), entry.get("uuid"))
+        for entry in latest.values()
+        if entry.get("entity") is None and entry.get("retired") is not True
     }
-    retired_here: set[tuple[Any, Any]] = set()
+    docket_placeholders = (
+        None if base_catalog is None else _docket_placeholder_uuids(base_catalog)
+    )
+    retired_here: dict[tuple[Any, Any], Any] = {}
+    succeeded_here: set[tuple[Any, Any]] = set()
     minted_here: set[Any] = set()
     tail = regenerated_registry[len(base_registry) :]
     for line in tail.decode("utf-8", "replace").splitlines():
@@ -13061,24 +13160,82 @@ def _registry_growth_refusal(
         if forbidden:
             return f"appended registry line carries {forbidden} for {concept!r}"
         if entry.get("retired") is True:
-            if entry.get("geography") is not None or entry.get("entity") is not None:
+            if entry.get("entity") is not None:
                 return f"append retires a non-placeholder identity {concept!r}"
-            if (concept, uuid) not in committed_placeholders:
+            if (*_registry_identity_key(entry), uuid) not in committed_placeholders:
                 return f"retire of {concept!r} matches no committed docket placeholder"
-            retired_here.add((concept, uuid))
+            if base_catalog is not None and docket_placeholders is None:
+                return "the base catalog does not list its docket placeholders"
+            if (
+                docket_placeholders is not None
+                and (concept, uuid) not in docket_placeholders
+            ):
+                return (
+                    f"retire of {concept!r} matches no docket-only row in the "
+                    "base catalog"
+                )
+            if (concept, uuid) in retired_here:
+                return f"append retires the placeholder for {concept!r} twice"
+            retired_here[(concept, uuid)] = entry.get("geography")
             continue
-        if entry.get("geography") is None or entry.get("entity") is None:
-            return f"append mints a placeholder identity for {concept!r}"
         if "succeeds" in entry:
             if (concept, uuid) not in retired_here:
+                if any(retired == concept for retired, _uuid in retired_here):
+                    return (
+                        f"succeeds-mint for {concept!r} keeps no retired "
+                        "placeholder's UUID"
+                    )
                 return (
                     f"succeeds-mint for {concept!r} without its placeholder "
                     "retire in this append"
                 )
+            if (concept, uuid) in succeeded_here:
+                return f"append enriches the placeholder for {concept!r} twice"
+            # The generator also writes a succeeds-mint without an entity, or
+            # without a geography, when the observation has none. Appends
+            # refused those identities before 2026-10-17 and still do: an
+            # append may not mint a placeholder, succeeding or not.
+            if entry.get("geography") is None or entry.get("entity") is None:
+                return (
+                    f"succeeds-mint for {concept!r} lands on an identity "
+                    "without a geography or entity"
+                )
+            placeholder_geography = retired_here[(concept, uuid)]
+            predecessor = entry["succeeds"]
+            if not (
+                type(predecessor) is dict
+                and set(predecessor) == {"concept", "geography", "entity"}
+                and predecessor["concept"] == concept
+                and _registry_geography_key(predecessor["geography"])
+                == _registry_geography_key(placeholder_geography)
+                and predecessor["entity"] is None
+            ):
+                return (
+                    f"succeeds-mint for {concept!r} names a predecessor other "
+                    "than the placeholder this append retires"
+                )
+            if not _placeholder_geography_admits(
+                placeholder_geography, entry.get("geography")
+            ):
+                return (
+                    f"succeeds-mint for {concept!r} lands on a geography its "
+                    "placeholder does not admit"
+                )
+            succeeded_here.add((concept, uuid))
             continue
+        if entry.get("geography") is None or entry.get("entity") is None:
+            return f"append mints a placeholder identity for {concept!r}"
         if uuid in base_uuids or uuid in minted_here:
             return f"mint for {concept!r} reuses UUID {uuid}"
         minted_here.add(uuid)
+    unpaired = sorted(
+        concept for concept, _uuid in retired_here.keys() - succeeded_here
+    )
+    if unpaired:
+        return (
+            f"append retires the placeholder for {unpaired[0]!r} without its "
+            "succeeds-mint"
+        )
     return None
 
 
@@ -13097,6 +13254,14 @@ def _regenerate_series_catalog(
             "base commit is missing series-catalog generator "
             "scripts/build_series_catalog.py"
         )
+    # The committed catalog, read before the generator rewrites it: the guard
+    # below checks each retired placeholder is a docket-only row in it.
+    try:
+        base_catalog: bytes | None = (
+            stage / "ledger" / "series_catalog.json"
+        ).read_bytes()
+    except OSError:
+        base_catalog = None
     completed = subprocess.run(
         [sys.executable, str(generator)],
         cwd=stage,
@@ -13120,7 +13285,10 @@ def _regenerate_series_catalog(
         ) from exc
     if regenerated_registry != base_registry:
         growth_refusal = _registry_growth_refusal(
-            base_registry, regenerated_registry, appended_row_ids or []
+            base_registry,
+            regenerated_registry,
+            appended_row_ids or [],
+            base_catalog,
         )
         if growth_refusal:
             raise LedgerProposalError(
