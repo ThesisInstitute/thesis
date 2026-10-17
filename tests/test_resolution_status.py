@@ -865,6 +865,11 @@ RECEIPT_STOP_LOG = (
     "RECEIPT PIN REFUSED: thesis locks receipt 0.6.1 but "
     "PolicyEngine/chronicle@4b4395b07dcf (codex/thesis-ledger-facts) locks "
     "receipt 0.6.2.\n"
+    # main() returns 4 through its wrapper, which prints the finish line; the
+    # run never reached the loop, so there is no loop-complete line. With the
+    # finish line present, only the receipt stop keeps the run from reading
+    # as completed (round 6 of the #304 review).
+    f"{rs._FINISHED} 4\n"
 )
 
 
@@ -1071,6 +1076,22 @@ def test_the_verdicts_head_decides_whatever_follows_it(head, ref, fill):
 
 
 # --- A run that stopped early (2026-10-16) ---
+
+
+def test_the_receipt_stop_prefix_is_the_one_the_resolver_prints():
+    source = _RESOLVER.read_text()
+    assert 'RECEIPT_PIN_REFUSED = "RECEIPT PIN REFUSED: "' in source
+    assert rs._RECEIPT_STOP == "RECEIPT PIN REFUSED:"
+    assert RECEIPT_STOP_LOG.startswith(rs._RECEIPT_STOP)
+
+
+def test_a_receipt_stop_with_the_finish_line_is_still_not_completed():
+    # The finish line alone would make the run read as completed; the receipt
+    # stop is what keeps "the last resolver run did not complete" on the page.
+    _targets, run = rs.parse_resolver_log(RECEIPT_STOP_LOG)
+    assert run["logAvailable"] and not run["completed"]
+    assert not run["loopCompleted"]
+    assert rs.stopped_on_receipt_pin(run)
 
 
 def test_the_resolver_prints_the_lines_this_file_reads_for_completion():
