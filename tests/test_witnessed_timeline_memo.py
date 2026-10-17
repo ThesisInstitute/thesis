@@ -188,3 +188,110 @@ def test_a_rejected_registration_is_not_remembered(tmp_path: Path) -> None:
         with pytest.raises(TimelineError, match="raw SHA-256 mismatch"):
             _validate_registration(tmp_path, logical, raw_sha256="0" * 64, memo=memo)
     assert memo.registrations == set()
+
+
+def test_a_run_whose_bytes_changed_mid_call_is_verified_again(
+    tmp_path: Path, verify_calls: list[Path]
+) -> None:
+    """Review of 8c83c3e3 (finding 1): a result is reused only for the root
+    and manifest bytes it was computed from."""
+
+    commitment = _run(tmp_path)
+    memo = VerificationMemo()
+    _commit(tmp_path, commitment, memo)
+    manifest = tmp_path / "2026-10-16" / "run-a" / "manifest.json"
+    manifest.write_bytes(b'{"schemaVersion":"thesis_analyst_run_manifest_v1","v":2}')
+    changed = {
+        **commitment,
+        "manifestSha256": hashlib.sha256(manifest.read_bytes()).hexdigest(),
+        "manifestSize": manifest.stat().st_size,
+    }
+    _commit(tmp_path, changed, memo)
+    assert len(verify_calls) == 2
+    # The original bytes no longer match, so the original commitment refuses.
+    with pytest.raises(TimelineError, match="committed custody manifest mismatch"):
+        _commit(tmp_path, commitment, memo)
+
+
+def test_a_manifest_registration_is_checked_against_each_expected_hash(
+    tmp_path: Path, verify_calls: list[Path]
+) -> None:
+    """Two runs name one registration; the second expects another hash.
+
+    The memo answered the first expectation; it must not answer the second.
+    """
+
+    logical, _path, _digest = _registration(tmp_path)
+    good = timeline_module.canonical_sha256(
+        json.loads((tmp_path / "targets" / "target.json").read_bytes())
+    )
+    memo = VerificationMemo()
+    for name, expected in (("run-good", good), ("run-bad", "0" * 64)):
+        run_dir = tmp_path / "2026-10-16" / name
+        run_dir.mkdir(parents=True)
+        (run_dir / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "targetContext": {
+                        "targetRegistrationPath": logical,
+                        "targetContentHash": expected,
+                    }
+                }
+            )
+        )
+        if expected == good:
+            timeline_module._registration_from_manifest(
+                tmp_path, run_dir, None, {}, memo=memo
+            )
+        else:
+            with pytest.raises(TimelineError, match="canonical SHA-256 mismatch"):
+                timeline_module._registration_from_manifest(
+                    tmp_path, run_dir, None, {}, memo=memo
+                )
+
+
+@pytest.mark.live_records
+def test_the_real_verifier_through_the_memo_on_a_committed_run(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Differential with the real verify_run on a real run from records/.
+
+    The latest snapshot's first custody commitment goes through _commit_root
+    three times: twice with one memo and once without. The real verifier
+    runs twice in all (once per memo-less call, once for the memo), and
+    every pass accepts the commitment against the real bytes.
+    """
+
+    records = ROOT / "records"
+    latest = None
+    for path in sorted(records.glob("*/digest-*.json")):
+        if path.name.endswith(".witness.json"):
+            continue
+        digest = json.loads(path.read_bytes())
+        custody = (digest.get("artifactCommitments") or {}).get("custodyRoots")
+        if custody:
+            latest = custody
+    assert latest, "no snapshot commits a custody root"
+    commitment = latest[0]
+
+    real = timeline_module.verify_run
+    calls: list[Path] = []
+
+    def counting(run_dir: Path):
+        calls.append(run_dir)
+        return real(run_dir)
+
+    monkeypatch.setattr(timeline_module, "verify_run", counting)
+    memo = VerificationMemo()
+    outputs = []
+    for use_memo in (memo, memo, None):
+        runs: dict = {}
+        roots: dict = {}
+        registrations: dict = {}
+        _commit_root(
+            records, commitment, None, None, runs, roots, registrations, memo=use_memo
+        )
+        outputs.append((runs, roots, registrations))
+    assert len(calls) == 2
+    assert outputs[0] == outputs[1] == outputs[2]
+    assert len(memo.runs) == 1

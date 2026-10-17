@@ -15,7 +15,7 @@ from typing import Any, Iterable
 
 from canonical_json import canonical_bytes, canonical_sha256
 from register_targets import RegistrationError, registration_content_hash
-from verify_custody import CustodyError, verify_run
+from verify_custody import CustodyError, CustodyVerification, verify_run
 from verify_record_chain import (
     ChainError,
     ChainVerification,
@@ -46,14 +46,19 @@ class VerificationMemo:
     only 591 runs, and verify_run re-verified each run once per commitment
     (up to 208 times): about 50 minutes per call in CI, growing with the
     square of the history. verify_run and registration validation are pure
-    functions of bytes on disk, which a single call does not see change,
-    so a run is verified once and a registration once per expectation. The
+    functions of the repository's bytes and the process's working directory
+    (verify_run also reads REPOSITORY_ROOT and constituent runs outside the
+    run directory), none of which a single call changes. So a run is
+    verified once per (run directory, custody root file digest, manifest
+    digest) and a registration once per expectation: a root or manifest that
+    changed between two commitments in the same call is verified again
+    rather than reusing a result computed from other bytes. The
     per-commitment checks (paths, root and manifest file digests and sizes,
     root identity, inventory version) still run against every commitment.
     A memo lives for one call only; nothing is cached across calls.
     """
 
-    runs: dict[Path, Any] = field(default_factory=dict)
+    runs: dict[tuple[Path, str, str], CustodyVerification] = field(default_factory=dict)
     registrations: set[tuple[str, Any, Any, Any]] = field(default_factory=set)
 
 
@@ -243,15 +248,19 @@ def _commit_root(
     manifest_path = physical_path(records, manifest_logical)
     if root_path.parent != run_dir or manifest_path.parent != run_dir:
         raise TimelineError(f"custody commitment paths disagree for {run_logical}")
-    if hashlib.sha256(root_path.read_bytes()).hexdigest() != commitment.get(
+    root_digest = hashlib.sha256(root_path.read_bytes()).hexdigest()
+    if root_digest != commitment.get(
         "custodyRootFileSha256"
     ) or root_path.stat().st_size != commitment.get("custodyRootSize"):
         raise TimelineError(f"committed custody root file mismatch: {root_logical}")
-    if hashlib.sha256(manifest_path.read_bytes()).hexdigest() != commitment.get(
+    manifest_digest = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    if manifest_digest != commitment.get(
         "manifestSha256"
     ) or manifest_path.stat().st_size != commitment.get("manifestSize"):
         raise TimelineError(f"committed custody manifest mismatch: {manifest_logical}")
-    verified = memo.runs.get(run_dir) if memo is not None else None
+    # Reuse a verification only for the root and manifest bytes just checked.
+    memo_key = (run_dir, root_digest, manifest_digest)
+    verified = memo.runs.get(memo_key) if memo is not None else None
     if verified is None:
         try:
             verified = verify_run(run_dir)
@@ -260,7 +269,7 @@ def _commit_root(
                 f"covered custody root does not verify: {run_logical}: {exc}"
             ) from exc
         if memo is not None:
-            memo.runs[run_dir] = verified
+            memo.runs[memo_key] = verified
     root_hash = str(commitment.get("custodyRootSha256", ""))
     if verified.custody_root_sha256 != root_hash:
         raise TimelineError(f"custody root identity mismatch: {run_logical}")
