@@ -42,6 +42,7 @@ CADENCE_MAP = {
     "monthly": "month",
     "quarterly": "quarter",
     "annual": "year",
+    "fiscal_year": "fiscal_year",
 }
 CATALOG_ROW_KEYS = {
     "uuid",
@@ -105,6 +106,26 @@ def _target_period_identity(entry: dict[str, Any]) -> tuple[str, object]:
         if fiscal_year:
             return ("registered_query_snapshot_fiscal_year", fiscal_year.group(1))
     return ("literal", period)
+
+
+def _observed_cadence(entry: dict[str, Any]) -> str | None:
+    """The period type an observed Ledger row for this entry must carry.
+
+    A registered-query snapshot of a fiscal year is an annual docket entry,
+    but the USAspending leg writes its rows with period type fiscal_year,
+    and the catalog derives an observed row's cadence from its rows. So such
+    an entry may pin only a fiscal_year lineage, never a calendar-year one.
+    A docket-only placeholder keeps the docket's own cadence: it was seeded
+    from this entry, not from rows.
+    """
+
+    expected = CADENCE_MAP.get(entry.get("cadence"))
+    if (
+        expected == "year"
+        and _target_period_identity(entry)[0] == "registered_query_snapshot_fiscal_year"
+    ):
+        return "fiscal_year"
+    return expected
 
 
 def _object(raw: bytes, label: str) -> dict[str, Any]:
@@ -274,10 +295,11 @@ def _assert_containment(
                 f"{series}: unsupported docket cadence {docket_cadence!r}"
             )
         elif catalog_row["status"] == "observed":
-            if catalog_row["cadence"] != expected_cadence:
+            observed_cadence = _observed_cadence(entry)
+            if catalog_row["cadence"] != observed_cadence:
                 cadence_mismatches.append(
                     f"{series}: docket {docket_cadence} maps to "
-                    f"{expected_cadence}, catalog has {catalog_row['cadence']}"
+                    f"{observed_cadence}, catalog has {catalog_row['cadence']}"
                 )
         else:
             # Docket-only rows were minted from this registry, so their
@@ -547,7 +569,7 @@ def _derive_expected_pin(
         if (r.get("geography") or {}).get("level") == "country"
         and (expected_id is None or (r.get("geography") or {}).get("id") == expected_id)
     ]
-    expected_cadence = CADENCE_MAP.get(entry.get("cadence"))
+    expected_cadence = _observed_cadence(entry)
     if expected_cadence is not None:
         pool = [r for r in pool if r.get("cadence") == expected_cadence]
     pool = [
@@ -1046,3 +1068,170 @@ def test_residual_polish_from_final_review(tmp_path: pathlib.Path) -> None:
         _assert_containment(
             _catalog_shell([ph]), "t", docket_path=_docket_file(tmp_path, [entry])
         )
+
+
+def _fiscal_year_snapshot_entry(
+    row: dict[str, Any], **overrides: Any
+) -> dict[str, Any]:
+    entry = {
+        "series": row["concept"],
+        "cadence": "annual",
+        "period": "FY2026",
+        "slug": "snapshot-fy2026",
+        "extras": {
+            "targetUnit": "millions",
+            "sourceBinding": {"releasePolicy": "registered_query_snapshot"},
+        },
+        "ledger": {"uuid": row["uuid"], "concept": row["concept"]},
+    }
+    entry.update(overrides)
+    return entry
+
+
+def test_fiscal_year_snapshot_pins_its_fiscal_year_lineage(
+    tmp_path: pathlib.Path,
+) -> None:
+    # 2026-10-17: the five DoD USAspending FY2026 snapshots became observed
+    # rows with cadence fiscal_year (the resolver writes period type
+    # fiscal_year); the gate expected the annual docket cadence's "year".
+    row = _catalog_row(
+        uuid="00000000-0000-4000-8000-0000000000f1",
+        concept="usaspending.test.series",
+        unit="millions",
+        cadence="fiscal_year",
+        first_observed_period="2026",
+        last_observed_period="2026",
+    )
+    for period in ("FY2026", "fy_2026", "2026", "Fy2026"):
+        entry = _fiscal_year_snapshot_entry(row, period=period)
+        _assert_containment(
+            _catalog_shell([row]),
+            "test catalog",
+            docket_path=_docket_file(tmp_path, [entry]),
+        )
+
+
+def test_fiscal_year_snapshot_refuses_a_calendar_year_lineage(
+    tmp_path: pathlib.Path,
+) -> None:
+    calendar = _catalog_row(
+        uuid="00000000-0000-4000-8000-0000000000f2",
+        concept="usaspending.test.series",
+        unit="millions",
+        cadence="year",
+        first_observed_period="2026",
+        last_observed_period="2026",
+    )
+    entry = _fiscal_year_snapshot_entry(calendar)
+    with pytest.raises(AssertionError, match="maps to fiscal_year, catalog has year"):
+        _assert_containment(
+            _catalog_shell([calendar]),
+            "test catalog",
+            docket_path=_docket_file(tmp_path, [entry]),
+        )
+
+
+def test_fiscal_year_snapshot_placeholder_keeps_the_seeded_cadence(
+    tmp_path: pathlib.Path,
+) -> None:
+    # Placeholders were seeded from the annual docket entry, so their
+    # cadence is "year" until rows arrive (cdfi, dhs, ntia, ondcp and usfs
+    # at Chronicle dd929cba).
+    def placeholder(cadence: str) -> dict[str, Any]:
+        return _catalog_row(
+            uuid="00000000-0000-4000-8000-0000000000f3",
+            concept="usaspending.test.placeholder",
+            status="docket-only",
+            cadence=cadence,
+            unit="millions",
+            entity=None,
+            sources=[],
+            rid_patterns=[],
+            first_observed_period=None,
+            last_observed_period=None,
+            observation_count=0,
+        )
+
+    seeded = placeholder("year")
+    entry = _fiscal_year_snapshot_entry(seeded)
+    _assert_containment(
+        _catalog_shell([seeded]),
+        "test catalog",
+        docket_path=_docket_file(tmp_path, [entry]),
+    )
+    misseeded = placeholder("month")
+    with pytest.raises(AssertionError, match="placeholder cadence"):
+        _assert_containment(
+            _catalog_shell([misseeded]),
+            "test catalog",
+            docket_path=_docket_file(
+                tmp_path, [_fiscal_year_snapshot_entry(misseeded)]
+            ),
+        )
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        # Not a registered-query snapshot: an annual first print stays "year".
+        {"extras": {"targetUnit": "millions"}},
+        {
+            "extras": {
+                "targetUnit": "millions",
+                "sourceBinding": {"releasePolicy": "first_print"},
+            }
+        },
+        # A snapshot whose period is not a fiscal year.
+        {"period": "2026-05"},
+        {"period": None},
+        # Not an annual entry.
+        {"cadence": "monthly"},
+    ],
+)
+def test_only_fiscal_year_snapshots_take_the_fiscal_year_cadence(
+    tmp_path: pathlib.Path, overrides: dict[str, Any]
+) -> None:
+    row = _catalog_row(
+        uuid="00000000-0000-4000-8000-0000000000f4",
+        concept="usaspending.test.series",
+        unit="millions",
+        cadence="fiscal_year",
+        first_observed_period="2026",
+        last_observed_period="2026",
+    )
+    entry = _fiscal_year_snapshot_entry(row, **overrides)
+    with pytest.raises(AssertionError, match="cadence mismatches"):
+        _assert_containment(
+            _catalog_shell([row]),
+            "test catalog",
+            docket_path=_docket_file(tmp_path, [entry]),
+        )
+
+
+def test_usaspending_snapshots_are_contained_in_the_dd929cba_rows(
+    tmp_path: pathlib.Path,
+) -> None:
+    # Offline regression for 2026-10-17: Chronicle dd929cba holds five
+    # observed DoD FY2026 snapshot rows (cadence fiscal_year) and six
+    # placeholders seeded "year". Every committed usaspending.* docket entry
+    # must be contained in them.
+    frozen = _load(
+        ROOT / "tests" / "fixtures" / "usaspending_catalog_rows_dd929cba.json",
+        "usaspending catalog rows",
+    )
+    rows = frozen["series"]
+    assert {row["status"] for row in rows} == {"observed", "docket-only"}
+    assert {row["cadence"] for row in rows if row["status"] == "observed"} == {
+        "fiscal_year"
+    }
+    entries = [
+        entry
+        for entry in _load(DOCKET_PATH, "docket")["series"]
+        if entry["series"].startswith("usaspending.")
+    ]
+    assert len(entries) >= 12
+    _assert_containment(
+        _catalog_shell(rows),
+        "dd929cba usaspending rows",
+        docket_path=_docket_file(tmp_path, entries),
+    )
