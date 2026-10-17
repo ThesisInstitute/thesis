@@ -685,3 +685,38 @@ def test_the_append_path_refuses_to_enrich_a_row_the_committed_catalog_observes(
         resolve_pending._regenerate_series_catalog(
             stage, candidate_ledger=b"", base_registry=base, appended_row_ids=[CDFI_ROW]
         )
+
+
+# The guard is total: whatever the registry lines or catalog hold, it answers
+# with a refusal or None and never raises. (A geography written as a list, as
+# some fixtures do, crashed an early version with an unhashable key.)
+
+JSON_SCALARS = st.none() | st.booleans() | st.integers() | st.text(max_size=8)
+JSON_VALUES = st.recursive(
+    JSON_SCALARS,
+    lambda inner: st.lists(inner, max_size=3)
+    | st.dictionaries(st.text(max_size=8), inner, max_size=3),
+    max_leaves=8,
+)
+REGISTRY_FIELDS = st.sampled_from(
+    ["concept", "geography", "entity", "uuid", "retired", "succeeds", "note"]
+)
+REGISTRY_LINES = st.dictionaries(
+    REGISTRY_FIELDS,
+    JSON_VALUES | st.just(CDFI) | st.just(CDFI_UUID) | st.just(US_NO_VINTAGE),
+    max_size=7,
+).map(lambda fields: json.dumps(fields).encode() + b"\n")
+
+
+@settings(max_examples=500, deadline=None)
+@given(
+    base_lines=st.lists(REGISTRY_LINES, max_size=4),
+    tail_lines=st.lists(REGISTRY_LINES | st.just(CDFI_RETIRE), max_size=4),
+    catalog=st.none() | JSON_VALUES.map(lambda value: json.dumps(value).encode()),
+)
+def test_the_guard_never_raises(
+    base_lines: list[bytes], tail_lines: list[bytes], catalog: bytes | None
+) -> None:
+    base = CDFI_LINE + b"".join(base_lines)
+    result = refusal(base, base + b"".join(tail_lines), [CDFI_ROW], catalog)
+    assert result is None or isinstance(result, str)

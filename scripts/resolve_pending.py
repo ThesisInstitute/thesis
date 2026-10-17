@@ -12992,20 +12992,26 @@ def _identity_belongs_to_rows(concept: str, appended_row_ids: list[str]) -> bool
     return False
 
 
-def _registry_geography_key(geography: Any) -> Any:
+def _registry_geography_key(geography: Any) -> tuple[str, str]:
     """A geography as Chronicle's registry keys it: (level, id, vintage), with
     a missing vintage read as none (`_geo_key` in scripts/build_series_catalog.py).
-    """
-    if type(geography) is not dict:
-        return geography
-    return (geography.get("level"), geography.get("id"), geography.get("vintage"))
+    Any other value keys as its canonical JSON, tagged so it never equals a
+    dict's key. Keys are hashable whatever a line holds."""
+    if type(geography) is dict:
+        return (
+            "dict",
+            json.dumps(
+                [geography.get("level"), geography.get("id"), geography.get("vintage")]
+            ),
+        )
+    return ("raw", json.dumps(geography, sort_keys=True))
 
 
-def _registry_entity_key(entity: Any) -> Any:
+def _registry_entity_key(entity: Any) -> tuple[str, str]:
     """An entity as Chronicle's registry keys it: (name, role)."""
-    if type(entity) is not dict:
-        return entity
-    return (entity.get("name"), entity.get("role"))
+    if type(entity) is dict:
+        return ("dict", json.dumps([entity.get("name"), entity.get("role")]))
+    return ("raw", json.dumps(entity, sort_keys=True))
 
 
 def _registry_identity_key(entry: dict[str, Any]) -> tuple[Any, Any, Any]:
@@ -13046,9 +13052,11 @@ def _docket_placeholder_uuids(base_catalog: bytes) -> set[tuple[Any, Any]] | Non
     if type(rows) is not list:
         return None
     return {
-        (row.get("concept"), row.get("uuid"))
+        (row["concept"], row["uuid"])
         for row in rows
         if type(row) is dict
+        and isinstance(row.get("concept"), str)
+        and isinstance(row.get("uuid"), str)
         and row.get("status") == "docket-only"
         and row.get("entity") is None
     }
@@ -13110,8 +13118,14 @@ def _registry_growth_refusal(
             entry = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if isinstance(entry, dict):
-            base_uuids.add(entry.get("uuid"))
+        # A line whose concept or UUID is not a string can match no appended
+        # line (those are checked to be strings), so it is skipped.
+        if (
+            isinstance(entry, dict)
+            and isinstance(entry.get("concept"), str)
+            and isinstance(entry.get("uuid"), str)
+        ):
+            base_uuids.add(entry["uuid"])
             latest[_registry_identity_key(entry)] = entry
     committed_placeholders = {
         (*_registry_identity_key(entry), entry.get("uuid"))
