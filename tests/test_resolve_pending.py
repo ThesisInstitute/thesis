@@ -15,6 +15,8 @@ import sys
 from types import SimpleNamespace
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -6509,3 +6511,124 @@ def test_the_workflow_publishes_before_failing_on_refused_rows() -> None:
     assert fail_step == names.index("Alert on failure") - 1
     assert fail_step > names.index("Record the successfully deployed ledger SHA")
     assert "if: steps.resolve.outputs.resolver_rc == '3'" in workflow
+
+
+# --- Registry growth is a per-row catalog refusal (2026-10-16) ---
+#
+# Run 38962977031 reached the append for the first time in two weeks and
+# raised there: the FY2026 USAspending CDFI snapshot's row made the staged
+# generator retire a non-placeholder identity, which _regenerate_series_catalog
+# refuses for the whole append. The per-row preflight only looked at the
+# generator's exit code, so it could not exclude that one row.
+
+_REGISTRY_GENERATOR = b"""import json, pathlib, sys
+text = pathlib.Path("ledger/official_observations.jsonl").read_text()
+rows = [json.loads(line) for line in text.splitlines() if line.strip()]
+registry = pathlib.Path("ledger/series_uuid_registry.jsonl")
+ids = [row["source_record_id"] for row in rows]
+if any(ref.startswith("conflict.") for ref in ids):
+    sys.exit("unit conflict within identity")
+if any(ref.startswith("unlink.") for ref in ids):
+    registry.unlink()
+    sys.exit(0)
+added = []
+for ref in ids:
+    concept = ".".join(ref.split(".")[:3])
+    full = {"geography": ["country", "0100000US", "current"],
+            "entity": ["economy", "aggregate"]}
+    if ref.startswith("retire."):
+        added.append({"concept": concept, "uuid": "old-" + concept, **full,
+                      "retired": True})
+    elif ref.startswith("mint."):
+        added.append({"concept": concept, "uuid": "fresh-" + ref, **full})
+if added:
+    with registry.open("a") as handle:
+        for entry in added:
+            handle.write(json.dumps(entry) + "\\n")
+"""
+_BASE_REGISTRY = (
+    b'{"concept":"base.series.level","uuid":"base-1",'
+    b'"geography":["country","0100000US","current"],'
+    b'"entity":["economy","aggregate"]}\n'
+)
+
+
+def _registry_tree() -> resolve_pending.RepositoryTree:
+    tree = _catalog_tree(_REGISTRY_GENERATOR)
+    tree.files["ledger/series_uuid_registry.jsonl"] = _BASE_REGISTRY
+    tree.modes["ledger/series_uuid_registry.jsonl"] = "100644"
+    tree.blob_shas["ledger/series_uuid_registry.jsonl"] = "b" * 40
+    return tree
+
+
+def _refuse(monkeypatch, rows: list[dict[str, str]]) -> dict[str, str]:
+    tree = _registry_tree()
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    return resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, "ledger/official_observations.jsonl", base, rows
+    )
+
+
+def test_a_row_that_retires_an_identity_is_refused_alone(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "mint.series.a.fy2026.snapshot"},
+        {"source_record_id": "retire.cdfi.obligations.fy2026.snapshot"},
+        {"source_record_id": "plain.series.b.2026_09.first_print"},
+    ]
+    refusals = _refuse(monkeypatch, rows)
+    assert list(refusals) == ["retire.cdfi.obligations.fy2026.snapshot"]
+    reason = refusals["retire.cdfi.obligations.fy2026.snapshot"]
+    assert reason.startswith("series-catalog registry growth refused: ")
+    assert "retires a non-placeholder identity 'retire.cdfi.obligations'" in reason
+
+
+def test_a_first_observations_own_fresh_identity_is_not_refused(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "mint.series.a.fy2026.snapshot"},
+        {"source_record_id": "mint.series.b.fy2026.snapshot"},
+    ]
+    assert _refuse(monkeypatch, rows) == {}
+
+
+def test_a_generator_that_removes_the_registry_is_a_refusal(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "plain.series.b.2026_09.first_print"},
+        {"source_record_id": "unlink.series.c.2026_09.first_print"},
+    ]
+    refusals = _refuse(monkeypatch, rows)
+    assert refusals == {
+        "unlink.series.c.2026_09.first_print": (
+            "series-catalog registry growth refused: the generator removed the "
+            "UUID registry"
+        )
+    }
+
+
+@settings(max_examples=15, deadline=None)
+@given(
+    kinds=st.lists(
+        st.sampled_from(["plain", "mint", "retire", "conflict"]), min_size=1, max_size=4
+    )
+)
+def test_exactly_the_rows_that_fail_alone_are_refused(kinds: list[str]) -> None:
+    """Every row whose own append the generator refuses, by exit code or by
+    registry growth, is refused with that reason; every other row is kept,
+    and the kept rows pass together (no rows fail only together here)."""
+    rows = [
+        {"source_record_id": f"{kind}.series.s{index}.2026_09.first_print"}
+        for index, kind in enumerate(kinds)
+    ]
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        refusals = _refuse(monkeypatch, rows)
+    expected = {
+        row["source_record_id"]
+        for row, kind in zip(rows, kinds)
+        if kind in {"retire", "conflict"}
+    }
+    assert set(refusals) == expected
+    for ref, reason in refusals.items():
+        if ref.startswith("retire."):
+            assert reason.startswith("series-catalog registry growth refused: ")
+        else:
+            assert reason.startswith("series-catalog generator exit 1: ")
