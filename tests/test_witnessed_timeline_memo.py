@@ -282,6 +282,20 @@ def test_the_real_verifier_through_the_memo_on_a_committed_run(
         return real(run_dir)
 
     monkeypatch.setattr(timeline_module, "verify_run", counting)
+    # Real proofs, so the comparison covers populated run, root and
+    # registration maps rather than three empty ones.
+    direct = timeline_module.ProofCandidate(
+        earliest_witnessed_at="2026-10-16T00:00:00Z",
+        witness_digest="records/2026-10-16/digest-direct.json",
+        tsa_gen_time="2026-10-16T00:00:00Z",
+        coverage="direct",
+    )
+    contents = timeline_module.ProofCandidate(
+        earliest_witnessed_at="2026-10-16T00:00:00Z",
+        witness_digest="records/2026-10-16/digest-container.json",
+        tsa_gen_time="2026-10-16T00:00:00Z",
+        coverage="transitive",
+    )
     memo = VerificationMemo()
     outputs = []
     for use_memo in (memo, memo, None):
@@ -289,9 +303,23 @@ def test_the_real_verifier_through_the_memo_on_a_committed_run(
         roots: dict = {}
         registrations: dict = {}
         _commit_root(
-            records, commitment, None, None, runs, roots, registrations, memo=use_memo
+            records,
+            commitment,
+            direct,
+            contents,
+            runs,
+            roots,
+            registrations,
+            memo=use_memo,
         )
         outputs.append((runs, roots, registrations))
     assert len(calls) == 2
     assert outputs[0] == outputs[1] == outputs[2]
+    runs, roots, _registrations = outputs[0]
+    assert runs == {commitment["runDirectory"]: contents.as_json()}
+    assert set(roots) == {commitment["custodyRootSha256"]}
+    assert (
+        roots[commitment["custodyRootSha256"]]["custodyInventoryVersion"]
+        == (commitment["custodyInventoryVersion"])
+    )
     assert len(memo.runs) == 1
