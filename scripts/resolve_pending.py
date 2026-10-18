@@ -121,10 +121,13 @@ from sba_loan_performance import (
 )
 from thesis_log_client import load_thesis_log
 from verify_custody import (
+    CLAIMS_LABEL_LAG,
     CustodyError,
     claims_vintages_consistent,
     judge_claims_first_print,
     parse_alfred_claims_vintage,
+    read_alfred_claims_vintage,
+    require_claims_vintage_label,
     verify_run,
 )
 from witnessed_timeline import TimelineError, extract_timeline
@@ -12484,7 +12487,9 @@ CLAIMS_DRIFT_RECORD_URL = (
 )
 # Ledger rows the claims leg wrote from a later DOL release than the week's
 # first print, while the weekly claims windows drifted (2026-09-11 to
-# 2026-10-09). Each record id maps to the assertion version it supersedes.
+# 2026-10-18; the last, continued claims week 2026-09-26, is Chronicle line
+# 239, appended by resolver run 39147142911 before the guard in #344 merged).
+# Each record id maps to the assertion version it supersedes.
 # No value comes from this table: every run re-derives the first vintage from
 # ALFRED and refuses an entry unless its row is still the active version and
 # was read from a later release than the first print. Once the superseding
@@ -12504,6 +12509,9 @@ CLAIMS_FIRST_PRINT_CORRECTIONS: dict[str, str] = {
     ),
     "dol.eta.continued_claims.sa.week_2026-09-19.first_print": (
         "av2:1ef4c99a3c6aca000995a600728f3431d7c872442680337ce8748d837ea47922"
+    ),
+    "dol.eta.continued_claims.sa.week_2026-09-26.first_print": (
+        "av2:b1c9579624a6cf93d0a0f5343c4c861a03a0637048bf689012538c05c75ed2e9"
     ),
 }
 
@@ -12620,6 +12628,25 @@ class ClaimsVintages:
         except ValueError as exc:
             raise ClaimsVintageError(str(exc)) from exc
 
+    def _require_label(
+        self, series_id: str, role: str, day: dt.date, raw: bytes
+    ) -> None:
+        """Defer the week when ALFRED answers a read with an earlier day's vintage
+        than its role allows (verify_custody.CLAIMS_LABEL_LAG).
+
+        Such a response is an honest vintage of another day, so the series is
+        not refused for the rest of the run; the week waits.
+        """
+
+        lag, shows = CLAIMS_LABEL_LAG[role]
+        label, _rows = read_alfred_claims_vintage(raw, series_id, day.isoformat())
+        try:
+            require_claims_vintage_label(
+                series_id, role, day, label, day - dt.timedelta(days=lag), shows
+            )
+        except ValueError as exc:
+            raise ClaimsVintageError(str(exc)) from exc
+
     def first_print(
         self, kind: str, week: str, limit: dt.date
     ) -> tuple[dt.date, float, bytes, str, list[ClaimsEvidence]] | None:
@@ -12629,7 +12656,10 @@ class ClaimsVintages:
         (register_targets.weekly_claims_release_day), never from ALFRED, so no
         ALFRED response can move it. ALFRED must agree at four reads: the day
         before holds no such week (read twice, byte-identical); the scheduled
-        day holds it; the day after prints the same value. Returns that
+        day holds it; the day after prints the same value. The day before and
+        the scheduled day must each be ALFRED's vintage of that very day; the
+        day after may be its vintage of the scheduled day, as ALFRED's header
+        sometimes says (verify_custody.CLAIMS_LABEL_LAG). Returns that
         value with the three supporting reads as evidence; None when the day
         has not come or ALFRED does not answer. A week ALFRED did not print on
         the scheduled day defers until DOL's day is listed as an exception.
@@ -12654,6 +12684,7 @@ class ClaimsVintages:
         rows, before_raw, before_at = self.read(series_id, before)
         if before_raw is None:
             return None
+        self._require_label(series_id, "vintage_before_release", before, before_raw)
         if week in rows:
             self._refuse(
                 series_id,
@@ -12678,6 +12709,7 @@ class ClaimsVintages:
         rows, raw, retrieved_at = self.read(series_id, scheduled)
         if raw is None:
             return None
+        self._require_label(series_id, "release_day", scheduled, raw)
         if week not in rows:
             raise ClaimsVintageError(
                 f"ALFRED {series_id} vintage {scheduled}, DOL's scheduled "
@@ -12687,6 +12719,7 @@ class ClaimsVintages:
         later, later_raw, later_at = self.read(series_id, following)
         if later_raw is None:
             return None
+        self._require_label(series_id, "vintage_after_release", following, later_raw)
         if later.get(week) != rows[week]:
             self._refuse(
                 series_id,

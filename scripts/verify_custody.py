@@ -974,16 +974,27 @@ def _verify_resolver_v2(
         raise CustodyError("weeklyClaimsSchedule is malformed")
 
 
-def parse_alfred_claims_vintage(
+def read_alfred_claims_vintage(
     raw: bytes, series_id: str, day: str
-) -> dict[str, float]:
-    """{week: value} from one complete ALFRED claims vintage; ValueError if not.
+) -> tuple[date, dict[str, float]]:
+    """(label, {week: value}) from one complete ALFRED claims vintage, or ValueError.
 
     The one parser the resolver and custody both use. Absence of a week is
-    evidence only from a complete vintage: the exact header ALFRED writes for
-    this series and date, then one finite numeric row per week from the
-    series' first week with no gap. An error page, another series or date, a
-    malformed row, or a body that stops early is refused.
+    evidence only from a complete vintage: an ALFRED header for this series,
+    then one finite numeric row per week from the series' first week with no
+    gap. An error page, another series, a malformed row, or a body that stops
+    early is refused.
+
+    The label is the vintage date the header names. ALFRED does not always
+    name the requested date: on 2026-10-18 its ICSA responses for seven of
+    291 daily vintage dates in 2026 (Fridays and weekend days from
+    2026-09-25) were labeled the day before and held that day's rows; its
+    response for 2026-09-25 was byte-identical to its response for
+    2026-09-24 (~/reviews/thesis-weekly-claims-2026-10/header_survey/). So a
+    response is read as ALFRED's vintage of its label, which must be a real
+    date no later than the requested one; a label after it is another
+    vintage and is refused. What a read must show about its label is
+    judge_claims_first_print's rule, by role.
     """
 
     try:
@@ -993,11 +1004,17 @@ def parse_alfred_claims_vintage(
     lines = [line.rstrip("\r") for line in lines]
     while lines and not lines[-1]:
         lines.pop()
-    header = f"observation_date,{series_id}_{day.replace('-', '')}"
-    if not lines or lines[0] != header:
+    header = lines[0] if lines else ""
+    match = re.fullmatch(rf"observation_date,{re.escape(series_id)}_(\d{{8}})", header)
+    label = None
+    if match:
+        try:
+            label = datetime.strptime(match.group(1), "%Y%m%d").date()
+        except ValueError:
+            label = None
+    if label is None or label > date.fromisoformat(day):
         raise ValueError(
-            f"ALFRED {series_id} {day} is not a vintage CSV (header "
-            f"{(lines[0] if lines else '')[:60]!r})"
+            f"ALFRED {series_id} {day} is not a vintage CSV (header {header[:60]!r})"
         )
     rows: dict[str, float] = {}
     expected = date.fromisoformat(CLAIMS_SERIES_FIRST_WEEK[series_id])
@@ -1018,12 +1035,58 @@ def parse_alfred_claims_vintage(
         expected += timedelta(days=7)
     if not rows:
         raise ValueError(f"ALFRED {series_id} {day} holds no weeks")
-    return rows
+    return label, rows
+
+
+def parse_alfred_claims_vintage(
+    raw: bytes, series_id: str, day: str
+) -> dict[str, float]:
+    """{week: value} from one complete ALFRED claims vintage; ValueError if not.
+
+    read_alfred_claims_vintage without the label.
+    """
+
+    return read_alfred_claims_vintage(raw, series_id, day)[1]
+
+
+def require_claims_vintage_label(
+    series_id: str,
+    role: str,
+    day: date,
+    label: date,
+    earliest: date,
+    shows: str,
+) -> None:
+    """ValueError unless a read for ``day`` is ALFRED's vintage of a day from
+    ``earliest`` to ``day``: a response labeled earlier holds an earlier day's
+    rows, so it cannot show ``shows``."""
+
+    if not earliest <= label <= day:
+        raise ValueError(
+            f"ALFRED {series_id} answered its {role} read for {day} with its "
+            f"vintage of {label}, which cannot show {shows}"
+        )
 
 
 CLAIMS_SERIES_NAMES = {
     "ICSA": "us.dol.initial_claims.sa",
     "CCSA": "dol.eta.continued_claims.sa",
+}
+# How many days before the day it reads a first-print read's label may fall,
+# by role, and what the read must show. The day before and the release day
+# must be ALFRED's vintage of that very day. The day after may be its vintage
+# of the release day, which holds the same rows: ALFRED answered ICSA
+# 2026-09-25 with its 2026-09-24 file. The superseded row's read needs no
+# label rule; it must only hold a later release, which judge_claims_first_print
+# checks from its rows.
+CLAIMS_LABEL_LAG = {
+    "vintage_before_release": (0, "the week absent the day before DOL's release"),
+    "vintage_before_release_reread": (
+        0,
+        "the week absent the day before DOL's release",
+    ),
+    "release_day": (0, "the week as printed on DOL's release day"),
+    "vintage_after_release": (1, "the release day's print a day later"),
 }
 
 
@@ -1074,7 +1137,8 @@ def judge_claims_first_print(
     before must lack the week on two byte-identical reads, the release day
     must hold it, the day after must print the same value, every read must
     be a complete vintage and all must be mutually consistent, and a
-    superseded row's vintage must be a later release.
+    superseded row's vintage must be a later release. Each read must be
+    ALFRED's vintage of the day it shows (CLAIMS_LABEL_LAG).
     """
 
     from register_targets import weekly_claims_release_day
@@ -1097,10 +1161,16 @@ def judge_claims_first_print(
     extra = set(reads) - set(expected) - {"superseded_row_vintage"}
     if extra:
         raise ValueError(f"unexpected reads for week {week}: {sorted(extra)}")
-    rows = {
-        role: parse_alfred_claims_vintage(raw, series_id, day.isoformat())
+    labelled = {
+        role: read_alfred_claims_vintage(raw, series_id, day.isoformat())
         for role, (day, raw) in reads.items()
     }
+    rows = {role: role_rows for role, (_label, role_rows) in labelled.items()}
+    for role, (lag, shows) in CLAIMS_LABEL_LAG.items():
+        day = reads[role][0]
+        require_claims_vintage_label(
+            series_id, role, day, labelled[role][0], day - timedelta(days=lag), shows
+        )
     claims_vintages_consistent(
         series_id, [(reads[role][0], rows[role]) for role in rows]
     )

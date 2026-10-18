@@ -10,12 +10,17 @@ rows read from a later release.
 
 Fixtures are real data:
 - tests/fixtures/alfred_claims_vintages_2026.json: ICSA and CCSA as each
-  Thursday vintage from 2026-08-20 to 2026-10-08 printed them, fetched
-  2026-10-12 from alfred.stlouisfed.org.
-- tests/fixtures/chronicle_late_release_claims_rows.jsonl: the five rows in
+  Thursday vintage from 2026-08-20 to 2026-10-15 printed them, fetched
+  2026-10-12 and 2026-10-18 from alfred.stlouisfed.org, and the vintage dates
+  whose ALFRED response named another day's vintage in its header ("labels").
+- tests/fixtures/alfred_icsa_2026-09-2{3,4,5}.csv.gz: ALFRED's complete ICSA
+  responses for those vintage dates, fetched 2026-10-18; the 2026-09-25
+  response is byte-identical to the 2026-09-24 one, header included.
+- tests/fixtures/chronicle_late_release_claims_rows.jsonl: the six rows in
   PolicyEngine/chronicle ledger/official_observations.jsonl (branch
-  codex/thesis-ledger-facts at d7e45bc5751357fdac1cfc182e1abaa414b675f3,
-  lines 222, 223, 225, 232 and 233) that CLAIMS_FIRST_PRINT_CORRECTIONS names.
+  codex/thesis-ledger-facts) that CLAIMS_FIRST_PRINT_CORRECTIONS names: lines
+  222, 223, 225, 232 and 233 at d7e45bc5751357fdac1cfc182e1abaa414b675f3, and
+  line 239 at 86da0233a28e926da052effe93a66e2d9e3d77c2.
 Tests that need releases outside that range build SYNTHETIC vintages and say so.
 """
 
@@ -100,20 +105,24 @@ def fetch_from(
     releases_by_series: dict[str, dict[str, dict[str, float]]],
     corrupt=None,
     before_first_release: str = FIXTURE_FIRST_WEEK,
+    labels: dict[str, dict[str, str]] | None = None,
 ):
     """An ALFRED stand-in: a vintage date returns the latest release on or before it.
 
     Before its first release a series holds the weeks through
     ``before_first_release`` (the earliest real release's rows for those
-    weeks, else SYNTHETIC filler). ``corrupt(series, vintage, raw, attempt)``
-    may replace a response.
+    weeks, else SYNTHETIC filler). ``labels[series][vintage]`` names the day
+    whose vintage ALFRED answers that date with, as its header says (real
+    ALFRED does this; see ALFRED["labels"]). ``corrupt(series, vintage, raw,
+    attempt)`` may replace a response.
     """
 
     attempts: dict[tuple[str, str], int] = {}
 
     def fetch(series_id: str, vintage: str):
         releases = releases_by_series[series_id]
-        printed = [day for day in sorted(releases) if day <= vintage]
+        label = ((labels or {}).get(series_id) or {}).get(vintage, vintage)
+        printed = [day for day in sorted(releases) if day <= label]
         if printed:
             rows = filled(dict(releases[printed[-1]]))
         else:
@@ -122,7 +131,7 @@ def fetch_from(
                 week: earliest.get(week, 1.0)
                 for week in weeks_through(before_first_release)
             }
-        raw = csv_bytes(series_id, vintage, rows)
+        raw = csv_bytes(series_id, label, rows)
         attempt = attempts.get((series_id, vintage), 0)
         attempts[(series_id, vintage)] = attempt + 1
         if corrupt is not None:
@@ -133,7 +142,9 @@ def fetch_from(
 
 
 def real_vintages(corrupt=None) -> resolve_pending.ClaimsVintages:
-    return resolve_pending.ClaimsVintages(fetch_from(ALFRED["series"], corrupt))
+    return resolve_pending.ClaimsVintages(
+        fetch_from(ALFRED["series"], corrupt, labels=ALFRED["labels"])
+    )
 
 
 def synthetic_vintages(week: dt.date, first: dt.date) -> resolve_pending.ClaimsVintages:
@@ -222,7 +233,7 @@ def test_every_real_week_resolves_to_its_first_release(kind) -> None:
             week,
             kind,
             "2026-10-08",
-            dt.date(2026, 10, 12),
+            dt.date(2026, 10, 18),
             real_vintages(),
         )
         assert fetched is not None, week
@@ -237,6 +248,7 @@ def test_every_real_week_resolves_to_its_first_release(kind) -> None:
 def test_the_pending_drifted_week_resolves_to_its_first_print(capsys) -> None:
     # Continued claims, week ending 2026-09-26: the one claims forecast still
     # pending on 2026-10-12. Printed 1.716 on 2026-10-08; resolutionDate 10-18.
+    # The old leg recorded the revised 1.714 that day (Chronicle line 239).
     ref = "dol.eta.continued_claims.sa.week_2026-09-26.first_print"
     fetched = resolve_pending.resolve_claims_ref(
         ref,
@@ -365,10 +377,15 @@ EXPECTED_CORRECTIONS = {
         1.701,
         "2026-10-01",
     ),
+    "dol.eta.continued_claims.sa.week_2026-09-26.first_print": (
+        1.714,
+        1.716,
+        "2026-10-08",
+    ),
 }
 
 
-def test_the_table_names_exactly_the_five_real_rows() -> None:
+def test_the_table_names_exactly_the_six_real_rows() -> None:
     table = resolve_pending.CLAIMS_FIRST_PRINT_CORRECTIONS
     assert table == {
         row["source_record_id"]: row["assertionVersion"]["id"] for row in LATE_ROWS
@@ -381,7 +398,7 @@ def test_the_table_names_exactly_the_five_real_rows() -> None:
 
 # Invariant 3: after the corrections, every listed record's current row holds
 # the first print, read from the first vintage, and names what it replaces.
-def test_corrections_supersede_the_five_real_rows_with_first_prints() -> None:
+def test_corrections_supersede_the_six_real_rows_with_first_prints() -> None:
     fetched, supersedes, refusals = resolve_pending.claims_corrections(
         LATE_ROWS, real_vintages()
     )
@@ -437,8 +454,42 @@ def test_a_stale_table_entry_is_refused() -> None:
     fetched, _supersedes, refusals = resolve_pending.claims_corrections(
         rows, real_vintages()
     )
-    assert len(fetched) == 4
+    assert len(fetched) == len(LATE_ROWS) - 1
     assert len(refusals) == 1 and "is not the record's active row" in refusals[0]
+
+
+def test_the_row_a_late_run_appended_on_2026_10_18_is_corrected() -> None:
+    # Chronicle line 239: resolver run 39147142911 (main 992b15b2, before the
+    # guard in #344) read continued claims week 2026-09-26 from ALFRED's
+    # 2026-10-18 vintage, which carries DOL's 2026-10-15 revision (1.714).
+    # DOL first printed it on 2026-10-08 as 1.716.
+    ref = "dol.eta.continued_claims.sa.week_2026-09-26.first_print"
+    row = next(row for row in LATE_ROWS if row["source_record_id"] == ref)
+    assert (row["value"], row["sourceVintage"]) == (1.714, "2026-10-18")
+    vintages = real_vintages()
+    fetched, supersedes, refusals = resolve_pending.claims_corrections(
+        [row], vintages
+    )
+    assert refusals == []
+    [(corrected, series_id, vintage, *_rest)] = fetched
+    assert (corrected["value"], corrected["observed_at"], vintage, series_id) == (
+        1.716,
+        "2026-10-08",
+        "2026-10-08",
+        "CCSA",
+    )
+    assert supersedes == {ref: row["assertionVersion"]["id"]}
+    note = corrected["measure"]["concept_evidence_notes"]
+    assert f"Supersedes {row['assertionVersion']['id']}" in note
+    assert "read from ALFRED vintage 2026-10-18" in note and "recorded 1.714" in note
+    assert [
+        (role, day.isoformat()) for role, day, _raw, _at in vintages.evidence[ref]
+    ] == [
+        ("vintage_before_release", "2026-10-07"),
+        ("vintage_before_release_reread", "2026-10-07"),
+        ("vintage_after_release", "2026-10-09"),
+        ("superseded_row_vintage", "2026-10-18"),
+    ]
 
 
 def test_a_row_read_inside_the_first_release_is_refused() -> None:
@@ -512,8 +563,20 @@ def complete_vintage(series_id: str, vintage: str, through: str) -> bytes:
     ("label", "raw"),
     [
         ("an error page", HTML),
-        ("another vintage date", complete_vintage("ICSA", "2026-09-02", "2026-08-22")),
+        ("a later vintage date", complete_vintage("ICSA", "2026-09-04", "2026-08-29")),
         ("another series", complete_vintage("CCSA", "2026-09-03", "2026-08-22")),
+        (
+            "a malformed label",
+            b"observation_date,ICSA_2026093\n2026-08-08,1\n2026-08-15,1\n",
+        ),
+        (
+            "an impossible label date",
+            b"observation_date,ICSA_20260231\n2026-08-08,1\n2026-08-15,1\n",
+        ),
+        (
+            "a label with a suffix",
+            b"observation_date,ICSA_20260903_x\n2026-08-08,1\n2026-08-15,1\n",
+        ),
         (
             "a missing week",
             b"observation_date,ICSA_20260903\n2026-08-08,1\n2026-08-22,1\n",
@@ -539,6 +602,133 @@ def test_parse_reads_a_complete_vintage() -> None:
     raw = complete_vintage("ICSA", "2026-09-03", "2026-08-29").replace(b"\n", b"\r\n")
     rows = resolve_pending.parse_claims_vintage(raw, "ICSA", dt.date(2026, 9, 3))
     assert list(rows) == weeks_through("2026-08-29")
+
+
+def real_icsa_response(day: str) -> bytes:
+    return gzip.decompress((FIXTURES / f"alfred_icsa_{day}.csv.gz").read_bytes())
+
+
+def test_alfred_answers_a_later_date_with_an_earlier_days_vintage(
+    monkeypatch,
+) -> None:
+    # Real ALFRED bytes (fetched 2026-10-18), read from the series' real first
+    # week: its ICSA response for vintage date 2026-09-25 is its 2026-09-24
+    # file, header and all. Before this was handled, the exact-header rule
+    # refused it, so initial claims week 2026-09-19 could never resolve or be
+    # corrected, and the refusal stopped ICSA for the rest of the run.
+    monkeypatch.setattr(
+        verify_custody,
+        "CLAIMS_SERIES_FIRST_WEEK",
+        {"ICSA": "1967-01-07", "CCSA": "1967-01-07"},
+    )
+    after = real_icsa_response("2026-09-25")
+    release = real_icsa_response("2026-09-24")
+    before = real_icsa_response("2026-09-23")
+    assert after == release
+    assert after.split(b"\n", 1)[0] == b"observation_date,ICSA_20260924"
+    label, rows = verify_custody.read_alfred_claims_vintage(after, "ICSA", "2026-09-25")
+    assert label == dt.date(2026, 9, 24)
+    assert next(iter(rows)) == "1967-01-07" and rows["2026-09-19"] == 197000.0
+    assert verify_custody.judge_claims_first_print(
+        "ICSA",
+        "2026-09-19",
+        {
+            "vintage_before_release": (dt.date(2026, 9, 23), before),
+            "vintage_before_release_reread": (dt.date(2026, 9, 23), before),
+            "release_day": (dt.date(2026, 9, 24), release),
+            "vintage_after_release": (dt.date(2026, 9, 25), after),
+        },
+    ) == (dt.date(2026, 9, 24), 197000.0)
+
+
+def test_the_fixture_labels_are_one_day_back() -> None:
+    # Every vintage date ALFRED answered with another day's vintage (survey of
+    # 2026-01-01 to 2026-10-18) named the day before; none named a later day.
+    labels = [
+        (dt.date.fromisoformat(day), dt.date.fromisoformat(label))
+        for series in ALFRED["labels"].values()
+        for day, label in series.items()
+    ]
+    assert len(labels) == 7
+    assert all(day - label == dt.timedelta(days=1) for day, label in labels)
+
+
+# Each first-print read must be ALFRED's vintage of the day it shows. A read
+# answered with an earlier day's vintage defers the week (the series is not
+# refused: the response is an honest vintage of another day), except the day
+# after, which may be the release day's own vintage.
+LABEL_CASES = {
+    # role: (vintage date answered with an earlier day's file, defers?)
+    "vintage_before_release": ("2026-09-02", True),
+    "release_day": ("2026-09-03", True),
+    "vintage_after_release": ("2026-09-04", False),
+}
+
+
+@pytest.mark.parametrize("role", sorted(LABEL_CASES))
+def test_each_read_must_be_the_vintage_of_the_day_it_shows(role, capsys) -> None:
+    day, defers = LABEL_CASES[role]
+    previous = (dt.date.fromisoformat(day) - dt.timedelta(days=1)).isoformat()
+    vintages = resolve_pending.ClaimsVintages(
+        fetch_from(ALFRED["series"], labels={"ICSA": {day: previous}})
+    )
+    fetched = resolve_pending.resolve_claims_ref(
+        "us.dol.initial_claims.sa.week_2026-08-29",
+        "2026-08-29",
+        "initial",
+        "2026-09-11",
+        dt.date(2026, 9, 20),
+        vintages,
+    )
+    out = capsys.readouterr().out
+    if defers:
+        assert fetched is None
+        assert f"vintage of {previous}, which cannot show" in out
+        # The series still reads: one honest earlier vintage refuses nothing.
+        assert vintages.read("ICSA", dt.date(2026, 9, 10))[1] is not None
+    else:
+        assert fetched is not None
+        assert (fetched[0]["value"], fetched[0]["observed_at"]) == (206.0, "2026-09-03")
+
+
+@pytest.mark.parametrize(
+    ("role", "day", "label"),
+    [
+        ("vintage_before_release", "2026-09-02", "2026-09-01"),
+        ("vintage_before_release_reread", "2026-09-02", "2026-09-01"),
+        ("release_day", "2026-09-03", "2026-09-02"),
+        ("vintage_after_release", "2026-09-04", "2026-09-02"),
+    ],
+)
+def test_the_judge_holds_each_read_to_its_label(role, day, label) -> None:
+    def body(as_of):
+        """ALFRED's ICSA vintage of ``as_of``, labeled so."""
+        releases = ALFRED["series"]["ICSA"]
+        latest = max(release for release in releases if release <= as_of)
+        return csv_bytes("ICSA", as_of, filled(dict(releases[latest])))
+
+    reads = {
+        "vintage_before_release": ("2026-09-02", "2026-09-02"),
+        "vintage_before_release_reread": ("2026-09-02", "2026-09-02"),
+        "release_day": ("2026-09-03", "2026-09-03"),
+        "vintage_after_release": ("2026-09-04", "2026-09-04"),
+    }
+    reads[role] = (day, label)
+    if role.startswith("vintage_before"):
+        # The two reads of the day before are one answer, read twice.
+        reads["vintage_before_release"] = reads["vintage_before_release_reread"] = (
+            day,
+            label,
+        )
+    with pytest.raises(ValueError, match=f"vintage of {label}, which cannot show"):
+        verify_custody.judge_claims_first_print(
+            "ICSA",
+            "2026-08-29",
+            {
+                name: (dt.date.fromisoformat(read_day), body(as_of))
+                for name, (read_day, as_of) in reads.items()
+            },
+        )
 
 
 def corrupt_at(day: str, replace):
@@ -1158,14 +1348,14 @@ def test_two_dates_ending_at_one_week_must_print_it_the_same() -> None:
 
 
 def build_correction_run(tmp_path, monkeypatch, mutate=None):
-    """A sealed resolver run holding all five corrections and their evidence."""
+    """A sealed resolver run holding all six corrections and their evidence."""
 
     monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
     vintages = real_vintages()
     fetched, supersedes, refusals = resolve_pending.claims_corrections(
         LATE_ROWS, vintages
     )
-    assert refusals == [] and len(fetched) == 5
+    assert refusals == [] and len(fetched) == 6
     run_dir = resolve_pending.resolution_run_dir("2026-10-13T04:00:00Z")
     run_dir.mkdir(parents=True)
     facts = []
