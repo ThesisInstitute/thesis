@@ -202,9 +202,15 @@ def test_a_later_failure_after_a_receipt_refusal_still_says_why() -> None:
     assert "the resolver stopped before any capture: `RECEIPT PIN REFUSED" not in (
         alert["body"]
     )
-    assert "Before that, the resolver stopped before any capture: `thesis locks" in (
-        alert["body"]
+    line = next(
+        line
+        for line in alert["body"].splitlines()
+        if line.startswith("Before that, the resolver stopped before any capture: ")
     )
+    assert line.startswith(
+        "Before that, the resolver stopped before any capture: `thesis locks"
+    )
+    assert line.endswith("(docs/receipt-pin.md)")
 
 
 @pytest.mark.parametrize(
@@ -453,8 +459,11 @@ def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
         assert alert["title"] == f"Resolution loop failed {DATE}"
         # The alert's own line, not text it quotes: a refusal reason can
         # mention docs/receipt-pin.md inside a code span (round 7 of the review).
+        # The line also ends with the checklist's path (round 8: dropping it
+        # broke no test). _bounded drops whole lines, never cuts one.
         stopped = any(
             line.startswith("Before that, the resolver stopped before any capture: ")
+            and line.endswith(f"({ra.RECEIPT_DOC})")
             for line in alert["body"].splitlines()
         )
         assert stopped == receipt
