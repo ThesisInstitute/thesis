@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "thesis_rfc3161_witness_v2",
+  "status": "available",
+  "digestSha256": "47743ad16be886975cc3096031e7fc323e275d17f90c3e5757cb3e3a7b5d3fab",
+  "trustBundleId": "tsa-anchors-v3",
+  "trustBundlePath": "records/trust/tsa-anchors-v3.json",
+  "trustBundleSha256": "a7a8043930e43de4a993df43c8afdbd19bbd85be2f6a5ae6c9a6636c42d22b7e",
+  "anchorOutcomes": [
+    {
+      "status": "unavailable",
+      "tsa": "https://freetsa.org/tsr",
+      "tsaAnchorId": "freetsa-root-2016",
+      "reason": "pinned timestamp verification failed: OpenSSL command failed (openssl ts -reply -config /dev/null -in /home/runner/work/thesis/thesis/records/2026-10-18/digest-39149041708-1.freetsa-root-2016.tsr -token_out -out /tmp/thesis-tsa-ord_zjrd/token.der): Using configuration from /dev/null\n4067D986C97F0000:error:068C0100:asn1 encoding routines:ASN1_item_i2d_bio:malloc failure:../crypto/asn1/a_i2d_fp.c:94:"
+    },
+    {
+      "status": "available",
+      "tsa": "http://timestamp.digicert.com",
+      "tsaAnchorId": "digicert-trusted-root-g4",
+      "tokenPath": "records/2026-10-18/digest-39149041708-1.digicert-trusted-root-g4.tsr",
+      "tokenSha256": "2c81ef5cad381000e8a70df6c59b2ee5f074e24792764cd23075791e3fe9b67f",
+      "tsaPolicyOid": "2.16.840.1.114412.7.1",
+      "tsaImprintAlgorithmOid": "2.16.840.1.101.3.4.2.1",
+      "tsaGenTime": "2026-10-18T18:15:52Z",
+      "tsaSignerCertificateSha256": "2da09da7f4131f9fe72db6c5e6e9c9656755af043f1ea742cc0d2120e141ebfc",
+      "tsaSignerSpkiSha256": "753596b60a629061144cbd312017bbfb77510eac20b7eadc5fafb7cabe142fd5"
+    }
+  ],
+  "supplementalOutcomes": []
+}
