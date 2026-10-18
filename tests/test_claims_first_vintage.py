@@ -589,6 +589,16 @@ def complete_vintage(series_id: str, vintage: str, through: str) -> bytes:
         ),
         ("a cut row", b"observation_date,ICSA_20260903\n2026-08-08,1\n2026-08-1"),
         ("no rows", b"observation_date,ICSA_20260903\n"),
+        # Review of #345, round 12: date.fromisoformat accepts both of these
+        # spellings of 2026-08-15, which then sort wrongly as week keys.
+        (
+            "a basic-format week",
+            b"observation_date,ICSA_20260903\n2026-08-08,1\n20260815,1\n",
+        ),
+        (
+            "an ISO-week week",
+            b"observation_date,ICSA_20260903\n2026-08-08,1\n2026-W33-6,1\n",
+        ),
     ],
 )
 def test_parse_refuses_anything_but_a_complete_vintage(label, raw) -> None:
@@ -727,6 +737,77 @@ def test_the_judge_holds_each_read_to_its_label(role, day, label) -> None:
                 for name, (read_day, as_of) in reads.items()
             },
         )
+
+
+def test_a_day_after_answered_two_days_back_defers_without_refusing(capsys) -> None:
+    # Review of #345, round 12, P3: a day after answered with the day before's
+    # vintage ends earlier than the release day, so once it joined the run's
+    # consistency check it refused ICSA for the rest of the run. The label is
+    # now checked first: the week waits and the series still resolves.
+    vintages = resolve_pending.ClaimsVintages(
+        fetch_from(ALFRED["series"], labels={"ICSA": {"2026-09-04": "2026-09-02"}})
+    )
+    args = ("2026-08-29", "initial", "2026-09-11", dt.date(2026, 9, 20), vintages)
+    assert (
+        resolve_pending.resolve_claims_ref(
+            "us.dol.initial_claims.sa.week_2026-08-29", *args
+        )
+        is None
+    )
+    assert "vintage of 2026-09-02, which cannot show" in capsys.readouterr().out
+    fetched = resolve_pending.resolve_claims_ref(
+        "us.dol.initial_claims.sa.week_2026-09-05",
+        "2026-09-05",
+        "initial",
+        "2026-09-20",
+        dt.date(2026, 9, 20),
+        vintages,
+    )
+    assert fetched is not None
+    assert (fetched[0]["value"], fetched[0]["observed_at"]) == (206.0, "2026-09-10")
+
+
+def test_a_correction_answered_with_another_days_vintage_waits(capsys) -> None:
+    # Review of #345, round 12, P3: a too-early label in the corrections path
+    # was reported as a refused table entry (exit 3, "fix the table"). The
+    # entry still matches the ledger, so it waits.
+    vintages = resolve_pending.ClaimsVintages(
+        fetch_from(
+            ALFRED["series"],
+            labels={"ICSA": {**ALFRED["labels"]["ICSA"], "2026-09-03": "2026-09-02"}},
+        )
+    )
+    fetched, supersedes, refusals = resolve_pending.claims_corrections(
+        LATE_ROWS, vintages
+    )
+    ref = "us.dol.initial_claims.sa.week_2026-08-29"
+    assert refusals == []
+    assert ref not in supersedes and len(fetched) == len(LATE_ROWS) - 1
+    out = capsys.readouterr().out
+    assert f"correction waits, ALFRED answered another day's vintage: {ref}" in out
+
+
+def test_two_reads_with_one_label_must_hold_the_same_rows() -> None:
+    # Review of #345, round 12, P3: a day after answered with the release day's
+    # vintage is that vintage again, so it must hold the same rows, not only
+    # the same value for the week.
+    releases = ALFRED["series"]["ICSA"]
+    before = csv_bytes("ICSA", "2026-09-02", filled(dict(releases["2026-08-27"])))
+    release = csv_bytes("ICSA", "2026-09-03", filled(dict(releases["2026-09-03"])))
+    reads = {
+        "vintage_before_release": (dt.date(2026, 9, 2), before),
+        "vintage_before_release_reread": (dt.date(2026, 9, 2), before),
+        "release_day": (dt.date(2026, 9, 3), release),
+        "vintage_after_release": (dt.date(2026, 9, 4), release),
+    }
+    assert verify_custody.judge_claims_first_print("ICSA", "2026-08-29", reads) == (
+        dt.date(2026, 9, 3),
+        206000.0,
+    )
+    altered = release.replace(b"2026-08-08,212000", b"2026-08-08,211000")
+    reads["vintage_after_release"] = (dt.date(2026, 9, 4), altered)
+    with pytest.raises(ValueError, match="but with different rows"):
+        verify_custody.judge_claims_first_print("ICSA", "2026-08-29", reads)
 
 
 def corrupt_at(day: str, replace):

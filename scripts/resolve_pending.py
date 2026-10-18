@@ -12526,6 +12526,14 @@ class ClaimsFirstPrintUncorroboratedError(ClaimsVintageError):
     """DOL's release day has come; the next day, which corroborates it, has not."""
 
 
+class ClaimsVintageLabelError(ClaimsVintageError):
+    """ALFRED answered a read with an earlier day's vintage than its role allows.
+
+    The response is an honest vintage of another day, so the series is not
+    refused for the rest of the run; the week waits.
+    """
+
+
 # role, vintage date, raw response, retrieval instant
 ClaimsEvidence = tuple[str, dt.date, bytes, str]
 
@@ -12592,8 +12600,17 @@ class ClaimsVintages:
         raise exc
 
     def read(
-        self, series_id: str, day: dt.date
+        self, series_id: str, day: dt.date, role: str | None = None
     ) -> tuple[dict[str, float], bytes | None, str]:
+        """One vintage of the series, read once per run.
+
+        With a first-print ``role``, the response must be ALFRED's vintage of
+        a day that role allows (verify_custody.CLAIMS_LABEL_LAG). That is
+        checked before the read joins the run's consistency checks: a read
+        answered with too early a vintage raises ClaimsVintageLabelError and
+        is not kept, so it defers its week without refusing the series.
+        """
+
         if series_id in self._refused:
             raise ClaimsVintageError(
                 f"ALFRED {series_id} refused for the rest of this run: "
@@ -12604,11 +12621,18 @@ class ClaimsVintages:
             raw, retrieved_at = self._request(series_id, day)
             try:
                 rows = {} if raw is None else parse_claims_vintage(raw, series_id, day)
+            except ClaimsVintageError as exc:
+                self._refuse(series_id, exc)
+            if raw is not None and role is not None:
+                self._require_label(series_id, role, day, raw)
+            try:
                 self._reads[key] = (rows, raw, retrieved_at)
                 self._require_consistent(series_id)
             except ClaimsVintageError as exc:
                 self._reads.pop(key, None)
                 self._refuse(series_id, exc)
+        elif role is not None and self._reads[key][1] is not None:
+            self._require_label(series_id, role, day, self._reads[key][1])
         return self._reads[key]
 
     def _require_consistent(self, series_id: str) -> None:
@@ -12631,12 +12655,8 @@ class ClaimsVintages:
     def _require_label(
         self, series_id: str, role: str, day: dt.date, raw: bytes
     ) -> None:
-        """Defer the week when ALFRED answers a read with an earlier day's vintage
-        than its role allows (verify_custody.CLAIMS_LABEL_LAG).
-
-        Such a response is an honest vintage of another day, so the series is
-        not refused for the rest of the run; the week waits.
-        """
+        """ClaimsVintageLabelError when ALFRED answers a read with an earlier
+        day's vintage than its role allows (verify_custody.CLAIMS_LABEL_LAG)."""
 
         lag, shows = CLAIMS_LABEL_LAG[role]
         label, _rows = read_alfred_claims_vintage(raw, series_id, day.isoformat())
@@ -12645,7 +12665,7 @@ class ClaimsVintages:
                 series_id, role, day, label, day - dt.timedelta(days=lag), shows
             )
         except ValueError as exc:
-            raise ClaimsVintageError(str(exc)) from exc
+            raise ClaimsVintageLabelError(str(exc)) from exc
 
     def first_print(
         self, kind: str, week: str, limit: dt.date
@@ -12681,10 +12701,11 @@ class ClaimsVintages:
                 f"ALFRED's vintage of {following} must corroborate it"
             )
         before = scheduled - dt.timedelta(days=1)
-        rows, before_raw, before_at = self.read(series_id, before)
+        rows, before_raw, before_at = self.read(
+            series_id, before, "vintage_before_release"
+        )
         if before_raw is None:
             return None
-        self._require_label(series_id, "vintage_before_release", before, before_raw)
         if week in rows:
             self._refuse(
                 series_id,
@@ -12706,20 +12727,20 @@ class ClaimsVintages:
                     f"before DOL's release of week {week}, two different ways"
                 ),
             )
-        rows, raw, retrieved_at = self.read(series_id, scheduled)
+        rows, raw, retrieved_at = self.read(series_id, scheduled, "release_day")
         if raw is None:
             return None
-        self._require_label(series_id, "release_day", scheduled, raw)
         if week not in rows:
             raise ClaimsVintageError(
                 f"ALFRED {series_id} vintage {scheduled}, DOL's scheduled "
                 f"release day, does not hold week {week}; an off-schedule "
                 f"release needs DOL's day in WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
             )
-        later, later_raw, later_at = self.read(series_id, following)
+        later, later_raw, later_at = self.read(
+            series_id, following, "vintage_after_release"
+        )
         if later_raw is None:
             return None
-        self._require_label(series_id, "vintage_after_release", following, later_raw)
         if later.get(week) != rows[week]:
             self._refuse(
                 series_id,
@@ -12855,6 +12876,14 @@ def claims_corrections(
             if first is not None:
                 read_release = vintages.latest_week(series_id, read_day)
                 first_release = vintages.latest_week(series_id, first[0])
+        except ClaimsVintageLabelError as exc:
+            # An honest vintage of another day: the entry still matches the
+            # ledger, so the correction waits rather than being refused.
+            print(
+                "  correction waits, ALFRED answered another day's vintage: "
+                f"{ref} — {exc}"
+            )
+            continue
         except ClaimsVintageError as exc:
             refusals.append(f"{ref} — {exc}")
             continue

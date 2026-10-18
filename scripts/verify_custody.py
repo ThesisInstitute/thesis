@@ -1021,7 +1021,9 @@ def read_alfred_claims_vintage(
     for number, line in enumerate(lines[1:], start=2):
         week, separator, value = line.partition(",")
         try:
-            if not separator or date.fromisoformat(week) != expected:
+            # Exactly YYYY-MM-DD: date.fromisoformat also takes 20260815 and
+            # 2026-W33-6, which would compare wrongly as week keys.
+            if not separator or week != expected.isoformat():
                 raise ValueError
             parsed = float(value)
             if not math.isfinite(parsed):
@@ -1171,6 +1173,17 @@ def judge_claims_first_print(
         require_claims_vintage_label(
             series_id, role, day, labelled[role][0], day - timedelta(days=lag), shows
         )
+    # Two reads ALFRED answered with one day's vintage are that vintage twice:
+    # a day after answered with the release day's vintage must hold exactly
+    # the release day's rows, not just the same value for the week.
+    by_label: dict[date, tuple[str, dict[str, float]]] = {}
+    for role, (label, role_rows) in sorted(labelled.items()):
+        first_role, first_rows = by_label.setdefault(label, (role, role_rows))
+        if role_rows != first_rows:
+            raise ValueError(
+                f"ALFRED {series_id} answered the {first_role} and {role} reads "
+                f"with its vintage of {label}, but with different rows"
+            )
     claims_vintages_consistent(
         series_id, [(reads[role][0], rows[role]) for role in rows]
     )
