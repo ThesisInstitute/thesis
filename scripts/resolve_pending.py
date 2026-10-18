@@ -12488,6 +12488,63 @@ def pending_claims_refs(log: dict) -> list[tuple[str, str, str, str]]:
     return out
 
 
+def claims_vintage_holds_next_week(
+    raw: bytes, series_id: str, week: str, vintage: dt.date
+) -> bool:
+    """Whether this ALFRED vintage is a later release than the week's first print.
+
+    DOL revises a week's figure in the release that first prints the following
+    reference week, so a vintage that already holds `week + 7 days` carries
+    the revised figure. Read from the vintage itself, never from an offset
+    off the reference week: the claims leg trusts the forecast's recorded
+    release day so holiday shifts resolve correctly.
+    """
+
+    following = (dt.date.fromisoformat(week) + dt.timedelta(days=7)).isoformat()
+    column = f"{series_id}_{vintage.isoformat().replace('-', '')}"
+    # Read only the following week's cell, the way fred_advance_value reads
+    # the target's: unrelated history is never converted, so a malformed
+    # historical value cannot raise here.
+    for row in csv.DictReader(io.StringIO(raw.decode())):
+        date = row.get("observation_date") or row.get("DATE")
+        if date == following:
+            value = row.get(column) or row.get(series_id)
+            return value not in (None, "", ".")
+    return False
+
+
+def resolve_claims_ref(
+    ref: str, week: str, kind: str, source_vintage: str, today: dt.date
+) -> tuple[dict[str, Any], str, str, bytes, str, str] | None:
+    """One pending weekly claims cell -> its fetched ledger row, or None."""
+
+    release_day = dt.date.fromisoformat(source_vintage)
+    if release_day > today:
+        print(f"  release {release_day} not reached: {ref}")
+        return None
+    series_id = "ICSA" if kind == "initial" else "CCSA"
+    value, raw, _source_url, retrieved_at = fred_advance_value(
+        series_id, week, release_day.isoformat()
+    )
+    if value is None or raw is None:
+        print(f"  not yet published: {ref}")
+        return None
+    if claims_vintage_holds_next_week(raw, series_id, week, release_day):
+        # The registered releasePolicy is advance_vintage. A forecast whose
+        # resolutionDate trails DOL's print by a release or more would put
+        # the revised figure in an append-only ledger as the advance print.
+        print(
+            f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — ALFRED vintage "
+            f"{release_day} already holds the week after {week}, so it is a "
+            "later release than the first print and carries the revised "
+            "figure; left pending"
+        )
+        return None
+    row = claims_fact(ref, week, value, kind, release_day)
+    print(f"  resolve {ref} -> {row['value']} {row['measure']['unit']}")
+    return (row, series_id, release_day.isoformat(), raw, retrieved_at, "csv")
+
+
 def pending_adapter_refs(
     log: dict,
     registrations: Mapping[str, Mapping[str, Any]] | None = None,
@@ -15421,22 +15478,9 @@ def _main() -> int:
         if ref in existing_ids:
             print(f"  already recorded: {ref}")
             continue
-        release_day = dt.date.fromisoformat(source_vintage)
-        if release_day > today:
-            print(f"  release {release_day} not reached: {ref}")
-            continue
-        series_id = "ICSA" if kind == "initial" else "CCSA"
-        value, raw, _source_url, retrieved_at = fred_advance_value(
-            series_id, week, release_day.isoformat()
-        )
-        if value is None or raw is None:
-            print(f"  not yet published: {ref}")
-            continue
-        row = claims_fact(ref, week, value, kind, release_day)
-        fetched_rows.append(
-            (row, series_id, release_day.isoformat(), raw, retrieved_at, "csv")
-        )
-        print(f"  resolve {ref} -> {row['value']} {row['measure']['unit']}")
+        fetched = resolve_claims_ref(ref, week, kind, source_vintage, today)
+        if fetched is not None:
+            fetched_rows.append(fetched)
 
     # Generic adapters: official BEA current releases, ALFRED vintage series,
     # BLS API series, A-19 snapshot rows, international native sources, and
