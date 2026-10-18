@@ -30,7 +30,9 @@ interface StatusFile {
   asOf: string;
   generatedAtUtc: string;
   workflowRun: string;
-  run: { logAvailable: boolean; completed: boolean; error: string };
+  /** `completed`: the resolver returned. `loopCompleted`: every routed
+   * target had its turn (absent in files written before 2026-10-16). */
+  run: { logAvailable: boolean; completed: boolean; loopCompleted?: boolean; error: string };
   targets: Record<string, Omit<OverdueStatus, "dataPointId">>;
 }
 

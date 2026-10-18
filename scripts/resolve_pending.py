@@ -143,6 +143,33 @@ MAX_TIMESTAMP_TOKEN_BYTES = 1024 * 1024
 DEFAULT_TIMESTAMP_TIMEOUT_SECONDS = 45.0
 PRODUCER_SIGNING_KEY_ENV = "LEDGER_PRODUCER_SIGNING_KEY"
 
+# The chronicle gate jobs wait for a runner before they judge anything. The
+# 2026-09-22 and 2026-09-23 proposals (chronicle #285, #286) sat queued for
+# 33 and 68 minutes, and the old 30 x 20 s poll closed both PRs while their
+# gates were still queued, reporting that the gate "did not pass". Wait on
+# a wall-clock budget instead; the resolve job's timeout-minutes in
+# .github/workflows/resolve-and-rebuild.yml must cover it.
+DEFAULT_APPEND_GATE_TIMEOUT_MINUTES = 150.0
+APPEND_GATE_TIMEOUT_ENV = "LEDGER_APPEND_GATE_TIMEOUT_MINUTES"
+APPEND_GATE_MAX_POLL_SECONDS = 120.0
+APPEND_GATE_MAX_READ_FAILURES = 5
+# GitHub lists check runs 100 to a page. Ten pages is far beyond any
+# proposal seen so far; a listing longer than that is refused, not truncated.
+APPEND_GATE_CHECK_RUN_PAGE_SIZE = 100
+APPEND_GATE_MAX_CHECK_RUN_PAGES = 10
+# One `gh api` page read may take at most this long, and no longer than the
+# budget has left, but never less than the floor: a read always gets long
+# enough to finish, even the one at the deadline.
+APPEND_GATE_MAX_READ_SECONDS = 120.0
+APPEND_GATE_MIN_READ_SECONDS = 15.0
+# Both are required checks on the ledger branch, but the resolver's token is
+# a repository admin and enforce_admins is off: its merges have gone through
+# with checks that are required today failing (chronicle #240) or still
+# running (#162, trusted base). This tuple is therefore what enforces either
+# verdict on a resolver merge. The trusted job runs the default branch's
+# workflow definition, which the proposal cannot edit.
+REQUIRED_APPEND_GATES = ("Append gate", "Trusted base append gate")
+
 SBA_CUSTODY_ABSENT = "SBA CUSTODY ABSENT (refusing):"
 SBA_CUSTODY_UNWITNESSED = "SBA CUSTODY UNWITNESSED (refusing):"
 SBA_CUSTODY_UNATTESTED = "SBA CUSTODY UNATTESTED (refusing):"
@@ -2381,12 +2408,10 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
     # docket calendar across a series' annual revision therefore means
     # re-verifying and re-committing its anchors in the same change.
     #
-    # Three of the six have no docket template yet, so nothing can register
-    # them: the unemployment rate and the two CPI series. Chronicle holds two
-    # lineages for each concept (an ``economy/aggregate`` one the ALFRED leg
-    # wrote, and an older one the docket pins), a declared ``sourceSeriesId``
-    # matches neither, and the docket-to-Ledger containment gate refuses the
-    # pin. That is a Chronicle identity decision; see the docs section.
+    # The unemployment rate and the two CPI series took their docket
+    # templates after Chronicle folded each concept's two lineages into the
+    # ``economy/aggregate`` one these specs write (Max's ruling d353,
+    # PolicyEngine/chronicle#344); see the docs section.
     "bls.cps.unemployment_rate": {
         "series_id": "LNS14000000",
         "period_type": "month",
@@ -7293,28 +7318,53 @@ def _replay_sba_candidate(
     )
 
 
+class _MemoizedTimeline:
+    """`extract_timeline(records)` for one run: read at most once, and only
+    when a caller asks. A failure is kept and raised again to every later
+    caller, so a chain that does not verify is not re-verified per target."""
+
+    def __init__(self, records: pathlib.Path) -> None:
+        self._records = records
+        self._timeline: Mapping[str, Any] | None = None
+        self._error: Exception | None = None
+        self.loads = 0
+
+    def __call__(self) -> Mapping[str, Any]:
+        if self._error is not None:
+            raise self._error
+        if self._timeline is None:
+            self.loads += 1
+            try:
+                self._timeline = extract_timeline(self._records)
+            except (OSError, TimelineError, ValueError) as exc:
+                self._error = exc
+                raise
+        return self._timeline
+
+
 def resolve_sba_pdf_first_print(
     records: pathlib.Path,
     *,
     series: str,
     fiscal_year: int,
     timeline: Mapping[str, Any] | None = None,
+    timeline_loader: Callable[[], Mapping[str, Any]] | None = None,
 ) -> tuple[SbaPdfResolution | None, str | None]:
-    """Replay the earliest witnessed covered SBA ZIP, never later/live bytes."""
+    """Replay the earliest witnessed covered SBA ZIP, never later/live bytes.
+
+    The witnessed record timeline is read only once some retained capture
+    covers `fiscal_year`, from `timeline`, else `timeline_loader`, else
+    `extract_timeline(records)`. No candidate is judged without it, and a
+    year no capture covers is refused without it: re-verifying the whole
+    record chain took 49 minutes on 2026-10-12 and stopped every scheduled
+    resolver run at its timeout, before the references after it.
+    """
 
     if series not in SBA_PDF_ADAPTERS:
         raise ValueError(f"unsupported SBA loan-performance series {series!r}")
     if type(fiscal_year) is not int:
         raise TypeError("fiscal_year must be an integer")
     records = records.resolve()
-    if timeline is None:
-        try:
-            timeline = extract_timeline(records)
-        except (OSError, TimelineError, ValueError) as exc:
-            return _sba_refusal(
-                SBA_CUSTODY_INVALID,
-                f"witnessed record timeline does not verify: {exc}",
-            )
     run_dirs = _sba_capture_directories(records)
     if not run_dirs:
         return _sba_refusal(
@@ -7384,6 +7434,14 @@ def resolve_sba_pdf_first_print(
             SBA_CUSTODY_ABSENT,
             f"no retained capture covers {series} fiscal year {fiscal_year}",
         )
+    if timeline is None:
+        try:
+            timeline = (timeline_loader or (lambda: extract_timeline(records)))()
+        except (OSError, TimelineError, ValueError) as exc:
+            return _sba_refusal(
+                SBA_CUSTODY_INVALID,
+                f"witnessed record timeline does not verify: {exc}",
+            )
 
     candidates: list[_SbaPdfCandidate] = []
     try:
@@ -13825,18 +13883,28 @@ def ledger_state(repo: str, branch: str, path: str) -> tuple[str, str, str]:
     return base64.b64decode(payload["content"]).decode(), payload["sha"], repo_sha
 
 
-def _gh_api(*args: str, input_body: dict[str, Any] | None = None) -> str:
+def _gh_api(
+    *args: str,
+    input_body: dict[str, Any] | None = None,
+    timeout: float | None = None,
+) -> str:
     # Without `--input -` gh ignores stdin and sends an empty request body
     # (GitHub answers 422 "nil is not an object"); the flag precedes the
     # endpoint so callers' path arguments stay the trailing tokens.
     body_flags = ["--input", "-"] if input_body is not None else []
     command = ["gh", "api", *body_flags, *args]
-    completed = subprocess.run(
-        command,
-        input=json.dumps(input_body) if input_body is not None else None,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            input=json.dumps(input_body) if input_body is not None else None,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            f"gh api {' '.join(args)} timed out after {timeout:g} s"
+        ) from exc
     if completed.returncode != 0:
         raise RuntimeError(
             f"gh api {' '.join(args)} failed: {completed.stderr.strip()[:500]}"
@@ -14045,6 +14113,7 @@ def _collect_release_tree_files(
 # would split the folded lineages again, the generator would record revive
 # events for the absorbed identities, and _registry_growth_refusal would
 # refuse every append.
+_SERIES_UUID_REGISTRY = "ledger/series_uuid_registry.jsonl"
 CATALOG_REGENERATION_INPUTS = (
     "scripts/build_series_catalog.py",
     "scripts/check_thesis_facts_append.py",
@@ -14394,12 +14463,23 @@ def ledger_catalog_refusals(
     passes, is each row tried alone, and a row that fails alone is refused
     with the generator's reason. Rows that fail only together are not
     separated: the append then fails as before.
+
+    "Fails" also covers a generator that exits cleanly but grows the UUID
+    registry beyond the append's own first observations, the check
+    _regenerate_series_catalog applies to the real append. Without it one
+    such row raised there and held every other row hostage (2026-10-16: the
+    FY2026 USAspending CDFI snapshot retired a non-placeholder identity, and
+    run 38962977031 appended nothing and never reached the ledger pin).
     """
 
     if not rows:
         return {}
     tree = _fetch_repository_tree(repo, base_sha, path)
     lines = [json.dumps(row, separators=(",", ":")) for row in rows]
+    base_registry = tree.files.get(_SERIES_UUID_REGISTRY)
+
+    def row_ids(selected: list[str]) -> list[str]:
+        return [str(json.loads(line).get("source_record_id", "")) for line in selected]
 
     def failure(selected: list[str]) -> str | None:
         candidate = base_content.rstrip("\n") + "\n"
@@ -14420,8 +14500,21 @@ def ledger_catalog_refusals(
                 capture_output=True,
                 text=True,
             )
+            growth = None
+            if completed.returncode == 0 and base_registry is not None:
+                try:
+                    regenerated = (stage / _SERIES_UUID_REGISTRY).read_bytes()
+                except OSError:
+                    growth = "the generator removed the UUID registry"
+                else:
+                    if regenerated != base_registry:
+                        growth = _registry_growth_refusal(
+                            base_registry, regenerated, row_ids(selected)
+                        )
         if completed.returncode == 0:
-            return None
+            if growth is None:
+                return None
+            return f"series-catalog registry growth refused: {growth}"
         output = completed.stderr.strip() or completed.stdout.strip()
         detail = " ".join(
             line for line in output.splitlines() if not line.startswith("note:")
@@ -14485,6 +14578,268 @@ def exclude_catalog_refusals(
     return kept
 
 
+def append_gate_state(gate_runs: list[dict]) -> str:
+    """Classify one required gate's check runs: passed, failed or pending.
+
+    "failed" as soon as any run concluded against the proposal, even while
+    its twin is still queued, so a rejection never waits out the budget.
+    "passed" only when every run completed and append_gate_verdict accepts
+    them. Everything else is "pending", including a set of skipped twins
+    alone: the delivering event's real run belongs to a separate workflow
+    run, so the other event's twin can be the only run visible for a moment.
+    """
+    if any(
+        run.get("status") == "completed"
+        and run.get("conclusion") not in ("success", "skipped", "neutral")
+        for run in gate_runs
+    ):
+        return "failed"
+    if gate_runs and all(run.get("status") == "completed" for run in gate_runs):
+        if append_gate_verdict(gate_runs):
+            return "passed"
+    return "pending"
+
+
+def _describe_gate_runs(gate: str, gate_runs: list[dict]) -> str:
+    judging = [run for run in gate_runs if run.get("conclusion") != "skipped"]
+    if not gate_runs:
+        return f"{gate}: no check run yet"
+    if not judging:
+        return f"{gate}: only skipped twins so far"
+    return "; ".join(
+        f"{gate}: "
+        + (
+            str(run.get("conclusion"))
+            if run.get("status") == "completed"
+            else str(run.get("status") or "unknown status")
+        )
+        + f" ({run.get('html_url') or 'no run URL'})"
+        for run in judging
+    )
+
+
+def append_gate_timeout_seconds(
+    cli_minutes: float | None, environ: Mapping[str, str]
+) -> float:
+    """The gate budget in seconds: CLI flag, else environment, else default."""
+
+    minutes: Any = cli_minutes
+    if minutes is None:
+        raw = environ.get(APPEND_GATE_TIMEOUT_ENV, "").strip()
+        try:
+            minutes = float(raw) if raw else DEFAULT_APPEND_GATE_TIMEOUT_MINUTES
+        except ValueError as exc:
+            raise LedgerProposalError(
+                f"{APPEND_GATE_TIMEOUT_ENV} is not a number: {raw!r}"
+            ) from exc
+    if isinstance(minutes, bool) or not isinstance(minutes, (int, float)):
+        raise LedgerProposalError("append gate timeout must be a number of minutes")
+    return _validate_gate_timeout(float(minutes) * 60)
+
+
+def _validate_gate_timeout(value: float) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise LedgerProposalError(
+            "gate_timeout_seconds must be a finite positive number"
+        )
+    result = float(value)
+    if not math.isfinite(result) or result <= 0:
+        raise LedgerProposalError(
+            "gate_timeout_seconds must be a finite positive number"
+        )
+    return result
+
+
+class CheckRunsIncompleteError(RuntimeError):
+    """A check-run listing that cannot be shown to be the whole set."""
+
+
+def read_check_runs(
+    repo: str,
+    commit_sha: str,
+    *,
+    deadline: float | None = None,
+    clock: Callable[[], float] = time.monotonic,
+) -> list[dict]:
+    """Every check run on ``commit_sha``, or an error; never a partial list.
+
+    GitHub pages this listing. Reading page one alone would let a rejecting
+    run on page two go unseen while both gates' successes sat on page one,
+    and the resolver's admin token would then merge past it. So every page
+    is read, ``total_count`` must be the same integer on each, every run
+    must carry an integer ``id`` seen once, no page may exceed the page
+    size, and the distinct runs must add up to ``total_count``. A listing
+    that reordered between page reads can repeat one run and skip another
+    while its length still adds up; counting distinct ids refuses that.
+    Anything else raises CheckRunsIncompleteError, which await_append_gates
+    treats as a failed read and retries; an incomplete listing is never
+    classified. With a ``deadline``, each page read is bounded by what the
+    budget has left, between the read floor and cap.
+    """
+
+    runs: list[dict] = []
+    seen: set[int] = set()
+    total: int | None = None
+    for page in range(1, APPEND_GATE_MAX_CHECK_RUN_PAGES + 1):
+        read_timeout = None
+        if deadline is not None:
+            read_timeout = min(
+                APPEND_GATE_MAX_READ_SECONDS,
+                max(APPEND_GATE_MIN_READ_SECONDS, deadline - clock()),
+            )
+        payload = json.loads(
+            _gh_api(
+                f"repos/{repo}/commits/{commit_sha}/check-runs"
+                f"?per_page={APPEND_GATE_CHECK_RUN_PAGE_SIZE}&page={page}",
+                timeout=read_timeout,
+            )
+        )
+        page_runs = payload.get("check_runs") if type(payload) is dict else None
+        page_total = payload.get("total_count") if type(payload) is dict else None
+        if type(page_runs) is not list or type(page_total) is not int:
+            raise CheckRunsIncompleteError(
+                f"check-runs page {page} lacks a list or an integer total_count"
+            )
+        if len(page_runs) > APPEND_GATE_CHECK_RUN_PAGE_SIZE:
+            raise CheckRunsIncompleteError(
+                f"check-runs page {page} holds {len(page_runs)} runs, more than "
+                f"the {APPEND_GATE_CHECK_RUN_PAGE_SIZE} requested"
+            )
+        if total is None:
+            total = page_total
+        elif page_total != total:
+            # Runs were added between pages; positions shifted, so a run can
+            # have been skipped. Read the whole listing again.
+            raise CheckRunsIncompleteError(
+                f"check-run total_count moved from {total} to {page_total} "
+                "between pages"
+            )
+        for run in page_runs:
+            run_id = run.get("id") if type(run) is dict else None
+            if type(run_id) is not int:
+                raise CheckRunsIncompleteError(
+                    f"check-runs page {page} has a run without an integer id"
+                )
+            if run_id in seen:
+                raise CheckRunsIncompleteError(
+                    f"check run {run_id} appears twice in one listing"
+                )
+            seen.add(run_id)
+            runs.append(run)
+        if len(runs) >= total or len(page_runs) < APPEND_GATE_CHECK_RUN_PAGE_SIZE:
+            break
+    if total is None or len(runs) != total:
+        raise CheckRunsIncompleteError(
+            f"check-run listing returned {len(runs)} of {total} runs"
+        )
+    return runs
+
+
+def await_append_gates(
+    repo: str,
+    commit_sha: str,
+    pr_number: int,
+    *,
+    timeout_seconds: float,
+    poll_seconds: float = 20,
+    max_poll_seconds: float = APPEND_GATE_MAX_POLL_SECONDS,
+    poll_attempts: int | None = None,
+    gates: tuple[str, ...] = REQUIRED_APPEND_GATES,
+    clock: Callable[[], float] = time.monotonic,
+    sleep: Callable[[float], None] = time.sleep,
+) -> None:
+    """Return once every required gate passed on the proposal head.
+
+    Raises LedgerProposalError naming the adverse run as soon as any gate
+    concludes against the proposal, and a differently worded error naming
+    the still-queued or running jobs when the wall-clock budget runs out.
+    A timeout is not a verdict; the old single message ("did not pass")
+    made a runner-queue delay read as a rejected append (thesis #286).
+    ``poll_attempts`` additionally caps the number of reads (tests use 1).
+    """
+    timeout_seconds = _validate_gate_timeout(timeout_seconds)
+    started = clock()
+    deadline = started + timeout_seconds
+    delay = max(0.0, float(poll_seconds))
+    attempts = 0
+    read_failures = 0
+    last_read_error: BaseException | None = None
+    last_seen: dict[str, list[dict]] = {gate: [] for gate in gates}
+    # The ids of the last multi-page listing that read as passed.
+    passed_ids: frozenset[int] | None = None
+    while True:
+        attempts += 1
+        try:
+            # Each page read is bounded by what the budget has left.
+            runs = read_check_runs(repo, commit_sha, deadline=deadline, clock=clock)
+        except (RuntimeError, json.JSONDecodeError) as exc:
+            # Reading check runs has no side effects, so a transient API
+            # error (5xx, secondary rate limit, a timeout, a listing that
+            # moved between pages) retries inside the budget rather than
+            # closing a proposal whose gate may be about to pass.
+            read_failures += 1
+            last_read_error = exc
+            if read_failures >= APPEND_GATE_MAX_READ_FAILURES:
+                raise LedgerProposalError(
+                    f"could not read append gate status for {repo}#{pr_number} "
+                    f"({read_failures} consecutive failures): {exc}"
+                ) from exc
+        else:
+            read_failures = 0
+            last_read_error = None
+            states: dict[str, str] = {}
+            for gate in gates:
+                last_seen[gate] = [
+                    run for run in runs if type(run) is dict and run.get("name") == gate
+                ]
+                states[gate] = append_gate_state(last_seen[gate])
+            failed = [gate for gate in gates if states[gate] == "failed"]
+            if failed:
+                raise LedgerProposalError(
+                    f"append gate failed for {repo}#{pr_number}: "
+                    + "; ".join(
+                        _describe_gate_runs(gate, last_seen[gate]) for gate in failed
+                    )
+                    + "; refusing to merge"
+                )
+            if all(states[gate] == "passed" for gate in gates):
+                ids = frozenset(run["id"] for run in runs)
+                # One page is one snapshot. Across pages, a run re-run
+                # between two page reads can swap a new attempt onto a page
+                # already read while the total holds, so a multi-page pass
+                # stands only when the next read returns the same runs.
+                if len(runs) <= APPEND_GATE_CHECK_RUN_PAGE_SIZE or ids == passed_ids:
+                    # The budget bounds how long to wait, not which verdicts
+                    # count: both gates passed on this exact head, so a pass
+                    # read just after the deadline still stands.
+                    return
+                passed_ids = ids
+            else:
+                passed_ids = None
+        now = clock()
+        if now >= deadline or (poll_attempts is not None and attempts >= poll_attempts):
+            waiting = [
+                gate for gate in gates if append_gate_state(last_seen[gate]) != "passed"
+            ]
+            detail = "; ".join(
+                _describe_gate_runs(gate, last_seen[gate]) for gate in waiting
+            )
+            if not waiting and passed_ids is not None:
+                detail = (
+                    "both gates passed on a multi-page listing that no second "
+                    "read has confirmed yet"
+                )
+            if last_read_error is not None:
+                detail += f"; last status read failed: {last_read_error}"
+            raise LedgerProposalError(
+                f"append gate did not complete for {repo}#{pr_number} after "
+                f"{(now - started) / 60:.1f} of {timeout_seconds / 60:g} allowed "
+                f"minutes; no verdict yet ({detail})"
+            )
+        sleep(max(0.0, min(delay, deadline - now)))
+        delay = min(delay * 2, max_poll_seconds)
+
+
 def propose_ledger_append(
     repo: str,
     branch: str,
@@ -14494,8 +14849,9 @@ def propose_ledger_append(
     base_sha: str,
     added: int,
     *,
-    poll_seconds: int = 20,
-    poll_attempts: int = 30,
+    poll_seconds: float = 20,
+    poll_attempts: int | None = None,
+    gate_timeout_seconds: float = DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60,
     timestamp_requester: TimestampRequester | None = None,
     timestamp_timeout_seconds: float = DEFAULT_TIMESTAMP_TIMEOUT_SECONDS,
     clock_skew_seconds: int = DEFAULT_CLOCK_SKEW_SECONDS,
@@ -14508,6 +14864,8 @@ def propose_ledger_append(
     environment_signing_key = os.environ.pop(PRODUCER_SIGNING_KEY_ENV, None)
     if producer_signing_key is None:
         producer_signing_key = environment_signing_key
+    # A malformed budget must refuse before the TSA or any remote mutation.
+    gate_timeout_seconds = _validate_gate_timeout(gate_timeout_seconds)
     candidate_ledger = content.encode("utf-8")
     base_tree = _fetch_repository_tree(repo, base_sha, path)
     if base_tree.blob_shas.get(path) != blob_sha:
@@ -14586,21 +14944,16 @@ def propose_ledger_append(
             raise LedgerProposalError("GitHub did not return a pull-request number")
         pr_number = pr["number"]
 
-        gate_passed = False
-        for _ in range(poll_attempts):
-            runs = json.loads(
-                _gh_api(f"repos/{repo}/commits/{proposal_commit}/check-runs")
-            ).get("check_runs", [])
-            gate_runs = [run for run in runs if run.get("name") == "Append gate"]
-            if gate_runs and all(run.get("status") == "completed" for run in gate_runs):
-                gate_passed = append_gate_verdict(gate_runs)
-                break
-            time.sleep(poll_seconds)
-        if not gate_passed:
-            raise LedgerProposalError(
-                f"append gate did not pass for {repo}#{pr_number}; refusing to "
-                "leave a failed proposal branch or PR"
-            )
+        # Raises on a failed gate or an exhausted budget; the handler below
+        # closes the PR and deletes the branch either way.
+        await_append_gates(
+            repo,
+            proposal_commit,
+            pr_number,
+            timeout_seconds=gate_timeout_seconds,
+            poll_seconds=poll_seconds,
+            poll_attempts=poll_attempts,
+        )
 
         current_base = _branch_head(repo, branch)
         if current_base != base_sha:
@@ -15557,7 +15910,25 @@ def finalize_resolution_manifest(
     return manifest
 
 
+# resolution_status.py reads both lines. Without the first, the run stopped
+# (a timeout, a cancellation, a crash) before every routed reference had its
+# verdict line, so a reference with no line was not reached rather than
+# passed over. Without the second, main() never returned.
+RESOLUTION_LOOP_COMPLETE = "resolution loop complete:"
+RESOLVER_FINISHED = "resolver finished with exit code"
+
+
 def main() -> int:
+    """Run the resolver, then say it returned (resolution_status.py reads it).
+
+    A run that crashes prints its traceback instead, and one that is
+    cancelled prints nothing more, so neither can be read as finished."""
+    code = _main()
+    print(f"{RESOLVER_FINISHED} {code}")
+    return code
+
+
+def _main() -> int:
     # Remove the secret before any network client or subprocess can inherit it.
     # The value remains only as an in-memory string until proposal signing.
     producer_signing_key = os.environ.pop(PRODUCER_SIGNING_KEY_ENV, None)
@@ -15566,13 +15937,29 @@ def main() -> int:
     parser.add_argument("--ledger-repo", default="PolicyEngine/chronicle")
     parser.add_argument("--ledger-branch", default="codex/thesis-ledger-facts")
     parser.add_argument("--ledger-path", default="ledger/official_observations.jsonl")
+    parser.add_argument(
+        "--append-gate-timeout-minutes",
+        type=float,
+        default=None,
+        help=(
+            "wall-clock minutes to wait for the chronicle append gates "
+            f"(default: ${APPEND_GATE_TIMEOUT_ENV}, else "
+            f"{DEFAULT_APPEND_GATE_TIMEOUT_MINUTES:g})"
+        ),
+    )
     args = parser.parse_args()
+    # Resolve and validate the budget before any fetch, so a bad value fails
+    # the run at startup instead of after the TSA round trip.
+    gate_timeout_seconds = append_gate_timeout_seconds(
+        args.append_gate_timeout_minutes, os.environ
+    )
 
     log = load_thesis_log(LOG_URL)
     todo = pending_claims_refs(log)
     adapter_todo = pending_adapter_refs(log)
     if not todo and not adapter_todo:
         print("no pending adapter-covered cells")
+        print(f"{RESOLUTION_LOOP_COMPLETE} 0 reference(s) examined")
         return 0
 
     content, sha, ledger_repo_sha = ledger_state(
@@ -15684,9 +16071,7 @@ def main() -> int:
     # SSA official pages: one headless-browser capture per URL per run.
     ssa_capture_cache: dict[str, Any] = {}
     ssa_browser_unavailable: str | None = None
-    sba_timeline_cache: Mapping[str, Any] | None = None
-    sba_timeline_error: str | None = None
-    sba_timeline_loaded = False
+    sba_timeline = _MemoizedTimeline(ROOT / "records")
     loop_contracts = registration_contracts()
     for ref, kind, spec, period_type, period, source_vintage, forecast in adapter_todo:
         qcew_row: dict[str, Any] | None = None
@@ -15834,24 +16219,11 @@ def main() -> int:
         sba_resolution: SbaPdfResolution | None = None
         archive_vintage = release_day.isoformat()
         if kind == "sba_pdf":
-            if not sba_timeline_loaded:
-                try:
-                    sba_timeline_cache = extract_timeline(ROOT / "records")
-                except (OSError, TimelineError, ValueError) as exc:
-                    sba_timeline_error = str(exc)
-                sba_timeline_loaded = True
-            if sba_timeline_error is not None:
-                print(
-                    f"  {SBA_CUSTODY_INVALID} witnessed record timeline does "
-                    f"not verify: {sba_timeline_error}"
-                )
-                continue
-            assert sba_timeline_cache is not None
             sba_resolution, refusal = resolve_sba_pdf_first_print(
                 ROOT / "records",
                 series=spec["series_id"],
                 fiscal_year=int(period),
-                timeline=sba_timeline_cache,
+                timeline_loader=sba_timeline,
             )
             if refusal:
                 if refusal.startswith(SBA_PARSER_REFUSAL):
@@ -17585,6 +17957,10 @@ def main() -> int:
         )
         print(f"  resolve {ref} -> {row['value']} {row['measure']['unit']}")
 
+    print(
+        f"{RESOLUTION_LOOP_COMPLETE} {len(todo) + len(adapter_todo)} "
+        "reference(s) examined"
+    )
     if environment_failures:
         print(
             "environment failures left admitted references unresolvable "
@@ -17682,6 +18058,7 @@ def main() -> int:
         ledger_repo_sha,
         len(new_rows),
         producer_signing_key=producer_signing_key,
+        gate_timeout_seconds=gate_timeout_seconds,
     )
     print(
         f"appended {len(new_rows)} observation(s) to "
