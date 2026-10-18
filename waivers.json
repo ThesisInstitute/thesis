@@ -33,6 +33,23 @@
     "legacy_incomplete_custody_roots": {
       "description": "Custody roots recorded before custody inventory v2, honestly marked legacy-incomplete and permanently headline-ineligible. Immutable history; frozen.",
       "frozenCount": 40
+    },
+    "weekly_claims_windows_off_schedule": {
+      "description": "Weekly claims registrations whose expectedReleaseWindow is not DOL's scheduled release day +/- 2 days. From the 2026-08-12 roll to the fix, register_targets.expected_release_window stepped the previous forecast's resolutionDate forward 7 days; published forecasts carried the window end, so each roll drifted 2 days later. Registrations are immutable, so this population is frozen: it cannot shrink, and any new member means the derivation regressed. See docs/weekly-claims-release-window-drift.md.",
+      "members": [
+        "dol.eta.continued_claims.sa.week_2026-09-05.first_print",
+        "dol.eta.continued_claims.sa.week_2026-09-12.first_print",
+        "dol.eta.continued_claims.sa.week_2026-09-19.first_print",
+        "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+        "dol.eta.continued_claims.sa.week_2026-10-03.first_print",
+        "us.dol.initial_claims.sa.week_2026-08-15",
+        "us.dol.initial_claims.sa.week_2026-08-22",
+        "us.dol.initial_claims.sa.week_2026-08-29",
+        "us.dol.initial_claims.sa.week_2026-09-05",
+        "us.dol.initial_claims.sa.week_2026-09-12",
+        "us.dol.initial_claims.sa.week_2026-09-19",
+        "us.dol.initial_claims.sa.week_2026-09-26"
+      ]
     }
   }
 }

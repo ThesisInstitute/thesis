@@ -148,6 +148,22 @@ SERIES_BINDINGS: dict[str, dict[str, Any]] = {
         "dataPointSuffix": "week_{period}.first_print",
     },
 }
+# Both SERIES_BINDINGS series print in DOL's UI Weekly Claims news release.
+# The Office of Unemployment Insurance states its schedule on the archive
+# page below: every Thursday at 8:30am Eastern, except when Thursday is a
+# federal holiday, and it lists each off-Thursday release date. A reference
+# week ends on a Saturday, so releaseLagDays (5 for the advance initial-claims
+# week, 12 for insured unemployment, which prints one week later) lands on
+# that Thursday. The lag restates DOL's stated schedule; it is not a cadence
+# read off earlier Thesis targets.
+WEEKLY_CLAIMS_SCHEDULE_URL = "https://oui.doleta.gov/unemploy/claims_arch.asp"
+# Scheduled Thursday -> the release day DOL lists instead. Read 2026-09-20,
+# when the page listed exactly one date. A federal-holiday Thursday missing
+# from this table fails registration closed until DOL's date is added.
+WEEKLY_CLAIMS_RELEASE_EXCEPTIONS: dict[str, str] = {
+    "2026-11-26": "2026-11-25",
+}
+WEEKLY_CLAIMS_WINDOW_HALF_WIDTH_DAYS = 2
 
 
 def is_calendar_gated_source(adapter: Any, series: Any) -> bool:
@@ -509,6 +525,67 @@ def source_binding_seed(
     return inherited if isinstance(inherited, dict) else {}
 
 
+def _thursday_federal_holiday(day: dt.date) -> str | None:
+    """Name the federal holiday (5 U.S.C. 6103) falling on this Thursday.
+
+    Only the fixed-date holidays, Thanksgiving and Inauguration Day can land
+    on a Thursday: the other statutory holidays are Mondays, and an observed
+    day moves a weekend holiday to Friday or Monday. Inauguration Day
+    (January 20 after a presidential election, 6103(c)) is a holiday for
+    federal employees in the Washington area, where DOL publishes.
+    """
+
+    fixed = {
+        (1, 1): "New Year's Day",
+        (6, 19): "Juneteenth",
+        (7, 4): "Independence Day",
+        (11, 11): "Veterans Day",
+        (12, 25): "Christmas Day",
+    }
+    name = fixed.get((day.month, day.day))
+    if name:
+        return name
+    if (day.month, day.day) == (1, 20) and day.year % 4 == 1:
+        return "Inauguration Day"
+    if day.month == 11 and 22 <= day.day <= 28:
+        return "Thanksgiving"
+    return None
+
+
+def weekly_claims_release_day(series: str, period: str) -> dt.date:
+    """The day DOL's stated schedule prints this reference week.
+
+    Derived only from the reference week and WEEKLY_CLAIMS_SCHEDULE_URL's
+    rule. A previous target's resolutionDate is never an input: a published
+    forecast may carry any day inside its registered window, so stepping it
+    forward moves the next window by the same error.
+    """
+
+    if series not in SERIES_BINDINGS:
+        raise RegistrationError(f"{series} has no reviewed weekly release lag")
+    week = _iso_date(str(period).removeprefix("week_"))
+    if week.weekday() != 5:
+        raise RegistrationError(
+            f"weekly claims reference week {week.isoformat()} must end on a Saturday"
+        )
+    scheduled = week + dt.timedelta(days=int(SERIES_BINDINGS[series]["releaseLagDays"]))
+    if scheduled.weekday() != 3:
+        raise RegistrationError(
+            f"{series} releaseLagDays does not land on DOL's Thursday release"
+        )
+    listed = WEEKLY_CLAIMS_RELEASE_EXCEPTIONS.get(scheduled.isoformat())
+    if listed is not None:
+        return _iso_date(listed)
+    holiday = _thursday_federal_holiday(scheduled)
+    if holiday is not None:
+        raise RegistrationError(
+            f"{series} {period} is scheduled for {scheduled.isoformat()}, a "
+            f"federal holiday ({holiday}); add the release day DOL lists at "
+            f"{WEEKLY_CLAIMS_SCHEDULE_URL} to WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+        )
+    return scheduled
+
+
 def expected_release_window(
     target: dict[str, Any], previous: dict[str, Any] | None, registration_date: dt.date
 ) -> dict[str, str]:
@@ -537,6 +614,28 @@ def expected_release_window(
         start, end = _iso_date(str(supplied["start"])), _iso_date(str(supplied["end"]))
     elif target.get("expectedReleaseDate"):
         start = end = _iso_date(str(target["expectedReleaseDate"]))
+        if target.get("series") in SERIES_BINDINGS:
+            # One schedule for admission and the waiver ratchet: a weekly
+            # claims release day off DOL's Thursday must be the day DOL lists,
+            # recorded in WEEKLY_CLAIMS_RELEASE_EXCEPTIONS with its source.
+            scheduled = weekly_claims_release_day(
+                str(target["series"]), str(target["period"])
+            )
+            if start != scheduled:
+                raise RegistrationError(
+                    f"{target['series']} {target['period']} expectedReleaseDate "
+                    f"{start.isoformat()} is not the scheduled release day "
+                    f"{scheduled.isoformat()}; add the day DOL lists at "
+                    f"{WEEKLY_CLAIMS_SCHEDULE_URL} to "
+                    "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+                )
+    elif target.get("series") in SERIES_BINDINGS:
+        # Ahead of the previous-target branch on purpose: a roll always
+        # carries previousTarget.resolutionDate, and stepping that forward
+        # walked these windows 2 days later every week (2026-08-12 onward).
+        center = weekly_claims_release_day(str(target["series"]), str(target["period"]))
+        half_width = dt.timedelta(days=WEEKLY_CLAIMS_WINDOW_HALF_WIDTH_DAYS)
+        start, end = center - half_width, center + half_width
     elif previous and previous.get("resolutionDate"):
         prior = _iso_date(str(previous["resolutionDate"]))
         period = str(target["period"])
@@ -554,11 +653,6 @@ def expected_release_window(
                 registration_date + dt.timedelta(days=1),
                 registration_date + dt.timedelta(days=75),
             )
-    elif target["series"] in SERIES_BINDINGS:
-        week = _iso_date(str(target["period"]).removeprefix("week_"))
-        lag = int(SERIES_BINDINGS[str(target["series"])]["releaseLagDays"])
-        center = week + dt.timedelta(days=lag)
-        start, end = center - dt.timedelta(days=2), center + dt.timedelta(days=2)
     else:
         # Prospect/mined targets without an exact official date are admitted
         # only to a broad expected window.  The analyst must verify the exact
