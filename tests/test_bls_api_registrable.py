@@ -5,8 +5,9 @@ the six Table A-19 rows, 2026-09-25 and 2026-09-26 (see
 ``tests/fixtures/bls_api/README.md``). They prove the parser, the transforms
 and the binding; they are never resolution evidence.
 
-Twelve specs are registrable. Nine have docket templates. The other three wait
-on a Chronicle lineage decision (``LINEAGE_BLOCKED`` below).
+Twelve specs are registrable, and all twelve have docket templates. Three of
+them (``FOLDED_BY_D353`` below) waited until Chronicle folded their duplicate
+lineages (Max's ruling d353; PolicyEngine/chronicle#344).
 """
 
 from __future__ import annotations
@@ -111,16 +112,18 @@ CAPTURES = {
     ),
 }
 REGISTRABLE = sorted(CAPTURES)
-# Chronicle holds two observed lineages for each of these concepts, and a
-# declared BLS series id appears in neither, so the docket-to-Ledger
-# containment gate cannot re-derive the pin. They get a docket template only
-# after Chronicle resolves the duplicate (docs/anchor-verifications.md).
-LINEAGE_BLOCKED = {
+# Chronicle held two observed lineages for each of these concepts: the
+# hand-recorded May 2026 print with a bespoke entity and every resolver print
+# with economy/aggregate. Chronicle folded them into the economy/aggregate
+# lineage (Max's ruling d353, PolicyEngine/chronicle#344), the docket pins
+# moved there, and the series took their templates
+# (docs/anchor-verifications.md).
+FOLDED_BY_D353 = (
     "bls.cps.unemployment_rate",
     "bls.cpi.u.headline_mom",
     "bls.cpi.u.core_mom",
-}
-DOCKETED = sorted(set(REGISTRABLE) - LINEAGE_BLOCKED)
+)
+DOCKETED = REGISTRABLE
 
 
 def _rows(series: str) -> dict[str, dict]:
@@ -687,7 +690,12 @@ def test_docket_templates_are_the_executor_templates() -> None:
         )
 
 
-def test_lineage_blocked_series_stay_templateless_until_chronicle_is_fixed() -> None:
+def test_bls_api_facts_join_the_lineage_the_docket_pins() -> None:
+    # The fold is what makes these templates sound: Chronicle now holds one
+    # observed lineage per concept, a fact the bls_api executor writes lands in
+    # it, and the docket pins it. If a spec ever sets another entity, or the
+    # catalog splits again, this fails before a fact lands in an unpinned
+    # lineage.
     registry = json.loads((ROOT / "scripts" / "docket_series.json").read_text())
     entries = {entry["series"]: entry for entry in registry["series"]}
     waived = json.loads((ROOT / "waivers.json").read_text())["waivers"][
@@ -696,30 +704,40 @@ def test_lineage_blocked_series_stay_templateless_until_chronicle_is_fixed() -> 
     catalog = json.loads(
         (ROOT / "tests" / "fixtures" / "ledger_series_catalog.json").read_text()
     )["series"]
-    for series in sorted(LINEAGE_BLOCKED):
-        assert "sourceBinding" not in (entries[series].get("extras") or {})
-        assert series in waived
+    for series in FOLDED_BY_D353:
+        spec = resolve_pending.BLS_API_ADAPTERS[series]
+        entry = entries[series]
+        assert entry["extras"]["sourceBinding"] == (
+            resolve_pending.bls_api_binding_template(spec)
+        )
+        assert series not in waived
         lineages = [
             row
             for row in catalog
             if row.get("concept") == series and row.get("status") != "docket-only"
         ]
-        series_id = resolve_pending.BLS_API_ADAPTERS[series]["series_id"]
-        # This is the blocking condition itself. When Chronicle merges the
-        # duplicate, or a lineage gains the BLS id, this assertion fails: that
-        # is the signal to give the series its docket template.
-        assert len(lineages) > 1, series
-        assert not any(
-            series_id in (row.get("source_concepts") or []) for row in lineages
-        ), series
-        # The pinned lineage is not the one a default-entity fact would join.
-        pinned = entries[series]["ledger"]["uuid"]
-        default_entity = [
-            row["uuid"]
-            for row in lineages
-            if (row.get("entity") or {}).get("name") == "economy"
-        ]
-        assert default_entity and pinned not in default_entity, series
+        assert len(lineages) == 1, series
+        (lineage,) = lineages
+        assert entry["ledger"]["uuid"] == lineage["uuid"], series
+        url = resolve_pending.BLS_API_URL.format(
+            series=spec["series_id"], start=2029, end=2030
+        )
+        fact = resolve_pending.generic_fact(
+            f"{series}.2030_01.first_print",
+            spec,
+            "month",
+            "2030-01",
+            0.1,
+            dt.date(2030, 2, 8),
+            url,
+            "timeseries/data (BLS Public Data API v2)",
+        )
+        assert fact["entity"] == lineage["entity"], series
+        assert {
+            key: fact["geography"].get(key) for key in ("level", "id", "vintage")
+        } == {
+            key: lineage["geography"].get(key) for key in ("level", "id", "vintage")
+        }, series
 
 
 def test_docket_templates_pass_the_prospector_binding_schema() -> None:

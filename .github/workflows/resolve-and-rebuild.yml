@@ -32,7 +32,21 @@ jobs:
     # overlap it, and that day's snapshot would then predate the fresh
     # resolutions. The next snapshot picks them up; a cancelled run loses
     # the publish outright, so the longer cap is the better trade.
-    timeout-minutes: 60
+    # Since 2026-10-01 the SBA loan-performance targets' window is open, and
+    # the first of them verifies the whole witnessed record timeline before
+    # it can refuse or resolve: about 50 minutes on 2026-10-09, when the
+    # resolve step took 58 and the 60-minute cap cancelled the site rebuild
+    # after that day's append had merged (chronicle#327); on 2026-10-10 it
+    # cancelled the resolve step itself. The resolver also waits for
+    # Chronicle's append gates, whose jobs sat queued for a runner 33-68
+    # minutes on 2026-09-22/23 (chronicle #285, #286); that wait has its own
+    # 150-minute budget (DEFAULT_APPEND_GATE_TIMEOUT_MINUTES; override with
+    # LEDGER_APPEND_GATE_TIMEOUT_MINUTES on the resolve step). 240 covers a
+    # 60-minute resolve, the whole gate budget, the pin and witness step,
+    # a 7-minute rebuild and the 12-minute deploy canary. The workflow-level
+    # concurrency group queues a dispatched or next-day run behind a long
+    # one instead of overlapping it.
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v5
         with:
@@ -280,6 +294,7 @@ jobs:
           echo "pushed_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Attest the deployed-ledger push
+        id: attest_deployed
         if: steps.deployed_ledger.outputs.pushed_sha != ''
         uses: ./.github/actions/attest-records-push
         with:
@@ -343,8 +358,24 @@ jobs:
         # of vanishing. If the script fails, the old title and one-line body
         # go out; if the issue call fails, a one-line issue under the same
         # title does (a call that failed only on our side can then post
-        # twice, which beats posting nothing).
-        if: failure()
+        # twice, which beats posting nothing). A run cancelled before it
+        # finished publishing alerts too: from 2026-10-01 every scheduled run
+        # hit the 60-minute cap, and none of them opened an issue. A cancel
+        # turns failure() false and skips "Fail the run on refused rows", so
+        # a cancelled run stays silent only when the resolver exited 0 (no
+        # refused rows) and publication completed: the ledger step said there
+        # was nothing to publish, or the deployed-ledger record succeeded and
+        # its attestation did not fail. The status page still runs on a
+        # cancel. A step output that a cancelled step never wrote is null, and
+        # GitHub evaluates null == '0' as true, so each output is trusted only
+        # beside its own step's success.
+        if: >-
+          failure() || (cancelled() && !(steps.resolve.outcome == 'success'
+          && steps.resolve.outputs.resolver_rc == '0'
+          && ((steps.ledger.outcome == 'success'
+          && steps.ledger.outputs.needs_publish == '0')
+          || (steps.deployed_ledger.outcome == 'success'
+          && steps.attest_deployed.outcome != 'failure'))))
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

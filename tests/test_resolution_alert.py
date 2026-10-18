@@ -152,6 +152,13 @@ def test_the_receipt_crash_names_the_import_error() -> None:
         ),
         ("  resolve a.b -> 1.0 thousands\n", "", "Read the run's log"),
         (
+            # 2026-10-13 to 10-15: the job's timeout cancelled the step in
+            # flight, with no traceback.
+            "  resolve a.b -> 1.0 thousands\n",
+            "cancelled",
+            "cancelled before the resolver finished",
+        ),
+        (
             "appended 1 observation(s) to o/r@b:l.jsonl via reviewed proposal "
             f"(merged at {'a' * 40})\n",
             "success",
@@ -334,7 +341,7 @@ def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str]]:
 
 
 GATES = st.sampled_from(["failure", "skipped", "success", "cancelled", "", "FAILURE"])
-OUTCOMES = st.sampled_from(["success", "failure", "skipped", ""])
+OUTCOMES = st.sampled_from(["success", "failure", "skipped", "cancelled", ""])
 
 
 @settings(max_examples=400, deadline=None)
@@ -430,7 +437,22 @@ def test_the_alert_reads_the_refused_gate_and_keeps_its_place() -> None:
     # step succeeded or was skipped.
     assert gate["if"] == "steps.resolve.outputs.resolver_rc == '3'"
     alert = _step("Alert on failure")
-    assert alert["if"] == "failure()"
+    # A cancellation alerts only when publication had not completed.
+    assert alert["if"] == (
+        "failure() || (cancelled() && !(steps.resolve.outcome == 'success' "
+        "&& steps.resolve.outputs.resolver_rc == '0' "
+        "&& ((steps.ledger.outcome == 'success' "
+        "&& steps.ledger.outputs.needs_publish == '0') "
+        "|| (steps.deployed_ledger.outcome == 'success' "
+        "&& steps.attest_deployed.outcome != 'failure'))))"
+    )
+    assert _step("Compare ledger branch with the last successful deployment")["id"] == (
+        "ledger"
+    )
+    assert _step("Attest the deployed-ledger push")["id"] == "attest_deployed"
+    deployed = _step("Record the successfully deployed ledger SHA")
+    assert deployed["id"] == "deployed_ledger"
+    assert _step("Resolve pending cells against official prints")["id"] == "resolve"
     assert alert["env"]["REFUSED_GATE"] == "${{ steps.refused_gate.outcome }}"
     assert alert["env"]["RESOLVE_OUTCOME"] == "${{ steps.resolve.outcome }}"
     assert alert["env"]["NEEDS_PUBLISH"] == "${{ steps.ledger.outputs.needs_publish }}"

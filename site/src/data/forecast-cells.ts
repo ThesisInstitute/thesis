@@ -86,6 +86,7 @@ export type {
   NumericCdfPoint,
   PredictionDistribution,
 } from "./prediction-distribution";
+import type { Unit } from "./units";
 
 // Forecast-cell definitions and AI analyst reasoning scripts.
 // Each cell is a self-contained record with a pre-written reasoning stream
@@ -97,26 +98,8 @@ export type {
 
 export type ForecastCellType = "data" | "policy" | "conditional";
 
-export type Unit =
-  | "count"
-  | "percent"
-  | "gbp_billions"
-  | "usd"
-  | "usd_millions"
-  | "usd_billions"
-  // Non-canonical variant admitted by the 2026-08-03 auto-roll — registered
-  // snapshots are immutable, so the site tolerates it. Canonical is
-  // "usd_billions" and registration-side enum validation is the follow-up.
-  | "billions USD"
-  | "usd_monthly"
-  | "thousands"
-  | "millions"
-  | "million_cubic_feet"
-  | "per_1000_live_births"
-  | "ratio"
-  | "minutes"
-  | "percent_growth"
-  | "index_points";
+// The unit list lives in units.ts so runtime checks share it.
+export type { Unit };
 
 export interface HistoricalPoint {
   // Optional only for already-published pre-2.5.10 cells. Current generated
