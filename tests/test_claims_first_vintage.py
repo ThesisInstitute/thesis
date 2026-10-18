@@ -1922,7 +1922,8 @@ def test_custody_refuses_two_archives_of_one_series_date_that_differ(
 def test_the_run_records_the_schedule_it_decided_with() -> None:
     import inspect
 
-    source = inspect.getsource(resolve_pending.main)
+    # main() wraps _main(), which builds the run manifest.
+    source = inspect.getsource(resolve_pending._main)
     assert '"weeklyClaimsSchedule"' in source
     assert "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS" in source
 
