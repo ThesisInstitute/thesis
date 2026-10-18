@@ -21,6 +21,7 @@ from hypothesis import strategies as st
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import chronicle_receipt_pin  # noqa: E402
 import ledger_release_chain  # noqa: E402
 import register_targets  # noqa: E402
 import resolve_pending  # noqa: E402
@@ -2185,6 +2186,45 @@ def _sign_test_manifest(
     return signature_path.read_bytes()
 
 
+CHRONICLE_RECEIPT_LOCKS = sorted(
+    (ROOT / "tests" / "fixtures" / "chronicle_receipt_pin").glob("uv-lock-*.toml")
+)
+
+
+def _receipt_lock_excerpt(lock: bytes) -> bytes:
+    """A uv.lock holding only ``lock``'s header and its receipt entry."""
+
+    blocks = lock.decode("utf-8").split("\n\n")
+    receipt = [
+        block for block in blocks if block.startswith('[[package]]\nname = "receipt"\n')
+    ]
+    assert len(receipt) == 1
+    return f"{blocks[0]}\n\n{receipt[0].rstrip()}\n".encode()
+
+
+# A staged Chronicle base locks exactly thesis's receipt unless a test says
+# otherwise; the conftest stub gives this interpreter that receipt too.
+THESIS_RECEIPT_LOCK = _receipt_lock_excerpt((ROOT / "uv.lock").read_bytes())
+
+
+def _thesis_receipt_version() -> str:
+    pin = chronicle_receipt_pin.locked_pin(THESIS_RECEIPT_LOCK, label="thesis")
+    assert pin is not None
+    return pin.version
+
+
+def _chronicle_lock_locking_another_receipt() -> tuple[bytes, str]:
+    """A real Chronicle lock excerpt naming a receipt thesis does not lock."""
+
+    thesis = _thesis_receipt_version()
+    for path in CHRONICLE_RECEIPT_LOCKS:
+        raw = path.read_bytes()
+        pin = chronicle_receipt_pin.locked_pin(raw, label=path.name)
+        if pin is not None and pin.version != thesis:
+            return raw, pin.version
+    raise AssertionError("every Chronicle lock fixture names thesis's receipt")
+
+
 def _fake_catalog_generator() -> bytes:
     return b"""#!/usr/bin/env python3
 import hashlib
@@ -2289,6 +2329,7 @@ def _release_fixture_tree(
         ),
         "scripts/receipt_pins.py": b"APPEND_GATE_SPEC = None\nLEDGER_SPEC = None\n",
         "ledger/seeds/thesis_docket_series.json": b"[]\n",
+        "uv.lock": THESIS_RECEIPT_LOCK,
         manifest_path: manifest_raw,
         **{
             f"releases/manifests/{pathlib.PurePosixPath(manifest_name).stem}."
@@ -2651,6 +2692,7 @@ def test_catalog_regeneration_inputs_cover_the_fixture_stage(
         "ledger/series_uuid_registry.jsonl",
         "ledger/seeds/thesis_docket_series.json",
         "ledger/seeds/entity_folds.json",
+        "uv.lock",
     )
     tree, _anchor_dir, _requester, _signing_key = _release_fixture_tree(tmp_path)
     allowed = {
@@ -6366,6 +6408,7 @@ def _catalog_tree(generator: bytes) -> resolve_pending.RepositoryTree:
             b'{"source_record_id":"base","unit":"thousands"}\n'
         ),
         "scripts/build_series_catalog.py": generator,
+        "uv.lock": THESIS_RECEIPT_LOCK,
     }
     return resolve_pending.RepositoryTree(
         tree_sha="1" * 40,
@@ -6632,3 +6675,376 @@ def test_exactly_the_rows_that_fail_alone_are_refused(kinds: list[str]) -> None:
             assert reason.startswith("series-catalog registry growth refused: ")
         else:
             assert reason.startswith("series-catalog generator exit 1: ")
+
+
+# --- receipt pin: every proposal runs Chronicle's generator under this receipt ---
+
+# The unstubbed functions, captured before the conftest stub replaces them.
+_REAL_CHRONICLE_RECEIPT_LOCK = resolve_pending.chronicle_receipt_lock
+_REAL_INSTALLED_RECEIPT_VERSION = resolve_pending.installed_receipt_version
+_PENDING_CLAIM = ("test.claims.week_2026-09-19", "2026-09-19", "initial", "2026-09-24")
+
+
+def _install_one_pending_claim(monkeypatch) -> list[tuple]:
+    """main() with one due claims cell; returns the capture calls it makes."""
+
+    captures: list[tuple] = []
+    monkeypatch.setattr(
+        resolve_pending,
+        "load_thesis_log",
+        lambda _url: {"entries": [], "resolutionLinks": []},
+    )
+    monkeypatch.setattr(
+        resolve_pending, "pending_claims_refs", lambda _log: [_PENDING_CLAIM]
+    )
+    monkeypatch.setattr(resolve_pending, "pending_adapter_refs", lambda _log: [])
+    monkeypatch.setattr(resolve_pending, "registration_contracts", lambda: {})
+    monkeypatch.setattr(
+        resolve_pending, "ledger_state", lambda *_args: ("", "blob", "b" * 40)
+    )
+
+    def capture(*args):
+        captures.append(args)
+        return None, None, "", ""
+
+    monkeypatch.setattr(resolve_pending, "fred_advance_value", capture)
+    return captures
+
+
+def test_main_refuses_a_chronicle_receipt_mismatch_before_any_capture(
+    monkeypatch, capsys
+) -> None:
+    captures = _install_one_pending_claim(monkeypatch)
+    chronicle_lock, chronicle_version = _chronicle_lock_locking_another_receipt()
+    reads: list[tuple[str, str]] = []
+
+    def read_lock(repo: str, sha: str) -> bytes:
+        reads.append((repo, sha))
+        return chronicle_lock
+
+    monkeypatch.setattr(resolve_pending, "chronicle_receipt_lock", read_lock)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    # The lock read is at the exact commit the append would be built on, and
+    # nothing was fetched from any publisher.
+    assert reads == [("PolicyEngine/chronicle", "b" * 40)]
+    assert captures == []
+    out = capsys.readouterr().out
+    reason = (
+        f"thesis locks receipt {_thesis_receipt_version()} but "
+        "PolicyEngine/chronicle@bbbbbbbbbbbb (codex/thesis-ledger-facts) locks "
+        f"receipt {chronicle_version}."
+    )
+    assert f"RECEIPT PIN REFUSED: {reason}" in out
+    assert f"::error title=Receipt pin mismatch::{reason}" in out
+    # main()'s wrapper still prints the finish line; the loop never ran.
+    assert f"{resolve_pending.RESOLVER_FINISHED} 4" in out
+    assert resolve_pending.RESOLUTION_LOOP_COMPLETE not in out
+    # Exit 4 is its own status, but the workflow treats it like
+    # EXIT_REFUSED_ROWS: it publishes what moved upstream, then fails the job
+    # ("Fail the run on refused rows"), and the alert opens its issue.
+    assert resolve_pending.EXIT_RECEIPT_PIN_REFUSED not in (
+        0,
+        resolve_pending.EXIT_REFUSED_ROWS,
+    )
+
+
+def test_main_dry_run_reports_a_receipt_mismatch_and_goes_on(
+    monkeypatch, capsys
+) -> None:
+    captures = _install_one_pending_claim(monkeypatch)
+    chronicle_lock, _version = _chronicle_lock_locking_another_receipt()
+    monkeypatch.setattr(
+        resolve_pending, "chronicle_receipt_lock", lambda *_args: chronicle_lock
+    )
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert "RECEIPT PIN REFUSED: thesis locks receipt" in out
+    assert "dry-run: continuing; a real run stops here" in out
+    assert "::error" not in out
+    assert len(captures) == 1
+
+
+def test_main_captures_when_chronicle_locks_thesiss_receipt(
+    monkeypatch, capsys
+) -> None:
+    captures = _install_one_pending_claim(monkeypatch)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert "RECEIPT PIN" not in out
+    assert "nothing new to record" in out
+    assert len(captures) == 1
+
+
+def test_main_refuses_when_it_cannot_read_chronicles_lock(monkeypatch, capsys) -> None:
+    captures = _install_one_pending_claim(monkeypatch)
+
+    def unreadable(*_args):
+        raise RuntimeError(
+            "gh api repos/PolicyEngine/chronicle/git/commits failed: 502"
+        )
+
+    monkeypatch.setattr(resolve_pending, "chronicle_receipt_lock", unreadable)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    assert captures == []
+    assert (
+        "RECEIPT PIN REFUSED: cannot read PolicyEngine/chronicle@bbbbbbbbbbbb "
+        "(codex/thesis-ledger-facts) uv.lock: gh api "
+        "repos/PolicyEngine/chronicle/git/commits failed: 502"
+    ) in capsys.readouterr().out
+
+
+def test_main_refuses_an_interpreter_without_the_locked_receipt(
+    monkeypatch, capsys
+) -> None:
+    captures = _install_one_pending_claim(monkeypatch)
+    monkeypatch.setattr(resolve_pending, "installed_receipt_version", lambda: None)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    assert captures == []
+    assert "RECEIPT PIN REFUSED: receipt is not installed for" in (
+        capsys.readouterr().out
+    )
+
+
+def test_main_refuses_an_installed_receipt_other_than_the_locked_one(
+    monkeypatch, capsys, tmp_path: pathlib.Path
+) -> None:
+    # The real probe, not the conftest stub: a distribution at a version no
+    # lock names must be what main() compares (review of #304, finding 3).
+    dist = tmp_path / "receipt-0.0.1.dist-info"
+    dist.mkdir()
+    (dist / "METADATA").write_text(
+        "Metadata-Version: 2.1\nName: receipt\nVersion: 0.0.1\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setattr(
+        resolve_pending, "installed_receipt_version", _REAL_INSTALLED_RECEIPT_VERSION
+    )
+    captures = _install_one_pending_claim(monkeypatch)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    assert captures == []
+    assert f"{sys.executable} has receipt 0.0.1, but thesis and" in (
+        capsys.readouterr().out
+    )
+
+
+def test_the_refusal_prints_as_one_line_and_an_escaped_annotation(
+    monkeypatch, capsys
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    resolve_pending.announce_receipt_pin_refusal("50% off\r\n::warning::x ##[error]y")
+    lines = capsys.readouterr().out.splitlines()
+    # Neither command format survives: ``::`` (read at a line's start) nor
+    # the legacy ``##[`` (read anywhere in a line).
+    assert lines == [
+        "RECEIPT PIN REFUSED: 50% off  : :warning: :x # #[error]y",
+        "::error title=Receipt pin mismatch::50%25 off%0D%0A: :warning: :x # #[error]y",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("lock", "reason"),
+    [
+        # tomllib's plain ValueError past Python's 4300-digit integer limit.
+        (b"x = " + b"1" * 5000 + b"\n", "is not a readable uv.lock (ValueError)"),
+        # A duplicate key the parser would quote, carrying a legacy command.
+        (
+            b'["##[warning]injected"]\n["##[warning]injected"]\n',
+            "is not a readable uv.lock (TOMLDecodeError",
+        ),
+    ],
+    ids=["integer-past-digit-limit", "duplicate-key-with-command"],
+)
+def test_main_refuses_a_chronicle_lock_it_cannot_parse_without_crashing(
+    monkeypatch, capsys, lock: bytes, reason: str
+) -> None:
+    # Round 2 of the #304 review, findings 1 and 2: exit 4 and one clean
+    # line, never a crash (exit 1, which skips publishing) or a command.
+    captures = _install_one_pending_claim(monkeypatch)
+    monkeypatch.setattr(resolve_pending, "chronicle_receipt_lock", lambda *_: lock)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    assert captures == []
+    out = capsys.readouterr().out
+    assert reason in out
+    assert "injected" not in out and "##[" not in out
+
+
+@pytest.mark.parametrize("broken", ["thesis_lock", "installed"])
+def test_main_refuses_when_its_own_side_cannot_be_read(
+    monkeypatch, capsys, tmp_path: pathlib.Path, broken: str
+) -> None:
+    captures = _install_one_pending_claim(monkeypatch)
+    if broken == "thesis_lock":
+        monkeypatch.setattr(
+            chronicle_receipt_pin, "THESIS_LOCK", tmp_path / "missing" / "uv.lock"
+        )
+        reason = "cannot read thesis's uv.lock (FileNotFoundError)"
+    else:
+
+        def unreadable() -> str:
+            raise ValueError("malformed METADATA")
+
+        monkeypatch.setattr(resolve_pending, "installed_receipt_version", unreadable)
+        reason = "cannot read this interpreter's receipt (ValueError)"
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+
+    assert resolve_pending.main() == resolve_pending.EXIT_RECEIPT_PIN_REFUSED
+    assert captures == []
+    assert f"RECEIPT PIN REFUSED: {reason}" in capsys.readouterr().out
+
+
+def test_the_preflight_reads_chronicles_lock_through_the_verified_gh_client(
+    monkeypatch,
+) -> None:
+    lock = CHRONICLE_RECEIPT_LOCKS[0].read_bytes()
+    blob = hashlib.sha1(f"blob {len(lock)}\0".encode() + lock).hexdigest()
+    calls: list[tuple[str, ...]] = []
+
+    def gh(*args: str, input_body=None) -> str:
+        calls.append(args)
+        assert input_body is None
+        if args[0].endswith(f"/git/commits/{'b' * 40}"):
+            return json.dumps({"sha": "b" * 40, "tree": {"sha": "9" * 40}})
+        if args[0].endswith(f"/git/trees/{'9' * 40}"):
+            return json.dumps(
+                {
+                    "truncated": False,
+                    "tree": [
+                        {
+                            "path": "uv.lock",
+                            "mode": "100644",
+                            "type": "blob",
+                            "sha": blob,
+                        }
+                    ],
+                }
+            )
+        assert args[0].endswith(f"/git/blobs/{blob}")
+        return json.dumps(
+            {
+                "sha": blob,
+                "encoding": "base64",
+                "content": base64.b64encode(lock).decode(),
+            }
+        )
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", gh)
+    assert _REAL_CHRONICLE_RECEIPT_LOCK("PolicyEngine/chronicle", "b" * 40) == lock
+    assert [call[0].split("/")[-2] for call in calls] == ["commits", "trees", "blobs"]
+
+
+def test_the_preflight_asks_this_interpreter_for_its_receipt() -> None:
+    assert (
+        _REAL_INSTALLED_RECEIPT_VERSION() == chronicle_receipt_pin.installed_version()
+    )
+
+
+def test_append_proposal_refuses_a_base_locking_another_receipt_before_its_generator(
+    tmp_path: pathlib.Path,
+) -> None:
+    tree, anchor_dir, requester, signing_key_pem = _release_fixture_tree(tmp_path)
+    chronicle_lock, chronicle_version = _chronicle_lock_locking_another_receipt()
+    tree.files["uv.lock"] = chronicle_lock
+    # Were the generator to run, the error would name its exit code instead.
+    tree.files["scripts/build_series_catalog.py"] = b"raise SystemExit(17)\n"
+    timestamp_requests: list[str] = []
+
+    def counting_requester(endpoint: str, query: bytes, timeout: float) -> bytes:
+        timestamp_requests.append(endpoint)
+        return requester(endpoint, query, timeout)
+
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.receipt-pin","value":1}\n'
+    )
+    with pytest.raises(resolve_pending.LedgerProposalError) as refused:
+        resolve_pending._prepare_release_files(
+            tree,
+            path="ledger/official_observations.jsonl",
+            candidate_ledger=candidate,
+            added=1,
+            requester=counting_requester,
+            timeout_seconds=10,
+            clock_skew_seconds=resolve_pending.DEFAULT_CLOCK_SKEW_SECONDS,
+            anchor_dir=anchor_dir,
+            now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
+            producer_signing_key=signing_key_pem,
+        )
+    assert str(refused.value).startswith(
+        "RECEIPT PIN REFUSED: refusing to run the staged series-catalog "
+        "generator: thesis locks "
+        f"receipt {_thesis_receipt_version()} but the staged Chronicle base "
+        f"(tree 111111111111) locks receipt {chronicle_version}."
+    )
+    assert timestamp_requests == []
+
+
+def test_append_proposal_refuses_a_base_without_a_lock(tmp_path: pathlib.Path) -> None:
+    tree, anchor_dir, requester, signing_key_pem = _release_fixture_tree(tmp_path)
+    del tree.files["uv.lock"]
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.no-lock","value":1}\n'
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=re.escape("the staged Chronicle base (tree 111111111111) has no uv.lock"),
+    ):
+        resolve_pending._prepare_release_files(
+            tree,
+            path="ledger/official_observations.jsonl",
+            candidate_ledger=candidate,
+            added=1,
+            requester=requester,
+            timeout_seconds=10,
+            clock_skew_seconds=resolve_pending.DEFAULT_CLOCK_SKEW_SECONDS,
+            anchor_dir=anchor_dir,
+            now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
+            producer_signing_key=signing_key_pem,
+        )
+
+
+def test_ledger_catalog_refusals_name_a_receipt_mismatch_instead_of_trying_rows(
+    monkeypatch, tmp_path: pathlib.Path
+) -> None:
+    ran = tmp_path / "generator-ran"
+    tree = _catalog_tree(
+        f"import pathlib\npathlib.Path({str(ran)!r}).write_text('ran')\n".encode()
+    )
+    chronicle_lock, chronicle_version = _chronicle_lock_locking_another_receipt()
+    tree.files["uv.lock"] = chronicle_lock
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=re.escape(
+            "RECEIPT PIN REFUSED: refusing to run the staged series-catalog "
+            f"generator: thesis locks receipt {_thesis_receipt_version()} but "
+            f"PolicyEngine/chronicle@{'b' * 12} locks receipt {chronicle_version}."
+        ),
+    ):
+        resolve_pending.ledger_catalog_refusals(
+            "PolicyEngine/chronicle",
+            "b" * 40,
+            "ledger/official_observations.jsonl",
+            base,
+            [{"source_record_id": "row", "unit": "thousands"}],
+        )
+    assert not ran.exists()

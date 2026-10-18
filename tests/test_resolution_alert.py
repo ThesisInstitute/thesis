@@ -10,7 +10,9 @@ fetched row refused and nothing new to publish. Until this change all four
 opened or fed the same "Resolution loop failed" issue.
 
 Invariants (property-tested below):
-- the kind is "refused_rows" exactly when the refused-rows gate failed;
+- the kind is "receipt_pin" exactly when the refused-rows gate failed and
+  the resolver printed a RECEIPT PIN REFUSED line (exit 4), and
+  "refused_rows" exactly when the gate failed without one;
 - the loop-failed title is the old title, unchanged;
 - on generated logs mixing every line shape the resolver prints, the
   refused list is exactly the references whose line is one of the three
@@ -138,6 +140,77 @@ def test_the_receipt_crash_names_the_import_error() -> None:
     assert "The resolver stopped on: `" in alert["body"]
     assert "cannot import name 'PinnedSigner'" in alert["body"]
     assert alert["refused"] == []
+
+
+# What resolve_pending prints for the 2026-09-29 mismatch once it refuses
+# before capture instead of crashing (thesis locked 0.6.1, Chronicle 0.6.2).
+RECEIPT_LOG = (
+    "RECEIPT PIN REFUSED: thesis locks receipt 0.6.1 but "
+    "PolicyEngine/chronicle@4b4395b07dcf (codex/thesis-ledger-facts) locks "
+    "receipt 0.6.2. The resolver runs Chronicle's staged series-catalog "
+    "generator under thesis's receipt, and Chronicle has tested that code only "
+    "under 0.6.2. Make the two locks name the same receipt before the resolver "
+    "runs again.\n"
+    "resolver finished with exit code 4\n"
+)
+
+
+def test_the_alert_reads_the_receipt_line_the_status_page_reads() -> None:
+    assert ra._RECEIPT_PREFIX == rs._RECEIPT_STOP
+
+
+@pytest.mark.parametrize(
+    ("needs_publish", "head"),
+    [
+        ("1", "The resolve run published what was new"),
+        ("0", "The resolve run had nothing new to publish"),
+    ],
+)
+def test_a_receipt_pin_refusal_gets_its_own_title_and_reason(
+    needs_publish: str, head: str
+) -> None:
+    alert = ra.build_alert(
+        RECEIPT_LOG,
+        refused_gate="failure",
+        run_url=URL,
+        date=DATE,
+        resolve_outcome="success",
+        needs_publish=needs_publish,
+    )
+    assert alert["kind"] == "receipt_pin"
+    assert alert["title"] == "Resolution stopped on a receipt pin mismatch 2026-09-29"
+    assert alert["refused"] == []
+    body = alert["body"]
+    assert body.startswith(f"{head}, then failed: it fetched no official figure")
+    assert (
+        "The resolver's reason: `thesis locks receipt 0.6.1 but "
+        "PolicyEngine/chronicle@4b4395b07dcf (codex/thesis-ledger-facts) locks "
+        "receipt 0.6.2."
+    ) in body
+    assert "docs/receipt-pin.md" in body
+
+
+def test_a_later_failure_after_a_receipt_refusal_still_says_why() -> None:
+    alert = ra.build_alert(
+        RECEIPT_LOG,
+        refused_gate="skipped",
+        run_url=URL,
+        date=DATE,
+        resolve_outcome="success",
+    )
+    assert alert["kind"] == "loop_failed"
+    assert "the resolver stopped before any capture: `RECEIPT PIN REFUSED" not in (
+        alert["body"]
+    )
+    line = next(
+        line
+        for line in alert["body"].splitlines()
+        if line.startswith("Before that, the resolver stopped before any capture: ")
+    )
+    assert line.startswith(
+        "Before that, the resolver stopped before any capture: `thesis locks"
+    )
+    assert line.endswith("(docs/receipt-pin.md)")
 
 
 @pytest.mark.parametrize(
@@ -340,16 +413,29 @@ def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str]]:
     return "\n".join(lines) + "\n", expected
 
 
+@st.composite
+def resolver_logs_maybe_receipt(draw: st.DrawFn) -> tuple[str, set[str], bool]:
+    """resolver_logs(), sometimes with resolve_pending's receipt refusal line
+    somewhere in it (it stops the real resolver before any target line)."""
+    log, expected = draw(resolver_logs())
+    if not draw(st.booleans()):
+        return log, expected, False
+    lines = log.splitlines()
+    at = draw(st.integers(0, len(lines)))
+    lines.insert(at, f"RECEIPT PIN REFUSED: {draw(ONE_LINE)}")
+    return "\n".join(lines) + "\n", expected, True
+
+
 GATES = st.sampled_from(["failure", "skipped", "success", "cancelled", "", "FAILURE"])
 OUTCOMES = st.sampled_from(["success", "failure", "skipped", "cancelled", ""])
 
 
 @settings(max_examples=400, deadline=None)
-@given(resolver_logs(), GATES, OUTCOMES, st.sampled_from(["0", "1", ""]))
+@given(resolver_logs_maybe_receipt(), GATES, OUTCOMES, st.sampled_from(["0", "1", ""]))
 def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
-    drawn: tuple[str, set[str]], gate: str, outcome: str, needs_publish: str
+    drawn: tuple[str, set[str], bool], gate: str, outcome: str, needs_publish: str
 ) -> None:
-    log, expected = drawn
+    log, expected, receipt = drawn
     alert = ra.build_alert(
         log,
         refused_gate=gate,
@@ -358,6 +444,11 @@ def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
         resolve_outcome=outcome,
         needs_publish=needs_publish,
     )
+    if gate == "failure" and receipt:
+        assert alert["kind"] == "receipt_pin"
+        assert alert["title"] == f"Resolution stopped on a receipt pin mismatch {DATE}"
+        assert alert["refused"] == []
+        return
     assert set(alert["refused"]) == expected
     assert alert["refused"] == sorted(alert["refused"])
     if gate == "failure":
@@ -366,6 +457,16 @@ def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
     else:
         assert alert["kind"] == "loop_failed"
         assert alert["title"] == f"Resolution loop failed {DATE}"
+        # The alert's own line, not text it quotes: a refusal reason can
+        # mention docs/receipt-pin.md inside a code span (round 7 of the review).
+        # The line also ends with the checklist's path (round 8: dropping it
+        # broke no test). _bounded drops whole lines, never cuts one.
+        stopped = any(
+            line.startswith("Before that, the resolver stopped before any capture: ")
+            and line.endswith(f"({ra.RECEIPT_DOC})")
+            for line in alert["body"].splitlines()
+        )
+        assert stopped == receipt
 
 
 def _outside_code_spans(body: str) -> str:
@@ -390,6 +491,7 @@ def test_resolver_text_reaches_the_issue_only_inside_code_spans(
         for ref, why in refusals
     )
     log += f"{tail}\nTraceback (most recent call last):\nValueError: {tail}\n"
+    log += f"RECEIPT PIN REFUSED: {tail}\n"
     alert = ra.build_alert(
         log, refused_gate=gate, run_url=URL, date=DATE, resolve_outcome=outcome
     )
@@ -410,7 +512,7 @@ def test_it_never_raises_on_any_log(log: str, gate: str, outcome: str) -> None:
     alert = ra.build_alert(
         log, refused_gate=gate, run_url=URL, date=DATE, resolve_outcome=outcome
     )
-    assert alert["kind"] in {"refused_rows", "loop_failed"}
+    assert alert["kind"] in {"refused_rows", "loop_failed", "receipt_pin"}
     assert alert["body"].endswith("\n")
     assert len(alert["body"]) <= ra.MAX_BODY_CHARS
 
@@ -435,7 +537,11 @@ def test_the_alert_reads_the_refused_gate_and_keeps_its_place() -> None:
     assert gate["id"] == "refused_gate"
     # No status function in `if`, so the gate runs only after every earlier
     # step succeeded or was skipped.
-    assert gate["if"] == "steps.resolve.outputs.resolver_rc == '3'"
+    # Exit 3 (refused rows) and exit 4 (receipt pin) both publish first.
+    assert gate["if"] == (
+        "steps.resolve.outputs.resolver_rc == '3' || "
+        "steps.resolve.outputs.resolver_rc == '4'"
+    )
     alert = _step("Alert on failure")
     assert alert["if"] == "failure() || cancelled()"
     assert alert["env"]["REFUSED_GATE"] == "${{ steps.refused_gate.outcome }}"
