@@ -99,8 +99,9 @@ then reads the ALFRED vintage dated that day
 `scripts/resolve_pending.py`). It never reads the window. DOL revises each
 week's figure in the next release, 7 days later.
 
-Status as of 2026-10-12. "First print" is the first ALFRED vintage that
-holds the week, found by bisecting ALFRED itself.
+Status as of 2026-10-12, with the row appended on 2026-10-18. "First print"
+is the first ALFRED vintage that holds the week, found by bisecting ALFRED
+itself.
 
 | Target | Registered window | First print | Window holds it | `resolutionDate` | Ledger row | Matches first print |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -117,15 +118,17 @@ holds the week, found by bisecting ALFRED itself.
 | continued, week 2026-09-05 | 09-17 to 09-21 | 1.730 on 09-17 | yes, off center | 09-21 | 1.730 from vintage 09-21 | yes |
 | continued, week 2026-09-12 | 09-26 to 09-30 | 1.719 on 09-24 | **no** | 09-30 | 1.719 from vintage 09-30 | yes |
 | continued, week 2026-09-19 | 10-05 to 10-09 | 1.701 on 10-01 | **no** | 10-09 | **1.699** from vintage 10-09 | **no, revised** |
-| continued, week 2026-09-26 | 10-14 to 10-18 | 10-08 | **no** | 10-18 | **pending** | see below |
+| continued, week 2026-09-26 | 10-14 to 10-18 | 1.716 on 10-08 | **no** | 10-18 | **1.714** from vintage 10-18, appended 2026-10-18 | **no, revised** |
 | continued, week 2026-10-03 | 10-23 to 10-27 | 10-15 | **no** | none | expired unforecast (`94609afb`) | n/a |
 
-Twelve registrations are off schedule; they are the waiver members. Four
-ledger rows record DOL's revised figure under the advance label. One
-forecast is still pending: continued claims, week ending 2026-09-26. DOL
-printed it on 2026-10-08 and revises it on 2026-10-15, so the first resolver
-run to succeed on or after its `resolutionDate`, 2026-10-18, would record the
-revised figure unless the guard in the companion pull request has merged.
+Twelve registrations are off schedule; they are the waiver members. Five
+ledger rows record DOL's revised figure under the advance label. On
+2026-10-12 one forecast was still pending: continued claims, week ending
+2026-09-26. DOL printed it on 2026-10-08 (1.716) and revised it on
+2026-10-15 (1.714). The guard had not merged when its `resolutionDate`
+came, so the scheduled resolver run of 2026-10-18 (Actions run 39147142911,
+on `main` at `992b15b2`) read ALFRED's 2026-10-18 vintage and appended 1.714
+as Chronicle line 239 (`86da0233`).
 
 The per-row audit, with the vintage bisection script, is kept at
 `~/reviews/thesis-weekly-claims-2026-10/` (`first_vintage_audit.py`,
@@ -143,6 +146,11 @@ appends read the late vintages. A run that fails while fetching, before
 the proposal merges, appends nothing; a failure after the merge (its
 verification or the proposal-ref cleanup) still leaves the rows appended. Each of the four rows carries an `assertionVersion` id and
 `supersedes: null`; no superseding row exists in the ledger yet.
+
+On 2026-10-18 a 28th was appended, the fifth that does not equal the first
+print: continued claims week 2026-09-26, 1.714 from vintage 2026-10-18
+(Chronicle `86da0233`, line 239,
+`av2:b1c9579624a6cf93d0a0f5343c4c861a03a0637048bf689012538c05c75ed2e9`).
 
 ## Other code that reads the window or the late date
 
@@ -184,7 +192,22 @@ guard merged. Carrying out the ruling now means two things:
    the wrong date. The three reads are archived with the run as
    `firstPrintEvidence`, and `verify_custody` replays them by the same
    parser the resolver uses.
-2. The five rows read from a later release (the four above, and initial
+
+   ALFRED's header names the vintage a response is, and it is not always
+   the requested date. On 2026-10-18 its ICSA responses for seven of 291
+   daily vintage dates in 2026, all Fridays or weekend days from
+   2026-09-25, named the day before and held that day's rows; the
+   2026-09-25 response is byte-identical to the 2026-09-24 one. The same
+   query with its parameters reordered returned a header naming the
+   requested date. A response is read as the vintage its header
+   names, which must not be later than the requested date. The day before
+   and the release day must each be the vintage of that very day; the day
+   after may be the release day's vintage (`CLAIMS_LABEL_LAG` in
+   `scripts/verify_custody.py`). A read answered with an earlier day's
+   vintage than its role allows defers the week. The survey and the
+   body comparison are kept at
+   `~/reviews/thesis-weekly-claims-2026-10/header_survey/`.
+2. The six rows read from a later release (the five above, and initial
    claims week 2026-09-05, whose value was unchanged) are corrected by
    appending first-print rows whose `assertionVersion.supersedes` names the
    replaced row's id (`CLAIMS_FIRST_PRINT_CORRECTIONS`). Chronicle's append

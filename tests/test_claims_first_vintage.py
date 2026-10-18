@@ -467,9 +467,7 @@ def test_the_row_a_late_run_appended_on_2026_10_18_is_corrected() -> None:
     row = next(row for row in LATE_ROWS if row["source_record_id"] == ref)
     assert (row["value"], row["sourceVintage"]) == (1.714, "2026-10-18")
     vintages = real_vintages()
-    fetched, supersedes, refusals = resolve_pending.claims_corrections(
-        [row], vintages
-    )
+    fetched, supersedes, refusals = resolve_pending.claims_corrections([row], vintages)
     assert refusals == []
     [(corrected, series_id, vintage, *_rest)] = fetched
     assert (corrected["value"], corrected["observed_at"], vintage, series_id) == (
