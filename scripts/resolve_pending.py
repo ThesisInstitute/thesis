@@ -13785,7 +13785,6 @@ def _regenerate_series_catalog(
         cwd=stage,
         capture_output=True,
         text=True,
-        env=_staged_subprocess_env(),
     )
     if completed.returncode != 0:
         detail = completed.stderr.strip() or completed.stdout.strip()
@@ -14649,7 +14648,6 @@ def ledger_catalog_refusals(
                 cwd=stage,
                 capture_output=True,
                 text=True,
-                env=_staged_subprocess_env(),
             )
             growth = None
             if completed.returncode == 0 and base_registry is not None:
@@ -14773,10 +14771,12 @@ def exclude_catalog_refusals(
 
 StripKey = tuple[str, str, str, str]
 IDENTITY_ANCHOR_MOVER = "thesis-resolver"
-# Credentials the staged base code never needs, so it is not handed them in
-# its environment. Hygiene, not isolation: the staged code runs as the same
-# user as the resolver, which is acceptable only because it is the protected
-# base branch's own code.
+# Credentials the staged base code never needs, so the curation probe is
+# not handed them in its environment. Hygiene, not isolation: the staged
+# code runs as the same user as the resolver, which is acceptable only
+# because it is the protected base branch's own code. thesis#337 replaces
+# this kind of denylist with an allowlist for the generator runs; the probe
+# should take that allowlist when it lands.
 _STAGED_SECRET_ENV = (
     "GH_TOKEN",
     "GITHUB_TOKEN",
