@@ -2391,6 +2391,7 @@ def _proposal_api_stub(
     arch_conclusion: str | None = "failure",
     open_issues: list[dict] | None = None,
     fail_issue_calls: bool = False,
+    base_arch_conclusion: str | None = "success",
 ):
     merged = False
 
@@ -2423,6 +2424,18 @@ def _proposal_api_stub(
             if fail_pr_creation:
                 raise RuntimeError("simulated PR creation failure")
             return json.dumps({"number": 7})
+        if "/check-runs" in joined and f"commits/{'b' * 40}/" in joined:
+            # The ledger branch head the proposal builds on: its push run.
+            runs = [
+                {
+                    "id": 21,
+                    "name": "Arch checks",
+                    "status": "completed",
+                    "conclusion": base_arch_conclusion,
+                    "html_url": "https://github.com/PolicyEngine/chronicle/actions/runs/21",
+                }
+            ]
+            return json.dumps(_check_runs_page(runs))
         if "/check-runs" in joined:
             return json.dumps(
                 _check_runs_page(
@@ -2474,6 +2487,7 @@ def _install_proposal_transport(
     arch_conclusion: str | None = "failure",
     open_issues: list[dict] | None = None,
     fail_issue_calls: bool = False,
+    base_arch_conclusion: str | None = "success",
 ) -> None:
     monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
 
@@ -2503,6 +2517,7 @@ def _install_proposal_transport(
             arch_conclusion=arch_conclusion,
             open_issues=open_issues,
             fail_issue_calls=fail_issue_calls,
+            base_arch_conclusion=base_arch_conclusion,
         ),
     )
 
@@ -3822,7 +3837,9 @@ def test_append_proposal_gate_timeout_closes_pr_without_a_rejection_message(
 
     assert "Append gate: queued" in str(info.value)
     joined = [" ".join(args) for args, _ in calls]
-    assert sum("/check-runs" in call for call in joined) == 3
+    # Three reads of the proposal head (the ledger branch head is read once,
+    # before the proposal, by report_red_ledger_base).
+    assert sum(f"commits/{'c' * 40}/check-runs" in call for call in joined) == 3
     assert not any("/merge" in call for call in joined)
     assert any("PATCH" in call and "/pulls/7" in call for call in joined)
     assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
@@ -4005,6 +4022,34 @@ def test_green_arch_checks_files_nothing(monkeypatch, capsys) -> None:
     assert _propose_one_row() == "d" * 40
     assert not any("/issues" in " ".join(args) for args, _ in calls)
     assert "ARCH CHECKS" not in capsys.readouterr().out
+
+
+def test_a_red_ledger_branch_head_is_filed_before_the_append(
+    monkeypatch, capsys
+) -> None:
+    """A red head (an earlier append merged before Arch checks reported, a
+    hand merge) is filed when the next append builds on it; it never holds
+    the append."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch,
+        _pre_genesis_tree(),
+        calls,
+        arch_conclusion="success",
+        base_arch_conclusion="failure",
+    )
+    assert _propose_one_row() == "d" * 40
+    created = [
+        body
+        for args, body in calls
+        if args[-1] == "repos/PolicyEngine/chronicle/issues" and "POST" in args
+    ]
+    assert len(created) == 1 and "b" * 40 in created[0]["body"]
+    assert "LEDGER BRANCH RED BEFORE THIS APPEND" in capsys.readouterr().out
+    joined = [" ".join(args) for args, _ in calls]
+    issue_at = next(i for i, call in enumerate(joined) if "/issues" in call)
+    pr_at = next(i for i, call in enumerate(joined) if call.endswith("/pulls"))
+    assert issue_at < pr_at
 
 
 def test_refuse_policy_holds_the_append_on_red_arch_checks(monkeypatch) -> None:

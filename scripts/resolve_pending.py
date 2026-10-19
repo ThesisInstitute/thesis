@@ -14782,12 +14782,26 @@ _STAGED_SECRET_ENV = (
     "GITHUB_TOKEN",
     "ARCH_DATA_TOKEN",
     PRODUCER_SIGNING_KEY_ENV,
+    # Actions' OIDC and runtime credentials, and the files that feed later
+    # steps' environments.
+    "ACTIONS_ID_TOKEN_REQUEST_TOKEN",
+    "ACTIONS_ID_TOKEN_REQUEST_URL",
+    "ACTIONS_RUNTIME_TOKEN",
+    "ACTIONS_RUNTIME_URL",
+    "ACTIONS_RESULTS_URL",
+    "ACTIONS_CACHE_URL",
+    "GITHUB_ENV",
+    "GITHUB_PATH",
+    "GITHUB_OUTPUT",
+    "GITHUB_STATE",
+    "GITHUB_STEP_SUMMARY",
 )
 CATALOG_CURATION_TIMEOUT_SECONDS = 600
 
 # Run inside a staged base tree: reads the base's own catalog code and
 # fixtures and prints one JSON document. argv[1] is the committed base
-# catalog, read before the generator rewrote it.
+# catalog, argv[2] the base's identity anchor fixture (empty when it has
+# none) and argv[3] the base's UUID registry.
 _CATALOG_CURATION_PROBE = r"""
 import json
 import pathlib
@@ -14862,8 +14876,22 @@ if (
 anchor_path = stage / "tests/fixtures/series_catalog/identity_anchor.json"
 if anchor_path.is_file() and hasattr(bsc, "identity_anchor_problems"):
     anchor = json.loads(anchor_path.read_text(encoding="utf-8"))
+    problems = bsc.identity_anchor_problems(committed["series"], anchor)
+    if hasattr(bsc, "identity_anchor_continuity_problems"):
+        # What CI's "Identity anchor move continues the base pin" checks.
+        base_raw = pathlib.Path(sys.argv[2]).read_text(encoding="utf-8")
+        base_anchor = json.loads(base_raw) if base_raw.strip() else None
+        base_uuids = set()
+        for line in pathlib.Path(sys.argv[3]).read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                entry = json.loads(line)
+                if isinstance(entry, dict) and isinstance(entry.get("uuid"), str):
+                    base_uuids.add(entry["uuid"])
+        problems += bsc.identity_anchor_continuity_problems(
+            base_anchor, anchor, base_uuids
+        )
     out["anchor"] = {
-        "problems": bsc.identity_anchor_problems(committed["series"], anchor),
+        "problems": problems,
         "movers": list(getattr(bsc, "IDENTITY_ANCHOR_MOVERS", ())),
     }
 print(json.dumps(out))
@@ -14939,7 +14967,14 @@ def _catalog_curation_probe(
 ) -> dict[str, Any]:
     try:
         completed = _run_staged_python(
-            stage, ["-c", _CATALOG_CURATION_PROBE, str(base_catalog)]
+            stage,
+            [
+                "-c",
+                _CATALOG_CURATION_PROBE,
+                str(base_catalog),
+                str(base_catalog.parent / "base-identity-anchor.json"),
+                str(base_catalog.parent / "base-series-uuid-registry.jsonl"),
+            ],
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise CatalogProbeError(f"catalog probe did not run: {exc}") from exc
@@ -15010,9 +15045,11 @@ def strip_review_refusal(
     None only when the strip is "derived" alone, its shape has one period
     slot, no row already in the ledger carries the identifier it spells,
     some row in this append does, and every such row's registered contract
-    names the row's dataPointId and a series that the shape continues with
-    the period slot. The stripped segment is then the period segment of the
-    dataPointId grammar ``<series>.<period>[.<policy>...]``.
+    names the row's dataPointId and a series that both the shape and the
+    dataPointId continue with the stripped spelling. The stripped segment
+    is then the period segment of the dataPointId grammar
+    ``<series>.<period>[.<policy>...]``, in whichever identifier field the
+    strip was found.
     """
     _concept, field, shape, spelling = key
     if set(kinds) != {"derived"}:
@@ -15040,7 +15077,14 @@ def strip_review_refusal(
             or contract.get("dataPointId") != ref
         ):
             return f"{ref} has no registered contract naming its series"
-        if not shape.startswith(f"{series}.{{P:"):
+        series_depth = len(series.split("."))
+        ref_segments = ref.split(".")
+        if (
+            not shape.startswith(f"{series}.{{P:")
+            or not ref.startswith(f"{series}.")
+            or len(ref_segments) <= series_depth
+            or ref_segments[series_depth] != spelling
+        ):
             return (
                 f"the period slot is not the segment after {ref}'s registered "
                 f"series {series}"
@@ -15111,6 +15155,7 @@ def identity_anchor_move(
     base: list[Mapping[str, Any]],
     candidate: list[Mapping[str, Any]],
     appended_row_ids: list[str],
+    base_registry_uuids: frozenset[str] | set[str] = frozenset(),
 ) -> tuple[list[dict[str, Any]] | None, str | None]:
     """The anchor events of one append, or why it cannot record them.
 
@@ -15120,7 +15165,9 @@ def identity_anchor_move(
     full identity under a UUID the base does not hold (a mint), or a base
     placeholder (no entity) re-keyed under the same UUID and concept to a
     full identity its geography admits (an enrichment), each for a concept
-    one of this append's rows names. Anything else returns None and a reason.
+    one of this append's rows names. A mint may not repeat an identity
+    another row already holds, nor take a UUID the base registry holds (a
+    revive is a curator's call). Anything else returns None and a reason.
     """
     for side, identities in (("base", base), ("candidate", candidate)):
         uuids = [identity["uuid"] for identity in identities]
@@ -15140,6 +15187,14 @@ def identity_anchor_move(
         removed_by_uuid[identity["uuid"]] = identity
     events: list[dict[str, Any]] = []
     enriched: set[str] = set()
+
+    def identity_key(identity: Mapping[str, Any]) -> str:
+        # The anchor tuple without its UUID: concept, geography, entity.
+        return json.dumps(json.loads(identity["line"])[1:])
+
+    keys = [identity_key(identity) for identity in candidate]
+    if len(keys) != len(set(keys)):
+        return None, "the candidate catalog holds one identity under two UUIDs"
     for identity in sorted(added, key=lambda i: (i["concept"], i["uuid"])):
         uuid, concept = identity["uuid"], identity["concept"]
         if not _full_identity(identity):
@@ -15150,6 +15205,11 @@ def identity_anchor_move(
         if before is None:
             if uuid in base_uuids or any(e["uuid"] == uuid for e in events):
                 return None, f"{concept} reuses UUID {uuid}"
+            if uuid in base_registry_uuids:
+                return None, (
+                    f"{concept} mints UUID {uuid}, which the base registry "
+                    "already holds"
+                )
             events.append(
                 {
                     "event": "mint",
@@ -15316,11 +15376,29 @@ def catalog_curation(
 
 
 def _problem_owner(problem: str, keys: tuple[StripKey, ...]) -> bool:
-    # Chronicle's audit starts every report "'<spelling>' on '<concept>': ".
+    """Whether an audit report is about one of ``keys``.
+
+    Chronicle's audit starts every report "'<spelling>' on '<concept>': ".
+    A report that names a field and shape belongs to the key with that
+    field and shape; one that names none (a spelling that is no period
+    token, a strip in only the plan or the catalog) is taken to belong to
+    every key with its spelling and concept, so it can never be cleared or
+    left standing unnoticed.
+    """
     return any(
         problem.startswith(f"{spelling!r} on {concept!r}: ")
-        for concept, _field, _shape, spelling in keys
+        and (f"{field} shape {shape!r}" in problem or " shape '" not in problem)
+        for concept, field, shape, spelling in keys
     )
+
+
+def _anchor_residual(anchor_problems: list[str], anchor_moves: bool) -> list[str]:
+    # Chronicle's own report already says the anchor moved when it checks it.
+    if anchor_moves and not any(
+        problem.startswith("identity anchor moved") for problem in anchor_problems
+    ):
+        return [*anchor_problems, "identity anchor moved and is not re-pinned"]
+    return list(anchor_problems)
 
 
 def _catalog_curation(
@@ -15358,8 +15436,19 @@ def _catalog_curation(
             (stage / _SERIES_UUID_REGISTRY).write_bytes(registry)
         base_catalog_path = root / "base-series-catalog.json"
         base_catalog_path.write_bytes(base_catalog)
+        # The base's anchor and registry, for Chronicle's continuity check.
+        (root / "base-identity-anchor.json").write_bytes(
+            tree.files.get(CATALOG_IDENTITY_ANCHOR, b"")
+        )
+        (root / "base-series-uuid-registry.jsonl").write_bytes(
+            tree.files.get(_SERIES_UUID_REGISTRY, b"")
+        )
+
+        def probe() -> dict[str, Any]:
+            return _catalog_curation_probe(stage, base_catalog_path)
+
         try:
-            before = _catalog_curation_probe(stage, base_catalog_path)
+            before = probe()
         except CatalogProbeError as exc:
             return CatalogCuration(files={}, notes=(str(exc),))
         before_problems = list((before.get("strips") or {}).get("problems") or [])
@@ -15429,7 +15518,10 @@ def _catalog_curation(
                 notes.append("this base does not accept machine anchor moves")
             else:
                 move, reason = identity_anchor_move(
-                    identities["base"], identities["candidate"], appended_ids
+                    identities["base"],
+                    identities["candidate"],
+                    appended_ids,
+                    _registry_uuids(tree.files.get(_SERIES_UUID_REGISTRY, b"")),
                 )
                 if move is None:
                     notes.append(f"identity anchor left to a curator: {reason}")
@@ -15447,35 +15539,31 @@ def _catalog_curation(
                         }
                     )
                     events = tuple(move)
-        unpinned = (
-            ["identity anchor moved and is not re-pinned"]
-            if anchor_moves and CATALOG_IDENTITY_ANCHOR not in files
-            else []
-        )
-        if not files:
-            anchor_before = list((before.get("anchor") or {}).get("problems") or [])
-            return CatalogCuration(
-                files={},
-                residual=tuple([*before_problems, *anchor_before, *unpinned]),
-                notes=tuple(notes),
-            )
-
-        for relative, payload in files.items():
-            (stage / _validated_repository_path(relative)).write_bytes(payload)
-        try:
-            after = _catalog_curation_probe(stage, base_catalog_path)
-        except CatalogProbeError as exc:
-            after = None
-            rejection = f"the curated state could not be dry-run: {exc}"
-        if after is not None:
-            strip_problems = list((after.get("strips") or {}).get("problems") or [])
-            anchor_problems = list((after.get("anchor") or {}).get("problems") or [])
+        anchor_before = list((before.get("anchor") or {}).get("problems") or [])
+        state = before
+        # Judge the strips and the anchor separately, dropping whichever the
+        # base's own audit does not accept, and re-probe until what is left
+        # is exactly what was dry-run (at most twice: parts only drop out).
+        while files:
+            for relative in CATALOG_CURATION_INPUTS:
+                payload = files.get(relative, tree.files.get(relative))
+                if payload is not None:
+                    (stage / _validated_repository_path(relative)).write_bytes(
+                        payload
+                    )
+            try:
+                state = probe()
+            except CatalogProbeError as exc:
+                notes.append(f"the curated state could not be dry-run: {exc}")
+                files, strips, events, state = {}, (), (), before
+                break
+            strip_problems = list((state.get("strips") or {}).get("problems") or [])
+            anchor_problems = list((state.get("anchor") or {}).get("problems") or [])
             # Curation may only remove reports, and only its own: a report
-            # still standing on a recorded strip, a new report, a report it
-            # cleared without recording that strip (a sibling of a recorded
-            # shape), or any anchor report beside a recorded move means the
-            # base's audit does not accept what was written.
-            unexpected = [
+            # still standing on a recorded strip, a new report, or a report
+            # cleared without recording its strip (a sibling of a recorded
+            # shape) means the audit does not accept what was written.
+            strip_rejection = [
                 *(p for p in strip_problems if _problem_owner(p, strips)),
                 *(p for p in strip_problems if p not in before_problems),
                 *(
@@ -15483,31 +15571,58 @@ def _catalog_curation(
                     for p in before_problems
                     if p not in strip_problems and not _problem_owner(p, strips)
                 ),
-                *(anchor_problems if events else []),
             ]
-            rejection = (
-                "the dry run rejected the resolver's curation: "
-                + "; ".join(unexpected)[:500]
-                if unexpected
-                else None
-            )
-        if rejection is not None:
-            # Ship nothing rather than curation the base does not accept.
-            unpinned = (
-                ["identity anchor moved and is not re-pinned"] if anchor_moves else []
-            )
-            return CatalogCuration(
-                files={},
-                residual=tuple([*before_problems, *unpinned]),
-                notes=(*notes, rejection),
-            )
+            anchor_rejection = anchor_problems if events else []
+            dropped = False
+            if strips and strip_rejection:
+                notes.append(
+                    "the dry run rejected the recorded strips: "
+                    + "; ".join(strip_rejection)[:500]
+                )
+                files.pop(CATALOG_REVIEWED_STRIPS, None)
+                strips, dropped = (), True
+            if events and anchor_rejection:
+                notes.append(
+                    "the dry run rejected the anchor move: "
+                    + "; ".join(anchor_rejection)[:500]
+                )
+                files.pop(CATALOG_IDENTITY_ANCHOR, None)
+                events, dropped = (), True
+            if not dropped:
+                break
+        strip_residual = (
+            list((state.get("strips") or {}).get("problems") or [])
+            if files
+            else before_problems
+        )
+        anchor_residual = (
+            list((state.get("anchor") or {}).get("problems") or [])
+            if CATALOG_IDENTITY_ANCHOR in files
+            else anchor_before
+        )
         return CatalogCuration(
             files=files,
             strips=strips,
             anchor_events=events,
-            residual=tuple([*strip_problems, *anchor_problems, *unpinned]),
+            residual=tuple(
+                [
+                    *strip_residual,
+                    *_anchor_residual(
+                        anchor_residual,
+                        anchor_moves and CATALOG_IDENTITY_ANCHOR not in files,
+                    ),
+                ]
+            ),
             notes=tuple(notes),
         )
+
+
+def _registry_uuids(registry: bytes) -> frozenset[str]:
+    uuids = set()
+    for row in _jsonl_objects(registry):
+        if isinstance(row.get("uuid"), str):
+            uuids.add(row["uuid"])
+    return frozenset(uuids)
 
 
 def append_gate_state(gate_runs: list[dict]) -> str:
@@ -15714,10 +15829,23 @@ def await_append_gates(
     last_seen: dict[str, list[dict]] = {gate: [] for gate in watched}
     # The ids of the last multi-page listing that read as passed.
     passed_ids: frozenset[int] | None = None
-    # When a read (confirmed, for a multi-page listing) first showed every
-    # required gate passed, and whether the latest read still did.
-    required_passed_at: float | None = None
+    # Whether the latest successful read showed every required gate passed,
+    # whether that pass is confirmed (one page, or the same runs as the
+    # previous passing read), whether the current unbroken run of passing
+    # reads holds a confirmed pass, and when that run was first confirmed
+    # (the advisory grace counts from there).
+    required_passed_now = False
     required_confirmed = False
+    confirmed_once = False
+    required_passed_at: float | None = None
+
+    def may_merge() -> bool:
+        # A confirmed pass on the latest read; or, once the current run of
+        # passing reads holds a confirmed pass (where the merge went ahead
+        # before advisory gates existed), a latest read that still shows
+        # every required gate passed. A required gate read as anything but
+        # passed since then ends that run and holds the merge again.
+        return required_confirmed or (confirmed_once and required_passed_now)
 
     def advisory_verdicts() -> dict[str, tuple[str, str]]:
         return {
@@ -15740,11 +15868,10 @@ def await_append_gates(
             # closing a proposal whose gate may be about to pass.
             read_failures += 1
             last_read_error = exc
-            if required_confirmed:
-                # The last good read had every required gate passed; before
-                # advisory gates existed the merge went ahead on that read,
-                # so a failed read while waiting for an advisory verdict
-                # never turns into a refusal.
+            if may_merge():
+                # The last good read allows the merge (see may_merge), so a
+                # failed read while waiting for an advisory verdict never
+                # turns into a refusal.
                 return advisory_verdicts()
             if read_failures >= APPEND_GATE_MAX_READ_FAILURES:
                 raise LedgerProposalError(
@@ -15770,7 +15897,13 @@ def await_append_gates(
                     + "; refusing to merge"
                 )
             required_confirmed = False
-            if all(states[gate] == "passed" for gate in gates):
+            required_passed_now = all(states[gate] == "passed" for gate in gates)
+            if not required_passed_now:
+                # A required gate re-run or still running: the next merge
+                # needs a fresh confirmed pass, and a fresh grace.
+                required_passed_at = None
+                confirmed_once = False
+            if required_passed_now:
                 ids = frozenset(run["id"] for run in runs)
                 # One page is one snapshot. Across pages, a run re-run
                 # between two page reads can swap a new attempt onto a page
@@ -15778,6 +15911,7 @@ def await_append_gates(
                 # stands only when the next read returns the same runs.
                 if len(runs) <= APPEND_GATE_CHECK_RUN_PAGE_SIZE or ids == passed_ids:
                     required_confirmed = True
+                    confirmed_once = True
                     if required_passed_at is None:
                         required_passed_at = clock()
                     # The budget bounds how long to wait, not which verdicts
@@ -15792,7 +15926,7 @@ def await_append_gates(
                 passed_ids = None
         now = clock()
         if now >= deadline or (poll_attempts is not None and attempts >= poll_attempts):
-            if required_confirmed:
+            if may_merge():
                 # Every required gate passed on this head; only an advisory
                 # verdict is missing, and it never holds a merge.
                 return advisory_verdicts()
@@ -15950,6 +16084,44 @@ def report_arch_checks_at_merge(
         print(f"  ledger curation filed: {where}")
 
 
+def report_red_ledger_base(repo: str, base_sha: str) -> str:
+    """Arch checks' state on the ledger branch head, filed if it is red.
+
+    The branch head a proposal builds on carries the push run of Arch
+    checks. A red one means curation is owed from an earlier change (an
+    append merged before Arch checks reported, a hand merge, a broken
+    base), so it is filed with the same issue as a red merge. Returns the
+    state; never raises, and never holds the append.
+    """
+    try:
+        runs = read_check_runs(repo, base_sha)
+        arch = [
+            run
+            for run in runs
+            if type(run) is dict and run.get("name") == ARCH_CHECKS_GATE
+        ]
+        state = append_gate_state(arch)
+    except Exception as exc:  # noqa: BLE001 - a report must not cost an append
+        print(f"  could not read Arch checks on the ledger branch head: {exc}")
+        return "unknown"
+    if state != "failed":
+        return state
+    detail = _describe_gate_runs(ARCH_CHECKS_GATE, arch)
+    print(f"LEDGER BRANCH RED BEFORE THIS APPEND: {repo}@{base_sha} ({detail})")
+    try:
+        where = _file_ledger_curation_issue(
+            repo,
+            f"The ledger branch head {base_sha} has Arch checks red ({detail}), "
+            "before the next resolver append was proposed. Every pull request "
+            "into the branch fails Arch checks until it is curated.",
+        )
+    except Exception as exc:  # noqa: BLE001 - reporting must not fail the run
+        print(f"  could not file the ledger curation issue: {exc}")
+    else:
+        print(f"  ledger curation filed: {where}")
+    return state
+
+
 def propose_ledger_append(
     repo: str,
     branch: str,
@@ -16053,6 +16225,7 @@ def propose_ledger_append(
             f"ledger branch moved while proposal was prepared: {base_sha} -> "
             f"{current_base}; retry against the new trusted state"
         )
+    report_red_ledger_base(repo, base_sha)
 
     stamp = utc_now().lower().replace(":", "-").replace("t", "-")
     proposal = f"thesis-facts-append/{stamp}-{time.time_ns():x}"

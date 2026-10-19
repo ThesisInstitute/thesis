@@ -294,6 +294,162 @@ def test_merge_happens_only_when_every_required_gate_passed(
     }
 
 
+_REQUIRED_NAMES = ("Append gate", "Trusted base append gate")
+
+
+@st.composite
+def _listing_pool(draw):
+    """Three distinct check-run listings for one head; a listing's run ids
+    are fixed by its variant, so reading the same variant twice reads the
+    same runs. Some are padded past one page with unrelated runs."""
+    pool = []
+    for _variant in range(3):
+        runs = [
+            (gate, *draw(st.sampled_from(_SHAPES)))
+            for gate in (*_REQUIRED_NAMES, ARCH)
+            for _ in range(draw(st.integers(0, 2)))
+        ]
+        pad = draw(st.sampled_from([0, 0, rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE + 20]))
+        pool.append((runs, pad))
+    return pool
+
+
+def _listing_runs(pool, variant: int) -> list[dict]:
+    runs, pad = pool[variant]
+    listing = [
+        _run(variant * 10_000 + index, name, status, conclusion)
+        for index, (name, status, conclusion) in enumerate(runs)
+    ]
+    listing += [
+        _run(variant * 10_000 + 5_000 + index, "Other check", "completed", "success")
+        for index in range(pad)
+    ]
+    return listing
+
+
+@settings(max_examples=400, deadline=None)
+@given(
+    pool=_listing_pool(),
+    script=st.lists(
+        st.one_of(st.integers(0, 2), st.just("error")), min_size=1, max_size=12
+    ),
+    refuse=st.booleans(),
+)
+def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
+    monkeypatch_session, pool, script, refuse
+) -> None:
+    """Over any sequence of listings and failed reads (including listings
+    longer than a page, required gates re-run mid-wait and the advisory
+    grace and budget running out): when await_append_gates returns, the
+    latest successful read shows every required gate passed, and the
+    unbroken run of passing reads it ends holds a confirmed pass (one page,
+    or the same runs as the passing read before it). The advisory verdict
+    returned is the advisory gate's state in that latest read."""
+    size = rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE
+    reads: list = []
+
+    def api(*args: str, **_kwargs) -> str:
+        endpoint = args[0]
+        page = int(endpoint.rsplit("page=", 1)[1])
+        if page == 1:
+            step = script[min(len(reads), len(script) - 1)]
+            reads.append(step)
+            if step == "error":
+                raise RuntimeError("HTTP 502")
+        listing = _listing_runs(pool, reads[-1])
+        return json.dumps(
+            {
+                "total_count": len(listing),
+                "check_runs": listing[(page - 1) * size : page * size],
+            }
+        )
+
+    monkeypatch_session.setattr(rp, "_gh_api", api)
+    required = (*_REQUIRED_NAMES, ARCH) if refuse else _REQUIRED_NAMES
+    advisory = () if refuse else (ARCH,)
+
+    def passed(variant: int) -> bool:
+        listing = _listing_runs(pool, variant)
+        return all(
+            rp.append_gate_state([r for r in listing if r["name"] == gate])
+            == "passed"
+            for gate in required
+        )
+
+    clock = _FakeClock()
+    try:
+        verdicts = rp.await_append_gates(
+            REPO, "c" * 40, 7, timeout_seconds=600, advisory=advisory,
+            gates=required, advisory_grace_seconds=120,
+            clock=clock, sleep=clock.sleep,
+        )
+    except rp.LedgerProposalError:
+        return
+    good = [read for read in reads if read != "error"]
+    assert good and passed(good[-1])
+    run_start = len(good) - 1
+    while run_start > 0 and passed(good[run_start - 1]):
+        run_start -= 1
+    assert any(
+        len(_listing_runs(pool, good[k])) <= size
+        or (k > run_start and good[k - 1] == good[k])
+        for k in range(run_start, len(good))
+    ), (reads, script)
+    latest = _listing_runs(pool, good[-1])
+    assert {gate: verdict[0] for gate, verdict in verdicts.items()} == {
+        gate: rp.append_gate_state([r for r in latest if r["name"] == gate])
+        for gate in advisory
+    }
+
+
+def test_a_required_rerun_needs_a_fresh_confirmed_pass(monkeypatch) -> None:
+    """A confirmed pass, then a required gate re-run (pending), then a pass
+    on a listing longer than one page that no second read confirms: the
+    earlier confirmation must not carry the merge past the re-run."""
+    size = rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE
+    pad = [
+        _run(9_000 + index, "Other check", "completed", "success")
+        for index in range(size + 20)
+    ]
+    first = [*_green_append_gates(), _run(3, ARCH, "queued", None)]
+    rerun = [
+        _run(1, "Append gate", "in_progress", None),
+        _run(2, "Trusted base append gate", "completed", "success"),
+        _run(3, ARCH, "queued", None),
+    ]
+    reads = [first, rerun]
+    served: list[int] = []
+
+    def api(*args: str, **_kwargs) -> str:
+        page = int(args[0].rsplit("page=", 1)[1])
+        if page == 1:
+            served.append(len(served))
+        index = served[-1]
+        if index < len(reads):
+            listing = reads[index]
+        else:
+            # Every later read: passing again, multi-page, and each read
+            # sees a new attempt id, so no two reads confirm each other.
+            listing = [
+                _run(100 + index, "Append gate", "completed", "success"),
+                _run(2, "Trusted base append gate", "completed", "success"),
+                _run(3, ARCH, "queued", None),
+                *pad,
+            ]
+        return json.dumps({
+            "total_count": len(listing),
+            "check_runs": listing[(page - 1) * size: page * size],
+        })
+
+    monkeypatch.setattr(rp, "_gh_api", api)
+    clock = _FakeClock()
+    with pytest.raises(rp.LedgerProposalError, match="did not complete"):
+        rp.await_append_gates(
+            REPO, "c" * 40, 7, timeout_seconds=600, advisory=(ARCH,),
+            advisory_grace_seconds=10_000, clock=clock, sleep=clock.sleep,
+        )
+
+
 @pytest.fixture(scope="module")
 def monkeypatch_session():
     patch = pytest.MonkeyPatch()
@@ -371,6 +527,29 @@ def test_a_shape_is_recorded_only_when_every_first_spelling_is_provable() -> Non
     assert additions == {}
     assert "no row in this append" in refusals[sibling]
     assert "reviewed as one" in refusals[KEY]
+
+
+def test_a_measure_concept_strip_must_be_the_datapointid_period_segment() -> None:
+    """The measure.concept spelling must also be the dataPointId segment
+    after the registered series (the 2026-10-19 review's P3-4)."""
+    key = (SERIES, "measure.concept", f"{SERIES}.{{P:fy9999}}", "fy2026")
+    good_row = {**ROW, "measure": {"concept": f"{SERIES}.fy2026"}}
+    additions, _ = rp.provable_strip_reviews(
+        {key: DERIVED}, {}, [], [good_row], CONTRACTS
+    )
+    assert additions == {key: ("derived",)}
+    elsewhere = f"{SERIES}.annual.fy2026.first_print"
+    bad_row = {
+        **ROW, "source_record_id": elsewhere,
+        "measure": {"concept": f"{SERIES}.fy2026"},
+    }
+    contracts = {
+        elsewhere: {"contract": {"dataPointId": elsewhere, "series": SERIES}}
+    }
+    additions, refusals = rp.provable_strip_reviews(
+        {key: DERIVED}, {}, [], [bad_row], contracts
+    )
+    assert additions == {} and "not the segment after" in refusals[key]
 
 
 def test_continuations_of_a_reviewed_shape_need_no_review() -> None:
@@ -456,6 +635,8 @@ def test_strip_reviews_are_exactly_the_provable_first_strips(world) -> None:
             contract = contracts[row["source_record_id"]]["contract"]
             assert contract["dataPointId"] == row["source_record_id"]
             assert shape.startswith(contract["series"] + ".{P:")
+            depth = len(contract["series"].split("."))
+            assert row["source_record_id"].split(".")[depth] == spelling
 
 
 # --- The anchor move -------------------------------------------------------------
@@ -539,19 +720,36 @@ def _admitted(placeholder):
 
 @st.composite
 def _sanctioned_append(draw):
-    base = []
+    """A catalog, the catalog one sanctioned append makes of it, and the row
+    ids that name the touched concepts. As in a real catalog, every
+    (concept, geography, entity) is held once."""
+
+    def key(concept, geography, entity) -> str:
+        return json.dumps([concept, _geo_key(geography), _entity_key(entity)])
+
+    base, held = [], set()
     for index in range(draw(st.integers(0, 6))):
         placeholder = draw(st.booleans())
         concept = draw(st.sampled_from(_A_CONCEPTS))
         geography = draw(st.sampled_from(
             [None, *_FULL_GEOS] if placeholder else _FULL_GEOS))
         entity = None if placeholder else draw(st.sampled_from(_ENTITIES))
+        if key(concept, geography, entity) in held:
+            continue
+        held.add(key(concept, geography, entity))
         base.append(_identity(f"u{index:02d}", concept, geography, entity))
     candidate, touched = [], []
     for identity in base:
-        if identity["entity"] is None and draw(st.booleans()):
-            geography = draw(st.sampled_from(_admitted(identity["geography"])))
-            entity = draw(st.sampled_from(_ENTITIES))
+        options = [
+            (geography, entity)
+            for geography in _admitted(identity["geography"])
+            for entity in _ENTITIES
+            if key(identity["concept"], geography, entity) not in held
+        ]
+        if identity["entity"] is None and options and draw(st.booleans()):
+            geography, entity = draw(st.sampled_from(options))
+            held.discard(key(identity["concept"], identity["geography"], None))
+            held.add(key(identity["concept"], geography, entity))
             candidate.append(
                 _identity(identity["uuid"], identity["concept"], geography, entity)
             )
@@ -560,10 +758,12 @@ def _sanctioned_append(draw):
             candidate.append(identity)
     for index in range(draw(st.integers(0, 3))):
         concept = draw(st.sampled_from(_A_CONCEPTS))
-        candidate.append(_identity(
-            f"m{index:02d}", concept, draw(st.sampled_from(_FULL_GEOS)),
-            draw(st.sampled_from(_ENTITIES)),
-        ))
+        geography = draw(st.sampled_from(_FULL_GEOS))
+        entity = draw(st.sampled_from(_ENTITIES))
+        if key(concept, geography, entity) in held:
+            continue
+        held.add(key(concept, geography, entity))
+        candidate.append(_identity(f"m{index:02d}", concept, geography, entity))
         touched.append(concept)
     ids = [f"{concept}.fy2026.first_print" for concept in touched]
     return base, candidate, ids
@@ -583,18 +783,23 @@ def test_a_sanctioned_append_yields_events_that_undo_to_the_base(append) -> None
 
 _MOVE_MUTATIONS = [
     "remint", "entity_change", "concept_change", "unadmitted_geography",
-    "placeholder_mint", "drop", "foreign_concept", "uuid_reuse",
+    "placeholder_mint", "drop", "foreign_concept", "duplicate_uuid_row",
+    "mint_existing_identity", "registry_revive",
 ]
 
 
-@settings(max_examples=600, deadline=None,
+@pytest.mark.parametrize("mutation", _MOVE_MUTATIONS)
+@settings(max_examples=150, deadline=None,
           suppress_health_check=[HealthCheck.filter_too_much])
 @given(append=_sanctioned_append(), data=st.data())
-def test_no_other_binding_change_yields_an_anchor_move(append, data) -> None:
+def test_no_other_binding_change_yields_an_anchor_move(
+    mutation, append, data
+) -> None:
     """Each way an append could change a binding other than a fresh mint or
-    its own placeholder's enrichment is refused, with a reason."""
+    its own placeholder's enrichment is refused, with a reason.
+    Parametrized, so Hypothesis fails a mutation it can never exercise."""
     base, candidate, ids = append
-    mutation = data.draw(st.sampled_from(_MOVE_MUTATIONS))
+    registry_uuids: set[str] = set()
     full = [i for i in base if i["entity"] is not None and i in candidate]
     placeholders = [i for i in base if i["entity"] is None]
     if mutation == "remint":
@@ -638,14 +843,27 @@ def test_no_other_binding_change_yields_an_anchor_move(append, data) -> None:
     elif mutation == "foreign_concept":
         candidate = [*candidate, _identity("fresh", "q.other", _FULL_GEOS[0],
                                            ECONOMY)]
-    elif mutation == "uuid_reuse":
+    elif mutation == "duplicate_uuid_row":
         assume(base)
         old = data.draw(st.sampled_from(base))
         assume(any(i["line"] == old["line"] for i in candidate))
         candidate = [*candidate, _identity(old["uuid"], "b.series", _FULL_GEOS[0],
                                            ECONOMY)]
         ids = [*ids, "b.series.2026"]
-    events, reason = rp.identity_anchor_move(base, candidate, ids)
+    elif mutation == "mint_existing_identity":
+        # The same (concept, geography, entity) under a second, fresh UUID.
+        assume(full)
+        old = data.draw(st.sampled_from(full))
+        candidate = [*candidate, _identity("fresh", old["concept"],
+                                           old["geography"], old["entity"])]
+        ids = [*ids, f"{old['concept']}.2026"]
+    elif mutation == "registry_revive":
+        # A mint of a UUID the base registry holds (a retired binding).
+        candidate = [*candidate, _identity("retired", "a.series", _FULL_GEOS[0],
+                                           ECONOMY)]
+        ids = [*ids, "a.series.2026"]
+        registry_uuids = {"retired"}
+    events, reason = rp.identity_anchor_move(base, candidate, ids, registry_uuids)
     assert events is None and reason, mutation
 
 
@@ -872,6 +1090,8 @@ def identity_anchor_digest(lines):
 
 def identity_anchor_problems(series, anchor):
     digest = identity_anchor_digest(identity_anchor_lines(series))
+    if (ROOT / "REJECT_ANCHOR").exists() and anchor.get("move"):
+        return ["identity anchor move: rejected by the fake audit"]
     if digest == anchor["sha256"]:
         return []
     return [f"identity anchor moved: {digest} != {anchor['sha256']}"]
@@ -997,11 +1217,21 @@ def test_catalog_curation_carries_both_fixtures_and_the_dry_run_is_green() -> No
     assert anchor["move"]["from_sha256"] != anchor["sha256"]
 
 
-def test_catalog_curation_ships_nothing_the_dry_run_rejects() -> None:
+def test_the_dry_run_drops_only_the_part_it_rejects() -> None:
+    """Strips and anchor are judged apart (the 2026-10-19 review's P3-5): a
+    rejected strip record keeps a sound anchor move, and the reverse."""
     curation = _curate(_fake_base(extra={"REJECT_CURATION": b""}))
-    assert curation.files == {}
-    assert any("dry run rejected" in note for note in curation.notes)
+    assert rp.CATALOG_REVIEWED_STRIPS not in curation.files
+    assert rp.CATALOG_IDENTITY_ANCHOR in curation.files
+    assert curation.strips == () and curation.anchor_events
+    assert any("rejected the recorded strips" in n for n in curation.notes)
     assert any("first strip" in line for line in curation.residual)
+    curation = _curate(_fake_base(extra={"REJECT_ANCHOR": b""}))
+    assert rp.CATALOG_REVIEWED_STRIPS in curation.files
+    assert rp.CATALOG_IDENTITY_ANCHOR not in curation.files
+    assert curation.strips == (KEY,) and curation.anchor_events == ()
+    assert any("rejected the anchor move" in n for n in curation.notes)
+    assert sum("identity anchor moved" in line for line in curation.residual) == 1
 
 
 def test_catalog_curation_leaves_unprovable_strips_to_a_curator() -> None:
@@ -1021,7 +1251,7 @@ def test_catalog_curation_never_moves_an_already_stale_anchor() -> None:
     curation = _curate(_fake_base(anchor_pin="0" * 64))
     assert rp.CATALOG_IDENTITY_ANCHOR not in curation.files
     assert any("already stale" in note for note in curation.notes)
-    assert any("identity anchor moved" in line for line in curation.residual)
+    assert sum("identity anchor moved" in line for line in curation.residual) == 1
 
 
 def test_catalog_curation_without_curation_fixtures_does_nothing() -> None:
