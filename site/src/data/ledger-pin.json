@@ -2,17 +2,17 @@
   "schemaVersion": "thesis_ledger_pin_v1",
   "repo": "PolicyEngine/chronicle",
   "branch": "codex/thesis-ledger-facts",
-  "sha": "86da0233a28e926da052effe93a66e2d9e3d77c2",
-  "jsonlSha256": "961a253aa9e91e00b6003de1f2420ceca1d8fd02f6517a0c2bdc9071491a5fb6",
-  "jsonlBytes": 476018,
-  "catalogSha256": "5582f9d9efe7e9cba80dcb3229b63dc8d4429907d0480f8779b00b7ad8192edc",
+  "sha": "7adcc72f9478edd01c7d3c6079a6420c3931ac48",
+  "jsonlSha256": "b51c795b1774c33d66bd24bd20e7f3cc575ce28cdc6d487e4306f168647e7b5e",
+  "jsonlBytes": 493876,
+  "catalogSha256": "107ebc90ce3fdd1a58a8ca8844ec5180f294e03d7319e004a8d6d7757eb4b26c",
   "catalogBytes": 201661,
-  "lineCount": 239,
-  "pinnedAtUtc": "2026-10-18T17:05:22Z",
+  "lineCount": 245,
+  "pinnedAtUtc": "2026-10-19T02:25:41Z",
   "releaseHead": {
-    "index": 25,
-    "manifestSha256": "4d035a7c9c7ce8020b2707f503940545966f8b06a33f0931f4f8f076e99f433c",
-    "freetsaGenTimeUtc": "2026-10-18T16:59:22Z",
-    "digicertGenTimeUtc": "2026-10-18T16:59:22Z"
+    "index": 26,
+    "manifestSha256": "3c124e90ed8847c3efed7fb49b0d0f96dd2147f47f06c0cd211d0a6cfe9f7227",
+    "freetsaGenTimeUtc": "2026-10-19T02:19:02Z",
+    "digicertGenTimeUtc": "2026-10-19T02:19:02Z"
   }
 }

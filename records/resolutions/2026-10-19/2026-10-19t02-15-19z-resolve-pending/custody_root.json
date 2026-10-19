@@ -1,0 +1,168 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-10-01-332ac7a927974e50.csv.gz",
+      "sha256": "f46bd129a2fa2e6a7d8989439f7e1e541dc91a383dbe43acc38927a8aa9f507f",
+      "bytes": 15679,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-09-30-cac813a91196edeb.csv.gz",
+      "sha256": "84046d3c8ad62ba88c5a5a46f37368314cc56cc24b1f069cacdc9b5ee344687f",
+      "bytes": 15674,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-10-02-d6a2cf41f718a749.csv.gz",
+      "sha256": "761933d23fa21dee85e6d36eab6a36a75916c91123c293b6c4c8c80f101dbda9",
+      "bytes": 15679,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-10-09-d91683b28c58f14d.csv.gz",
+      "sha256": "a5ce7b8911bf75c16054278122a99e1945068bceb1430958c4758bd11610ea07",
+      "bytes": 15684,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-10-08-88c59b27cff5b62f.csv.gz",
+      "sha256": "126325e3fe10d09c475732eb7892ae6413c138d1da5814fce493bcb2281a9edb",
+      "bytes": 15684,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-10-07-5b72190892be541c.csv.gz",
+      "sha256": "60f5021cd5bc9eb3b41d5d8d4a5f70b42ffce12517419d829f6839713abc7bd8",
+      "bytes": 15679,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-10-18-c10ea83f6367ce95.csv.gz",
+      "sha256": "a9d0754d0ec5eea9cb904180775316a6e55385178f31b4612e9cc0bf982eb797",
+      "bytes": 15690,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-03-b3e33c756fbb9dc5.csv.gz",
+      "sha256": "713f2321f24719c053dcd14e4081978866a61051391bdf4d1d38a0a1e3fbe5d9",
+      "bytes": 13675,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-02-f3b9f4b456a49215.csv.gz",
+      "sha256": "5e64123ed369625d44c73b8aae028a37c71ac7a7a234b653bdb5fcc5d54f10f6",
+      "bytes": 13672,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-04-5fe0ea5c66196a91.csv.gz",
+      "sha256": "f5a9b387328dbec38185fd71ecb3c14ed150adece6ba20af42d495d1982dc760",
+      "bytes": 13675,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-11-48c1604272f69868.csv.gz",
+      "sha256": "33f587b3874c5dd5ea61f46fa2dc3c79df82f602e5400f75950ea65bc82b2e6e",
+      "bytes": 13679,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-10-f577dd7507bff573.csv.gz",
+      "sha256": "6c5a1ddbaaaef7f648a56b88222433e1d89b4bfa339443b9838a0881c50e285d",
+      "bytes": 13678,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-09-ef96c5fff0675093.csv.gz",
+      "sha256": "3206c5afa29a03c1e60c7d1ced271bc331e298c39a3cea922b8bc2e2e0e6a7d0",
+      "bytes": 13675,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-20-051e04c05d125f58.csv.gz",
+      "sha256": "6441dd5568c1063706942aee94ff155c4232862281e4e8c1e79c8566b911055f",
+      "bytes": 13682,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-17-f52db239a6cb94bb.csv.gz",
+      "sha256": "bfb7b0b501f83b581cbd16b355203bb7783a5eb5629bf19a410b4f6ba3846268",
+      "bytes": 13683,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-16-48b22dc9ab757055.csv.gz",
+      "sha256": "41727d112fc6df8532e622e8cf2c7c5f5d0053169a9f17d0a100eb136745d276",
+      "bytes": 13679,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-18-ae0e3fc3967d9228.csv.gz",
+      "sha256": "de53778910d08d349b201f5ed6ee5c1ad78419113763c8e43e510ff5b55ece25",
+      "bytes": 13683,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-29-b13eb096d14f12e2.csv.gz",
+      "sha256": "abfb4cfada5d5a56ac85010d4293341d0d5bd6ad19f8fdde407e53b381fa76cc",
+      "bytes": 13685,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-24-f25c2200dc8282ef.csv.gz",
+      "sha256": "17636604bcbdf28a588f64aa17a88678ad56834bc0a16ac3b405e0fc036960ec",
+      "bytes": 13686,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-23-6f57c7282b71efa3.csv.gz",
+      "sha256": "f05b88e03e31f32f13653b5630dc0eb0defbf60cb10f3c9b312da4f84359bbf7",
+      "bytes": 13683,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-09-25-39b7cbb171bb7095.csv.gz",
+      "sha256": "702d4f6b6d4b422e5d24af0e9315a4ec81f6c8bc8368956926bf14cd1e3a7be7",
+      "bytes": 13686,
+      "createdAt": "2026-10-19T02:15:19Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/icsa-2026-10-08-6e41916aefb26ecf.csv.gz",
+      "sha256": "a1022c1ff5d5339bf6b7c6eba444f2a7dc4b766908cabf27918fb8f250b2af19",
+      "bytes": 13694,
+      "createdAt": "2026-10-19T02:15:19Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "b1d4024cd2af076f10996fc51c5713b1a4621246eff69b335a7f567a5ce45b05"
+  }
+}
