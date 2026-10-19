@@ -1,0 +1,173 @@
+# Paper comparison: Thesis forecasts vs Kalshi prices
+
+This is a read-only scoring study. It compares published Thesis forecasts with
+Kalshi market prices for the official US statistics both cover, and scores
+both against the official first print. It places no orders, holds no
+positions, simulates no trading strategy, and needs no Kalshi account: every
+Kalshi number comes from the public, unauthenticated market-data API.
+
+What it measures is forecast skill on monthly and weekly national statistics
+at stated horizons. It says nothing about any other domain (for example state
+or municipal finance), and small samples are expected.
+
+`scripts/kalshi_paper_comparison.py` implements everything below. Results are
+written outside the repository (`--out`); this document is the analysis plan.
+
+## Status of this plan
+
+The plan was written on 2026-10-19, after the outcomes in scope were public and
+after inspecting the order book of one event (KXCPI-26AUG) to choose the price
+rule, but before computing any Thesis or Kalshi score. Any later change to the
+primary specification must be listed in the results as a deviation.
+
+## Forecasts in scope
+
+- **Source.** Every `prediction_recorded` entry in the published Thesis log
+  (the attested `records/<day>/bodies-*/log` projection on `main`) whose
+  `recordedAt` is on or after 2026-07-01T00:00:00Z and whose `dataPointId`
+  maps to a Kalshi series in the table below.
+- **Published distribution.** The run's 201-point `numeric_cdf_v1` from the
+  published target-architecture table `forecastDistributions`
+  (`/targets/forecastDistributions/<chunk>.json` on app.thesisinstitute.org).
+  The CDF is read with linear interpolation between points, 0 below the first
+  point and 1 above the last. A differential check rebuilds each
+  `interval_seeded` CDF from the run's point and 80% interval with the
+  `interval_anchor_v1` transform (`site/src/data/prediction-distribution.ts`)
+  and must match the published points.
+- **Primary forecaster.** The `thesis.analyst` run labelled `Headline` for
+  each target. Other agent variants (for example threshold-ladder runs) and
+  the deterministic `brier.time_series_prior` persistence baseline are scored
+  as secondary forecasters.
+- **Withdrawn cells.** Catalog cells that the publication gate excludes (the
+  site shows "No forecast available") are listed with their claimed run time
+  and are not scored.
+
+## Registration time
+
+A run's registration time is the earliest RFC 3161 witness time of its custody
+root in `records/witnessed-timeline.json` (`custodyRoots`). If the custody root
+is absent there, the run directory's witness time (`runs`) is used; if neither
+exists, the claimed `recordedAt` is used and flagged. Each run's coverage class
+is reported.
+
+## Kalshi series in scope
+
+| Thesis target family | Kalshi series | Contract strike | Reported value and grid |
+| --- | --- | --- | --- |
+| `bls.cpi.u.headline_mom.<month>` | KXCPI | above X (`greater`) | CPI-U SA % change, 0.1 |
+| `bls.cpi.u.core_mom.<month>` | KXCPICORE | above X | core CPI-U SA % change, 0.1 |
+| `bls.cps.unemployment_rate.<month>` | KXU3 | above X | U-3 rate %, 0.1 |
+| `bls.ces.*payroll*change*` | KXPAYROLLS | above X persons | total nonfarm change, 1,000 |
+| `us.dol.initial_claims.sa.week_<date>` | KXJOBLESSCLAIMS | at least X (`greater_or_equal`) | advance SA initial claims, 1,000 |
+| `dol.eta.continued_claims.sa.week_<date>` | KXCONTCLAIMS | at least X million | advance SA insured unemployment, 0.001 million |
+| `bls.jolts.job_openings.<month>` | KXJOLTSOPEN | above X million | SA job openings, 0.001 million |
+| `us.bea.core_pce.mom_sa.<month>`, `bea.pce.core_mom.<month>` | KXPCECORE | above X | core PCE price index % change, 0.1 |
+
+Secondary: KXECONSTATCPI, KXECONSTATCPICORE and KXECONSTATU3 list "exactly X"
+markets for the same statistics. They are scored separately, with an added
+"any other value" bracket, because their brackets do not cover every value.
+
+Thesis targets with no Kalshi market for the same statistic and period (for
+example JOLTS quits and hires, CPI components, or a GDP period Kalshi does not
+list) are listed in the inventory and not scored.
+
+Kalshi events are matched by series and reference period, read from the
+event's markets' rule text, and verified against the event title.
+
+## Horizons
+
+- **At registration:** the Thesis registration time.
+- **Seven days before release:** the official release instant minus 168 hours.
+- **One day before release:** the official release instant minus 24 hours.
+
+The release instant is the agency's scheduled time on the release date (8:30
+ET for CPI, the Employment Situation, weekly claims and Personal Income and
+Outlays; 10:00 ET for JOLTS), with the date taken from the official release
+document. Kalshi's market close must precede it.
+
+A Kalshi price is compared with a Thesis forecast only when the horizon is at
+or after the Thesis registration time, so the market never has less
+information than Thesis had. Pairs that fail this are counted and dropped.
+Results are never pooled across horizons.
+
+## Kalshi price at a time
+
+- The market must have opened at or before the horizon.
+- Use the hourly candlestick (`period_interval=60`) with the latest
+  `end_period_ts` at or before the horizon, from the live endpoint or the
+  historical tier for markets settled before Kalshi's archive cutoff.
+- **Primary price:** the midpoint of the closing yes bid and yes ask, where an
+  empty bid is 0 and an empty ask is 1.
+- **Sensitivity price:** the last traded price at or before the horizon, or the
+  midpoint if the market never traded.
+- **Ladder repair:** within an event, P(yes) must not increase with the
+  strike. Violations are repaired with unweighted pooled-adjacent-violators
+  isotonic regression and counted.
+- Volume is recorded per market: lifetime volume, volume up to the horizon,
+  open interest at the horizon, and the bid-ask spread at the horizon.
+
+## Brackets and probabilities
+
+For an event at a horizon, the admitted markets' strikes s1 < ... < sn define
+n + 1 brackets of the reported value Y, following each contract's wording:
+`greater` gives (-inf, s1], (s1, s2], ..., (sn, inf); `greater_or_equal` gives
+(-inf, s1), [s1, s2), ..., [sn, inf). Kalshi's bracket probabilities are the
+differences of the repaired ladder prices.
+
+Thesis's bracket probabilities come from its published CDF F. The agency
+publishes Y as a latent value L rounded to the reporting grid g, and F is read
+as the distribution of L (Thesis point estimates sit between grid values). So
+P(Y > s) = 1 - F(s + g/2) and P(Y >= s) = 1 - F(s - g/2). Sensitivity: the
+literal reading P(Y > s) = P(Y >= s) = 1 - F(s). Thesis units are converted to
+the contract's strike units first (thousands to persons for payrolls and
+initial claims).
+
+## Outcomes
+
+The outcome is the official first print, read from the agency's own release:
+the BLS news release archive (CPI Table A, Employment Situation summary tables
+A and B, JOLTS Table A), the DOL Employment and Training Administration weekly
+claims press release, and the BEA Personal Income and Outlays release.
+Each market's realized outcome under its rule must equal Kalshi's recorded
+`result`; any disagreement is reported, and the official release governs.
+Thesis's own resolution status is reported alongside, including targets its
+resolver has not yet resolved.
+
+## Scores
+
+Both forecasters are scored on the same brackets.
+
+- **Log score:** ln of the probability given to the realized bracket.
+  Bracket probabilities are floored at 0.001 and renormalized, for both
+  forecasters. Sensitivity floor: 0.01.
+- **Brier score:** the multi-category Brier score, sum over brackets of
+  (probability - indicator)^2, from 0 (best) to 2.
+- **Ladder Brier (secondary):** the mean over the event's binary markets of
+  (P(yes) - outcome)^2.
+
+Paired differences are oriented so that a positive value favors Thesis:
+delta log = log(Thesis) - log(Kalshi); delta Brier = Brier(Kalshi) -
+Brier(Thesis).
+
+## Inference
+
+- The unit is the event (one statistic for one reference period), with one
+  primary Thesis forecast per event.
+- Per series: n, mean paired difference, a two-sided exact sign-flip
+  randomization p-value (all 2^n sign patterns for n <= 16, otherwise 100,000
+  draws with a fixed seed), and a 95% percentile bootstrap interval over
+  events (10,000 resamples, fixed seed).
+- A series with fewer than five resolved pairs gets its numbers reported and
+  the plain statement that there are too few pairs to conclude anything.
+- Pooled: (a) all events equally weighted; (b) series-balanced (the mean of
+  series means). Events released together (headline and core CPI; U-3 and
+  payrolls; initial and continued claims) are correlated, so the pooled
+  interval also resamples release dates rather than events.
+- There are three horizons and two scores. No result is described as
+  significant; intervals are reported as they are.
+
+## Data provenance
+
+Every HTTP response used is stored by SHA-256 with its URL and fetch time, so a
+rerun with `--offline` reproduces the results byte for byte from the stored
+responses.
