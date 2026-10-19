@@ -26,7 +26,9 @@ import hashlib
 import json
 import pathlib
 import re
+import subprocess
 import sys
+import tempfile
 
 import pytest
 from hypothesis import HealthCheck, assume, given, settings
@@ -155,6 +157,75 @@ def test_a_gate_cannot_be_both_required_and_advisory() -> None:
             REPO, "c" * 40, 7, timeout_seconds=60,
             gates=(ARCH,), advisory=(ARCH,),
         )
+
+
+def test_a_failed_read_while_awaiting_arch_checks_never_refuses(monkeypatch) -> None:
+    """Once a read showed every required gate passed, the old code merged on
+    it; waiting on an advisory verdict must not turn later read failures
+    into a closed proposal."""
+    clock = _FakeClock()
+    reads = 0
+
+    def api(*_args: str, **_kwargs) -> str:
+        nonlocal reads
+        reads += 1
+        if reads > 1:
+            raise RuntimeError("HTTP 502")
+        runs = [*_green_append_gates(), _run(3, ARCH, "queued", None)]
+        return json.dumps({"total_count": len(runs), "check_runs": runs})
+
+    monkeypatch.setattr(rp, "_gh_api", api)
+    verdicts = rp.await_append_gates(
+        REPO, "c" * 40, 7, timeout_seconds=150 * 60, advisory=(ARCH,),
+        clock=clock, sleep=clock.sleep,
+    )
+    assert verdicts[ARCH][0] == "pending" and reads == 2
+
+
+def _issue_api(calls: list, pages: list[list[dict]]):
+    def api(*args: str, input_body=None, **_kwargs) -> str:
+        calls.append((args, input_body))
+        joined = " ".join(args)
+        if "/issues?state=open" in joined:
+            page = int(joined.rsplit("page=", 1)[1])
+            return json.dumps(pages[page - 1] if page <= len(pages) else [])
+        return json.dumps({"number": 99, "html_url": "https://x/99", "id": 1})
+
+    return api
+
+
+def test_a_missing_verdict_is_filed_when_the_dry_run_predicts_red(
+    monkeypatch,
+) -> None:
+    calls: list = []
+    monkeypatch.setattr(rp, "_gh_api", _issue_api(calls, [[]]))
+    predicted = rp.CatalogCuration(files={}, residual=("'x' on 'y': first strip",))
+    rp.report_arch_checks_at_merge(
+        REPO, 7, "d" * 40, state="pending", runs="Arch checks: no check run yet",
+        curation=predicted, run_url=None,
+    )
+    created = [body for args, body in calls if args[-1] == f"repos/{REPO}/issues"]
+    assert len(created) == 1
+    assert "dry run predicts it red" in created[0]["body"]
+    assert "'x' on 'y': first strip" in created[0]["body"]
+    calls.clear()
+    rp.report_arch_checks_at_merge(
+        REPO, 7, "d" * 40, state="pending", runs="Arch checks: queued",
+        curation=rp.CatalogCuration(files={}), run_url=None,
+    )
+    assert calls == []
+
+
+def test_the_open_curation_issue_is_found_past_the_first_page(monkeypatch) -> None:
+    calls: list = []
+    filler = [
+        {"number": n, "title": f"pr {n}", "pull_request": {}} for n in range(100)
+    ]
+    match = {"number": 512, "title": rp.LEDGER_CURATION_ISSUE_TITLE}
+    monkeypatch.setattr(rp, "_gh_api", _issue_api(calls, [filler, [match]]))
+    rp._file_ledger_curation_issue(REPO, "body")
+    posts = [args[-1] for args, _ in calls if "POST" in args]
+    assert posts == [f"repos/{REPO}/issues/512/comments"]
 
 
 _SHAPES = [
@@ -290,6 +361,18 @@ def test_unprovable_first_strips_are_left_to_a_curator(
     assert len(refusals) == 1 and reason in next(iter(refusals.values())), case
 
 
+def test_a_shape_is_recorded_only_when_every_first_spelling_is_provable() -> None:
+    """Chronicle reviews a shape as one decision, so recording fy2026 would
+    turn an unproven fy2025 of the same shape into a continuation."""
+    sibling = (SERIES, "source_record_id", SHAPE, "fy2025")
+    additions, refusals = rp.provable_strip_reviews(
+        {KEY: DERIVED, sibling: DERIVED}, {}, [], [ROW], CONTRACTS
+    )
+    assert additions == {}
+    assert "no row in this append" in refusals[sibling]
+    assert "reviewed as one" in refusals[KEY]
+
+
 def test_continuations_of_a_reviewed_shape_need_no_review() -> None:
     reviewed = {(SERIES, "source_record_id", SHAPE, "fy2025"): DERIVED}
     additions, refusals = rp.provable_strip_reviews(
@@ -354,6 +437,8 @@ def test_strip_reviews_are_exactly_the_provable_first_strips(world) -> None:
     first = {key for key in live if key not in reviewed and key[:3] not in shapes}
     assert set(additions) | set(refusals) == first
     assert not set(additions) & set(refusals)
+    # A shape is recorded whole or not at all.
+    assert not {key[:3] for key in additions} & {key[:3] for key in refusals}
     for key in additions:
         concept, field, shape, spelling = key
         assert live[key] == DERIVED
@@ -671,9 +756,12 @@ def test_workflow_run_url_only_names_a_github_actions_run() -> None:
 # --- catalog_curation end to end, against a fake Chronicle base ----------------
 
 # A stand-in for Chronicle's scripts/build_series_catalog.py with the surface
-# the resolver's generator run and probe use. Its period strips are fyNNNN
-# segments of source_record_id; a REJECT_CURATION file makes its audit
-# report every strip, reviewed or not.
+# the resolver's probe uses. Its period strips are fyNNNN segments of
+# source_record_id, and like the real generator it mints a new identity under
+# a random UUID. A REJECT_CURATION file makes its audit report every strip,
+# reviewed or not; a CLEAR_UNRELATED file makes it report nothing once any
+# strip is reviewed. It refuses to run when it can read the resolver's
+# credentials in its environment.
 _FAKE_CATALOG_MODULE = r'''
 import hashlib
 import json
@@ -681,6 +769,10 @@ import os
 import pathlib
 import re
 import sys
+import uuid as uuid_module
+
+if "GH_TOKEN" in os.environ or "LEDGER_PRODUCER_SIGNING_KEY" in os.environ:
+    sys.exit(9)
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "ledger" / "series_catalog.json"
@@ -733,8 +825,7 @@ def build_catalog(observations, docket, existing, registry, *rest):
             ]
             stripped.setdefault(spelling, set()).add(concept)
         known = series.get(concept)
-        uuid = known["uuid"] if known else hashlib.sha256(
-            concept.encode()).hexdigest()[:12]
+        uuid = known["uuid"] if known else str(uuid_module.uuid4())
         series[concept] = {"uuid": uuid, "concept": concept,
                            "geography": row["geography"], "entity": row["entity"]}
     catalog = {
@@ -758,6 +849,8 @@ def stripped_segment_review_problems(stripped_segments, strips, reviewed):
     live, decided = strip_records(strips), strip_records(reviewed)
     shapes = {key[:3] for key in decided}
     reject = (ROOT / "REJECT_CURATION").exists()
+    if decided and (ROOT / "CLEAR_UNRELATED").exists():
+        return []
     problems = []
     for concept, field, shape, spelling in live:
         if not reject and ((concept, field, shape, spelling) in decided
@@ -785,8 +878,6 @@ def identity_anchor_problems(series, anchor):
 
 
 if __name__ == "__main__":
-    if "GH_TOKEN" in os.environ:
-        sys.exit(9)
     catalog, _plan = build_catalog(None, None, None, None)
     CATALOG.write_text(json.dumps(catalog, indent=2) + "\n")
 '''
@@ -822,6 +913,7 @@ def _fake_base(
     anchor_pin: str | None = None,
     fixtures: bool = True,
     extra: dict[str, bytes] | None = None,
+    base_rows: tuple[dict, ...] = (_BASE_ROW,),
 ) -> rp.RepositoryTree:
     base_series = [
         {"uuid": hashlib.sha256(b"other.series").hexdigest()[:12],
@@ -829,7 +921,7 @@ def _fake_base(
         _PLACEHOLDER,
     ]
     files = {
-        _LEDGER: (json.dumps(_BASE_ROW) + "\n").encode(),
+        _LEDGER: "".join(json.dumps(row) + "\n" for row in base_rows).encode(),
         "ledger/series_catalog.json": json.dumps(
             {"series": sorted(base_series, key=lambda r: r["concept"]),
              "stripped_segments": {}}
@@ -854,12 +946,34 @@ def _fake_base(
     )
 
 
-def _curate(tree: rp.RepositoryTree, contracts=CONTRACTS, row=ROW):
-    candidate = tree.files[_LEDGER] + (json.dumps(row) + "\n").encode()
+def _regenerated(tree: rp.RepositoryTree, candidate: bytes) -> bytes:
+    """The catalog the (fake) base generator writes for ``candidate``, as
+    _prepare_release_files would ship it."""
+    with tempfile.TemporaryDirectory() as name:
+        stage = pathlib.Path(name)
+        rp._materialize_repository_tree(stage, tree)
+        (stage / _LEDGER).write_bytes(candidate)
+        subprocess.run(
+            [sys.executable, "scripts/build_series_catalog.py"],
+            cwd=stage,
+            check=True,
+            env=rp._staged_subprocess_env(),
+        )
+        return (stage / "ledger" / "series_catalog.json").read_bytes()
+
+
+def _candidate(tree: rp.RepositoryTree, *rows: dict) -> bytes:
+    return tree.files[_LEDGER] + "".join(json.dumps(r) + "\n" for r in rows).encode()
+
+
+def _curate(tree: rp.RepositoryTree, contracts=CONTRACTS, row=ROW, catalog=None):
+    candidate = _candidate(tree, row)
     return rp.catalog_curation(
         tree,
         path=_LEDGER,
         candidate_ledger=candidate,
+        catalog=catalog if catalog is not None else _regenerated(tree, candidate),
+        registry=None,
         target_contracts=contracts,
         run_url="https://github.com/ThesisInstitute/thesis/actions/runs/9",
     )
@@ -881,7 +995,6 @@ def test_catalog_curation_carries_both_fixtures_and_the_dry_run_is_green() -> No
     assert anchor["comment"] == "anchor comment"
     assert anchor["move"]["by"] == rp.IDENTITY_ANCHOR_MOVER
     assert anchor["move"]["from_sha256"] != anchor["sha256"]
-    assert json.loads(curation.catalog)["series"][1]["entity"] == ECONOMY
 
 
 def test_catalog_curation_ships_nothing_the_dry_run_rejects() -> None:
@@ -912,9 +1025,15 @@ def test_catalog_curation_never_moves_an_already_stale_anchor() -> None:
 
 
 def test_catalog_curation_without_curation_fixtures_does_nothing() -> None:
-    # Not even the generator runs (this one would fail).
+    # Not even the probe runs (this module would fail).
     tree = _fake_base(module="raise SystemExit(5)\n", fixtures=False)
-    curation = _curate(tree)
+    assert _curate(tree, catalog=b"{}") == rp.CatalogCuration(files={})
+    # Nor without a shipped catalog (a base before the witnessed release chain).
+    tree = _fake_base(module="raise SystemExit(5)\n")
+    curation = rp.catalog_curation(
+        tree, path=_LEDGER, candidate_ledger=_candidate(tree, ROW), catalog=None,
+        registry=None, target_contracts=CONTRACTS,
+    )
     assert curation == rp.CatalogCuration(files={})
 
 
@@ -935,9 +1054,124 @@ def test_catalog_curation_only_writes_a_fixture_in_chronicle_s_layout() -> None:
     assert any("not in the layout" in note for note in curation.notes)
 
 
-def test_staged_code_never_sees_the_resolver_s_credentials(monkeypatch) -> None:
-    # The fake generator exits 9 when it can read GH_TOKEN.
+def test_staged_code_is_not_handed_the_resolver_s_credentials(monkeypatch) -> None:
+    # The fake module exits 9 when its environment holds GH_TOKEN or the
+    # producer key. (Hygiene: the staged base code runs as the same user.)
+    tree = _fake_base()
+    catalog = _regenerated(tree, _candidate(tree, ROW))
     monkeypatch.setenv("GH_TOKEN", "secret")
     monkeypatch.setenv(rp.PRODUCER_SIGNING_KEY_ENV, "key")
-    curation = _curate(_fake_base())
-    assert curation.strips == (KEY,)
+    assert _curate(tree, catalog=catalog).strips == (KEY,)
+
+
+NEW_SERIES = "usaspending.new.series_obligations"
+NEW_REF = f"{NEW_SERIES}.fy2026.registered_query_snapshot"
+NEW_ROW = {**ROW, "source_record_id": NEW_REF, "measure": {"concept": NEW_SERIES}}
+NEW_CONTRACTS = {
+    NEW_REF: {"contract": {"dataPointId": NEW_REF, "series": NEW_SERIES}}
+}
+
+
+def test_a_fresh_mint_keeps_its_curation_because_the_shipped_catalog_is_used(
+) -> None:
+    """Chronicle mints a new identity under a random UUID, so two generator
+    runs describe two catalogs. Curation must come from the bytes that ship
+    (the 2026-10-19 review's P2: a second run dropped it every time)."""
+    tree = _fake_base()
+    candidate = _candidate(tree, NEW_ROW)
+    first, second = _regenerated(tree, candidate), _regenerated(tree, candidate)
+    assert first != second
+    curation = _curate(tree, contracts=NEW_CONTRACTS, row=NEW_ROW, catalog=first)
+    shipped = {
+        row["concept"]: row["uuid"] for row in json.loads(first)["series"]
+    }
+    assert [(e["event"], e["uuid"]) for e in curation.anchor_events] == [
+        ("mint", shipped[NEW_SERIES])
+    ]
+    anchor = json.loads(curation.files[rp.CATALOG_IDENTITY_ANCHOR])
+    assert anchor["sha256"] == _anchor_digest(json.loads(first)["series"])
+    assert curation.strips == (
+        (NEW_SERIES, "source_record_id",
+         f"{NEW_SERIES}.{{P:fy9999}}.registered_query_snapshot", "fy2026"),
+    )
+    assert curation.residual == ()
+
+
+def test_curation_may_not_clear_a_report_it_did_not_answer() -> None:
+    """A base strip left to a curator must still be reported after the
+    resolver records its own; an audit that stops reporting it means the
+    curation reached beyond what was proven, so none ships."""
+    unrelated = {
+        "source_record_id": "other.flow.fy2025.first_print",
+        "measure": {"concept": "other.flow"},
+        "geography": GEO_US,
+        "entity": ECONOMY,
+    }
+    tree = _fake_base(
+        base_rows=(_BASE_ROW, unrelated), extra={"CLEAR_UNRELATED": b""}
+    )
+    curation = _curate(tree)
+    assert curation.files == {}
+    assert any("dry run rejected" in note for note in curation.notes)
+    assert any("'fy2025' on 'other.flow'" in line for line in curation.residual)
+
+
+def test_a_proposal_ships_curation_derived_from_its_own_catalog(monkeypatch) -> None:
+    """End to end through propose_ledger_append: the fixtures in the
+    proposal commit describe exactly the catalog that commit ships, even
+    when the append mints an identity under a random UUID."""
+    tree = _fake_base()
+    candidate = _candidate(tree, NEW_ROW)
+
+    def prepare(*_args, **_kwargs) -> dict[str, bytes]:
+        return {"ledger/series_catalog.json": _regenerated(tree, candidate)}
+
+    published: list[dict[str, bytes]] = []
+
+    def publish(*_args, changes, **_kwargs) -> str:
+        published.append(dict(changes))
+        return "c" * 40
+
+    merged = False
+
+    def api(*args: str, input_body=None, **_kwargs) -> str:
+        nonlocal merged
+        joined = " ".join(args)
+        if "/check-runs" in joined:
+            runs = [*_green_append_gates(), _run(3, ARCH, "completed", "success")]
+            return json.dumps({"total_count": len(runs), "check_runs": runs})
+        if joined.endswith("/pulls") and "POST" in args:
+            return json.dumps({"number": 7})
+        if "/merge" in joined:
+            merged = True
+            return json.dumps({"merged": True, "sha": "d" * 40})
+        if joined.endswith("/pulls/7"):
+            return json.dumps({
+                "merged": merged, "merge_commit_sha": "d" * 40 if merged else None,
+                "head": {"sha": "c" * 40},
+                "base": {"ref": "codex/thesis-ledger-facts", "sha": "b" * 40},
+            })
+        return "{}"
+
+    monkeypatch.setattr(rp, "_fetch_repository_tree", lambda *_: tree)
+    monkeypatch.setattr(rp, "_prepare_release_files", prepare)
+    monkeypatch.setattr(rp, "_publish_proposal_commit", publish)
+    monkeypatch.setattr(rp, "_branch_head", lambda *_: "b" * 40)
+    monkeypatch.setattr(rp, "_verify_remote_proposal_state", lambda *_a, **_k: None)
+    monkeypatch.setattr(rp, "_gh_api", api)
+    merged_sha = rp.propose_ledger_append(
+        REPO, "codex/thesis-ledger-facts", _LEDGER, candidate.decode(),
+        "a" * 40, "b" * 40, 1, poll_seconds=0, poll_attempts=1,
+        target_contracts=NEW_CONTRACTS,
+    )
+    assert merged_sha == "d" * 40
+    (changes,) = published
+    catalog = json.loads(changes["ledger/series_catalog.json"])
+    anchor = json.loads(changes[rp.CATALOG_IDENTITY_ANCHOR])
+    assert anchor["sha256"] == _anchor_digest(catalog["series"])
+    (event,) = anchor["move"]["events"]
+    assert event["event"] == "mint"
+    assert event["uuid"] == next(
+        row["uuid"] for row in catalog["series"] if row["concept"] == NEW_SERIES
+    )
+    assert NEW_SERIES in json.loads(changes[rp.CATALOG_REVIEWED_STRIPS])["strips"]
