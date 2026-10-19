@@ -367,20 +367,28 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
     monkeypatch_session.setattr(rp, "_gh_api", api)
     required = (*_REQUIRED_NAMES, ARCH) if refuse else _REQUIRED_NAMES
     advisory = () if refuse else (ARCH,)
+    min_runs = {ARCH: 2} if refuse else {}
+
+    def state(listing: list[dict], gate: str) -> str:
+        runs = [r for r in listing if r["name"] == gate]
+        verdict = rp.append_gate_state(runs)
+        real = [
+            r for r in runs
+            if r["status"] == "completed" and r["conclusion"] != "skipped"
+        ]
+        if verdict == "passed" and len(real) < min_runs.get(gate, 0):
+            return "pending"
+        return verdict
 
     def passed(variant: int) -> bool:
         listing = _listing_runs(pool, variant)
-        return all(
-            rp.append_gate_state([r for r in listing if r["name"] == gate])
-            == "passed"
-            for gate in required
-        )
+        return all(state(listing, gate) == "passed" for gate in required)
 
     clock = _FakeClock()
     try:
         verdicts = rp.await_append_gates(
             REPO, "c" * 40, 7, timeout_seconds=600, advisory=advisory,
-            gates=required, advisory_grace_seconds=120,
+            gates=required, advisory_grace_seconds=120, min_runs=min_runs,
             clock=clock, sleep=clock.sleep,
         )
     except rp.LedgerProposalError:
@@ -397,8 +405,7 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
     ), (reads, script)
     latest = _listing_runs(pool, good[-1])
     assert {gate: verdict[0] for gate, verdict in verdicts.items()} == {
-        gate: rp.append_gate_state([r for r in latest if r["name"] == gate])
-        for gate in advisory
+        gate: state(latest, gate) for gate in advisory
     }
 
 

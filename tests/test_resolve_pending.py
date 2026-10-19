@@ -2363,13 +2363,20 @@ def _gate_check_runs(
         real("Append gate", append_conclusion, 1),
         twin("Trusted base append gate", 12),
         real("Trusted base append gate", trusted_conclusion, 2),
-        {
-            "id": 13,
-            "name": "Arch checks",
-            "status": "queued" if arch_conclusion is None else "completed",
-            "conclusion": arch_conclusion,
-            "html_url": "https://github.com/PolicyEngine/chronicle/actions/runs/13",
-        },
+        # Arch checks runs for the proposal branch's push and for its pull
+        # request.
+        *(
+            {
+                "id": run_id,
+                "name": "Arch checks",
+                "status": "queued" if arch_conclusion is None else "completed",
+                "conclusion": arch_conclusion,
+                "html_url": (
+                    f"https://github.com/PolicyEngine/chronicle/actions/runs/{run_id}"
+                ),
+            }
+            for run_id in (13, 14)
+        ),
     ]
 
 
@@ -4075,6 +4082,32 @@ def test_refuse_policy_merges_on_green_arch_checks(monkeypatch) -> None:
     )
     refuse = resolve_pending.ARCH_CHECKS_POLICY_REFUSE
     assert _propose_one_row(arch_checks_policy=refuse) == "d" * 40
+
+
+def test_refuse_policy_waits_for_both_arch_checks_runs(monkeypatch) -> None:
+    """Arch checks runs for the proposal's push and its pull request; under
+    "refuse" a green push run alone never merges (the pull request run,
+    which also checks the anchor move against the base, may not be listed
+    yet)."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, arch_conclusion="success"
+    )
+    base_api = resolve_pending._gh_api
+
+    def push_run_only(*args: str, **kwargs) -> str:
+        raw = base_api(*args, **kwargs)
+        if f"commits/{'c' * 40}/check-runs" in " ".join(args):
+            page = json.loads(raw)
+            runs = [r for r in page["check_runs"] if r.get("id") != 14]
+            return json.dumps(_check_runs_page(runs))
+        return raw
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", push_run_only)
+    refuse = resolve_pending.ARCH_CHECKS_POLICY_REFUSE
+    with pytest.raises(resolve_pending.LedgerProposalError, match="did not complete"):
+        _propose_one_row(arch_checks_policy=refuse)
+    assert not any("/merge" in " ".join(args) for args, _ in calls)
 
 
 def test_unknown_arch_checks_policy_refuses_before_any_remote_call(

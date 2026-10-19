@@ -15794,6 +15794,7 @@ def await_append_gates(
     gates: tuple[str, ...] = REQUIRED_APPEND_GATES,
     advisory: tuple[str, ...] = (),
     advisory_grace_seconds: float = ARCH_CHECKS_GRACE_SECONDS,
+    min_runs: Mapping[str, int] | None = None,
     clock: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
 ) -> dict[str, tuple[str, str]]:
@@ -15812,6 +15813,11 @@ def await_append_gates(
     budget. Returns each advisory gate's state ("passed", "failed" or
     "pending") and a description of its runs, from the read that ended the
     wait, for the caller to act on.
+
+    ``min_runs`` holds a gate's pass until that many of its runs (skipped
+    twins aside) have completed: Arch checks runs once for the proposal
+    branch's push and once for its pull request, and the push run can finish
+    before the pull request run is even listed.
     """
     timeout_seconds = _validate_gate_timeout(timeout_seconds)
     overlap = set(gates) & set(advisory)
@@ -15827,6 +15833,20 @@ def await_append_gates(
     last_read_error: BaseException | None = None
     watched = (*gates, *advisory)
     last_seen: dict[str, list[dict]] = {gate: [] for gate in watched}
+    min_runs = dict(min_runs or {})
+
+    def gate_state(gate: str) -> str:
+        state = append_gate_state(last_seen[gate])
+        if state == "passed" and gate in min_runs:
+            real = [
+                run
+                for run in last_seen[gate]
+                if run.get("status") == "completed"
+                and run.get("conclusion") != "skipped"
+            ]
+            if len(real) < min_runs[gate]:
+                return "pending"
+        return state
     # The ids of the last multi-page listing that read as passed.
     passed_ids: frozenset[int] | None = None
     # Whether the latest successful read showed every required gate passed,
@@ -15850,7 +15870,7 @@ def await_append_gates(
     def advisory_verdicts() -> dict[str, tuple[str, str]]:
         return {
             gate: (
-                append_gate_state(last_seen[gate]),
+                gate_state(gate),
                 _describe_gate_runs(gate, last_seen[gate]),
             )
             for gate in advisory
@@ -15886,7 +15906,7 @@ def await_append_gates(
                 last_seen[gate] = [
                     run for run in runs if type(run) is dict and run.get("name") == gate
                 ]
-                states[gate] = append_gate_state(last_seen[gate])
+                states[gate] = gate_state(gate)
             failed = [gate for gate in gates if states[gate] == "failed"]
             if failed:
                 raise LedgerProposalError(
@@ -15930,9 +15950,7 @@ def await_append_gates(
                 # Every required gate passed on this head; only an advisory
                 # verdict is missing, and it never holds a merge.
                 return advisory_verdicts()
-            waiting = [
-                gate for gate in gates if append_gate_state(last_seen[gate]) != "passed"
-            ]
+            waiting = [gate for gate in gates if gate_state(gate) != "passed"]
             detail = "; ".join(
                 _describe_gate_runs(gate, last_seen[gate]) for gate in waiting
             )
@@ -16166,9 +16184,12 @@ def propose_ledger_append(
     if arch_checks_policy == ARCH_CHECKS_POLICY_REFUSE:
         required_gates = (*REQUIRED_APPEND_GATES, ARCH_CHECKS_GATE)
         advisory_gates: tuple[str, ...] = ()
+        # Both the push run and the pull request run of Arch checks.
+        gate_min_runs = {ARCH_CHECKS_GATE: 2}
     else:
         required_gates = REQUIRED_APPEND_GATES
         advisory_gates = (ARCH_CHECKS_GATE,)
+        gate_min_runs = {}
     candidate_ledger = content.encode("utf-8")
     base_tree = _fetch_repository_tree(repo, base_sha, path)
     if base_tree.blob_shas.get(path) != blob_sha:
@@ -16283,6 +16304,7 @@ def propose_ledger_append(
             poll_attempts=poll_attempts,
             gates=required_gates,
             advisory=advisory_gates,
+            min_runs=gate_min_runs,
         )
 
         current_base = _branch_head(repo, branch)
