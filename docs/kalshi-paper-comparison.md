@@ -35,7 +35,8 @@ primary specification must be listed in the results as a deviation.
   `interval_anchor_v1` transform (`site/src/data/prediction-distribution.ts`)
   and must match the published points.
 - **Primary forecaster.** The `thesis.analyst` run labelled `Headline` for
-  each target. Other agent variants (for example threshold-ladder runs) and
+  each target (if a target has more than one, the earliest registered). Other
+  agent variants (for example threshold-ladder runs) and
   the deterministic `brier.time_series_prior` persistence baseline are scored
   as secondary forecasters.
 - **Withdrawn cells.** Catalog cells that the publication gate excludes (the
@@ -72,7 +73,10 @@ example JOLTS quits and hires, CPI components, or a GDP period Kalshi does not
 list) are listed in the inventory and not scored.
 
 Kalshi events are matched by series and reference period, read from the
-event's markets' rule text, and verified against the event title.
+event's markets' rule text, and verified against the event title. Each
+market's strike and its unit are read from its own rule text and must equal
+its `floor_strike` (Kalshi moved continuing-claims strikes from "1.84 million"
+to "1750K" between events).
 
 ## Horizons
 
@@ -138,8 +142,9 @@ resolver has not yet resolved.
 Both forecasters are scored on the same brackets.
 
 - **Log score:** ln of the probability given to the realized bracket.
-  Bracket probabilities are floored at 0.001 and renormalized, for both
-  forecasters. Sensitivity floor: 0.01.
+  Bracket probabilities are raised to at least 0.001, with the added mass
+  taken proportionally from the other brackets, for both forecasters.
+  Sensitivity floor: 0.01.
 - **Brier score:** the multi-category Brier score, sum over brackets of
   (probability - indicator)^2, from 0 (best) to 2.
 - **Ladder Brier (secondary):** the mean over the event's binary markets of
@@ -165,6 +170,18 @@ Brier(Thesis).
   interval also resamples release dates rather than events.
 - There are three horizons and two scores. No result is described as
   significant; intervals are reported as they are.
+
+## Changes made after this plan was first committed
+
+Each was made before any Thesis or Kalshi score was looked at.
+
+- Strike units are read from each market's rule text (see above), after the
+  first run showed the continuing-claims unit change.
+- One sensitivity was added after inspecting bid-ask spreads: **liquid
+  markets only**, which drops any market whose spread at the horizon exceeds
+  20 cents and scores the remaining strikes. JOLTS openings and continuing
+  claims are thinly quoted (median spreads of 33 to 49 cents and 9 cents), and
+  an empty book's midpoint of 0.5 is not a market forecast.
 
 ## Data provenance
 
