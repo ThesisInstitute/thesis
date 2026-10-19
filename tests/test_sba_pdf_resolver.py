@@ -1526,31 +1526,34 @@ def test_a_covered_year_still_refuses_when_the_chain_does_not_verify(
     )
 
 
-@pytest.mark.parametrize("verifies", [True, False])
+@pytest.mark.parametrize(
+    "error", [None, resolve_pending.TimelineError, OSError, ValueError]
+)
 def test_one_run_reads_the_timeline_at_most_once(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
-    verifies: bool,
+    error: type[Exception] | None,
 ) -> None:
     """Three SBA targets, one chain: a timeline that verifies is read once
-    and shared; one that does not is not re-verified for every target."""
+    and shared; one that fails, with any error the callers catch, is not
+    re-verified for every target."""
     reads: list[pathlib.Path] = []
     timeline = {"runs": {}, "custodyRoots": {}}
 
     def extract(records: pathlib.Path) -> Mapping[str, object]:
         reads.append(records)
-        if not verifies:
-            raise resolve_pending.TimelineError("record chain does not verify")
+        if error is not None:
+            raise error("record chain does not verify")
         return timeline
 
     monkeypatch.setattr(resolve_pending, "extract_timeline", extract)
     memo = resolve_pending._MemoizedTimeline(tmp_path)
     assert memo.loads == 0 and reads == []
     for _target in range(3):
-        if verifies:
+        if error is None:
             assert memo() is timeline
         else:
-            with pytest.raises(resolve_pending.TimelineError):
+            with pytest.raises(error):
                 memo()
     assert reads == [tmp_path]
     assert memo.loads == 1
