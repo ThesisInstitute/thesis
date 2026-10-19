@@ -94,8 +94,11 @@ from ledger_release_chain import (
 from pin_ledger import PinError, _validate_catalog_binding
 from register_targets import (
     LEGACY_BOUNDED_CONDITIONAL_IDS,
+    WEEKLY_CLAIMS_RELEASE_EXCEPTIONS,
+    WEEKLY_CLAIMS_SCHEDULE_URL,
     RegistrationError,
     registration_content_hash,
+    weekly_claims_release_day,
 )
 from sba_loan_performance import (
     CHARGE_OFF_AMOUNT_SERIES,
@@ -117,7 +120,16 @@ from sba_loan_performance import (
     PARTIAL_REFUSAL as SBA_PARTIAL_REFUSAL,
 )
 from thesis_log_client import load_thesis_log
-from verify_custody import CustodyError, verify_run
+from verify_custody import (
+    CLAIMS_LABEL_LAG,
+    CustodyError,
+    claims_vintages_consistent,
+    judge_claims_first_print,
+    parse_alfred_claims_vintage,
+    read_alfred_claims_vintage,
+    require_claims_vintage_label,
+    verify_run,
+)
 from witnessed_timeline import TimelineError, extract_timeline
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -9185,6 +9197,23 @@ def bls_ledger_unit_conflict(
     )
 
 
+def _report_run_refusals(
+    unit_refusals: list[str], claims_correction_refusals: list[str]
+) -> int:
+    """Report both refusal lists; ``EXIT_REFUSED_ROWS`` if either has any."""
+
+    status = _report_ledger_unit_refusals(unit_refusals)
+    if claims_correction_refusals:
+        print(
+            f"{len(claims_correction_refusals)} claims correction(s) refused; "
+            "fix CLAIMS_FIRST_PRINT_CORRECTIONS to match the ledger"
+        )
+        for line in claims_correction_refusals:
+            print(f"  refused: {line}")
+        status = EXIT_REFUSED_ROWS
+    return status
+
+
 def _report_ledger_unit_refusals(refusals: list[str]) -> int:
     """List references the unit guard refused; ``EXIT_REFUSED_ROWS`` if any.
 
@@ -12394,9 +12423,19 @@ def qcew_postfetch_window_refusal(
 
 
 def claims_fact(
-    ref: str, week: str, raw: float, kind: str, release_day: dt.date
+    ref: str,
+    week: str,
+    raw: float,
+    kind: str,
+    release_day: dt.date,
+    note: str | None = None,
 ) -> dict:
-    """Build a ledger fact row for a weekly claims first print."""
+    """Build a ledger fact row for a weekly claims first print.
+
+    ``release_day`` is the first ALFRED vintage that holds the week. ``note``
+    is appended to the row's evidence note, which the site shows on the
+    resolution.
+    """
     if kind == "initial":
         value, unit = round(raw / 1_000, 1), "thousands"
         concept = "us.dol.initial_claims.sa"
@@ -12431,6 +12470,7 @@ def claims_fact(
                 f"DOL ETA UI Weekly Claims news release, advance seasonally "
                 f"adjusted figure for the week ending {week}, read from FRED "
                 f"{fred_id} (advance vintage) as the cell's resolver names."
+                + (f" {note}" if note else "")
             ),
         },
         "aggregation": {"method": "level"},
@@ -12443,8 +12483,9 @@ def claims_fact(
             "vintage": "advance",
             "extracted_at": dt.date.today().isoformat(),
             "extraction_method": (
-                "Automated first-print capture via FRED series "
-                f"{fred_id} by scripts/resolve_pending.py"
+                "Automated first-print capture: the first ALFRED vintage of "
+                f"FRED series {fred_id} that holds the week, found by "
+                "scripts/resolve_pending.py"
             ),
         },
         "source_row_keys": [week],
@@ -12488,61 +12529,459 @@ def pending_claims_refs(log: dict) -> list[tuple[str, str, str, str]]:
     return out
 
 
-def claims_vintage_holds_next_week(
-    raw: bytes, series_id: str, week: str, vintage: dt.date
-) -> bool:
-    """Whether this ALFRED vintage is a later release than the week's first print.
+CLAIMS_SERIES_IDS = {"initial": "ICSA", "continued": "CCSA"}
+CLAIMS_SERIES_NAMES = {
+    "initial": "us.dol.initial_claims.sa",
+    "continued": "dol.eta.continued_claims.sa",
+}
+CLAIMS_REF = re.compile(
+    r"(?:us\.dol\.initial_claims\.sa\.week_(?P<initial>\d{4}-\d{2}-\d{2})"
+    r"|dol\.eta\.continued_claims\.sa\.week_(?P<continued>\d{4}-\d{2}-\d{2})"
+    r"(?:\.first_print)?)$"
+)
+CLAIMS_DRIFT_RECORD_URL = (
+    "https://github.com/ThesisInstitute/thesis/blob/main/docs/"
+    "weekly-claims-release-window-drift.md"
+)
+# Ledger rows the claims leg wrote from a later DOL release than the week's
+# first print, while the weekly claims windows drifted (2026-09-11 to
+# 2026-10-18; the last, continued claims week 2026-09-26, is Chronicle line
+# 239, appended by resolver run 39147142911 before the guard in #344 merged).
+# Each record id maps to the assertion version it supersedes.
+# No value comes from this table: every run re-derives the first vintage from
+# ALFRED and refuses an entry unless its row is still the active version and
+# was read from a later release than the first print. Once the superseding
+# row is in the ledger the entry is a no-op and costs no request.
+CLAIMS_FIRST_PRINT_CORRECTIONS: dict[str, str] = {
+    "us.dol.initial_claims.sa.week_2026-08-29": (
+        "av2:a2b5892be7698fdbb34d6f0b414e2693aed8117ee89b10fd172fc888dbea8e58"
+    ),
+    "us.dol.initial_claims.sa.week_2026-09-05": (
+        "av2:cbca175607bdda672245e73ba0956a7e323cc35fcd94018f6af4197f82a1f7b2"
+    ),
+    "us.dol.initial_claims.sa.week_2026-09-12": (
+        "av2:635144cd48b0cafaab61e4824d258376f7a1eb7d6d25bfe02ce216207f26836c"
+    ),
+    "us.dol.initial_claims.sa.week_2026-09-19": (
+        "av2:0bd8b7e84226b570fcb187b2a0ef0393212cf6766406a9ed7ef390546048d587"
+    ),
+    "dol.eta.continued_claims.sa.week_2026-09-19.first_print": (
+        "av2:1ef4c99a3c6aca000995a600728f3431d7c872442680337ce8748d837ea47922"
+    ),
+    "dol.eta.continued_claims.sa.week_2026-09-26.first_print": (
+        "av2:b1c9579624a6cf93d0a0f5343c4c861a03a0637048bf689012538c05c75ed2e9"
+    ),
+}
 
-    DOL revises a week's figure in the release that first prints the following
-    reference week, so a vintage that already holds `week + 7 days` carries
-    the revised figure. Read from the vintage itself, never from an offset
-    off the reference week: the claims leg trusts the forecast's recorded
-    release day so holiday shifts resolve correctly.
+ClaimsFetched = tuple[dict[str, Any], str, str, bytes, str, str]
+
+
+class ClaimsVintageError(ValueError):
+    """ALFRED answered, but not in a shape a first print can come from."""
+
+
+class ClaimsFirstPrintUncorroboratedError(ClaimsVintageError):
+    """DOL's release day has come; the next day, which corroborates it, has not."""
+
+
+class ClaimsVintageLabelError(ClaimsVintageError):
+    """ALFRED answered a read with an earlier day's vintage than its role allows.
+
+    The response is an honest vintage of another day, so the series is not
+    refused for the rest of the run; the week waits.
     """
 
-    following = (dt.date.fromisoformat(week) + dt.timedelta(days=7)).isoformat()
-    column = f"{series_id}_{vintage.isoformat().replace('-', '')}"
-    # Read only the following week's cell, the way fred_advance_value reads
-    # the target's: unrelated history is never converted, so a malformed
-    # historical value cannot raise here.
-    for row in csv.DictReader(io.StringIO(raw.decode())):
-        date = row.get("observation_date") or row.get("DATE")
-        if date == following:
-            value = row.get(column) or row.get(series_id)
-            return value not in (None, "", ".")
-    return False
+
+# role, vintage date, raw response, retrieval instant
+ClaimsEvidence = tuple[str, dt.date, bytes, str]
+
+
+def fetch_claims_vintage(series_id: str, vintage: str) -> tuple[bytes | None, str]:
+    """Raw ALFRED CSV for one vintage date; None when ALFRED refuses it."""
+    url = FRED_CSV.format(series=series_id, vintage=vintage)
+    retrieved_at = utc_now()
+    try:
+        with urllib.request.urlopen(url, timeout=120) as response:
+            return response.read(), retrieved_at
+    except urllib.error.HTTPError:
+        return None, retrieved_at
+
+
+def parse_claims_vintage(raw: bytes, series_id: str, day: dt.date) -> dict[str, float]:
+    """{week: value} from one complete ALFRED claims vintage, or refuse.
+
+    The rules live in verify_custody.parse_alfred_claims_vintage, so custody
+    replays an archived run by the same rules the resolver read it with.
+    """
+
+    try:
+        return parse_alfred_claims_vintage(raw, series_id, day.isoformat())
+    except ValueError as exc:
+        raise ClaimsVintageError(str(exc)) from exc
+
+
+class ClaimsVintages:
+    """One run's ALFRED reads for the claims leg: one request per series-day.
+
+    A vintage date between two releases returns the earlier release, and a
+    week, once printed, stays in every later vintage. So the vintage dates on
+    which a week is present form one unbroken run, and its first day is the
+    week's first print.
+
+    No single response decides the answer. Every response must be a complete
+    vintage; the reads of a run must agree with each other; the absence the
+    answer rests on is read twice; and the first vintage's value must be
+    corroborated by the next day's vintage. Any disagreement refuses the
+    series for the rest of the run.
+    """
+
+    def __init__(self, fetch: Callable[..., Any] | None = None) -> None:
+        self._fetch = fetch or fetch_claims_vintage
+        self._reads: dict[
+            tuple[str, dt.date], tuple[dict[str, float], bytes | None, str]
+        ] = {}
+        self._refused: dict[str, str] = {}
+        self.requests = 0
+        # Supporting reads behind each record id's first print, archived with
+        # the run so its decision can be replayed.
+        self.evidence: dict[str, list[ClaimsEvidence]] = {}
+
+    def _request(self, series_id: str, day: dt.date) -> tuple[bytes | None, str]:
+        self.requests += 1
+        try:
+            return self._fetch(series_id, day.isoformat())
+        except (http.client.HTTPException, OSError):
+            return None, utc_now()
+
+    def _refuse(self, series_id: str, exc: ClaimsVintageError) -> None:
+        self._refused.setdefault(series_id, str(exc))
+        raise exc
+
+    def read(
+        self, series_id: str, day: dt.date, role: str | None = None
+    ) -> tuple[dict[str, float], bytes | None, str]:
+        """One vintage of the series, read once per run.
+
+        With a first-print ``role``, the response must be ALFRED's vintage of
+        a day that role allows (verify_custody.CLAIMS_LABEL_LAG). That is
+        checked before the read joins the run's consistency checks: a read
+        answered with too early a vintage raises ClaimsVintageLabelError and
+        is not kept, so it defers its week without refusing the series.
+        """
+
+        if series_id in self._refused:
+            raise ClaimsVintageError(
+                f"ALFRED {series_id} refused for the rest of this run: "
+                f"{self._refused[series_id]}"
+            )
+        key = (series_id, day)
+        if key not in self._reads:
+            raw, retrieved_at = self._request(series_id, day)
+            try:
+                rows = {} if raw is None else parse_claims_vintage(raw, series_id, day)
+            except ClaimsVintageError as exc:
+                self._refuse(series_id, exc)
+            if raw is not None and role is not None:
+                self._require_label(series_id, role, day, raw)
+            try:
+                self._reads[key] = (rows, raw, retrieved_at)
+                self._require_consistent(series_id)
+            except ClaimsVintageError as exc:
+                self._reads.pop(key, None)
+                self._refuse(series_id, exc)
+        elif role is not None and self._reads[key][1] is not None:
+            self._require_label(series_id, role, day, self._reads[key][1])
+        return self._reads[key]
+
+    def _require_consistent(self, series_id: str) -> None:
+        """Refuse reads that cannot all be honest vintages of one series.
+
+        The rules are verify_custody.claims_vintages_consistent, applied to
+        every vintage this run has read of the series.
+        """
+
+        reads = [
+            (day, rows)
+            for (series, day), (rows, raw, _) in self._reads.items()
+            if series == series_id and raw is not None
+        ]
+        try:
+            claims_vintages_consistent(series_id, reads)
+        except ValueError as exc:
+            raise ClaimsVintageError(str(exc)) from exc
+
+    def _require_label(
+        self, series_id: str, role: str, day: dt.date, raw: bytes
+    ) -> None:
+        """ClaimsVintageLabelError when ALFRED answers a read with an earlier
+        day's vintage than its role allows (verify_custody.CLAIMS_LABEL_LAG)."""
+
+        lag, shows = CLAIMS_LABEL_LAG[role]
+        label, _rows = read_alfred_claims_vintage(raw, series_id, day.isoformat())
+        try:
+            require_claims_vintage_label(
+                series_id, role, day, label, day - dt.timedelta(days=lag), shows
+            )
+        except ValueError as exc:
+            raise ClaimsVintageLabelError(str(exc)) from exc
+
+    def first_print(
+        self, kind: str, week: str, limit: dt.date
+    ) -> tuple[dt.date, float, bytes, str, list[ClaimsEvidence]] | None:
+        """The week's first print: ALFRED's vintage of DOL's scheduled release day.
+
+        The day comes from DOL's stated schedule and its listed exceptions
+        (register_targets.weekly_claims_release_day), never from ALFRED, so no
+        ALFRED response can move it. ALFRED must agree at four reads: the day
+        before holds no such week (read twice, byte-identical); the scheduled
+        day holds it; the day after prints the same value. The day before and
+        the scheduled day must each be ALFRED's vintage of that very day; the
+        day after may be its vintage of the scheduled day, as ALFRED's header
+        sometimes says (verify_custody.CLAIMS_LABEL_LAG). Returns that
+        value with the three supporting reads as evidence; None when the day
+        has not come or ALFRED does not answer. A week ALFRED did not print on
+        the scheduled day defers until DOL's day is listed as an exception.
+        """
+
+        series_id = CLAIMS_SERIES_IDS[kind]
+        try:
+            scheduled = weekly_claims_release_day(
+                CLAIMS_SERIES_NAMES[kind], f"week_{week}"
+            )
+        except RegistrationError as exc:
+            raise ClaimsVintageError(str(exc)) from exc
+        if limit < scheduled:
+            return None
+        following = scheduled + dt.timedelta(days=1)
+        if limit < following:
+            raise ClaimsFirstPrintUncorroboratedError(
+                f"DOL's scheduled release of week {week} is {scheduled}; "
+                f"ALFRED's vintage of {following} must corroborate it"
+            )
+        before = scheduled - dt.timedelta(days=1)
+        rows, before_raw, before_at = self.read(
+            series_id, before, "vintage_before_release"
+        )
+        if before_raw is None:
+            return None
+        if week in rows:
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} vintage {before} already holds week "
+                    f"{week}, before DOL's scheduled release day {scheduled}; "
+                    "an early release needs DOL's day in "
+                    "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+                ),
+            )
+        reread, reread_at = self._request(series_id, before)
+        if reread is None:
+            return None
+        if reread != before_raw:
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} answered vintage {before}, the day "
+                    f"before DOL's release of week {week}, two different ways"
+                ),
+            )
+        rows, raw, retrieved_at = self.read(series_id, scheduled, "release_day")
+        if raw is None:
+            return None
+        if week not in rows:
+            raise ClaimsVintageError(
+                f"ALFRED {series_id} vintage {scheduled}, DOL's scheduled "
+                f"release day, does not hold week {week}; an off-schedule "
+                f"release needs DOL's day in WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+            )
+        later, later_raw, later_at = self.read(
+            series_id, following, "vintage_after_release"
+        )
+        if later_raw is None:
+            return None
+        if later.get(week) != rows[week]:
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} vintage {scheduled} prints week {week} "
+                    f"as {rows[week]:g} but the next day's vintage {following} "
+                    f"prints {later.get(week)}"
+                ),
+            )
+        evidence: list[ClaimsEvidence] = [
+            ("vintage_before_release", before, before_raw, before_at),
+            ("vintage_before_release_reread", before, reread, reread_at),
+            ("vintage_after_release", following, later_raw, later_at),
+        ]
+        # The value is the one judge_claims_first_print decides from exactly
+        # the reads archived as evidence: custody replays the same function,
+        # so what the archive supports and what the ledger records agree.
+        reads = {role: (day, body) for role, day, body, _at in evidence}
+        reads["release_day"] = (scheduled, raw)
+        try:
+            judged_day, value = judge_claims_first_print(series_id, week, reads)
+        except ValueError as exc:
+            self._refuse(series_id, ClaimsVintageError(str(exc)))
+        return judged_day, value, raw, retrieved_at, evidence
+
+    def latest_week(self, series_id: str, day: dt.date) -> str | None:
+        rows, raw, _ = self.read(series_id, day)
+        return max(rows) if raw is not None and rows else None
 
 
 def resolve_claims_ref(
-    ref: str, week: str, kind: str, source_vintage: str, today: dt.date
-) -> tuple[dict[str, Any], str, str, bytes, str, str] | None:
-    """One pending weekly claims cell -> its fetched ledger row, or None."""
+    ref: str,
+    week: str,
+    kind: str,
+    source_vintage: str,
+    today: dt.date,
+    vintages: ClaimsVintages | None = None,
+) -> ClaimsFetched | None:
+    """One pending weekly claims cell -> its first-print ledger row, or None.
+
+    The registered releasePolicy is advance_vintage, so the value is the one
+    ALFRED holds as of DOL's scheduled release day, verified as its first
+    print (ClaimsVintages.first_print), wherever the forecast's
+    resolutionDate fell. The leg still waits for that date before acting.
+    The supporting reads are kept in ``vintages.evidence[ref]``.
+    """
 
     release_day = dt.date.fromisoformat(source_vintage)
     if release_day > today:
         print(f"  release {release_day} not reached: {ref}")
         return None
-    series_id = "ICSA" if kind == "initial" else "CCSA"
-    value, raw, _source_url, retrieved_at = fred_advance_value(
-        series_id, week, release_day.isoformat()
-    )
-    if value is None or raw is None:
+    vintages = vintages or ClaimsVintages()
+    series_id = CLAIMS_SERIES_IDS[kind]
+    try:
+        first = vintages.first_print(kind, week, today)
+    except ClaimsFirstPrintUncorroboratedError as exc:
+        print(f"  FIRST PRINT AWAITS A SECOND VINTAGE DAY (deferring): {ref} — {exc}")
+        return None
+    except ClaimsVintageError as exc:
+        print(f"  ALFRED RESPONSE REFUSED (deferring): {ref} — {exc}")
+        return None
+    if first is None:
         print(f"  not yet published: {ref}")
         return None
-    if claims_vintage_holds_next_week(raw, series_id, week, release_day):
-        # The registered releasePolicy is advance_vintage. A forecast whose
-        # resolutionDate trails DOL's print by a release or more would put
-        # the revised figure in an append-only ledger as the advance print.
-        print(
-            f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — ALFRED vintage "
-            f"{release_day} already holds the week after {week}, so it is a "
-            "later release than the first print and carries the revised "
-            "figure; left pending"
+    first_day, raw_value, raw, retrieved_at, evidence = first
+    vintages.evidence[ref] = evidence
+    note = None
+    if first_day != release_day:
+        note = (
+            f"Resolved at the first ALFRED vintage that holds the week, "
+            f"{first_day}, DOL's release day; the forecast's resolutionDate "
+            f"is {release_day}. See {CLAIMS_DRIFT_RECORD_URL}."
         )
-        return None
-    row = claims_fact(ref, week, value, kind, release_day)
-    print(f"  resolve {ref} -> {row['value']} {row['measure']['unit']}")
-    return (row, series_id, release_day.isoformat(), raw, retrieved_at, "csv")
+    row = claims_fact(ref, week, raw_value, kind, first_day, note=note)
+    print(
+        f"  resolve {ref} -> {row['value']} {row['measure']['unit']} "
+        f"(first vintage {first_day})"
+    )
+    return (row, series_id, first_day.isoformat(), raw, retrieved_at, "csv")
+
+
+def claims_corrections(
+    ledger_rows: list[dict[str, Any]],
+    vintages: ClaimsVintages | None = None,
+    corrections: Mapping[str, str] | None = None,
+) -> tuple[list[ClaimsFetched], dict[str, str], list[str]]:
+    """First-print rows that supersede the listed late-release claims rows.
+
+    Returns the fetched rows, the version each supersedes by record id, and
+    refusals. An entry is refused unless its listed version is the record's
+    active row (the latest row for that id, as Chronicle's append gate reads
+    it) and that row was read from a later DOL release than the first print.
+    An entry whose version is already superseded is done and is skipped, as
+    is one whose record the ledger does not hold. Runs with nothing pending
+    exit before reading the ledger, so corrections ride on runs that have
+    pending work.
+    """
+
+    if corrections is None:
+        corrections = CLAIMS_FIRST_PRINT_CORRECTIONS
+    vintages = vintages or ClaimsVintages()
+    active: dict[str, dict[str, Any]] = {}
+    superseded: set[str] = set()
+    for row in ledger_rows:
+        version = row.get("assertionVersion")
+        if isinstance(version, Mapping) and version.get("supersedes"):
+            superseded.add(str(version["supersedes"]))
+        active[str(row.get("source_record_id"))] = row
+    fetched: list[ClaimsFetched] = []
+    supersedes_by_ref: dict[str, str] = {}
+    refusals: list[str] = []
+    for ref, version_id in sorted(corrections.items()):
+        row = active.get(ref)
+        if version_id in superseded or row is None:
+            # Done, or a ledger that never held the record (a fixture).
+            continue
+        match = CLAIMS_REF.match(ref)
+        active_id = ((row or {}).get("assertionVersion") or {}).get("id")
+        if match is None or active_id != version_id:
+            refusals.append(
+                f"{ref} — listed version {version_id} is not the record's "
+                f"active row (active: {active_id})"
+            )
+            continue
+        kind = "initial" if match.group("initial") else "continued"
+        week = match.group(kind)
+        series_id = CLAIMS_SERIES_IDS[kind]
+        read_day = dt.date.fromisoformat(
+            str(row.get("sourceVintage") or row["observed_at"])
+        )
+        try:
+            first = vintages.first_print(kind, week, read_day)
+            if first is not None:
+                read_release = vintages.latest_week(series_id, read_day)
+                first_release = vintages.latest_week(series_id, first[0])
+        except ClaimsVintageLabelError as exc:
+            # An honest vintage of another day: the entry still matches the
+            # ledger, so the correction waits rather than being refused.
+            print(
+                "  correction waits, ALFRED answered another day's vintage: "
+                f"{ref} — {exc}"
+            )
+            continue
+        except ClaimsVintageError as exc:
+            refusals.append(f"{ref} — {exc}")
+            continue
+        if first is None:
+            print(f"  correction waits, ALFRED did not answer: {ref}")
+            continue
+        first_day, raw_value, raw, retrieved_at, evidence = first
+        if read_release is None or first_release is None:
+            print(f"  correction waits, ALFRED did not answer: {ref}")
+            continue
+        if read_release <= first_release:
+            refusals.append(
+                f"{ref} — the listed row was read from vintage {read_day}, the "
+                f"same DOL release as the first print ({first_day}); nothing "
+                "to correct"
+            )
+            continue
+        note = (
+            f"Supersedes {version_id}, which was read from ALFRED vintage "
+            f"{read_day}, a later DOL release than the first print, and "
+            f"recorded {row.get('value')}. Resolved at the first ALFRED "
+            f"vintage that holds the week, {first_day}, DOL's release day. "
+            f"See {CLAIMS_DRIFT_RECORD_URL}."
+        )
+        _rows, read_raw, read_at = vintages.read(series_id, read_day)
+        # The read that shows the superseded row came from a later release.
+        vintages.evidence[ref] = [
+            *evidence,
+            ("superseded_row_vintage", read_day, read_raw, read_at),
+        ]
+        corrected = claims_fact(ref, week, raw_value, kind, first_day, note=note)
+        print(
+            f"  correct: {ref} — {row.get('value')} (vintage {read_day}) -> "
+            f"{corrected['value']} (first vintage {first_day})"
+        )
+        fetched.append(
+            (corrected, series_id, first_day.isoformat(), raw, retrieved_at, "csv")
+        )
+        supersedes_by_ref[ref] = version_id
+    return fetched, supersedes_by_ref, refusals
 
 
 def pending_adapter_refs(
@@ -14052,32 +14491,47 @@ def apply_catalog_refusals(
     rows: list[dict[str, Any]],
     refusals: dict[str, str],
     refused: list[str],
+    evidence: dict[str, list[dict[str, Any]]] | None = None,
 ) -> list[dict[str, Any]]:
     """Report each catalog refusal, add it to ``refused``, return the rest."""
 
     for ref, reason in refusals.items():
         refused.append(f"{ref}: {reason}")
         print(f"  CATALOG REFUSED (excluded from append): {ref} — {reason}")
-    return exclude_catalog_refusals(rows, refusals)
+    return exclude_catalog_refusals(rows, refusals, evidence)
 
 
 def exclude_catalog_refusals(
-    rows: list[dict[str, Any]], refusals: dict[str, str]
+    rows: list[dict[str, Any]],
+    refusals: dict[str, str],
+    evidence: dict[str, list[dict[str, Any]]] | None = None,
 ) -> list[dict[str, Any]]:
     """The rows the catalog accepts; refused rows' archives are removed.
 
-    A refused row's response archive is deleted unless a kept row shares it,
-    so an excluded row leaves no orphan archive in the run directory.
+    A refused row's response archive, and the archives of its first-print
+    evidence (``evidence`` by record id, whose refused entries are dropped),
+    are deleted unless a kept row's response or evidence shares the file, so
+    an excluded row leaves no orphan archive and takes none a kept row needs.
     """
 
+    evidence = evidence if evidence is not None else {}
+
+    def archives(row: dict[str, Any]) -> set[str]:
+        record_id = str(row["source_record_id"])
+        return {
+            row["responseArchive"]["path"],
+            *(item["responseArchive"]["path"] for item in evidence.get(record_id, [])),
+        }
+
     kept = [row for row in rows if str(row["source_record_id"]) not in refusals]
-    kept_archives = {row["responseArchive"]["path"] for row in kept}
+    kept_archives = set().union(*(archives(row) for row in kept))
     for row in rows:
-        if str(row["source_record_id"]) not in refusals:
+        record_id = str(row["source_record_id"])
+        if record_id not in refusals:
             continue
-        archive = row["responseArchive"]["path"]
-        if archive not in kept_archives:
+        for archive in archives(row) - kept_archives:
             (ROOT / archive).unlink(missing_ok=True)
+        evidence.pop(record_id, None)
     return kept
 
 
@@ -15342,8 +15796,15 @@ def finalize_resolution_manifest(
     refs: list[dict[str, Any]] = []
     rooted: list[dict[str, Any]] = []
     seen_paths: set[str] = set()
-    for fact in manifest["facts"]:
-        archive = fact["responseArchive"]
+    archives = [
+        archive
+        for fact in manifest["facts"]
+        for archive in (
+            fact["responseArchive"],
+            *(item["responseArchive"] for item in fact.get("firstPrintEvidence", [])),
+        )
+    ]
+    for archive in archives:
         path = repository / archive["path"]
         relative = path.resolve().relative_to(run_dir.resolve()).as_posix()
         ref = {
@@ -15355,7 +15816,8 @@ def finalize_resolution_manifest(
         }
         # Several facts can legitimately share one archived response (two
         # dataPointId dialects of the same series resolve from the same
-        # vintage bytes); the inventory lists each archive exactly once.
+        # vintage bytes, and a claims evidence read can be another fact's
+        # response); the inventory lists each archive exactly once.
         if ref["path"] in seen_paths:
             continue
         seen_paths.add(ref["path"])
@@ -15474,13 +15936,25 @@ def _main() -> int:
 
     fetched_rows: list[tuple[dict[str, Any], str, str, bytes, str, str]] = []
     today = dt.date.today()
+    claims_vintages = ClaimsVintages()
     for ref, week, kind, source_vintage in todo:
         if ref in existing_ids:
             print(f"  already recorded: {ref}")
             continue
-        fetched = resolve_claims_ref(ref, week, kind, source_vintage, today)
+        fetched = resolve_claims_ref(
+            ref, week, kind, source_vintage, today, claims_vintages
+        )
         if fetched is not None:
             fetched_rows.append(fetched)
+    # Superseding first-print rows for claims rows read from a later release.
+    correction_rows, claims_supersedes, claims_correction_refusals = claims_corrections(
+        ledger_rows, claims_vintages
+    )
+    fetched_rows.extend(correction_rows)
+    for line in claims_correction_refusals:
+        print(f"  CLAIMS CORRECTION REFUSED (refusing): {line}")
+    # A refused correction is a reviewed table that no longer matches the
+    # ledger: the rest of the run still appends, then exits EXIT_REFUSED_ROWS.
 
     # Generic adapters: official BEA current releases, ALFRED vintage series,
     # BLS API series, A-19 snapshot rows, international native sources, and
@@ -17297,12 +17771,12 @@ def _main() -> int:
         return 1
     if not fetched_rows:
         print("nothing new to record")
-        return _report_ledger_unit_refusals(ledger_unit_refusals)
+        return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
     if args.dry_run:
         print(f"dry-run: would append {len(fetched_rows)} row(s)")
         for row, *_ in fetched_rows:
             print(json.dumps(row)[:200])
-        return _report_ledger_unit_refusals(ledger_unit_refusals)
+        return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
 
     run_retrieved_at = min(item[4] for item in fetched_rows)
     run_dir = resolution_run_dir(run_retrieved_at)
@@ -17310,21 +17784,48 @@ def _main() -> int:
     target_contracts = registration_contracts()
     new_rows = []
     provenance_refusals: list[str] = []
+    claims_evidence_archives: dict[str, list[dict[str, Any]]] = {}
     for row, series_id, vintage, raw, retrieved_at, extension in fetched_rows:
         try:
-            new_rows.append(
-                attach_resolution_provenance(
-                    row,
-                    run_dir=run_dir,
-                    series_id=series_id,
-                    vintage=vintage,
-                    raw=raw,
-                    retrieved_at=retrieved_at,
-                    ledger_repo_sha=ledger_repo_sha,
-                    target_contracts=target_contracts,
-                    extension=extension,
-                )
+            attached = attach_resolution_provenance(
+                row,
+                run_dir=run_dir,
+                series_id=series_id,
+                vintage=vintage,
+                raw=raw,
+                retrieved_at=retrieved_at,
+                ledger_repo_sha=ledger_repo_sha,
+                target_contracts=target_contracts,
+                extension=extension,
             )
+            record_id = str(row.get("source_record_id"))
+            evidence = claims_vintages.evidence.get(record_id)
+            if evidence:
+                # The reads behind a claims first print: the day before DOL's
+                # release (twice) and the day after it.
+                claims_evidence_archives[record_id] = [
+                    {
+                        "role": role,
+                        "vintageDate": day.isoformat(),
+                        "retrievedAt": evidence_retrieved_at,
+                        "responseArchive": archive_response(
+                            run_dir,
+                            series_id=series_id,
+                            vintage=day.isoformat(),
+                            raw=evidence_raw,
+                        ),
+                    }
+                    for role, day, evidence_raw, evidence_retrieved_at in evidence
+                ]
+            supersedes = claims_supersedes.get(record_id)
+            if supersedes:
+                # The version id is a content address that excludes this
+                # link, so setting it after provenance keeps the id valid.
+                attached["assertionVersion"] = {
+                    **attached["assertionVersion"],
+                    "supersedes": supersedes,
+                }
+            new_rows.append(attached)
         except ValueError as exc:
             # One target's contract refusal must not hold every other
             # resolution hostage (the 2026-07-23/25 outages): append the
@@ -17342,6 +17843,7 @@ def _main() -> int:
             args.ledger_repo, ledger_repo_sha, args.ledger_path, content, new_rows
         ),
         provenance_refusals,
+        claims_evidence_archives,
     )
     if not new_rows:
         print("every fetched row was refused; nothing to append")
@@ -17360,6 +17862,15 @@ def _main() -> int:
         {
             "schemaVersion": "thesis_resolution_run_v1",
             "retrievedAt": run_retrieved_at,
+            # Every weekly claims fact carries the ALFRED reads its first
+            # print rests on; verify_custody refuses one without them.
+            "firstPrintEvidenceRequired": True,
+            # Provenance only: the DOL schedule the run decided with.
+            # Custody re-derives release days from the reviewed table.
+            "weeklyClaimsSchedule": {
+                "source": WEEKLY_CLAIMS_SCHEDULE_URL,
+                "releaseExceptions": dict(WEEKLY_CLAIMS_RELEASE_EXCEPTIONS),
+            },
             "ledgerRepo": args.ledger_repo,
             "ledgerBranch": args.ledger_branch,
             "ledgerRepoSha": ledger_repo_sha,
@@ -17370,6 +17881,20 @@ def _main() -> int:
                     "retrievedAt": row["retrievedAt"],
                     "targetContentHash": row.get("targetContentHash"),
                     "responseArchive": row["responseArchive"],
+                    **(
+                        {"supersedes": row["assertionVersion"]["supersedes"]}
+                        if row["assertionVersion"].get("supersedes")
+                        else {}
+                    ),
+                    **(
+                        {
+                            "firstPrintEvidence": claims_evidence_archives[
+                                row["source_record_id"]
+                            ]
+                        }
+                        if row["source_record_id"] in claims_evidence_archives
+                        else {}
+                    ),
                 }
                 for row in new_rows
             ],
@@ -17398,7 +17923,7 @@ def _main() -> int:
             "or curate the ledger's lineages named above"
         )
         return EXIT_REFUSED_ROWS
-    return _report_ledger_unit_refusals(ledger_unit_refusals)
+    return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
 
 
 if __name__ == "__main__":
