@@ -27,7 +27,7 @@ API_UA = "thesis-paper-comparison/0.1 (+https://github.com/ThesisInstitute/thesi
 RETRY_STATUSES = {429, 500, 502, 503, 504}
 
 
-class OfflineMiss(RuntimeError):
+class OfflineMissError(RuntimeError):
     """An offline run asked for a URL the store does not hold."""
 
 
@@ -97,7 +97,7 @@ class FetchCache:
                 raise FetchError(f"stored body for {url} fails its hash")
             return body
         if self.offline:
-            raise OfflineMiss(url)
+            raise OfflineMissError(url)
         last_error: Exception | None = None
         for attempt in range(self.max_attempts):
             self._throttle()
@@ -148,8 +148,10 @@ def _record_for(
         "status": status,
         "sha256": digest,
         "bytes": None if body is None else len(body),
-        "fetchedAt": dt.datetime.now(dt.timezone.utc)
-        .replace(microsecond=0)
-        .isoformat()
-        .replace("+00:00", "Z"),
+        "fetchedAt": (
+            dt.datetime.now(dt.timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("+00:00", "Z")
+        ),
     }

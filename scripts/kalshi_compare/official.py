@@ -87,7 +87,8 @@ def release_instant(hour: str, minute: str, meridiem: str, date_text: str) -> st
 
 
 BLS_RELEASE_TIME = re.compile(
-    r"(?:embargoed until|For release)\s+(?:USDL-[\d-]+\s+)?(\d{1,2}):(\d{2})\s*([ap])\.m\.\s*"
+    r"(?:embargoed until|For"
+    r" release)\s+(?:USDL-[\d-]+\s+)?(\d{1,2}):(\d{2})\s*([ap])\.m\.\s*"
     r"\((?:ET|EDT|EST)\)\s*[A-Za-z]+,\s*([A-Za-z]+ \d{1,2}, \d{4})",
     re.I,
 )
@@ -161,7 +162,8 @@ def parse_bls_cpi(text: str, row: str) -> tuple[str, Decimal, Decimal | None, st
     else:
         lead = re.search(
             r"index for all items less food and energy\s+"
-            r"(increased|rose|decreased|declined|fell|edged up|edged down|was unchanged)"
+            r"(increased|rose|decreased|declined|fell|edged up|edged down|was"
+            r" unchanged)"
             r"(?:\s+(\d+\.\d) percent)?",
             text,
         )
@@ -194,7 +196,8 @@ def parse_bls_empsit(
             )
         value = to_decimal(table.group(5)) * 1000
         lead = re.search(
-            r"Total nonfarm payroll employment\s+(increased|rose|decreased|declined|fell|"
+            r"Total nonfarm payroll"
+            r" employment\s+(increased|rose|decreased|declined|fell|"
             r"edged up|edged down)\s+(?:by\s+)?([\d,]+)",
             text,
         )
@@ -205,8 +208,10 @@ def parse_bls_empsit(
         )
         return period, value, lead_value, bls_release_at(text)
     table = re.search(
-        r"Summary table A\. Household data, seasonally adjusted \[Numbers in thousands\] "
-        r"Category (.*?) Employment status .*? Unemployment rate\s+(\d+\.\d)\s+(\d+\.\d)\s+"
+        r"Summary table A\. Household data, seasonally adjusted \[Numbers in"
+        r" thousands\] "
+        r"Category (.*?) Employment status .*? Unemployment"
+        r" rate\s+(\d+\.\d)\s+(\d+\.\d)\s+"
         r"(\d+\.\d)\s+(\d+\.\d)",
         text,
     )
@@ -219,8 +224,10 @@ def parse_bls_empsit(
         )
     value = Decimal(table.group(5))
     lead = re.search(
-        r"unemployment rate\s+(?:was unchanged at|changed little at|was little changed at|"
-        r"rose to|increased to|edged up to|edged down to|declined to|fell to|decreased to|"
+        r"unemployment rate\s+(?:was unchanged at|changed little at|was little"
+        r" changed at|"
+        r"rose to|increased to|edged up to|edged down to|declined to|fell"
+        r" to|decreased to|"
         r"remained at|held at|was)\s+(\d+\.\d) percent",
         text,
     )
@@ -238,7 +245,8 @@ def parse_bls_jolts(text: str) -> tuple[str, Decimal, Decimal | None, str]:
     period = month_period(title.group(1), title.group(2))
     table = re.search(
         r"Table A\. Job openings, hires, and total separations by industry, seasonally "
-        r"adjusted Category Job openings Hires Total separations (.*?) LEVELS BY INDUSTRY "
+        r"adjusted Category Job openings Hires Total separations (.*?) LEVELS BY"
+        r" INDUSTRY "
         r"\(in thousands\) Total\s+([\d,]+)\s+([\d,]+)\s+([\d,]+)",
         text,
     )
@@ -287,7 +295,8 @@ def parse_dol_claims(text: str, statistic: str) -> tuple[str, Decimal, None, str
         )
     else:
         found = re.search(
-            rf"The advance number for seasonally adjusted insured unemployment during the "
+            rf"The advance number for seasonally adjusted insured unemployment during"
+            rf" the "
             rf"week ending ({MONTH_WORD}\.? \d{{1,2}}) was ([\d,]+)",
             text,
             re.I,
@@ -318,8 +327,10 @@ def parse_bea_core_pce(text: str) -> tuple[str, Decimal, Decimal | None, str]:
         raise OfficialParseError("BEA release title not found")
     period = month_period(title.group(1), title.group(2))
     table = re.search(
-        rf"Personal Income and Related Measures \[Percent change from preceding month\]\s+"
-        rf"({MONTH_WORD})\s+({MONTH_WORD})\s+.*?PCE price index excluding food and energy\s+"
+        rf"Personal Income and Related Measures \[Percent change from preceding"
+        rf" month\]\s+"
+        rf"({MONTH_WORD})\s+({MONTH_WORD})\s+.*?PCE price index excluding food and"
+        r" energy\s+"
         rf"(-?\d+\.\d)\s+(-?\d+\.\d)",
         text,
         re.I,
@@ -331,7 +342,8 @@ def parse_bea_core_pce(text: str) -> tuple[str, Decimal, Decimal | None, str]:
     value = Decimal(table.group(4))
     lead = re.search(
         r"Excluding food and energy, the PCE price index\s+(?:also\s+)?"
-        r"(increased|decreased|rose|fell|declined|was unchanged)(?:\s+(\d+\.\d) percent)?",
+        r"(increased|decreased|rose|fell|declined|was unchanged)(?:\s+(\d+\.\d)"
+        r" percent)?",
         text,
     )
     lead_value = signed_change(*lead.groups()) if lead else None

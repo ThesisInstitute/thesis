@@ -275,10 +275,20 @@ KNOWN_UNMATCHED = (
 )
 
 
+# Invisible characters Unicode classes as letters (Kalshi titled one event
+# "May\u3164 2, 2026", with a Hangul filler where a space belongs).
+INVISIBLE_LETTERS = {"\u115f", "\u1160", "\u3164", "\uffa0"}
+
+
 def normalize_text(text: str) -> str:
     text = unicodedata.normalize("NFKC", text or "")
     text = "".join(
-        " " if unicodedata.category(c).startswith(("Z", "C")) else c for c in text
+        (
+            " "
+            if c in INVISIBLE_LETTERS or unicodedata.category(c).startswith(("Z", "C"))
+            else c
+        )
+        for c in text
     )
     return re.sub(r"\s+", " ", text).strip()
 
@@ -297,7 +307,9 @@ def period_from_groups(groups: dict, cadence: str) -> str:
 
 
 WEEK_ENDING = re.compile(
-    rf"week ending\s+(?P<month>{MONTH_WORD})\.?\s+(?P<day>\d{{1,2}})(?:st|nd|rd|th)?,?\s+(?P<year>\d{{4}})",
+    r"week"
+    rf" ending\s+(?P<month>{MONTH_WORD})\.?\s+(?P<day>\d{{1,2}})"
+    r"(?:st|nd|rd|th)?,?\s+(?P<year>\d{4})",
     re.I,
 )
 MONTH_YEAR = re.compile(rf"\b(?P<month>{MONTH_WORD})\.?\s+(?P<year>20\d{{2}})\b", re.I)
@@ -377,7 +389,8 @@ def strike_of(market: dict, spec: "SeriesSpec") -> Decimal:
     if spec.kind == "ladder":
         if market.get("strike_type") not in ("greater", "greater_or_equal"):
             raise ValueError(
-                f"{market['ticker']}: unexpected strike_type {market.get('strike_type')}"
+                f"{market['ticker']}: unexpected strike_type"
+                f" {market.get('strike_type')}"
             )
         listed = Decimal(str(market["floor_strike"]))
     else:

@@ -111,8 +111,10 @@ def run(
                         "runId": run_.run_id,
                         "dataPointId": run_.data_point_id,
                         "recordedAt": run_.recorded_at,
-                        "reason": contracts.unmatched_reason(run_.data_point_id)
-                        or "no Kalshi series for this statistic",
+                        "reason": (
+                            contracts.unmatched_reason(run_.data_point_id)
+                            or "no Kalshi series for this statistic"
+                        ),
                     }
                 )
             continue
@@ -194,8 +196,8 @@ def run(
             )
             if market.get("result") not in ("yes" if yes else "no",):
                 unit.result_mismatches.append(
-                    f"{market['ticker']}: official {value} implies {'yes' if yes else 'no'}, "
-                    f"Kalshi result {market.get('result')!r}"
+                    f"{market['ticker']}: official {value} implies"
+                    f" {'yes' if yes else 'no'}, Kalshi result {market.get('result')!r}"
                 )
         release_ts = kalshi.to_ts(unit.official.release_at)
         late = [
@@ -238,6 +240,9 @@ def run(
             "distributions": distribution_meta,
             "resolutionStatusAsOf": status.get("asOf"),
             "scopeStart": thesis.SCOPE_START,
+            "publishedRuns": len(all_runs),
+            "publishedRunsInScope": len(in_scope),
+            "ledgerPin": ledger.get("source", {}).get("pin"),
             "specs": SENSITIVITY_SPECS,
         },
         "inventory": inventory_rows(units, observations, status, resolved),
@@ -354,7 +359,9 @@ def score_units(
                                 {
                                     **base,
                                     "spec": spec_name,
-                                    "reason": "no market quoted within the spread limit",
+                                    "reason": (
+                                        "no market quoted within the spread limit"
+                                    ),
                                 }
                             )
                             continue
@@ -543,6 +550,60 @@ def summarize_pairs(pairs: list[dict]) -> dict:
                 by_horizon[horizon] = summarize_rows(rows)
             by_spec[spec_name] = by_horizon
         out[forecaster] = by_spec
+    out["thesis_vs_persistence"] = thesis_vs_baseline(pairs)
+    return out
+
+
+def thesis_vs_baseline(pairs: list[dict]) -> dict:
+    """Thesis headline minus the persistence baseline on identical brackets.
+
+    Only release-anchored horizons qualify: there both runs face the same
+    Kalshi strike set at the same instant. Positive favors Thesis.
+    """
+    head = {
+        (p["eventKey"], p["horizon"], p["spec"]): p
+        for p in primary_pairs(pairs, "thesis_headline")
+    }
+    base = {
+        (p["eventKey"], p["horizon"], p["spec"]): p
+        for p in primary_pairs(pairs, "persistence_baseline")
+    }
+    out: dict[str, Any] = {}
+    for spec_name in SENSITIVITY_SPECS:
+        by_horizon: dict[str, Any] = {}
+        for horizon in ("release_minus_7d", "release_minus_1d"):
+            keys = sorted(
+                k for k in head.keys() & base.keys() if k[1:] == (horizon, spec_name)
+            )
+            rows = []
+            for key in keys:
+                h, b = head[key], base[key]
+                rows.append(
+                    {
+                        "series": h["series"],
+                        "deltaLog": h["thesisLog"] - b["thesisLog"],
+                        "deltaBrier": b["thesisBrier"] - h["thesisBrier"],
+                    }
+                )
+            by_series: dict[str, Any] = {}
+            for series in sorted({r["series"] for r in rows}):
+                items = [r for r in rows if r["series"] == series]
+                by_series[series] = {
+                    metric: scoring.summarize([r[metric] for r in items])
+                    for metric in ("deltaLog", "deltaBrier")
+                }
+            by_horizon[horizon] = {
+                "bySeries": by_series,
+                "pooled": (
+                    {
+                        metric: scoring.summarize([r[metric] for r in rows])
+                        for metric in ("deltaLog", "deltaBrier")
+                    }
+                    if rows
+                    else {}
+                ),
+            }
+        out[spec_name] = by_horizon
     return out
 
 
@@ -608,8 +669,9 @@ def inventory_rows(units, observations, status, resolved) -> list[dict]:
                     "primarySeries": unit.spec.primary,
                     "period": unit.period,
                     "kalshiEvent": unit.event_ticker,
-                    "kalshiEventCheck": unit.period_check
-                    or "no Kalshi event for this period",
+                    "kalshiEventCheck": (
+                        unit.period_check or "no Kalshi event for this period"
+                    ),
                     "kalshiSettled": unit.settled,
                     "officialRelease": (
                         None if unit.official is None else unit.official.release_at
@@ -618,8 +680,10 @@ def inventory_rows(units, observations, status, resolved) -> list[dict]:
                         None if unit.official is None else str(unit.official.value)
                     ),
                     "officialError": unit.official_error,
-                    "thesisResolverState": target_status.get("state")
-                    or ("resolved" if run_.data_point_id in resolved else None),
+                    "thesisResolverState": (
+                        target_status.get("state")
+                        or ("resolved" if run_.data_point_id in resolved else None)
+                    ),
                     "thesisResolverCode": target_status.get("code"),
                     "thesisLedgerValue": (
                         None if observation is None else observation.get("value")

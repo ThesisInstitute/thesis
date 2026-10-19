@@ -188,3 +188,21 @@ Each was made before any Thesis or Kalshi score was looked at.
 Every HTTP response used is stored by SHA-256 with its URL and fetch time, so a
 rerun with `--offline` reproduces the results byte for byte from the stored
 responses.
+
+## Running it
+
+```bash
+uv run python scripts/kalshi_paper_comparison.py \
+  --out ~/reviews/thesis-vs-kalshi-2026-10/results \
+  --cache ~/reviews/thesis-vs-kalshi-2026-10/fetch \
+  --as-of 2026-10-19T23:00:00Z
+```
+
+Add `--offline` to rerun from the stored responses only. Reading the DOL
+releases needs `pdftotext` (poppler). The run writes `REPORT.md`,
+`REPORT.html`, the CSV tables and `summary.json` to `--out`; results stay
+outside the repository.
+
+Tests: `uv run --extra dev pytest tests/test_kalshi_paper_comparison.py`
+(real excerpted fixtures, property tests for the scoring invariants, and
+differential checks of the published CDFs and Kalshi's recorded results).

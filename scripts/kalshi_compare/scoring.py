@@ -45,7 +45,7 @@ def ladder_violations(values: Sequence[float]) -> int:
 
 
 def ladder_to_brackets(p_yes: Sequence[float]) -> list[float]:
-    """P(bracket) from non-increasing P(Y beyond strike_i), n strikes -> n+1 brackets."""
+    """Bracket probabilities from a non-increasing ladder: n strikes, n+1 brackets."""
     clipped = [min(1.0, max(0.0, p)) for p in p_yes]
     brackets = [1.0 - clipped[0]]
     brackets += [a - b for a, b in zip(clipped, clipped[1:])]
