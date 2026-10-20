@@ -45,6 +45,9 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import resolve_pending as rp  # noqa: E402
 
+# Module-scoped patches (monkeypatch_session) outlive their test, so a test
+# that needs the real transport sets it back explicitly.
+_REAL_GH_API = rp._gh_api
 REPO = "PolicyEngine/chronicle"
 ARCH = rp.ARCH_CHECKS_GATE
 
@@ -375,13 +378,18 @@ def test_a_hung_gh_process_is_killed_at_the_filing_deadline(
     fake_gh.write_text("#!/bin/sh\nexec sleep 60\n")
     fake_gh.chmod(0o755)
     monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ.get('PATH', '')}")
+    monkeypatch.setattr(rp, "_gh_api", _REAL_GH_API)
     monkeypatch.setattr(rp, "LEDGER_CURATION_ISSUE_SECONDS", 0.5)
     started = time.monotonic()
-    _report_merge_red(time.monotonic)
+    # A frozen filing clock: the first call always gets the whole 0.5 s,
+    # however long a loaded machine takes to reach it, and subprocess
+    # times it on the real clock.
+    _report_merge_red(lambda: 0.0)
     # Generous for a loaded machine; the hung gh alone would take 60 s.
     assert time.monotonic() - started < 15
     out = capsys.readouterr().out
-    assert "could not file the ledger curation issue" in out and "timed out" in out
+    assert "could not file the ledger curation issue" in out
+    assert "timed out after 0.5 s" in out
 
 
 _SHAPES = [
