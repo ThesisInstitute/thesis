@@ -13,9 +13,12 @@ returned, so a Vitest can hold the port to it:
 * whether ``check_rows`` accepts each ledger whose rows pass its
   non-assertion checks.
 
-The rows come from three places: real rows from the pinned Chronicle ledger
-(tests/fixtures/chronicle_rows_598f394d.json), gated ledgers built as valid
-append sequences with corrections (each one accepted by ``check_rows``), and
+The rows come from four places: real rows from the pinned Chronicle ledger
+(tests/fixtures/chronicle_rows_598f394d.json); the six real correction chains
+Chronicle holds at 8722b2da, each first-vintage claims correction with the row
+it supersedes (tests/fixtures/chronicle_rows_8722b2da.json); gated ledgers
+built as valid append sequences with corrections (each one accepted by
+``check_rows``); and
 arbitrary ledgers composed from shape variants receipt must also handle:
 missing, null, empty, non-object and non-string ``assertionVersion`` parts,
 dangling and self supersedes, duplicated rows, and non-object ``measure``,
@@ -54,6 +57,9 @@ from receipt.append_gate import (
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "site" / "src" / "__tests__" / "fixtures" / "receipt-current-view.json"
 CHRONICLE_ROWS = ROOT / "tests" / "fixtures" / "chronicle_rows_598f394d.json"
+# Twelve lines of the ledger at 8722b2da: the first-vintage claims corrections
+# at lines 240-245 (#345) and the six rows they supersede.
+CHRONICLE_CORRECTION_ROWS = ROOT / "tests" / "fixtures" / "chronicle_rows_8722b2da.json"
 SEED = 20260929
 SCHEMA_VERSION = "thesis_receipt_current_view_fixture_v1"
 RECEIPT_VERSION = "0.6.2"
@@ -524,6 +530,21 @@ def build_fixture() -> dict[str, Any]:
         rng.shuffle(indices)
         ledgers.append(_ledger_entry(pool, "arbitrary", indices))
 
+    # The real corrections come last, so the seeded draws above, and every
+    # line and ledger they produced, stay as they were. One ledger holds the
+    # twelve rows in Chronicle's order, which check_rows accepts. The same
+    # rows reversed put each correction before the row it supersedes, which
+    # check_rows refuses, but effective_current_rows still drops the original.
+    corrections = json.loads(CHRONICLE_CORRECTION_ROWS.read_text())
+    real_corrections = [
+        pool.add(line, f"chronicle@{corrections['sha'][:8]}:L{number}")
+        for number, line in sorted(
+            corrections["lines"].items(), key=lambda kv: int(kv[0])
+        )
+    ]
+    ledgers.append(_ledger_entry(pool, "chronicle", real_corrections))
+    ledgers.append(_ledger_entry(pool, "arbitrary", real_corrections[::-1]))
+
     return {
         "schemaVersion": SCHEMA_VERSION,
         "generator": "scripts/generate_receipt_current_view_fixture.py",
@@ -531,6 +552,9 @@ def build_fixture() -> dict[str, Any]:
         "seed": SEED,
         "chronicle": {
             key: chronicle[key] for key in ("repo", "sha", "path", "jsonlSha256")
+        },
+        "chronicleCorrections": {
+            key: corrections[key] for key in ("repo", "sha", "path", "jsonlSha256")
         },
         "assertionContentKeys": list(CHRONICLE_ASSERTION_CONTENT_KEYS),
         "lines": pool.lines,

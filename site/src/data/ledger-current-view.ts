@@ -405,7 +405,10 @@ export function supersedeChain(
  * lacks an acceptance record. A correction appended after a registration is
  * still the print the registration's pinned state already held, so ledger
  * membership (finding N5) is judged on the first acceptance, never the
- * correction's own.
+ * correction's own. That holds when the superseded row recorded a later
+ * vintage than its correction, as the first-vintage claims corrections do: a
+ * later vintage in the pinned state means the first print was public earlier
+ * still.
  */
 export function firstAcceptedSequence(
   entry: ObservationRecordedLedgerEntry,

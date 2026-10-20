@@ -356,14 +356,26 @@ of receipt 0.6.2's `effective_current_rows`), which works as follows:
   pass `getResolutionContractViolation`.
 - A pre-versioning row is addressed by its recomputed `av2` content address,
   as the append gate addresses it.
-- Chronology and ledger membership (finding N5) come from the first print in
-  the correction's chain. A later-dated correction therefore cannot admit a
-  late run, and a correction cannot launder a print the registration's pinned
-  state already held.
+- Chronology comes from the earliest print in the correction's chain, and
+  ledger membership (finding N5) from the chain's first acceptance. A
+  later-dated correction therefore cannot admit a late run, and a correction
+  cannot launder a print the registration's pinned state already held. This
+  holds when the superseded row recorded a later vintage than the correction
+  (the first-vintage claims corrections): a later vintage in the pinned state
+  means the first print was public even earlier.
 - Cutoff histories (baselines and normalization scales) use the view as of
-  the cutoff, so a correction accepted later never rewrites them.
-- A correction's resolution event gets its own id. Every other row keeps the
-  id it always had.
+  the cutoff, so a correction accepted later never rewrites them. A
+  superseded row leaves every history, even when its correction fails the
+  history's unit or series filter. A correction that takes its record out of
+  a history that held it (a unit change, say) must be listed with its reason
+  in `INTENDED_HISTORY_DROP_OUTS` (`site/src/__tests__/ledger-corrections.test.ts`).
+  Any other drop-out fails CI, because it looks exactly like a filter that has
+  started rejecting corrections.
+- A correction's resolution event is `<historical id>.<its own assertion
+  version>`, so an event id never names two outcomes. Every other row keeps
+  the id it always had. A pin that brings a correction of a graded row
+  changes that forecast's event, score ids and the hashes over them. Its
+  scores change only if the correction changes the value.
 
 The build also re-runs the append gate's assertion-version checks on the pinned
 rows. Every explicit id must equal its recomputed content address, and every

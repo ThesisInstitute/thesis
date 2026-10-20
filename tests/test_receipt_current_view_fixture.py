@@ -69,10 +69,35 @@ def test_real_chronicle_rows_carry_receipt_ids() -> None:
     assert 0 < versioned < len(sample["lines"])
 
 
+def test_real_chronicle_corrections_carry_receipt_ids() -> None:
+    # Chronicle's first real corrections (#345): each names the version it
+    # replaces, and every row carries the id receipt computes from its content.
+    sample = json.loads(fixture_gen.CHRONICLE_CORRECTION_ROWS.read_text())
+    assert sample["sha"] == "8722b2da00d2cce6f76ffd350ab9931688fae57a"
+    rows = {int(number): json.loads(line) for number, line in sample["lines"].items()}
+    lines_by_id = {}
+    for number, row in rows.items():
+        version = row["assertionVersion"]
+        assert version["id"] == receipt_append_gate.expected_assertion_version_id(
+            row, fixture_gen.SPEC
+        )
+        lines_by_id[version["id"]] = number
+    corrections = {
+        number: row
+        for number, row in rows.items()
+        if row["assertionVersion"]["supersedes"]
+    }
+    assert sorted(corrections) == [240, 241, 242, 243, 244, 245]
+    for number, row in corrections.items():
+        replaced = lines_by_id[row["assertionVersion"]["supersedes"]]
+        assert replaced < number
+        assert rows[replaced]["source_record_id"] == row["source_record_id"]
+
+
 def test_every_gated_ledger_passes_the_gate() -> None:
     fixture = json.loads(fixture_gen.FIXTURE.read_text())
     gated = [ledger for ledger in fixture["ledgers"] if ledger["kind"] != "arbitrary"]
-    assert len(gated) == 61
+    assert len(gated) == 62
     for ledger in gated:
         lines = [fixture["lines"][index]["line"] for index in ledger["lines"]]
         receipt_append_gate.check_rows(lines, len(lines), fixture_gen.SPEC)
