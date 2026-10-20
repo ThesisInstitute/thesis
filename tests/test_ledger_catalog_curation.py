@@ -22,17 +22,21 @@ and held the ledger branch red until a curation pull request landed
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
+import io
 import json
+import os
 import pathlib
 import re
 import subprocess
 import sys
 import tempfile
+import time
 from collections import Counter
 
 import pytest
-from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import HealthCheck, assume, example, given, settings
 from hypothesis import event as hypothesis_event
 from hypothesis import strategies as st
 
@@ -230,6 +234,156 @@ def test_the_open_curation_issue_is_found_past_the_first_page(monkeypatch) -> No
     assert posts == [f"repos/{REPO}/issues/512/comments"]
 
 
+# --- Issue filing ends by its deadline -----------------------------------------
+
+
+def _timed_issue_api(clock, calls: list, *, latency, open_pages=0, match=False):
+    """A GitHub API on a fake clock: the n-th call takes ``latency(n)``
+    seconds to answer, or never answers (None). As with _gh_api, a call
+    whose timeout runs out first raises once that timeout has elapsed.
+    ``open_pages`` full pages of other open issues and pull requests come
+    before a short last page, which holds the curation issue if ``match``.
+    Records (args, timeout, start time) for every call."""
+
+    def api(*args: str, input_body=None, timeout=None) -> str:
+        n = len(calls)
+        calls.append((args, timeout, clock.now))
+        wait = latency(n)
+        if timeout is not None and (wait is None or wait >= timeout):
+            clock.now += timeout
+            raise RuntimeError(f"gh api {' '.join(args)} timed out after {timeout:g} s")
+        if wait is None:
+            # Unbounded against a stalled API: a real run would hang here.
+            raise RuntimeError("unbounded call to a stalled API")
+        clock.now += wait
+        joined = " ".join(args)
+        if "/check-runs" in joined:
+            red = [_run(3, ARCH, "completed", "failure")]
+            return json.dumps({"total_count": 1, "check_runs": red})
+        if "/issues?state=open" in joined:
+            page = int(joined.rsplit("page=", 1)[1])
+            if page <= open_pages:
+                return json.dumps([
+                    {"number": page * 1_000 + k, "title": f"pr {k}", "pull_request": {}}
+                    for k in range(100)
+                ])
+            title = rp.LEDGER_CURATION_ISSUE_TITLE
+            return json.dumps([{"number": 512, "title": title}] if match else [])
+        return json.dumps({"number": 99, "html_url": "https://x/99"})
+
+    return api
+
+
+def _report_merge_red(clock) -> None:
+    rp.report_arch_checks_at_merge(
+        REPO, 7, "d" * 40, state="failed", runs=f"{ARCH}: failure",
+        curation=rp.CatalogCuration(files={}), run_url=None, clock=clock,
+    )
+
+
+def _report_base_red(clock) -> None:
+    assert rp.report_red_ledger_base(REPO, "b" * 40, clock=clock) == "failed"
+
+
+@pytest.mark.parametrize("report", [_report_merge_red, _report_base_red])
+def test_a_stalled_issue_api_cannot_hold_the_run(monkeypatch, capsys, report) -> None:
+    """Round 5's nit: filing paginated and posted with no time bound, so a
+    GitHub API that never answers would hold a run whose rows had merged
+    and still had to be published. Now the first stalled call waits out the
+    filing budget, nothing is called after it, and the run goes on."""
+    clock = _FakeClock()
+    calls: list = []
+
+    def latency(n: int):
+        # report_red_ledger_base reads the branch head's check runs first.
+        first_issue_call = 1 if report is _report_base_red else 0
+        return 0.0 if n < first_issue_call else None
+
+    monkeypatch.setattr(rp, "_gh_api", _timed_issue_api(clock, calls, latency=latency))
+    report(clock)
+    budget = rp.LEDGER_CURATION_ISSUE_SECONDS
+    issue_calls = [call for call in calls if "/check-runs" not in call[0][0]]
+    assert [(timeout, at) for _args, timeout, at in issue_calls] == [(budget, 0.0)]
+    assert clock.now == budget
+    out = capsys.readouterr().out
+    assert "could not file the ledger curation issue" in out and "timed out" in out
+
+
+@settings(max_examples=300, deadline=None)
+@given(
+    latencies=st.lists(
+        st.one_of(st.none(), st.floats(0, 70, allow_nan=False)), max_size=14
+    ),
+    open_pages=st.integers(0, rp.LEDGER_CURATION_ISSUE_MAX_PAGES + 1),
+    match=st.booleans(),
+)
+def test_issue_filing_ends_by_its_deadline_and_files_whatever_fits(
+    monkeypatch_session, latencies, open_pages, match
+) -> None:
+    """For any API latencies (stalled calls included) and any number of
+    pages of open issues:
+
+    F1 every call carries a timeout of exactly what the filing budget has
+       left when it starts, and no call starts once the budget is spent;
+    F2 filing ends by the deadline, and the report never raises;
+    F3 the issue is filed exactly when every call filing needs (each page
+       read until the issue is found or a short page ends the listing,
+       then one post) answers inside what the budget has left. The
+       deadline drops nothing that fits."""
+    clock = _FakeClock()
+    calls: list = []
+    monkeypatch_session.setattr(
+        rp, "_gh_api", _timed_issue_api(
+            clock, calls, open_pages=open_pages, match=match,
+            latency=lambda n: latencies[n] if n < len(latencies) else 0.0,
+        ),
+    )
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        _report_merge_red(clock)
+    budget = rp.LEDGER_CURATION_ISSUE_SECONDS
+    for _args, timeout, at in calls:  # F1
+        assert at < budget and timeout == budget - at
+    assert clock.now <= budget * (1 + 1e-12)  # F2
+    # F3: the calls filing needs, each answering inside what is left.
+    max_pages = rp.LEDGER_CURATION_ISSUE_MAX_PAGES
+    needed = open_pages + 2 if open_pages < max_pages else None
+    now, fits = 0.0, needed is not None
+    for n in range(needed or 0):
+        wait = latencies[n] if n < len(latencies) else 0.0
+        if wait is None or wait >= budget - now:
+            fits = False
+            break
+        now += wait
+    filed = "ledger curation filed: " in out.getvalue()
+    assert filed == fits, (out.getvalue(), calls)
+    if filed:
+        assert len(calls) == needed
+        post = f"repos/{REPO}/issues/512/comments" if match else f"repos/{REPO}/issues"
+        assert calls[-1][0][-1] == post
+    else:
+        assert "could not file the ledger curation issue" in out.getvalue()
+
+
+@pytest.mark.skipif(os.name != "posix", reason="uses a shell script as gh")
+def test_a_hung_gh_process_is_killed_at_the_filing_deadline(
+    monkeypatch, capsys, tmp_path
+) -> None:
+    """End to end through _gh_api and subprocess: a gh that never answers is
+    killed when the filing budget runs out, and the report returns."""
+    fake_gh = tmp_path / "gh"
+    fake_gh.write_text("#!/bin/sh\nexec sleep 60\n")
+    fake_gh.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{tmp_path}{os.pathsep}{os.environ.get('PATH', '')}")
+    monkeypatch.setattr(rp, "LEDGER_CURATION_ISSUE_SECONDS", 0.5)
+    started = time.monotonic()
+    _report_merge_red(time.monotonic)
+    # Generous for a loaded machine; the hung gh alone would take 60 s.
+    assert time.monotonic() - started < 15
+    out = capsys.readouterr().out
+    assert "could not file the ledger curation issue" in out and "timed out" in out
+
+
 _SHAPES = [
     ("queued", None),
     ("in_progress", None),
@@ -296,10 +450,60 @@ def test_merge_happens_only_when_every_required_gate_passed(
     }
 
 
+def test_a_run_count_is_shown_only_while_min_runs_holds_the_gate() -> None:
+    """Round 5's nit: a failed verdict also read "(1 of 2 runs completed)",
+    as if the gate were still waiting."""
+    def url(run_id: int) -> str:
+        return f"https://github.com/{REPO}/actions/runs/{run_id}"
+
+    green = _run(3, ARCH, "completed", "success")
+    describe = rp._describe_gate_runs
+    held = f"{ARCH}: success ({url(3)}) (1 of 2 runs completed)"
+    # Held by min_runs alone: the listing reads as a pass, so the count
+    # says why it is pending. A skipped twin is no run.
+    assert describe(ARCH, [green], 2) == held
+    assert describe(ARCH, [green, _run(4, ARCH, "completed", "skipped")], 2) == held
+    # Enough runs: nothing to explain.
+    assert describe(ARCH, [green, _run(4, ARCH, "completed", "success")], 2) == (
+        f"{ARCH}: success ({url(3)}); {ARCH}: success ({url(4)})"
+    )
+    # A failed verdict is final whatever the count, and a run still going
+    # says so itself.
+    assert describe(ARCH, [_run(3, ARCH, "completed", "failure")], 2) == (
+        f"{ARCH}: failure ({url(3)})"
+    )
+    assert describe(ARCH, [green, _run(4, ARCH, "in_progress", None)], 2) == (
+        f"{ARCH}: success ({url(3)}); {ARCH}: in_progress ({url(4)})"
+    )
+
+
+@settings(max_examples=300, deadline=None)
+@given(arch=st.lists(st.sampled_from(_SHAPES), max_size=4), need=st.integers(0, 3))
+def test_the_run_count_appears_exactly_when_min_runs_holds_a_passing_gate(
+    monkeypatch_session, arch, need
+) -> None:
+    """For any Arch checks runs and min_runs, the advisory verdict
+    await_append_gates returns carries a run count exactly when its state is
+    pending while the runs themselves pass (append_gate_state "passed"), so
+    never on a failed or passed verdict."""
+    runs = [
+        *_green_append_gates(),
+        *(_run(100 + i, ARCH, status, conclusion)
+          for i, (status, conclusion) in enumerate(arch)),
+    ]
+    _install_runs(monkeypatch_session, lambda: runs)
+    clock = _FakeClock()
+    verdicts = rp.await_append_gates(
+        REPO, "c" * 40, 7, timeout_seconds=60, poll_attempts=1, advisory=(ARCH,),
+        advisory_grace_seconds=0, min_runs={ARCH: need},
+        clock=clock, sleep=clock.sleep,
+    )
+    state, described = verdicts[ARCH]
+    own = rp.append_gate_state([run for run in runs if run["name"] == ARCH])
+    assert ("runs completed)" in described) == (state == "pending" and own == "passed")
+
+
 _REQUIRED_NAMES = ("Append gate", "Trusted base append gate")
-# Outcomes of the stateful gate-wait property in this process, so the test
-# after it can tell that its oracle really ran on merges under each policy.
-_GATE_WAIT_OUTCOMES: Counter = Counter()
 
 
 _PASSING_SHAPES = [
@@ -323,8 +527,10 @@ def _listing_pool(draw):
     are fixed by its variant, so reading the same variant twice reads the
     same runs. About half the variants pass every required gate (a success
     beside skipped or neutral twins), so waits do end in merges; Arch checks
-    takes one of the shapes the "refuse" rule must tell apart; some
-    listings are padded past one page with unrelated runs."""
+    takes one of the shapes the "refuse" rule must tell apart, and in a
+    passing variant leans to two green runs, the only shape "refuse" merges
+    on, so waits merge under "refuse" too; some listings are padded past
+    one page with unrelated runs."""
     pool = []
     for _variant in range(3):
         passing = draw(st.booleans())
@@ -342,7 +548,11 @@ def _listing_pool(draw):
                     (gate, *draw(st.sampled_from(_SHAPES)))
                     for _ in range(draw(st.integers(0, 2)))
                 ]
-        runs += [(ARCH, *shape) for shape in draw(st.sampled_from(_ARCH_SETS))]
+        arch_sets = st.sampled_from(_ARCH_SETS)
+        if passing:
+            # Lean to the one Arch checks shape "refuse" merges on.
+            arch_sets = st.one_of(st.just(_ARCH_SETS[0]), arch_sets)
+        runs += [(ARCH, *shape) for shape in draw(arch_sets)]
         pad = draw(st.sampled_from([0, 0, rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE + 20]))
         pool.append((runs, pad))
     return pool
@@ -361,16 +571,60 @@ def _listing_runs(pool, variant: int) -> list[dict]:
     return listing
 
 
+_READ_SCRIPTS = st.lists(
+    st.one_of(st.integers(0, 2), st.just("error")), min_size=1, max_size=12
+)
+
+
+def _same_pool(runs: list[tuple], pad: int = 0) -> list[tuple]:
+    """A _listing_pool value whose three variants hold the same runs (each
+    variant still gets its own run ids)."""
+    return [(runs, pad)] * 3
+
+
+_PASS = [(gate, "completed", "success") for gate in _REQUIRED_NAMES]
+_ARCH_GREEN = [(ARCH, "completed", "success")] * 2
+_PAST_A_PAGE = rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE + 20
+
+
+# Explicit examples run on every run of the property, whatever it draws, so
+# its oracle checks merges under both policies every time (round 5's nit:
+# that it did was only likely), and each pins the outcome it must have.
+@example(  # "land", one page, Arch checks green: merges at once.
+    pool=_same_pool([*_PASS, *_ARCH_GREEN]), script=[0], refuse=False,
+    expect="merged",
+)
+@example(  # "land", Arch checks never reports: merges after the grace.
+    pool=_same_pool(_PASS), script=[0], refuse=False, expect="merged",
+)
+@example(  # "land", a pass confirmed by a repeated multi-page read, then
+    # a failed read while Arch checks is queued: merges on the confirmation.
+    pool=_same_pool([*_PASS, (ARCH, "queued", None)], _PAST_A_PAGE),
+    script=[0, 0, "error"], refuse=False, expect="merged",
+)
+@example(  # "refuse", a multi-page pass confirmed by a repeated read.
+    pool=_same_pool([*_PASS, *_ARCH_GREEN], _PAST_A_PAGE), script=[0, 0],
+    refuse=True, expect="merged",
+)
+@example(  # Multi-page passes that no two consecutive reads confirm.
+    pool=_same_pool([*_PASS, *_ARCH_GREEN], _PAST_A_PAGE), script=[0, 1] * 6,
+    refuse=False, expect="refused",
+)
+@example(  # "refuse", Arch checks red.
+    pool=_same_pool([*_PASS, (ARCH, "completed", "failure"), _ARCH_GREEN[0]]),
+    script=[0], refuse=True, expect="refused",
+)
+@example(  # "refuse", one green Arch checks run beside a skipped twin.
+    pool=_same_pool([*_PASS, _ARCH_GREEN[0], (ARCH, "completed", "skipped")]),
+    script=[0], refuse=True, expect="refused",
+)
 @settings(max_examples=400, deadline=None)
 @given(
-    pool=_listing_pool(),
-    script=st.lists(
-        st.one_of(st.integers(0, 2), st.just("error")), min_size=1, max_size=12
-    ),
-    refuse=st.booleans(),
+    pool=_listing_pool(), script=_READ_SCRIPTS, refuse=st.booleans(),
+    expect=st.none(),
 )
 def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
-    monkeypatch_session, pool, script, refuse
+    monkeypatch_session, pool, script, refuse, expect
 ) -> None:
     """Over any sequence of listings and failed reads (including listings
     longer than a page, required gates re-run mid-wait and the advisory
@@ -379,6 +633,40 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
     unbroken run of passing reads it ends holds a confirmed pass (one page,
     or the same runs as the passing read before it). The advisory verdict
     returned is the advisory gate's state in that latest read."""
+    outcome = _check_gate_wait(monkeypatch_session, pool, script, refuse)
+    assert expect in (None, outcome)
+
+
+def test_the_gate_wait_property_reaches_merges_under_both_policies(
+    monkeypatch,
+) -> None:
+    """The property above checks its invariant only when a wait ends in a
+    merge, so its generator must reach merges under each policy (round 3
+    found it almost never did). This runs the same check on a fixed,
+    derandomized sample of the same strategies, so the share it requires is
+    the same on every run, and counts inside this one test, so pytest-xdist
+    cannot put the count and the check in different workers (round 5's
+    nits). The share is measured on the sample, not on the property's own
+    random draw."""
+    outcomes: Counter = Counter()
+
+    @settings(max_examples=400, deadline=None, derandomize=True, database=None)
+    @given(pool=_listing_pool(), script=_READ_SCRIPTS, refuse=st.booleans())
+    def sample(pool, script, refuse) -> None:
+        policy = "refuse" if refuse else "land"
+        outcomes[(policy, _check_gate_wait(monkeypatch, pool, script, refuse))] += 1
+
+    sample()
+    for policy in ("land", "refuse"):
+        merged = outcomes[(policy, "merged")]
+        total = merged + outcomes[(policy, "refused")]
+        assert total and merged >= total // 10, (policy, merged, total)
+
+
+def _check_gate_wait(patch, pool, script, refuse) -> str:
+    """Run one wait over ``script`` (a listing variant or a failed read per
+    read; the last step repeats) and check the property's invariant if it
+    merged. Returns "merged" or "refused"."""
     size = rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE
     reads: list = []
 
@@ -398,12 +686,11 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
             }
         )
 
-    monkeypatch_session.setattr(rp, "_gh_api", api)
+    patch.setattr(rp, "_gh_api", api)
     required = (*_REQUIRED_NAMES, ARCH) if refuse else _REQUIRED_NAMES
     advisory = () if refuse else (ARCH,)
     # As propose_ledger_append calls it, under either policy.
     min_runs = {ARCH: 2}
-    policy = "refuse" if refuse else "land"
 
     def state(listing: list[dict], gate: str) -> str:
         runs = [r for r in listing if r["name"] == gate]
@@ -429,10 +716,8 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
         )
     except rp.LedgerProposalError:
         hypothesis_event("refused")
-        _GATE_WAIT_OUTCOMES[(policy, "refused")] += 1
-        return
+        return "refused"
     hypothesis_event("merged")
-    _GATE_WAIT_OUTCOMES[(policy, "merged")] += 1
     good = [read for read in reads if read != "error"]
     assert good and passed(good[-1])
     run_start = len(good) - 1
@@ -447,6 +732,7 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
     assert {gate: verdict[0] for gate, verdict in verdicts.items()} == {
         gate: state(latest, gate) for gate in advisory
     }
+    return "merged"
 
 
 def test_a_required_rerun_needs_a_fresh_confirmed_pass(monkeypatch) -> None:
@@ -495,18 +781,6 @@ def test_a_required_rerun_needs_a_fresh_confirmed_pass(monkeypatch) -> None:
             REPO, "c" * 40, 7, timeout_seconds=600, advisory=(ARCH,),
             advisory_grace_seconds=10_000, clock=clock, sleep=clock.sleep,
         )
-
-
-def test_the_gate_wait_property_checked_merges_under_both_policies() -> None:
-    """The property above checks its invariant only when a wait ends in a
-    merge, so require that a fair share of its examples did, under each
-    policy (round 3 found it almost never did)."""
-    if not _GATE_WAIT_OUTCOMES:
-        pytest.skip("the gate-wait property did not run in this process")
-    for policy in ("land", "refuse"):
-        merged = _GATE_WAIT_OUTCOMES[(policy, "merged")]
-        total = merged + _GATE_WAIT_OUTCOMES[(policy, "refused")]
-        assert total and merged >= max(3, total // 50), (policy, merged, total)
 
 
 def _scripted_reads(monkeypatch, listings) -> list[int]:
@@ -586,7 +860,11 @@ def test_land_merges_on_an_earlier_confirmation(monkeypatch, ending) -> None:
     (multi-page, a new attempt id on every read), then a failed read or the
     deadline: the merge goes ahead on the earlier confirmation, as it did
     before advisory gates existed (round 3's P3-C, round 4's P3-1)."""
+    clock = _FakeClock()
+    read_at: dict[int, float] = {}
+
     def listings(n: int):
+        read_at.setdefault(n, clock.now)
         if n < 2:
             return _padded([*_green_append_gates(), *_ARCH_QUEUED], 9_000)
         if ending == "failed read" and n == 4:
@@ -601,15 +879,22 @@ def test_land_merges_on_an_earlier_confirmation(monkeypatch, ending) -> None:
         )
 
     served = _scripted_reads(monkeypatch, listings)
-    clock = _FakeClock()
     verdicts = rp.await_append_gates(
         REPO, "c" * 40, 7, timeout_seconds=600, advisory=(ARCH,),
         advisory_grace_seconds=10_000, min_runs={ARCH: 2},
         clock=clock, sleep=clock.sleep,
     )
     assert verdicts[ARCH][0] == "pending"
-    # The unconfirmed passing reads were really served before the return.
-    assert len(served) >= 4
+    # Exactly which reads were served (round 5's nit: the bound was loose).
+    if ending == "failed read":
+        # Confirmed at read 1, unconfirmed passes at 2 and 3, and the wait
+        # ends on the failed read itself.
+        assert served == [0, 1, 2, 3, 4]
+    else:
+        # The wait for Arch checks runs the whole budget: the last read is
+        # at the deadline, and the merge follows it.
+        assert served == sorted(read_at) and len(served) > 4
+        assert read_at[served[-1]] == clock.now == 600
 
 
 def test_a_required_rerun_restarts_the_advisory_grace(monkeypatch) -> None:
