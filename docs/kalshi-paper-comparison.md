@@ -78,7 +78,9 @@ markets for the same statistics. They are scored separately, with an added
 
 Thesis targets with no Kalshi market for the same statistic and period (for
 example JOLTS quits and hires, CPI components, or a GDP period Kalshi does not
-list) are listed in the inventory and not scored.
+list) are listed in the inventory and not scored. Each such target belongs to a
+recorded catalog screen group (change 7 below), so every "no Kalshi series"
+statement rests on a search the run repeats.
 
 Kalshi events are matched by series and reference period, read from the
 event's markets' rule text, and verified against the event title. Each
@@ -232,6 +234,25 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
    times were added for the Census and ABS sources, and the scope statement
    above now says it includes one Australian series.
 
+7. **After a further independent review (2026-10-20):** the catalog screen
+   behind every "no Kalshi series" statement is now part of the run rather
+   than a one-off search. Every unmatched Thesis target belongs to one of 39
+   screen groups, each with the keywords a Kalshi series on that statistic
+   would use. The run searches the ticker and title of every series in the
+   stored catalog, in every category, and the event titles of series whose
+   events cover several countries under a title that names none (KXUE,
+   KXGDPNOM and KXGOVBAL, found by reading the events of every Economics and
+   World series whose title names no country). Each hit must be a scored
+   series, an older ticker or second venue, a related series whose events are
+   checked for each run's period, or a different statistic with a reviewed
+   reason; a hit without one, or an unmatched target outside every group,
+   stops the run. The hits and verdicts are written to `catalog_screen.csv`.
+   The screen added KXJOLTS as an older venue for job openings, and KXUSPPIYOY,
+   KXCPISHELTER, CPISHELTER, KXJPMOMINF, REALWAGES, KXTDEFFICITBY,
+   KXDATACENTCON and KXMANUCON as related series. The reference-period reader
+   now requires 20xx years, so StatCan's table number 36-10-0434-01 is no
+   longer read as a period.
+
 ## Data provenance
 
 Every HTTP response used is stored by SHA-256 with its URL and fetch time, so a
@@ -247,7 +268,9 @@ uv run python scripts/kalshi_paper_comparison.py \
   --as-of 2026-10-19T23:00:00Z
 ```
 
-Add `--offline` to rerun from the stored responses only. Reading the DOL
+Add `--offline` to rerun from the stored responses only, and `--ref <commit>` to
+pin the Thesis commit whose published log is scored (the default, origin/main,
+moves as records land; the report's Reproduce section gives both). Reading the DOL
 releases needs `pdftotext` (poppler). The run writes `REPORT.md`,
 `REPORT.html`, the CSV tables and `summary.json` to `--out`; results stay
 outside the repository.

@@ -25,6 +25,7 @@ import json
 import math
 import pathlib
 import sys
+import urllib.parse
 from decimal import Decimal
 
 import pytest
@@ -629,8 +630,22 @@ def test_rule_direction_must_match_strike_type():
         ("bls.cpi.owners_equivalent_rent_mom.july_2026.first_print", "2026-07"),
         ("us.dol.initial_claims.sa.week_2026-08-08", "2026-08-08"),
         ("census.housing_starts.saar.2026-07.first_print", "2026-07"),
-        ("irs.actc.total_claims.2027.first_print.current_law", None),
+        ("irs.actc.total_claims.2027.first_print.current_law", "2027"),
         ("bls.productivity.nonfarm_qoq_prelim.2026_q3.first_print", "2026-Q3"),
+        # A table number is not a period, and a suffix date is not either.
+        (
+            "statcan.36-10-0434-01.all_industries.month_to_month_percent_change"
+            ".2026-07.first_print",
+            "2026-07",
+        ),
+        (
+            "usda.fsa.crp.enrolled_acres_total.2027_09.first_print"
+            ".source_recovered_2026_08",
+            "2027-09",
+        ),
+        ("statcan.employment_insurance.canada.june_2026.first_print", "2026-06"),
+        ("ssa.supplement.table_6b5.share_claimed_age_62.2025.first_print", "2025"),
+        ("bls.cps.telework_share.first_print", None),
     ],
 )
 def test_period_of(data_point, period):
@@ -688,9 +703,13 @@ def test_unmatched_rows_cite_kalshi_evidence():
         ],
     )
     ppi, wic = rows
-    assert ppi["reason"] == "Kalshi's related series has no event for this period"
+    assert ppi["reason"].startswith(
+        "Kalshi's related series has no event for this period (KXUSPPIYOY is on"
+    )
     assert "KXUSPPI: 2026-08" in ppi["kalshiEvidence"]
+    assert ppi["catalogScreen"] == "producer prices"
     assert wic["reason"].startswith("no Kalshi series")
+    assert wic["catalogScreen"] == "nutrition programs"
 
 
 def test_unmatched_rows_refuse_an_unhandled_match():
@@ -789,10 +808,135 @@ def test_every_in_scope_run_is_matched_or_listed_once():
 
 
 def test_belgian_unemployment_cites_kxue():
-    series, note = contracts.related_series(
+    ((series, note),) = contracts.related_series(
         "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print"
     )
-    assert series == ("KXUE",) and "Belgium" in note
+    assert series == "KXUE" and "Belgium" in note
+
+
+class SeriesCache:
+    """Serves canned Kalshi /events pages per series ticker."""
+
+    def __init__(self, events_by_series):
+        self.events_by_series = events_by_series
+
+    def get_json(self, url, **_):
+        series = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)[
+            "series_ticker"
+        ][0]
+        return {"events": self.events_by_series.get(series, []), "cursor": ""}
+
+
+def catalog_item(ticker, title, category="Economics"):
+    return {"ticker": ticker, "title": title, "category": category}
+
+
+def event(ticker, title, sub_title=""):
+    return {"event_ticker": ticker, "title": title, "sub_title": sub_title}
+
+
+SCREEN_RUNS = [
+    thesis_run("fns.wic.total_participation.2026_09.first_print"),
+    thesis_run("bls.jolts.quits_rate.2026_08.first_print"),
+    thesis_run("bls.cpi.shelter_mom.2026_08.first_print"),
+    thesis_run("statcan.employment_insurance.canada.june_2026.first_print", "CA"),
+]
+
+
+def test_catalog_screen_accounts_for_every_hit():
+    from kalshi_compare import pipeline
+
+    catalog = [
+        catalog_item("KXJOLTSOPEN", "U.S. job openings in [month]"),
+        catalog_item("KXJOLTS", "Job openings", "World"),
+        catalog_item("KXCPISHELTER", "CPI on shelter"),
+        catalog_item("KXCOMPANYACTIONSNAP", "SNAP Company Action", "Financials"),
+        catalog_item("KXSNAPELECTIONSPAIN", "Spain snap election", "Elections"),
+        catalog_item("KXUE", "Monthly Unemployment"),
+    ]
+    cache = SeriesCache(
+        {
+            "KXUE": [
+                event("KXUE-CAN26OCT", "Canada unemployment rate in October"),
+                event("KXUE-AUS26OCT", "Australia unemployment rate in October"),
+            ]
+        }
+    )
+    screen = pipeline.catalog_screen(cache, catalog, SCREEN_RUNS)
+    verdicts = {(h["series"], h["event"]): h["verdict"] for h in screen["hits"]}
+    assert verdicts == {
+        ("KXJOLTSOPEN", ""): "matched",
+        ("KXJOLTS", ""): "alternate venue",
+        ("KXCPISHELTER", ""): "related",
+        ("KXCOMPANYACTIONSNAP", ""): "different statistic",
+        ("KXUE", "KXUE-CAN26OCT"): "different statistic",
+        # The Australia group's keywords find the scored KXUE-AUS events.
+        ("KXUE", "KXUE-AUS26OCT"): "matched",
+    }
+    # Lower-case "snap" (an election) is not the SNAP acronym.
+    assert all(h["series"] != "KXSNAPELECTIONSPAIN" for h in screen["hits"])
+    assert screen["multiCountrySeries"] == {"KXUE": 2}
+    groups = {g["screen"]: g for g in screen["groups"]}
+    assert groups["Canada"]["thesisRuns"] == 1
+    assert groups["Canada"]["thesisCountries"] == ["CA"]
+
+
+@pytest.mark.parametrize(
+    ("item", "events"),
+    [
+        # A new series on a screened statistic.
+        (catalog_item("KXWICPART", "WIC participation in [month]"), {}),
+        # A new country in a multi-country series, on a screened statistic.
+        (
+            catalog_item("KXUE", "Monthly Unemployment"),
+            {
+                "KXUE": [
+                    event("KXUE-AUS26OCT", "Australia unemployment rate in October"),
+                    event("KXUE-CAN26OCT", "Canada unemployment rate in October"),
+                    event("KXUE-CAN26NOV", "Canada employment insurance claims"),
+                    event(
+                        "KXUE-BEL26OCT",
+                        "Belgium unemployment rate in October",
+                    ),
+                ]
+            },
+        ),
+    ],
+)
+def test_catalog_screen_stops_on_a_hit_without_a_verdict(item, events):
+    from kalshi_compare import pipeline
+
+    runs = SCREEN_RUNS + [
+        thesis_run(
+            "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print", "BE"
+        )
+    ]
+    with pytest.raises(ValueError, match="no verdict"):
+        pipeline.catalog_screen(SeriesCache(events), [item], runs)
+
+
+def test_catalog_screen_stops_on_an_uncovered_run():
+    from kalshi_compare import pipeline
+
+    with pytest.raises(ValueError, match="outside the catalog screen"):
+        pipeline.catalog_screen(
+            SeriesCache({}), [], [thesis_run("xx.new_agency.series.2026_07")]
+        )
+
+
+def test_screen_verdicts_are_exact_for_series():
+    # A reviewed reason for one series never covers a new series that shares
+    # its prefix; event keys (with "-") match by prefix.
+    assert contracts.screen_verdict_reason("KXCTC") is not None
+    assert contracts.screen_verdict_reason("KXCTCNEW") is None
+    assert contracts.screen_verdict_reason("KXUE-CAN26OCT", event=True)
+    assert contracts.screen_verdict_reason("KXUE-CAN26OCT") is None
+    handled = (
+        {spec.series for spec in contracts.SPECS}
+        | {v for venues in contracts.ALTERNATE_VENUES.values() for v in venues}
+        | {series for _, pairs in contracts.RELATED for series, _ in pairs}
+    )
+    assert not handled & set(contracts.SCREEN_VERDICTS)
 
 
 def test_alternate_venues_are_checked_for_matched_periods():

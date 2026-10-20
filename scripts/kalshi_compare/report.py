@@ -393,6 +393,7 @@ def write(results: dict, out: pathlib.Path) -> None:
     ):
         write_csv(out / f"{name}.csv", results[name])
     write_csv(out / "scores.csv", results["scores"])
+    write_csv(out / "catalog_screen.csv", results["catalogScreen"]["hits"])
     (out / "summary.json").write_text(json.dumps(results["summary"], indent=1) + "\n")
     doc, figure_svg = build(results)
     markdown = doc.markdown()
@@ -816,6 +817,37 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
             "Kalshi series the catalog screen found for statistics Thesis forecasts, "
             "with the 2026 reference periods each lists.",
         )
+    screen = results["catalogScreen"]
+    multi = screen["multiCountrySeries"]
+    doc.p(
+        "**Catalog screen.** Each unmatched run belongs to a screen group whose "
+        "keywords a Kalshi series on the same statistic would use. The screen "
+        f"searched the ticker and title of all {screen['seriesSearched']:,} series "
+        "in the stored catalog, in every category, and the "
+        f"{screen['multiCountryEventsSearched']} event titles of the "
+        f"{count_word(len(multi))} series whose events cover several countries "
+        f"under a title that names none ({', '.join(f'`{t}`' for t in multi)}; "
+        "found by reading the events of every Economics and World series whose "
+        "title names no country, so a series of that kind filed under another "
+        "category would be searched by its title only). "
+        "Every hit is accounted for in `catalog_screen.csv`: scored, an older "
+        "ticker or second venue, a related series whose events are checked per "
+        "run, or a different statistic with the reason. A hit with no verdict, or "
+        "an unmatched run outside every group, stops the run."
+    )
+    doc.table(
+        ["Screen group", "Thesis runs", "Kalshi hits", "Verdicts"],
+        [
+            [
+                g["screen"],
+                str(g["thesisRuns"]),
+                str(g["hits"]),
+                ", ".join(f"{n} {v}" for v, n in g["verdicts"].items()) or "\u2014",
+            ]
+            for g in screen["groups"]
+        ],
+        "Keyword patterns are in `results.json` under `catalogScreen`.",
+    )
     venues = results.get("alternateVenues") or []
     if venues:
         doc.table(
@@ -1328,11 +1360,14 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
 
     doc.h(2, "Reproduce")
     doc.p(
-        "From a checkout of the PR branch, with network access: "
-        "`python3 scripts/kalshi_paper_comparison.py --out <dir> --as-of <UTC time>`. "
-        "Every response used is stored by SHA-256 under `fetch/`; adding `--offline "
-        "--cache <path to fetch>` reruns from the stored responses only. `pdftotext` "
-        "(poppler) is needed to read the DOL and Census releases."
+        "From a checkout of the PR branch, with the stored responses in `fetch/`: "
+        f"`python3 scripts/kalshi_paper_comparison.py --ref {meta['commit']} "
+        f"--as-of {meta['asOf']} --cache <path to fetch> --out <dir> --offline` "
+        "reproduces these files. `--ref` pins the Thesis commit whose published log "
+        "is scored (the default, origin/main, moves as records land). Every response "
+        "used is stored by SHA-256 with its URL and fetch time; without `--offline` "
+        "the run fetches anything not stored. `pdftotext` (poppler) is needed to read "
+        "the DOL and Census releases."
     )
     doc.h(2, "Files")
     doc.ul(
@@ -1340,8 +1375,10 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
             (
                 "`inventory.csv`: every matched Thesis run, with registration proof,"
                 " published CDF check, Kalshi event, official value and Thesis resolver"
-                " status. `unmatched.csv`: every other run in scope and the Kalshi"
-                " evidence. `withdrawn.csv`: catalog runs the site does not publish."
+                " status. `unmatched.csv`: every other run in scope, its catalog"
+                " screen group and the Kalshi evidence. `catalog_screen.csv`: every"
+                " catalog screen hit with its verdict and reason. `withdrawn.csv`:"
+                " catalog runs the site does not publish."
             ),
             (
                 "`outcomes.csv`: official first prints, sources, hashes and the Kalshi "
