@@ -145,6 +145,7 @@ class ThesisRun:
     recorded_at: str
     registration: Registration
     unit: str
+    country: str
     point: float
     ci_low: float
     ci_high: float
@@ -182,6 +183,7 @@ def published_runs(entries: list[dict], timeline: dict) -> list[ThesisRun]:
                 recorded_at=entry["recordedAt"],
                 registration=registration_for(entry, timeline),
                 unit=entry.get("unit") or "",
+                country=entry.get("country") or "US",
                 point=float(entry["pointEstimate"]),
                 ci_low=float(interval["lower"]),
                 ci_high=float(interval["upper"]),

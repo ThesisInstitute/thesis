@@ -37,6 +37,10 @@ SERIES_LABELS = {
     "KXCONTCLAIMS": "Continuing claims (weekly)",
     "KXJOLTSOPEN": "JOLTS job openings",
     "KXPCECORE": "Core PCE price index (MoM)",
+    "KXHOUSINGSTART": "Housing starts (SAAR)",
+    "KXBUILDPERMS": "Building permits (SAAR)",
+    "KXNHSALES": "New home sales (SAAR)",
+    "KXUE": "Australia unemployment rate",
     "KXECONSTATCPI": "CPI-U all items, exact-value markets",
     "KXECONSTATCPICORE": "Core CPI-U, exact-value markets",
     "KXECONSTATU3": "Unemployment rate, exact-value markets",
@@ -50,6 +54,10 @@ PRIMARY_ORDER = [
     "KXCONTCLAIMS",
     "KXJOLTSOPEN",
     "KXPCECORE",
+    "KXHOUSINGSTART",
+    "KXBUILDPERMS",
+    "KXNHSALES",
+    "KXUE",
 ]
 MIN_SERIES_N = 5
 
@@ -245,7 +253,8 @@ svg .title {{ fill: var(--text); font-weight: 600; }}
 svg .grid {{ stroke: var(--rule); stroke-width: 1; }}
 svg .zero {{ stroke: var(--zero); stroke-width: 1.5; }}
 svg .dot {{ fill: var(--series-1); stroke: var(--surface); stroke-width: 2; }}
-svg .dot:hover {{ stroke: var(--text); }}
+svg .dot:hover, svg .ring:hover {{ stroke-width: 3; }}
+svg .ring {{ fill: none; stroke: var(--series-1); stroke-width: 1.5; }}
 svg .mean {{ stroke: var(--text); stroke-width: 2; }}
 a {{ color: var(--series-1); }}
 </style></head>
@@ -258,16 +267,24 @@ a {{ color: var(--series-1); }}
 # Figure -----------------------------------------------------------------------
 
 
-def dot_figure(pairs: list[dict], spec: str, metric: str = "deltaLog") -> str:
-    """Per-event paired differences, one panel per horizon, rows by series."""
+def dot_figure(pairs: list[dict], metric: str = "deltaLog") -> str:
+    """Per-event paired differences under both rules, one panel per horizon."""
     clip = 3.0
     series = [s for s in PRIMARY_ORDER if any(p["series"] == s for p in pairs)]
-    panel_w, label_w, row_h, top = 250, 210, 30, 44
+    panel_w, label_w, row_h, top = 250, 210, 30, 62
     width = label_w + panel_w * 3 + 20
     height = top + row_h * len(series) + 40
     parts = [
-        f'<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}" '
-        'role="img" aria-label="Per-event paired log-score differences">'
+        (
+            f'<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}" '
+            'role="img" aria-label="Per-event paired log-score differences">'
+        ),
+        (
+            f'<circle class="dot" cx="{label_w + 12}" cy="12" r="5"/><text'
+            f' x="{label_w + 22}" y="16">Pre-specified rule</text><circle class="ring"'
+            f' cx="{label_w + 172}" cy="12" r="5"/><text x="{label_w + 182}"'
+            ' y="16">Liquid markets only (added after the plan)</text>'
+        ),
     ]
     for row, name in enumerate(series):
         y = top + row_h * row + row_h / 2
@@ -283,7 +300,7 @@ def dot_figure(pairs: list[dict], spec: str, metric: str = "deltaLog") -> str:
             return x0 + (max(-clip, min(clip, v)) + clip) / (2 * clip) * inner
 
         parts.append(
-            f'<text class="title" x="{x0 + inner / 2}" y="18" text-anchor="middle">'
+            f'<text class="title" x="{x0 + inner / 2}" y="44" text-anchor="middle">'
             f"{HORIZON_LABELS[horizon]}</text>"
         )
         for tick in (-3, -2, -1, 0, 1, 2, 3):
@@ -298,31 +315,31 @@ def dot_figure(pairs: list[dict], spec: str, metric: str = "deltaLog") -> str:
             )
         for row, name in enumerate(series):
             y = top + row_h * row + row_h / 2
-            items = [
-                p
-                for p in pairs
-                if p["series"] == name and p["horizon"] == horizon and p["spec"] == spec
-            ]
-            for index, item in enumerate(items):
-                value = item[metric]
-                jitter = ((index % 5) - 2) * 3
-                label = (
-                    f"{item['eventKey']}: {metric} {value:+.2f}; Thesis"
-                    f" p={item['thesisRealizedProb']:.3f}, Kalshi"
-                    f" p={item['kalshiRealizedProb']:.3f}"
-                    + (" (clipped)" if abs(value) > clip else "")
+            for spec, cls in (("primary", "dot"), ("liquid_markets_only", "ring")):
+                items = sorted(
+                    (
+                        p
+                        for p in pairs
+                        if p["series"] == name
+                        and p["horizon"] == horizon
+                        and p["spec"] == spec
+                    ),
+                    key=lambda p: p["eventKey"],
                 )
-                parts.append(
-                    f'<circle class="dot" cx="{sx(value):.1f}" cy="{y + jitter:.1f}"'
-                    f' r="5"><title>{html.escape(label)}</title></circle>'
-                )
-            if items:
-                mean = sum(i[metric] for i in items) / len(items)
-                parts.append(
-                    f'<line class="mean" x1="{sx(mean):.1f}" x2="{sx(mean):.1f}"'
-                    f' y1="{y - 9}" y2="{y + 9}"><title>mean {mean:+.2f}'
-                    f" (n={len(items)})</title></line>"
-                )
+                for index, item in enumerate(items):
+                    value = item[metric]
+                    jitter = ((index % 5) - 2) * 3
+                    label = (
+                        f"{item['eventKey']} ({SPEC_LABELS[spec]}): {value:+.2f}; "
+                        f"Thesis p={item['thesisRealizedProb']:.3f}, "
+                        f"Kalshi p={item['kalshiRealizedProb']:.3f}"
+                        + (" (clipped)" if abs(value) > clip else "")
+                    )
+                    parts.append(
+                        f'<circle class="{cls}" cx="{sx(value):.1f}" '
+                        f'cy="{y + jitter:.1f}" r="5"><title>{html.escape(label)}'
+                        "</title></circle>"
+                    )
     parts.append(
         f'<text x="{label_w + 10}" y="{height - 4}">Log-score difference, Thesis minus '
         "Kalshi (positive favors Thesis; values beyond ±3 drawn at the edge)</text>"
@@ -353,21 +370,32 @@ def write(results: dict, out: pathlib.Path) -> None:
     (out / "REPORT.html").write_text(doc.html("Thesis vs Kalshi"))
 
 
-def headline_pairs(results: dict, spec: str) -> list[dict]:
+def headline_pairs(results: dict, spec: str | None = None) -> list[dict]:
     chosen: dict[tuple, dict] = {}
     for pair in sorted(results["pairs"], key=lambda p: (p["registeredAt"], p["runId"])):
-        if pair["forecaster"] != "thesis_headline" or pair["spec"] != spec:
+        if pair["forecaster"] != "thesis_headline":
             continue
-        chosen.setdefault((pair["eventKey"], pair["horizon"]), pair)
+        if spec is not None and pair["spec"] != spec:
+            continue
+        chosen.setdefault((pair["eventKey"], pair["horizon"], pair["spec"]), pair)
     return list(chosen.values())
 
 
-def build(results: dict) -> tuple[Doc, str]:
+def values_text(rows: list[dict], metric: str) -> str:
+    return ", ".join(num(r[metric]) for r in sorted(rows, key=lambda r: r["period"]))
+
+
+def p_text(v: dict) -> str:
+    return f"{v['signFlipP']:.3f}" + ("" if v["n"] <= 16 else " (MC)")
+
+
+def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
     meta = results["meta"]
     summary = results["summary"]
     head = summary["thesis_headline"]
     inventory = results["inventory"]
     outcomes = {o["eventKey"]: o for o in results["outcomes"]}
+    pairs = headline_pairs(results)
     doc = Doc()
 
     primary_runs = [
@@ -380,173 +408,209 @@ def build(results: dict) -> tuple[Doc, str]:
     released = {
         e for e in with_event if outcomes[f"{e[0]}:{e[1]}"]["officialValue"] is not None
     }
+    non_us = sorted({SERIES_LABELS[e[0]] for e in events if e[0] == "KXUE"})
     pooled = {(spec, h): head[spec][h]["pooled"] for spec in head for h in head[spec]}
 
     def pool(spec: str, horizon: str, metric: str) -> dict:
         return pooled[(spec, horizon)].get(metric) or {"n": 0}
 
+    def rows_for(spec: str, horizon: str) -> list[dict]:
+        return [
+            p
+            for p in pairs
+            if p["spec"] == spec and p["horizon"] == horizon and p["primarySeries"]
+        ]
+
     doc.h(1, "Thesis forecasts vs Kalshi prices: a paper comparison")
     doc.p(
-        "Read-only scoring study. It places no orders, uses no Kalshi account and "
-        "simulates no trading; every Kalshi number is public market data. "
-        f"Data as of {meta['asOf']}. Thesis records at commit `{meta['commit'][:12]}` "
-        f"(published log `{meta['logBody']}`), published distributions from projection "
-        f"`{meta['distributions']['projectionRootSha256'][:12]}`. The analysis plan, "
-        "committed before any score was computed, is `docs/kalshi-paper-comparison.md` "
-        "in [ThesisInstitute/thesis#381](https://github.com/ThesisInstitute/thesis/pull/381)."
+        "Read-only scoring study. It places no orders, uses no Kalshi account and"
+        " simulates no trading; every Kalshi number is public market data. Data as of"
+        f" {meta['asOf']}. Thesis records at commit `{meta['commit'][:12]}` (published"
+        f" log `{meta['logBody']}`), published distributions from projection"
+        f" `{meta['distributions']['projectionRootSha256'][:12]}`. The analysis plan is"
+        " `docs/kalshi-paper-comparison.md` in"
+        " [ThesisInstitute/thesis#381](https://github.com/ThesisInstitute/thesis/pull/381);"
+        " it was committed before any score was computed, and its last section lists"
+        " every later change."
     )
 
-    # Summary
-    reg_p, reg_l = pool("primary", "at_registration", "deltaLog"), pool(
-        "liquid_markets_only", "at_registration", "deltaLog"
-    )
-    reg_b = pool("primary", "at_registration", "deltaBrier")
-    d1_p, d1_l = pool("primary", "release_minus_1d", "deltaLog"), pool(
-        "liquid_markets_only", "release_minus_1d", "deltaLog"
-    )
-    d1_lb = pool("liquid_markets_only", "release_minus_1d", "deltaLadderBrier")
-    d7_l = pool("liquid_markets_only", "release_minus_7d", "deltaLog")
-    small = [
-        s
-        for s in PRIMARY_ORDER
-        if 0
-        < (
-            head["primary"]["release_minus_1d"]["bySeries"].get(s, {}).get("deltaLog")
-            or {"n": 0}
-        )["n"]
-        < MIN_SERIES_N
-    ]
+    # Summary -------------------------------------------------------------------
+    reg = {m: pool("primary", "at_registration", m) for m in ("deltaLog", "deltaBrier")}
+    reg_rows = rows_for("primary", "at_registration")
+    worst = max(reg_rows, key=lambda r: abs(r["deltaLog"])) if reg_rows else None
+    rest = [r["deltaLog"] for r in reg_rows if r is not worst]
+    thin = {}
+    for series in ("KXCPI", "KXCPICORE", "KXPCECORE"):
+        spreads = [
+            m["spread"]
+            for m in results["markets"]
+            if m["eventKey"].startswith(series + ":")
+            and m["horizon"] == "at_registration"
+            and m["spread"] is not None
+        ]
+        if spreads:
+            thin[series] = statistics.median(spreads)
+    d1 = {m: pool("primary", "release_minus_1d", m) for m in ("deltaLog", "deltaBrier")}
+    d7 = pool("primary", "release_minus_7d", "deltaLog")
+    l1 = {
+        m: pool("liquid_markets_only", "release_minus_1d", m)
+        for m in ("deltaLog", "deltaBrier")
+    }
+    same = head["primary"]["release_minus_1d"]["sameEventsAsRegistration"].get(
+        "deltaLog"
+    ) or {"n": 0}
     one_day = head["primary"]["release_minus_1d"]["bySeries"]
     big = [
-        (s, one_day[s]["deltaLog"]["n"])
+        (s, one_day[s]["deltaLog"])
         for s in PRIMARY_ORDER
         if s in one_day and one_day[s]["deltaLog"]["n"] >= MIN_SERIES_N
     ]
-    small_n = [one_day[s]["deltaLog"]["n"] for s in small]
-    min_small, max_small = (min(small_n), max(small_n)) if small_n else (0, 0)
-    claims_reg = [
-        e
-        for e in results["exclusions"]
-        if e["series"] in ("KXJOBLESSCLAIMS", "KXCONTCLAIMS")
-        and e["forecaster"] == "thesis_headline"
-        and e["horizon"] == "at_registration"
-        and not e.get("spec")
+    small = [
+        s
+        for s in PRIMARY_ORDER
+        if s in one_day and 0 < one_day[s]["deltaLog"]["n"] < MIN_SERIES_N
     ]
-    claims_no_market = len({e["eventKey"] for e in claims_reg})
-    claims_total = len(
-        {
-            (i["kalshiSeries"], i["period"])
-            for i in primary_runs
-            if i["kalshiSeries"] in ("KXJOBLESSCLAIMS", "KXCONTCLAIMS")
-            and (i["kalshiSeries"], i["period"]) in released
-        }
-    )
-    rebuilt = [i for i in inventory if i["distributionProvenance"] == "interval_seeded"]
-    rebuilt_exact = sum(1 for i in rebuilt if i["publishedCdfCheck"] == "rebuilt_exact")
-    kalshi_floor_hits = sum(
-        1
-        for s in results["scores"]
-        if s["spec"] == "primary"
-        and s["forecaster"] == "thesis_headline"
-        and s["primarySeries"]
-        and s["kalshiFloored"]
-    )
+    unmatched = results["unmatched"]
     doc.h(2, "Summary")
-    doc.ul(
-        [
-            (
-                f"**Scope.** {len(primary_runs)} published Thesis headline forecasts"
-                " registered since 1 July 2026 target a statistic Kalshi lists, across"
-                f" {len({e[0] for e in events})} series; {len(with_event)} of them have"
-                f" a Kalshi event for the same reference period, and {len(released)} of"
-                " those have been released. Those are scored against the official"
-                " first print on Kalshi's own brackets. Intervals in brackets are 95%"
-                " bootstrap intervals; positive differences favor Thesis."
-            ),
-            "**At Thesis's registration time**, when both had the same information,"
-            f" there is no detectable difference. Over {reg_p['n']} events, the mean"
-            f" log-score difference is {ci_text(reg_p)}, and {ci_text(reg_l)} with"
-            f" thinly quoted markets dropped; the Brier difference is {ci_text(reg_b)}."
-            " All three intervals "
-            + (
-                "include zero."
-                if all(
-                    direction(v) == "interval includes zero"
-                    for v in (reg_p, reg_l, reg_b)
-                )
-                else "are shown; not all include zero."
-            ),
-            (
-                "**Closer to the release, Kalshi is better than Thesis's earlier"
-                " forecast**, as expected: the market keeps updating while the Thesis"
-                " forecast stays fixed at its registration, often weeks earlier. One"
-                " day before release, with thinly quoted markets dropped, the log"
-                f" difference over {d1_l['n']} events is {ci_text(d1_l)},"
-                f" {reading(d1_l)} ({wins(d1_l)}), and the ladder Brier difference is"
-                f" {ci_text(d1_lb)}, {reading(d1_lb)}. Seven days before release it is"
-                f" {ci_text(d7_l)} over {d7_l['n']} events, {reading(d7_l)}. Under the"
-                " pre-specified primary rule, which reads an empty order book as 50%,"
-                f" the one-day log difference is {ci_text(d1_p)}, {reading(d1_p)}."
-            ),
-            "**Per series, there are too few resolved pairs to conclude anything**"
-            " except "
-            + " and ".join(
-                f"{SERIES_LABELS[s].split(' (')[0].lower()} ({n} weeks)" for s, n in big
+    bullets = [
+        f"**Scope.** {len(primary_runs)} published Thesis headline forecasts recorded "
+        "since 1 July 2026 are for a statistic Kalshi lists, across "
+        f"{len({e[0] for e in events})} Kalshi series"
+        + (f" (including {', '.join(non_us)})" if non_us else "")
+        + f". {len(with_event)} of them have a Kalshi event for the same reference "
+        f"period, and {len(released)} of those have been released and are scored "
+        "against the official first print, on Kalshi's own brackets. The other "
+        f"{len(unmatched)} published runs in scope were checked against Kalshi's "
+        "catalog and have no matching event. Bracketed ranges are 95% bootstrap "
+        "intervals; positive differences favor Thesis.",
+    ]
+    if worst is not None:
+        bullets.append(
+            "**At Thesis's registration time**, the only horizon where Kalshi had no "
+            f"more information than Thesis, the {reg['deltaLog']['n']} comparisons "
+            "cannot tell the two apart: the log-score difference is "
+            f"{ci_text(reg['deltaLog'])} and the Brier difference "
+            f"{ci_text(reg['deltaBrier'])}. Kalshi's books were thin at that point "
+            "(median spreads of "
+            + ", ".join(
+                f"{v * 100:.0f} cents for"
+                f" {SERIES_LABELS[k].split(',')[0].split(' (')[0]}"
+                for k, v in thin.items()
             )
-            + "; "
-            + ", ".join(SERIES_LABELS[s] for s in small)
-            + f" each have {min_small} to {max_small}. Weekly claims are mostly"
-            f" comparable only one day before release: in {claims_no_market} of"
-            f" {claims_total} claims weeks Kalshi had no quoted market when Thesis"
-            " registered.",
-            (
-                "**What this does and does not measure.** It measures probabilistic"
-                " forecast accuracy on monthly and weekly US national statistics at"
-                " stated horizons. It does not measure skill at state or municipal"
-                " questions, at municipal bond pricing, or at anything involving"
-                " trading, and results this small should not be extrapolated to those."
-            ),
-        ]
+            + f"), and the mean is driven by one event, {worst['eventKey']}"
+            f" ({num(worst['deltaLog'])}), where an empty book gave the realized"
+            f" bracket a price of {worst['kalshiRealizedProb']:.2f}; the other"
+            f" {len(rest)} average {num(sum(rest) / len(rest))}. The intervals admit"
+            " large differences in either direction."
+        )
+    bullets.append(
+        "**Closer to the release, Kalshi's prices scored better on average than "
+        "Thesis's earlier, fixed forecast**, as expected given the information that "
+        "arrived in between. Under the pre-specified rule the difference is not clear: "
+        f"one day before release the log difference is {ci_text(d1['deltaLog'])} "
+        f"(Brier {ci_text(d1['deltaBrier'])}) over {d1['deltaLog']['n']} events, and "
+        f"seven days before it is {ci_text(d7)}. It becomes clear only after dropping "
+        "order books with spreads above 20 cents, a rule adopted after the plan: one "
+        f"day before release, log {ci_text(l1['deltaLog'])} over {l1['deltaLog']['n']} "
+        f"events (Brier {ci_text(l1['deltaBrier'])}). On the {same['n']} events also "
+        f"scored at registration, the one-day difference is {ci_text(same)}."
     )
+    bullets.append(
+        "**Per series, there are too few resolved pairs to conclude anything.** Only "
+        + " and ".join(
+            f"{SERIES_LABELS[s].split(' (')[0].lower()} ({v['n']})" for s, v in big
+        )
+        + " reach five pairs, and for "
+        + ("both" if len(big) == 2 else "each")
+        + " the one-day interval "
+        + (
+            "includes zero"
+            if all(direction(v) == "interval includes zero" for _, v in big)
+            else "is shown below"
+        )
+        + f". The other {len(small)} series have one to three events each; their "
+        "individual differences are listed below rather than summarized."
+    )
+    bullets.append(
+        "**What this does and does not measure.** It measures probabilistic forecast "
+        "accuracy on official monthly and weekly statistics, mostly national US "
+        "figures, at stated horizons. It does not measure skill at state or municipal "
+        "questions, at municipal bond pricing, or at anything involving trading, and "
+        "results this small should not be extrapolated to those."
+    )
+    doc.ul(bullets)
 
     figure_svg = dot_figure(
-        headline_pairs(results, "liquid_markets_only"), "liquid_markets_only"
+        [
+            p
+            for p in pairs
+            if p["primarySeries"] and p["spec"] in ("primary", "liquid_markets_only")
+        ]
     )
     doc.figure(
         figure_svg,
-        "Each dot is one event: Thesis's log score minus Kalshi's on Kalshi's brackets,"
-        " liquid markets only. Black ticks are series means. Hover a dot for its"
-        " details.",
+        "Each mark is one event: Thesis's log score minus Kalshi's on Kalshi's "
+        "brackets. Filled dots use the pre-specified price rule; rings drop order "
+        "books quoted wider than 20 cents. Hover a mark for its details.",
         "figure_log_differences.svg",
     )
 
-    # Scope
+    # Scope -------------------------------------------------------------------------
     doc.h(2, "What was compared")
+    distinct = {
+        i["runId"]: i
+        for i in inventory
+        if i["distributionProvenance"] == "interval_seeded"
+    }
+    exact = sum(
+        1 for i in distinct.values() if i["publishedCdfCheck"] == "rebuilt_exact"
+    )
+    catalog = meta["kalshiCatalog"]
     in_scope_text = (
         f"all {meta['publishedRuns']} recorded since 1 July 2026"
         if meta["publishedRuns"] == meta["publishedRunsInScope"]
         else f"{meta['publishedRunsInScope']} of them recorded since 1 July 2026"
     )
+    ineligible = [
+        i
+        for i in primary_runs
+        if i["headlineEligibleRoot"] is False
+        and (i["kalshiSeries"], i["period"]) in released
+    ]
     doc.p(
-        f"The published Thesis log holds {meta['publishedRuns']} forecast runs,"
-        f" {in_scope_text}. Runs were matched to Kalshi by statistic and reference"
-        " period; the Kalshi event's period is read from its title and every market's"
-        " rule text. Each Thesis forecast is its published 201-point CDF;"
-        f" {rebuilt_exact} of the {len(rebuilt)} interval-seeded CDFs used here rebuild"
-        " exactly from the run's point estimate and 80% interval with the documented"
-        " transform. Registration time is the RFC 3161 witness time of the run's"
-        " custody root."
+        f"The published Thesis log holds {meta['publishedRuns']} forecast runs, "
+        f"{in_scope_text}. Kalshi's full series catalog ({catalog['series']:,} series, "
+        f"{catalog['economicsSeries']} in Economics; stored response "
+        f"`{(catalog['sha256'] or '')[:12]}`) was screened for every statistic Thesis "
+        "forecasts, by keyword and then by reading the candidates. Matched runs are "
+        "paired with the Kalshi event for the same reference period, read from the "
+        "event title and every market's rule text. Each Thesis forecast is its "
+        f"published 201-point CDF; all {exact} of the {len(distinct)} distinct "
+        "interval-seeded runs used here rebuild exactly from the run's point estimate "
+        "and 80% interval with the documented transform. Registration time is the "
+        "RFC 3161 witness time of the run's custody root; the threshold-ladder "
+        "variant has only a run-directory witness, and the persistence baseline has "
+        "no witness and uses its recorded time."
+        + (
+            f" One scored headline run ({ineligible[0]['dataPointId']}) has a custody "
+            "root that Thesis's own verifier marks not headline-eligible; results "
+            "without it are reported below."
+            if ineligible
+            else ""
+        )
     )
     rows = []
     for series in PRIMARY_ORDER:
         mine = [i for i in primary_runs if i["kalshiSeries"] == series]
         if not mine:
             continue
-        evs = sorted({i["period"] for i in mine})
-        rel = [p for p in evs if (series, p) in released]
-        no_event = [p for p in evs if (series, p) not in with_event]
+        periods = sorted({i["period"] for i in mine})
+        rel = [p for p in periods if (series, p) in released]
+        no_event = [p for p in periods if (series, p) not in with_event]
         pending = [
-            p for p in evs if (series, p) in with_event and (series, p) not in released
+            p
+            for p in periods
+            if (series, p) in with_event and (series, p) not in released
         ]
         n_by_h = []
         for h in HORIZON_LABELS:
@@ -566,11 +630,16 @@ def build(results: dict) -> tuple[Doc, str]:
                 SERIES_LABELS[series],
                 f"`{series}`",
                 str(len(mine)),
+                str(len(periods) - len(no_event)),
                 str(len(rel)),
                 " / ".join(n_by_h),
                 f"{statistics.median(lead):.0f}" if lead else "n/a",
-                ", ".join(pending + [f"{p} (no Kalshi event)" for p in no_event])
+                ", ".join(
+                    f"{p} (expected {outcomes[f'{series}:{p}']['expectedRelease']})"
+                    for p in pending
+                )
                 or "none",
+                ", ".join(no_event) or "none",
             ]
         )
     doc.table(
@@ -578,71 +647,106 @@ def build(results: dict) -> tuple[Doc, str]:
             "Statistic",
             "Kalshi series",
             "Thesis forecasts",
+            "With a Kalshi event",
             "Released",
             "Scored (reg / 7d / 1d)",
             "Median days, registration to release",
-            "Not yet scorable",
+            "Awaiting release",
+            "No Kalshi event for the period",
         ],
         rows,
-        "Scored counts are events; an event is dropped at a horizon if it falls before "
-        "Thesis's registration or if no Kalshi market had a quote by then "
-        "(see `exclusions.csv`).",
+        "Scored counts are events. An event is dropped at a horizon if the horizon "
+        "falls before Thesis's registration or if no Kalshi market had a quote by "
+        "then (see `exclusions.csv`).",
     )
-    reasons = Counter(u["reason"] for u in results["unmatched"])
+    reasons = Counter(u["reason"] for u in unmatched)
+    countries = Counter(u["country"] for u in unmatched)
     doc.p(
-        f"{len(results['unmatched'])} other published US runs since 1 July have no"
-        " matching Kalshi market: "
+        f"**Runs with no matching Kalshi event.** {len(unmatched)} published runs "
+        "recorded since 1 July ("
+        + ", ".join(f"{n} {c}" for c, n in countries.most_common())
+        + ") are listed in `unmatched.csv` with the evidence: "
         + "; ".join(f"{n} — {r}" for r, n in reasons.most_common())
-        + f" (`unmatched.csv`). {len(results['withdrawn'])} catalog runs for matched"
-        " statistics are not in the published log (the live page checked for one,"
-        ' `us-cpi-u-mom-july-2026`, says "No forecast available"); they are listed'
-        " in `withdrawn.csv` and not scored."
+        + "."
+    )
+    related_rows = {}
+    for u in unmatched:
+        if u["kalshiEvidence"]:
+            key = (u["dataPointId"].rsplit(".", 2)[0], u["kalshiEvidence"], u["reason"])
+            related_rows.setdefault(key, []).append(u["period"] or "?")
+    if related_rows:
+        doc.table(
+            ["Thesis target family", "Thesis periods", "What Kalshi lists", "Verdict"],
+            [
+                [f"`{fam}`", ", ".join(sorted(set(ps))), ev, reason]
+                for (fam, ev, reason), ps in sorted(related_rows.items())
+            ],
+            "Kalshi series the catalog screen found for statistics Thesis forecasts, "
+            "with the 2026 reference periods each lists (June onward).",
+        )
+    withdrawn = results["withdrawn"]
+    confirmed = sum(1 for w in withdrawn if w["livePageSaysNoForecast"])
+    doc.p(
+        f"{len(withdrawn)} catalog runs for matched statistics are not in the "
+        f'published log. The live page for {confirmed} of them says "No forecast '
+        'available" (pages stored with the other responses); they are listed in '
+        "`withdrawn.csv` and not scored."
     )
 
-    # Contracts
     doc.h(3, "How each contract was read")
     doc.ul(
         [
             (
-                'CPI, core CPI, U-3, core PCE: "above X" on the single-decimal'
-                ' published value. Payrolls: "above X" persons on the first-print'
-                ' change. JOLTS: "above X million" on the level BLS reports in'
-                " thousands."
+                'CPI, core CPI, U-3, core PCE and Australian unemployment: "above X" on'
+                ' the single-decimal published value. Payrolls: "above X" persons on'
+                ' the first-print change. JOLTS: "above X million" on the level BLS'
+                ' reports in thousands. Housing starts and permits: "above X million"'
+                ' on the first Census print; new home sales: "above X" homes.'
             ),
             (
-                'Initial and continuing claims: "at least X" on the advance seasonally'
-                " adjusted figure first published. Kalshi switched continuing-claims"
-                ' strikes from "1.84 million" to "1750K" between events; each strike is'
-                " read with the unit its own rule states and checked against the"
-                " market's strike field."
+                'Continuing claims: "at least X" on the advance seasonally adjusted'
+                " figure first published, as the rule states. Initial claims: the rule"
+                ' says only "at least X initial jobless claims for the week ending";'
+                " Kalshi's recorded expiration value equals the seasonally adjusted"
+                " advance figure in every week, and that is what is scored. Kalshi"
+                ' switched continuing-claims strikes from "1.84 million" to "1750K"'
+                " between events; each strike is read with the unit its own rule"
+                " states, and the rule's direction word must agree with the market's"
+                " strike type."
             ),
             (
                 "Thesis's CDF is read as the distribution of the unrounded value the"
-                " agency then rounds: P(Y > s) = 1 − F(s + g/2) and P(Y ≥ s) = 1 − F(s"
-                " − g/2), where g is the reporting grid (0.1 point, 1,000 persons, or"
-                " 0.001 million). The literal reading 1 − F(s) is a sensitivity."
+                " agency then rounds to its reporting grid g (0.1 point, 1,000 persons"
+                " or homes, or 0.001 million): P(Y > s) = 1 − F(s + g/2) and P(Y ≥ s) ="
+                " 1 − F(s − g/2). This is a symmetric reading of a continuous CDF for a"
+                " value published on a grid; the literal reading 1 − F(s) is a"
+                " sensitivity."
             ),
             (
                 "Kalshi's price is the midpoint of the closing bid and ask of the last"
                 " hourly candle at or before the horizon (an empty side counts as 0 or"
-                " 1), with the ladder made non-increasing by isotonic regression."
-                " Brackets are the intervals between consecutive strikes."
+                " 1), searched over the market's whole life, with the ladder made"
+                " non-increasing by isotonic regression. Brackets are the intervals"
+                " between consecutive strikes."
             ),
         ]
     )
 
-    # Outcomes
+    # Outcomes -------------------------------------------------------------------
     doc.h(2, "Outcomes")
     mismatches = sum(len(o["kalshiResultMismatches"]) for o in results["outcomes"])
     n_markets = sum(o["nMarkets"] for o in results["outcomes"] if o["officialValue"])
+    seconds = sum(1 for o in results["outcomes"] if o["officialSecondReading"])
     doc.p(
         "Each value is the official first print read from the agency's own release"
-        " (BLS news release archive, DOL Employment and Training Administration weekly"
-        " release, BEA Personal Income and Outlays), with the release time the"
-        " document states. Where the release's lead paragraph also states the value,"
-        f" both readings agree. Across {n_markets} settled Kalshi markets, the contract"
-        " rule applied to the official value reproduces Kalshi's recorded result in"
-        f" every case ({mismatches} disagreements)."
+        " (BLS news release archive; DOL Employment and Training Administration weekly"
+        " release; BEA Personal Income and Outlays; Census/HUD New Residential"
+        " Construction and Sales; ABS Labour Force, Australia), with the release time"
+        f" the document states. For {seconds} events the same document states the value"
+        " a second time (lead paragraph, summary box or table), and the two readings"
+        f" agree. Across {n_markets} settled Kalshi markets, the contract rule applied"
+        " to the official value reproduces Kalshi's recorded result in every case"
+        f" ({mismatches} disagreements)."
     )
     rows = []
     for key in sorted(
@@ -668,7 +772,9 @@ def build(results: dict) -> tuple[Doc, str]:
             and i["forecaster"] == "thesis_headline"
         ]
         state = (
-            dps[0]["thesisResolverCode"] or dps[0]["thesisResolverState"] if dps else ""
+            (dps[0]["thesisResolverCode"] or dps[0]["thesisResolverState"])
+            if dps
+            else ""
         )
         ledger = o["thesisLedgerAgreesWithOfficial"]
         rows.append(
@@ -693,14 +799,15 @@ def build(results: dict) -> tuple[Doc, str]:
             "Thesis ledger value",
         ],
         rows,
-        "Values are in Kalshi strike units (persons for payrolls and initial claims,"
-        " millions for continuing claims and job openings, percent otherwise).",
+        "Values are in Kalshi strike units (persons for payrolls and initial claims, "
+        "homes for new home sales, millions for continuing claims, job openings, "
+        "starts and permits, percent otherwise).",
     )
     differs = [
         o for o in results["outcomes"] if o["thesisLedgerAgreesWithOfficial"] is False
     ]
     unresolved = Counter(
-        (i["thesisResolverCode"] or i["thesisResolverState"])
+        (i["thesisResolverCode"] or i["thesisResolverState"] or "no status")
         for i in primary_runs
         if (i["kalshiSeries"], i["period"]) in released and not i["thesisResolved"]
     )
@@ -719,14 +826,15 @@ def build(results: dict) -> tuple[Doc, str]:
         " read here from the DOL releases."
     )
 
-    # Results
+    # Results -----------------------------------------------------------------------
     doc.h(2, "Results")
     doc.p(
         "Differences are Thesis minus Kalshi for log scores and Kalshi minus Thesis for"
-        " Brier scores, so positive always favors Thesis. Intervals are 95% bootstrap"
-        " intervals over events; p is an exact sign-flip randomization test. With three"
-        " horizons, two scores and several sensitivities, no single interval should be"
-        " read as a discovery."
+        " Brier scores, so positive always favors Thesis. Intervals are 95% percentile"
+        " bootstrap intervals, resampling events or, where stated, release dates. p is"
+        " a two-sided sign-flip randomization test, exact for up to 16 events and from"
+        " 100,000 random sign patterns (MC) above that. With three horizons, two scores"
+        " and five price rules, no single interval should be read as a discovery."
     )
     rows = []
     for spec in ("primary", "liquid_markets_only"):
@@ -735,13 +843,15 @@ def build(results: dict) -> tuple[Doc, str]:
             if not p:
                 continue
             lg, br, lb = p["deltaLog"], p["deltaBrier"], p["deltaLadderBrier"]
+            lo, hi = lg["ci95ReleaseClustered"]
             rows.append(
                 [
                     SPEC_LABELS[spec],
                     HORIZON_LABELS[h],
                     str(lg["n"]),
                     ci_text(lg),
-                    f"{lg['signFlipP']:.3f}",
+                    f"[{num(lo)}, {num(hi)}]",
+                    p_text(lg),
                     ci_text(br),
                     ci_text(lb),
                     wins(lg),
@@ -753,37 +863,87 @@ def build(results: dict) -> tuple[Doc, str]:
             "Horizon",
             "Events",
             "Log difference",
+            "Log, release-clustered interval",
             "p",
             "Brier difference",
             "Ladder Brier difference",
             "Better log score",
         ],
         rows,
-        "Pooled over all primary series, each event weighted equally. Release-clustered"
-        " and series-balanced intervals are in `summary.json`.",
+        "Pooled over the primary series, each event weighted equally. The plan names "
+        "the release-clustered interval for pooled results; both are shown. The "
+        "multi-category Brier is the plan's primary Brier score; the ladder Brier is "
+        "secondary.",
+    )
+    subset_rows = []
+    for spec in ("primary", "liquid_markets_only"):
+        for h in ("release_minus_7d", "release_minus_1d"):
+            v = head[spec][h]["sameEventsAsRegistration"].get("deltaLog")
+            if v:
+                subset_rows.append(
+                    [
+                        SPEC_LABELS[spec],
+                        HORIZON_LABELS[h],
+                        "Same events as registration",
+                        str(v["n"]),
+                        ci_text(v),
+                    ]
+                )
+        if ineligible:
+            v = head[spec]["release_minus_1d"]["headlineEligibleOnly"].get("deltaLog")
+            if v:
+                subset_rows.append(
+                    [
+                        SPEC_LABELS[spec],
+                        HORIZON_LABELS["release_minus_1d"],
+                        "Headline-eligible custody roots only",
+                        str(v["n"]),
+                        ci_text(v),
+                    ]
+                )
+    doc.table(
+        ["Price rule", "Horizon", "Subset", "Events", "Log difference"], subset_rows
     )
 
     for h in HORIZON_LABELS:
         doc.h(3, f"By series: {HORIZON_LABELS[h].lower()}")
         rows = []
         for series in PRIMARY_ORDER:
-            prim = head["primary"][h]["bySeries"].get(series)
-            liq = head["liquid_markets_only"][h]["bySeries"].get(series)
-            if not prim:
+            prim = rows_for("primary", h)
+            liq = rows_for("liquid_markets_only", h)
+            mine = [r for r in prim if r["series"] == series]
+            mine_l = [r for r in liq if r["series"] == series]
+            if not mine:
                 continue
-            lg = prim["deltaLog"]
-            note = "too few to conclude" if lg["n"] < MIN_SERIES_N else direction(lg)
-            rows.append(
-                [
-                    SERIES_LABELS[series],
-                    str(lg["n"]),
-                    ci_text(lg),
-                    ci_text(liq["deltaLog"]) if liq and liq.get("deltaLog") else "n/a",
-                    ci_text(prim["deltaBrier"]),
-                    wins(lg),
-                    note,
-                ]
-            )
+            if len(mine) >= MIN_SERIES_N:
+                v = head["primary"][h]["bySeries"][series]["deltaLog"]
+                vl = (
+                    head["liquid_markets_only"][h]["bySeries"]
+                    .get(series, {})
+                    .get("deltaLog")
+                )
+                vb = head["primary"][h]["bySeries"][series]["deltaBrier"]
+                rows.append(
+                    [
+                        SERIES_LABELS[series],
+                        str(len(mine)),
+                        f"{ci_text(v)}, p {p_text(v)}",
+                        ci_text(vl) if vl else "n/a",
+                        ci_text(vb),
+                        wins(v),
+                    ]
+                )
+            else:
+                rows.append(
+                    [
+                        SERIES_LABELS[series],
+                        str(len(mine)),
+                        values_text(mine, "deltaLog"),
+                        values_text(mine_l, "deltaLog") or "n/a",
+                        values_text(mine, "deltaBrier"),
+                        "too few to summarize",
+                    ]
+                )
         doc.table(
             [
                 "Statistic",
@@ -792,9 +952,11 @@ def build(results: dict) -> tuple[Doc, str]:
                 "Log, liquid only",
                 "Brier difference",
                 "Better log score",
-                "Reading",
             ],
             rows,
+            "With fewer than five events the individual differences are listed in "
+            "period order; with two events a bootstrap interval is only the two"
+            " values.",
         )
 
     doc.h(3, "Sensitivities")
@@ -808,11 +970,15 @@ def build(results: dict) -> tuple[Doc, str]:
     doc.table(
         ["Rule (pooled log difference)"] + list(HORIZON_LABELS.values()),
         rows,
-        "The liquid-markets rule was added after inspecting bid-ask spreads and before "
-        "any score was inspected; the others were pre-specified.",
+        'All rules but "liquid markets only" were pre-specified. That rule was '
+        "adopted after full runs whose saved output already contained scores; the "
+        "author had not examined them, which the record cannot show, so treat it as "
+        "post hoc. It changes the brackets as well as the prices: some registration "
+        "comparisons rest on one or two strikes, where both forecasters put most "
+        "probability on the realized bracket.",
     )
 
-    # Secondary
+    # Secondary -----------------------------------------------------------------------
     doc.h(2, "Secondary comparisons")
     vs = (
         summary.get("thesis_vs_persistence", {})
@@ -823,10 +989,10 @@ def build(results: dict) -> tuple[Doc, str]:
         items = []
         for series, m in vs["bySeries"].items():
             items.append(
-                f"{SERIES_LABELS[series]}: log {ci_text(m['deltaLog'])}"
-                f" ({wins(m['deltaLog'], 'headline', 'baseline')}); Brier"
-                f" {ci_text(m['deltaBrier'])}"
-                f" ({wins(m['deltaBrier'], 'headline', 'baseline')})"
+                f"{SERIES_LABELS[series]}: log {ci_text(m['deltaLog'])} "
+                f"({wins(m['deltaLog'], 'headline', 'baseline')}); Brier "
+                f"{ci_text(m['deltaBrier'])} "
+                f"({wins(m['deltaBrier'], 'headline', 'baseline')})"
             )
         doc.p(
             "**Thesis headline vs Thesis's persistence baseline**, on identical Kalshi "
@@ -837,28 +1003,34 @@ def build(results: dict) -> tuple[Doc, str]:
     for series in ("KXECONSTATCPI", "KXECONSTATCPICORE", "KXECONSTATU3"):
         cells = [SERIES_LABELS[series]]
         for h in HORIZON_LABELS:
-            v = head["primary"][h]["bySeries"].get(series, {}).get("deltaLog")
-            cells.append(f"{ci_text(v)}, n={v['n']}" if v else "n/a")
+            mine = [
+                p
+                for p in pairs
+                if p["series"] == series
+                and p["horizon"] == h
+                and p["spec"] == "primary"
+            ]
+            cells.append(values_text(mine, "deltaLog") or "n/a")
         exact_rows.append(cells)
     doc.p(
-        '**Exact-value markets** ("exactly X") cover the same CPI and unemployment'
-        ' prints with smaller volume. They are scored with an added "any other value"'
-        " bracket and are not pooled with the main results."
+        '**Exact-value markets** ("exactly X") cover the same CPI and unemployment '
+        'prints with less volume. They are scored with an added "any other value" '
+        "bracket and are not pooled with the main results."
     )
-    doc.table(["Markets (log difference)"] + list(HORIZON_LABELS.values()), exact_rows)
+    doc.table(["Markets (log differences)"] + list(HORIZON_LABELS.values()), exact_rows)
     variant = [i for i in inventory if i["forecaster"].startswith("thesis_variant")]
     if variant:
         v = variant[0]
+        knots = v["publishedCdfCheck"].split(":")[-1].split(",")
         doc.p(
             "**Threshold-ladder variant.** One additional Thesis run"
             f" ({v['dataPointId']}, registered {v['registeredAt'][:10]}) used ladder"
-            " elicitation. Its published CDF does not pass through 10% and 90% at its"
-            f" stated 80% interval (`{v['publishedCdfCheck']}`), consistent with rungs"
-            " stated on the published one-decimal value; its scores under both CDF"
-            " readings are in `pairs.csv`."
+            f" elicitation. Its published CDF is {knots[0]} at the lower end of its"
+            f" stated 80% interval and {knots[-1]} at the upper end, rather than 0.1"
+            " and 0.9. Its scores under both CDF readings are in `pairs.csv`."
         )
 
-    # Liquidity
+    # Liquidity ---------------------------------------------------------------------
     doc.h(2, "Market liquidity")
     by: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for m in results["markets"]:
@@ -867,6 +1039,8 @@ def build(results: dict) -> tuple[Doc, str]:
             by[(series, m["horizon"])].append(m)
     rows = []
     for series in PRIMARY_ORDER:
+        if not any(by.get((series, h)) for h in HORIZON_LABELS):
+            continue
         cells = [SERIES_LABELS[series]]
         for h in HORIZON_LABELS:
             ms = by.get((series, h))
@@ -888,47 +1062,64 @@ def build(results: dict) -> tuple[Doc, str]:
         + list(HORIZON_LABELS.values())
         + ["Lifetime contracts traded (scored events)"],
         rows,
-        "Median bid-ask spread across an event's markets at the horizon, and contracts"
-        " traded in the seven days before it, summed over scored events. Per-market"
-        " detail is in `markets.csv`.",
+        "Median bid-ask spread across an event's markets at the horizon, and contracts "
+        "traded in the seven days before it, summed over scored events. Per-market "
+        "detail, including volume traded up to each horizon, is in `markets.csv`.",
     )
 
-    # Caveats
+    # Caveats ------------------------------------------------------------------------
+    kalshi_floor_hits = [
+        s
+        for s in results["scores"]
+        if s["spec"] == "primary"
+        and s["forecaster"] == "thesis_headline"
+        and s["primarySeries"]
+        and s["kalshiFloored"]
+    ]
+    unquoted = sum(
+        1
+        for e in results["exclusions"]
+        if e.get("reason") == "market open but no candle by then"
+    )
     doc.h(2, "Caveats")
     doc.ul(
         [
             (
                 "Samples are small and correlated: headline and core CPI share a"
-                " release, as do U-3 and payrolls, and initial and continuing claims."
+                " release, as do U-3 and payrolls, initial and continuing claims, and"
+                " housing starts and permits."
             ),
             (
                 "Only the registration-time comparison gives both sides the same"
-                " information. The 7-day and 1-day comparisons pit a fixed Thesis"
-                " forecast against a market that has kept updating, so they measure how"
-                " much later information was worth as much as forecasting skill."
+                " information, and even there Kalshi may have had slightly more:"
+                " registration is the witness time, up to about half a day after the"
+                " run's recorded time. The 7-day and 1-day comparisons pit a fixed"
+                " Thesis forecast against a market that has kept updating, so they"
+                " measure the value of later information as much as forecasting skill."
             ),
             (
                 "Thesis interval-seeded CDFs are a piecewise-linear shape through five"
                 " knots (support ends, 10%, 50%, 90%), so the probability on a narrow"
                 " bracket reflects that transform as much as the forecaster's belief."
             ),
+            "Kalshi's empty or wide books produce midpoints that are not forecasts,"
+            " and isotonic repair can pool them into a flat run that gives a bracket"
+            f" zero. Under the primary rule, {len(kalshi_floor_hits)} Kalshi log scores"
+            " hit the probability floor this way ("
+            + ", ".join(
+                f"{s['eventKey']} {s['horizon'].replace('_', ' ')}"
+                for s in kalshi_floor_hits
+            )
+            + "). The liquid-markets rule drops such books.",
             (
-                "Kalshi's empty or one-sided books produce midpoints near 50% that are"
-                " not forecasts. The pre-specified primary rule keeps them; the"
-                " liquid-markets rule drops them. Under the primary rule,"
-                f" {kalshi_floor_hits} Kalshi log scores hit the probability floor;"
-                " each came from a book of near-50% midpoints."
+                f"{unquoted} market-horizon cases had a market open but never quoted"
+                " before the horizon; those markets are left out of that horizon's"
+                " ladder and listed in `exclusions.csv`."
             ),
             (
-                "Weekly claims comparisons exist almost only one day before release"
-                f" ({claims_total - claims_no_market} of {claims_total} weeks are also"
-                " scored at registration), and continuing-claims markets are thinly"
-                " traded."
-            ),
-            (
-                "Thesis registration uses the RFC 3161 witness time of the run's"
-                " custody root; the deterministic persistence baseline has no custody"
-                " root and uses its recorded time."
+                "Weekly claims are mostly comparable only one day before release,"
+                " because Kalshi usually lists each week's markets after Thesis"
+                " registers, and continuing-claims markets are thinly traded."
             ),
         ]
     )
@@ -938,8 +1129,8 @@ def build(results: dict) -> tuple[Doc, str]:
         "From a checkout of the PR branch, with network access: "
         "`python3 scripts/kalshi_paper_comparison.py --out <dir> --as-of <UTC time>`. "
         "Every response used is stored by SHA-256 under `fetch/`; adding `--offline "
-        "--cache <this folder>/../fetch` reruns from the stored responses only. "
-        "`pdftotext` (poppler) is needed to read the DOL releases."
+        "--cache <path to fetch>` reruns from the stored responses only. `pdftotext` "
+        "(poppler) is needed to read the DOL and Census releases."
     )
     doc.h(2, "Files")
     doc.ul(
@@ -947,24 +1138,24 @@ def build(results: dict) -> tuple[Doc, str]:
             (
                 "`inventory.csv`: every matched Thesis run, with registration proof,"
                 " published CDF check, Kalshi event, official value and Thesis resolver"
-                " status."
+                " status. `unmatched.csv`: every other run in scope and the Kalshi"
+                " evidence. `withdrawn.csv`: catalog runs the site does not publish."
             ),
             (
-                "`outcomes.csv`: official first prints, sources, hashes and the Kalshi"
-                " cross-check."
+                "`outcomes.csv`: official first prints, sources, hashes and the Kalshi "
+                "cross-check."
             ),
             (
                 "`markets.csv`: each Kalshi market at each horizon: bid, ask, midpoint,"
-                " last trade, spread, open interest, volume."
+                " last trade, spread, open interest, volume in the prior week and up to"
+                " the horizon."
             ),
             (
                 "`scores.csv` and `pairs.csv`: bracket probabilities and scores per"
-                " event, horizon, forecaster and rule."
-            ),
-            (
-                "`summary.json`: all summaries, including release-clustered and"
-                " series-balanced intervals. `exclusions.csv`, `unmatched.csv`,"
-                " `withdrawn.csv`: what was left out and why."
+                " event, horizon, forecaster and rule. `summary.json`: all summaries,"
+                " including release-clustered and two-stage series-balanced intervals"
+                " and the subsets above. `exclusions.csv`: what was left out at each"
+                " horizon and why."
             ),
         ]
     )

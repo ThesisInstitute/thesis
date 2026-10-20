@@ -43,7 +43,7 @@ class OfficialPrint:
     source_url: str
     source_sha256: str | None
     table_reading: str
-    lead_reading: str | None
+    second_reading: str | None  # the same value read elsewhere in the document
 
 
 def html_text(body: bytes) -> str:
@@ -350,10 +350,133 @@ def parse_bea_core_pce(text: str) -> tuple[str, Decimal, Decimal | None, str]:
     return period, value, lead_value, release_instant(*released.groups())
 
 
+CENSUS_RELEASE_TIME = re.compile(
+    r"FOR RELEASE AT\s+(\d{1,2}):(\d{2})\s+([AP])M\s+(?:EDT|EST|ET),\s+[A-Z]+,\s+"
+    r"([A-Za-z]+ \d{1,2}, \d{4})",
+    re.I,
+)
+
+
+def parse_census_construction(
+    text: str, statistic: str
+) -> tuple[str, Decimal, Decimal | None, str]:
+    """Census/HUD New Residential Construction: starts or permits, in millions."""
+    released = CENSUS_RELEASE_TIME.search(text)
+    if not released:
+        raise OfficialParseError("no release statement in the Census release")
+    title = re.search(
+        rf"MONTHLY NEW RESIDENTIAL CONSTRUCTION,\s+({MONTH_WORD})\s+(\d{{4}})",
+        text,
+        re.I,
+    )
+    if not title:
+        raise OfficialParseError("New Residential Construction title not found")
+    period = month_period(title.group(1), title.group(2))
+    month_word = rf"{title.group(1)}"
+    if statistic == "starts":
+        lead = re.search(
+            rf"Privately-owned housing starts in {month_word} were at a seasonally[- ]"
+            r"adjusted annual rate of\s+([\d,]+)",
+            text,
+            re.I,
+        )
+        box = re.search(r"Housing Starts:\s+([\d,]+)", text)
+    else:
+        lead = re.search(
+            rf"Privately-owned housing units authorized by building permits in "
+            rf"{month_word} were at a seasonally[- ]adjusted annual rate of\s+([\d,]+)",
+            text,
+            re.I,
+        )
+        box = re.search(r"Building Permits:\s+([\d,]+)", text)
+    if not lead:
+        raise OfficialParseError(f"Census {statistic} lead sentence not found")
+    value = to_decimal(lead.group(1)) / Decimal(1_000_000)
+    second = to_decimal(box.group(1)) / Decimal(1_000_000) if box else None
+    return period, value, second, release_instant(*released.groups())
+
+
+def parse_census_new_home_sales(text: str) -> tuple[str, Decimal, Decimal | None, str]:
+    """Census/HUD New Residential Sales: new houses sold, SAAR, in houses."""
+    released = CENSUS_RELEASE_TIME.search(text)
+    if not released:
+        raise OfficialParseError("no release statement in the Census release")
+    title = re.search(
+        rf"MONTHLY NEW RESIDENTIAL SALES,\s+({MONTH_WORD})\s+(\d{{4}})", text, re.I
+    )
+    if not title:
+        raise OfficialParseError("New Residential Sales title not found")
+    period = month_period(title.group(1), title.group(2))
+    lead = re.search(
+        rf"Sales of new single-family houses in {title.group(1)}(?: \d{{4}})? were"
+        r" at a "
+        r"seasonally[- ]adjusted annual rate of\s+([\d,]+)",
+        text,
+        re.I,
+    )
+    box = re.search(r"New Houses Sold\s*\d?:\s+([\d,]+)", text)
+    if not lead:
+        raise OfficialParseError("New Residential Sales lead sentence not found")
+    second = to_decimal(box.group(1)) if box else None
+    return (
+        period,
+        to_decimal(lead.group(1)),
+        second,
+        release_instant(*released.groups()),
+    )
+
+
+ABS_OFFSETS = {"AEST": 10, "AEDT": 11}
+
+
+def parse_abs_unemployment(text: str) -> tuple[str, Decimal, Decimal | None, str]:
+    """ABS Labour Force, Australia release page: seasonally adjusted rate."""
+    reference = re.search(rf"Reference period\s+({MONTH_WORD})\s+(\d{{4}})", text, re.I)
+    released = re.search(
+        r"Release date and time\s+(\d{2})/(\d{2})/(\d{4})\s+(\d{1,2}):(\d{2})\s*(am|pm)"
+        r"\s+(AEST|AEDT)",
+        text,
+        re.I,
+    )
+    if not reference or not released:
+        raise OfficialParseError("ABS reference period or release time not found")
+    period = month_period(reference.group(1), reference.group(2))
+    day, month, year, hour, minute, meridiem, zone = released.groups()
+    hour_24 = int(hour) % 12 + (12 if meridiem.lower() == "pm" else 0)
+    local = dt.datetime(int(year), int(month), int(day), hour_24, int(minute))
+    release_at = (local - dt.timedelta(hours=ABS_OFFSETS[zone.upper()])).strftime(
+        "%Y-%m-%dT%H:%M:%SZ"
+    )
+    lead = re.search(
+        rf"In seasonally adjusted terms, in {reference.group(1)} {reference.group(2)}:"
+        r".{0,400}?the unemployment rate (?:was|remained at|rose to|increased to|"
+        r"fell to|decreased to|declined to)\s+(\d+\.\d)%",
+        text,
+        re.I,
+    )
+    if not lead:
+        raise OfficialParseError(
+            "ABS seasonally adjusted unemployment sentence not found"
+        )
+    table = re.search(r"Unemployment rate\s+(\d+\.\d)%\s+(\d+\.\d)%", text)
+    second = Decimal(table.group(2)) if table else None
+    return period, Decimal(lead.group(1)), second, release_at
+
+
 BLS_ARCHIVE = "https://www.bls.gov/news.release/archives/{name}_{date:%m%d%Y}.htm"
 DOL_ARCHIVE = "https://oui.doleta.gov/press/{date:%Y}/{date:%m%d%y}.pdf"
 BEA_RELEASE = (
     "https://www.bea.gov/news/{year}/personal-income-and-outlays-{month}-{year}"
+)
+CENSUS_NRC = (
+    "https://www.census.gov/construction/nrc/pdf/newresconst_{year}{month:02d}.pdf"
+)
+CENSUS_NRS = (
+    "https://www.census.gov/construction/nrs/pdf/newressales_{year}{month:02d}.pdf"
+)
+ABS_LABOUR_FORCE = (
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/"
+    "labour-force-australia/{month}-{year}"
 )
 MONTH_SLUG = [
     "",
@@ -412,6 +535,26 @@ def source_for(official: str, period: str, release_date: dt.date) -> Source:
             "html",
             parse_bea_core_pce,
         )
+    year, month = int(period[:4]), int(period[5:7])
+    if official in ("census_starts", "census_permits"):
+        statistic = "starts" if official == "census_starts" else "permits"
+        return Source(
+            CENSUS_NRC.format(year=year, month=month),
+            "pdf",
+            lambda text: parse_census_construction(text, statistic),
+        )
+    if official == "census_new_home_sales":
+        return Source(
+            CENSUS_NRS.format(year=year, month=month),
+            "pdf",
+            parse_census_new_home_sales,
+        )
+    if official == "abs_unemployment":
+        return Source(
+            ABS_LABOUR_FORCE.format(month=MONTH_SLUG[month][:3], year=year),
+            "html",
+            parse_abs_unemployment,
+        )
     raise KeyError(official)
 
 
@@ -427,20 +570,18 @@ def fetch_print(
     source = source_for(official, period, release_date)
     body = cache.get(source.url, user_agent=BROWSER_COMPATIBLE_UA, accept="*/*")
     text = pdf_text(body) if source.kind == "pdf" else html_text(body)
-    parsed_period, value, lead, release_at = source.parse(text)
+    parsed_period, value, second, release_at = source.parse(text)
     if parsed_period != period:
         raise OfficialParseError(
             f"{source.url} reports {parsed_period}, expected {period}"
         )
-    if lead is not None:
-        if official == "bls_jolts_openings":
-            if abs(lead - value) > Decimal("0.05"):
-                raise OfficialParseError(f"{source.url}: lead {lead} vs table {value}")
-        elif official == "bls_payrolls":
-            if lead != value:
-                raise OfficialParseError(f"{source.url}: lead {lead} vs table {value}")
-        elif lead != value:
-            raise OfficialParseError(f"{source.url}: lead {lead} vs table {value}")
+    if second is not None:
+        # The JOLTS lead rounds to 0.1 million, so it can only bound the table.
+        tolerance = Decimal("0.05") if official == "bls_jolts_openings" else Decimal(0)
+        if abs(second - value) > tolerance:
+            raise OfficialParseError(
+                f"{source.url}: readings {value} and {second} differ"
+            )
     return OfficialPrint(
         statistic=official,
         period=period,
@@ -449,5 +590,5 @@ def fetch_print(
         source_url=source.url,
         source_sha256=cache.sha256_of(source.url),
         table_reading=str(value),
-        lead_reading=None if lead is None else str(lead),
+        second_reading=None if second is None else str(second),
     )

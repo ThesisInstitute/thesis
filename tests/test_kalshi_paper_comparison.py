@@ -349,6 +349,7 @@ def test_published_cdf_matches_the_documented_transform(run):
         recorded_at="",
         registration=None,
         unit="",
+        country="US",
         point=run["pointEstimate"],
         ci_low=run["interval80"][0],
         ci_high=run["interval80"][1],
@@ -538,3 +539,198 @@ def test_bootstrap_is_deterministic_and_brackets_the_mean():
     clustered = scoring.bootstrap_ci(values, ["a", "a", "b", "b", "c", "c"])
     assert clustered[0] <= scoring.mean(values) <= clustered[1]
     assert scoring.bootstrap_ci([0.2] * 5) == (pytest.approx(0.2), pytest.approx(0.2))
+
+
+# Added after review r1 ------------------------------------------------------------
+
+
+def test_census_construction_release():
+    text = EXCERPTS["census_nrc_2026-07"]["excerpt"]
+    assert official.parse_census_construction(text, "starts") == (
+        "2026-07",
+        Decimal("1.239"),
+        Decimal("1.239"),
+        "2026-08-18T12:30:00Z",
+    )
+    assert official.parse_census_construction(text, "permits")[1] == Decimal("1.443")
+
+
+def test_census_new_home_sales_release():
+    # The lead writes "seasonally-adjusted" with a hyphen; the release is 10:00 ET.
+    assert official.parse_census_new_home_sales(
+        EXCERPTS["census_nrs_2026-07"]["excerpt"]
+    ) == ("2026-07", Decimal("607000"), Decimal("607000"), "2026-08-25T14:00:00Z")
+
+
+def test_abs_labour_force_release_in_canberra_time():
+    assert official.parse_abs_unemployment(EXCERPTS["abs_lf_2026-07"]["excerpt"]) == (
+        "2026-07",
+        Decimal("4.5"),
+        Decimal("4.5"),
+        "2026-08-20T01:30:00Z",
+    )
+
+
+@pytest.mark.parametrize(
+    ("event", "series", "value"),
+    [
+        ("KXHOUSINGSTART-26AUG18", "KXHOUSINGSTART", Decimal("1.239")),
+        ("KXBUILDPERMS-26AUG18", "KXBUILDPERMS", Decimal("1.443")),
+        ("KXNHSALES-26AUG25", "KXNHSALES", Decimal("607000")),
+        ("KXUE-AUS26JUL", "KXUE", Decimal("4.5")),
+    ],
+)
+def test_added_series_reproduce_kalshi_results(event, series, value):
+    series_spec = spec(series)
+    period, _ = contracts.event_period(
+        KALSHI["events"][event], KALSHI["markets"][event], "monthly"
+    )
+    assert period == "2026-07"
+    for market in KALSHI["markets"][event]:
+        strike = contracts.strike_of(market, series_spec)
+        yes = contracts.market_yes("ladder", market["strike_type"], strike, value)
+        assert market["result"] == ("yes" if yes else "no"), market["ticker"]
+
+
+NEW_HOME_SALES_TARGET = (
+    "census.new_residential_sales.new_single_family_houses_sold_saar.2026_07"
+    ".first_print"
+)
+
+
+def test_added_thesis_targets_match():
+    cases = {
+        "census.housing_starts.saar.2026-07.first_print": ("KXHOUSINGSTART", "1"),
+        "census.housing.permits_saar.2026_07.first_print": ("KXBUILDPERMS", "0.001"),
+        NEW_HOME_SALES_TARGET: (
+            "KXNHSALES",
+            "1000",
+        ),
+        "abs.labour.unemployment_rate.2026_08.first_print": ("KXUE", "1"),
+        "abs.labour.unemployment_rate.australia.july_2026.first_print": ("KXUE", "1"),
+    }
+    for data_point, (series, scale) in cases.items():
+        ((found, _period, pattern),) = contracts.match_target(data_point)
+        assert found.series == series and pattern.to_strike == Decimal(scale)
+    assert spec("KXUE").event_prefix == "KXUE-AUS"
+
+
+def test_rule_direction_must_match_strike_type():
+    market = dict(KALSHI["markets"]["KXCPI-26AUG"][0])
+    market["strike_type"] = "greater_or_equal"
+    with pytest.raises(ValueError, match="strike_type"):
+        contracts.strike_of(market, spec("KXCPI"))
+
+
+@pytest.mark.parametrize(
+    ("data_point", "period"),
+    [
+        ("bls.wp.WPSFD4.2026_07.first_print", "2026-07"),
+        ("bls.cpi.owners_equivalent_rent_mom.july_2026.first_print", "2026-07"),
+        ("us.dol.initial_claims.sa.week_2026-08-08", "2026-08-08"),
+        ("census.housing_starts.saar.2026-07.first_print", "2026-07"),
+        ("irs.actc.total_claims.2027.first_print.current_law", None),
+    ],
+)
+def test_period_of(data_point, period):
+    assert contracts.period_of(data_point) == period
+
+
+class FakeCache:
+    """Serves canned Kalshi /events pages for unmatched_rows."""
+
+    def __init__(self, events):
+        self.events = events
+
+    def get_json(self, url, **_):
+        return {"events": self.events, "cursor": ""}
+
+
+def thesis_run(data_point: str, country: str = "US") -> thesis.ThesisRun:
+    return thesis.ThesisRun(
+        run_id=f"run.{data_point}",
+        slug="",
+        data_point_id=data_point,
+        label="Headline",
+        agent="thesis.analyst",
+        model=None,
+        recorded_at="2026-07-20T00:00:00Z",
+        registration=None,
+        unit="",
+        country=country,
+        point=0.0,
+        ci_low=0.0,
+        ci_high=0.0,
+        provenance="",
+        transform_version="",
+        resolution_date=None,
+    )
+
+
+def test_unmatched_rows_cite_kalshi_evidence():
+    from kalshi_compare import pipeline
+
+    cache = FakeCache(
+        [
+            {
+                "event_ticker": "KXUSPPI-26SEP10",
+                "title": "PPI MoM in August",
+                "sub_title": "August 2026",
+            },
+        ]
+    )
+    rows = pipeline.unmatched_rows(
+        cache,
+        [
+            thesis_run("bls.wp.WPSFD4.2026_07.first_print"),
+            thesis_run("fns.wic.total_participation.2026_09.first_print"),
+        ],
+    )
+    ppi, wic = rows
+    assert ppi["reason"] == "Kalshi's related series has no event for this period"
+    assert "KXUSPPI: 2026-08" in ppi["kalshiEvidence"]
+    assert wic["reason"].startswith("no Kalshi series")
+
+
+def test_unmatched_rows_refuse_an_unhandled_match():
+    from kalshi_compare import pipeline
+
+    cache = FakeCache(
+        [
+            {
+                "event_ticker": "KXUSPPI-26AUG",
+                "title": "PPI MoM in July",
+                "sub_title": "July 2026",
+            }
+        ]
+    )
+    with pytest.raises(ValueError, match="add a SeriesSpec"):
+        pipeline.unmatched_rows(
+            cache, [thesis_run("bls.wp.WPSFD4.2026_07.first_print")]
+        )
+
+
+def test_state_at_reaches_back_to_an_old_candle():
+    # A book that last changed weeks before the horizon is still its state.
+    old = kalshi.Candle(
+        end=1_000,
+        bid=0.4,
+        ask=0.5,
+        trade_close=None,
+        trade_previous=0.45,
+        volume=3.0,
+        open_interest=10.0,
+    )
+    state = kalshi.state_at([old], 1_000 + 40 * 24 * 3600)
+    assert state.candle_end == 1_000 and state.mid == pytest.approx(0.45)
+    assert state.volume_7d == 0
+
+
+def test_two_stage_interval_is_wider_than_fixed_strata():
+    from kalshi_compare import pipeline
+
+    groups = {"a": [1.0, 1.1], "b": [-1.0, -0.9], "c": [0.2, 0.3]}
+    lo, hi = pipeline.two_stage_ci(groups)
+    balanced = sum(sum(v) / len(v) for v in groups.values()) / len(groups)
+    assert lo <= balanced <= hi
+    assert hi - lo > 1.0  # between-series spread dominates

@@ -27,7 +27,6 @@ SENSITIVITY_SPECS = {
         "max_spread": 0.20,
     },
 }
-CANDLE_LOOKBACK = 14 * 24 * 3600
 
 
 @dataclasses.dataclass
@@ -101,22 +100,11 @@ def run(
     matched: list[
         tuple[thesis.ThesisRun, contracts.SeriesSpec, str, contracts.ThesisPattern]
     ] = []
-    unmatched: list[dict] = []
+    unmatched_runs: list[thesis.ThesisRun] = []
     for run_ in in_scope:
         hits = contracts.match_target(run_.data_point_id)
         if not hits:
-            if run_.data_point_id.startswith(("bls.", "bea.", "dol.", "us.")):
-                unmatched.append(
-                    {
-                        "runId": run_.run_id,
-                        "dataPointId": run_.data_point_id,
-                        "recordedAt": run_.recorded_at,
-                        "reason": (
-                            contracts.unmatched_reason(run_.data_point_id)
-                            or "no Kalshi series for this statistic"
-                        ),
-                    }
-                )
+            unmatched_runs.append(run_)
             continue
         for spec, period, pattern in hits:
             if run_.unit not in pattern.units:
@@ -132,12 +120,21 @@ def run(
         run_.cdf = cdfs.get(run_.run_id)
         run_.cdf_check = thesis.rebuild_check(run_)
 
+    catalog_url = kalshi.build_url(kalshi.API, "/series")
+    catalog = cache.get_json(catalog_url)["series"]
+    unmatched = unmatched_rows(cache, unmatched_runs)
+
     # Kalshi events by (series, period).
     units: dict[str, EventUnit] = {}
     events_by_series: dict[str, list[dict]] = {}
     for run_, spec, period, pattern in matched:
         if spec.series not in events_by_series:
-            events_by_series[spec.series] = kalshi.series_events(cache, spec.series)
+            events_by_series[spec.series] = [
+                event
+                for event in kalshi.series_events(cache, spec.series)
+                if not spec.event_prefix
+                or event["event_ticker"].startswith(spec.event_prefix)
+            ]
         key = f"{spec.series}:{period}"
         if key not in units:
             units[key] = EventUnit(spec, period, None, [], [])
@@ -208,17 +205,13 @@ def run(
         if late:
             unit.result_mismatches.append(f"markets close after the release: {late}")
 
-    # Candles for scored units.
+    # Candles for scored units, over each market's whole life, so the last
+    # book before a horizon is found however long ago it changed.
     for unit in units.values():
         if unit.official is None:
             continue
-        release_ts = kalshi.to_ts(unit.official.release_at)
-        earliest = min(
-            [kalshi.to_ts(r.registration.at) for r, _ in unit.runs]
-            + [release_ts - 7 * 24 * 3600]
-        )
         for market in unit.markets:
-            start = max(kalshi.to_ts(market["open_time"]), earliest - CANDLE_LOOKBACK)
+            start = kalshi.to_ts(market["open_time"]) - 3600
             end = kalshi.to_ts(market["close_time"])
             candles, tier = kalshi.market_candles(
                 cache, unit.spec.series, market, start, end
@@ -243,11 +236,19 @@ def run(
             "publishedRuns": len(all_runs),
             "publishedRunsInScope": len(in_scope),
             "ledgerPin": ledger.get("source", {}).get("pin"),
+            "kalshiCatalog": {
+                "url": catalog_url,
+                "sha256": cache.sha256_of(catalog_url),
+                "series": len(catalog),
+                "economicsSeries": sum(
+                    1 for item in catalog if item.get("category") == "Economics"
+                ),
+            },
             "specs": SENSITIVITY_SPECS,
         },
         "inventory": inventory_rows(units, observations, status, resolved),
         "unmatched": unmatched,
-        "withdrawn": withdrawn_cells(repo, commit, all_runs),
+        "withdrawn": withdrawn_cells(repo, commit, all_runs, cache),
         "outcomes": outcome_rows(units, observations),
         "markets": market_rows,
         "scores": scores,
@@ -297,6 +298,7 @@ def score_units(
                     "forecaster": run_.forecaster,
                     "releaseAt": unit.official.release_at,
                     "releaseDate": unit.official.release_at[:10],
+                    "registrationHeadlineEligible": run_.registration.headline_eligible,
                 }
                 if at < registered:
                     exclusions.append(
@@ -307,8 +309,16 @@ def score_units(
                 for market in unit.markets:
                     if kalshi.to_ts(market["open_time"]) > at:
                         continue
-                    state = kalshi.state_at(unit.candles.get(market["ticker"], []), at)
+                    candles = unit.candles.get(market["ticker"], [])
+                    state = kalshi.state_at(candles, at)
                     if state.candle_end is None:
+                        exclusions.append(
+                            {
+                                **base,
+                                "ticker": market["ticker"],
+                                "reason": "market open but no candle by then",
+                            }
+                        )
                         continue
                     strike = contracts.strike_of(market, unit.spec)
                     admitted.append((strike, market, state))
@@ -331,6 +341,9 @@ def score_units(
                                 "candleAgeHours": (at - state.candle_end) / 3600,
                                 "openInterest": state.open_interest,
                                 "volume7d": state.volume_7d,
+                                "volumeToHorizon": sum(
+                                    c.volume for c in candles if c.end <= at
+                                ),
                                 "lifetimeVolume": kalshi.market_volume(market),
                                 "result": market.get("result"),
                                 "tier": unit.candle_tiers.get(market["ticker"]),
@@ -489,6 +502,7 @@ def build_pairs(scores: list[dict]) -> list[dict]:
                 "kalshiLadderBrier",
                 "registrationCoverage",
                 "registeredAt",
+                "registrationHeadlineEligible",
             )
         }
         pair["deltaLog"] = row["thesisLog"] - row["kalshiLog"]
@@ -516,8 +530,12 @@ def primary_pairs(pairs: list[dict], forecaster: str = "thesis_headline") -> lis
     return list(chosen.values())
 
 
-def stratified_ci(groups: dict[str, list[float]]) -> tuple[float, float]:
-    """Series-balanced mean: resample events within each series."""
+def two_stage_ci(groups: dict[str, list[float]]) -> tuple[float, float]:
+    """Series-balanced mean: resample series, then events within each series.
+
+    Treating series as fixed strata ignores between-series variation and is
+    far too narrow when most series hold two or three events.
+    """
     import random
 
     rng = random.Random(scoring.SEED)
@@ -525,8 +543,8 @@ def stratified_ci(groups: dict[str, list[float]]) -> tuple[float, float]:
     means = []
     for _ in range(scoring.BOOTSTRAP_DRAWS):
         series_means = []
-        for key in keys:
-            values = groups[key]
+        for _ in keys:
+            values = groups[keys[rng.randrange(len(keys))]]
             sample = [values[rng.randrange(len(values))] for _ in values]
             series_means.append(sum(sample) / len(sample))
         means.append(sum(series_means) / len(series_means))
@@ -541,13 +559,27 @@ def summarize_pairs(pairs: list[dict]) -> dict:
         by_spec: dict[str, Any] = {}
         for spec_name in SENSITIVITY_SPECS:
             by_horizon: dict[str, Any] = {}
+            spec_rows = [p for p in chosen if p["spec"] == spec_name]
+            at_registration = {
+                p["eventKey"] for p in spec_rows if p["horizon"] == "at_registration"
+            }
             for horizon in HORIZONS:
-                rows = [
-                    p
-                    for p in chosen
-                    if p["spec"] == spec_name and p["horizon"] == horizon
-                ]
-                by_horizon[horizon] = summarize_rows(rows)
+                rows = [p for p in spec_rows if p["horizon"] == horizon]
+                summary = summarize_rows(rows)
+                # Subsets the review asked for: the same events as the
+                # registration comparison, and runs whose custody root
+                # Thesis's own verifier marks headline eligible.
+                summary["sameEventsAsRegistration"] = summarize_rows(
+                    [r for r in rows if r["eventKey"] in at_registration]
+                )["pooled"]
+                summary["headlineEligibleOnly"] = summarize_rows(
+                    [
+                        r
+                        for r in rows
+                        if r.get("registrationHeadlineEligible") is not False
+                    ]
+                )["pooled"]
+                by_horizon[horizon] = summary
             by_spec[spec_name] = by_horizon
         out[forecaster] = by_spec
     out["thesis_vs_persistence"] = thesis_vs_baseline(pairs)
@@ -632,7 +664,7 @@ def summarize_rows(rows: list[dict]) -> dict:
                 series_groups
             )
             pooled["seriesBalancedMean"] = balanced
-            pooled["seriesBalancedCi95"] = list(stratified_ci(series_groups))
+            pooled["seriesBalancedCi95TwoStage"] = list(two_stage_ci(series_groups))
             pooled["nSeries"] = len(series_groups)
             result["pooled"][metric] = pooled
     return result
@@ -725,8 +757,8 @@ def outcome_rows(units, observations) -> list[dict]:
                 "officialValue": (
                     None if official_value is None else str(official_value)
                 ),
-                "officialLeadReading": (
-                    None if unit.official is None else unit.official.lead_reading
+                "officialSecondReading": (
+                    None if unit.official is None else unit.official.second_reading
                 ),
                 "releaseAt": (
                     None if unit.official is None else unit.official.release_at
@@ -743,6 +775,9 @@ def outcome_rows(units, observations) -> list[dict]:
                 "thesisLedgerValues": thesis_in_strike_units,
                 "thesisLedgerAgreesWithOfficial": agrees,
                 "nMarkets": len(unit.markets),
+                "expectedRelease": (
+                    close_date_et(unit.markets[0]).isoformat() if unit.markets else None
+                ),
                 "lifetimeVolume": sum(
                     kalshi.market_volume(m) or 0.0 for m in unit.markets
                 ),
@@ -751,7 +786,76 @@ def outcome_rows(units, observations) -> list[dict]:
     return rows
 
 
-def withdrawn_cells(repo, commit, all_runs) -> list[dict]:
+def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict]:
+    """Every in-scope run with no matching Kalshi event, with the evidence.
+
+    For statistics where the catalog screen found a related Kalshi series,
+    the series' events are fetched and the run's period looked up, so the
+    reason says what Kalshi lists rather than asserting it.
+    """
+    events_by_series: dict[str, dict[str, list[str]]] = {}
+
+    def periods_for(series: str) -> dict[str, list[str]]:
+        if series not in events_by_series:
+            by_period: dict[str, list[str]] = {}
+            for event in kalshi.series_events(cache, series):
+                text = f"{event.get('title', '')} {event.get('sub_title', '')}"
+                for period in contracts.text_periods(text, "monthly"):
+                    by_period.setdefault(period, []).append(event["event_ticker"])
+            events_by_series[series] = by_period
+        return events_by_series[series]
+
+    rows = []
+    for run_ in runs:
+        period = contracts.period_of(run_.data_point_id)
+        related = contracts.related_series(run_.data_point_id)
+        if related is None:
+            reason = "no Kalshi series for this statistic found in the catalog screen"
+            detail = ""
+        else:
+            series_list, note = related
+            found = []
+            listed = []
+            for series in series_list:
+                periods = periods_for(series)
+                listed.append(
+                    f"{series}: "
+                    + (
+                        ", ".join(sorted(p for p in periods if p >= "2026-06"))
+                        or "no 2026 events"
+                    )
+                )
+                if period and period in periods:
+                    found.append(f"{series} {periods[period]}")
+            if found and note == "same statistic":
+                raise ValueError(
+                    f"{run_.data_point_id}: {found} lists the period; add a SeriesSpec"
+                )
+            if found:
+                reason = f"Kalshi lists the period, but {note}"
+            else:
+                reason = "Kalshi's related series has no event for this period"
+                if note != "same statistic":
+                    reason += f" ({note})"
+            detail = "; ".join(listed)
+        rows.append(
+            {
+                "runId": run_.run_id,
+                "dataPointId": run_.data_point_id,
+                "country": run_.country,
+                "recordedAt": run_.recorded_at,
+                "period": period,
+                "reason": reason,
+                "kalshiEvidence": detail,
+            }
+        )
+    return rows
+
+
+NO_FORECAST_TEXT = "No forecast available"
+
+
+def withdrawn_cells(repo, commit, all_runs, cache: FetchCache) -> list[dict]:
     published = {(r.data_point_id, r.recorded_at) for r in all_runs}
     published_slugs = {r.slug for r in all_runs}
     out = []
@@ -763,6 +867,9 @@ def withdrawn_cells(repo, commit, all_runs) -> list[dict]:
                 continue
             if (cell["dataPointId"], run_at) in published:
                 continue
+            page = cache.get(
+                f"{thesis.SITE}/{cell['slug']}", accept="text/html", allow_404=True
+            )
             out.append(
                 {
                     "slug": cell["slug"],
@@ -770,6 +877,9 @@ def withdrawn_cells(repo, commit, all_runs) -> list[dict]:
                     "claimedRunAt": run_at,
                     "file": cell["file"],
                     "slugHasPublishedRun": cell["slug"] in published_slugs,
+                    "livePageSaysNoForecast": (
+                        None if page is None else NO_FORECAST_TEXT.encode() in page
+                    ),
                 }
             )
     return out

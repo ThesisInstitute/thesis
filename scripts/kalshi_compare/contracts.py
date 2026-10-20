@@ -57,6 +57,7 @@ class SeriesSpec:
     primary: bool
     release_hour_et: tuple[int, int]
     canonical_unit: str = "percent"  # percent | persons | millions (strike units)
+    event_prefix: str | None = None  # for multi-country series such as KXUE
 
     def match(self, data_point_id: str) -> tuple[str, ThesisPattern] | None:
         for pattern in self.patterns:
@@ -223,6 +224,86 @@ SPECS: tuple[SeriesSpec, ...] = (
         (8, 30),
     ),
     SeriesSpec(
+        "KXHOUSINGSTART",
+        "Housing starts, SAAR",
+        "monthly",
+        (
+            _p(
+                r"^census\.housing_starts\.saar\.(?P<year>\d{4})-(?P<mm>\d{2})"
+                r"\.first_print$",
+                ("millions",),
+            ),
+        ),
+        Decimal("0.001"),
+        "census_starts",
+        "ladder",
+        True,
+        (8, 30),
+        "millions",
+    ),
+    SeriesSpec(
+        "KXBUILDPERMS",
+        "Building permits, SAAR",
+        "monthly",
+        (
+            _p(
+                r"^census\.housing\.permits_saar\.(?P<year>\d{4})_(?P<mm>\d{2})"
+                r"\.first_print$",
+                ("thousands",),
+                "0.001",
+            ),
+        ),
+        Decimal("0.001"),
+        "census_permits",
+        "ladder",
+        True,
+        (8, 30),
+        "millions",
+    ),
+    SeriesSpec(
+        "KXNHSALES",
+        "New single-family houses sold, SAAR",
+        "monthly",
+        (
+            _p(
+                r"^census\.new_residential_sales\.new_single_family_houses_sold_saar\."
+                r"(?P<year>\d{4})_(?P<mm>\d{2})\.first_print$",
+                ("thousands",),
+                "1000",
+            ),
+        ),
+        Decimal("1000"),
+        "census_new_home_sales",
+        "ladder",
+        True,
+        (10, 0),
+        "persons",
+    ),
+    SeriesSpec(
+        "KXUE",
+        "Australia unemployment rate, SA",
+        "monthly",
+        (
+            _p(
+                r"^abs\.labour\.unemployment_rate\.(?P<year>\d{4})_(?P<mm>\d{2})"
+                r"\.first_print$",
+                PCT,
+            ),
+            _p(
+                rf"^abs\.labour\.unemployment_rate\.australia\.{MONTH_NAME}"
+                r"\.first_print$",
+                PCT,
+            ),
+        ),
+        Decimal("0.1"),
+        "abs_unemployment",
+        "ladder",
+        True,
+        (11, 30),
+        "percent",
+        "KXUE-AUS",
+    ),
+    SeriesSpec(
         "KXECONSTATCPI",
         "CPI-U all items, SA % change (exact value)",
         "monthly",
@@ -257,22 +338,94 @@ SPECS: tuple[SeriesSpec, ...] = (
     ),
 )
 
-# Thesis families that look like Kalshi statistics but have no market for the
-# same quantity, so the inventory can say so explicitly.
-KNOWN_UNMATCHED = (
-    (
-        re.compile(r"^bls\.jolts\.(quits_rate|hires_rate)"),
-        "Kalshi lists no JOLTS quits or hires market",
-    ),
-    (
-        re.compile(r"^bls\.cpi\.(shelter|rent|owners|services)"),
-        "Kalshi's CPI component markets differ",
-    ),
-    (
-        re.compile(r"^bea\.pce_price_index\.monthly_change"),
-        "KXPCEHEAD lists only Aug and Sep 2026",
-    ),
+# Thesis families for which the Kalshi catalog (screened 2026-10-20) has a
+# related series that does not give a scorable match. The pipeline checks
+# each related series' events for the run's period and records what it found.
+RELATED: tuple[tuple[re.Pattern, tuple[str, ...], str], ...] = tuple(
+    (re.compile(pattern), series, note)
+    for pattern, series, note in (
+        (r"^bls\.wp\.WPSFD4", ("KXUSPPI",), "same statistic"),
+        (r"^bls\.cpi\.owners_equivalent_rent", ("KXOER",), "same statistic"),
+        (
+            r"^bls\.cpi\.shelter_mom",
+            ("KXSHELTERCPI",),
+            (
+                "Kalshi's market is on the index level, Thesis's target on the monthly"
+                " change"
+            ),
+        ),
+        (r"^census\.m3\.durable_goods_new_orders", ("KXUSDURABLE",), "same statistic"),
+        (r"^fed\.g17\.industrial_production", ("KXUSIPMOM",), "same statistic"),
+        (r"^bea\.pce_price_index\.monthly_change", ("KXPCEHEAD",), "same statistic"),
+        (r"^statcan\.cpi\.allitems\.yoy", ("KXCACPIYOY",), "same statistic"),
+        (r"^ons\.cpi\.annual_rate", ("KXUKCPIYOY",), "same statistic"),
+        (
+            r"^statjp\.cpi\.tokyo",
+            ("KXJPCPIYOY",),
+            "Kalshi's market is national CPI, Thesis's target is Tokyo CPI",
+        ),
+        (
+            r"^bea\.disposable_personal_income",
+            ("KXUSPINCOME",),
+            "Kalshi's market is personal income growth, Thesis's target the DPI level",
+        ),
+        (
+            r"^bls\.real_earnings\.avg_hourly_mom",
+            ("KXREALWAGES", "KXAHEMOM"),
+            "Kalshi's markets are custom-period real wage growth and nominal earnings",
+        ),
+        (
+            r"^treasury\.mts\.monthly_deficit",
+            ("KXDEFICIT", "KXUSDEBTMON"),
+            "Kalshi's markets are on deficit size by date and the debt level",
+        ),
+        (
+            r"^bea\.trade\.goods_services_deficit",
+            ("KXTRADEDEFFICIT", "KXTRADEDEFICIT"),
+            "Kalshi's markets are custom-period and annual",
+        ),
+        (
+            r"^bls\.productivity\.nonfarm_qoq",
+            ("KXNFPROD",),
+            "Kalshi's market is year-over-year growth in any quarter of a year",
+        ),
+        (
+            r"^eurostat\.unemployment_rate\.euro_area",
+            ("KXUE",),
+            "KXUE lists country events but no euro-area event",
+        ),
+    )
 )
+
+
+def related_series(data_point_id: str) -> tuple[tuple[str, ...], str] | None:
+    for regex, series, note in RELATED:
+        if regex.match(data_point_id):
+            return series, note
+    return None
+
+
+PERIOD_TOKENS = (
+    (re.compile(r"week_(\d{4})-(\d{2})-(\d{2})"), "week"),
+    (re.compile(rf"(?<![a-z])({MONTH_WORD})_(\d{{4}})"), "month_name"),
+    (re.compile(r"(?<!\d)(\d{4})[-_](\d{2})(?![-_\d])"), "year_month"),
+)
+
+
+def period_of(data_point_id: str) -> str | None:
+    """Best-effort reference period of a Thesis data point, for the inventory."""
+    for regex, kind in PERIOD_TOKENS:
+        found = regex.search(data_point_id)
+        if not found:
+            continue
+        if kind == "week":
+            return "-".join(found.groups())
+        if kind == "month_name":
+            return f"{int(found.group(2)):04d}-{MONTHS[found.group(1)]:02d}"
+        year, month = int(found.group(1)), int(found.group(2))
+        if 1 <= month <= 12:
+            return f"{year:04d}-{month:02d}"
+    return None
 
 
 # Invisible characters Unicode classes as letters (Kalshi titled one event
@@ -350,7 +503,7 @@ def week_ending_date(period: str) -> dt.date:
 
 
 RULE_STRIKE = re.compile(
-    r"(?:more than|above|at least|exactly)\s+(?P<number>-?[\d,]*\.?\d+)\s*"
+    r"(?P<word>more than|above|at least|exactly)\s+(?P<number>-?[\d,]*\.?\d+)\s*"
     r"(?P<suffix>%|K\b|k\b|M\b|million|thousand)?",
     re.I,
 )
@@ -400,6 +553,18 @@ def strike_of(market: dict, spec: "SeriesSpec") -> Decimal:
         if not exact:
             raise ValueError(f"{market['ticker']}: cannot read the exact value")
         listed = Decimal(exact.group(1))
+    word = found["word"].lower()
+    expected = {
+        "more than": "greater",
+        "above": "greater",
+        "at least": "greater_or_equal",
+        "exactly": None,
+    }[word]
+    if spec.kind == "ladder" and market.get("strike_type") != expected:
+        raise ValueError(
+            f"{market['ticker']}: rule says {word!r} but strike_type is "
+            f"{market.get('strike_type')}"
+        )
     if listed != number:
         raise ValueError(
             f"{market['ticker']}: rule says {number}, strike field says {listed}"
@@ -425,10 +590,3 @@ def match_target(data_point_id: str) -> list[tuple[SeriesSpec, str, ThesisPatter
         if found:
             out.append((spec, found[0], found[1]))
     return out
-
-
-def unmatched_reason(data_point_id: str) -> str | None:
-    for regex, reason in KNOWN_UNMATCHED:
-        if regex.match(data_point_id):
-            return reason
-    return None

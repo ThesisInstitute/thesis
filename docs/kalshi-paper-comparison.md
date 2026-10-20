@@ -63,6 +63,12 @@ is reported.
 | `dol.eta.continued_claims.sa.week_<date>` | KXCONTCLAIMS | at least X million | advance SA insured unemployment, 0.001 million |
 | `bls.jolts.job_openings.<month>` | KXJOLTSOPEN | above X million | SA job openings, 0.001 million |
 | `us.bea.core_pce.mom_sa.<month>`, `bea.pce.core_mom.<month>` | KXPCECORE | above X | core PCE price index % change, 0.1 |
+| `census.housing_starts.saar.<month>` | KXHOUSINGSTART | above X million | housing starts SAAR, 0.001 million |
+| `census.housing.permits_saar.<month>` | KXBUILDPERMS | above X million | building permits SAAR, 0.001 million |
+| `census.new_residential_sales.new_single_family_houses_sold_saar.<month>` | KXNHSALES | above X homes | new houses sold SAAR, 1,000 |
+| `abs.labour.unemployment_rate.<month>` | KXUE (Australia events) | above X | ABS unemployment rate %, 0.1 |
+
+The last four rows were added after independent review (see the final section).
 
 Secondary: KXECONSTATCPI, KXECONSTATCPICORE and KXECONSTATU3 list "exactly X"
 markets for the same statistics. They are scored separately, with an added
@@ -120,7 +126,8 @@ differences of the repaired ladder prices.
 
 Thesis's bracket probabilities come from its published CDF F. The agency
 publishes Y as a latent value L rounded to the reporting grid g, and F is read
-as the distribution of L (Thesis point estimates sit between grid values). So
+as the distribution of L (a symmetric convention for a continuous CDF of a value
+published on a grid). So
 P(Y > s) = 1 - F(s + g/2) and P(Y >= s) = 1 - F(s - g/2). Sensitivity: the
 literal reading P(Y > s) = P(Y >= s) = 1 - F(s). Thesis units are converted to
 the contract's strike units first (thousands to persons for payrolls and
@@ -173,15 +180,44 @@ Brier(Thesis).
 
 ## Changes made after this plan was first committed
 
-Each was made before any Thesis or Kalshi score was looked at.
+The plan as first committed is commit 98940ca4. Later changes, in order:
 
-- Strike units are read from each market's rule text (see above), after the
-  first run showed the continuing-claims unit change.
-- One sensitivity was added after inspecting bid-ask spreads: **liquid
-  markets only**, which drops any market whose spread at the horizon exceeds
-  20 cents and scores the remaining strikes. JOLTS openings and continuing
-  claims are thinly quoted (median spreads of 33 to 49 cents and 9 cents), and
-  an empty book's midpoint of 0.5 is not a market forecast.
+1. **Strike units** are read from each market's own rule text, after the first
+   full run showed Kalshi moving continuing-claims strikes from "1.84 million"
+   to "1750K"; the rule's direction word must also match the market's strike
+   type.
+2. **Liquid markets only** (spread of 20 cents or less) was added as a
+   sensitivity after inspecting bid-ask spreads. It was adopted after full runs
+   whose saved output already contained scores; the author had not examined
+   those scores, which the record cannot show, so treat it as post hoc. It is
+   never the primary rule.
+3. **Floor wording.** "Floored at 0.001 and renormalized" is implemented as:
+   raise each bracket to at least 0.001, taking the added mass proportionally
+   from the others.
+4. **Tiebreak.** If a target has more than one headline run, the earliest
+   registered is primary. No target has two, so it never applies.
+5. **After independent review (2026-10-20):**
+   - Kalshi's full series catalog is fetched and stored, and every statistic
+     Thesis forecasts was screened against it. This found Kalshi events for
+     Thesis's periods in four more series: KXHOUSINGSTART, KXBUILDPERMS and
+     KXNHSALES (Census/HUD, scored from the New Residential Construction and
+     Sales release PDFs) and KXUE's Australian events (scored from the ABS
+     Labour Force release pages). Every other in-scope run is listed with the
+     Kalshi evidence for its statistic and period.
+   - Candles are read over each market's whole life. The first version
+     fetched only 14 days before the earliest horizon, which silently dropped
+     two open strikes in one event whose books had not changed in that window.
+     A market open but never quoted before a horizon is listed as an exclusion.
+   - Pooled intervals are reported both by event and by release date (the
+     latter is the one this plan names). Per-series results with fewer than
+     five events list the individual differences instead of an interval. The
+     series-balanced interval resamples series as well as events. p-values
+     above 16 events say they are Monte Carlo. Results on the same events as
+     the registration comparison, and on headline-eligible custody roots only,
+     are reported.
+   - The justification for the rounding reading was corrected: Thesis point
+     estimates sit between grid values only for some series, so the reading is
+     stated as a convention.
 
 ## Data provenance
 
