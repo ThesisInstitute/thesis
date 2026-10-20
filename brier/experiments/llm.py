@@ -25,14 +25,18 @@ def _is_openai_model(model: str) -> bool:
     return any(model.startswith(p) for p in prefixes)
 
 
-def _load_key_from_keychain(account: str) -> Optional[str]:
-    """Load a secret from macOS keychain (service 'claude-env')."""
+def _load_key_from_keychain(name: str) -> Optional[str]:
+    """Load a secret through the `agent-secret` CLI (a dedicated macOS keychain).
+
+    The login keychain's "claude-env" items this used to read were retired into
+    that keychain; `agent-secret` unlocks it without a password dialog.
+    """
     try:
         result = subprocess.run(
-            ["security", "find-generic-password", "-s", "claude-env", "-a", account, "-w"],
+            ["agent-secret", "get", name],
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=30,
         )
         if result.returncode == 0 and result.stdout.strip():
             return result.stdout.strip()
@@ -42,7 +46,7 @@ def _load_key_from_keychain(account: str) -> Optional[str]:
 
 
 def _load_anthropic_key() -> str:
-    """Load Anthropic API key from env or macOS keychain."""
+    """Load Anthropic API key from env, then agent-secret."""
     key = os.environ.get("ANTHROPIC_API_KEY")
     if key:
         return key
@@ -51,12 +55,12 @@ def _load_anthropic_key() -> str:
         return key
     raise RuntimeError(
         "ANTHROPIC_API_KEY not found. Set it as an environment variable "
-        "or store it in the macOS keychain with service 'claude-env'."
+        "or store it with `agent-secret set ANTHROPIC_API_KEY`."
     )
 
 
 def _load_openai_key() -> str:
-    """Load OpenAI API key from env or macOS keychain."""
+    """Load OpenAI API key from env, then agent-secret."""
     key = os.environ.get("OPENAI_API_KEY")
     if key:
         return key
@@ -65,7 +69,7 @@ def _load_openai_key() -> str:
         return key
     raise RuntimeError(
         "OPENAI_API_KEY not found. Set it as an environment variable "
-        "or store it in the macOS keychain with service 'claude-env'."
+        "or store it with `agent-secret set OPENAI_API_KEY`."
     )
 
 
