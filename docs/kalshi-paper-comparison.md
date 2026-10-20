@@ -1,7 +1,9 @@
 # Paper comparison: Thesis forecasts vs Kalshi prices
 
 This is a read-only scoring study. It compares published Thesis forecasts with
-Kalshi market prices for the official US statistics both cover, and scores
+Kalshi market prices for the official statistics both cover (US national
+statistics as first planned, plus one Australian series added after review),
+and scores
 both against the official first print. It places no orders, holds no
 positions, simulates no trading strategy, and needs no Kalshi account: every
 Kalshi number comes from the public, unauthenticated market-data API.
@@ -90,10 +92,12 @@ to "1750K" between events).
 - **Seven days before release:** the official release instant minus 168 hours.
 - **One day before release:** the official release instant minus 24 hours.
 
-The release instant is the agency's scheduled time on the release date (8:30
-ET for CPI, the Employment Situation, weekly claims and Personal Income and
-Outlays; 10:00 ET for JOLTS), with the date taken from the official release
-document. Kalshi's market close must precede it.
+The release instant is the time the agency's own release document states:
+8:30 ET for CPI, the Employment Situation, weekly claims, Personal Income and
+Outlays and Census/HUD New Residential Construction; 10:00 ET for JOLTS and
+Census/HUD New Residential Sales; 11:30 Canberra time (AEST or AEDT, as the
+ABS release page states) for ABS Labour Force. Kalshi's market close must
+precede it.
 
 A Kalshi price is compared with a Thesis forecast only when the horizon is at
 or after the Thesis registration time, so the market never has less
@@ -215,9 +219,18 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
      above 16 events say they are Monte Carlo. Results on the same events as
      the registration comparison, and on headline-eligible custody roots only,
      are reported.
+   - Release times were added for the Census and ABS sources, and the scope
+     statement above now says it includes one Australian series.
    - The justification for the rounding reading was corrected: Thesis point
      estimates sit between grid values only for some series, so the reading is
      stated as a convention.
+
+6. **After the second review (2026-10-20):** the report's Summary quotes
+   release-clustered intervals, says which series were added after the first
+   review and gives the eight original series as a subset, and discloses Kalshi
+   floor hits at every horizon it quotes. Other Kalshi series on the matched
+   statistics (older tickers and second venues such as KXUSNFP and KXJOBLESS)
+   are listed with whether they have an event for a matched period.
 
 ## Data provenance
 

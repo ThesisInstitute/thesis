@@ -751,3 +751,81 @@ def test_abs_unemployment_verb_variants(phrase):
         "the unemployment rate was 4.5%", phrase, 1
     )
     assert official.parse_abs_unemployment(text)[1] == Decimal("4.5")
+
+
+# Added after review r2 ------------------------------------------------------------
+
+
+def test_candle_window_covers_the_whole_market_life():
+    # r1's bug: candles were fetched only 14 days before the earliest horizon.
+    from kalshi_compare import pipeline
+
+    market = {"open_time": "2026-02-20T15:00:00Z", "close_time": "2026-09-11T12:25:00Z"}
+    start, end = pipeline.candle_window(market)
+    assert start == kalshi.to_ts(market["open_time"]) - 3600
+    assert end == kalshi.to_ts(market["close_time"])
+
+
+def test_every_in_scope_run_is_matched_or_listed_once():
+    from kalshi_compare import pipeline
+
+    runs = [
+        thesis_run("bls.cpi.u.headline_mom.august_2026.first_print"),
+        thesis_run("us.dol.initial_claims.sa.week_2026-08-08"),
+        thesis_run("fns.wic.total_participation.2026_09.first_print"),
+        thesis_run("abs.labour.unemployment_rate.2026_08.first_print", "AU"),
+        thesis_run("statcan.cpi.allitems.yoy.2026_07.first_print", "CA"),
+    ]
+    runs[0].unit = "percent_growth"
+    runs[1].unit = "thousands"
+    runs[3].unit = "percent"
+    matched, unmatched = pipeline.partition_runs(runs)
+    matched_ids = {r.run_id for r, *_ in matched}
+    unmatched_ids = {r.run_id for r in unmatched}
+    assert matched_ids | unmatched_ids == {r.run_id for r in runs}
+    assert not matched_ids & unmatched_ids
+    # The CPI run matches both the ladder and the exact-value series.
+    assert sum(1 for r, *_ in matched if r.run_id == runs[0].run_id) == 2
+
+
+def test_belgian_unemployment_cites_kxue():
+    series, note = contracts.related_series(
+        "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print"
+    )
+    assert series == ("KXUE",) and "Belgium" in note
+
+
+def test_alternate_venues_are_checked_for_matched_periods():
+    from kalshi_compare import pipeline
+
+    class Unit:
+        def __init__(self, series, period):
+            self.spec = spec(series)
+            self.period = period
+
+    cache = FakeCache(
+        [
+            {
+                "event_ticker": "KXUSNFP-26MAY08",
+                "title": "US nonfarm payrolls",
+                "sub_title": "April 2026",
+            },
+            {
+                "event_ticker": "KXUSNFP-26SEP04",
+                "title": "US nonfarm payrolls",
+                "sub_title": "August 2026",
+            },
+        ]
+    )
+    rows = pipeline.alternate_venue_rows(cache, {"k": Unit("KXPAYROLLS", "2026-08")})
+    venue = next(r for r in rows if r["venue"] == "KXUSNFP")
+    assert venue["matchedPeriodsListed"] == ["2026-08"]
+    assert venue["latestPeriod"] == "2026-08"
+
+
+def test_report_refuses_unformatted_placeholders():
+    from kalshi_compare import report
+
+    assert report.UNFORMATTED.search("Across {n_markets} settled markets")
+    assert report.UNFORMATTED.search("value {o['officialValue']}")
+    assert not report.UNFORMATTED.search("Brackets are (-inf, s1] and [s1, s2)")

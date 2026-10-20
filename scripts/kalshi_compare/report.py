@@ -12,6 +12,7 @@ import html
 import json
 import math
 import pathlib
+import re
 import statistics
 from collections import Counter, defaultdict
 from typing import Any
@@ -60,10 +61,21 @@ PRIMARY_ORDER = [
     "KXUE",
 ]
 MIN_SERIES_N = 5
-SHORT_NAMES = {
+UNFORMATTED = re.compile(r"\{[A-Za-z_][A-Za-z0-9_.\[\]'\"]*\}")
+ADDED_SERIES = frozenset({"KXHOUSINGSTART", "KXBUILDPERMS", "KXNHSALES", "KXUE"})
+PROSE_NAMES = {
     "KXCPI": "headline CPI",
     "KXCPICORE": "core CPI",
+    "KXU3": "U-3 unemployment",
+    "KXPAYROLLS": "payrolls",
+    "KXJOBLESSCLAIMS": "initial claims",
+    "KXCONTCLAIMS": "continuing claims",
+    "KXJOLTSOPEN": "JOLTS openings",
     "KXPCECORE": "core PCE",
+    "KXHOUSINGSTART": "housing starts",
+    "KXBUILDPERMS": "building permits",
+    "KXNHSALES": "new home sales",
+    "KXUE": "Australian unemployment",
 }
 
 
@@ -99,6 +111,12 @@ def num(x: float | None, digits: int = 2) -> str:
         return "n/a"
     text = f"{x:+.{digits}f}"
     return text.replace("-", "−")
+
+
+def ci_rel(v: dict) -> str:
+    """Mean with the release-clustered interval (the plan's pooled interval)."""
+    lo, hi = v.get("ci95ReleaseClustered") or v["ci95"]
+    return f"{num(v['mean'])} [{num(lo)}, {num(hi)}]"
 
 
 def ci_text(v: dict) -> str:
@@ -370,8 +388,14 @@ def write(results: dict, out: pathlib.Path) -> None:
     write_csv(out / "scores.csv", results["scores"])
     (out / "summary.json").write_text(json.dumps(results["summary"], indent=1) + "\n")
     doc, figure_svg = build(results)
+    markdown = doc.markdown()
+    placeholder = UNFORMATTED.search(markdown)
+    if placeholder:
+        raise ValueError(
+            f"report has an unformatted placeholder: {placeholder.group(0)}"
+        )
     (out / "figure_log_differences.svg").write_text(figure_svg)
-    (out / "REPORT.md").write_text(doc.markdown())
+    (out / "REPORT.md").write_text(markdown)
     (out / "REPORT.html").write_text(doc.html("Thesis vs Kalshi"))
 
 
@@ -413,7 +437,7 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
     released = {
         e for e in with_event if outcomes[f"{e[0]}:{e[1]}"]["officialValue"] is not None
     }
-    non_us = sorted({SERIES_LABELS[e[0]] for e in events if e[0] == "KXUE"})
+    non_us = sorted({PROSE_NAMES[e[0]] for e in events if e[0] == "KXUE"})
     pooled = {(spec, h): head[spec][h]["pooled"] for spec in head for h in head[spec]}
 
     def pool(spec: str, horizon: str, metric: str) -> dict:
@@ -440,10 +464,21 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
     )
 
     # Summary -------------------------------------------------------------------
+    def floor_split(spec: str, horizon: str) -> tuple[list[dict], dict]:
+        rows = rows_for(spec, horizon)
+        hit = [r for r in rows if r.get("kalshiFloored")]
+        rest = head[spec][horizon]["excludingKalshiFloorHits"].get("deltaLog") or {
+            "n": 0
+        }
+        return hit, rest
+
+    def hits_text(hit: list[dict]) -> str:
+        return ", ".join(f"{r['eventKey']} {num(r['deltaLog'])}" for r in hit)
+
     reg = {m: pool("primary", "at_registration", m) for m in ("deltaLog", "deltaBrier")}
     reg_rows = rows_for("primary", "at_registration")
     thin = {}
-    for series in ("KXCPI", "KXCPICORE", "KXPCECORE"):
+    for series in PRIMARY_ORDER:
         spreads = [
             m["spread"]
             for m in results["markets"]
@@ -451,7 +486,7 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
             and m["horizon"] == "at_registration"
             and m["spread"] is not None
         ]
-        if spreads:
+        if spreads and statistics.median(spreads) > 0.20:
             thin[series] = statistics.median(spreads)
     d1 = {m: pool("primary", "release_minus_1d", m) for m in ("deltaLog", "deltaBrier")}
     d7 = pool("primary", "release_minus_7d", "deltaLog")
@@ -475,75 +510,102 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         if s in one_day and 0 < one_day[s]["deltaLog"]["n"] < MIN_SERIES_N
     ]
     unmatched = results["unmatched"]
+    roles = Counter({i["runId"]: i["forecaster"] for i in inventory}.values())
+    n_variant = sum(n for role, n in roles.items() if role.startswith("thesis_variant"))
+    added_names = [
+        PROSE_NAMES[s]
+        for s in PRIMARY_ORDER
+        if s in ADDED_SERIES and any(e[0] == s for e in events)
+    ]
     doc.h(2, "Summary")
     bullets = [
-        f"**Scope.** {len(primary_runs)} published Thesis headline forecasts recorded "
-        "since 1 July 2026 are for a statistic Kalshi lists, across "
+        f"**Scope.** Of the {meta['publishedRunsInScope']} published Thesis runs "
+        "recorded since 1 July 2026, "
+        f"{len({i['runId'] for i in inventory})} are for a statistic Kalshi lists "
+        f"({roles['thesis_headline']} headline forecasts, "
+        f"{roles['persistence_baseline']} persistence baselines and {n_variant} "
+        f"ladder variant); the other {len(unmatched)} were checked against Kalshi's "
+        "full catalog and have no matching event. The headline forecasts span "
         f"{len({e[0] for e in events})} Kalshi series"
-        + (f" (including {', '.join(non_us)})" if non_us else "")
-        + f". {len(with_event)} of them have a Kalshi event for the same reference "
-        f"period, and {len(released)} of those have been released and are scored "
-        "against the official first print, on Kalshi's own brackets. The other "
-        f"{len(unmatched)} published runs in scope were checked against Kalshi's "
-        "catalog and have no matching event. Bracketed ranges are 95% bootstrap "
-        "intervals; positive differences favor Thesis.",
+        + (f", including {', '.join(non_us)}" if non_us else "")
+        + f"; {len(with_event)} have a Kalshi event for the same reference period, and "
+        f"{len(released)} of those have been released and are scored against the "
+        "official first print, on Kalshi's own brackets."
+        + (
+            f" Four series ({', '.join(added_names)}) were added after the first "
+            "independent review, which had seen the scores, when a screen of Kalshi's "
+            "catalog found them; on the eight series of the original plan the pooled "
+            "means are unchanged from that review (subset table below)."
+            if added_names
+            else ""
+        )
+        + " Bracketed ranges are 95% bootstrap intervals that resample release dates, "
+        "as the plan specifies; positive differences favor Thesis.",
     ]
     if reg_rows:
-        floored = {
-            sc["eventKey"]
-            for sc in results["scores"]
-            if sc["spec"] == "primary"
-            and sc["forecaster"] == "thesis_headline"
-            and sc["horizon"] == "at_registration"
-            and sc["primarySeries"]
-            and sc["kalshiFloored"]
-        }
-        hit = [r for r in reg_rows if r["eventKey"] in floored]
-        others = [r["deltaLog"] for r in reg_rows if r["eventKey"] not in floored]
+        hit, rest = floor_split("primary", "at_registration")
         reg_liquid = pool("liquid_markets_only", "at_registration", "deltaLog")
         text = (
             "**At Thesis's registration time**, the only horizon where Kalshi had no "
             f"more information than Thesis, the {reg['deltaLog']['n']} comparisons "
             "cannot tell the two apart. Under the pre-specified rule the log-score "
-            f"difference is {ci_text(reg['deltaLog'])} and the Brier difference "
-            f"{ci_text(reg['deltaBrier'])}"
+            f"difference is {ci_rel(reg['deltaLog'])} and the Brier difference "
+            f"{ci_rel(reg['deltaBrier'])}"
         )
         if hit:
             text += (
-                f", but {len(hit)} of the events had empty Kalshi books that priced the"
-                " realized bracket at zero ("
-                + ", ".join(f"{r['eventKey']} {num(r['deltaLog'])}" for r in hit)
-                + f"); the other {len(others)} average {num(sum(others) / len(others))}"
+                f", but {len(hit)} of the events had empty or wide Kalshi books that "
+                f"priced the realized bracket at zero ({hits_text(hit)}); the other "
+                f"{rest['n']} average {num(rest['mean'])}"
             )
         text += (
             ". Dropping books quoted wider than 20 cents gives "
-            f"{ci_text(reg_liquid)} over {reg_liquid['n']} events. Kalshi's books were "
-            "thin at that point (median spreads of "
+            f"{ci_rel(reg_liquid)} over {reg_liquid['n']} events. Several of "
+            "Kalshi's books were thin at that point (median spreads of "
             + ", ".join(
-                f"{v * 100:.0f} cents for {SHORT_NAMES[k]}" for k, v in thin.items()
+                f"{v * 100:.0f} cents for {PROSE_NAMES[k]}" for k, v in thin.items()
             )
             + "), and the intervals admit large differences in either direction."
         )
         bullets.append(text)
-    bullets.append(
+    hit1, rest1 = floor_split("primary", "release_minus_1d")
+    hit_last, rest_last = floor_split("last_trade_price", "release_minus_1d")
+    text = (
         "**Closer to the release, Kalshi's prices scored better on average than "
         "Thesis's earlier, fixed forecast**, as expected given the information that "
-        "arrived in between. Under the pre-specified rule the difference is not clear: "
-        f"one day before release the log difference is {ci_text(d1['deltaLog'])} "
-        f"(Brier {ci_text(d1['deltaBrier'])}) over {d1['deltaLog']['n']} events, and "
-        f"seven days before it is {ci_text(d7)}. It becomes clear only after dropping "
-        "order books with spreads above 20 cents, a rule adopted after the plan: one "
-        f"day before release, log {ci_text(l1['deltaLog'])} over {l1['deltaLog']['n']} "
-        f"events (Brier {ci_text(l1['deltaBrier'])}). It also depends on the price "
-        "used: with last traded prices instead of midpoints, the one-day difference is "
-        f"{ci_text(last1)}. On the {same['n']} events also scored at registration, the "
-        f"one-day difference is {ci_text(same)}."
+        "arrived in between; how clearly depends on how empty and stale order books "
+        "are handled. Under the pre-specified rule the one-day log difference is "
+        f"{ci_rel(d1['deltaLog'])} (Brier {ci_rel(d1['deltaBrier'])}) over "
+        f"{d1['deltaLog']['n']} events"
     )
+    if hit1:
+        text += (
+            f", including {len(hit1)} where empty or wide books priced the realized "
+            f"bracket at zero ({hits_text(hit1)}); the other {rest1['n']} give "
+            f"{ci_rel(rest1)}"
+        )
+    text += (
+        f". Seven days before release it is {ci_rel(d7)}. Dropping books quoted wider "
+        "than 20 cents, a rule adopted after the plan, gives "
+        f"{ci_rel(l1['deltaLog'])} one day out over {l1['deltaLog']['n']} events "
+        f"(Brier {ci_rel(l1['deltaBrier'])}). With last traded prices instead of "
+        f"midpoints it is {ci_rel(last1)}"
+    )
+    if hit_last:
+        text += (
+            f", entirely because in {len(hit_last)} events a stale last trade priced "
+            f"the realized bracket at zero ({hits_text(hit_last)}); the other "
+            f"{rest_last['n']} give {ci_rel(rest_last)}"
+        )
+    text += (
+        ". Splits by floor hits are descriptive, since which events hit the floor "
+        f"depends on the outcome. On the {same['n']} events also scored at "
+        f"registration, the one-day difference is {ci_rel(same)}."
+    )
+    bullets.append(text)
     bullets.append(
         "**Per series, there are too few resolved pairs to conclude anything.** Only "
-        + " and ".join(
-            f"{SERIES_LABELS[s].split(' (')[0].lower()} ({v['n']})" for s, v in big
-        )
+        + " and ".join(f"{PROSE_NAMES[s]} ({v['n']})" for s, v in big)
         + " reach five pairs, and for "
         + ("both" if len(big) == 2 else "each")
         + " the one-day interval "
@@ -708,6 +770,30 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
             "Kalshi series the catalog screen found for statistics Thesis forecasts, "
             "with the 2026 reference periods each lists.",
         )
+    venues = results.get("alternateVenues") or []
+    if venues:
+        doc.table(
+            [
+                "Matched series",
+                "Other Kalshi series",
+                "Events",
+                "Latest year in tickers",
+                "Lists a matched period",
+            ],
+            [
+                [
+                    f"`{v['series']}`",
+                    f"`{v['venue']}`",
+                    str(v["events"]),
+                    str(v["latestTickerYear"] or "\u2014"),
+                    ", ".join(v["matchedPeriodEvents"]) or "no",
+                ]
+                for v in venues
+            ],
+            "Older tickers and second venues for statistics matched above. Any event "
+            "listed here for a matched period would be a second market on the same "
+            "print; none is scored.",
+        )
     withdrawn = results["withdrawn"]
     confirmed = sum(1 for w in withdrawn if w["livePageSaysNoForecast"])
     doc.p(
@@ -721,11 +807,20 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
     doc.ul(
         [
             (
-                'CPI, core CPI, U-3, core PCE and Australian unemployment: "above X" on'
-                ' the single-decimal published value. Payrolls: "above X" persons on'
-                ' the first-print change. JOLTS: "above X million" on the level BLS'
-                ' reports in thousands. Housing starts and permits: "above X million"'
-                ' on the first Census print; new home sales: "above X" homes.'
+                'CPI, core CPI, U-3 and core PCE: "above X" on the single-decimal'
+                ' published value. Payrolls: "above X" persons on the first-print'
+                ' change. JOLTS: "above X million" on the level BLS reports in'
+                ' thousands. Housing starts and permits: "above X million" on the first'
+                " Census print, as both rules state."
+            ),
+            (
+                "Two rules are less specific than what is scored. Australian"
+                ' unemployment: the rule says only "above X% for <month>", naming no'
+                " source, adjustment or vintage; Kalshi's expiration values equal ABS's"
+                " first-published seasonally adjusted rate. New home sales: the rule"
+                " names the seasonally adjusted annual rate but has no first-print"
+                " clause; Kalshi settled June 2026 on the first print (628,000), which"
+                " Census later revised to 678,000."
             ),
             (
                 'Continuing claims: "at least X" on the advance seasonally adjusted'
@@ -760,17 +855,21 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
     doc.h(2, "Outcomes")
     mismatches = sum(len(o["kalshiResultMismatches"]) for o in results["outcomes"])
     n_markets = sum(o["nMarkets"] for o in results["outcomes"] if o["officialValue"])
-    seconds = sum(1 for o in results["outcomes"] if o["officialSecondReading"])
+    seconds = [o for o in results["outcomes"] if o["officialSecondReading"]]
+    exact_seconds = sum(
+        1 for o in seconds if o["officialSecondReading"] == o["officialValue"]
+    )
     doc.p(
         "Each value is the official first print read from the agency's own release"
         " (BLS news release archive; DOL Employment and Training Administration weekly"
         " release; BEA Personal Income and Outlays; Census/HUD New Residential"
         " Construction and Sales; ABS Labour Force, Australia), with the release time"
-        f" the document states. For {seconds} events the same document states the value"
-        " a second time (lead paragraph, summary box or table), and the two readings"
-        f" agree. Across {n_markets} settled Kalshi markets, the contract rule applied"
-        " to the official value reproduces Kalshi's recorded result in every case"
-        f" ({mismatches} disagreements)."
+        f" the document states. For {len(seconds)} events the same document states the"
+        " value a second time (lead paragraph, summary box or table): the two readings"
+        f" are equal for {exact_seconds}, and for the rest (JOLTS, whose lead rounds to"
+        f" 0.1 million) they agree within that rounding. Across {n_markets} settled"
+        " Kalshi markets, the contract rule applied to the official value reproduces"
+        f" Kalshi's recorded result in every case ({mismatches} disagreements)."
     )
     rows = []
     for key in sorted(
@@ -900,33 +999,38 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         "secondary.",
     )
     subset_rows = []
-    for spec in ("primary", "liquid_markets_only"):
-        for h in ("release_minus_7d", "release_minus_1d"):
-            v = head[spec][h]["sameEventsAsRegistration"].get("deltaLog")
-            if v:
+    subset_labels = (
+        ("originalSeries", "Eight series of the original plan"),
+        ("sameEventsAsRegistration", "Same events as registration"),
+        ("excludingKalshiFloorHits", "Without Kalshi floor hits (descriptive)"),
+        ("headlineEligibleOnly", "Headline-eligible custody roots only"),
+    )
+    for key, label in subset_labels:
+        for spec in ("primary", "liquid_markets_only"):
+            for h in HORIZON_LABELS:
+                if key == "sameEventsAsRegistration" and h == "at_registration":
+                    continue
+                if key == "headlineEligibleOnly" and not ineligible:
+                    continue
+                full = pooled[(spec, h)].get("deltaLog")
+                v = head[spec][h][key].get("deltaLog")
+                if not v or (full and v["n"] == full["n"] and key != "originalSeries"):
+                    continue
                 subset_rows.append(
                     [
+                        label,
                         SPEC_LABELS[spec],
                         HORIZON_LABELS[h],
-                        "Same events as registration",
                         str(v["n"]),
-                        ci_text(v),
-                    ]
-                )
-        if ineligible:
-            v = head[spec]["release_minus_1d"]["headlineEligibleOnly"].get("deltaLog")
-            if v:
-                subset_rows.append(
-                    [
-                        SPEC_LABELS[spec],
-                        HORIZON_LABELS["release_minus_1d"],
-                        "Headline-eligible custody roots only",
-                        str(v["n"]),
-                        ci_text(v),
+                        ci_rel(v),
                     ]
                 )
     doc.table(
-        ["Price rule", "Horizon", "Subset", "Events", "Log difference"], subset_rows
+        ["Subset", "Price rule", "Horizon", "Events", "Log difference"],
+        subset_rows,
+        "Subset intervals resample release dates. A subset identical to the full sample"
+        " at a horizon is omitted. Splits by floor hits depend on the outcome and are"
+        " descriptive, not tests.",
     )
 
     for h in HORIZON_LABELS:
@@ -952,7 +1056,14 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
                         SERIES_LABELS[series],
                         str(len(mine)),
                         f"{ci_text(v)}, p {p_text(v)}",
-                        ci_text(vl) if vl else "n/a",
+                        (
+                            (
+                                ci_text(vl)
+                                + (f", n={vl['n']}" if vl["n"] != v["n"] else "")
+                            )
+                            if vl
+                            else "n/a"
+                        ),
                         ci_text(vb),
                         wins(v),
                     ]

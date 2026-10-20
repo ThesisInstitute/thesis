@@ -390,6 +390,11 @@ RELATED: tuple[tuple[re.Pattern, tuple[str, ...], str], ...] = tuple(
             "Kalshi's market is year-over-year growth in any quarter of a year",
         ),
         (
+            r"^eurostat\.une_rt_m\.unemployment_rate\.belgium",
+            ("KXUE",),
+            "KXUE's events for that month are for single countries, none for Belgium",
+        ),
+        (
             r"^eurostat\.unemployment_rate\.euro_area",
             ("KXUE",),
             (
@@ -399,6 +404,21 @@ RELATED: tuple[tuple[re.Pattern, tuple[str, ...], str], ...] = tuple(
         ),
     )
 )
+
+
+# Other Kalshi series on statistics already matched above (older tickers and
+# second venues). The pipeline lists their events for every matched period so
+# a second venue is never silently ignored.
+ALTERNATE_VENUES: dict[str, tuple[str, ...]] = {
+    "KXCPI": ("CPI",),
+    "KXCPICORE": ("CPICORE",),
+    "KXU3": ("U3",),
+    "KXPAYROLLS": ("KXUSNFP", "PAYROLLS", "KXPROLLS", "PROLLS"),
+    "KXJOBLESSCLAIMS": ("KXJOBLESS", "JOBLESS"),
+    "KXPCECORE": ("PCECORE",),
+    "KXHOUSINGSTART": ("KXHOUSESTART", "HOUSESTART"),
+    "KXNHSALES": ("KXHOME", "HOME"),
+}
 
 
 def related_series(data_point_id: str) -> tuple[tuple[str, ...], str] | None:

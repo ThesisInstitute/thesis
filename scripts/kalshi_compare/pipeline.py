@@ -7,6 +7,7 @@ import datetime as dt
 import gzip
 import json
 import pathlib
+import re
 from decimal import Decimal
 from typing import Any
 
@@ -14,6 +15,19 @@ from . import contracts, kalshi, official, scoring, thesis
 from .fetch import FetchCache
 
 HORIZONS = ("at_registration", "release_minus_7d", "release_minus_1d")
+# The eight series in the plan as first committed (98940ca4).
+ORIGINAL_SERIES = frozenset(
+    {
+        "KXCPI",
+        "KXCPICORE",
+        "KXU3",
+        "KXPAYROLLS",
+        "KXJOBLESSCLAIMS",
+        "KXCONTCLAIMS",
+        "KXJOLTSOPEN",
+        "KXPCECORE",
+    }
+)
 PRIMARY_SPEC = {"price": "mid", "reading": "rounded", "floor": 0.001}
 SENSITIVITY_SPECS = {
     "primary": PRIMARY_SPEC,
@@ -76,6 +90,88 @@ def latest_observations(ledger_entries: list[dict]) -> dict[str, dict]:
     return out
 
 
+def partition_runs(
+    in_scope: list[thesis.ThesisRun],
+) -> tuple[
+    list[tuple[thesis.ThesisRun, contracts.SeriesSpec, str, contracts.ThesisPattern]],
+    list[thesis.ThesisRun],
+]:
+    """Split in-scope runs into matched (one row per matching series) and the rest.
+
+    Every in-scope run lands in exactly one side; the assert keeps the
+    inventory complete if the matching rules change.
+    """
+    matched = []
+    unmatched_runs = []
+    for run_ in in_scope:
+        hits = contracts.match_target(run_.data_point_id)
+        if not hits:
+            unmatched_runs.append(run_)
+            continue
+        for spec, period, pattern in hits:
+            if run_.unit not in pattern.units:
+                raise ValueError(
+                    f"{run_.run_id}: unit {run_.unit} not in {pattern.units}"
+                )
+            matched.append((run_, spec, period, pattern))
+    matched_ids = {r.run_id for r, *_ in matched}
+    unmatched_ids = {r.run_id for r in unmatched_runs}
+    assert not matched_ids & unmatched_ids
+    assert matched_ids | unmatched_ids == {r.run_id for r in in_scope}
+    return matched, unmatched_runs
+
+
+def candle_window(market: dict) -> tuple[int, int]:
+    """Request candles over the market's whole life, from an hour before it opened.
+
+    A narrower window drops a market whose book last changed before the window
+    starts (the first version used 14 days and lost two strikes).
+    """
+    return kalshi.to_ts(market["open_time"]) - 3600, kalshi.to_ts(market["close_time"])
+
+
+TICKER_YEAR = re.compile(r"-(\d{2})[A-Z]{3}")
+
+
+def alternate_venue_rows(cache: FetchCache, units: dict) -> list[dict]:
+    """Events other Kalshi series list for the periods matched here."""
+    rows = []
+    by_series: dict[str, tuple[contracts.SeriesSpec, set[str]]] = {}
+    for unit in units.values():
+        if unit.spec.series in contracts.ALTERNATE_VENUES:
+            spec, periods = by_series.setdefault(unit.spec.series, (unit.spec, set()))
+            periods.add(unit.period)
+    for series, (spec, periods) in sorted(by_series.items()):
+        for venue in contracts.ALTERNATE_VENUES[series]:
+            listed: dict[str, list[str]] = {}
+            venue_events = kalshi.series_events(cache, venue)
+            for event in venue_events:
+                text = f"{event.get('title', '')} {event.get('sub_title', '')}"
+                for period in contracts.text_periods(text, spec.cadence):
+                    listed.setdefault(period, []).append(event["event_ticker"])
+            overlap = sorted(periods & set(listed))
+            rows.append(
+                {
+                    "series": series,
+                    "venue": venue,
+                    "events": len(venue_events),
+                    "latestTickerYear": max(
+                        (
+                            2000 + int(found.group(1))
+                            for event in venue_events
+                            if (found := TICKER_YEAR.search(event["event_ticker"]))
+                        ),
+                        default=None,
+                    ),
+                    "eventsWithReadablePeriod": sum(len(v) for v in listed.values()),
+                    "latestPeriod": max(listed) if listed else None,
+                    "matchedPeriodsListed": overlap,
+                    "matchedPeriodEvents": [t for p in overlap for t in listed[p]],
+                }
+            )
+    return rows
+
+
 def run(
     *,
     repo: pathlib.Path,
@@ -97,21 +193,7 @@ def run(
     all_runs = thesis.published_runs(entries, timeline)
     in_scope = [r for r in all_runs if r.recorded_at >= thesis.SCOPE_START]
 
-    matched: list[
-        tuple[thesis.ThesisRun, contracts.SeriesSpec, str, contracts.ThesisPattern]
-    ] = []
-    unmatched_runs: list[thesis.ThesisRun] = []
-    for run_ in in_scope:
-        hits = contracts.match_target(run_.data_point_id)
-        if not hits:
-            unmatched_runs.append(run_)
-            continue
-        for spec, period, pattern in hits:
-            if run_.unit not in pattern.units:
-                raise ValueError(
-                    f"{run_.run_id}: unit {run_.unit} not in {pattern.units}"
-                )
-            matched.append((run_, spec, period, pattern))
+    matched, unmatched_runs = partition_runs(in_scope)
 
     cdfs, distribution_meta = thesis.load_distributions(
         cache, {run_.run_id for run_, *_ in matched}
@@ -211,8 +293,7 @@ def run(
         if unit.official is None:
             continue
         for market in unit.markets:
-            start = kalshi.to_ts(market["open_time"]) - 3600
-            end = kalshi.to_ts(market["close_time"])
+            start, end = candle_window(market)
             candles, tier = kalshi.market_candles(
                 cache, unit.spec.series, market, start, end
             )
@@ -249,6 +330,7 @@ def run(
         "inventory": inventory_rows(units, observations, status, resolved),
         "unmatched": unmatched,
         "withdrawn": withdrawn_cells(repo, commit, all_runs, cache),
+        "alternateVenues": alternate_venue_rows(cache, units),
         "outcomes": outcome_rows(units, observations),
         "markets": market_rows,
         "scores": scores,
@@ -503,6 +585,8 @@ def build_pairs(scores: list[dict]) -> list[dict]:
                 "registrationCoverage",
                 "registeredAt",
                 "registrationHeadlineEligible",
+                "kalshiFloored",
+                "thesisFloored",
             )
         }
         pair["deltaLog"] = row["thesisLog"] - row["kalshiLog"]
@@ -578,6 +662,14 @@ def summarize_pairs(pairs: list[dict]) -> dict:
                         for r in rows
                         if r.get("registrationHeadlineEligible") is not False
                     ]
+                )["pooled"]
+                summary["originalSeries"] = summarize_rows(
+                    [r for r in rows if r["series"] in ORIGINAL_SERIES]
+                )["pooled"]
+                # Descriptive only: which events hit the floor depends on the
+                # outcome, so this is not a test.
+                summary["excludingKalshiFloorHits"] = summarize_rows(
+                    [r for r in rows if not r.get("kalshiFloored")]
                 )["pooled"]
                 by_horizon[horizon] = summary
             by_spec[spec_name] = by_horizon
