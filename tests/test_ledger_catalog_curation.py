@@ -32,6 +32,7 @@ import tempfile
 
 import pytest
 from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import event as hypothesis_event
 from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -297,18 +298,47 @@ def test_merge_happens_only_when_every_required_gate_passed(
 _REQUIRED_NAMES = ("Append gate", "Trusted base append gate")
 
 
+_PASSING_SHAPES = [
+    ("completed", "success"),
+    ("completed", "skipped"),
+    ("completed", "neutral"),
+]
+_ARCH_SETS = [
+    [("completed", "success"), ("completed", "success")],
+    [("completed", "success"), ("completed", "skipped")],
+    [("completed", "success")],
+    [("completed", "success"), ("queued", None)],
+    [("completed", "failure"), ("completed", "success")],
+    [],
+]
+
+
 @st.composite
 def _listing_pool(draw):
     """Three distinct check-run listings for one head; a listing's run ids
     are fixed by its variant, so reading the same variant twice reads the
-    same runs. Some are padded past one page with unrelated runs."""
+    same runs. About half the variants pass every required gate (a success
+    beside skipped or neutral twins), so waits do end in merges; Arch checks
+    takes one of the shapes the "refuse" rule must tell apart; some
+    listings are padded past one page with unrelated runs."""
     pool = []
     for _variant in range(3):
-        runs = [
-            (gate, *draw(st.sampled_from(_SHAPES)))
-            for gate in (*_REQUIRED_NAMES, ARCH)
-            for _ in range(draw(st.integers(0, 2)))
-        ]
+        passing = draw(st.booleans())
+        runs = []
+        for gate in _REQUIRED_NAMES:
+            if passing:
+                runs.append((gate, "completed", "success"))
+                runs += [
+                    (gate, *shape)
+                    for shape in draw(st.lists(st.sampled_from(_PASSING_SHAPES),
+                                               max_size=1))
+                ]
+            else:
+                runs += [
+                    (gate, *draw(st.sampled_from(_SHAPES)))
+                    for _ in range(draw(st.integers(0, 2)))
+                ]
+        runs += [(ARCH, *shape) for shape in draw(st.sampled_from(_ARCH_SETS))]
         pad = draw(st.sampled_from([0, 0, rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE + 20]))
         pool.append((runs, pad))
     return pool
@@ -392,7 +422,9 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
             clock=clock, sleep=clock.sleep,
         )
     except rp.LedgerProposalError:
+        hypothesis_event("refused")
         return
+    hypothesis_event("merged")
     good = [read for read in reads if read != "error"]
     assert good and passed(good[-1])
     run_start = len(good) - 1
@@ -455,6 +487,130 @@ def test_a_required_rerun_needs_a_fresh_confirmed_pass(monkeypatch) -> None:
             REPO, "c" * 40, 7, timeout_seconds=600, advisory=(ARCH,),
             advisory_grace_seconds=10_000, clock=clock, sleep=clock.sleep,
         )
+
+
+def _scripted_reads(monkeypatch, listings) -> list[int]:
+    """Serve ``listings(n)`` on the n-th read (pages included); returns the
+    list of read numbers served, for assertions."""
+    size = rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE
+    served: list[int] = []
+
+    def api(*args: str, **_kwargs) -> str:
+        page = int(args[0].rsplit("page=", 1)[1])
+        if page == 1:
+            served.append(len(served))
+        listing = listings(served[-1])
+        if listing is None:
+            raise RuntimeError("HTTP 502")
+        return json.dumps({
+            "total_count": len(listing),
+            "check_runs": listing[(page - 1) * size: page * size],
+        })
+
+    monkeypatch.setattr(rp, "_gh_api", api)
+    return served
+
+
+def _padded(runs: list[dict], base_id: int) -> list[dict]:
+    return [*runs, *(
+        _run(base_id + index, "Other check", "completed", "success")
+        for index in range(rp.APPEND_GATE_CHECK_RUN_PAGE_SIZE + 20)
+    )]
+
+
+_ARCH_QUEUED = [_run(3, ARCH, "queued", None), _run(4, ARCH, "queued", None)]
+
+
+def test_a_pass_never_confirms_across_a_broken_run(monkeypatch) -> None:
+    """A multi-page pass, a read with a required gate not passed, then the
+    same pass again: the two passes are not consecutive, so neither
+    confirms the other (mutant: keeping passed_ids across the break)."""
+    passing = _padded([*_green_append_gates(), *_ARCH_QUEUED], 9_000)
+    broken = _padded([
+        _run(1, "Append gate", "in_progress", None),
+        _run(2, "Trusted base append gate", "completed", "success"),
+        *_ARCH_QUEUED,
+    ], 9_000)
+    _scripted_reads(monkeypatch, lambda n: passing if n % 2 == 0 else broken)
+    clock = _FakeClock()
+    # No advisory grace: a (wrongly) confirmed pass would merge at once.
+    with pytest.raises(rp.LedgerProposalError, match="did not complete"):
+        rp.await_append_gates(
+            REPO, "c" * 40, 7, timeout_seconds=600, advisory=(ARCH,),
+            advisory_grace_seconds=0, min_runs={ARCH: 2},
+            clock=clock, sleep=clock.sleep,
+        )
+
+
+def test_refuse_counts_a_skipped_twin_as_no_arch_checks_run(monkeypatch) -> None:
+    """Under "refuse", one green Arch checks run beside a skipped twin is
+    one run, not the two (push and pull request) the rule waits for."""
+    runs = [
+        *_green_append_gates(),
+        _run(3, ARCH, "completed", "success"),
+        _run(4, ARCH, "completed", "skipped"),
+    ]
+    _scripted_reads(monkeypatch, lambda _n: runs)
+    clock = _FakeClock()
+    with pytest.raises(rp.LedgerProposalError, match="did not complete"):
+        rp.await_append_gates(
+            REPO, "c" * 40, 7, timeout_seconds=600,
+            gates=(*_REQUIRED_NAMES, ARCH), min_runs={ARCH: 2},
+            clock=clock, sleep=clock.sleep,
+        )
+
+
+def test_land_merges_on_an_earlier_confirmation(monkeypatch) -> None:
+    """Under "land", a confirmed pass followed by passing but unconfirmed
+    reads (multi-page, new attempt ids) and then a failed read merges, as
+    the code before advisory gates would have (round 3's P3-C)."""
+    def listings(n: int):
+        if n < 2:
+            return _padded([*_green_append_gates(), *_ARCH_QUEUED], 9_000)
+        if n % 3 == 2:
+            return None
+        return _padded([*_green_append_gates(), *_ARCH_QUEUED], 20_000 + n * 500)
+
+    _scripted_reads(monkeypatch, listings)
+    clock = _FakeClock()
+    verdicts = rp.await_append_gates(
+        REPO, "c" * 40, 7, timeout_seconds=600, advisory=(ARCH,),
+        advisory_grace_seconds=10_000, min_runs={ARCH: 2},
+        clock=clock, sleep=clock.sleep,
+    )
+    assert verdicts[ARCH][0] == "pending"
+
+
+def test_a_required_rerun_restarts_the_advisory_grace(monkeypatch) -> None:
+    """The advisory grace counts from the confirmed pass of the current run
+    of passing reads, so a required re-run gives Arch checks a fresh grace
+    (mutant: not resetting required_passed_at)."""
+    passing = [*_green_append_gates(), *_ARCH_QUEUED]
+    rerun = [
+        _run(1, "Append gate", "in_progress", None),
+        _run(2, "Trusted base append gate", "completed", "success"),
+        *_ARCH_QUEUED,
+    ]
+    clock = _FakeClock()
+    repassed_at: list[float] = []
+
+    def listings(n: int):
+        if n == 0:
+            return passing
+        if clock.now < 400:
+            return rerun
+        if not repassed_at:
+            repassed_at.append(clock.now)
+        return passing
+
+    _scripted_reads(monkeypatch, listings)
+    verdicts = rp.await_append_gates(
+        REPO, "c" * 40, 7, timeout_seconds=150 * 60, advisory=(ARCH,),
+        advisory_grace_seconds=300, min_runs={ARCH: 2},
+        clock=clock, sleep=clock.sleep,
+    )
+    assert verdicts[ARCH][0] == "pending"
+    assert clock.now >= repassed_at[0] + 300
 
 
 @pytest.fixture(scope="module")

@@ -15179,7 +15179,6 @@ def identity_anchor_move(
     candidate_lines = {identity["line"]: identity for identity in candidate}
     removed = [i for line, i in base_lines.items() if line not in candidate_lines]
     added = [i for line, i in candidate_lines.items() if line not in base_lines]
-    base_uuids = {identity["uuid"] for identity in base}
     removed_by_uuid: dict[str, Mapping[str, Any]] = {}
     for identity in removed:
         if identity["uuid"] in removed_by_uuid:
@@ -15203,8 +15202,8 @@ def identity_anchor_move(
             return None, f"{concept} ({uuid}) belongs to no row in this append"
         before = removed_by_uuid.get(uuid)
         if before is None:
-            if uuid in base_uuids or any(e["uuid"] == uuid for e in events):
-                return None, f"{concept} reuses UUID {uuid}"
+            # UUIDs are unique on each side, so a new UUID cannot be one the
+            # base catalog holds; the registry also remembers retired ones.
             if uuid in base_registry_uuids:
                 return None, (
                     f"{concept} mints UUID {uuid}, which the base registry "
@@ -15850,22 +15849,20 @@ def await_append_gates(
     # The ids of the last multi-page listing that read as passed.
     passed_ids: frozenset[int] | None = None
     # Whether the latest successful read showed every required gate passed,
-    # whether that pass is confirmed (one page, or the same runs as the
-    # previous passing read), whether the current unbroken run of passing
-    # reads holds a confirmed pass, and when that run was first confirmed
-    # (the advisory grace counts from there).
+    # whether the current unbroken run of passing reads holds a confirmed
+    # pass (one page, or the same runs as the previous passing read), and
+    # when that run was first confirmed (the advisory grace counts from
+    # there).
     required_passed_now = False
-    required_confirmed = False
     confirmed_once = False
     required_passed_at: float | None = None
 
     def may_merge() -> bool:
-        # A confirmed pass on the latest read; or, once the current run of
-        # passing reads holds a confirmed pass (where the merge went ahead
-        # before advisory gates existed), a latest read that still shows
-        # every required gate passed. A required gate read as anything but
-        # passed since then ends that run and holds the merge again.
-        return required_confirmed or (confirmed_once and required_passed_now)
+        # The current unbroken run of passing reads holds a confirmed pass
+        # (where the merge went ahead before advisory gates existed). Any
+        # read showing a required gate not passed ends that run and clears
+        # confirmed_once, so this also means the latest read passed.
+        return confirmed_once
 
     def advisory_verdicts() -> dict[str, tuple[str, str]]:
         return {
@@ -15916,7 +15913,6 @@ def await_append_gates(
                     )
                     + "; refusing to merge"
                 )
-            required_confirmed = False
             required_passed_now = all(states[gate] == "passed" for gate in gates)
             if not required_passed_now:
                 # A required gate re-run or still running: the next merge
@@ -15930,20 +15926,20 @@ def await_append_gates(
                 # already read while the total holds, so a multi-page pass
                 # stands only when the next read returns the same runs.
                 if len(runs) <= APPEND_GATE_CHECK_RUN_PAGE_SIZE or ids == passed_ids:
-                    required_confirmed = True
                     confirmed_once = True
                     if required_passed_at is None:
                         required_passed_at = clock()
-                    # The budget bounds how long to wait, not which verdicts
-                    # count: both gates passed on this exact head, so a pass
-                    # read just after the deadline still stands.
-                    if all(
-                        states[gate] in ("passed", "failed") for gate in advisory
-                    ) or clock() - required_passed_at >= advisory_grace_seconds:
-                        return advisory_verdicts()
                 passed_ids = ids
             else:
                 passed_ids = None
+            # The budget bounds how long to wait, not which verdicts count:
+            # the required gates passed on this exact head, so a pass read
+            # just after the deadline still stands.
+            if may_merge() and (
+                all(states[gate] in ("passed", "failed") for gate in advisory)
+                or clock() - required_passed_at >= advisory_grace_seconds
+            ):
+                return advisory_verdicts()
         now = clock()
         if now >= deadline or (poll_attempts is not None and attempts >= poll_attempts):
             if may_merge():
@@ -16112,7 +16108,9 @@ def report_red_ledger_base(repo: str, base_sha: str) -> str:
     state; never raises, and never holds the append.
     """
     try:
-        runs = read_check_runs(repo, base_sha)
+        runs = read_check_runs(
+            repo, base_sha, deadline=time.monotonic() + APPEND_GATE_MAX_READ_SECONDS
+        )
         arch = [
             run
             for run in runs
@@ -16184,12 +16182,13 @@ def propose_ledger_append(
     if arch_checks_policy == ARCH_CHECKS_POLICY_REFUSE:
         required_gates = (*REQUIRED_APPEND_GATES, ARCH_CHECKS_GATE)
         advisory_gates: tuple[str, ...] = ()
-        # Both the push run and the pull request run of Arch checks.
-        gate_min_runs = {ARCH_CHECKS_GATE: 2}
     else:
         required_gates = REQUIRED_APPEND_GATES
         advisory_gates = (ARCH_CHECKS_GATE,)
-        gate_min_runs = {}
+    # Arch checks has a verdict only once both its push run and its pull
+    # request run have completed: on a new proposal branch only the pull
+    # request run checks the anchor move against the base.
+    gate_min_runs = {ARCH_CHECKS_GATE: 2}
     candidate_ledger = content.encode("utf-8")
     base_tree = _fetch_repository_tree(repo, base_sha, path)
     if base_tree.blob_shas.get(path) != blob_sha:
