@@ -135,7 +135,21 @@ describe("receipt parity: the port against receipt 0.6.2", () => {
           })
           .map((index) => JSON.parse(lines[index].line) as Json),
       );
-    expect(realRecordIds.size).toBe(15);
+    expect(realRecordIds.size).toBe(21);
+    // Chronicle's own corrections: in its order, the six first-vintage claims
+    // corrections at 8722b2da replace the six rows they supersede.
+    const realCorrections = ledgers.filter(
+      (ledger) =>
+        ledger.kind === "chronicle" &&
+        lines[ledger.lines[0]].origin.startsWith("chronicle@8722b2da:"),
+    );
+    expect(realCorrections).toHaveLength(1);
+    const [corrected] = realCorrections;
+    expect(corrected.checkRows).toBe("accept");
+    expect(corrected.current).toEqual([6, 7, 8, 9, 10, 11]);
+    for (const position of corrected.current!) {
+      expect(lines[corrected.lines[position]].supersedes).toMatch(/^av2:/);
+    }
     expect(
       dropping.filter((ledger) => ledger.kind === "gated").length,
     ).toBeGreaterThanOrEqual(30);
@@ -831,6 +845,37 @@ describe("scoring on the current view", () => {
     expect(
       evaluateResolvedForecastRun(cell, run(), ledger).score?.observedValue,
     ).toBe(231);
+  });
+
+  it("excludes a correction of a quarantined legacy row of a contract-bound target", () => {
+    // The quarantined original grades legacy_unbound. Its correction is
+    // appended after the quarantine, so it needs the full contract binding,
+    // which a copy of the legacy row lacks; the original never grades again.
+    const legacy = boundRow();
+    delete legacy.targetContentHash;
+    delete legacy.sourceBindingProjection;
+    const fixed = versioned({ ...legacy, value: 231 }, legacy);
+    const [registration, legacyEntry, fixedEntry] = ledgerOf([legacy, fixed]);
+    const quarantined = {
+      ...(legacyEntry as ObservationRecordedLedgerEntry),
+      legacyQuarantined: true,
+    };
+    const alone = evaluateResolvedForecastRun(cell, run(), [
+      registration,
+      quarantined,
+    ]);
+    expect(alone.score?.contractBinding).toBe("legacy_unbound");
+    expect(alone.score?.observedValue).toBe(225);
+    const corrected = evaluateResolvedForecastRun(cell, run(), [
+      registration,
+      quarantined,
+      fixedEntry,
+    ]);
+    expect(corrected.score).toBeUndefined();
+    expect(corrected.exclusion?.reason).toBe("contract_violation");
+    expect(corrected.exclusion?.detail).toMatch(
+      /carries no target contract hash/,
+    );
   });
 
   it("dates the resolution by its first print, so a late correction admits no late run", () => {
