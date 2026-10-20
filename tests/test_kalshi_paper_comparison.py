@@ -820,7 +820,7 @@ def test_alternate_venues_are_checked_for_matched_periods():
     rows = pipeline.alternate_venue_rows(cache, {"k": Unit("KXPAYROLLS", "2026-08")})
     venue = next(r for r in rows if r["venue"] == "KXUSNFP")
     assert venue["matchedPeriodsListed"] == ["2026-08"]
-    assert venue["latestPeriod"] == "2026-08"
+    assert venue["latestYear"] == 2026
 
 
 def test_report_refuses_unformatted_placeholders():
@@ -829,3 +829,58 @@ def test_report_refuses_unformatted_placeholders():
     assert report.UNFORMATTED.search("Across {n_markets} settled markets")
     assert report.UNFORMATTED.search("value {o['officialValue']}")
     assert not report.UNFORMATTED.search("Brackets are (-inf, s1] and [s1, s2)")
+
+
+def test_older_weekly_titles_read_as_week_ending():
+    # KXJOBLESS titled 2022 events "Initial jobless claims, Sep 18 to 24, 2022?".
+    assert contracts.text_periods(
+        "Initial jobless claims, Sep 18 to 24, 2022?", "weekly"
+    ) == {"2022-09-24"}
+
+
+def test_unreadable_recent_venue_events_raise():
+    from kalshi_compare import pipeline
+
+    class Unit:
+        def __init__(self, series, period):
+            self.spec = spec(series)
+            self.period = period
+
+    cache = FakeCache(
+        [
+            {
+                "event_ticker": "KXJOBLESS-26AUG13",
+                "title": "Jobless claims this week",
+                "sub_title": "Next Thursday",
+            }
+        ]
+    )
+    with pytest.raises(ValueError, match="no readable period"):
+        pipeline.alternate_venue_rows(
+            cache, {"k": Unit("KXJOBLESSCLAIMS", "2026-08-08")}
+        )
+
+
+def test_old_unreadable_venue_events_are_reported_not_raised():
+    from kalshi_compare import pipeline
+
+    class Unit:
+        def __init__(self, series, period):
+            self.spec = spec(series)
+            self.period = period
+
+    cache = FakeCache(
+        [
+            {
+                "event_ticker": "JOBLESS-22SEP10",
+                "title": "Initial jobless claims from " "Sep 4-10?",
+                "sub_title": "From Sep 4-10",
+            }
+        ]
+    )
+    rows = pipeline.alternate_venue_rows(
+        cache, {"k": Unit("KXJOBLESSCLAIMS", "2026-08-08")}
+    )
+    assert all(
+        r["eventsWithReadablePeriod"] == 0 and r["latestYear"] == 2022 for r in rows
+    )

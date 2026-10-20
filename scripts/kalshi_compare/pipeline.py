@@ -116,8 +116,10 @@ def partition_runs(
             matched.append((run_, spec, period, pattern))
     matched_ids = {r.run_id for r, *_ in matched}
     unmatched_ids = {r.run_id for r in unmatched_runs}
-    assert not matched_ids & unmatched_ids
-    assert matched_ids | unmatched_ids == {r.run_id for r in in_scope}
+    if matched_ids & unmatched_ids or matched_ids | unmatched_ids != {
+        r.run_id for r in in_scope
+    }:
+        raise ValueError("in-scope runs are not split into matched and unmatched")
     return matched, unmatched_runs
 
 
@@ -150,21 +152,29 @@ def alternate_venue_rows(cache: FetchCache, units: dict) -> list[dict]:
                 for period in contracts.text_periods(text, spec.cadence):
                     listed.setdefault(period, []).append(event["event_ticker"])
             overlap = sorted(periods & set(listed))
+            readable = sum(len(v) for v in listed.values())
+            ticker_years = [
+                2000 + int(found.group(1))
+                for event in venue_events
+                if (found := TICKER_YEAR.search(event["event_ticker"]))
+            ]
+            period_years = [int(p[:4]) for p in listed]
+            latest_year = max(ticker_years + period_years, default=None)
+            unreadable = len(venue_events) - readable
+            if unreadable and (
+                latest_year is None or latest_year >= min(int(p[:4]) for p in periods)
+            ):
+                raise ValueError(
+                    f"{venue}: {unreadable} event titles name no readable period "
+                    "and the events may cover a matched period"
+                )
             rows.append(
                 {
                     "series": series,
                     "venue": venue,
                     "events": len(venue_events),
-                    "latestTickerYear": max(
-                        (
-                            2000 + int(found.group(1))
-                            for event in venue_events
-                            if (found := TICKER_YEAR.search(event["event_ticker"]))
-                        ),
-                        default=None,
-                    ),
-                    "eventsWithReadablePeriod": sum(len(v) for v in listed.values()),
-                    "latestPeriod": max(listed) if listed else None,
+                    "eventsWithReadablePeriod": readable,
+                    "latestYear": latest_year,
                     "matchedPeriodsListed": overlap,
                     "matchedPeriodEvents": [t for p in overlap for t in listed[p]],
                 }

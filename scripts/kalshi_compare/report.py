@@ -61,7 +61,14 @@ PRIMARY_ORDER = [
     "KXUE",
 ]
 MIN_SERIES_N = 5
-UNFORMATTED = re.compile(r"\{[A-Za-z_][A-Za-z0-9_.\[\]'\"]*\}")
+NUMBER_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
+
+
+def count_word(n: int) -> str:
+    return NUMBER_WORDS.get(n, str(n))
+
+
+UNFORMATTED = re.compile(r"\{[^{}\n]*\}")
 ADDED_SERIES = frozenset({"KXHOUSINGSTART", "KXBUILDPERMS", "KXNHSALES", "KXUE"})
 PROSE_NAMES = {
     "KXCPI": "headline CPI",
@@ -389,7 +396,7 @@ def write(results: dict, out: pathlib.Path) -> None:
     (out / "summary.json").write_text(json.dumps(results["summary"], indent=1) + "\n")
     doc, figure_svg = build(results)
     markdown = doc.markdown()
-    placeholder = UNFORMATTED.search(markdown)
+    placeholder = UNFORMATTED.search(markdown) or UNFORMATTED.search(figure_svg)
     if placeholder:
         raise ValueError(
             f"report has an unformatted placeholder: {placeholder.group(0)}"
@@ -412,6 +419,30 @@ def headline_pairs(results: dict, spec: str | None = None) -> list[dict]:
 
 def values_text(rows: list[dict], metric: str) -> str:
     return ", ".join(num(r[metric]) for r in sorted(rows, key=lambda r: r["period"]))
+
+
+def last_trade_kind(results: dict, pair: dict) -> str:
+    """Why a last-trade ladder put zero on the realized bracket: stale or untraded."""
+    score = next(
+        s
+        for s in results["scores"]
+        if s["runId"] == pair["runId"]
+        and s["horizon"] == pair["horizon"]
+        and s["spec"] == "last_trade_price"
+    )
+    strikes = score["strikes"]
+    index = score["realizedBracket"]
+    bounds = set(strikes[max(0, index - 1) : index + 1])
+    traded = [
+        m["lastTrade"] is not None
+        for m in results["markets"]
+        if m["eventKey"] == pair["eventKey"]
+        and m["horizon"] == pair["horizon"]
+        and m["strike"] in bounds
+    ]
+    return (
+        "stale last trades" if any(traded) else "an untraded book read at its midpoints"
+    )
 
 
 def p_text(v: dict) -> str:
@@ -532,7 +563,8 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         f"{len(released)} of those have been released and are scored against the "
         "official first print, on Kalshi's own brackets."
         + (
-            f" Four series ({', '.join(added_names)}) were added after the first "
+            f" {count_word(len(added_names)).capitalize()} series"
+            f" ({', '.join(added_names)}) were added after the first "
             "independent review, which had seen the scores, when a screen of Kalshi's "
             "catalog found them; on the eight series of the original plan the pooled "
             "means are unchanged from that review (subset table below)."
@@ -569,6 +601,7 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         )
         bullets.append(text)
     hit1, rest1 = floor_split("primary", "release_minus_1d")
+    orig7 = head["primary"]["release_minus_7d"]["originalSeries"].get("deltaLog") or {}
     hit_last, rest_last = floor_split("last_trade_price", "release_minus_1d")
     text = (
         "**Closer to the release, Kalshi's prices scored better on average than "
@@ -585,17 +618,30 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
             f"{ci_rel(rest1)}"
         )
     text += (
-        f". Seven days before release it is {ci_rel(d7)}. Dropping books quoted wider "
+        f". Seven days before release it is {ci_rel(d7)}"
+        + (
+            f" (on the eight original series alone, {ci_rel(orig7)}, sign-flip p "
+            f"{p_text(orig7)})"
+            if orig7.get("n")
+            else ""
+        )
+        + ". Dropping books quoted wider "
         "than 20 cents, a rule adopted after the plan, gives "
         f"{ci_rel(l1['deltaLog'])} one day out over {l1['deltaLog']['n']} events "
         f"(Brier {ci_rel(l1['deltaBrier'])}). With last traded prices instead of "
         f"midpoints it is {ci_rel(last1)}"
     )
     if hit_last:
+        kinds = Counter(last_trade_kind(results, r) for r in hit_last)
+        cause = " or ".join(
+            f"{label} ({n})" for label, n in sorted(kinds.items(), key=lambda k: -k[1])
+        )
+        flips = (last1["mean"] > 0) != (rest_last["mean"] > 0)
         text += (
-            f", entirely because in {len(hit_last)} events a stale last trade priced "
-            f"the realized bracket at zero ({hits_text(hit_last)}); the other "
-            f"{rest_last['n']} give {ci_rel(rest_last)}"
+            f"; {'the sign comes from' if flips else 'that includes'} "
+            f"{len(hit_last)} events where {cause} priced the realized bracket at zero "
+            f"({hits_text(hit_last)}), and the other {rest_last['n']} give "
+            f"{ci_rel(rest_last)}"
         )
     text += (
         ". Splits by floor hits are descriptive, since which events hit the floor "
@@ -777,7 +823,7 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
                 "Matched series",
                 "Other Kalshi series",
                 "Events",
-                "Latest year in tickers",
+                "Latest year",
                 "Lists a matched period",
             ],
             [
@@ -785,8 +831,14 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
                     f"`{v['series']}`",
                     f"`{v['venue']}`",
                     str(v["events"]),
-                    str(v["latestTickerYear"] or "\u2014"),
-                    ", ".join(v["matchedPeriodEvents"]) or "no",
+                    str(v["latestYear"] or "\u2014"),
+                    ", ".join(v["matchedPeriodEvents"])
+                    or (
+                        "no"
+                        if v["eventsWithReadablePeriod"] == v["events"]
+                        else f"no ({v['events'] - v['eventsWithReadablePeriod']} titles"
+                        " name no period; none can be from a matched year)"
+                    ),
                 ]
                 for v in venues
             ],
@@ -859,6 +911,11 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
     exact_seconds = sum(
         1 for o in seconds if o["officialSecondReading"] == o["officialValue"]
     )
+    rounded_second = {
+        PROSE_NAMES.get(o["eventKey"].split(":")[0], o["eventKey"])
+        for o in seconds
+        if o["officialSecondReading"] != o["officialValue"]
+    }
     doc.p(
         "Each value is the official first print read from the agency's own release"
         " (BLS news release archive; DOL Employment and Training Administration weekly"
@@ -866,8 +923,14 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         " Construction and Sales; ABS Labour Force, Australia), with the release time"
         f" the document states. For {len(seconds)} events the same document states the"
         " value a second time (lead paragraph, summary box or table): the two readings"
-        f" are equal for {exact_seconds}, and for the rest (JOLTS, whose lead rounds to"
-        f" 0.1 million) they agree within that rounding. Across {n_markets} settled"
+        f" are equal for {exact_seconds}"
+        + (
+            f", and for the rest ({', '.join(sorted(rounded_second))}, whose lead"
+            " rounds to 0.1 million) they agree within that rounding"
+            if rounded_second
+            else ""
+        )
+        + f". Across {n_markets} settled"
         " Kalshi markets, the contract rule applied to the official value reproduces"
         f" Kalshi's recorded result in every case ({mismatches} disagreements)."
     )
@@ -1006,7 +1069,10 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         ("headlineEligibleOnly", "Headline-eligible custody roots only"),
     )
     for key, label in subset_labels:
-        for spec in ("primary", "liquid_markets_only"):
+        specs = ("primary", "liquid_markets_only") + (
+            ("last_trade_price",) if key == "excludingKalshiFloorHits" else ()
+        )
+        for spec in specs:
             for h in HORIZON_LABELS:
                 if key == "sameEventsAsRegistration" and h == "at_registration":
                     continue
@@ -1100,11 +1166,12 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         cells = [SPEC_LABELS[spec]]
         for h in HORIZON_LABELS:
             v = pooled[(spec, h)].get("deltaLog")
-            cells.append(f"{ci_text(v)}, n={v['n']}" if v else "n/a")
+            cells.append(f"{ci_rel(v)}, n={v['n']}" if v else "n/a")
         rows.append(cells)
     doc.table(
         ["Rule (pooled log difference)"] + list(HORIZON_LABELS.values()),
         rows,
+        "Intervals resample release dates. "
         'All rules but "liquid markets only" were pre-specified. That rule was '
         "adopted after full runs whose saved output already contained scores; the "
         "author had not examined them, which the record cannot show, so treat it as "

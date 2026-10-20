@@ -491,15 +491,22 @@ WEEK_ENDING = re.compile(
     r"(?:st|nd|rd|th)?,?\s+(?P<year>\d{4})",
     re.I,
 )
+# Older weekly titles: "Initial jobless claims, Sep 18 to 24, 2022?"
+WEEK_RANGE = re.compile(
+    rf"(?P<month>{MONTH_WORD})\.?\s+\d{{1,2}}\s*(?:-|to)\s*(?P<day>\d{{1,2}}),?\s+"
+    r"(?P<year>\d{4})",
+    re.I,
+)
 MONTH_YEAR = re.compile(rf"\b(?P<month>{MONTH_WORD})\.?\s+(?P<year>20\d{{2}})\b", re.I)
 
 
 def text_periods(text: str, cadence: str) -> set[str]:
     text = normalize_text(text)
     if cadence == "weekly":
+        found = list(WEEK_ENDING.finditer(text)) or list(WEEK_RANGE.finditer(text))
         return {
             f"{int(m['year']):04d}-{MONTHS[m['month'].lower()]:02d}-{int(m['day']):02d}"
-            for m in WEEK_ENDING.finditer(text)
+            for m in found
         }
     return {
         f"{int(m['year']):04d}-{MONTHS[m['month'].lower()]:02d}"

@@ -219,8 +219,6 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
      above 16 events say they are Monte Carlo. Results on the same events as
      the registration comparison, and on headline-eligible custody roots only,
      are reported.
-   - Release times were added for the Census and ABS sources, and the scope
-     statement above now says it includes one Australian series.
    - The justification for the rounding reading was corrected: Thesis point
      estimates sit between grid values only for some series, so the reading is
      stated as a convention.
@@ -230,7 +228,9 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
    review and gives the eight original series as a subset, and discloses Kalshi
    floor hits at every horizon it quotes. Other Kalshi series on the matched
    statistics (older tickers and second venues such as KXUSNFP and KXJOBLESS)
-   are listed with whether they have an event for a matched period.
+   are listed with whether they have an event for a matched period. Release
+   times were added for the Census and ABS sources, and the scope statement
+   above now says it includes one Australian series.
 
 ## Data provenance
 
