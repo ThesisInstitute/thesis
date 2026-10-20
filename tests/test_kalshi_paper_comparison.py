@@ -630,6 +630,7 @@ def test_rule_direction_must_match_strike_type():
         ("us.dol.initial_claims.sa.week_2026-08-08", "2026-08-08"),
         ("census.housing_starts.saar.2026-07.first_print", "2026-07"),
         ("irs.actc.total_claims.2027.first_print.current_law", None),
+        ("bls.productivity.nonfarm_qoq_prelim.2026_q3.first_print", "2026-Q3"),
     ],
 )
 def test_period_of(data_point, period):
@@ -734,3 +735,19 @@ def test_two_stage_interval_is_wider_than_fixed_strata():
     balanced = sum(sum(v) / len(v) for v in groups.values()) / len(groups)
     assert lo <= balanced <= hi
     assert hi - lo > 1.0  # between-series spread dominates
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "the unemployment rate increased 0.2ppt to 4.5%",
+        "the unemployment rate rose to 4.5%",
+        "the unemployment rate increased marginally to 4.5%",
+    ],
+)
+def test_abs_unemployment_verb_variants(phrase):
+    # ABS wrote "increased 0.2ppt to 4.6%" for August 2026.
+    text = EXCERPTS["abs_lf_2026-07"]["excerpt"].replace(
+        "the unemployment rate was 4.5%", phrase, 1
+    )
+    assert official.parse_abs_unemployment(text)[1] == Decimal("4.5")

@@ -60,6 +60,11 @@ PRIMARY_ORDER = [
     "KXUE",
 ]
 MIN_SERIES_N = 5
+SHORT_NAMES = {
+    "KXCPI": "headline CPI",
+    "KXCPICORE": "core CPI",
+    "KXPCECORE": "core PCE",
+}
 
 
 # CSV --------------------------------------------------------------------------
@@ -437,8 +442,6 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
     # Summary -------------------------------------------------------------------
     reg = {m: pool("primary", "at_registration", m) for m in ("deltaLog", "deltaBrier")}
     reg_rows = rows_for("primary", "at_registration")
-    worst = max(reg_rows, key=lambda r: abs(r["deltaLog"])) if reg_rows else None
-    rest = [r["deltaLog"] for r in reg_rows if r is not worst]
     thin = {}
     for series in ("KXCPI", "KXCPICORE", "KXPCECORE"):
         spreads = [
@@ -456,6 +459,7 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         m: pool("liquid_markets_only", "release_minus_1d", m)
         for m in ("deltaLog", "deltaBrier")
     }
+    last1 = pool("last_trade_price", "release_minus_1d", "deltaLog")
     same = head["primary"]["release_minus_1d"]["sameEventsAsRegistration"].get(
         "deltaLog"
     ) or {"n": 0}
@@ -484,25 +488,43 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         "catalog and have no matching event. Bracketed ranges are 95% bootstrap "
         "intervals; positive differences favor Thesis.",
     ]
-    if worst is not None:
-        bullets.append(
+    if reg_rows:
+        floored = {
+            sc["eventKey"]
+            for sc in results["scores"]
+            if sc["spec"] == "primary"
+            and sc["forecaster"] == "thesis_headline"
+            and sc["horizon"] == "at_registration"
+            and sc["primarySeries"]
+            and sc["kalshiFloored"]
+        }
+        hit = [r for r in reg_rows if r["eventKey"] in floored]
+        others = [r["deltaLog"] for r in reg_rows if r["eventKey"] not in floored]
+        reg_liquid = pool("liquid_markets_only", "at_registration", "deltaLog")
+        text = (
             "**At Thesis's registration time**, the only horizon where Kalshi had no "
             f"more information than Thesis, the {reg['deltaLog']['n']} comparisons "
-            "cannot tell the two apart: the log-score difference is "
-            f"{ci_text(reg['deltaLog'])} and the Brier difference "
-            f"{ci_text(reg['deltaBrier'])}. Kalshi's books were thin at that point "
-            "(median spreads of "
-            + ", ".join(
-                f"{v * 100:.0f} cents for"
-                f" {SERIES_LABELS[k].split(',')[0].split(' (')[0]}"
-                for k, v in thin.items()
-            )
-            + f"), and the mean is driven by one event, {worst['eventKey']}"
-            f" ({num(worst['deltaLog'])}), where an empty book gave the realized"
-            f" bracket a price of {worst['kalshiRealizedProb']:.2f}; the other"
-            f" {len(rest)} average {num(sum(rest) / len(rest))}. The intervals admit"
-            " large differences in either direction."
+            "cannot tell the two apart. Under the pre-specified rule the log-score "
+            f"difference is {ci_text(reg['deltaLog'])} and the Brier difference "
+            f"{ci_text(reg['deltaBrier'])}"
         )
+        if hit:
+            text += (
+                f", but {len(hit)} of the events had empty Kalshi books that priced the"
+                " realized bracket at zero ("
+                + ", ".join(f"{r['eventKey']} {num(r['deltaLog'])}" for r in hit)
+                + f"); the other {len(others)} average {num(sum(others) / len(others))}"
+            )
+        text += (
+            ". Dropping books quoted wider than 20 cents gives "
+            f"{ci_text(reg_liquid)} over {reg_liquid['n']} events. Kalshi's books were "
+            "thin at that point (median spreads of "
+            + ", ".join(
+                f"{v * 100:.0f} cents for {SHORT_NAMES[k]}" for k, v in thin.items()
+            )
+            + "), and the intervals admit large differences in either direction."
+        )
+        bullets.append(text)
     bullets.append(
         "**Closer to the release, Kalshi's prices scored better on average than "
         "Thesis's earlier, fixed forecast**, as expected given the information that "
@@ -512,8 +534,10 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
         f"seven days before it is {ci_text(d7)}. It becomes clear only after dropping "
         "order books with spreads above 20 cents, a rule adopted after the plan: one "
         f"day before release, log {ci_text(l1['deltaLog'])} over {l1['deltaLog']['n']} "
-        f"events (Brier {ci_text(l1['deltaBrier'])}). On the {same['n']} events also "
-        f"scored at registration, the one-day difference is {ci_text(same)}."
+        f"events (Brier {ci_text(l1['deltaBrier'])}). It also depends on the price "
+        "used: with last traded prices instead of midpoints, the one-day difference is "
+        f"{ci_text(last1)}. On the {same['n']} events also scored at registration, the "
+        f"one-day difference is {ci_text(same)}."
     )
     bullets.append(
         "**Per series, there are too few resolved pairs to conclude anything.** Only "
@@ -682,7 +706,7 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
                 for (fam, ev, reason), ps in sorted(related_rows.items())
             ],
             "Kalshi series the catalog screen found for statistics Thesis forecasts, "
-            "with the 2026 reference periods each lists (June onward).",
+            "with the 2026 reference periods each lists.",
         )
     withdrawn = results["withdrawn"]
     confirmed = sum(1 for w in withdrawn if w["livePageSaysNoForecast"])

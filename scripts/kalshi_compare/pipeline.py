@@ -821,7 +821,7 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
                 listed.append(
                     f"{series}: "
                     + (
-                        ", ".join(sorted(p for p in periods if p >= "2026-06"))
+                        ", ".join(sorted(p for p in periods if p >= "2026-01"))
                         or "no 2026 events"
                     )
                 )

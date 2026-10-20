@@ -392,7 +392,10 @@ RELATED: tuple[tuple[re.Pattern, tuple[str, ...], str], ...] = tuple(
         (
             r"^eurostat\.unemployment_rate\.euro_area",
             ("KXUE",),
-            "KXUE lists country events but no euro-area event",
+            (
+                "KXUE's events for that month are for single countries, none for the"
+                " euro area"
+            ),
         ),
     )
 )
@@ -409,6 +412,7 @@ PERIOD_TOKENS = (
     (re.compile(r"week_(\d{4})-(\d{2})-(\d{2})"), "week"),
     (re.compile(rf"(?<![a-z])({MONTH_WORD})_(\d{{4}})"), "month_name"),
     (re.compile(r"(?<!\d)(\d{4})[-_](\d{2})(?![-_\d])"), "year_month"),
+    (re.compile(r"(?<!\d)(\d{4})_q([1-4])(?!\d)"), "quarter"),
 )
 
 
@@ -420,6 +424,8 @@ def period_of(data_point_id: str) -> str | None:
             continue
         if kind == "week":
             return "-".join(found.groups())
+        if kind == "quarter":
+            return f"{found.group(1)}-Q{found.group(2)}"
         if kind == "month_name":
             return f"{int(found.group(2)):04d}-{MONTHS[found.group(1)]:02d}"
         year, month = int(found.group(1)), int(found.group(2))

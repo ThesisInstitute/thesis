@@ -449,8 +449,9 @@ def parse_abs_unemployment(text: str) -> tuple[str, Decimal, Decimal | None, str
     )
     lead = re.search(
         rf"In seasonally adjusted terms, in {reference.group(1)} {reference.group(2)}:"
-        r".{0,400}?the unemployment rate (?:was|remained at|rose to|increased to|"
-        r"fell to|decreased to|declined to)\s+(\d+\.\d)%",
+        r".{0,400}?the unemployment rate (?:was|remained at|"
+        r"(?:rose|increased|fell|decreased|declined)(?: marginally| [\d.]+ ?ppts?)? to)"
+        r"\s+(\d+\.\d)%",
         text,
         re.I,
     )
