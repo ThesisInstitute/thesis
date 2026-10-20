@@ -34,6 +34,7 @@ import {
 } from "@/data/thesis-log";
 import { ledgerHistoryAtCutoff } from "@/data/time-series-priors";
 import { isUnit } from "@/data/units";
+import { WITNESSED_CUSTODY_ROOTS } from "@/data/witnessed-timeline";
 
 // Scoring fixtures below test the ledger view, not execution verification,
 // which published-scoring-gate.test.ts exercises without mocks.
@@ -909,6 +910,50 @@ describe("scoring on the current view", () => {
     expect(corrected.score?.observedValue).toBe(231);
   });
 
+  it("judges the witness tier against the first print, not a later-dated correction", () => {
+    // A custody witness proves a run predates the outcome only if it
+    // precedes the first print. Here the run is witnessed the day after the
+    // first print, so its proof falls back to the claimed run time; a
+    // correction dated after the witness must not upgrade it.
+    const [root, proof] = Object.entries(WITNESSED_CUSTODY_ROOTS).find(
+      ([, entry]) =>
+        entry.inventoryStatus === "complete" && entry.headlineEligible === true,
+    )!;
+    const witnessDay = Date.parse(
+      `${proof.earliestWitnessedAt.slice(0, 10)}T00:00:00Z`,
+    );
+    const day = (offset: number) =>
+      new Date(witnessDay + offset * 86_400_000).toISOString().slice(0, 10);
+    const witnessedCell: ForecastCell = {
+      ...cell,
+      predictionRun: {
+        ...cell.predictionRun!,
+        runAt: `${day(-3)}T00:00:00Z`,
+        custodyRootSha256: root,
+      },
+    };
+    const firstPrint = versioned(boundRow({ observed_at: day(-1) }), null);
+    const lateFix = versioned(
+      boundRow({ value: 231, observed_at: day(3) }),
+      firstPrint,
+    );
+    const witnessedRun = getForecastRunEntries(witnessedCell)[0];
+    const alone = evaluateResolvedForecastRun(
+      witnessedCell,
+      witnessedRun,
+      ledgerOf([firstPrint]),
+    );
+    const corrected = evaluateResolvedForecastRun(
+      witnessedCell,
+      witnessedRun,
+      ledgerOf([firstPrint, lateFix]),
+    );
+    expect(alone.score?.chronology).toBe("claimed_time_verified");
+    expect(corrected.score?.observedValue).toBe(231);
+    expect(corrected.score?.observedAt).toBe(day(-1));
+    expect(corrected.score?.chronology).toBe("claimed_time_verified");
+  });
+
   it("keeps a correction of a pre-registration print out of grading (N5)", () => {
     // The original was already inside the pinned state (sequence 1 < 2);
     // appending a correction later must not launder it.
@@ -937,16 +982,38 @@ describe("cutoff histories on the as-of view", () => {
   };
   const original = versioned(boundRow(), null);
   const correction = versioned(boundRow({ value: 231 }), original);
-  const history = (rows: Json[], cutoff: string) =>
+  const history = (rows: Json[], cutoff: string, firstSequence = 2) =>
     ledgerHistoryAtCutoff(
       nextCell,
-      [nextTarget, ...ledgerOf(rows)],
+      [nextTarget, ...ledgerOf(rows, firstSequence)],
       cutoff,
     ).map((entry) => entry.value);
 
   it("reads the original before the correction's acceptance and the correction after", () => {
     // original accepted at sequence 2, correction at sequence 3
     expect(history([original, correction], acceptedAt(2))).toEqual([225]);
+    expect(history([original, correction], acceptedAt(3))).toEqual([231]);
+  });
+
+  it("replaces the original with a later-dated correction", () => {
+    // Histories keep a record's current row whatever its date: the
+    // first-print boundary is a grading rule, not a history filter.
+    const late = versioned(
+      boundRow({ value: 231, observed_at: "2026-07-27" }),
+      original,
+    );
+    expect(history([original, late], acceptedAt(2))).toEqual([225]);
+    expect(history([original, late], acceptedAt(3))).toEqual([231]);
+  });
+
+  it("keeps a correction of a pre-registration print out of histories (N5)", () => {
+    // The original was inside the pinned state (sequence 1 < 2), so the
+    // series filter never admits its record. The series filter judges the
+    // correction on its whole chain in the full ledger, so it cannot launder
+    // the record in, even though the as-of view no longer holds the original.
+    expect(history([original], acceptedAt(1), 1)).toEqual([]);
+    expect(history([original, correction], acceptedAt(2), 1)).toEqual([]);
+    // The same chain accepted after the pin enters as its correction.
     expect(history([original, correction], acceptedAt(3))).toEqual([231]);
   });
 

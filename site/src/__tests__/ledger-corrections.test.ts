@@ -684,10 +684,8 @@ describe("Chronicle corrections on the pinned ledger", () => {
     ).toEqual([]);
   });
 
-  it("reports a unit-changing correction as a drop-out until it is listed", () => {
-    // The case the list exists for. Move the record the most histories hold
-    // into another unit: every history that held it loses it, and the check
-    // above would name each one.
+  // The contract-bound row the most cutoff histories hold, and how many.
+  function mostHeldRecord(): [ObservationRecordedLedgerEntry, number] {
     const held = new Map<ObservationRecordedLedgerEntry, number>();
     for (const forecast of FORECAST_CELLS) {
       for (const entry of ledgerHistoryAtCutoff(
@@ -700,7 +698,35 @@ describe("Chronicle corrections on the pinned ledger", () => {
         }
       }
     }
-    const [record] = [...held].sort((left, right) => right[1] - left[1])[0];
+    return [...held].sort((left, right) => right[1] - left[1])[0];
+  }
+
+  it("keeps a same-date or later-dated correction in every history that held its original", () => {
+    // Histories keep a record's current row whatever its date, so a value
+    // correction of a held record replaces it everywhere and leaves nothing.
+    const [record, holders] = mostHeldRecord();
+    expect(holders).toBeGreaterThan(1);
+    const observedAt = rawRows[observations.indexOf(record)]
+      .observed_at as string;
+    // One day later keeps the print on or before the correction's acceptance.
+    for (const shape of [observedAt, daysLater(observedAt, 1)]) {
+      const { correction, extended, replaced } = withCorrection(record, {
+        value: record.value + 5,
+        observed_at: shape,
+      });
+      const { checks, dropOuts } = historyDropOuts(extended, [
+        [replaced, correction],
+      ]);
+      expect(checks, shape).toBe(holders);
+      expect(dropOuts, shape).toEqual([]);
+    }
+  });
+
+  it("reports a unit-changing correction as a drop-out until it is listed", () => {
+    // The case the list exists for. Move the record the most histories hold
+    // into another unit: every history that held it loses it, and the check
+    // above would name each one.
+    const [record, holders] = mostHeldRecord();
     const raw = rawRows[observations.indexOf(record)];
     const unit = record.unit === "millions" ? "thousands" : "millions";
     const { correction, extended, replaced } = withCorrection(record, {
@@ -713,7 +739,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
     const { checks, dropOuts } = historyDropOuts(extended, [
       [replaced, correction],
     ]);
-    expect(checks).toBe(held.get(record));
+    expect(checks).toBe(holders);
     expect(dropOuts).toHaveLength(checks);
     for (const dropOut of dropOuts) {
       expect(dropOut.correction).toBe(observationAssertionId(correction));
