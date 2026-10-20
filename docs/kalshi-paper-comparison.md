@@ -275,9 +275,11 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
    2026 quarter" (KXNFPROD) and day-dated events (KXTRUFPDEBT). The evidence
    for unmatched runs now reads day dates, month ranges, "any year quarter",
    and a lone month with a lone year. Scored matching keeps the strict reader.
-   Any event still naming no period is listed in the evidence. A run is not
-   called absent while such an event could cover its period, and on a
-   same-statistic series such an event stops the run. Screen hits are
+   Events that still name no period, or that use span wording the reader
+   may read only in part (such as "before July 1, 2026"), are counted in the
+   evidence, and each one that could cover the run's year is listed. A run
+   is not called absent while such an event exists. On a same-statistic
+   series, such an event stops the run. Screen hits are
    counted one row per group, series and verdict, with distinct series
    counted. Two sweeps for missed series found none on the same statistic.
    Their adjacent series (personal spending, ADP, CPI-U index level,

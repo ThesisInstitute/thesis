@@ -918,7 +918,13 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
                 periods = contracts.text_periods(text, cadence, spans=True)
                 for found in periods:
                     by_period.setdefault(found, []).append(event["event_ticker"])
-                if not periods:
+                # A span the reader only partly reads ("before July 1, 2026")
+                # stays listed, so a period it covers is never called absent.
+                fully_read = contracts.MONTH_RANGE.search(
+                    text
+                ) or contracts.ANY_QUARTER.search(text)
+                partial = contracts.SPAN_WORDS.search(text) and not fully_read
+                if not periods or partial:
                     unread.append((event["event_ticker"], " ".join(text.split())))
             events_by_series[(series, cadence)] = (by_period, unread)
         return events_by_series[(series, cadence)]
@@ -948,13 +954,22 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
                     u for u in unread if contracts.could_cover_year(u[1], run_year)
                 ]
                 if unread:
+                    others = [u for u in unread if u not in could_cover]
                     text += (
-                        f"; {len(unread)} event{'s' if len(unread) > 1 else ''} name"
-                        f"{'' if len(unread) > 1 else 's'} no {unit[cadence]} ("
-                        + "; ".join(f"{t}: {title}" for t, title in unread[:2])
-                        + ("; …" if len(unread) > 2 else "")
-                        + ")"
+                        f"; {len(unread)} event{'s' if len(unread) > 1 else ''}"
+                        f" span{'' if len(unread) > 1 else 's'} several periods or"
+                        f" name{'' if len(unread) > 1 else 's'} no {unit[cadence]}"
                     )
+                    if could_cover:
+                        text += (
+                            f"; could cover {run_year or 'the period'}: "
+                            + "; ".join(f"{t}: {title}" for t, title in could_cover)
+                        )
+                    if others:
+                        text += (
+                            f"; {len(others)} name only other years, e.g."
+                            f" {others[0][0]}: {others[0][1]}"
+                        )
                 listed.append(text)
                 if period and period in periods:
                     if note == contracts.SAME:

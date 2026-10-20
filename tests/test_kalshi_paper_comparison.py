@@ -1056,7 +1056,28 @@ def test_unmatched_rows_never_call_an_unreadable_event_absent():
         "; KXDEBTSHRINK also lists events that span several periods or name none,"
         " shown in the evidence"
     )
-    assert "1 event names no month (KXDEBTSHRINK-28NOV11" in row["kalshiEvidence"]
+    assert (
+        "1 event spans several periods or names no month; could cover 2026:"
+        " KXDEBTSHRINK-28NOV11" in row["kalshiEvidence"]
+    )
+
+
+def test_a_partly_read_span_is_never_called_absent():
+    # Review r6: "before July 1, 2026" reads as July but covers June too.
+    from kalshi_compare import pipeline
+
+    cache = SeriesCache(
+        {
+            "KXTRUFPDEBT": [
+                event("KXTRUFPDEBT-26JUL01", "US public debt before July 1, 2026")
+            ]
+        }
+    )
+    (row,) = pipeline.unmatched_rows(
+        cache, [thesis_run("treasury.mts.monthly_deficit.2026_06.first_print")]
+    )
+    assert row["reason"].startswith("no related Kalshi event names this period (")
+    assert "KXTRUFPDEBT also lists events that span" in row["reason"]
 
 
 def test_unreadable_event_on_the_same_statistic_stops_the_run():
@@ -1079,6 +1100,8 @@ def test_unreadable_event_on_the_same_statistic_stops_the_run():
         ("PPI MoM next release", True),
         ("Canada unemployment below 6.5% before 2027?", True),
         ("Real wages through 2026", True),
+        ("Real wage growth from 2025 to 2027", True),
+        ("Real wage growth from 2027 to 2029", False),
     ],
 )
 def test_could_cover_year(text, covers):

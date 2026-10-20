@@ -1008,12 +1008,12 @@ SCREEN_VERDICTS: dict[str, str] = {
     "KXCHEXPORTS": "China's export growth, not US export prices",
     "KXCHIMPORTS": "China's import growth, not US import prices",
     "KXSKEXPYOY": "South Korea's export growth, not US export prices",
-    "KXCNIMPORT": "US goods imports from China (volume), not import prices",
-    "KXEIACRUDEXPM": "US crude oil export volumes, not export prices",
-    "KXHELIUMIMP": "US helium import volumes, not import prices",
-    "KXIRANIMPORTS": "US imports from Iran (volume), not import prices",
+    "KXCNIMPORT": "annual US goods imports from China, not import prices",
+    "KXEIACRUDEXPM": "US crude oil exports, not export prices",
+    "KXHELIUMIMP": "US helium imports, not import prices",
+    "KXIRANIMPORTS": "the value of US imports from Iran, not import prices",
     "KXMEXCUBOIL": "whether Mexico resumes oil exports to Cuba",
-    "KXRUCRUDEX": "Russian crude export volumes",
+    "KXRUCRUDEX": "Russian crude export volumes (barrels per day)",
     "KXTARIFFSGLOBAL": "a tariff policy question",
     "KXSEMIPRODH": "annual US semiconductor production, one industry",
     "SEMIPRODH": "annual US semiconductor production, one industry",
@@ -1140,6 +1140,16 @@ ANY_QUARTER = re.compile(
 )
 
 
+YEAR_RANGE = re.compile(
+    r"\b(?P<y1>20\d{2})\s*(?:to|through|thru|until|-|\u2013)\s*(?P<y2>20\d{2})\b",
+    re.I,
+)
+# Words that make a title a span the reader may only partly read ("before
+# July 1, 2026" covers June too); such events are also treated as unread.
+SPAN_WORDS = re.compile(
+    r"\b(before|by|through|thru|until|from|since|between|any|during|within)\b",
+    re.I,
+)
 SPAN_END = re.compile(
     r"\b(?P<word>before|by|through|thru|until)\s+(?:the end of\s+)?(?P<year>20\d{2})\b",
     re.I,
@@ -1163,6 +1173,9 @@ def could_cover_year(text: str, year: int | None) -> bool:
     for m in spans:
         end = int(m["year"]) - (1 if m["word"].lower() == "before" else 0)
         if end >= year:
+            return True
+    for m in YEAR_RANGE.finditer(text):
+        if int(m["y1"]) <= year <= int(m["y2"]):
             return True
     return False
 
