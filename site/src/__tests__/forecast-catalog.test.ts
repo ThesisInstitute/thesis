@@ -2363,9 +2363,30 @@ describe("forecast catalog", () => {
       (entry) => entry.forecastSlug,
     );
     expect(new Set(resolutionSlugs).size).toBe(resolutionSlugs.length);
+    // A Chronicle correction appends a row that reuses its predecessor's
+    // source_record_id, so the two share an observationId. Ids are unique
+    // in the supersede-aware current view, not across physical rows, and
+    // every superseded row's id lives on in its correction. The chain rules
+    // and how corrected records grade are in ledger-corrections.test.ts.
+    const supersededVersionIds = new Set(
+      observationEntries.flatMap((entry) =>
+        entry.assertionVersion?.supersedes
+          ? [entry.assertionVersion.supersedes]
+          : [],
+      ),
+    );
+    const currentObservationEntries = observationEntries.filter(
+      (entry) =>
+        !entry.assertionVersion ||
+        !supersededVersionIds.has(entry.assertionVersion.id),
+    );
+    expect(
+      new Set(currentObservationEntries.map((entry) => entry.observationId))
+        .size,
+    ).toBe(currentObservationEntries.length);
     expect(
       new Set(observationEntries.map((entry) => entry.observationId)).size,
-    ).toBe(observationEntries.length);
+    ).toBe(currentObservationEntries.length);
 
     const resolvedPredictions = [
       {
