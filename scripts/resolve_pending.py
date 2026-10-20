@@ -15179,11 +15179,9 @@ def identity_anchor_move(
     candidate_lines = {identity["line"]: identity for identity in candidate}
     removed = [i for line, i in base_lines.items() if line not in candidate_lines]
     added = [i for line, i in candidate_lines.items() if line not in base_lines]
-    removed_by_uuid: dict[str, Mapping[str, Any]] = {}
-    for identity in removed:
-        if identity["uuid"] in removed_by_uuid:
-            return None, f"the base holds UUID {identity['uuid']} twice"
-        removed_by_uuid[identity["uuid"]] = identity
+    # UUIDs are unique on each side (checked above), so each removed
+    # identity has its own UUID.
+    removed_by_uuid = {identity["uuid"]: identity for identity in removed}
     events: list[dict[str, Any]] = []
     enriched: set[str] = set()
 
@@ -15646,13 +15644,15 @@ def append_gate_state(gate_runs: list[dict]) -> str:
     return "pending"
 
 
-def _describe_gate_runs(gate: str, gate_runs: list[dict]) -> str:
+def _describe_gate_runs(
+    gate: str, gate_runs: list[dict], min_runs: int = 0
+) -> str:
     judging = [run for run in gate_runs if run.get("conclusion") != "skipped"]
     if not gate_runs:
         return f"{gate}: no check run yet"
     if not judging:
         return f"{gate}: only skipped twins so far"
-    return "; ".join(
+    described = "; ".join(
         f"{gate}: "
         + (
             str(run.get("conclusion"))
@@ -15662,6 +15662,10 @@ def _describe_gate_runs(gate: str, gate_runs: list[dict]) -> str:
         + f" ({run.get('html_url') or 'no run URL'})"
         for run in judging
     )
+    completed = [run for run in judging if run.get("status") == "completed"]
+    if len(completed) < min_runs:
+        described += f" ({len(completed)} of {min_runs} runs completed)"
+    return described
 
 
 def append_gate_timeout_seconds(
@@ -15868,7 +15872,7 @@ def await_append_gates(
         return {
             gate: (
                 gate_state(gate),
-                _describe_gate_runs(gate, last_seen[gate]),
+                _describe_gate_runs(gate, last_seen[gate], min_runs.get(gate, 0)),
             )
             for gate in advisory
         }
@@ -15934,7 +15938,10 @@ def await_append_gates(
                 passed_ids = None
             # The budget bounds how long to wait, not which verdicts count:
             # the required gates passed on this exact head, so a pass read
-            # just after the deadline still stands.
+            # just after the deadline still stands. The advisory verdict is
+            # this read's, confirmed or not: a torn multi-page listing can
+            # misread it, which at worst files a needless issue or misses one
+            # that report_red_ledger_base raises on the next append.
             if may_merge() and (
                 all(states[gate] in ("passed", "failed") for gate in advisory)
                 or clock() - required_passed_at >= advisory_grace_seconds
@@ -15948,7 +15955,8 @@ def await_append_gates(
                 return advisory_verdicts()
             waiting = [gate for gate in gates if gate_state(gate) != "passed"]
             detail = "; ".join(
-                _describe_gate_runs(gate, last_seen[gate]) for gate in waiting
+                _describe_gate_runs(gate, last_seen[gate], min_runs.get(gate, 0))
+                for gate in waiting
             )
             if not waiting and passed_ids is not None:
                 detail = (

@@ -29,6 +29,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 
 import pytest
 from hypothesis import HealthCheck, assume, given, settings
@@ -296,6 +297,9 @@ def test_merge_happens_only_when_every_required_gate_passed(
 
 
 _REQUIRED_NAMES = ("Append gate", "Trusted base append gate")
+# Outcomes of the stateful gate-wait property in this process, so the test
+# after it can tell that its oracle really ran on merges under each policy.
+_GATE_WAIT_OUTCOMES: Counter = Counter()
 
 
 _PASSING_SHAPES = [
@@ -397,7 +401,9 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
     monkeypatch_session.setattr(rp, "_gh_api", api)
     required = (*_REQUIRED_NAMES, ARCH) if refuse else _REQUIRED_NAMES
     advisory = () if refuse else (ARCH,)
-    min_runs = {ARCH: 2} if refuse else {}
+    # As propose_ledger_append calls it, under either policy.
+    min_runs = {ARCH: 2}
+    policy = "refuse" if refuse else "land"
 
     def state(listing: list[dict], gate: str) -> str:
         runs = [r for r in listing if r["name"] == gate]
@@ -423,8 +429,10 @@ def test_every_merge_rests_on_a_confirmed_pass_in_the_latest_run_of_reads(
         )
     except rp.LedgerProposalError:
         hypothesis_event("refused")
+        _GATE_WAIT_OUTCOMES[(policy, "refused")] += 1
         return
     hypothesis_event("merged")
+    _GATE_WAIT_OUTCOMES[(policy, "merged")] += 1
     good = [read for read in reads if read != "error"]
     assert good and passed(good[-1])
     run_start = len(good) - 1
@@ -487,6 +495,18 @@ def test_a_required_rerun_needs_a_fresh_confirmed_pass(monkeypatch) -> None:
             REPO, "c" * 40, 7, timeout_seconds=600, advisory=(ARCH,),
             advisory_grace_seconds=10_000, clock=clock, sleep=clock.sleep,
         )
+
+
+def test_the_gate_wait_property_checked_merges_under_both_policies() -> None:
+    """The property above checks its invariant only when a wait ends in a
+    merge, so require that a fair share of its examples did, under each
+    policy (round 3 found it almost never did)."""
+    if not _GATE_WAIT_OUTCOMES:
+        pytest.skip("the gate-wait property did not run in this process")
+    for policy in ("land", "refuse"):
+        merged = _GATE_WAIT_OUTCOMES[(policy, "merged")]
+        total = merged + _GATE_WAIT_OUTCOMES[(policy, "refused")]
+        assert total and merged >= max(3, total // 50), (policy, merged, total)
 
 
 def _scripted_reads(monkeypatch, listings) -> list[int]:
@@ -560,18 +580,27 @@ def test_refuse_counts_a_skipped_twin_as_no_arch_checks_run(monkeypatch) -> None
         )
 
 
-def test_land_merges_on_an_earlier_confirmation(monkeypatch) -> None:
-    """Under "land", a confirmed pass followed by passing but unconfirmed
-    reads (multi-page, new attempt ids) and then a failed read merges, as
-    the code before advisory gates would have (round 3's P3-C)."""
+@pytest.mark.parametrize("ending", ["failed read", "deadline"])
+def test_land_merges_on_an_earlier_confirmation(monkeypatch, ending) -> None:
+    """Under "land", a confirmed pass, then passing but unconfirmed reads
+    (multi-page, a new attempt id on every read), then a failed read or the
+    deadline: the merge goes ahead on the earlier confirmation, as it did
+    before advisory gates existed (round 3's P3-C, round 4's P3-1)."""
     def listings(n: int):
         if n < 2:
             return _padded([*_green_append_gates(), *_ARCH_QUEUED], 9_000)
-        if n % 3 == 2:
+        if ending == "failed read" and n == 4:
             return None
-        return _padded([*_green_append_gates(), *_ARCH_QUEUED], 20_000 + n * 500)
+        return _padded(
+            [
+                _run(100 + n, "Append gate", "completed", "success"),
+                _run(2, "Trusted base append gate", "completed", "success"),
+                *_ARCH_QUEUED,
+            ],
+            20_000 + n * 500,
+        )
 
-    _scripted_reads(monkeypatch, listings)
+    served = _scripted_reads(monkeypatch, listings)
     clock = _FakeClock()
     verdicts = rp.await_append_gates(
         REPO, "c" * 40, 7, timeout_seconds=600, advisory=(ARCH,),
@@ -579,6 +608,8 @@ def test_land_merges_on_an_earlier_confirmation(monkeypatch) -> None:
         clock=clock, sleep=clock.sleep,
     )
     assert verdicts[ARCH][0] == "pending"
+    # The unconfirmed passing reads were really served before the return.
+    assert len(served) >= 4
 
 
 def test_a_required_rerun_restarts_the_advisory_grace(monkeypatch) -> None:
