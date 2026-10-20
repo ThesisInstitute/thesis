@@ -171,6 +171,30 @@ APPEND_GATE_MIN_READ_SECONDS = 15.0
 # verdict on a resolver merge. The trusted job runs the default branch's
 # workflow definition, which the proposal cannot edit.
 REQUIRED_APPEND_GATES = ("Append gate", "Trusted base append gate")
+# Branch protection requires a third check, Chronicle CI's "Arch checks",
+# whose series-catalog audit fails when an append needs catalog curation (a
+# concept's first period strip in a new identifier shape, or a moved
+# identity anchor). The resolver never awaited it: 17 of the 28 appends from
+# 2026-07-10 to 2026-10-19 merged with it red, and the branch stayed red,
+# blocking every other pull request into it, until a curation pull request
+# landed (chronicle#363 and #371 after #361 and #369). Proposals now carry the
+# curation the resolver can prove (catalog_curation), and the resolver
+# awaits Arch checks. What a red verdict does is ARCH_CHECKS_POLICY:
+# "land" merges and files the curation work as a Chronicle issue, the
+# behaviour before this check was awaited; "refuse" closes the proposal like
+# a failed append gate, so the rows wait, and a row whose registered window
+# closes meanwhile can no longer resolve. The choice is Max's (decision
+# queued 2026-10-19); until he rules, nothing lands later than it did.
+ARCH_CHECKS_GATE = "Arch checks"
+ARCH_CHECKS_POLICY_LAND = "land"
+ARCH_CHECKS_POLICY_REFUSE = "refuse"
+ARCH_CHECKS_POLICIES = (ARCH_CHECKS_POLICY_LAND, ARCH_CHECKS_POLICY_REFUSE)
+ARCH_CHECKS_POLICY = ARCH_CHECKS_POLICY_LAND
+# Under "land", once both append gates have passed, how long to keep waiting
+# for an Arch checks verdict before merging without one. Arch checks
+# usually finishes before the append gate does.
+ARCH_CHECKS_GRACE_SECONDS = 20 * 60
+LEDGER_CURATION_ISSUE_TITLE = "Ledger branch red after a resolver append"
 
 SBA_CUSTODY_ABSENT = "SBA CUSTODY ABSENT (refusing):"
 SBA_CUSTODY_UNWITNESSED = "SBA CUSTODY UNWITNESSED (refusing):"
@@ -14233,6 +14257,13 @@ CATALOG_REGENERATION_INPUTS = (
     "ledger/seeds/thesis_docket_series.json",
     "ledger/seeds/entity_folds.json",
 )
+# The two curation fixtures Chronicle's catalog tests read (see
+# catalog_curation). Optional: a base without one gets no curation of it.
+CATALOG_REVIEWED_STRIPS = (
+    "tests/fixtures/series_catalog/reviewed_stripped_segments.json"
+)
+CATALOG_IDENTITY_ANCHOR = "tests/fixtures/series_catalog/identity_anchor.json"
+CATALOG_CURATION_INPUTS = (CATALOG_REVIEWED_STRIPS, CATALOG_IDENTITY_ANCHOR)
 
 
 def _fetch_repository_tree(
@@ -14264,10 +14295,18 @@ def _fetch_repository_tree(
         (ledger_path, True),
         (PREFIX_RELATIVE.as_posix(), False),
         *((path, False) for path in CATALOG_REGENERATION_INPUTS),
+        *((path, False) for path in CATALOG_CURATION_INPUTS),
     ):
-        blob = _repository_blob_at_path(
-            repo, root_entries, wanted, cache, required=required
-        )
+        try:
+            blob = _repository_blob_at_path(
+                repo, root_entries, wanted, cache, required=required
+            )
+        except LedgerProposalError:
+            # A curation fixture that is not a regular file only means no
+            # curation; it must not cost the append.
+            if wanted not in CATALOG_CURATION_INPUTS:
+                raise
+            blob = None
         if blob is not None:
             payload, mode, blob_sha = blob
             files[wanted] = payload
@@ -14703,6 +14742,886 @@ def exclude_catalog_refusals(
     return kept
 
 
+# --- Catalog curation a proposal carries -----------------------------------
+#
+# Chronicle's "Arch checks" audits the regenerated series catalog against
+# two curated fixtures: reviewed period strips (a concept's first strip in a
+# new identifier shape needs a curator's decision that the stripped segment
+# is a period, not a statute, cohort or edition label) and the identity
+# anchor (every binding change must move a pinned digest). Neither can land
+# before the rows that need it: Chronicle reports a reviewed strip that is
+# not live, and the anchor pins the post-append digest. So the curation
+# either rides in the append's own proposal or follows it while the branch
+# is red. catalog_curation writes into the proposal exactly the curation the
+# resolver can prove, and nothing else:
+#
+# * a first strip whose only kind is "derived" (the builder found the
+#   segment spells the row's own declared period) and whose period slot is
+#   the dataPointId segment right after the series the row's registration
+#   names. That segment is the period by the resolver's own grammar
+#   (parse_ref_period), so the curator's question is answered by
+#   construction;
+# * an identity-anchor move made only of fresh-UUID mints and same-UUID
+#   placeholder enrichments of this append's own identities, recorded so that
+#   Chronicle re-derives it (build_series_catalog.identity_anchor_problems).
+#
+# The curated state is dry-run with the base's own audit before anything
+# visible happens, and a curation that does not clear what it claimed is
+# dropped, never shipped. What stays red is reported, not hidden.
+
+StripKey = tuple[str, str, str, str]
+IDENTITY_ANCHOR_MOVER = "thesis-resolver"
+# Credentials the staged base code never needs, so the curation probe is
+# not handed them in its environment. Hygiene, not isolation: the staged
+# code runs as the same user as the resolver, which is acceptable only
+# because it is the protected base branch's own code. thesis#337 replaces
+# this kind of denylist with an allowlist for the generator runs; the probe
+# should take that allowlist when it lands.
+_STAGED_SECRET_ENV = (
+    "GH_TOKEN",
+    "GITHUB_TOKEN",
+    "ARCH_DATA_TOKEN",
+    PRODUCER_SIGNING_KEY_ENV,
+    # Actions' OIDC and runtime credentials, and the files that feed later
+    # steps' environments.
+    "ACTIONS_ID_TOKEN_REQUEST_TOKEN",
+    "ACTIONS_ID_TOKEN_REQUEST_URL",
+    "ACTIONS_RUNTIME_TOKEN",
+    "ACTIONS_RUNTIME_URL",
+    "ACTIONS_RESULTS_URL",
+    "ACTIONS_CACHE_URL",
+    "GITHUB_ENV",
+    "GITHUB_PATH",
+    "GITHUB_OUTPUT",
+    "GITHUB_STATE",
+    "GITHUB_STEP_SUMMARY",
+)
+CATALOG_CURATION_TIMEOUT_SECONDS = 600
+
+# Run inside a staged base tree: reads the base's own catalog code and
+# fixtures and prints one JSON document. argv[1] is the committed base
+# catalog, argv[2] the base's identity anchor fixture (empty when it has
+# none) and argv[3] the base's UUID registry.
+_CATALOG_CURATION_PROBE = r"""
+import json
+import pathlib
+import sys
+
+stage = pathlib.Path.cwd()
+sys.path.insert(0, str(stage / "scripts"))
+import build_series_catalog as bsc
+
+base_catalog = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+committed = json.loads(bsc.CATALOG.read_text(encoding="utf-8"))
+
+
+def identities(catalog):
+    rows = []
+    for row in catalog["series"]:
+        geography, entity = row.get("geography"), row.get("entity")
+        rows.append({
+            "uuid": row["uuid"],
+            "concept": row["concept"],
+            "geography": None if geography is None else {
+                key: geography.get(key) for key in ("level", "id", "vintage")
+            },
+            "entity": None if entity is None else {
+                key: entity.get(key) for key in ("name", "role")
+            },
+            "line": json.dumps([
+                row["uuid"], row["concept"], bsc._geo_key(geography),
+                bsc._entity_key(entity),
+            ]),
+        })
+    return rows
+
+
+out = {
+    "identities": {
+        "base": identities(base_catalog),
+        "candidate": identities(committed),
+    },
+    "strips": None,
+    "anchor": None,
+}
+reviewed_path = stage / "tests/fixtures/series_catalog/reviewed_stripped_segments.json"
+if (
+    reviewed_path.is_file()
+    and hasattr(bsc, "stripped_segment_review_problems")
+    and hasattr(bsc, "strip_records")
+):
+    inputs = [
+        bsc.OBSERVATIONS,
+        bsc.DOCKET_SEED,
+        bsc.ExistingCatalog(bsc.CATALOG),
+        bsc.UuidRegistry.load(bsc.UUID_REGISTRY),
+    ]
+    if hasattr(bsc, "ENTITY_FOLDS"):
+        inputs.append(bsc.ENTITY_FOLDS)
+    _catalog, plan = bsc.build_catalog(*inputs)
+    reviewed = json.loads(reviewed_path.read_text(encoding="utf-8"))["strips"]
+    out["strips"] = {
+        "live": [
+            [*key, sorted(kinds)]
+            for key, kinds in sorted(bsc.strip_records(plan["strips"]).items())
+        ],
+        "reviewed": [
+            [*key, sorted(kinds)]
+            for key, kinds in sorted(bsc.strip_records(reviewed).items())
+        ],
+        "problems": bsc.stripped_segment_review_problems(
+            committed["stripped_segments"], plan["strips"], reviewed
+        ),
+    }
+anchor_path = stage / "tests/fixtures/series_catalog/identity_anchor.json"
+if anchor_path.is_file() and hasattr(bsc, "identity_anchor_problems"):
+    anchor = json.loads(anchor_path.read_text(encoding="utf-8"))
+    problems = bsc.identity_anchor_problems(committed["series"], anchor)
+    if hasattr(bsc, "identity_anchor_continuity_problems"):
+        # What CI's "Identity anchor move continues the base pin" checks.
+        base_raw = pathlib.Path(sys.argv[2]).read_text(encoding="utf-8")
+        base_anchor = json.loads(base_raw) if base_raw.strip() else None
+        base_uuids = set()
+        for line in pathlib.Path(sys.argv[3]).read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                entry = json.loads(line)
+                if isinstance(entry, dict) and isinstance(entry.get("uuid"), str):
+                    base_uuids.add(entry["uuid"])
+        problems += bsc.identity_anchor_continuity_problems(
+            base_anchor, anchor, base_uuids
+        )
+    out["anchor"] = {
+        "problems": problems,
+        "movers": list(getattr(bsc, "IDENTITY_ANCHOR_MOVERS", ())),
+    }
+print(json.dumps(out))
+"""
+
+
+class CatalogProbeError(RuntimeError):
+    """The staged base's catalog code could not be run or read."""
+
+
+@dataclass(frozen=True)
+class CatalogCuration:
+    """The curation one proposal carries, and what will still be red.
+
+    ``files`` maps fixture paths to the bytes the proposal commit sets.
+    ``residual`` lists what the dry run of the curated state still reports
+    (Arch checks will fail on it), and ``notes`` why something was left to
+    a curator.
+    """
+
+    files: dict[str, bytes]
+    strips: tuple[StripKey, ...] = ()
+    anchor_events: tuple[dict[str, Any], ...] = ()
+    residual: tuple[str, ...] = ()
+    notes: tuple[str, ...] = ()
+
+    def summary(self) -> list[str]:
+        lines = []
+        if self.strips:
+            lines.append(
+                f"{len(self.strips)} first period strip(s) recorded as reviewed in "
+                f"{CATALOG_REVIEWED_STRIPS}: "
+                + "; ".join(
+                    f"{spelling} in {concept} {field}"
+                    for concept, field, _shape, spelling in self.strips
+                )
+            )
+        if self.anchor_events:
+            lines.append(
+                f"identity anchor moved in {CATALOG_IDENTITY_ANCHOR} by "
+                f"{len(self.anchor_events)} event(s): "
+                + "; ".join(
+                    f"{event['event']} {event['uuid'][:8]} {event['concept']}"
+                    for event in self.anchor_events
+                )
+            )
+        return lines
+
+
+def _staged_subprocess_env() -> dict[str, str]:
+    return {
+        key: value
+        for key, value in os.environ.items()
+        if key not in _STAGED_SECRET_ENV
+    }
+
+
+def _run_staged_python(
+    stage: pathlib.Path, argv: list[str]
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, *argv],
+        cwd=stage,
+        capture_output=True,
+        text=True,
+        env=_staged_subprocess_env(),
+        timeout=CATALOG_CURATION_TIMEOUT_SECONDS,
+    )
+
+
+def _catalog_curation_probe(
+    stage: pathlib.Path, base_catalog: pathlib.Path
+) -> dict[str, Any]:
+    try:
+        completed = _run_staged_python(
+            stage,
+            [
+                "-c",
+                _CATALOG_CURATION_PROBE,
+                str(base_catalog),
+                str(base_catalog.parent / "base-identity-anchor.json"),
+                str(base_catalog.parent / "base-series-uuid-registry.jsonl"),
+            ],
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise CatalogProbeError(f"catalog probe did not run: {exc}") from exc
+    if completed.returncode != 0:
+        detail = (completed.stderr.strip() or completed.stdout.strip())[-500:]
+        raise CatalogProbeError(
+            f"catalog probe exit {completed.returncode}: {detail}"
+        )
+    lines = completed.stdout.strip().splitlines()
+    try:
+        payload = json.loads(lines[-1]) if lines else None
+    except json.JSONDecodeError as exc:
+        raise CatalogProbeError("catalog probe printed no JSON document") from exc
+    if type(payload) is not dict:
+        raise CatalogProbeError("catalog probe printed no JSON object")
+    return payload
+
+
+def _jsonl_objects(payload: bytes) -> list[dict[str, Any]]:
+    rows = []
+    for line in payload.decode("utf-8", "replace").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def _row_identifier(row: Mapping[str, Any], field: str) -> str | None:
+    """A row's value in one of Chronicle's identifier fields."""
+    if field == "source_record_id":
+        value = row.get("source_record_id")
+    elif field == "measure.concept":
+        measure = row.get("measure")
+        value = measure.get("concept") if isinstance(measure, Mapping) else None
+    else:
+        return None
+    return value if isinstance(value, str) else None
+
+
+def strip_slot_fill(shape: str, spelling: str) -> str | None:
+    """The identifier a one-slot strip shape spells with ``spelling``."""
+    segments = shape.split(".")
+    slots = [
+        index
+        for index, segment in enumerate(segments)
+        if segment.startswith("{P:") and segment.endswith("}")
+    ]
+    if len(slots) != 1:
+        return None
+    segments[slots[0]] = spelling
+    return ".".join(segments)
+
+
+def strip_review_refusal(
+    key: StripKey,
+    kinds: frozenset[str],
+    base_rows: list[Mapping[str, Any]],
+    appended_rows: list[Mapping[str, Any]],
+    contracts: Mapping[str, Mapping[str, Any]],
+) -> str | None:
+    """Why the resolver cannot record this first strip as reviewed, or None.
+
+    None only when the strip is "derived" alone, its shape has one period
+    slot, no row already in the ledger carries the identifier it spells,
+    some row in this append does, and every such row's registered contract
+    names the row's dataPointId and a series that both the shape and the
+    dataPointId continue with the stripped spelling. The stripped segment
+    is then the period segment of the dataPointId grammar
+    ``<series>.<period>[.<policy>...]``, in whichever identifier field the
+    strip was found.
+    """
+    _concept, field, shape, spelling = key
+    if set(kinds) != {"derived"}:
+        return (
+            f"strip kinds {sorted(kinds)}: the identifier does not spell the "
+            "row's declared period directly"
+        )
+    filled = strip_slot_fill(shape, spelling)
+    if filled is None:
+        return "the strip shape does not have exactly one period slot"
+    if any(_row_identifier(row, field) == filled for row in base_rows):
+        return f"a row already in the ledger carries {filled}"
+    rows = [row for row in appended_rows if _row_identifier(row, field) == filled]
+    if not rows:
+        return f"no row in this append carries {filled}"
+    for row in rows:
+        ref = row.get("source_record_id")
+        entry = contracts.get(ref) if isinstance(ref, str) else None
+        contract = entry.get("contract") if isinstance(entry, Mapping) else None
+        series = contract.get("series") if isinstance(contract, Mapping) else None
+        if (
+            not isinstance(series, str)
+            or not series
+            or "{" in series
+            or contract.get("dataPointId") != ref
+        ):
+            return f"{ref} has no registered contract naming its series"
+        series_depth = len(series.split("."))
+        ref_segments = ref.split(".")
+        if (
+            not shape.startswith(f"{series}.{{P:")
+            or not ref.startswith(f"{series}.")
+            or len(ref_segments) <= series_depth
+            or ref_segments[series_depth] != spelling
+        ):
+            return (
+                f"the period slot is not the segment after {ref}'s registered "
+                f"series {series}"
+            )
+    return None
+
+
+def provable_strip_reviews(
+    live: Mapping[StripKey, frozenset[str]],
+    reviewed: Mapping[StripKey, frozenset[str]],
+    base_rows: list[Mapping[str, Any]],
+    appended_rows: list[Mapping[str, Any]],
+    contracts: Mapping[str, Mapping[str, Any]],
+) -> tuple[dict[StripKey, tuple[str, ...]], dict[StripKey, str]]:
+    """First strips the resolver records as reviewed, and the rest's reasons.
+
+    Only a strip Chronicle's audit would report as a concept's first in a
+    field and shape is considered: one outside ``reviewed`` whose
+    (concept, field, shape) has no reviewed strip. Continuations of a
+    reviewed shape need no review, and the audit's other reports (a reviewed
+    strip gone or grown, an overlap strip) stay a curator's.
+    """
+    reviewed_shapes = {key[:3] for key in reviewed}
+    additions: dict[StripKey, tuple[str, ...]] = {}
+    refusals: dict[StripKey, str] = {}
+    for key in sorted(live):
+        if key in reviewed or key[:3] in reviewed_shapes:
+            continue
+        reason = strip_review_refusal(
+            key, live[key], base_rows, appended_rows, contracts
+        )
+        if reason is None:
+            additions[key] = ("derived",)
+        else:
+            refusals[key] = reason
+    # Chronicle reviews a (concept, field, shape) as one decision: recording
+    # one spelling turns every other spelling of that shape into a
+    # continuation. So a shape is recorded only when all of its first strips
+    # are provable; otherwise none is, and a curator decides the shape.
+    refused_shapes = {key[:3] for key in refusals}
+    for key in [key for key in additions if key[:3] in refused_shapes]:
+        del additions[key]
+        refusals[key] = (
+            "another spelling of its shape is left to a curator, and the shape "
+            "is reviewed as one"
+        )
+    return additions, refusals
+
+
+def _full_identity(identity: Mapping[str, Any]) -> bool:
+    geography, entity = identity.get("geography"), identity.get("entity")
+    return (
+        isinstance(geography, Mapping)
+        and set(geography) == {"level", "id", "vintage"}
+        and all(
+            isinstance(geography[key], str) and geography[key]
+            for key in ("level", "id")
+        )
+        and isinstance(entity, Mapping)
+        and set(entity) == {"name", "role"}
+        and all(
+            isinstance(entity[key], str) and entity[key] for key in ("name", "role")
+        )
+    )
+
+
+def identity_anchor_move(
+    base: list[Mapping[str, Any]],
+    candidate: list[Mapping[str, Any]],
+    appended_row_ids: list[str],
+    base_registry_uuids: frozenset[str] | set[str] = frozenset(),
+) -> tuple[list[dict[str, Any]] | None, str | None]:
+    """The anchor events of one append, or why it cannot record them.
+
+    ``base`` and ``candidate`` are the identity tuples of the catalog before
+    and after the append, as the staged probe reads them (``line`` is the
+    tuple the anchor digests). Every changed tuple must be explained: a new
+    full identity under a UUID the base does not hold (a mint), or a base
+    placeholder (no entity) re-keyed under the same UUID and concept to a
+    full identity its geography admits (an enrichment), each for a concept
+    one of this append's rows names. A mint may not repeat an identity
+    another row already holds, nor take a UUID the base registry holds (a
+    revive is a curator's call). Anything else returns None and a reason.
+    """
+    for side, identities in (("base", base), ("candidate", candidate)):
+        uuids = [identity["uuid"] for identity in identities]
+        if len(uuids) != len(set(uuids)):
+            # Chronicle digests the tuples as a list, so a repeated row moves
+            # the anchor without any identity changing.
+            return None, f"the {side} catalog holds a UUID on two rows"
+    base_lines = {identity["line"]: identity for identity in base}
+    candidate_lines = {identity["line"]: identity for identity in candidate}
+    removed = [i for line, i in base_lines.items() if line not in candidate_lines]
+    added = [i for line, i in candidate_lines.items() if line not in base_lines]
+    # UUIDs are unique on each side (checked above), so each removed
+    # identity has its own UUID.
+    removed_by_uuid = {identity["uuid"]: identity for identity in removed}
+    events: list[dict[str, Any]] = []
+    enriched: set[str] = set()
+
+    def identity_key(identity: Mapping[str, Any]) -> str:
+        # The anchor tuple without its UUID: concept, geography, entity.
+        return json.dumps(json.loads(identity["line"])[1:])
+
+    keys = [identity_key(identity) for identity in candidate]
+    if len(keys) != len(set(keys)):
+        return None, "the candidate catalog holds one identity under two UUIDs"
+    for identity in sorted(added, key=lambda i: (i["concept"], i["uuid"])):
+        uuid, concept = identity["uuid"], identity["concept"]
+        if not _full_identity(identity):
+            return None, f"{concept} ({uuid}) lands without a geography or entity"
+        if not _identity_belongs_to_rows(concept, appended_row_ids):
+            return None, f"{concept} ({uuid}) belongs to no row in this append"
+        before = removed_by_uuid.get(uuid)
+        if before is None:
+            # UUIDs are unique on each side, so a new UUID cannot be one the
+            # base catalog holds; the registry also remembers retired ones.
+            if uuid in base_registry_uuids:
+                return None, (
+                    f"{concept} mints UUID {uuid}, which the base registry "
+                    "already holds"
+                )
+            events.append(
+                {
+                    "event": "mint",
+                    "uuid": uuid,
+                    "concept": concept,
+                    "geography": dict(identity["geography"]),
+                    "entity": dict(identity["entity"]),
+                }
+            )
+            continue
+        if (
+            before["concept"] != concept
+            or before["entity"] is not None
+            or not _placeholder_geography_admits(
+                before["geography"], identity["geography"]
+            )
+            or uuid in enriched
+        ):
+            return None, (
+                f"{concept} ({uuid}) re-keys an identity that is not its own "
+                "docket placeholder"
+            )
+        enriched.add(uuid)
+        events.append(
+            {
+                "event": "enrich",
+                "uuid": uuid,
+                "concept": concept,
+                "geography": dict(identity["geography"]),
+                "entity": dict(identity["entity"]),
+                "placeholder_geography": (
+                    None
+                    if before["geography"] is None
+                    else dict(before["geography"])
+                ),
+            }
+        )
+    unexplained = sorted(set(removed_by_uuid) - enriched)
+    if unexplained:
+        return None, f"the append drops identities {unexplained} without re-keying them"
+    return events, None
+
+
+def _identity_anchor_digest(lines: list[str]) -> str:
+    # build_series_catalog.identity_anchor_digest, which the dry run re-checks.
+    return hashlib.sha256("\n".join(sorted(lines)).encode()).hexdigest()
+
+
+def _render_fixture_json(value: Any, depth: int = 0) -> str:
+    """JSON as Chronicle's catalog fixtures are written: two-space indent,
+    lists of scalars on one line."""
+    pad, inner = "  " * depth, "  " * (depth + 1)
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        items = [
+            f"{inner}{json.dumps(key, ensure_ascii=False)}: "
+            f"{_render_fixture_json(item, depth + 1)}"
+            for key, item in value.items()
+        ]
+        return "{\n" + ",\n".join(items) + "\n" + pad + "}"
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        if not any(isinstance(item, (dict, list)) for item in value):
+            inline = ", ".join(json.dumps(item, ensure_ascii=False) for item in value)
+            return f"[{inline}]"
+        items = [f"{inner}{_render_fixture_json(item, depth + 1)}" for item in value]
+        return "[\n" + ",\n".join(items) + "\n" + pad + "]"
+    return json.dumps(value, ensure_ascii=False)
+
+
+def render_catalog_fixture(value: Any) -> bytes:
+    return (_render_fixture_json(value) + "\n").encode("utf-8")
+
+
+def _sorted_strips(strips: Mapping[str, Any], depth: int = 4) -> dict[str, Any]:
+    if depth == 1:
+        return {key: strips[key] for key in sorted(strips)}
+    return {key: _sorted_strips(strips[key], depth - 1) for key in sorted(strips)}
+
+
+def curated_strips_fixture(
+    fixture: Mapping[str, Any],
+    additions: Mapping[StripKey, tuple[str, ...]],
+    note: str,
+) -> dict[str, Any]:
+    """``fixture`` with ``additions`` recorded and a note per spelling.
+
+    Existing decisions and notes are kept byte for byte; a spelling's note
+    gains ``note`` (formatted with the concepts recorded) as a new sentence.
+    """
+    updated = copy.deepcopy(dict(fixture))
+    strips = updated["strips"]
+    for (concept, field, shape, spelling), kinds in additions.items():
+        strips.setdefault(concept, {}).setdefault(field, {}).setdefault(shape, {})[
+            spelling
+        ] = sorted(kinds)
+    updated["strips"] = _sorted_strips(strips)
+    notes = dict(updated.get("notes") or {})
+    for spelling in sorted({key[3] for key in additions}):
+        concepts = ", ".join(
+            sorted({key[0] for key in additions if key[3] == spelling})
+        )
+        sentence = note.format(spelling=spelling, concepts=concepts)
+        notes[spelling] = (
+            f"{notes[spelling]} {sentence}" if spelling in notes else sentence
+        )
+    updated["notes"] = {key: notes[key] for key in sorted(notes)}
+    return updated
+
+
+def _workflow_run_url(environ: Mapping[str, str] | None = None) -> str | None:
+    environ = os.environ if environ is None else environ
+    server = environ.get("GITHUB_SERVER_URL", "")
+    repository = environ.get("GITHUB_REPOSITORY", "")
+    run_id = environ.get("GITHUB_RUN_ID", "")
+    if server != "https://github.com" or not repository or not run_id.isdigit():
+        return None
+    return f"{server}/{repository}/actions/runs/{run_id}"
+
+
+def catalog_curation(
+    tree: RepositoryTree,
+    *,
+    path: str,
+    candidate_ledger: bytes,
+    catalog: bytes | None,
+    registry: bytes | None,
+    target_contracts: Mapping[str, Mapping[str, Any]],
+    run_url: str | None = None,
+    today: dt.date | None = None,
+) -> CatalogCuration:
+    """The curation the proposal shipping ``catalog`` and ``registry`` needs.
+
+    ``catalog`` and ``registry`` are the exact bytes the proposal commit
+    sets (from _prepare_release_files; ``registry`` None when the base's
+    stays). They are staged as they are, never regenerated: Chronicle mints
+    fresh identities under random UUIDs, so a second generator run would
+    describe a different catalog. A probe over the base's own catalog code
+    reads the staged state, the provable curation is written into the stage,
+    and a second probe must confirm it. Never raises: anything unexpected
+    yields no curation and a note, which is the behaviour before curation
+    existed.
+    """
+    if catalog is None or not any(
+        relative in tree.files for relative in CATALOG_CURATION_INPUTS
+    ):
+        return CatalogCuration(files={})
+    try:
+        return _catalog_curation(
+            tree,
+            path=path,
+            candidate_ledger=candidate_ledger,
+            catalog=catalog,
+            registry=registry,
+            target_contracts=target_contracts,
+            run_url=run_url,
+            today=today,
+        )
+    except Exception as exc:  # noqa: BLE001 - curation must never cost an append
+        failure = f"catalog curation failed: {type(exc).__name__}: {exc}"
+        return CatalogCuration(files={}, notes=(failure,))
+
+
+def _problem_owner(problem: str, keys: tuple[StripKey, ...]) -> bool:
+    """Whether an audit report is about one of ``keys``.
+
+    Chronicle's audit starts every report "'<spelling>' on '<concept>': ".
+    A report that names a field and shape belongs to the key with that
+    field and shape; one that names none (a spelling that is no period
+    token, a strip in only the plan or the catalog) is taken to belong to
+    every key with its spelling and concept, so it can never be cleared or
+    left standing unnoticed.
+    """
+    return any(
+        problem.startswith(f"{spelling!r} on {concept!r}: ")
+        and (f"{field} shape {shape!r}" in problem or " shape '" not in problem)
+        for concept, field, shape, spelling in keys
+    )
+
+
+def _anchor_residual(anchor_problems: list[str], anchor_moves: bool) -> list[str]:
+    # Chronicle's own report already says the anchor moved when it checks it.
+    if anchor_moves and not any(
+        problem.startswith("identity anchor moved") for problem in anchor_problems
+    ):
+        return [*anchor_problems, "identity anchor moved and is not re-pinned"]
+    return list(anchor_problems)
+
+
+def _catalog_curation(
+    tree: RepositoryTree,
+    *,
+    path: str,
+    candidate_ledger: bytes,
+    catalog: bytes,
+    registry: bytes | None,
+    target_contracts: Mapping[str, Mapping[str, Any]],
+    run_url: str | None,
+    today: dt.date | None,
+) -> CatalogCuration:
+    base_ledger = tree.files.get(path)
+    base_catalog = tree.files.get("ledger/series_catalog.json")
+    if (
+        base_ledger is None
+        or base_catalog is None
+        or not candidate_ledger.startswith(base_ledger)
+    ):
+        return CatalogCuration(files={}, notes=("no staged catalog to curate",))
+    base_rows = _jsonl_objects(base_ledger)
+    appended_rows = _jsonl_objects(candidate_ledger[len(base_ledger) :])
+    appended_ids = [str(row.get("source_record_id", "")) for row in appended_rows]
+    day = (today or dt.datetime.now(dt.timezone.utc).date()).isoformat()
+    notes: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="thesis-catalog-curation-") as name:
+        root = pathlib.Path(name)
+        stage = root / "repo"
+        stage.mkdir()
+        _materialize_repository_tree(stage, tree)
+        (stage / _validated_repository_path(path)).write_bytes(candidate_ledger)
+        (stage / "ledger" / "series_catalog.json").write_bytes(catalog)
+        if registry is not None:
+            (stage / _SERIES_UUID_REGISTRY).write_bytes(registry)
+        base_catalog_path = root / "base-series-catalog.json"
+        base_catalog_path.write_bytes(base_catalog)
+        # The base's anchor and registry, for Chronicle's continuity check.
+        (root / "base-identity-anchor.json").write_bytes(
+            tree.files.get(CATALOG_IDENTITY_ANCHOR, b"")
+        )
+        (root / "base-series-uuid-registry.jsonl").write_bytes(
+            tree.files.get(_SERIES_UUID_REGISTRY, b"")
+        )
+
+        def probe() -> dict[str, Any]:
+            return _catalog_curation_probe(stage, base_catalog_path)
+
+        try:
+            before = probe()
+        except CatalogProbeError as exc:
+            return CatalogCuration(files={}, notes=(str(exc),))
+        before_problems = list((before.get("strips") or {}).get("problems") or [])
+
+        files: dict[str, bytes] = {}
+        strips: tuple[StripKey, ...] = ()
+        events: tuple[dict[str, Any], ...] = ()
+        strip_state = before.get("strips")
+        if strip_state is not None and CATALOG_REVIEWED_STRIPS in tree.files:
+            live = {
+                tuple(entry[:4]): frozenset(entry[4]) for entry in strip_state["live"]
+            }
+            reviewed = {
+                tuple(entry[:4]): frozenset(entry[4])
+                for entry in strip_state["reviewed"]
+            }
+            additions, refusals = provable_strip_reviews(
+                live, reviewed, base_rows, appended_rows, target_contracts
+            )
+            notes += [
+                f"strip {key[3]!r} on {key[0]!r} ({key[1]}) left to a curator: {reason}"
+                for key, reason in refusals.items()
+            ]
+            raw = tree.files[CATALOG_REVIEWED_STRIPS]
+            if additions:
+                fixture = json.loads(raw)
+                if render_catalog_fixture(fixture) != raw:
+                    notes.append(
+                        f"{CATALOG_REVIEWED_STRIPS} is not in the layout the "
+                        "resolver writes; its strips are left to a curator"
+                    )
+                else:
+                    by = f" (run {run_url})" if run_url else ""
+                    files[CATALOG_REVIEWED_STRIPS] = render_catalog_fixture(
+                        curated_strips_fixture(
+                            fixture,
+                            additions,
+                            f"Recorded {day} by the Thesis resolver{by} for "
+                            "{concepts}: {spelling} is the segment right after "
+                            "the series each row's registration names in its "
+                            "dataPointId, and it spells the row's own declared "
+                            "period (kind derived).",
+                        )
+                    )
+                    strips = tuple(sorted(additions))
+
+        identities = before["identities"]
+        base_lines = [identity["line"] for identity in identities["base"]]
+        candidate_lines = [identity["line"] for identity in identities["candidate"]]
+        anchor_moves = sorted(base_lines) != sorted(candidate_lines)
+        if anchor_moves:
+            anchor_state = before.get("anchor")
+            raw_anchor = tree.files.get(CATALOG_IDENTITY_ANCHOR)
+            anchor = json.loads(raw_anchor) if raw_anchor is not None else None
+            base_digest = _identity_anchor_digest(base_lines)
+            if anchor_state is None or not isinstance(anchor, dict):
+                notes.append(
+                    "the identity anchor moves, and this base pins it where the "
+                    "resolver does not write it"
+                )
+            elif anchor.get("sha256") != base_digest:
+                notes.append(
+                    "the identity anchor moves, and the base's pin is already "
+                    "stale, so the move cannot be derived from it"
+                )
+            elif IDENTITY_ANCHOR_MOVER not in anchor_state.get("movers", []):
+                notes.append("this base does not accept machine anchor moves")
+            else:
+                move, reason = identity_anchor_move(
+                    identities["base"],
+                    identities["candidate"],
+                    appended_ids,
+                    _registry_uuids(tree.files.get(_SERIES_UUID_REGISTRY, b"")),
+                )
+                if move is None:
+                    notes.append(f"identity anchor left to a curator: {reason}")
+                else:
+                    files[CATALOG_IDENTITY_ANCHOR] = render_catalog_fixture(
+                        {
+                            "comment": anchor.get("comment"),
+                            "sha256": _identity_anchor_digest(candidate_lines),
+                            "move": {
+                                "by": IDENTITY_ANCHOR_MOVER,
+                                "from_sha256": base_digest,
+                                "run_url": run_url,
+                                "events": move,
+                            },
+                        }
+                    )
+                    events = tuple(move)
+        anchor_before = list((before.get("anchor") or {}).get("problems") or [])
+        state = before
+        # Judge the strips and the anchor separately, dropping whichever the
+        # base's own audit does not accept, and re-probe until what is left
+        # is exactly what was dry-run (at most twice: parts only drop out).
+        while files:
+            for relative in CATALOG_CURATION_INPUTS:
+                payload = files.get(relative, tree.files.get(relative))
+                if payload is not None:
+                    (stage / _validated_repository_path(relative)).write_bytes(
+                        payload
+                    )
+            try:
+                state = probe()
+            except CatalogProbeError as exc:
+                notes.append(f"the curated state could not be dry-run: {exc}")
+                files, strips, events, state = {}, (), (), before
+                break
+            strip_problems = list((state.get("strips") or {}).get("problems") or [])
+            anchor_problems = list((state.get("anchor") or {}).get("problems") or [])
+            # Curation may only remove reports, and only its own: a report
+            # still standing on a recorded strip, a new report, or a report
+            # cleared without recording its strip (a sibling of a recorded
+            # shape) means the audit does not accept what was written.
+            strip_rejection = [
+                *(p for p in strip_problems if _problem_owner(p, strips)),
+                *(p for p in strip_problems if p not in before_problems),
+                *(
+                    p
+                    for p in before_problems
+                    if p not in strip_problems and not _problem_owner(p, strips)
+                ),
+            ]
+            anchor_rejection = anchor_problems if events else []
+            dropped = False
+            if strips and strip_rejection:
+                notes.append(
+                    "the dry run rejected the recorded strips: "
+                    + "; ".join(strip_rejection)[:500]
+                )
+                files.pop(CATALOG_REVIEWED_STRIPS, None)
+                strips, dropped = (), True
+            if events and anchor_rejection:
+                notes.append(
+                    "the dry run rejected the anchor move: "
+                    + "; ".join(anchor_rejection)[:500]
+                )
+                files.pop(CATALOG_IDENTITY_ANCHOR, None)
+                events, dropped = (), True
+            if not dropped:
+                break
+        strip_residual = (
+            list((state.get("strips") or {}).get("problems") or [])
+            if files
+            else before_problems
+        )
+        anchor_residual = (
+            list((state.get("anchor") or {}).get("problems") or [])
+            if CATALOG_IDENTITY_ANCHOR in files
+            else anchor_before
+        )
+        return CatalogCuration(
+            files=files,
+            strips=strips,
+            anchor_events=events,
+            residual=tuple(
+                [
+                    *strip_residual,
+                    *_anchor_residual(
+                        anchor_residual,
+                        anchor_moves and CATALOG_IDENTITY_ANCHOR not in files,
+                    ),
+                ]
+            ),
+            notes=tuple(notes),
+        )
+
+
+def _registry_uuids(registry: bytes) -> frozenset[str]:
+    uuids = set()
+    for row in _jsonl_objects(registry):
+        if isinstance(row.get("uuid"), str):
+            uuids.add(row["uuid"])
+    return frozenset(uuids)
+
+
 def append_gate_state(gate_runs: list[dict]) -> str:
     """Classify one required gate's check runs: passed, failed or pending.
 
@@ -14725,13 +15644,15 @@ def append_gate_state(gate_runs: list[dict]) -> str:
     return "pending"
 
 
-def _describe_gate_runs(gate: str, gate_runs: list[dict]) -> str:
+def _describe_gate_runs(
+    gate: str, gate_runs: list[dict], min_runs: int = 0
+) -> str:
     judging = [run for run in gate_runs if run.get("conclusion") != "skipped"]
     if not gate_runs:
         return f"{gate}: no check run yet"
     if not judging:
         return f"{gate}: only skipped twins so far"
-    return "; ".join(
+    described = "; ".join(
         f"{gate}: "
         + (
             str(run.get("conclusion"))
@@ -14741,6 +15662,10 @@ def _describe_gate_runs(gate: str, gate_runs: list[dict]) -> str:
         + f" ({run.get('html_url') or 'no run URL'})"
         for run in judging
     )
+    completed = [run for run in judging if run.get("status") == "completed"]
+    if len(completed) < min_runs:
+        described += f" ({len(completed)} of {min_runs} runs completed)"
+    return described
 
 
 def append_gate_timeout_seconds(
@@ -14870,9 +15795,12 @@ def await_append_gates(
     max_poll_seconds: float = APPEND_GATE_MAX_POLL_SECONDS,
     poll_attempts: int | None = None,
     gates: tuple[str, ...] = REQUIRED_APPEND_GATES,
+    advisory: tuple[str, ...] = (),
+    advisory_grace_seconds: float = ARCH_CHECKS_GRACE_SECONDS,
+    min_runs: Mapping[str, int] | None = None,
     clock: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
-) -> None:
+) -> dict[str, tuple[str, str]]:
     """Return once every required gate passed on the proposal head.
 
     Raises LedgerProposalError naming the adverse run as soon as any gate
@@ -14881,17 +15809,74 @@ def await_append_gates(
     A timeout is not a verdict; the old single message ("did not pass")
     made a runner-queue delay read as a rejected append (thesis #286).
     ``poll_attempts`` additionally caps the number of reads (tests use 1).
+
+    ``advisory`` gates are awaited but never refuse: once the required
+    gates have passed, the wait goes on until each advisory gate has a
+    verdict, for at most ``advisory_grace_seconds`` and never past the
+    budget. Returns each advisory gate's state ("passed", "failed" or
+    "pending") and a description of its runs, from the read that ended the
+    wait, for the caller to act on.
+
+    ``min_runs`` holds a gate's pass until that many of its runs (skipped
+    twins aside) have completed: Arch checks runs once for the proposal
+    branch's push and once for its pull request, and the push run can finish
+    before the pull request run is even listed.
     """
     timeout_seconds = _validate_gate_timeout(timeout_seconds)
+    overlap = set(gates) & set(advisory)
+    if overlap:
+        raise LedgerProposalError(
+            f"gates cannot be both required and advisory: {sorted(overlap)}"
+        )
     started = clock()
     deadline = started + timeout_seconds
     delay = max(0.0, float(poll_seconds))
     attempts = 0
     read_failures = 0
     last_read_error: BaseException | None = None
-    last_seen: dict[str, list[dict]] = {gate: [] for gate in gates}
+    watched = (*gates, *advisory)
+    last_seen: dict[str, list[dict]] = {gate: [] for gate in watched}
+    min_runs = dict(min_runs or {})
+
+    def gate_state(gate: str) -> str:
+        state = append_gate_state(last_seen[gate])
+        if state == "passed" and gate in min_runs:
+            real = [
+                run
+                for run in last_seen[gate]
+                if run.get("status") == "completed"
+                and run.get("conclusion") != "skipped"
+            ]
+            if len(real) < min_runs[gate]:
+                return "pending"
+        return state
     # The ids of the last multi-page listing that read as passed.
     passed_ids: frozenset[int] | None = None
+    # Whether the latest successful read showed every required gate passed,
+    # whether the current unbroken run of passing reads holds a confirmed
+    # pass (one page, or the same runs as the previous passing read), and
+    # when that run was first confirmed (the advisory grace counts from
+    # there).
+    required_passed_now = False
+    confirmed_once = False
+    required_passed_at: float | None = None
+
+    def may_merge() -> bool:
+        # The current unbroken run of passing reads holds a confirmed pass
+        # (where the merge went ahead before advisory gates existed). Any
+        # read showing a required gate not passed ends that run and clears
+        # confirmed_once, so this also means the latest read passed.
+        return confirmed_once
+
+    def advisory_verdicts() -> dict[str, tuple[str, str]]:
+        return {
+            gate: (
+                gate_state(gate),
+                _describe_gate_runs(gate, last_seen[gate], min_runs.get(gate, 0)),
+            )
+            for gate in advisory
+        }
+
     while True:
         attempts += 1
         try:
@@ -14904,6 +15889,11 @@ def await_append_gates(
             # closing a proposal whose gate may be about to pass.
             read_failures += 1
             last_read_error = exc
+            if may_merge():
+                # The last good read allows the merge (see may_merge), so a
+                # failed read while waiting for an advisory verdict never
+                # turns into a refusal.
+                return advisory_verdicts()
             if read_failures >= APPEND_GATE_MAX_READ_FAILURES:
                 raise LedgerProposalError(
                     f"could not read append gate status for {repo}#{pr_number} "
@@ -14913,11 +15903,11 @@ def await_append_gates(
             read_failures = 0
             last_read_error = None
             states: dict[str, str] = {}
-            for gate in gates:
+            for gate in watched:
                 last_seen[gate] = [
                     run for run in runs if type(run) is dict and run.get("name") == gate
                 ]
-                states[gate] = append_gate_state(last_seen[gate])
+                states[gate] = gate_state(gate)
             failed = [gate for gate in gates if states[gate] == "failed"]
             if failed:
                 raise LedgerProposalError(
@@ -14927,27 +15917,46 @@ def await_append_gates(
                     )
                     + "; refusing to merge"
                 )
-            if all(states[gate] == "passed" for gate in gates):
+            required_passed_now = all(states[gate] == "passed" for gate in gates)
+            if not required_passed_now:
+                # A required gate re-run or still running: the next merge
+                # needs a fresh confirmed pass, and a fresh grace.
+                required_passed_at = None
+                confirmed_once = False
+            if required_passed_now:
                 ids = frozenset(run["id"] for run in runs)
                 # One page is one snapshot. Across pages, a run re-run
                 # between two page reads can swap a new attempt onto a page
                 # already read while the total holds, so a multi-page pass
                 # stands only when the next read returns the same runs.
                 if len(runs) <= APPEND_GATE_CHECK_RUN_PAGE_SIZE or ids == passed_ids:
-                    # The budget bounds how long to wait, not which verdicts
-                    # count: both gates passed on this exact head, so a pass
-                    # read just after the deadline still stands.
-                    return
+                    confirmed_once = True
+                    if required_passed_at is None:
+                        required_passed_at = clock()
                 passed_ids = ids
             else:
                 passed_ids = None
+            # The budget bounds how long to wait, not which verdicts count:
+            # the required gates passed on this exact head, so a pass read
+            # just after the deadline still stands. The advisory verdict is
+            # this read's, confirmed or not: a torn multi-page listing can
+            # misread it, which at worst files a needless issue or misses one
+            # that report_red_ledger_base raises on the next append.
+            if may_merge() and (
+                all(states[gate] in ("passed", "failed") for gate in advisory)
+                or clock() - required_passed_at >= advisory_grace_seconds
+            ):
+                return advisory_verdicts()
         now = clock()
         if now >= deadline or (poll_attempts is not None and attempts >= poll_attempts):
-            waiting = [
-                gate for gate in gates if append_gate_state(last_seen[gate]) != "passed"
-            ]
+            if may_merge():
+                # Every required gate passed on this head; only an advisory
+                # verdict is missing, and it never holds a merge.
+                return advisory_verdicts()
+            waiting = [gate for gate in gates if gate_state(gate) != "passed"]
             detail = "; ".join(
-                _describe_gate_runs(gate, last_seen[gate]) for gate in waiting
+                _describe_gate_runs(gate, last_seen[gate], min_runs.get(gate, 0))
+                for gate in waiting
             )
             if not waiting and passed_ids is not None:
                 detail = (
@@ -14963,6 +15972,178 @@ def await_append_gates(
             )
         sleep(max(0.0, min(delay, deadline - now)))
         delay = min(delay * 2, max_poll_seconds)
+
+
+def _proposal_curation_body(curation: CatalogCuration, policy: str) -> str:
+    """The pull-request paragraphs on catalog curation and Arch checks."""
+    parts = []
+    if curation.files:
+        parts.append(
+            "It also carries the series-catalog curation this append needs, "
+            "which Chronicle's catalog tests re-check:\n"
+            + "\n".join(f"- {line}" for line in curation.summary())
+        )
+    if curation.residual:
+        parts.append(
+            "The resolver's dry run expects Arch checks to fail on curation "
+            "only a curator can do:\n"
+            + "\n".join(f"- {line}" for line in curation.residual)
+        )
+    if policy == ARCH_CHECKS_POLICY_REFUSE:
+        parts.append("It merges only if Arch checks passes too.")
+    else:
+        parts.append(
+            "Arch checks is awaited; a red verdict is filed as curation work "
+            f"(issue \"{LEDGER_CURATION_ISSUE_TITLE}\") and does not hold the "
+            "merge."
+        )
+    return "".join(f"\n\n{part}" for part in parts)
+
+
+LEDGER_CURATION_ISSUE_MAX_PAGES = 10
+
+
+def _open_ledger_curation_issue(repo: str) -> dict | None:
+    """The open curation issue, searching every page of open issues (the
+    listing also counts pull requests)."""
+    for page in range(1, LEDGER_CURATION_ISSUE_MAX_PAGES + 1):
+        issues = json.loads(
+            _gh_api(f"repos/{repo}/issues?state=open&per_page=100&page={page}")
+        )
+        if type(issues) is not list:
+            raise LedgerProposalError("GitHub issue listing is not a list")
+        for issue in issues:
+            if (
+                type(issue) is dict
+                and issue.get("title") == LEDGER_CURATION_ISSUE_TITLE
+                and "pull_request" not in issue
+                and type(issue.get("number")) is int
+            ):
+                return issue
+        if len(issues) < 100:
+            return None
+    raise LedgerProposalError(
+        f"more than {LEDGER_CURATION_ISSUE_MAX_PAGES * 100} open issues to search"
+    )
+
+
+def _file_ledger_curation_issue(repo: str, body: str) -> str:
+    """Comment on the open curation issue, or open one; returns its URL."""
+    issue = _open_ledger_curation_issue(repo)
+    if issue is not None:
+        _gh_api(
+            "-X",
+            "POST",
+            f"repos/{repo}/issues/{issue['number']}/comments",
+            input_body={"body": body},
+        )
+        return str(issue.get("html_url") or f"{repo}#{issue['number']}")
+    created = json.loads(
+        _gh_api(
+            "-X",
+            "POST",
+            f"repos/{repo}/issues",
+            input_body={"title": LEDGER_CURATION_ISSUE_TITLE, "body": body},
+        )
+    )
+    if type(created) is not dict:
+        raise LedgerProposalError("GitHub did not return the created issue")
+    return str(created.get("html_url") or created.get("number"))
+
+
+def report_arch_checks_at_merge(
+    repo: str,
+    pr_number: int,
+    merged_sha: str,
+    *,
+    state: str,
+    runs: str,
+    curation: CatalogCuration,
+    run_url: str | None,
+) -> None:
+    """Say loudly that an append merged without a green Arch checks.
+
+    Under the "land" policy the merge stands, as it did before Arch checks
+    was awaited, but a red verdict leaves the ledger branch red for every
+    other pull request until a curator acts, so it is filed as a Chronicle
+    issue naming what the dry run expects a curator to do; so is a missing
+    verdict when the dry run predicts red. Never raises: the rows are
+    already merged and must still be published.
+    """
+    print(
+        f"ARCH CHECKS {state.upper()} AT MERGE: {repo}#{pr_number} merged at "
+        f"{merged_sha} under the '{ARCH_CHECKS_POLICY_LAND}' policy ({runs})"
+    )
+    # Red, or no verdict yet where the dry run predicts red: either way the
+    # branch needs a curator.
+    if state != "failed" and not curation.residual:
+        return
+    verdict = (
+        "with Arch checks red"
+        if state == "failed"
+        else "before Arch checks reported, and the dry run predicts it red"
+    )
+    lines = [
+        f"Thesis resolver append {repo}#{pr_number} merged at {merged_sha} "
+        f"{verdict} ({runs}).",
+        "",
+        "Every pull request into this branch fails Arch checks until the "
+        "curation below lands (see chronicle#363 and #371 for the pattern).",
+    ]
+    if run_url:
+        lines.append(f"Resolver run: {run_url}")
+    if curation.residual:
+        lines += ["", "What the resolver's dry run expects a curator to do:"]
+        lines += [f"- {line}" for line in curation.residual]
+    if curation.notes:
+        lines += ["", "Why the resolver did not curate it itself:"]
+        lines += [f"- {line}" for line in curation.notes]
+    try:
+        where = _file_ledger_curation_issue(repo, "\n".join(lines))
+    except Exception as exc:  # noqa: BLE001 - reporting must not fail the run
+        print(f"  could not file the ledger curation issue: {exc}")
+    else:
+        print(f"  ledger curation filed: {where}")
+
+
+def report_red_ledger_base(repo: str, base_sha: str) -> str:
+    """Arch checks' state on the ledger branch head, filed if it is red.
+
+    The branch head a proposal builds on carries the push run of Arch
+    checks. A red one means curation is owed from an earlier change (an
+    append merged before Arch checks reported, a hand merge, a broken
+    base), so it is filed with the same issue as a red merge. Returns the
+    state; never raises, and never holds the append.
+    """
+    try:
+        runs = read_check_runs(
+            repo, base_sha, deadline=time.monotonic() + APPEND_GATE_MAX_READ_SECONDS
+        )
+        arch = [
+            run
+            for run in runs
+            if type(run) is dict and run.get("name") == ARCH_CHECKS_GATE
+        ]
+        state = append_gate_state(arch)
+    except Exception as exc:  # noqa: BLE001 - a report must not cost an append
+        print(f"  could not read Arch checks on the ledger branch head: {exc}")
+        return "unknown"
+    if state != "failed":
+        return state
+    detail = _describe_gate_runs(ARCH_CHECKS_GATE, arch)
+    print(f"LEDGER BRANCH RED BEFORE THIS APPEND: {repo}@{base_sha} ({detail})")
+    try:
+        where = _file_ledger_curation_issue(
+            repo,
+            f"The ledger branch head {base_sha} has Arch checks red ({detail}), "
+            "before the next resolver append was proposed. Every pull request "
+            "into the branch fails Arch checks until it is curated.",
+        )
+    except Exception as exc:  # noqa: BLE001 - reporting must not fail the run
+        print(f"  could not file the ledger curation issue: {exc}")
+    else:
+        print(f"  ledger curation filed: {where}")
+    return state
 
 
 def propose_ledger_append(
@@ -14983,14 +16164,39 @@ def propose_ledger_append(
     release_anchor_dir: pathlib.Path | None = None,
     release_now: dt.datetime | None = None,
     producer_signing_key: str | None = None,
+    target_contracts: Mapping[str, Mapping[str, Any]] | None = None,
+    arch_checks_policy: str = ARCH_CHECKS_POLICY,
+    run_url: str | None = None,
 ) -> str:
-    """Publish one fully witnessed commit through the reviewed append gate."""
+    """Publish one fully witnessed commit through the reviewed append gate.
+
+    The commit also carries the catalog curation the resolver can prove
+    (catalog_curation), so Chronicle's Arch checks can pass on it, and the
+    merge awaits Arch checks under ``arch_checks_policy``: "refuse" treats
+    it as a required gate, "land" merges on the two append gates and files
+    a red verdict as curation work.
+    """
 
     environment_signing_key = os.environ.pop(PRODUCER_SIGNING_KEY_ENV, None)
     if producer_signing_key is None:
         producer_signing_key = environment_signing_key
     # A malformed budget must refuse before the TSA or any remote mutation.
     gate_timeout_seconds = _validate_gate_timeout(gate_timeout_seconds)
+    if arch_checks_policy not in ARCH_CHECKS_POLICIES:
+        raise LedgerProposalError(
+            f"unknown Arch checks policy {arch_checks_policy!r}; expected one "
+            f"of {ARCH_CHECKS_POLICIES}"
+        )
+    if arch_checks_policy == ARCH_CHECKS_POLICY_REFUSE:
+        required_gates = (*REQUIRED_APPEND_GATES, ARCH_CHECKS_GATE)
+        advisory_gates: tuple[str, ...] = ()
+    else:
+        required_gates = REQUIRED_APPEND_GATES
+        advisory_gates = (ARCH_CHECKS_GATE,)
+    # Arch checks has a verdict only once both its push run and its pull
+    # request run have completed: on a new proposal branch only the pull
+    # request run checks the anchor move against the base.
+    gate_min_runs = {ARCH_CHECKS_GATE: 2}
     candidate_ledger = content.encode("utf-8")
     base_tree = _fetch_repository_tree(repo, base_sha, path)
     if base_tree.blob_shas.get(path) != blob_sha:
@@ -15009,8 +16215,31 @@ def propose_ledger_append(
         now=release_now,
         producer_signing_key=producer_signing_key,
     )
-    message = f"Record {added} first-print observation(s) via resolve_pending.py"
-    changes = {path: candidate_ledger, **release_files}
+    # Derived from the exact catalog and registry this commit ships.
+    curation = catalog_curation(
+        base_tree,
+        path=path,
+        candidate_ledger=candidate_ledger,
+        catalog=release_files.get("ledger/series_catalog.json"),
+        registry=release_files.get(_SERIES_UUID_REGISTRY),
+        target_contracts=target_contracts or {},
+        run_url=run_url,
+    )
+    for line in curation.summary():
+        print(f"  CATALOG CURATION (in the proposal): {line}")
+    for line in curation.notes:
+        print(f"  catalog curation note: {line}")
+    for line in curation.residual:
+        print(f"  CATALOG CURATION NEEDED (Arch checks will fail): {line}")
+    title = f"Record {added} first-print observation(s) via resolve_pending.py"
+    message = title
+    if curation.files:
+        message += (
+            "\n\nCatalog curation in this commit, re-checked by Chronicle's "
+            "series-catalog tests:\n"
+            + "\n".join(f"- {line}" for line in curation.summary())
+        )
+    changes = {path: candidate_ledger, **release_files, **curation.files}
     proposal_commit = _publish_proposal_commit(
         repo,
         base_sha=base_sha,
@@ -15024,6 +16253,7 @@ def propose_ledger_append(
             f"ledger branch moved while proposal was prepared: {base_sha} -> "
             f"{current_base}; retry against the new trusted state"
         )
+    report_red_ledger_base(repo, base_sha)
 
     stamp = utc_now().lower().replace(":", "-").replace("t", "-")
     proposal = f"thesis-facts-append/{stamp}-{time.time_ns():x}"
@@ -15051,7 +16281,7 @@ def propose_ledger_append(
                 "POST",
                 f"repos/{repo}/pulls",
                 input_body={
-                    "title": message,
+                    "title": title,
                     "head": proposal,
                     "base": branch,
                     "body": (
@@ -15061,6 +16291,7 @@ def propose_ledger_append(
                         "the ledger append and its complete four-sibling release, "
                         "and "
                         "merges only after the thesis-facts append gate passes."
+                        + _proposal_curation_body(curation, arch_checks_policy)
                     ),
                 },
             )
@@ -15071,13 +16302,16 @@ def propose_ledger_append(
 
         # Raises on a failed gate or an exhausted budget; the handler below
         # closes the PR and deletes the branch either way.
-        await_append_gates(
+        advisory_verdicts = await_append_gates(
             repo,
             proposal_commit,
             pr_number,
             timeout_seconds=gate_timeout_seconds,
             poll_seconds=poll_seconds,
             poll_attempts=poll_attempts,
+            gates=required_gates,
+            advisory=advisory_gates,
+            min_runs=gate_min_runs,
         )
 
         current_base = _branch_head(repo, branch)
@@ -15166,12 +16400,25 @@ def propose_ledger_append(
             merged_sha,
             path=path,
             candidate_ledger=candidate_ledger,
-            release_files=release_files,
+            release_files={**release_files, **curation.files},
             clock_skew_seconds=clock_skew_seconds,
             anchor_dir=release_anchor_dir,
         )
         _gh_api("-X", "DELETE", f"repos/{repo}/git/refs/heads/{proposal}")
         ref_created = False
+        arch_state, arch_runs = advisory_verdicts.get(
+            ARCH_CHECKS_GATE, ("passed", "")
+        )
+        if arch_state != "passed":
+            report_arch_checks_at_merge(
+                repo,
+                pr_number,
+                merged_sha,
+                state=arch_state,
+                runs=arch_runs,
+                curation=curation,
+                run_url=run_url,
+            )
         return merged_sha
     except BaseException as exc:
         cleanup_failures = _cleanup_proposal(
@@ -18078,6 +19325,8 @@ def _main() -> int:
         len(new_rows),
         producer_signing_key=producer_signing_key,
         gate_timeout_seconds=gate_timeout_seconds,
+        target_contracts=target_contracts,
+        run_url=_workflow_run_url(),
     )
     print(
         f"appended {len(new_rows)} observation(s) to "

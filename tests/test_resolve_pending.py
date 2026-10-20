@@ -2331,12 +2331,14 @@ def _pre_genesis_tree() -> resolve_pending.RepositoryTree:
 def _gate_check_runs(
     append_conclusion: str | None,
     trusted_conclusion: str | None,
+    arch_conclusion: str | None = "failure",
 ) -> list[dict]:
     """Check runs as chronicle's gate workflow leaves them on a proposal head.
 
     Each required gate has one real run (the delivering event) and one
     skipped twin (the other event's job-level condition). None models a real
-    run still queued for a runner.
+    run still queued for a runner. Arch checks defaults to the failure every
+    proposal before 2026-10-19 that needed catalog curation carried.
     """
 
     def real(name: str, conclusion: str | None, run_id: int) -> dict:
@@ -2361,12 +2363,20 @@ def _gate_check_runs(
         real("Append gate", append_conclusion, 1),
         twin("Trusted base append gate", 12),
         real("Trusted base append gate", trusted_conclusion, 2),
-        {
-            "id": 13,
-            "name": "Arch checks",
-            "status": "completed",
-            "conclusion": "failure",
-        },
+        # Arch checks runs for the proposal branch's push and for its pull
+        # request.
+        *(
+            {
+                "id": run_id,
+                "name": "Arch checks",
+                "status": "queued" if arch_conclusion is None else "completed",
+                "conclusion": arch_conclusion,
+                "html_url": (
+                    f"https://github.com/PolicyEngine/chronicle/actions/runs/{run_id}"
+                ),
+            }
+            for run_id in (13, 14)
+        ),
     ]
 
 
@@ -2385,6 +2395,10 @@ def _proposal_api_stub(
     fail_pr_creation: bool = False,
     recover_pr_number: int | None = None,
     merge_payload: dict | None = None,
+    arch_conclusion: str | None = "failure",
+    open_issues: list[dict] | None = None,
+    fail_issue_calls: bool = False,
+    base_arch_conclusion: str | None = "success",
 ):
     merged = False
 
@@ -2392,6 +2406,17 @@ def _proposal_api_stub(
         nonlocal merged
         calls.append((args, input_body))
         joined = " ".join(args)
+        if "/issues" in joined:
+            if fail_issue_calls:
+                raise RuntimeError("simulated issue API failure")
+            if "/issues?state=open" in joined:
+                return json.dumps(open_issues or [])
+            if joined.endswith("/comments") and "POST" in args:
+                return json.dumps({"id": 1})
+            if joined.endswith("/issues") and "POST" in args:
+                return json.dumps(
+                    {"number": 99, "html_url": "https://github.com/x/y/issues/99"}
+                )
         if "/git/refs" in joined and "POST" in args:
             if fail_ref_creation:
                 raise RuntimeError("simulated ref creation failure")
@@ -2406,9 +2431,25 @@ def _proposal_api_stub(
             if fail_pr_creation:
                 raise RuntimeError("simulated PR creation failure")
             return json.dumps({"number": 7})
+        if "/check-runs" in joined and f"commits/{'b' * 40}/" in joined:
+            # The ledger branch head the proposal builds on: its push run.
+            runs = [
+                {
+                    "id": 21,
+                    "name": "Arch checks",
+                    "status": "completed",
+                    "conclusion": base_arch_conclusion,
+                    "html_url": "https://github.com/PolicyEngine/chronicle/actions/runs/21",
+                }
+            ]
+            return json.dumps(_check_runs_page(runs))
         if "/check-runs" in joined:
             return json.dumps(
-                _check_runs_page(_gate_check_runs(gate_conclusion, trusted_conclusion))
+                _check_runs_page(
+                    _gate_check_runs(
+                        gate_conclusion, trusted_conclusion, arch_conclusion
+                    )
+                )
             )
         if "/merge" in joined:
             result = (
@@ -2450,6 +2491,10 @@ def _install_proposal_transport(
     recover_pr_number: int | None = None,
     merge_payload: dict | None = None,
     published: list[dict[str, bytes]] | None = None,
+    arch_conclusion: str | None = "failure",
+    open_issues: list[dict] | None = None,
+    fail_issue_calls: bool = False,
+    base_arch_conclusion: str | None = "success",
 ) -> None:
     monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
 
@@ -2476,6 +2521,10 @@ def _install_proposal_transport(
             fail_pr_creation=fail_pr_creation,
             recover_pr_number=recover_pr_number,
             merge_payload=merge_payload,
+            arch_conclusion=arch_conclusion,
+            open_issues=open_issues,
+            fail_issue_calls=fail_issue_calls,
+            base_arch_conclusion=base_arch_conclusion,
         ),
     )
 
@@ -3795,7 +3844,9 @@ def test_append_proposal_gate_timeout_closes_pr_without_a_rejection_message(
 
     assert "Append gate: queued" in str(info.value)
     joined = [" ".join(args) for args, _ in calls]
-    assert sum("/check-runs" in call for call in joined) == 3
+    # Three reads of the proposal head (the ledger branch head is read once,
+    # before the proposal, by report_red_ledger_base).
+    assert sum(f"commits/{'c' * 40}/check-runs" in call for call in joined) == 3
     assert not any("/merge" in call for call in joined)
     assert any("PATCH" in call and "/pulls/7" in call for call in joined)
     assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
@@ -3877,6 +3928,204 @@ def test_append_proposal_cleans_pr_and_branch_when_merge_is_refused(
     assert any("/merge" in call for call in joined)
     assert any("PATCH" in call and "/pulls/7" in call for call in joined)
     assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
+
+
+def _propose_one_row(**kwargs) -> str:
+    tree_ledger = b'{"source_record_id":"fixture.base","value":0}\n'
+    candidate = tree_ledger + b'{"source_record_id":"test.series.arch","value":1}\n'
+    return resolve_pending.propose_ledger_append(
+        "PolicyEngine/chronicle",
+        "codex/thesis-ledger-facts",
+        "ledger/official_observations.jsonl",
+        candidate.decode(),
+        "a" * 40,
+        "b" * 40,
+        1,
+        poll_seconds=0,
+        poll_attempts=1,
+        **kwargs,
+    )
+
+
+def test_land_policy_merges_past_red_arch_checks_and_files_the_curation(
+    monkeypatch, capsys
+) -> None:
+    """The behaviour before Arch checks was awaited, now said out loud: the
+    append merges, and the red verdict becomes a Chronicle issue."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, _pre_genesis_tree(), calls)
+
+    assert _propose_one_row(run_url="https://github.com/o/r/actions/runs/5") == (
+        "d" * 40
+    )
+
+    joined = [" ".join(args) for args, _ in calls]
+    assert any("/merge" in call for call in joined)
+    created = [
+        body
+        for args, body in calls
+        if args[-1] == "repos/PolicyEngine/chronicle/issues" and "POST" in args
+    ]
+    assert len(created) == 1
+    assert created[0]["title"] == resolve_pending.LEDGER_CURATION_ISSUE_TITLE
+    assert "PolicyEngine/chronicle#7 merged at " + "d" * 40 in created[0]["body"]
+    assert "actions/runs/13" in created[0]["body"]
+    assert "https://github.com/o/r/actions/runs/5" in created[0]["body"]
+    out = capsys.readouterr().out
+    assert "ARCH CHECKS FAILED AT MERGE" in out
+    assert "ledger curation filed: https://github.com/x/y/issues/99" in out
+    pr_body = next(
+        body["body"]
+        for args, body in calls
+        if args[-1] == "repos/PolicyEngine/chronicle/pulls" and "POST" in args
+    )
+    assert "Arch checks is awaited" in pr_body
+
+
+def test_land_policy_comments_on_the_open_curation_issue(monkeypatch) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch,
+        _pre_genesis_tree(),
+        calls,
+        open_issues=[
+            {
+                "number": 5,
+                "title": resolve_pending.LEDGER_CURATION_ISSUE_TITLE,
+                "pull_request": {},
+            },
+            {"number": 6, "title": "unrelated"},
+            {"number": 8, "title": resolve_pending.LEDGER_CURATION_ISSUE_TITLE},
+        ],
+    )
+    _propose_one_row()
+    posts = [
+        args[-1] for args, _ in calls if "POST" in args and "/issues" in args[-1]
+    ]
+    # A pull request that shares the title is not the issue.
+    assert posts == ["repos/PolicyEngine/chronicle/issues/8/comments"]
+
+
+def test_a_failing_issue_api_never_undoes_a_merged_append(
+    monkeypatch, capsys
+) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, fail_issue_calls=True
+    )
+    assert _propose_one_row() == "d" * 40
+    assert "could not file the ledger curation issue" in capsys.readouterr().out
+    joined = [" ".join(args) for args, _ in calls]
+    # Merged, then the proposal branch deleted; nothing was closed.
+    assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
+    assert not any("PATCH" in call for call in joined)
+
+
+def test_green_arch_checks_files_nothing(monkeypatch, capsys) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, arch_conclusion="success"
+    )
+    assert _propose_one_row() == "d" * 40
+    assert not any("/issues" in " ".join(args) for args, _ in calls)
+    assert "ARCH CHECKS" not in capsys.readouterr().out
+
+
+def test_a_red_ledger_branch_head_is_filed_before_the_append(
+    monkeypatch, capsys
+) -> None:
+    """A red head (an earlier append merged before Arch checks reported, a
+    hand merge) is filed when the next append builds on it; it never holds
+    the append."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch,
+        _pre_genesis_tree(),
+        calls,
+        arch_conclusion="success",
+        base_arch_conclusion="failure",
+    )
+    assert _propose_one_row() == "d" * 40
+    created = [
+        body
+        for args, body in calls
+        if args[-1] == "repos/PolicyEngine/chronicle/issues" and "POST" in args
+    ]
+    assert len(created) == 1 and "b" * 40 in created[0]["body"]
+    assert "LEDGER BRANCH RED BEFORE THIS APPEND" in capsys.readouterr().out
+    joined = [" ".join(args) for args, _ in calls]
+    issue_at = next(i for i, call in enumerate(joined) if "/issues" in call)
+    pr_at = next(i for i, call in enumerate(joined) if call.endswith("/pulls"))
+    assert issue_at < pr_at
+
+
+def test_refuse_policy_holds_the_append_on_red_arch_checks(monkeypatch) -> None:
+    """Option (a): Arch checks becomes a required gate. A red verdict closes
+    the proposal like a failed append gate, and nothing merges."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, _pre_genesis_tree(), calls)
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"append gate failed .*Arch checks: failure",
+    ):
+        _propose_one_row(arch_checks_policy=resolve_pending.ARCH_CHECKS_POLICY_REFUSE)
+    joined = [" ".join(args) for args, _ in calls]
+    assert not any("/merge" in call for call in joined)
+    assert any("PATCH" in call and "/pulls/7" in call for call in joined)
+    assert not any("/issues" in call for call in joined)
+
+
+def test_refuse_policy_merges_on_green_arch_checks(monkeypatch) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, arch_conclusion="success"
+    )
+    refuse = resolve_pending.ARCH_CHECKS_POLICY_REFUSE
+    assert _propose_one_row(arch_checks_policy=refuse) == "d" * 40
+
+
+def test_refuse_policy_waits_for_both_arch_checks_runs(monkeypatch) -> None:
+    """Arch checks runs for the proposal's push and its pull request; under
+    "refuse" a green push run alone never merges (the pull request run,
+    which also checks the anchor move against the base, may not be listed
+    yet)."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, arch_conclusion="success"
+    )
+    base_api = resolve_pending._gh_api
+
+    def push_run_only(*args: str, **kwargs) -> str:
+        raw = base_api(*args, **kwargs)
+        if f"commits/{'c' * 40}/check-runs" in " ".join(args):
+            page = json.loads(raw)
+            runs = [r for r in page["check_runs"] if r.get("id") != 14]
+            return json.dumps(_check_runs_page(runs))
+        return raw
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", push_run_only)
+    refuse = resolve_pending.ARCH_CHECKS_POLICY_REFUSE
+    with pytest.raises(resolve_pending.LedgerProposalError, match="did not complete"):
+        _propose_one_row(arch_checks_policy=refuse)
+    assert not any("/merge" in " ".join(args) for args, _ in calls)
+
+
+def test_unknown_arch_checks_policy_refuses_before_any_remote_call(
+    monkeypatch,
+) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, _pre_genesis_tree(), calls)
+    with pytest.raises(resolve_pending.LedgerProposalError, match="policy"):
+        _propose_one_row(arch_checks_policy="merge-anyway")
+    assert calls == []
+
+
+def test_the_default_arch_checks_policy_awaits_max_s_ruling() -> None:
+    # Flipping this to "refuse" is the whole of option (a); it changes when
+    # rows needing uncurated catalog work land, so it is Max's call.
+    land = resolve_pending.ARCH_CHECKS_POLICY_LAND
+    assert resolve_pending.ARCH_CHECKS_POLICY == land
+    assert resolve_pending.ARCH_CHECKS_GATE not in resolve_pending.REQUIRED_APPEND_GATES
 
 
 def test_append_proposal_refuses_if_base_moves_during_gate_poll(
