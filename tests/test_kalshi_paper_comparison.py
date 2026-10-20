@@ -645,6 +645,8 @@ def test_rule_direction_must_match_strike_type():
         ),
         ("statcan.employment_insurance.canada.june_2026.first_print", "2026-06"),
         ("ssa.supplement.table_6b5.share_claimed_age_62.2025.first_print", "2025"),
+        # Kinds are tried in order, so a month name beats an earlier year-month.
+        ("x.target.2027_09.first_print.august_2026", "2026-08"),
         ("bls.cps.telework_share.first_print", None),
     ],
 )
@@ -853,32 +855,106 @@ def test_catalog_screen_accounts_for_every_hit():
         catalog_item("KXCOMPANYACTIONSNAP", "SNAP Company Action", "Financials"),
         catalog_item("KXSNAPELECTIONSPAIN", "Spain snap election", "Elections"),
         catalog_item("KXUE", "Monthly Unemployment"),
+        catalog_item("KXEXUSHOME", "Median Existing US Home Price"),
     ]
     cache = SeriesCache(
         {
             "KXUE": [
                 event("KXUE-CAN26OCT", "Canada unemployment rate in October"),
                 event("KXUE-AUS26OCT", "Australia unemployment rate in October"),
-            ]
+            ],
+            # An event hit takes its series' verdict.
+            "KXEXUSHOME": [
+                event("KXEXUSHOME-26OCT13", "US existing home: median sales price")
+            ],
         }
     )
     screen = pipeline.catalog_screen(cache, catalog, SCREEN_RUNS)
-    verdicts = {(h["series"], h["event"]): h["verdict"] for h in screen["hits"]}
+    verdicts = {(h["series"], h["verdict"]) for h in screen["hits"]}
     assert verdicts == {
-        ("KXJOLTSOPEN", ""): "matched",
-        ("KXJOLTS", ""): "alternate venue",
-        ("KXCPISHELTER", ""): "related",
-        ("KXCOMPANYACTIONSNAP", ""): "different statistic",
-        ("KXUE", "KXUE-CAN26OCT"): "different statistic",
+        ("KXJOLTSOPEN", "matched"),
+        ("KXJOLTS", "alternate venue"),
+        ("KXCPISHELTER", "related"),
+        ("KXCOMPANYACTIONSNAP", "different statistic"),
+        ("KXUE", "different statistic"),  # its Canadian events
         # The Australia group's keywords find the scored KXUE-AUS events.
-        ("KXUE", "KXUE-AUS26OCT"): "matched",
+        ("KXUE", "matched"),
+        ("KXEXUSHOME", "different statistic"),
     }
+    kxue = [h for h in screen["hits"] if h["series"] == "KXUE"]
+    assert all(h["eventsHit"] == 1 and not h["seriesTitleHit"] for h in kxue)
     # Lower-case "snap" (an election) is not the SNAP acronym.
     assert all(h["series"] != "KXSNAPELECTIONSPAIN" for h in screen["hits"])
-    assert screen["multiCountrySeries"] == {"KXUE": 2}
+    # Every Economics and World series has its events read; others do not.
+    assert screen["eventSeriesSearched"] == 5 and screen["eventsSearched"] == 3
     groups = {g["screen"]: g for g in screen["groups"]}
     assert groups["Canada"]["thesisRuns"] == 1
     assert groups["Canada"]["thesisCountries"] == ["CA"]
+
+
+def test_catalog_screen_reads_events_of_every_economics_series():
+    # A series whose title names no screened statistic, with one event that
+    # does, must still be accounted for.
+    from kalshi_compare import pipeline
+
+    catalog = [catalog_item("KXMONTHLYSTATS", "Monthly statistics")]
+    cache = SeriesCache(
+        {"KXMONTHLYSTATS": [event("KXMONTHLYSTATS-26SEP", "WIC participation")]}
+    )
+    with pytest.raises(ValueError, match="KXMONTHLYSTATS-26SEP"):
+        pipeline.catalog_screen(cache, catalog, SCREEN_RUNS)
+
+
+def test_related_series_of_another_family_is_labelled_so():
+    # KXTRADEDEFICIT's events are checked for trade runs, not deficit runs.
+    from kalshi_compare import pipeline
+
+    runs = [thesis_run("treasury.mts.monthly_deficit.2026_09.first_print")]
+    screen = pipeline.catalog_screen(
+        SeriesCache({}),
+        [catalog_item("KXTRADEDEFICIT", "US annual trade deficit")],
+        runs,
+    )
+    (hit,) = [h for h in screen["hits"] if h["screen"].startswith("federal")]
+    assert hit["verdict"] == "related to another family"
+    assert "bea" in hit["reason"]
+
+
+@pytest.mark.parametrize(
+    ("ticker", "title"),
+    [
+        # Series an independent review found the first keyword set missed.
+        ("KXCRED", "Credit card debt"),
+        ("KXWAGESBEAT", "Wages vs. inflation"),
+        ("KXTRUFPDEBT", "Total Public Debt"),
+        ("KXWAAEROEMP", "Washington aerospace manufacturing employment"),
+        ("KXHEALTHCOST", "US employer health insurance cost growth"),
+        ("KXSNAPDELAY", "Snap benefits delayed or reduced"),
+        ("KXSSCOLA", "Social Security cost-of-living adjustment"),
+        ("KXHPI", "Housing Price Index"),
+        ("KXCABUILDPERMITS", "California permitted housing units"),
+        ("KXEHSALES", "Existing home sales in time period"),
+        ("KXTRUFHOUCPI", "Truflation US CPI Housing Inflation Index"),
+        ("KXCANRECESSION", "Canada recession in [year]?"),
+    ],
+)
+def test_screen_keywords_reach_reviewed_misses(ticker, title):
+    text = contracts.normalize_text(f"{ticker} {title}")
+    assert any(g.keywords.search(text) for g in contracts.CATALOG_SCREEN)
+
+
+def test_unmatched_rows_compare_quarterly_runs_by_quarter():
+    from kalshi_compare import pipeline
+
+    cache = FakeCache(
+        [event("KXHEALTHCOST-26OCT30", "Health cost growth in Q3 2026", "Q3 2026")]
+    )
+    (row,) = pipeline.unmatched_rows(
+        cache, [thesis_run("bls.eci.private_wages_salaries_qoq.2026_q3.first_print")]
+    )
+    assert row["period"] == "2026-Q3"
+    assert row["reason"].startswith("Kalshi lists the period, but KXHEALTHCOST")
+    assert "KXHEALTHCOST: 2026-Q3" in row["kalshiEvidence"]
 
 
 @pytest.mark.parametrize(
@@ -886,6 +962,11 @@ def test_catalog_screen_accounts_for_every_hit():
     [
         # A new series on a screened statistic.
         (catalog_item("KXWICPART", "WIC participation in [month]"), {}),
+        # An event whose ticker, not its title, names a screened statistic.
+        (
+            catalog_item("KXINDEX", "Index level"),
+            {"KXINDEX": [event("HPI-26SEP", "Index in September 2026")]},
+        ),
         # A new country in a multi-country series, on a screened statistic.
         (
             catalog_item("KXUE", "Monthly Unemployment"),

@@ -818,35 +818,37 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
             "with the 2026 reference periods each lists.",
         )
     screen = results["catalogScreen"]
-    multi = screen["multiCountrySeries"]
+    categories = " and ".join(screen["eventScreenCategories"])
     doc.p(
         "**Catalog screen.** Each unmatched run belongs to a screen group whose "
         "keywords a Kalshi series on the same statistic would use. The screen "
         f"searched the ticker and title of all {screen['seriesSearched']:,} series "
-        "in the stored catalog, in every category, and the "
-        f"{screen['multiCountryEventsSearched']} event titles of the "
-        f"{count_word(len(multi))} series whose events cover several countries "
-        f"under a title that names none ({', '.join(f'`{t}`' for t in multi)}; "
-        "found by reading the events of every Economics and World series whose "
-        "title names no country, so a series of that kind filed under another "
-        "category would be searched by its title only). "
-        "Every hit is accounted for in `catalog_screen.csv`: scored, an older "
-        "ticker or second venue, a related series whose events are checked per "
-        "run, or a different statistic with the reason. A hit with no verdict, or "
-        "an unmatched run outside every group, stops the run."
+        f"in the stored catalog, in every category, and the ticker, title and "
+        f"subtitle of all {screen['eventsSearched']:,} events of the "
+        f"{screen['eventSeriesSearched']:,} {categories} series (a series such as "
+        "KXUE names its countries only in its events). Series in other categories "
+        "are searched by ticker and title only. Every hit is accounted for in "
+        "`catalog_screen.csv`, one row per group, series and verdict: scored, an "
+        "older ticker or second venue, a related series whose events are checked "
+        "for this group's runs, a series related to another family, or a different "
+        "statistic with the reason. A hit with no verdict, or an unmatched run "
+        "outside every group, stops the run. Keywords can still miss a series "
+        "worded in a way no group anticipates; the patterns are in `results.json` "
+        "under `catalogScreen`."
     )
     doc.table(
-        ["Screen group", "Thesis runs", "Kalshi hits", "Verdicts"],
+        ["Screen group", "Thesis runs", "Kalshi series hit", "Events hit", "Verdicts"],
         [
             [
                 g["screen"],
                 str(g["thesisRuns"]),
-                str(g["hits"]),
+                str(g["seriesHit"]),
+                str(g["eventsHit"]),
                 ", ".join(f"{n} {v}" for v, n in g["verdicts"].items()) or "\u2014",
             ]
             for g in screen["groups"]
         ],
-        "Keyword patterns are in `results.json` under `catalogScreen`.",
+        "Verdicts count series (a multi-country series can have more than one).",
     )
     venues = results.get("alternateVenues") or []
     if venues:

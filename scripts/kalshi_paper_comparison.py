@@ -6,9 +6,12 @@ attested Thesis records at a git ref. No orders, no account, no trading
 simulation. The analysis plan is docs/kalshi-paper-comparison.md.
 
     uv run python scripts/kalshi_paper_comparison.py \
-        --out ~/reviews/thesis-vs-kalshi-2026-10 --as-of 2026-10-19T23:00:00Z
+        --out ~/reviews/thesis-vs-kalshi-2026-10/results \
+        --cache ~/reviews/thesis-vs-kalshi-2026-10/fetch \
+        --ref <Thesis commit> --as-of <UTC time>
 
-Rerun from stored responses only with --offline.
+Rerun from stored responses only with --offline. --ref pins the Thesis commit
+whose published log is scored; the default, origin/main, moves.
 """
 
 from __future__ import annotations

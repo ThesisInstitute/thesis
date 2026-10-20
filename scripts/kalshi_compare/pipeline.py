@@ -899,17 +899,18 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
     reason says what Kalshi lists rather than asserting it. Every run names
     the catalog screen group whose search backs its reason.
     """
-    events_by_series: dict[str, dict[str, list[str]]] = {}
+    events_by_series: dict[tuple[str, str], dict[str, list[str]]] = {}
 
-    def periods_for(series: str) -> dict[str, list[str]]:
-        if series not in events_by_series:
+    def periods_for(series: str, cadence: str) -> dict[str, list[str]]:
+        """Event tickers by the period each names, in the run's own cadence."""
+        if (series, cadence) not in events_by_series:
             by_period: dict[str, list[str]] = {}
             for event in kalshi.series_events(cache, series):
                 text = f"{event.get('title', '')} {event.get('sub_title', '')}"
-                for period in contracts.text_periods(text, "monthly"):
+                for period in contracts.text_periods(text, cadence):
                     by_period.setdefault(period, []).append(event["event_ticker"])
-            events_by_series[series] = by_period
-        return events_by_series[series]
+            events_by_series[(series, cadence)] = by_period
+        return events_by_series[(series, cadence)]
 
     rows = []
     for run_ in runs:
@@ -921,12 +922,13 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
             detail = ""
         else:
             found_notes, other_notes, listed = [], [], []
+            cadence = contracts.period_cadence(period) if period else "monthly"
             for series, note in related:
-                periods = periods_for(series)
+                periods = periods_for(series, cadence)
                 listed.append(
                     f"{series}: "
                     + (
-                        ", ".join(sorted(p for p in periods if p >= "2026-01"))
+                        ", ".join(sorted(p for p in periods if p[:4] >= "2026"))
                         or "no 2026 events"
                     )
                 )
@@ -964,41 +966,38 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
     return rows
 
 
-def multi_country_series(cache: FetchCache, catalog: list[dict]) -> dict[str, list]:
-    """Series whose events name two or more countries under a title naming none.
+def screen_events(cache: FetchCache, catalog: list[dict]) -> dict[str, list[dict]]:
+    """Every event of every series in the event-screened categories.
 
-    KXUE ("Monthly Unemployment") is one: its events are per country, so a
-    title search alone would miss a statistic it covers. Every Economics and
-    World series with no country in its title has its events read.
+    A series such as KXUE ("Monthly Unemployment") names its countries only in
+    its event titles, so its events are screened as well as its title.
     """
-    found = {}
-    for item in catalog:
-        if item.get("category") not in contracts.MULTI_COUNTRY_CATEGORIES:
-            continue
-        if contracts.countries_named(contracts.normalize_text(item.get("title") or "")):
-            continue
-        events = kalshi.series_events(cache, item["ticker"])
-        named: set[str] = set()
-        for event in events:
-            named |= contracts.countries_named(
-                contracts.normalize_text(
-                    f"{event.get('title', '')} {event.get('sub_title', '')}"
-                )
-            )
-        if len(named) >= 2:
-            found[item["ticker"]] = events
-    return found
+    return {
+        item["ticker"]: kalshi.series_events(cache, item["ticker"])
+        for item in catalog
+        if item.get("category") in contracts.EVENT_SCREEN_CATEGORIES
+    }
 
 
-def screen_verdict(series: str, event_ticker: str | None) -> tuple[str, str] | None:
-    """How a catalog screen hit is accounted for, or None if it is not."""
-    specs = {spec.series: spec for spec in contracts.SPECS}
-    spec = specs.get(series)
+def screen_verdict(
+    series: str, event_ticker: str | None, group_ids: list[str]
+) -> tuple[str, str] | None:
+    """How a catalog screen hit is accounted for, or None if it is not.
+
+    ``group_ids`` are the data point ids of the screen group's unmatched runs:
+    a related series counts as checked only if one of those runs checks it.
+    """
+    spec = {s.series: s for s in contracts.SPECS}.get(series)
     if event_ticker is not None:
-        if spec and spec.event_prefix and event_ticker.startswith(spec.event_prefix):
-            return "matched", f"scored as {spec.series} ({spec.statistic})"
+        if spec and spec.event_prefix:
+            # Multi-country series: each country's events need their own verdict.
+            if event_ticker.startswith(spec.event_prefix):
+                return "matched", f"scored as {spec.series} ({spec.statistic})"
+            reason = contracts.screen_verdict_reason(event_ticker, event=True)
+            return ("different statistic", reason) if reason else None
         reason = contracts.screen_verdict_reason(event_ticker, event=True)
-        return ("different statistic", reason) if reason else None
+        if reason:
+            return "different statistic", reason
     if spec:
         return "matched", f"scored as {spec.series} ({spec.statistic})"
     for matched, venues in contracts.ALTERNATE_VENUES.items():
@@ -1007,14 +1006,22 @@ def screen_verdict(series: str, event_ticker: str | None) -> tuple[str, str] | N
                 f"older ticker or second venue for {matched}; its events are listed"
                 " for every matched period"
             )
-    for _, pairs in contracts.RELATED:
+    checked, elsewhere = [], []
+    for regex, pairs in contracts.RELATED:
         for related, note in pairs:
-            if related == series:
-                return (
-                    "related",
-                    ("same statistic" if note == contracts.SAME else note)
-                    + "; its events are checked for each run's period",
-                )
+            if related != series:
+                continue
+            text = "same statistic" if note == contracts.SAME else note
+            if any(regex.match(data_point) for data_point in group_ids):
+                checked.append(text)
+            else:
+                elsewhere.append(f"{text} (checked for `{regex.pattern}` runs)")
+    if checked:
+        return "related", "; ".join(dict.fromkeys(checked)) + (
+            "; its events are checked for each run's period"
+        )
+    if elsewhere:
+        return "related to another family", "; ".join(dict.fromkeys(elsewhere))
     reason = contracts.screen_verdict_reason(series)
     return ("different statistic", reason) if reason else None
 
@@ -1027,7 +1034,8 @@ def catalog_screen(
     Every unmatched run must belong to a screen group, and every hit must be
     accounted for (matched, alternate venue, related, or a reviewed different
     statistic); either gap stops the run, so the "no Kalshi series" reasons
-    rest on a recorded search rather than an assertion.
+    rest on a recorded search rather than an assertion. Hits are recorded one
+    row per group, series and verdict, with the number of events that hit.
     """
     uncovered = sorted(
         {
@@ -1038,64 +1046,77 @@ def catalog_screen(
     )
     if uncovered:
         raise ValueError(f"unmatched runs outside the catalog screen: {uncovered}")
-    runs_by_group: dict[str, list[thesis.ThesisRun]] = {}
+    ids_by_group: dict[str, list[str]] = {}
+    countries_by_group: dict[str, set[str]] = {}
     for run_ in runs:
-        runs_by_group.setdefault(
-            contracts.screen_group(run_.data_point_id).label, []
-        ).append(run_)
-    multi = multi_country_series(cache, catalog)
-    texts = [
-        (
-            item,
-            None,
-            item.get("title") or "",
-            contracts.normalize_text(f"{item['ticker']} {item.get('title') or ''}"),
+        label = contracts.screen_group(run_.data_point_id).label
+        ids_by_group.setdefault(label, []).append(run_.data_point_id)
+        countries_by_group.setdefault(label, set()).add(run_.country)
+    events = screen_events(cache, catalog)
+    texts = []
+    for item in catalog:
+        title = item.get("title") or ""
+        texts.append(
+            (item, None, title, contracts.normalize_text(f"{item['ticker']} {title}"))
         )
-        for item in catalog
-    ]
-    by_ticker = {item["ticker"]: item for item in catalog}
-    for ticker, events in sorted(multi.items()):
-        for event in events:
-            title = f"{event.get('title', '')} / {event.get('sub_title', '')}"
+        for event in events.get(item["ticker"], []):
+            event_title = f"{event.get('title', '')} / {event.get('sub_title', '')}"
             texts.append(
                 (
-                    by_ticker[ticker],
+                    item,
                     event["event_ticker"],
-                    title,
-                    contracts.normalize_text(title),
+                    event_title,
+                    contracts.normalize_text(
+                        f"{event['event_ticker']} {event.get('title', '')}"
+                        f" {event.get('sub_title', '')}"
+                    ),
                 )
             )
-    hits, groups, unaccounted = [], [], []
+    hits: dict[tuple, dict] = {}
+    groups, unaccounted = [], []
     for group in contracts.CATALOG_SCREEN:
-        group_runs = runs_by_group.get(group.label, [])
-        counts: Counter = Counter()
+        group_ids = ids_by_group.get(group.label, [])
         for item, event_ticker, title, text in texts:
             if not group.keywords.search(text):
                 continue
-            verdict = screen_verdict(item["ticker"], event_ticker)
+            verdict = screen_verdict(item["ticker"], event_ticker, group_ids)
             if verdict is None:
                 unaccounted.append(f"{group.label}: {event_ticker or item['ticker']}")
                 continue
-            counts[verdict[0]] += 1
-            hits.append(
+            key = (group.label, item["ticker"], *verdict)
+            row = hits.setdefault(
+                key,
                 {
                     "screen": group.label,
                     "series": item["ticker"],
-                    "event": event_ticker or "",
                     "category": item.get("category"),
-                    "title": title,
+                    "seriesTitle": item.get("title") or "",
+                    "seriesTitleHit": False,
+                    "eventsHit": 0,
+                    "exampleEvents": [],
                     "verdict": verdict[0],
                     "reason": verdict[1],
-                }
+                },
             )
+            if event_ticker is None:
+                row["seriesTitleHit"] = True
+            else:
+                row["eventsHit"] += 1
+                if len(row["exampleEvents"]) < 3:
+                    row["exampleEvents"].append(f"{event_ticker}: {title}")
+        rows = [r for k, r in hits.items() if k[0] == group.label]
+        counts = Counter()
+        for r in rows:
+            counts[r["verdict"]] += 1
         groups.append(
             {
                 "screen": group.label,
                 "thesisFamilies": group.families.pattern,
                 "keywords": group.keywords.pattern,
-                "thesisRuns": len(group_runs),
-                "thesisCountries": sorted({r.country for r in group_runs}),
-                "hits": sum(counts.values()),
+                "thesisRuns": len(group_ids),
+                "thesisCountries": sorted(countries_by_group.get(group.label, ())),
+                "seriesHit": len(rows),
+                "eventsHit": sum(r["eventsHit"] for r in rows),
                 "verdicts": dict(sorted(counts.items())),
             }
         )
@@ -1104,12 +1125,15 @@ def catalog_screen(
             "catalog screen hits with no verdict (add a SeriesSpec, RELATED,"
             f" ALTERNATE_VENUES or SCREEN_VERDICTS entry): {unaccounted}"
         )
+    for row in hits.values():
+        row["exampleEvents"] = "; ".join(row["exampleEvents"])
     return {
         "seriesSearched": len(catalog),
-        "multiCountrySeries": {t: len(e) for t, e in sorted(multi.items())},
-        "multiCountryEventsSearched": sum(len(e) for e in multi.values()),
+        "eventScreenCategories": list(contracts.EVENT_SCREEN_CATEGORIES),
+        "eventSeriesSearched": len(events),
+        "eventsSearched": sum(len(e) for e in events.values()),
         "groups": groups,
-        "hits": hits,
+        "hits": list(hits.values()),
     }
 
 

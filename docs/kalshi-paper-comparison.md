@@ -242,7 +242,8 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
    stored catalog, in every category, and the event titles of series whose
    events cover several countries under a title that names none (KXUE,
    KXGDPNOM and KXGOVBAL, found by reading the events of every Economics and
-   World series whose title names no country). Each hit must be a scored
+   World series whose title names no country; change 8 widened this to every
+   event of every Economics and World series). Each hit must be a scored
    series, an older ticker or second venue, a related series whose events are
    checked for each run's period, or a different statistic with a reviewed
    reason; a hit without one, or an unmatched target outside every group,
@@ -252,6 +253,21 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
    KXDATACENTCON and KXMANUCON as related series. The reference-period reader
    now requires 20xx years, so StatCan's table number 36-10-0434-01 is no
    longer read as a period.
+
+8. **After the review of change 7 (2026-10-20):** that review found series
+   the keywords missed. Among them were a monthly "Credit card debt" series
+   (CRED, KXCRED) behind the consumer-credit statement, a 12-month real
+   earnings series (KXWAGESBEAT), federal debt series, state permit and house
+   price series, and others. The keywords were widened for every group. The
+   screen now reads the events of every Economics and World series (5,688
+   events in 999 series), not only those of series whose events name several
+   countries, and it searches event tickers as well as titles. A series related
+   to another family is labelled so, rather than as checked for this group. A
+   related series is compared with a quarterly or annual run in that run's own
+   period. The new related series are KXWAGESBEAT, KXAHEG, KXHEALTHCOST,
+   CRED, KXCRED, KXTRUFPDEBT, KXDEBTLEVEL, the KXDEBTGROWTH series,
+   KXDEBTSHRINK and KXNDEBTSHRINK. Every other new hit carries a reviewed
+   reason. No score changed.
 
 ## Data provenance
 
@@ -265,7 +281,8 @@ responses.
 uv run python scripts/kalshi_paper_comparison.py \
   --out ~/reviews/thesis-vs-kalshi-2026-10/results \
   --cache ~/reviews/thesis-vs-kalshi-2026-10/fetch \
-  --as-of 2026-10-19T23:00:00Z
+  --ref a179451fbddb3babaa26d1405f6dbff3d76bd559 \
+  --as-of 2026-10-20T02:04:11Z
 ```
 
 Add `--offline` to rerun from the stored responses only, and `--ref <commit>` to

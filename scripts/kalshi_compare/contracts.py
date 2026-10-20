@@ -341,8 +341,22 @@ SPECS: tuple[SeriesSpec, ...] = (
 # Thesis families for which the Kalshi catalog has a related series that does
 # not give a scorable match. The pipeline checks each related series' events
 # for the run's period and records what it found; a "same statistic" series
-# that lists the period stops the run, since it would need a SeriesSpec.
+# that lists the period stops the run, since it would need a SeriesSpec. Series
+# that share a note (older tickers) are named together in it.
 SAME = "same statistic"
+_REAL_WAGES = "KXREALWAGES and REALWAGES are on custom-period real wage growth"
+_DEBT = (
+    "KXUSDEBTMON, KXTRUFPDEBT, KXDEBTLEVEL and the KXDEBTGROWTH and DEBTSHRINK"
+    " series are on the federal debt level or its change, not the monthly deficit"
+)
+_DEFICIT_BY_DATE = "KXDEFICIT and KXTDEFFICITBY are on the deficit's size by a date"
+_TRADE_ANNUAL = (
+    "KXTRADEDEFFICIT and KXTRADEDEFICIT are on custom-period or annual deficits"
+)
+_CREDIT_CARD = (
+    "CRED and KXCRED are on the total credit card debt level in a quarter, not"
+    " the G.19 annual growth rate"
+)
 RELATED: tuple[tuple[re.Pattern, tuple[tuple[str, str], ...]], ...] = tuple(
     (re.compile(pattern), pairs)
     for pattern, pairs in (
@@ -353,7 +367,9 @@ RELATED: tuple[tuple[re.Pattern, tuple[tuple[str, str], ...]], ...] = tuple(
                 (
                     "KXUSPPIYOY",
                     "KXUSPPIYOY is on the 12-month change, Thesis's target on the"
-                    " monthly change",
+                    " monthly change; converting one to the other needs the"
+                    " previous eleven months' index values as of the release,"
+                    " which this study does not model",
                 ),
             ),
         ),
@@ -363,8 +379,11 @@ RELATED: tuple[tuple[re.Pattern, tuple[tuple[str, str], ...]], ...] = tuple(
             (
                 (
                     "KXSHELTERCPI",
-                    "KXSHELTERCPI is on the index level, Thesis's target on the"
-                    " monthly change",
+                    "KXSHELTERCPI is on the seasonally adjusted index level (FRED"
+                    " CUSR0000SAH1, per its rule), Thesis's target on the monthly"
+                    " change; its strikes fall between the 0.1-point steps of the"
+                    " published change, so scoring it would need an assumption"
+                    " about values within a step",
                 ),
                 ("KXCPISHELTER", SAME),
                 ("CPISHELTER", SAME),
@@ -401,39 +420,45 @@ RELATED: tuple[tuple[re.Pattern, tuple[tuple[str, str], ...]], ...] = tuple(
         ),
         (
             r"^bls\.real_earnings\.avg_hourly_mom",
-            tuple(
+            (
+                ("KXREALWAGES", _REAL_WAGES),
+                ("REALWAGES", _REAL_WAGES),
                 (
-                    series,
-                    "KXREALWAGES and REALWAGES are on custom-period real wage growth",
-                )
-                for series in ("KXREALWAGES", "REALWAGES")
-            )
-            + (("KXAHEMOM", "KXAHEMOM is on nominal hourly earnings"),),
+                    "KXWAGESBEAT",
+                    "KXWAGESBEAT is on the 12-month change in real average hourly"
+                    " earnings for December",
+                ),
+                ("KXAHEMOM", "KXAHEMOM is on nominal hourly earnings"),
+                (
+                    "KXAHEG",
+                    "KXAHEG is on nominal wage growth above a threshold in any"
+                    " month through July 2027",
+                ),
+            ),
         ),
         (
             r"^treasury\.mts\.monthly_deficit",
             (
-                (
-                    "KXDEFICIT",
-                    "KXDEFICIT and KXTDEFFICITBY are on the deficit's size by a date",
-                ),
-                (
-                    "KXTDEFFICITBY",
-                    "KXDEFICIT and KXTDEFFICITBY are on the deficit's size by a date",
-                ),
-                ("KXUSDEBTMON", "KXUSDEBTMON is on the debt level"),
+                ("KXDEFICIT", _DEFICIT_BY_DATE),
+                ("KXTDEFFICITBY", _DEFICIT_BY_DATE),
+            )
+            + tuple(
+                (series, _DEBT)
+                for series in (
+                    "KXUSDEBTMON",
+                    "KXTRUFPDEBT",
+                    "KXDEBTLEVEL",
+                    "KXDEBTGROWTH",
+                    "KXDEBTGROWTH25",
+                    "KXDEBTGROWTH26",
+                    "KXDEBTSHRINK",
+                    "KXNDEBTSHRINK",
+                )
             ),
         ),
         (
             r"^bea\.trade\.goods_services_deficit",
-            tuple(
-                (
-                    series,
-                    "KXTRADEDEFFICIT and KXTRADEDEFICIT are on custom-period or"
-                    " annual deficits",
-                )
-                for series in ("KXTRADEDEFFICIT", "KXTRADEDEFICIT")
-            ),
+            (("KXTRADEDEFFICIT", _TRADE_ANNUAL), ("KXTRADEDEFICIT", _TRADE_ANNUAL)),
         ),
         (
             r"^census\.construction_spending\.total",
@@ -458,6 +483,20 @@ RELATED: tuple[tuple[re.Pattern, tuple[tuple[str, str], ...]], ...] = tuple(
                     "KXNFPROD is on year-over-year growth in any quarter of a year",
                 ),
             ),
+        ),
+        (
+            r"^bls\.eci\.",
+            (
+                (
+                    "KXHEALTHCOST",
+                    "KXHEALTHCOST is on the 12-month change in private employers'"
+                    " health-benefit costs, one component",
+                ),
+            ),
+        ),
+        (
+            r"^fed\.g19\.consumer_credit_revolving",
+            (("CRED", _CREDIT_CARD), ("KXCRED", _CREDIT_CARD)),
         ),
         (
             r"^eurostat\.une_rt_m\.unemployment_rate\.belgium",
@@ -513,17 +552,18 @@ def _ci(pattern: str) -> str:
 class ScreenGroup:
     label: str
     families: re.Pattern  # Thesis data point ids this group covers
-    keywords: re.Pattern  # searched in Kalshi ticker + title text
+    keywords: re.Pattern  # searched in Kalshi ticker, title and event text
 
 
-# The catalog screen (plan change 7). Every in-scope Thesis run with no
+# The catalog screen (plan changes 7 and 8). Every in-scope Thesis run with no
 # scorable Kalshi event belongs to a group here, and each group names the
 # words a Kalshi series on the same statistic would use. The pipeline searches
-# every series in the catalog (ticker and title) and, for series whose events
-# cover several countries, every event title. Each hit must be a matched,
-# alternate or related series, or carry a reviewed reason in SCREEN_VERDICTS;
-# an unaccounted hit or an uncovered run stops the run. Keywords are broad on
-# purpose: a false hit costs one reviewed line, a missed series costs a pair.
+# every series in the catalog (ticker and title) and every event (ticker,
+# title and subtitle) of every Economics and World series. Each hit must be a
+# matched, alternate or related series, or carry a reviewed reason in
+# SCREEN_VERDICTS; an unaccounted hit or an uncovered run stops the run.
+# Keywords are broad on purpose: a false hit costs one reviewed line, a missed
+# series costs a pair.
 CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
     ScreenGroup(label, re.compile(families), re.compile(keywords))
     for label, families, keywords in (
@@ -533,7 +573,7 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             r"|personal_current_taxes|ita\.personal_transfer_payments)",
             _ci(
                 r"personal income|disposable income|social benefit|transfer payment"
-                r"|personal (current )?tax"
+                r"|personal (current )?tax|government benefit"
             ),
         ),
         (
@@ -541,8 +581,10 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             r"^bea\.(private_nonresidential|research_and_development)_fixed_investment",
             _ci(
                 r"fixed investment|business investment|nonresidential"
-                r"|research and development"
-            ),
+                r"|research and development|capital expenditure|\bcapex\b"
+                r"|business spending"
+            )
+            + r"|\bR&D\b",
         ),
         (
             "PCE price index",
@@ -553,37 +595,47 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             "trade balance",
             r"^(bea|ons)\.trade\.",
             _ci(
-                r"trade deficit|trade balance|balance of trade|trade gap"
-                r"|goods and services"
+                r"trade (deficit|balance|gap|surplus)|balance of trade"
+                r"|goods and services|current account"
             ),
         ),
         (
             "job gains",
             r"^bls\.bed\.",
-            _ci(r"job gains|job losses|business employment dynamics"),
+            _ci(
+                r"job (gains|losses|creation|destruction)|gross job"
+                r"|business employment dynamics"
+            ),
         ),
         (
             "health care employment",
             r"^bls\.ces\.home_health",
-            _ci(r"home health|health care (employment|jobs)"),
+            _ci(r"home health|health ?care (employment|jobs|workers)"),
         ),
         (
             "CPI components",
             r"^bls\.cpi\.(owners_equivalent|rent_primary|services_less|shelter)",
-            _ci(r"shelter|owners.? equivalent|rent of primary")
+            _ci(
+                r"shelter|owners.? equivalent|rent of primary|housing inflation"
+                r"|rent (inflation|index|prices?|growth)"
+            )
             + r"|\bOER\b|\bCPI\b.*"
-            + _ci(r"\brent\b|services"),
+            + _ci(r"\brent\b|services|housing"),
         ),
         (
             "occupation and telework",
             r"^bls\.cps\.(employed_people_by_occupation|telework)",
-            _ci(r"occupation|telework|remote work|work from home"),
+            _ci(r"occupation|telework|remote work|work from home|hybrid work"),
         ),
         ("U-6", r"^bls\.cps\.u6", r"\bU-?6\b|" + _ci(r"underemploy")),
         (
             "employment cost",
             r"^bls\.(eci|ecec)\.",
-            _ci(r"employment cost|compensation cost") + r"|\bECI\b",
+            _ci(
+                r"employment cost|compensation cost|labor cost"
+                r"|(health|benefit)\w* (insurance )?costs?|wages and salaries"
+            )
+            + r"|\bECI\b",
         ),
         (
             "import and export prices",
@@ -593,81 +645,103 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
         (
             "JOLTS hires and quits",
             r"^bls\.jolts\.(hires|quits)",
-            _ci(r"\bquits?\b|quit rate|\bhires rate|labor turnover|job openings")
+            _ci(
+                r"\bquits?\b|quit rate|\bhires\b|\bhiring rate|separations"
+                r"|labor turnover|job openings"
+            )
             + r"|\bJOLTS\b",
         ),
         (
             "productivity",
             r"^bls\.productivity\.",
-            _ci(r"productivity|unit labor cost"),
+            _ci(r"productivity|unit labor cost|output per hour"),
         ),
         (
             "QCEW",
             r"^bls\.qcew\.",
-            _ci(
-                r"aircraft manufactur|aerospace (employ|jobs)"
-                r"|quarterly census of employment"
-            )
-            + r"|\bQCEW\b",
+            _ci(r"aerospace|aircraft|quarterly census of employment") + r"|\bQCEW\b",
         ),
         (
             "real earnings",
             r"^bls\.real_earnings\.",
-            _ci(r"real wage|real earnings|hourly earnings"),
+            _ci(
+                r"real wage|real earnings|hourly earnings|wage growth|\bwages\b"
+                r"|paychecks?"
+            ),
         ),
         (
             "producer prices",
             r"^(bls\.wp\.|ons\.ppi\.)",
-            r"\bPPI\b|" + _ci(r"producer price"),
+            r"\bPPI\b|" + _ci(r"producer price|wholesale (price|inflation)"),
         ),
         (
             "Colorado",
             r"^(bls\.laus\.colorado|co\.)",
             _ci(
-                r"colorado.*(unemploy|employ|labor force|income tax|tax revenue"
-                r"|medicaid|permit)"
+                r"colorado.*(unemploy|employ|jobs|labor force|income tax|tax revenue"
+                r"|revenue|budget|medicaid|caseload|permit)"
             ),
         ),
         (
             "construction spending and output",
             r"^(census\.construction_spending|eurostat\.construction)",
-            _ci(r"construction (spending|outlays|output|production)"),
+            _ci(r"construction (spending|outlays|output|production|put in place)"),
         ),
         (
             "housing",
             r"^(census\.housing|abs\.building_approvals|hmrc\.property_transactions"
             r"|ons\.uk_hpi|ons\.pipr)",
             _ci(
-                r"housing (completion|start)|building (permit|approval)|dwelling"
-                r"|new home sales|new residential|property transaction|house price"
-                r"|home price|private rent|rental price"
-            ),
+                r"housing (completion|start|units|permits?|prices?)"
+                r"|(building|residential) (permit|approval)|dwelling"
+                r"|new home sales|existing home|home sales|new residential"
+                r"|property transaction|house price|home price|home value"
+                r"|private rent|rental price"
+            )
+            + r"|\bHPI\b",
         ),
         (
             "durable goods",
             r"^census\.m3\.",
-            _ci(r"durable goods|factory orders|capital goods|defense capital"),
+            _ci(
+                r"durable goods|factory orders|capital goods|defense capital"
+                r"|core capital|business equipment"
+            ),
         ),
-        ("poverty", r"^census\.spm\.", _ci(r"poverty")),
-        ("nursing homes", r"^cms\.", _ci(r"nursing|care compare")),
-        ("natural gas venting", r"^eia\.ng\.", _ci(r"vented|flared|flaring")),
+        ("poverty", r"^census\.spm\.", _ci(r"poverty") + r"|\bSPM\b"),
+        (
+            "nursing homes",
+            r"^cms\.",
+            _ci(r"nursing|care compare|care home|long-term care"),
+        ),
+        (
+            "natural gas venting",
+            r"^eia\.ng\.",
+            _ci(r"vented|venting|flared|flaring"),
+        ),
         (
             "industrial production",
             r"^(fed\.g17\.|ons\.production\.)",
             _ci(
                 r"industrial (production|output)|capacity utili"
-                r"|manufacturing (production|output)"
+                r"|manufacturing (production|output)|factory output"
+                r"|index of production"
             ),
         ),
         (
             "consumer credit",
             r"^fed\.g19\.",
-            _ci(r"consumer credit|revolving credit|nonrevolving"),
+            _ci(
+                r"consumer credit|revolving credit|nonrevolving"
+                r"|credit card (debt|balance)|household debt|consumer debt"
+                r"|(student|auto) loan (debt|balance)|student debt"
+            ),
         ),
         (
             "nutrition programs",
             r"^(fns\.wic|usda\.fns\.snap)",
-            r"\bWIC\b|\bSNAP\b|" + _ci(r"food stamp|nutrition assistance"),
+            r"\bWIC\b|\bSNAP\b|"
+            + _ci(r"snap benefit|food stamp|nutrition assistance|women, infants"),
         ),
         (
             "child tax credit",
@@ -677,30 +751,31 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
         (
             "SBA disaster loans",
             r"^sba\.disaster",
-            r"\bSBA\b|" + _ci(r"disaster loan|small business administration"),
+            r"\bSBA\b|"
+            + _ci(r"disaster (loan|assistance)|small business administration"),
         ),
         (
             "Social Security and SSI",
             r"^ssa\.",
-            r"\bSSI\b|"
-            + _ci(
-                r"supplemental security"
-                r"|social security (recipients|beneficiar|awards|claims)"
-                r"|retired.worker"
-            ),
+            r"\bSSI\b|\bCOLA\b|"
+            + _ci(r"supplemental security|social security|retired.worker"),
         ),
         (
             "federal and public-sector budget",
             r"^(treasury\.mts|ons\.pusf)",
             _ci(
-                r"deficit|treasury statement|federal budget"
-                r"|public sector (net )?borrowing|public finances"
+                r"deficit|treasury statement|federal budget|budget balance"
+                r"|public sector (net )?borrowing|public finances|public debt"
+                r"|debt (level|growth|outstanding)|national debt|total (us )?debt"
             ),
         ),
         (
             "federal awards",
             r"^usaspending\.",
-            _ci(r"obligation|prime award|federal contract|federal grant|usaspending"),
+            _ci(
+                r"obligation|prime award|federal contract|government contract"
+                r"|federal grant|federal spending|usaspending"
+            ),
         ),
         (
             "Conservation Reserve Program",
@@ -712,8 +787,8 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             "Australia",
             r"^abs\.",
             _ci(
-                r"australia.*(cpi|inflation|consumer price|employ|jobs?\b|building"
-                r"|dwelling|approval)"
+                r"australia.*(cpi|inflation|consumer price|price index|employ"
+                r"|jobs?\b|labour|labor|building|dwelling|approval|housing)"
             )
             + r"|\bABS\b",
         ),
@@ -721,27 +796,31 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             "Belgium",
             r"^(eurostat\.une_rt_m\.unemployment_rate\.belgium|nbb\.|statbel\.)",
             _ci(
-                r"belgi.*(cpi|inflation|unemploy|confidence|barometer|gdp"
-                r"|health index)|statbel"
+                r"belgi.*(cpi|inflation|unemploy|jobless|confidence|barometer|gdp"
+                r"|health index|growth)|statbel"
             ),
         ),
         (
             "Canada",
             r"^statcan\.",
             _ci(
-                r"canad.*(cpi|inflation|price|gdp|employment insurance|jobless"
-                r"|claims|unemploy|beneficiar|employ)|statcan|statistics canada"
+                r"canad.*(cpi|inflation|price|gdp|growth|recession"
+                r"|employment insurance|jobless|claims|unemploy|beneficiar|employ"
+                r"|labour|jobs)|statcan|statistics canada"
             ),
         ),
         (
             "euro area",
-            r"^eurostat\.(unemployment_rate\.euro_area|construction)",
-            _ci(r"(euro|\beu\b|european union).*(unemploy|construction)"),
+            r"^eurostat\.unemployment_rate\.euro_area",
+            _ci(
+                r"(euro|\beu\b|european union|europe).*(unemploy|jobless"
+                r"|construction)"
+            ),
         ),
         (
             "Japan",
             r"^statjp\.",
-            _ci(r"(tokyo|japan).*(cpi|inflation|consumer price)"),
+            _ci(r"(tokyo|japan).*(cpi|inflation|consumer price|prices)"),
         ),
         (
             "United Kingdom",
@@ -765,8 +844,8 @@ def screen_group(data_point_id: str) -> ScreenGroup | None:
 
 
 # Reviewed reasons for screen hits that are not on a screened statistic, keyed
-# by series ticker (exact) or, for events of multi-country series, by event
-# ticker prefix (keys containing "-"; the longest matching prefix wins).
+# by series ticker (exact) or, for events, by event ticker prefix (keys
+# containing "-"; the longest matching prefix wins).
 SCREEN_VERDICTS: dict[str, str] = {
     # trade
     "KXCHTRADEBAL": "China's trade balance",
@@ -777,17 +856,21 @@ SCREEN_VERDICTS: dict[str, str] = {
     "KXTRDDEFCN": "the US goods deficit with China, one bilateral component",
     "TRDDEFCN": "the US goods deficit with China, one bilateral component",
     "KXTRUMPTRADEGAP": "whether the US-China trade gap closes, a one-off question",
-    "KXTDEFICITHALF": "whether the trade deficit halves during a presidential term",
+    "KXTDEFICITHALF": (
+        "whether the trade deficit falls below a level before February 2029"
+        " (title 'U.S. BOP'; its one event asks whether the deficit halves)"
+    ),
     # labor
     "KXAIJOBLOSS": "announced AI-linked layoffs, not BED gross job gains",
     "KXOSHADIRECTOR": "a nomination, not a statistic",
-    "KXAHEG": (
-        "one event on nominal wage growth above a threshold in any month through"
-        " July 2027"
-    ),
     "KXTFP": "total factor productivity (one 2025 event), not labor productivity",
+    "KXWAAEROEMP": (
+        "Washington's annual-average aerospace employment, not national QCEW"
+        " aircraft-manufacturing establishments"
+    ),
     # prices
     "KXRTSHELTER": "a film's review score",
+    "KXTRUFHOUCPI": "Truflation's daily housing index, not BLS CPI",
     "KXPPIVSCPI": "whether PPI inflation exceeds CPI inflation",
     "KXPPICPI": "whether PPI inflation exceeds CPI inflation",
     "KXLUMBERPPIHIGH": "the softwood lumber PPI",
@@ -800,9 +883,20 @@ SCREEN_VERDICTS: dict[str, str] = {
     # housing
     "KXEXUSHOME": "the US median existing-home price",
     "KXUSHOME": "the US median new-home price",
+    "KXEHSALES": "US existing-home sales",
+    "KXHPI": "the US FHFA house price index (2021 events)",
+    "HPI": "the US FHFA house price index (no events)",
+    "KXHOMEUS": "Zillow's US home price (monthly)",
+    "HOMEUS": "Zillow's US home price (monthly)",
+    "KXHOMEUSY": "Zillow's US home price (annual)",
+    "HOMEUSY": "Zillow's US home price (annual)",
     "KXCANHOME": "Canada's average home price",
     "KXCANHOUSTART": "Canada's annual housing starts",
     "KXCOBUILDPERMITS": "Colorado's annual building permits",
+    "KXCABUILDPERMITS": "California's annual building permits",
+    "KXCTMFPERMITS": "Connecticut's annual multifamily building permits",
+    "KXBOZPERMITS": "Bozeman's annual housing permits",
+    "KXVTPERMITS": "Vermont's annual housing permits",
     "KXILHPIYOY": "a state house price index (Illinois)",
     "KXCOHPIYOY": "a state house price index (Colorado)",
     "KXCAHPIYOY": "a state house price index (California)",
@@ -816,6 +910,7 @@ SCREEN_VERDICTS: dict[str, str] = {
     "KXCALHOME": "a Canadian city's home price (Calgary)",
     # output and budgets
     "KXCHIPYOY": "China's industrial production",
+    "KXCANRECESSION": "whether Canada has two negative GDP quarters",
     "KXUKGDPMOM": "UK monthly GDP, not the index of production",
     "KXUKUNRATE": (
         "the UK unemployment rate; Thesis's UK labor targets are the claimant"
@@ -833,8 +928,15 @@ SCREEN_VERDICTS: dict[str, str] = {
     # programs and policy questions
     "KXSNAPRESTRICT": "a bill on what SNAP benefits can buy, not participation",
     "KXSNAPCUTS": "legislated SNAP cuts, not participation",
+    "KXSNAPDELAY": (
+        "whether November 2025 SNAP benefits were delayed, not participation"
+    ),
     "KXCOMPANYACTIONSNAP": "Snap Inc., the company",
     "KXEARNINGSMENTIONSNAP": "Snap Inc., the company",
+    "KXSSCOLA": (
+        "the Social Security cost-of-living adjustment, not SSI recipients or"
+        " retired-worker awards"
+    ),
     "KXCTC": "whether the child tax credit is expanded, not a count of claims",
     "CTC": "whether the child tax credit is expanded, not a count of claims",
     "KXCTCS": "whether the child tax credit is expanded, not a count of claims",
@@ -844,6 +946,51 @@ SCREEN_VERDICTS: dict[str, str] = {
     "KXUKLABOURDEPUTY": "a Labour Party deputy leadership election",
     "KXCAGOAT": "a California wage rule question",
     "KXSECVA": "a cabinet nomination",
+    # hits from the wider keywords and the event screen (r4 review)
+    "KXMEDIANRENTCHI": "a city's annual rent growth (Chicago)",
+    "KXMEDIANRENTHOU": "a city's annual rent growth (Houston)",
+    "KXMEDIANRENTLA": "a city's annual rent growth (Los Angeles)",
+    "KXMEDIANRENTMIA": "a city's annual rent growth (Miami)",
+    "KXRENTNYCM": "New York City's monthly rent increase",
+    "RENTNYCM": "New York City's monthly rent increase",
+    "KXRENTNYCY": "New York City's yearly rent increase",
+    "RENTNYCY": "New York City's yearly rent increase",
+    "KXSFRENTSY": "San Francisco's yearly rent growth",
+    "SFRENTSY": "San Francisco's yearly rent growth",
+    "KXNYCSTAT": (
+        "New York City administrative statistics (shelter stays, housing permits)"
+    ),
+    "KXOPENAICEOCHANGE": "a company event",
+    "OPENAICEOCHANGE": "a company event",
+    "KXCHINABOEING": "a Chinese aircraft order, a company event",
+    "KXSOCIALSECURITYDEPLETE": "Social Security trust fund depletion",
+    "KXSSTAX": "taxation of Social Security benefits, a policy question",
+    "KXSTUDENTDEBT": (
+        "the student loan debt level at a year's end, not the G.19 annual growth"
+        " rate"
+    ),
+    "KXGOVBAL": (
+        "annual general government budget balances by country (2026), not a"
+        " monthly deficit or monthly borrowing"
+    ),
+    "KXAAMMCAPEX": "four companies' combined capital expenditures",
+    "KXMASCIENRDEMP": "Massachusetts scientific R&D employment",
+    "KXBOSHOMEVAL": "a metro's typical home value (Boston)",
+    "KXDCHOMEVAL": "a metro's typical home value (Washington DC)",
+    "KXDENHOMEVAL": "a metro's typical home value (Denver)",
+    "KXHOUHOMEVAL": "a metro's typical home value (Houston)",
+    "KXMIAHOMEVAL": "a metro's typical home value (Miami)",
+    "KXPHXHOMEVAL": "a metro's typical home value (Phoenix)",
+    "KXSDHOMEVAL": "a metro's typical home value (San Diego)",
+    "KXSEAHOMEVAL": "a metro's typical home value (Seattle)",
+    "KXSFHOMEVAL": "a metro's typical home value (San Francisco)",
+    "KXUSHOMEVAL": "the US metro typical home value",
+    "KXEHSHARE": "US existing-home sales",
+    "KXBRAZILJOBS": "Brazil's formal job creation",
+    "KXCHICKENWINGM": "a commodity's wholesale price (chicken wings)",
+    "KXCOWAGE": "Colombia's real wage growth",
+    "KXSDEBT": "student debt forgiveness by law or order, a policy question",
+    "SDEBT": "student debt forgiveness by law or order, a policy question",
 }
 
 
@@ -854,49 +1001,10 @@ def screen_verdict_reason(ticker: str, *, event: bool = False) -> str | None:
     return SCREEN_VERDICTS[max(keys, key=len)] if keys else None
 
 
-# Country words for finding Kalshi series whose events cover several
-# countries under one generic title (KXUE is one); their event titles are
-# screened as well as the series title.
-COUNTRY_WORDS: dict[str, str] = {
-    r"australia": "AU",
-    r"belgi": "BE",
-    r"canad": "CA",
-    r"china|chinese": "CN",
-    r"euro area|eurozone": "EA",
-    r"france|french": "FR",
-    r"germany|german": "DE",
-    r"italy|italian": "IT",
-    r"japan": "JP",
-    r"mexico": "MX",
-    r"brazil": "BR",
-    r"russia": "RU",
-    r"india\b": "IN",
-    r"south africa": "ZA",
-    r"united kingdom|\buk\b|britain": "GB",
-    r"united states|\bu\.?s\.?\b": "US",
-    r"spain": "ES",
-    r"korea": "KR",
-    r"turkey": "TR",
-    r"argentina": "AR",
-    r"switzerland": "CH",
-    r"sweden": "SE",
-    r"norway": "NO",
-    r"new zealand": "NZ",
-    r"singapore": "SG",
-    r"netherlands": "NL",
-    r"poland": "PL",
-    r"israel": "IL",
-    r"saudi": "SA",
-    r"indonesia": "ID",
-}
-COUNTRY_PATTERNS = tuple(
-    (re.compile(pattern, re.I), code) for pattern, code in COUNTRY_WORDS.items()
-)
-MULTI_COUNTRY_CATEGORIES = ("Economics", "World")
-
-
-def countries_named(text: str) -> set[str]:
-    return {code for pattern, code in COUNTRY_PATTERNS if pattern.search(text)}
+# Categories whose every event is read and screened, not only the series
+# title: a series such as KXUE ("Monthly Unemployment") names its countries
+# only in its event titles.
+EVENT_SCREEN_CATEGORIES = ("Economics", "World")
 
 
 PERIOD_TOKENS = (
@@ -912,8 +1020,10 @@ def period_of(data_point_id: str) -> str | None:
     """Best-effort reference period of a Thesis data point, for the inventory.
 
     Years must be 20xx, so a table number such as StatCan's 36-10-0434-01 is
-    never read as a period. The first token wins: Thesis ids put the period
-    before suffixes such as a source-recovery date.
+    never read as a period. Token kinds are tried in the order of
+    PERIOD_TOKENS (week, month name, year-month, quarter, year), and within a
+    kind the first in the id wins: Thesis ids put the period before suffixes
+    such as a source-recovery date.
     """
     for regex, kind in PERIOD_TOKENS:
         for found in regex.finditer(data_point_id):
@@ -977,8 +1087,28 @@ WEEK_RANGE = re.compile(
 MONTH_YEAR = re.compile(rf"\b(?P<month>{MONTH_WORD})\.?\s+(?P<year>20\d{{2}})\b", re.I)
 
 
+QUARTER_TEXT = re.compile(
+    r"\bQ(?P<q1>[1-4])\s*,?\s*(?P<y1>20\d{2})\b"
+    r"|\b(?P<y2>20\d{2})\s*-?\s*Q(?P<q2>[1-4])\b"
+    r"|\b(?P<word>first|second|third|fourth) quarter(?: of)?,?\s+(?P<y3>20\d{2})\b",
+    re.I,
+)
+QUARTER_WORDS = {"first": 1, "second": 2, "third": 3, "fourth": 4}
+YEAR_TEXT = re.compile(r"(?<![\d.])(20\d{2})(?![\d.])")
+
+
 def text_periods(text: str, cadence: str) -> set[str]:
     text = normalize_text(text)
+    if cadence == "quarterly":
+        periods = set()
+        for m in QUARTER_TEXT.finditer(text):
+            if m["word"]:
+                periods.add(f"{m['y3']}-Q{QUARTER_WORDS[m['word'].lower()]}")
+            else:
+                periods.add(f"{m['y1'] or m['y2']}-Q{m['q1'] or m['q2']}")
+        return periods
+    if cadence == "annual":
+        return set(YEAR_TEXT.findall(text))
     if cadence == "weekly":
         found = list(WEEK_ENDING.finditer(text)) or list(WEEK_RANGE.finditer(text))
         return {
@@ -989,6 +1119,17 @@ def text_periods(text: str, cadence: str) -> set[str]:
         f"{int(m['year']):04d}-{MONTHS[m['month'].lower()]:02d}"
         for m in MONTH_YEAR.finditer(text)
     }
+
+
+def period_cadence(period: str) -> str:
+    """The cadence a period_of() value is written in."""
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", period):
+        return "weekly"
+    if re.fullmatch(r"\d{4}-Q[1-4]", period):
+        return "quarterly"
+    if re.fullmatch(r"\d{4}", period):
+        return "annual"
+    return "monthly"
 
 
 def event_period(
