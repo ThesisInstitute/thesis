@@ -346,8 +346,9 @@ SPECS: tuple[SeriesSpec, ...] = (
 SAME = "same statistic"
 _REAL_WAGES = "KXREALWAGES and REALWAGES are on custom-period real wage growth"
 _DEBT = (
-    "KXUSDEBTMON, KXTRUFPDEBT, KXDEBTLEVEL and the KXDEBTGROWTH and DEBTSHRINK"
-    " series are on the federal debt level or its change, not the monthly deficit"
+    "KXUSDEBTMON, KXTRUFPDEBT, KXDEBTLEVEL, KXUSDEBT and the KXDEBTGROWTH and"
+    " DEBTSHRINK series are on the federal debt level or its change, not the"
+    " monthly deficit"
 )
 _DEFICIT_BY_DATE = "KXDEFICIT and KXTDEFFICITBY are on the deficit's size by a date"
 _TRADE_ANNUAL = (
@@ -367,9 +368,10 @@ RELATED: tuple[tuple[re.Pattern, tuple[tuple[str, str], ...]], ...] = tuple(
                 (
                     "KXUSPPIYOY",
                     "KXUSPPIYOY is on the 12-month change, Thesis's target on the"
-                    " monthly change; converting one to the other needs the"
-                    " previous eleven months' index values as of the release,"
-                    " which this study does not model",
+                    " monthly change; converting one to the other needs the index"
+                    " levels twelve months and one month before, as published at"
+                    " the release and on the same seasonal basis, which this study"
+                    " does not model",
                 ),
             ),
         ),
@@ -453,6 +455,7 @@ RELATED: tuple[tuple[re.Pattern, tuple[tuple[str, str], ...]], ...] = tuple(
                     "KXDEBTGROWTH26",
                     "KXDEBTSHRINK",
                     "KXNDEBTSHRINK",
+                    "KXUSDEBT",
                 )
             ),
         ),
@@ -573,7 +576,8 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             r"|personal_current_taxes|ita\.personal_transfer_payments)",
             _ci(
                 r"personal income|disposable income|social benefit|transfer payment"
-                r"|personal (current )?tax|government benefit"
+                r"|personal (current )?tax|government benefit|personal spending"
+                r"|personal outlays|consumer spending"
             ),
         ),
         (
@@ -604,8 +608,9 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             r"^bls\.bed\.",
             _ci(
                 r"job (gains|losses|creation|destruction)|gross job"
-                r"|business employment dynamics"
-            ),
+                r"|business employment dynamics|employment change|private payrolls"
+            )
+            + r"|\bADP\b",
         ),
         (
             "health care employment",
@@ -617,7 +622,7 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             r"^bls\.cpi\.(owners_equivalent|rent_primary|services_less|shelter)",
             _ci(
                 r"shelter|owners.? equivalent|rent of primary|housing inflation"
-                r"|rent (inflation|index|prices?|growth)"
+                r"|rent (inflation|index|prices?|growth)|cpi-u index"
             )
             + r"|\bOER\b|\bCPI\b.*"
             + _ci(r"\brent\b|services|housing"),
@@ -640,7 +645,7 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
         (
             "import and export prices",
             r"^bls\.(export_prices|import_price_index)\.",
-            _ci(r"import price|export price"),
+            _ci(r"import price|export price|\bimports\b|\bexports\b"),
         ),
         (
             "JOLTS hires and quits",
@@ -695,6 +700,7 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
                 r"housing (completion|start|units|permits?|prices?)"
                 r"|(building|residential) (permit|approval)|dwelling"
                 r"|new home sales|existing home|home sales|new residential"
+                r"|housing inventory|home inventory|active listings"
                 r"|property transaction|house price|home price|home value"
                 r"|private rent|rental price"
             )
@@ -725,7 +731,7 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             _ci(
                 r"industrial (production|output)|capacity utili"
                 r"|manufacturing (production|output)|factory output"
-                r"|index of production"
+                r"|index of production|semiconductor production"
             ),
         ),
         (
@@ -734,6 +740,7 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             _ci(
                 r"consumer credit|revolving credit|nonrevolving"
                 r"|credit card (debt|balance)|household debt|consumer debt"
+                r"|credit.card (delinquen|charge.off|default)"
                 r"|(student|auto) loan (debt|balance)|student debt"
             ),
         ),
@@ -766,7 +773,8 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             _ci(
                 r"deficit|treasury statement|federal budget|budget balance"
                 r"|public sector (net )?borrowing|public finances|public debt"
-                r"|debt (level|growth|outstanding)|national debt|total (us )?debt"
+                r"|debt (level|growth|outstanding|increase|to gdp)|national debt"
+                r"|total (us )?debt|government debt"
             ),
         ),
         (
@@ -804,7 +812,7 @@ CATALOG_SCREEN: tuple[ScreenGroup, ...] = tuple(
             "Canada",
             r"^statcan\.",
             _ci(
-                r"canad.*(cpi|inflation|price|gdp|growth|recession"
+                r"canad.*(cpi|inflation|price|gdp|growth|recession|pmi"
                 r"|employment insurance|jobless|claims|unemploy|beneficiar|employ"
                 r"|labour|jobs)|statcan|statistics canada"
             ),
@@ -988,7 +996,31 @@ SCREEN_VERDICTS: dict[str, str] = {
     "KXEHSHARE": "US existing-home sales",
     "KXBRAZILJOBS": "Brazil's formal job creation",
     "KXCHICKENWINGM": "a commodity's wholesale price (chicken wings)",
-    "KXCOWAGE": "Colombia's real wage growth",
+    "KXCOWAGE": "Colombia's minimum-wage increase minus inflation",
+    # adjacent series recorded after the r5 sweeps
+    "KXCPINDEX": "the headline CPI-U index level, not a component's change",
+    "KXCAIVEYPMI": "a purchasing managers' survey index, not GDP by industry",
+    "CREDITCDEF": "whether credit card defaults rise, not G.19 growth",
+    "KXCREDITCDEF": "whether credit card defaults rise, not G.19 growth",
+    "KXCCCHGOFF": "the credit-card charge-off rate, not G.19 growth",
+    "KXCCDELINQ": "the credit-card delinquency rate, not G.19 growth",
+    "KXUSHOMEINVENT": "US active housing listings, not completions",
+    "KXCHEXPORTS": "China's export growth, not US export prices",
+    "KXCHIMPORTS": "China's import growth, not US import prices",
+    "KXSKEXPYOY": "South Korea's export growth, not US export prices",
+    "KXCNIMPORT": "US goods imports from China (volume), not import prices",
+    "KXEIACRUDEXPM": "US crude oil export volumes, not export prices",
+    "KXHELIUMIMP": "US helium import volumes, not import prices",
+    "KXIRANIMPORTS": "US imports from Iran (volume), not import prices",
+    "KXMEXCUBOIL": "whether Mexico resumes oil exports to Cuba",
+    "KXRUCRUDEX": "Russian crude export volumes",
+    "KXTARIFFSGLOBAL": "a tariff policy question",
+    "KXSEMIPRODH": "annual US semiconductor production, one industry",
+    "SEMIPRODH": "annual US semiconductor production, one industry",
+    "KXADP": "ADP's private employment change, not BLS gross job gains",
+    "KXUSPSPEND": (
+        "personal spending growth, not income, benefits, transfers or taxes"
+    ),
     "KXSDEBT": "student debt forgiveness by law or order, a policy question",
     "SDEBT": "student debt forgiveness by law or order, a policy question",
 }
@@ -1087,6 +1119,62 @@ WEEK_RANGE = re.compile(
 MONTH_YEAR = re.compile(rf"\b(?P<month>{MONTH_WORD})\.?\s+(?P<year>20\d{{2}})\b", re.I)
 
 
+# Wider readings for the unmatched-run evidence only (text_periods with
+# spans=True); the scored matching keeps the strict readings above.
+DATE_TEXT = re.compile(
+    rf"\b(?P<month>{MONTH_WORD})\.?\s+\d{{1,2}}(?:st|nd|rd|th)?,?\s+(?P<year>20\d{{2}})\b",
+    re.I,
+)
+MONTH_RANGE = re.compile(
+    rf"\b(?P<m1>{MONTH_WORD})\.?\s+(?P<y1>20\d{{2}})\s*(?:through|thru|to|until|-|\u2013)"
+    rf"\s*(?P<m2>{MONTH_WORD})\.?\s+(?P<y2>20\d{{2}})\b",
+    re.I,
+)
+# Capitalized month names only, so the verb "may" is not read as May.
+MONTH_ALONE = re.compile(
+    r"\b(?P<month>January|February|March|April|May|June|July|August|September"
+    r"|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\b"
+)
+ANY_QUARTER = re.compile(
+    r"\bany (?:(?P<y1>20\d{2}) quarter|quarter (?:of|in) (?P<y2>20\d{2}))\b", re.I
+)
+
+
+SPAN_END = re.compile(
+    r"\b(?P<word>before|by|through|thru|until)\s+(?:the end of\s+)?(?P<year>20\d{2})\b",
+    re.I,
+)
+
+
+def could_cover_year(text: str, year: int | None) -> bool:
+    """Whether an event whose period cannot be read might cover ``year``.
+
+    True if the text names no year, names ``year``, or names a span that
+    reaches it ("before 2029" reaches 2028, "through 2027" reaches 2027).
+    """
+    if year is None:
+        return True
+    text = normalize_text(text)
+    spans = list(SPAN_END.finditer(text))
+    # Years named outside a span phrase ("before 2026" does not name 2026).
+    years = {int(y) for y in YEAR_TEXT.findall(SPAN_END.sub(" ", text))}
+    if (not years and not spans) or year in years:
+        return True
+    for m in spans:
+        end = int(m["year"]) - (1 if m["word"].lower() == "before" else 0)
+        if end >= year:
+            return True
+    return False
+
+
+def _months_between(y1: int, m1: int, y2: int, m2: int) -> set[str]:
+    months, year, month = set(), y1, m1
+    while (year, month) <= (y2, m2) and len(months) < 60:
+        months.add(f"{year:04d}-{month:02d}")
+        year, month = (year + 1, 1) if month == 12 else (year, month + 1)
+    return months
+
+
 QUARTER_TEXT = re.compile(
     r"\bQ(?P<q1>[1-4])\s*,?\s*(?P<y1>20\d{2})\b"
     r"|\b(?P<y2>20\d{2})\s*-?\s*Q(?P<q2>[1-4])\b"
@@ -1097,7 +1185,14 @@ QUARTER_WORDS = {"first": 1, "second": 2, "third": 3, "fourth": 4}
 YEAR_TEXT = re.compile(r"(?<![\d.])(20\d{2})(?![\d.])")
 
 
-def text_periods(text: str, cadence: str) -> set[str]:
+def text_periods(text: str, cadence: str, *, spans: bool = False) -> set[str]:
+    """Reference periods a Kalshi title names, in ``cadence``.
+
+    With ``spans`` (used only for the unmatched-run evidence, never for
+    scoring), it also reads day dates ("July 31, 2026"), month ranges
+    ("August 2026 through July 2027"), "any 2026 quarter", and a lone month
+    word with a lone year ("in October" / "UE 2026").
+    """
     text = normalize_text(text)
     if cadence == "quarterly":
         periods = set()
@@ -1106,6 +1201,26 @@ def text_periods(text: str, cadence: str) -> set[str]:
                 periods.add(f"{m['y3']}-Q{QUARTER_WORDS[m['word'].lower()]}")
             else:
                 periods.add(f"{m['y1'] or m['y2']}-Q{m['q1'] or m['q2']}")
+        if spans:
+            for m in ANY_QUARTER.finditer(text):
+                periods |= {f"{m['y1'] or m['y2']}-Q{q}" for q in range(1, 5)}
+        return periods
+    if cadence == "monthly" and spans:
+        periods = text_periods(text, "monthly")
+        for m in DATE_TEXT.finditer(text):
+            periods.add(f"{int(m['year']):04d}-{MONTHS[m['month'].lower()]:02d}")
+        for m in MONTH_RANGE.finditer(text):
+            periods |= _months_between(
+                int(m["y1"]),
+                MONTHS[m["m1"].lower()],
+                int(m["y2"]),
+                MONTHS[m["m2"].lower()],
+            )
+        if not periods:
+            months = {MONTHS[m["month"].lower()] for m in MONTH_ALONE.finditer(text)}
+            years = set(YEAR_TEXT.findall(text))
+            if len(months) == 1 and len(years) == 1:
+                periods.add(f"{years.pop()}-{months.pop():02d}")
         return periods
     if cadence == "annual":
         return set(YEAR_TEXT.findall(text))

@@ -899,17 +899,28 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
     reason says what Kalshi lists rather than asserting it. Every run names
     the catalog screen group whose search backs its reason.
     """
-    events_by_series: dict[tuple[str, str], dict[str, list[str]]] = {}
+    events_by_series: dict[tuple[str, str], tuple[dict, list]] = {}
+    unit = {"monthly": "month", "quarterly": "quarter", "annual": "year"}
 
-    def periods_for(series: str, cadence: str) -> dict[str, list[str]]:
-        """Event tickers by the period each names, in the run's own cadence."""
+    def periods_for(series: str, cadence: str) -> tuple[dict, list]:
+        """Event tickers by the period each names, and the events naming none.
+
+        Periods are read with spans, so a range ("August 2026 through July
+        2027"), "any 2026 quarter" or a day date counts for every period it
+        covers. Events still naming no period are returned with the years
+        their text names, so absence is never claimed for them.
+        """
         if (series, cadence) not in events_by_series:
             by_period: dict[str, list[str]] = {}
+            unread = []
             for event in kalshi.series_events(cache, series):
                 text = f"{event.get('title', '')} {event.get('sub_title', '')}"
-                for period in contracts.text_periods(text, cadence):
-                    by_period.setdefault(period, []).append(event["event_ticker"])
-            events_by_series[(series, cadence)] = by_period
+                periods = contracts.text_periods(text, cadence, spans=True)
+                for found in periods:
+                    by_period.setdefault(found, []).append(event["event_ticker"])
+                if not periods:
+                    unread.append((event["event_ticker"], " ".join(text.split())))
+            events_by_series[(series, cadence)] = (by_period, unread)
         return events_by_series[(series, cadence)]
 
     rows = []
@@ -921,17 +932,30 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
             reason = "no Kalshi series for this statistic found in the catalog screen"
             detail = ""
         else:
-            found_notes, other_notes, listed = [], [], []
+            found_notes, other_notes, listed, open_series = [], [], [], []
             cadence = contracts.period_cadence(period) if period else "monthly"
+            run_year = int(period[:4]) if period else None
             for series, note in related:
-                periods = periods_for(series, cadence)
-                listed.append(
-                    f"{series}: "
-                    + (
-                        ", ".join(sorted(p for p in periods if p[:4] >= "2026"))
-                        or "no 2026 events"
-                    )
+                periods, unread = periods_for(series, cadence)
+                shown = sorted(p for p in periods if p[:4] >= "2026")
+                text = f"{series}: " + (
+                    ", ".join(shown) or f"no event names a 2026 {unit[cadence]}"
                 )
+                # Unread events that could cover the run's period: those
+                # naming no year, the run's year, or a span reaching it
+                # ("before 2029", "through 2027").
+                could_cover = [
+                    u for u in unread if contracts.could_cover_year(u[1], run_year)
+                ]
+                if unread:
+                    text += (
+                        f"; {len(unread)} event{'s' if len(unread) > 1 else ''} name"
+                        f"{'' if len(unread) > 1 else 's'} no {unit[cadence]} ("
+                        + "; ".join(f"{t}: {title}" for t, title in unread[:2])
+                        + ("; …" if len(unread) > 2 else "")
+                        + ")"
+                    )
+                listed.append(text)
                 if period and period in periods:
                     if note == contracts.SAME:
                         raise ValueError(
@@ -939,7 +963,16 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
                             " the period; add a SeriesSpec"
                         )
                     found_notes.append(note)
-                elif note != contracts.SAME:
+                    continue
+                if could_cover:
+                    if note == contracts.SAME:
+                        raise ValueError(
+                            f"{run_.data_point_id}: {series} has events whose period"
+                            f" cannot be read ({[u[0] for u in could_cover]}); read"
+                            " them before calling the period absent"
+                        )
+                    open_series.append(series)
+                if note != contracts.SAME:
                     other_notes.append(note)
             # Series that share a note (an older ticker) are named once.
             found_notes = list(dict.fromkeys(found_notes))
@@ -947,9 +980,24 @@ def unmatched_rows(cache: FetchCache, runs: list[thesis.ThesisRun]) -> list[dict
             if found_notes:
                 reason = "Kalshi lists the period, but " + "; ".join(found_notes)
             else:
-                reason = "Kalshi's related series has no event for this period"
+                reason = (
+                    "no related Kalshi event names this period"
+                    if open_series
+                    else "Kalshi's related series has no event for this period"
+                )
                 if other_notes:
                     reason += f" ({'; '.join(other_notes)})"
+                if open_series:
+                    names = (
+                        ", ".join(open_series[:-1]) + " and " + open_series[-1]
+                        if len(open_series) > 1
+                        else open_series[0]
+                    )
+                    verb = "list" if len(open_series) > 1 else "lists"
+                    reason += (
+                        f"; {names} also {verb} events that span several periods"
+                        " or name none, shown in the evidence"
+                    )
             detail = "; ".join(listed)
         rows.append(
             {
@@ -1083,7 +1131,7 @@ def catalog_screen(
             if verdict is None:
                 unaccounted.append(f"{group.label}: {event_ticker or item['ticker']}")
                 continue
-            key = (group.label, item["ticker"], *verdict)
+            key = (group.label, item["ticker"], verdict[0])
             row = hits.setdefault(
                 key,
                 {
@@ -1095,9 +1143,11 @@ def catalog_screen(
                     "eventsHit": 0,
                     "exampleEvents": [],
                     "verdict": verdict[0],
-                    "reason": verdict[1],
+                    "reason": [],
                 },
             )
+            if verdict[1] not in row["reason"]:
+                row["reason"].append(verdict[1])
             if event_ticker is None:
                 row["seriesTitleHit"] = True
             else:
@@ -1105,9 +1155,7 @@ def catalog_screen(
                 if len(row["exampleEvents"]) < 3:
                     row["exampleEvents"].append(f"{event_ticker}: {title}")
         rows = [r for k, r in hits.items() if k[0] == group.label]
-        counts = Counter()
-        for r in rows:
-            counts[r["verdict"]] += 1
+        counts = Counter(r["verdict"] for r in rows)
         groups.append(
             {
                 "screen": group.label,
@@ -1115,7 +1163,7 @@ def catalog_screen(
                 "keywords": group.keywords.pattern,
                 "thesisRuns": len(group_ids),
                 "thesisCountries": sorted(countries_by_group.get(group.label, ())),
-                "seriesHit": len(rows),
+                "seriesHit": len({r["series"] for r in rows}),
                 "eventsHit": sum(r["eventsHit"] for r in rows),
                 "verdicts": dict(sorted(counts.items())),
             }
@@ -1127,6 +1175,7 @@ def catalog_screen(
         )
     for row in hits.values():
         row["exampleEvents"] = "; ".join(row["exampleEvents"])
+        row["reason"] = " | ".join(row["reason"])
     return {
         "seriesSearched": len(catalog),
         "eventScreenCategories": list(contracts.EVENT_SCREEN_CATEGORIES),

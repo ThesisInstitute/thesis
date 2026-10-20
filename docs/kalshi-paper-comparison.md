@@ -258,7 +258,7 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
    the keywords missed. Among them were a monthly "Credit card debt" series
    (CRED, KXCRED) behind the consumer-credit statement, a 12-month real
    earnings series (KXWAGESBEAT), federal debt series, state permit and house
-   price series, and others. The keywords were widened for every group. The
+   price series, and others. The keywords were widened across the groups. The
    screen now reads the events of every Economics and World series (5,688
    events in 999 series), not only those of series whose events name several
    countries, and it searches event tickers as well as titles. A series related
@@ -268,6 +268,22 @@ The plan as first committed is commit 98940ca4. Later changes, in order:
    CRED, KXCRED, KXTRUFPDEBT, KXDEBTLEVEL, the KXDEBTGROWTH series,
    KXDEBTSHRINK and KXNDEBTSHRINK. Every other new hit carries a reviewed
    reason. No score changed.
+
+9. **After the review of change 8 (2026-10-20):** that review found that an
+   event whose period the reader could not parse was reported as absent. Its
+   examples were a month range (KXAHEG, August 2026 through July 2027), "any
+   2026 quarter" (KXNFPROD) and day-dated events (KXTRUFPDEBT). The evidence
+   for unmatched runs now reads day dates, month ranges, "any year quarter",
+   and a lone month with a lone year. Scored matching keeps the strict reader.
+   Any event still naming no period is listed in the evidence. A run is not
+   called absent while such an event could cover its period, and on a
+   same-statistic series such an event stops the run. Screen hits are
+   counted one row per group, series and verdict, with distinct series
+   counted. Two sweeps for missed series found none on the same statistic.
+   Their adjacent series (personal spending, ADP, CPI-U index level,
+   credit-card delinquency, housing inventory, semiconductor production,
+   foreign trade flows, Canada's Ivey PMI) and KXUSDEBT now carry recorded
+   verdicts. No score changed.
 
 ## Data provenance
 

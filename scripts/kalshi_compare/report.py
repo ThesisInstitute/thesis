@@ -848,7 +848,9 @@ def build(results: dict) -> tuple[Doc, str]:  # noqa: C901
             ]
             for g in screen["groups"]
         ],
-        "Verdicts count series (a multi-country series can have more than one).",
+        "Series hit counts distinct series; verdicts count series by verdict, so a"
+        " multi-country series whose events get different verdicts counts once per"
+        " verdict.",
     )
     venues = results.get("alternateVenues") or []
     if venues:

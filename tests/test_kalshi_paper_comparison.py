@@ -905,6 +905,50 @@ def test_catalog_screen_reads_events_of_every_economics_series():
         pipeline.catalog_screen(cache, catalog, SCREEN_RUNS)
 
 
+def test_screen_counts_a_series_once_per_group(monkeypatch):
+    # One series can carry two verdicts in a group (its title one way, an
+    # event another); it is still one series hit.
+    from kalshi_compare import pipeline
+
+    monkeypatch.setitem(contracts.SCREEN_VERDICTS, "KXUSPPIYOY-25JAN", "old event")
+    screen = pipeline.catalog_screen(
+        SeriesCache(
+            {"KXUSPPIYOY": [event("KXUSPPIYOY-25JAN", "PPI YoY in January 2025")]}
+        ),
+        [catalog_item("KXUSPPIYOY", "US PPI YoY in [month]")],
+        [thesis_run("bls.wp.WPSFD4.2026_07.first_print")],
+    )
+    rows = [h for h in screen["hits"] if h["screen"] == "producer prices"]
+    assert sorted(h["verdict"] for h in rows) == ["different statistic", "related"]
+    (group,) = [g for g in screen["groups"] if g["screen"] == "producer prices"]
+    assert group["seriesHit"] == 1
+
+
+def test_screen_joins_reasons_within_one_verdict():
+    # KXGOVBAL's UK event has its own reason, its other events the series's:
+    # one row per verdict, with both reasons (review r5).
+    from kalshi_compare import pipeline
+
+    screen = pipeline.catalog_screen(
+        SeriesCache(
+            {
+                "KXGOVBAL": [
+                    event(
+                        "KXGOVBAL-27APR20GB",
+                        "United Kingdom's government budget balance in 2026",
+                    ),
+                    event("KXGOVBAL-27APR20JP", "Japan's government budget balance"),
+                ]
+            }
+        ),
+        [catalog_item("KXGOVBAL", "What will [Country]'s budget balance be?")],
+        [thesis_run("treasury.mts.monthly_deficit.2026_07.first_print")],
+    )
+    (row,) = [h for h in screen["hits"] if h["screen"].startswith("federal")]
+    assert row["eventsHit"] == 2 and row["seriesTitleHit"]
+    assert row["reason"].count(" | ") == 1
+
+
 def test_related_series_of_another_family_is_labelled_so():
     # KXTRADEDEFICIT's events are checked for trade runs, not deficit runs.
     from kalshi_compare import pipeline
@@ -941,6 +985,121 @@ def test_related_series_of_another_family_is_labelled_so():
 def test_screen_keywords_reach_reviewed_misses(ticker, title):
     text = contracts.normalize_text(f"{ticker} {title}")
     assert any(g.keywords.search(text) for g in contracts.CATALOG_SCREEN)
+
+
+@pytest.mark.parametrize(
+    ("data_point", "series", "kalshi_event"),
+    [
+        # A month range covers every month in it, not only its endpoints.
+        (
+            "bls.real_earnings.avg_hourly_mom.2026_09.first_print",
+            "KXAHEG",
+            event(
+                "KXAHEG-27AUG06",
+                "Will US wage growth exceed 3.7% by July 2027?",
+                "any reference month from August 2026 through July 2027",
+            ),
+        ),
+        # "Any 2026 quarter" covers each 2026 quarter.
+        (
+            "bls.productivity.nonfarm_qoq_prelim.2026_q3.first_print",
+            "KXNFPROD",
+            event(
+                "KXNFPROD-27MAR04",
+                "U.S. nonfarm productivity YoY above 3% in any 2026 quarter?",
+                "2026",
+            ),
+        ),
+        # A day-dated event names its month.
+        (
+            "treasury.mts.monthly_deficit.2026_07.first_print",
+            "KXTRUFPDEBT",
+            event(
+                "KXTRUFPDEBT-26JUL31",
+                "US public debt on July 31, 2026",
+                "July 31, 2026",
+            ),
+        ),
+    ],
+)
+def test_unmatched_rows_read_ranges_spans_and_dates(data_point, series, kalshi_event):
+    # Review r5: these were reported as "no event" because only exact
+    # "Month YYYY" text was read.
+    from kalshi_compare import pipeline
+
+    (row,) = pipeline.unmatched_rows(
+        SeriesCache({series: [kalshi_event]}), [thesis_run(data_point)]
+    )
+    assert row["reason"].startswith("Kalshi lists the period, but ")
+    assert series in row["reason"]
+
+
+def test_unmatched_rows_never_call_an_unreadable_event_absent():
+    from kalshi_compare import pipeline
+
+    cache = SeriesCache(
+        {
+            "KXDEBTSHRINK": [
+                event(
+                    "KXDEBTSHRINK-28NOV11",
+                    "Will Trump reduce the national debt?",
+                    "Before 2029",
+                )
+            ]
+        }
+    )
+    (row,) = pipeline.unmatched_rows(
+        cache, [thesis_run("treasury.mts.monthly_deficit.2026_07.first_print")]
+    )
+    assert row["reason"].startswith("no related Kalshi event names this period (")
+    assert row["reason"].endswith(
+        "; KXDEBTSHRINK also lists events that span several periods or name none,"
+        " shown in the evidence"
+    )
+    assert "1 event names no month (KXDEBTSHRINK-28NOV11" in row["kalshiEvidence"]
+
+
+def test_unreadable_event_on_the_same_statistic_stops_the_run():
+    from kalshi_compare import pipeline
+
+    cache = SeriesCache({"KXUSPPI": [event("KXUSPPI-NEXT", "PPI MoM next release")]})
+    with pytest.raises(ValueError, match="cannot be read"):
+        pipeline.unmatched_rows(
+            cache, [thesis_run("bls.wp.WPSFD4.2026_07.first_print")]
+        )
+
+
+@pytest.mark.parametrize(
+    ("text", "covers"),
+    [
+        ("Peak US National Debt Before 2029", True),
+        ("How much will US debt increase in 2025? Before 2026", False),
+        ("US trade deficit for 2032", False),
+        ("Credit card debt in Q2 2021?", False),
+        ("PPI MoM next release", True),
+        ("Canada unemployment below 6.5% before 2027?", True),
+        ("Real wages through 2026", True),
+    ],
+)
+def test_could_cover_year(text, covers):
+    assert contracts.could_cover_year(text, 2026) is covers
+
+
+def test_span_readings_never_reach_scored_matching():
+    # Scored events are matched with the strict reader only.
+    assert contracts.text_periods("US public debt on July 31, 2026", "monthly") == set()
+    assert contracts.text_periods(
+        "US public debt on July 31, 2026", "monthly", spans=True
+    ) == {"2026-07"}
+    # A day date with a second year in the text still names its month.
+    assert contracts.text_periods(
+        "US debt on Dec 31, 2026, above its 2025 level", "monthly", spans=True
+    ) == {"2026-12"}
+    # The verb "may" is not the month May.
+    assert (
+        contracts.text_periods("Prices may rise in 2026", "monthly", spans=True)
+        == set()
+    )
 
 
 def test_unmatched_rows_compare_quarterly_runs_by_quarter():
