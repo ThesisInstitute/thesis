@@ -79,7 +79,10 @@ CHRONICLE_ASSERTION_CONTENT_KEYS = (
     "domain",
 )
 
-# The units the site's ledger parser admits (thesis-log.ts isUnit).
+# The units generated rows draw from, and the ones siteParseable treats as
+# admitted. Every one must be in the site parser's list (site/src/data/units.ts
+# UNITS), which ledger-current-view.test.ts checks; that list has since grown,
+# and widening this one would reseed the whole fixture for no new coverage.
 SITE_UNITS = (
     "percent",
     "count",

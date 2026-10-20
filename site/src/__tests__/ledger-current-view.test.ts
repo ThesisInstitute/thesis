@@ -33,6 +33,7 @@ import {
   type PolicyEngineLedgerEntry,
 } from "@/data/thesis-log";
 import { ledgerHistoryAtCutoff } from "@/data/time-series-priors";
+import { isUnit } from "@/data/units";
 
 // Scoring fixtures below test the ledger view, not execution verification,
 // which published-scoring-gate.test.ts exercises without mocks.
@@ -171,6 +172,12 @@ describe("receipt parity: the port against receipt 0.6.2", () => {
     expect(
       lines.filter((line) => line.portRefuses).length,
     ).toBeGreaterThanOrEqual(5);
+    // The generator judged siteParseable against its own unit list; the
+    // site's list must admit every unit it marked parseable.
+    for (const line of lines.filter((line) => line.siteParseable)) {
+      const row = JSON.parse(line.line) as { measure: { unit: unknown } };
+      expect(isUnit(row.measure.unit), line.origin).toBe(true);
+    }
   });
 
   it("recomputes every row's content address and effective id", () => {
