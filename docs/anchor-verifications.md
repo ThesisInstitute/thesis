@@ -1581,3 +1581,212 @@ released months, and the first target is the next unreleased one. The 18
   a failed fetch and defers; the window lasts about four weeks.
 - It does not choose how Chronicle curates the lineages.
 - It decides nothing about the 18 existing registrations or their custody.
+
+# Anchor verifications — Colorado state batch (2026-10-09)
+
+Two cells of the July 2026 Colorado chain (`colorado-chain-2026-07-22.ts`,
+runs recorded 2026-07-23 UTC) had no resolver route and are not registered:
+`co.hcpf.medicaid.total_caseload.2026-08.first_print` and
+`co.dor.individual_income_tax.net_collections.2026_07.first_print`. Neither
+new family accepts a registration: both are in
+`EXECUTION_PLAN_UNREGISTRABLE_FAMILIES`. Their routers claim only
+`<stem>.YYYY-MM.first_print` references (or `YYYY_MM`). One cell resolves;
+the other is refused, with its reason on the status page.
+
+## The custody rule both legs apply
+
+Neither source lets this resolver establish when a figure was first
+published: no capture of either file from its release period was found, and
+neither file carries a version history. What the response does carry is a
+`Last-Modified` header, and the resolver's own schedule gives that header a
+meaning:
+
+- The main loop skips a release-calendar cell while its `resolutionDate` is
+  later than the runner's date (`release … not reached`), so no capture by
+  this resolver predates the resolution date by the runner's clock.
+- So the leg records against the bytes being served at the end of the
+  resolution date (UTC): a file whose `Last-Modified` is no later than that
+  instant holds those bytes, if the header is accurate.
+  `served_unchanged_since_resolution_date` accepts exactly that case.
+- A later `Last-Modified` means the file changed after the resolution date,
+  or was first posted after it. The response cannot tell the two apart, so
+  the read is refused as `FIRST-PRINT WINDOW MISSED`. A missing or unreadable
+  header is refused as custody unknown.
+
+What the rule does not establish, by design: a change made before the end
+of the resolution date cannot be detected (the test
+`test_a_correction_made_before_the_resolution_date_is_read_as_served` labels
+this residual as intended), the header is taken at the server's word, and a
+report first posted after its cell's resolution date is refused even if it
+was never changed.
+
+## Colorado HCPF Medicaid caseload (CO_HCPF_ADAPTERS)
+
+Status: **VERIFIED** (reader and anchors) from the reports the Premiums,
+Expenditures and Caseload Reports page
+(https://hcpf.colorado.gov/budget/FY-Premiums-Expenditures-Caseload-Reports)
+linked on 2026-10-09: June to September 2026 report sets, each a PDF and a
+workbook. The figure is the `TOTAL` column of the table "MEDICAID CASELOAD
+WITHOUT RETROACTIVITY" (page 4 of each PDF; the `Medicaid Caseload` sheet of
+the workbook). The September workbook also has a separate `CBHP Caseload`
+sheet, which the leg does not read.
+
+Read 2026-10-09 from the files the page linked. For each report the PDF and
+the workbook carried the same `Last-Modified` and agreed on every month both
+print (the workbooks' hashes are in the fixture README):
+
+| Report named for | HTTP Last-Modified (PDF and workbook) | PDF CreationDate | Newest populated month | Its TOTAL |
+|---|---|---|---|---|
+| June 2026 | Mon, 15 Jun 2026 20:20:16 GMT | 2026-06-15 09:46:39 -06:00 | May 2026 | 1,238,720 |
+| July 2026 | Wed, 15 Jul 2026 18:53:51 GMT | 2026-07-14 15:26:43 -06:00 | June 2026 | 1,237,772 |
+| August 2026 | Mon, 17 Aug 2026 18:00:45 GMT | 2026-08-14 11:10:56 -06:00 | July 2026 | 1,242,335 |
+| September 2026 (target) | Mon, 14 Sep 2026 17:35:17 GMT | 2026-09-11 11:42:55 -06:00 | August 2026 | 1,247,588 |
+
+The first three rows are the runtime anchors: each run re-reads those
+reports through the same reader before the target, and requires the same
+totals. Their `Last-Modified` is not judged: they test the reader, not
+custody.
+
+**Which report, and which row.** In each inspected report the newest
+populated month is the month before the month in the file name. The page's
+own note describes a different convention ("a report with the link August
+will reference August activity, but the report will be dated September"),
+so the reader selects the report by file name and then also requires it to
+print the requested month as its newest populated month. The forecast's
+rule names the same file: "the August activity report dated September
+2026".
+
+**Why only the newest populated month.** The reports reprint earlier
+months, and values change between them: the downloaded February 2026 report
+prints 1,236,302 for January 2026 and the June 2026 report prints
+1,236,285. The table's note says the data "may be restated in future
+reports". The reader returns only the newest populated month's `TOTAL`, and
+requires that row's seventeen categories to sum to it. This selection does
+not establish first publication; the custody rule decides whether the bytes
+may be recorded.
+
+**Custody for the target.** The September PDF's `Last-Modified`
+(2026-09-14 17:35 UTC) is before the end of the cell's resolution date
+(2026-09-15), so it passes. On 2026-10-16 the same file still carried that
+header. The Wayback Machine's index, queried 2026-10-09, listed no capture
+of the September report's PDF or workbook, and its only captures of the page
+since 2026-08-01 were from 2026-08-13 and 2026-08-22. On 2026-10-16 the page
+also listed the October 2026 report (PDF `Last-Modified` 2026-10-15 20:24
+UTC, SHA-256 `35f895d8…820f`), which prints August 2026 as 1,247,588, the
+same figure.
+
+**PDF and workbook.** The forecast's rule makes the PDF the citable print if
+the two disagree, so the PDF is what the leg reads (through `pdftotext
+-layout`, as the FSA CRP leg does). The workbook linked for the same report
+is read as a cross-check and recorded in the capture envelope as `agrees`,
+`disagrees`, `absent` (no matching link) or `unreadable`; it never changes
+the value. For the September report the two agree on all 50 months the PDF
+prints, category by category. The workbook's older history (from July 2009)
+holds three months, September to November 2014, with a figure that is not a
+whole count; they are parsed and flagged, and could never be returned.
+
+**Cell history.** The forecasting cell recorded 1,236,302 (January 2026),
+1,229,956 (December 2025), 1,221,808 (November 2025), 1,235,329 (August
+2025) and 1,214,424 (January 2025). All five match the downloaded February
+2026 report (`2026 February, Joint Budget Committee Monthly Premiums
+Report_0.pdf`, `Last-Modified` Tue, 17 Feb 2026 21:55:02 GMT, newest
+populated month January 2026), read 2026-10-09. The page no longer links it,
+so it is not a runtime anchor.
+
+**Dry runs** against the live site (2026-10-09 and 2026-10-16): the three
+anchors reproduced, and August 2026 resolved to 1,247,588 members, recorded
+as 1247.588 thousand with `observed_at` 2026-09-14, the UTC date of the PDF's
+`Last-Modified`. Chronicle's catalog generator accepted the row on its ledger
+head `d7e45bc5` (2026-10-09) and again on `8c4a0f86` (2026-10-16), minting one
+new series (`co.hcpf.medicaid.total_caseload`, Colorado, thousands, monthly);
+a copy in a second unit made it fail. Its append-gate row checks accepted the
+row both times.
+
+Fixtures: `tests/fixtures/co_hcpf/` (the landing page, page 4 of each of the
+four PDFs with its `pdftotext` text, and the September workbook).
+
+## Colorado DOR net individual income tax collections (CO_DOR_ADAPTERS)
+
+Status: **REFUSED**. The leg records no value for any month.
+
+**The source.** The Wayback Machine's 2026-05-05 capture of the General Fund
+Collections Reports page
+(https://cdor.colorado.gov/data-and-reports/general-fund-collections-reports)
+links the label "General Fund Collections Report, July 2019 to Date" to a
+Google Drive file (id `1Bg4VFz2V2sWbR9Nj9v0ygYOgViFor_CN`). A curl request
+for the live page with a browser User-Agent got a Cloudflare challenge
+(HTTP 403) on 2026-10-09, so the leg reads the Drive file by that id. The
+workbook has one sheet, months as columns with the newest first, dollar
+amounts in thousands, and a row "Total Net Individual Income", the line the
+forecast names.
+
+**What was served.** Downloaded 2026-10-09 (and the header re-checked
+2026-10-16): newest month August 2026, publish-date line September 2026,
+`Last-Modified` Mon, 28 Sep 2026 21:09:16 GMT. For July 2026 it prints
+984,764 ($ thousands). For a signed-in reader the Drive API reported the
+file id as created 2023-12-14 and modified 2026-09-28, `canReadRevisions:
+false`, and only the head revision.
+
+**Why nothing is recorded.** The July cell's resolution date is 2026-08-31,
+and the file's `Last-Modified` is 2026-09-28, so the custody rule refuses
+it: the bytes served at the end of 2026-08-31 cannot be shown to be these. Nothing checked establishes when July 2026 first appeared in this
+file or what was first published for it. Looked for on 2026-10-09 and not
+found:
+
+- an earlier revision in Drive (see above);
+- a web archive copy: six Wayback Machine CDX queries, one per form of the
+  file's address (`docs.google.com/spreadsheets/d/<id>*`,
+  `drive.google.com/file/d/<id>*`, `drive.google.com/uc?id=<id>*`,
+  `drive.google.com/uc?export=download&id=<id>`,
+  `drive.google.com/open?id=<id>*`,
+  `drive.usercontent.google.com/download?id=<id>*`, each from 2025 or 2026),
+  returned no captures, and archive.today's timemap had no memento for the
+  spreadsheet's `/edit` address;
+- a capture of the page from the release period: the Wayback Machine's index
+  lists two 2026 captures, 2026-05-05 (HTTP 200) and 2026-10-06 (a redirect
+  of the `http://` address);
+- a record in this repository: the file id appears nowhere under `records/`.
+
+Even with a `Last-Modified` before the resolution date, the leg would refuse
+as `CO DOR ADAPTER UNVERIFIED`: it has no verified anchors and no reviewed
+capture path. A month newer than the workbook's newest column defers
+(`MONTH NOT IN WORKBOOK`); a month older than its oldest column, and any
+parse failure, is a `CO DOR PARSE REFUSAL`.
+
+The cell stays pending with that reason until a disposition ruling (decision
+d1196), which this chapter does not make.
+
+**Row checks.** The identity cells and the selected row labels must each
+appear exactly once, and the selected rows must sit where the reader expects
+them. Where the custody rule would allow a read, the requested month's net
+line must equal gross plus the listed adjustments less refunds exactly, and
+withholding, estimated payments and cash must sum to within one thousand of
+gross. In the downloaded file net holds exactly in all 86 months, and the
+component sum differs from gross by one thousand in 28 of them; why is not
+established.
+
+**Cell history not used.** The forecasting cell recorded 0.614 and 1.76
+(billions) as July 2019 and July 2020 "individual income tax receipts cited
+from CDOR data", from a secondary article. The workbook's net line for those
+months is 582,376 and 1,640,533 ($ thousands); its gross line is 613,223 and
+1,713,321. Neither recorded value is the net line the cell is scored on.
+
+Fixture: `tests/fixtures/co_dor/` (the downloaded workbook, byte for byte).
+
+## What this does not prove or decide
+
+- It does not establish when either agency first published either figure.
+  For HCPF it shows that the server reports no modification of the
+  September PDF since 2026-09-14, the day before the cell's resolution date,
+  and that the October report prints the same August figure. No independent
+  capture of the September file was found.
+- It does not decide what happens to the DOR cell. Voiding it, scoring it
+  against this file's figure with that caveat, or asking DOR whether an
+  earlier July print exists are dispositions for d1196.
+- It does not make either series registrable.
+- It has not run on a GitHub runner. Fetch failures defer and failed checks
+  refuse; an HCPF response that passes every check would resolve.
+- The existing Colorado facts in the ledger (`bls.laus.colorado.*`,
+  `ssa.ssi.recipients.colorado.*`) carry national geography. This batch
+  records its fact with Colorado's (`0400000US08`) and leaves those rows
+  alone.
