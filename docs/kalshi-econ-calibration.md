@@ -335,12 +335,13 @@ changes 5 to 7 came after it, before the full run.
    and is listed; it enters the Kalshi-results sensitivity.
 5. **Threads.** Independent analyses run on four threads; each seeds its own
    generator, so no number depends on the thread count.
-6. **Interior prices (post hoc, secondary).** The CPI test run gave slopes
-   above 1. Prices in this data move in one-cent steps, so a midpoint cannot go
-   below half a cent or above 99.5 cents, and the slope is sensitive to
-   markets at those edges. Before the full run, a secondary analysis was added
-   that repeats the compression test and the reliability summary on prices from
-   0.05 to 0.95 only. It is never primary.
+6. **Interior prices (post hoc, secondary).** Added after the CPI test run
+   had computed compression slopes (its numbers are recorded with the results,
+   outside the repository). Prices in this data move in one-cent steps, so a
+   midpoint cannot go below half a cent or above 99.5 cents, and the slope is
+   sensitive to markets at those edges. Before the full run, a secondary
+   analysis was added that repeats the compression test and the reliability
+   summary on prices from 0.05 to 0.95 only. It is never primary.
 7. **Market life ends at the release.** A market's life for the life
    fractions runs to its close or to the release, whichever is first, so no
    price after the release is read. The report lists every market that closed
