@@ -368,6 +368,12 @@ def build(results: dict, summary_lines: list[str]) -> tuple[Doc, dict[str, str]]
         f"for {expiration.get(True, 0)} events and differs for {expiration.get(False, 0)}; "
         f"{expiration.get(None, 0)} events record no single number."
     )
+    late = results.get("lateCloses", [])
+    doc.p(
+        f"Markets that closed after their event's release: {len(late)}"
+        + (": " + ", ".join(f"`{m['ticker']}`" for m in late) if late else "")
+        + ". A market's life for the life fractions ends at the release in any case."
+    )
     if results["duplicatePeriods"]:
         doc.p(
             "Kalshi lists more than one event for "
@@ -456,11 +462,13 @@ def build(results: dict, summary_lines: list[str]) -> tuple[Doc, dict[str, str]]
 
     doc.h(2, "Sensitivity analyses")
     for key, label in (
+        ("compressionByEvent", "Intervals resampling events instead of release dates"),
         ("compressionRaw", "Unrepaired midpoints"),
         ("compressionLiquid", "Quotes with spreads of 20 cents or less"),
         ("compressionPaper", "Paper-matched: last traded price, life from first trade"),
         ("compressionPaperVolume", "Paper-matched, lifetime volume above 20,000 contracts"),
         ("compressionKalshiResults", "Kalshi's recorded results as outcomes"),
+        ("compressionInterior", "Prices from 0.05 to 0.95 only (added after the CPI test run)"),
     ):
         doc.h(3, label)
         doc.table(

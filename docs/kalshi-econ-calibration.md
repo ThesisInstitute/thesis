@@ -304,7 +304,7 @@ about any trading strategy, and it does not test the paper's pooled result.
 The plan as first committed is commit 64ab04df. Changes 1 to 4 were made while
 reading the contracts and releases, before any Kalshi price was compared with
 an outcome. A test run of the code on the two CPI series then computed scores;
-change 5 came after it.
+changes 5 to 7 came after it, before the full run.
 
 1. **Legacy rule periods.** Some 2021 and 2022 rules name the month without the
    year ("in June") or write "July, 2021". Such a rule is accepted only if it
@@ -335,3 +335,13 @@ change 5 came after it.
    and is listed; it enters the Kalshi-results sensitivity.
 5. **Threads.** Independent analyses run on four threads; each seeds its own
    generator, so no number depends on the thread count.
+6. **Interior prices (post hoc, secondary).** The CPI test run gave slopes
+   above 1. Prices in this data move in one-cent steps, so a midpoint cannot go
+   below half a cent or above 99.5 cents, and the slope is sensitive to
+   markets at those edges. Before the full run, a secondary analysis was added
+   that repeats the compression test and the reliability summary on prices from
+   0.05 to 0.95 only. It is never primary.
+7. **Market life ends at the release.** A market's life for the life
+   fractions runs to its close or to the release, whichever is first, so no
+   price after the release is read. The report lists every market that closed
+   after its release (`lateCloses`); if there are none, this changes nothing.

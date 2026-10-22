@@ -31,6 +31,7 @@ LIQUID_SPREAD = 0.20
 PAPER_VOLUME = 20_000.0
 LEGACY_CUTOFF = "2025-01-01"
 WORKERS = 4  # the shared host's cap on local parallelism
+INTERIOR = (0.05, 0.95)
 
 
 def utc_now() -> str:
@@ -178,9 +179,29 @@ def event_instant(item: Scored, horizon: str) -> int:
     return int(item.event.first_open + value * (item.anchor - item.event.first_open))
 
 
-def market_instant(market: dict, fraction: float) -> int:
-    start, end = kalshi.to_ts(market["open_time"]), kalshi.to_ts(market["close_time"])
-    return int(start + fraction * (end - start))
+def market_end(item: "Scored", market: dict) -> int:
+    """A market's close, or the release if the market closed after it.
+
+    A market still trading after the release would price a known outcome;
+    ``late_closes`` lists any such market.
+    """
+    return min(kalshi.to_ts(market["close_time"]), item.release_ts)
+
+
+def market_instant(item: "Scored", market: dict, fraction: float) -> int:
+    start = kalshi.to_ts(market["open_time"])
+    return int(start + fraction * (market_end(item, market) - start))
+
+
+def late_closes(scored: list["Scored"]) -> list[dict]:
+    return [
+        {"eventTicker": item.key, "ticker": m["ticker"], "closeTime": m["close_time"],
+         "releaseAt": item.event.official.release_at}
+        for item in scored
+        if item.has_official
+        for m in item.event.markets
+        if kalshi.to_ts(m["close_time"]) > item.release_ts
+    ]
 
 
 def first_trade_start(candles: list[kalshi.Candle]) -> int | None:
@@ -265,7 +286,7 @@ def build_rows(scored: list[Scored]) -> dict[str, list[dict]]:
                 # Each market at its own life fraction, priced within the
                 # event's ladder at that instant.
                 for market in item.event.markets:
-                    t = market_instant(market, value)
+                    t = market_instant(item, market, value)
                     market_quotes, _ = quotes_at(item, t)
                     tickers = [q.ticker for q in market_quotes]
                     if market["ticker"] not in tickers:
@@ -338,13 +359,18 @@ def paper_rows(item, base, horizon, kind, value, at, exclusions) -> list[dict]:
         candles = item.candles[market["ticker"]]
         start = first_trade_start(candles)
         if start is None:
-            continue  # never traded: excluded from this variant, as in the paper
+            # Never traded: excluded from this variant, as in the paper.
+            exclusions.append(
+                {**base, "horizon": horizon, "ticker": market["ticker"],
+                 "variant": "paper", "reason": "never traded"}
+            )
+            continue
         if kind == "fixed":
             t = at
             if kalshi.to_ts(market["open_time"]) > t:
                 continue
         else:
-            close = kalshi.to_ts(market["close_time"])
+            close = market_end(item, market)
             if close <= start:
                 continue
             t = int(start + value * (close - start))
@@ -636,6 +662,7 @@ def run(
             for k, n in duplicates.items() if n > 1
         ],
         "exclusions": rows["exclusions"],
+        "lateCloses": late_closes(scored),
         "eventRows": events_rows,
         "binaryRows": binary,
         "paperRows": rows["paper"],
@@ -651,9 +678,14 @@ def run(
         dict(r, volumeClass="above 20,000" if r["lifetimeVolume"] > PAPER_VOLUME else "at most 20,000")
         for r in official_binary
     ]
+    interior = [r for r in official_binary if INTERIOR[0] <= r["p"] <= INTERIOR[1]]
     jobs = {
         "reliability": (reliability_tables, (official_binary,), {}),
         "compression": (compression, (official_binary,), {}),
+        # Secondary: clusters are events rather than release dates.
+        "compressionByEvent": (
+            compression, ([dict(r, cluster=r["eventTicker"]) for r in official_binary],), {}
+        ),
         "eventScores": (event_scores, (events_rows,), {}),
         "eventScoresByEvent": (event_scores, (events_rows,), {"cluster_key": "eventTicker"}),
         "outOfSample": (out_of_sample, (official_binary, events_rows), {}),
@@ -670,6 +702,10 @@ def run(
         "reliabilityKalshiResults": (reliability_tables, (binary,), {"source": "kalshi"}),
         "compressionKalshiResults": (compression, (binary,), {"source": "kalshi"}),
         "eventScoresKalshiResults": (event_scores, (events_rows,), {"source": "kalshi"}),
+        # Added after the CPI test run (deviation 6): prices away from the
+        # one-cent floor and ceiling only.
+        "reliabilityInterior": (reliability_tables, (interior,), {}),
+        "compressionInterior": (compression, (interior,), {}),
         "reliabilityBy_generation": (reliability_tables, (official_binary,), {"split": "generation"}),
         "reliabilityBy_era": (reliability_tables, (official_binary,), {"split": "era"}),
         "reliabilityBy_volume": (reliability_tables, (volume_rows,), {"split": "volumeClass"}),
