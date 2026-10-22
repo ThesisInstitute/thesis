@@ -101,10 +101,11 @@ def reliability_grid(reliability: dict, groups: list[str], title: str) -> str:
 
             parts.append(
                 f'<rect x="{x0}" y="{y0}" width="{panel}" height="{panel}" '
-                'fill="none" class="grid"/>'
+                'fill="none" stroke="#dddcd7" class="grid"/>'
             )
             parts.append(
-                f'<line class="zero" x1="{sx(0)}" y1="{sy(0)}" x2="{sx(1)}"'
+                '<line class="zero" stroke="#8a8983" stroke-width="1.5" '
+                f'x1="{sx(0)}" y1="{sy(0)}" x2="{sx(1)}"'
                 f' y2="{sy(1)}"/>'
             )
             if row == len(groups) - 1:
@@ -126,7 +127,8 @@ def reliability_grid(reliability: dict, groups: list[str], title: str) -> str:
                 lo, hi = b.get("ci95", [None, None])
                 if lo is not None and lo == lo:
                     parts.append(
-                        f'<line class="mean" x1="{x:.1f}" x2="{x:.1f}" '
+                        f'<line class="mean" stroke="#0b0b0b" x1="{x:.1f}" '
+                        f'x2="{x:.1f}" '
                         f'y1="{sy(lo):.1f}" y2="{sy(hi):.1f}"/>'
                     )
                 radius = max(2.0, min(6.0, b["n"] ** 0.5 / 4))
@@ -137,7 +139,8 @@ def reliability_grid(reliability: dict, groups: list[str], title: str) -> str:
                     + (f" [{lo:.3f}, {hi:.3f}]" if lo is not None and lo == lo else "")
                 )
                 parts.append(
-                    f'<circle class="dot" cx="{x:.1f}" cy="{y:.1f}" r="{radius:.1f}">'
+                    f'<circle class="dot" fill="#2a78d6" cx="{x:.1f}" '
+                    f'cy="{y:.1f}" r="{radius:.1f}">'
                     f"<title>{html.escape(label)}</title></circle>"
                 )
             parts.append(
@@ -645,7 +648,13 @@ def build(results: dict, summary_lines: list[str]) -> tuple[Doc, dict[str, str]]
         "It measures the calibration and accuracy of Kalshi's prices on twelve economic"
         " release series at stated horizons, against the official first print. It says"
         " nothing about Kalshi in other categories or about any trading strategy, and"
-        " it does not test the paper's pooled result."
+        " it does not test the paper's pooled result. The paper's Kalshi pattern comes"
+        " from its sample of markets with more than $20,000 of volume, and the"
+        " preprint's figure for that sample (Fig. S5) is captioned as excluding the"
+        " Economy and Sports domains, so these series may not be in the sample the"
+        " paper's Kalshi statement describes. Prices here sit on a one-cent grid"
+        " (midpoints from half a cent to 99.5 cents), which bounds how extreme a quoted"
+        " price can be."
     )
     doc.h(2, "Reproduce")
     doc.p(
