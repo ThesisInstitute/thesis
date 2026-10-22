@@ -56,9 +56,7 @@ FAMILY_ORDER = (
 
 
 def spec_for(series: str) -> contracts.SeriesSpec:
-    return next(
-        s for s in contracts.SPECS if s.series == series and s.kind == "ladder"
-    )
+    return next(s for s in contracts.SPECS if s.series == series and s.kind == "ladder")
 
 
 def generation(series: str, event_ticker: str) -> str:
@@ -114,7 +112,9 @@ def read_strike(market: dict, spec: contracts.SeriesSpec) -> Strike:
     rule = contracts.normalize_text(market.get("rules_primary", ""))
     found = LEGACY_RULE_STRIKE.search(rule)
     if found is None:
-        raise ValueError(f"{market['ticker']}: no direction in the rule text ({first_error})")
+        raise ValueError(
+            f"{market['ticker']}: no direction in the rule text ({first_error})"
+        )
     expected = DIRECTION[found["word"].lower()]
     listed = market.get("strike_type")
     if listed is not None and listed != expected:
@@ -127,7 +127,9 @@ def read_strike(market: dict, spec: contracts.SeriesSpec) -> Strike:
         sub = SUB_TITLE_STRIKE.match(market.get("yes_sub_title") or "")
         tick = TICKER_STRIKE.search(market["ticker"])
         if not sub or not tick:
-            raise ValueError(f"{market['ticker']}: no strike in rule, subtitle or ticker")
+            raise ValueError(
+                f"{market['ticker']}: no strike in rule, subtitle or ticker"
+            )
         number = Decimal(sub["number"].replace(",", ""))
         if Decimal(tick["number"]) != number:
             raise ValueError(
@@ -139,11 +141,15 @@ def read_strike(market: dict, spec: contracts.SeriesSpec) -> Strike:
         suffix = "%"
     factors = contracts.UNIT_FACTORS[spec.canonical_unit]
     if suffix not in factors:
-        raise ValueError(f"{market['ticker']}: unit {suffix!r} not valid for {spec.series}")
+        raise ValueError(
+            f"{market['ticker']}: unit {suffix!r} not valid for {spec.series}"
+        )
     floor = market.get("floor_strike")
     # Kalshi stored some U-3 floors as 4.099999 for a rule that says 4.1.
     if floor is not None and abs(Decimal(str(floor)) - number) > FLOOR_TOLERANCE:
-        raise ValueError(f"{market['ticker']}: text says {number}, floor_strike {floor}")
+        raise ValueError(
+            f"{market['ticker']}: text says {number}, floor_strike {floor}"
+        )
     if floor is not None and Decimal(str(floor)) != number:
         source += "_floor_rounded"
     return Strike(number * factors[suffix], expected, source)
@@ -260,7 +266,9 @@ def scoped_events(cache: FetchCache, series: str) -> tuple[list[dict], list[dict
     spec = spec_for(series)
     inside, outside = [], []
     for event in kalshi.series_events(cache, series):
-        if spec.event_prefix and not event["event_ticker"].startswith(spec.event_prefix):
+        if spec.event_prefix and not event["event_ticker"].startswith(
+            spec.event_prefix
+        ):
             outside.append(event)
         else:
             inside.append(event)
@@ -280,7 +288,10 @@ def build_event(cache: FetchCache, series: str, raw: dict) -> Event:
     for market in markets:
         if market.get("result") not in ("yes", "no"):
             event.dropped.append(
-                {"ticker": market["ticker"], "reason": f"result {market.get('result')!r}"}
+                {
+                    "ticker": market["ticker"],
+                    "reason": f"result {market.get('result')!r}",
+                }
             )
             continue
         try:
@@ -309,7 +320,9 @@ BLS_NAMES = {
     "bls_unemployment": "empsit",
     "bls_jolts_openings": "jolts",
 }
-ARCHIVE_LINK = re.compile(r"/news\.release/archives/(?P<name>[a-z]+)_(?P<date>\d{8})\.htm")
+ARCHIVE_LINK = re.compile(
+    r"/news\.release/archives/(?P<name>[a-z]+)_(?P<date>\d{8})\.htm"
+)
 SEARCH_DAYS = 150
 
 
@@ -337,7 +350,7 @@ def bls_archive_dates(cache: FetchCache, name: str) -> list[dt.date]:
     return sorted(dates)
 
 
-class NoOfficialValue(LookupError):
+class NoOfficialValueError(LookupError):
     """No release published a value for the period."""
 
 
@@ -357,7 +370,9 @@ def _print(
     if second is not None:
         tolerance = Decimal("0.05") if key == "bls_jolts_openings" else Decimal(0)
         if abs(second - value) > tolerance:
-            raise official.OfficialParseError(f"{url}: readings {value} and {second} differ")
+            raise official.OfficialParseError(
+                f"{url}: readings {value} and {second} differ"
+            )
     return official.OfficialPrint(
         statistic=key,
         period=period,
@@ -393,7 +408,7 @@ def locate_print(cache: FetchCache, event: Event) -> None:
                     f"{source.url} reports {got_period}, expected {period}"
                 )
             found = _print(cache, key, period, source.url, value, second, release_at)
-    except (NoOfficialValue, official.NoValuePublished) as error:
+    except (NoOfficialValueError, official.NoValuePublishedError) as error:
         event.official_note = f"no official value: {error}"
         return
     except (official.OfficialParseError, ValueError, KeyError) as error:
@@ -451,13 +466,13 @@ def _bls_print(cache, event, key, period, hint):
         if titled == period:
             try:
                 got, value, second, release_at = source.parse(text)
-            except official.NoValuePublished as error:
-                raise NoOfficialValue(f"{source.url}: {error}") from error
+            except official.NoValuePublishedError as error:
+                raise NoOfficialValueError(f"{source.url}: {error}") from error
             return _print(cache, key, period, source.url, value, second, release_at)
         event.official_delayed = True
         value = prior_column_value(text, key, period)
         if value is None:
-            raise NoOfficialValue(
+            raise NoOfficialValueError(
                 f"{source.url} (for {titled}) is the first later release and"
                 f" publishes no {period} value"
             )
@@ -525,7 +540,9 @@ def _cpi_prior_column(text: str, key: str, period: str) -> Decimal | None:
     ][:7]
     if period not in header:
         return None
-    label = "All items" if key == "bls_cpi_headline" else "All items less food and energy"
+    label = (
+        "All items" if key == "bls_cpi_headline" else "All items less food and energy"
+    )
     cell = r"(?:-?\d*\.\d|-(?=\s))"
     values = re.search(rf"\b{re.escape(label)}\.*\s+((?:{cell}\s+){{7}}{cell})", table)
     if not values:
@@ -631,10 +648,14 @@ def bea_core_pce(text: str, period: str) -> tuple[Decimal, Decimal | None, str, 
     if two:
         columns = [contracts.MONTHS[two.group(i).lower()] for i in (1, 2)]
         if month not in columns:
-            raise official.OfficialParseError("BEA table columns do not include the month")
+            raise official.OfficialParseError(
+                "BEA table columns do not include the month"
+            )
         value = Decimal(two.group(3 + columns.index(month)))
         if len(titled) == 1 and columns[1] != month:
-            raise official.OfficialParseError("BEA table's second column is not the month")
+            raise official.OfficialParseError(
+                "BEA table's second column is not the month"
+            )
         how = "two-column table"
     elif (one := BEA_FROM_TO.search(text)) is not None:
         if contracts.MONTHS[one.group(2).lower()] != month:
@@ -643,7 +664,9 @@ def bea_core_pce(text: str, period: str) -> tuple[Decimal, Decimal | None, str, 
     elif (five := BEA_FIVE_COLUMNS.search(text)) is not None:
         months = re.findall(_MW, five.group(1), re.I)
         if len(months) != 5 or contracts.MONTHS[months[-1].lower()] != month:
-            raise official.OfficialParseError("BEA table's last column is not the month")
+            raise official.OfficialParseError(
+                "BEA table's last column is not the month"
+            )
         value, how = Decimal(five.group(2).split()[-1]), "five-column table"
     elif monthly_lead is not None:
         others = leads[1:]
@@ -669,7 +692,9 @@ def _bea_print(cache, event, key, period):
     for release_year, slug in _bea_slugs(period):
         url = BEA_RELEASE.format(year=release_year, slug=slug)
         event.candidates_tried.append(url)
-        body = cache.get(url, user_agent=BROWSER_COMPATIBLE_UA, accept="*/*", allow_404=True)
+        body = cache.get(
+            url, user_agent=BROWSER_COMPATIBLE_UA, accept="*/*", allow_404=True
+        )
         if body is None:
             continue
         value, second, release_at, how = bea_core_pce(official.html_text(body), period)
@@ -705,7 +730,13 @@ def settlement_agreement(event: Event) -> list[dict]:
 
 
 EXPIRATION_NUMBER = re.compile(r"^\s*(-?[\d,]*\.?\d+)\s*%?\s*$")
-EXPIRATION_SCALES = (Decimal(1), Decimal(1000), Decimal("0.001"), Decimal(10) ** 6, Decimal(10) ** -6)
+EXPIRATION_SCALES = (
+    Decimal(1),
+    Decimal(1000),
+    Decimal("0.001"),
+    Decimal(10) ** 6,
+    Decimal(10) ** -6,
+)
 
 
 def expiration_value(event: Event) -> Decimal | None:
@@ -724,7 +755,7 @@ def expiration_value(event: Event) -> Decimal | None:
 
 
 def expiration_agrees(event: Event) -> bool | None:
-    """Whether Kalshi's recorded value equals the official print, up to a power of 1,000.
+    """Whether Kalshi's recorded value equals the official print, up to x1,000 steps.
 
     None when there is no official print or no single numeric recorded value.
     """

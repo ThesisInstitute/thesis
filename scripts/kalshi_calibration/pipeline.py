@@ -35,14 +35,20 @@ INTERIOR = (0.05, 0.95)
 
 
 def utc_now() -> str:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace(
-        "+00:00", "Z"
+    return (
+        dt.datetime.now(dt.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
     )
 
 
 def et_date(ts: int) -> str:
     return (
-        dt.datetime.fromtimestamp(ts, dt.timezone.utc).astimezone(official.ET).date().isoformat()
+        dt.datetime.fromtimestamp(ts, dt.timezone.utc)
+        .astimezone(official.ET)
+        .date()
+        .isoformat()
     )
 
 
@@ -66,7 +72,9 @@ class Scored:
 
 def settlement_ts(event: history.Event) -> int:
     stamps = [m.get("settlement_ts") for m in event.markets if m.get("settlement_ts")]
-    return max(kalshi.to_ts(s[:19] + "Z") for s in stamps) if stamps else event.last_close
+    return (
+        max(kalshi.to_ts(s[:19] + "Z") for s in stamps) if stamps else event.last_close
+    )
 
 
 # Loading -------------------------------------------------------------------
@@ -113,10 +121,14 @@ def attach_candles(cache: FetchCache, events: list[history.Event]) -> list[Score
         has_official = event.official is not None
         anchor = event.anchor if has_official else event.last_close
         release_ts = (
-            kalshi.to_ts(event.official.release_at) if has_official else settlement_ts(event)
+            kalshi.to_ts(event.official.release_at)
+            if has_official
+            else settlement_ts(event)
         )
         cluster = (
-            et_date(kalshi.to_ts(event.official.release_at)) if has_official else et_date(anchor)
+            et_date(kalshi.to_ts(event.official.release_at))
+            if has_official
+            else et_date(anchor)
         )
         scored.append(
             Scored(
@@ -164,7 +176,12 @@ def quotes_at(item: Scored, at: int) -> tuple[list[Quote], list[str]]:
         if state.candle_end > at:
             raise AssertionError(f"{market['ticker']}: candle after the horizon")
         quotes.append(
-            Quote(market["ticker"], item.event.strikes[market["ticker"]].value, state, market)
+            Quote(
+                market["ticker"],
+                item.event.strikes[market["ticker"]].value,
+                state,
+                market,
+            )
         )
     quotes.sort(key=lambda q: q.strike)
     if len({q.strike for q in quotes}) != len(quotes):
@@ -195,8 +212,12 @@ def market_instant(item: "Scored", market: dict, fraction: float) -> int:
 
 def late_closes(scored: list["Scored"]) -> list[dict]:
     return [
-        {"eventTicker": item.key, "ticker": m["ticker"], "closeTime": m["close_time"],
-         "releaseAt": item.event.official.release_at}
+        {
+            "eventTicker": item.key,
+            "ticker": m["ticker"],
+            "closeTime": m["close_time"],
+            "releaseAt": item.event.official.release_at,
+        }
         for item in scored
         if item.has_official
         for m in item.event.markets
@@ -205,7 +226,7 @@ def late_closes(scored: list["Scored"]) -> list[dict]:
 
 
 def first_trade_start(candles: list[kalshi.Candle]) -> int | None:
-    """Start of the first hourly candle with a trade (Themis starts at the first trade)."""
+    """Start of the first hourly candle with a trade (Themis starts at the first)."""
     for candle in candles:
         if candle.trade_close is not None:
             return candle.end - 3600
@@ -262,8 +283,12 @@ def build_rows(scored: list[Scored]) -> dict[str, list[dict]]:
             quotes, unquoted = quotes_at(item, at)
             for ticker in unquoted:
                 exclusions.append(
-                    {**base, "horizon": horizon, "ticker": ticker,
-                     "reason": "market open but no candle by then"}
+                    {
+                        **base,
+                        "horizon": horizon,
+                        "ticker": ticker,
+                        "reason": "market open but no candle by then",
+                    }
                 )
             if not quotes:
                 exclusions.append(
@@ -291,14 +316,22 @@ def build_rows(scored: list[Scored]) -> dict[str, list[dict]]:
                     tickers = [q.ticker for q in market_quotes]
                     if market["ticker"] not in tickers:
                         exclusions.append(
-                            {**base, "horizon": horizon, "ticker": market["ticker"],
-                             "reason": "market not quoted at its life fraction"}
+                            {
+                                **base,
+                                "horizon": horizon,
+                                "ticker": market["ticker"],
+                                "reason": "market not quoted at its life fraction",
+                            }
                         )
                         continue
                     index = tickers.index(market["ticker"])
                     binary.append(
                         binary_row(
-                            item, base, horizon, t, market_quotes[index],
+                            item,
+                            base,
+                            horizon,
+                            t,
+                            market_quotes[index],
                             repair(market_quotes)[index],
                         )
                     )
@@ -308,7 +341,11 @@ def build_rows(scored: list[Scored]) -> dict[str, list[dict]]:
                         index = liquid_tickers.index(market["ticker"])
                         liquid.append(
                             binary_row(
-                                item, base, horizon, t, liquid_quotes[index],
+                                item,
+                                base,
+                                horizon,
+                                t,
+                                liquid_quotes[index],
                                 repair(liquid_quotes)[index],
                             )
                         )
@@ -329,12 +366,15 @@ def repair(quotes: list[Quote]) -> list[float]:
 
 def liquid_only(quotes: list[Quote]) -> list[Quote]:
     return [
-        q for q in quotes
+        q
+        for q in quotes
         if q.state.spread is not None and q.state.spread <= LIQUID_SPREAD + 1e-9
     ]
 
 
-def binary_row(item: Scored, base: dict, horizon: str, at: int, quote: Quote, p: float) -> dict:
+def binary_row(
+    item: Scored, base: dict, horizon: str, at: int, quote: Quote, p: float
+) -> dict:
     market = quote.market
     return {
         **base,
@@ -361,8 +401,13 @@ def paper_rows(item, base, horizon, kind, value, at, exclusions) -> list[dict]:
         if start is None:
             # Never traded: excluded from this variant, as in the paper.
             exclusions.append(
-                {**base, "horizon": horizon, "ticker": market["ticker"],
-                 "variant": "paper", "reason": "never traded"}
+                {
+                    **base,
+                    "horizon": horizon,
+                    "ticker": market["ticker"],
+                    "variant": "paper",
+                    "reason": "never traded",
+                }
             )
             continue
         if kind == "fixed":
@@ -379,8 +424,13 @@ def paper_rows(item, base, horizon, kind, value, at, exclusions) -> list[dict]:
             raise AssertionError(f"{market['ticker']}: candle after the horizon")
         if state.last is None:
             exclusions.append(
-                {**base, "horizon": horizon, "ticker": market["ticker"],
-                 "variant": "paper", "reason": "no trade by then"}
+                {
+                    **base,
+                    "horizon": horizon,
+                    "ticker": market["ticker"],
+                    "variant": "paper",
+                    "reason": "no trade by then",
+                }
             )
             continue
         out.append(
@@ -398,7 +448,14 @@ def paper_rows(item, base, horizon, kind, value, at, exclusions) -> list[dict]:
     return out
 
 
-def event_row(item: Scored, base: dict, horizon: str, at: int, quotes: list[Quote], strike_type: str) -> dict:
+def event_row(
+    item: Scored,
+    base: dict,
+    horizon: str,
+    at: int,
+    quotes: list[Quote],
+    strike_type: str,
+) -> dict:
     strikes = [q.strike for q in quotes]
     raw = [q.state.mid for q in quotes]
     repaired = scoring.isotonic_nonincreasing(raw)
@@ -414,7 +471,9 @@ def event_row(item: Scored, base: dict, horizon: str, at: int, quotes: list[Quot
         "repaired": repaired,
         "brackets": brackets,
         "violations": scoring.ladder_violations(raw),
-        "officialValue": None if not item.has_official else str(item.event.official.value),
+        "officialValue": (
+            None if not item.has_official else str(item.event.official.value)
+        ),
     }
     for source in ("official", "kalshi"):
         if source == "official":
@@ -422,13 +481,17 @@ def event_row(item: Scored, base: dict, horizon: str, at: int, quotes: list[Quot
                 continue
             value = item.event.official.value
             realized = scoring.realized_ladder_bracket(value, strikes, strike_type)
-            outcomes = [contracts.market_yes("ladder", strike_type, s, value) for s in strikes]
+            outcomes = [
+                contracts.market_yes("ladder", strike_type, s, value) for s in strikes
+            ]
         else:
             if not item.kalshi_realized_ok:
                 continue
             outcomes = [q.market["result"] == "yes" for q in quotes]
             realized = sum(outcomes)
-        row.update(score_brackets(brackets, repaired, realized, outcomes, suffix=source))
+        row.update(
+            score_brackets(brackets, repaired, realized, outcomes, suffix=source)
+        )
     return row
 
 
@@ -461,7 +524,9 @@ def usable(row: dict, source: str) -> bool:
     return row[outcome_key(source)] is not None
 
 
-def reliability_tables(rows, source="official", draws=calibration.MEAN_DRAWS, split=None):
+def reliability_tables(
+    rows, source="official", draws=calibration.MEAN_DRAWS, split=None
+):
     out: dict[str, Any] = {}
     y = outcome_key(source)
     groups = GROUPS if split is None else sorted({r[split] for r in rows})
@@ -469,8 +534,10 @@ def reliability_tables(rows, source="official", draws=calibration.MEAN_DRAWS, sp
         out[horizon] = {}
         for group in groups:
             chosen = [
-                r for r in rows
-                if r["horizon"] == horizon and usable(r, source)
+                r
+                for r in rows
+                if r["horizon"] == horizon
+                and usable(r, source)
                 and (in_group(r, group) if split is None else r[split] == group)
             ]
             clusters: dict[str, list] = defaultdict(list)
@@ -513,8 +580,10 @@ def event_scores(event_rows, source="official", cluster_key="cluster"):
         groups = list(GROUPS) + list(history.SERIES)
         for group in groups:
             chosen = [
-                r for r in event_rows
-                if r["horizon"] == horizon and f"log_{source}" in r
+                r
+                for r in event_rows
+                if r["horizon"] == horizon
+                and f"log_{source}" in r
                 and (in_group(r, group) if group in GROUPS else r["series"] == group)
             ]
             entry = {"events": len(chosen)}
@@ -536,53 +605,92 @@ def out_of_sample(binary_rows, event_rows, source="official", pooled=True):
         out[horizon] = {}
         for group in (GROUPS if pooled else ("all",)):
             rows = [
-                r for r in binary_rows
+                r
+                for r in binary_rows
                 if r["horizon"] == horizon and usable(r, source) and in_group(r, group)
             ]
             if not rows:
                 out[horizon][group] = {"folds": 0}
                 continue
             folds, skipped = calibration.forward_folds(
-                [r["cluster"] for r in rows], [r["at"] for r in rows], [r["releaseTs"] for r in rows]
+                [r["cluster"] for r in rows],
+                [r["at"] for r in rows],
+                [r["releaseTs"] for r in rows],
             )
             evs = defaultdict(list)
             for r in event_rows:
-                if r["horizon"] == horizon and f"log_{source}" in r and in_group(r, group):
+                if (
+                    r["horizon"] == horizon
+                    and f"log_{source}" in r
+                    and in_group(r, group)
+                ):
                     evs[r["cluster"]].append(r)
             per_model: dict[str, dict[str, dict[str, float]]] = {
                 m: defaultdict(dict) for m in calibration.FITTERS
             }
             maps_out = []
             for fold in folds:
-                table = calibration.aggregate((rows[i]["p"], rows[i][y]) for i in fold.train)
+                table = calibration.aggregate(
+                    (rows[i]["p"], rows[i][y]) for i in fold.train
+                )
                 test = [rows[i] for i in fold.test]
-                base_log = sum(calibration.binary_log_loss(r["p"], r[y]) for r in test) / len(test)
-                base_brier = sum(calibration.binary_brier(r["p"], r[y]) for r in test) / len(test)
+                base_log = sum(
+                    calibration.binary_log_loss(r["p"], r[y]) for r in test
+                ) / len(test)
+                base_brier = sum(
+                    calibration.binary_brier(r["p"], r[y]) for r in test
+                ) / len(test)
                 fold_events = evs.get(fold.cluster, [])
                 for name, fitter in calibration.FITTERS.items():
                     mapping = fitter(table)
-                    maps_out.append({"cluster": fold.cluster, "model": name, "params": mapping.params, "converged": mapping.converged})
-                    log = sum(calibration.binary_log_loss(mapping(r["p"]), r[y]) for r in test) / len(test)
-                    brier = sum(calibration.binary_brier(mapping(r["p"]), r[y]) for r in test) / len(test)
+                    maps_out.append(
+                        {
+                            "cluster": fold.cluster,
+                            "model": name,
+                            "params": mapping.params,
+                            "converged": mapping.converged,
+                        }
+                    )
+                    log = sum(
+                        calibration.binary_log_loss(mapping(r["p"]), r[y]) for r in test
+                    ) / len(test)
+                    brier = sum(
+                        calibration.binary_brier(mapping(r["p"]), r[y]) for r in test
+                    ) / len(test)
                     per_model[name]["binaryLog"][fold.cluster] = base_log - log
                     per_model[name]["binaryBrier"][fold.cluster] = base_brier - brier
                     if fold_events:
                         d_log, d_brier = [], []
                         for e in fold_events:
-                            ladder = calibration.recalibrated_ladder(e["repaired"], mapping)
+                            ladder = calibration.recalibrated_ladder(
+                                e["repaired"], mapping
+                            )
                             brackets = scoring.ladder_to_brackets(ladder)
                             realized = e[f"realized_{source}"]
                             floored = scoring.floor_renormalize(brackets, FLOOR)
-                            d_log.append(scoring.log_score(floored, realized) - e[f"log_{source}"])
-                            d_brier.append(e[f"brier_{source}"] - scoring.brier_score(brackets, realized))
-                        per_model[name]["bracketLog"][fold.cluster] = sum(d_log) / len(d_log)
-                        per_model[name]["bracketBrier"][fold.cluster] = sum(d_brier) / len(d_brier)
+                            d_log.append(
+                                scoring.log_score(floored, realized)
+                                - e[f"log_{source}"]
+                            )
+                            d_brier.append(
+                                e[f"brier_{source}"]
+                                - scoring.brier_score(brackets, realized)
+                            )
+                        per_model[name]["bracketLog"][fold.cluster] = sum(d_log) / len(
+                            d_log
+                        )
+                        per_model[name]["bracketBrier"][fold.cluster] = sum(
+                            d_brier
+                        ) / len(d_brier)
             out[horizon][group] = {
                 "folds": len(folds),
                 "skippedFolds": len(skipped),
                 "testMarkets": sum(len(f.test) for f in folds),
                 "models": {
-                    name: {metric: calibration.bootstrap_fold_means(values) for metric, values in metrics.items()}
+                    name: {
+                        metric: calibration.bootstrap_fold_means(values)
+                        for metric, values in metrics.items()
+                    }
                     for name, metrics in per_model.items()
                 },
                 "lastMaps": maps_out[-2:],
@@ -618,14 +726,28 @@ def inventory(events: list[history.Event]) -> list[dict]:
                 "periodRelaxed": event.period_relaxed,
                 "markets": len(event.markets),
                 "droppedMarkets": event.dropped,
-                "officialValue": None if event.official is None else str(event.official.value),
-                "officialSecondReading": None if event.official is None else event.official.second_reading,
-                "releaseAt": None if event.official is None else event.official.release_at,
-                "sourceUrl": None if event.official is None else event.official.source_url,
-                "sourceSha256": None if event.official is None else event.official.source_sha256,
+                "officialValue": (
+                    None if event.official is None else str(event.official.value)
+                ),
+                "officialSecondReading": (
+                    None if event.official is None else event.official.second_reading
+                ),
+                "releaseAt": (
+                    None if event.official is None else event.official.release_at
+                ),
+                "sourceUrl": (
+                    None if event.official is None else event.official.source_url
+                ),
+                "sourceSha256": (
+                    None if event.official is None else event.official.source_sha256
+                ),
                 "officialNote": event.official_note,
                 "officialDelayed": event.official_delayed,
-                "kalshiExpirationValue": None if history.expiration_value(event) is None else str(history.expiration_value(event)),
+                "kalshiExpirationValue": (
+                    None
+                    if history.expiration_value(event) is None
+                    else str(history.expiration_value(event))
+                ),
                 "expirationAgrees": history.expiration_agrees(event),
                 "candidatesTried": event.candidates_tried,
             }
@@ -658,8 +780,15 @@ def run(
         "outsideScope": outside,
         "settlement": settlement_rows(events),
         "duplicatePeriods": [
-            {"series": k[0], "period": k[1], "events": [s.key for s in scored if (s.event.series, s.event.period) == k]}
-            for k, n in duplicates.items() if n > 1
+            {
+                "series": k[0],
+                "period": k[1],
+                "events": [
+                    s.key for s in scored if (s.event.series, s.event.period) == k
+                ],
+            }
+            for k, n in duplicates.items()
+            if n > 1
         ],
         "exclusions": rows["exclusions"],
         "lateCloses": late_closes(scored),
@@ -675,7 +804,14 @@ def run(
     paper_official = [r for r in rows["paper"] if r["hasOfficial"]]
     paper_volume = [r for r in paper_official if r["lifetimeVolume"] > PAPER_VOLUME]
     volume_rows = [
-        dict(r, volumeClass="above 20,000" if r["lifetimeVolume"] > PAPER_VOLUME else "at most 20,000")
+        dict(
+            r,
+            volumeClass=(
+                "above 20,000"
+                if r["lifetimeVolume"] > PAPER_VOLUME
+                else "at most 20,000"
+            ),
+        )
         for r in official_binary
     ]
     interior = [r for r in official_binary if INTERIOR[0] <= r["p"] <= INTERIOR[1]]
@@ -684,10 +820,16 @@ def run(
         "compression": (compression, (official_binary,), {}),
         # Secondary: clusters are events rather than release dates.
         "compressionByEvent": (
-            compression, ([dict(r, cluster=r["eventTicker"]) for r in official_binary],), {}
+            compression,
+            ([dict(r, cluster=r["eventTicker"]) for r in official_binary],),
+            {},
         ),
         "eventScores": (event_scores, (events_rows,), {}),
-        "eventScoresByEvent": (event_scores, (events_rows,), {"cluster_key": "eventTicker"}),
+        "eventScoresByEvent": (
+            event_scores,
+            (events_rows,),
+            {"cluster_key": "eventTicker"},
+        ),
         "outOfSample": (out_of_sample, (official_binary, events_rows), {}),
         # Sensitivities and secondary splits.
         "reliabilityRaw": (reliability_tables, (raw_rows,), {}),
@@ -699,16 +841,32 @@ def run(
         "compressionPaper": (compression, (paper_official,), {}),
         "reliabilityPaperVolume": (reliability_tables, (paper_volume,), {}),
         "compressionPaperVolume": (compression, (paper_volume,), {}),
-        "reliabilityKalshiResults": (reliability_tables, (binary,), {"source": "kalshi"}),
+        "reliabilityKalshiResults": (
+            reliability_tables,
+            (binary,),
+            {"source": "kalshi"},
+        ),
         "compressionKalshiResults": (compression, (binary,), {"source": "kalshi"}),
-        "eventScoresKalshiResults": (event_scores, (events_rows,), {"source": "kalshi"}),
+        "eventScoresKalshiResults": (
+            event_scores,
+            (events_rows,),
+            {"source": "kalshi"},
+        ),
         # Added after the CPI test run (deviation 6): prices away from the
         # one-cent floor and ceiling only.
         "reliabilityInterior": (reliability_tables, (interior,), {}),
         "compressionInterior": (compression, (interior,), {}),
-        "reliabilityBy_generation": (reliability_tables, (official_binary,), {"split": "generation"}),
+        "reliabilityBy_generation": (
+            reliability_tables,
+            (official_binary,),
+            {"split": "generation"},
+        ),
         "reliabilityBy_era": (reliability_tables, (official_binary,), {"split": "era"}),
-        "reliabilityBy_volume": (reliability_tables, (volume_rows,), {"split": "volumeClass"}),
+        "reliabilityBy_volume": (
+            reliability_tables,
+            (volume_rows,),
+            {"split": "volumeClass"},
+        ),
     }
     # Each job seeds its own generator, so threads do not change any number.
     with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as pool:

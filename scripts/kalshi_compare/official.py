@@ -34,7 +34,7 @@ class OfficialParseError(ValueError):
     pass
 
 
-class NoValuePublished(OfficialParseError):
+class NoValuePublishedError(OfficialParseError):
     """The release's table shows no value for the period (a dash)."""
 
 
@@ -167,14 +167,14 @@ def parse_bls_cpi(text: str, row: str) -> tuple[str, Decimal, Decimal | None, st
     # Older releases write ".2" and pad labels with dots; a dash marks a month
     # with no published value (the 2025 lapse in appropriations).
     cell = r"(?:-?\d*\.\d|-(?=\s))"
-    values = re.search(
-        rf"\b{re.escape(label)}\.*\s+((?:{cell}\s+){{7}}{cell})", table
-    )
+    values = re.search(rf"\b{re.escape(label)}\.*\s+((?:{cell}\s+){{7}}{cell})", table)
     if not values:
         raise OfficialParseError(f"CPI Table A row {label!r} not found")
     cells = values.group(1).split()
     if cells[6] == "-":
-        raise NoValuePublished(f"CPI Table A shows no {label!r} value for {period}")
+        raise NoValuePublishedError(
+            f"CPI Table A shows no {label!r} value for {period}"
+        )
     table_value = Decimal(cells[6])
     if row == "headline":
         lead = re.search(
@@ -249,7 +249,9 @@ def parse_bls_empsit(
             "Summary table A's fourth column is not the reference month"
         )
     if table.group(5) == "-":
-        raise NoValuePublished(f"Summary table A shows no unemployment rate for {period}")
+        raise NoValuePublishedError(
+            f"Summary table A shows no unemployment rate for {period}"
+        )
     value = Decimal(table.group(5))
     lead = re.search(
         r"unemployment rate\s+(?:was unchanged at|changed little at|was little"
@@ -508,7 +510,9 @@ def parse_abs_unemployment(text: str) -> tuple[str, Decimal, Decimal | None, str
     )
     if table:
         if month_period(table.group(3), f"20{table.group(4)}") != period:
-            raise OfficialParseError("ABS table's second column is not the reference month")
+            raise OfficialParseError(
+                "ABS table's second column is not the reference month"
+            )
         second = Decimal(table.group(6))
     else:
         table = re.search(r"Unemployment rate\s+(\d+\.\d)%\s+(\d+\.\d)%", text)

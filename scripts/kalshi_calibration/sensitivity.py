@@ -26,7 +26,9 @@ def horizon_class(score: dict) -> str:
         return "anchor_7d"
     if score["horizon"] == "release_minus_1d":
         return "anchor_1d"
-    lead = (kalshi.to_ts(score["releaseAt"]) - kalshi.to_ts(score["horizonAt"])) / 86_400
+    lead = (
+        kalshi.to_ts(score["releaseAt"]) - kalshi.to_ts(score["horizonAt"])
+    ) / 86_400
     if lead >= LEAD_EDGES[0]:
         return "anchor_30d"
     if lead >= LEAD_EDGES[1]:
@@ -38,9 +40,7 @@ def training_table(binary_rows: list[dict], horizon: str, before: int) -> dict:
     return calibration.aggregate(
         (r["p"], r["yOfficial"])
         for r in binary_rows
-        if r["horizon"] == horizon
-        and r["hasOfficial"]
-        and r["releaseTs"] < before
+        if r["horizon"] == horizon and r["hasOfficial"] and r["releaseTs"] < before
     )
 
 
@@ -78,6 +78,116 @@ STATEMENT_SUBSETS = (
 )
 
 
+# The numbers #381's report quotes in its Summary
+# (~/reviews/thesis-vs-kalshi-2026-10/results/REPORT.md), as quoted.
+QUOTED_IN_381_SUMMARY = {
+    ("primary", "at_registration", "pooled", "deltaLog"): "+0.61 [-0.07, +1.66]",
+    ("primary", "at_registration", "pooled", "deltaBrier"): "+0.04 [-0.08, +0.21]",
+    ("primary", "at_registration", "excludingKalshiFloorHits", "deltaLog"): "+0.01",
+    (
+        "liquid_markets_only",
+        "at_registration",
+        "pooled",
+        "deltaLog",
+    ): "+0.05 [-0.03, +0.17]",
+    ("primary", "release_minus_7d", "pooled", "deltaLog"): "-0.17 [-0.40, +0.05]",
+    (
+        "primary",
+        "release_minus_7d",
+        "originalSeries",
+        "deltaLog",
+    ): "-0.28 [-0.54, -0.02]",
+    ("primary", "release_minus_1d", "pooled", "deltaLog"): "-0.12 [-0.46, +0.32]",
+    ("primary", "release_minus_1d", "pooled", "deltaBrier"): "-0.02 [-0.09, +0.05]",
+    (
+        "primary",
+        "release_minus_1d",
+        "excludingKalshiFloorHits",
+        "deltaLog",
+    ): "-0.35 [-0.59, -0.12]",
+    (
+        "primary",
+        "release_minus_1d",
+        "sameEventsAsRegistration",
+        "deltaLog",
+    ): "-0.27 [-0.53, -0.01]",
+    (
+        "liquid_markets_only",
+        "release_minus_1d",
+        "pooled",
+        "deltaLog",
+    ): "-0.35 [-0.59, -0.11]",
+    (
+        "liquid_markets_only",
+        "release_minus_1d",
+        "pooled",
+        "deltaBrier",
+    ): "-0.07 [-0.14, +0.01]",
+    (
+        "last_trade_price",
+        "release_minus_1d",
+        "pooled",
+        "deltaLog",
+    ): "+0.15 [-0.30, +0.65]",
+    (
+        "last_trade_price",
+        "release_minus_1d",
+        "excludingKalshiFloorHits",
+        "deltaLog",
+    ): "-0.36 [-0.62, -0.09]",
+}
+SPEC_WORDS = {
+    "primary": "midpoint prices",
+    "liquid_markets_only": "books quoted within 20 cents",
+    "last_trade_price": "last traded prices",
+}
+HORIZON_WORDS = {
+    "at_registration": "at Thesis's registration time",
+    "release_minus_7d": "seven days before release",
+    "release_minus_1d": "one day before release",
+}
+SUBSET_WORDS = {
+    "pooled": "all events",
+    "excludingKalshiFloorHits": (
+        "events where Kalshi did not price the outcome at the floor"
+    ),
+    "originalSeries": "the eight original series",
+    "sameEventsAsRegistration": "the events also scored at registration",
+}
+METRIC_WORDS = {"deltaLog": "log-score difference", "deltaBrier": "Brier difference"}
+
+
+def signed(x: float) -> str:
+    return f"{x:+.3f}"
+
+
+def interval(ci) -> str:
+    return f"[{signed(ci[0])}, {signed(ci[1])}]"
+
+
+def describe(row: dict) -> str:
+    """One #381 statement and how recalibration moves it, in words."""
+    key = (row["spec"], row["horizon"], row["subset"], row["metric"])
+    what = (
+        f"the {METRIC_WORDS[row['metric']]} {HORIZON_WORDS[row['horizon']]} "
+        f"({SPEC_WORDS[row['spec']]}, {SUBSET_WORDS[row['subset']]}, "
+        f"{row['nBefore']} events)"
+    )
+    before = f"{signed(row['meanBefore'])} {interval(row['ciBefore'])}"
+    after = f"{signed(row['meanAfter'])} {interval(row['ciAfter'])}"
+    how = []
+    if row.get("signFlips"):
+        how.append("its mean changes sign")
+    if row.get("zeroInclusionChanges"):
+        how.append(
+            "its interval now includes zero"
+            if includes_zero(row["ciAfter"])
+            else "its interval no longer includes zero"
+        )
+    quoted = " (quoted in #381's Summary)" if key in QUOTED_IN_381_SUMMARY else ""
+    return f"{what}{quoted} moves from {before} to {after}: {' and '.join(how)}"
+
+
 def statements(summary: dict) -> list[dict]:
     """Every pooled number of the kind #381's Summary quotes, flattened."""
     out = []
@@ -110,7 +220,9 @@ def includes_zero(interval) -> bool:
 
 
 def compare(original: list[dict], recalibrated: list[dict]) -> list[dict]:
-    index = {(s["spec"], s["horizon"], s["subset"], s["metric"]): s for s in recalibrated}
+    index = {
+        (s["spec"], s["horizon"], s["subset"], s["metric"]): s for s in recalibrated
+    }
     rows = []
     for before in original:
         key = (before["spec"], before["horizon"], before["subset"], before["metric"])
@@ -132,9 +244,9 @@ def compare(original: list[dict], recalibrated: list[dict]) -> list[dict]:
                 }
             )
             flips = (before["mean"] > 0) != (after["mean"] > 0)
-            zero_changes = includes_zero(before["ci95ReleaseClustered"]) != includes_zero(
-                after["ci95ReleaseClustered"]
-            )
+            zero_changes = includes_zero(
+                before["ci95ReleaseClustered"]
+            ) != includes_zero(after["ci95ReleaseClustered"])
             row["signFlips"] = flips
             row["zeroInclusionChanges"] = zero_changes
             row["changes"] = flips or zero_changes
@@ -177,7 +289,9 @@ def run(results_381: dict, binary_rows: list[dict]) -> dict[str, Any]:
                     "params": mapping.params,
                 }
             )
-        summary = compare_pipeline.summarize_pairs(compare_pipeline.build_pairs(new_scores))
+        summary = compare_pipeline.summarize_pairs(
+            compare_pipeline.build_pairs(new_scores)
+        )
         comparison = compare(original, statements(summary))
         out["models"][model] = {
             "summary": summary,

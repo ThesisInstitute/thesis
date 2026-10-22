@@ -235,7 +235,9 @@ class ClusterStats:
 
 
 def cluster_stats(rows: Iterable[tuple[float, int]], bins: int = BINS) -> ClusterStats:
-    stats = ClusterStats([0.0] * bins, [0.0] * bins, [0.0] * bins, 0.0, 0.0, [0, 0], [0, 0])
+    stats = ClusterStats(
+        [0.0] * bins, [0.0] * bins, [0.0] * bins, 0.0, 0.0, [0, 0], [0, 0]
+    )
     for p, y in rows:
         b = bin_of(p, bins)
         stats.n[b] += 1
@@ -253,7 +255,9 @@ def cluster_stats(rows: Iterable[tuple[float, int]], bins: int = BINS) -> Cluste
 
 
 def combine(stats: Sequence[ClusterStats], bins: int = BINS) -> ClusterStats:
-    out = ClusterStats([0.0] * bins, [0.0] * bins, [0.0] * bins, 0.0, 0.0, [0, 0], [0, 0])
+    out = ClusterStats(
+        [0.0] * bins, [0.0] * bins, [0.0] * bins, 0.0, 0.0, [0, 0], [0, 0]
+    )
     for s in stats:
         for b in range(bins):
             out.n[b] += s.n[b]
@@ -274,16 +278,22 @@ def summary_of(stats: ClusterStats) -> dict:
     if total == 0:
         return {"n": 0}
     base = sum(stats.sum_y) / total
-    reliability = sum(
-        (stats.sum_p[b] - stats.sum_y[b]) ** 2 / stats.n[b]
-        for b in range(len(stats.n))
-        if stats.n[b]
-    ) / total
-    resolution = sum(
-        stats.n[b] * (stats.sum_y[b] / stats.n[b] - base) ** 2
-        for b in range(len(stats.n))
-        if stats.n[b]
-    ) / total
+    reliability = (
+        sum(
+            (stats.sum_p[b] - stats.sum_y[b]) ** 2 / stats.n[b]
+            for b in range(len(stats.n))
+            if stats.n[b]
+        )
+        / total
+    )
+    resolution = (
+        sum(
+            stats.n[b] * (stats.sum_y[b] / stats.n[b] - base) ** 2
+            for b in range(len(stats.n))
+            if stats.n[b]
+        )
+        / total
+    )
     brier = stats.sum_sq / total
     return {
         "n": total,
@@ -294,8 +304,10 @@ def summary_of(stats: ClusterStats) -> dict:
         "resolution": resolution,
         "uncertainty": base * (1 - base),
         "withinBin": brier - (reliability - resolution + base * (1 - base)),
-        "ece": sum(abs(stats.sum_p[b] - stats.sum_y[b]) for b in range(len(stats.n)))
-        / total,
+        "ece": (
+            sum(abs(stats.sum_p[b] - stats.sum_y[b]) for b in range(len(stats.n)))
+            / total
+        ),
         "belowHalf": None if not stats.below[0] else stats.below[1] / stats.below[0],
         "aboveHalf": None if not stats.above[0] else stats.above[1] / stats.above[0],
         "bins": [
@@ -345,7 +357,15 @@ def bootstrap_reliability(
                 collected[f"freq{b}"].append(summary["bins"][b]["freq"])
     point["ci95"] = {
         name: percentile_interval(collected[name])
-        for name in ("brier", "logLoss", "reliability", "resolution", "ece", "belowHalf", "aboveHalf")
+        for name in (
+            "brier",
+            "logLoss",
+            "reliability",
+            "resolution",
+            "ece",
+            "belowHalf",
+            "aboveHalf",
+        )
     }
     for b in range(bins):
         point["bins"][b]["ci95"] = percentile_interval(collected[f"freq{b}"])

@@ -36,16 +36,30 @@ EXCERPT_DOCS = {
     "bls_cpi_2022-07": "https://www.bls.gov/news.release/archives/cpi_08102022.htm",
     "bls_cpi_2025-11": "https://www.bls.gov/news.release/archives/cpi_12182025.htm",
     "bls_cpi_2025-12": "https://www.bls.gov/news.release/archives/cpi_01132026.htm",
-    "bls_empsit_2025-11": "https://www.bls.gov/news.release/archives/empsit_12162025.htm",
-    "bls_empsit_2025-12": "https://www.bls.gov/news.release/archives/empsit_01092026.htm",
-    "bea_pio_2022-11": "https://www.bea.gov/news/2022/personal-income-and-outlays-november-2022",
-    "bea_pio_2024-11": "https://www.bea.gov/news/2024/personal-income-and-outlays-november-2024",
-    "bea_pio_2024-12": "https://www.bea.gov/news/2025/personal-income-and-outlays-december-2024",
-    "bea_pio_2025-03": "https://www.bea.gov/news/2025/personal-income-and-outlays-march-2025",
+    "bls_empsit_2025-11": (
+        "https://www.bls.gov/news.release/archives/empsit_12162025.htm"
+    ),
+    "bls_empsit_2025-12": (
+        "https://www.bls.gov/news.release/archives/empsit_01092026.htm"
+    ),
+    "bea_pio_2022-11": (
+        "https://www.bea.gov/news/2022/personal-income-and-outlays-november-2022"
+    ),
+    "bea_pio_2024-11": (
+        "https://www.bea.gov/news/2024/personal-income-and-outlays-november-2024"
+    ),
+    "bea_pio_2024-12": (
+        "https://www.bea.gov/news/2025/personal-income-and-outlays-december-2024"
+    ),
+    "bea_pio_2025-03": (
+        "https://www.bea.gov/news/2025/personal-income-and-outlays-march-2025"
+    ),
     "bea_pio_2025-10-11": (
         "https://www.bea.gov/news/2026/personal-income-and-outlays-october-and-november-2025"
     ),
-    "bea_pio_2026-03": "https://www.bea.gov/news/2026/personal-income-and-outlays-march-2026",
+    "bea_pio_2026-03": (
+        "https://www.bea.gov/news/2026/personal-income-and-outlays-march-2026"
+    ),
     "abs_lf_2026-02": (
         "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/"
         "labour-force-australia/feb-2026"
@@ -59,8 +73,13 @@ ANCHORS = {
     "bls_cpi": (
         (r"(?i)embargoed until", 0, 400),
         (r"CONSUMER PRICE INDEX\s*\W+\s*[A-Z]+ \d{4}", 0, 1200),
-        (r"index for all items less food and energy\s+(?:rose|increased|fell|declined|"
-         r"decreased|was unchanged|edged)", 0, 300),
+        (
+            r"index for all items less food and"
+            r" energy\s+(?:rose|increased|fell|declined|"
+            r"decreased|was unchanged|edged)",
+            0,
+            300,
+        ),
         (r"Table A\. Percent changes in CPI", 0, 2600),
     ),
     "bls_empsit": (
@@ -89,7 +108,9 @@ def excerpt(text: str, anchors) -> str:
     spans = []
     for pattern, before, after in anchors:
         for found in re.finditer(pattern, text):
-            spans.append((max(0, found.start() - before), min(len(text), found.start() + after)))
+            spans.append(
+                (max(0, found.start() - before), min(len(text), found.start() + after))
+            )
     spans.sort()
     merged: list[list[int]] = []
     for start, end in spans:
@@ -100,7 +121,9 @@ def excerpt(text: str, anchors) -> str:
     return " ".join(text[s:e] for s, e in merged)
 
 
-def write(cache: FetchCache, results: dict, events_built: list, directory: pathlib.Path) -> None:
+def write(
+    cache: FetchCache, results: dict, events_built: list, directory: pathlib.Path
+) -> None:
     directory = directory.expanduser()
     directory.mkdir(parents=True, exist_ok=True)
     markets_by_event: dict[str, list[dict]] = {}
@@ -144,4 +167,6 @@ def write(cache: FetchCache, results: dict, events_built: list, directory: pathl
             "kind": "html",
             "excerpt": excerpt(text, ANCHORS[kind]),
         }
-    (directory / "official_excerpts.json").write_text(json.dumps(excerpts, indent=1) + "\n")
+    (directory / "official_excerpts.json").write_text(
+        json.dumps(excerpts, indent=1) + "\n"
+    )

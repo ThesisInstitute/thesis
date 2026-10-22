@@ -344,4 +344,9 @@ changes 5 to 7 came after it, before the full run.
 7. **Market life ends at the release.** A market's life for the life
    fractions runs to its close or to the release, whichever is first, so no
    price after the release is read. The report lists every market that closed
-   after its release (`lateCloses`); if there are none, this changes nothing.
+   after its release (`lateCloses`): 77 markets in eight events (U-3 and
+   payrolls for January 2026; housing starts and permits for March 2026;
+   permits for April 2026; Australian unemployment for February, March and
+   September 2026); each event's last market closed 52 minutes to 3.9
+   hours after its release. Fixed horizons were already anchored at the
+   earlier of the release and the last close, as planned.

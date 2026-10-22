@@ -32,7 +32,9 @@ from kalshi_compare.fetch import FetchCache  # noqa: E402
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--out", type=pathlib.Path, required=True)
-    parser.add_argument("--cache", type=pathlib.Path, help="response store (default: <out>/fetch)")
+    parser.add_argument(
+        "--cache", type=pathlib.Path, help="response store (default: <out>/fetch)"
+    )
     parser.add_argument(
         "--as-of",
         default=dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -58,7 +60,9 @@ def main(argv: list[str] | None = None) -> int:
     events = results.pop("_events")
     if args.repro381:
         frozen = json.loads(args.repro381.expanduser().read_text())
-        results["analyses"]["sensitivity381"] = sensitivity.run(frozen, results["binaryRows"])
+        results["analyses"]["sensitivity381"] = sensitivity.run(
+            frozen, results["binaryRows"]
+        )
     (out / "results.json").write_text(json.dumps(results, indent=1, default=str) + "\n")
     report.write(results, out, report.summary_lines(results))
     if args.write_fixtures:
