@@ -74,9 +74,15 @@ n_bad = pe.certification_note(pe.POPULACE_BUILD, "1.784.3")
 check("CERT-2", "running 1.784.3 on build P is flagged UNCERTIFIED",
       n_bad["certified"] is False and n_bad["warning"], f"{n_bad}")
 
-n_good = pe.certification_note(pe.POPULACE_BUILD, "1.764.6")
-check("CERT-3", "running 1.764.6 on build P is certified", n_good["certified"] is True,
-      f"certified={n_good['certified']}")
+n_good = pe.certification_note(pe.POPULACE_BUILD, "1.764.6", running_core_version="3.26.11",
+                               validated_against="policyengine-us@1.764.6")
+check("CERT-3", "running 1.764.6 + core 3.26.11, validated on 1.764.6, on build P is certified",
+      n_good["certified"] is True, f"certified={n_good['certified']}")
+
+n_offver = pe.certification_note(pe.POPULACE_BUILD, "1.764.6", running_core_version="3.26.11",
+                                 validated_against="policyengine-us@1.784.3")
+check("CERT-5", "a reform validated on another model version is NOT certified (prb4 round 3)",
+      n_offver["certified"] is False and n_offver["warning"], f"{n_offver}")
 
 check("CERT-4", "the LOCALLY installed version is NOT certified for build P (must use Modal/1.764.6)",
       installed != cert, f"installed={installed!r} != certified={cert!r} -> local build-P runs would be uncertified")

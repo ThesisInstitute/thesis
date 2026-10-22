@@ -65,16 +65,44 @@ build P (populace-us-2024-buildp-…) certifies policyengine-us == 1.764.6  (+ c
 
 `policyengine-us==1.784.3` (the newest wheel) has **no released certified build**
 — the model advanced past the latest certified data. So to price on build P,
-install **1.764.6**, not the newest. The tool enforces this:
+install **1.764.6**, not the newest. The tool enforces this, fail-closed:
+`certification_note` certifies a run only when ALL of these hold, and every
+refusal says which failed.
+
+1. The build's release manifest is reachable and pins an exact
+   `policyengine-us` version.
+2. The running `policyengine-us`, **measured** in the process that computed
+   (package metadata there, `pe.runtime_stack()`), equals that pin. A driver's
+   own pin constant is what it asked the installer for, not what ran, and
+   never counts.
+3. The measured running `policyengine-core` equals the manifest's core pin,
+   when the manifest names one.
+4. The reform was validated against that same running model
+   (`validated_against == "policyengine-us@<running>"`). A reform checked on
+   another version can name a parameter the running model silently ignores.
 
 ```python
-pe.certification_note(build, running_version)
+pe.certification_note(build, running_version,
+                      running_core_version=core, validated_against=param_source)
 # -> {"certified": False, "warning": "UNCERTIFIED PAIRING: build certifies
-#     policyengine-us==1.764.6, running 1.784.3. Install the certified version."}
+#     policyengine-us==1.764.6, running 1.784.3. Install the certified version. ..."}
 ```
 
 `compute_block` carries this `certification` block on every run. A run whose
 `certification.certified` is false is **inadmissible** for a published number.
+
+**On published pages.** The bill page passes every compute row through one gate,
+`isPublishableCompute` (`site/src/lib/compute-publishability.ts`; its Python
+mirror is `publishable_compute_row` in `scripts/tools/attach_compute.py`, and both
+are pinned to `tests/fixtures/compute_publishability_cases.json`). A row that is
+not certified, or whose certification disagrees with the row's own versions,
+validation or build, still lists: model, build, engine, an "uncertified pairing"
+chip, the certification's reason, and the reform. It shows **no figure** — no
+stats, no summary, no note. There is no "claimed-tier" display for a model
+number. Nor is certification ever typed by hand: `attach_compute.py` refuses a
+registry row whose certification differs from the block `compute_block` emitted
+for its grounding run, and the tests require every committed row to be a
+registered, verified one.
 
 ## 0.3 Where the national microsim runs — Modal, not a laptop
 
@@ -83,10 +111,17 @@ sim substrate) with the certified stack pinned — see
 `scripts/tools/modal_economy.py`: a 32 GB function that installs
 `policyengine-us==1.764.6` + `core==3.26.11`, prices the reform on build P, and
 returns the full app-v2 metric set (budget, poverty by group, deciles,
-winners/losers, inequality). `modal run scripts/tools/modal_economy.py`
-(set `PYTHONIOENCODING=utf-8` on Windows or the CLI's `✓` crashes cp1252).
-Ten-year sweep: `modal run scripts/tools/modal_economy.py::sweep` — one
-container per year in parallel.
+winners/losers, inequality). The audited wrapper ships into the container:
+before any microsim the container measures its own installed versions
+(`pe.require_runtime_stack`, which refuses on any mismatch with the pins) and
+validates the reform against that running model, and the result reports those
+measured versions and that validation — which is what certification checks.
+The local preflight validation is never recorded. Single year:
+`modal run scripts/tools/modal_economy.py::main` (set `PYTHONIOENCODING=utf-8`
+on Windows or the CLI's `✓` crashes cp1252). Ten-year sweep:
+`modal run scripts/tools/modal_economy.py::sweep` — one container per year in
+parallel; the sweep refuses unless every container measured the same stack, and
+records its own certification.
 
 Capture rules for compute drivers (each violated once on 2026-07-31; both
 failures were recoverable only because results print before any file write):
@@ -197,7 +232,8 @@ PolicyEngine versions:
 | `winners_losers` | share gaining / losing >5%, <5%, no change |
 
 Provenance on every run (for the audit): `engine` (local/api), `dataset` (the
-pinned Populace build for local runs), `pe_us_version`, `param_source`,
+pinned Populace build for local runs), `pe_us_version` and `pe_core_version`
+(measured; `None` for the hosted API, whose model version is unknowable), `param_source`,
 `checked_existence`, `reform_policy_id`, `baseline_policy_id`, `computed_at`.
 
 ### Status is not always "ok"

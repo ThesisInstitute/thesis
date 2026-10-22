@@ -8,10 +8,20 @@ core==3.26.11 for build P) — running an uncertified model/data pair is exactly
 what the #45 audit exists to prevent.
 
 Wrapper routing (review finding, #64 — the audit artifact must not bypass the
-wrapper it audits): the local entrypoint validates the reform FAIL-CLOSED via
-pe.validate_reform before submitting, and every completed run is recorded as a
-pe.EconomyRun -> pe._log_call (bills/compute-log audit trail) with the bill.json
-row produced by pe.compute_block. The remote function only computes.
+wrapper it audits): every completed run is recorded as a pe.EconomyRun ->
+pe._log_call (bills/compute-log audit trail) with the bill.json row produced by
+pe.compute_block.
+
+Certification at exact runtime (review finding, prb4 round 3): the wrapper ships
+INTO the container. Before any microsim the container measures its own installed
+policyengine-us / policyengine-core (pe.require_runtime_stack — refuses on any
+mismatch with the pins) and validates the reform FAIL-CLOSED against that same
+running model (pe.validate_reform there). The result carries those measured
+versions and that validation, and certification compares them to the build's
+release manifest. The PE_US/PE_CORE constants below are install pins only — never
+reported as what ran. The local entrypoints still run a cheap validation
+preflight before submitting, but it checks whatever model is installed locally,
+so it is never the recorded validation.
 
 Budget aggregation (review finding, #64): federal = engine's own federal
 variables — income_tax (federal 1040 net liability incl. refundable credits)
@@ -39,6 +49,7 @@ PE_US = "1.764.6"
 PE_CORE = "3.26.11"
 BUILD_P = "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z"
 DATASET = f"hf://datasets/policyengine/populace-us/populace_us_2024.h5@{BUILD_P}"
+REMOTE_TOOLS = "/opt/thesis-tools"  # where the audited wrapper lands in the container
 
 def _out_dir() -> Path:
     # Resolved LAZILY at the local entrypoint only — the Modal container mounts
@@ -55,6 +66,9 @@ image = (
         "microdf-python",
         "huggingface-hub",
     )
+    # The audited wrapper rides along so the container certifies itself.
+    .add_local_file(Path(__file__).resolve().parent / "policyengine.py",
+                    f"{REMOTE_TOOLS}/policyengine.py")
 )
 
 app = modal.App("stronger-start-buildp-economy")
@@ -64,6 +78,22 @@ app = modal.App("stronger-start-buildp-economy")
 def economy(reform: dict, year: int) -> dict:
     import warnings
     warnings.filterwarnings("ignore")
+    sys.path.insert(0, REMOTE_TOOLS)
+    import policyengine as pe  # the audited wrapper, measuring THIS container
+    if not str(Path(pe.__file__).resolve()).startswith(REMOTE_TOOLS):
+        raise RuntimeError(f"wrong policyengine module imported: {pe.__file__}")
+
+    # Measure what is installed HERE, before computing — certification records
+    # what ran, never the pins this driver asked pip for.
+    stack = pe.require_runtime_stack({pe.MODEL_PACKAGE: PE_US, pe.CORE_PACKAGE: PE_CORE})
+    # Validate against the exact model that prices the reform (fail-closed).
+    v = pe.validate_reform(reform)
+    if not v.ok:
+        raise pe.PolicyEngineError("reform failed validation:\n  - " + "\n  - ".join(v.problems))
+    if v.param_source != f"{pe.MODEL_PACKAGE}@{stack[pe.MODEL_PACKAGE]}":
+        raise pe.PolicyEngineError(f"validation ran against {v.param_source}, not the running "
+                                   f"{pe.MODEL_PACKAGE}@{stack[pe.MODEL_PACKAGE]}")
+
     import numpy as np
     from policyengine_us import Microsimulation
     from policyengine_core.reforms import Reform
@@ -151,8 +181,11 @@ def economy(reform: dict, year: int) -> dict:
     return {
         "engine": "modal",
         "dataset": BUILD_P,
-        "pe_us_version": PE_US,
-        "pe_core_version": PE_CORE,
+        "pe_us_version": stack[pe.MODEL_PACKAGE],    # measured in-container
+        "pe_core_version": stack[pe.CORE_PACKAGE],   # measured in-container
+        "versions_measured_in_container": True,
+        "validation": {"param_source": v.param_source, "checked_existence": v.checked_existence,
+                       "problems": v.problems},
         "year": year,
         "reform": reform,
         "budget": {
@@ -180,19 +213,31 @@ def _wrapper():
     return pe
 
 
-def _validate_or_die(pe, reform: dict):
+def _preflight(pe, reform: dict) -> None:
+    """Cheap local check before paying for containers. It validates against the
+    LOCALLY installed model (or the metadata API), so it is never recorded — the
+    recorded validation is the container's, against the model that ran."""
     v = pe.validate_reform(reform)  # FAIL-CLOSED: refuses if existence unverifiable
     if not v.ok:
-        raise SystemExit("reform failed validation:\n  - " + "\n  - ".join(v.problems))
-    print(f"validated [{v.param_source}] checked_existence={v.checked_existence}")
-    return v
+        raise SystemExit("reform failed preflight validation:\n  - " + "\n  - ".join(v.problems))
+    print(f"preflight validated [{v.param_source}] (not recorded; the container re-validates)")
 
 
-def _record(pe, v, result: dict, provision: str) -> dict:
+def _measured(result: dict) -> tuple:
+    """The provenance a remote result must carry before it is recorded."""
+    if result.get("versions_measured_in_container") is not True:
+        raise SystemExit("remote result lacks in-container version measurement — refusing to record")
+    val = result["validation"]
+    return result["pe_us_version"], result["pe_core_version"], val["param_source"], val["checked_existence"]
+
+
+def _record(pe, result: dict, provision: str) -> dict:
     """Register the remote result in the wrapper's audit trail and emit the
     bill.json compute row via pe.compute_block — the artifact goes through the
     wrapper, never around it."""
     from datetime import datetime, timezone
+
+    us, core, param_source, checked = _measured(result)
 
     imp = {
         "budgetary_impact": result["budget"]["budgetary_impact"],
@@ -206,8 +251,8 @@ def _record(pe, v, result: dict, provision: str) -> dict:
     run = pe.EconomyRun(
         "ok", result["year"], "us", "us", result["reform"], None, pe.baseline_id("us"),
         impact=imp, message="ok", engine="modal", dataset=result["dataset"],
-        pe_us_version=result["pe_us_version"], param_source=v.param_source,
-        checked_existence=v.checked_existence,
+        pe_us_version=us, pe_core_version=core, param_source=param_source,
+        checked_existence=checked,
         computed_at=datetime.now(timezone.utc).isoformat(),
     )
     pe._log_call(run, pe.DEFAULT_LOG_DIR)
@@ -217,10 +262,10 @@ def _record(pe, v, result: dict, provision: str) -> dict:
 @app.local_entrypoint()
 def main():
     pe = _wrapper()
-    v = _validate_or_die(pe, STRONGER_START)
+    _preflight(pe, STRONGER_START)
     result = economy.remote(STRONGER_START, 2026)
     print(json.dumps(result, indent=2))
-    block = _record(pe, v, result,
+    block = _record(pe, result,
                     "Sec. 2 — strike refundable CTC earnings threshold ($2,500 -> $1)")
     print(json.dumps(block, indent=2))
     with open(_out_dir() / "buildP-economy-2026.json", "w") as f:
@@ -234,10 +279,12 @@ def sweep(start: int = 2026, end: int = 2035):
     """Ten-year sweep, one container per year in parallel:
     modal run scripts/tools/modal_economy.py::sweep"""
     pe = _wrapper()
-    v = _validate_or_die(pe, STRONGER_START)
+    _preflight(pe, STRONGER_START)
     years = list(range(start, end + 1))
     rows = []
+    provenance = set()
     for res in economy.map([STRONGER_START] * len(years), years):
+        provenance.add(_measured(res))
         rows.append({
             "year": res["year"],
             "budgetary_impact": res["budget"]["budgetary_impact"],
@@ -247,11 +294,17 @@ def sweep(start: int = 2026, end: int = 2035):
             "child_poverty_baseline": res["poverty"]["child"]["baseline"],
             "child_poverty_reform": res["poverty"]["child"]["reform"],
         })
+    if len(provenance) != 1:
+        raise SystemExit(f"sweep containers disagree on their measured stack: {sorted(provenance)}")
+    us, core, param_source, checked = provenance.pop()
     rows.sort(key=lambda r: r["year"])
     total = sum(r["budgetary_impact"] for r in rows)
-    out = {"dataset": BUILD_P, "pe_us_version": PE_US, "pe_core_version": PE_CORE,
-           "engine": "modal", "reform": STRONGER_START,
-           "validation": {"param_source": v.param_source, "checked_existence": v.checked_existence},
+    certification = pe.certification_note(BUILD_P, us, running_core_version=core,
+                                          validated_against=param_source if checked else None)
+    out = {"dataset": BUILD_P, "pe_us_version": us, "pe_core_version": core,
+           "engine": "modal", "versions_measured_in_container": True, "reform": STRONGER_START,
+           "validation": {"param_source": param_source, "checked_existence": checked},
+           "certification": certification,
            "years": rows, "ten_year_budgetary_impact": total}
     print(json.dumps(out, indent=2))
     with open(_out_dir() / f"buildP-sweep-{start}-{end}.json", "w") as f:
