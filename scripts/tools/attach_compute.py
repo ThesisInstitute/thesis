@@ -31,8 +31,12 @@ from pathlib import Path
 BILLS_DIR = Path(__file__).resolve().parents[2] / "bills"
 
 # Registry of audited compute rows, keyed by (slug, provision index).
-# S.3596 row: certified build-P run, Modal, 2026-07-31 — full artifact at
-# bills/stronger-start-working-families-act/buildP-economy-2026.json.
+# S.3596 row: build-P run on Modal, re-run 2026-10-22 with versions measured
+# in-container and the reform validated there (the 2026-07-31 run's figures,
+# reproduced exactly, could not prove either) — full artifacts in
+# bills/stronger-start-working-families-act/. `certification` is copied verbatim
+# from compute-row-2026.json (pe.compute_block output); the drift guard below
+# refuses any other value.
 ROWS: dict[tuple[str, int], list[dict]] = {
     ("s3596-119", 0): [
         {
@@ -54,10 +58,16 @@ ROWS: dict[tuple[str, int], list[dict]] = {
             "pe_us_version": "1.764.6",
             "pe_core_version": "3.26.11",
             "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+            "param_source": "policyengine-us@1.764.6",
             "certification": {
+                "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
                 "certified_model_version": "1.764.6",
                 "running_model_version": "1.764.6",
+                "certified_core_version": "3.26.11",
+                "running_core_version": "3.26.11",
+                "validated_against": "policyengine-us@1.764.6",
                 "certified": True,
+                "warning": None,
             },
             "year": 2026,
             "region": "us",
@@ -74,10 +84,11 @@ ROWS: dict[tuple[str, int], list[dict]] = {
             ),
             "source": (
                 "Audited call path scripts/tools/policyengine.py per POLICYENGINE.md; "
-                "run scripts/tools/modal_economy.py 2026-07-31 on the certified stack; "
-                "full artifacts bills/stronger-start-working-families-act/"
-                "buildP-economy-2026.json and buildP-sweep-2026-2035.json "
-                "(sum-checked; PR #64)."
+                "run scripts/tools/modal_economy.py 2026-10-22 on the certified stack, "
+                "versions measured and reform validated in the container (reproduces "
+                "the 2026-07-31 run exactly); full artifacts "
+                "bills/stronger-start-working-families-act/buildP-economy-2026.json "
+                "and buildP-sweep-2026-2035.json (sum-checked; PRs #64, #392)."
             ),
         }
     ],

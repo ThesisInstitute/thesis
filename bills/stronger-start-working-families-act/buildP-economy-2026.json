@@ -3,6 +3,12 @@
   "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
   "pe_us_version": "1.764.6",
   "pe_core_version": "3.26.11",
+  "versions_measured_in_container": true,
+  "validation": {
+    "param_source": "policyengine-us@1.764.6",
+    "checked_existence": true,
+    "problems": []
+  },
   "year": 2026,
   "reform": {
     "gov.irs.credits.ctc.refundable.phase_in.threshold": {

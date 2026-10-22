@@ -159,10 +159,16 @@
           "pe_us_version": "1.764.6",
           "pe_core_version": "3.26.11",
           "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "param_source": "policyengine-us@1.764.6",
           "certification": {
+            "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
             "certified_model_version": "1.764.6",
             "running_model_version": "1.764.6",
-            "certified": false
+            "certified_core_version": "3.26.11",
+            "running_core_version": "3.26.11",
+            "validated_against": "policyengine-us@1.764.6",
+            "certified": true,
+            "warning": null
           },
           "year": 2026,
           "region": "us",
@@ -172,8 +178,8 @@
           "ten_year_window": "2026-2035",
           "poverty_child_pct_change": -0.0115527,
           "beneficiaries_share": 0.0648,
-          "note": "Certification pending (prb4 re-review, 2026-07-31): the committed evidence validates against policyengine-us@1.784.3 while the Modal artifact records pe_us_version 1.764.6, and the validation path has fail-open branches — 'certified' is not yet proven at exact runtime. Figure retained as claimed-tier evidence with this caveat. Static microsim, one evidence stream with its own error bars. Anchors: PolicyEngine -$1.6B/yr on an older data build; Tax Policy Center ~$1.0B/yr.",
-          "source": "Audited call path scripts/tools/policyengine.py per POLICYENGINE.md; run scripts/tools/modal_economy.py 2026-07-31 on the certified stack; full artifacts bills/stronger-start-working-families-act/buildP-economy-2026.json and buildP-sweep-2026-2035.json (sum-checked; PR #64)."
+          "note": "Static microsim, one evidence stream with its own error bars. Anchors: PolicyEngine -$1.6B/yr on an older data build; Tax Policy Center ~$1.0B/yr.",
+          "source": "Audited call path scripts/tools/policyengine.py per POLICYENGINE.md; run scripts/tools/modal_economy.py 2026-10-22 on the certified stack, versions measured and reform validated in the container (reproduces the 2026-07-31 run exactly); full artifacts bills/stronger-start-working-families-act/buildP-economy-2026.json and buildP-sweep-2026-2035.json (sum-checked; PRs #64, #392)."
         }
       ]
     }

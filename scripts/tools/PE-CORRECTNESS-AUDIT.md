@@ -251,6 +251,44 @@ the compute_block fix had silently rolled back in an aborted edit script — the
 fail-closed gate fired correctly at its own author on first real use; fixed
 with two regression tests (18 passing).
 
+## 8a. Certification was asserted, not measured (prb4 round 3, fixed 2026-10-22)
+
+After #64 merged, the Sol round-3 review found the certification chain itself
+unproven: the committed evidence validated against `policyengine-us@1.784.3`
+(the 2026 row; the sweep against `@1.661.0`) while the Modal artifact recorded
+1.764.6. That 1.764.6 was the driver's own `PE_US` pin constant echoed back,
+never read in the container. So `certified: true` could not fail. The row was
+then hand-flipped to `certified: false` and published anyway, with the note
+"Figure retained as claimed-tier evidence" — which §0.2 forbids, since an
+uncertified run is inadmissible for a published number.
+
+*Fixed (#392):*
+1. **Measured, not asserted.** `certification_note` certifies only when the
+   running `policyengine-us` and `policyengine-core`, measured from package
+   metadata in the process that computed (`pe.runtime_stack`), match the
+   build's manifest pins, and the reform was validated against that same
+   running model. `modal_economy.py` ships the wrapper into the container,
+   which runs `pe.require_runtime_stack` and `pe.validate_reform` before any
+   microsim and reports what it measured. The local preflight is never
+   recorded. Hosted-API runs no longer record the local machine's version.
+2. **Published pages withhold uncertified figures.** One gate,
+   `isPublishableCompute` / `publishable_compute_row`, pinned to
+   `tests/fixtures/compute_publishability_cases.json`. A failing row lists its
+   provenance and reason, and no figure.
+3. **No hand-typed certification.** `attach_compute.py` requires the registry
+   row's certification to equal the `compute_block` output of its grounding run,
+   with versions and `param_source` equal to the measured artifact values. Tests
+   require every committed bill row to be a registered, verified row.
+
+**Re-run, 2026-10-22, Modal** (2026: `ap-3hNH8qQe8MgQudwigCL6fh`; sweep:
+`ap-pC0HjguLRapdnimfkCfcEV`): measured `policyengine-us==1.764.6` +
+`policyengine-core==3.26.11`, validated in-container on `policyengine-us@1.764.6`,
+certified. Every metric reproduces the 2026-07-31 run bit for bit: 2026
+**−$1,826,050,568.80**; ten-year **−$17,069,142,980.93**; all ten sweep years,
+poverty, deciles, winners/losers and Gini identical. The headline did not move;
+only now is it proven at exact runtime. Edit record:
+`bills/provenance/s3596-119/compute-recertification-2026-10-22.json`.
+
 ## 9. Verdict
 
 With the tool in place, an agent **cannot**: invent a parameter (VAL-2 blocks it
