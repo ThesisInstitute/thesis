@@ -290,6 +290,20 @@ def test_legacy_rule_periods():
         history.event_period({"title": "CPI in June 2022?"}, other_month, "monthly")[0]
         is None
     )
+    # A legacy rule naming another month without a year is refused too.
+    other_month_alone = [
+        {
+            "ticker": "CPI-21JUN-T0.6",
+            "rules_primary": "If the CPI increases by more than 0.6% in July, then the "
+            "market resolves to Yes.",
+        }
+    ]
+    assert (
+        history.event_period(
+            {"title": "CPI in June 2021?"}, other_month_alone, "monthly"
+        )[0]
+        is None
+    )
 
 
 # Official parsers on older and shutdown-era layouts -----------------------------
@@ -468,7 +482,7 @@ def test_no_candle_after_the_horizon(candles, hour):
         assert all(c.end > at for c in candles)
 
 
-def synthetic_item(candles_by_ticker, open_ts, close_ts, anchor):
+def synthetic_item(candles_by_ticker, open_ts, close_ts, anchor, release=None):
     markets = []
     strikes = {}
     for index, ticker in enumerate(sorted(candles_by_ticker)):
@@ -486,7 +500,14 @@ def synthetic_item(candles_by_ticker, open_ts, close_ts, anchor):
     event.period = "2026-01"
     event.settled = True
     return pipeline.Scored(
-        event, candles_by_ticker, {}, False, anchor, anchor, "2026-01-01", True
+        event,
+        candles_by_ticker,
+        {},
+        False,
+        anchor,
+        anchor if release is None else release,
+        "2026-01-01",
+        True,
     )
 
 
@@ -499,14 +520,22 @@ def test_every_horizon_reads_only_earlier_candles(histories, data):
     tickers = [f"M{i}" for i in range(len(histories))]
     opens = [data.draw(st.integers(0, 500)) * 3600 for _ in tickers]
     closes = [o + data.draw(st.integers(1, 1500)) * 3600 for o in opens]
-    anchor = max(closes)
-    item = synthetic_item(dict(zip(tickers, histories)), opens, closes, anchor)
+    # Some markets may close after the release (77 did in the study's data).
+    release = (
+        data.draw(st.integers(min(opens) // 3600 + 1, max(closes) // 3600 + 48)) * 3600
+    )
+    anchor = min(release, max(closes))
+    item = synthetic_item(dict(zip(tickers, histories)), opens, closes, anchor, release)
     for name, kind, value in pipeline.HORIZONS:
         at = pipeline.event_instant(item, name)
         if kind == "fixed":
             assert at == anchor - value
         else:
             assert item.event.first_open <= at <= anchor
+            for market in item.event.markets:
+                t = pipeline.market_instant(item, market, value)
+                opened = kalshi.to_ts(market["open_time"])
+                assert t <= max(item.release_ts, opened)
         quotes, _ = pipeline.quotes_at(item, at)
         assert all(q.state.candle_end <= at for q in quotes)
         assert all(kalshi.to_ts(q.market["open_time"]) <= at for q in quotes)
@@ -558,13 +587,20 @@ def test_forward_folds_never_train_on_later_outcomes(cluster_ids, data):
     # Releases follow the cluster's day; instants come before the release.
     releases = [c * 100 + data.draw(st.integers(0, 50)) for c in cluster_ids]
     instants = [r - data.draw(st.integers(0, 400)) for r in releases]
+    # Other scored items (event brackets) can sit earlier than every market.
+    other = {}
+    for cluster in sorted(set(clusters)):
+        if data.draw(st.booleans()):
+            own = min(i for i, k in zip(instants, clusters) if k == cluster)
+            other[cluster] = own - data.draw(st.integers(0, 300))
     folds, skipped = calibration.forward_folds(
-        clusters, instants, releases, min_clusters=2
+        clusters, instants, releases, min_clusters=2, other_instants=other
     )
     assert {f.cluster for f in folds} | set(skipped) == set(clusters)
     for fold in folds:
         assert all(clusters[i] == fold.cluster for i in fold.test)
-        assert fold.first_instant == min(instants[i] for i in fold.test)
+        own = min(instants[i] for i in fold.test)
+        assert fold.first_instant == min(own, other.get(fold.cluster, own))
         assert all(releases[i] < fold.first_instant for i in fold.train)
         assert not set(fold.train) & set(fold.test)
 

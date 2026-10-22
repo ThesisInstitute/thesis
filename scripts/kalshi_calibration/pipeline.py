@@ -548,20 +548,33 @@ def reliability_tables(
             stats = {k: calibration.cluster_stats(v) for k, v in clusters.items()}
             summary = calibration.bootstrap_reliability(stats, draws=draws)
             summary["events"] = len(events)
+            bin_events: dict[int, set] = defaultdict(set)
+            bin_clusters: dict[int, set] = defaultdict(set)
+            for r in chosen:
+                b = calibration.bin_of(r["p"])
+                bin_events[b].add(r["eventTicker"])
+                bin_clusters[b].add(r["cluster"])
+            for entry in summary.get("bins", []):
+                entry["events"] = len(bin_events[entry["bin"]])
+                entry["clusters"] = len(bin_clusters[entry["bin"]])
             out[horizon][group] = summary
     return out
 
 
-def compression(rows, source="official", draws=calibration.REFIT_DRAWS):
+def compression(rows, source="official", draws=calibration.REFIT_DRAWS, split=None):
     out: dict[str, Any] = {}
     y = outcome_key(source)
+    groups = GROUPS if split is None else sorted({r[split] for r in rows})
     for horizon in HORIZON_NAMES:
         out[horizon] = {}
-        for group in GROUPS:
+        for group in groups:
             tables: dict[str, list] = defaultdict(list)
+            events = set()
             for r in rows:
-                if r["horizon"] == horizon and usable(r, source) and in_group(r, group):
+                member = in_group(r, group) if split is None else r[split] == group
+                if r["horizon"] == horizon and usable(r, source) and member:
                     tables[r["cluster"]].append((r["p"], r[y]))
+                    events.add(r["eventTicker"])
             if len(tables) < 2:
                 out[horizon][group] = {"clusters": len(tables)}
                 continue
@@ -569,6 +582,7 @@ def compression(rows, source="official", draws=calibration.REFIT_DRAWS):
             fit = calibration.bootstrap_logistic(aggregated, draws=draws)
             fit["verdict"] = calibration.verdict(fit["betaCi95"])
             fit["n"] = sum(len(v) for v in tables.values())
+            fit["events"] = len(events)
             out[horizon][group] = fit
     return out
 
@@ -612,11 +626,6 @@ def out_of_sample(binary_rows, event_rows, source="official", pooled=True):
             if not rows:
                 out[horizon][group] = {"folds": 0}
                 continue
-            folds, skipped = calibration.forward_folds(
-                [r["cluster"] for r in rows],
-                [r["at"] for r in rows],
-                [r["releaseTs"] for r in rows],
-            )
             evs = defaultdict(list)
             for r in event_rows:
                 if (
@@ -625,6 +634,12 @@ def out_of_sample(binary_rows, event_rows, source="official", pooled=True):
                     and in_group(r, group)
                 ):
                     evs[r["cluster"]].append(r)
+            folds, skipped = calibration.forward_folds(
+                [r["cluster"] for r in rows],
+                [r["at"] for r in rows],
+                [r["releaseTs"] for r in rows],
+                other_instants={k: min(e["at"] for e in v) for k, v in evs.items()},
+            )
             per_model: dict[str, dict[str, dict[str, float]]] = {
                 m: defaultdict(dict) for m in calibration.FITTERS
             }
@@ -856,6 +871,17 @@ def run(
         # one-cent floor and ceiling only.
         "reliabilityInterior": (reliability_tables, (interior,), {}),
         "compressionInterior": (compression, (interior,), {}),
+        "reliabilityBy_series": (
+            reliability_tables,
+            (official_binary,),
+            {"split": "series"},
+        ),
+        "compressionBySeries": (compression, (official_binary,), {"split": "series"}),
+        "outOfSampleKalshiResults": (
+            out_of_sample,
+            (binary, events_rows),
+            {"source": "kalshi"},
+        ),
         "reliabilityBy_generation": (
             reliability_tables,
             (official_binary,),

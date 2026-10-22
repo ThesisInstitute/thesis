@@ -69,7 +69,13 @@ def recalibrated_score(score: dict, mapping: calibration.Map, floor: float) -> d
     }
 
 
-STATEMENT_SPECS = ("primary", "liquid_markets_only", "last_trade_price")
+STATEMENT_SPECS = (
+    "primary",
+    "liquid_markets_only",
+    "last_trade_price",
+    "literal_cdf_reading",
+    "floor_0.01",
+)
 STATEMENT_SUBSETS = (
     "pooled",
     "excludingKalshiFloorHits",
@@ -140,6 +146,8 @@ SPEC_WORDS = {
     "primary": "midpoint prices",
     "liquid_markets_only": "books quoted within 20 cents",
     "last_trade_price": "last traded prices",
+    "literal_cdf_reading": "the literal CDF reading",
+    "floor_0.01": "a 0.01 log-score floor",
 }
 HORIZON_WORDS = {
     "at_registration": "at Thesis's registration time",

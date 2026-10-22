@@ -489,10 +489,14 @@ def forward_folds(
     instants: Sequence[int],
     releases: Sequence[int],
     min_clusters: int = MIN_TRAIN_CLUSTERS,
+    other_instants: dict[str, int] | None = None,
 ) -> tuple[list[Fold], list[str]]:
     """One fold per cluster; train on rows released before its first instant.
 
-    Returns (evaluated folds, clusters skipped for too little history).
+    ``other_instants`` gives, per cluster, the earliest instant of anything
+    else scored in the fold (event-level brackets), so the cutoff also
+    precedes those. Returns (evaluated folds, clusters skipped for too little
+    history).
     """
     by_cluster: dict[str, list[int]] = defaultdict(list)
     for index, cluster in enumerate(clusters):
@@ -502,6 +506,8 @@ def forward_folds(
     for cluster in sorted(by_cluster):
         test = tuple(by_cluster[cluster])
         first = min(instants[i] for i in test)
+        if other_instants and cluster in other_instants:
+            first = min(first, other_instants[cluster])
         train = tuple(i for i in order if releases[i] < first)
         if len({clusters[i] for i in train}) < min_clusters:
             skipped.append(cluster)
