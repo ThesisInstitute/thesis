@@ -54,7 +54,9 @@ def _log(*targets: tuple[str, str, str]) -> dict:
     }
 
 
-def _status(log, text=REAL_LOG, *, claimed=(), registrations=None, as_of=AS_OF):
+def _status(
+    log, text=REAL_LOG, *, claimed=(), registrations=None, as_of=AS_OF, voided=None
+):
     resolver_targets, run = rs.parse_resolver_log(text)
     return rs.build_status(
         log,
@@ -63,6 +65,7 @@ def _status(log, text=REAL_LOG, *, claimed=(), registrations=None, as_of=AS_OF):
         claimed_refs=set(claimed),
         registrations=registrations or {},
         as_of=as_of,
+        **({} if voided is None else {"voided_targets": voided}),
     )
 
 
@@ -113,7 +116,9 @@ def test_the_real_run_is_read_as_failed_with_its_error():
     ],
 )
 def test_real_resolver_lines_classify(ref, state, code):
-    row = _status(_log((ref, "a-slug", "2026-08-01")))["targets"][ref]
+    # How these runs' lines read, before any void: d1633 has since voided
+    # the BEA cell, which test_voided_targets.py covers.
+    row = _status(_log((ref, "a-slug", "2026-08-01")), voided={})["targets"][ref]
     assert (row["state"], row["code"]) == (state, code)
     assert row["reason"] == rs.REASONS[code]
     assert row["forecastSlug"] == "a-slug" and row["resolutionDate"] == "2026-08-01"
@@ -337,6 +342,7 @@ def test_every_code_the_rules_can_emit_has_a_reason():
             "NO_REPORT",
             "NOT_REACHED",
             "NO_RESOLVER_RUN",
+            "VOIDED",
         }
     )
     assert emitted - {"UNCLASSIFIED"} <= set(rs.REASONS)
@@ -512,6 +518,19 @@ def test_a_summary_line_alone_still_reports_its_target():
         (
             "fetch/parse failed (deferring): {ref} — ValueError: bad table",
             "UNCLASSIFIED",
+        ),
+        (
+            "LEGACY RELEASE CAPTURE READ FAILED (deferring): "
+            "https://web.archive.org/web/20260904123456/https://www.bls.gov/"
+            "news.release/empsit.nr0.htm has no verifiable index digest, and an "
+            "unread earlier capture cannot be skipped: {ref}",
+            "SOURCE_UNREACHABLE",
+        ),
+        (
+            "PRINTED PRECISION BELOW CONTRACT (refusing, ruling pending): {ref} — "
+            "the registered page states total job openings only in its text, to "
+            "0.1 million, and this contract reads a thousands figure",
+            "PRINTED_PRECISION_BELOW_CONTRACT",
         ),
     ],
 )
@@ -1050,6 +1069,7 @@ def test_the_run_cancelled_at_its_timeout_is_not_read_as_completed():
         text=CANCELLED_LOG,
         claimed=[ref],
         as_of=dt.date(2026, 10, 15),
+        voided={},  # read as of 10-15, before d1633 voided this cell
     )["targets"][ref]
     assert (row["state"], row["code"]) == ("unknown", "NOT_REACHED")
     assert row["reason"] == rs.REASONS["NOT_REACHED"]

@@ -68,8 +68,42 @@ def install_main(monkeypatch, reg, release_date=None):
     monkeypatch.setattr(rp, "fred_vintage_series", no_network)
 
 
-@pytest.mark.parametrize("content_hash", CAPTURE)
-def test_each_of_twelve_refs_reaches_capture_leg(monkeypatch, capsys, content_hash):
+HELD = [h for h in CAPTURE if CAPTURE[h]["parser"] in rp.LEGACY_RELEASE_PRECISION_HELD]
+UNHELD = [h for h in CAPTURE if h not in HELD]
+
+
+def test_only_the_two_jolts_openings_cells_are_held() -> None:
+    assert sorted(CAPTURE[h]["contract"]["dataPointId"] for h in HELD) == [
+        "bls.jolts.job_openings.august_2026.first_print",
+        "bls.jolts.job_openings.july_2026.first_print",
+    ]
+    assert len(UNHELD) == 10
+
+
+@pytest.mark.parametrize("content_hash", HELD)
+def test_a_held_cell_refuses_before_any_capture_is_read(
+    monkeypatch, capsys, content_hash
+):
+    reg = registration(content_hash)
+    install_main(monkeypatch, reg)
+
+    def never(*_args, **_kwargs):
+        pytest.fail("a held cell must not be discovered or parsed")
+
+    monkeypatch.setattr(rp, "a19_registered_capture", never)
+    monkeypatch.setattr(rp, "parse_release", never)
+    rp.main()
+    output = capsys.readouterr().out
+    ref = reg["contract"]["dataPointId"]
+    assert (
+        "  PRINTED PRECISION BELOW CONTRACT (refusing, ruling pending): "
+        f"{ref} — {rp.LEGACY_RELEASE_PRECISION_HELD['jolts_job_openings']}"
+    ) in output
+    assert "would append" not in output
+
+
+@pytest.mark.parametrize("content_hash", UNHELD)
+def test_each_unheld_ref_reaches_capture_leg(monkeypatch, capsys, content_hash):
     reg = registration(content_hash)
     install_main(monkeypatch, reg)
     contract = reg["contract"]
@@ -96,8 +130,9 @@ def test_each_of_twelve_refs_reaches_capture_leg(monkeypatch, capsys, content_ha
         )
 
     monkeypatch.setattr(rp, "a19_registered_capture", discover)
-    # 5004 is a level float multiplication gets wrong (5.0040000000000004);
-    # the leg converts with Decimal, so JOLTS thousands become exactly 5.004.
+    # 5004 is a level float multiplication by 0.001 gets wrong
+    # (5.0040000000000004); the leg multiplies with Decimal. Every unheld
+    # cell registers factor 1, so the figure passes through unchanged.
     monkeypatch.setattr(rp, "parse_release", lambda html, parser_id: (period, 5004.0))
     facts = []
     fact_builder = rp.legacy_release_capture_fact

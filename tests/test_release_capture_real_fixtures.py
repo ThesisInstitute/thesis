@@ -1,11 +1,11 @@
 """The parsers against real Archive captures of non-target months.
 
 Each fixture is the exact body the Archive stores for one capture (its ``id_``
-form), with the index row's digest beside it. The expected values are read
-from the same release's own prose, by a pattern that shares no code with the
-table parser, so each test is a differential check of the table cell the
-parser pins. No fixture is a capture of a month any reviewed contract
-forecasts.
+form), with the index row's digest beside it. Each pinned figure is checked
+against a second source that shares no code with its parser: for CPI, the
+release's own prose; for the Employment Situation and JOLTS pages, the
+first-print ALFRED vintage recorded in the sidecar. No fixture is a capture
+of a month any reviewed contract forecasts.
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ import json
 import pathlib
 import re
 import sys
+from decimal import ROUND_HALF_UP, Decimal
 
 import pytest
 
@@ -23,6 +24,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import resolve_pending  # noqa: E402
 from legacy_release_contracts import LEGACY_RELEASE_CAPTURE_CONTRACTS  # noqa: E402
+from legacy_release_parsers import LABELS as LEGACY_RELEASE_LABELS  # noqa: E402
 from legacy_release_parsers import parse_release  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures" / "release_capture"
@@ -117,12 +119,104 @@ def test_cpi_table_a_cells_agree_with_the_release_prose() -> None:
     assert headline != core
 
 
-def test_a_real_cpi_release_is_refused_for_a_parser_of_another_page() -> None:
-    _meta, _raw, html = _load(FIXTURES / "cpi.nr0-20260720045436.json")
-    for parser_id in (
+_PAGE_PARSERS = {
+    "https://www.bls.gov/news.release/cpi.nr0.htm": {
+        "cpi_headline_mom",
+        "cpi_core_mom",
+    },
+    "https://www.bls.gov/news.release/empsit.nr0.htm": {
         "empsit_unemployment_rate",
         "empsit_payroll_change",
-        "jolts_job_openings",
-        "jolts_quits_rate",
-    ):
-        assert parse_release(html, parser_id) is None
+    },
+    "https://www.bls.gov/news.release/jolts.nr0.htm": {"jolts_job_openings"},
+    "https://www.bls.gov/news.release/jolts.t04.htm": {"jolts_quits_rate"},
+}
+
+
+def test_every_reviewed_page_and_parser_has_a_real_fixture() -> None:
+    contracts = {
+        (entry["contract"]["sourceBinding"]["sourceUrl"], entry["parser"])
+        for entry in LEGACY_RELEASE_CAPTURE_CONTRACTS.values()
+    }
+    assert contracts == {
+        (url, parser_id) for url, ids in _PAGE_PARSERS.items() for parser_id in ids
+    }
+    fixtures = {json.loads(sidecar.read_text())["sourceUrl"] for sidecar in CAPTURES}
+    assert fixtures == set(_PAGE_PARSERS)
+
+
+@pytest.mark.parametrize("sidecar", CAPTURES, ids=lambda p: p.stem)
+def test_each_real_page_is_read_only_by_its_own_parsers(sidecar: pathlib.Path) -> None:
+    meta, _raw, html = _load(sidecar)
+    own = _PAGE_PARSERS[meta["sourceUrl"]]
+    for parser_id in LEGACY_RELEASE_LABELS:
+        reading = parse_release(html, parser_id)
+        assert (reading is not None) is (parser_id in own), parser_id
+
+
+_INDEPENDENT = [
+    (sidecar, parser_id)
+    for sidecar in CAPTURES
+    for parser_id in json.loads(sidecar.read_text()).get("independentFirstPrint", {})
+]
+
+
+@pytest.mark.parametrize(
+    ("sidecar", "parser_id"),
+    _INDEPENDENT,
+    ids=[f"{sidecar.stem}-{parser_id}" for sidecar, parser_id in _INDEPENDENT],
+)
+def test_each_figure_agrees_with_the_independent_first_print(
+    sidecar: pathlib.Path, parser_id: str
+) -> None:
+    meta, _raw, html = _load(sidecar)
+    independent = meta["independentFirstPrint"][parser_id]
+    match = re.search(r"(\d{4}) M(\d{2})", meta["title"])
+    assert match is not None
+    reading = parse_release(html, parser_id)
+    assert reading is not None
+    assert reading[0] == f"{match.group(1)}-{match.group(2)}"
+    expected = Decimal(str(independent["value"]))
+    precision = independent.get("printedPrecision")
+    if precision is not None:
+        expected = expected.quantize(Decimal(str(precision)), ROUND_HALF_UP)
+    assert Decimal(str(reading[1])) == expected
+
+
+def test_every_non_cpi_fixture_records_an_independent_first_print() -> None:
+    for sidecar in CAPTURES:
+        meta = json.loads(sidecar.read_text())
+        if "cpi" in sidecar.stem:
+            continue
+        assert set(meta["independentFirstPrint"]) == _PAGE_PARSERS[meta["sourceUrl"]]
+
+
+def test_the_jolts_summary_prints_openings_only_rounded_so_the_cells_are_held() -> None:
+    """The evidence behind resolve_pending.LEGACY_RELEASE_PRECISION_HELD."""
+    meta, _raw, html = _load(FIXTURES / "jolts.nr0-20260810093236.json")
+    assert "<table" not in html.lower()
+    assert re.search(r"\b7,?359\b", html) is None
+    assert parse_release(html, "jolts_job_openings") == ("2026-06", 7.4)
+    assert set(resolve_pending.LEGACY_RELEASE_PRECISION_HELD) == {"jolts_job_openings"}
+    factors = {
+        entry["contract"]["sourceBinding"]["transform"]["factor"]
+        for entry in LEGACY_RELEASE_CAPTURE_CONTRACTS.values()
+        if entry["parser"] == "jolts_job_openings"
+    }
+    # The contracts read thousands; the page prints 0.1 million.
+    assert factors == {0.001}
+    assert meta["independentFirstPrint"]["jolts_job_openings"]["value"] == 7.359
+
+
+def test_one_disagreeing_statement_in_a_real_release_refuses_the_read() -> None:
+    _meta, _raw, html = _load(FIXTURES / "empsit.nr0-20260810222604.json")
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    lead = "unemployment rate (4.1 percent)"
+    assert html.count(lead) == 1
+    changed = html.replace(lead, "unemployment rate (4.3 percent)")
+    assert parse_release(changed, "empsit_unemployment_rate") is None
+    assert parse_release(html, "empsit_payroll_change") == ("2026-07", -23.0)
+    section = "changed little in July (-23,000)"
+    assert html.count(section) == 1
+    changed = html.replace(section, "changed little in July (-24,000)")
+    assert parse_release(changed, "empsit_payroll_change") is None

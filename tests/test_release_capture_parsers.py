@@ -1,8 +1,10 @@
-"""Synthetic release layouts; these are not claimed Archive-capture fixtures.
+"""Synthetic table layouts; these are not claimed Archive-capture fixtures.
 
-Values for CPI/employment/JOLTS are from the permitted historical releases,
-never the target months. Prose/table checks here exercise parser selection
-only. Real Archive captures are tested in test_release_capture_real_fixtures.py.
+These cover the table pages (CPI Table A, JOLTS Table 4). Values are from
+permitted historical releases, never the target months. The prose pages
+(Employment Situation and JOLTS summaries) are covered by
+test_release_capture_prose.py, and real Archive captures of every page by
+test_release_capture_real_fixtures.py.
 """
 
 from __future__ import annotations
@@ -24,11 +26,12 @@ IDS = tuple(SPECS)
 EXPECTED = {
     "cpi_headline_mom": ("2026-07", 0.1),
     "cpi_core_mom": ("2026-07", 0.2),
-    "empsit_unemployment_rate": ("2026-07", 4.1),
-    "empsit_payroll_change": ("2026-07", -23.0),
-    "jolts_job_openings": ("2026-06", 7359.0),
     "jolts_quits_rate": ("2026-06", 2.0),
 }
+
+
+def test_every_table_parser_has_a_synthetic_layout() -> None:
+    assert set(IDS) == set(EXPECTED)
 
 
 def _cell(value: object, target: bool = False) -> str:
@@ -63,78 +66,6 @@ def _fixture(parser_id: str) -> str:
             body += f'<tr data-row="{key}"><th>{row}</th>'
             body += _cell("0.8") + _cell(printed, parser_id == key) + _cell("3.4")
             body += "</tr>"
-    elif parser_id.startswith("empsit_"):
-        title = "Employment Situation Summary"
-        is_rate = parser_id.endswith("rate")
-        caption = (
-            "Summary table A. Household data, seasonally adjusted [Numbers in "
-            "thousands]"
-            if is_rate
-            else "Summary table B. Establishment data, seasonally adjusted"
-        )
-        marker = "" if is_rate else "(p)"
-        header = (
-            "<tr><th>Category</th><th>July 2025</th><th>June 2026</th>"
-            f"<th>July 2026{marker}</th>"
-            + ("<th>Change from: June 2026-July 2026</th>" if is_rate else "")
-            + "</tr>"
-        )
-        if is_rate:
-            body = (
-                '<tr><th colspan="5">Employment status</th></tr>'
-                '<tr data-row="empsit_unemployment_rate"><th>Unemployment rate</th>'
-                + _cell("4.3")
-                + _cell("4.2")
-                + _cell(value, True)
-                + _cell("-0.1")
-                + "</tr>"
-            )
-        else:
-            body = (
-                '<tr><th colspan="4">EMPLOYMENT BY SELECTED INDUSTRY '
-                "(Over-the-month change, in thousands)</th></tr>"
-                '<tr data-row="empsit_payroll_change"><th>Total nonfarm</th>'
-                + _cell("64")
-                + _cell("20")
-                + _cell(value, True)
-                + "</tr>"
-                '<tr><th colspan="4">(3-month average change, in thousands)</th></tr>'
-                "<tr><th>Total nonfarm</th>"
-                + _cell("19")
-                + _cell("77")
-                + _cell("20")
-                + "</tr>"
-            )
-    elif parser_id == "jolts_job_openings":
-        title = "Job Openings and Labor Turnover Summary"
-        caption = (
-            "Table A. Job openings, hires, and total separations by industry, "
-            "seasonally adjusted"
-        )
-        header = (
-            '<tr><th rowspan="2">Industry</th>'
-            '<th colspan="3">Job openings</th>'
-            '<th colspan="3">Hires</th>'
-            '<th colspan="3">Total separations</th></tr>'
-            + "<tr>"
-            + "<th>April 2026</th><th>May 2026</th><th>June 2026(P)</th>" * 3
-            + "</tr>"
-        )
-        body = (
-            '<tr><th colspan="10">LEVELS BY INDUSTRY (in thousands)</th></tr>'
-            '<tr data-row="jolts_job_openings"><th>Total</th>'
-            + _cell("7190")
-            + _cell("7537")
-            + _cell("7,359", True)
-            + "".join(_cell(number) for number in (5100, 5200, 5300, 4900, 5000, 5100))
-            + "</tr>"
-            '<tr><th colspan="10">RATES BY INDUSTRY (percent)</th></tr>'
-            '<tr data-row="jolts_openings_rate"><th>Total</th>'
-            + "".join(
-                _cell(number) for number in (4.3, 4.5, 4.4, 3.1, 3.2, 3.3, 3, 3.1, 3.2)
-            )
-            + "</tr>"
-        )
     elif parser_id == "jolts_quits_rate":
         title = (
             "Table 4. Quits levels and rates by industry and region, "
@@ -237,20 +168,11 @@ def test_duplicate_table_or_title_and_unclosed_table_refuse(parser_id: str) -> N
         assert parse_release(mutated, parser_id) is None
 
 
-def test_payroll_never_uses_three_month_average_when_monthly_row_missing() -> None:
-    html = _fixture("empsit_payroll_change")
-    row = re.search(r'<tr data-row="empsit_payroll_change">.*?</tr>', html)[0]
-    assert parse_release(html.replace(row, ""), "empsit_payroll_change") is None
-
-
 def test_unknown_parser_refuses() -> None:
     assert parse_release(_fixture("cpi_headline_mom"), "unknown") is None
 
 
-@pytest.mark.parametrize(
-    "parser_id",
-    ("cpi_headline_mom", "cpi_core_mom", "jolts_job_openings"),
-)
+@pytest.mark.parametrize("parser_id", ("cpi_headline_mom", "cpi_core_mom"))
 def test_unknown_group_note_is_not_silently_stripped(parser_id: str) -> None:
     html = _fixture(parser_id)
     group = SPECS[parser_id].group
@@ -258,9 +180,7 @@ def test_unknown_group_note_is_not_silently_stripped(parser_id: str) -> None:
     assert parse_release(html.replace(group, group + "(2)"), parser_id) is None
 
 
-@pytest.mark.parametrize(
-    "parser_id", ("empsit_payroll_change", "jolts_job_openings", "jolts_quits_rate")
-)
+@pytest.mark.parametrize("parser_id", ("jolts_quits_rate",))
 def test_only_known_preliminary_header_markers_strip(parser_id: str) -> None:
     html = _fixture(parser_id)
     assert parse_release(html.replace("(p)", "(P)"), parser_id) == EXPECTED[parser_id]
@@ -367,48 +287,9 @@ def test_numeric_overflow_refuses_instead_of_returning_infinity(parser_id: str) 
     assert parse_release(html, parser_id) is None
 
 
-@pytest.mark.parametrize(
-    "parser_id", ("empsit_unemployment_rate", "empsit_payroll_change")
-)
-def test_employment_section_can_occupy_only_the_stub_beside_blank_data_cells(
-    parser_id: str,
-) -> None:
-    html = _fixture(parser_id)
-    section = SPECS[parser_id].section
-    assert section is not None
-    row = _target_row(html, parser_id)
-    columns = 1 + len(re.findall(r"<td\b", row))
-    original = f'<tr><th colspan="{columns}">{section}</th></tr>'
-    assert original in html
-    # Both common forms are layout only: the section identity remains pinned
-    # by row-selection state even when it is absent above numeric columns.
-    for blank_cells in (
-        f'<td colspan="{columns - 1}"></td>',
-        "<td></td>" * (columns - 1),
-    ):
-        changed = f"<tr><th>{section}</th>{blank_cells}</tr>"
-        assert (
-            parse_release(html.replace(original, changed), parser_id)
-            == EXPECTED[parser_id]
-        )
-        assert (
-            parse_release(
-                html.replace(original, changed.replace(section, "Unknown section")),
-                parser_id,
-            )
-            is None
-        )
-
-
-def test_jolts_openings_never_uses_table_a_rate_row_if_level_row_is_missing() -> None:
-    html = _fixture("jolts_job_openings")
-    level_row = _target_row(html, "jolts_job_openings")
-    assert parse_release(html.replace(level_row, ""), "jolts_job_openings") is None
-
-
-def test_jolts_openings_requires_summary_table_a_not_full_release_table_1() -> None:
-    # Full archived releases also contain Table 1. It is not the registered
-    # nr0 summary's pinned table, even when it has a superficially valid cell.
+def test_jolts_openings_never_reads_a_table_even_a_valid_looking_table_1() -> None:
+    # Full archived releases also contain Table 1. The registered nr0 summary
+    # is prose; a table page with a superficially valid cell is not it.
     table_1 = (
         "<html><head><title>Job Openings and Labor Turnover Summary - "
         "2026 M06 Results</title></head><body><table>"
@@ -459,7 +340,7 @@ def test_the_rates_note_is_stripped_for_the_quits_table_only() -> None:
     quits = _fixture("jolts_quits_rate")
     assert "Rates(2)" in quits
     assert parse_release(quits, "jolts_quits_rate") == EXPECTED["jolts_quits_rate"]
-    for parser_id in ("cpi_headline_mom", "jolts_job_openings"):
+    for parser_id in ("cpi_headline_mom", "cpi_core_mom"):
         html = _fixture(parser_id)
         group = SPECS[parser_id].group
         assert group is not None

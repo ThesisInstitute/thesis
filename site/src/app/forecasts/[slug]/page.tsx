@@ -8,6 +8,7 @@ import { ForecastRuntime } from "@/components/ForecastRuntime";
 import {
   overdueNotice,
   RESOLUTION_STATUS_META,
+  VOIDED_CODE,
 } from "@/data/resolution-status";
 import {
   getPublishedForecast,
@@ -126,11 +127,17 @@ export default async function ForecastDetailPage({
               style={{ borderColor: "var(--theme-border)" }}
             >
               <p className="[font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.12em] text-[var(--theme-text-dim)]">
-                Overdue · was due {formatFullDate(overdue.since)}
+                {overdue.code === VOIDED_CODE ? "Void" : "Overdue"} · was due{" "}
+                {formatFullDate(overdue.since)}
               </p>
               <p className="mt-2 text-[0.92rem] leading-[1.6] text-[var(--theme-text)]">
                 {overdue.reason}
               </p>
+              {overdue.ruling && (
+                <p className="mt-1 [font-family:var(--font-mono)] text-[0.72rem] leading-[1.5] text-[var(--theme-text-muted)]">
+                  ruling: {overdue.ruling}
+                </p>
+              )}
               {overdue.detail && (
                 <p className="mt-1 [font-family:var(--font-mono)] text-[0.72rem] leading-[1.5] text-[var(--theme-text-muted)]">
                   resolver: {overdue.detail}

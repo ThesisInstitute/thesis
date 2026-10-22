@@ -13,7 +13,9 @@ printed (``detail`` carries the resolver's own words), or the fact that it
 printed none. A row for a reference the resolver has no route for may also
 carry ``registration``: registration facts (an adapter other than
 generic-url, a registered series spelled differently from the reference),
-never resolver output. A line shape this file does not
+never resolver output. A target a recorded ruling voided
+(``voided_targets.py``) is ``VOIDED`` and carries ``ruling``: the ruling's
+reason and date, never resolver output. A line shape this file does not
 know becomes ``UNCLASSIFIED`` with the resolver's own words, so a new
 refusal shows up as itself and is never dropped.
 
@@ -30,7 +32,11 @@ import json
 import pathlib
 import re
 import sys
+from collections.abc import Mapping
 from typing import Any
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from voided_targets import VOIDED_TARGETS, VoidedTarget  # noqa: E402
 
 SCHEMA_VERSION = "thesis_resolution_status_v1"
 
@@ -64,10 +70,16 @@ _LINE_RULES: tuple[tuple[re.Pattern[str], str, str], ...] = tuple(
         # "A-19 CAPTURE READ FAILED (deferring)": the Archive did not serve
         # the exact capture asked for (a transport error, or bytes that are
         # not that capture). A read failure, never a parse of what it holds.
+        # The legacy release leg shares the walk and prints the same verdict.
         (
-            r"^A-19 CAPTURE READ FAILED \(deferring\)$",
+            r"^(?:A-19|LEGACY RELEASE) CAPTURE READ FAILED \(deferring\)$",
             "fetch_failed",
             "SOURCE_UNREACHABLE",
+        ),
+        (
+            r"^PRINTED PRECISION BELOW CONTRACT \(refusing",
+            "refused",
+            "PRINTED_PRECISION_BELOW_CONTRACT",
         ),
         (r"^UNIT MISMATCH \(refusing\)$", "refused", "UNIT_MISMATCH"),
         (r"^IMPLAUSIBLE VALUE \(refusing", "refused", "IMPLAUSIBLE_VALUE"),
@@ -189,6 +201,17 @@ REASONS = {
     "SOURCE_DOES_NOT_PUBLISH_FIGURE": (
         "The registered source does not publish the figure this forecast "
         "names, so it cannot resolve mechanically."
+    ),
+    "PRINTED_PRECISION_BELOW_CONTRACT": (
+        "The registered page prints this figure only more coarsely than the "
+        "registered contract reads it. The resolver will not record it until "
+        "a ruling says whether the printed figure resolves the forecast."
+    ),
+    "VOIDED": (
+        "This forecast is void and will not resolve. A recorded ruling found "
+        "that its registered contract cannot be resolved as written. The "
+        "forecast and its trace stay on the record, and with no outcome it is "
+        "never scored."
     ),
     "ENVIRONMENT_FAILURE": (
         "The resolver reported an environment failure for this target on its last run."
@@ -429,6 +452,7 @@ def build_status(
     claimed_refs: set[str],
     registrations: dict[str, dict[str, Any]],
     as_of: dt.date,
+    voided_targets: Mapping[str, VoidedTarget] = VOIDED_TARGETS,
 ) -> dict[str, Any]:
     """One row per pending target whose resolution date is before `as_of`."""
     forecasts = {
@@ -445,8 +469,14 @@ def build_status(
         if not ref or not slug or not due or due >= as_of.isoformat():
             continue
         seen = resolver_targets.get(ref)
-        detail = registration = ""
-        if seen:
+        detail = registration = ruling = ""
+        voided = voided_targets.get(ref)
+        if voided is not None:
+            # A recorded ruling, never resolver output, and terminal: no
+            # resolver line about the reference can overrule it.
+            state, code = "voided", "VOIDED"
+            ruling = f"{voided.reason} Voided by ruling on {voided.ruled_on}."
+        elif seen:
             state, code, detail = seen["state"], seen["code"], seen["detail"]
             if state == "resolved_this_run" and not run["completed"]:
                 code = "RESOLVED_BUT_RUN_FAILED"
@@ -488,6 +518,7 @@ def build_status(
             "reason": reason,
             **({"detail": detail} if detail else {}),
             **({"registration": registration} if registration else {}),
+            **({"ruling": ruling} if ruling else {}),
         }
     ordered = dict(
         sorted(rows.items(), key=lambda item: (item[1]["resolutionDate"], item[0]))

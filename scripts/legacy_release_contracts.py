@@ -1,9 +1,10 @@
 """Exact legacy registrations reviewed for release-capture execution.
 
 These fingerprints are a run-time disposition for named historical targets,
-not an admission path for new generic-url registrations. Archive execution is
-held for founder decision d1633; this table does not change any registration,
-docket, waiver, or record. No target-window capture was read to build it.
+not an admission path for new generic-url registrations. Founder ruling d1633
+(2026-10-22) admitted Archive execution for exactly these hashes; this table
+does not change any registration, docket, waiver, or record. No target-window
+capture was read to build it.
 """
 
 from __future__ import annotations

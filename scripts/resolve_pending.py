@@ -137,6 +137,7 @@ from verify_custody import (
     require_claims_vintage_label,
     verify_run,
 )
+from voided_targets import VOIDED_TARGETS
 from witnessed_timeline import TimelineError, extract_timeline
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -12572,7 +12573,7 @@ def pending_claims_refs(log: dict) -> list[tuple[str, str, str, str]]:
         if link.get("status") != "pending":
             continue
         ref = link.get("targetFactRef")
-        if not ref:
+        if not ref or ref in VOIDED_TARGETS:
             continue
         forecast = forecasts.get(link.get("forecastSlug"))
         if not forecast:
@@ -13049,11 +13050,29 @@ def claims_corrections(
     return fetched, supersedes_by_ref, refusals
 
 
+# Reviewed legacy pages that print the registered figure only more coarsely
+# than the contract reads it, by parser. jolts.nr0.htm states total job
+# openings only in its text, to 0.1 million ("7.4 million" in the June 2026
+# release, tests/fixtures/release_capture/), while both openings contracts
+# read a thousands figure (valueScale 0.001). Whether to resolve at the
+# printed precision or void is ruling d1856's; until it rules, these cells
+# refuse before any capture is read. The reader returns millions as printed,
+# so lifting a hold takes a conversion the ruling sets, not only deleting
+# the entry: the registered 0.001 factor applied to 7.4 would record 0.0074.
+LEGACY_RELEASE_PRECISION_HELD: dict[str, str] = {
+    "jolts_job_openings": (
+        "the registered page states total job openings only in its text, to "
+        "0.1 million, and this contract reads a thousands figure"
+    ),
+}
+
+
 def legacy_release_spec(content_hash: str) -> tuple[str, dict[str, Any]] | None:
     """Route a reviewed hash without widening any series-stem executor.
 
-    These twelve Archive dispositions are held for founder ruling d1633.
-    Nothing here admits a new registration; generic-url is still refused by
+    Founder ruling d1633 admitted these twelve Archive dispositions (two of
+    them held by LEGACY_RELEASE_PRECISION_HELD). Nothing here admits a new
+    registration; generic-url is still refused by
     execution_plan_refusal. The full immutable contract is checked separately
     before the main loop makes any request.
     """
@@ -13203,7 +13222,9 @@ def pending_adapter_refs(
         if link.get("status") != "pending":
             continue
         ref = link.get("targetFactRef")
-        if not ref:
+        # A voided target is terminal: no family routes it, whatever its
+        # reference or registration would otherwise select.
+        if not ref or ref in VOIDED_TARGETS:
             continue
         forecast = forecasts.get(link.get("forecastSlug")) or {}
         release_date = str(forecast.get("resolutionDate") or "")
@@ -18142,6 +18163,15 @@ def _main() -> int:
             # capture requests. The shared A-19 walk authenticates every read
             # and refuses to skip an unidentified earlier HTTP 200 row.
             parser_id = spec["parser"]
+            held = LEGACY_RELEASE_PRECISION_HELD.get(parser_id)
+            if held is not None:
+                # Refused before any capture is read, so a held cell stays
+                # unread until a ruling says how to read it.
+                print(
+                    "  PRINTED PRECISION BELOW CONTRACT (refusing, ruling "
+                    f"pending): {ref} — {held}"
+                )
+                continue
             window = source_binding["expectedReleaseWindow"]
             registered_url = source_binding["sourceUrl"]
             discovery_key = (
@@ -18159,7 +18189,7 @@ def _main() -> int:
                     request_capture=False,
                     source_url=registered_url,
                     parser=lambda html: parse_release(html, parser_id),
-                    parser_name=f"BLS release table ({parser_id})",
+                    parser_name=f"the BLS release ({parser_id})",
                     require_digest=True,
                 )
             discovery = release_discovered[discovery_key]
@@ -18170,8 +18200,8 @@ def _main() -> int:
             if reading is None or reading[0] != period:
                 print(f"  LEGACY RELEASE PERIOD MISMATCH (refusing): {ref}")
                 continue
-            # Decimal multiplication preserves the published thousands to
-            # millions conversion without inventing additional precision.
+            # Decimal multiplication applies the registered factor without
+            # inventing precision the page did not print.
             factor = source_binding["transform"]["factor"]
             value = float(Decimal(str(reading[1])) * Decimal(str(factor)))
             raw = discovery.raw

@@ -5,6 +5,7 @@ import rawStatus from "@/data/resolution-status.json";
 import {
   NO_REPORT_REASON,
   RESOLUTION_STATUS_META,
+  VOIDED_CODE,
   overdueNotice,
   shortReason,
   type OverdueStatus,
@@ -89,6 +90,41 @@ describe("card wording", () => {
       "The resolver has no route for this target's reference.",
     );
     expect(shortReason("One sentence only.")).toBe("One sentence only.");
+  });
+});
+
+describe("voided targets", () => {
+  const voided: OverdueStatus = {
+    ...row,
+    state: "voided",
+    code: VOIDED_CODE,
+    reason:
+      "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written.",
+    ruling:
+      "The registered source is SSA's July 2026 table, so it cannot hold the August 2026 figure this forecast names. Voided by ruling on 2026-10-22.",
+  };
+  const notice = overdueNotice(
+    { slug: row.forecastSlug, status: "pending", resolutionDate: "2026-07-13" },
+    { asOf: "2026-10-22", lookup: () => voided },
+  );
+
+  it("carry the ruling, never as the resolver's words", () => {
+    expect(notice?.code).toBe(VOIDED_CODE);
+    expect(notice?.ruling).toBe(voided.ruling);
+    expect(notice && "detail" in notice).toBe(false);
+  });
+
+  it("lead the compact card with the void, not a refusal", () => {
+    expect(shortReason(voided.reason)).toBe(
+      "This forecast is void and will not resolve.",
+    );
+  });
+
+  it("are VOIDED in the committed file exactly when they carry a ruling", () => {
+    for (const [dataPointId, status] of Object.entries(rawStatus.targets)) {
+      const hasRuling = "ruling" in status && Boolean(status.ruling);
+      expect(status.code === VOIDED_CODE, dataPointId).toBe(hasRuling);
+    }
   });
 });
 

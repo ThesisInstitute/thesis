@@ -2,18 +2,24 @@
 
 Each cell is pinned from its forecast's own question (QUESTIONS below,
 quoted from site/src/data/forecast-examples and tied to it by a test), not
-inferred from a series id. Layout reference (never a target release): BLS's
-archived cpi_08122026.htm, empsit_08072026.htm and jolts_08042026.htm, and
-the real June 2026 CPI capture in tests/fixtures/release_capture/. The
-Employment Situation and JOLTS parsers are tested on synthetic layouts only
-until verified non-target captures of those pages are added.
+inferred from a series id. Layout reference (never a target release): the
+real non-target Archive captures in tests/fixtures/release_capture/, namely
+the June 2026 CPI summary, the July 2026 Employment Situation summary, and
+the June 2026 JOLTS summary and Table 4.
+
+Two page shapes occur. The CPI summary (cpi.nr0.htm) and JOLTS Table 4
+(jolts.t04.htm) print HTML tables, read by SPECS below. The Employment
+Situation and JOLTS summaries (empsit.nr0.htm, jolts.nr0.htm) print no
+table at all: the release is one preformatted block of prose, and the
+figure is read from the sentences that state it (PROSE_PARSERS).
 
 These parsers return the number printed by the page. Registered transforms
-(including JOLTS thousands to millions) belong to the caller.
+belong to the caller.
 """
 
 from __future__ import annotations
 
+import html as html_lib
 import math
 import re
 from dataclasses import dataclass, field
@@ -341,37 +347,6 @@ SPECS = {
         group="Seasonally adjusted changes from preceding month",
         table_id="cpi_pressa",
     ),
-    # empsit_unemployment_rate questions: Summary A, Employment status /
-    # Unemployment rate, latest month. The adjacent change column is excluded.
-    "empsit_unemployment_rate": _Spec(
-        _EMPSIT,
-        r"Summary table A\. Household data, seasonally adjusted"
-        r"(?: \[Numbers in thousands\])?",
-        "Unemployment rate",
-        section="Employment status",
-    ),
-    # empsit_payroll_change questions: Summary B, Total nonfarm in the
-    # Over-the-month change (thousands) section; never the 3-month average.
-    "empsit_payroll_change": _Spec(
-        _EMPSIT,
-        r"Summary table B\. Establishment data, seasonally adjusted",
-        "Total nonfarm",
-        section="EMPLOYMENT BY SELECTED INDUSTRY (Over-the-month change, in thousands)",
-        preliminary=True,
-    ),
-    # jolts_job_openings questions: Summary Table A on jolts.nr0.htm,
-    # LEVELS BY INDUSTRY (in thousands) / Total / Job openings / latest month.
-    # The same table's RATES BY INDUSTRY Total row is a different measure.
-    # Caller applies the registered 0.001 factor exactly once.
-    "jolts_job_openings": _Spec(
-        _JOLTS,
-        r"Table A\. Job openings, hires, and total separations by industry, "
-        r"seasonally adjusted",
-        "Total",
-        group="Job openings",
-        section="LEVELS BY INDUSTRY (in thousands)",
-        preliminary=True,
-    ),
     # jolts_quits_rate questions: Table 4 Total, Rates (not levels), latest
     # month, not the change-from column. (2) is this header's known note.
     "jolts_quits_rate": _Spec(
@@ -384,14 +359,181 @@ SPECS = {
 }
 
 
-def parse_release(html: str, parser_id: str) -> tuple[str, float] | None:
-    """Read exactly the registered question's pinned release cell, or refuse.
+_MONTH_NAMES = (
+    "January February March April May June July August September October "
+    "November December"
+).split()
+_MONTH = "|".join(_MONTH_NAMES)
 
-    The release title must authenticate its month and the chosen table must
-    display that same month as its latest ordinary month column. Table ids,
-    captions, section labels, row text and all column groups are binding;
-    missing, repeated, malformed or nonnumeric candidates never guess.
+
+def _words(allowed: str) -> str:
+    """Up to six words between a subject and its figure, each from `allowed`.
+
+    A whitelist, so a qualifier ("for May", "since January", "average",
+    "over the year", "and the number of ...") ends the match instead of
+    being read past: such a sentence states some other figure.
     """
+    return rf"(?:\s(?:{allowed})){{0,6}}"
+
+
+_PAYROLL_SUBJECT = r"(?<![A-Za-z])(?:[Tt]otal )?nonfarm payroll employment"
+_PAYROLL_WORDS = _words(
+    "changed|little|was|were|essentially|unchanged|edged|up|down|rose|"
+    "increased|declined|decreased|fell|grew|held|steady|flat|continued|to|"
+    "trend|over|the|month|showed|no|change"
+)
+# Printed to the thousand ("143,000", "-23,000"): BLS's payroll change has
+# no finer figure, and the contracts count in thousands.
+_THOUSANDS = r"[1-9][0-9]{0,2}(?:,[0-9]{3})*,000"
+_RATE_SUBJECT = r"(?<![A-Za-z-])[Tt]he unemployment rate"
+_RATE_WORDS = _words(
+    "was|were|changed|little|unchanged|essentially|held|steady|remained|"
+    "edged|up|down|ticked|rose|increased|declined|decreased|fell|also|again"
+)
+_RATE = r"[0-9]{1,2}\.[0-9]"
+_OPENINGS_WORDS = _words(
+    "was|were|little|changed|unchanged|essentially|edged|up|down|rose|"
+    "increased|declined|decreased|fell|held|steady|mostly|relatively"
+)
+_IN_MONTH = rf"(?:\sin\s(?P<month>{_MONTH}))?"
+_DOWN = {"declined", "decreased", "fell", "edged down"}
+
+
+@dataclass(frozen=True)
+class _Prose:
+    title: str
+    heading: str
+    statements: tuple[re.Pattern[str], ...]
+
+
+PROSE_PARSERS = {
+    # empsit_unemployment_rate questions: the release's U-3 rate, which its
+    # text states to 0.1 percent, the precision of Summary table A.
+    "empsit_unemployment_rate": _Prose(
+        _EMPSIT,
+        "THE EMPLOYMENT SITUATION",
+        tuple(
+            re.compile(pattern)
+            for pattern in (
+                rf"{_RATE_SUBJECT} \((?P<value>{_RATE}) percent\)",
+                rf"{_RATE_SUBJECT}, at (?P<value>{_RATE}) percent,",
+                rf"{_RATE_SUBJECT}{_RATE_WORDS}"
+                rf"(?: by [0-9]\.[0-9] percentage points?)?"
+                rf" (?:at|to) (?P<value>{_RATE}) percent{_IN_MONTH}",
+                rf"{_RATE_SUBJECT} was (?P<value>{_RATE}) percent{_IN_MONTH}",
+            )
+        ),
+    ),
+    # empsit_payroll_change questions: the over-the-month change in total
+    # nonfarm payroll employment, which the text states to the thousand,
+    # the precision of Summary table B. Never the average monthly gain, and
+    # never a revised earlier month ("the change ... for May was revised").
+    "empsit_payroll_change": _Prose(
+        _EMPSIT,
+        "THE EMPLOYMENT SITUATION",
+        tuple(
+            re.compile(pattern)
+            for pattern in (
+                rf"{_PAYROLL_SUBJECT}{_PAYROLL_WORDS}{_IN_MONTH}"
+                rf" \((?P<signed>[+-]{_THOUSANDS})\)",
+                rf"{_PAYROLL_SUBJECT} (?P<verb>rose|increased|grew|edged up|"
+                rf"declined|decreased|fell|edged down) by "
+                rf"(?P<count>{_THOUSANDS})(?![,.]?[0-9]){_IN_MONTH}",
+            )
+        ),
+    ),
+    # jolts_job_openings questions: total job openings. The summary states
+    # it only in millions to one decimal ("7.4 million"); see
+    # resolve_pending.LEGACY_RELEASE_PRECISION_HELD before reading it.
+    "jolts_job_openings": _Prose(
+        _JOLTS,
+        "JOB OPENINGS AND LABOR TURNOVER",
+        tuple(
+            re.compile(pattern)
+            for pattern in (
+                rf"(?<![A-Za-z])[Tt]he number of job openings{_OPENINGS_WORDS}"
+                rf"(?: by [0-9,]+)? (?:at|to) (?P<value>[0-9]{{1,2}}\.[0-9])"
+                rf" million{_IN_MONTH}",
+                rf"(?<![A-Za-z])[Tt]he number and rate of job openings"
+                rf"{_OPENINGS_WORDS} (?:at|to) (?P<value>[0-9]{{1,2}}\.[0-9])"
+                rf" million and [0-9]{{1,2}}\.[0-9] percent",
+            )
+        ),
+    ),
+}
+
+
+def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
+    """The figure every matching sentence of the release month states, or None.
+
+    The page must have exactly one title naming the release and its month,
+    exactly one preformatted block, and exactly one release heading naming
+    the same month. At least two sentences must state the figure (BLS states
+    each headline figure in the lead paragraph and again in its section),
+    every such sentence must state the same figure, and a sentence that
+    names a month must name the release month.
+    """
+    spec = PROSE_PARSERS[parser_id]
+    doc = _Document()
+    try:
+        doc.feed(html)
+        doc.close()
+    except (AssertionError, ValueError):
+        return None
+    if doc.malformed or doc.in_title or len(doc.titles) != 1:
+        return None
+    title = re.fullmatch(
+        rf"{spec.title} - ([0-9]{{4}}) M(0[1-9]|1[0-2]) Results", _text(doc.titles[0])
+    )
+    if title is None:
+        return None
+    period = f"{title[1]}-{title[2]}"
+    month_name = _MONTH_NAMES[int(title[2]) - 1]
+    blocks = re.findall(r"<pre\b[^>]*>(.*?)</pre\s*>", html, re.S | re.I)
+    if len(blocks) != 1:
+        return None
+    text = " ".join(html_lib.unescape(re.sub(r"<[^>]+>", " ", blocks[0])).split())
+    headings = re.findall(
+        rf"{spec.heading}\W+({'|'.join(m.upper() for m in _MONTH_NAMES)})"
+        rf" ([0-9]{{4}})\b",
+        text,
+    )
+    if headings != [(month_name.upper(), title[1])]:
+        return None
+    values: set[Decimal] = set()
+    statements = 0
+    for pattern in spec.statements:
+        for match in pattern.finditer(text):
+            statements += 1
+            groups = match.groupdict()
+            if groups.get("month") and groups["month"] != month_name:
+                return None
+            if groups.get("value"):
+                values.add(Decimal(groups["value"]))
+            elif groups.get("signed"):
+                printed = groups["signed"]
+                count = Decimal(printed[1:].replace(",", "")) / 1000
+                values.add(-count if printed[0] == "-" else count)
+            else:
+                count = Decimal(groups["count"].replace(",", "")) / 1000
+                values.add(-count if groups["verb"] in _DOWN else count)
+    if statements < 2 or len(values) != 1:
+        return None
+    value = float(values.pop())
+    return (period, value) if math.isfinite(value) else None
+
+
+def parse_release(html: str, parser_id: str) -> tuple[str, float] | None:
+    """Read exactly the registered question's pinned release figure, or refuse.
+
+    For a table page, the release title must authenticate its month and the
+    chosen table must display that same month as its latest ordinary month
+    column. Table ids, captions, section labels, row text and all column
+    groups are binding; missing, repeated, malformed or nonnumeric
+    candidates never guess. A prose page is read by _prose_release.
+    """
+    if parser_id in PROSE_PARSERS:
+        return _prose_release(html, parser_id)
     spec = SPECS.get(parser_id)
     if spec is None:
         return None
