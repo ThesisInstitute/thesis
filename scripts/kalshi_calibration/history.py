@@ -216,6 +216,7 @@ class Event:
     official_note: str = ""
     official_delayed: bool = False
     candidates_tried: list[str] = dataclasses.field(default_factory=list)
+    event_markets_raw: list[dict] = dataclasses.field(default_factory=list)
 
     @property
     def ticker(self) -> str:
@@ -269,7 +270,7 @@ def scoped_events(cache: FetchCache, series: str) -> tuple[list[dict], list[dict
 def build_event(cache: FetchCache, series: str, raw: dict) -> Event:
     spec = spec_for(series)
     markets = kalshi.event_markets(cache, raw["event_ticker"])
-    event = Event(series, spec, raw, markets)
+    event = Event(series, spec, raw, markets, event_markets_raw=list(markets))
     event.settled = bool(markets) and all(
         m.get("result") not in (None, "") for m in markets
     )

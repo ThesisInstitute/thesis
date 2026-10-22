@@ -301,4 +301,37 @@ about any trading strategy, and it does not test the paper's pooled result.
 
 ## Changes made after this plan was first committed
 
-None yet.
+The plan as first committed is commit 64ab04df. Changes 1 to 4 were made while
+reading the contracts and releases, before any Kalshi price was compared with
+an outcome. A test run of the code on the two CPI series then computed scores;
+change 5 came after it.
+
+1. **Legacy rule periods.** Some 2021 and 2022 rules name the month without the
+   year ("in June") or write "July, 2021". Such a rule is accepted only if it
+   names the title's month, no other month and no year in another form. A rule
+   that names a different month (one market of `CPI-22JUN` says July 2022)
+   still makes its event unreadable, as planned.
+2. **Legacy strike wordings.** The legacy reader also accepts "greater than"
+   (2022-2023 core CPI rules, some with `strike_type` set) and "0.50
+   percent%" (`CPI-21OCT-T0.5`). `floor_strike` must agree with the text to
+   within 0.00001: Kalshi stored 4.099999 for rules that say 4.1 on U-3 markets
+   from 2023 to 2025. Kalshi's results agree with the text's 4.1 on every such
+   market (the settlement check).
+3. **Release layouts.** BEA's release pages used five layouts over the period:
+   a five-column table (2022-2024), a single statement in the text with no
+   table (the December 2024 and January 2025 releases, which give one reading
+   only), a "from February to March" table, a two-column table, and the
+   combined October and November 2025 release, which the search reaches as
+   `october-and-november-2025`. The ABS parser now reads the paragraph and table
+   labelled seasonally adjusted: the April 2026 page puts the trend paragraph
+   within the old reading window, and the February 2026 page puts the trend
+   table first. Both fixes are in #381's shared parser; #381's results
+   reproduce byte for byte afterwards.
+4. **Weekly claims during the 2025 shutdown.** DOL's 2025-11-20 release says no
+   claims releases were published from 2025-10-02 to 2025-11-13 and that the
+   official seasonally adjusted data for those weeks were posted on its
+   website. The posting as first published cannot be retrieved now, so
+   `KXJOBLESSCLAIMS-25OCT02` (week ending 2025-09-27) has no official outcome
+   and is listed; it enters the Kalshi-results sensitivity.
+5. **Threads.** Independent analyses run on four threads; each seeds its own
+   generator, so no number depends on the thread count.
