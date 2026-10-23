@@ -1,0 +1,930 @@
+{
+  "_comment": "Shared oracle for the POLICYENGINE.md §0.2 publication gate. Both site/src/lib/compute-publishability.ts (isPublishableCompute) and scripts/tools/attach_compute.py (publishable_compute_row) must return `publishable` for every row. FIGURE-SUMMARY / FIGURE-NOTE mark text a withheld card must never render.",
+  "cases": [
+    {
+      "name": "certified at exact runtime",
+      "publishable": true,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "no certification block",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "certification null",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": null,
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "certified false (the July 2026 hand-flipped S.3596 row)",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified": false
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "hand-asserted certified true with no validation or build (the July 2026 row before the flip)",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified": true
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "certified string 'true' is not the boolean",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": "true",
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "validated against another model version (prb4 finding)",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.784.3",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.784.3",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "validated against the metadata API",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "metadata-api",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "metadata-api",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "validation missing",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "row param_source disagrees with the certification",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.784.3",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "row without param_source still publishes when the certification is consistent",
+      "publishable": true,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "running model differs from the build's pin",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.784.3",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.784.3",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.784.3",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.784.3",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "certification's running version is not the row's version",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.784.3",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "running model version unknown",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": null,
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": null,
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "row has no model version",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "manifest unreachable (no certified version)",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": null,
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "running core differs from the build's core pin",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.23.6",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.23.6",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "row core version is not the certification's running core",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.23.6",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "running core unknown while the build pins one",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": null,
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "manifest pins no core: core is not required",
+      "publishable": true,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": null,
+          "running_core_version": null,
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "certification for another build",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-spm-20260915",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "certification without build",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "row without dataset",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "pending run",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "pending",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "run without status",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": null
+        },
+        "year": 2026,
+        "region": "us",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    },
+    {
+      "name": "certified flag with a warning attached",
+      "publishable": false,
+      "row": {
+        "model": "policyengine-us",
+        "reform": {
+          "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+            "2026-01-01.2100-12-31": 0
+          }
+        },
+        "result_summary": "FIGURE-SUMMARY decile 1 averages +$32/yr",
+        "engine": "modal",
+        "pe_us_version": "1.764.6",
+        "pe_core_version": "3.26.11",
+        "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+        "param_source": "policyengine-us@1.764.6",
+        "certification": {
+          "build": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+          "certified_model_version": "1.764.6",
+          "running_model_version": "1.764.6",
+          "certified_core_version": "3.26.11",
+          "running_core_version": "3.26.11",
+          "validated_against": "policyengine-us@1.764.6",
+          "certified": true,
+          "warning": "UNCERTIFIED PAIRING: something"
+        },
+        "year": 2026,
+        "region": "us",
+        "status": "ok",
+        "budgetary_impact": -1826050568.8,
+        "ten_year_budgetary_impact": -17069142980.93,
+        "ten_year_window": "2026-2035",
+        "poverty_child_pct_change": -0.0115527,
+        "beneficiaries_share": 0.0648,
+        "note": "FIGURE-NOTE Anchors: Tax Policy Center ~$1.0B/yr."
+      }
+    }
+  ]
+}
