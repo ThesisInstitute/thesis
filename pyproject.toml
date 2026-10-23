@@ -88,8 +88,10 @@ dev = [
     "pyyaml>=6.0.2",
     # The IRS SOI and EIA DNav adapter fixtures parse real .xls workbooks.
     "xlrd==2.0.1",
-    # Property tests (tests/test_resolution_status.py).
-    "hypothesis>=6.140",
+    # Property tests: tests/test_resolution_status.py, and the stateful
+    # challenge one-shot ledger in tests/test_ingest_challenge_submissions.py
+    # (real git histories against a reference model).
+    "hypothesis>=6.168.1",
 ]
 
 [tool.setuptools.packages.find]
