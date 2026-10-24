@@ -66,8 +66,7 @@ def _count(thousands: int) -> str:
 _DECOYS = (
     "The unemployment rates for teenagers ({r} percent) and adult men "
     "({r} percent) showed little change.",
-    "The unemployment rate for Black workers ({r} percent) changed little in "
-    "{name}.",
+    "The unemployment rate for Black workers ({r} percent) changed little in {name}.",
     "In {prior}, the unemployment rate was {r} percent.",
     "Employment in health care continued its upward trend (+{n[0]:,},000).",
     "Retail trade lost {n[1]:,},000 jobs in {name}.",
@@ -78,6 +77,10 @@ _DECOYS = (
     "{n[4]:,},000 per month since January.",
     "The change in total nonfarm payroll employment for {prior} was revised "
     "down by {n[5]:,},000, from +{n[6]:,},000 to +{n[7]:,},000.",
+    "Total nonfarm payroll employment rose by {n[2]:,},000 in {name} of last year.",
+    "The unemployment rate was {r} percent in {name} a year earlier.",
+    "Nonfarm payroll employment in {name} (+{n[1]:,},000) by industry is "
+    "shown in table B-1.",
 )
 
 
@@ -139,8 +142,7 @@ def _empsit_text(case: dict, *, keep: str = "both") -> tuple[str, str]:
         "prior 12 months.",
         f"Total nonfarm payroll employment edged {'up' if up else 'down'} in "
         f"{name} ({signed}).",
-        f"Total nonfarm payroll employment ({signed}) was little changed in "
-        f"{name}.",
+        f"Total nonfarm payroll employment ({signed}) was little changed in {name}.",
     )[case["payroll_section"]]
     if keep == "rate_lead_only":
         rate_section = "Household survey measures changed little."
@@ -290,9 +292,9 @@ def test_a_headline_statement_naming_another_year_is_refused(
         moved = _section_month(pre, name, f"{name} {year}", section)
         assert parse_release(_page(title, moved), parser_id) is None
         same = _section_month(pre, name, f"{name} 2026", section)
-        assert parse_release(_page(title, same), parser_id) == _readings(case)[
-            parser_id
-        ]
+        assert (
+            parse_release(_page(title, same), parser_id) == _readings(case)[parser_id]
+        )
 
 
 def test_previous_month_statements_never_supply_the_rate() -> None:
@@ -448,16 +450,27 @@ def test_the_sign_of_a_payroll_change_follows_its_verb_or_its_printed_sign(
         "2026-09",
         41.0 * sign,
     )
-    # A verb that contradicts its printed sign says two things: refused.
-    flipped = pre.replace(f"({printed})", f"({'-' if sign > 0 else '+'}41,000)")
-    assert parse_release(_page(title, flipped), "empsit_payroll_change") is None
+    # A verb that contradicts its printed sign says two things: refused,
+    # even when every statement prints the same figure.
+    flipped = f"{'-' if sign > 0 else '+'}41,000"
+    both = (
+        "THE EMPLOYMENT SITUATION -- SEPTEMBER 2026\n"
+        f"Total nonfarm payroll employment {verb} in September ({flipped}). "
+        f"Total nonfarm payroll employment ({flipped}) {verb} in September."
+    )
+    assert parse_release(_page(title, both), "empsit_payroll_change") is None
+    neutral = both.replace(f" {verb} in", " changed little in")
+    assert parse_release(_page(title, neutral), "empsit_payroll_change") == (
+        "2026-09",
+        -41.0 * sign,
+    )
 
 
 def test_a_unicode_minus_is_a_minus() -> None:
     title = "Employment Situation Summary - 2026 M07 Results"
     pre = (
         "THE EMPLOYMENT SITUATION -- JULY 2026\n"
-        "Total nonfarm payroll employment changed little in July (−23,000). "
+        "Total nonfarm payroll employment changed little in July (\u221223,000). "
         "Total nonfarm payroll employment (&#8722;23,000) was little changed "
         "in July."
     )

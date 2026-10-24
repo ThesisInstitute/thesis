@@ -6,16 +6,19 @@ Invariants:
 - each reason states facts the registration itself shows, wherever the
   repository holds the evidence: the BEA vintage date against its window,
   the SSA table month against the period, the page and window of a
-  no-custody void;
+  no-custody void, and the Archive's index for that window, replayed
+  through the leg's own discovery;
 - no resolver family routes a voided reference, for any pending log;
 - the status file reports an overdue voided target as VOIDED with its
   ruling, whatever the resolver printed about it, and the register changes
-  no other row (a differential against an empty register).
+  no other row (a differential against an empty register);
+- the committed status file already holds those VOIDED rows.
 """
 
 from __future__ import annotations
 
 import datetime as dt
+import json
 import pathlib
 import posixpath
 import re
@@ -139,6 +142,54 @@ def test_a_no_custody_void_names_its_registered_page_and_window(ref: str) -> Non
     assert VOIDED_TARGETS[ref].reason == voided_targets._no_custody(page, start, end)
 
 
+_NO_CUSTODY = sorted(
+    ref
+    for ref, voided in VOIDED_TARGETS.items()
+    if "has no Internet Archive capture" in voided.reason
+)
+_INDEX_READS = ROOT / "tests" / "fixtures" / "release_capture" / "cdx"
+
+
+def test_every_no_custody_void_has_its_index_read() -> None:
+    assert len(_NO_CUSTODY) == 3
+    assert len(list(_INDEX_READS.glob("*.json"))) == len(_NO_CUSTODY)
+
+
+@pytest.mark.parametrize("ref", _NO_CUSTODY)
+def test_the_archive_index_lists_no_capture_in_a_no_custody_window(ref: str) -> None:
+    """Replays the saved index read through the leg's own discovery."""
+    binding = _binding(ref)
+    window = binding["expectedReleaseWindow"]
+    start, end = (dt.date.fromisoformat(window[key]) for key in ("start", "end"))
+    page = posixpath.basename(urllib.parse.urlparse(binding["sourceUrl"]).path)
+    read = json.loads(
+        (
+            _INDEX_READS
+            / f"{page.removesuffix('.htm')}-{start:%Y%m%d}-{end:%Y%m%d}.json"
+        ).read_text()
+    )
+    query = resolve_pending.WAYBACK_CDX_URL.format(
+        url=urllib.parse.quote(binding["sourceUrl"], safe=""),
+        start=f"{start:%Y%m%d}000000",
+        end=f"{end:%Y%m%d}235959",
+    )
+    assert (read["sourceUrl"], read["query"], read["httpStatus"]) == (
+        binding["sourceUrl"],
+        query,
+        200,
+    )
+
+    def served(url: str) -> tuple[bytes, str]:
+        assert url == query, url
+        return read["body"].encode(), url
+
+    index = resolve_pending.a19_window_captures(
+        window, served, source_url=binding["sourceUrl"]
+    )
+    assert (index.listed, index.rows, index.captures) == (0, [], [])
+    assert read["readOnUtc"] in VOIDED_TARGETS[ref].reason
+
+
 def _pending_log(refs: list[str]) -> dict:
     return {
         "entries": [
@@ -231,7 +282,43 @@ def test_an_overdue_voided_target_reports_voided_with_its_ruling(
     assert row["code"] == "VOIDED"
     assert row["reason"] == rs.REASONS["VOIDED"]
     assert row["ruling"] == f"{voided.reason} Voided by ruling on {voided.ruled_on}."
+    assert row["ruling"] == rs.voided_ruling(voided)
     assert "detail" not in row and "registration" not in row
+
+
+def test_the_committed_status_file_agrees_with_the_register() -> None:
+    """A void ships with its row: the site never shows a void as overdue.
+
+    The resolver workflow rewrites this file after each run, from the same
+    register, so a void that lands without its rows would show "Overdue"
+    until then. Each row the file holds for a voided target must already be
+    the VOIDED row build_status writes, and no other row may be VOIDED.
+    """
+    status = json.loads(
+        (ROOT / "site" / "src" / "data" / "resolution-status.json").read_text()
+    )
+    rows = status["targets"]
+    voided_rows = {ref for ref, row in rows.items() if row["code"] == "VOIDED"}
+    assert voided_rows, "no VOIDED row in the committed status file"
+    assert voided_rows == set(rows) & set(VOIDED_TARGETS)
+    for ref in voided_rows:
+        row = rows[ref]
+        assert {key: row[key] for key in ("state", "code", "reason", "ruling")} == {
+            "state": "voided",
+            "code": "VOIDED",
+            "reason": rs.reason_for("VOIDED", "voided"),
+            "ruling": rs.voided_ruling(VOIDED_TARGETS[ref]),
+        }, ref
+        assert set(row) == {
+            "forecastSlug",
+            "resolutionDate",
+            "state",
+            "code",
+            "reason",
+            "ruling",
+        }, ref
+    for ref, row in rows.items():
+        assert ("ruling" in row) is (ref in voided_rows), ref
 
 
 _OTHER_REFS = sorted(

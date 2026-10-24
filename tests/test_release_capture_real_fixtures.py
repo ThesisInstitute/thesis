@@ -245,13 +245,16 @@ _EMPSIT_READINGS = {
         "Total nonfarm payroll employment has increased by an average of "
         "123,000 per month since January.",
         "In June, the unemployment rate was 4.8 percent.",
-        "The unemployment rate for teenagers (12.1 percent) changed little in "
-        "July.",
+        "The unemployment rate for teenagers (12.1 percent) changed little in July.",
         "The unemployment rates for adult men (3.9 percent) and adult women "
         "(3.8 percent) changed little in July.",
         "The change in total nonfarm payroll employment for June was revised "
         "down by 37,000, from +57,000 to +20,000.",
         "Employment in health care rose by 55,000 in July.",
+        "Total nonfarm payroll employment rose by 123,000 in July of last year.",
+        "The unemployment rate was 3.9 percent in July a year earlier.",
+        "Nonfarm payroll employment in July (+999,000) by industry is shown in "
+        "table B-1.",
     ),
 )
 def test_a_decoy_added_to_a_real_release_never_changes_its_reading(
@@ -285,8 +288,7 @@ def test_a_decoy_added_to_a_real_release_never_changes_its_reading(
         ),
         (
             "empsit_payroll_change",
-            "Total nonfarm payroll employment changed little in July 2025 "
-            "(-23,000).",
+            "Total nonfarm payroll employment changed little in July 2025 (-23,000).",
         ),
     ),
 )

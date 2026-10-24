@@ -41,11 +41,15 @@ _BEA_JUNE_FROZEN_VINTAGE = (
 
 
 def _no_custody(page: str, start: str, end: str) -> str:
+    # The Archive's index for each window, as read on 2026-10-24, is in
+    # tests/fixtures/release_capture/cdx/; a test replays it through the
+    # leg's own discovery.
     return (
         f"The registered page ({page}) has no Internet Archive capture dated "
-        f"inside the registered release window ({start} to {end}, per the "
-        "Archive's index read on 2026-10-22), so no record of the first print "
-        "exists to resolve from."
+        f"inside the registered release window ({start} to {end}): the "
+        "Archive's index, read on 2026-10-22 and 2026-10-24, lists none. Such a "
+        "capture is the only record of the first print the ruling admits, so "
+        "this forecast has none to resolve from."
     )
 
 

@@ -30,3 +30,10 @@ openings only to 0.1 million: "7.4 million" for June 2026, where ALFRED's
 first-print vintage has 7,359 thousand. Both openings contracts read a
 thousands figure, so the resolver holds them
 (`LEGACY_RELEASE_PRECISION_HELD`) until ruling d1856.
+
+`cdx/` holds the Archive's index for each no-custody void of ruling d1633
+(`scripts/voided_targets.py`): the registered page and release window, the
+exact query the leg sends, and the body served on 2026-10-24 (an empty
+index, `[]`). An index read lists timestamps, statuses and digests; no
+capture was opened. `tests/test_voided_targets.py` replays each read through
+the leg's own discovery.

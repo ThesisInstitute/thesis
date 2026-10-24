@@ -444,6 +444,11 @@ def parse_resolver_log(
     return targets, run
 
 
+def voided_ruling(voided: VoidedTarget) -> str:
+    """The ``ruling`` of a VOIDED row: the ruling's reason, then its date."""
+    return f"{voided.reason} Voided by ruling on {voided.ruled_on}."
+
+
 def build_status(
     log: dict[str, Any],
     resolver_targets: dict[str, dict[str, str]],
@@ -475,7 +480,7 @@ def build_status(
             # A recorded ruling, never resolver output, and terminal: no
             # resolver line about the reference can overrule it.
             state, code = "voided", "VOIDED"
-            ruling = f"{voided.reason} Voided by ruling on {voided.ruled_on}."
+            ruling = voided_ruling(voided)
         elif seen:
             state, code, detail = seen["state"], seen["code"], seen["detail"]
             if state == "resolved_this_run" and not run["completed"]:

@@ -381,11 +381,10 @@ def _group(name: str, pattern: str, capture: bool) -> str:
 
 
 # Every statement opens with its measure's own subject, capitalized as a
-# sentence or clause opens, so a modifier ("Private nonfarm ...", "In June,
-# the unemployment rate ...") is never read past. Every statement then names
+# sentence or clause opens it, so a modifier ("Private nonfarm ...", "In
+# June, the unemployment rate ...") is never read past. Every statement then names
 # its month in place ("in July"), and the month must end the phrase: "in
 # July 2025", "in July of last year" and "per month" are not this month.
-_START = r"(?<!\S)"
 _WHEN = rf" in (?P<month>{_MONTH})(?: (?P<year>[0-9]{{4}}))?(?=[.,;:]|\s\(|$)"
 _PAYROLL = r"(?:Total n|N)onfarm payroll employment"
 _PAYROLL_BOTH = r"Both (?:total )?nonfarm payroll employment"
@@ -399,9 +398,11 @@ _DOWN_WORDS = {"declined", "decreased", "fell", "down"}
 _PAYROLL_VERBS = "rose|increased|grew|edged up|declined|decreased|fell|edged down"
 _DOWN = {"declined", "decreased", "fell", "edged down"}
 # Printed to the thousand ("143,000", "-23,000"): BLS's payroll change has
-# no finer figure, and the contracts count in thousands.
-_THOUSANDS = r"[1-9][0-9]{0,2}(?:,[0-9]{3})*,000(?![,.]?[0-9])"
-_SIGNED = rf"[+\-−]{_THOUSANDS}"
+# no finer figure, and the contracts count in thousands. Every form
+# follows the figure with ")" or the month, so "143,000,500" and
+# "143,000.5" are never read as 143,000.
+_THOUSANDS = r"[1-9][0-9]{0,2}(?:,[0-9]{3})*,000"
+_SIGNED = rf"[+\-\u2212]{_THOUSANDS}"
 _RATE_SUBJECT = r"The unemployment rate"
 _RATE = r"[0-9]{1,2}\.[0-9]"
 _RATE_WORDS = (
@@ -445,7 +446,7 @@ class _Prose:
 
 
 def _compile(*patterns: str) -> tuple[re.Pattern[str], ...]:
-    return tuple(re.compile(_START + pattern) for pattern in patterns)
+    return tuple(re.compile(pattern) for pattern in patterns)
 
 
 PROSE_PARSERS = {
