@@ -640,6 +640,12 @@ def test_a_rate_continuation_is_a_tail_through_discovery(paragraph: str) -> None
         "discouraged workers in the labor force.",
         "The unemployment rate was 4.8 percent in July, after averaging the "
         "latest three months.",
+        # Round-7 review: a comparison with a bare period makes the figure a
+        # change over that period.
+        "Total nonfarm payroll employment rose by 2,000,000 in July, compared with "
+        "a year earlier.",
+        "Total nonfarm payroll employment increased by 2,000,000 in July compared "
+        "with the previous year.",
     ),
 )
 def test_a_sentence_of_another_basis_or_period_never_defers_a_real_release(
