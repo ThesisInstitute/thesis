@@ -1,0 +1,21 @@
+{
+ "captureUrl": "https://web.archive.org/web/20260412071958/https://www.bls.gov/news.release/empsit.nr0.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+ "stamp": "20260412071958",
+ "indexDigest": "6KVUIK6O7QKRA3DLKZXBN2ESU7GZH57S",
+ "gzipEncoded": false,
+ "title": "Employment Situation Summary - 2026 M03 Results",
+ "note": "Corpus capture of the 2026-03 release, captured 2026-04-12. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {
+  "empsit_unemployment_rate": {
+   "value": 4.3,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=UNRATE&vintage_date=2026-04-12",
+   "how": "the 2026-03 value in the 2026-04-12 vintage"
+  },
+  "empsit_payroll_change": {
+   "value": 178.0,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2026-04-12",
+   "how": "2026-03 minus 2026-02 in the 2026-04-12 vintage (158637 - 158459), in thousands"
+  }
+ }
+}

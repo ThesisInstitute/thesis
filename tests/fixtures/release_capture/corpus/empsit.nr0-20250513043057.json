@@ -1,0 +1,21 @@
+{
+ "captureUrl": "https://web.archive.org/web/20250513043057/https://www.bls.gov/news.release/empsit.nr0.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+ "stamp": "20250513043057",
+ "indexDigest": "7UPXPUGNZCVLUTMX2K57UNACD3ONYHJC",
+ "gzipEncoded": true,
+ "title": "Employment Situation Summary - 2025 M04 Results",
+ "note": "Corpus capture of the 2025-04 release, captured 2025-05-13. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {
+  "empsit_unemployment_rate": {
+   "value": 4.2,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=UNRATE&vintage_date=2025-05-13",
+   "how": "the 2025-04 value in the 2025-05-13 vintage"
+  },
+  "empsit_payroll_change": {
+   "value": 177.0,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2025-05-13",
+   "how": "2025-04 minus 2025-03 in the 2025-05-13 vintage (159517 - 159340), in thousands"
+  }
+ }
+}

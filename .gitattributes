@@ -22,3 +22,7 @@ tests/fixtures/eia_dnav/api-no-key.json binary
 # Release-capture fixtures are the exact bodies the Internet Archive stores,
 # checked against its index digest (JOLTS Table 4 keeps BLS's CRLF lines).
 tests/fixtures/release_capture/*.raw binary
+
+# Archive capture bodies are checked against the index digest byte-for-byte;
+# half are plain HTML, which line-ending translation would rewrite.
+tests/fixtures/release_capture/**/*.raw -text

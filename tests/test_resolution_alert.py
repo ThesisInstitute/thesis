@@ -778,7 +778,7 @@ def test_a_raced_push_rebuilds_from_the_newer_main(
     result = _run_status_step(tmp_path, world, races=races)
     assert result.returncode == 0, result.stderr
     status, parent = _published(world)
-    assert status["builder"] == "next"
+    assert status.get("builder") == "next"
     assert parent == world["next"]
     assert (tmp_path / "pushes").read_text() == str(races + 1)
 

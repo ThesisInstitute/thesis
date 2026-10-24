@@ -23,6 +23,36 @@ gone. All four came over verified TLS. Each capture was selected from the
 Archive's index alone (timestamp, status, digest), dated before every target
 window for its page. Never fetch a capture dated inside a target window.
 
+`corpus/` holds 50 more captures, one per release month: the Employment
+Situation for 21 months from July 2024 to June 2026, CPI for 12 from May
+2025 to May 2026, the JOLTS summary for 9 from August 2025 to May 2026, and
+JOLTS Table 4 for 8 from August 2025 to April 2026. Each was chosen from the Archive's index alone (the
+earliest status-200 capture from a fixed day of each calendar month), with
+the index queried only up to a cutoff at least a month before every target
+window for its page, and fetched 2026-10-23 from the `id_` form over
+verified TLS. Each sidecar records the ALFRED vintage dated the capture day
+(`alfredgraph.csv?id=...&vintage_date=...`): UNRATE; PAYEMS less the prior
+month; CPIAUCSL and CPILFESL as a one-month percent change, which the page
+prints to 0.1; JTSJOL in millions, printed to 0.1; JTSQUR. The tests read
+every capture with every parser, through the leg's own discovery, and
+check that each figure equals its first print, that no other parser reads
+the page, and that each capture predates every reviewed window for its
+page.
+
+The corpus is where the readers met BLS's real wording. Before it, 18 of
+its 83 reader-capture pairs deferred (2 rightly, the November 2025 CPI
+below); every reading that returned was right. The forms it added: "roughly in line with" and "but has ..." tails;
+a rate lead carrying the payroll clause ("The unemployment rate rose to 4.3
+percent in July, and nonfarm payroll employment edged up by 114,000"); a
+statement that leaves its month unsaid ("held at 4.3 percent", "over the
+month"), which only supports a dated one; a heading month not in capitals
+("March 2026"); the December release titled "M13"; and JOLTS's
+"continued to trend down" and "6.5 million (-386,000)". One capture is an
+expected refusal, with its reason in the sidecar: the November 2025 CPI
+release prints "-" for the one-month changes, as BLS collected no October
+2025 data. The September 2024 Employment Situation, titled "2024 Q03", is
+not in the corpus; its title dates no month, so the reader refuses it.
+
 The Employment Situation and JOLTS summaries print no table. Their figures
 are read from the release's prose (`PROSE_PARSERS` in
 `scripts/legacy_release_parsers.py`). The JOLTS summary states total job

@@ -2,19 +2,24 @@
 
 Each fixture is the exact body the Archive stores for one capture (its ``id_``
 form), with the index row's digest beside it. Each pinned figure is checked
-against a second source that shares no code with its parser: for CPI, the
-release's own prose; for the Employment Situation and JOLTS pages, the
-first-print ALFRED vintage recorded in the sidecar. No fixture is a capture
-of a month any reviewed contract forecasts.
+against a second source that shares no code with its parser: for the four
+first fixtures' CPI, the release's own prose; for every other capture, the
+first-print ALFRED vintage dated the capture day, recorded in the sidecar.
+corpus/ holds one capture per release month across 2024-2026, so the
+readers meet the wordings BLS has actually printed. No fixture is a capture
+of a month any reviewed contract forecasts, and every one predates every
+reviewed release window for its page.
 """
 
 from __future__ import annotations
 
+import datetime as dt
 import gzip
 import json
 import pathlib
 import re
 import sys
+import urllib.error
 from decimal import ROUND_HALF_UP, Decimal
 
 import pytest
@@ -28,7 +33,8 @@ from legacy_release_parsers import LABELS as LEGACY_RELEASE_LABELS  # noqa: E402
 from legacy_release_parsers import parse_release  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures" / "release_capture"
-CAPTURES = sorted(FIXTURES.glob("*.json"))
+CORPUS = sorted((FIXTURES / "corpus").glob("*.json"))
+CAPTURES = sorted(FIXTURES.glob("*.json")) + CORPUS
 _MONTHS = (
     "january february march april may june july august september october "
     "november december"
@@ -40,6 +46,13 @@ def _load(sidecar: pathlib.Path) -> tuple[dict, bytes, str]:
     raw = sidecar.with_suffix(".raw").read_bytes()
     body = gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
     return meta, raw, body.decode("utf-8", errors="replace")
+
+
+def _period(meta: dict) -> str:
+    """The release month a sidecar's title names ("M13" is December)."""
+    match = re.search(r"(\d{4}) M(\d{2})", meta["title"])
+    assert match is not None
+    return f"{match.group(1)}-{min(int(match.group(2)), 12):02d}"
 
 
 def _prose(html: str) -> str:
@@ -92,14 +105,33 @@ def test_no_fixture_is_a_month_a_reviewed_contract_forecasts(
     sidecar: pathlib.Path,
 ) -> None:
     meta, _raw, _html = _load(sidecar)
-    match = re.search(r"(\d{4}) M(\d{2})", meta["title"])
-    assert match is not None
-    period = f"{match.group(1)}-{match.group(2)}"
     forecast = {
         (entry["contract"]["sourceBinding"]["sourceUrl"], entry["contract"]["period"])
         for entry in LEGACY_RELEASE_CAPTURE_CONTRACTS.values()
     }
-    assert (meta["sourceUrl"], period) not in forecast
+    assert (meta["sourceUrl"], _period(meta)) not in forecast
+
+
+@pytest.mark.parametrize("sidecar", CAPTURES, ids=lambda p: p.stem)
+def test_every_fixture_predates_every_reviewed_window_for_its_page(
+    sidecar: pathlib.Path,
+) -> None:
+    """Assignment stays blind: no fixture was captured once a target could print."""
+    meta = json.loads(sidecar.read_text())
+    stamp = meta["stamp"]
+    assert (
+        meta["captureUrl"] == f"https://web.archive.org/web/{stamp}/{meta['sourceUrl']}"
+    )
+    captured = dt.date(int(stamp[:4]), int(stamp[4:6]), int(stamp[6:8]))
+    starts = [
+        dt.date.fromisoformat(
+            entry["contract"]["sourceBinding"]["expectedReleaseWindow"]["start"]
+        )
+        for entry in LEGACY_RELEASE_CAPTURE_CONTRACTS.values()
+        if entry["contract"]["sourceBinding"]["sourceUrl"] == meta["sourceUrl"]
+    ]
+    assert starts
+    assert captured < min(starts)
 
 
 def test_cpi_table_a_cells_agree_with_the_release_prose() -> None:
@@ -148,10 +180,99 @@ def test_every_reviewed_page_and_parser_has_a_real_fixture() -> None:
 @pytest.mark.parametrize("sidecar", CAPTURES, ids=lambda p: p.stem)
 def test_each_real_page_is_read_only_by_its_own_parsers(sidecar: pathlib.Path) -> None:
     meta, _raw, html = _load(sidecar)
-    own = _PAGE_PARSERS[meta["sourceUrl"]]
+    own = _PAGE_PARSERS[meta["sourceUrl"]] - set(meta.get("expectedRefusal", {}))
     for parser_id in LEGACY_RELEASE_LABELS:
         reading = parse_release(html, parser_id)
         assert (reading is not None) is (parser_id in own), parser_id
+
+
+def _discover_capture(meta: dict, raw: bytes, parser_id: str):
+    """What the leg's own discovery makes of one real capture, as stored.
+
+    A one-row index holds the capture's own stamp and digest, inside a
+    closed window around the capture day.
+    """
+    stamp, source_url = meta["stamp"], meta["sourceUrl"]
+    day = dt.date(int(stamp[:4]), int(stamp[4:6]), int(stamp[6:8]))
+    index = json.dumps(
+        [resolve_pending._WAYBACK_CDX_HEADER]
+        + [[stamp, source_url, "200", meta["indexDigest"]]]
+    ).encode()
+
+    def read(url: str) -> tuple[bytes, str]:
+        if url.startswith("https://web.archive.org/cdx/"):
+            return index, url
+        if url == f"https://web.archive.org/web/{stamp}id_/{source_url}":
+            return raw, url
+        raise urllib.error.HTTPError(url, 404, "no capture", None, None)
+
+    return resolve_pending.a19_registered_capture(
+        _period(meta),
+        {
+            "start": f"{day - dt.timedelta(days=3)}",
+            "end": f"{day + dt.timedelta(days=1)}",
+        },
+        day + dt.timedelta(days=2),
+        read,
+        request_capture=False,
+        source_url=source_url,
+        parser=lambda page: parse_release(page, parser_id),
+        parser_name=f"the BLS release ({parser_id})",
+        require_digest=True,
+    )
+
+
+_OWN = [
+    (sidecar, parser_id)
+    for sidecar in CAPTURES
+    for parser_id in sorted(_PAGE_PARSERS[json.loads(sidecar.read_text())["sourceUrl"]])
+]
+
+
+@pytest.mark.parametrize(
+    ("sidecar", "parser_id"),
+    _OWN,
+    ids=[f"{sidecar.stem}-{parser_id}" for sidecar, parser_id in _OWN],
+)
+def test_each_real_capture_resolves_through_discovery_or_defers_for_its_reason(
+    sidecar: pathlib.Path, parser_id: str
+) -> None:
+    meta, raw, _html = _load(sidecar)
+    found = _discover_capture(meta, raw, parser_id)
+    if parser_id in meta.get("expectedRefusal", {}):
+        assert found.url is None
+        assert "CAPTURE UNIDENTIFIED (deferring)" in found.verdict
+    else:
+        assert found.verdict == ""
+        assert found.url == meta["captureUrl"]
+
+
+def test_every_expected_refusal_says_why_and_is_a_cpi_shutdown_month() -> None:
+    refusals = {
+        sidecar.stem: json.loads(sidecar.read_text()).get("expectedRefusal", {})
+        for sidecar in CAPTURES
+    }
+    refused = {stem: ids for stem, ids in refusals.items() if ids}
+    # November 2025 CPI: Table A prints "-" where the one-month changes go.
+    assert set(refused) == {"cpi.nr0-20251220005743"}
+    for ids in refused.values():
+        assert set(ids) == {"cpi_headline_mom", "cpi_core_mom"}
+        assert all("October 2025" in reason for reason in ids.values())
+
+
+def test_the_corpus_covers_every_page_across_many_release_months() -> None:
+    months: dict[str, set[str]] = {}
+    for sidecar in CORPUS:
+        meta = json.loads(sidecar.read_text())
+        months.setdefault(meta["sourceUrl"], set()).add(_period(meta))
+    assert set(months) == set(_PAGE_PARSERS)
+    counts = {url.rsplit("/", 1)[1]: len(periods) for url, periods in months.items()}
+    assert counts == {
+        "cpi.nr0.htm": 12,
+        "empsit.nr0.htm": 21,
+        "jolts.nr0.htm": 9,
+        "jolts.t04.htm": 8,
+    }
 
 
 _INDEPENDENT = [
@@ -171,11 +292,9 @@ def test_each_figure_agrees_with_the_independent_first_print(
 ) -> None:
     meta, _raw, html = _load(sidecar)
     independent = meta["independentFirstPrint"][parser_id]
-    match = re.search(r"(\d{4}) M(\d{2})", meta["title"])
-    assert match is not None
     reading = parse_release(html, parser_id)
     assert reading is not None
-    assert reading[0] == f"{match.group(1)}-{match.group(2)}"
+    assert reading[0] == _period(meta)
     expected = Decimal(str(independent["value"]))
     precision = independent.get("printedPrecision")
     if precision is not None:
@@ -183,12 +302,13 @@ def test_each_figure_agrees_with_the_independent_first_print(
     assert Decimal(str(reading[1])) == expected
 
 
-def test_every_non_cpi_fixture_records_an_independent_first_print() -> None:
+def test_every_fixture_but_the_first_cpi_records_an_independent_first_print() -> None:
     for sidecar in CAPTURES:
         meta = json.loads(sidecar.read_text())
-        if "cpi" in sidecar.stem:
+        if sidecar.stem == "cpi.nr0-20260720045436":
             continue
-        assert set(meta["independentFirstPrint"]) == _PAGE_PARSERS[meta["sourceUrl"]]
+        own = _PAGE_PARSERS[meta["sourceUrl"]] - set(meta.get("expectedRefusal", {}))
+        assert set(meta["independentFirstPrint"]) == own
 
 
 def test_the_jolts_summary_prints_openings_only_rounded_so_the_cells_are_held() -> None:
@@ -262,6 +382,7 @@ _EMPSIT_READINGS = {
         "The unemployment rate (4.8 percent) changed little in July (among teenagers).",
         "The unemployment rate (4.8 percent) changed little in July (not seasonally "
         "adjusted).",
+        "The unemployment rate was 4.8 percent in July, before seasonal adjustment.",
         "Total nonfarm payroll employment rose by 123,000 in July, a year earlier.",
         "Total nonfarm payroll employment changed little in July (+123,000) (not "
         "seasonally adjusted).",
@@ -380,3 +501,111 @@ def test_a_lead_whose_payroll_verb_contradicts_its_sign_refuses_both_readers() -
     )
     for parser_id, reading in _EMPSIT_READINGS.items():
         assert parse_release(agreeing, parser_id) == reading
+
+
+def _phrase(text: str) -> re.Pattern[str]:
+    """`text` as the page prints it, wherever its lines break."""
+    return re.compile(r"\s+".join(map(re.escape, text.split())))
+
+
+def _discover(html: str, parser_id: str):
+    """What the leg's own discovery makes of one capture holding `html`.
+
+    The capture is the real July fixture's stamp, inside a closed window,
+    served as the Archive stores it (gzip) under its index digest.
+    """
+    meta = json.loads(_EMPSIT_REAL.read_text())
+    stamp, source_url = meta["stamp"], meta["sourceUrl"]
+    raw = gzip.compress(html.encode())
+    index = json.dumps(
+        [resolve_pending._WAYBACK_CDX_HEADER]
+        + [[stamp, source_url, "200", resolve_pending.a19_digest(raw)]]
+    ).encode()
+
+    def read(url: str) -> tuple[bytes, str]:
+        if url.startswith("https://web.archive.org/cdx/"):
+            return index, url
+        if url == f"https://web.archive.org/web/{stamp}id_/{source_url}":
+            return raw, url
+        raise urllib.error.HTTPError(url, 404, "no capture", None, None)
+
+    return resolve_pending.a19_registered_capture(
+        "2026-07",
+        {"start": "2026-08-07", "end": "2026-08-14"},
+        dt.date(2026, 8, 15),
+        read,
+        request_capture=False,
+        source_url=source_url,
+        parser=lambda page: parse_release(page, parser_id),
+        parser_name=f"the BLS release ({parser_id})",
+        require_digest=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "continuation",
+    (
+        # Round-4 review, finding 1: each deferred the capture forever.
+        ", following little change in June (+36,000)",
+        ", following gains of 34,000 in May and 41,000 in June",
+        ", similar to the average monthly gain of 166,000 in 2019",
+        ", compared with an average monthly gain of 158,000 thus far this year",
+        ", below the average monthly gain of 168,000 over the past 12 months",
+        " and has shown little change since April",
+        ", up from a revised -13,000 in June",
+    ),
+)
+def test_a_payroll_continuation_is_a_tail_through_discovery(continuation: str) -> None:
+    _meta, _raw, html = _load(_EMPSIT_REAL)
+    section = _phrase(
+        "Total nonfarm payroll employment changed little in July (-23,000), "
+        "following an average monthly gain of 34,000 over the prior 12 months."
+    )
+    assert len(section.findall(html)) == 1
+    changed = section.sub(
+        f"Total nonfarm payroll employment changed little in July (-23,000)"
+        f"{continuation}.",
+        html,
+    )
+    assert changed != html
+    assert parse_release(changed, "empsit_payroll_change") == ("2026-07", -23.0)
+    found = _discover(changed, "empsit_payroll_change")
+    assert found.verdict == ""
+    assert found.url == _meta["captureUrl"]
+    # The same capture with the statement qualified instead defers: the
+    # page then holds one statement, and discovery cannot skip it.
+    qualified = section.sub(
+        "Total nonfarm payroll employment changed little in July (-23,000), a year "
+        "earlier.",
+        html,
+    )
+    deferred = _discover(qualified, "empsit_payroll_change")
+    assert deferred.url is None
+    assert "CAPTURE UNIDENTIFIED (deferring)" in deferred.verdict
+
+
+@pytest.mark.parametrize(
+    "paragraph",
+    (
+        "The unemployment rate was 4.1 percent in July and has remained at either "
+        "4.1 percent or 4.2 percent since June.",
+        "The unemployment rate was 4.1 percent in July and has shown little "
+        "movement since January.",
+        "The unemployment rate stood at 4.1 percent in July, compared with 3.9 "
+        "percent a year earlier.",
+        "The unemployment rate rose 0.1 percentage point to 4.1 percent in July, "
+        "following a decline in June.",
+    ),
+)
+def test_a_rate_continuation_is_a_tail_through_discovery(paragraph: str) -> None:
+    _meta, _raw, html = _load(_EMPSIT_REAL)
+    household = re.compile(
+        r"Both the unemployment rate,\s+at 4\.1 percent,\s+and the number of"
+        r"\s+unemployed people,\s+at 6\.9 million,\s+changed little in July\."
+    )
+    changed = household.sub(paragraph, html)
+    assert changed != html
+    assert parse_release(changed, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    found = _discover(changed, "empsit_unemployment_rate")
+    assert found.verdict == ""
+    assert found.url == _meta["captureUrl"]

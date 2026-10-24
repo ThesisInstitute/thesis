@@ -13,13 +13,20 @@ Invariants, for every generated release:
 - the reader returns (release month, headline figure), exactly;
 - no decoy changes what it returns, whatever its numbers and wherever it
   sits;
-- a statement with anything after its month but a known tail (a qualifier
-  naming another period, subgroup or basis) is not read;
+- a statement with anything after its month but a tail (a clause opened by
+  a comparison word, "and has ...", "and continued ...", or "the U.S.
+  Bureau of Labor Statistics reported today") is not read: what follows is
+  a qualifier naming another period, subgroup or basis;
+- no tail, whatever figures it holds, changes what a statement says;
+- a statement that leaves its month unsaid only supports: without a
+  statement naming the month the page is refused, and with one, what is
+  read is what the dated statement says;
 - one statement alone, two statements that disagree, a headline statement
   naming another month or year, a payroll verb that contradicts its printed
   sign (in the payroll statement or in the payroll clause a rate statement
-  leans on), a title and heading that disagree, or a page without exactly
-  one preformatted block is refused (None), never guessed.
+  leans on, or one leaning on a rate statement), a title and heading that
+  disagree, or a page without exactly one preformatted block is refused
+  (None), never guessed.
 """
 
 from __future__ import annotations
@@ -98,6 +105,7 @@ _DECOYS = (
     "(not seasonally adjusted).",
     "Total nonfarm payroll employment rose by {n[4]:,},000 in {name}, and the "
     "unemployment rate was little changed at {r} percent in {prior}.",
+    "The unemployment rate was {r} percent in {name}, before seasonal adjustment.",
     "Chart 1. The unemployment rate ({r} percent) in {name}.",
     "Chart 2. Total nonfarm payroll employment (+{n[5]:,},000) in {name}.",
 )
@@ -109,9 +117,11 @@ def _empsit(draw: st.DrawFn) -> dict:
         "month": draw(st.integers(1, 12)),
         "rate": Decimal(draw(st.integers(20, 99))) / 10,
         "payroll": draw(st.integers(-999, 999).filter(lambda value: value != 0)),
-        "lead": draw(st.integers(0, 4)),
-        "rate_section": draw(st.integers(0, 8)),
-        "payroll_section": draw(st.integers(0, 5)),
+        "lead": draw(st.integers(0, 6)),
+        "rate_section": draw(st.integers(0, 11)),
+        "payroll_section": draw(st.integers(0, 10)),
+        "heading_upper": draw(st.booleans()),
+        "m13": draw(st.booleans()),
         "numbers": draw(st.lists(st.integers(1, 999), min_size=8, max_size=8)),
         "decoy_rate": Decimal(draw(st.integers(20, 199))) / 10,
         "order": draw(st.permutations(range(len(_DECOYS)))),
@@ -141,6 +151,13 @@ def _empsit_text(case: dict, *, keep: str = "both") -> tuple[str, str]:
         f"Total nonfarm payroll employment changed little ({signed}) in {name}, "
         f"and the unemployment rate rose 0.1 percentage point to {rate} percent, "
         "the U.S. Bureau of Labor Statistics reported today.",
+        f"The unemployment rate {'edged down' if up else 'rose'} to {rate} percent "
+        f"in {name}, and nonfarm payroll employment edged "
+        f"{'up' if up else 'down'} by {count}, the U.S. Bureau of Labor "
+        "Statistics reported today.",
+        f"The unemployment rate was little changed at {rate} percent in {name}, "
+        f"while nonfarm payroll employment changed little ({signed}), the U.S. "
+        "Bureau of Labor Statistics reported today.",
     )[case["lead"]]
     rate_section = (
         f"Both the unemployment rate, at {rate} percent, and the number of "
@@ -158,6 +175,13 @@ def _empsit_text(case: dict, *, keep: str = "both") -> tuple[str, str]:
         f"a narrow range of 4.0 percent to 4.2 percent since {prior} 2024.",
         f"In {name}, the unemployment rate, at {rate} percent, changed little, "
         "and the number of unemployed people was little changed at 6.9 million.",
+        f"The unemployment rate stood at {rate} percent in {name}, compared with "
+        f"{case['decoy_rate']:.1f} percent a year earlier.",
+        f"The unemployment rate was {rate} percent in {name} and has remained at "
+        f"either {case['decoy_rate']:.1f} percent or {rate} percent since {prior}.",
+        # The month unsaid: a supporting statement.
+        f"The unemployment rate held at {rate} percent and has remained in a "
+        f"narrow range of 4.0 percent to 4.5 percent since {prior} 2025.",
     )[case["rate_section"]]
     a = case["numbers"][0]
     payroll_section = (
@@ -174,6 +198,18 @@ def _empsit_text(case: dict, *, keep: str = "both") -> tuple[str, str]:
         f"and has shown little change since {prior}.",
         f"Total nonfarm payroll employment {'increased' if up else 'decreased'} "
         f"by {count} in {name} and continued to trend {'up' if up else 'down'}.",
+        f"Total nonfarm payroll employment changed little in {name} ({signed}), "
+        f"following little change in {prior} (+{a:,},000).",
+        f"Total nonfarm payroll employment {'rose' if up else 'fell'} {count} in "
+        f"{name}, compared with an average monthly gain of {a:,},000 in 2025.",
+        # The month unsaid: a supporting statement.
+        f"Total nonfarm payroll employment {'increased' if up else 'decreased'} "
+        f"by {count} over the month.",
+        f"Total nonfarm payroll employment changed little in {name} ({signed}), "
+        "roughly in line with the average monthly change over the prior 12 "
+        f"months (+{a:,},000).",
+        f"Total nonfarm payroll employment edged {'up' if up else 'down'} by "
+        f"{count} in {name} but has shown little change since {prior}.",
     )[case["payroll_section"]]
     if keep == "rate_lead_only":
         rate_section = "Household survey measures changed little."
@@ -185,13 +221,17 @@ def _empsit_text(case: dict, *, keep: str = "both") -> tuple[str, str]:
         )
         for i in case["order"]
     )
+    # BLS prints the heading's month in capitals, once ("March 2026") not.
+    heading = name.upper() if case["heading_upper"] else name
     pre = (
-        f"THE EMPLOYMENT SITUATION -- {name.upper()} 2026\n\n"
+        f"THE EMPLOYMENT SITUATION -- {heading} 2026\n\n"
         f"{lead}\n\nHousehold Survey Data\n\n{rate_section}\n\n"
         f"Establishment Survey Data\n\n{payroll_section}\n\n{decoys}\n\n"
         f"The Employment Situation for {following} is scheduled to be released."
     )
-    title = f"Employment Situation Summary - 2026 M{case['month']:02d} Results"
+    # The December release is titled "M13".
+    code = 13 if case["month"] == 12 and case["m13"] else case["month"]
+    title = f"Employment Situation Summary - 2026 M{code:02d} Results"
     return title, pre
 
 
@@ -213,6 +253,8 @@ _JULY = {
     "numbers": [34, 22, 19, 41, 30, 66, 129, 63],
     "decoy_rate": Decimal("12.1"),
     "order": list(range(len(_DECOYS))),
+    "heading_upper": True,
+    "m13": False,
 }
 
 
@@ -286,12 +328,16 @@ def test_statements_that_disagree_are_refused(case: dict, shift: int) -> None:
     assert parse_release(_page(title, changed), "empsit_payroll_change") is None
 
 
-def _section_month(pre: str, name: str, other: str, section: str) -> str:
-    """The release with one section's statement moved to another month."""
+def _section_month(pre: str, name: str, other: str, section: str) -> str | None:
+    """The release with one section's statement moved to another month.
+
+    None when the statement leaves its month unsaid.
+    """
     head, rest = pre.split(f"\n\n{section}\n\n", 1)
     statement, tail = rest.split("\n\n", 1)
     moved = re.sub(rf"\b([Ii]n) {name}\b", rf"\1 {other}", statement, count=1)
-    assert moved != statement
+    if moved == statement:
+        return None
     return f"{head}\n\n{section}\n\n{moved}\n\n{tail}"
 
 
@@ -304,8 +350,9 @@ def test_a_headline_statement_naming_another_month_is_refused(
     name = MONTHS[case["month"] - 1]
     other = MONTHS[(case["month"] - 1 + offset) % 12]
     rate = _section_month(pre, name, other, "Household Survey Data")
-    assert parse_release(_page(title, rate), "empsit_unemployment_rate") is None
     payroll = _section_month(pre, name, other, "Establishment Survey Data")
+    assume(rate is not None and payroll is not None)
+    assert parse_release(_page(title, rate), "empsit_unemployment_rate") is None
     assert parse_release(_page(title, payroll), "empsit_payroll_change") is None
 
 
@@ -321,8 +368,10 @@ def test_a_headline_statement_naming_another_year_is_refused(
         ("Establishment Survey Data", "empsit_payroll_change"),
     ):
         moved = _section_month(pre, name, f"{name} {year}", section)
-        assert parse_release(_page(title, moved), parser_id) is None
         same = _section_month(pre, name, f"{name} 2026", section)
+        if moved is None or same is None:
+            continue
+        assert parse_release(_page(title, moved), parser_id) is None
         assert (
             parse_release(_page(title, same), parser_id) == _readings(case)[parser_id]
         )
@@ -381,7 +430,8 @@ def test_a_payroll_measure_other_than_the_total_is_never_a_statement(
         " (among teenagers)",
         " (not seasonally adjusted)",
         " of last year",
-        ", compared with 3.9 percent a year earlier",
+        ", before seasonal adjustment",
+        ", a year earlier, compared with 3.9 percent",
         " for the second consecutive month among adult women",
     ),
 )
@@ -409,6 +459,209 @@ def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> No
     )
 
 
+# What a tail may open with, and words it may hold after: other months and
+# years, other figures, qualifiers. None is capitalized but a month, so no
+# tail holds a statement of its own.
+_TAIL_OPENERS = (
+    ", following",
+    " following",
+    ", after",
+    ", compared with",
+    " compared with",
+    ", similar to",
+    ", in line with",
+    ", close to",
+    ", about the same as",
+    ", the same as",
+    ", up from",
+    ", down from",
+    ", higher than",
+    ", lower than",
+    ", less than",
+    ", more than",
+    ", above",
+    ", below",
+    " and has",
+    " and have",
+    " and had",
+    " and continued",
+    " and remained",
+    " and is",
+    " and was",
+    " and were",
+    ", and the number of unemployed people",
+    ", while the number of unemployed persons",
+)
+_TAIL_WORDS = (
+    *MONTHS,
+    "2024",
+    "2025",
+    "4.2 percent",
+    "0.3 percentage point",
+    "(+36,000)",
+    "(-41,000)",
+    "166,000",
+    "a year earlier",
+    "before seasonal adjustment",
+    "(not seasonally adjusted)",
+    "among teenagers",
+    "the average monthly gain",
+    "the unemployment rate",
+    "payroll employment",
+    "since",
+    "in",
+    "rose",
+    "fell",
+    "by",
+    "respectively",
+    "and",
+    ",",
+)
+
+
+@st.composite
+def _tail(draw: st.DrawFn) -> str:
+    words = draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=12))
+    return draw(st.sampled_from(_TAIL_OPENERS)) + "".join(
+        word if word == "," else f" {word}" for word in words
+    )
+
+
+@settings(max_examples=300, deadline=None)
+@given(tails=st.lists(st.one_of(st.just(""), _tail()), min_size=4, max_size=4))
+def test_no_tail_changes_what_a_statement_says(tails: list[str]) -> None:
+    """Round-4 review: a continuation is a tail, and none of it is read."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    pre = (
+        "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        f"The unemployment rate was 4.1 percent in July{tails[0]}. "
+        f"The unemployment rate changed little at 4.1 percent in July{tails[1]}. "
+        f"Total nonfarm payroll employment rose by 123,000 in July{tails[2]}. "
+        f"Total nonfarm payroll employment changed little in July (+123,000)"
+        f"{tails[3]}."
+    )
+    html = _page(title, pre)
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    assert parse_release(html, "empsit_payroll_change") == ("2026-07", 123.0)
+
+
+@pytest.mark.parametrize(
+    "continuation",
+    (
+        # Round-4 review, verbatim and its table.
+        ", following little change in June (+36,000)",
+        ", following gains of 34,000 in May and 41,000 in June",
+        ", similar to the average monthly gain of 166,000 in 2019",
+        ", compared with an average monthly gain of 158,000 thus far this year",
+        ", below the average monthly gain of 168,000 over the past 12 months",
+    ),
+)
+def test_a_payroll_continuation_is_read_as_a_tail(continuation: str) -> None:
+    title = "Employment Situation Summary - 2026 M07 Results"
+    pre = (
+        "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        "Total nonfarm payroll employment changed little in July (-23,000), and "
+        "the unemployment rate was little changed at 4.1 percent, the U.S. Bureau "
+        "of Labor Statistics reported today. "
+        "Total nonfarm payroll employment changed little in July (-23,000)"
+        f"{continuation}."
+    )
+    assert parse_release(_page(title, pre), "empsit_payroll_change") == (
+        "2026-07",
+        -23.0,
+    )
+
+
+@pytest.mark.parametrize(
+    ("dated", "unsaid", "parser_id", "reading"),
+    (
+        (
+            "The unemployment rate was little changed at 4.3 percent in May.",
+            "The unemployment rate held at 4.3 percent and has remained in a narrow "
+            "range of 4.3 percent to 4.5 percent since July 2025.",
+            "empsit_unemployment_rate",
+            4.3,
+        ),
+        (
+            "Total nonfarm payroll employment increased by 142,000 in May.",
+            "Total nonfarm payroll employment increased by 142,000 over the month.",
+            "empsit_payroll_change",
+            142.0,
+        ),
+        (
+            "Total nonfarm payroll employment changed little in May (-23,000).",
+            "Total nonfarm payroll employment changed little (-23,000).",
+            "empsit_payroll_change",
+            -23.0,
+        ),
+    ),
+)
+def test_a_statement_that_leaves_its_month_unsaid_only_supports(
+    dated: str, unsaid: str, parser_id: str, reading: float
+) -> None:
+    """Real releases (May 2026, August 2024) state one figure without its month."""
+    title = "Employment Situation Summary - 2026 M05 Results"
+    head = "THE EMPLOYMENT SITUATION -- MAY 2026\n"
+    # Dated and unsaid agreeing: read.
+    pair = _page(title, f"{head}{dated} {unsaid}")
+    assert parse_release(pair, parser_id) == ("2026-05", reading)
+    # Unsaid alone, even twice: no statement names the month.
+    twice = _page(title, f"{head}{unsaid} {unsaid}")
+    assert parse_release(twice, parser_id) is None
+    # Unsaid disagreeing with the dated statement: refused.
+    figure = re.search(r"[0-9]+[.,][0-9]+", unsaid)
+    assert figure is not None
+    other = unsaid.replace(
+        figure.group(0), "9.9" if "." in figure.group(0) else "999,000", 1
+    )
+    assert parse_release(_page(title, f"{head}{dated} {other}"), parser_id) is None
+    # Dated alone: one statement.
+    assert parse_release(_page(title, f"{head}{dated}"), parser_id) is None
+
+
+def test_a_rate_lead_carrying_the_payroll_clause_is_checked_like_one() -> None:
+    """Real release, July 2024: the payroll clause takes the rate's month."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    lead = (
+        "The unemployment rate rose to 4.3 percent in July, and nonfarm payroll "
+        "employment edged up by 114,000, the U.S. Bureau of Labor Statistics "
+        "reported today."
+    )
+    sections = (
+        "The unemployment rate rose by 0.2 percentage point to 4.3 percent in July, "
+        "and the number of unemployed people increased by 352,000 to 7.2 million. "
+        "Total nonfarm payroll employment edged up by 114,000 in July, below the "
+        "average monthly gain of 215,000 over the prior 12 months."
+    )
+    html = _page(title, f"THE EMPLOYMENT SITUATION -- JULY 2026\n{lead} {sections}")
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.3)
+    assert parse_release(html, "empsit_payroll_change") == ("2026-07", 114.0)
+    signed = lead.replace("edged up by 114,000", "changed little (-114,000)")
+    contradicted = signed.replace("changed little", "edged up")
+    for text, readings in (
+        (
+            signed,
+            {
+                "empsit_unemployment_rate": ("2026-07", 4.3),
+                "empsit_payroll_change": None,
+            },
+        ),
+        (
+            contradicted,
+            {"empsit_unemployment_rate": None, "empsit_payroll_change": None},
+        ),
+    ):
+        page = _page(title, f"THE EMPLOYMENT SITUATION -- JULY 2026\n{text} {sections}")
+        for parser_id, reading in readings.items():
+            assert parse_release(page, parser_id) == reading
+    # The rate's month is the clause's: a June rate lead dates the payroll
+    # clause June too, and refuses the page.
+    june = lead.replace("in July", "in June")
+    page = _page(title, f"THE EMPLOYMENT SITUATION -- JULY 2026\n{june} {sections}")
+    for parser_id in _EMPSIT_IDS:
+        assert parse_release(page, parser_id) is None
+
+
 def test_qualified_statements_never_supply_the_rate() -> None:
     """Round-3 review, finding 1, verbatim: they returned 4.8."""
     title = "Employment Situation Summary - 2026 M07 Results"
@@ -427,7 +680,7 @@ def test_qualified_statements_never_supply_the_rate() -> None:
 
 
 @settings(max_examples=100, deadline=None)
-@given(case=_empsit(), lead=st.sampled_from((0, 2, 4)))
+@given(case=_empsit(), lead=st.sampled_from((0, 2, 4, 6)))
 def test_a_lead_whose_payroll_verb_contradicts_its_sign_refuses_both_readers(
     case: dict, lead: int
 ) -> None:
@@ -461,11 +714,46 @@ def test_a_heading_month_the_title_does_not_name_is_refused(
     case: dict, offset: int
 ) -> None:
     title, pre = _empsit_text(case)
-    name = MONTHS[case["month"] - 1].upper()
-    other = MONTHS[(case["month"] - 1 + offset) % 12].upper()
-    changed = pre.replace(f"-- {name} 2026", f"-- {other} 2026")
-    for parser_id in _EMPSIT_IDS:
-        assert parse_release(_page(title, changed), parser_id) is None
+    name = MONTHS[case["month"] - 1]
+    other = MONTHS[(case["month"] - 1 + offset) % 12]
+    for printed in (other.upper(), other):
+        changed = re.sub(rf"-- {name} 2026", f"-- {printed} 2026", pre, flags=re.I)
+        assert changed != pre
+        for parser_id in _EMPSIT_IDS:
+            assert parse_release(_page(title, changed), parser_id) is None
+
+
+@pytest.mark.parametrize(
+    ("code", "heading", "reading"),
+    (
+        ("M12", "DECEMBER", "2025-12"),
+        ("M13", "DECEMBER", "2025-12"),
+        ("M13", "December", "2025-12"),
+        ("M13", "NOVEMBER", None),
+        ("M14", "DECEMBER", None),
+        ("M00", "DECEMBER", None),
+    ),
+)
+def test_the_december_release_titled_m13_is_december(
+    code: str, heading: str, reading: str | None
+) -> None:
+    """Real captures: BLS titles the December Employment Situation "M13"."""
+    title = f"Employment Situation Summary - 2025 {code} Results"
+    pre = (
+        f"THE EMPLOYMENT SITUATION -- {heading} 2025\n"
+        "Total nonfarm payroll employment increased by 256,000 in December, and "
+        "the unemployment rate changed little at 4.1 percent, the U.S. Bureau of "
+        "Labor Statistics reported today. "
+        "The unemployment rate changed little at 4.1 percent in December. "
+        "Total nonfarm payroll employment rose by 256,000 in December."
+    )
+    html = _page(title, pre)
+    for parser_id, value in (
+        ("empsit_unemployment_rate", 4.1),
+        ("empsit_payroll_change", 256.0),
+    ):
+        expected = None if reading is None else (reading, value)
+        assert parse_release(html, parser_id) == expected
 
 
 def test_a_duplicated_title_or_another_release_title_is_refused() -> None:
@@ -589,33 +877,59 @@ def _jolts(draw: st.DrawFn) -> dict:
         "openings": Decimal(draw(st.integers(30, 150))) / 10,
         "rate": Decimal(draw(st.integers(20, 80))) / 10,
         "revised": Decimal(draw(st.integers(30, 150))) / 10,
-        "lead": draw(st.integers(0, 3)),
+        "lead": draw(st.integers(0, 6)),
+        "section": draw(st.integers(0, 2)),
+        "change": draw(st.integers(1, 999)),
         "dash": draw(st.sampled_from(("-", "--", "—", "�"))),
     }
 
 
-def _jolts_page(case: dict, *, second: bool = True, month: str | None = None) -> str:
+def _jolts_page(
+    case: dict,
+    *,
+    second: bool = True,
+    month: str | None = None,
+    lead: str | None = None,
+) -> str:
     name = MONTHS[case["month"] - 1]
     prior = MONTHS[case["month"] - 2]
     openings = f"{case['openings']:.1f}"
     lead = (
-        f"The number of job openings was little changed at {openings} million "
-        f"in {name}, the U.S. Bureau of Labor Statistics reported today.",
-        f"The number of job openings {'rose' if case['month'] % 2 else 'fell'} "
-        f"to {openings} million in {name}.",
-        f"The number of job openings decreased by 300,000 to {openings} million "
-        f"in {name}.",
-        f"The number of job openings was little changed at {openings} million "
-        f"on the last business day of {name}, the U.S. Bureau of Labor "
-        "Statistics reported today.",
-    )[case["lead"]]
+        (
+            f"The number of job openings was little changed at {openings} million "
+            f"in {name}, the U.S. Bureau of Labor Statistics reported today.",
+            f"The number of job openings {'rose' if case['month'] % 2 else 'fell'} "
+            f"to {openings} million in {name}.",
+            f"The number of job openings decreased by 300,000 to {openings} million "
+            f"in {name}.",
+            f"The number of job openings was little changed at {openings} million "
+            f"on the last business day of {name}, the U.S. Bureau of Labor "
+            "Statistics reported today.",
+            # Real releases, November and December 2025.
+            f"The number of job openings continued to trend down to {openings} "
+            f"million in {name}, the U.S. Bureau of Labor Statistics reported today.",
+            f"The number of job openings trended down to {openings} million "
+            f"(-{case['change']},000) in {name} and was down by 966,000 over the year.",
+            f"The number of job openings was little changed at {openings} million in "
+            f"{name} but was down by 885,000 over the year.",
+        )[case["lead"]]
+        if lead is None
+        else lead
+    )
     section = (
         f"The number and rate of job openings were little changed at {openings} "
         f"million and {case['rate']:.1f} percent, respectively, in "
-        f"{month or name}."
-        if second
-        else "Job openings changed little in most industries."
-    )
+        f"{month or name}.",
+        # Real release, April 2026.
+        f"The number and rate of job openings increased to {openings} million "
+        f"(+{case['change']},000) and {case['rate']:.1f} percent, respectively, "
+        f"in {month or name}.",
+        # The month unsaid: a supporting statement.
+        f"The number of job openings was little changed at {openings} million "
+        "over the month.",
+    )[case["section"]]
+    if not second:
+        section = "Job openings changed little in most industries."
     pre = (
         f"JOB OPENINGS AND LABOR TURNOVER {case['dash']} {name.upper()} 2026\n\n"
         f"{lead} Hires were unchanged at 5.3 million. Within separations, quits "
@@ -648,7 +962,7 @@ def test_jolts_openings_one_statement_or_a_disagreement_is_refused(
     assert parse_release(_jolts_page(case, second=False), "jolts_job_openings") is None
     openings = f"{case['openings']:.1f}"
     other = f"{case['openings'] + Decimal('0.1'):.1f}"
-    html = _jolts_page(case).replace(
+    html = _jolts_page({**case, "section": 0}).replace(
         f"changed at {openings} million and", f"changed at {other} million and"
     )
     assert parse_release(html, "jolts_job_openings") is None
@@ -660,7 +974,21 @@ def test_jolts_openings_statement_naming_another_month_is_refused(
     case: dict, offset: int
 ) -> None:
     other = MONTHS[(case["month"] - 1 + offset) % 12]
-    assert parse_release(_jolts_page(case, month=other), "jolts_job_openings") is None
+    dated = {**case, "section": case["section"] % 2}
+    assert parse_release(_jolts_page(dated, month=other), "jolts_job_openings") is None
+
+
+@settings(max_examples=100, deadline=None)
+@given(case=_jolts())
+def test_jolts_openings_with_no_dated_statement_is_refused(case: dict) -> None:
+    unsaid = (
+        f"The number of job openings was little changed at {case['openings']:.1f} "
+        "million over the month."
+    )
+    unsaid_only = {**case, "section": 2}
+    assert parse_release(_jolts_page(unsaid_only), "jolts_job_openings") is not None
+    html = _jolts_page(unsaid_only, lead=unsaid)
+    assert parse_release(html, "jolts_job_openings") is None
 
 
 @settings(max_examples=100, deadline=None)
@@ -681,6 +1009,8 @@ def test_each_prose_reader_refuses_the_other_summary_page() -> None:
             "rate": Decimal("4.4"),
             "revised": Decimal("7.5"),
             "lead": 0,
+            "section": 0,
+            "change": 731,
             "dash": "�",
         }
     )
