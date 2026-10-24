@@ -24,5 +24,6 @@ tests/fixtures/eia_dnav/api-no-key.json binary
 tests/fixtures/release_capture/*.raw binary
 
 # Archive capture bodies are checked against the index digest byte-for-byte;
-# half are plain HTML, which line-ending translation would rewrite.
-tests/fixtures/release_capture/**/*.raw -text
+# half are plain HTML, which line-ending translation would rewrite, and their
+# whitespace is the page's own.
+tests/fixtures/release_capture/**/*.raw -text -whitespace

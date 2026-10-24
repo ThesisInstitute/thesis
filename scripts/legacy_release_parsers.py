@@ -389,9 +389,10 @@ def _words(allowed: str) -> str:
 _WHEN = rf" in (?P<month>{_MONTH})(?: (?P<year>[0-9]{{4}}))?"
 # A statement may instead leave its month unsaid ("The unemployment rate
 # held at 4.3 percent and has remained ...", "... increased by 142,000 over
-# the month"). It then only supports: the page must also hold a statement
-# that names the month, and every statement must agree, so the figure read
-# is always one a dated statement states.
+# the month"). It then only corroborates: it counts toward the two
+# statements when it states the figure the dated statements state, and is
+# otherwise ignored ("Annual Average Data for 2025 ... The unemployment
+# rate was 4.0 percent."). It can neither supply the figure nor veto it.
 _WHEN_OR_UNSAID = rf"(?:{_WHEN}| over the month)?"
 _COUNT = r"[1-9][0-9]{0,2}(?:,[0-9]{3})*"
 _PAYROLL = r"(?:Total n|N)onfarm payroll employment"
@@ -438,20 +439,66 @@ _OPENINGS_CHANGE = rf"(?: \([+\-\u2212]{_COUNT}\))?"
 # read. Anything else after the month qualifies the statement itself (",
 # a year earlier", "(2025)", "(among teenagers)", "of last year"), so the
 # sentence is no statement. "Before" opens no tail: "before seasonal
-# adjustment" is another measure.
+# adjustment" is another measure. Every tail in the corpus of real
+# releases (tests/fixtures/release_capture/corpus/) opens with one of these.
 _COMPARE = (
     "(?:(?:roughly|about|nearly|slightly|somewhat|well|much|far) )?"
     "(?:following|after|compared with|similar to|in line with|close to|"
     "the same as|up from|down from|(?:higher|lower|less|more) than|above|below)"
 )
+# A tail never speaks to the statement's own basis, scope or revision: a
+# sentence whose tail names one ("... but was 4.1 percent after seasonal
+# adjustment", "..., above the national rate", "... among adults", "...,
+# after revision") is no statement, for the figure it states may be the
+# unadjusted, partial or unrevised one. No tail in the corpus of real
+# releases holds one of these words; "after accounting for the annual
+# adjustments to the population controls", which BLS prints after the
+# January rate, holds none.
+_REQUALIFIERS = (
+    r"\b(?:"
+    + "|".join(
+        (
+            # Basis: another adjustment, or a figure leaving part out.
+            "[Ss]easonal",
+            r"(?:un)?adjusted\b",
+            "exclud",
+            r"without\b",
+            r"basis\b",
+            "benchmark",
+            # Scope: the whole, a subgroup, a sector or a place.
+            r"national\b",
+            r"nationwide\b",
+            r"overall\b",
+            r"among\b",
+            r"adults?\b",
+            "teen",
+            r"(?:wo)?men\b",
+            "youth",
+            "veteran",
+            r"(?:White|Black|Asian|Hispanic|Latino)s?\b",
+            r"private\b",
+            r"government\b",
+            r"sectors?\b",
+            "industr",
+            r"regions?\b",
+            r"states?\b",
+            r"metropolitan\b",
+            # Revision.
+            "revis",
+        )
+    )
+    + ")"
+)
 _TAIL = (
     rf"(?:,? {_COMPARE}\b"
-    r"| (?:and|but) (?:has|have|had|continued|remained|is|was|were)\b"
+    r"| (?:and|but) (?:has|have|had|continued|remained)\b"
+    # JOLTS: "... but was down by 885,000 over the year".
+    r"| (?:and|but) (?:was|were) (?:up|down) by\b"
     rf"|, (?:and|while) {_UNEMPLOYED}\b)"
     # To the full stop. A period inside a number ("4.2") has no space after
     # it, so it ends nothing. One ending an abbreviation ("the U.S. average")
     # ends the tail early, which changes nothing: the statement is whole.
-    r"(?:[^.]|\.(?=\S))*?"
+    rf"(?:(?!{_REQUALIFIERS})(?:[^.]|\.(?=\S)))*?"
 )
 _REPORTED = r", the U\.S\. Bureau of Labor Statistics reported today"
 _END = rf"(?:{_REPORTED}|{_TAIL})?\.(?=\s|$)"
@@ -675,12 +722,14 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     month. A statement is one of the reader's forms, whole: the measure's
     own subject opening a sentence or clause, the figure, the month named in
     place or left unsaid, and nothing after it but a tail and the full stop
-    (_END). At least two statements, in separate stretches of text, must
-    state the figure (BLS states each headline figure in the lead paragraph
-    and again in its section), at least one must name the month, and they
-    must all agree. A statement that names another month or year, or whose
-    verb contradicts its printed sign, refuses the page. Text in no form is
-    not read.
+    (_END). The statements that name the month must all agree, and at least
+    two statements in separate stretches of text must state their figure
+    (BLS states each headline figure in the lead paragraph and again in its
+    section): dated ones, or undated ones that state the same figure. A
+    dated statement that names another month or year, or whose verb
+    contradicts its printed sign, refuses the page. An undated statement
+    never does: one stating another figure, or contradicting itself, is
+    ignored. Text in no form is not read.
     """
     spec = PROSE_PARSERS[parser_id]
     doc = _Document()
@@ -714,31 +763,36 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
         return None
     found: list[tuple[int, int]] = []
     values: set[Decimal] = set()
-    dated = False
+    undated: list[tuple[tuple[int, int], Decimal | None]] = []
     for pattern in spec.statements:
         for match in pattern.finditer(text):
             groups = match.groupdict()
-            if groups["month"] is not None:
-                if groups["month"] != month_name or groups["year"] not in (
-                    None,
-                    title[1],
-                ):
-                    return None
-                dated = True
+            if groups["month"] is None:
+                undated.append((match.span(), _statement_value(groups)))
+                continue
+            if groups["month"] != month_name or groups["year"] not in (
+                None,
+                title[1],
+            ):
+                return None
             value = _statement_value(groups)
             if value is None:
                 return None
             values.add(value)
             found.append(match.span())
+    if len(values) != 1:
+        return None
+    (figure,) = values
+    found += [span for span, value in undated if value == figure]
     # Two forms matching one stretch of text are one statement, not two.
     statements, reach = 0, -1
     for begin, finish in sorted(found):
         if begin >= reach:
             statements += 1
         reach = max(reach, finish)
-    if statements < 2 or not dated or len(values) != 1:
+    if statements < 2:
         return None
-    value = float(values.pop())
+    value = float(figure)
     return (period, value) if math.isfinite(value) else None
 
 

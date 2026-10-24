@@ -14,19 +14,26 @@ Invariants, for every generated release:
 - no decoy changes what it returns, whatever its numbers and wherever it
   sits;
 - a statement with anything after its month but a tail (a clause opened by
-  a comparison word, "and has ...", "and continued ...", or "the U.S.
-  Bureau of Labor Statistics reported today") is not read: what follows is
-  a qualifier naming another period, subgroup or basis;
-- no tail, whatever figures it holds, changes what a statement says;
-- a statement that leaves its month unsaid only supports: without a
-  statement naming the month the page is refused, and with one, what is
-  read is what the dated statement says;
-- one statement alone, two statements that disagree, a headline statement
-  naming another month or year, a payroll verb that contradicts its printed
-  sign (in the payroll statement or in the payroll clause a rate statement
-  leans on, or one leaning on a rate statement), a title and heading that
-  disagree, or a page without exactly one preformatted block is refused
-  (None), never guessed.
+  a comparison word, "and has ...", "and continued ...", "but was down by
+  ...", or "the U.S. Bureau of Labor Statistics reported today") is not
+  read: what follows is a qualifier naming another period, subgroup or
+  basis;
+- no tail, whatever other figures, months or years it holds, changes what
+  a statement says;
+- a tail that speaks to the statement's own basis, scope or revision
+  ("after seasonal adjustment", "the national rate", "among adults",
+  "after revision") makes the sentence no statement: it neither supplies
+  the figure nor refuses the page;
+- a statement that leaves its month unsaid only corroborates: it counts
+  when it states the figure the dated statements state, and is otherwise
+  ignored, so what is read is always what a dated statement says, and no
+  undated statement (an annual average, a revision note) refuses the page;
+- one statement alone, two dated statements that disagree, a headline
+  statement naming another month or year, a payroll verb that contradicts
+  its printed sign (in the payroll statement or in the payroll clause a
+  rate statement leans on, or one leaning on a rate statement), a title and
+  heading that disagree, or a page without exactly one preformatted block
+  is refused (None), never guessed.
 """
 
 from __future__ import annotations
@@ -433,6 +440,26 @@ def test_a_payroll_measure_other_than_the_total_is_never_a_statement(
         ", before seasonal adjustment",
         ", a year earlier, compared with 3.9 percent",
         " for the second consecutive month among adult women",
+        # Round-5 review, finding 1: "and/but was" opens no tail unless the
+        # clause is a change ("but was down by ..."), and no tail may speak
+        # to the statement's own basis, scope or revision.
+        " but was 4.0 percent a year earlier",
+        " and is 4.0 percent for adults",
+        " and were 4.0 percent",
+        " and was not seasonally adjusted",
+        ", after seasonal adjustment",
+        ", compared with 3.9 percent on a seasonally adjusted basis",
+        ", following 3.9 percent before seasonal adjustment",
+        ", above the national rate",
+        ", similar to the rate among adults",
+        ", compared with 3.9 percent overall",
+        ", following revisions to May and June",
+        " and has remained unchanged after revision",
+        ", up from 3.9 percent unadjusted",
+        # "Before" opens no tail: the figure before an adjustment is another.
+        ", before the annual population control adjustments",
+        ", after excluding the population control adjustments",
+        " and has remained there for adult men since May",
     ),
 )
 def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> None:
@@ -460,7 +487,7 @@ def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> No
 
 
 # What a tail may open with, and words it may hold after: other months and
-# years, other figures, qualifiers. None is capitalized but a month, so no
+# years, other figures, comparisons. None is capitalized but a month, so no
 # tail holds a statement of its own.
 _TAIL_OPENERS = (
     ", following",
@@ -486,9 +513,10 @@ _TAIL_OPENERS = (
     " and had",
     " and continued",
     " and remained",
-    " and is",
-    " and was",
-    " and were",
+    " but has",
+    " but was down by",
+    " and was up by",
+    " and were down by",
     ", and the number of unemployed people",
     ", while the number of unemployed persons",
 )
@@ -502,9 +530,8 @@ _TAIL_WORDS = (
     "(-41,000)",
     "166,000",
     "a year earlier",
-    "before seasonal adjustment",
-    "(not seasonally adjusted)",
-    "among teenagers",
+    "over the year",
+    "over the prior 12 months",
     "the average monthly gain",
     "the unemployment rate",
     "payroll employment",
@@ -543,6 +570,126 @@ def test_no_tail_changes_what_a_statement_says(tails: list[str]) -> None:
     html = _page(title, pre)
     assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
     assert parse_release(html, "empsit_payroll_change") == ("2026-07", 123.0)
+
+
+# What a tail may not speak to: the statement's own basis, scope or revision.
+# One phrase for each word legacy_release_parsers._REQUALIFIERS names.
+_REQUALIFIED = (
+    # Basis.
+    "after seasonal adjustment",
+    "on a seasonally adjusted basis",
+    "(not seasonally adjusted)",
+    "Seasonally",
+    "unadjusted",
+    "adjusted",
+    "excluding the population control adjustments",
+    "without the strike",
+    "on a three-month average basis",
+    "before the annual benchmark",
+    # Scope.
+    "the national rate",
+    "nationwide",
+    "overall",
+    "among the long-term unemployed",
+    "for adults",
+    "for adult women",
+    "for teenagers",
+    "for men",
+    "for women",
+    "for youth",
+    "for veterans",
+    "for Whites",
+    "for Black workers",
+    "for Asians",
+    "for Hispanics",
+    "for Latino workers",
+    "for private employers",
+    "in government",
+    "in both sectors",
+    "by industry",
+    "in the Northeast region",
+    "in most states",
+    "in metropolitan areas",
+    # Revision.
+    "as revised",
+    "after revision",
+    "revisions",
+)
+
+
+@st.composite
+def _requalified_tail(draw: st.DrawFn) -> str:
+    words = [
+        *draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=6)),
+        draw(st.sampled_from(_REQUALIFIED)),
+        *draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=6)),
+    ]
+    return draw(st.sampled_from(_TAIL_OPENERS)) + "".join(
+        word if word == "," else f" {word}" for word in words
+    )
+
+
+@settings(max_examples=300, deadline=None)
+@given(tail=_requalified_tail())
+def test_a_tail_speaking_to_the_statements_own_basis_unmakes_the_statement(
+    tail: str,
+) -> None:
+    """Round-5 review, finding 1: such a sentence neither reads nor refuses."""
+    _check_requalified(tail)
+
+
+@pytest.mark.parametrize("phrase", _REQUALIFIED)
+@pytest.mark.parametrize("opener", (", compared with 3.9 percent", " and has remained"))
+def test_each_word_naming_a_basis_scope_or_revision_unmakes_the_statement(
+    phrase: str, opener: str
+) -> None:
+    _check_requalified(f"{opener} {phrase}")
+
+
+def _check_requalified(tail: str) -> None:
+    title = "Employment Situation Summary - 2026 M07 Results"
+    head = "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    requalified = (
+        f"The unemployment rate was 4.8 percent in July{tail}. "
+        f"The unemployment rate changed little at 4.8 percent in July{tail}. "
+        f"Total nonfarm payroll employment rose by 999,000 in July{tail}. "
+        f"Total nonfarm payroll employment changed little in July (+999,000){tail}."
+    )
+    for parser_id in _EMPSIT_IDS:
+        assert parse_release(_page(title, head + requalified), parser_id) is None
+    headline = (
+        "The unemployment rate was 4.1 percent in July. "
+        "The unemployment rate changed little at 4.1 percent in July. "
+        "Total nonfarm payroll employment rose by 123,000 in July. "
+        "Total nonfarm payroll employment changed little in July (+123,000)."
+    )
+    html = _page(title, f"{head}{headline} {requalified}")
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    assert parse_release(html, "empsit_payroll_change") == ("2026-07", 123.0)
+
+
+def test_a_tail_restating_the_figure_on_another_basis_is_never_read() -> None:
+    """Round-5 review, finding 1, verbatim: it returned 4.8."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    pre = (
+        "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        "The unemployment rate was 4.8 percent in July but was 4.1 percent after "
+        "seasonal adjustment.\n"
+        "The unemployment rate stood at 4.8 percent in July but was 4.1 percent on "
+        "a seasonally adjusted basis."
+    )
+    assert parse_release(_page(title, pre), "empsit_unemployment_rate") is None
+    # Beside the headline, the same sentence is ignored, as is one saying
+    # the headline was not seasonally adjusted.
+    title, july = _empsit_text(_JULY)
+    for added in (
+        pre.split("\n", 1)[1],
+        "The unemployment rate was 4.8 percent in July and was not seasonally "
+        "adjusted.",
+    ):
+        html = _page(title, f"{july}\n\n{added}")
+        for parser_id, reading in _readings(_JULY).items():
+            assert parse_release(html, parser_id) == reading
 
 
 @pytest.mark.parametrize(
@@ -596,27 +743,65 @@ def test_a_payroll_continuation_is_read_as_a_tail(continuation: str) -> None:
         ),
     ),
 )
-def test_a_statement_that_leaves_its_month_unsaid_only_supports(
+def test_a_statement_that_leaves_its_month_unsaid_only_corroborates(
     dated: str, unsaid: str, parser_id: str, reading: float
 ) -> None:
     """Real releases (May 2026, August 2024) state one figure without its month."""
     title = "Employment Situation Summary - 2026 M05 Results"
     head = "THE EMPLOYMENT SITUATION -- MAY 2026\n"
-    # Dated and unsaid agreeing: read.
-    pair = _page(title, f"{head}{dated} {unsaid}")
-    assert parse_release(pair, parser_id) == ("2026-05", reading)
-    # Unsaid alone, even twice: no statement names the month.
-    twice = _page(title, f"{head}{unsaid} {unsaid}")
-    assert parse_release(twice, parser_id) is None
-    # Unsaid disagreeing with the dated statement: refused.
+
+    def read(*sentences: str) -> tuple[str, float] | None:
+        return parse_release(_page(title, head + " ".join(sentences)), parser_id)
+
     figure = re.search(r"[0-9]+[.,][0-9]+", unsaid)
     assert figure is not None
     other = unsaid.replace(
         figure.group(0), "9.9" if "." in figure.group(0) else "999,000", 1
     )
-    assert parse_release(_page(title, f"{head}{dated} {other}"), parser_id) is None
+    # Dated and unsaid agreeing: read.
+    assert read(dated, unsaid) == ("2026-05", reading)
+    # Unsaid alone, even twice: no statement names the month.
+    assert read(unsaid, unsaid) is None
     # Dated alone: one statement.
-    assert parse_release(_page(title, f"{head}{dated}"), parser_id) is None
+    assert read(dated) is None
+    # Unsaid disagreeing is ignored: it neither counts nor refuses.
+    assert read(dated, other) is None
+    assert read(dated, dated, other) == ("2026-05", reading)
+    assert read(other, dated, unsaid) == ("2026-05", reading)
+    assert read(other, other) is None
+
+
+def test_an_undated_statement_never_refuses_the_page() -> None:
+    """Round-5 review, finding 2: an annual average vetoed the headline."""
+    title, july = _empsit_text(_JULY)
+    for added in (
+        "Annual Average Data for 2025\nThe unemployment rate was 4.0 percent.",
+        "Total nonfarm payroll employment increased by 999,000 over the month.",
+        # Contradicting itself, undated: ignored too.
+        "Total nonfarm payroll employment edged up (-23,000).",
+        "Both nonfarm payroll employment (-23,000) and the unemployment rate "
+        "(4.1 percent) edged up.",
+    ):
+        html = _page(title, f"{july}\n\n{added}")
+        for parser_id, reading in _readings(_JULY).items():
+            assert parse_release(html, parser_id) == reading
+    # Dated, such sentences refuse.
+    for added, refused in (
+        ("The unemployment rate was 4.0 percent in July.", _EMPSIT_IDS[:1]),
+        (
+            "Total nonfarm payroll employment edged up in July (-23,000).",
+            _EMPSIT_IDS[1:],
+        ),
+        (
+            "Both nonfarm payroll employment (-23,000) and the unemployment rate "
+            "(4.1 percent) edged up in July.",
+            _EMPSIT_IDS,
+        ),
+    ):
+        html = _page(title, f"{july}\n\n{added}")
+        for parser_id, reading in _readings(_JULY).items():
+            expected = None if parser_id in refused else reading
+            assert parse_release(html, parser_id) == expected
 
 
 def test_a_rate_lead_carrying_the_payroll_clause_is_checked_like_one() -> None:
@@ -660,6 +845,49 @@ def test_a_rate_lead_carrying_the_payroll_clause_is_checked_like_one() -> None:
     page = _page(title, f"THE EMPLOYMENT SITUATION -- JULY 2026\n{june} {sections}")
     for parser_id in _EMPSIT_IDS:
         assert parse_release(page, parser_id) is None
+
+
+@pytest.mark.parametrize(
+    ("clause", "payroll"),
+    (
+        (", and nonfarm payroll employment (+57,000) changed little", 57),
+        (
+            ", while total nonfarm payroll employment (-57,000) was essentially flat",
+            -57,
+        ),
+    ),
+)
+def test_a_rate_lead_whose_payroll_clause_prints_its_figure_first_is_checked(
+    clause: str, payroll: int
+) -> None:
+    """Round-5 review: the figure-before-verb clause was untested."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    head = "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    sections = (
+        "The unemployment rate was 4.1 percent in July. "
+        f"Total nonfarm payroll employment changed little in July ({_signed(payroll)})."
+    )
+
+    def lead(text: str) -> str:
+        return (
+            f"The unemployment rate was little changed at 4.1 percent in July{text}, "
+            "the U.S. Bureau of Labor Statistics reported today."
+        )
+
+    html = _page(title, f"{head}{lead(clause)} {sections}")
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    assert parse_release(html, "empsit_payroll_change") == ("2026-07", float(payroll))
+    # The lead disagreeing with the payroll section refuses the payroll reader.
+    other = clause.replace(_count(payroll), "58,000")
+    html = _page(title, f"{head}{lead(other)} {sections}")
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    assert parse_release(html, "empsit_payroll_change") is None
+    # Its verb contradicting its sign refuses both readers.
+    verb = "edged down" if payroll > 0 else "edged up"
+    contradicted = re.sub(r"\) .*", f") {verb}", clause)
+    html = _page(title, f"{head}{lead(contradicted)} {sections}")
+    for parser_id in _EMPSIT_IDS:
+        assert parse_release(html, parser_id) is None
 
 
 def test_qualified_statements_never_supply_the_rate() -> None:

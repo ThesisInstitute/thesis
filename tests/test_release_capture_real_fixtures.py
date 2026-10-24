@@ -552,7 +552,7 @@ def _discover(html: str, parser_id: str):
         ", compared with an average monthly gain of 158,000 thus far this year",
         ", below the average monthly gain of 168,000 over the past 12 months",
         " and has shown little change since April",
-        ", up from a revised -13,000 in June",
+        ", up from -13,000 in June",
     ),
 )
 def test_a_payroll_continuation_is_a_tail_through_discovery(continuation: str) -> None:
@@ -609,3 +609,32 @@ def test_a_rate_continuation_is_a_tail_through_discovery(paragraph: str) -> None
     found = _discover(changed, "empsit_unemployment_rate")
     assert found.verdict == ""
     assert found.url == _meta["captureUrl"]
+
+
+@pytest.mark.parametrize(
+    "sentence",
+    (
+        # Round-5 review, finding 1: a sentence whose tail speaks to the
+        # figure's basis is no statement, so it neither reads nor refuses.
+        "The unemployment rate was 4.8 percent in July and was not seasonally "
+        "adjusted.",
+        "The unemployment rate was 4.8 percent in July but was 4.1 percent after "
+        "seasonal adjustment.",
+        "Total nonfarm payroll employment rose by 123,000 in July, compared with "
+        "-23,000 after seasonal adjustment.",
+        # Round-5 review, finding 2: an undated statement of another figure
+        # is ignored.
+        "Annual Average Data for 2025\nThe unemployment rate was 4.0 percent.",
+        "Total nonfarm payroll employment increased by 2,000,000 over the month.",
+    ),
+)
+def test_a_sentence_of_another_basis_or_period_never_defers_a_real_release(
+    sentence: str,
+) -> None:
+    meta, _raw, html = _load(_EMPSIT_REAL)
+    changed = _with_sentence(html, sentence)
+    for parser_id, reading in _EMPSIT_READINGS.items():
+        assert parse_release(changed, parser_id) == reading
+        found = _discover(changed, parser_id)
+        assert found.verdict == ""
+        assert found.url == meta["captureUrl"]
