@@ -29,6 +29,7 @@ from hypothesis import strategies as st
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import legacy_release_parsers  # noqa: E402
 import resolve_pending  # noqa: E402
 from legacy_release_contracts import LEGACY_RELEASE_CAPTURE_CONTRACTS  # noqa: E402
 from legacy_release_parsers import LABELS as LEGACY_RELEASE_LABELS  # noqa: E402
@@ -510,13 +511,14 @@ def _phrase(text: str) -> re.Pattern[str]:
     return re.compile(r"\s+".join(map(re.escape, text.split())))
 
 
-def _discover(html: str, parser_id: str):
+def _discover(html: str, parser_id: str, sidecar: pathlib.Path = _EMPSIT_REAL):
     """What the leg's own discovery makes of one capture holding `html`.
 
-    The capture is the real July fixture's stamp, inside a closed window,
-    served as the Archive stores it (gzip) under its index digest.
+    The capture is a real fixture's stamp (the July Employment Situation's
+    unless `sidecar` names another), inside a closed window, served as the
+    Archive stores it (gzip) under its index digest.
     """
-    meta = json.loads(_EMPSIT_REAL.read_text())
+    meta = json.loads(sidecar.read_text())
     stamp, source_url = meta["stamp"], meta["sourceUrl"]
     raw = gzip.compress(html.encode())
     index = json.dumps(
@@ -532,7 +534,7 @@ def _discover(html: str, parser_id: str):
         raise urllib.error.HTTPError(url, 404, "no capture", None, None)
 
     return resolve_pending.a19_registered_capture(
-        "2026-07",
+        _period(meta),
         {"start": "2026-08-07", "end": "2026-08-14"},
         dt.date(2026, 8, 15),
         read,
@@ -931,3 +933,117 @@ def test_round_8_red_team_a_commented_out_block_never_reads_a_real_release() -> 
     ):
         for parser_id, reading in _EMPSIT_READINGS.items():
             assert parse_release(page, parser_id) == reading
+
+
+_JOLTS_REAL = FIXTURES / "jolts.nr0-20260810093236.json"
+# Each real summary fixture: its readings, and its heading as printed.
+_REAL_SUMMARIES = {
+    _EMPSIT_REAL: (_EMPSIT_READINGS, "THE EMPLOYMENT SITUATION - JULY 2026"),
+    _JOLTS_REAL: (
+        {"jolts_job_openings": ("2026-06", 7.4)},
+        "JOB OPENINGS AND LABOR TURNOVER � JUNE 2026",
+    ),
+}
+
+
+def _defers(page: str, sidecar: pathlib.Path) -> None:
+    """Every reader of the page refuses it, and discovery defers."""
+    for parser_id in _REAL_SUMMARIES[sidecar][0]:
+        assert parse_release(page, parser_id) is None
+        found = _discover(page, parser_id, sidecar)
+        assert found.url is None
+        assert "CAPTURE UNIDENTIFIED (deferring)" in found.verdict
+
+
+def _resolves(page: str, sidecar: pathlib.Path) -> None:
+    """Every reader of the page reads it as the fixture, and discovery
+    resolves the capture."""
+    meta = json.loads(sidecar.read_text())
+    for parser_id, reading in _REAL_SUMMARIES[sidecar][0].items():
+        assert parse_release(page, parser_id) == reading
+        found = _discover(page, parser_id, sidecar)
+        assert found.verdict == ""
+        assert found.url == meta["captureUrl"]
+
+
+@pytest.mark.parametrize("sidecar", _REAL_SUMMARIES, ids=lambda p: p.stem)
+def test_round_9_review_a_label_before_a_real_heading_defers_the_capture(
+    sidecar: pathlib.Path,
+) -> None:
+    """Round-9 review, finding 2, on the real captures: a label at the start
+    of the block, or just before the heading, refuses every reader of the
+    page, and discovery defers."""
+    _meta, _raw, html = _load(sidecar)
+    _resolves(html, sidecar)
+    heading = _phrase(_REAL_SUMMARIES[sidecar][1])
+    assert len(heading.findall(html)) == 1
+    assert html.count("<pre>\n") == 1
+    start = html.index("<pre>\n") + len("<pre>\n")
+    for label in ("Not seasonally adjusted:", "Puerto Rico", "(p)", "� Revised"):
+        _defers(f"{html[:start]}{label}\n{html[start:]}", sidecar)
+        _defers(heading.sub(lambda match: f"{label}\n{match[0]}", html), sidecar)
+
+
+@pytest.mark.parametrize("sidecar", _REAL_SUMMARIES, ids=lambda p: p.stem)
+def test_round_9_review_text_between_a_real_name_and_its_block_defers_it(
+    sidecar: pathlib.Path,
+) -> None:
+    """Round-9 review, finding 1, on the real captures: text shown between
+    the release's name and its block refuses the page; markup a browser
+    shows nothing for leaves the reading as it was."""
+    _meta, _raw, html = _load(sidecar)
+    assert html.count("</h1>") == 1
+    name = html.index("</h1>") + len("</h1>")
+    for shown in (
+        "<p>Not seasonally adjusted:</p>",
+        "<p>Puerto Rico</p>",
+        "<span>Preliminary</span>",
+        "Revised",
+        "<h2>Not seasonally adjusted</h2>",
+    ):
+        _defers(f"{html[:name]}{shown}{html[name:]}", sidecar)
+    for unseen in (
+        "<!-- Not seasonally adjusted: -->",
+        "<p></p>",
+        "<script>var label = 'Puerto Rico';</script>",
+        "<style>p { margin: 0; }</style>",
+        "<br>",
+    ):
+        _resolves(f"{html[:name]}{unseen}{html[name:]}", sidecar)
+
+
+_SUMMARY_READERS = {
+    "https://www.bls.gov/news.release/empsit.nr0.htm": "empsit_unemployment_rate",
+    "https://www.bls.gov/news.release/jolts.nr0.htm": "jolts_job_openings",
+}
+_SUMMARIES = [
+    sidecar
+    for sidecar in CAPTURES
+    if json.loads(sidecar.read_text())["sourceUrl"] in _SUMMARY_READERS
+]
+
+
+@pytest.mark.parametrize("sidecar", _SUMMARIES, ids=lambda p: p.stem)
+def test_every_real_summary_is_plain_with_its_block_right_after_its_name(
+    sidecar: pathlib.Path,
+) -> None:
+    """What the prose readers require of a page holds of every real summary
+    capture: a plain page, one block, shown right after the release's name,
+    and before the heading only the release's metadata, which every one
+    prints."""
+    meta, _raw, html = _load(sidecar)
+    spec = legacy_release_parsers.PROSE_PARSERS[_SUMMARY_READERS[meta["sourceUrl"]]]
+    doc = legacy_release_parsers._Page()
+    doc.feed(html)
+    doc.close()
+    assert doc.plain
+    assert doc.where == "after"
+    assert len(doc.titles) == 1
+    assert len(doc.pres) == 1
+    assert doc.before_block is not None
+    assert re.search(rf"(?<!\w)(?:{spec.title})$", doc.before_block)
+    text = " ".join("".join(doc.pres[0]).split())
+    heading = re.search(rf"{spec.heading}\W+", text)
+    assert heading is not None
+    assert legacy_release_parsers._PREAMBLE.fullmatch(text, 0, heading.start())
+    assert re.search(r"USDL-[0-9]{2}-[0-9]{4}", text[: heading.start()])

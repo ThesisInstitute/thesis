@@ -96,8 +96,29 @@ the heading and the lead but, in three 2025 Employment Situations, a first
 sentence stating payrolls alone, before the rate's ("The unemployment rate,
 at 4.2 percent, also changed little in July."). The readers require that
 too, so a label ("Not seasonally adjusted:") or any other text before the
-lead refuses the page. The release is the one real `<pre>` element; a
-block inside a comment or a script is none.
+lead refuses the page. Before its heading, every capture's block prints
+only the release's metadata: when it is released, its number
+("USDL-26-1291") and whom to contact, separated by "*" or "•"
+(`_PREAMBLE`). Any other text there refuses the page as well.
+
+The release is the one real `<pre>` element, and the readers take it only
+from a plain page (`_Page`). Nothing may change the whole page: a second
+`<html>`, `<head>` or `<body>`, a frame, `<plaintext>`, a declarative
+shadow root or a refresh. Up to the end of the block, every end tag must
+close the element opened last. The block's ancestors must be plain
+containers (`div`, `p`, `span`, `main` and the like, with only a class,
+id, lang or role), and the block may hold only the table and text markup
+BLS prints in it. Between the release's name ("Employment Situation
+Summary", the page's `<h1>`) and the block, any shown text, or any
+element but a plain container or a line break, refuses the page. A comment, a script or a
+stylesheet there does not, since a browser shows none of them. Every one
+of the 32 summary captures is such a page
+(`test_every_real_summary_is_plain_with_its_block_right_after_its_name`).
+The readers run no stylesheet or script, so text hidden or moved by either
+is read where the markup puts it. How Python's `HTMLParser` splits a page
+into tags, comments and text is checked once, against probes whose split
+the HTML standard fixes (`_PROBES`). On a runtime that splits any of them
+otherwise, the readers read no summary page, and those cells defer.
 
 The Employment Situation and JOLTS summaries print no table. Their figures
 are read from the release's prose (`PROSE_PARSERS` in

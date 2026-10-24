@@ -84,10 +84,13 @@ _EMPSIT_IDS = ("empsit_unemployment_rate", "empsit_payroll_change")
 
 
 def _page(title: str, pre: str, *, pres: int = 1) -> str:
+    # As on BLS's pages, the block follows the release's name.
+    name = title.split(" - ")[0]
     blocks = "".join(f"<pre>\n{pre}\n</pre>" for _ in range(pres))
     return (
         f"<html><head><title>{title}</title></head><body>"
-        f"<div><p>Navigation</p></div>{blocks}<p>Footer</p></body></html>"
+        f"<div><p>Navigation</p></div><h2>{name}</h2>{blocks}<p>Footer</p>"
+        "</body></html>"
     )
 
 
@@ -1529,9 +1532,10 @@ def _bls_habits() -> list[str]:
             continue
         raw = raw_path.read_bytes()
         body = gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
-        doc = legacy_release_parsers._Document()
+        doc = legacy_release_parsers._Page()
         doc.feed(body.decode("utf-8", errors="replace"))
         doc.close()
+        assert doc.plain, raw_path.name
         (block,) = doc.pres
         text = " ".join("".join(block).split())
         for month in after_month.finditer(text):
@@ -1952,6 +1956,20 @@ def test_a_comparison_with_a_bare_period_is_no_tail(
         f", {' '.join(opener)} a gain {named}",
     ):
         _check(tail, "payroll", True)
+
+
+@pytest.mark.parametrize("clause", _CLAUSES)
+def test_a_year_of_the_1900s_is_a_year(clause: str) -> None:
+    """Round-9 review, minor gap: a 19xx year names an operand's period, and
+    is no operand of its own."""
+    for tail in (
+        ", compared with 3.5 percent in 1969",
+        ", compared with 3.5 percent since 1999",
+        ", compared with 3.5 percent in June 1999",
+    ):
+        _check(tail, clause, True)
+    for tail in (", compared with 1999 in June", ", compared with 1969"):
+        _check(tail, clause, False)
 
 
 @pytest.mark.parametrize(
@@ -2463,7 +2481,8 @@ def test_round_8_red_team_a_label_before_the_lead_refuses_the_page() -> None:
 
 
 # What may stand between a heading and the lead on a forged or rearranged
-# page. None is a sound dated statement of the month.
+# page. None is a sound dated statement of the release month ({name}; the
+# generated releases are of 2026).
 _BEFORE_THE_LEAD = (
     "Not seasonally adjusted:",
     "NOT SEASONALLY ADJUSTED",
@@ -2472,11 +2491,11 @@ _BEFORE_THE_LEAD = (
     "Table A. Household data, not seasonally adjusted",
     "-",
     "(p)",
-    "In June, total nonfarm payroll employment rose by 87,000.",
-    "Total nonfarm payroll employment rose by 87,000 in June.",
+    "In {prior}, total nonfarm payroll employment rose by 87,000.",
+    "Total nonfarm payroll employment rose by 87,000 in {prior}.",
     "Total nonfarm payroll employment rose by 87,000.",
-    "Total nonfarm payroll employment rose by 87,000 in July 2025.",
-    "Total nonfarm payroll employment changed little (+87,000) in July, after "
+    "Total nonfarm payroll employment rose by 87,000 in {name} 2025.",
+    "Total nonfarm payroll employment changed little (+87,000) in {name}, after "
     "seasonal adjustment.",
 )
 
@@ -2488,6 +2507,8 @@ def test_nothing_but_the_releases_statements_may_come_before_the_lead(
 ) -> None:
     title, pre = _empsit_text(case)
     heading, rest = pre.split("\n\n", 1)
+    month = case["month"] - 1
+    before = before.format(name=MONTHS[month], prior=MONTHS[month - 1])
     html = _page(title, f"{heading}\n\n{before}\n\n{rest}")
     for parser_id in _EMPSIT_IDS:
         assert parse_release(html, parser_id) is None
@@ -2829,7 +2850,7 @@ def test_only_a_real_preformatted_element_is_the_release() -> None:
             assert parse_release(page, "empsit_payroll_change") == reading, hidden
     # Inside the block a tag or comment is a word break.
     marked = html.replace(
-        "THE EMPLOYMENT SITUATION", "THE<!-- x -->EMPLOYMENT<b>SITUATION</b>", 1
+        "THE EMPLOYMENT SITUATION", "THE<!-- x -->EMPLOYMENT<span>SITUATION</span>", 1
     )
     assert parse_release(marked, "empsit_payroll_change") == reading
     # A block never closed, or one inside another, is refused.
@@ -2839,6 +2860,554 @@ def test_only_a_real_preformatted_element_is_the_release() -> None:
         html.replace("</pre>", "<pre></pre>"),
     ):
         assert parse_release(broken, "empsit_payroll_change") is None
+
+
+def _july() -> tuple[str, tuple[str, float]]:
+    title, pre = _empsit_text(_JULY)
+    return _page(title, pre), ("2026-07", -23.0)
+
+
+def _plain(html: str) -> bool:
+    doc = legacy_release_parsers._Page()
+    doc.feed(html)
+    doc.close()
+    return doc.plain
+
+
+_ROUND_9_LABEL = (
+    "<title>Employment Situation Summary - 2026 M07 Results</title>\n"
+    "<pre>Not seasonally adjusted:\n"
+    "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    "The unemployment rate was 4.8 percent in July.\n"
+    "The unemployment rate was 4.8 percent.\n"
+    "The seasonally adjusted unemployment rate for July was 4.1 percent.</pre>"
+)
+_ROUND_9_SCRIPT = (
+    "<title>Employment Situation Summary - 2026 M07 Results</title>\n"
+    "<pre>THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    "<script>The unemployment rate was 4.8 percent in July.\n"
+    "The unemployment rate was 4.8 percent.</script>\n"
+    "The seasonally adjusted unemployment rate for July was 4.1 percent.</pre>"
+)
+_ROUND_9_SELF_CLOSED = (
+    "<title>Employment Situation Summary - 2026 M07 Results</title>\n"
+    "<script/><pre>THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    "The unemployment rate was 4.8 percent in July.\n"
+    "The unemployment rate was 4.8 percent.</pre></script>\n"
+    "<p>The unemployment rate was 4.1 percent in July.</p>"
+)
+_NAME = "<h1>Employment Situation Summary</h1>"
+
+
+def test_round_9_review_pages_are_refused() -> None:
+    """Round-9 review, findings 1 and 2, verbatim: each returned 4.8. Each
+    also refuses with the release's name before its block, which leaves
+    only the finding's own markup to refuse it; without that markup the
+    page reads."""
+    rate = "empsit_unemployment_rate"
+    for page in (_ROUND_9_LABEL, _ROUND_9_SCRIPT, _ROUND_9_SELF_CLOSED):
+        assert parse_release(page, rate) is None
+    label = _ROUND_9_LABEL.replace("<pre>", f"{_NAME}<pre>")
+    assert parse_release(label, rate) is None
+    assert parse_release(label.replace("Not seasonally adjusted:\n", ""), rate) == (
+        "2026-07",
+        4.8,
+    )
+    script = _ROUND_9_SCRIPT.replace("<pre>", f"{_NAME}<pre>")
+    assert parse_release(script, rate) is None
+    assert not _plain(script)
+    spanned = script.replace("<script>", "<span>").replace("</script>", "</span>")
+    assert parse_release(spanned, rate) == ("2026-07", 4.8)
+    closed = _ROUND_9_SELF_CLOSED.replace("<script/>", f"{_NAME}<script/>")
+    assert parse_release(closed, rate) is None
+    assert not _plain(closed)
+    opened = closed.replace("<script/>", "").replace("</script>", "")
+    assert parse_release(opened, rate) == ("2026-07", 4.8)
+
+
+# A real Employment Situation preamble, item by item, and a JOLTS one with
+# its windows-1252 bullets as the leg decodes them.
+_EMPSIT_PREAMBLE = (
+    "Transmission of material in this news release is embargoed until",
+    "8:30 a.m. (ET) Friday, August 7, 2026",
+    "USDL-26-1291",
+    "Technical information:",
+    "Household data: (202) 691-6378 * cpsinfo@bls.gov * www.bls.gov/cps",
+    "Establishment data: (202) 691-6555 * cesinfo@bls.gov * www.bls.gov/ces",
+    "Media contact: (202) 691-5902 * PressOffice@bls.gov",
+)
+_JOLTS_PREAMBLE = (
+    "For release 10:00 a.m. (ET) Tuesday, August 4, 2026",
+    "USDL-26-1234",
+    "Technical information: (202) 691-5870 � JoltsInfo@bls.gov � www.bls.gov/jlt",
+    "Media contact: (202) 691-5902 � PressOffice@bls.gov",
+)
+_LABELS = (
+    "Not seasonally adjusted:",
+    "Seasonally adjusted",
+    "Revised",
+    "(p) Preliminary",
+    "Puerto Rico:",
+    "DRAFT",
+    "Table A.",
+    "-",
+)
+_JOLTS_JUNE = {
+    "month": 6,
+    "openings": Decimal("7.4"),
+    "rate": Decimal("4.5"),
+    "revised": Decimal("7.2"),
+    "lead": 0,
+    "section": 0,
+    "change": 100,
+    "dash": "--",
+}
+
+
+@pytest.mark.parametrize("label", _LABELS)
+@pytest.mark.parametrize("at", range(len(_EMPSIT_PREAMBLE) + 1))
+def test_round_9_review_a_label_anywhere_before_the_heading_is_refused(
+    label: str, at: int
+) -> None:
+    """Round-9 review, finding 1: only the release's own metadata (when it
+    is released, its number, whom to contact) may come before its heading."""
+    title, pre = _empsit_text(_JULY)
+    lines = list(_EMPSIT_PREAMBLE)
+    assert parse_release(
+        _page(title, "\n".join([*lines, pre])), "empsit_payroll_change"
+    ) == (
+        "2026-07",
+        -23.0,
+    )
+    lines.insert(at, label)
+    page = _page(title, "\n".join([*lines, pre]))
+    for parser_id in _EMPSIT_IDS:
+        assert parse_release(page, parser_id) is None
+
+
+@pytest.mark.parametrize("label", _LABELS)
+@pytest.mark.parametrize("at", range(len(_JOLTS_PREAMBLE) + 1))
+def test_a_label_before_the_jolts_heading_is_refused(label: str, at: int) -> None:
+    html = _jolts_page(_JOLTS_JUNE)
+    lines = list(_JOLTS_PREAMBLE)
+    reading = ("2026-06", 7.4)
+    for bullet in ("�", "•"):
+        preamble = "\n".join(lines).replace("�", bullet)
+        page = html.replace("<pre>\n", f"<pre>\n{preamble}\n", 1)
+        assert parse_release(page, "jolts_job_openings") == reading
+    lines.insert(at, label)
+    page = html.replace("<pre>\n", "<pre>\n{}\n".format("\n".join(lines)), 1)
+    assert parse_release(page, "jolts_job_openings") is None
+
+
+# Elements no release uses in its block; each may hide, show apart or move
+# what it holds.
+_FOREIGN_TO_THE_BLOCK = (
+    "b",
+    "button",
+    "del",
+    "details",
+    "dialog",
+    "div",
+    "font",
+    "iframe",
+    "label",
+    "math",
+    "noembed",
+    "noframes",
+    "noscript",
+    "object",
+    "ruby",
+    "s",
+    "script",
+    "select",
+    "style",
+    "sup",
+    "svg",
+    "template",
+    "textarea",
+    "xmp",
+)
+
+
+@pytest.mark.parametrize("tag", _FOREIGN_TO_THE_BLOCK)
+def test_round_9_review_no_other_element_stands_in_the_block(tag: str) -> None:
+    """Round-9 review, finding 2: a script inside the block supplied the
+    headline. Only the elements releases use there may stand in it."""
+    html, reading = _july()
+    at = "Household Survey Data"
+    assert html.count(at) == 1
+    assert parse_release(html.replace(at, f"<span></span>{at}"), _EMPSIT_IDS[1]) == (
+        reading
+    )
+    page = html.replace(at, f"<{tag}></{tag}>{at}")
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+    assert not _plain(page)
+
+
+@pytest.mark.parametrize("markup", ("<img>", "<hr>", "<input>", "<wbr>", "<embed>"))
+def test_no_other_void_element_stands_in_the_block(markup: str) -> None:
+    html, _ = _july()
+    page = html.replace("Household Survey Data", f"{markup}Household Survey Data")
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+
+
+@pytest.mark.parametrize(
+    "attribute",
+    (
+        'style="display:none"',
+        "hidden",
+        'aria-hidden="true"',
+        'onclick="go()"',
+        'dir="rtl"',
+        "popover",
+        'lang="fr"',
+        'data-x="1"',
+    ),
+)
+def test_no_other_attribute_stands_in_the_block(attribute: str) -> None:
+    html, reading = _july()
+    at = "Household Survey Data"
+    plain = html.replace(at, f'<span class="a" id="b" title="c">{at}</span>')
+    assert parse_release(plain, _EMPSIT_IDS[1]) == reading
+    page = html.replace(at, f"<span {attribute}>{at}</span>")
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+    assert not _plain(page)
+
+
+@pytest.mark.parametrize("attribute", ('class="x"', 'style="color:red"', "hidden"))
+def test_the_pre_tag_carries_no_attribute(attribute: str) -> None:
+    html, _ = _july()
+    page = html.replace("<pre>", f"<pre {attribute}>", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+
+
+@pytest.mark.parametrize(
+    ("before", "after", "read"),
+    (
+        ('<div class="normalnews">', "</div>", True),
+        ('<section id="a"><main role="main">', "</main></section>", True),
+        ("<div hidden>", "</div>", False),
+        ('<div style="display:none">', "</div>", False),
+        ("<div hidden><div>", "</div></div>", False),
+        ('<div aria-hidden="true">', "</div>", False),
+        ("<template>", "</template>", False),
+        ("<noscript>", "</noscript>", False),
+        ("<details>", "</details>", False),
+        ("<dialog>", "</dialog>", False),
+        ("<object>", "</object>", False),
+        ("<table><tr><td>", "</td></tr></table>", False),
+        ("<ul><li>", "</li></ul>", False),
+        ("<b>", "</b>", False),
+        ("<svg>", "</svg>", False),
+    ),
+)
+def test_the_block_stands_only_in_plain_elements(
+    before: str, after: str, read: bool
+) -> None:
+    """None of the elements around the block may hide or move it."""
+    html, reading = _july()
+    page = html.replace("<pre>", f"{before}<pre>", 1).replace(
+        "</pre>", f"</pre>{after}", 1
+    )
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+    assert _plain(page) is read
+
+
+@pytest.mark.parametrize(
+    "tag",
+    (
+        "a",
+        "div",
+        "iframe",
+        "noscript",
+        "pre",
+        "script",
+        "span",
+        "style",
+        "template",
+        "textarea",
+        "title",
+        "xmp",
+    ),
+)
+@pytest.mark.parametrize("at", ("<div><p>Navigation", "<h2>", "<pre>"))
+def test_round_9_review_a_self_closed_element_is_refused(tag: str, at: str) -> None:
+    """Round-9 review, finding 2: a browser ignores "/>" on an element that
+    is not void, so "<script/>" opens a script that runs on to
+    "</script>"."""
+    html, _ = _july()
+    page = html.replace(at, f"<{tag}/>{at}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+    assert not _plain(page)
+
+
+def test_a_void_element_or_svg_may_close_itself() -> None:
+    html, reading = _july()
+    for markup in (
+        "<br/>",
+        '<img src="logo.png"/>',
+        '<meta charset="utf-8"/>',
+        '<link rel="icon" href="x.ico"/>',
+        '<svg><path d="M0 0"/></svg>',
+    ):
+        page = html.replace("<div><p>Navigation", f"{markup}<div><p>Navigation", 1)
+        assert parse_release(page, _EMPSIT_IDS[1]) == reading, markup
+    # Inside the block "/>" closes nothing either: a <span/> left open at
+    # the block's end refuses it, a <br/> is a break.
+    at = "Household Survey Data"
+    assert parse_release(html.replace(at, f"<br/>{at}"), _EMPSIT_IDS[1]) == reading
+    assert parse_release(html.replace(at, f"<span/>{at}"), _EMPSIT_IDS[1]) is None
+
+
+@pytest.mark.parametrize(
+    "at", ("<div><p>Navigation", "Household Survey Data", "<p>Footer")
+)
+def test_plaintext_anywhere_is_refused(at: str) -> None:
+    html, _ = _july()
+    page = html.replace(at, f"<plaintext>{at}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+
+
+@pytest.mark.parametrize(
+    ("between", "read"),
+    (
+        ("", True),
+        ("\n  \n", True),
+        ("<!-- the release -->", True),
+        ("<script>var label = 'Not seasonally adjusted:';</script>", True),
+        ("<style>p { color: red }</style>", True),
+        ("<template><p>Not seasonally adjusted:</p><img></template>", True),
+        ('<link rel="stylesheet" href="x.css">', True),
+        ("<br>", True),
+        ('<div class="normalnews">', True),
+        ("<p>Not seasonally adjusted:</p>", False),
+        ("Not seasonally adjusted:", False),
+        ("<p hidden>Not seasonally adjusted:</p>", False),
+        ('<div style="display:none">Not seasonally adjusted:</div>', False),
+        ("<noscript>Not seasonally adjusted:</noscript>", False),
+        ("<xmp>Not seasonally adjusted:</xmp>", False),
+        ("<textarea>Not seasonally adjusted:</textarea>", False),
+        ('<img src="x.png" alt="Not seasonally adjusted:">', False),
+        ('<iframe src="label.html"></iframe>', False),
+        ('<input value="Not seasonally adjusted:">', False),
+        ("<select><option>Not seasonally adjusted</option></select>", False),
+        ("<hr>", False),
+    ),
+)
+def test_nothing_shown_stands_between_the_release_name_and_its_block(
+    between: str, read: bool
+) -> None:
+    """The block follows the release's name ("Employment Situation
+    Summary"): text, hidden text, or an element that shows something of its
+    own between them could qualify it."""
+    html, reading = _july()
+    page = html.replace("</h2>", f"</h2>{between}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+@pytest.mark.parametrize(
+    ("name", "read"),
+    (
+        ("<h1>Employment Situation Summary</h1>", True),
+        ("<h2>The Employment Situation Summary</h2>", True),
+        ("<h2>Employment Situation News Release</h2>", True),
+        ('<h2 hidden="">Employment Situation Summary</h2>', False),
+        ('<h2 style="display:none">Employment Situation Summary</h2>', False),
+        (
+            "<p>Not seasonally adjusted:</p><span hidden>Employment Situation "
+            "Summary</span>",
+            False,
+        ),
+        ("<h2>Employment Situation <span hidden>X</span>Summary</h2>", False),
+        ("<table><tr><td>Employment Situation Summary</td></tr></table>", False),
+        ("<h2>Job Openings and Labor Turnover Summary</h2>", False),
+        ("<h2>Situation Summary</h2>", False),
+        ("<h2>Employment Situation Summary</h2><h3>Revised</h3>", False),
+        ("", False),
+    ),
+)
+def test_the_block_follows_the_release_name_shown(name: str, read: bool) -> None:
+    html, reading = _july()
+    assert html.count("<h2>Employment Situation Summary</h2>") == 1
+    page = html.replace("<h2>Employment Situation Summary</h2>", name)
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+@pytest.mark.parametrize(
+    "markup",
+    (
+        # A second <html>, <head> or <body> adds its attributes to the first.
+        "<body hidden>",
+        '<html style="display:none">',
+        "<head></head>",
+        "<body>",
+        "<frameset></frameset>",
+        "<frame>",
+        # A declarative shadow root shows itself instead of its host's
+        # content.
+        '<template shadowrootmode="open"></template>',
+        '<template shadowroot="open"></template>',
+        '<meta http-equiv="refresh" content="0; url=https://example.com/">',
+    ),
+)
+@pytest.mark.parametrize("at", ("<div><p>Navigation", "<p>Footer"))
+def test_markup_that_changes_the_whole_page_refuses_it(markup: str, at: str) -> None:
+    html, reading = _july()
+    page = html.replace(at, f"{markup}{at}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+    harmless = '<meta http-equiv="X-UA-Compatible" content="IE=edge">'
+    assert parse_release(html.replace(at, f"{harmless}{at}", 1), _EMPSIT_IDS[1]) == (
+        reading
+    )
+
+
+@pytest.mark.parametrize(
+    ("markup", "read"),
+    (
+        ("<div><span>x</span></div>", True),
+        ("<p><b>x</b></p>", True),
+        ("</br>", True),
+        ("</img>", True),
+        ("<div><span>x</div>", False),
+        ("</p>", False),
+        ("<span>x</div>", False),
+        # The <b> a browser opens again after the <p> closes.
+        ("<p><b hidden>x</p>", False),
+        # Left open: the name and the block stand in it.
+        ("<div hidden><div></div>", False),
+    ),
+)
+def test_up_to_the_block_every_end_tag_closes_the_element_last_opened(
+    markup: str, read: bool
+) -> None:
+    html, reading = _july()
+    page = html.replace("<div><p>Navigation", f"{markup}<div><p>Navigation", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+@pytest.mark.parametrize(
+    ("markup", "read"),
+    (
+        ("<!-- plain -->", True),
+        ("<!---->", True),
+        ("<!DOCTYPE html>", True),
+        ("<script><!-- old style --></script>", True),
+        ("<script>document.write('</scr' + 'ipt>')</script>", True),
+        ('<noscript><link rel="stylesheet" href="x.css"></noscript>', True),
+        ("<!-- THE EMPLOYMENT SITUATION -- JULY 2026 -->", True),
+        ('<?xml version="1.0"?>', True),
+        ("<style>a</stylex>b</style>", True),
+        ("<![CDATA[x>y]]>", False),
+        ("x\0y", False),
+        # A browser runs this script on past its first "</script>".
+        ("<script><!--<script></script>x</script>", False),
+        # With scripts on, a browser reads a <noscript>'s content as raw
+        # text up to "</noscript>", wherever that stands.
+        ("<noscript><!-- </noscript> --></noscript>", False),
+        ("<noscript><div>x</div></noscript>", False),
+        ('<noscript><img alt="</noscript><div hidden>"></noscript>', False),
+        ("<noscript><script></script></noscript>", False),
+    ),
+)
+def test_markup_tokenizers_read_alike_up_to_the_block(markup: str, read: bool) -> None:
+    html, reading = _july()
+    page = html.replace("<div><p>Navigation", f"{markup}<div><p>Navigation", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+@pytest.mark.parametrize(
+    ("table", "read"),
+    (
+        (
+            "<table><caption>Table A</caption><thead><tr><th>Category</th></tr>"
+            "</thead><tbody><tr><td>4.1</td></tr></tbody><tfoot><tr><td>Note</td>"
+            "</tr></tfoot></table>",
+            True,
+        ),
+        # As real releases print them: a header cell left open, "/>".
+        ("<table><tr><th>a<td/>4.1</td></tr></table>", True),
+        ("<table><tr><td>a<td>b</table>", True),
+        ("<table><tr><td><span>a</td></tr></table>", True),
+        (
+            "<table><tbody><tr><td>a</td></tr></tbody><tbody><tr><td>b</td></tr>"
+            "</tbody></table>",
+            True,
+        ),
+        ("<table><tr><td><table><tr><td>a</td></tr></table></td></tr></table>", True),
+        # A browser moves text or another element out of the table, before it.
+        ("<table>Not seasonally adjusted:<tr><td>4.1</td></tr></table>", False),
+        ("<table><tr><td>4.1</td></tr>Not seasonally adjusted:</table>", False),
+        ("<table><span>x</span><tr><td>4.1</td></tr></table>", False),
+        ("<table><tr><p>x</p><td>4.1</td></tr></table>", False),
+        ("<table><tr><td>4.1</td></tr><table>", False),
+        # And shows a table's parts in their order, wherever they stand.
+        ("<table><tr><td>4.1</td></tr><caption>x</caption></table>", False),
+        (
+            "<table><tbody><tr><td>4.1</td></tr></tbody><thead><tr><th>x</th></tr>"
+            "</thead></table>",
+            False,
+        ),
+        (
+            "<table><tfoot><tr><td>x</td></tr></tfoot><tbody><tr><td>4.1</td></tr>"
+            "</tbody></table>",
+            False,
+        ),
+        ("<table><caption>a</caption><caption>b</caption></table>", False),
+        ("<table><thead></thead><thead></thead></table>", False),
+        # A cell with no table; a table the block's end leaves open.
+        ("<td>4.1</td>", False),
+        ("<table><tr><td>4.1", False),
+    ),
+)
+def test_a_table_in_the_block_reads_in_the_order_a_browser_shows_it(
+    table: str, read: bool
+) -> None:
+    html, reading = _july()
+    at = "The Employment Situation for August"
+    assert html.count(at) == 1
+    page = html.replace(at, f"{table}{at}")
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+    assert _plain(page) is read
+
+
+@pytest.mark.parametrize(
+    ("comment", "read"),
+    (
+        ("<!-- Not seasonally adjusted: -->", True),
+        ("<!-- a -- Not seasonally adjusted: -->", True),
+        ("<!-- a -- > Not seasonally adjusted: -->", True),
+        ("<!-- Not seasonally adjusted: --->", True),
+        # A browser ends these early, and shows the label.
+        ("<!-->Not seasonally adjusted:-->", False),
+        ("<!--->Not seasonally adjusted:-->", False),
+        ("<!-- a --!> Not seasonally adjusted: -->", False),
+    ),
+)
+def test_a_comment_ends_where_a_browser_ends_it(comment: str, read: bool) -> None:
+    """Between the release's name and its block, a comment hides a label
+    only as far as a browser reads it as a comment."""
+    html, reading = _july()
+    page = html.replace("</h2>", f"</h2>{comment}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+def test_the_tokenizer_splits_markup_as_browsers_do() -> None:
+    """The prose readers trust this parser's tokens only because it splits
+    each probe as the HTML standard does; without that they read nothing."""
+    for html, tokens in legacy_release_parsers._PROBES:
+        assert legacy_release_parsers._tokens(html) == tokens, html
+    assert legacy_release_parsers._TOKENIZES_AS_BROWSERS
+
+
+def test_a_tokenizer_that_splits_markup_otherwise_reads_no_page(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    html, reading = _july()
+    assert parse_release(html, _EMPSIT_IDS[1]) == reading
+    monkeypatch.setattr(legacy_release_parsers, "_TOKENIZES_AS_BROWSERS", False)
+    for parser_id in PROSE_PARSERS:
+        assert parse_release(html, parser_id) is None
 
 
 @settings(max_examples=50, deadline=None)

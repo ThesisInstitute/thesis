@@ -198,12 +198,7 @@ class _Table:
 
 
 class _Document(HTMLParser):
-    """Keep table boundaries, header spans and unsplit numeric text.
-
-    Also the text of each preformatted block, with every tag or comment
-    inside it a word break. Only real <pre> elements count: one inside a
-    comment or a script is no block.
-    """
+    """Keep table boundaries, header spans and unsplit numeric text."""
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -211,20 +206,11 @@ class _Document(HTMLParser):
         self.stack: list[_Table] = []
         self.titles: list[list[str]] = []
         self.in_title = False
-        self.pres: list[list[str]] = []
-        self.in_pre = False
         self.malformed = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         names = [name for name, _ in attrs]
         values = {name: value or "" for name, value in attrs}
-        if self.in_pre:
-            self.pres[-1].append(" ")
-            if tag == "pre":
-                self.malformed = True
-        elif tag == "pre":
-            self.in_pre = True
-            self.pres.append([])
         if tag == "title":
             if self.in_title:
                 self.malformed = True
@@ -261,10 +247,6 @@ class _Document(HTMLParser):
                 table.caption.append(" ")
 
     def handle_endtag(self, tag: str) -> None:
-        if tag == "pre":
-            self.in_pre = False
-        elif self.in_pre:
-            self.pres[-1].append(" ")
         if tag == "title":
             self.in_title = False
         if not self.stack:
@@ -279,13 +261,7 @@ class _Document(HTMLParser):
         elif tag == "caption":
             table.in_caption = False
 
-    def handle_comment(self, data: str) -> None:
-        if self.in_pre:
-            self.pres[-1].append(" ")
-
     def handle_data(self, data: str) -> None:
-        if self.in_pre:
-            self.pres[-1].append(data)
         if self.in_title:
             self.titles[-1].append(data)
         if not self.stack:
@@ -297,6 +273,351 @@ class _Document(HTMLParser):
             table.caption.append(data)
         elif data.strip():
             table.malformed = True
+
+
+_VOID = frozenset(
+    {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta"}
+    | {"source", "track", "wbr"}
+)
+# Elements whose content a browser never renders: what it runs or applies,
+# inert content, the document's title, and fallbacks no current browser
+# uses. Metadata, which it never renders either.
+_INVISIBLE = frozenset({"noembed", "noframes", "script", "style", "template", "title"})
+_METADATA = frozenset({"base", "head", "link", "meta"})
+# Elements the release's name and its block may stand in, with the
+# attributes they may carry: none of them hides, moves or adds to what it
+# holds. Real pages put the name in an <h1> and the block in <div>s.
+_PLAIN_TAGS = frozenset(
+    {"article", "body", "div", "h1", "h2", "h3", "h4", "h5", "h6", "header"}
+    | {"html", "main", "p", "section", "span"}
+)
+_PLAIN_ATTRIBUTES = frozenset({"class", "id", "lang", "role"})
+# Only inside these does "/>" close an element that is not void.
+_FOREIGN = frozenset({"math", "svg"})
+# Inside the block, real releases use only these elements and attributes
+# (the January and February Employment Situations hold tables there).
+_BLOCK_TAGS = frozenset(
+    {"a", "br", "caption", "p", "span", "table", "tbody", "td", "tfoot", "th"}
+    | {"thead", "tr"}
+)
+_BLOCK_ATTRIBUTES = frozenset(
+    {"cellpadding", "cellspacing", "class", "colspan", "headers", "href", "id"}
+    | {"name", "rowspan", "title", "xborder"}
+)
+# Where text or any other element is moved out of the table, before it.
+_TABLE_CONTEXT = frozenset({"table", "tbody", "tfoot", "thead", "tr"})
+# A table's parts, in the order a browser shows them wherever they stand.
+_SECTIONS = {"caption": 1, "thead": 2, "tbody": 3, "tfoot": 4}
+
+
+class _Page(HTMLParser):
+    """A release page, read for its one preformatted block.
+
+    Keeps the page's titles, the text of each <pre> element (each tag or
+    comment inside one a word break), and the text a browser shows before
+    the first, where an element that is not plain stands as an unreadable
+    mark ("\\0") and its text as marks too. Only real <pre> elements count:
+    one inside a comment or a script is no block.
+
+    `plain` is False when the page uses markup on which a browser and this
+    parser could disagree about what the page shows, or where:
+
+    - anywhere: a second <html>, <head> or <body> (a browser adds its
+      attributes to the first), frames, <plaintext>, a declarative shadow
+      root, or a refresh;
+    - up to the end of the block: an end tag that does not close the
+      element last opened (a void element's aside), "/>" on an element
+      that is not void outside SVG or MathML (a browser ignores it, so
+      "<script/>" opens a script), a marked section ("<![CDATA[", which a
+      browser ends at the first ">"), a NUL (which a browser drops), a
+      script a browser would run on past its first "</script>" ("<!--"
+      then "<script"), or a <noscript> holding anything but void elements
+      (with scripts on, a browser reads its content as raw text up to
+      "</noscript>");
+    - the block in an element that is not plain, or its <pre> tag with
+      attributes;
+    - inside the block: an element or attribute releases do not use there,
+      text or an element a browser would move out of a table, a table's
+      parts out of the order a browser shows them, or an element left open
+      at its end.
+
+    How this parser splits a page into tags, comments and text is checked
+    once, against _PROBES (_TOKENIZES_AS_BROWSERS). The page's stylesheets
+    and scripts are not run.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.titles: list[list[str]] = []
+        self.in_title = False
+        self.pres: list[list[str]] = []
+        self.before_block: str | None = None
+        self.plain = True
+        # "before" the block, in the "block", or "after" it.
+        self.where = "before"
+        # Open elements, each with whether it is plain: before the block,
+        # all of them; in the block, those opened inside it, every one of
+        # its open tables with its rank in _SECTIONS.
+        self.open: list[tuple[str, bool]] = []
+        self.ranks: list[int] = []
+        self.shown: list[str] = []
+        self.raw: list[str] = []
+        self.roots: dict[str, int] = {}
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in _VOID or any(name in _FOREIGN for name, _ in self.open):
+            super().handle_startendtag(tag, attrs)
+            return
+        if self.where == "before":
+            self.plain = False
+        self.handle_starttag(tag, attrs)
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        names = {name for name, _ in attrs}
+        values = {name: value or "" for name, value in attrs}
+        if tag in ("html", "head", "body"):
+            self.roots[tag] = self.roots.get(tag, 0) + 1
+            if self.roots[tag] > 1:
+                self.plain = False
+        if (
+            tag in ("frame", "frameset", "plaintext")
+            or tag == "template"
+            and any(name.startswith("shadowroot") for name in names)
+            or tag == "meta"
+            and values.get("http-equiv", "").strip().lower() == "refresh"
+        ):
+            self.plain = False
+        if tag == "title":
+            if self.in_title:
+                self.plain = False
+            self.in_title = True
+            self.titles.append([])
+        if self.where == "after":
+            if tag == "pre":
+                self.pres.append([])
+        elif self.where == "block":
+            self._block_start(tag, names)
+        elif tag == "pre":
+            if attrs or not all(plain for _, plain in self.open):
+                self.plain = False
+            self.before_block = _text(self.shown)
+            self.pres.append([])
+            self.where = "block"
+            self.open = []
+        else:
+            if any(name == "noscript" for name, _ in self.open) and (
+                tag not in _VOID or any("<" in value for value in values.values())
+            ):
+                self.plain = False
+            plain = tag in _PLAIN_TAGS and names <= _PLAIN_ATTRIBUTES
+            if (
+                not plain
+                and tag not in _INVISIBLE | _METADATA | {"br", "wbr"}
+                and not any(name in _INVISIBLE for name, _ in self.open)
+            ):
+                # It may show something of its own: an image, a control, a
+                # frame.
+                self.shown.append("\0")
+            if tag not in _VOID:
+                self.open.append((tag, plain))
+                self.raw = []
+
+    def _block_start(self, tag: str, names: set[str]) -> None:
+        self.pres[-1].append(" ")
+        if tag not in _BLOCK_TAGS or not names <= _BLOCK_ATTRIBUTES:
+            self.plain = False
+            return
+        top = self.open[-1][0] if self.open else "pre"
+        parts = ("tr", "td", "th", *_SECTIONS)
+        if top in _TABLE_CONTEXT and tag not in parts:
+            self.plain = False
+            return
+        tables = [index for index, (name, _) in enumerate(self.open) if name == "table"]
+        if tag in parts:
+            if not tables:
+                # A browser drops it.
+                self.plain = False
+                return
+            # A new part closes what is open of the same table: a section
+            # all of it, a row the open row, a cell the open cell.
+            table = tables[-1]
+            if tag in _SECTIONS:
+                del self.open[table + 1 :]
+                rank = _SECTIONS[tag]
+                if rank < self.ranks[-1] or rank == self.ranks[-1] != 3:
+                    self.plain = False
+                self.ranks[-1] = rank
+            else:
+                within = ("thead", "tbody", "tfoot") if tag == "tr" else ("tr",)
+                parents = [
+                    index
+                    for index in range(table + 1, len(self.open))
+                    if self.open[index][0] in within
+                ]
+                if parents:
+                    del self.open[parents[-1] + 1 :]
+                elif tag == "tr":
+                    # Rows straight in a table are its body to a browser.
+                    del self.open[table + 1 :]
+                    if self.ranks[-1] > 3:
+                        self.plain = False
+                    self.ranks[-1] = 3
+                else:
+                    self.plain = False
+                    return
+        elif tag == "table":
+            self.ranks.append(0)
+        if tag not in _VOID:
+            self.open.append((tag, True))
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "title":
+            self.in_title = False
+        if self.where == "block":
+            self._block_end(tag)
+            return
+        if self.where == "after" or tag in _VOID:
+            # "</br>" is a <br> to a browser, any other void end tag nothing.
+            return
+        if not self.open or self.open[-1][0] != tag:
+            self.plain = False
+            for index in range(len(self.open) - 1, -1, -1):
+                if self.open[index][0] == tag:
+                    del self.open[index:]
+                    break
+            return
+        self.open.pop()
+        if tag == "script":
+            content = "".join(self.raw).lower()
+            if "<!--" in content and "<script" in content:
+                self.plain = False
+
+    def _block_end(self, tag: str) -> None:
+        if tag in _VOID:
+            if tag == "br":
+                self.pres[-1].append(" ")
+            return
+        self.pres[-1].append(" ")
+        if tag == "pre":
+            # A browser does not end the block while a table in it is open.
+            if self.open:
+                self.plain = False
+            self.where = "after"
+            return
+        if tag == "table" or tag in ("tr", "td", "th", *_SECTIONS):
+            # It closes the innermost such part of the innermost table, and
+            # everything open inside it. Otherwise a browser ignores it.
+            tables = [
+                index for index, (name, _) in enumerate(self.open) if name == "table"
+            ]
+            floor = tables[-1] if tables and tag != "table" else -1
+            for index in range(len(self.open) - 1, floor, -1):
+                if self.open[index][0] == tag:
+                    del self.open[index:]
+                    if tag == "table":
+                        self.ranks.pop()
+                    break
+            return
+        if not self.open or self.open[-1][0] != tag:
+            self.plain = False
+            return
+        self.open.pop()
+
+    def handle_comment(self, data: str) -> None:
+        if self.where == "after":
+            return
+        if any(name == "noscript" for name, _ in self.open):
+            self.plain = False
+        if self.where == "block":
+            self.pres[-1].append(" ")
+
+    def unknown_decl(self, data: str) -> None:
+        if self.where != "after":
+            self.plain = False
+
+    def handle_data(self, data: str) -> None:
+        if self.in_title:
+            self.titles[-1].append(data)
+        if self.where == "after":
+            return
+        if "\0" in data:
+            self.plain = False
+        if self.where == "block":
+            if self.open and self.open[-1][0] in _TABLE_CONTEXT and data.strip():
+                self.plain = False
+            self.pres[-1].append(data)
+            return
+        if self.open and self.open[-1][0] == "script":
+            self.raw.append(data)
+        if any(name in _INVISIBLE for name, _ in self.open):
+            return
+        plain = all(plain for _, plain in self.open)
+        self.shown.append(data if plain else re.sub(r"\S", "\0", data))
+
+
+class _Tokens(HTMLParser):
+    """The tags, comments and text a page splits into, in order."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.tokens: list[tuple] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.tokens.append(("start", tag, tuple(attrs)))
+
+    def handle_endtag(self, tag: str) -> None:
+        self.tokens.append(("end", tag))
+
+    def handle_comment(self, data: str) -> None:
+        self.tokens.append(("comment", data))
+
+    def handle_data(self, data: str) -> None:
+        if self.tokens and self.tokens[-1][0] == "data":
+            data = self.tokens.pop()[1] + data
+        self.tokens.append(("data", data))
+
+
+def _tokens(html: str) -> list[tuple]:
+    tokens = _Tokens()
+    tokens.feed(html)
+    tokens.close()
+    return tokens.tokens
+
+
+# Markup that tokenizers have split differently, and how the HTML standard
+# splits it, as browsers do: comments a browser ends early ("<!-->",
+# "--!>") or does not end ("-- >"), bogus comments, end tags in raw text
+# and escapable raw text, and "/" between attributes.
+_PROBES = (
+    ("<!-->a", [("comment", ""), ("data", "a")]),
+    ("<!--->a", [("comment", ""), ("data", "a")]),
+    ("<!--a--!>b", [("comment", "a"), ("data", "b")]),
+    ("<!--a-- >b-->", [("comment", "a-- >b")]),
+    ("<!--a--!b-->", [("comment", "a--!b")]),
+    ("<!a>b", [("comment", "a"), ("data", "b")]),
+    ("</ a>b", [("comment", " a"), ("data", "b")]),
+    ("</>b", [("data", "b")]),
+    ("<?a>b", [("data", "b")]),
+    (
+        "<script>a</scripta>b</script>",
+        [("start", "script", ()), ("data", "a</scripta>b"), ("end", "script")],
+    ),
+    (
+        "<script>a</script\tb>c",
+        [("start", "script", ()), ("data", "a"), ("end", "script"), ("data", "c")],
+    ),
+    *(
+        (
+            f"<{tag}><b></{tag}>",
+            [("start", tag, ()), ("data", "<b>"), ("end", tag)],
+        )
+        for tag in ("iframe", "noembed", "noframes", "style", "textarea", "title")
+        + ("xmp",)
+    ),
+    ("<div/hidden>", [("start", "div", (("hidden", None),))]),
+)
+# Without it the prose readers read no page.
+_TOKENIZES_AS_BROWSERS = all(_tokens(html) == tokens for html, tokens in _PROBES)
 
 
 def _period(text: str, preliminary: bool) -> str | None:
@@ -624,6 +945,28 @@ _TAILS = {
 }
 # Some releases name the bureau "the U.S. Bureau of Labor Statistics (BLS)".
 _REPORTED = r", the U\.S\. Bureau of Labor Statistics(?: \(BLS\))? reported today"
+# What a release prints in its block before its heading, in every real
+# summary capture: when it is released ("Transmission of material in this
+# news release is embargoed until 8:30 a.m. (ET) Friday, August 7, 2026",
+# "For release 10:00 a.m. (ET) Tuesday, August 4, 2026"), its number
+# ("USDL-26-1291") and whom to contact ("Technical information: Household
+# data: (202) 691-6378 * cpsinfo@bls.gov * www.bls.gov/cps"), in that
+# column layout's order. Any other text there ("Not seasonally adjusted:")
+# could qualify the release, so the page is refused.
+_WEEKDAY = "Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday"
+_PREAMBLE = re.compile(
+    r"(?:(?:Transmission of material in this news release is embargoed until"
+    r"|For release"
+    rf"|[0-9]{{1,2}}:[0-9]{{2}} [ap]\.m\. \(ET\) (?:{_WEEKDAY}), (?:{_MONTH})"
+    r" [0-9]{1,2}, [0-9]{4}"
+    r"|USDL-[0-9]{2}-[0-9]{4}"
+    r"|Technical information:|(?:Household|Establishment) data:|Media contact:"
+    r"|\([0-9]{3}\) [0-9]{3}-[0-9]{4}"
+    r"|[A-Za-z]+@bls\.gov|www\.bls\.gov/[a-z]+"
+    # The separator: "*", or "•", which in windows-1252 the leg decodes
+    # as U+FFFD.
+    "|[*•�]) )*"
+)
 
 
 def _end(clause: str) -> str:
@@ -901,10 +1244,12 @@ def _only_statements(
 def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     """The figure every statement of the release month states, or None.
 
-    The page must have exactly one title naming the release and its month
-    (the Employment Situation titles its December release "M13"), exactly
-    one preformatted block (a real <pre> element, not one in a comment), and
-    exactly one release heading naming the same month. Where the release
+    The page must be plain (_Page) and have exactly one title naming the
+    release and its month (the Employment Situation titles its December
+    release "M13"), exactly one preformatted block (a real <pre> element,
+    not one in a comment), shown right after the release's name, and in it
+    exactly one release heading naming the same month, with nothing before
+    the heading but the release's metadata (_PREAMBLE). Where the release
     first names the measure after the heading (its lead), a dated statement
     of the month must hold that mention, and the release must open with it:
     between the heading and that statement there may be only the release's
@@ -924,13 +1269,15 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     statements counting. Text in no form is not read.
     """
     spec = PROSE_PARSERS[parser_id]
-    doc = _Document()
+    if not _TOKENIZES_AS_BROWSERS:
+        return None
+    doc = _Page()
     try:
         doc.feed(html)
         doc.close()
     except (AssertionError, ValueError):
         return None
-    if doc.malformed or doc.in_title or doc.in_pre or len(doc.titles) != 1:
+    if not doc.plain or doc.in_title or doc.where != "after" or len(doc.titles) != 1:
         return None
     title = re.fullmatch(
         rf"{spec.title} - ([0-9]{{4}}) M(0[1-9]|1[0-3]) Results", _text(doc.titles[0])
@@ -941,6 +1288,12 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     period = f"{title[1]}-{month:02d}"
     month_name = _MONTH_NAMES[month - 1]
     if len(doc.pres) != 1:
+        return None
+    # The block follows the release's own name on the page ("... Employment
+    # Situation Summary"), shown, with nothing between them.
+    if doc.before_block is None or not re.search(
+        rf"(?<!\w)(?:{spec.title})$", doc.before_block
+    ):
         return None
     text = " ".join("".join(doc.pres[0]).split())
     # "JULY 2026", and once "March 2026".
@@ -953,6 +1306,8 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     if [(heading[1].upper(), heading[2]) for heading in headings] != [
         (month_name.upper(), title[1])
     ]:
+        return None
+    if not _PREAMBLE.fullmatch(text, 0, headings[0].start()):
         return None
     # The lead: where the release first names the measure after its heading.
     lead = spec.mention.search(text, headings[0].end())
