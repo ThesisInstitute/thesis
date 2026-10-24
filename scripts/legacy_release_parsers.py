@@ -366,26 +366,29 @@ _MONTH_NAMES = (
 _MONTH = "|".join(_MONTH_NAMES)
 
 
-def _words(allowed: str, least: int = 1) -> str:
-    """Between `least` and six words, each from `allowed`.
+def _words(allowed: str) -> str:
+    """Between one and six words, each from `allowed`.
 
     A whitelist, so a qualifier ("for May", "since January", "per month",
     "on average", "and the number of ...") ends the match instead of being
-    read past: such a sentence states some other figure.
+    read past: such a sentence states some other figure. At least one, so a
+    caption with no verb ("Chart 2. Total nonfarm payroll employment
+    (+50,000) in July.") is not a statement.
     """
-    return rf"(?:\s(?:{allowed})){{{least},6}}"
-
-
-def _group(name: str, pattern: str, capture: bool) -> str:
-    return f"(?P<{name}>{pattern})" if capture else f"(?:{pattern})"
+    return rf"(?:\s(?:{allowed})){{1,6}}"
 
 
 # Every statement opens with its measure's own subject, capitalized as a
 # sentence or clause opens it, so a modifier ("Private nonfarm ...", "In
-# June, the unemployment rate ...") is never read past. Every statement then names
-# its month in place ("in July"), and the month must end the phrase: "in
-# July 2025", "in July of last year" and "per month" are not this month.
-_WHEN = rf" in (?P<month>{_MONTH})(?: (?P<year>[0-9]{{4}}))?(?=[.,;:]|\s\(|$)"
+# June, the unemployment rate ...") is never read past. It names its month
+# in place ("in July"; a rate statement may instead open with it, _FRONT),
+# and it runs to the end of its sentence: after the month (and a payroll
+# figure) come only the tails below, then the full stop. So "in July, a
+# year earlier", "in July (2025)", "in July (among teenagers)", "in July of
+# last year" and "per month" are no statement.
+_WHEN = rf" in (?P<month>{_MONTH})(?: (?P<year>[0-9]{{4}}))?"
+_MONTH_YEAR = rf"(?:{_MONTH})(?: [0-9]{{4}})?"
+_COUNT = r"[1-9][0-9]{0,2}(?:,[0-9]{3})*"
 _PAYROLL = r"(?:Total n|N)onfarm payroll employment"
 _PAYROLL_BOTH = r"Both (?:total )?nonfarm payroll employment"
 _PAYROLL_WORDS = (
@@ -410,7 +413,7 @@ _RATE_WORDS = (
     "edged|up|down|ticked|rose|increased|declined|decreased|fell|also|again|"
     "showed|no|or|change"
 )
-_BY_POINTS = r"(?: by [0-9]\.[0-9] percentage points?)?"
+_BY_POINTS = r"(?: (?:by )?[0-9]\.[0-9] percentage points?)?"
 _UNEMPLOYED = r"the number of unemployed (?:people|persons)"
 _MILLIONS = r"[0-9]{1,2}\.[0-9]"
 _OPENINGS_WORDS = (
@@ -420,21 +423,83 @@ _OPENINGS_WORDS = (
 # JOLTS dates openings to the month's last business day ("on the last
 # business day of May" in earlier releases, "in June" in the 2026 ones).
 _OPENINGS_WHEN = _WHEN.replace(" in ", " (?:in|on the last business day of) ", 1)
+_LINK_WORDS = (
+    "following|after|compared|with|lower|higher|than|above|below|in|line|"
+    "similar|to|about|the|same|as|an|less|more|close"
+)
+# What may follow a statement's month, none of it read: each tail is about
+# another figure (the 12-month average, a range, the number unemployed) or
+# no figure at all.
+_TAILS = (
+    # ", following an average monthly gain of 34,000 over the prior 12
+    # months"
+    rf",{_words(_LINK_WORDS)} average monthly (?:gain|increase|loss|decline|"
+    rf"change) of {_COUNT} over the prior 12 months",
+    # " and has shown little change since April"
+    rf" and has (?:shown little change|changed little|been little changed|"
+    rf"been essentially unchanged|remained little changed) since {_MONTH_YEAR}",
+    # " and has remained in a narrow range of 4.0 percent to 4.2 percent
+    # since May 2024"
+    rf" and has (?:remained|been|held) in a (?:narrow )?range of {_RATE}"
+    rf"(?: percent)? to {_RATE} percent since {_MONTH_YEAR}",
+    # " and continued its recent upward trend"
+    r" and (?:has )?continued (?:its (?:recent )?(?:upward|downward) trend|"
+    r"to trend (?:up|down))",
+    # ", and the number of unemployed people, at 7.4 million, changed little"
+    rf", (?:and|while) {_UNEMPLOYED}(?:, at {_MILLIONS} million,"
+    rf"{_words(_RATE_WORDS)}| \({_MILLIONS} million\){_words(_RATE_WORDS)}|"
+    rf"{_words(_RATE_WORDS)}(?: by {_COUNT})? (?:at|to) {_MILLIONS} million)",
+)
+_REPORTED = r", the U\.S\. Bureau of Labor Statistics reported today"
+_END = rf"(?:{'|'.join(_TAILS)})?(?:{_REPORTED})?\.(?=\s|$)"
 
 
-def _payroll_clauses(capture: bool) -> tuple[str, ...]:
-    """The forms that state the month's change in total nonfarm payrolls."""
-    signed = _group("signed", _SIGNED, capture)
-    words = _group("words", _words(_PAYROLL_WORDS), capture)
-    verb = _group("verb", _PAYROLL_VERBS, capture)
-    count = _group("count", _THOUSANDS, capture)
+def _payroll_clauses(prefix: str) -> tuple[str, ...]:
+    """The forms that state the month's change in total nonfarm payrolls.
+
+    The printed figure and its verb are captured under `prefix`, so a clause
+    another measure's statement leans on is checked like any other.
+    """
+    signed = rf"(?P<{prefix}signed>{_SIGNED})"
+    words = rf"(?P<{prefix}words>{_words(_PAYROLL_WORDS)})"
+    verb = rf"(?P<{prefix}verb>{_PAYROLL_VERBS})"
+    count = rf"(?P<{prefix}count>{_THOUSANDS})"
     return (
         # "Total nonfarm payroll employment changed little in July (-23,000)"
         rf"{_PAYROLL}{words}{_WHEN} \({signed}\)",
         # "Total nonfarm payroll employment (+50,000) changed little in July"
         rf"{_PAYROLL} \({signed}\){words}{_WHEN}",
+        # "Total nonfarm payroll employment changed little (+50,000) in July"
+        rf"{_PAYROLL}{words} \({signed}\){_WHEN}",
         # "Total nonfarm payroll employment rose by 143,000 in January"
         rf"{_PAYROLL} {verb} by {count}{_WHEN}",
+    )
+
+
+# What a rate statement says between its subject and its month.
+_RATE_BODIES = (
+    # " (4.1 percent) changed little"
+    rf" \((?P<value>{_RATE}) percent\){_words(_RATE_WORDS)}",
+    # ", at 4.1 percent, changed little"
+    rf", at (?P<value>{_RATE}) percent,{_words(_RATE_WORDS)}",
+    # " rose by 0.2 percentage point to 4.3 percent"
+    rf"{_words(_RATE_WORDS)}{_BY_POINTS} (?:at|to) (?P<value>{_RATE}) percent",
+    # " was 4.1 percent"
+    rf" was (?P<value>{_RATE}) percent",
+)
+# The month may instead open the sentence ("In July, the unemployment rate
+# ..."); then nothing but a tail follows the figure.
+_FRONT = rf"In (?P<month>{_MONTH})(?: (?P<year>[0-9]{{4}}))?, "
+
+
+def _rate_after(value: str) -> str:
+    """The rate clause a payroll clause may carry on into.
+
+    ", and the unemployment rate changed little at 4.0 percent"
+    """
+    return (
+        rf", (?:and|while) the unemployment rate{_words(_RATE_WORDS)}"
+        rf"{_BY_POINTS} (?:at|to) {value} percent"
     )
 
 
@@ -446,7 +511,7 @@ class _Prose:
 
 
 def _compile(*patterns: str) -> tuple[re.Pattern[str], ...]:
-    return tuple(re.compile(pattern) for pattern in patterns)
+    return tuple(re.compile(pattern + _END) for pattern in patterns)
 
 
 PROSE_PARSERS = {
@@ -459,16 +524,9 @@ PROSE_PARSERS = {
         "THE EMPLOYMENT SITUATION",
         _compile(
             # "The unemployment rate (4.1 percent) changed little in July"
-            rf"{_RATE_SUBJECT} \((?P<value>{_RATE}) percent\)"
-            rf"{_words(_RATE_WORDS)}{_WHEN}",
-            # "The unemployment rate, at 4.1 percent, changed little in July"
-            rf"{_RATE_SUBJECT}, at (?P<value>{_RATE}) percent,"
-            rf"{_words(_RATE_WORDS)}{_WHEN}",
-            # "The unemployment rate rose by 0.2 percentage point to 4.3
-            # percent in July"
-            rf"{_RATE_SUBJECT}{_words(_RATE_WORDS)}{_BY_POINTS} (?:at|to) "
-            rf"(?P<value>{_RATE}) percent{_WHEN}",
-            rf"{_RATE_SUBJECT} was (?P<value>{_RATE}) percent{_WHEN}",
+            *(rf"{_RATE_SUBJECT}{body}{_WHEN}" for body in _RATE_BODIES),
+            # "In July, the unemployment rate (4.1 percent) changed little"
+            *(rf"{_FRONT}the unemployment rate{body}" for body in _RATE_BODIES),
             # "Both the unemployment rate (4.1 percent) and the number of
             # unemployed people (6.9 million) changed little in July"
             rf"(?:Both t|T)he unemployment rate \((?P<value>{_RATE}) percent\) "
@@ -487,16 +545,16 @@ PROSE_PARSERS = {
             rf"{_MILLIONS} million, respectively,{_WHEN}",
             # "Both nonfarm payroll employment (-23,000) and the unemployment
             # rate (4.1 percent) changed little in July"
-            rf"{_PAYROLL_BOTH} \({_SIGNED}\) and the unemployment rate "
-            rf"\((?P<value>{_RATE}) percent\){_words(_RATE_WORDS)}{_WHEN}",
+            rf"{_PAYROLL_BOTH} \((?P<payroll_signed>{_SIGNED})\) and the "
+            rf"unemployment rate \((?P<value>{_RATE}) percent\)"
+            rf"(?P<payroll_words>{_words(_RATE_WORDS)}){_WHEN}",
             # "Total nonfarm payroll employment increased by 143,000 in
             # January, and the unemployment rate changed little at 4.0
-            # percent": the rate takes the payroll clause's month.
+            # percent": the rate takes the payroll clause's month, and the
+            # payroll clause is checked like any payroll statement.
             *(
-                rf"{clause}, (?:and|while) the unemployment rate"
-                rf"{_words(_RATE_WORDS)}{_BY_POINTS} (?:at|to) "
-                rf"(?P<value>{_RATE}) percent(?=[.,;:]|$)"
-                for clause in _payroll_clauses(capture=False)
+                clause + _rate_after(rf"(?P<value>{_RATE})")
+                for clause in _payroll_clauses("payroll_")
             ),
         ),
     ),
@@ -509,7 +567,7 @@ PROSE_PARSERS = {
         _EMPSIT,
         "THE EMPLOYMENT SITUATION",
         _compile(
-            *_payroll_clauses(capture=True),
+            *(rf"{clause}(?:{_rate_after(_RATE)})?" for clause in _payroll_clauses("")),
             rf"{_PAYROLL_BOTH} \((?P<signed>{_SIGNED})\) and the unemployment "
             rf"rate \({_RATE} percent\)(?P<words>{_words(_RATE_WORDS)}){_WHEN}",
         ),
@@ -524,8 +582,8 @@ PROSE_PARSERS = {
             # "The number of job openings was little changed at 7.4 million
             # in June"
             rf"The number of job openings{_words(_OPENINGS_WORDS)}"
-            rf"(?: by [1-9][0-9]{{0,2}}(?:,[0-9]{{3}})*)? (?:at|to) "
-            rf"(?P<value>{_MILLIONS}) million{_OPENINGS_WHEN}",
+            rf"(?: by {_COUNT})? (?:at|to) (?P<value>{_MILLIONS}) million"
+            rf"{_OPENINGS_WHEN}",
             rf"The number of job openings was (?P<value>{_MILLIONS}) million"
             rf"{_OPENINGS_WHEN}",
             # "The number and rate of job openings were little changed at 7.4
@@ -538,19 +596,29 @@ PROSE_PARSERS = {
 }
 
 
+def _contradicts(groups: dict[str, str | None], prefix: str) -> bool:
+    """A payroll verb that contradicts its printed sign ("edged up (-41,000)")."""
+    printed = groups.get(prefix + "signed")
+    if not printed:
+        return False
+    words = set((groups.get(prefix + "words") or "").split())
+    return bool(words & (_UP_WORDS if printed[0] != "+" else _DOWN_WORDS))
+
+
 def _statement_value(groups: dict[str, str | None]) -> Decimal | None:
-    """The figure one statement states, or None when it contradicts itself."""
+    """The figure one statement states, or None when it contradicts itself.
+
+    A rate statement that leans on a payroll clause contradicts itself when
+    that clause does: the sentence says two things, and neither is guessed.
+    """
+    if _contradicts(groups, "") or _contradicts(groups, "payroll_"):
+        return None
     if groups.get("value"):
         return Decimal(groups["value"])
     if groups.get("signed"):
         printed = groups["signed"]
-        down = printed[0] != "+"
-        words = set((groups.get("words") or "").split())
-        # "edged up ... (-41,000)" says two things; neither is guessed.
-        if words & (_UP_WORDS if down else _DOWN_WORDS):
-            return None
         count = Decimal(printed[1:].replace(",", "")) / 1000
-        return -count if down else count
+        return -count if printed[0] != "+" else count
     count = Decimal(str(groups["count"]).replace(",", "")) / 1000
     return -count if groups["verb"] in _DOWN else count
 
@@ -561,8 +629,9 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     The page must have exactly one title naming the release and its month,
     exactly one preformatted block, and exactly one release heading naming
     the same month. A statement is one of the reader's forms, whole: the
-    measure's own subject opening a sentence or clause, the figure, and the
-    month named in place. At least two statements, in separate stretches of
+    measure's own subject opening a sentence or clause, the figure, the
+    month named in place, and nothing after it but a known tail and the full
+    stop (_END). At least two statements, in separate stretches of
     text, must state the figure (BLS states each headline figure in the lead
     paragraph and again in its section), and they must all agree. A
     statement that names another month or year, or whose verb contradicts

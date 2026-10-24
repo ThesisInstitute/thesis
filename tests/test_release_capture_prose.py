@@ -13,10 +13,13 @@ Invariants, for every generated release:
 - the reader returns (release month, headline figure), exactly;
 - no decoy changes what it returns, whatever its numbers and wherever it
   sits;
+- a statement with anything after its month but a known tail (a qualifier
+  naming another period, subgroup or basis) is not read;
 - one statement alone, two statements that disagree, a headline statement
   naming another month or year, a payroll verb that contradicts its printed
-  sign, a title and heading that disagree, or a page without exactly one
-  preformatted block is refused (None), never guessed.
+  sign (in the payroll statement or in the payroll clause a rate statement
+  leans on), a title and heading that disagree, or a page without exactly
+  one preformatted block is refused (None), never guessed.
 """
 
 from __future__ import annotations
@@ -61,13 +64,16 @@ def _count(thousands: int) -> str:
 
 # Sentences BLS prints beside the headline figures. None is a statement of
 # this month's headline: each names a subgroup, an industry, private
-# payrolls, an average, a revised earlier month, or its month only before
-# its subject. Fields: name, prior (the month before), n (numbers), r (a rate).
+# payrolls, an average, a revised earlier month, a qualifier after its month
+# (another period, subgroup or basis), its subject only in lower case, or no
+# verb (a caption). Fields: name, prior (the month before), n (numbers), r
+# (a rate).
 _DECOYS = (
     "The unemployment rates for teenagers ({r} percent) and adult men "
     "({r} percent) showed little change.",
     "The unemployment rate for Black workers ({r} percent) changed little in {name}.",
-    "In {prior}, the unemployment rate was {r} percent.",
+    "In {prior}, the unemployment rate for teenagers was {r} percent.",
+    "In {prior}, total nonfarm payroll employment rose by {n[3]:,},000.",
     "Employment in health care continued its upward trend (+{n[0]:,},000).",
     "Retail trade lost {n[1]:,},000 jobs in {name}.",
     "Private nonfarm payroll employment rose by {n[2]:,},000 in {name}.",
@@ -81,6 +87,19 @@ _DECOYS = (
     "The unemployment rate was {r} percent in {name} a year earlier.",
     "Nonfarm payroll employment in {name} (+{n[1]:,},000) by industry is "
     "shown in table B-1.",
+    # Round-3 review, finding 1.
+    "The unemployment rate was {r} percent in {name}, a year earlier.",
+    "The unemployment rate ({r} percent) was unchanged in {name} (2025).",
+    "The unemployment rate ({r} percent) changed little in {name} (among teenagers).",
+    "The unemployment rate ({r} percent) was little changed in {name} (not "
+    "seasonally adjusted).",
+    "Total nonfarm payroll employment rose by {n[2]:,},000 in {name}, a year earlier.",
+    "Total nonfarm payroll employment changed little in {name} (+{n[3]:,},000) "
+    "(not seasonally adjusted).",
+    "Total nonfarm payroll employment rose by {n[4]:,},000 in {name}, and the "
+    "unemployment rate was little changed at {r} percent in {prior}.",
+    "Chart 1. The unemployment rate ({r} percent) in {name}.",
+    "Chart 2. Total nonfarm payroll employment (+{n[5]:,},000) in {name}.",
 )
 
 
@@ -90,9 +109,9 @@ def _empsit(draw: st.DrawFn) -> dict:
         "month": draw(st.integers(1, 12)),
         "rate": Decimal(draw(st.integers(20, 99))) / 10,
         "payroll": draw(st.integers(-999, 999).filter(lambda value: value != 0)),
-        "lead": draw(st.integers(0, 3)),
-        "rate_section": draw(st.integers(0, 5)),
-        "payroll_section": draw(st.integers(0, 3)),
+        "lead": draw(st.integers(0, 4)),
+        "rate_section": draw(st.integers(0, 8)),
+        "payroll_section": draw(st.integers(0, 5)),
         "numbers": draw(st.lists(st.integers(1, 999), min_size=8, max_size=8)),
         "decoy_rate": Decimal(draw(st.integers(20, 199))) / 10,
         "order": draw(st.permutations(range(len(_DECOYS)))),
@@ -119,6 +138,9 @@ def _empsit_text(case: dict, *, keep: str = "both") -> tuple[str, str]:
         f"Total nonfarm payroll employment edged {'up' if up else 'down'} by "
         f"{count} in {name}, while the unemployment rate "
         f"{'edged down' if up else 'rose'} to {rate} percent.",
+        f"Total nonfarm payroll employment changed little ({signed}) in {name}, "
+        f"and the unemployment rate rose 0.1 percentage point to {rate} percent, "
+        "the U.S. Bureau of Labor Statistics reported today.",
     )[case["lead"]]
     rate_section = (
         f"Both the unemployment rate, at {rate} percent, and the number of "
@@ -131,6 +153,11 @@ def _empsit_text(case: dict, *, keep: str = "both") -> tuple[str, str]:
         f"The unemployment rate, at {rate} percent, changed little in {name}.",
         f"The unemployment rate ({rate} percent) and the number of unemployed "
         f"people (6.9 million) changed little in {name}.",
+        f"In {name}, the unemployment rate was unchanged at {rate} percent.",
+        f"The unemployment rate was {rate} percent in {name} and has remained in "
+        f"a narrow range of 4.0 percent to 4.2 percent since {prior} 2024.",
+        f"In {name}, the unemployment rate, at {rate} percent, changed little, "
+        "and the number of unemployed people was little changed at 6.9 million.",
     )[case["rate_section"]]
     a = case["numbers"][0]
     payroll_section = (
@@ -143,6 +170,10 @@ def _empsit_text(case: dict, *, keep: str = "both") -> tuple[str, str]:
         f"Total nonfarm payroll employment edged {'up' if up else 'down'} in "
         f"{name} ({signed}).",
         f"Total nonfarm payroll employment ({signed}) was little changed in {name}.",
+        f"Total nonfarm payroll employment changed little ({signed}) in {name} "
+        f"and has shown little change since {prior}.",
+        f"Total nonfarm payroll employment {'increased' if up else 'decreased'} "
+        f"by {count} in {name} and continued to trend {'up' if up else 'down'}.",
     )[case["payroll_section"]]
     if keep == "rate_lead_only":
         rate_section = "Household survey measures changed little."
@@ -259,7 +290,7 @@ def _section_month(pre: str, name: str, other: str, section: str) -> str:
     """The release with one section's statement moved to another month."""
     head, rest = pre.split(f"\n\n{section}\n\n", 1)
     statement, tail = rest.split("\n\n", 1)
-    moved = re.sub(rf"\bin {name}\b", f"in {other}", statement, count=1)
+    moved = re.sub(rf"\b([Ii]n) {name}\b", rf"\1 {other}", statement, count=1)
     assert moved != statement
     return f"{head}\n\n{section}\n\n{moved}\n\n{tail}"
 
@@ -340,6 +371,77 @@ def test_a_payroll_measure_other_than_the_total_is_never_a_statement(
         "2026-07",
         123.0,
     )
+
+
+@pytest.mark.parametrize(
+    "qualifier",
+    (
+        ", a year earlier",
+        " (2025)",
+        " (among teenagers)",
+        " (not seasonally adjusted)",
+        " of last year",
+        ", compared with 3.9 percent a year earlier",
+        " for the second consecutive month among adult women",
+    ),
+)
+def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> None:
+    """Round-3 review, finding 1: the qualifier is part of the statement."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    pre = (
+        "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        f"The unemployment rate was 4.8 percent in July{qualifier}. "
+        f"The unemployment rate (4.8 percent) was unchanged in July{qualifier}. "
+        f"Total nonfarm payroll employment rose by 123,000 in July{qualifier}. "
+        "Total nonfarm payroll employment changed little in July (+123,000)"
+        f"{qualifier}."
+    )
+    for parser_id in _EMPSIT_IDS:
+        assert parse_release(_page(title, pre), parser_id) is None
+    bare = pre.replace(qualifier, "")
+    assert parse_release(_page(title, bare), "empsit_unemployment_rate") == (
+        "2026-07",
+        4.8,
+    )
+    assert parse_release(_page(title, bare), "empsit_payroll_change") == (
+        "2026-07",
+        123.0,
+    )
+
+
+def test_qualified_statements_never_supply_the_rate() -> None:
+    """Round-3 review, finding 1, verbatim: they returned 4.8."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    pre = (
+        "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        "In July, the unemployment rate was unchanged at 4.1 percent.\n"
+        "The unemployment rate was unchanged at 4.1 percent in July and has "
+        "remained in a narrow range of 4.0 percent to 4.2 percent since January.\n"
+        "The unemployment rate was 4.8 percent in July, a year earlier.\n"
+        "The unemployment rate (4.8 percent) was unchanged in July (2025)."
+    )
+    assert parse_release(_page(title, pre), "empsit_unemployment_rate") == (
+        "2026-07",
+        4.1,
+    )
+
+
+@settings(max_examples=100, deadline=None)
+@given(case=_empsit(), lead=st.sampled_from((0, 2, 4)))
+def test_a_lead_whose_payroll_verb_contradicts_its_sign_refuses_both_readers(
+    case: dict, lead: int
+) -> None:
+    """Round-3 review, finding 4: a rate statement's payroll clause is checked."""
+    case = {**case, "lead": lead}
+    title, pre = _empsit_text(case)
+    heading, statement, rest = pre.split("\n\n", 2)
+    assert statement.count("changed little") == 1
+    down = case["payroll"] < 0
+    for verb, refused in (("edged up", down), ("edged down", not down)):
+        changed = statement.replace("changed little", verb)
+        html = _page(title, f"{heading}\n\n{changed}\n\n{rest}")
+        for parser_id, reading in _readings(case).items():
+            assert parse_release(html, parser_id) == (None if refused else reading)
 
 
 def test_a_page_without_exactly_one_preformatted_block_is_refused() -> None:

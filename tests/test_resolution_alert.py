@@ -639,3 +639,165 @@ def test_if_the_issue_call_fails_a_one_line_issue_still_goes_out(
     assert last[last.index("--body") + 1] == (
         f"The alert body could not be posted; see {URL}"
     )
+
+
+# ---- the status page step, executed ------------------------------------------
+
+_STATUS_STEP = "Publish why each overdue forecast has not resolved"
+_STATUS_FILE = "site/src/data/resolution-status.json"
+# A stand-in builder: it writes which tree's code ran and the log it was
+# given, so the test sees whose builder produced the published file.
+_STUB_BUILDER = """\
+import argparse, json, pathlib
+parser = argparse.ArgumentParser()
+parser.add_argument("--resolver-log", type=pathlib.Path)
+parser.add_argument("--workflow-run")
+parser.add_argument("--out", type=pathlib.Path)
+args = parser.parse_args()
+args.out.write_text(json.dumps({{
+    "builder": {tag!r},
+    "log": args.resolver_log.read_text(),
+    "run": args.workflow_run,
+}}) + "\\n")
+"""
+
+
+def _git(cwd: pathlib.Path, *args: str) -> str:
+    return subprocess.run(
+        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+
+def _commit_builder(repo: pathlib.Path, tag: str, status: str) -> str:
+    (repo / "scripts").mkdir(exist_ok=True)
+    (repo / "scripts/resolution_status.py").write_text(_STUB_BUILDER.format(tag=tag))
+    (repo / _STATUS_FILE).parent.mkdir(parents=True, exist_ok=True)
+    (repo / _STATUS_FILE).write_text(status)
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", tag)
+    return _git(repo, "rev-parse", "HEAD")
+
+
+def _status_world(tmp_path: pathlib.Path, *, main_status: str = "{}\n") -> dict:
+    """An origin whose main moved on after the job checked out.
+
+    The job's checkout holds the builder as it was when the run began
+    ("checkout"); main has since changed it ("main"), and a later commit
+    ("next") waits on a side branch for a push to race with.
+    """
+    seed = tmp_path / "seed"
+    seed.mkdir()
+    _git(seed, "init", "-q", "-b", "main")
+    _git(seed, "config", "user.name", "t")
+    _git(seed, "config", "user.email", "t@example.org")
+    old = _commit_builder(seed, "checkout", "{}\n")
+    main = _commit_builder(seed, "main", main_status)
+    later = _commit_builder(seed, "next", main_status)
+    origin = tmp_path / "origin.git"
+    _git(tmp_path, "clone", "-q", "--bare", str(seed), str(origin))
+    _git(origin, "update-ref", "refs/heads/main", main)
+    _git(origin, "update-ref", "refs/heads/next", later)
+    workspace = tmp_path / "workspace"
+    _git(tmp_path, "clone", "-q", str(origin), str(workspace))
+    _git(workspace, "checkout", "-q", "--detach", old)
+    return {"origin": origin, "workspace": workspace, "main": main, "next": later}
+
+
+def _run_status_step(
+    tmp_path: pathlib.Path, world: dict, *, races: int = 0
+) -> subprocess.CompletedProcess:
+    """Run the step's own script; the first `races` pushes lose to "next"."""
+    script = _step(_STATUS_STEP)["run"].replace("/tmp/", f"{tmp_path}/")
+    (tmp_path / "resolve-out.log").write_text("RESOLVED x\n")
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    real_git = shutil.which("git")
+    assert real_git
+    (bin_dir / "git").write_text(
+        f"#!{sys.executable}\n"
+        "import os, pathlib, subprocess, sys\n"
+        f"real, origin = {real_git!r}, {str(world['origin'])!r}\n"
+        f"counter = pathlib.Path({str(tmp_path / 'pushes')!r})\n"
+        "args = sys.argv[1:]\n"
+        "if 'push' in args:\n"
+        "    n = int(counter.read_text()) if counter.exists() else 0\n"
+        "    counter.write_text(str(n + 1))\n"
+        f"    if n < {races}:\n"
+        "        # Another writer lands on main first; this push is refused.\n"
+        "        subprocess.run([real, '--git-dir', origin, 'update-ref',\n"
+        "                        'refs/heads/main', 'refs/heads/next'], check=True)\n"
+        "        sys.exit(1)\n"
+        "os.execv(real, [real, *args])\n"
+    )
+    (bin_dir / "git").chmod(0o755)
+    (bin_dir / "python3").symlink_to(sys.executable)
+    env = {
+        "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
+        "HOME": str(tmp_path),
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GITHUB_WORKSPACE": str(world["workspace"]),
+        "GITHUB_RUN_ID": "4242",
+        "GH_TOKEN": "unused",
+    }
+    return subprocess.run(
+        ["bash", "-c", script],
+        cwd=world["workspace"],
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
+
+def _published(world: dict) -> tuple[dict, str]:
+    origin = world["origin"]
+    text = _git(origin, "show", f"main:{_STATUS_FILE}")
+    return json.loads(text), _git(origin, "rev-parse", "main^")
+
+
+def test_the_status_page_is_built_by_mains_builder_not_the_checkouts(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Round-3 review, finding 3: a run begun before a merge."""
+    world = _status_world(tmp_path)
+    result = _run_status_step(tmp_path, world)
+    assert result.returncode == 0, result.stderr
+    status, parent = _published(world)
+    assert status == {"builder": "main", "log": "RESOLVED x\n", "run": "4242"}
+    assert parent == world["main"]
+    # The job's own tree is left as it was.
+    assert (world["workspace"] / _STATUS_FILE).read_text() == "{}\n"
+
+
+@pytest.mark.parametrize("races", (1, 2))
+def test_a_raced_push_rebuilds_from_the_newer_main(
+    tmp_path: pathlib.Path, races: int
+) -> None:
+    world = _status_world(tmp_path)
+    result = _run_status_step(tmp_path, world, races=races)
+    assert result.returncode == 0, result.stderr
+    status, parent = _published(world)
+    assert status["builder"] == "next"
+    assert parent == world["next"]
+    assert (tmp_path / "pushes").read_text() == str(races + 1)
+
+
+def test_three_lost_races_publish_nothing_and_say_so(tmp_path: pathlib.Path) -> None:
+    world = _status_world(tmp_path)
+    result = _run_status_step(tmp_path, world, races=3)
+    assert result.returncode == 0, result.stderr
+    assert "push raced three times" in result.stdout
+    assert _git(world["origin"], "rev-parse", "main") == world["next"]
+
+
+def test_an_unchanged_status_file_is_not_committed(tmp_path: pathlib.Path) -> None:
+    unchanged = (
+        json.dumps({"builder": "main", "log": "RESOLVED x\n", "run": "4242"}) + "\n"
+    )
+    world = _status_world(tmp_path, main_status=unchanged)
+    result = _run_status_step(tmp_path, world)
+    assert result.returncode == 0, result.stderr
+    assert "nothing to publish" in result.stdout
+    assert _git(world["origin"], "rev-parse", "main") == world["main"]
+    assert not (tmp_path / "pushes").exists()

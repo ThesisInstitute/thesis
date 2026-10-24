@@ -244,7 +244,7 @@ _EMPSIT_READINGS = {
         "average, over the prior 12 months.",
         "Total nonfarm payroll employment has increased by an average of "
         "123,000 per month since January.",
-        "In June, the unemployment rate was 4.8 percent.",
+        "In June, the unemployment rate for teenagers was 12.1 percent.",
         "The unemployment rate for teenagers (12.1 percent) changed little in July.",
         "The unemployment rates for adult men (3.9 percent) and adult women "
         "(3.8 percent) changed little in July.",
@@ -255,6 +255,20 @@ _EMPSIT_READINGS = {
         "The unemployment rate was 3.9 percent in July a year earlier.",
         "Nonfarm payroll employment in July (+999,000) by industry is shown in "
         "table B-1.",
+        # Round-3 review, finding 1: a qualifier after the month names
+        # another period or measure, so the statement is not read.
+        "The unemployment rate was 4.8 percent in July, a year earlier.",
+        "The unemployment rate (4.8 percent) was unchanged in July (2025).",
+        "The unemployment rate (4.8 percent) changed little in July (among teenagers).",
+        "The unemployment rate (4.8 percent) changed little in July (not seasonally "
+        "adjusted).",
+        "Total nonfarm payroll employment rose by 123,000 in July, a year earlier.",
+        "Total nonfarm payroll employment changed little in July (+123,000) (not "
+        "seasonally adjusted).",
+        "Total nonfarm payroll employment rose by 123,000 in July, and the "
+        "unemployment rate was little changed at 4.8 percent in June.",
+        "Chart 1. The unemployment rate (4.8 percent) in July.",
+        "Chart 2. Total nonfarm payroll employment (+123,000) in July.",
     ),
 )
 def test_a_decoy_added_to_a_real_release_never_changes_its_reading(
@@ -283,6 +297,14 @@ def test_a_decoy_added_to_a_real_release_never_changes_its_reading(
             "The unemployment rate was 4.1 percent in July 2025.",
         ),
         (
+            "empsit_unemployment_rate",
+            "In June, the unemployment rate was 4.8 percent.",
+        ),
+        (
+            "empsit_unemployment_rate",
+            "In July 2025, the unemployment rate was 4.1 percent.",
+        ),
+        (
             "empsit_payroll_change",
             "Total nonfarm payroll employment rose by 63,000 in May.",
         ),
@@ -299,20 +321,62 @@ def test_a_headline_statement_of_another_month_refuses_a_real_release(
     assert parse_release(_with_sentence(html, sentence), parser_id) is None
 
 
-def test_the_respectively_wording_of_the_household_paragraph_reads_the_same() -> None:
+@pytest.mark.parametrize(
+    "paragraph",
+    (
+        "The unemployment rate and the number of unemployed people were little\n"
+        "changed at 4.1 percent and 6.9 million, respectively, in July.",
+        # Round-3 review, finding 2: the range is not read, the rate is.
+        "The unemployment rate was unchanged at 4.1 percent in July and has\n"
+        "remained in a narrow range of 4.0 percent to 4.2 percent since January.",
+        "In July, the unemployment rate was unchanged at 4.1 percent.",
+        "In July, the unemployment rate, at 4.1 percent, changed little, and the\n"
+        "number of unemployed people was little changed at 6.9 million.",
+        "The unemployment rate rose 0.1 percentage point to 4.1 percent in July\n"
+        "and has shown little change since May 2025.",
+    ),
+)
+def test_another_wording_of_the_household_paragraph_reads_the_same(
+    paragraph: str,
+) -> None:
     _meta, _raw, html = _load(_EMPSIT_REAL)
     household = re.compile(
         r"Both the unemployment rate,\s+at 4\.1 percent,\s+and the number of"
         r"\s+unemployed people,\s+at 6\.9 million,\s+changed little in July\."
     )
     assert len(household.findall(html)) == 1
-    changed = household.sub(
-        "The unemployment rate and the number of unemployed people were little\n"
-        "changed at 4.1 percent and 6.9 million, respectively, in July.",
-        html,
-    )
+    changed = household.sub(paragraph, html)
     assert changed != html
     assert parse_release(changed, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    # The same paragraph of another month refuses the page.
+    june = household.sub(paragraph.replace("July", "June"), html)
+    assert parse_release(june, "empsit_unemployment_rate") is None
     # Without the household paragraph the lead alone is one statement.
     alone = household.sub("Household measures changed little.", html)
     assert parse_release(alone, "empsit_unemployment_rate") is None
+
+
+def test_a_lead_whose_payroll_verb_contradicts_its_sign_refuses_both_readers() -> None:
+    """Round-3 review, finding 4: the rate's lead clause is checked too."""
+    _meta, _raw, html = _load(_EMPSIT_REAL)
+    lead = re.compile(
+        r"Both\s+nonfarm\s+payroll\s+employment\s+\(-23,000\)\s+and\s+the\s+"
+        r"unemployment\s+rate\s+\(4\.1\s+percent\)\s+changed\s+little\s+in\s+July"
+    )
+    assert len(lead.findall(html)) == 1
+    for verb in ("rose", "edged up", "increased"):
+        changed = lead.sub(
+            "Both nonfarm payroll employment (-23,000) and the unemployment rate "
+            f"(4.1 percent) {verb} in July",
+            html,
+        )
+        for parser_id in _EMPSIT_READINGS:
+            assert parse_release(changed, parser_id) is None
+    # The same lead with its verb agreeing reads as before.
+    agreeing = lead.sub(
+        "Both nonfarm payroll employment (-23,000) and the unemployment rate "
+        "(4.1 percent) edged down in July",
+        html,
+    )
+    for parser_id, reading in _EMPSIT_READINGS.items():
+        assert parse_release(agreeing, parser_id) == reading

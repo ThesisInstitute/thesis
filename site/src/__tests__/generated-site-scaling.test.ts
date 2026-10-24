@@ -38,7 +38,10 @@ describe("generated-site scaling surfaces", () => {
     // The overdue notice is one sentence, never the resolver's full report.
     for (const item of listing) {
       if (!item.overdue) continue;
-      expect(Object.keys(item.overdue).sort()).toEqual(["reason", "since"]);
+      // Beside them, only the flag of a target a recorded ruling voided.
+      const { voided, ...notice } = item.overdue;
+      expect(Object.keys(notice).sort()).toEqual(["reason", "since"]);
+      expect(voided === undefined || voided === true).toBe(true);
       expect(item.overdue.reason.length).toBeLessThan(200);
       expect(item.status).toBe("pending");
     }
