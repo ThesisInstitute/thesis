@@ -284,6 +284,7 @@ _VOID = frozenset(
 # uses. Metadata, which it never renders either.
 _INVISIBLE = frozenset({"noembed", "noframes", "script", "style", "template", "title"})
 _METADATA = frozenset({"base", "head", "link", "meta"})
+_HEADINGS = frozenset({"h1", "h2", "h3", "h4", "h5", "h6"})
 # Elements the release's name and its block may stand in, with the
 # attributes they may carry: none of them hides, moves or adds to what it
 # holds. Real pages put the name in an <h1> and the block in <div>s.
@@ -314,26 +315,31 @@ class _Page(HTMLParser):
     """A release page, read for its one preformatted block.
 
     Keeps the page's titles, the text of each <pre> element (each tag or
-    comment inside one a word break), and the text a browser shows before
-    the first, where an element that is not plain stands as an unreadable
-    mark ("\\0") and its text as marks too. Only real <pre> elements count:
-    one inside a comment or a script is no block.
+    comment inside one a word break), and the name: the whole text of the
+    heading (<h1> to <h6>) the first follows, when a browser shows nothing
+    between them. In the text a browser shows, an element that is not
+    plain stands as an unreadable mark ("\\0") and its text as marks too.
+    Only real <pre> elements count: one inside a comment or a script is no
+    block.
 
     `plain` is False when the page uses markup on which a browser and this
     parser could disagree about what the page shows, or where:
 
-    - anywhere: a second <html>, <head> or <body> (a browser adds its
-      attributes to the first), frames, <plaintext>, a declarative shadow
-      root, or a refresh;
+    - anywhere: an <html>, <head> or <body> with an attribute that is not
+      plain, or a second one (wherever it stands, a browser adds its
+      attributes to the page's one root of that kind, even one it made
+      itself), frames, <plaintext>, a declarative shadow root, or a
+      refresh (of an attribute given twice, a browser keeps the first);
     - up to the end of the block: an end tag that does not close the
       element last opened (a void element's aside), "/>" on an element
       that is not void outside SVG or MathML (a browser ignores it, so
       "<script/>" opens a script), a marked section ("<![CDATA[", which a
       browser ends at the first ">"), a NUL (which a browser drops), a
       script a browser would run on past its first "</script>" ("<!--"
-      then "<script"), or a <noscript> holding anything but void elements
+      then "<script"), a <noscript> holding anything but void elements
       (with scripts on, a browser reads its content as raw text up to
-      "</noscript>");
+      "</noscript>"), or a heading opened inside a heading (a browser may
+      close the first);
     - the block in an element that is not plain, or its <pre> tag with
       attributes;
     - inside the block: an element or attribute releases do not use there,
@@ -351,7 +357,7 @@ class _Page(HTMLParser):
         self.titles: list[list[str]] = []
         self.in_title = False
         self.pres: list[list[str]] = []
-        self.before_block: str | None = None
+        self.name: str | None = None
         self.plain = True
         # "before" the block, in the "block", or "after" it.
         self.where = "before"
@@ -361,6 +367,10 @@ class _Page(HTMLParser):
         self.open: list[tuple[str, bool]] = []
         self.ranks: list[int] = []
         self.shown: list[str] = []
+        # Where in `shown` the open heading starts, and where the last
+        # closed heading starts and ends.
+        self.heading_from = 0
+        self.heading: tuple[int, int] | None = None
         self.raw: list[str] = []
         self.roots: dict[str, int] = {}
 
@@ -374,10 +384,12 @@ class _Page(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         names = {name for name, _ in attrs}
-        values = {name: value or "" for name, value in attrs}
+        values: dict[str, str] = {}
+        for name, value in attrs:
+            values.setdefault(name, value or "")
         if tag in ("html", "head", "body"):
             self.roots[tag] = self.roots.get(tag, 0) + 1
-            if self.roots[tag] > 1:
+            if self.roots[tag] > 1 or not names <= _PLAIN_ATTRIBUTES:
                 self.plain = False
         if (
             tag in ("frame", "frameset", "plaintext")
@@ -399,7 +411,8 @@ class _Page(HTMLParser):
         elif tag == "pre":
             if attrs or not all(plain for _, plain in self.open):
                 self.plain = False
-            self.before_block = _text(self.shown)
+            if self.heading is not None and not _text(self.shown[self.heading[1] :]):
+                self.name = _text(self.shown[self.heading[0] : self.heading[1]])
             self.pres.append([])
             self.where = "block"
             self.open = []
@@ -408,6 +421,10 @@ class _Page(HTMLParser):
                 tag not in _VOID or any("<" in value for value in values.values())
             ):
                 self.plain = False
+            if tag in _HEADINGS:
+                if any(name in _HEADINGS for name, _ in self.open):
+                    self.plain = False
+                self.heading_from = len(self.shown)
             plain = tag in _PLAIN_TAGS and names <= _PLAIN_ATTRIBUTES
             if (
                 not plain
@@ -482,6 +499,8 @@ class _Page(HTMLParser):
             self.plain = False
             return
         self.open.pop()
+        if tag in _HEADINGS:
+            self.heading = (self.heading_from, len(self.shown))
         if tag == "script":
             content = "".join(self.raw).lower()
             if "<!--" in content and "<script" in content:
@@ -1250,7 +1269,8 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     The page must be plain (_Page) and have exactly one title naming the
     release and its month (the Employment Situation titles its December
     release "M13"), exactly one preformatted block (a real <pre> element,
-    not one in a comment), shown right after the release's name, and in it
+    not one in a comment), shown right after a heading whose whole text is
+    the release's name, and in it
     exactly one release heading naming the same month, with nothing before
     the heading but the release's metadata (_PREAMBLE). Where the release
     first names the measure after the heading (its lead), a dated statement
@@ -1292,11 +1312,11 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     month_name = _MONTH_NAMES[month - 1]
     if len(doc.pres) != 1:
         return None
-    # The block follows the release's own name on the page ("... Employment
-    # Situation Summary"), shown, with nothing between them.
-    if doc.before_block is None or not re.search(
-        rf"(?<!\w)(?:{spec.title})$", doc.before_block
-    ):
+    # The block follows a heading that is the release's own name and
+    # nothing else ("Employment Situation Summary"), shown, with nothing
+    # between them: a word in the heading could qualify the release ("Not
+    # seasonally adjusted: Employment Situation Summary").
+    if doc.name is None or not re.fullmatch(spec.title, doc.name):
         return None
     text = " ".join("".join(doc.pres[0]).split())
     # "JULY 2026", and once "March 2026".

@@ -1012,6 +1012,41 @@ def test_round_9_review_text_between_a_real_name_and_its_block_defers_it(
         _resolves(f"{html[:name]}{unseen}{html[name:]}", sidecar)
 
 
+@pytest.mark.parametrize("sidecar", _REAL_SUMMARIES, ids=lambda p: p.stem)
+def test_round_10_review_markup_on_a_real_page_defers_it(
+    sidecar: pathlib.Path,
+) -> None:
+    """Round-10 review, on the real captures: a word added to the heading
+    that names the release (finding 1), a root tag that hides the page
+    after the block (finding 2), and a refresh given before a repeated
+    attribute (finding 3) each refuse the page. The same markup made
+    harmless leaves the reading as it was."""
+    _meta, _raw, html = _load(sidecar)
+    assert html.count("<h1>") == 1
+    assert html.count("</pre>") == 1
+    assert html.count("</html>") == 1
+    name = html.index("<h1>") + len("<h1>")
+    end = html.index("</pre>") + len("</pre>")
+    top = html.index("<html")
+    for qualifier in ("Not seasonally adjusted: ", "Revised ", "Puerto Rico "):
+        _defers(f"{html[:name]}{qualifier}{html[name:]}", sidecar)
+    for root in (
+        "<body hidden>",
+        '<html style="display:none">',
+        "<body hidden></body>",
+    ):
+        _defers(f"{html[:end]}{root}{html[end:]}", sidecar)
+        _defers(f"{html}{root}", sidecar)
+    _defers(f"{html[:top]}<body hidden></body>{html[top:]}", sidecar)
+    refresh = (
+        '<meta http-equiv=refresh http-equiv=content-type content="0;url=about:blank">'
+    )
+    _defers(f"{html[:top]}{refresh}{html[top:]}", sidecar)
+    swapped = '<meta http-equiv=content-type http-equiv=refresh content="0">'
+    _resolves(f"{html[:top]}{swapped}{html[top:]}", sidecar)
+    _resolves(f"{html[:end]}<p></p>{html[end:]}", sidecar)
+
+
 _SUMMARY_READERS = {
     "https://www.bls.gov/news.release/empsit.nr0.htm": "empsit_unemployment_rate",
     "https://www.bls.gov/news.release/jolts.nr0.htm": "jolts_job_openings",
@@ -1040,8 +1075,9 @@ def test_every_real_summary_is_plain_with_its_block_right_after_its_name(
     assert doc.where == "after"
     assert len(doc.titles) == 1
     assert len(doc.pres) == 1
-    assert doc.before_block is not None
-    assert re.search(rf"(?<!\w)(?:{spec.title})$", doc.before_block)
+    assert doc.name is not None
+    assert re.fullmatch(spec.title, doc.name)
+    assert doc.roots == {"html": 1, "head": 1, "body": 1}
     text = " ".join("".join(doc.pres[0]).split())
     heading = re.search(rf"{spec.heading}\W+", text)
     assert heading is not None

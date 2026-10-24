@@ -102,17 +102,25 @@ only the release's metadata: when it is released, its number
 (`_PREAMBLE`). Any other text there refuses the page as well.
 
 The release is the one real `<pre>` element, and the readers take it only
-from a plain page (`_Page`). Nothing may change the whole page: a second
-`<html>`, `<head>` or `<body>`, a frame, `<plaintext>`, a declarative
-shadow root or a refresh. Up to the end of the block, every end tag must
-close the element opened last. The block's ancestors must be plain
-containers (`div`, `p`, `span`, `main` and the like, with only a class,
-id, lang or role), and the block may hold only the table and text markup
-BLS prints in it. Between the release's name ("Employment Situation
-Summary", the page's `<h1>`) and the block, any shown text, or any
-element but a plain container or a line break, refuses the page. A comment, a script or a
-stylesheet there does not, since a browser shows none of them. Every one
-of the 32 summary captures is such a page
+from a plain page (`_Page`). Nothing may change the whole page: an
+`<html>`, `<head>` or `<body>` tag with any attribute but a class, id,
+lang or role, or a second one, wherever it stands (a browser gives every
+such tag's attributes to the page's one root of that kind, even one it
+made itself), a frame, `<plaintext>`, a declarative shadow root or a
+refresh. Of an attribute given twice, the first counts, as in a browser.
+Up to the end of the block, every end tag must close the element opened
+last, and no heading may open inside another. The block's ancestors must
+be plain containers (`div`, `p`, `span`, `main` and the like, with only a
+class, id, lang or role), and the block may hold only the table and text
+markup BLS prints in it. The block follows a heading whose whole text is
+the release's name ("Employment Situation Summary", the page's `<h1>`):
+any other word in that heading could qualify the release ("Not seasonally
+adjusted: Employment Situation Summary"), so it refuses the page. Between
+that heading and the block, any shown text, or any element but a plain
+container or a line break, refuses the page as well. A comment, a script
+or a stylesheet there does not, since a browser shows none of them. Every
+one of the 32 summary captures is such a page, with one `<html lang>`, one
+`<head>` and one `<body>`
 (`test_every_real_summary_is_plain_with_its_block_right_after_its_name`).
 The readers run no stylesheet or script, so text hidden or moved by either
 is read where the markup puts it. How Python's `HTMLParser` splits a page

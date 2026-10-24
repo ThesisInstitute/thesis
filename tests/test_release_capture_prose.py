@@ -3085,6 +3085,107 @@ def test_round_9_review_pages_are_refused() -> None:
     assert parse_release(opened, rate) == ("2026-07", 4.8)
 
 
+_ROUND_10_QUALIFIED = (
+    "<title>Employment Situation Summary - 2026 M07 Results</title>\n"
+    "<h1>Not seasonally adjusted: Employment Situation Summary</h1>\n"
+    "<pre>THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    "The unemployment rate was 4.8 percent in July.\n"
+    "The unemployment rate was 4.8 percent.\n"
+    "The seasonally adjusted unemployment rate for July was 4.1 percent.</pre>"
+)
+_ROUND_10_HIDDEN = (
+    "<title>Employment Situation Summary - 2026 M07 Results</title>\n"
+    "<h1>Employment Situation Summary</h1>\n"
+    "<pre>THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    "The unemployment rate was 4.8 percent in July.\n"
+    "The unemployment rate was 4.8 percent.</pre>\n"
+    "<body hidden>"
+)
+_ROUND_10_REFRESH = (
+    '<meta http-equiv=refresh http-equiv=content-type content="0;url=about:blank">'
+)
+
+
+def test_round_10_review_pages_are_refused() -> None:
+    """Round-10 review, findings 1 to 3, verbatim: each returned 4.8.
+    Without the finding's own markup each page reads."""
+    rate = "empsit_unemployment_rate"
+    assert parse_release(_ROUND_10_QUALIFIED, rate) is None
+    named = _ROUND_10_QUALIFIED.replace("Not seasonally adjusted: ", "")
+    assert parse_release(named, rate) == ("2026-07", 4.8)
+    shown = _ROUND_10_HIDDEN.removesuffix("\n<body hidden>")
+    assert parse_release(shown, rate) == ("2026-07", 4.8)
+    for page in (
+        _ROUND_10_HIDDEN,
+        f"<body hidden></body>{shown}",
+        f"{shown}<html hidden>",
+        f"<html hidden></html>{shown}",
+    ):
+        assert parse_release(page, rate) is None
+        assert not _plain(page)
+    assert parse_release(f"{_ROUND_10_REFRESH}{shown}", rate) is None
+    assert not _plain(f"{_ROUND_10_REFRESH}{shown}")
+    # The first of a repeated attribute is the one a browser keeps.
+    swapped = '<meta http-equiv=content-type http-equiv=refresh content="0">'
+    assert parse_release(f"{swapped}{shown}", rate) == ("2026-07", 4.8)
+    upper = '<meta HTTP-EQUIV=Refresh http-equiv=content-type content="0">'
+    assert parse_release(f"{upper}{shown}", rate) is None
+
+
+def _rootless() -> tuple[str, tuple[str, float]]:
+    """The July page with no <html>, <head> or <body> tag: a browser makes
+    each root itself."""
+    html, reading = _july()
+    for tag in ("<html>", "<head>", "</head>", "<body>", "</body>", "</html>"):
+        assert html.count(tag) == 1
+        html = html.replace(tag, "")
+    return html, reading
+
+
+@pytest.mark.parametrize(
+    ("markup", "read"),
+    (
+        ("<body hidden>", False),
+        ("<body hidden></body>", False),
+        ('<body style="display:none">', False),
+        ('<body onload="hide()">', False),
+        ("<html hidden>", False),
+        ('<html style="visibility:hidden"></html>', False),
+        ("<head hidden>", False),
+        ('<html lang="en">', True),
+        ('<body class="page" id="top">', True),
+        ("<head></head>", True),
+    ),
+)
+@pytest.mark.parametrize(
+    "at", ("<title>", "<div><p>Navigation", "<h2>", "<p>Footer", None)
+)
+def test_every_root_tag_carries_only_plain_attributes(
+    markup: str, read: bool, at: str | None
+) -> None:
+    """Wherever an <html>, <head> or <body> tag stands, before the page's
+    content, after the block, or past the end, a browser adds its
+    attributes to the root of that kind, which it makes itself where the
+    page has no such tag first."""
+    html, reading = _rootless()
+    page = f"{html}{markup}" if at is None else html.replace(at, f"{markup}{at}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+def test_a_name_inside_a_head_element_is_refused() -> None:
+    """A browser moves a heading out of the page's <head>, or ignores a
+    <head> misplaced in the body, and shows the heading. The parser does not
+    model either, and takes no text inside a <head> for shown text, so the
+    page is refused rather than read."""
+    html, reading = _rootless()
+    name = "<h2>Employment Situation Summary</h2>"
+    assert html.count(name) == 1
+    assert parse_release(html, _EMPSIT_IDS[1]) == reading
+    page = html.replace(name, f"<head>{name}</head>")
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+    assert _plain(page)
+
+
 # A real Employment Situation preamble, item by item, and a JOLTS one with
 # its windows-1252 bullets as the leg decodes them.
 _EMPSIT_PREAMBLE = (
@@ -3417,8 +3518,45 @@ def test_text_a_browser_moves_out_of_a_misplaced_head_is_shown() -> None:
     ("name", "read"),
     (
         ("<h1>Employment Situation Summary</h1>", True),
-        ("<h2>The Employment Situation Summary</h2>", True),
+        ('<h1 class="title">Employment Situation Summary</h1>', True),
+        ("<h3>Employment Situation Summary</h3>", True),
+        ("<h4>Employment Situation Summary</h4>", True),
+        ("<h5>Employment Situation Summary</h5>", True),
+        ("<h6>\n  Employment Situation Summary\n</h6>", True),
+        ("<h2>Employment <span>Situation</span> Summary</h2>", True),
+        ("<h2>Employment&nbsp;Situation Summary</h2>", True),
         ("<h2>Employment Situation News Release</h2>", True),
+        ("<div><h2>Employment Situation Summary</h2></div>", True),
+        ("<h2>Employment Situation Summary</h2><p></p><br>", True),
+        # The heading is the name and nothing else: a word in it could
+        # qualify the release.
+        ("<h2>The Employment Situation Summary</h2>", False),
+        ("<h2>Revised Employment Situation Summary</h2>", False),
+        ("<h2>Not seasonally adjusted: Employment Situation Summary</h2>", False),
+        ("<h2>Employment Situation Summary (not seasonally adjusted)</h2>", False),
+        ("<h2>Employment Situation Summary<br>Puerto Rico</h2>", False),
+        (
+            "<h2>Not seasonally adjusted: <span>Employment Situation "
+            "Summary</span></h2>",
+            False,
+        ),
+        ('<h2>Employment Situation Summary<img alt="Revised"></h2>', False),
+        ("<h2>Employment Situation Summary<!-- x -->Revised</h2>", False),
+        # A heading inside a heading: where it opens right inside the other,
+        # a browser closes the outer one first, which then shows its own
+        # words as a heading.
+        (
+            "<h2>Not seasonally adjusted:<h3>Employment Situation Summary</h3></h2>",
+            False,
+        ),
+        ("<h2><span>Revised <h3>Employment Situation Summary</h3></span></h2>", False),
+        # Only a heading names the release, and it is closed before the block.
+        ("<p>Employment Situation Summary</p>", False),
+        ("<div>Employment Situation Summary</div>", False),
+        ("<span>Employment Situation Summary</span>", False),
+        ("<h2>Employment Situation Summary", False),
+        ("<h2></h2>Employment Situation Summary", False),
+        ("<h2></h2><span>Employment Situation Summary</span>", False),
         ('<h2 hidden="">Employment Situation Summary</h2>', False),
         ('<h2 style="display:none">Employment Situation Summary</h2>', False),
         (
