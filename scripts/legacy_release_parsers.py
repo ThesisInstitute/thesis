@@ -383,7 +383,7 @@ def _words(allowed: str) -> str:
 # June, the unemployment rate ...") is never read past. It names its month
 # in place ("in July"; a rate statement may instead open with it, _FRONT),
 # and it runs to the end of its sentence: after the month (and a payroll
-# figure) comes only a tail (_END), then the full stop. So "in July, a year
+# figure) comes only a tail (_end), then the full stop. So "in July, a year
 # earlier", "in July (2025)", "in July (among teenagers)", "in July of last
 # year" and "per month" are no statement.
 _WHEN = rf" in (?P<month>{_MONTH})(?: (?P<year>[0-9]{{4}}))?"
@@ -434,128 +434,34 @@ _OPENINGS_WHEN = _WHEN.replace(" in ", " (?:in|on the last business day of) ", 1
 _OPENINGS_WHEN_OR_UNSAID = rf"(?:{_OPENINGS_WHEN}| over the month)?"
 # The level may carry its change ("6.5 million (-386,000)"), never read.
 _OPENINGS_CHANGE = rf"(?: \([+\-\u2212]{_COUNT}\))?"
-# A tail is a clause about some other figure (an average, an earlier
-# month, a range, the number unemployed) or about the trend. It opens with
-# one of these words, and none of it is read. "Before" opens no tail:
-# "before seasonal adjustment" is another measure.
+# A tail is a clause about some other figure (an earlier month, an
+# average, a range, the number unemployed) or about the trend, and none of
+# it is read. It is one of the closed forms below, and none of them can say
+# anything of the statement's own figure: not its basis ("after seasonal
+# adjustment"), scope ("the U.S. rate"), measure ("after including
+# discouraged workers"), period ("compared with a year earlier", "and by
+# 120,000 for the month") or revision. A sentence whose tail is anything
+# else is no statement. Every tail in the corpus of real releases
+# (tests/fixtures/release_capture/corpus/) is one of them.
+#
+# A comparison opens with one of these words. "Before" opens none: "before
+# seasonal adjustment" is another measure.
 _COMPARE = (
     "(?:(?:roughly|about|nearly|slightly|somewhat|well|much|far) )?"
     "(?:following|after|compared with|similar to|in line with|close to|"
     "the same as|up from|down from|(?:higher|lower|less|more) than|above|below)"
 )
-# After its opener a tail holds only these words, months and figures: the
-# words of a change, an average over a standard window ("over", "for" or
-# "during the prior 12 months"), a range or a trend. They cannot say that
-# the statement's own figure is of another basis ("after seasonal
-# adjustment", "after including discouraged workers"), scope ("the U.S.
-# rate", "among adults"), period ("after averaging the latest three
-# months") or revision, so a sentence whose tail says any of that is no
-# statement; a comparison must also name what it compares with
-# (_COMPARATORS). Every tail in the corpus of real releases
-# (tests/fixtures/release_capture/corpus/) is made of them.
-_TAIL_VOCABULARY = (
-    # Articles, prepositions and conjunctions.
-    "a",
-    "an",
-    "the",
-    "of",
-    "in",
-    "to",
-    "by",
-    "at",
-    "over",
-    "since",
-    "for",
-    "during",
-    "per",
-    "and",
-    "or",
-    "either",
-    "than",
-    "this",
-    "its",
-    "thus",
-    "so",
-    "far",
-    # A change and its size.
-    "change",
-    "changes",
-    "changed",
-    "unchanged",
-    "little",
-    "no",
-    "net",
-    "gain",
-    "gains",
-    "loss",
-    "losses",
-    "increase",
-    "increases",
-    "increased",
-    "decrease",
-    "decreases",
-    "decreased",
-    "decline",
-    "declines",
-    "declined",
-    "rose",
-    "fell",
-    "edged",
-    "up",
-    "down",
-    "percent",
-    "percentage",
-    "point",
-    "points",
-    "million",
-    # An average, a range or a trend.
-    "average",
-    "monthly",
-    "narrow",
-    "range",
-    "trend",
-    "trended",
-    "upward",
-    "downward",
-    "movement",
-    "recent",
-    "showing",
-    "shown",
-    "has",
-    "have",
-    "had",
-    "remained",
-    "continued",
-    "was",
-    "were",
-    "been",
-    "essentially",
-    # A period.
-    "month",
-    "months",
-    "year",
-    "prior",
-    "past",
-    "last",
-    "previous",
-    "preceding",
-    "earlier",
-)
-# A figure: "4.2", "166,000", "-13,000", "12", "2025"; a change in
-# parentheses: "(+36,000)". A period inside a number ("4.2") has a digit
-# after it; no other period is part of a tail, so an abbreviation ("U.S.")
-# ends none.
-_TAIL_FIGURE = r"[+\-\u2212]?[0-9](?:[0-9,]|\.(?=[0-9]))*"
-# Each token is followed by another (after a space or ", "), by "reported
-# today" or by the full stop, so a word is never read as a longer word's start.
-_TAIL_TOKEN = (
-    rf"(?:{_MONTH}|{_TAIL_FIGURE}|\({_TAIL_FIGURE}\)|{'|'.join(_TAIL_VOCABULARY)})"
-)
-# A comparison names what it compares with: a figure ("compared with 3.9
-# percent a year earlier") or a change, an average or a trend ("following
-# little change in June", "similar to the average monthly gain of 166,000").
-# A bare period ("compared with a year earlier") would make the statement's
-# own figure a change over that period, so it opens no tail.
+# A figure: "4.2", "166,000", "-13,000". A comma or period inside a number
+# has a digit after it, so no full stop, abbreviation ("U.S.") or
+# separating comma is part of one.
+_TAIL_FIGURE = r"[+\-\u2212]?[0-9](?:[0-9]|[,.](?=[0-9]))*"
+_YEAR = r"(?:19|20)[0-9]{2}"
+# What a comparison compares with, its operand, comes first: a figure, never
+# a year ("compared with 3.9 percent a year earlier"), or a change, an
+# average or a trend ("following little change", "similar to the average
+# monthly gain of 166,000"). A bare period ("compared with a year earlier")
+# is no operand: it would make the statement's own figure a change over
+# that period.
 _COMPARATORS = (
     "change",
     "changes",
@@ -573,30 +479,87 @@ _COMPARATORS = (
     "average",
     "trend",
 )
-# A year ("in 2025") or a count of months ("the prior 12 months") says when,
-# not what, so it is no figure to compare with.
-_COMPARED_FIGURE = (
-    rf"(?:\({_TAIL_FIGURE}\)|(?!(?:19|20)[0-9]{{2}}\b){_TAIL_FIGURE}"
-    r"(?![0-9]|,[0-9]|\.[0-9])(?! months?\b))"
+_MODIFIERS = ("little", "no", "net", "average", "monthly")
+_OPERAND_FIGURE = (
+    rf"(?!{_YEAR}(?![0-9]|,[0-9]|\.[0-9])){_TAIL_FIGURE}"
+    r"(?: percent| million| percentage points?)?"
 )
-_COMPARED = (
-    rf"(?=(?:,? {_TAIL_TOKEN})*?,? (?:{_COMPARED_FIGURE}|"
-    rf"(?:{'|'.join(_COMPARATORS)})\b))"
+_OPERAND = (
+    rf"(?:{_OPERAND_FIGURE}|(?:(?:a|an|the) )?(?:showing )?"
+    rf"(?:(?:{'|'.join(_MODIFIERS)}) )*(?:{'|'.join(_COMPARATORS)})"
+    rf"(?: of {_OPERAND_FIGURE})?)"
 )
-_TAIL = (
-    rf"(?:(?:,? {_COMPARE}\b{_COMPARED}"
-    r"| (?:and|but) (?:has|have|had|continued|remained)\b"
-    # JOLTS: "... but was down by 885,000 over the year".
-    r"| (?:and|but) (?:was|were) (?:up|down) by\b"
-    rf"|, (?:and|while) {_UNEMPLOYED}\b)"
-    rf"(?:,? {_TAIL_TOKEN})*"
-    # The tail BLS prints after the January rate, taken only whole.
-    r"|, after accounting for (?:the annual adjustments to the population "
-    r"controls|annual population control adjustments))"
+# Then the operand's own period, which it must name ("in June", "over the
+# prior 12 months"), and nothing else but a change in parentheses ("in the
+# prior month (+36,000)"). _prose_release ignores a statement whose tail
+# names the release month itself: the figure it compares with would be the
+# same month's, of another basis or measure.
+_PERIOD = (
+    rf" (?:in|since) (?:(?:{_MONTH})(?: {_YEAR})?|{_YEAR})"
+    r"| in the (?:prior|previous|preceding|past|last) month"
+    r"| (?:over|for|during|in) the (?:prior|previous|preceding|past|last) "
+    r"[1-9][0-9]? months"
+    r"| over the (?:(?:prior|previous|preceding|past|last) )?year"
+    r"| a (?:year|month) earlier"
+    r"| per month"
+    r"| (?:so|thus) far this year"
 )
+_CHANGE_IN_PARENS = rf" \({_TAIL_FIGURE}\)"
+_PERIODS = rf"(?:{_CHANGE_IN_PARENS})?(?:{_PERIOD})(?:{_PERIOD}|{_CHANGE_IN_PARENS})*"
+# A second operand, with its own period, may follow ("following gains of
+# 34,000 in May and 41,000 in June").
+_COMPARISON = rf",? {_COMPARE} {_OPERAND}{_PERIODS}(?: and {_OPERAND}{_PERIODS})?"
+# The trend since another period ("... and has shown little change since
+# April", "... and has remained in a narrow range of 4.0 percent to 4.2
+# percent since May 2024").
+_RANGE = rf"{_TAIL_FIGURE}(?: percent| million)?"
+_TREND = (
+    r" (?:and|but) (?:(?:has|have|had) (?:"
+    r"shown little (?:net )?(?:change|movement)|changed little"
+    r"|been (?:essentially unchanged|little changed|unchanged)"
+    r"|trended (?:up|down)"
+    r"|remained (?:essentially unchanged|little changed|unchanged"
+    rf"|in a narrow range of {_RANGE} to {_RANGE}"
+    rf"|at either {_RANGE} or {_RANGE})){_PERIODS}"
+    r"|continued (?:(?:its|the) (?:recent )?(?:upward|downward) trend"
+    rf"|to trend (?:up|down))(?:{_PERIOD})*)"
+)
+# JOLTS: "... but was down by 885,000 over the year", after the level only.
+_OVER_THE_YEAR = (
+    rf" (?:and|but) (?:was|were) (?:up|down) by {_TAIL_FIGURE}(?: million)? "
+    r"over the year"
+)
+# After the rate only: the number unemployed ("..., and the number of
+# unemployed people, at 7.1 million, changed little in August"), and the
+# January note on the population controls, taken only whole.
+_COUNTED = rf"{_TAIL_FIGURE}(?: million)?"
+_UNEMPLOYED_CLAUSE = (
+    rf", (?:and|while) {_UNEMPLOYED}(?:, at {_COUNTED},)?"
+    r" (?:changed little|(?:was|were) (?:little changed|essentially unchanged"
+    r"|unchanged)|(?:increased|decreased|rose|fell|declined|edged (?:up|down))"
+    rf"(?: by {_COUNTED})?)(?: (?:at|to) {_COUNTED})?(?: in (?:{_MONTH}))?"
+)
+_POPULATION_CONTROLS = (
+    r", after accounting for (?:the annual adjustments to the population "
+    r"controls|annual population control adjustments)"
+)
+# The tails a statement may end with, by the clause it ends with. The
+# comparison or trend is captured, so its periods can be checked.
+_TAILS = {
+    "payroll": rf"(?P<tail>{_COMPARISON}|{_TREND})",
+    "rate": (
+        rf"(?:(?P<tail>{_COMPARISON}|{_TREND})|{_UNEMPLOYED_CLAUSE}"
+        rf"|{_POPULATION_CONTROLS})"
+    ),
+    "openings": rf"(?:(?P<tail>{_COMPARISON}|{_TREND})|{_OVER_THE_YEAR})",
+}
 # Some releases name the bureau "the U.S. Bureau of Labor Statistics (BLS)".
 _REPORTED = r", the U\.S\. Bureau of Labor Statistics(?: \(BLS\))? reported today"
-_END = rf"{_TAIL}?(?:{_REPORTED})?\.(?=\s|$)"
+
+
+def _end(clause: str) -> str:
+    """After a statement's last clause: a tail, "reported today", the stop."""
+    return rf"(?:{_TAILS[clause]})?(?:{_REPORTED})?\.(?=\s|$)"
 
 
 def _payroll_clauses(prefix: str) -> tuple[str, ...]:
@@ -682,8 +645,10 @@ class _Prose:
     statements: tuple[re.Pattern[str], ...]
 
 
-def _compile(*patterns: str) -> tuple[re.Pattern[str], ...]:
-    return tuple(re.compile(pattern + _END) for pattern in patterns)
+def _compile(clause: str, *patterns: str) -> tuple[re.Pattern[str], ...]:
+    """Statements whose last clause is about `clause` ("rate", "payroll" or
+    "openings"), each run to its full stop."""
+    return tuple(re.compile(pattern + _end(clause)) for pattern in patterns)
 
 
 PROSE_PARSERS = {
@@ -695,17 +660,21 @@ PROSE_PARSERS = {
         _EMPSIT,
         "THE EMPLOYMENT SITUATION",
         re.compile("unemployment rate", re.I),
+        # "The unemployment rate rose to 4.3 percent in July, and nonfarm
+        # payroll employment edged up by 114,000": the payroll clause is
+        # checked like any payroll statement.
         _compile(
-            # "The unemployment rate (4.1 percent) changed little in July"
-            *(rf"{_RATE_SUBJECT}{body}{_WHEN_OR_UNSAID}" for body in _RATE_BODIES),
-            # "The unemployment rate rose to 4.3 percent in July, and nonfarm
-            # payroll employment edged up by 114,000": the payroll clause is
-            # checked like any payroll statement.
+            "payroll",
             *(
                 rf"{_RATE_SUBJECT}{body}{_WHEN}{after}"
                 for body in _RATE_BODIES
                 for after in _payroll_after("payroll_")
             ),
+        )
+        + _compile(
+            "rate",
+            # "The unemployment rate (4.1 percent) changed little in July"
+            *(rf"{_RATE_SUBJECT}{body}{_WHEN_OR_UNSAID}" for body in _RATE_BODIES),
             # "In July, the unemployment rate (4.1 percent) changed little"
             *(rf"{_FRONT}the unemployment rate{body}" for body in _RATE_BODIES),
             # "Both the unemployment rate (4.1 percent) and the number of
@@ -749,7 +718,8 @@ PROSE_PARSERS = {
         "THE EMPLOYMENT SITUATION",
         re.compile("nonfarm payroll employment", re.I),
         _compile(
-            *(rf"{clause}(?:{_rate_after(_RATE)})?" for clause in _payroll_clauses("")),
+            "payroll",
+            *_payroll_clauses(""),
             # "The unemployment rate rose to 4.3 percent in July, and nonfarm
             # payroll employment edged up by 114,000"
             *(
@@ -757,6 +727,11 @@ PROSE_PARSERS = {
                 for body in _rate_bodies(_RATE)
                 for after in _payroll_after("")
             ),
+        )
+        + _compile(
+            "rate",
+            # "..., and the unemployment rate changed little at 4.0 percent"
+            *(clause + _rate_after(_RATE) for clause in _payroll_clauses("")),
             rf"{_PAYROLL_BOTH} \((?P<signed>{_SIGNED})\) and the unemployment "
             rf"rate \({_RATE} percent\)(?P<words>{_words(_RATE_WORDS)})"
             rf"{_WHEN_OR_UNSAID}",
@@ -770,6 +745,7 @@ PROSE_PARSERS = {
         "JOB OPENINGS AND LABOR TURNOVER",
         re.compile("job openings", re.I),
         _compile(
+            "openings",
             # "The number of job openings was little changed at 7.4 million
             # in June"
             rf"The number of job openings{_words(_OPENINGS_WORDS)}"
@@ -814,6 +790,20 @@ def _statement_value(groups: dict[str, str | None]) -> Decimal | None:
     return -count if groups["verb"] in _DOWN else count
 
 
+def _names_the_month(tail: str | None, month_name: str, year: str) -> bool:
+    """Whether a comparison or trend names the release month itself.
+
+    "... rose by 2,000,000 in July, compared with a gain of 120,000 in July"
+    gives the month two figures, so one of them is of another basis or
+    measure, and the sentence is no statement. Another year's month ("since
+    July 2025") is another period.
+    """
+    return tail is not None and any(
+        named[1] == month_name and named[2] in (None, year)
+        for named in re.finditer(rf"\b({_MONTH})(?: ([0-9]{{4}}))?", tail)
+    )
+
+
 def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     """The figure every statement of the release month states, or None.
 
@@ -825,7 +815,7 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     statement is one of the reader's forms, whole: the measure's
     own subject opening a sentence or clause, the figure, the month named in
     place or left unsaid, and nothing after it but a tail and the full stop
-    (_END). The statements that name the month must all agree, and at least
+    (_end). The statements that name the month must all agree, and at least
     two statements in separate stretches of text must state their figure
     (BLS states each headline figure in the lead paragraph and again in its
     section): dated ones, and the undated ones when every undated statement
@@ -877,6 +867,8 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     for pattern in spec.statements:
         for match in pattern.finditer(text):
             groups = match.groupdict()
+            if _names_the_month(groups.get("tail"), month_name, title[1]):
+                continue
             if groups["month"] is None:
                 undated.append((match.span(), _statement_value(groups)))
                 continue

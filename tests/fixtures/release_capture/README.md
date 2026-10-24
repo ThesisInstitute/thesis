@@ -56,16 +56,23 @@ prints "-" for the one-month changes, as BLS collected no October 2025
 data. The September 2024 Employment Situation, titled "2024 Q03", is not
 in the corpus; its title dates no month, so the reader refuses it.
 
-A tail is made only of the words in `_TAIL_VOCABULARY`, months and
-figures, and every tail in the corpus is. A tail with any other word
-("compared with the U.S. rate of 4.1 percent", "after including
-discouraged workers") makes the sentence no statement, because such words
-can say the statement's own figure is of another basis, scope or period.
-Some captures name the bureau "the U.S. Bureau of Labor Statistics (BLS)"
-before "reported today". The statements that leave their month unsaid
-count only when every one of them states the dated figure. A comparison
-in a tail names what it compares with (a figure, a change, an average or a
-trend); a bare period ("compared with a year earlier") is no tail.
+A tail is one of a few closed forms (`_TAILS` in the parser), chosen by
+the clause the statement ends with, and each of the corpus's 23 tails is
+one of them: a comparison, naming what it compares with (a figure, a
+change, an average or a trend) and then that operand's own period
+("following an average monthly gain of 194,000 over the prior 12
+months"); the trend since another period ("and has shown little change
+since April"); after a rate, the number unemployed or the
+population-control note; after the openings level, "but was down by
+885,000 over the year". Anything else after the month ("compared with a
+year earlier", "compared with the U.S. rate of 4.1 percent", "after
+including discouraged workers", ", and by 120,000 for the month") makes
+the sentence no statement, because it can say the statement's own figure
+is of another basis, scope or period. A comparison or trend naming the
+release month itself is no tail either. Some captures name the bureau "the
+U.S. Bureau of Labor Statistics (BLS)" before "reported today". The
+statements that leave their month unsaid count only when every one of
+them states the dated figure.
 
 In every capture, where the release first names the measure after its
 heading ("unemployment rate", "nonfarm payroll employment", "job

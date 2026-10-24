@@ -19,16 +19,21 @@ Invariants, for every generated release:
   sits;
 - after its month a statement holds only a tail, then optionally "the U.S.
   Bureau of Labor Statistics reported today", then its full stop. A tail
-  opens with a comparison word, "and has ...", "and continued ...", "but
-  was down by ..." or ", and the number of unemployed people", and holds
-  only the reviewed words of a change, an average, a range, a trend or a
-  period, with months and figures; a comparison names what it compares
-  with (a figure, a change, an average or a trend), never a bare period
-  ("compared with a year earlier");
+  is one of a few closed forms, by the clause the statement ends with: a
+  comparison, naming what it compares with (a figure, a change, an average
+  or a trend) and then that operand's own period ("following a gain of
+  166,000 in June", never "compared with a year earlier"); the trend since
+  another period ("and has shown little change since April"); after a
+  rate, the number unemployed or the population-control note; after the
+  openings level, its change over the year. A comparison or trend naming
+  the release month itself is no tail;
 - anything else after the month (another period, subgroup, basis or
   measure: ", a year earlier", "after seasonal adjustment", "the U.S.
-  rate", "after including discouraged workers") makes the sentence no
-  statement, which neither supplies the figure nor refuses the page;
+  rate", "after including discouraged workers", ", and by 120,000 for the
+  month") makes the sentence no statement, which neither supplies the
+  figure nor refuses the page;
+- the parser reads a tail exactly when a second, plain-Python reading of
+  the closed forms does;
 - no tail, whatever other figures, months or years it holds, changes what
   a statement says;
 - a statement that leaves its month unsaid only corroborates: the undated
@@ -475,15 +480,15 @@ def test_a_payroll_measure_other_than_the_total_is_never_a_statement(
         ", before the annual population control adjustments",
         ", after excluding the population control adjustments",
         " and has remained there for adult men since May",
-        # Round-6 review: an abbreviation ends no tail early, and a tail holds
-        # only the reviewed words, so no measure, period or scope follows.
+        # Round-6 review: an abbreviation ends no tail early, and a tail is a
+        # closed form, so no measure, period or scope follows.
         ", compared with the U.S. rate of 4.1 percent on a seasonally adjusted basis",
         ", compared with the U.S. rate of 4.1 percent",
         ", after including discouraged workers in the labor force",
         ", after averaging the latest three months",
         " and is 4.1 percent",
         ", the U.S. Bureau of Labor Statistics reported today on an adjusted basis",
-        # "Before" opens no tail even when every word after it is reviewed:
+        # "Before" opens no tail even when what follows is a comparison's:
         # the figure before a change is another figure.
         ", before a change of 0.3 percentage point",
         ", before the change",
@@ -517,169 +522,948 @@ def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> No
     )
 
 
-# The words a tail may hold, as reviewed. The parser's own list must be
-# exactly this one, so a word is added only with a test.
-_TAIL_VOCABULARY = tuple(
-    (
-        # Articles, prepositions and conjunctions.
-        "a an the of in to by at over since for during per and or either than this "
-        "its thus so far "
-        # A change and its size.
-        "change changes changed unchanged little no net gain gains loss losses "
-        "increase increases increased decrease decreases decreased decline "
-        "declines declined rose fell edged up down percent percentage point "
-        "points million "
-        # An average, a range or a trend.
-        "average monthly narrow range trend trended upward downward movement "
-        "recent showing shown has have had remained continued was were been "
-        "essentially "
-        # A period.
-        "month months year prior past last previous preceding earlier"
-    ).split()
-)
-
-
-def test_the_tail_vocabulary_is_the_reviewed_one() -> None:
-    assert legacy_release_parsers._TAIL_VOCABULARY == _TAIL_VOCABULARY
-
-
-# What a comparison may compare with, as reviewed: the parser's list must be
-# exactly this one.
+# What a comparison may compare with, and the words before it, as reviewed:
+# the parser's lists must be exactly these, so one is added only with a test.
 _COMPARATORS = tuple(
     (
         "change changes gain gains loss losses increase increases decrease "
         "decreases decline declines movement average trend"
     ).split()
 )
+_MODIFIERS = ("little", "no", "net", "average", "monthly")
 
 
-def test_the_comparators_are_the_reviewed_ones() -> None:
+def test_the_comparators_and_modifiers_are_the_reviewed_ones() -> None:
     assert legacy_release_parsers._COMPARATORS == _COMPARATORS
+    assert legacy_release_parsers._MODIFIERS == _MODIFIERS
 
 
-# What a tail may open with, and words it may hold after: other months and
-# years, other figures, the reviewed words. None is capitalized but a month,
-# so no tail holds a statement of its own. A comparison also names what it
-# compares with.
-_COMPARISON_OPENERS = (
-    ", following",
-    " following",
-    ", after",
-    ", compared with",
-    " compared with",
-    ", similar to",
-    ", in line with",
-    ", close to",
-    ", about the same as",
-    ", the same as",
-    ", up from",
-    ", down from",
-    ", higher than",
-    ", lower than",
-    ", less than",
-    ", more than",
-    ", above",
-    ", below",
+# The tails, written a second time and independently of the parser's
+# regular expressions: plain Python over words. A tail is one of these
+# closed forms, by the clause its statement ends with.
+# - A comparison, after any clause: an opener; what it compares with (a
+#   figure that is not a year, or a change, an average or a trend, after an
+#   article, "showing" and modifiers, with an "of" figure); then that
+#   operand's own period or periods, with a change in parentheses. A second
+#   operand, with its own period, may follow "and".
+# - The trend since another period, after any clause: " and has shown
+#   little change since April", " and has remained in a narrow range of 4.0
+#   percent to 4.2 percent since May 2024", " and continued its recent
+#   upward trend".
+# - After a rate: ", and the number of unemployed people ..." and the
+#   January note on the population controls, whole.
+# - After the openings level: " but was down by 885,000 over the year".
+# A comparison or trend that names the release month itself (alone or in
+# the release year) is no tail. "Reported today" may follow any tail.
+_OPENERS = tuple(
+    tuple(opener.split())
+    for opener in (
+        "following",
+        "after",
+        "compared with",
+        "similar to",
+        "in line with",
+        "close to",
+        "the same as",
+        "up from",
+        "down from",
+        "higher than",
+        "lower than",
+        "less than",
+        "more than",
+        "above",
+        "below",
+    )
 )
-_TAIL_OPENERS = (
-    *_COMPARISON_OPENERS,
-    " and has",
-    " and have",
-    " and had",
-    " and continued",
-    " and remained",
-    " but has",
-    " but was down by",
-    " and was up by",
-    " and were down by",
-    ", and the number of unemployed people",
-    ", while the number of unemployed persons",
+_ADVERBS = ("roughly", "about", "nearly", "slightly", "somewhat", "well", "much", "far")
+_PRIOR = ("prior", "previous", "preceding", "past", "last")
+_UNITS = (("percent",), ("million",), ("percentage", "point"), ("percentage", "points"))
+_RISES = ("increased", "decreased", "rose", "fell", "declined")
+_REPORTED_WORDS = ("the", "U.S.", "Bureau", "of", "Labor", "Statistics")
+_POPULATION_WORDS = (
+    tuple(
+        "after accounting for the annual adjustments to the population controls".split()
+    ),
+    tuple("after accounting for annual population control adjustments".split()),
 )
-_TAIL_WORDS = (
-    *MONTHS,
-    "2024",
-    "2025",
-    "4.2 percent",
-    "0.3 percentage point",
-    "(+36,000)",
-    "(-41,000)",
-    "166,000",
-    "a year earlier",
-    "over the year",
-    "over the prior 12 months",
-    "the average monthly gain",
-    "a narrow range of 4.0 percent to 4.2 percent",
-    "thus far this year",
-    "-13,000",
-    "12",
-    *_TAIL_VOCABULARY,
+# Words: a parenthesized word, a figure, a comma, a lone parenthesis, or a
+# run of other characters. Every character but a space is in one.
+_TOKEN = re.compile(
+    r"\([^()\s]*\)|[+\-−]?[0-9](?:[0-9]|[,.](?=[0-9]))*|,|[()]|[^\s,()]+"
 )
 
 
-# What a comparison names: a figure, or one of the comparators.
-_COMPARED_WITH = ("4.2 percent", "(+36,000)", "166,000", "-13,000", *_COMPARATORS)
+def _words_of(tail: str) -> list[str]:
+    return _TOKEN.findall(tail)
+
+
+def _render(words: list[str]) -> str:
+    return "".join("," if word == "," else f" {word}" for word in words)
+
+
+def _is_figure(word: str) -> bool:
+    return re.fullmatch(r"[+\-−]?[0-9](?:[0-9]|[,.](?=[0-9]))*", word) is not None
+
+
+def _is_year(word: str) -> bool:
+    return re.fullmatch(r"(?:19|20)[0-9]{2}", word) is not None
+
+
+def _at(words: list[str], i: int, *options: tuple[str, ...]) -> set[int]:
+    """Where each of `options`, a run of words, ends if it starts at i."""
+    return {
+        i + len(option)
+        for option in options
+        if tuple(words[i : i + len(option)]) == option
+    }
+
+
+def _then(words: list[str], starts: set[int], *options: tuple[str, ...]) -> set[int]:
+    return {end for start in starts for end in _at(words, start, *options)}
+
+
+def _maybe(words: list[str], starts: set[int], *options: tuple[str, ...]) -> set[int]:
+    return starts | _then(words, starts, *options)
+
+
+def _figure_at(words: list[str], starts: set[int], *, year: bool = True) -> set[int]:
+    return {
+        start + 1
+        for start in starts
+        if start < len(words)
+        and _is_figure(words[start])
+        and (year or not _is_year(words[start]))
+    }
+
+
+def _operand(words: list[str], i: int) -> set[int]:
+    figure = _figure_at(words, {i}, year=False)
+    ends = _maybe(words, figure, *_UNITS)
+    starts = _maybe(words, {i}, ("a",), ("an",), ("the",))
+    starts = _maybe(words, starts, ("showing",))
+    while True:
+        more = starts | _then(words, starts, *((m,) for m in _MODIFIERS))
+        if more == starts:
+            break
+        starts = more
+    heads = _then(words, starts, *((c,) for c in _COMPARATORS))
+    of = _figure_at(words, _then(words, heads, ("of",)), year=False)
+    return ends | heads | _maybe(words, of, *_UNITS)
+
+
+def _period(words: list[str], i: int) -> set[int]:
+    after = _at(words, i, ("in",), ("since",))
+    months = {s + 1 for s in after if s < len(words) and words[s] in MONTHS}
+    years = {s + 1 for s in months | after if s < len(words) and _is_year(words[s])}
+    ends = months | years
+    ends |= _at(words, i, *(("in", "the", prior, "month") for prior in _PRIOR))
+    for preposition in ("over", "for", "during", "in"):
+        for prior in _PRIOR:
+            count = _at(words, i, (preposition, "the", prior))
+            ends |= _then(
+                words,
+                {
+                    s + 1
+                    for s in count
+                    if s < len(words) and re.fullmatch(r"[1-9][0-9]?", words[s])
+                },
+                ("months",),
+            )
+    ends |= _at(
+        words, i, ("over", "the", "year"), *(("over", "the", p, "year") for p in _PRIOR)
+    )
+    ends |= _at(
+        words, i, ("a", "year", "earlier"), ("a", "month", "earlier"), ("per", "month")
+    )
+    ends |= _at(
+        words, i, ("so", "far", "this", "year"), ("thus", "far", "this", "year")
+    )
+    return ends
+
+
+def _parenthesized(words: list[str], i: int) -> set[int]:
+    word = words[i] if i < len(words) else ""
+    return (
+        {i + 1}
+        if word[:1] == "(" and word[-1:] == ")" and _is_figure(word[1:-1])
+        else set()
+    )
+
+
+def _periods(
+    words: list[str], i: int, *, changes: bool = True, least: int = 1
+) -> set[int]:
+    starts = {i} | (_parenthesized(words, i) if changes else set())
+    ends: set[int] = set()
+    frontier = {e for s in starts for e in _period(words, s)} if least else set(starts)
+    while frontier:
+        ends |= frontier
+        frontier = {e for s in frontier for e in _period(words, s)}
+        if changes:
+            frontier |= {e for s in ends for e in _parenthesized(words, s)}
+        frontier -= ends
+    return ends
+
+
+def _comparison(words: list[str], i: int) -> set[int]:
+    starts = _maybe(words, {i}, (",",))
+    starts = _maybe(words, starts, *((adverb,) for adverb in _ADVERBS))
+    operands = {e for s in _then(words, starts, *_OPENERS) for e in _operand(words, s)}
+    first = {e for s in operands for e in _periods(words, s)}
+    second = {e for s in _then(words, first, ("and",)) for e in _operand(words, s)}
+    return first | {e for s in second for e in _periods(words, s)}
+
+
+def _amount(words: list[str], starts: set[int]) -> set[int]:
+    return _maybe(words, _figure_at(words, starts), ("percent",), ("million",))
+
+
+def _trend(words: list[str], i: int) -> set[int]:
+    joined = _at(words, i, ("and",), ("but",))
+    has = _then(words, joined, ("has",), ("have",), ("had",))
+    bodies = _then(
+        words,
+        has,
+        ("shown", "little", "change"),
+        ("shown", "little", "movement"),
+        ("shown", "little", "net", "change"),
+        ("shown", "little", "net", "movement"),
+        ("changed", "little"),
+        ("been", "essentially", "unchanged"),
+        ("been", "little", "changed"),
+        ("been", "unchanged"),
+        ("trended", "up"),
+        ("trended", "down"),
+        ("remained", "essentially", "unchanged"),
+        ("remained", "little", "changed"),
+        ("remained", "unchanged"),
+    )
+    ranged = _amount(
+        words, _then(words, has, ("remained", "in", "a", "narrow", "range", "of"))
+    )
+    bodies |= _amount(words, _then(words, ranged, ("to",)))
+    either = _amount(words, _then(words, has, ("remained", "at", "either")))
+    bodies |= _amount(words, _then(words, either, ("or",)))
+    ends = {e for s in bodies for e in _periods(words, s)}
+    continued = _then(words, joined, ("continued",))
+    trends = _then(
+        words,
+        _maybe(words, _then(words, continued, ("its",), ("the",)), ("recent",)),
+        ("upward", "trend"),
+        ("downward", "trend"),
+    ) | _then(words, continued, ("to", "trend", "up"), ("to", "trend", "down"))
+    return ends | {
+        e for s in trends for e in _periods(words, s, changes=False, least=0)
+    }
+
+
+def _over_the_year(words: list[str], i: int) -> set[int]:
+    changed = _then(
+        words,
+        _at(words, i, ("and",), ("but",)),
+        *((verb, way, "by") for verb in ("was", "were") for way in ("up", "down")),
+    )
+    counted = _maybe(words, _figure_at(words, changed), ("million",))
+    return _then(words, counted, ("over", "the", "year"))
+
+
+def _unemployed(words: list[str], i: int) -> set[int]:
+    def counted(starts: set[int]) -> set[int]:
+        return _maybe(words, _figure_at(words, starts), ("million",))
+
+    subject = _then(
+        words,
+        _at(words, i, (",", "and"), (",", "while")),
+        ("the", "number", "of", "unemployed", "people"),
+        ("the", "number", "of", "unemployed", "persons"),
+    )
+    subject |= _then(words, counted(_then(words, subject, (",", "at"))), (",",))
+    verbs = _then(
+        words,
+        subject,
+        ("changed", "little"),
+        *(
+            (be, *state)
+            for be in ("was", "were")
+            for state in (
+                ("little", "changed"),
+                ("essentially", "unchanged"),
+                ("unchanged",),
+            )
+        ),
+    )
+    moved = _then(
+        words,
+        subject,
+        *((rise,) for rise in _RISES),
+        ("edged", "up"),
+        ("edged", "down"),
+    )
+    verbs |= moved | counted(_then(words, moved, ("by",)))
+    verbs |= counted(_then(words, verbs, ("at",), ("to",)))
+    return verbs | {
+        s + 1
+        for s in _then(words, verbs, ("in",))
+        if s < len(words) and words[s] in MONTHS
+    }
+
+
+def _names_the_month(words: list[str], month: str, year: str) -> bool:
+    return any(
+        word == month
+        and (i + 1 == len(words) or words[i + 1] == year or not _is_year(words[i + 1]))
+        for i, word in enumerate(words)
+    )
+
+
+def _reference(tail: str, clause: str, month: str = "July", year: str = "2026") -> bool:
+    """Whether `tail` may end a statement whose last clause is `clause`."""
+    words = _words_of(tail)
+    ends = {0}
+    compared = (_comparison(words, 0) | _trend(words, 0)) if words else set()
+    ends |= {e for e in compared if not _names_the_month(words[:e], month, year)}
+    if clause == "rate":
+        ends |= _unemployed(words, 0) | _at(
+            words, 0, *((",", *w) for w in _POPULATION_WORDS)
+        )
+    if clause == "openings":
+        ends |= _over_the_year(words, 0)
+    reported = _then(words, ends, (",", *_REPORTED_WORDS))
+    reported = _then(words, _maybe(words, reported, ("(BLS)",)), ("reported", "today"))
+    return len(words) in ends | reported
+
+
+def _admitted(tail: str, clause: str) -> bool:
+    """Whether the parser reads a July statement whose last clause is
+    `clause` and ends in `tail`: beside two statements of the headline, it
+    then disagrees with them, and the page refuses."""
+    if clause == "rate":
+        title, head = _EMPSIT_JULY
+        headline = (
+            "The unemployment rate was 4.1 percent in July. "
+            "The unemployment rate changed little at 4.1 percent in July. "
+        )
+        probe = f"The unemployment rate was 4.8 percent in July{tail}."
+        parser_id, reading = "empsit_unemployment_rate", ("2026-07", 4.1)
+    elif clause == "payroll":
+        title, head = _EMPSIT_JULY
+        headline = (
+            "Total nonfarm payroll employment rose by 123,000 in July. "
+            "Total nonfarm payroll employment changed little in July (+123,000). "
+        )
+        probe = f"Total nonfarm payroll employment rose by 999,000 in July{tail}."
+        parser_id, reading = "empsit_payroll_change", ("2026-07", 123.0)
+    else:
+        title = "Job Openings and Labor Turnover Summary - 2026 M07 Results"
+        head = "JOB OPENINGS AND LABOR TURNOVER -- JULY 2026\n"
+        headline = (
+            "The number of job openings was 7.4 million in July. "
+            "The number of job openings was little changed at 7.4 million in July. "
+        )
+        probe = f"The number of job openings was 9.9 million in July{tail}."
+        parser_id, reading = "jolts_job_openings", ("2026-07", 7.4)
+    got = parse_release(_page(title, f"{head}{headline}{probe}"), parser_id)
+    assert got in (None, reading), (tail, got)
+    return got is None
+
+
+_EMPSIT_JULY = (
+    "Employment Situation Summary - 2026 M07 Results",
+    "THE EMPLOYMENT SITUATION -- JULY 2026\n",
+)
+_CLAUSES = ("rate", "payroll", "openings")
+
+
+def _check(tail: str, clause: str, expected: bool) -> None:
+    assert _reference(tail, clause) is expected, (tail, clause)
+    assert _admitted(tail, clause) is expected, (tail, clause)
+
+
+# Months and years another period may name in a July 2026 release.
+_OTHER_MONTHS = tuple(month for month in MONTHS if month != "July")
+_FIGURES = ("4.2", "166,000", "-13,000", "−41,000", "+36,000", "7.4", "885,000")
 
 
 @st.composite
-def _tail(draw: st.DrawFn) -> str:
-    opener = draw(st.sampled_from(_TAIL_OPENERS))
-    words = draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=12))
-    if opener in _COMPARISON_OPENERS:
-        at = draw(st.integers(0, len(words)))
-        words.insert(at, draw(st.sampled_from(_COMPARED_WITH)))
-    # Words follow one another after a space or a comma.
-    return opener + "".join(draw(st.sampled_from((" ", ", "))) + word for word in words)
+def _operand_words(draw: st.DrawFn) -> list[str]:
+    if draw(st.booleans()):
+        return [draw(st.sampled_from(_FIGURES)), *draw(st.sampled_from(((), *_UNITS)))]
+    words = list(draw(st.sampled_from(((), ("a",), ("an",), ("the",)))))
+    words += draw(st.sampled_from(((), ("showing",))))
+    words += draw(st.lists(st.sampled_from(_MODIFIERS), max_size=3))
+    words.append(draw(st.sampled_from(_COMPARATORS)))
+    if draw(st.booleans()):
+        words += [
+            "of",
+            draw(st.sampled_from(_FIGURES)),
+            *draw(st.sampled_from(((), *_UNITS))),
+        ]
+    return words
+
+
+@st.composite
+def _period_words(draw: st.DrawFn) -> list[str]:
+    prior = draw(st.sampled_from(_PRIOR))
+    month = draw(st.sampled_from(_OTHER_MONTHS))
+    return list(
+        draw(
+            st.sampled_from(
+                (
+                    ("in", month),
+                    ("since", month),
+                    ("in", month, "2024"),
+                    ("since", "July", "2025"),
+                    ("in", "2025"),
+                    ("in", "the", prior, "month"),
+                    (
+                        draw(st.sampled_from(("over", "for", "during", "in"))),
+                        "the",
+                        prior,
+                        "12",
+                        "months",
+                    ),
+                    ("over", "the", "year"),
+                    ("over", "the", prior, "year"),
+                    ("a", "year", "earlier"),
+                    ("a", "month", "earlier"),
+                    ("per", "month"),
+                    (draw(st.sampled_from(("so", "thus"))), "far", "this", "year"),
+                )
+            )
+        )
+    )
+
+
+@st.composite
+def _periods_words(draw: st.DrawFn) -> list[str]:
+    words = ["(+36,000)"] if draw(st.integers(0, 4)) == 0 else []
+    for _ in range(draw(st.integers(1, 3))):
+        words += draw(_period_words())
+        if draw(st.integers(0, 4)) == 0:
+            words.append(
+                draw(st.sampled_from(("(+36,000)", "(-133,000)", "(−133,000)")))
+            )
+    return words
+
+
+@st.composite
+def _tail_words(draw: st.DrawFn, clause: str) -> list[str]:
+    """A tail in one of the closed forms for `clause`, as words."""
+    forms = ["comparison", "trend"]
+    forms += {
+        "rate": ["unemployed", "population"],
+        "payroll": [],
+        "openings": ["year"],
+    }[clause]
+    form = draw(st.sampled_from(forms))
+    if form == "comparison":
+        words = [*draw(st.sampled_from(((), (",",))))]
+        words += draw(st.sampled_from(((), *((adverb,) for adverb in _ADVERBS))))
+        words += draw(st.sampled_from(_OPENERS))
+        words += draw(_operand_words()) + draw(_periods_words())
+        if draw(st.integers(0, 3)) == 0:
+            words += ["and", *draw(_operand_words()), *draw(_periods_words())]
+    elif form == "trend":
+        amount = [
+            draw(st.sampled_from(_FIGURES)),
+            *draw(st.sampled_from(((), ("percent",), ("million",)))),
+        ]
+        other = [draw(st.sampled_from(_FIGURES)), "percent"]
+        words = [draw(st.sampled_from(("and", "but")))]
+        if draw(st.integers(0, 3)):
+            words.append(draw(st.sampled_from(("has", "have", "had"))))
+            words += draw(
+                st.sampled_from(
+                    (
+                        ("shown", "little", "change"),
+                        ("shown", "little", "net", "movement"),
+                        ("changed", "little"),
+                        ("been", "essentially", "unchanged"),
+                        ("been", "little", "changed"),
+                        ("trended", draw(st.sampled_from(("up", "down")))),
+                        ("remained", "unchanged"),
+                        (
+                            "remained",
+                            "in",
+                            "a",
+                            "narrow",
+                            "range",
+                            "of",
+                            *amount,
+                            "to",
+                            *other,
+                        ),
+                        ("remained", "at", "either", *amount, "or", *other),
+                    )
+                )
+            )
+            words += draw(_periods_words())
+        else:
+            words += ["continued"]
+            words += draw(
+                st.sampled_from(
+                    (
+                        ("its", "recent", "upward", "trend"),
+                        ("the", "downward", "trend"),
+                        ("to", "trend", draw(st.sampled_from(("up", "down")))),
+                    )
+                )
+            )
+            for _ in range(draw(st.integers(0, 2))):
+                words += draw(_period_words())
+    elif form == "unemployed":
+        counted = [
+            draw(st.sampled_from(_FIGURES)),
+            *draw(st.sampled_from(((), ("million",)))),
+        ]
+        words = [
+            ",",
+            draw(st.sampled_from(("and", "while"))),
+            "the",
+            "number",
+            "of",
+            "unemployed",
+        ]
+        words.append(draw(st.sampled_from(("people", "persons"))))
+        if draw(st.booleans()):
+            words += [",", "at", *counted, ","]
+        verb = draw(
+            st.sampled_from(
+                (
+                    ("changed", "little"),
+                    ("was", "little", "changed"),
+                    ("were", "essentially", "unchanged"),
+                    ("increased", "by", *counted),
+                    ("edged", "down"),
+                    ("fell",),
+                )
+            )
+        )
+        words += verb
+        if draw(st.booleans()):
+            words += [draw(st.sampled_from(("at", "to"))), *counted]
+        if draw(st.booleans()):
+            words += ["in", draw(st.sampled_from(MONTHS))]
+    elif form == "population":
+        words = [",", *draw(st.sampled_from(_POPULATION_WORDS))]
+    else:
+        words = [
+            draw(st.sampled_from(("and", "but"))),
+            draw(st.sampled_from(("was", "were"))),
+        ]
+        words += [
+            draw(st.sampled_from(("up", "down"))),
+            "by",
+            draw(st.sampled_from(_FIGURES)),
+        ]
+        words += [*draw(st.sampled_from(((), ("million",)))), "over", "the", "year"]
+    if draw(st.integers(0, 3)) == 0:
+        words += [
+            ",",
+            *_REPORTED_WORDS,
+            *draw(st.sampled_from(((), ("(BLS)",)))),
+            "reported",
+            "today",
+        ]
+    return words
 
 
 @settings(max_examples=300, deadline=None)
-@given(tails=st.lists(st.one_of(st.just(""), _tail()), min_size=4, max_size=4))
-def test_no_tail_changes_what_a_statement_says(tails: list[str]) -> None:
+@given(data=st.data(), clause=st.sampled_from(_CLAUSES))
+def test_every_tail_of_the_closed_forms_is_read_by_both_readings(
+    data: st.DataObject, clause: str
+) -> None:
+    tail = _render(data.draw(_tail_words(clause)))
+    _check(tail, clause, True)
+
+
+# Words a near-miss may gain: the forms' own, others BLS prints, and those
+# that would speak to the statement's own basis, scope, measure or period.
+_NEAR_WORDS = (
+    ",",
+    "and",
+    "or",
+    "but",
+    "by",
+    "of",
+    "in",
+    "for",
+    "the",
+    "a",
+    "an",
+    "over",
+    "since",
+    "month",
+    "months",
+    "year",
+    "earlier",
+    "prior",
+    "previous",
+    "per",
+    "has",
+    "was",
+    "is",
+    "were",
+    "percent",
+    "million",
+    "change",
+    "gain",
+    "average",
+    "monthly",
+    "little",
+    "no",
+    "net",
+    "trend",
+    "range",
+    "to",
+    "at",
+    "either",
+    "July",
+    "June",
+    "2025",
+    "2026",
+    "12",
+    "three",
+    "166,000",
+    "120,000",
+    "4.1",
+    "(+36,000)",
+    "(BLS)",
+    "U.S.",
+    "seasonal",
+    "adjustment",
+    "adjusted",
+    "rate",
+    "including",
+    "workers",
+    "revised",
+    "latest",
+    "after",
+    "following",
+    "compared",
+    "with",
+    "same",
+    "unemployed",
+    "people",
+    "showing",
+    "today",
+)
+
+
+@st.composite
+def _near_miss(draw: st.DrawFn, clause: str) -> str:
+    """A tail of the closed forms with one to three word edits, or the
+    start of one joined to the end of another (of any clause's forms)."""
+    words = draw(_tail_words(clause))
+    if draw(st.booleans()):
+        other = draw(_tail_words(draw(st.sampled_from(_CLAUSES))))
+        cut = draw(st.integers(0, len(words)))
+        words = words[:cut] + other[draw(st.integers(0, len(other))) :]
+    else:
+        words = _edited(draw, words)
+    # Four digits right after the month are the statement's own year ("in
+    # July 2025", which refuses the page), not a tail.
+    assume(not re.match(r" [0-9]{4}", _render(words)))
+    return _render(words)
+
+
+def _edited(draw: st.DrawFn, words: list[str]) -> list[str]:
+    for _ in range(draw(st.integers(1, 3))):
+        at = draw(st.integers(0, len(words)))
+        edit = draw(st.sampled_from(("insert", "delete", "replace")))
+        if edit == "insert" or not words:
+            words.insert(at, draw(st.sampled_from(_NEAR_WORDS)))
+        elif edit == "delete":
+            del words[min(at, len(words) - 1)]
+        else:
+            words[min(at, len(words) - 1)] = draw(st.sampled_from(_NEAR_WORDS))
+    return words
+
+
+@settings(max_examples=1000, deadline=None)
+@given(data=st.data(), clause=st.sampled_from(_CLAUSES))
+def test_the_parser_reads_a_tail_exactly_when_the_closed_forms_do(
+    data: st.DataObject, clause: str
+) -> None:
+    """Round-8 review: the parser's tails are the closed forms, written twice.
+
+    Tails a few word edits away from a closed form (an added "and by
+    120,000", a dropped operand, another month, a basis word), and closed
+    forms cut and joined, are read by the parser exactly when the
+    plain-Python reading above reads them.
+    """
+    tail = data.draw(_near_miss(clause))
+    expected = _reference(tail, clause)
+    event(f"{clause}: {'a tail' if expected else 'no tail'}")
+    assert _admitted(tail, clause) is expected, (tail, clause)
+
+
+@settings(max_examples=300, deadline=None)
+@given(
+    rates=st.lists(_tail_words("rate"), min_size=2, max_size=2),
+    payrolls=st.lists(_tail_words("payroll"), min_size=2, max_size=2),
+)
+def test_no_tail_changes_what_a_statement_says(
+    rates: list[list[str]], payrolls: list[list[str]]
+) -> None:
     """Round-4 review: a continuation is a tail, and none of it is read."""
-    _check_tails(tails)
+    _check_tails([_render(words) for words in (*rates, *payrolls)])
 
 
-@pytest.mark.parametrize("word", _TAIL_VOCABULARY)
-def test_each_reviewed_word_may_be_part_of_a_tail(word: str) -> None:
-    _check_tails(
-        [
-            f", following {word} (+36,000)",
-            f" and has {word}",
-            "",
-            f", below 4.2 percent {word}",
-        ]
-    )
-    # Each tail may also end "reported today", as a lead's does.
-    reported = ", the U.S. Bureau of Labor Statistics (BLS) reported today"
-    _check_tails(
-        [f", following (+36,000) {word}{reported}", "", "", f" and has {word}"]
-    )
+# Every tail in the 54 real captures (corpus/tails.py), by its clause.
+_REAL_TAILS = (
+    ("payroll", ", the U.S. Bureau of Labor Statistics reported today"),
+    (
+        "payroll",
+        " and has shown little change since April, the U.S. Bureau of Labor Statistics"
+        " (BLS) reported today",
+    ),
+    ("payroll", " but has shown little change since April"),
+    ("payroll", ", below the average monthly gain of 215,000 over the prior 12 months"),
+    (
+        "payroll",
+        ", following an average monthly gain of 194,000 over the prior 12 months",
+    ),
+    ("payroll", ", following little change in the prior month (+36,000)"),
+    ("payroll", ", similar to the average monthly gain of 166,000 in 2024"),
+    (
+        "payroll",
+        ", higher than the average monthly gain of 158,000 over the prior 12 months",
+    ),
+    (
+        "payroll",
+        ", roughly in line with the average monthly gain of 152,000 over the prior 12"
+        " months",
+    ),
+    (
+        "payroll",
+        ", in line with the average monthly gain of 146,000 over the prior 12 months",
+    ),
+    ("payroll", ", following an increase in January (+126,000)"),
+    ("payroll", ", following a decrease in February (-133,000)"),
+    ("payroll", ", after showing little net change over the prior 12 months"),
+    ("payroll", ", similar to the gain of 179,000 in April"),
+    (
+        "payroll",
+        ", roughly in line with the average monthly change over the prior 12 months"
+        " (+36,000)",
+    ),
+    (
+        "rate",
+        " and has remained in a narrow range of 4.0 percent to 4.2 percent since May"
+        " 2024",
+    ),
+    (
+        "rate",
+        ", and the number of unemployed people increased by 352,000 to 7.2 million",
+    ),
+    (
+        "rate",
+        ", and the number of unemployed people, at 7.1 million, changed little in"
+        " August",
+    ),
+    ("rate", ", and the number of unemployed people was little changed at 7.0 million"),
+    ("rate", ", and the number of unemployed people changed little at 7.4 million"),
+    (
+        "rate",
+        ", after accounting for the annual adjustments to the population controls",
+    ),
+    ("openings", " but was down by 885,000 over the year"),
+    ("openings", " and was down by 966,000 over the year"),
+)
+
+
+@pytest.mark.parametrize(("clause", "tail"), _REAL_TAILS)
+def test_every_real_tail_is_a_closed_form(clause: str, tail: str) -> None:
+    _check(tail, clause, True)
+
+
+@pytest.mark.parametrize(
+    "tail",
+    (
+        # Each opener, after a comma or not, and after an adverb.
+        *(f", {' '.join(opener)} a gain in June" for opener in _OPENERS),
+        *(f" {' '.join(opener)} 4.0 percent a year earlier" for opener in _OPENERS),
+        *(f", {adverb} similar to the average in 2025" for adverb in _ADVERBS),
+        # Each modifier, "showing", each article and unit.
+        *(f", following {modifier} change in June" for modifier in _MODIFIERS),
+        ", after showing little net change over the prior 12 months",
+        ", following a decrease in June",
+        ", following an increase in June",
+        *(f", compared with 0.3 {' '.join(unit)} in June" for unit in _UNITS),
+        *(f", compared with a gain of 0.3 {' '.join(unit)} in June" for unit in _UNITS),
+        # Each period, and a change in parentheses before or after one.
+        ", following a gain in May 2024",
+        ", following a gain since June",
+        ", following a gain since 2024",
+        ", following a gain in 2025",
+        *(f", following a gain in the {prior} month" for prior in _PRIOR),
+        *(
+            f", following a gain {preposition} the {prior} 12 months"
+            for preposition in ("over", "for", "during", "in")
+            for prior in _PRIOR
+        ),
+        ", following a gain over the year",
+        *(f", following a gain over the {prior} year" for prior in _PRIOR),
+        ", following a gain a year earlier",
+        ", following a gain a month earlier",
+        ", following an average of 168,000 per month over the prior 12 months",
+        ", following a gain so far this year",
+        ", following a gain thus far this year",
+        ", following little change (+36,000) in June",
+        ", following little change in June (−36,000)",
+        ", following gains of 34,000 in May and 41,000 in June",
+        ", following an increase in May and a decrease in June",
+        # A figure that only begins like a year is a figure.
+        ", following a gain of 20251 in June",
+        ", up from 1999.5 percent in June",
+    ),
+)
+def test_each_part_of_a_comparison_may_be_its_own(tail: str) -> None:
+    for clause in _CLAUSES:
+        _check(tail, clause, True)
 
 
 @pytest.mark.parametrize("comparator", _COMPARATORS)
 def test_each_comparator_may_be_what_a_comparison_names(comparator: str) -> None:
-    _check_tails(
-        [
-            f", compared with the {comparator} a year earlier",
-            f", following the {comparator} in June",
-            f" up from the {comparator} over the prior 12 months",
-            f", below the {comparator} of the previous year",
-        ]
-    )
+    for tail in (
+        f", compared with the {comparator} a year earlier",
+        f", following the {comparator} in June",
+        f" up from the {comparator} over the prior 12 months",
+        f", below the {comparator} of 166,000 over the previous year",
+    ):
+        _check(tail, "payroll", True)
+    # Not a period: the comparator names what is compared with.
+    _check(f", following the {comparator}", "payroll", False)
 
 
-@pytest.mark.parametrize("opener", _COMPARISON_OPENERS)
 @pytest.mark.parametrize(
-    "period",
-    ("a year earlier", "the previous year", "the prior 12 months", "June", "2025"),
+    "tail",
+    (
+        " and has shown little change since April",
+        " but has shown little movement since January",
+        " and have shown little net change since April",
+        " and had changed little since April",
+        " and has been essentially unchanged since April",
+        " and has been little changed since April",
+        " and has been unchanged since April",
+        " and has trended up over the prior 12 months",
+        " and has trended down since 2024",
+        " and has remained essentially unchanged since April",
+        " and has remained little changed since April",
+        " and has remained unchanged since April",
+        " and has remained in a narrow range of 4.0 percent to 4.2 percent since May"
+        " 2024",
+        " and has remained at either 4.1 percent or 4.2 percent since June",
+        " and continued its recent upward trend",
+        " and continued the downward trend over the year",
+        " but continued to trend up",
+        " and continued to trend down since June",
+    ),
 )
-def test_a_comparison_with_a_bare_period_is_no_tail(opener: str, period: str) -> None:
+def test_each_trend_may_be_its_own(tail: str) -> None:
+    for clause in _CLAUSES:
+        _check(tail, clause, True)
+
+
+@pytest.mark.parametrize(
+    ("tail", "clauses"),
+    (
+        (", while the number of unemployed persons edged up by 0.1 million", ("rate",)),
+        (", and the number of unemployed people were essentially unchanged", ("rate",)),
+        (
+            ", and the number of unemployed people fell to 6.9 million in July",
+            ("rate",),
+        ),
+        (", after accounting for annual population control adjustments", ("rate",)),
+        (" but were up by 0.3 million over the year", ("openings",)),
+    ),
+)
+def test_a_tail_about_another_measure_follows_only_its_own_clause(
+    tail: str, clauses: tuple[str, ...]
+) -> None:
+    for clause in _CLAUSES:
+        _check(tail, clause, clause in clauses)
+
+
+@pytest.mark.parametrize(
+    "tail",
+    (
+        # Round-8 review, finding 1: a later clause restating the figure.
+        ", compared with a year earlier, and by 120,000 for the month",
+        ", compared with a gain a year earlier, and by 120,000 for the month",
+        ", following a gain in June, and by 120,000 for the month",
+        ", following a gain in June and by 120,000 for the month",
+        ", following a gain in June and 120,000 for the month",
+        ", following a gain in June, and 120,000 over the month",
+        ", following a gain in June or 120,000 over the month",
+        " and has increased by 120,000 for the month",
+        " and has shown little change since April, and by 120,000 for the month",
+        " and was up by 120,000 over the month",
+        " and was up by 120,000 over the year",
+        ", and was 120,000 over the month",
+        # A comparison with no operand, or no period of its own.
+        ", compared with a year earlier",
+        " compared with the previous year",
+        ", up from a year earlier",
+        ", compared with 120,000",
+        ", following a gain",
+        ", following little change (+36,000)",
+        ", compared with 2025",
+        ", following 12 months",
+        # Round-8 review, finding 2: a figure the test generator ran into a
+        # count of months.
+        ", following 166,000 month",
+        ", following 166,000 months",
+        ", following January January January 166,000 month",
+        # A separating comma is no part of a figure.
+        ", compared with 120,000, in June",
+        ", following a gain of 120,000, in June",
+        # The release month itself, or in the release year.
+        ", compared with a gain of 120,000 in July",
+        ", compared with a gain of 120,000 in July 2026",
+        ", following a gain in June and 120,000 in July",
+        " and has shown little change since July",
+    ),
+)
+def test_a_tail_restating_the_statements_own_figure_is_no_tail(tail: str) -> None:
+    for clause in ("rate", "payroll"):
+        _check(tail, clause, False)
+    _check_requalified(tail)
+
+
+def test_another_years_month_is_another_period() -> None:
+    for tail in (
+        ", compared with a gain of 120,000 in July 2025",
+        " and has remained in a narrow range of 4.0 percent to 4.2 percent since July"
+        " 2025",
+    ):
+        _check(tail, "payroll", True)
+
+
+@pytest.mark.parametrize("opener", _OPENERS)
+@pytest.mark.parametrize(
+    ("period", "named"),
+    (
+        ("a year earlier", "a year earlier"),
+        ("the previous year", "over the previous year"),
+        ("the prior 12 months", "over the prior 12 months"),
+        ("June", "in June"),
+        ("2025", "in 2025"),
+    ),
+)
+def test_a_comparison_with_a_bare_period_is_no_tail(
+    opener: tuple[str, ...], period: str, named: str
+) -> None:
     """Round-7 review, finding 1: "compared with a year earlier" makes the
     statement's own figure a change over the year."""
-    _check_requalified(f"{opener} {period}")
-    # Naming what it compares with, the same comparison is a tail.
-    _check_tails(
-        [f"{opener} 4.0 percent {period}", "", f"{opener} a gain {period}", ""]
-    )
+    _check_requalified(f", {' '.join(opener)} {period}")
+    # Naming what it compares with, and that operand's period, it is a tail.
+    for tail in (
+        f", {' '.join(opener)} 4.0 percent {named}",
+        f", {' '.join(opener)} a gain {named}",
+    ):
+        _check(tail, "payroll", True)
 
 
 @pytest.mark.parametrize(
@@ -688,9 +1472,17 @@ def test_a_comparison_with_a_bare_period_is_no_tail(opener: str, period: str) ->
 )
 def test_a_tail_figure_may_carry_any_printed_sign(figure: str) -> None:
     # A minus sign may be printed as a hyphen or as U+2212.
-    _check_tails(
-        ["", "", f", up from {figure} in June", f", following {figure} in June"]
-    )
+    if figure.startswith("("):
+        tails = [
+            f", following little change in June {figure}",
+            f", following a gain {figure} in June",
+        ]
+    else:
+        tails = [
+            f", up from {figure} in June",
+            f", following a change of {figure} in June",
+        ]
+    _check_tails(["", "", *tails])
 
 
 @pytest.mark.parametrize(
@@ -715,6 +1507,8 @@ def test_the_population_control_tail_may_follow_a_rate_statement(tail: str) -> N
 
 
 def _check_tails(tails: list[str]) -> None:
+    """Rate statements ending in the first two tails, payroll statements in
+    the last two: each reader returns its figure."""
     title = "Employment Situation Summary - 2026 M07 Results"
     pre = (
         "THE EMPLOYMENT SITUATION -- JULY 2026\n"
@@ -730,7 +1524,7 @@ def _check_tails(tails: list[str]) -> None:
 
 
 # What a tail may not speak to: the statement's own basis, scope, measure,
-# period or revision. Each phrase holds a word outside the tail vocabulary.
+# period or revision. No closed form holds any of these.
 _REQUALIFIED = (
     # Basis.
     "after seasonal adjustment",
@@ -767,10 +1561,14 @@ _REQUALIFIED = (
     "in the Northeast region",
     "in most states",
     "in metropolitan areas",
-    # Measure and period (round-6 review).
+    # Measure and period (round-6, round-7 and round-8 reviews).
     "the U.S. rate",
     "including discouraged workers in the labor force",
     "averaging the latest three months",
+    "and by 120,000 for the month",
+    "for the month",
+    "over the month",
+    "on the year",
     # Revision.
     "as revised",
     "after revision",
@@ -780,14 +1578,13 @@ _REQUALIFIED = (
 
 @st.composite
 def _requalified_tail(draw: st.DrawFn) -> str:
-    words = [
-        *draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=6)),
-        draw(st.sampled_from(_REQUALIFIED)),
-        *draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=6)),
-    ]
-    # Words follow one another after a space or a comma.
-    return draw(st.sampled_from(_TAIL_OPENERS)) + "".join(
-        draw(st.sampled_from((" ", ", "))) + word for word in words
+    """A tail of the closed forms for both readers (a comparison or trend),
+    with a qualifier put in at any word boundary."""
+    words = draw(_tail_words("payroll"))
+    at = draw(st.integers(0, len(words)))
+    comma = draw(st.sampled_from(((), (",",))))
+    return _render(
+        [*words[:at], *comma, draw(st.sampled_from(_REQUALIFIED)), *words[at:]]
     )
 
 
@@ -801,11 +1598,15 @@ def test_a_tail_speaking_to_the_statements_own_basis_unmakes_the_statement(
 
 
 @pytest.mark.parametrize("phrase", _REQUALIFIED)
-@pytest.mark.parametrize("opener", (", compared with 3.9 percent", " and has remained"))
+@pytest.mark.parametrize(
+    "tail",
+    (", compared with 3.9 percent in June", " and has remained unchanged since June"),
+)
 def test_each_word_naming_a_basis_scope_or_revision_unmakes_the_statement(
-    phrase: str, opener: str
+    phrase: str, tail: str
 ) -> None:
-    _check_requalified(f"{opener} {phrase}")
+    _check_tails([tail, tail, tail, tail])
+    _check_requalified(f"{tail} {phrase}")
 
 
 def _check_requalified(tail: str) -> None:
@@ -828,6 +1629,18 @@ def _check_requalified(tail: str) -> None:
     html = _page(title, f"{head}{headline} {requalified}")
     assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
     assert parse_release(html, "empsit_payroll_change") == ("2026-07", 123.0)
+
+
+def test_round_8_a_later_clause_never_supplies_the_monthly_change() -> None:
+    """Round-8 review, finding 1, verbatim: it returned 2000."""
+    title, head = _EMPSIT_JULY
+    pre = (
+        "Total nonfarm payroll employment rose by 2,000,000 in July, compared with "
+        "a year earlier, and by 120,000 for the month.\n"
+        "Total nonfarm payroll employment increased by 2,000,000 in July, compared "
+        "with a year earlier, and by 120,000 for the month."
+    )
+    assert parse_release(_page(title, head + pre), "empsit_payroll_change") is None
 
 
 def test_round_6_counterexamples_are_never_read() -> None:
@@ -1048,8 +1861,9 @@ def test_round_7_annual_comparisons_never_supply_the_monthly_change() -> None:
     """Round-7 review, finding 1, verbatim: it returned 2000."""
     title = "Employment Situation Summary - 2026 M07 Results"
     assert parse_release(_page(title, _ROUND_7), "empsit_payroll_change") is None
-    # The true headline is a statement now ("no" is a reviewed word), and
-    # with a second statement it reads, beside the annual comparisons.
+    # The true headline is a statement ("following no change in June" is a
+    # comparison), and with a second statement it reads, beside the annual
+    # comparisons.
     second = "\nTotal nonfarm payroll employment rose by 120,000 in July."
     assert parse_release(_page(title, _ROUND_7 + second), "empsit_payroll_change") == (
         "2026-07",

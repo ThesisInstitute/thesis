@@ -646,6 +646,12 @@ def test_a_rate_continuation_is_a_tail_through_discovery(paragraph: str) -> None
         "a year earlier.",
         "Total nonfarm payroll employment increased by 2,000,000 in July compared "
         "with the previous year.",
+        # Round-8 review, finding 1: a later clause restating the figure for
+        # the month, and a comparison with the release month itself.
+        "Total nonfarm payroll employment rose by 2,000,000 in July, compared with "
+        "a year earlier, and by 120,000 for the month.",
+        "Total nonfarm payroll employment rose by 2,000,000 in July, compared with "
+        "a gain of 120,000 in July.",
     ),
 )
 def test_a_sentence_of_another_basis_or_period_never_defers_a_real_release(
@@ -672,6 +678,8 @@ _ADDED_TAILS = (
     ", a year earlier",
     ", after seasonal adjustment",
     ", compared with the U.S. rate of 4.1 percent",
+    ", compared with a year earlier, and by 120,000 for the month",
+    ", compared with a gain of 120,000 in July",
 )
 
 
@@ -816,6 +824,25 @@ def test_round_7_annual_comparisons_never_resolve_through_discovery() -> None:
         "<html><head><title>Employment Situation Summary - 2026 M07 Results</title>"
         f"</head><body><pre>\n{pre}\n</pre></body></html>"
     )
+    found = _discover(page, "empsit_payroll_change")
+    assert found.url is None
+    assert "CAPTURE UNIDENTIFIED (deferring)" in found.verdict
+
+
+def test_round_8_a_later_clause_never_resolves_through_discovery() -> None:
+    """Round-8 review, finding 1, verbatim: discovery accepted 2000."""
+    pre = (
+        "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        "Total nonfarm payroll employment rose by 2,000,000 in July, compared with "
+        "a year earlier, and by 120,000 for the month.\n"
+        "Total nonfarm payroll employment increased by 2,000,000 in July, compared "
+        "with a year earlier, and by 120,000 for the month."
+    )
+    page = (
+        "<html><head><title>Employment Situation Summary - 2026 M07 Results</title>"
+        f"</head><body><pre>\n{pre}\n</pre></body></html>"
+    )
+    assert parse_release(page, "empsit_payroll_change") is None
     found = _discover(page, "empsit_payroll_change")
     assert found.url is None
     assert "CAPTURE UNIDENTIFIED (deferring)" in found.verdict
