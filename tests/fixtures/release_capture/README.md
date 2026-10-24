@@ -56,6 +56,15 @@ prints "-" for the one-month changes, as BLS collected no October 2025
 data. The September 2024 Employment Situation, titled "2024 Q03", is not
 in the corpus; its title dates no month, so the reader refuses it.
 
+A tail is made only of the words in `_TAIL_VOCABULARY`, months and
+figures, and every tail in the corpus is. A tail with any other word
+("compared with the U.S. rate of 4.1 percent", "after including
+discouraged workers") makes the sentence no statement, because such words
+can say the statement's own figure is of another basis, scope or period.
+Some captures name the bureau "the U.S. Bureau of Labor Statistics (BLS)"
+before "reported today". The statements that leave their month unsaid
+count only when every one of them states the dated figure.
+
 The Employment Situation and JOLTS summaries print no table. Their figures
 are read from the release's prose (`PROSE_PARSERS` in
 `scripts/legacy_release_parsers.py`). The JOLTS summary states total job

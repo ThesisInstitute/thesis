@@ -389,10 +389,11 @@ def _words(allowed: str) -> str:
 _WHEN = rf" in (?P<month>{_MONTH})(?: (?P<year>[0-9]{{4}}))?"
 # A statement may instead leave its month unsaid ("The unemployment rate
 # held at 4.3 percent and has remained ...", "... increased by 142,000 over
-# the month"). It then only corroborates: it counts toward the two
-# statements when it states the figure the dated statements state, and is
-# otherwise ignored ("Annual Average Data for 2025 ... The unemployment
-# rate was 4.0 percent."). It can neither supply the figure nor veto it.
+# the month"). It then only corroborates: the undated statements count
+# toward the two statements when every one states the figure the dated
+# statements state, and are otherwise ignored ("Annual Average Data for 2025
+# ... The unemployment rate was 4.0 percent."). They can neither supply the
+# figure nor veto it.
 _WHEN_OR_UNSAID = rf"(?:{_WHEN}| over the month)?"
 _COUNT = r"[1-9][0-9]{0,2}(?:,[0-9]{3})*"
 _PAYROLL = r"(?:Total n|N)onfarm payroll employment"
@@ -434,74 +435,126 @@ _OPENINGS_WHEN_OR_UNSAID = rf"(?:{_OPENINGS_WHEN}| over the month)?"
 # The level may carry its change ("6.5 million (-386,000)"), never read.
 _OPENINGS_CHANGE = rf"(?: \([+\-\u2212]{_COUNT}\))?"
 # A tail is a clause about some other figure (an average, an earlier
-# month, a range, the number unemployed) or about the trend, opened by one
-# of these words. It runs to the end of the sentence, and none of it is
-# read. Anything else after the month qualifies the statement itself (",
-# a year earlier", "(2025)", "(among teenagers)", "of last year"), so the
-# sentence is no statement. "Before" opens no tail: "before seasonal
-# adjustment" is another measure. Every tail in the corpus of real
-# releases (tests/fixtures/release_capture/corpus/) opens with one of these.
+# month, a range, the number unemployed) or about the trend. It opens with
+# one of these words, and none of it is read. "Before" opens no tail:
+# "before seasonal adjustment" is another measure.
 _COMPARE = (
     "(?:(?:roughly|about|nearly|slightly|somewhat|well|much|far) )?"
     "(?:following|after|compared with|similar to|in line with|close to|"
     "the same as|up from|down from|(?:higher|lower|less|more) than|above|below)"
 )
-# A tail never speaks to the statement's own basis, scope or revision: a
-# sentence whose tail names one ("... but was 4.1 percent after seasonal
-# adjustment", "..., above the national rate", "... among adults", "...,
-# after revision") is no statement, for the figure it states may be the
-# unadjusted, partial or unrevised one. No tail in the corpus of real
-# releases holds one of these words; "after accounting for the annual
-# adjustments to the population controls", which BLS prints after the
-# January rate, holds none.
-_REQUALIFIERS = (
-    r"\b(?:"
-    + "|".join(
-        (
-            # Basis: another adjustment, or a figure leaving part out.
-            "[Ss]easonal",
-            r"(?:un)?adjusted\b",
-            "exclud",
-            r"without\b",
-            r"basis\b",
-            "benchmark",
-            # Scope: the whole, a subgroup, a sector or a place.
-            r"national\b",
-            r"nationwide\b",
-            r"overall\b",
-            r"among\b",
-            r"adults?\b",
-            "teen",
-            r"(?:wo)?men\b",
-            "youth",
-            "veteran",
-            r"(?:White|Black|Asian|Hispanic|Latino)s?\b",
-            r"private\b",
-            r"government\b",
-            r"sectors?\b",
-            "industr",
-            r"regions?\b",
-            r"states?\b",
-            r"metropolitan\b",
-            # Revision.
-            "revis",
-        )
-    )
-    + ")"
+# After its opener a tail holds only these words, months and figures: the
+# words of a change, an average over a standard window, a range or a trend.
+# They cannot say that the statement's own figure is of another basis
+# ("after seasonal adjustment", "after including discouraged workers"),
+# scope ("the U.S. rate", "among adults"), period ("after averaging the
+# latest three months") or revision, so a sentence whose tail says any of
+# that is no statement. Every tail in the corpus of real releases
+# (tests/fixtures/release_capture/corpus/) is made of them.
+_TAIL_VOCABULARY = (
+    # Articles, prepositions and conjunctions.
+    "a",
+    "an",
+    "the",
+    "of",
+    "in",
+    "to",
+    "by",
+    "at",
+    "over",
+    "since",
+    "and",
+    "or",
+    "either",
+    "than",
+    "this",
+    "its",
+    "thus",
+    "so",
+    "far",
+    # A change and its size.
+    "change",
+    "changes",
+    "changed",
+    "unchanged",
+    "little",
+    "net",
+    "gain",
+    "gains",
+    "loss",
+    "losses",
+    "increase",
+    "increases",
+    "increased",
+    "decrease",
+    "decreases",
+    "decreased",
+    "decline",
+    "declines",
+    "declined",
+    "rose",
+    "fell",
+    "edged",
+    "up",
+    "down",
+    "percent",
+    "percentage",
+    "point",
+    "points",
+    "million",
+    # An average, a range or a trend.
+    "average",
+    "monthly",
+    "narrow",
+    "range",
+    "trend",
+    "trended",
+    "upward",
+    "downward",
+    "movement",
+    "recent",
+    "showing",
+    "shown",
+    "has",
+    "have",
+    "had",
+    "remained",
+    "continued",
+    "was",
+    "were",
+    # A period.
+    "month",
+    "months",
+    "year",
+    "prior",
+    "past",
+    "previous",
+    "earlier",
+)
+# A figure: "4.2", "166,000", "-13,000", "12", "2025"; a change in
+# parentheses: "(+36,000)". A period inside a number ("4.2") has a digit
+# after it; no other period is part of a tail, so an abbreviation ("U.S.")
+# ends none.
+_TAIL_FIGURE = r"[+\-\u2212]?[0-9](?:[0-9,]|\.(?=[0-9]))*"
+# Each token is followed by another (after a space or ", "), by "reported
+# today" or by the full stop, so a word is never read as a longer word's start.
+_TAIL_TOKEN = (
+    rf"(?:{_MONTH}|{_TAIL_FIGURE}|\({_TAIL_FIGURE}\)|{'|'.join(_TAIL_VOCABULARY)})"
 )
 _TAIL = (
-    rf"(?:,? {_COMPARE}\b"
+    rf"(?:(?:,? {_COMPARE}\b"
     r"| (?:and|but) (?:has|have|had|continued|remained)\b"
     # JOLTS: "... but was down by 885,000 over the year".
     r"| (?:and|but) (?:was|were) (?:up|down) by\b"
     rf"|, (?:and|while) {_UNEMPLOYED}\b)"
-    # To the full stop. A period inside a number ("4.2") has no space after
-    # it, so it ends nothing. One ending an abbreviation ("the U.S. average")
-    # ends the tail early, which changes nothing: the statement is whole.
-    rf"(?:(?!{_REQUALIFIERS})(?:[^.]|\.(?=\S)))*?"
+    rf"(?:,? {_TAIL_TOKEN})*"
+    # The tail BLS prints after the January rate, taken only whole.
+    r"|, after accounting for (?:the annual adjustments to the population "
+    r"controls|annual population control adjustments))"
 )
-_REPORTED = r", the U\.S\. Bureau of Labor Statistics reported today"
-_END = rf"(?:{_REPORTED}|{_TAIL})?\.(?=\s|$)"
+# Some releases name the bureau "the U.S. Bureau of Labor Statistics (BLS)".
+_REPORTED = r", the U\.S\. Bureau of Labor Statistics(?: \(BLS\))? reported today"
+_END = rf"{_TAIL}?(?:{_REPORTED})?\.(?=\s|$)"
 
 
 def _payroll_clauses(prefix: str) -> tuple[str, ...]:
@@ -725,11 +778,12 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     (_END). The statements that name the month must all agree, and at least
     two statements in separate stretches of text must state their figure
     (BLS states each headline figure in the lead paragraph and again in its
-    section): dated ones, or undated ones that state the same figure. A
-    dated statement that names another month or year, or whose verb
-    contradicts its printed sign, refuses the page. An undated statement
-    never does: one stating another figure, or contradicting itself, is
-    ignored. Text in no form is not read.
+    section): dated ones, and the undated ones when every undated statement
+    states that figure. A dated statement that names another month or year,
+    or whose verb contradicts its printed sign, refuses the page. An undated
+    statement never does: one stating another figure, or contradicting
+    itself, only stops the undated statements counting. Text in no form is
+    not read.
     """
     spec = PROSE_PARSERS[parser_id]
     doc = _Document()
@@ -783,7 +837,11 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     if len(values) != 1:
         return None
     (figure,) = values
-    found += [span for span, value in undated if value == figure]
+    # An undated statement may be about another period, and one stating
+    # another figure (or contradicting itself) shows that one is. So the
+    # undated statements corroborate only when every one states the figure.
+    if all(value == figure for _, value in undated):
+        found += [span for span, _ in undated]
     # Two forms matching one stretch of text are one statement, not two.
     statements, reach = 0, -1
     for begin, finish in sorted(found):

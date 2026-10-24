@@ -13,21 +13,23 @@ Invariants, for every generated release:
 - the reader returns (release month, headline figure), exactly;
 - no decoy changes what it returns, whatever its numbers and wherever it
   sits;
-- a statement with anything after its month but a tail (a clause opened by
-  a comparison word, "and has ...", "and continued ...", "but was down by
-  ...", or "the U.S. Bureau of Labor Statistics reported today") is not
-  read: what follows is a qualifier naming another period, subgroup or
-  basis;
+- after its month a statement holds only a tail, then optionally "the U.S.
+  Bureau of Labor Statistics reported today", then its full stop. A tail
+  opens with a comparison word, "and has ...", "and continued ...", "but
+  was down by ..." or ", and the number of unemployed people", and holds
+  only the reviewed words of a change, an average, a range, a trend or a
+  period, with months and figures;
+- anything else after the month (another period, subgroup, basis or
+  measure: ", a year earlier", "after seasonal adjustment", "the U.S.
+  rate", "after including discouraged workers") makes the sentence no
+  statement, which neither supplies the figure nor refuses the page;
 - no tail, whatever other figures, months or years it holds, changes what
   a statement says;
-- a tail that speaks to the statement's own basis, scope or revision
-  ("after seasonal adjustment", "the national rate", "among adults",
-  "after revision") makes the sentence no statement: it neither supplies
-  the figure nor refuses the page;
-- a statement that leaves its month unsaid only corroborates: it counts
-  when it states the figure the dated statements state, and is otherwise
-  ignored, so what is read is always what a dated statement says, and no
-  undated statement (an annual average, a revision note) refuses the page;
+- a statement that leaves its month unsaid only corroborates: the undated
+  statements count only when every one states the figure the dated
+  statements state, so what is read is always what a dated statement says,
+  and no undated statement (an annual average, a revision note) refuses
+  the page;
 - one statement alone, two dated statements that disagree, a headline
   statement naming another month or year, a payroll verb that contradicts
   its printed sign (in the payroll statement or in the payroll clause a
@@ -51,6 +53,7 @@ from hypothesis import strategies as st
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import legacy_release_parsers  # noqa: E402
 from legacy_release_parsers import PROSE_PARSERS, parse_release  # noqa: E402
 
 MONTHS = (
@@ -460,6 +463,18 @@ def test_a_payroll_measure_other_than_the_total_is_never_a_statement(
         ", before the annual population control adjustments",
         ", after excluding the population control adjustments",
         " and has remained there for adult men since May",
+        # Round-6 review: an abbreviation ends no tail early, and a tail holds
+        # only the reviewed words, so no measure, period or scope follows.
+        ", compared with the U.S. rate of 4.1 percent on a seasonally adjusted basis",
+        ", compared with the U.S. rate of 4.1 percent",
+        ", after including discouraged workers in the labor force",
+        ", after averaging the latest three months",
+        " and is 4.1 percent",
+        ", the U.S. Bureau of Labor Statistics reported today on an adjusted basis",
+        # "Before" opens no tail even when every word after it is reviewed:
+        # the figure before a change is another figure.
+        ", before a change of 0.3 percentage point",
+        ", before the change",
     ),
 )
 def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> None:
@@ -486,9 +501,34 @@ def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> No
     )
 
 
+# The words a tail may hold, as reviewed. The parser's own list must be
+# exactly this one, so a word is added only with a test.
+_TAIL_VOCABULARY = tuple(
+    (
+        # Articles, prepositions and conjunctions.
+        "a an the of in to by at over since and or either than this its thus so "
+        "far "
+        # A change and its size.
+        "change changes changed unchanged little net gain gains loss losses "
+        "increase increases increased decrease decreases decreased decline "
+        "declines declined rose fell edged up down percent percentage point "
+        "points million "
+        # An average, a range or a trend.
+        "average monthly narrow range trend trended upward downward movement "
+        "recent showing shown has have had remained continued was were "
+        # A period.
+        "month months year prior past previous earlier"
+    ).split()
+)
+
+
+def test_the_tail_vocabulary_is_the_reviewed_one() -> None:
+    assert legacy_release_parsers._TAIL_VOCABULARY == _TAIL_VOCABULARY
+
+
 # What a tail may open with, and words it may hold after: other months and
-# years, other figures, comparisons. None is capitalized but a month, so no
-# tail holds a statement of its own.
+# years, other figures, the reviewed words. None is capitalized but a month,
+# so no tail holds a statement of its own.
 _TAIL_OPENERS = (
     ", following",
     " following",
@@ -533,24 +573,20 @@ _TAIL_WORDS = (
     "over the year",
     "over the prior 12 months",
     "the average monthly gain",
-    "the unemployment rate",
-    "payroll employment",
-    "since",
-    "in",
-    "rose",
-    "fell",
-    "by",
-    "respectively",
-    "and",
-    ",",
+    "a narrow range of 4.0 percent to 4.2 percent",
+    "thus far this year",
+    "-13,000",
+    "12",
+    *_TAIL_VOCABULARY,
 )
 
 
 @st.composite
 def _tail(draw: st.DrawFn) -> str:
     words = draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=12))
+    # Words follow one another after a space or a comma.
     return draw(st.sampled_from(_TAIL_OPENERS)) + "".join(
-        word if word == "," else f" {word}" for word in words
+        draw(st.sampled_from((" ", ", "))) + word for word in words
     )
 
 
@@ -558,6 +594,50 @@ def _tail(draw: st.DrawFn) -> str:
 @given(tails=st.lists(st.one_of(st.just(""), _tail()), min_size=4, max_size=4))
 def test_no_tail_changes_what_a_statement_says(tails: list[str]) -> None:
     """Round-4 review: a continuation is a tail, and none of it is read."""
+    _check_tails(tails)
+
+
+@pytest.mark.parametrize("word", _TAIL_VOCABULARY)
+def test_each_reviewed_word_may_be_part_of_a_tail(word: str) -> None:
+    _check_tails([f", following {word}", f" and has {word}", "", f", below {word}"])
+    # Each tail may also end "reported today", as a lead's does.
+    reported = ", the U.S. Bureau of Labor Statistics (BLS) reported today"
+    _check_tails([f", following {word}{reported}", "", "", f" and has {word}"])
+
+
+@pytest.mark.parametrize(
+    "figure",
+    ("+36,000", "-13,000", "−13,000", "(+36,000)", "(-41,000)", "(−41,000)"),
+)
+def test_a_tail_figure_may_carry_any_printed_sign(figure: str) -> None:
+    # A minus sign may be printed as a hyphen or as U+2212.
+    _check_tails(
+        ["", "", f", up from {figure} in June", f", following {figure} in June"]
+    )
+
+
+@pytest.mark.parametrize(
+    "tail",
+    (
+        # BLS's January rate, and the wording of its later population notes.
+        ", after accounting for the annual adjustments to the population controls",
+        ", after accounting for annual population control adjustments",
+    ),
+)
+def test_the_population_control_tail_may_follow_a_rate_statement(tail: str) -> None:
+    _check_tails([tail, tail, "", ""])
+    # Only whole: a part of it, or more, is no tail.
+    for changed in (tail.rsplit(" ", 1)[0], f"{tail} by state"):
+        title = "Employment Situation Summary - 2026 M07 Results"
+        pre = (
+            "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+            f"The unemployment rate was 4.8 percent in July{changed}. "
+            f"The unemployment rate changed little at 4.8 percent in July{changed}."
+        )
+        assert parse_release(_page(title, pre), "empsit_unemployment_rate") is None
+
+
+def _check_tails(tails: list[str]) -> None:
     title = "Employment Situation Summary - 2026 M07 Results"
     pre = (
         "THE EMPLOYMENT SITUATION -- JULY 2026\n"
@@ -572,8 +652,8 @@ def test_no_tail_changes_what_a_statement_says(tails: list[str]) -> None:
     assert parse_release(html, "empsit_payroll_change") == ("2026-07", 123.0)
 
 
-# What a tail may not speak to: the statement's own basis, scope or revision.
-# One phrase for each word legacy_release_parsers._REQUALIFIERS names.
+# What a tail may not speak to: the statement's own basis, scope, measure,
+# period or revision. Each phrase holds a word outside the tail vocabulary.
 _REQUALIFIED = (
     # Basis.
     "after seasonal adjustment",
@@ -610,6 +690,10 @@ _REQUALIFIED = (
     "in the Northeast region",
     "in most states",
     "in metropolitan areas",
+    # Measure and period (round-6 review).
+    "the U.S. rate",
+    "including discouraged workers in the labor force",
+    "averaging the latest three months",
     # Revision.
     "as revised",
     "after revision",
@@ -624,8 +708,9 @@ def _requalified_tail(draw: st.DrawFn) -> str:
         draw(st.sampled_from(_REQUALIFIED)),
         *draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=6)),
     ]
+    # Words follow one another after a space or a comma.
     return draw(st.sampled_from(_TAIL_OPENERS)) + "".join(
-        word if word == "," else f" {word}" for word in words
+        draw(st.sampled_from((" ", ", "))) + word for word in words
     )
 
 
@@ -666,6 +751,42 @@ def _check_requalified(tail: str) -> None:
     html = _page(title, f"{head}{headline} {requalified}")
     assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
     assert parse_release(html, "empsit_payroll_change") == ("2026-07", 123.0)
+
+
+def test_round_6_counterexamples_are_never_read() -> None:
+    """Round-6 review, verbatim: each returned 4.8."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    head = "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    abbreviated = (
+        "The unemployment rate was 4.8 percent in July, compared with the U.S. rate "
+        "of 4.1 percent on a seasonally adjusted basis.\n"
+        "The unemployment rate stood at 4.8 percent in July, compared with the U.S. "
+        "rate of 4.1 percent after seasonal adjustment."
+    )
+    measure = (
+        "The unemployment rate was 4.1 percent.\n"
+        "Alternative Measures of Labor Underutilization\n"
+        "The unemployment rate was 4.8 percent in July, after including discouraged "
+        "workers in the labor force.\n"
+        "Annual Average Data for 2025\n"
+        "The unemployment rate was 4.8 percent."
+    )
+    averaged = (
+        "The unemployment rate was 4.8 percent in July, after averaging the latest "
+        "three months.\n"
+        "The unemployment rate stood at 4.8 percent in July, after averaging the "
+        "latest three months."
+    )
+    for pre in (abbreviated, measure, averaged):
+        assert (
+            parse_release(_page(title, head + pre), "empsit_unemployment_rate") is None
+        )
+    # Were the U-4 sentence a statement, the undated statements, disagreeing
+    # among themselves, still would not count: one dated statement remains.
+    dated = measure.replace(
+        ", after including discouraged workers in the labor force.", "."
+    )
+    assert parse_release(_page(title, head + dated), "empsit_unemployment_rate") is None
 
 
 def test_a_tail_restating_the_figure_on_another_basis_is_never_read() -> None:
@@ -717,6 +838,14 @@ def test_a_payroll_continuation_is_read_as_a_tail(continuation: str) -> None:
         "2026-07",
         -23.0,
     )
+    reported = pre.replace(
+        f"{continuation}.",
+        f"{continuation}, the U.S. Bureau of Labor Statistics (BLS) reported today.",
+    )
+    assert parse_release(_page(title, reported), "empsit_payroll_change") == (
+        "2026-07",
+        -23.0,
+    )
 
 
 @pytest.mark.parametrize(
@@ -764,10 +893,13 @@ def test_a_statement_that_leaves_its_month_unsaid_only_corroborates(
     assert read(unsaid, unsaid) is None
     # Dated alone: one statement.
     assert read(dated) is None
-    # Unsaid disagreeing is ignored: it neither counts nor refuses.
+    assert read(dated, unsaid, unsaid) == ("2026-05", reading)
+    # Unsaid disagreeing never refuses, and no undated statement then
+    # counts: one may be about another period, so none corroborates.
     assert read(dated, other) is None
     assert read(dated, dated, other) == ("2026-05", reading)
-    assert read(other, dated, unsaid) == ("2026-05", reading)
+    assert read(other, dated, unsaid) is None
+    assert read(other, dated, dated, unsaid) == ("2026-05", reading)
     assert read(other, other) is None
 
 

@@ -23,6 +23,8 @@ import urllib.error
 from decimal import ROUND_HALF_UP, Decimal
 
 import pytest
+from hypothesis import event, given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -626,6 +628,14 @@ def test_a_rate_continuation_is_a_tail_through_discovery(paragraph: str) -> None
         # is ignored.
         "Annual Average Data for 2025\nThe unemployment rate was 4.0 percent.",
         "Total nonfarm payroll employment increased by 2,000,000 over the month.",
+        # Round-6 review: the abbreviation ends no tail, and no other measure
+        # or period follows one.
+        "The unemployment rate was 4.8 percent in July, compared with the U.S. "
+        "rate of 4.1 percent on a seasonally adjusted basis.",
+        "The unemployment rate was 4.8 percent in July, after including "
+        "discouraged workers in the labor force.",
+        "The unemployment rate was 4.8 percent in July, after averaging the "
+        "latest three months.",
     ),
 )
 def test_a_sentence_of_another_basis_or_period_never_defers_a_real_release(
@@ -638,3 +648,144 @@ def test_a_sentence_of_another_basis_or_period_never_defers_a_real_release(
         found = _discover(changed, parser_id)
         assert found.verdict == ""
         assert found.url == meta["captureUrl"]
+
+
+# Sentences in the readers' own forms, of any figure, month and year, with
+# or without a tail, for the property below.
+_ADDED_TAILS = (
+    "",
+    ", following little change in June (+36,000)",
+    ", compared with an average monthly gain of 158,000 over the prior 12 months",
+    " and has remained in a narrow range of 4.0 percent to 4.2 percent since January",
+    ", the U.S. Bureau of Labor Statistics reported today",
+    ", compared with a year earlier",
+    ", a year earlier",
+    ", after seasonal adjustment",
+    ", compared with the U.S. rate of 4.1 percent",
+)
+
+
+@st.composite
+def _added_empsit_sentence(draw: st.DrawFn) -> str:
+    month = draw(st.sampled_from(("June", "July", "August")))
+    when = draw(
+        st.sampled_from(
+            (
+                "",
+                " over the month",
+                f" in {month}",
+                f" in {month} 2025",
+                f" in {month} 2026",
+            )
+        )
+    )
+    tail = draw(st.sampled_from(_ADDED_TAILS))
+    rate = draw(st.sampled_from(("3.9", "4.1", "4.8")))
+    change = draw(st.sampled_from((-23_000, 23_000, -123_000, 123_000)))
+    signed, count = f"{change:+,}", f"{abs(change):,}"
+    # The verb need not agree with the sign, so some sentences contradict
+    # themselves.
+    verb = draw(st.sampled_from(("rose by", "increased by", "declined by", "fell by")))
+    words = draw(st.sampled_from(("changed little", "edged up", "edged down")))
+    return draw(
+        st.sampled_from(
+            (
+                f"The unemployment rate was {rate} percent{when}{tail}.",
+                f"The unemployment rate ({rate} percent) changed little{when}{tail}.",
+                f"The unemployment rate changed little at {rate} percent{when}{tail}.",
+                f"In {month}, the unemployment rate was {rate} percent{tail}.",
+                f"Total nonfarm payroll employment {verb} {count}{when}{tail}.",
+                f"Total nonfarm payroll employment {words}{when} ({signed}){tail}.",
+                f"Both nonfarm payroll employment ({signed}) and the unemployment rate "
+                f"({rate} percent) {words}{when}{tail}.",
+                f"Total nonfarm payroll employment {verb} {count}{when}, and the "
+                f"unemployment rate changed little at {rate} percent{tail}.",
+            )
+        )
+    )
+
+
+@st.composite
+def _added_jolts_sentence(draw: st.DrawFn) -> str:
+    month = draw(st.sampled_from(("May", "June", "July")))
+    when = draw(
+        st.sampled_from(
+            (
+                "",
+                " over the month",
+                f" in {month}",
+                f" in {month} 2025",
+                f" on the last business day of {month}",
+            )
+        )
+    )
+    tail = draw(st.sampled_from(_ADDED_TAILS))
+    level = draw(st.sampled_from(("6.5", "7.2", "7.4")))
+    change = draw(st.sampled_from(("", " (-386,000)", " (+120,000)")))
+    return draw(
+        st.sampled_from(
+            (
+                f"The number of job openings was {level} million{change}{when}{tail}.",
+                f"The number of job openings was little changed at {level} million"
+                f"{change}{when}{tail}.",
+                f"The number of job openings declined by 386,000 to {level} million"
+                f"{when}{tail}.",
+            )
+        )
+    )
+
+
+def _sentence_ends(html: str) -> list[int]:
+    """Where a sentence of the release text ends (never after "U.S.")."""
+    start, end = html.lower().index("<pre"), html.lower().rindex("</pre>")
+    return [
+        start + match.end()
+        for match in re.finditer(r"(?<!U\.S)\.(?=\s+[A-Z])", html[start:end])
+    ]
+
+
+def _check_added_sentences(
+    sidecar: pathlib.Path, readings: dict, sentence: st.SearchStrategy[str], draw
+) -> None:
+    _meta, _raw, html = _load(sidecar)
+    ends = _sentence_ends(html)
+    added = draw(
+        st.lists(st.tuples(st.sampled_from(ends), sentence), min_size=1, max_size=3)
+    )
+    changed = html
+    for at, text in sorted(added, reverse=True):
+        changed = f"{changed[:at]} {text}{changed[at:]}"
+    for parser_id, reading in readings.items():
+        assert parse_release(html, parser_id) == reading
+        got = parse_release(changed, parser_id)
+        event(f"{parser_id}: {'kept' if got == reading else 'refused'}")
+        assert got in (reading, None), (added, got)
+
+
+@settings(max_examples=300, deadline=None)
+@given(data=st.data())
+def test_no_added_sentence_changes_a_real_employment_reading(
+    data: st.DataObject,
+) -> None:
+    """Text added to a real page may refuse it, never change what it reads.
+
+    A real release states each headline figure in a dated statement, so a
+    statement of another figure for that month disagrees with it and refuses
+    the page, and one of another month or year refuses it too. However a
+    sentence is worded, then, the reader returns the release's own figure or
+    nothing.
+    """
+    _check_added_sentences(
+        _EMPSIT_REAL, _EMPSIT_READINGS, _added_empsit_sentence(), data.draw
+    )
+
+
+@settings(max_examples=150, deadline=None)
+@given(data=st.data())
+def test_no_added_sentence_changes_a_real_openings_reading(data: st.DataObject) -> None:
+    _check_added_sentences(
+        FIXTURES / "jolts.nr0-20260810093236.json",
+        {"jolts_job_openings": ("2026-06", 7.4)},
+        _added_jolts_sentence(),
+        data.draw,
+    )
