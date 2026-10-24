@@ -220,3 +220,97 @@ def test_one_disagreeing_statement_in_a_real_release_refuses_the_read() -> None:
     assert html.count(section) == 1
     changed = html.replace(section, "changed little in July (-24,000)")
     assert parse_release(changed, "empsit_payroll_change") is None
+
+
+def _with_sentence(html: str, sentence: str) -> str:
+    """The page with one more sentence at the end of its release text."""
+    end = html.lower().rindex("</pre>")
+    return f"{html[:end]}\n{sentence}\n{html[end:]}"
+
+
+_EMPSIT_REAL = FIXTURES / "empsit.nr0-20260810222604.json"
+_EMPSIT_READINGS = {
+    "empsit_unemployment_rate": ("2026-07", 4.1),
+    "empsit_payroll_change": ("2026-07", -23.0),
+}
+
+
+@pytest.mark.parametrize(
+    "sentence",
+    (
+        "Private nonfarm payroll employment rose by 123,000 in July.",
+        "Private nonfarm payroll employment increased by 123,000 in July.",
+        "Total nonfarm payroll employment rose by 123,000 per month, on "
+        "average, over the prior 12 months.",
+        "Total nonfarm payroll employment has increased by an average of "
+        "123,000 per month since January.",
+        "In June, the unemployment rate was 4.8 percent.",
+        "The unemployment rate for teenagers (12.1 percent) changed little in "
+        "July.",
+        "The unemployment rates for adult men (3.9 percent) and adult women "
+        "(3.8 percent) changed little in July.",
+        "The change in total nonfarm payroll employment for June was revised "
+        "down by 37,000, from +57,000 to +20,000.",
+        "Employment in health care rose by 55,000 in July.",
+    ),
+)
+def test_a_decoy_added_to_a_real_release_never_changes_its_reading(
+    sentence: str,
+) -> None:
+    _meta, _raw, html = _load(_EMPSIT_REAL)
+    changed = _with_sentence(html, sentence)
+    for parser_id, reading in _EMPSIT_READINGS.items():
+        assert parse_release(html, parser_id) == reading
+        assert parse_release(changed, parser_id) == reading
+
+
+@pytest.mark.parametrize(
+    ("parser_id", "sentence"),
+    (
+        (
+            "empsit_unemployment_rate",
+            "The unemployment rate (4.8 percent) changed little in June.",
+        ),
+        (
+            "empsit_unemployment_rate",
+            "The unemployment rate, at 4.8 percent, was unchanged in June.",
+        ),
+        (
+            "empsit_unemployment_rate",
+            "The unemployment rate was 4.1 percent in July 2025.",
+        ),
+        (
+            "empsit_payroll_change",
+            "Total nonfarm payroll employment rose by 63,000 in May.",
+        ),
+        (
+            "empsit_payroll_change",
+            "Total nonfarm payroll employment changed little in July 2025 "
+            "(-23,000).",
+        ),
+    ),
+)
+def test_a_headline_statement_of_another_month_refuses_a_real_release(
+    parser_id: str, sentence: str
+) -> None:
+    _meta, _raw, html = _load(_EMPSIT_REAL)
+    assert parse_release(_with_sentence(html, sentence), parser_id) is None
+
+
+def test_the_respectively_wording_of_the_household_paragraph_reads_the_same() -> None:
+    _meta, _raw, html = _load(_EMPSIT_REAL)
+    household = re.compile(
+        r"Both the unemployment rate,\s+at 4\.1 percent,\s+and the number of"
+        r"\s+unemployed people,\s+at 6\.9 million,\s+changed little in July\."
+    )
+    assert len(household.findall(html)) == 1
+    changed = household.sub(
+        "The unemployment rate and the number of unemployed people were little\n"
+        "changed at 4.1 percent and 6.9 million, respectively, in July.",
+        html,
+    )
+    assert changed != html
+    assert parse_release(changed, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    # Without the household paragraph the lead alone is one statement.
+    alone = household.sub("Household measures changed little.", html)
+    assert parse_release(alone, "empsit_unemployment_rate") is None
