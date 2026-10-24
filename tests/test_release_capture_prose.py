@@ -1719,6 +1719,48 @@ def test_a_tail_run_together_or_carrying_a_year_is_no_tail(tail: str) -> None:
         _check(tail, clause, False)
 
 
+@pytest.mark.parametrize(
+    "tail",
+    (
+        ", following gains of 34,000 in May, and 41,000 in June",
+        ", following a gain of 34,000 in May, and 2,000,000 over the year",
+        ", compared with 4.2 percent in June, and 3.9 percent a year earlier",
+    ),
+)
+def test_a_second_operand_follows_and_without_a_comma(tail: str) -> None:
+    """After a comma, ", and ..." reads as a clause of the statement itself,
+    which may restate its figure for another period, so it is no tail."""
+    for clause in _CLAUSES:
+        _check(tail.replace(", and", " and"), clause, True)
+        _check(tail, clause, False)
+
+
+@pytest.mark.parametrize(
+    "tail",
+    (
+        # A level's change is a tail only over the year: a month earlier,
+        # it would restate the month's own change.
+        " but is up from 4.1 percent a month earlier",
+        # "Little changed" must say from when: a year earlier.
+        " and is little changed",
+        # At most two operands.
+        ", following gains of 34,000 in May and 41,000 in June and 50,000 in April",
+        # "Before" opens no comparison, nor does "as".
+        ", before 4.0 percent in June",
+        ", as 4.0 percent in June",
+        # An average without "prior" may take in the release month.
+        ", above the 12-month average gain of 12,000",
+        # A continued trend carries no change of its own.
+        " and continued to trend up (+50,000)",
+        # The population-control note counts only whole.
+        ", after accounting for ",
+    ),
+)
+def test_a_tail_one_step_outside_the_closed_forms_is_no_tail(tail: str) -> None:
+    for clause in _CLAUSES:
+        _check(tail, clause, False)
+
+
 @pytest.mark.parametrize("comparator", _COMPARATORS)
 def test_each_comparator_may_be_what_a_comparison_names(comparator: str) -> None:
     for tail in (
@@ -2466,6 +2508,31 @@ def test_a_mention_in_capitals_before_the_headline_is_the_lead(
     assert parse_release(html, parser_id) is None
 
 
+def test_every_form_holds_its_mention_and_two_measure_forms_are_shared() -> None:
+    """What the lead rule rests on. Every statement holds its reader's
+    mention. A sentence stating both measures is a statement of both
+    Employment Situation readers or of neither, so the lead of one is never
+    inside a statement of the other alone."""
+
+    def anonymous(pattern: str) -> str:
+        pattern = re.sub(r"\(\?P<value>([^()]*)\)", r"\1", pattern)
+        return re.sub(r"\(\?P<\w+>", "(", pattern)
+
+    def holds(spec: legacy_release_parsers._Prose, pattern: str) -> bool:
+        return bool(spec.mention.search(pattern.replace("(?:Total n|N)", "N")))
+
+    for spec in PROSE_PARSERS.values():
+        for statement in spec.statements:
+            assert holds(spec, statement.pattern), statement.pattern
+    rate, payroll = (PROSE_PARSERS[parser_id] for parser_id in _EMPSIT_IDS)
+    both = [
+        {anonymous(s.pattern) for s in spec.statements if holds(other, s.pattern)}
+        for spec, other in ((rate, payroll), (payroll, rate))
+    ]
+    assert both[0] == both[1]
+    assert len(both[0]) == 17
+
+
 def test_round_8_red_team_a_label_before_the_lead_refuses_the_page() -> None:
     """Round-8 red team (r8a), finding 2, verbatim: it returned the
     unadjusted 4.8, though the page says the adjusted rate is 4.1."""
@@ -2543,6 +2610,49 @@ def test_the_release_may_open_with_payrolls_before_the_rate() -> None:
     ):
         html = _page(title, f"{head}{first}\n{rest}")
         assert parse_release(html, "empsit_unemployment_rate") is None, first
+
+
+@pytest.mark.parametrize(
+    "first",
+    (
+        # Text before the payroll sentence, even a stop or a colon.
+        "Not seasonally adjusted:\nTotal nonfarm payroll employment rose by 73,000 in "
+        "July.",
+        ":\nTotal nonfarm payroll employment rose by 73,000 in July.",
+        # A payroll sentence whose comparison names the month: no statement.
+        "Total nonfarm payroll employment rose by 73,000 in July, compared with a "
+        "gain of 50,000 in July.",
+        # Another release's statement.
+        "The number of job openings was 7.4 million in July.",
+    ),
+)
+def test_before_the_rate_lead_stand_only_this_releases_sound_statements(
+    first: str,
+) -> None:
+    title, head = _EMPSIT_JULY
+    rest = (
+        "The unemployment rate changed little at 4.2 percent in July.\n"
+        "Household Survey Data\n"
+        "The unemployment rate was 4.2 percent in July."
+    )
+    payroll = "Total nonfarm payroll employment rose by 73,000 in July."
+    html = _page(title, f"{head}{payroll}\n{rest}")
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.2)
+    html = _page(title, f"{head}{first}\n{rest}")
+    assert parse_release(html, "empsit_unemployment_rate") is None
+
+
+def test_only_whole_spans_within_the_stretch_cover_it() -> None:
+    """_only_statements, which the opening rule rests on."""
+    only = legacy_release_parsers._only_statements
+    text = "A. B. C."
+    assert only(text, 0, 8, [(0, 2), (3, 5), (6, 8)])
+    assert not only(text, 0, 8, [(0, 2), (6, 8)])
+    # A span inside one already counted covers nothing more.
+    assert only(text, 0, 8, [(0, 5), (1, 2), (6, 8)])
+    # A span that begins before the stretch or ends after it covers none of it.
+    assert not only(text, 3, 5, [(0, 5)])
+    assert not only(text, 0, 5, [(3, 8)])
 
 
 # Sentences in the readers' own forms, of any figure, month and year, with
@@ -2733,6 +2843,34 @@ def test_a_rate_lead_carrying_the_payroll_clause_is_checked_like_one() -> None:
         assert parse_release(page, parser_id) is None
 
 
+def test_a_two_clause_statement_takes_the_tails_of_its_last_clause() -> None:
+    """After a payroll clause, a tail about the number unemployed is no tail;
+    after a rate clause, it is."""
+    title, head = _EMPSIT_JULY
+    unemployed = ", and the number of unemployed people changed little"
+    sections = (
+        "Household Survey Data\n"
+        "The unemployment rate changed little at 4.1 percent in July.\n"
+        "Establishment Survey Data\n"
+        "Total nonfarm payroll employment changed little in July (+123,000)."
+    )
+    rate_lead = (
+        "The unemployment rate rose to 4.1 percent in July, and nonfarm payroll "
+        "employment edged up by 123,000."
+    )
+    html = _page(title, f"{head}{rate_lead}\n{sections}")
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    html = _page(title, f"{head}{rate_lead[:-1]}{unemployed}.\n{sections}")
+    assert parse_release(html, "empsit_unemployment_rate") is None
+    payroll_lead = (
+        "Total nonfarm payroll employment rose by 123,000 in July, and the "
+        f"unemployment rate changed little at 4.1 percent{unemployed}."
+    )
+    html = _page(title, f"{head}{payroll_lead}\n{sections}")
+    assert parse_release(html, "empsit_unemployment_rate") == ("2026-07", 4.1)
+    assert parse_release(html, "empsit_payroll_change") == ("2026-07", 123.0)
+
+
 @pytest.mark.parametrize(
     ("clause", "payroll"),
     (
@@ -2853,13 +2991,35 @@ def test_only_a_real_preformatted_element_is_the_release() -> None:
         "THE EMPLOYMENT SITUATION", "THE<!-- x -->EMPLOYMENT<span>SITUATION</span>", 1
     )
     assert parse_release(marked, "empsit_payroll_change") == reading
-    # A block never closed, or one inside another, is refused.
+    # A block never closed, even by a page that ends in it, or one inside
+    # another, is refused.
     for broken in (
         html.replace("</pre>", ""),
+        html[: html.index("</pre>")],
         html.replace("<pre>", "<pre><pre>", 1),
         html.replace("</pre>", "<pre></pre>"),
     ):
         assert parse_release(broken, "empsit_payroll_change") is None
+
+
+@pytest.mark.parametrize(
+    "parted", ("THE EMPLOYMENT</br>SITUATION", "<p>THE EMPLOYMENT</p>SITUATION")
+)
+def test_an_end_tag_in_the_block_parts_words(parted: str) -> None:
+    """A browser breaks the line at "</br>" and at a paragraph's end."""
+    html, reading = _july()
+    page = html.replace("THE EMPLOYMENT SITUATION", parted, 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == reading
+
+
+@pytest.mark.parametrize("stray", ("</span>", "</p>", "</a>", "<span>x</a></span>"))
+def test_inside_the_block_every_end_tag_closes_the_element_last_opened(
+    stray: str,
+) -> None:
+    html, _ = _july()
+    page = html.replace("Household Survey Data", f"{stray}Household Survey Data", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+    assert not _plain(page)
 
 
 def _july() -> tuple[str, tuple[str, float]]:
@@ -3000,6 +3160,26 @@ def test_a_label_before_the_jolts_heading_is_refused(label: str, at: int) -> Non
     assert parse_release(page, "jolts_job_openings") is None
 
 
+@pytest.mark.parametrize(
+    ("at", "line"),
+    (
+        # A weekday's place holding a label.
+        (1, "8:30 a.m. (ET) Revised, August 7, 2026"),
+        # A contact outside BLS.
+        (4, "Household data: (202) 691-6378 * cpsinfo@example.com * www.bls.gov/cps"),
+        # Items run together.
+        (4, "Household data:(202) 691-6378 * cpsinfo@bls.gov * www.bls.gov/cps"),
+    ),
+)
+def test_each_preamble_item_is_one_of_the_releases_own(at: int, line: str) -> None:
+    title, pre = _empsit_text(_JULY)
+    lines = list(_EMPSIT_PREAMBLE)
+    lines[at] = line
+    page = _page(title, "\n".join([*lines, pre]))
+    for parser_id in _EMPSIT_IDS:
+        assert parse_release(page, parser_id) is None
+
+
 # Elements no release uses in its block; each may hide, show apart or move
 # what it holds.
 _FOREIGN_TO_THE_BLOCK = (
@@ -3087,6 +3267,10 @@ def test_the_pre_tag_carries_no_attribute(attribute: str) -> None:
     (
         ('<div class="normalnews">', "</div>", True),
         ('<section id="a"><main role="main">', "</main></section>", True),
+        ("<article><header>", "</header></article>", True),
+        ('<span class="x">', "</span>", True),
+        # A browser moves the block out of the table, before it.
+        ("<table>", "</table>", False),
         ("<div hidden>", "</div>", False),
         ('<div style="display:none">', "</div>", False),
         ("<div hidden><div>", "</div></div>", False),
@@ -3178,6 +3362,8 @@ def test_plaintext_anywhere_is_refused(at: str) -> None:
         ("<script>var label = 'Not seasonally adjusted:';</script>", True),
         ("<style>p { color: red }</style>", True),
         ("<template><p>Not seasonally adjusted:</p><img></template>", True),
+        ("<noframes>Not seasonally adjusted:</noframes>", True),
+        ("<noembed>Not seasonally adjusted:</noembed>", True),
         ('<link rel="stylesheet" href="x.css">', True),
         ("<br>", True),
         ('<div class="normalnews">', True),
@@ -3206,6 +3392,27 @@ def test_nothing_shown_stands_between_the_release_name_and_its_block(
     assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
 
 
+def test_the_title_shows_nothing_and_must_be_closed() -> None:
+    html, reading = _july()
+    title = "<title>Employment Situation Summary - 2026 M07 Results</title>"
+    assert html.count(title) == 1
+    untitled = html.replace(title, "")
+    page = untitled.replace("</h2>", f"</h2>{title}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == reading
+    page = untitled.replace("</html>", f"</html>{title.removesuffix('</title>')}")
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+
+
+def test_text_a_browser_moves_out_of_a_misplaced_head_is_shown() -> None:
+    """A browser ignores <head> in the body, and shows the text in it."""
+    html, reading = _july()
+    page = html.replace("<head>", "").replace("</head>", "")
+    empty = page.replace("</h2>", "</h2><head></head>", 1)
+    assert parse_release(empty, _EMPSIT_IDS[1]) == reading
+    label = page.replace("</h2>", "</h2><head>Not seasonally adjusted:</head>", 1)
+    assert parse_release(label, _EMPSIT_IDS[1]) is None
+
+
 @pytest.mark.parametrize(
     ("name", "read"),
     (
@@ -3223,6 +3430,7 @@ def test_nothing_shown_stands_between_the_release_name_and_its_block(
         ("<table><tr><td>Employment Situation Summary</td></tr></table>", False),
         ("<h2>Job Openings and Labor Turnover Summary</h2>", False),
         ("<h2>Situation Summary</h2>", False),
+        ("<h2>TheEmployment Situation Summary</h2>", False),
         ("<h2>Employment Situation Summary</h2><h3>Revised</h3>", False),
         ("", False),
     ),
@@ -3249,6 +3457,7 @@ def test_the_block_follows_the_release_name_shown(name: str, read: bool) -> None
         '<template shadowrootmode="open"></template>',
         '<template shadowroot="open"></template>',
         '<meta http-equiv="refresh" content="0; url=https://example.com/">',
+        '<meta http-equiv="Refresh" content="0; url=https://example.com/">',
     ),
 )
 @pytest.mark.parametrize("at", ("<div><p>Navigation", "<p>Footer"))
@@ -3298,10 +3507,14 @@ def test_up_to_the_block_every_end_tag_closes_the_element_last_opened(
         ("<!-- THE EMPLOYMENT SITUATION -- JULY 2026 -->", True),
         ('<?xml version="1.0"?>', True),
         ("<style>a</stylex>b</style>", True),
+        ('<script>var a = "<!--";</script><script>var b = "<script";</script>', True),
         ("<![CDATA[x>y]]>", False),
         ("x\0y", False),
-        # A browser runs this script on past its first "</script>".
+        # A browser runs this script on past its first "</script>", the last
+        # two to the end of the page.
         ("<script><!--<script></script>x</script>", False),
+        ("<script><!--<script></script>", False),
+        ("<script><!--<SCRIPT></script>", False),
         # With scripts on, a browser reads a <noscript>'s content as raw
         # text up to "</noscript>", wherever that stands.
         ("<noscript><!-- </noscript> --></noscript>", False),
@@ -3335,12 +3548,42 @@ def test_markup_tokenizers_read_alike_up_to_the_block(markup: str, read: bool) -
             True,
         ),
         ("<table><tr><td><table><tr><td>a</td></tr></table></td></tr></table>", True),
+        # An inner table's foot, or an end tag with nothing to close in the
+        # inner table, leaves the outer table alone.
+        (
+            "<table><tr><td><table><tfoot><tr><td>f</td></tr></tfoot></table></td>"
+            "</tr><tr><td>b</td></tr></table>",
+            True,
+        ),
+        (
+            "<table><tr><td><table><tfoot><tr><td>f</td></tr></tfoot></tr></table>"
+            "</td></tr><tr><td>b</td></tr></table>",
+            True,
+        ),
         # A browser moves text or another element out of the table, before it.
         ("<table>Not seasonally adjusted:<tr><td>4.1</td></tr></table>", False),
         ("<table><tr><td>4.1</td></tr>Not seasonally adjusted:</table>", False),
         ("<table><span>x</span><tr><td>4.1</td></tr></table>", False),
         ("<table><tr><p>x</p><td>4.1</td></tr></table>", False),
         ("<table><tr><td>4.1</td></tr><table>", False),
+        *(
+            (
+                f"<table><{part}>Not seasonally adjusted:<tr><td>4.1</td></tr></{part}>"
+                "</table>",
+                False,
+            )
+            for part in ("thead", "tbody", "tfoot")
+        ),
+        # Or there once a section, a row or a cell has closed.
+        (
+            "<table><thead><tr><th>a<tbody><tr><td>b</td></tr></tbody>Not seasonally "
+            "adjusted:</table>",
+            False,
+        ),
+        ("<table><tr><td>a<td>b</td>Not seasonally adjusted:</tr></table>", False),
+        ("<table><tr><td>a<tr><td>b</td></tr>Not seasonally adjusted:</table>", False),
+        # No release prints a <pre> in its block.
+        ("<table><tr><td><pre>x</table>", False),
         # And shows a table's parts in their order, wherever they stand.
         ("<table><tr><td>4.1</td></tr><caption>x</caption></table>", False),
         (
@@ -3355,8 +3598,16 @@ def test_markup_tokenizers_read_alike_up_to_the_block(markup: str, read: bool) -
         ),
         ("<table><caption>a</caption><caption>b</caption></table>", False),
         ("<table><thead></thead><thead></thead></table>", False),
-        # A cell with no table; a table the block's end leaves open.
+        # A row after the foot shows before it.
+        (
+            "<table><tfoot><tr><td>x</td></tr></tfoot><tr><td>4.1</td></tr></table>",
+            False,
+        ),
+        # A cell with no table, or outside any row (no release prints one); a
+        # table the block's end leaves open.
         ("<td>4.1</td>", False),
+        ("<table><td>4.1</td></table>", False),
+        ("<table><tbody><td>4.1</td></tbody></table>", False),
         ("<table><tr><td>4.1", False),
     ),
 )

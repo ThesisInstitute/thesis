@@ -388,8 +388,7 @@ class _Page(HTMLParser):
         ):
             self.plain = False
         if tag == "title":
-            if self.in_title:
-                self.plain = False
+            # A title inside one adds a second title, which refuses the page.
             self.in_title = True
             self.titles.append([])
         if self.where == "after":
@@ -481,10 +480,6 @@ class _Page(HTMLParser):
             return
         if not self.open or self.open[-1][0] != tag:
             self.plain = False
-            for index in range(len(self.open) - 1, -1, -1):
-                if self.open[index][0] == tag:
-                    del self.open[index:]
-                    break
             return
         self.open.pop()
         if tag == "script":
@@ -618,6 +613,14 @@ _PROBES = (
 )
 # Without it the prose readers read no page.
 _TOKENIZES_AS_BROWSERS = all(_tokens(html) == tokens for html, tokens in _PROBES)
+
+
+def html_tokenizer_conforms() -> bool:
+    """Whether this runtime's HTMLParser splits _PROBES as browsers do.
+
+    When it does not, the prose readers read no page.
+    """
+    return _TOKENIZES_AS_BROWSERS
 
 
 def _period(text: str, preliminary: bool) -> str | None:

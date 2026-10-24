@@ -17,6 +17,7 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import legacy_release_parsers  # noqa: E402
 import resolve_pending as rp  # noqa: E402
 
 CAPTURE = rp.LEGACY_RELEASE_CAPTURE_CONTRACTS
@@ -155,6 +156,69 @@ def test_each_unheld_ref_reaches_capture_leg(monkeypatch, capsys, content_hash):
     assert fact["measure"]["concept"] == contract["series"]
     assert fact["measure"]["unit"] == contract["unit"]
     assert fact["observed_at"] == binding["expectedReleaseWindow"]["start"]
+
+
+PROSE = [h for h in UNHELD if CAPTURE[h]["parser"] in rp.LEGACY_PROSE_PARSERS]
+TABLES = [h for h in UNHELD if h not in PROSE]
+
+
+def test_the_prose_cells_are_the_employment_situation_cells() -> None:
+    assert sorted(CAPTURE[h]["parser"] for h in PROSE) == [
+        "empsit_payroll_change",
+        "empsit_payroll_change",
+        "empsit_unemployment_rate",
+        "empsit_unemployment_rate",
+    ]
+    assert len(TABLES) == 6
+
+
+@pytest.mark.parametrize("content_hash", PROSE)
+def test_a_prose_cell_fails_the_run_where_html_parser_splits_otherwise(
+    monkeypatch, capsys, content_hash
+):
+    """On a runtime whose html.parser fails the probes, the prose readers
+    read no page. The cell fails the run, as a missing parser does, and is
+    never left to defer as a page no reader identifies."""
+    reg = registration(content_hash)
+    install_main(monkeypatch, reg)
+    monkeypatch.setattr(legacy_release_parsers, "_TOKENIZES_AS_BROWSERS", False)
+
+    def never(*_args, **_kwargs):
+        pytest.fail("no capture may be discovered or parsed")
+
+    monkeypatch.setattr(rp, "a19_registered_capture", never)
+    monkeypatch.setattr(rp, "parse_release", never)
+    assert rp.main() == 1
+    output = capsys.readouterr().out
+    ref = reg["contract"]["dataPointId"]
+    version = sys.version.split()[0]
+    refusal = (
+        f"Python {version}'s html.parser splits markup otherwise than browsers, "
+        "so the prose readers read no page"
+    )
+    assert f"  LEGACY RELEASE ENVIRONMENT FAILURE (fatal): {ref} — {refusal}" in output
+    assert f"  fatal: {ref}: {refusal}" in output
+    assert "would append" not in output
+
+
+@pytest.mark.parametrize("content_hash", TABLES)
+def test_a_table_cell_does_not_rest_on_the_html_tokenizer(
+    monkeypatch, capsys, content_hash
+):
+    reg = registration(content_hash)
+    install_main(monkeypatch, reg)
+    monkeypatch.setattr(legacy_release_parsers, "_TOKENIZES_AS_BROWSERS", False)
+    calls = []
+
+    def discover(*_args, **kwargs):
+        calls.append(kwargs)
+        return rp.A19Discovery(None, None, "CAPTURE UNIDENTIFIED (deferring)")
+
+    monkeypatch.setattr(rp, "a19_registered_capture", discover)
+    assert rp.main() == 0
+    output = capsys.readouterr().out
+    assert len(calls) == 1
+    assert "ENVIRONMENT FAILURE" not in output
 
 
 def test_unreviewed_generic_url_keeps_existing_mismatch_line(monkeypatch, capsys):

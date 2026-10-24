@@ -97,7 +97,8 @@ from legacy_release_contracts import (
     legacy_release_contract_mismatches,
 )
 from legacy_release_parsers import LABELS as LEGACY_RELEASE_LABELS
-from legacy_release_parsers import parse_release
+from legacy_release_parsers import PROSE_PARSERS as LEGACY_PROSE_PARSERS
+from legacy_release_parsers import html_tokenizer_conforms, parse_release
 from pin_ledger import PinError, _validate_catalog_binding
 from register_targets import (
     LEGACY_BOUNDED_CONDITIONAL_IDS,
@@ -18171,6 +18172,20 @@ def _main() -> int:
                     "  PRINTED PRECISION BELOW CONTRACT (refusing, ruling "
                     f"pending): {ref} — {held}"
                 )
+                continue
+            if parser_id in LEGACY_PROSE_PARSERS and not html_tokenizer_conforms():
+                # This runtime's html.parser splits markup otherwise than
+                # browsers (legacy_release_parsers._PROBES), so the prose
+                # readers would read no page and the cell would only look
+                # unidentified. A missing parser is fatal, as for xlrd.
+                refusal = (
+                    f"Python {sys.version.split()[0]}'s html.parser splits markup "
+                    "otherwise than browsers, so the prose readers read no page"
+                )
+                print(
+                    f"  LEGACY RELEASE ENVIRONMENT FAILURE (fatal): {ref} — {refusal}"
+                )
+                environment_failures.append(f"{ref}: {refusal}")
                 continue
             window = source_binding["expectedReleaseWindow"]
             registered_url = source_binding["sourceUrl"]

@@ -532,6 +532,12 @@ def test_a_summary_line_alone_still_reports_its_target():
             "0.1 million, and this contract reads a thousands figure",
             "PRINTED_PRECISION_BELOW_CONTRACT",
         ),
+        (
+            "LEGACY RELEASE ENVIRONMENT FAILURE (fatal): {ref} — Python 3.14.0's "
+            "html.parser splits markup otherwise than browsers, so the prose "
+            "readers read no page",
+            "ENVIRONMENT_FAILURE",
+        ),
     ],
 )
 def test_line_shapes_added_since_the_first_fixture(line, code):

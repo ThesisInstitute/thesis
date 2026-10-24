@@ -118,7 +118,11 @@ The readers run no stylesheet or script, so text hidden or moved by either
 is read where the markup puts it. How Python's `HTMLParser` splits a page
 into tags, comments and text is checked once, against probes whose split
 the HTML standard fixes (`_PROBES`). On a runtime that splits any of them
-otherwise, the readers read no summary page, and those cells defer.
+otherwise, the readers read no summary page, and the resolver fails the
+run for those cells ("LEGACY RELEASE ENVIRONMENT FAILURE (fatal)"), as it
+does for a missing parser. The resolver's runner image (ubuntu-26.04,
+20261012) ships Python 3.14.4, and CPython 3.14.4 passes them all;
+3.14.0 does not.
 
 The Employment Situation and JOLTS summaries print no table. Their figures
 are read from the release's prose (`PROSE_PARSERS` in
