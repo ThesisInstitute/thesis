@@ -559,6 +559,16 @@ def _discover(html: str, parser_id: str):
         ", following an average monthly gain of 34,000 for the prior 12 months",
         ", following an average monthly gain of 34,000 during the prior 12 months",
         ", following no change in June",
+        # Round-8 red team (r8b), finding 1: each deferred the capture.
+        ", after changing little over the prior 12 months",
+        ", following a large increase in January (+77,000)",
+        ", similar to the average increase of 11,000 jobs per month in 2024",
+        ", following an average monthly gain of 150,000 over the past six months",
+        " and has continued to trend up since April",
+        " and has shown little change for the past year",
+        " and has shown little or no change since April",
+        " and has shown little change in recent months",
+        ", above the prior 12-month average gain (+5,000)",
     ),
 )
 def test_a_payroll_continuation_is_a_tail_through_discovery(continuation: str) -> None:
@@ -846,3 +856,78 @@ def test_round_8_a_later_clause_never_resolves_through_discovery() -> None:
     found = _discover(page, "empsit_payroll_change")
     assert found.url is None
     assert "CAPTURE UNIDENTIFIED (deferring)" in found.verdict
+
+
+_JULY_2025 = FIXTURES / "corpus" / "empsit.nr0-20250812021231.json"
+
+
+@pytest.mark.parametrize(
+    "trend",
+    (
+        "and has shown little change since April",
+        # Round-8 red team (r8b), finding 1: each deferred this capture.
+        "and has shown little or no change since April",
+        "and has shown little change in recent months",
+        "and has continued to show little change since April",
+    ),
+)
+def test_another_wording_of_the_2025_trend_reads_the_same(trend: str) -> None:
+    """The July 2025 release states payrolls before the rate, both with the
+    trend since April; either wording of the trend reads the same."""
+    _meta, _raw, html = _load(_JULY_2025)
+    original = _phrase("and has shown little change since April")
+    assert len(original.findall(html)) == 2
+    changed = original.sub(trend, html)
+    readings = {
+        parser_id: parse_release(changed, parser_id)
+        for parser_id in ("empsit_payroll_change", "empsit_unemployment_rate")
+    }
+    expected = {
+        "empsit_payroll_change": ("2025-07", 73.0),
+        "empsit_unemployment_rate": ("2025-07", 4.2),
+    }
+    if trend == "and has continued to show little change since April":
+        # Not one of the forms: the payroll statements are no statements,
+        # and the payroll reader defers. The rate, which opens after the
+        # payroll sentence, then has nothing sound before it but text.
+        expected = dict.fromkeys(expected)
+    assert readings == expected
+
+
+def test_round_8_red_team_text_before_the_lead_defers_a_real_release() -> None:
+    """Round-8 red team (r8a), finding 2, on the real July capture: a label
+    between the heading and the lead refuses both readers, and discovery
+    defers."""
+    _meta, _raw, html = _load(_EMPSIT_REAL)
+    heading = _phrase("THE EMPLOYMENT SITUATION - JULY 2026")
+    assert len(heading.findall(html)) == 1
+    for label in ("Not seasonally adjusted:", "Puerto Rico", "(p)"):
+        labelled = heading.sub(
+            f"THE EMPLOYMENT SITUATION - JULY 2026\n\n{label}\n", html
+        )
+        for parser_id in _EMPSIT_READINGS:
+            assert parse_release(labelled, parser_id) is None
+            found = _discover(labelled, parser_id)
+            assert found.url is None
+            assert "CAPTURE UNIDENTIFIED (deferring)" in found.verdict
+
+
+def test_round_8_red_team_a_commented_out_block_never_reads_a_real_release() -> None:
+    """Round-8 red team (r8a), finding 3, on the real July capture: a forged
+    block inside a comment changes nothing."""
+    _meta, _raw, html = _load(_EMPSIT_REAL)
+    forged = (
+        "<!--<pre>THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        "The unemployment rate was 4.8 percent in July.\n"
+        "The unemployment rate was 4.8 percent.\n"
+        "Total nonfarm payroll employment rose by 999,000 in July.\n"
+        "Total nonfarm payroll employment rose by 999,000 in July.</pre>-->"
+    )
+    before = html.lower().index("<pre")
+    after = html.lower().index("</pre>") + len("</pre>")
+    for page in (
+        html[:before] + forged + html[before:],
+        html[:after] + forged + html[after:],
+    ):
+        for parser_id, reading in _EMPSIT_READINGS.items():
+            assert parse_release(page, parser_id) == reading

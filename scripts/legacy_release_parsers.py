@@ -19,9 +19,9 @@ belong to the caller.
 
 from __future__ import annotations
 
-import html as html_lib
 import math
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from decimal import Decimal
 from html.parser import HTMLParser
@@ -198,7 +198,12 @@ class _Table:
 
 
 class _Document(HTMLParser):
-    """Keep table boundaries, header spans and unsplit numeric text."""
+    """Keep table boundaries, header spans and unsplit numeric text.
+
+    Also the text of each preformatted block, with every tag or comment
+    inside it a word break. Only real <pre> elements count: one inside a
+    comment or a script is no block.
+    """
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -206,11 +211,20 @@ class _Document(HTMLParser):
         self.stack: list[_Table] = []
         self.titles: list[list[str]] = []
         self.in_title = False
+        self.pres: list[list[str]] = []
+        self.in_pre = False
         self.malformed = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         names = [name for name, _ in attrs]
         values = {name: value or "" for name, value in attrs}
+        if self.in_pre:
+            self.pres[-1].append(" ")
+            if tag == "pre":
+                self.malformed = True
+        elif tag == "pre":
+            self.in_pre = True
+            self.pres.append([])
         if tag == "title":
             if self.in_title:
                 self.malformed = True
@@ -247,6 +261,10 @@ class _Document(HTMLParser):
                 table.caption.append(" ")
 
     def handle_endtag(self, tag: str) -> None:
+        if tag == "pre":
+            self.in_pre = False
+        elif self.in_pre:
+            self.pres[-1].append(" ")
         if tag == "title":
             self.in_title = False
         if not self.stack:
@@ -261,7 +279,13 @@ class _Document(HTMLParser):
         elif tag == "caption":
             table.in_caption = False
 
+    def handle_comment(self, data: str) -> None:
+        if self.in_pre:
+            self.pres[-1].append(" ")
+
     def handle_data(self, data: str) -> None:
+        if self.in_pre:
+            self.pres[-1].append(data)
         if self.in_title:
             self.titles[-1].append(data)
         if not self.stack:
@@ -442,14 +466,19 @@ _OPENINGS_CHANGE = rf"(?: \([+\-\u2212]{_COUNT}\))?"
 # discouraged workers"), period ("compared with a year earlier", "and by
 # 120,000 for the month") or revision. A sentence whose tail is anything
 # else is no statement. Every tail in the corpus of real releases
-# (tests/fixtures/release_capture/corpus/) is one of them.
+# (tests/fixtures/release_capture/corpus/) is one of them, and so is every
+# comparison, trend or change over the year those releases print after any
+# measure's month, but those the tests list as excluded, with the reason.
 #
-# A comparison opens with one of these words. "Before" opens none: "before
-# seasonal adjustment" is another measure.
+# A comparison opens with a comma and then one of these words. Without the
+# comma the comparison could be the figure's own ("was 10.0 percent higher
+# than 4.0 percent in June"). "Before" opens none: "before seasonal
+# adjustment" is another measure.
 _COMPARE = (
-    "(?:(?:roughly|about|nearly|slightly|somewhat|well|much|far) )?"
-    "(?:following|after|compared with|similar to|in line with|close to|"
-    "the same as|up from|down from|(?:higher|lower|less|more) than|above|below)"
+    "(?:(?:roughly|about|nearly|slightly|somewhat|well|much|far|largely|mostly) )?"
+    "(?:following|after|compared (?:with|to)|similar to|in line with|close to|"
+    "the same as|up from|down from|(?:higher|lower|less|more) than|above|below|"
+    "half|double|offsetting)"
 )
 # A figure: "4.2", "166,000", "-13,000". A comma or period inside a number
 # has a digit after it, so no full stop, abbreviation ("U.S.") or
@@ -459,9 +488,9 @@ _YEAR = r"(?:19|20)[0-9]{2}"
 # What a comparison compares with, its operand, comes first: a figure, never
 # a year ("compared with 3.9 percent a year earlier"), or a change, an
 # average or a trend ("following little change", "similar to the average
-# monthly gain of 166,000"). A bare period ("compared with a year earlier")
-# is no operand: it would make the statement's own figure a change over
-# that period.
+# monthly gain of 166,000", "after changing little"). A bare period
+# ("compared with a year earlier") is no operand: it would make the
+# statement's own figure a change over that period.
 _COMPARATORS = (
     "change",
     "changes",
@@ -479,55 +508,95 @@ _COMPARATORS = (
     "average",
     "trend",
 )
-_MODIFIERS = ("little", "no", "net", "average", "monthly")
+_MODIFIERS = (
+    "little",
+    "no",
+    "net",
+    "average",
+    "monthly",
+    "large",
+    "larger",
+    "job",
+    "employment",
+)
 _OPERAND_FIGURE = (
     rf"(?!{_YEAR}(?![0-9]|,[0-9]|\.[0-9])){_TAIL_FIGURE}"
-    r"(?: percent| million| percentage points?)?"
+    r"(?: percent| million| percentage points?| jobs)?"
 )
 _OPERAND = (
-    rf"(?:{_OPERAND_FIGURE}|(?:(?:a|an|the) )?(?:showing )?"
+    rf"(?:{_OPERAND_FIGURE}|changing little|(?:(?:a|an|the) )?(?:showing )?"
     rf"(?:(?:{'|'.join(_MODIFIERS)}) )*(?:{'|'.join(_COMPARATORS)})"
     rf"(?: of {_OPERAND_FIGURE})?)"
 )
 # Then the operand's own period, which it must name ("in June", "over the
-# prior 12 months"), and nothing else but a change in parentheses ("in the
-# prior month (+36,000)"). _prose_release ignores a statement whose tail
-# names the release month itself: the figure it compares with would be the
-# same month's, of another basis or measure.
+# prior 12 months", "over the past six months"), and nothing else but a
+# change in parentheses ("in the prior month (+36,000)"). _prose_release
+# ignores a statement whose tail names the release month itself: the figure
+# it compares with would be the same month's, of another basis or measure.
+# For the same reason one month is only "the prior", "previous" or
+# "preceding" month: "the past month" or "the last month" may be the
+# release month.
+_SPAN = "(?:[1-9][0-9]?|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)"
+_PRIOR = "(?:prior|previous|preceding|past|last)"
 _PERIOD = (
     rf" (?:in|since) (?:(?:{_MONTH})(?: {_YEAR})?|{_YEAR})"
-    r"| in the (?:prior|previous|preceding|past|last) month"
-    r"| (?:over|for|during|in) the (?:prior|previous|preceding|past|last) "
-    r"[1-9][0-9]? months"
-    r"| over the (?:(?:prior|previous|preceding|past|last) )?year"
+    r"| (?:over|for|during|in) the (?:prior|previous|preceding) month"
+    rf"| (?:over|for|during|in) the {_PRIOR} (?:year|{_SPAN} months)"
+    r"| over the year"
     r"| a (?:year|month) earlier"
     r"| per month"
     r"| (?:so|thus) far this year"
 )
 _CHANGE_IN_PARENS = rf" \({_TAIL_FIGURE}\)"
 _PERIODS = rf"(?:{_CHANGE_IN_PARENS})?(?:{_PERIOD})(?:{_PERIOD}|{_CHANGE_IN_PARENS})*"
+# An average over the prior months names its own period ("above the prior
+# 12-month average gain (+5,000)", "about double the prior 12-month average
+# gain of 12,000").
+_SPAN_AVERAGE = (
+    rf"the {_PRIOR} {_SPAN}-month average(?: (?:{'|'.join(_COMPARATORS)}))?"
+    rf"(?: of {_OPERAND_FIGURE})?(?:{_CHANGE_IN_PARENS})?"
+)
 # A second operand, with its own period, may follow ("following gains of
 # 34,000 in May and 41,000 in June").
-_COMPARISON = rf",? {_COMPARE} {_OPERAND}{_PERIODS}(?: and {_OPERAND}{_PERIODS})?"
+_COMPARISON = (
+    rf", {_COMPARE} (?:{_OPERAND}{_PERIODS}(?: and {_OPERAND}{_PERIODS})?"
+    rf"|{_SPAN_AVERAGE})"
+)
 # The trend since another period ("... and has shown little change since
 # April", "... and has remained in a narrow range of 4.0 percent to 4.2
-# percent since May 2024").
+# percent since May 2024", "... and has shown little change in recent
+# months"). A trend states no figure of a month.
 _RANGE = rf"{_TAIL_FIGURE}(?: percent| million)?"
+_TREND_PERIOD = rf"(?:{_PERIOD}| in recent months)"
 _TREND = (
     r" (?:and|but) (?:(?:has|have|had) (?:"
-    r"shown little (?:net )?(?:change|movement)|changed little"
-    r"|been (?:essentially unchanged|little changed|unchanged)"
-    r"|trended (?:up|down)"
-    r"|remained (?:essentially unchanged|little changed|unchanged"
+    r"shown little (?:or no )?(?:net )?(?:employment )?(?:change|movement)"
+    r"|changed little"
+    r"|(?:been|remained) (?:essentially unchanged|little changed|unchanged"
     rf"|in a narrow range of {_RANGE} to {_RANGE}"
-    rf"|at either {_RANGE} or {_RANGE})){_PERIODS}"
-    r"|continued (?:(?:its|the) (?:recent )?(?:upward|downward) trend"
-    rf"|to trend (?:up|down))(?:{_PERIOD})*)"
+    rf"|at either {_RANGE} or {_RANGE})"
+    r"|trended (?:up|down))"
+    rf"(?:{_CHANGE_IN_PARENS})?{_TREND_PERIOD}"
+    rf"(?:{_TREND_PERIOD}|{_CHANGE_IN_PARENS})*"
+    r"|(?:(?:has|have|had) )?continued (?:(?:its|the) (?:recent )?"
+    rf"(?:upward|downward) trend|to trend (?:up|down))(?:{_TREND_PERIOD})*)"
 )
-# JOLTS: "... but was down by 885,000 over the year", after the level only.
+# A level's change over the year, after the openings level or a rate only
+# ("... but was down by 885,000 over the year", "... but is up from 1.5
+# million a year earlier", "... and is little different from a year
+# earlier"). Never after the payroll change, whose level change is not its
+# own; and never since a month ("and is up by 120,000 since June" would
+# restate July's change).
+_YEAR_AGO = r" (?:over the year|from a year earlier)"
 _OVER_THE_YEAR = (
-    rf" (?:and|but) (?:was|were) (?:up|down) by {_TAIL_FIGURE}(?: million)? "
-    r"over the year"
+    r" (?:and|but) (?:"
+    r"(?:(?:is|are|was|were) (?:up|down)(?: by)?"
+    r"|(?:has|have|had) (?:increased|decreased|declined|risen|fallen|grown) by)"
+    rf" {_TAIL_FIGURE}(?: million| percentage points?)?{_YEAR_AGO}"
+    rf"|(?:is|are|was|were) (?:up|down) from {_TAIL_FIGURE}(?: million| percent)?"
+    r" a year earlier"
+    r"|(?:(?:is|are|was|were) (?:little changed|little different|unchanged"
+    rf"|essentially unchanged)|showed little change){_YEAR_AGO})"
 )
 # After the rate only: the number unemployed ("..., and the number of
 # unemployed people, at 7.1 million, changed little in August"), and the
@@ -548,8 +617,8 @@ _POPULATION_CONTROLS = (
 _TAILS = {
     "payroll": rf"(?P<tail>{_COMPARISON}|{_TREND})",
     "rate": (
-        rf"(?:(?P<tail>{_COMPARISON}|{_TREND})|{_UNEMPLOYED_CLAUSE}"
-        rf"|{_POPULATION_CONTROLS})"
+        rf"(?:(?P<tail>{_COMPARISON}|{_TREND})|{_OVER_THE_YEAR}"
+        rf"|{_UNEMPLOYED_CLAUSE}|{_POPULATION_CONTROLS})"
     ),
     "openings": rf"(?:(?P<tail>{_COMPARISON}|{_TREND})|{_OVER_THE_YEAR})",
 }
@@ -804,26 +873,55 @@ def _names_the_month(tail: str | None, month_name: str, year: str) -> bool:
     )
 
 
+def _statements(
+    spec: _Prose, text: str, month_name: str, year: str
+) -> Iterator[re.Match[str]]:
+    """Each sentence in one of the reader's forms, but those whose
+    comparison or trend names the release month (no statement)."""
+    for pattern in spec.statements:
+        for match in pattern.finditer(text):
+            if not _names_the_month(match.groupdict().get("tail"), month_name, year):
+                yield match
+
+
+def _only_statements(
+    text: str, start: int, end: int, spans: list[tuple[int, int]]
+) -> bool:
+    """Whether text[start:end] is nothing but whitespace and whole spans."""
+    covered = start
+    for begin, finish in sorted(spans):
+        if begin < start or finish > end or finish <= covered:
+            continue
+        if text[covered:begin].strip():
+            return False
+        covered = finish
+    return not text[covered:end].strip()
+
+
 def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     """The figure every statement of the release month states, or None.
 
     The page must have exactly one title naming the release and its month
     (the Employment Situation titles its December release "M13"), exactly
-    one preformatted block, and exactly one release heading naming the same
-    month. Where the release first names the measure after the heading (its
-    lead), a dated statement of the month must hold that mention. A
-    statement is one of the reader's forms, whole: the measure's
-    own subject opening a sentence or clause, the figure, the month named in
-    place or left unsaid, and nothing after it but a tail and the full stop
-    (_end). The statements that name the month must all agree, and at least
-    two statements in separate stretches of text must state their figure
-    (BLS states each headline figure in the lead paragraph and again in its
-    section): dated ones, and the undated ones when every undated statement
-    states that figure. A dated statement that names another month or year,
-    or whose verb contradicts its printed sign, refuses the page. An undated
-    statement never does: one stating another figure, or contradicting
-    itself, only stops the undated statements counting. Text in no form is
-    not read.
+    one preformatted block (a real <pre> element, not one in a comment), and
+    exactly one release heading naming the same month. Where the release
+    first names the measure after the heading (its lead), a dated statement
+    of the month must hold that mention, and the release must open with it:
+    between the heading and that statement there may be only the release's
+    other dated statements of the month (the 2025 releases state payrolls
+    before the rate), never a label or any other text that could qualify
+    it ("Not seasonally adjusted:"). A statement is one of the reader's
+    forms, whole: the measure's own subject opening a sentence or clause,
+    the figure, the month named in place or left unsaid, and nothing after
+    it but a tail and the full stop (_end). The statements that name the
+    month must all agree, and at least two statements in separate stretches
+    of text must state their figure (BLS states each headline figure in the
+    lead paragraph and again in its section): dated ones, and the undated
+    ones when every undated statement states that figure. A dated statement
+    that names another month or year, or whose verb contradicts its printed
+    sign, refuses the page. An undated statement never does: one stating
+    another figure, or contradicting itself, only stops the undated
+    statements counting. Text in no form is not read.
     """
     spec = PROSE_PARSERS[parser_id]
     doc = _Document()
@@ -832,7 +930,7 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
         doc.close()
     except (AssertionError, ValueError):
         return None
-    if doc.malformed or doc.in_title or len(doc.titles) != 1:
+    if doc.malformed or doc.in_title or doc.in_pre or len(doc.titles) != 1:
         return None
     title = re.fullmatch(
         rf"{spec.title} - ([0-9]{{4}}) M(0[1-9]|1[0-3]) Results", _text(doc.titles[0])
@@ -842,10 +940,9 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     month = min(int(title[2]), 12)
     period = f"{title[1]}-{month:02d}"
     month_name = _MONTH_NAMES[month - 1]
-    blocks = re.findall(r"<pre\b[^>]*>(.*?)</pre\s*>", html, re.S | re.I)
-    if len(blocks) != 1:
+    if len(doc.pres) != 1:
         return None
-    text = " ".join(html_lib.unescape(re.sub(r"<[^>]+>", " ", blocks[0])).split())
+    text = " ".join("".join(doc.pres[0]).split())
     # "JULY 2026", and once "March 2026".
     headings = list(
         re.finditer(
@@ -864,31 +961,41 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     found: list[tuple[int, int]] = []
     values: set[Decimal] = set()
     undated: list[tuple[tuple[int, int], Decimal | None]] = []
-    for pattern in spec.statements:
-        for match in pattern.finditer(text):
-            groups = match.groupdict()
-            if _names_the_month(groups.get("tail"), month_name, title[1]):
-                continue
-            if groups["month"] is None:
-                undated.append((match.span(), _statement_value(groups)))
-                continue
-            if groups["month"] != month_name or groups["year"] not in (
-                None,
-                title[1],
-            ):
-                return None
-            value = _statement_value(groups)
-            if value is None:
-                return None
-            values.add(value)
-            found.append(match.span())
+    for match in _statements(spec, text, month_name, title[1]):
+        groups = match.groupdict()
+        if groups["month"] is None:
+            undated.append((match.span(), _statement_value(groups)))
+            continue
+        if groups["month"] != month_name or groups["year"] not in (None, title[1]):
+            return None
+        value = _statement_value(groups)
+        if value is None:
+            return None
+        values.add(value)
+        found.append(match.span())
     if len(values) != 1:
         return None
     (figure,) = values
-    # A dated statement must hold the lead, and every other dated statement
-    # agrees with it. So the figure read is the one the release states where
-    # it first names the measure, and nothing elsewhere can supply another.
-    if not any(begin <= lead.start() < finish for begin, finish in found):
+    # What the release may open with: its readers' dated statements of the
+    # month, each sound.
+    opening = [
+        match.span()
+        for other in PROSE_PARSERS.values()
+        if other.heading == spec.heading
+        for match in _statements(other, text, month_name, title[1])
+        if match["month"] == month_name
+        and match["year"] in (None, title[1])
+        and _statement_value(match.groupdict()) is not None
+    ]
+    # A dated statement must hold the lead, the release must open with it,
+    # and every other dated statement agrees with it. So the figure read is
+    # the one the release states where it first names the measure, nothing
+    # before it qualifies it, and nothing elsewhere can supply another.
+    if not any(
+        begin <= lead.start() < finish
+        and _only_statements(text, headings[0].end(), begin, opening)
+        for begin, finish in found
+    ):
         return None
     # An undated statement may be about another period, and one stating
     # another figure (or contradicting itself) shows that one is. So the

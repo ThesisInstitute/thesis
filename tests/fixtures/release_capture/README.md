@@ -58,29 +58,46 @@ in the corpus; its title dates no month, so the reader refuses it.
 
 A tail is one of a few closed forms (`_TAILS` in the parser), chosen by
 the clause the statement ends with, and each of the corpus's 23 tails is
-one of them: a comparison, naming what it compares with (a figure, a
-change, an average or a trend) and then that operand's own period
-("following an average monthly gain of 194,000 over the prior 12
-months"); the trend since another period ("and has shown little change
-since April"); after a rate, the number unemployed or the
-population-control note; after the openings level, "but was down by
-885,000 over the year". Anything else after the month ("compared with a
-year earlier", "compared with the U.S. rate of 4.1 percent", "after
-including discouraged workers", ", and by 120,000 for the month") makes
-the sentence no statement, because it can say the statement's own figure
-is of another basis, scope or period. A comparison or trend naming the
-release month itself is no tail either. Some captures name the bureau "the
-U.S. Bureau of Labor Statistics (BLS)" before "reported today". The
+one of them: a comparison, opening with a comma and naming what it
+compares with (a figure, a change, an average or a trend) and then that
+operand's own period ("following an average monthly gain of 194,000 over
+the prior 12 months"); the trend since another period ("and has shown
+little change since April"); after a rate, the number unemployed or the
+population-control note; after a rate or the openings level, the change
+over the year ("but was down by 885,000 over the year"). Anything else
+after the month ("compared with a year earlier", "compared with the U.S.
+rate of 4.1 percent", "after including discouraged workers", ", and by
+120,000 for the month", or a comparison without its comma, as in "was
+10.0 percent higher than 4.0 percent in June") makes the sentence no
+statement, because it can say the statement's own figure is of another
+basis, scope or period, or is a difference. A comparison or trend naming
+the release month itself is no tail either. Some captures name the bureau
+"the U.S. Bureau of Labor Statistics (BLS)" before "reported today". The
 statements that leave their month unsaid count only when every one of
 them states the dated figure.
+
+The tails are also checked against BLS's habits beyond the headline. The
+32 summary captures print 117 distinct comparisons, trends and changes
+after some measure's month ("following a large increase in January
+(+77,000)", "about double the prior 12-month average gain of 12,000",
+"but is up by 286,000 over the year"). 73 are tails. The other 44 are
+excluded, each for a stated reason: what a change is made of ("led by
+individual and family services"), a clause about another measure, or a
+change since a month, which in the next month's release would be its own
+change. `test_every_comparison_trend_or_change_bls_prints_is_a_tail_or_excluded`
+holds the list.
 
 In every capture, where the release first names the measure after its
 heading ("unemployment rate", "nonfarm payroll employment", "job
 openings"), a dated statement of the month holds that mention: the lead
 paragraph. The readers require it, so the figure read is always the one
-the lead states. Three 2025 Employment Situations state the rate in the
-lead's second sentence ("The unemployment rate, at 4.2 percent, also
-changed little in July."), after a first sentence about payrolls alone.
+the lead states. Every capture also opens with it: nothing stands between
+the heading and the lead but, in three 2025 Employment Situations, a first
+sentence stating payrolls alone, before the rate's ("The unemployment rate,
+at 4.2 percent, also changed little in July."). The readers require that
+too, so a label ("Not seasonally adjusted:") or any other text before the
+lead refuses the page. The release is the one real `<pre>` element; a
+block inside a comment or a script is none.
 
 The Employment Situation and JOLTS summaries print no table. Their figures
 are read from the release's prose (`PROSE_PARSERS` in
