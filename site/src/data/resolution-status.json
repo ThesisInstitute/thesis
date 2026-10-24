@@ -1,6 +1,6 @@
 {
   "schemaVersion": "thesis_resolution_status_v1",
-  "asOf": "2026-10-23",
+  "asOf": "2026-10-24",
   "run": {
     "logAvailable": true,
     "completed": true,
@@ -370,7 +370,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "https //web.archive.org/web/20260904170006/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error  Errno 111  Connection refused ), and an unread earlier capture cannot be skipped"
+      "detail": "URLError   urlopen error  Errno 111  Connection refused"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-august-2026",
@@ -378,7 +378,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "https //web.archive.org/web/20260904170006/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error  Errno 111  Connection refused ), and an unread earlier capture cannot be skipped"
+      "detail": "URLError   urlopen error  Errno 111  Connection refused"
     },
     "bls.cps.telework_share.2026-08.first_print": {
       "forecastSlug": "us-telework-rate-august-2026",
@@ -445,7 +445,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "https //web.archive.org/web/20260904170006/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error  Errno 111  Connection refused ), and an unread earlier capture cannot be skipped"
+      "detail": "URLError   urlopen error  Errno 111  Connection refused"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-august-2026",
@@ -453,7 +453,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "https //web.archive.org/web/20260904170006/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error  Errno 111  Connection refused ), and an unread earlier capture cannot be skipped"
+      "detail": "URLError   urlopen error  Errno 111  Connection refused"
     },
     "bls.real_earnings.avg_hourly_mom.2026-08.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-august-2026",
@@ -681,18 +681,18 @@
     "bls.cps.employed_people_by_occupation.computer_mathematical.september_2026.first_print": {
       "forecastSlug": "cps-computer-math-employment-september-2026",
       "resolutionDate": "2026-10-08",
-      "state": "refused",
-      "code": "LEDGER_CATALOG_REFUSED",
-      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
-      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.computer_mathematical', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curati"
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "https //web.archive.org/web/20261002184214/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error  Errno 111  Connection refused ), and an unread earlier capture cannot be skipped"
     },
     "bls.cps.employed_people_by_occupation.healthcare_support.september_2026.first_print": {
       "forecastSlug": "cps-healthcare-support-employment-september-2026",
       "resolutionDate": "2026-10-08",
-      "state": "refused",
-      "code": "LEDGER_CATALOG_REFUSED",
-      "reason": "The resolver read the official figure, but the ledger's series catalog refused the row, so it was not recorded. The catalog refuses, for example, a row that would give one series two units or two cadences.",
-      "detail": "series-catalog generator exit 1  unit conflict within identity ('bls.cps.employed_people_by_occupation.healthcare_support', '  country ,  0100000US ,  current  ', '  economy ,  aggregate  ')   'millions', 'thousands'    resolve by curation"
+      "state": "fetch_failed",
+      "code": "SOURCE_UNREACHABLE",
+      "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
+      "detail": "https //web.archive.org/web/20261002184214/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error  Errno 111  Connection refused ), and an unread earlier capture cannot be skipped"
     },
     "bls.cps.telework_share.2026-09.first_print": {
       "forecastSlug": "us-telework-rate-september-2026",
@@ -737,7 +737,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error  Errno 111  Connection refused"
+      "detail": "https //web.archive.org/web/20261008235844/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error  Errno 111  Connection refused ), and an unread earlier capture cannot be skipped"
     },
     "bls.cps.employed_people_by_occupation.office_administrative_support.september_2026.first_print": {
       "forecastSlug": "cps-office-admin-employment-september-2026",
@@ -745,7 +745,7 @@
       "state": "fetch_failed",
       "code": "SOURCE_UNREACHABLE",
       "reason": "The resolver's last attempt to fetch data it needs for this target (its source, a check against the source, or an archive record of it) did not return usable data.",
-      "detail": "URLError   urlopen error  Errno 111  Connection refused"
+      "detail": "https //web.archive.org/web/20261008235844/https //www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError   urlopen error  Errno 111  Connection refused ), and an unread earlier capture cannot be skipped"
     },
     "bls.real_earnings.avg_hourly_mom.2026-09.first_print": {
       "forecastSlug": "us-real-avg-hourly-earnings-mom-september-2026",
@@ -777,6 +777,6 @@
       "detail": "SNAPSHOT WINDOW MISSED (refusing). closed 2026-10-22"
     }
   },
-  "generatedAtUtc": "2026-10-23T18:01:57Z",
-  "workflowRun": "39999339635"
+  "generatedAtUtc": "2026-10-24T17:02:38Z",
+  "workflowRun": "40113936509"
 }
