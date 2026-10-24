@@ -555,6 +555,10 @@ def _discover(html: str, parser_id: str):
         ", below the average monthly gain of 168,000 over the past 12 months",
         " and has shown little change since April",
         ", up from -13,000 in June",
+        # Round-7 review, finding 2: the real tail with "for" or "during".
+        ", following an average monthly gain of 34,000 for the prior 12 months",
+        ", following an average monthly gain of 34,000 during the prior 12 months",
+        ", following no change in June",
     ),
 )
 def test_a_payroll_continuation_is_a_tail_through_discovery(continuation: str) -> None:
@@ -789,3 +793,23 @@ def test_no_added_sentence_changes_a_real_openings_reading(data: st.DataObject) 
         _added_jolts_sentence(),
         data.draw,
     )
+
+
+def test_round_7_annual_comparisons_never_resolve_through_discovery() -> None:
+    """Round-7 review, finding 1, verbatim: discovery accepted 2000."""
+    pre = (
+        "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        "Total nonfarm payroll employment rose by 120,000 in July, following no "
+        "change in June.\n"
+        "Total nonfarm payroll employment rose by 2,000,000 in July, compared with a "
+        "year earlier.\n"
+        "Total nonfarm payroll employment increased by 2,000,000 in July compared "
+        "with the previous year."
+    )
+    page = (
+        "<html><head><title>Employment Situation Summary - 2026 M07 Results</title>"
+        f"</head><body><pre>\n{pre}\n</pre></body></html>"
+    )
+    found = _discover(page, "empsit_payroll_change")
+    assert found.url is None
+    assert "CAPTURE UNIDENTIFIED (deferring)" in found.verdict

@@ -63,7 +63,17 @@ discouraged workers") makes the sentence no statement, because such words
 can say the statement's own figure is of another basis, scope or period.
 Some captures name the bureau "the U.S. Bureau of Labor Statistics (BLS)"
 before "reported today". The statements that leave their month unsaid
-count only when every one of them states the dated figure.
+count only when every one of them states the dated figure. A comparison
+in a tail names what it compares with (a figure, a change, an average or a
+trend); a bare period ("compared with a year earlier") is no tail.
+
+In every capture, where the release first names the measure after its
+heading ("unemployment rate", "nonfarm payroll employment", "job
+openings"), a dated statement of the month holds that mention: the lead
+paragraph. The readers require it, so the figure read is always the one
+the lead states. Three 2025 Employment Situations state the rate in the
+lead's second sentence ("The unemployment rate, at 4.2 percent, also
+changed little in July."), after a first sentence about payrolls alone.
 
 The Employment Situation and JOLTS summaries print no table. Their figures
 are read from the release's prose (`PROSE_PARSERS` in

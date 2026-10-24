@@ -444,12 +444,14 @@ _COMPARE = (
     "the same as|up from|down from|(?:higher|lower|less|more) than|above|below)"
 )
 # After its opener a tail holds only these words, months and figures: the
-# words of a change, an average over a standard window, a range or a trend.
-# They cannot say that the statement's own figure is of another basis
-# ("after seasonal adjustment", "after including discouraged workers"),
-# scope ("the U.S. rate", "among adults"), period ("after averaging the
-# latest three months") or revision, so a sentence whose tail says any of
-# that is no statement. Every tail in the corpus of real releases
+# words of a change, an average over a standard window ("over", "for" or
+# "during the prior 12 months"), a range or a trend. They cannot say that
+# the statement's own figure is of another basis ("after seasonal
+# adjustment", "after including discouraged workers"), scope ("the U.S.
+# rate", "among adults"), period ("after averaging the latest three
+# months") or revision, so a sentence whose tail says any of that is no
+# statement; a comparison must also name what it compares with
+# (_COMPARATORS). Every tail in the corpus of real releases
 # (tests/fixtures/release_capture/corpus/) is made of them.
 _TAIL_VOCABULARY = (
     # Articles, prepositions and conjunctions.
@@ -463,6 +465,9 @@ _TAIL_VOCABULARY = (
     "at",
     "over",
     "since",
+    "for",
+    "during",
+    "per",
     "and",
     "or",
     "either",
@@ -478,6 +483,7 @@ _TAIL_VOCABULARY = (
     "changed",
     "unchanged",
     "little",
+    "no",
     "net",
     "gain",
     "gains",
@@ -522,13 +528,17 @@ _TAIL_VOCABULARY = (
     "continued",
     "was",
     "were",
+    "been",
+    "essentially",
     # A period.
     "month",
     "months",
     "year",
     "prior",
     "past",
+    "last",
     "previous",
+    "preceding",
     "earlier",
 )
 # A figure: "4.2", "166,000", "-13,000", "12", "2025"; a change in
@@ -541,8 +551,40 @@ _TAIL_FIGURE = r"[+\-\u2212]?[0-9](?:[0-9,]|\.(?=[0-9]))*"
 _TAIL_TOKEN = (
     rf"(?:{_MONTH}|{_TAIL_FIGURE}|\({_TAIL_FIGURE}\)|{'|'.join(_TAIL_VOCABULARY)})"
 )
+# A comparison names what it compares with: a figure ("compared with 3.9
+# percent a year earlier") or a change, an average or a trend ("following
+# little change in June", "similar to the average monthly gain of 166,000").
+# A bare period ("compared with a year earlier") would make the statement's
+# own figure a change over that period, so it opens no tail.
+_COMPARATORS = (
+    "change",
+    "changes",
+    "gain",
+    "gains",
+    "loss",
+    "losses",
+    "increase",
+    "increases",
+    "decrease",
+    "decreases",
+    "decline",
+    "declines",
+    "movement",
+    "average",
+    "trend",
+)
+# A year ("in 2025") or a count of months ("the prior 12 months") says when,
+# not what, so it is no figure to compare with.
+_COMPARED_FIGURE = (
+    rf"(?:\({_TAIL_FIGURE}\)|(?!(?:19|20)[0-9]{{2}}\b){_TAIL_FIGURE}"
+    r"(?![0-9]|,[0-9]|\.[0-9])(?! months?\b))"
+)
+_COMPARED = (
+    rf"(?=(?:,? {_TAIL_TOKEN})*?,? (?:{_COMPARED_FIGURE}|"
+    rf"(?:{'|'.join(_COMPARATORS)})\b))"
+)
 _TAIL = (
-    rf"(?:(?:,? {_COMPARE}\b"
+    rf"(?:(?:,? {_COMPARE}\b{_COMPARED}"
     r"| (?:and|but) (?:has|have|had|continued|remained)\b"
     # JOLTS: "... but was down by 885,000 over the year".
     r"| (?:and|but) (?:was|were) (?:up|down) by\b"
@@ -634,6 +676,9 @@ def _rate_after(value: str) -> str:
 class _Prose:
     title: str
     heading: str
+    # How the release names the measure. Its first mention after the
+    # heading is the lead, which a dated statement must hold.
+    mention: re.Pattern[str]
     statements: tuple[re.Pattern[str], ...]
 
 
@@ -649,6 +694,7 @@ PROSE_PARSERS = {
     "empsit_unemployment_rate": _Prose(
         _EMPSIT,
         "THE EMPLOYMENT SITUATION",
+        re.compile("unemployment rate", re.I),
         _compile(
             # "The unemployment rate (4.1 percent) changed little in July"
             *(rf"{_RATE_SUBJECT}{body}{_WHEN_OR_UNSAID}" for body in _RATE_BODIES),
@@ -701,6 +747,7 @@ PROSE_PARSERS = {
     "empsit_payroll_change": _Prose(
         _EMPSIT,
         "THE EMPLOYMENT SITUATION",
+        re.compile("nonfarm payroll employment", re.I),
         _compile(
             *(rf"{clause}(?:{_rate_after(_RATE)})?" for clause in _payroll_clauses("")),
             # "The unemployment rate rose to 4.3 percent in July, and nonfarm
@@ -721,6 +768,7 @@ PROSE_PARSERS = {
     "jolts_job_openings": _Prose(
         _JOLTS,
         "JOB OPENINGS AND LABOR TURNOVER",
+        re.compile("job openings", re.I),
         _compile(
             # "The number of job openings was little changed at 7.4 million
             # in June"
@@ -772,7 +820,9 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     The page must have exactly one title naming the release and its month
     (the Employment Situation titles its December release "M13"), exactly
     one preformatted block, and exactly one release heading naming the same
-    month. A statement is one of the reader's forms, whole: the measure's
+    month. Where the release first names the measure after the heading (its
+    lead), a dated statement of the month must hold that mention. A
+    statement is one of the reader's forms, whole: the measure's
     own subject opening a sentence or clause, the figure, the month named in
     place or left unsaid, and nothing after it but a tail and the full stop
     (_END). The statements that name the month must all agree, and at least
@@ -807,13 +857,19 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
         return None
     text = " ".join(html_lib.unescape(re.sub(r"<[^>]+>", " ", blocks[0])).split())
     # "JULY 2026", and once "March 2026".
-    headings = re.findall(
-        rf"{spec.heading}\W+((?i:{_MONTH})) ([0-9]{{4}})\b",
-        text,
+    headings = list(
+        re.finditer(
+            rf"{spec.heading}\W+((?i:{_MONTH})) ([0-9]{{4}})\b",
+            text,
+        )
     )
-    if [(name.upper(), year) for name, year in headings] != [
+    if [(heading[1].upper(), heading[2]) for heading in headings] != [
         (month_name.upper(), title[1])
     ]:
+        return None
+    # The lead: where the release first names the measure after its heading.
+    lead = spec.mention.search(text, headings[0].end())
+    if lead is None:
         return None
     found: list[tuple[int, int]] = []
     values: set[Decimal] = set()
@@ -837,6 +893,11 @@ def _prose_release(html: str, parser_id: str) -> tuple[str, float] | None:
     if len(values) != 1:
         return None
     (figure,) = values
+    # A dated statement must hold the lead, and every other dated statement
+    # agrees with it. So the figure read is the one the release states where
+    # it first names the measure, and nothing elsewhere can supply another.
+    if not any(begin <= lead.start() < finish for begin, finish in found):
+        return None
     # An undated statement may be about another period, and one stating
     # another figure (or contradicting itself) shows that one is. So the
     # undated statements corroborate only when every one states the figure.

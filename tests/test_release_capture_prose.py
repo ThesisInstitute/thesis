@@ -11,6 +11,10 @@ release is quoted.
 
 Invariants, for every generated release:
 - the reader returns (release month, headline figure), exactly;
+- where the release first names the measure after its heading (its lead),
+  a dated statement of the month must hold that mention, and every other
+  dated statement must agree with it: so whatever else a page holds, the
+  reader returns the lead's figure or nothing;
 - no decoy changes what it returns, whatever its numbers and wherever it
   sits;
 - after its month a statement holds only a tail, then optionally "the U.S.
@@ -18,7 +22,9 @@ Invariants, for every generated release:
   opens with a comparison word, "and has ...", "and continued ...", "but
   was down by ..." or ", and the number of unemployed people", and holds
   only the reviewed words of a change, an average, a range, a trend or a
-  period, with months and figures;
+  period, with months and figures; a comparison names what it compares
+  with (a figure, a change, an average or a trend), never a bare period
+  ("compared with a year earlier");
 - anything else after the month (another period, subgroup, basis or
   measure: ", a year earlier", "after seasonal adjustment", "the U.S.
   rate", "after including discouraged workers") makes the sentence no
@@ -47,7 +53,7 @@ from dataclasses import replace
 from decimal import Decimal
 
 import pytest
-from hypothesis import assume, given, settings
+from hypothesis import assume, event, given, settings
 from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -301,11 +307,17 @@ def test_a_decoy_anywhere_never_changes_what_the_empsit_readers_return(
     title, pre = _empsit_text(case)
     paragraphs = pre.split("\n\n")
     decoys = paragraphs.pop(-2)
-    # After the heading, before each section's heading, or at the end.
-    paragraphs.insert((1, 2, 4, len(paragraphs))[at], decoys)
-    moved = _page(title, "\n\n".join(paragraphs))
+    # After the lead, after each section's heading, or at the end.
+    moved = paragraphs.copy()
+    moved.insert((2, 3, 5, len(moved))[at], decoys)
     for parser_id, reading in _readings(case).items():
-        assert parse_release(moved, parser_id) == reading
+        assert parse_release(_page(title, "\n\n".join(moved)), parser_id) == reading
+    # Before the lead, a decoy is where the release first names the measure,
+    # and it is no statement of the month: refused.
+    first = paragraphs.copy()
+    first.insert(1, decoys)
+    for parser_id in _EMPSIT_IDS:
+        assert parse_release(_page(title, "\n\n".join(first)), parser_id) is None
 
 
 @settings(max_examples=100, deadline=None)
@@ -475,6 +487,10 @@ def test_a_payroll_measure_other_than_the_total_is_never_a_statement(
         # the figure before a change is another figure.
         ", before a change of 0.3 percentage point",
         ", before the change",
+        # Round-7 review, finding 1: a comparison with a bare period.
+        ", compared with a year earlier",
+        " compared with the previous year",
+        ", up from a year earlier",
     ),
 )
 def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> None:
@@ -506,18 +522,19 @@ def test_a_statement_qualified_after_its_month_is_not_read(qualifier: str) -> No
 _TAIL_VOCABULARY = tuple(
     (
         # Articles, prepositions and conjunctions.
-        "a an the of in to by at over since and or either than this its thus so "
-        "far "
+        "a an the of in to by at over since for during per and or either than this "
+        "its thus so far "
         # A change and its size.
-        "change changes changed unchanged little net gain gains loss losses "
+        "change changes changed unchanged little no net gain gains loss losses "
         "increase increases increased decrease decreases decreased decline "
         "declines declined rose fell edged up down percent percentage point "
         "points million "
         # An average, a range or a trend.
         "average monthly narrow range trend trended upward downward movement "
-        "recent showing shown has have had remained continued was were "
+        "recent showing shown has have had remained continued was were been "
+        "essentially "
         # A period.
-        "month months year prior past previous earlier"
+        "month months year prior past last previous preceding earlier"
     ).split()
 )
 
@@ -526,10 +543,25 @@ def test_the_tail_vocabulary_is_the_reviewed_one() -> None:
     assert legacy_release_parsers._TAIL_VOCABULARY == _TAIL_VOCABULARY
 
 
+# What a comparison may compare with, as reviewed: the parser's list must be
+# exactly this one.
+_COMPARATORS = tuple(
+    (
+        "change changes gain gains loss losses increase increases decrease "
+        "decreases decline declines movement average trend"
+    ).split()
+)
+
+
+def test_the_comparators_are_the_reviewed_ones() -> None:
+    assert legacy_release_parsers._COMPARATORS == _COMPARATORS
+
+
 # What a tail may open with, and words it may hold after: other months and
 # years, other figures, the reviewed words. None is capitalized but a month,
-# so no tail holds a statement of its own.
-_TAIL_OPENERS = (
+# so no tail holds a statement of its own. A comparison also names what it
+# compares with.
+_COMPARISON_OPENERS = (
     ", following",
     " following",
     ", after",
@@ -548,6 +580,9 @@ _TAIL_OPENERS = (
     ", more than",
     ", above",
     ", below",
+)
+_TAIL_OPENERS = (
+    *_COMPARISON_OPENERS,
     " and has",
     " and have",
     " and had",
@@ -581,13 +616,19 @@ _TAIL_WORDS = (
 )
 
 
+# What a comparison names: a figure, or one of the comparators.
+_COMPARED_WITH = ("4.2 percent", "(+36,000)", "166,000", "-13,000", *_COMPARATORS)
+
+
 @st.composite
 def _tail(draw: st.DrawFn) -> str:
+    opener = draw(st.sampled_from(_TAIL_OPENERS))
     words = draw(st.lists(st.sampled_from(_TAIL_WORDS), max_size=12))
+    if opener in _COMPARISON_OPENERS:
+        at = draw(st.integers(0, len(words)))
+        words.insert(at, draw(st.sampled_from(_COMPARED_WITH)))
     # Words follow one another after a space or a comma.
-    return draw(st.sampled_from(_TAIL_OPENERS)) + "".join(
-        draw(st.sampled_from((" ", ", "))) + word for word in words
-    )
+    return opener + "".join(draw(st.sampled_from((" ", ", "))) + word for word in words)
 
 
 @settings(max_examples=300, deadline=None)
@@ -599,10 +640,46 @@ def test_no_tail_changes_what_a_statement_says(tails: list[str]) -> None:
 
 @pytest.mark.parametrize("word", _TAIL_VOCABULARY)
 def test_each_reviewed_word_may_be_part_of_a_tail(word: str) -> None:
-    _check_tails([f", following {word}", f" and has {word}", "", f", below {word}"])
+    _check_tails(
+        [
+            f", following {word} (+36,000)",
+            f" and has {word}",
+            "",
+            f", below 4.2 percent {word}",
+        ]
+    )
     # Each tail may also end "reported today", as a lead's does.
     reported = ", the U.S. Bureau of Labor Statistics (BLS) reported today"
-    _check_tails([f", following {word}{reported}", "", "", f" and has {word}"])
+    _check_tails(
+        [f", following (+36,000) {word}{reported}", "", "", f" and has {word}"]
+    )
+
+
+@pytest.mark.parametrize("comparator", _COMPARATORS)
+def test_each_comparator_may_be_what_a_comparison_names(comparator: str) -> None:
+    _check_tails(
+        [
+            f", compared with the {comparator} a year earlier",
+            f", following the {comparator} in June",
+            f" up from the {comparator} over the prior 12 months",
+            f", below the {comparator} of the previous year",
+        ]
+    )
+
+
+@pytest.mark.parametrize("opener", _COMPARISON_OPENERS)
+@pytest.mark.parametrize(
+    "period",
+    ("a year earlier", "the previous year", "the prior 12 months", "June", "2025"),
+)
+def test_a_comparison_with_a_bare_period_is_no_tail(opener: str, period: str) -> None:
+    """Round-7 review, finding 1: "compared with a year earlier" makes the
+    statement's own figure a change over the year."""
+    _check_requalified(f"{opener} {period}")
+    # Naming what it compares with, the same comparison is a tail.
+    _check_tails(
+        [f"{opener} 4.0 percent {period}", "", f"{opener} a gain {period}", ""]
+    )
 
 
 @pytest.mark.parametrize(
@@ -898,9 +975,13 @@ def test_a_statement_that_leaves_its_month_unsaid_only_corroborates(
     # counts: one may be about another period, so none corroborates.
     assert read(dated, other) is None
     assert read(dated, dated, other) == ("2026-05", reading)
-    assert read(other, dated, unsaid) is None
-    assert read(other, dated, dated, unsaid) == ("2026-05", reading)
+    assert read(dated, other, unsaid) is None
+    assert read(dated, other, dated, unsaid) == ("2026-05", reading)
     assert read(other, other) is None
+    # Where the release first names the measure, an undated statement is no
+    # lead: refused, whatever follows.
+    assert read(unsaid, dated, dated) is None
+    assert read(other, dated, dated) is None
 
 
 def test_an_undated_statement_never_refuses_the_page() -> None:
@@ -934,6 +1015,280 @@ def test_an_undated_statement_never_refuses_the_page() -> None:
         for parser_id, reading in _readings(_JULY).items():
             expected = None if parser_id in refused else reading
             assert parse_release(html, parser_id) == expected
+
+
+def test_an_undated_statement_contradicting_itself_stops_the_undated_counting() -> None:
+    """Round-7 review: the mutant ignoring a self-contradicting undated
+    statement in the unanimity check survived."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    head = "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    pre = (
+        "Total nonfarm payroll employment increased by 123,000 in July.\n"
+        "Total nonfarm payroll employment increased by 123,000 over the month.\n"
+    )
+    html = _page(title, head + pre)
+    assert parse_release(html, "empsit_payroll_change") == ("2026-07", 123.0)
+    contradicted = "Total nonfarm payroll employment edged up (-23,000)."
+    html = _page(title, head + pre + contradicted)
+    assert parse_release(html, "empsit_payroll_change") is None
+
+
+_ROUND_7 = (
+    "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    "Total nonfarm payroll employment rose by 120,000 in July, following no change "
+    "in June.\n"
+    "Total nonfarm payroll employment rose by 2,000,000 in July, compared with a "
+    "year earlier.\n"
+    "Total nonfarm payroll employment increased by 2,000,000 in July compared with "
+    "the previous year."
+)
+
+
+def test_round_7_annual_comparisons_never_supply_the_monthly_change() -> None:
+    """Round-7 review, finding 1, verbatim: it returned 2000."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    assert parse_release(_page(title, _ROUND_7), "empsit_payroll_change") is None
+    # The true headline is a statement now ("no" is a reviewed word), and
+    # with a second statement it reads, beside the annual comparisons.
+    second = "\nTotal nonfarm payroll employment rose by 120,000 in July."
+    assert parse_release(_page(title, _ROUND_7 + second), "empsit_payroll_change") == (
+        "2026-07",
+        120.0,
+    )
+
+
+def test_the_figure_is_the_one_stated_where_the_release_first_names_it() -> None:
+    """Round-7 review, finding 1: with the true lead unread, other statements
+    of another figure supplied it."""
+    title = "Employment Situation Summary - 2026 M07 Results"
+    head = "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    annual = (
+        "Total nonfarm payroll employment rose by 2,000,000 in July, up from a "
+        "gain of 1,800,000 a year earlier.\n"
+        "Total nonfarm payroll employment increased by 2,000,000 in July, up from "
+        "a gain of 1,800,000 a year earlier."
+    )
+    # Alone, the two sentences are statements, and read.
+    assert parse_release(_page(title, head + annual), "empsit_payroll_change") == (
+        "2026-07",
+        2000.0,
+    )
+    # After a lead the reader cannot read, nothing does.
+    for lead in (
+        "Total nonfarm payroll employment rose by 120,000 in July, following "
+        "unusually strong hiring in June.",
+        "Total nonfarm payroll employment rose by 120,000 in July.\n\n",
+        "In June, total nonfarm payroll employment rose by 87,000.",
+        "Private nonfarm payroll employment rose by 2,000,000 in July.",
+        "Total nonfarm payroll employment rose by 2,000,000 over the month.",
+    ):
+        html = _page(title, f"{head}{lead}\n{annual}")
+        expected = None
+        assert parse_release(html, "empsit_payroll_change") == expected, lead
+    # A lead stating the figure reads it, and one stating another refuses.
+    for lead, expected in (
+        ("Total nonfarm payroll employment rose by 2,000,000 in July.", 2000.0),
+        ("Total nonfarm payroll employment rose by 120,000 in July.", None),
+    ):
+        html = _page(title, f"{head}{lead}\n{annual}")
+        reading = None if expected is None else ("2026-07", expected)
+        assert parse_release(html, "empsit_payroll_change") == reading
+
+
+def test_the_lead_is_found_whatever_its_case() -> None:
+    title = "Employment Situation Summary - 2026 M07 Results"
+    pre = (
+        "THE EMPLOYMENT SITUATION -- JULY 2026\n"
+        "Nonfarm payroll employment rose by 87,000 in July.\n"
+        "In June, total nonfarm payroll employment rose by 41,000.\n"
+        "Nonfarm payroll employment increased by 87,000 in July."
+    )
+    assert parse_release(_page(title, pre), "empsit_payroll_change") == (
+        "2026-07",
+        87.0,
+    )
+
+
+@pytest.mark.parametrize(
+    ("title", "heading", "mention", "statements", "parser_id", "reading"),
+    (
+        (
+            "Employment Situation Summary - 2026 M07 Results",
+            "THE EMPLOYMENT SITUATION -- JULY 2026",
+            "Unemployment rates by race are shown in table A-2.",
+            "The unemployment rate was 4.1 percent in July. "
+            "The unemployment rate changed little at 4.1 percent in July.",
+            "empsit_unemployment_rate",
+            ("2026-07", 4.1),
+        ),
+        (
+            "Job Openings and Labor Turnover Summary - 2026 M06 Results",
+            "JOB OPENINGS AND LABOR TURNOVER -- JUNE 2026",
+            "Job openings by industry are shown in table 1.",
+            "The number of job openings was little changed at 7.4 million in June. "
+            "The number of job openings was 7.4 million in June.",
+            "jolts_job_openings",
+            ("2026-06", 7.4),
+        ),
+    ),
+)
+def test_a_mention_in_capitals_before_the_headline_is_the_lead(
+    title: str,
+    heading: str,
+    mention: str,
+    statements: str,
+    parser_id: str,
+    reading: tuple[str, float],
+) -> None:
+    """The lead is where the release first names the measure, in any case."""
+    assert parse_release(_page(title, f"{heading}\n{statements}"), parser_id) == reading
+    html = _page(title, f"{heading}\n{mention}\n{statements}")
+    assert parse_release(html, parser_id) is None
+
+
+# Sentences in the readers' own forms, of any figure, month and year, with
+# or without a tail, for the property below.
+_ANY_TAILS = (
+    "",
+    ", following little change in June (+36,000)",
+    ", compared with an average monthly gain of 158,000 over the prior 12 months",
+    " and has remained in a narrow range of 4.0 percent to 4.2 percent since May",
+    ", the U.S. Bureau of Labor Statistics reported today",
+    ", compared with a year earlier",
+    ", up from a gain of 1,800,000 a year earlier",
+    ", after seasonal adjustment",
+    ", following unusually strong hiring in June",
+)
+_RATES = ("3.9", "4.1", "4.8")
+_CHANGES = (-23, 57, 123, 2000)
+
+
+@st.composite
+def _any_sentence(
+    draw: st.DrawFn,
+    rates: tuple[str, ...] = _RATES,
+    changes: tuple[int, ...] = _CHANGES,
+    months: tuple[str, ...] = ("June", "July", "August"),
+) -> str:
+    month = draw(st.sampled_from(months))
+    whens = ("", " over the month", f" in {month}", f" in {month} 2025")
+    when = draw(st.sampled_from(whens if len(months) > 1 else whens[:3]))
+    tail = draw(st.sampled_from(_ANY_TAILS))
+    rate = draw(st.sampled_from(rates))
+    change = draw(st.sampled_from(changes))
+    signed, count = _signed(change), _count(change)
+    verb = draw(st.sampled_from(("rose by", "increased by", "declined by", "fell by")))
+    words = draw(st.sampled_from(("changed little", "edged up", "edged down")))
+    return draw(
+        st.sampled_from(
+            (
+                f"The unemployment rate was {rate} percent{when}{tail}.",
+                f"The unemployment rate ({rate} percent) changed little{when}{tail}.",
+                f"In {month}, the unemployment rate was {rate} percent{tail}.",
+                f"The unemployment rate for teenagers was {rate} percent{when}.",
+                f"Total nonfarm payroll employment {verb} {count}{when}{tail}.",
+                f"Total nonfarm payroll employment {words}{when} ({signed}){tail}.",
+                f"Private nonfarm payroll employment {verb} {count}{when}.",
+                f"Both nonfarm payroll employment ({signed}) and the unemployment rate "
+                f"({rate} percent) {words}{when}{tail}.",
+                f"Total nonfarm payroll employment {verb} {count}{when}, and the "
+                f"unemployment rate changed little at {rate} percent{tail}.",
+            )
+        )
+    )
+
+
+@st.composite
+def _lead(draw: st.DrawFn, parser_id: str) -> tuple[str, float | None, str | int]:
+    """A lead for the reader, the July figure it states (None if none), and
+    the figure it prints."""
+    tail = draw(st.sampled_from(_ANY_TAILS[:5]))
+    if parser_id == "empsit_unemployment_rate":
+        rate = draw(st.sampled_from(_RATES))
+        stated = (
+            f"The unemployment rate was {rate} percent in July{tail}.",
+            f"The unemployment rate changed little at {rate} percent in July{tail}.",
+            f"In July, the unemployment rate was {rate} percent{tail}.",
+            f"Both nonfarm payroll employment (+57,000) and the unemployment rate "
+            f"({rate} percent) changed little in July{tail}.",
+        )
+        unstated = (
+            f"The unemployment rate was {rate} percent in July, after including "
+            "discouraged workers in the labor force.",
+            f"The unemployment rate for teenagers was {rate} percent in July.",
+            f"The unemployment rate was {rate} percent.",
+            f"The unemployment rate was {rate} percent in July, compared with a year "
+            "earlier.",
+            f"In June, the unemployment rate was {rate} percent.",
+        )
+        figure, printed = float(rate), rate
+    else:
+        change = draw(st.sampled_from(_CHANGES))
+        signed, count = _signed(change), _count(change)
+        verb = "rose" if change > 0 else "fell"
+        stated = (
+            f"Total nonfarm payroll employment {verb} by {count} in July{tail}.",
+            f"Total nonfarm payroll employment changed little in July ({signed})"
+            f"{tail}.",
+            f"Total nonfarm payroll employment {verb} by {count} in July, and the "
+            f"unemployment rate changed little at 4.1 percent{tail}.",
+        )
+        unstated = (
+            f"Total nonfarm payroll employment {verb} by {count} in July, following "
+            "unusually strong hiring in June.",
+            f"Private nonfarm payroll employment {verb} by {count} in July.",
+            f"Total nonfarm payroll employment {verb} by {count} over the month.",
+            f"Total nonfarm payroll employment {verb} by {count} in July, compared "
+            "with a year earlier.",
+            f"In June, total nonfarm payroll employment {verb} by {count}.",
+        )
+        figure, printed = float(change), change
+    if draw(st.booleans()):
+        return draw(st.sampled_from(stated)), figure, printed
+    return draw(st.sampled_from(unstated)), None, printed
+
+
+@settings(max_examples=400, deadline=None)
+@given(data=st.data(), parser_id=st.sampled_from(_EMPSIT_IDS))
+def test_whatever_follows_the_lead_the_reader_returns_its_figure_or_nothing(
+    data: st.DataObject, parser_id: str
+) -> None:
+    """Round-7 review: the guarantee holds for any page, not one fixture.
+
+    However the sentences after the lead are worded (statements of any
+    figure, month or year, with tails a reader may or may not admit,
+    decoys), the reader returns the July figure the lead states, or refuses.
+    A lead that states no July figure refuses the page.
+    """
+    lead, figure, printed = data.draw(_lead(parser_id))
+    # Sentences of any figures; all of one figure, so that they agree among
+    # themselves as a wrong figure stated twice would; or the lead's own
+    # figure for July, so that the page reads unless the lead is no
+    # statement.
+    mode = data.draw(st.sampled_from(("any", "one figure", "echo")))
+    if mode == "any":
+        sentence = _any_sentence()
+    elif mode == "one figure":
+        sentence = _any_sentence(
+            (data.draw(st.sampled_from(_RATES)),),
+            (data.draw(st.sampled_from(_CHANGES)),),
+        )
+    elif isinstance(printed, str):
+        sentence = _any_sentence((printed,), _CHANGES, ("July",))
+    else:
+        sentence = _any_sentence(_RATES, (printed,), ("July",))
+    body = data.draw(st.lists(sentence, min_size=1, max_size=6))
+    gaps = data.draw(st.lists(st.sampled_from((" ", "\n", "\n\n")), min_size=6))
+    text = lead + "".join(gap + sentence for gap, sentence in zip(gaps, body))
+    html = _page(
+        "Employment Situation Summary - 2026 M07 Results",
+        f"THE EMPLOYMENT SITUATION -- JULY 2026\n\n{text}",
+    )
+    got = parse_release(html, parser_id)
+    stated = "stated" if figure is not None else "unstated"
+    event(f"{mode}, {stated} lead: {'read' if got else 'refused'}")
+    allowed = (None,) if figure is None else (None, ("2026-07", figure))
+    assert got in allowed, (lead, body, got)
 
 
 def test_a_rate_lead_carrying_the_payroll_clause_is_checked_like_one() -> None:
