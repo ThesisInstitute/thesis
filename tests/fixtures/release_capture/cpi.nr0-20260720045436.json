@@ -1,0 +1,9 @@
+{
+  "captureUrl": "https://web.archive.org/web/20260720045436/https://www.bls.gov/news.release/cpi.nr0.htm",
+  "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
+  "stamp": "20260720045436",
+  "indexDigest": "BTBDZNR4OELOUZZFFZ45GU4Z2ZEXAT6B",
+  "gzipEncoded": true,
+  "title": "Consumer Price Index Summary - 2026 M06 Results",
+  "note": "June 2026 release (published 2026-07-14). Not a target month: no forecast in LEGACY_RELEASE_CAPTURE_CONTRACTS names June. Fetched 2026-10-16 from the id_ form; the bytes are exactly what the Archive stored, before BLS's gzip is removed."
+}

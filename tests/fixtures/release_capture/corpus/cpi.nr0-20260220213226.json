@@ -1,0 +1,23 @@
+{
+ "captureUrl": "https://web.archive.org/web/20260220213226/https://www.bls.gov/news.release/cpi.nr0.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
+ "stamp": "20260220213226",
+ "indexDigest": "KD4YPYJOG7HQDB2ZK2VHROAZDD34DKSV",
+ "gzipEncoded": true,
+ "title": "Consumer Price Index Summary - 2026 M01 Results",
+ "note": "Corpus capture of the 2026-01 release, captured 2026-02-20. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {
+  "cpi_headline_mom": {
+   "value": 0.1708,
+   "printedPrecision": 0.1,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CPIAUCSL&vintage_date=2026-02-20",
+   "how": "2026-01 over 2025-12 in the 2026-02-20 vintage (326.588 / 326.031), in percent; the page prints it to 0.1"
+  },
+  "cpi_core_mom": {
+   "value": 0.295,
+   "printedPrecision": 0.1,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CPILFESL&vintage_date=2026-02-20",
+   "how": "2026-01 over 2025-12 in the 2026-02-20 vintage (332.793 / 331.814), in percent; the page prints it to 0.1"
+  }
+ }
+}

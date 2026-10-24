@@ -27,7 +27,9 @@ export function ForecastCard({ forecast }: { forecast: ForecastListingItem }) {
               Resolved
             </Badge>
           )}
-          {forecast.overdue && <Badge>Overdue</Badge>}
+          {forecast.overdue && (
+            <Badge>{forecast.overdue.voided ? "Void" : "Overdue"}</Badge>
+          )}
         </div>
         <span className="[font-family:var(--font-mono)] text-[0.62rem] text-[var(--theme-text-dim)]">
           {resolutionVerb(forecast)}{" "}

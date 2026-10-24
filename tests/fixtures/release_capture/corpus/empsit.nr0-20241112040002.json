@@ -1,0 +1,21 @@
+{
+ "captureUrl": "https://web.archive.org/web/20241112040002/https://www.bls.gov/news.release/empsit.nr0.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+ "stamp": "20241112040002",
+ "indexDigest": "64YDSJZG6MCDZTU6NGMIFAIIOJG6MD6Y",
+ "gzipEncoded": false,
+ "title": "Employment Situation Summary - 2024 M10 Results",
+ "note": "Corpus capture of the 2024-10 release, captured 2024-11-12. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {
+  "empsit_unemployment_rate": {
+   "value": 4.1,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=UNRATE&vintage_date=2024-11-12",
+   "how": "the 2024-10 value in the 2024-11-12 vintage"
+  },
+  "empsit_payroll_change": {
+   "value": 12.0,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2024-11-12",
+   "how": "2024-10 minus 2024-09 in the 2024-11-12 vintage (159005 - 158993), in thousands"
+  }
+ }
+}

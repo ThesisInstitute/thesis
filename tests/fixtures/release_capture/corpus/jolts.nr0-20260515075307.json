@@ -1,0 +1,17 @@
+{
+ "captureUrl": "https://web.archive.org/web/20260515075307/https://www.bls.gov/news.release/jolts.nr0.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/jolts.nr0.htm",
+ "stamp": "20260515075307",
+ "indexDigest": "ZORXLBLAZG7HO46TWMOQBLFG3PCWY3JW",
+ "gzipEncoded": false,
+ "title": "Job Openings and Labor Turnover Summary - 2026 M03 Results",
+ "note": "Corpus capture of the 2026-03 release, captured 2026-05-15. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {
+  "jolts_job_openings": {
+   "value": 6.866,
+   "printedPrecision": 0.1,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=JTSJOL&vintage_date=2026-05-15",
+   "how": "the 2026-03 value in the 2026-05-15 vintage (6866 thousand), in millions; the page prints it rounded to 0.1 million"
+  }
+ }
+}

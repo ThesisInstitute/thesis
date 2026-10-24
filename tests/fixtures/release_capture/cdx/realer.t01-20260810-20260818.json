@@ -1,0 +1,8 @@
+{
+  "note": "The Internet Archive's index for the registered page and release window of a d1633 no-custody void, exactly as served. An index read lists timestamps, statuses and digests only; no capture was opened.",
+  "sourceUrl": "https://www.bls.gov/news.release/realer.t01.htm",
+  "query": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.bls.gov%2Fnews.release%2Frealer.t01.htm&from=20260810000000&to=20260818235959&output=json&fl=timestamp,original,statuscode,digest",
+  "readOnUtc": "2026-10-24",
+  "httpStatus": 200,
+  "body": "[]\n"
+}
