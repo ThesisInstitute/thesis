@@ -1,6 +1,6 @@
 {
   "schemaVersion": "thesis_resolution_status_v1",
-  "asOf": "2026-10-24",
+  "asOf": "2026-10-25",
   "run": {
     "logAvailable": true,
     "completed": true,
@@ -777,6 +777,6 @@
       "detail": "SNAPSHOT WINDOW MISSED (refusing). closed 2026-10-22"
     }
   },
-  "generatedAtUtc": "2026-10-24T17:02:38Z",
-  "workflowRun": "40113936509"
+  "generatedAtUtc": "2026-10-25T17:27:54Z",
+  "workflowRun": "40215372123"
 }
