@@ -15647,6 +15647,14 @@ def append_gate_state(gate_runs: list[dict]) -> str:
 def _describe_gate_runs(
     gate: str, gate_runs: list[dict], min_runs: int = 0
 ) -> str:
+    """Each judging run's verdict or status, with its URL.
+
+    "(n of m runs completed)" is added only when ``min_runs`` alone holds
+    the gate: every listed run completed and passes, but too few of them
+    have run, so the listing reads as a pass and the count says why it is
+    pending. A failed verdict, or a run still queued or in progress, speaks
+    for itself.
+    """
     judging = [run for run in gate_runs if run.get("conclusion") != "skipped"]
     if not gate_runs:
         return f"{gate}: no check run yet"
@@ -15663,7 +15671,7 @@ def _describe_gate_runs(
         for run in judging
     )
     completed = [run for run in judging if run.get("status") == "completed"]
-    if len(completed) < min_runs:
+    if append_gate_state(gate_runs) == "passed" and len(completed) < min_runs:
         described += f" ({len(completed)} of {min_runs} runs completed)"
     return described
 
@@ -16001,14 +16009,36 @@ def _proposal_curation_body(curation: CatalogCuration, policy: str) -> str:
 
 
 LEDGER_CURATION_ISSUE_MAX_PAGES = 10
+# The wall-clock budget for filing one curation issue, every page read and
+# the post included. Filing is best effort and comes after the rows have
+# merged, so a stalled GitHub API must not hold the run that still has to
+# publish them.
+LEDGER_CURATION_ISSUE_SECONDS = 120.0
 
 
-def _open_ledger_curation_issue(repo: str) -> dict | None:
+def _issue_call_timeout(deadline: float, clock: Callable[[], float]) -> float:
+    """What the filing budget has left for the next API call; raises once it
+    is spent, so no call starts past the deadline."""
+    left = deadline - clock()
+    if left <= 0:
+        raise LedgerProposalError(
+            f"ran out of the {LEDGER_CURATION_ISSUE_SECONDS:g} s allowed for "
+            "filing the ledger curation issue"
+        )
+    return left
+
+
+def _open_ledger_curation_issue(
+    repo: str, *, deadline: float, clock: Callable[[], float]
+) -> dict | None:
     """The open curation issue, searching every page of open issues (the
     listing also counts pull requests)."""
     for page in range(1, LEDGER_CURATION_ISSUE_MAX_PAGES + 1):
         issues = json.loads(
-            _gh_api(f"repos/{repo}/issues?state=open&per_page=100&page={page}")
+            _gh_api(
+                f"repos/{repo}/issues?state=open&per_page=100&page={page}",
+                timeout=_issue_call_timeout(deadline, clock),
+            )
         )
         if type(issues) is not list:
             raise LedgerProposalError("GitHub issue listing is not a list")
@@ -16027,15 +16057,24 @@ def _open_ledger_curation_issue(repo: str) -> dict | None:
     )
 
 
-def _file_ledger_curation_issue(repo: str, body: str) -> str:
-    """Comment on the open curation issue, or open one; returns its URL."""
-    issue = _open_ledger_curation_issue(repo)
+def _file_ledger_curation_issue(
+    repo: str, body: str, *, clock: Callable[[], float] = time.monotonic
+) -> str:
+    """Comment on the open curation issue, or open one; returns its URL.
+
+    Every API call is bounded by what is left of one
+    LEDGER_CURATION_ISSUE_SECONDS deadline, so filing ends by then whatever
+    the API does; a call that runs out raises, and callers report it.
+    """
+    deadline = clock() + LEDGER_CURATION_ISSUE_SECONDS
+    issue = _open_ledger_curation_issue(repo, deadline=deadline, clock=clock)
     if issue is not None:
         _gh_api(
             "-X",
             "POST",
             f"repos/{repo}/issues/{issue['number']}/comments",
             input_body={"body": body},
+            timeout=_issue_call_timeout(deadline, clock),
         )
         return str(issue.get("html_url") or f"{repo}#{issue['number']}")
     created = json.loads(
@@ -16044,6 +16083,7 @@ def _file_ledger_curation_issue(repo: str, body: str) -> str:
             "POST",
             f"repos/{repo}/issues",
             input_body={"title": LEDGER_CURATION_ISSUE_TITLE, "body": body},
+            timeout=_issue_call_timeout(deadline, clock),
         )
     )
     if type(created) is not dict:
@@ -16060,6 +16100,7 @@ def report_arch_checks_at_merge(
     runs: str,
     curation: CatalogCuration,
     run_url: str | None,
+    clock: Callable[[], float] = time.monotonic,
 ) -> None:
     """Say loudly that an append merged without a green Arch checks.
 
@@ -16067,8 +16108,9 @@ def report_arch_checks_at_merge(
     was awaited, but a red verdict leaves the ledger branch red for every
     other pull request until a curator acts, so it is filed as a Chronicle
     issue naming what the dry run expects a curator to do; so is a missing
-    verdict when the dry run predicts red. Never raises: the rows are
-    already merged and must still be published.
+    verdict when the dry run predicts red. Never raises, and filing gives up
+    after LEDGER_CURATION_ISSUE_SECONDS: the rows are already merged and
+    must still be published.
     """
     print(
         f"ARCH CHECKS {state.upper()} AT MERGE: {repo}#{pr_number} merged at "
@@ -16099,25 +16141,31 @@ def report_arch_checks_at_merge(
         lines += ["", "Why the resolver did not curate it itself:"]
         lines += [f"- {line}" for line in curation.notes]
     try:
-        where = _file_ledger_curation_issue(repo, "\n".join(lines))
+        where = _file_ledger_curation_issue(repo, "\n".join(lines), clock=clock)
     except Exception as exc:  # noqa: BLE001 - reporting must not fail the run
         print(f"  could not file the ledger curation issue: {exc}")
     else:
         print(f"  ledger curation filed: {where}")
 
 
-def report_red_ledger_base(repo: str, base_sha: str) -> str:
+def report_red_ledger_base(
+    repo: str, base_sha: str, *, clock: Callable[[], float] = time.monotonic
+) -> str:
     """Arch checks' state on the ledger branch head, filed if it is red.
 
     The branch head a proposal builds on carries the push run of Arch
     checks. A red one means curation is owed from an earlier change (an
     append merged before Arch checks reported, a hand merge, a broken
     base), so it is filed with the same issue as a red merge. Returns the
-    state; never raises, and never holds the append.
+    state; never raises, and never holds the append: the read and the
+    filing each run against a deadline.
     """
     try:
         runs = read_check_runs(
-            repo, base_sha, deadline=time.monotonic() + APPEND_GATE_MAX_READ_SECONDS
+            repo,
+            base_sha,
+            deadline=clock() + APPEND_GATE_MAX_READ_SECONDS,
+            clock=clock,
         )
         arch = [
             run
@@ -16138,6 +16186,7 @@ def report_red_ledger_base(repo: str, base_sha: str) -> str:
             f"The ledger branch head {base_sha} has Arch checks red ({detail}), "
             "before the next resolver append was proposed. Every pull request "
             "into the branch fails Arch checks until it is curated.",
+            clock=clock,
         )
     except Exception as exc:  # noqa: BLE001 - reporting must not fail the run
         print(f"  could not file the ledger curation issue: {exc}")
