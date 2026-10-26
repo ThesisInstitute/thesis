@@ -593,4 +593,4 @@ The initial confidence-interval (CI) rate — the proportion of initial response
 
 ## Code availability {.unnumbered}
 
-All code for running stability-under-probing experiments is available at <https://github.com/ThesisInstitute/thesis> under an open-source license. The repository includes the complete experiment infrastructure, analysis pipeline, and raw results. To reproduce the experiments, install the package with `pip install -e ".[dev]"` and run `python -m brier.experiments.stability_runner`.
+All code for running stability-under-probing experiments is available at <https://github.com/ThesisInstitute/thesis> under the MIT license. The repository includes the complete experiment infrastructure, analysis pipeline, and raw results. To reproduce the experiments, install the package with `pip install -e ".[dev]"` and run `python -m brier.experiments.stability_runner`.
