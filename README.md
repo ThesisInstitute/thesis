@@ -322,4 +322,12 @@ The repo no longer needs a stored `PYPI_API_TOKEN` once Trusted Publishing is co
 
 ## License
 
-MIT
+MIT; see [LICENSE](LICENSE).
+
+Some files keep their own terms:
+
+- `scripts/ledger_release_chain.py` is vendored from PolicyEngine/chronicle under its MIT license (Copyright (c) 2025 PolicyEngine); the notice is in `scripts/LICENSE-chronicle`.
+- The sigstore-python test fixtures in `tests/fixtures/challenge_signing/` are Apache-2.0, with the license text alongside them.
+- `paper/apa.csl` is the CSL APA style, CC BY-SA 3.0, as stated in the file.
+- Official statistics and documents captured in `records/`, `bills/` and `tests/fixtures/` keep their publishers' terms.
+- `scripts/tools/policyengine.py`, `scripts/tools/modal_economy.py` and `scripts/tools/_assert_correctness.py` import `policyengine-us` and `policyengine-core` (AGPL-3.0) at run time. Those packages aren't vendored here and keep their own license.
