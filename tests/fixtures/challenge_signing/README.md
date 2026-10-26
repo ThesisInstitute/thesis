@@ -10,6 +10,7 @@
   `bundle_v3_no_signed_time.txt`,
   `bundle_v3_no_signed_time.txt.sigstore.json` — vendored unmodified from
   [sigstore/sigstore-python](https://github.com/sigstore/sigstore-python)
-  v4.5.0 `test/assets/` (Apache-2.0). Staging-signed; verified in tests
+  v4.5.0 `test/assets/` (Apache-2.0; license text in
+  `LICENSE-Apache-2.0`). Staging-signed; verified in tests
   with `Verifier.staging(offline=True)`, the same offline pattern
   sigstore's own suite uses, so no network or OIDC flow is needed.

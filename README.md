@@ -322,4 +322,10 @@ The repo no longer needs a stored `PYPI_API_TOKEN` once Trusted Publishing is co
 
 ## License
 
-MIT
+MIT; see [LICENSE](LICENSE).
+
+Some files keep their own terms:
+
+- The sigstore-python test fixtures in `tests/fixtures/challenge_signing/` are Apache-2.0, with the license text alongside them.
+- Official statistics and documents captured in `records/` and `bills/` keep their publishers' terms.
+- `scripts/tools/_assert_correctness.py` imports PolicyEngine packages at run time; those packages keep their own licenses.
