@@ -1,0 +1,98 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "title": "ACTC total claiming returns for tax year 2027",
+  "question": "Conditional on the registered legislation, how many millions of returns claim the additional child tax credit for tax year 2027 in the first official IRS SOI Publication 1304 Table 3.3 all-returns total?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Conditional on the registered legislation, use the first official tax-year-2027 Publication 1304 Table 3.3 all-returns total number of returns under the plain Additional child tax credit concept, or its equivalent refundable child tax credit total concept. Do not substitute the separate refundable portion or used-to-offset-other-taxes subsets. Multiply the official return count by 0.000001 to express millions, retaining its precision without additional rounding. Ignore subsequent revisions and corrections; no correction grace period applies.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "historicalContext": [],
+  "drivers": [
+    "Earned-income threshold reduction",
+    "Filing participation among newly eligible families",
+    "Refundable cap and earnings phase-in",
+    "Other eligibility provisions in conditional legislation"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/pub/irs-prior/f1040s8--2025.pdf",
+    "https://www.irs.gov/pub/irs-drop/rp-25-32.pdf",
+    "https://www.irs.gov/irb/2026-38_irb",
+    "https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases"
+  ],
+  "runAt": "2026-10-07T12:43:34Z",
+  "status": "failed",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Conditional ACTC forecast: required evidence extraction failed"
+    },
+    {
+      "kind": "text",
+      "text": "The target is irs.actc.total_claims for tax year 2027, specifically Publication 1304 Table 3.3 total ACTC claiming returns. Historical anchors must use that same total concept, rather than either component subset."
+    },
+    {
+      "kind": "text",
+      "text": "The official IRS table index exposes the latest six years, 2018 through 2023, and earlier workbooks. All six canonical workbook URLs were attempted with the web tool; each returned '(400) Unsupported content-type: application/vnd.ms-excel'. The available tool inventory contains no fetch_source, extract_irs_soi, or calculate tool. Consequently, no captured-workbook extraction call IDs or canonical historical values were obtained. This is an access/extraction failure, not evidence that fewer than six official prints exist. As required, the run remains failed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.irs.gov/pub/irs-prior/f1040s8--2025.pdf",
+      "result": "IRS tax-year-2025 Schedule 8812 specifies a $2,500 earned-income threshold and a 15% earnings phase-in. These are fetched policy parameters, not historical ACTC return counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open and locate section 4.05 in https://www.irs.gov/pub/irs-drop/rp-25-32.pdf",
+      "result": "Revenue Procedure 2025-32 specifies a $2,200 maximum child tax credit and a $1,700 refundable cap per qualifying child for tax year 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open and locate the ACTC discussion in https://www.irs.gov/irb/2026-38_irb",
+      "result": "The IRS bulletin reiterates ACTC calculated as 15% of earned income exceeding $2,500, up to $1,700 per qualifying child for tax year 2025, with subsequent inflation adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate cannot be computed: none of the six required canonical prints was extracted. Policy parameters and rounded publication summaries cannot replace the required historical reference class. historicalContext is empty to avoid presenting unsupported numbers as fetched prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The intended model is persistence anchored on six canonical annual prints, with separate level, momentum, one-off and policy-mechanism adjustments. The historical sample could not be extracted, so level, momentum and realized dispersion are unavailable. Lowering the threshold could increase claiming participation, but the fetched policy formula does not quantify that increase. sigma = unavailable; the required half-width of approximately 1.28*sigma and final implied bounds cannot be calculated. No numerical forecast or interval is issued."
+    },
+    {
+      "kind": "math",
+      "text": "If the threshold becomes exactly $1 and the fetched 15% phase-in remains unchanged, the earnings-based credit calculation increases by at most 0.15*(2500-1) = $374.85 per return, before other limits. This is a derived dollar amount, not an estimate of additional claiming returns, and cannot supply the missing claims base rate or interval."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official IRS upcoming-release page covers 2026 and links a 2026 annual schedule. No official tax-year-2027 Publication 1304 release schedule verifying 2029-12-31 was found. resolutionDate retains the registered ledger deadline, but its required official schedule verification is unmet."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk is legislation combining the threshold reduction with broader refundability and increased filing participation. A downside risk is limited take-up or additional eligibility restrictions. Either mechanism could produce outcomes outside the interval of a future threshold-only forecast; this failed run has no numerical interval against which to assess them."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

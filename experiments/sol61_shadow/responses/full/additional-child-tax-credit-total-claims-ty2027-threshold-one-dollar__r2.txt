@@ -1,0 +1,111 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "title": "ACTC total claims, tax year 2027, threshold at most $1",
+  "question": "How many millions of US individual income tax returns claim the additional child tax credit for tax year 2027, unadjusted, in the FIRST PRINT of IRS SOI Publication 1304 Table 3.3, all returns total row, plain additional child tax credit number-of-returns column, conditional on the specified legislation?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS, SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+  "resolutionRule": "Resolve using the FIRST PRINT of IRS SOI Publication 1304 Table 3.3 for tax year 2027: all returns total row, refundable child tax credit or additional child tax credit, plain concept number-of-returns column. Use total claiming returns, excluding substitution of the separate refundable-portion or used-to-offset-other-taxes subsets. Multiply the published return count by 0.000001 to express millions, preserving the published count precision. Later revisions or corrections do not alter resolution. Evaluate the stated legislative condition as of 2027-12-31; if it fails, mark unresolved. The registered 2029-12-31 date is retained as an outer deadline, not an independently verified scheduled IRS release day.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "historicalContext": [],
+  "drivers": [
+    "Required official workbook history could not be extracted",
+    "Newly eligible claiming returns and take-up remain unquantified",
+    "No successful baseline and reform simulation"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/instructions/i1040s8",
+    "https://www.irs.gov/irb/2026-38_irb",
+    "https://www.young.senate.gov/wp-content/uploads/MCG25B67.pdf",
+    "https://api.policyengine.org/us/policy/1",
+    "https://api.policyengine.org/us/parameters",
+    "https://api.policyengine.org/us/economy/1/over/1?region=us&time_period=2027"
+  ],
+  "runAt": "2026-10-07T12:18:25Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Failed run: required official ACTC history could not be extracted; forecast withheld."
+    },
+    {
+      "kind": "text",
+      "text": "The target is total ACTC claiming returns, not credit dollars or the separate refunded subset. Registered identity, unit, condition and deadline are preserved. Null forecast fields denote extraction failure; this is not a valid publishable forecast cell."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the registered IRS Publication 1304 page and its Basic tables part 3 link.",
+      "result": "The official Table 3.3 listing exposes annual workbooks for 2023, 2022, 2021, 2020, 2019 and 2018, plus earlier years. The listing identifies available periods but supplies no parsed ACTC counts. Source: https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.irs.gov/pub/irs-soi/23in33ar.xls, https://www.irs.gov/pub/irs-soi/22in33ar.xls and https://www.irs.gov/pub/irs-soi/21in33ar.xls.",
+      "result": "Each workbook request failed with '(400) Unsupported content-type: application/vnd.ms-excel'. No claim count was fetched or extracted for tax years 2023, 2022 or 2021."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.irs.gov/pub/irs-soi/20in33ar.xls, https://www.irs.gov/pub/irs-soi/19in33ar.xls and https://www.irs.gov/pub/irs-soi/18in33ar.xls.",
+      "result": "Each workbook request failed with '(400) Unsupported content-type: application/vnd.ms-excel'. No claim count was fetched or extracted for tax years 2020, 2019 or 2018."
+    },
+    {
+      "kind": "text",
+      "text": "Tool discovery found no callable fetch_source, extract_irs_soi or calculate tools. Consequently there are no captured workbook extraction call IDs. The required exact-URL announcement MCP tool is also unavailable. The ledger supplies a deadline and release window but omits resolutionDateBasis; no agency calendar date is asserted. The explicit extraction-refusal rule requires this run to remain failed. Official history exists, so no fewer-than-required-history exception is claimed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open and web.find",
+      "call": "Fetch IRS Schedule 8812 instructions and Internal Revenue Bulletin 2026-38; inspect the earned-income worksheet and ACTC explanation.",
+      "result": "The official instructions show a $2,500 earned-income threshold, 15% phase-in and $1,700 maximum ACTC per qualifying child for tax year 2025. The bulletin independently describes 15% of earned income above $2,500 and future inflation adjustment of the cap. Sources: https://www.irs.gov/instructions/i1040s8 and https://www.irs.gov/irb/2026-38_irb"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch https://www.young.senate.gov/wp-content/uploads/MCG25B67.pdf.",
+      "result": "The proposed Stronger Start for Working Families Act replaces $3,000 in IRC section 24(d)(1)(B)(i) with $1, strikes section 24(h)(6), and applies to taxable years beginning after December 31, 2025. Proposal text does not establish enactment or satisfaction of the forecast condition."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the required annual total-claim counts could not be extracted. Last-print persistence, historical dispersion and walk-forward benchmark scores therefore cannot be computed. No thesis_model_candidate_v1 candidate is fabricated."
+    },
+    {
+      "kind": "text",
+      "text": "Policy mechanism, qualitative inference only: lowering the threshold can create positive entitlement for otherwise eligible low-earnings filers, but larger payments to existing claimants do not themselves increase claiming-return counts. The newly eligible population, take-up and offsetting eligibility responses were not quantified. PolicyEngine policy, parameter and economy endpoint attempts listed in sourceContext returned Internal Error; no usable baseline/reform simulation was obtained."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the persistence prior is unavailable because the official workbook history was not extracted. No numeric policy update is assigned. Sigma, interval half-width and final bounds cannot be computed from the missing history. Point estimate and interval fields remain null rather than inventing arithmetic."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would arise from strong filing take-up among newly eligible low-earnings households; downside risk would arise from weak take-up or restrictive eligibility changes. Without an estimated distribution, neither scenario can honestly be mapped outside a numerical interval."
+    },
+    {
+      "kind": "text",
+      "text": "The catalog slug check was skipped under the independence override. No repository files or Thesis/Brier records were accessed, and no files were created or modified. JSON syntax validation does not cure the missing mandatory history, numeric forecast or interval."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

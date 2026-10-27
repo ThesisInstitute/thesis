@@ -1,0 +1,121 @@
+{
+  "slug": "wic-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation, July 2026",
+  "question": "What will USDA publish as the FIRST PRINT of national total participation in the Special Supplemental Nutrition Program for Women, Infants, and Children (WIC) for July 2026, not seasonally adjusted, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA, WIC Data Tables, monthly national Total Participants",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Registered target: July 2026 national WIC total participation, not seasonally adjusted, FIRST PRINT. Read the July 2026 Total Participants entry in the official monthly national table, corroborated by the TOTAL row of the latest-month participation table's July 2026 Initial column. Later revisions are irrelevant; no correction grace applies. Whole-person counts require division by 1,000,000 to express millions, retaining six decimal places. The registered factor 0.001 requires inputs in thousands and is inconsistent with direct application to the fetched whole-person counts. A verified official resolution date was not available.",
+  "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+  "historicalContext": [
+    {
+      "period": { "type": "month", "value": "2025-04" },
+      "label": "April 2025",
+      "value": 6.856889
+    },
+    {
+      "period": { "type": "month", "value": "2025-11" },
+      "label": "November 2025",
+      "value": 6.752138
+    },
+    {
+      "period": { "type": "month", "value": "2025-12" },
+      "label": "December 2025",
+      "value": 6.694838
+    },
+    {
+      "period": { "type": "month", "value": "2026-03" },
+      "label": "March 2026",
+      "value": 6.701661
+    },
+    {
+      "period": { "type": "month", "value": "2026-06" },
+      "label": "June 2026",
+      "value": 6.669554
+    }
+  ],
+  "drivers": [
+    "Latest initial participation print",
+    "Missing first-print calibration history",
+    "Unverified release date",
+    "Registered unit-transform discrepancy"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program",
+    "https://www.fna.usda.gov/pd/wic-program",
+    "https://fns-prod.azureedge.us/pd/wic-program",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-2.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf"
+  ],
+  "runAt": "2026-10-07T10:37:58Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required resolution timing and first-print calibration could not be verified."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target preserves the July 2026 series, slug, unit and dataPointId, but supplies no resolutionDate. Its expected release window is not an official calendar date or a registered resolve-by-bound deadline. No official scheduled release day was found. Null forecast and date fields explicitly record abstention; this object does not satisfy the numeric cell contract."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/pd/wic-program and https://fns-prod.azureedge.us/pd/overview; directly open the registered FNS and current FNA landing URLs.",
+      "result": "Official CDN WIC page updated September 22, 2026 lists monthly national data through June 2026. Official overview reports June 2026 as latest activity, data as of September 18, 2026, with current numbers preliminary and subject to significant revision. Both direct landing URLs returned HTTP 403. The CDN identifies the agency as Food and Nutrition Administration."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf; read Total Participants.",
+      "result": "Data as of September 11, 2026: January 2026 6,696,300; February 6,664,741; March 6,703,035; April 6,708,518; May 6,687,977; June 6,669,554 participants. FY2026 is preliminary and all numbers are subject to revision. These are current-vintage observations, not a verified first-print history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official CDN latest-month files 27wilatest-7.pdf, 27wilatest-2.pdf and 27wilatest-3.pdf; read national TOTAL in each Initial column.",
+      "result": "April 2025 Initial: 6,856,889 participants; November 2025 Initial: 6,752,138; December 2025 Initial: 6,694,838. The April artifact says July 11, 2025. The November and December artifacts show inconsistent 2025 metadata dates; their column periods identify November and December 2025. These metadata dates cannot establish release timing."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official CDN latest-month files 27wilatest-6.pdf and 27wilatest-9.pdf; read national TOTAL in each Initial column.",
+      "result": "March 2026 Initial: 6,701,661 participants; June 2026 Initial: 6,669,554. The June file also shows May preliminary 6,687,977 and June 2025 6,883,200. Both files contain inconsistent 2025 footer dates. Other attempted latest-month slots could not be fetched; only five distinct Initial observations were recovered."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate: the persistence benchmark is the latest Initial total, 6.669554 million. The separate current-vintage January-June sample has mean 6.688354 million and range 6.664741-6.708518 million. No current signal was admitted to move the benchmark. The five Initial observations are nonconsecutive; their successive differences cannot be treated as monthly forecast errors. Fetch failure does not prove the official source exposes fewer than six prints, so no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Exploratory model candidate, generated in memory from the fetched current-vintage series: {\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":6.669554,\"p10\":6.633859,\"p50\":6.669554,\"p90\":6.705249,\"interval80\":[6.633859,6.705249],\"interval90\":[6.623680,6.715428],\"interval_method\":\"Gaussian fallback from sample standard deviation of current-vintage monthly changes; not first-print calibrated\",\"calibration_n\":5,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":{\"metric\":\"MAE\",\"value\":0.022860,\"n\":5},\"admissible_for_registered_target\":false}. This candidate is not promoted because its interval calibration does not meet the first-print requirement."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: exploratory persistence prior = 6.669554 million; sample = current-vintage January-June 2026; momentum, one-off and policy adjustments = 0. Monthly changes are [-0.031559, 0.038294, 0.005483, -0.020541, -0.018423] million, with mean -0.0053492. sigma = sqrt(sum((change + 0.0053492)^2)/4) = 0.027886978 million. Gaussian half-width = 1.28*sigma = 0.035695332, giving exploratory bounds 6.669554 +/- 0.035695332 = [6.633859, 6.705249]. The 90% half-width is 1.645*sigma = 0.045874078. These arithmetic results are not first-print-calibrated bounds and are therefore withheld from the cell. No claimed coverage sanity check is possible on the required history."
+    },
+    {
+      "kind": "text",
+      "text": "Outside the interval of the exploratory candidate if a large state reports a material participation drop or incomplete initial submissions, or if broad enrollment gains and previously missing state submissions raise the national initial total. These are hypothetical tail scenarios, not fetched current signals or quantitative updates."
+    },
+    {
+      "kind": "text",
+      "text": "Resolver discrepancy: fetched tables use whole-person counts. For June, 6,669,554 / 1,000,000 = 6.669554 million; applying the registered 0.001 directly would give 6,669.554 in thousands. Converting counts to thousands before the registered factor preserves the intended millions unit, but that normalization is not specified in the supplied binding. The registered resolver URL is retained; the currently fetched official page and artifacts are on the USDA CDN."
+    },
+    {
+      "kind": "text",
+      "text": "Disposition: drop the forecast under the honesty rule. The missing official resolution date, incomplete first-print history and unresolved binding normalization prevent a compliant scored cell. No date was inferred from cadence or the expected window, no historical value was invented, no artifacts were fabricated, and no prohibited forecast records or local files were consulted."
+    }
+  ]
+}

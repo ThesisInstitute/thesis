@@ -1,0 +1,33 @@
+{
+  "slug": "snap-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "August 2026 SNAP participation forecast unavailable",
+  "question": "What will USDA FNS report for national SNAP total persons participating in August 2026 in the first official monthly print?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS SNAP national monthly participation table",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve using the first official print of August 2026 Persons in the national monthly participation table, converting thousands to millions. Subsequent revisions do not affect resolution.",
+  "dataPointId": "usda.fns.snap.persons.august_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap"
+  ],
+  "runAt": "2026-10-07T12:33:47Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The web fetch of the official USDA FNS SNAP program-data page returned HTTP 403 Forbidden. Following the instruction to stop after a failed fetch, this run stopped without obtaining participation history or verifying the release calendar. No remembered statistics were substituted. A numerical forecast, empirical interval, and verified resolution date cannot be supplied; the null values indicate failure, not a valid forecast."
+    }
+  ]
+}

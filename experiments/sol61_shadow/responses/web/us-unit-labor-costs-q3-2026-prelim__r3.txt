@@ -1,0 +1,174 @@
+{
+  "slug": "us-unit-labor-costs-q3-2026-prelim",
+  "country": "US",
+  "type": "data",
+  "title": "US unit labor costs, Q3 2026 preliminary",
+  "question": "What will BLS first report for nonfarm business sector unit labor costs in 2026-Q3, measured as the seasonally adjusted percent change from the previous quarter at a compound annual rate, in the preliminary Productivity and Costs release?",
+  "unit": "percent_growth",
+  "pointEstimate": 1.2,
+  "ciLow": -1.4,
+  "ciHigh": 3.9,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-05",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, Productivity and Costs, Table 2",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/prod2.t02.htm",
+  "resolutionRule": "Resolve to the first released 2026-Q3 observation of PRS85006112 under the registered ALFRED first_print binding, corresponding to BLS preliminary Productivity and Costs Table 2, nonfarm business sector unit labor costs, seasonally adjusted percent change from the previous quarter at a compound annual rate. Use the initially published percentage at one decimal place with the registered multiplication factor of 1; do not deannualize. Subsequent revisions or corrections do not replace the first print. Cite the original BLS preliminary release as agency evidence.",
+  "dataPointId": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q1"},
+      "label": "2024-Q1",
+      "value": 4.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q2"},
+      "label": "2024-Q2",
+      "value": 0.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 3.0
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 5.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 1.6
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": -1.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 2.3
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 1.3
+    }
+  ],
+  "drivers": [
+    "Historical preliminary-print mean with partial persistence",
+    "Moderate private-sector wage growth",
+    "Output growth potentially exceeding labor-hours growth",
+    "Benefits and compensation coverage beyond payroll wages",
+    "Uncertainty from sector differences and preliminary source data"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/prod2.htm",
+    "https://www.bls.gov/news.release/prod2.t02.htm",
+    "https://alfred.stlouisfed.org/series?seid=PRS85006112",
+    "https://www.bls.gov/news.release/archives/prod2_05022024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11072024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02062025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05082025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08072025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_01082026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_03052026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05072026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08062026.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_07022026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_08072026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_09042026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+    "https://www.atlantafed.org/research-and-data/data/gdpnow/current-and-past-gdpnow-commentaries"
+  ],
+  "runAt": "2026-10-07T11:51:37Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast: Q3 2026 preliminary nonfarm business unit labor costs"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is PRS85006112, BLS Productivity and Costs Table 2, nonfarm business unit labor costs. Every ULC historical value and persistence anchor below is the original preliminary print of seasonally adjusted quarter-over-quarter annualized growth. Auxiliary ECI, CES, and GDPNow indicators inform the model but are not substituted for that variant or counted as ULC history."
+    },
+    {
+      "kind": "text",
+      "text": "The official BLS series release calendar fetched this run schedules Third Quarter 2026 (P) for November 5, 2026, at 08:30 Eastern Time, within the registered release window. The calendar schedules the revised release for December 8; that later vintage does not resolve this target. Calendar source: https://www.bls.gov/schedule/news_release/prod2.htm."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the BLS preliminary Productivity and Costs archives released May 2, August 1, and November 7, 2024, and February 6, 2025; read nonfarm business unit labor costs.",
+      "result": "Original preliminary SA annualized q/q prints: 2024-Q1 4.7%, 2024-Q2 0.9%, 2024-Q3 1.9%, and 2024-Q4 3.0%. Each release identifies the preliminary quarter and specifies annualized seasonally adjusted quarterly changes."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the BLS preliminary Productivity and Costs archives released May 8 and August 7, 2025, and January 8 and March 5, 2026; read nonfarm business unit labor costs.",
+      "result": "Original preliminary SA annualized q/q prints: 2025-Q1 5.7%, 2025-Q2 1.6%, 2025-Q3 -1.9%, and 2025-Q4 2.8%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read https://www.bls.gov/news.release/archives/prod2_05072026.htm and https://www.bls.gov/news.release/archives/prod2_08062026.htm, preliminary Table A1 and Table 2.",
+      "result": "2026-Q1 first print: ULC 2.3%, hourly compensation 3.1%, productivity 0.8%, output 1.5%, and hours 0.7%. 2026-Q2 first print: ULC 1.3%, hourly compensation 2.7%, productivity 1.4%, output 1.7%, and hours 0.3%. All are SA annualized quarterly changes."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class comprises ten consecutive preliminary prints from 2024-Q1 through 2026-Q2. Their base rate is a mean of 2.23%, median of 2.10%, and nine positive observations out of ten, with a range from -1.9% to 5.7%. Begin with this distribution before adjusting for the latest quarter and current indicators."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read private-industry compensation in https://www.bls.gov/news.release/archives/eci_07312026.htm.",
+      "result": "Private-industry compensation rose 0.9% seasonally adjusted during the three months ending June 2026; wages and salaries and benefits each rose 0.9%. This is a quarterly ECI measure, not annualized ULC."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read seasonally adjusted private-sector average hourly earnings and aggregate weekly hours in the July 2, August 7, September 4, and October 2, 2026 BLS Employment Situation archives listed in sourceContext, using the latest available observation for each month.",
+      "result": "April-June 2026 hourly earnings were $37.41, $37.49, and $37.59; aggregate weekly hours indexes were 116.6, 116.7, and 116.7. July-September hourly earnings were $37.64, $37.76, and $37.81; hours indexes were 116.7, 117.2, and 117.2. September earnings increased 0.1% monthly and 3.0% over twelve months."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the October 6, 2026 entry at https://www.atlantafed.org/research-and-data/data/gdpnow/current-and-past-gdpnow-commentaries.",
+      "result": "The Atlanta Fed's published GDPNow model estimate for 2026-Q3 real GDP growth was 3.7% SAAR on October 6, unchanged from October 1 after rounding. This is a model nowcast, not a realized GDP statistic or an official Federal Reserve policy forecast."
+    },
+    {
+      "kind": "math",
+      "text": "Construct a noisy current-quarter bridge. CES wage growth = 100*[(113.21/112.49)^4-1] = 2.584913% SAAR; CES hours growth = 100*[(351.1/350.0)^4-1] = 1.263082% SAAR. Annualized ECI compensation = 100*(1.009^4-1) = 3.648892%. An equally weighted compensation proxy is (2.584913+3.648892)/2 = 3.116903%. Using GDPNow 3.7% as a rough output proxy implies productivity = 100*[1.037/1.012630818-1] = 2.406522%. Implied ULC = 100*[1.031169026/1.024065218-1] = 0.693687%. These derived quantities are model estimates."
+    },
+    {
+      "kind": "text",
+      "text": "The bridge has material coverage limitations: headline GDP includes sectors excluded from nonfarm business output; CES private payroll hours omit proprietors and differ from hours actually worked; payroll earnings omit benefits, while the ECI input is lagged. Accordingly, give the bridge only half the final weight. No separately quantified one-off shock or direct policy-mechanism adjustment is imposed; their effects would operate through compensation, output, and hours."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use an equal-weight historical-mean and latest-print persistence prior from the ten fetched preliminary ULC prints. Level anchor = 2.23%; momentum adjustment = 0.5*(1.3-2.23) = -0.465 percentage points, giving a 1.765% prior. An equal-weight update toward the 0.693687% compensation/output/hours bridge adds -0.535656 points; separate one-off and policy adjustments are 0, giving 1.229344%, published as 1.2%. Estimate dispersion from the growth prints themselves: sum of squared deviations = 39.261; sigma = 2.08862 = sqrt(39.261/9). The normal-approximation 80% half-width is 1.28*sigma = 2.67343 points, with no additional narrowing or widening. Unrounded bounds are 1.229344 +/- 2.673434 = [-1.444090, 3.902778], published to one decimal as [-1.4, 3.9]. Model weights are judgmental, not fitted."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is compensation accelerating while output growth disappoints and hours remain firm; a sufficiently large compensation surprise or productivity contraction would land above the interval's 3.9% upper bound. The downside risk is stronger nonfarm output with restrained compensation and little additional labor input; a productivity surge substantially exceeding compensation growth would land outside the interval below -1.4%. Preliminary measurement surprises or changes in sector composition could produce either tail."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.2,
+      "ciLow": -1.4,
+      "ciHigh": 3.9
+    }
+  ]
+}

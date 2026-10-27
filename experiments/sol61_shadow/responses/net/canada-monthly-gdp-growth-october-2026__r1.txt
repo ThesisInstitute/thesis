@@ -1,0 +1,161 @@
+{
+  "slug": "canada-monthly-gdp-growth-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, October 2026",
+  "question": "What will Statistics Canada's first official estimate of October 2026 monthly growth in Canada's all-industries real GDP at basic prices be, using seasonally adjusted levels at annual rates in chained 2017 dollars?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.18,
+  "ciLow": -0.2196,
+  "ciHigh": 0.5796,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-23",
+  "resolutionSource": "Statistics Canada, GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Resolve using vector v65201210 in the first official October 2026 release of Table 36-10-0434-01: 100 × (October level / September level − 1), with both levels taken from that release's vintage. Use the seasonally adjusted all-industries series at annual rates in chained 2017 dollars. Retain the precision of the published levels when computing growth; do not substitute the Daily's rounded headline. Exclude advance estimates, subsequent corrections and later revisions.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 0.656392
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": -0.059994
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 0.220439
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": -0.27998
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 0.090549
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 0.107149
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": -0.013673
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 0.15739
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": -0.154071
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 0.645309
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 0.333302
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 0.373032
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": -0.004848
+    }
+  ],
+  "drivers": [
+    "Positive historical monthly growth base rate",
+    "Recent momentum supports a small upward adjustment",
+    "July construction strength offset by manufacturing and retail weakness",
+    "Temporary production disruptions limit extrapolation",
+    "First-print uncertainty beyond revised-history dispersion"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401"
+  ],
+  "runAt": "2026-10-07T12:48:53Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 Canadian monthly GDP growth forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The exact resolver is the first official October-over-September percentage change in v65201210, Table 36-10-0434-01. The fetched official vector definition confirms Canada, all industries, basic prices, chained 2017 dollars, seasonally adjusted at annual rates. All historical anchors use this monthly series and adjustment. Annual rates describe the levels; the forecasted growth is monthly, not annualized."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched Statistics Canada release calendar explicitly pairs December 23, 2026 with the October 2026 GDP-by-industry reference period, confirming the registered resolution date. Source: https://www150.statcan.gc.ca/release-diffusion/2026-eng.pdf."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl POST https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods with [{\"vectorId\":65201210,\"latestN\":14}]; raw JSON echoed and read.",
+      "result": "SUCCESS. The September 29, 2026 vintage returned levels: 2025-06 2323307; 2025-07 2338557; 2025-08 2337154; 2025-09 2342306; 2025-10 2335748; 2025-11 2337863; 2025-12 2340368; 2026-01 2340048; 2026-02 2343731; 2026-03 2340120; 2026-04 2355221; 2026-05 2363071; 2026-06 2371886; 2026-07 2371771. Applying the registered percentage-change transform produces the 13 historicalContext observations."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch limitation: the June 2026 Daily-page request timed out, and a separate January 2026 first-print lookup failed. Further source lookups stopped. The successfully fetched API history supplies the base rate, but these historicalContext values are calculated from revised September 2026 levels, not reconstructed original announcements. This vintage mismatch is an explicit limitation; no failed-request values or search-summary statistics are used."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Successful web open of https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm; headline excerpt.",
+      "result": "Released September 29, 2026: July real GDP monthly growth was 0.0%, with 10 of 20 sectors expanding. The same release reported an August advance estimate of +0.2%. The advance estimate is contextual evidence and is excluded from the historical sample and numerical forecast anchor."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Sector excerpt from the same successful July Daily-page open, rather than a separate fetch.",
+      "result": "July construction increased 1.3%; manufacturing declined 0.9%; retail trade declined 1.0%; mining, quarrying and oil and gas extraction declined 0.5%. Petroleum-refinery activity fell 6.2%, with unplanned downtime identified."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class comprises 13 consecutive transformed monthly observations from July 2025 through July 2026. Its base rate is +0.159307% per month. The latest six observations average +0.225019%. A modest momentum adjustment is appropriate, while July's flat result limits extrapolation of the spring expansion."
+    },
+    {
+      "kind": "text",
+      "text": "Separate effects: the GDP level establishes the denominator but receives no independent growth adjustment. Momentum contributes +0.016428 percentage points through partial weighting of the recent six-month mean. One-off production disruptions receive zero additional adjustment because their October persistence is unverified. Policy mechanisms receive zero additional adjustment because no quantified October policy effect was fetched."
+    },
+    {
+      "kind": "math",
+      "text": "For each historical month, g = 100 × (current level / previous level − 1). Across 13 observations, sum(g) = 2.070995 and mean(g) = 0.159307. Sum of squared deviations = 0.966574; sample sigma = sqrt(0.966574 / 12) = 0.283809 percentage points. Point = 0.75 × 0.159307 + 0.25 × 0.225019 = 0.175735%, rounded to 0.18%. Normal 80% half-width = 1.28 × 0.283809 = 0.363276; multiplying by 1.10 gives 0.399604. Bounds = 0.18 ± 0.399604 = [-0.219604, 0.579604], reported as [-0.2196, 0.5796]."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The model is a historical-mean prior with a modest recent-momentum update, using 13 revised monthly growth observations from July 2025 through July 2026. Starting from +0.159307%, the momentum component adds +0.016428 percentage points; level, one-off and policy adjustments each add zero. sigma = 0.283809. The approximate normal 80% half-width is 1.28*sigma = 0.363276, widened 10% to 0.399604 for the small sample and revised-history versus first-print mismatch. The final point is 0.18%, with implied bounds -0.2196% and 0.5796%. This is an approximate predictive interval, not verified original-vintage coverage."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is simultaneous construction and services strength plus recovery from production interruptions; broad gains could land above 0.5796%, outside the interval. The downside risk is renewed refinery or mining disruption combined with manufacturing and retail contraction; a sufficiently broad decline could land below -0.2196%, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.18,
+      "ciLow": -0.2196,
+      "ciHigh": 0.5796
+    }
+  ]
+}

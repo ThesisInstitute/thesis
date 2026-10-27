@@ -1,0 +1,101 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-in",
+  "country": "US",
+  "type": "data",
+  "title": "Indiana ex parte renewal share, August 2026",
+  "question": "What will Indiana's ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, without seasonal adjustment, computed to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Indiana's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.in.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Indiana original-submission history unavailable through the web tool",
+    "First-publication vintages not reconstructed",
+    "Registered release date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=5"
+  ],
+  "runAt": "2026-10-07T12:41:55Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld because the required official history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target is Indiana's August 2026 original-submission ex parte renewal share, resolving on its first public print. The supplied slug, unit, identifier, date, and resolver are preserved."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact CMS dataset identifier, restricted to data.medicaid.gov.",
+      "result": "The official indexed dataset page reports 3,876 rows, 22 columns, and an update dated September 25, 2026. Its exposed table contains Alaska rows; it supplies no Indiana history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click",
+      "call": "Open the official dataset dictionary linked from catalog.data.gov: https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+      "result": "The dictionary identifies ex parte renewals as Metric 5a1, renewals due as Metric 5, and total successful renewals as Metric 5a. It defines O as Original and U as Updated. These are field definitions, not fetched Indiana observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "Official metadata identifies the registered dataset, modified 2026-09-25T18:00:00Z, and links https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv as its CSV distribution."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "CMS lists June 2026 released September 25, 2026; May 2026 released August 28, 2026; and January 2026 released April 24, 2026. The fetched page supplies no scheduled August 2026 publication date."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. The official CSV returned Cache miss; datastore queries and filtered dataset pages were inaccessible. No Indiana numerator or denominator was retrieved. The empty historicalContext reflects fetch failure, not an official source exposing fewer prints. Metadata and other states cannot substitute for the registered series."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without admissible Indiana original-submission observations, last-print persistence, persistence plus panel shrinkage, walk-forward comparisons, and thesis_model_candidate_v1 candidates cannot be computed honestly."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The persistence prior and historical sample are unavailable; no adjustment is asserted. sigma is undefined because the required successive changes were not fetched. Consequently 1.28*sigma, the point estimate, and the implied interval bounds cannot be calculated. Null fields record a failed run and do not constitute a publishable numeric cell."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: 2026-12-15 is retained solely because it is the supplied ledger value. It was not verified as an official agency release date. No resolve-by-bound basis or registered methodology-announcement tool was supplied, so no bounded-date exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Resolver ambiguity: the supplied rule does not explicitly select renewals due or successful renewals as its denominator. CMS exposes both. The November 2025 specifications also permit corrections to earlier submissions, so an O flag alone would not establish an unchanged first-publication vintage."
+    },
+    {
+      "kind": "text",
+      "text": "Outside the interval if: no numerical interval exists to stress. An interruption in eligibility data matching could lower the ex parte numerator, while expanded automatic verification could raise it; these are unquantified scenarios, not forecast adjustments."
+    },
+    {
+      "kind": "text",
+      "text": "The catalog lookup was skipped under the independence override. No files were accessed or created. The missing observations, benchmark, dispersion estimate, and verified release date prevent a compliant forecast."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "title": "2027 ACTC claims conditional on a threshold of $1 or less",
+  "question": "How many returns claim the total additional child tax credit for tax year 2027 in the first official IRS SOI Publication 1304 Table 3.3 print, conditional on the registered legislation?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Conditional on the exact registered condition, use the first official tax-year-2027 Publication 1304 Table 3.3 all-returns total for the number of returns claiming total additional child tax credit or its corresponding refundable child tax credit concept. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Multiply the reported return count by 0.000001 without intermediate rounding. Subsequent revisions do not change resolution.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls"
+  ],
+  "runAt": "2026-10-07T12:33:41Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Failed run: canonical history could not be extracted"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the total ACTC claiming-return count in Publication 1304 Table 3.3, all-returns total row, expressed in millions. The exact resolver table was located on the [IRS basic tables page](https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3)."
+    },
+    {
+      "kind": "text",
+      "text": "Opening https://www.irs.gov/pub/irs-soi/23in33ar.xls returned: Failed to fetch; unsupported content-type application/vnd.ms-excel. No numeric table values were extracted."
+    },
+    {
+      "kind": "text",
+      "text": "The required fetch_source, extract_irs_soi, and calculate tools are unavailable in this environment. The instructions require a failed run when canonical history cannot be extracted, so evidence collection stopped."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate of six distinct canonical prints was not obtained. This is an extraction failure, not evidence that the official source exposes fewer than six prints. No history-availability exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "The resolutionDate is retained from the supplied target contract. It was not verified against an official release calendar or announcement schedule in this run."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: No persistence prior, historical sigma, policy adjustment, or 1.28*sigma half-width can be calculated without extracted canonical history. The estimate and interval remain null."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk or downside risk cannot be assessed against an 80% interval because no interval was produced."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "prompt.md",
+      "bytes": 10366,
+      "sha256": "e30ec9f23aeccfebb66a2d03438049dbe6c0dce1653fa94f1e33665d5eb52d1b"
+    },
+    {
+      "artifactType": "command",
+      "path": "command.json",
+      "bytes": 193,
+      "sha256": "6db3eae727f5f3481dce2c5315fc55a87fac89d68597be5daf0e6b177d0246b3",
+      "canonicalJsonSha256": "9433b607ffecdfb33aa0c1203ef0e98a48d2f9cb014901c2d0f7743a907da30c"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "stdout.txt",
+      "bytes": 1137,
+      "sha256": "0369b4763235b4c0ea5636c02ad10bf6c0780f5d5be23eb5af2d37e6cb9dd2e8"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "stderr.txt",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "raw_response.txt",
+      "bytes": 1137,
+      "sha256": "0369b4763235b4c0ea5636c02ad10bf6c0780f5d5be23eb5af2d37e6cb9dd2e8"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "parsed_cells.json",
+      "bytes": 1281,
+      "sha256": "58d251dba67b86448330add1f7b19f8d6a6ea2762a074a649c49572a58f6a70d",
+      "canonicalJsonSha256": "ad6ba0bdd5b173c13ce6a32804d5663f8c08a0831488a521782b8fe2faf703ef"
+    },
+    {
+      "artifactType": "error",
+      "path": "error.json",
+      "bytes": 229,
+      "sha256": "47434b7a7ffa046e3c43eb666aea63b80f348472e2429c9cea1eea33fd3dd3cf",
+      "canonicalJsonSha256": "d217d3847f56d406659f4af9435bfb7d25118c8b11abf3c141fb34d8c2473d30"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "04fd2c949a7e00a51bfa53d5ec44ca72cd3e51411845cf49bfa849647ce0028b"
+  }
+}

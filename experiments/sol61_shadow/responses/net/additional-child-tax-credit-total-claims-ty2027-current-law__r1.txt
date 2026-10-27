@@ -1,0 +1,73 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "title": "2027 ACTC claiming returns — forecast unavailable",
+  "question": "How many millions of returns will claim the additional child tax credit for tax year 2027 in the first official IRS Publication 1304, Table 3.3, all returns total row?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+  "resolutionRule": "Use the first official tax year 2027 Publication 1304 Table 3.3 all returns total for the number of returns under the plain additional child tax credit or refundable child tax credit concept header. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Multiply the unrounded count by 0.000001 to obtain millions. Subsequent corrections and revisions do not replace the first print. The registered resolution deadline is retained but was not verified against an official release schedule.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls"
+  ],
+  "runAt": "2026-10-07T12:48:39Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast failed: required canonical history could not be extracted"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the total number of ACTC claiming returns in Publication 1304 Table 3.3, expressed in millions, conditional on the exact registered current-law threshold condition."
+    },
+    {
+      "kind": "text",
+      "text": "The official IRS Publication 1304 page was fetched successfully and states that its statistical tables are available as Excel files."
+    },
+    {
+      "kind": "text",
+      "text": "Opening https://www.irs.gov/pub/irs-soi/23in33ar.xls returned: Failed to fetch; (400) Unsupported content-type: application/vnd.ms-excel. This is a retrieval/parsing failure, not evidence that the official workbook is unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "The required fetch_source and extract_irs_soi tools are unavailable in this run. No canonical workbook values were extracted. Following the instruction to stop after a failed base-rate fetch, no remembered values or rounded bulletin figures were substituted."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory six-print reference class and base rate were not established. An official-source history-availability waiver is neither supported nor claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical adjustment components, sigma, interval half-width, or implied bounds can be calculated from verified canonical history. The forecast remains failed."
+    },
+    {
+      "kind": "math",
+      "text": "Point estimate and 80% interval are null because the required historical inputs were not extracted; no numerical calculation was performed."
+    },
+    {
+      "kind": "text",
+      "text": "The resolutionDate retains the registered deadline of 2029-12-31. This run did not verify that date from an official IRS release calendar or announcement, so the release-timing requirement remains unsatisfied."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and scenarios outside the interval cannot be assessed quantitatively because no supported forecast interval was produced."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "slug": "us-dod-new-prime-awards-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 new prime awards: forecast withheld",
+  "question": "What will USAspending API agency 097 new_award_count report for FY2026 in the first registered-query snapshot, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "U.S. Treasury USAspending API v2",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+  "resolutionRule": "Retain the registered_query_snapshot policy: use new_award_count from the first official response captured for the registered FY2026 query, multiply by 0.000001, and preserve integer-count precision as six decimal places in millions. Do not substitute agency profile totals or revise the captured observation. A specific snapshot date could not be verified from an official release calendar or announcement schedule this run.",
+  "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 3.454745
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 3.771749
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 3.797153
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 3.840407
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 3.833879
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 3.882327
+    }
+  ],
+  "drivers": [
+    "Nightly publication pipeline",
+    "Delayed DoD procurement reporting",
+    "Backfills and corrections before snapshot capture"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-06T22:00:13Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Registered DoD FY2026 query: history fetched, resolution date unverified"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.agency.097.awards.new_award_count. Every historical observation came from GET execution of the registered endpoint with only fiscal_year substituted. Responses used agency_type awarding and award_type_codes null. These are current historical query observations, not archived original vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS against the exact registered query for fiscal_year=2020 and fiscal_year=2021; read the echoed JSON responses.",
+      "result": "FY2020 new_award_count=3454745, transformed value=3.454745 million. FY2021 new_award_count=3771749, transformed value=3.771749 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS against the exact registered query for fiscal_year=2022 and fiscal_year=2023; read the echoed JSON responses.",
+      "result": "FY2022 new_award_count=3797153, transformed value=3.797153 million. FY2023 new_award_count=3840407, transformed value=3.840407 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS against the exact registered query for fiscal_year=2024 and fiscal_year=2025; read the echoed JSON responses.",
+      "result": "FY2024 new_award_count=3833879, transformed value=3.833879 million. FY2025 new_award_count=3882327, transformed value=3.882327 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS 'https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026'; read the echoed JSON response.",
+      "result": "The current FY2026 response returned new_award_count=2806655, or 2.806655 million. This observation precedes the registered snapshot window and is not the resolution observation."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate across the six fetched fiscal-year flows is 3.763376667 million. The FY2023-FY2025 mean is 3.852204333 million. Completed historical query totals cannot be directly substituted for the current FY2026 public snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "Official update documentation states that USAspending publishes after its nightly pipeline and describes a 90-day delay for DoD procurement submissions. This reporting mechanism makes snapshot timing material. Source: https://www.usaspending.gov/data/data-sources-download.pdf."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The outside-view prior would use the six fetched FY2020-FY2025 annual flow values. Their sample mean is 3.763376667 million; sigma = 0.155896039 million, calculated as sqrt(sum((value-3.763376667)^2)/5). The historical 80% half-width is 1.28*sigma = 0.199546930 million. A snapshot model would update the level to the fetched 2.806655 million and separately account for arriving delayed records, momentum, and possible backfills. No final point or implied bounds are emitted because the required official resolution date remains unverified."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar discrepancy: the supplied registration specifies an October 15-22, 2026 window, but the official sources inspected did not verify a particular registered snapshot date within it. Choosing October 22 merely because it ends the supplied window would not satisfy the instruction requiring independent official schedule verification."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a large release of delayed procurement records or a historical backfill; the downside risk is interrupted publication or removal of duplicate records. Whether either outcome would land outside the interval cannot be assessed against final bounds until the snapshot timing is established."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

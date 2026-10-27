@@ -1,0 +1,154 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "title": "ACTC claiming returns, tax year 2027",
+  "question": "What will the first official IRS SOI Publication 1304 Table 3.3 print report for tax year 2027 total refundable child tax credit or additional child tax credit claiming returns, expressed in millions, conditional on the registered earned-income threshold remaining unchanged?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Resolve to the first official tax year 2027 Publication 1304 Table 3.3 all-returns total number of returns under the total refundable child tax credit or additional child tax credit concept. Multiply the printed return count by 0.000001 to obtain millions, without additional rounding. Do not substitute the separate refundable-portion or used-to-offset-other-taxes subsets. Ignore subsequent revisions and corrections. Apply the registered conditional gate. The registered resolution deadline is retained, but its official schedule verification failed this run.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "status": "failed",
+  "failureReasons": [
+    "The required fetch_source, extract_irs_soi, and calculate tools are unavailable. Web attempts to open all six latest canonical workbooks failed with unsupported Excel content-type errors.",
+    "Only five exact official PDF cross-checks were obtained. These do not satisfy the mandatory captured-workbook extraction or establish the required original-vintage reference class.",
+    "The official IRS release schedule fetched this run does not verify the registered 2029-12-31 resolution deadline."
+  ],
+  "historicalContext": [
+    {
+      "period": {
+        "type": "year",
+        "value": "2018"
+      },
+      "label": "2018",
+      "value": 20.450468
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2019"
+      },
+      "label": "2019",
+      "value": 19.867646
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2020"
+      },
+      "label": "2020",
+      "value": 19.119249
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2021"
+      },
+      "label": "2021",
+      "value": 37.771612
+    },
+    {
+      "period": {
+        "type": "year",
+        "value": "2022"
+      },
+      "label": "2022",
+      "value": 18.076696
+    }
+  ],
+  "drivers": [
+    "Persistence in total eligible claiming returns",
+    "Temporary expanded refundable-credit regime in tax year 2021",
+    "Claimant Social Security number eligibility requirements",
+    "Indexed credit limits and income-tax liability",
+    "Employment, earnings, and claiming participation"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/pub/irs-prior/p1304--2020.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2021.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2022.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2024.pdf",
+    "https://www.irs.gov/pub/irs-pdf/p1304.pdf",
+    "https://www.irs.gov/irb/2026-38_irb",
+    "https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases"
+  ],
+  "runAt": "2026-10-06T22:36:22Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Tax year 2027 ACTC claims: unsuccessful evidence-validation run"
+    },
+    {
+      "kind": "text",
+      "text": "Run failed under the prompt's explicit extraction-failure rule. Null estimates record that no validated numeric forecast was produced; they are not zero-claim predictions."
+    },
+    {
+      "kind": "text",
+      "text": "The resolver is series irs.actc.total_claims, Publication 1304 Table 3.3, total claiming returns in the all-returns row. All historical observations below use that total concept, including the combined refundable child tax credit or additional child tax credit header where applicable. They are PDF cross-checks only; captured workbook extraction and first-print vintage verification remain unmet."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Web retrieval of https://www.irs.gov/pub/irs-prior/p1304--2020.pdf and https://www.irs.gov/pub/irs-prior/p1304--2021.pdf, Table 3.3 total Additional child tax credit number-of-returns column.",
+      "result": "Tax year 2018: 20,450,468 returns, equivalent to 20.450468 million. Tax year 2019: 19,867,646 returns, equivalent to 19.867646 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Official-source web search of https://www.irs.gov/pub/irs-prior/p1304--2022.pdf, Table 3.3, tax year 2020.",
+      "result": "Tax year 2020 total Additional child tax credit: 19,119,249 returns, equivalent to 19.119249 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Official PDF retrieval and indexed cross-checks of https://www.irs.gov/pub/irs-prior/p1304--2024.pdf and https://www.irs.gov/pub/irs-pdf/p1304.pdf.",
+      "result": "Tax year 2021 total refundable child tax credit or additional child tax credit: 37,771,612 returns, equivalent to 37.771612 million. Tax year 2022 total: 18,076,696 returns, equivalent to 18.076696 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Web retrieval of https://www.irs.gov/irb/2026-38_irb, child tax credit discussion.",
+      "result": "IRS describes ACTC as generally 15% of earned income exceeding $2,500, with a $1,700 per-child maximum for tax year 2025 indexed thereafter. Claimant work-eligible Social Security number requirements apply to taxable years beginning after December 31, 2024."
+    },
+    {
+      "kind": "text",
+      "text": "The official Table 3.3 index exposes tax years 2018 through 2023 as the latest six published workbooks, alongside earlier years. Every corresponding YYin33ar.xls URL was attempted. Each web open returned an unsupported application/vnd.ms-excel error. The native fetch_source and extract_irs_soi tools are absent, so no captured extraction call IDs or calculate inputs exist. These are extraction failures, not evidence that fewer than six official prints exist; no history waiver is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The intended persistence prior would anchor the base rate on the latest six canonical prints, separate level and momentum, identify the temporary 2021 policy discontinuity, and then assess existing credit-limit and claimant-eligibility mechanisms. The required historical sample could not be extracted. sigma = unavailable; neither the roughly 1.28*sigma half-width nor final implied bounds can be calculated under the required procedure."
+    },
+    {
+      "kind": "math",
+      "text": "The PDF cross-check conversions use returns / 1,000,000: 20,450,468 / 1,000,000 = 20.450468; 19,867,646 / 1,000,000 = 19.867646; 19,119,249 / 1,000,000 = 19.119249; 37,771,612 / 1,000,000 = 37.771612; 18,076,696 / 1,000,000 = 18.076696. No forecast or interval arithmetic substitutes these partial cross-checks for the mandatory extracted history."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched IRS upcoming-data-releases page supplies a tentative 2026 schedule. It does not verify a tax year 2027 Publication 1304 release by 2029-12-31. That date is retained from the target contract and is explicitly unverified rather than inferred from historical cadence."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk is higher participation or greater refundable-credit eligibility as credit limits and deductions rise. A downside risk is reduced eligibility under claimant Social Security number requirements or weaker earnings. A substantial participation or eligibility shift could move claims outside the interval of a completed forecast, but this failed run establishes no numeric interval against which to evaluate those scenarios."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

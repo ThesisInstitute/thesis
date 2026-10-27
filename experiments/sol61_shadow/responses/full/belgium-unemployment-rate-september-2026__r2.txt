@@ -1,0 +1,122 @@
+{
+  "slug": "belgium-unemployment-rate-september-2026",
+  "country": "BE",
+  "type": "data",
+  "title": "Belgium unemployment rate, September 2026",
+  "question": "What will the FIRST PRINT of Eurostat's monthly seasonally adjusted unemployment rate for Belgium be for September 2026, dataset une_rt_m, total sexes, ages 15-74, expressed as a percentage of the labour force and published to one decimal place?",
+  "unit": "percent",
+  "pointEstimate": 5.9,
+  "ciLow": 5.7,
+  "ciHigh": 6.1,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Eurostat, monthly unemployment Euro indicators release and une_rt_m",
+  "resolutionSourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+  "resolutionRule": "Resolve to the first published September 2026 Belgium rate in Eurostat dataset une_rt_m: monthly frequency, seasonally adjusted, total sexes, ages 15-74, unemployed persons as a percentage of the labour force. The corresponding monthly unemployment Euro indicators release identifies it in the Belgium row, September 2026 Rates (%) column, of the Seasonally adjusted unemployment, totals table. Use the initial official print to one decimal place; ignore all later revisions. Eurostat's 1 October 2026 release explicitly announces the next release for 30 October 2026, which conflicts with the supplied November 1-9 expected window; retain the registered September target identity.",
+  "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 5.9},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 6.4},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 6.4},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 6.4},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 6.4},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 6.4},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 6.3},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 6.2},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 6.3},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 6.3},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": 6.0},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "2026-08", "value": 5.9}
+  ],
+  "drivers": [
+    "Latest first-print persistence at 5.9%",
+    "Summer decline already incorporated in the latest rate",
+    "Mixed September business employment expectations",
+    "First-print volatility from survey and seasonal updates"
+  ],
+  "sourceContext": [
+    "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30102025-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02122025-bp?id=0&item=table",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-08012026-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30012026-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-04032026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30042026-cp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01062026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap",
+    "https://ec.europa.eu/eurostat/statistics-explained/SEPDF/cache/1163.pdf?v=9952151041910144",
+    "https://www.nbb.be/en/statistics/latest-figures/business-confidence-indicator-2026m9",
+    "https://statbel.fgov.be/en/news/employment-rate-has-stabilised-728-second-quarter-2026"
+  ],
+  "runAt": "2026-10-07T12:17:47Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Belgium September 2026 unemployment: independent first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Eurostat une_rt_m, Belgium, monthly seasonally adjusted unemployment, total sexes aged 15-74, percent of the labour force. Preserve the supplied slug, unit and dataPointId. Country BE follows the registered target. History is reconstructed from each dated official release's latest reference-month column, preserving initial vintages. No repository files or Thesis/Brier records were accessed; the independent-run restriction precludes the catalog slug lookup."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap and search Eurostat's official unemployment update announcement.",
+      "result": "The 1 October 2026 official August release announces Next release: 30 October 2026; Belgium August 2026 = 5.9%. Official https://ec.europa.eu/eurostat/statistics-explained/SEPDF/cache/1163.pdf?v=9952151041910144 also gives its next article update as 30 October 2026. Calendar pages did not expose usable event entries. Use the explicit agency release announcement for resolutionDate 2026-10-30. The supplied expected window 2026-11-01 through 2026-11-09 conflicts with this announcement."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open Eurostat release tables https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30102025-bp ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02122025-bp?id=0&item=table ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-08012026-ap ; https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30012026-bp . Read each release's current-month Rates (%) column in Seasonally adjusted unemployment, totals.",
+      "result": "Belgium first prints: September 2025 = 5.9%, October 2025 = 6.4%, November 2025 = 6.4%, December 2025 = 6.4%. Corresponding EU first prints = 6.0%, 6.0%, 6.0%, 5.9%. The 2 December 2025 release revises September to 6.3%; historicalContext retains September's original 5.9%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open Eurostat release tables https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-04032026-ap ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30042026-cp ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01062026-ap . Read Belgium and EU total current-month rates.",
+      "result": "Belgium first prints: January 2026 = 6.4%, February = 6.4%, March = 6.3%, April = 6.2%. Corresponding EU first prints = 5.8%, 5.9%, 6.0%, 6.0%. March's initial 6.3% is retained despite later tables showing 6.2%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open Eurostat release tables https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp ; https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp ; https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap . Read Belgium and EU total current-month rates.",
+      "result": "Belgium first prints: May 2026 = 6.3%, June = 6.3%, July = 6.0%, August = 5.9%. Corresponding EU first prints = 5.9%, 6.0%, 6.1%, 6.1%. The latest release reports Belgium unemployed persons at 329 thousand in July and 324 thousand in August. Methods specify unemployment rates covering ages 15-74. The registered Data Browser URL was fetched but its dynamic table supplied no readable numeric history, so archived official resolving release tables provide the vintages."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the twelve comparable Belgium first prints from September 2025 through August 2026 have mean 6.241667%, median 6.3%, sample level standard deviation 0.197523 percentage points and range 5.9%-6.4%. Their eleven successive changes have mean 0.0 percentage points. The prior is last-print persistence, 5.9%. These summaries are arithmetic derived solely from the fetched official values."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmark comparison, computed with python3 arithmetic from the fetched Belgium and EU first prints: on the same nine one-step targets December 2025-August 2026, persistence MAE = 0.077778 and RMSE = 0.120185 percentage points; trailing-three-month mean MAE = 0.114815 and RMSE = 0.159087; persistence-plus-EU-shrinkage MAE = 0.102222 and RMSE = 0.120370. The shrinkage benchmark's declared fixed weights are 0.8 on Belgium's preceding first print and 0.2 on the EU aggregate's preceding first print. Final raw forecasts are persistence 5.9; trailing mean (6.3+6.0+5.9)/3 = 6.066667; shrinkage 0.8*5.9+0.2*6.1 = 5.94. Persistence has the lowest errors, with the shrinkage RMSE effectively tied. Model candidates were generated before the agent forecast, with a common fallback-prior volatility wrapper rather than native intervals: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":5.9,\"p10\":5.7,\"p50\":5.9,\"p90\":6.1,\"interval80\":[5.7,6.1],\"interval90\":[5.6,6.2],\"interval_method\":\"Normal fallback-prior wrapper from eleven successive official first-print changes; 1.28 sigma and 1.645 sigma; bounds rounded to 0.1 percentage point\",\"calibration_n\":11,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"n\":9,\"start\":\"2025-12\",\"end\":\"2026-08\",\"mae\":0.077778,\"rmse\":0.120185}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_three_month_mean\",\"point\":6.1,\"p10\":5.8,\"p50\":6.1,\"p90\":6.3,\"interval80\":[5.8,6.3],\"interval90\":[5.7,6.4],\"interval_method\":\"Normal fallback-prior wrapper from eleven successive official first-print changes, centered on unrounded mean 6.066667; 1.28 sigma and 1.645 sigma; bounds rounded to 0.1 percentage point\",\"calibration_n\":11,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"n\":9,\"start\":\"2025-12\",\"end\":\"2026-08\",\"mae\":0.114815,\"rmse\":0.159087}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence_plus_eu_shrinkage\",\"point\":5.9,\"p10\":5.7,\"p50\":5.9,\"p90\":6.2,\"interval80\":[5.7,6.2],\"interval90\":[5.6,6.3],\"interval_method\":\"Normal fallback-prior wrapper from eleven successive official first-print changes, centered on unrounded 0.8 Belgium + 0.2 EU aggregate = 5.94; 1.28 sigma and 1.645 sigma; bounds rounded to 0.1 percentage point\",\"calibration_n\":11,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"n\":9,\"start\":\"2025-12\",\"end\":\"2026-08\",\"mae\":0.102222,\"rmse\":0.120370}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official NBB September 2026 business confidence release at https://www.nbb.be/en/statistics/latest-figures/business-confidence-indicator-2026m9 ; open https://statbel.fgov.be/en/news/employment-rate-has-stabilised-728-second-quarter-2026 .",
+      "result": "The official NBB search extract reports overall confidence moving from -13.2 in August to -12.1 in September 2026, manufacturing from -17.8 to -12.2, and business-related services from -1.4 to -13.4. Employment expectations improved in manufacturing and worsened in trade. Direct NBB opening failed, so these are explicitly search-extract evidence. Statbel's 9 September 2026 release reports Q2 unemployment at 6.1% for ages 15-64 versus 6.3% in Q1, and employment at 72.8% for ages 20-64. These quarterly figures have different coverage from the registered monthly target."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update test: the latest Belgium level already incorporates the summer decline and the available quarterly survey information. September business survey employment signals point in opposing directions across sectors and supply no calibrated conversion into the target monthly unemployment rate. Assign a momentum adjustment of 0.0 percentage points, a policy adjustment of 0.0 and a one-off adjustment of 0.0. These are modeling choices, not claims that such forces have no effects. The selected candidate remains persistence; the agent-minus-benchmark delta is 0.0."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected persistence candidate, 5.9%, with weight 1.0; reference sample = twelve official initial monthly prints, September 2025-August 2026. Momentum, policy and one-off adjustments each = 0.0 percentage points, so point = 5.9+0.0+0.0+0.0 = 5.9%. For this rate-level series use successive first-print changes [0.5,0,0,0,0,-0.1,-0.1,0.1,0,-0.3,-0.1], not dispersion of levels. Their mean = 0; sum of squared deviations = 0.38; sigma = sqrt(0.38/(11-1)) = 0.194936 percentage points. Normal fallback-prior 80% half-width = 1.28*sigma = 0.249518; widening factor = 1.0. Raw bounds = 5.9 +/- 0.249518 = [5.650482,6.149518], rounded to the published one-decimal precision = [5.7,6.1]. The analogous 90% bounds are 5.9 +/- 1.645*sigma = [5.579330,6.220670], rounded [5.6,6.2]. Retaining initial vintages preserves the observed survey/revision discontinuities; no unquantified extra regime adjustment is applied. A fixed rounded +/-0.2 band around preceding first prints covers nine of eleven changes and nine of the latest ten. This is a small-sample retrospective sanity check, not an independently calibrated coverage guarantee."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and tails: persistence could lag a continuing decline; the July-August drop and mixed September sector signals do not establish a reliable additional point adjustment. Upside risk: layoffs or stronger labour-force entry, or survey/seasonal input changes reversing the summer decline, could produce a first print of at least 6.2%, outside the interval. Downside risk: another fall as large as July's 0.3 percentage-point first-print decline, through hiring or exits from active job search, would produce 5.6% or lower, outside the interval. Direct September labour-market evidence of those mechanisms would move the point up or down respectively. Eleven increments give limited tail calibration."
+    },
+    {
+      "kind": "forecast",
+      "point": 5.9,
+      "ciLow": 5.7,
+      "ciHigh": 6.1
+    }
+  ]
+}

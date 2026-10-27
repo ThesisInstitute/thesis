@@ -1,0 +1,39 @@
+{
+  "slug": "belgium-gdp-flash-q3-2026",
+  "country": "BE",
+  "type": "data",
+  "title": "Belgium Q3 2026 GDP flash forecast unavailable",
+  "question": "What will Belgium's first official flash estimate of real GDP growth, adjusted for seasonal and calendar effects, report for 2026-Q3 compared with the previous quarter?",
+  "unit": "percent_growth",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "National Bank of Belgium / National Accounts Institute flash estimate",
+  "resolutionSourceUrl": null,
+  "resolutionRule": "Resolve on the first official 2026-Q3 flash estimate of seasonally and calendar-adjusted real GDP percentage growth compared with the previous quarter, at the agency's published precision. Exclude subsequent revisions and quarterly aggregate releases.",
+  "dataPointId": "nbb.gdp.flash_qoq.2026_q3.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.nbb.be/en/statistics/latest-figures/nai-flash-estimate-2026q2",
+    "https://www.nbb.be/en/statistics/latest-figures/business-confidence-indicator-2026m9"
+  ],
+  "runAt": "2026-10-07T12:24:36Z",
+  "status": "failed",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast stopped because official-source fetches failed"
+    },
+    {
+      "kind": "text",
+      "text": "Opening the official NBB 2026-Q2 flash estimate and September business confidence pages returned HTTP 520 fetch errors. Following the instruction to stop after a failed fetch, no forecast was calculated."
+    },
+    {
+      "kind": "text",
+      "text": "The required historical base rate and release calendar could not be verified from fetched source contents. Search-result numbers were excluded. Null estimates and bounds indicate failure, not a forecast of zero."
+    }
+  ]
+}

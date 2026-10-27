@@ -1,0 +1,166 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ct",
+  "country": "US",
+  "type": "data",
+  "title": "Connecticut ex parte renewal share, August 2026",
+  "question": "What percentage of Connecticut beneficiaries due for Medicaid or CHIP renewal in August 2026 were renewed on an ex parte basis, using the first published original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data?",
+  "unit": "percent",
+  "pointEstimate": 82.2,
+  "ciLow": 78.8,
+  "ciHigh": 85.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolve using Connecticut's August 2026 reporting-period row, Original or Updated = O, in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Later corrections and updated (U) submissions do not change resolution.",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 82
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 83
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 82
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 79
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 83
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 83
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 84
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 85
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 84
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 82
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 82
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 82
+    }
+  ],
+  "drivers": [
+    "Persistence of the recent ex parte renewal level",
+    "Monthly renewal-cohort composition",
+    "Automated verification and reporting disruptions",
+    "Two months beyond the latest published reporting period",
+    "HUSKY D work rules begin with February 2027 renewal cohorts"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://portal.ct.gov/dss/all-programs/dss-benefits-and-hr1/hr1-for-providers/hr1-for-partners-faq"
+  ],
+  "runAt": "2026-10-07T11:45:25Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Connecticut August 2026 ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Connecticut's original monthly submission, not a national total or weighted average. CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c defines O as Original and U as Updated. CMS's published renewal-outcome percentage uses metric 5a1 divided by metric 5: ex parte renewals divided by all beneficiaries due for renewal. This formula makes the ledger's otherwise implicit denominator explicit."
+    },
+    {
+      "kind": "text",
+      "text": "All historical values and numerical anchors use the original current-month outcomes in CMS first-release snapshots, separately distinguished from quarterly updated outcomes. The snapshots publish whole-percent rounded shares. Raw historical O-row numerators could not be fetched through the official CSV or API this run; no exact one-decimal historical ratios have been invented. The target still resolves from the raw first-published O row to one decimal."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Connecticut rows in the July, August, September and October 2025 CMS monthly snapshot coverage-retention tables.",
+      "result": "July 2025: 96,159 due, 82% ex parte; August 2025: 89,089 due, 83% ex parte; September 2025: 89,231 due, 82% ex parte; October 2025: 114,550 due, 79% ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Connecticut rows in the November and December 2025 and January and February 2026 CMS monthly snapshot coverage-retention tables.",
+      "result": "November 2025: 106,526 due, 83% ex parte; December 2025: 104,099 due, 83% ex parte; January 2026: 82,990 due, 84% ex parte; February 2026: 100,412 due, 85% ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Connecticut rows in the March, April, May and June 2026 CMS monthly snapshot coverage-retention tables.",
+      "result": "March 2026: 101,908 due, 84% ex parte; April 2026: 78,137 due, 82% ex parte; May 2026: 87,434 due, 82% ex parte; June 2026: 83,450 due, 82% ex parte."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is twelve consecutive Connecticut original-outcome prints from July 2025 through June 2026. Their base rate is an unweighted monthly mean of 82.5833%, with a range of 79% to 85%. The recent April-June mean is 82%, supporting persistence with modest shrinkage toward the annual reference-class mean."
+    },
+    {
+      "kind": "text",
+      "text": "Separate adjustments: level receives greater weight on the recent plateau; momentum is zero because the last three rounded prints are unchanged; the October decline and November rebound remain in historical dispersion without a repeat-shock adjustment. Policy-mechanism adjustment is zero: Connecticut DSS identifies February 2027 as the first renewal cohort subject to HUSKY D work rules, after the target period."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification gap: the official CMS release listing confirms June 2026 was released September 25, 2026, but provides no announced publication date for August 2026. CMS specifications describe state submission deadlines on the eighth and fifteenth days, which are not publication dates. The registered resolutionDate of 2026-12-15 is retained, but official publication-calendar verification could not be completed."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior shrunk toward the twelve-print reference-class mean. The level estimate is (2*82 + 82.5833)/3 = 82.1944%; momentum, one-off and policy adjustments are each zero, giving 82.2%. The eleven successive changes are [1,-1,-3,4,0,1,1,-1,-2,0,0] percentage points, with mean zero and squared sum 34. Thus sigma = 1.84391 percentage points, computed as sqrt(34/10). The one-month Gaussian 80% half-width is 1.28*sigma = 2.36020. For the two-month June-to-August horizon, assume independent monthly innovations and add a uniform +/-0.5-point rounding variance of 1/12 as a modeling allowance: half-width = 1.28*sqrt(2*sigma^2 + 1/12) = 3.35822. Bounds around 82.2 are 78.84178 to 85.55822, rounded to 78.8%-85.6%."
+    },
+    {
+      "kind": "math",
+      "text": "Point = round((2*82 + 991/12)/3, 1) = 82.2. Sample change variance = 34/10 = 3.4. Half-width = 1.28*sqrt(2*3.4 + 1/12) = 3.35822. Final nominal 80% interval: [78.8, 85.6] percent."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a cohort with more readily verifiable eligibility or broader automated matching raises ex parte renewals. Downside risk: verification-feed failures, a harder-to-match cohort, or a processing backlog reduces original-month completions. A substantial automation improvement could land above 85.6%; a disruption larger than the historical October decline could land below 78.8%, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 82.2,
+      "ciLow": 78.8,
+      "ciHigh": 85.6
+    }
+  ]
+}

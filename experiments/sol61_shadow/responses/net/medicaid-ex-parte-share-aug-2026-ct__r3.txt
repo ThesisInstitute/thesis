@@ -1,0 +1,113 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ct",
+  "country": "US",
+  "type": "data",
+  "title": "Connecticut ex parte renewal share, August 2026",
+  "question": "What percentage of Connecticut Medicaid and CHIP beneficiaries due for renewal in August 2026 will be renewed on an ex parte basis, using CMS's first-published original (O) submission row, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 82.3,
+  "ciLow": 78.7,
+  "ciHigh": 85.9,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Connecticut's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Calculate 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Subsequent revisions and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ct.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-01"}, "label": "January 2025", "value": 83.4},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "February 2025", "value": 81.7},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "March 2025", "value": 77.8},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "April 2025", "value": 80.2},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "May 2025", "value": 81.2},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "June 2025", "value": 81.5},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "July 2025", "value": 82.1},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "August 2025", "value": 82.8},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "September 2025", "value": 82.3},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "October 2025", "value": 78.7},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "November 2025", "value": 83.1},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "December 2025", "value": 83.4},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "January 2026", "value": 84.2},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "February 2026", "value": 84.7},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "March 2026", "value": 83.8},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "April 2026", "value": 81.9},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "May 2026", "value": 82.2},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "June 2026", "value": 81.6}
+  ],
+  "drivers": [
+    "Persistence in Connecticut's original-submission renewal outcomes",
+    "Partial reversion toward the recent six-month average",
+    "Monthly variation in renewal cohorts and processing",
+    "Classification of renewals completed through administrative data"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=100&schema=false&conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=CT&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202501&conditions%5B2%5D%5Boperator%5D=%3E%3D&conditions%5B3%5D%5Bproperty%5D=reporting_period&conditions%5B3%5D%5Bvalue%5D=202506&conditions%5B3%5D%5Boperator%5D=%3C%3D&properties%5B0%5D=state_abbreviation&properties%5B1%5D=reporting_period&properties%5B2%5D=original_or_updated&properties%5B3%5D=beneficiaries_with_a_renewal_due&properties%5B4%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=100&schema=false&conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=CT&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202507&conditions%5B2%5D%5Boperator%5D=%3E%3D&conditions%5B3%5D%5Bproperty%5D=reporting_period&conditions%5B3%5D%5Bvalue%5D=202512&conditions%5B3%5D%5Boperator%5D=%3C%3D&properties%5B0%5D=state_abbreviation&properties%5B1%5D=reporting_period&properties%5B2%5D=original_or_updated&properties%5B3%5D=beneficiaries_with_a_renewal_due&properties%5B4%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=100&schema=false&conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=CT&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202601&conditions%5B2%5D%5Boperator%5D=%3E%3D&conditions%5B3%5D%5Bproperty%5D=reporting_period&conditions%5B3%5D%5Bvalue%5D=202606&conditions%5B3%5D%5Boperator%5D=%3C%3D&properties%5B0%5D=state_abbreviation&properties%5B1%5D=reporting_period&properties%5B2%5D=original_or_updated&properties%5B3%5D=beneficiaries_with_a_renewal_due&properties%5B4%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf"
+  ],
+  "runAt": "2026-10-07T12:31:54Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Connecticut August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Connecticut's state row for reporting_period=202608 and original_or_updated=O in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. All numerical historical anchors use the same O variant; U rows are excluded. The ledger does not explicitly name the denominator. CMS's June snapshot state table defines ex parte rates as a percentage of beneficiaries due for renewal, so that published definition supplies the denominator here."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the CMS datastore query in sourceContext with state_abbreviation=CT, original_or_updated=O, and reporting_period from 202501 through 202506. Echo and read the raw response.",
+      "result": "Ex parte numerator / renewals-due denominator: January 2025 65,938/79,067; February 82,170/100,610; March 82,907/106,605; April 60,167/75,020; May 69,072/85,045; June 64,080/78,578. Each row is O. Calculated one-decimal percentages are 83.4, 81.7, 77.8, 80.2, 81.2, and 81.5."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the CMS datastore query in sourceContext with state_abbreviation=CT, original_or_updated=O, and reporting_period from 202507 through 202512. Echo and read the raw response.",
+      "result": "Ex parte numerator / renewals-due denominator: July 2025 78,900/96,159; August 73,726/89,089; September 73,405/89,231; October 90,172/114,550; November 88,481/106,526; December 86,806/104,099. Each row is O. Calculated one-decimal percentages are 82.1, 82.8, 82.3, 78.7, 83.1, and 83.4."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the CMS datastore query in sourceContext with state_abbreviation=CT, original_or_updated=O, and reporting_period from 202601 through 202606. Echo and read the raw response.",
+      "result": "Ex parte numerator / renewals-due denominator: January 2026 69,915/82,990; February 85,009/100,412; March 85,362/101,908; April 63,959/78,137; May 71,906/87,434; June 68,055/83,450. Each row is O. Calculated one-decimal percentages are 84.2, 84.7, 83.8, 81.9, 82.2, and 81.6."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's June 2026 Eligibility Operations and Enrollment Snapshot, state renewal-outcomes table on PDF page 31.",
+      "result": "The Connecticut row reports 83,450 beneficiaries due for renewal, 86% total renewed, 9% disenrolled, 5% pending, and 82% renewed on an ex parte basis. The heading explicitly uses total beneficiaries due as the percentage denominator. The API ratio 100*68,055/83,450=81.5518% agrees with the snapshot's whole-percent 82%."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class comprises 18 distinct Connecticut O-row monthly prints from January 2025 through June 2026. Their unrounded mean gives a base rate of 82.0200%; the latest twelve average 82.5462%, and the latest six average 83.0527%. HistoricalContext displays ratios rounded to one decimal; model arithmetic uses the fetched counts without intermediate rounding."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior shrunk halfway toward the latest six-month mean. Level: June's 81.5518% plus half the gap to 83.0527%, giving 82.3023%. Momentum: zero additional extrapolation because June 2025 and June 2026 are nearly equal. One-off and policy-mechanism adjustments: zero; the fetched sources establish classification risks without evidence for a quantified Connecticut change. No seasonal adjustment is fitted to the limited comparable annual history. Across the 18-print sample, the 17 successive changes have mean -0.1084 percentage points and squared deviations summing to 63.5424; sigma = 1.9928 percentage points = sqrt(63.5424/16). The normal 80% one-month half-width is 1.28*sigma=2.5508 points. Multiply by sqrt(2) for the two-month June-to-August forecast horizon, yielding 3.6074 points and bounds 78.6948% to 85.9097%, rounded to 78.7% to 85.9%."
+    },
+    {
+      "kind": "math",
+      "text": "Share_t = 100*ex_parte_t/renewals_due_t. Point = 0.5*(81.5518274+83.0526949)=82.3022612, rounded to 82.3. Half-width = 1.28*1.9928377*sqrt(2)=3.6074216. The rounded 80% interval is [78.7,85.9]."
+    },
+    {
+      "kind": "text",
+      "text": "Official-date verification remains unmet. The official snapshot release listing fetched this run confirms June 2026 was released September 25, 2026, but provides no prospective announcement establishing December 15, 2026 for August's data. The registered resolutionDate is retained as required by the target contract and is unverified, rather than inferred from release cadence."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk is a renewal cohort more readily verified through administrative data or improved automatic processing; a share above 85.9% would land outside the interval. A downside risk is a less readily verified cohort, processing disruption, or more renewals classified as form-based; a share below 78.7% would land outside the interval. CMS cautions that mitigation strategies can affect classification of ex parte renewals."
+    },
+    {
+      "kind": "forecast",
+      "point": 82.3,
+      "ciLow": 78.7,
+      "ciHigh": 85.9
+    }
+  ]
+}

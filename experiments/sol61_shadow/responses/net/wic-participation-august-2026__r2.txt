@@ -1,0 +1,59 @@
+{
+  "slug": "wic-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation in August 2026",
+  "question": "What will USDA FNS report as total WIC participation for August 2026 in its first official monthly print, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve fns.wic.total_participation.2026-08.first_print using the first official August 2026 total participation value, applying the registered conversion to millions and retaining reported precision. Ignore subsequent revisions and corrections.",
+  "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [],
+  "runAt": "2026-10-07T12:03:20Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the registered first official monthly print of August 2026 total WIC participation."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.fns.usda.gov/pd/wic-program",
+      "result": "Failed to fetch: HTTP 403 Forbidden. No participation statistics were retrieved."
+    },
+    {
+      "kind": "text",
+      "text": "The run instructions require stopping after a failed fetch. The run therefore stops without substituting remembered or unofficial figures."
+    },
+    {
+      "kind": "text",
+      "text": "No official historical prints were retrieved, so the required base rate and six-print reference class are unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No numerical prior, adjustments, sigma, or interval bounds can be calculated from fetched history. Estimate and interval fields are null."
+    },
+    {
+      "kind": "text",
+      "text": "The official release calendar was not verified. The resolution date is null rather than inferred from the registered expected window. This object records a failed run and does not meet forecast validation requirements."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

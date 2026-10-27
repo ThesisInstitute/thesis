@@ -1,0 +1,138 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ak",
+  "country": "US",
+  "type": "data",
+  "title": "Alaska August 2026 ex parte renewal share",
+  "question": "What percentage of Alaska Medicaid and CHIP beneficiaries due for renewal in August 2026 will have coverage renewed on an ex parte basis, using CMS's first published original submission?",
+  "unit": "percent",
+  "pointEstimate": 26.0,
+  "ciLow": 13.3,
+  "ciHigh": 38.7,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Alaska's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Following CMS's published rate definition, calculate 100 times beneficiaries whose coverage was renewed on an ex parte basis divided by beneficiaries with a renewal due, using numerator and denominator as published, and round to one decimal. Subsequent updated submissions and revisions do not replace the first official print.",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 22
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": 23
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 21
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 27
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 18
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 27
+    }
+  ],
+  "drivers": [
+    "Persistence in Alaska's published ex parte renewal rate",
+    "Variation in renewal cohort size and composition",
+    "May decline followed by June reversal",
+    "Processing delays and classification of automated renewals"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-06T22:41:54Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Alaska August 2026 original-submission forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Alaska's state row for August 2026 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using the first published original submission, O. The ledger does not explicitly name the denominator. I interpret the share according to CMS's published state ex parte rate: Metric 5a1, ex parte renewals, divided by Metric 5, beneficiaries due for renewal. The snapshot table explicitly uses this denominator. This is a state rate, not a national total or weighted average."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the January and February 2026 CMS snapshots and read Alaska's current-month Coverage Retention and Disenrollment Rates by State tables.",
+      "result": "January 2026: Alaska had 17,354 beneficiaries due for renewal and a published ex parte rate of 22%. February 2026: 20,000 due and 23% ex parte. Sources: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the March and April 2026 CMS snapshots and read Alaska's current-month Coverage Retention and Disenrollment Rates by State tables.",
+      "result": "March 2026: Alaska had 17,809 beneficiaries due for renewal and a published ex parte rate of 21%. April 2026: 17,318 due and 27% ex parte. Sources: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the May and June 2026 CMS snapshots and read Alaska's current-month Coverage Retention and Disenrollment Rates by State tables.",
+      "result": "May 2026: Alaska had 30,712 beneficiaries due for renewal and a published ex parte rate of 18%. June 2026: 15,924 due and 27% ex parte; total renewed was 45% and pending was 23%. Sources: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is the six fetched January–June 2026 current-month original/preliminary state prints, consistently using ex parte renewals divided by all beneficiaries due. Their base rate is the unweighted monthly mean, (22+23+21+27+18+27)/6 = 23%. These PDF percentages are rounded to whole percentage points. Attempts to fetch the underlying recent O-row counts through the dataset, API, and CSV failed, so the history does not claim exact one-decimal ratios."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: the official CMS snapshot release list fetched this run confirms June 2026 was released September 25, 2026, but provides no future August 2026 announcement or calendar entry confirming December 15, 2026. The canonical resolutionDate is preserved; its required official-date verification remains unmet. No replacement date is inferred from cadence. Source: https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "Level receives the main weight. Momentum receives no extrapolated drift because the May decline and June rebound reverse each other. May's unusually large renewal cohort coincided with a low share, but no recurring one-off effect is assumed for August. No separate quantitative policy adjustment is applied without a verified Alaska implementation change. CMS specifications explain that some renewals completed using agency data after sending a form are classified as form renewals; this is a mechanism risk, not evidence of an Alaska-specific change."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence model shrunk toward the six-print January–June 2026 base rate. Start at 23%; the June level update is 0.75*(27-23) = +3 percentage points, with momentum, one-off, and policy adjustments each zero, giving 26.0%. Successive changes are [1,-2,6,-9,9], with mean 1 and centered squared sum 198; sigma = 7.0356 percentage points = sqrt(198/(5-1)). A normal-approximation 80% one-month half-width is 1.28*sigma = 9.0056 points. For the June-to-August horizon, multiply by sqrt(2), assuming roughly independent monthly innovations, yielding 12.7358 points. Thus 26.0 +/- 12.7358 gives final rounded bounds 13.3% and 38.7%. The short sample and rounded history limit calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a cohort easier to verify automatically, or improved automated processing, could raise the share above 38.7%, outside the interval. Downside risk: a larger cohort dominated by manual verification, processing disruption, or classification of automated renewals as form renewals could push it below 13.3%, outside the interval. The recent reversal also means independent-innovation scaling may overstate persistence of monthly shocks."
+    },
+    {
+      "kind": "forecast",
+      "point": 26.0,
+      "ciLow": 13.3,
+      "ciHigh": 38.7
+    }
+  ]
+}

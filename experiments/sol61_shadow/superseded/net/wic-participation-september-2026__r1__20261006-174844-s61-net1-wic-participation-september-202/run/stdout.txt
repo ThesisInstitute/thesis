@@ -1,0 +1,42 @@
+{
+  "slug": "wic-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 WIC participation forecast unavailable",
+  "question": "What will USDA report in its first official print of national total monthly WIC participation for September 2026?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first official published national total monthly WIC participation value for September 2026, expressed in millions. Subsequent revisions do not change the outcome.",
+  "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program",
+    "https://www.fna.usda.gov/pd/wic-program"
+  ],
+  "runAt": "2026-10-06T22:07:38Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Official-source retrieval failed"
+    },
+    {
+      "kind": "text",
+      "text": "Web retrieval of the official USDA WIC data page returned HTTP 403. The curl request to https://www.fns.usda.gov/pd/wic-program completed with an empty response. Retrieval of https://www.fna.usda.gov/pd/wic-program also returned HTTP 403."
+    },
+    {
+      "kind": "text",
+      "text": "No usable official monthly participation history was fetched, so the mandatory six-print base rate and dispersion calculation could not be established. The resolution date was not verified from an official release calendar."
+    },
+    {
+      "kind": "text",
+      "text": "Stopped under the fetch-failure instruction. Null estimates and bounds indicate that no forecast was produced; no remembered or search-summary statistics were substituted."
+    }
+  ]
+}

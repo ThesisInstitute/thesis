@@ -1,0 +1,150 @@
+{
+  "slug": "us-ondcp-hidta-al95001-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 HIDTA reported obligations",
+  "question": "What will the first registered USAspending API v2 query snapshot report for FY2026 net financial-assistance transaction obligations under Assistance Listing 95.001, in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": 108.82198836,
+  "ciLow": -7.052505,
+  "ciHigh": 276.75937091,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-22",
+  "resolutionSource": "U.S. Treasury USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the first official response captured under the registered_query_snapshot policy in the registered October 15–22, 2026 window. POST to the specified endpoint with group='fiscal_year', spending_level='transactions', filters.time_period=[{'start_date':'2025-10-01','end_date':'2026-09-30'}], filters.program_numbers=['95.001'], and filters.award_type_codes=['02','03','04','05','06','07','08','09','10','11']. Select results[time_period.fiscal_year='2026'].aggregated_amount and multiply by 0.000001. Preserve API dollar-and-cent precision, equivalent to eight decimal places in USD millions. Freeze that snapshot; subsequent corrections and revisions do not change resolution. October 22 is retained as the registered window endpoint; an official release date for this query could not be verified.",
+  "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 270.27144368
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 268.60530517
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 252.76050027
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 266.41544691
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 273.95994611
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 271.6576756
+    }
+  ],
+  "drivers": [
+    "Extremely small current FY2026 registered-query total",
+    "Historical annual obligations near $267 million",
+    "Substantial announced FY2026 HIDTA allocations",
+    "Uncertain publication of assistance award transactions",
+    "Registered snapshot timing lacks official release-date verification"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/api/v2/awards/last_updated/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.whitehouse.gov/releases/2026/07/white-house-announces-additional-277-million-to-fight-cartels-and-drug-traffickers/",
+    "https://www.govinfo.gov/content/pkg/PLAW-119publ75/html/PLAW-119publ75.htm",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://fiscal.treasury.gov/system/files/files/gtas/fy-2026-reporting-window-schedule.pdf"
+  ],
+  "runAt": "2026-10-06T22:39:46Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FY2026 HIDTA registered-query snapshot forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is nominal net financial-assistance transaction obligations filtered solely to Assistance Listing 95.001 and the registered award type codes, grouped by fiscal year. Every historical entry uses this same query variant, executed separately with October 1 through September 30 dates for its fiscal year. These are historical-period values fetched in this run, not archived original vintages. The current FY2026 observation precedes the registered resolution window."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ using the registered filters, group=fiscal_year and spending_level=transactions; FY2020 dates 2019-10-01 to 2020-09-30; FY2021 dates 2020-10-01 to 2021-09-30.",
+      "result": "The echoed official responses returned aggregated_amount=270271443.68 dollars for FY2020 and 268605305.17 dollars for FY2021. Multiplication by 0.000001 gives 270.27144368 and 268.60530517 USD millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ using the same registered filters; FY2022 dates 2021-10-01 to 2022-09-30; FY2023 dates 2022-10-01 to 2023-09-30.",
+      "result": "The echoed official responses returned aggregated_amount=252760500.27 dollars for FY2022 and 266415446.91 dollars for FY2023, giving 252.76050027 and 266.41544691 USD millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ using the same registered filters; FY2024 dates 2023-10-01 to 2024-09-30; FY2025 dates 2024-10-01 to 2025-09-30.",
+      "result": "The echoed official responses returned aggregated_amount=273959946.11 dollars for FY2024 and 271657675.60 dollars for FY2025, giving 273.95994611 and 271.65767560 USD millions."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the six fetched FY2020–FY2025 annual flows: mean 267.27838629 million, range 252.76050027 to 273.95994611 million. FY2025 persistence provides a normal-reporting prior of 271.65767560 million. Recent annual changes reverse direction, so I add no momentum extrapolation."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST the registered FY2026 query to https://api.usaspending.gov/api/v2/search/spending_over_time/ with dates 2025-10-01 to 2026-09-30; GET https://api.usaspending.gov/api/v2/awards/last_updated/.",
+      "result": "The FY2026 response returned aggregated_amount=264863.53 dollars, or 0.26486353 million. The update endpoint returned last_updated='10/06/2026'. The current total is approximately 0.0991% of the historical mean."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the July 9, 2026 White House HIDTA allocation announcement and the HIDTA appropriation section of https://www.govinfo.gov/content/pkg/PLAW-119publ75/html/PLAW-119publ75.htm.",
+      "result": "The White House FY2026 base-allocation table totals $277,491,415. Public Law 119-75 appropriates $298,579,000 for HIDTA, available through September 30, 2027; at least 51% is directed to state and local entities with a 120-day obligation requirement. Allocations and appropriations are policy evidence, not substitutes for registered-query obligations."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date validation discrepancy: Treasury's official FY2026 GTAS calendar gives September accounting reporting from October 6 through October 20, 2026, but this concerns accounting submissions. Treasury's FABS rules require assistance reporting within 30 days of action and at least twice monthly, with agency-selected publication after validation. Neither source verifies October 22 as an official annual release date for this transaction query. I retain the registered October 15–22 snapshot window and its October 22 endpoint while explicitly flagging that the requested official release-date verification remains unsatisfied."
+    },
+    {
+      "kind": "text",
+      "text": "Level: retain FY2025 obligations as the normal-reporting center. Momentum: zero adjustment. Policy: zero mechanical level adjustment because announced allocations do not establish this query's obligations. One-off and reporting mechanism: the current FY2026 total is 271.39281207 million below that center. I assign subjective probabilities of 60% to persistence of the small reported total and 40% to historical-scale publication before the snapshot. These probabilities express judgment, not fetched frequencies; partial publication could produce intermediate outcomes."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use the FY2025 persistence prior and six fetched FY2020–FY2025 annual flows. Because this is an annual-flow series, calculate dispersion from the values themselves: mean=267.27838629; sum of squared deviations=286.0542016061189; sigma = 7.56378478813509 = sqrt(286.0542016061189/5), in USD millions. The ordinary Gaussian 80% half-width is 1.28*sigma=9.681644528812916. Combine level persistence, zero momentum, zero policy-level adjustment, and the reporting-state update using 0.60*N(0.26486353,sigma^2)+0.40*N(271.65767560,sigma^2). Its mean is 0.60*0.26486353+0.40*271.65767560=108.821988358, rounded to 108.82198836. Approximate central 80% mixture bounds are 0.26486353+sigma*Phi_inverse(0.10/0.60)=-7.052504995393869 and 271.65767560+sigma*Phi_inverse((0.90-0.60)/0.40)=276.75937091228616, rounded to [-7.052505,276.75937091]. The interval's half-span is about 14.66 times the ordinary half-width because an entire annual reporting batch may be absent. The negative lower bound permits net deobligation outcomes; the target sums signed transaction obligations."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a large late publication batch: reported obligations matching the announced 277.491415 million base allocations would land above the interval's 276.75937091 million upper bound. The downside risk is continued publication failure or obligations recorded in another fiscal year, leaving the snapshot near 0.26486353 million. Substantial net deobligations taking the total below -7.052505 million would land outside the interval on the downside. The point is a probability-weighted mean between two separated scenarios."
+    },
+    {
+      "kind": "forecast",
+      "point": 108.82198836,
+      "ciLow": -7.052505,
+      "ciHigh": 276.75937091
+    }
+  ]
+}

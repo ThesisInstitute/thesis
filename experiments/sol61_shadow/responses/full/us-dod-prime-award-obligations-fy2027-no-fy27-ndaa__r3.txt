@@ -1,0 +1,75 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+  "country": "US",
+  "type": "conditional",
+  "title": "FY2027 DoD prime award obligations without FY2027 NDAA",
+  "question": "What will the USAspending API v2 agency 097 award-summary obligations field report for fiscal year 2027, converted to billions USD, in the registered query snapshot, conditional on the registered FY2027 NDAA non-enactment condition?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+  "resolutionRule": "Use the registered GET query for fiscal year 2027, read obligations, and multiply by 1e-9. The registered query snapshot is the resolving vintage; later API revisions do not replace it. Evaluate the exact registered non-enactment condition on 2026-12-31; if it fails, mark unresolved. The supplied context specifies an expected snapshot window but no exact snapshot date or timestamp.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+  "conditionalOn": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints/federal_accounts/",
+    "https://www.govinfo.gov/app/details/BILLS-119hr8800rh"
+  ],
+  "runAt": "2026-10-07T12:40:21Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: mandatory registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered USAspending agency award-obligations query, not total agency spending, budget authority, appropriations, or NDAA authorizations. No numeric forecast is issued. Null estimates and empty history explicitly record refusal and must not be normalized or scored as a forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025, https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024, and https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023.",
+      "result": "Each URL returned Internal Error: URL is not accessible via this tool. No obligations field or historical numeric value was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022, https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021, and https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020.",
+      "result": "Each URL returned Internal Error: URL is not accessible via this tool. No obligations field or historical numeric value was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "mcp__codex_apps__search_service_web_run",
+      "call": "Retry https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025, https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024, and https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023 through the second available web tool.",
+      "result": "Each URL again returned Internal Error: URL is not accessible via this tool. No obligations field or historical numeric value was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026 and https://www.govinfo.gov/app/details/BILLS-119hr8800rh.",
+      "result": "The fiscal_year=2026 query also returned URL is not accessible via this tool. GovInfo identifies H.R. 8800, 119th Congress, as the FY2027 NDAA reported in the House, with last action listed June 15, 2026. That version does not establish current enactment status."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. No registered-query obligation observations were fetched. Persistence, realized dispersion, walk-forward scores, and thesis_model_candidate_v1 candidates cannot be computed honestly. API documentation confirms the endpoint accepts GET requests, but supplies no admissible historical obligation values."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no grounded prior, conditional adjustment, sigma, or interval can be calculated without the mandatory query history. Authorization amounts and broader agency aggregates cannot substitute for the registered series."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution timing also remains unverified: the supplied expected window is not an official scheduled date or a registered resolve-by deadline. No exact snapshot date is inferred."
+    },
+    {
+      "kind": "text",
+      "text": "Refused under the registered-query instruction requiring refusal when the query cannot be executed. Historical values, a point estimate, and interval bounds have not been invented. The JSON parses, but this refusal cannot satisfy the numeric forecast-cell validation requirements."
+    }
+  ]
+}

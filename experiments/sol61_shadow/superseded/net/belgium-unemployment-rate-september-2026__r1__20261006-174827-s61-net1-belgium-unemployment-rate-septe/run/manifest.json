@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:16Z",
+  "runStartedAt": "2026-10-07T10:14:16Z",
+  "series": "eurostat.unemployment_rate.belgium",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "belgium-unemployment-rate-september-2026",
+    "country": "BE",
+    "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-11-09",
+      "start": "2026-11-01"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-11T19:13:41Z",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "registrationState": "preregistered",
+    "series": "eurostat.unemployment_rate.belgium",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "ec.europa.eu"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-09",
+        "start": "2026-11-01"
+      },
+      "field": "eurostat.unemployment_rate.belgium",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "eurostat.unemployment_rate.belgium",
+      "sourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+      "table": "Eurostat monthly unemployment euro-indicators release / une_rt_m data page",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26",
+    "targetRegistrationPath": "records/targets/2026-09-11-2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "targetContentHash": "2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26",
+  "targetRegistrationPath": "records/targets/2026-09-11-2a2e910a9190e434ae3320828c92ff9333ea94033678800a7900d94687de0d26.json",
+  "registeredAtUtc": "2026-09-11T19:13:41Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/prompt.md",
+      "sha256": "bc0a3e755a4fa228b53355f8fc039f48e164e595465cecc0b85bfa8c6400e61c",
+      "bytes": 10561,
+      "createdAt": "2026-10-07T10:14:16Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/command.json",
+      "sha256": "8088c2ed4e5382c8a777f838a1b34523067a364fafb4791dae211d633d8e16b0",
+      "bytes": 198,
+      "createdAt": "2026-10-07T10:14:16Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/stdout.txt",
+      "sha256": "f04ef9400b72403ca0b1f1d07cfc1b28b213e3030d5fbb44fdfd944b37541a39",
+      "bytes": 2093,
+      "createdAt": "2026-10-07T10:14:16Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:16Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/raw_response.txt",
+      "sha256": "f04ef9400b72403ca0b1f1d07cfc1b28b213e3030d5fbb44fdfd944b37541a39",
+      "bytes": 2093,
+      "createdAt": "2026-10-07T10:14:16Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/parsed_cells.json",
+      "sha256": "b8ed3a1a5b2c022d0386c0e65366a4e4f0ed76e2d49fce79cb25c56baebc9d9a",
+      "bytes": 2178,
+      "createdAt": "2026-10-07T10:14:16Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/normalized_cells.json",
+      "sha256": "db7488e46a14ab2f120bd5ec22a58bb50f61e86a1d912dcccf252cd676962666",
+      "bytes": 2079,
+      "createdAt": "2026-10-07T10:14:16Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:16Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/belgium-unemployment-rate-september-2026__r1/manifest.json",
+      "sha256": "387330c9b4e61bf1c27c88d072e161ea84562d7a0c9c7fc245d737afb0bab154",
+      "bytes": 4609,
+      "createdAt": "2026-10-07T10:14:16Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "55b7c1f259d435565ca3739dee59a1144a58053f70837c345351ace973159eaa"
+}

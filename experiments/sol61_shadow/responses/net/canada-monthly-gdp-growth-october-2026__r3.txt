@@ -1,0 +1,73 @@
+{
+  "slug": "canada-monthly-gdp-growth-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, October 2026",
+  "question": "What will Statistics Canada's first official print show for October 2026 month-over-month real GDP growth by industry, all industries, seasonally adjusted at annual rates, chained 2017 dollars?",
+  "unit": "percent_growth",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-23",
+  "resolutionSource": "Statistics Canada, GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Use vector v65201210 from the first official October 2026 release. Calculate 100 × (October level / September level − 1), using both levels from that release and retaining their published precision without additional rounding. Exclude advance estimates and subsequent corrections or revisions.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-07"
+      },
+      "label": "July 2026",
+      "value": 0.0
+    }
+  ],
+  "drivers": [],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm"
+  ],
+  "runAt": "2026-10-07T12:33:45Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official history fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "Opening https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm returned 'Failed to fetch' and 'Timeout fetching'. The production prompt explicitly requires stopping after a failed fetch. Forecast values are therefore null."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's July 2026 GDP release at https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm.",
+      "result": "The opened release reports July 2026 monthly real GDP growth of 0.0%. It separately reports an August advance estimate of 0.2%, which is excluded from the first-print historical sample."
+    },
+    {
+      "kind": "text",
+      "text": "The official vector definition identifies v65201210 as Canada, all industries, seasonally adjusted at annual rates, chained 2017 dollars. The fetched July headline is the monthly growth variant of this GDP-by-industry series."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official 2026 release calendar lists October 2026 GDP by industry for December 23, 2026, matching the registered resolution date."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate was not established: only one first-print monthly growth observation was successfully opened before stopping. Search-result values were not substituted for fetched history."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: No model was fitted. The incomplete historical sample cannot support the required dispersion calculation, so sigma, the 1.28 × sigma half-width, adjustment components, and final implied bounds remain uncomputed."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

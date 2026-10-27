@@ -1,0 +1,163 @@
+{
+  "slug": "belgium-unemployment-rate-september-2026",
+  "country": "BE",
+  "type": "data",
+  "title": "Belgium unemployment rate, September 2026",
+  "question": "What will Eurostat's FIRST PRINT of Belgium's September 2026 seasonally adjusted unemployment rate be, for total sexes aged 15-74, as a percentage of the labour force, in dataset une_rt_m and the monthly Euro-indicators unemployment release?",
+  "unit": "percent",
+  "pointEstimate": 5.9,
+  "ciLow": 5.6,
+  "ciHigh": 6.2,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Eurostat, monthly unemployment Euro-indicators release / une_rt_m",
+  "resolutionSourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+  "resolutionRule": "Use the September 2026 value in the FIRST official Eurostat monthly unemployment publication, table 'Seasonally adjusted unemployment, totals', Belgium row, Rates (%) September 2026 column: dataset une_rt_m, monthly frequency, Belgium, seasonally adjusted, total sexes, ages 15-74, percentage of the labour force. Resolve at the published precision of one decimal place (0.1 percentage point). The first published value is final for this forecast; subsequent revisions and corrections do not replace it. The official next-release announcement gives 30 October 2026, which conflicts with the registered expected window of 1-9 November 2026; the series and target period remain the registered ones.",
+  "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+  "historicalContext": [
+    {"period":{"type":"month","value":"2024-09"},"label":"2024-09","value":5.5},
+    {"period":{"type":"month","value":"2024-10"},"label":"2024-10","value":5.8},
+    {"period":{"type":"month","value":"2024-11"},"label":"2024-11","value":5.8},
+    {"period":{"type":"month","value":"2024-12"},"label":"2024-12","value":5.8},
+    {"period":{"type":"month","value":"2025-01"},"label":"2025-01","value":5.8},
+    {"period":{"type":"month","value":"2025-02"},"label":"2025-02","value":5.9},
+    {"period":{"type":"month","value":"2025-03"},"label":"2025-03","value":5.9},
+    {"period":{"type":"month","value":"2025-04"},"label":"2025-04","value":6.4},
+    {"period":{"type":"month","value":"2025-05"},"label":"2025-05","value":6.5},
+    {"period":{"type":"month","value":"2025-06"},"label":"2025-06","value":6.5},
+    {"period":{"type":"month","value":"2025-07"},"label":"2025-07","value":5.8},
+    {"period":{"type":"month","value":"2025-08"},"label":"2025-08","value":5.8},
+    {"period":{"type":"month","value":"2025-09"},"label":"2025-09","value":5.9},
+    {"period":{"type":"month","value":"2025-10"},"label":"2025-10","value":6.4},
+    {"period":{"type":"month","value":"2025-11"},"label":"2025-11","value":6.4},
+    {"period":{"type":"month","value":"2025-12"},"label":"2025-12","value":6.4},
+    {"period":{"type":"month","value":"2026-01"},"label":"2026-01","value":6.4},
+    {"period":{"type":"month","value":"2026-02"},"label":"2026-02","value":6.4},
+    {"period":{"type":"month","value":"2026-03"},"label":"2026-03","value":6.3},
+    {"period":{"type":"month","value":"2026-04"},"label":"2026-04","value":6.2},
+    {"period":{"type":"month","value":"2026-05"},"label":"2026-05","value":6.3},
+    {"period":{"type":"month","value":"2026-06"},"label":"2026-06","value":6.3},
+    {"period":{"type":"month","value":"2026-07"},"label":"2026-07","value":6.0},
+    {"period":{"type":"month","value":"2026-08"},"label":"2026-08","value":5.9}
+  ],
+  "drivers": [
+    "August first-print rate of 5.9%",
+    "Recent decline already reflected in persistence",
+    "Quarterly LFS and registered-unemployment benchmarking",
+    "Volatility across original first prints"
+  ],
+  "sourceContext": [
+    "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-31102024-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02122024-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-07012025-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30012025-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-04032025-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042025-bp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02052025-bp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-03062025-bp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02072025-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-31072025-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092025-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02102025-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30102025-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02122025-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-08012026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30012026-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-04032026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30042026-cp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01062026-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02072026-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30072026-bp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01092026-bp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap",
+    "https://ec.europa.eu/eurostat/cache/metadata/EN/une_rt_m_esms.htm",
+    "https://ec.europa.eu/eurostat/news/euro-indicators/release-calendar"
+  ],
+  "runAt": "2026-10-07T10:35:54Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Belgium September 2026 unemployment: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "Resolve the registered Belgium total unemployment rate, not youth unemployment or a later revised vintage. All historical observations below come from the focal month in its own original Eurostat release. The registered country BE, slug, unit and dataPointId are preserved."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open Eurostat's August 2026 monthly unemployment release and official Euro-indicators calendar.",
+      "result": "The [1 October 2026 release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap) reports Belgium August 2026 at 5.9%, with July at 6.0%, and announces the next release for 30 October 2026. The dynamic calendar did not expose its event body, so the date is verified from this official announcement. The registered 2026-11-01 to 2026-11-09 window is inconsistent with it; resolutionDate is 2026-10-30 without changing the September target."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search and open the six original Eurostat monthly unemployment releases for 2024-09 through 2025-02; extract 'Seasonally adjusted unemployment, totals', Belgium row, latest Rates (%) column.",
+      "result": "2024-09: 5.5% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-31102024-bp)); 2024-10: 5.8% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02122024-ap)); 2024-11: 5.8% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-07012025-bp)); 2024-12: 5.8% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30012025-bp)); 2025-01: 5.8% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-04032025-ap)); 2025-02: 5.9% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042025-bp)). Earlier columns are revised vintages and were not substituted for the focal first print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search and open the six original Eurostat monthly unemployment releases for 2025-03 through 2025-08; extract 'Seasonally adjusted unemployment, totals', Belgium row, latest Rates (%) column.",
+      "result": "2025-03: 5.9% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02052025-bp)); 2025-04: 6.4% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-03062025-bp)); 2025-05: 6.5% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02072025-ap)); 2025-06: 6.5% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-31072025-ap)); 2025-07: 5.8% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092025-ap)); 2025-08: 5.8% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02102025-ap)). Earlier columns are revised vintages and were not substituted for the focal first print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search and open the six original Eurostat monthly unemployment releases for 2025-09 through 2026-02; extract 'Seasonally adjusted unemployment, totals', Belgium row, latest Rates (%) column.",
+      "result": "2025-09: 5.9% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30102025-bp)); 2025-10: 6.4% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02122025-bp)); 2025-11: 6.4% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-08012026-ap)); 2025-12: 6.4% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30012026-bp)); 2026-01: 6.4% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-04032026-ap)); 2026-02: 6.4% ([original release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap)). Earlier columns are revised vintages and were not substituted for the focal first print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search and open the six original Eurostat monthly unemployment releases for 2026-03 through 2026-08; extract 'Seasonally adjusted unemployment, totals', Belgium row, latest Rates (%) column.",
+      "result": "2026-03: 6.3% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30042026-cp)); 2026-04: 6.2% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01062026-ap)); 2026-05: 6.3% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-02072026-ap)); 2026-06: 6.3% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30072026-bp)); 2026-07: 6.0% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01092026-bp)); 2026-08: 5.9% ([original release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap)). Earlier columns are revised vintages and were not substituted for the focal first print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read Eurostat une_rt_m official methodology and the release's Methods and definitions.",
+      "result": "The [official metadata](https://ec.europa.eu/eurostat/cache/metadata/EN/une_rt_m_esms.htm) defines total unemployment for ages 15-74. Belgium combines quarterly LFS data with monthly registered unemployment through Denton temporal disaggregation; forecast benchmark factors estimate the latest months. Therefore successive first-print differences combine monthly movements with vintage and estimation noise."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: 24 original monthly first prints, September 2024-August 2026, have mean 6.1000%, sample level SD 0.2993 percentage point and range 5.5%-6.5%. Their 23 successive changes have mean +0.0174 percentage point and range -0.7 to +0.5. The default prior is August first-print persistence at 5.9%, rather than the unconditional level mean. This is a single-country time-series target; no panel shrinkage is applied."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates were computed from the fetched first prints before selecting the forecast. Values below are unrounded model outputs, displayed to four decimals; intervals use normal residual wrappers, not native model intervals. [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"last_print_persistence\",\"point\":5.9,\"p10\":5.5970,\"p50\":5.9,\"p90\":6.2030,\"ci80\":[5.5970,6.2030],\"ci90\":[5.5106,6.2894],\"interval_method\":\"Normal residual wrapper centered on persistence; sample SD of successive original first-print changes\",\"calibration_n\":23,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"all_available\":{\"n\":23,\"mae\":0.1304,\"rmse\":0.2322},\"common_sample\":{\"n\":21,\"mae\":0.1286,\"rmse\":0.2340},\"common_test_period_start\":\"2024-12\",\"common_test_period_end\":\"2026-08\"}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_three_month_mean\",\"point\":6.0667,\"p10\":5.6719,\"p50\":6.0667,\"p90\":6.4615,\"ci80\":[5.6719,6.4615],\"ci90\":[5.5594,6.5740],\"interval_method\":\"Normal residual wrapper centered on trailing-three-month mean; sample SD of walk-forward errors\",\"calibration_n\":21,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"common_sample\":{\"n\":21,\"mae\":0.2238,\"rmse\":0.3019},\"common_test_period_start\":\"2024-12\",\"common_test_period_end\":\"2026-08\"}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select last_print_persistence: on the identical 21 one-step evaluation months, December 2024-August 2026, persistence MAE is 0.1286 percentage point and RMSE 0.2340, versus 0.2238 and 0.3019 for the trailing-three-month mean. Its competing point is 6.0667%. These are retrospective tests on original print sequences, not a reconstruction of every intervening database vintage. The selected point equals the strongest benchmark."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view updates: the July-to-August decline from 6.0% to 5.9% is already reflected in persistence. Additional momentum adjustment = 0.0 percentage point; no separately quantified policy or one-off adjustment is applied. No fetched release-specific signal justifies a material deviation. Prior weight = 100%; final delta from persistence = 0.0 percentage point."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = last_print_persistence at 5.9%; historical sample = 24 original first prints from 2024-09 through 2026-08. For their 23 successive changes, sum(delta) = 0.4 and sum(delta^2) = 1.24, so mean(delta) = 0.4/23 = 0.0173913 and sigma = 0.2367434 percentage point = sqrt((1.24 - 0.4^2/23)/22). Point = 1.00*5.9 + 0.0 momentum + 0.0 policy/one-off adjustment = 5.9. The normal residual 80% half-width = 1.28*sigma = 0.3030315; widening factor = 1.00. Raw bounds = 5.9 +/- 0.3030315 = [5.5969685, 6.2030315], rounded to the agency's 0.1-point precision as [5.6, 6.2]. No additional regime widening is imposed; first-print vintage noise is already included in sigma."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: applying the final rounded +/-0.3-point band to each preceding original print covers 20 of 23 historical one-step changes (87.0%) and all 10 most recent changes. This is an in-sample dispersion check, not independent validation of exact 80% coverage. The tails remain meaningful because the history contains two +0.5-point jumps and one -0.7-point fall."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: an upward benchmark adjustment or rebound in registered unemployment could repeat the September-to-October 2025 first-print jump from 5.9% to 6.4%; that would land above the interval's 6.2% ceiling. Downside risk: a sharp fall in registered joblessness or downward benchmark adjustment could repeat the June-to-July 2025 decline from 6.5% to 5.8%; applying that -0.7-point move to the 5.9% prior gives 5.2%, outside the interval below 5.6%. These are stress scenarios, not asserted current developments."
+    },
+    {
+      "kind": "text",
+      "text": "Audit limitation: the registered slug is copied from the supplied target context. The catalog uniqueness lookup was not performed because the run's independence instructions prohibit access to Thesis sources. No local files or prior forecasts were used, and no activity receipts were manufactured. The JSON cell was constructed and successfully parsed in this run; history identities, labels and forecast bounds were checked."
+    },
+    {
+      "kind": "forecast",
+      "point": 5.9,
+      "ciLow": 5.6,
+      "ciHigh": 6.2
+    }
+  ]
+}

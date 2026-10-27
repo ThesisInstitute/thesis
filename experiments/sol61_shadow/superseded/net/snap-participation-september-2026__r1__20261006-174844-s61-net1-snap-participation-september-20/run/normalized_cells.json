@@ -1,0 +1,64 @@
+[
+ {
+  "slug": "snap-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 SNAP participation: forecast unavailable",
+  "question": "What will USDA FNS report in its first official national monthly SNAP Persons print for September 2026, without seasonal adjustment, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS SNAP national monthly participation tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve using September 2026 Persons in the first official national monthly SNAP participation table. Multiply the reported value in thousands by 0.001 to obtain millions, preserving the published precision. Disregard subsequent revisions and corrections; no correction grace period applies.",
+  "dataPointId": "usda.fns.snap.persons.september_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+   "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+   "https://fns-prod.azureedge.us/pd/overview",
+   "https://www.fns.usda.gov/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+   "https://usda.azureedge.us/about-usda/reports-and-data/agency-reports?page=0"
+  ],
+  "runAt": "2026-10-06T22:16:23Z",
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Forecast run failed required evidence checks"
+   },
+   {
+    "kind": "text",
+    "text": "The target remains fns.snap.total_persons for September 2026, national monthly Persons, first official print. Annual fiscal-year participation and quality-control releases cannot substitute for this monthly series."
+   },
+   {
+    "kind": "text",
+    "text": "The official SNAP page was successfully fetched with curl. It identifies June 2026 as the latest available month and September 18, 2026 as its update date. Its canonical hostname is now www.fna.usda.gov, creating a discrepancy with the registered www.fns.usda.gov host binding; the target has not been changed."
+   },
+   {
+    "kind": "text",
+    "text": "The linked snap-4fymonthly-9.pdf could not be opened or rendered by the web tool. Curl returned a binary PDF, but no readable monthly Persons values were obtained through the permitted tools. Consequently, the mandatory six numeric historical prints and the base rate could not be established. No remembered or search-summary table values have been substituted."
+   },
+   {
+    "kind": "text",
+    "text": "No official schedule or announcement verified a publication date for September 2026 SNAP Persons. The official USDA calendar inspected contained no applicable SNAP date. The registered February 7\u201315, 2027 window is unverified, so resolutionDate is null."
+   },
+   {
+    "kind": "text",
+    "text": "Prior/update/interval: No persistence prior or historical sample can be estimated without fetched monthly counts. Level, momentum, one-off, and policy adjustments therefore remain unquantified. Sigma and the required 1.28*sigma half-width cannot be calculated; final implied bounds are unavailable. The run stops without a numerical forecast."
+   },
+   {
+    "kind": "text",
+    "text": "An upside risk would be increased enrollment or delayed eligibility-related exits; a downside risk would be accelerated exits. Without a defensible 80% interval, outcomes outside the interval cannot be specified numerically."
+   },
+   {
+    "kind": "forecast",
+    "point": null,
+    "ciLow": null,
+    "ciHigh": null
+   }
+  ]
+ }
+]

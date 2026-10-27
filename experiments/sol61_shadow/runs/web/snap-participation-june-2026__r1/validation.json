@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "snap-participation-june-2026",
+      "ok": false,
+      "errors": [
+        "resolutionDate 2026-09-18 is not after runAt 2026-10-07 \u2014 target already published (leakage)"
+      ]
+    }
+  ]
+}

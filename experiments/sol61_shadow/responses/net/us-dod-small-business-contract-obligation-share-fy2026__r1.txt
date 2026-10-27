@@ -1,0 +1,56 @@
+{
+  "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD small-business obligation share — forecast refused",
+  "question": "What percentage of FY2026 Department of Defense prime-contract transaction obligations will be attributed to small_business recipients in the first registered USAspending query snapshot?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Resolve as 100 times small_business obligations divided by all obligations, using awarding Department of Defense, award type codes A/B/C/D, transaction spending level, and FY2026. Preserve the first registered snapshot without subsequent revisions. An official snapshot date was not verified.",
+  "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-07T12:49:05Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused following an unsuccessful denominator request"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered transaction-level query ratio, rather than an agency profile total or published small-business scorecard."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with group fiscal_year, spending_level transactions, dates 2024-10-01 through 2025-09-30, awarding toptier Department of Defense, award_type_codes A/B/C/D, and recipient_type_names [small_business].",
+      "result": "The response returned fiscal_year 2025 aggregated_amount 102602666732.99 for the numerator."
+    },
+    {
+      "kind": "text",
+      "text": "I incorrectly represented the unrestricted denominator by explicitly submitting recipient_type_names: []. The API rejected that request with: Field 'filters|recipient_type_names' value '[]' is below min '1' items. This establishes a request-construction failure, not that the underlying series is unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory historical base rate was not fetched: a numerator alone cannot establish a share, and six distinct historical ratios are required."
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending documentation describes daily updates and a 90-day delay for DoD contract data. It does not verify a specific registered snapshot date within the supplied release window."
+    },
+    {
+      "kind": "text",
+      "text": "Under the instruction to stop after a failed fetch, this run stops without retrying or substituting other aggregates. No point estimate, interval, historical shares, or resolution date is asserted."
+    }
+  ]
+}

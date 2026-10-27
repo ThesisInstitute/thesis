@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:02Z",
+  "runStartedAt": "2026-10-07T10:14:02Z",
+  "series": "usaspending.cdfi.assistance_transaction_obligations",
+  "period": "FY2026",
+  "conditional": null,
+  "targetContext": {
+    "anchors": {
+      "2025": 319.455176
+    },
+    "catalogSlug": "us-cdfi-assistance-transaction-obligations-fy2026",
+    "country": "US",
+    "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+    "expectedReleaseWindow": {
+      "end": "2026-10-22",
+      "start": "2026-10-15"
+    },
+    "period": "FY2026",
+    "registeredAt": "2026-08-11T20:38:09Z",
+    "registeredAtUtc": "2026-08-11T20:38:09Z",
+    "registrationCommit": "49bf9b5726d9faf93b6c96c9d73d4a52dc74c030",
+    "registrationState": "preregistered",
+    "series": "usaspending.cdfi.assistance_transaction_obligations",
+    "sourceBinding": {
+      "adapter": "usaspending-api",
+      "allowedHosts": [
+        "api.usaspending.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-22",
+        "start": "2026-10-15"
+      },
+      "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+      "releasePolicy": "registered_query_snapshot",
+      "sourceSeriesId": "usaspending.search.spending_over_time.cdfi.program_obligations",
+      "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "table": "USAspending API v2 advanced search, CDFI Fund awarding-subagency financial-assistance award transactions, obligations by fiscal year",
+      "transform": {
+        "agency": {
+          "name": "Community Development Financial Institutions Fund",
+          "tier": "subtier",
+          "type": "awarding"
+        },
+        "awardTypeCodes": [
+          "02",
+          "03",
+          "04",
+          "05",
+          "06",
+          "07",
+          "08",
+          "09",
+          "10",
+          "11"
+        ],
+        "factor": 1e-06,
+        "fiscalYear": "{fiscal_year}",
+        "group": "fiscal_year",
+        "operation": "multiply",
+        "requestMethod": "POST",
+        "spendingLevel": "transactions"
+      }
+    },
+    "targetContentHash": "6e45cb2f4898f951845f89900e3c0befff43d9dc3bc3a0f7749231020fb88f32",
+    "targetRegistrationPath": "records/targets/2026-08-11-6e45cb2f4898f951845f89900e3c0befff43d9dc3bc3a0f7749231020fb88f32.json",
+    "targetUnit": "usd_millions",
+    "valueScale": 1e-06
+  },
+  "registrationCommit": "49bf9b5726d9faf93b6c96c9d73d4a52dc74c030",
+  "targetContentHash": "6e45cb2f4898f951845f89900e3c0befff43d9dc3bc3a0f7749231020fb88f32",
+  "targetRegistrationPath": "records/targets/2026-08-11-6e45cb2f4898f951845f89900e3c0befff43d9dc3bc3a0f7749231020fb88f32.json",
+  "registeredAtUtc": "2026-08-11T20:38:09Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/prompt.md",
+      "sha256": "d422b32d40e59ba89d9ee60c6106019f0427beb7c35de597aff2b0ff3377fed5",
+      "bytes": 12198,
+      "createdAt": "2026-10-07T10:14:02Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/command.json",
+      "sha256": "cdf1c50c0485755086091cc8ba6f677eca6619912272a7d380d42bfac94d5d9e",
+      "bytes": 207,
+      "createdAt": "2026-10-07T10:14:02Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/stdout.txt",
+      "sha256": "dd4f2fe926a719c8a2534a7f6187523e978a18d2dcbb271d59ca29b23945ae9c",
+      "bytes": 6469,
+      "createdAt": "2026-10-07T10:14:02Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:02Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/raw_response.txt",
+      "sha256": "dd4f2fe926a719c8a2534a7f6187523e978a18d2dcbb271d59ca29b23945ae9c",
+      "bytes": 6469,
+      "createdAt": "2026-10-07T10:14:02Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/parsed_cells.json",
+      "sha256": "36e9ee72e43e5c5b04a8541ae1273d0ebdc11bce470d1b9252947ffc0bc7cbc9",
+      "bytes": 6749,
+      "createdAt": "2026-10-07T10:14:02Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/normalized_cells.json",
+      "sha256": "e06b9f1be21f9ced582c14ffdd5c3b40f029b868031e8c5b1b8fd0fdd516feaf",
+      "bytes": 6301,
+      "createdAt": "2026-10-07T10:14:02Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:02Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/us-cdfi-assistance-transaction-obligations-fy2026__r1/manifest.json",
+      "sha256": "0a0fdc6ec46ece54eef6f91ad1190ae1ac72377aea86c0e8b7bc7e366fc0c934",
+      "bytes": 5196,
+      "createdAt": "2026-10-07T10:14:02Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "d12101b17dc88f3e5379084c896fcdedea7b632aa6e0cdb4c36a67a7b3d3890d"
+}

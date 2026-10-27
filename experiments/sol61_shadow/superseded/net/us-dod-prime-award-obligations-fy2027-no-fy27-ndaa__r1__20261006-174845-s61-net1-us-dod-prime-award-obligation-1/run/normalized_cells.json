@@ -1,0 +1,98 @@
+[
+ {
+  "status": "refused",
+  "slug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+  "unit": "billions USD",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+  "runAt": "2026-10-06T22:12:48Z",
+  "historicalContext": [
+   {
+    "label": "FY2018",
+    "value": 365.94340739236,
+    "period": {
+     "type": "fiscal_year",
+     "value": "2018"
+    }
+   },
+   {
+    "label": "FY2020",
+    "value": 431.88364015745,
+    "period": {
+     "type": "fiscal_year",
+     "value": "2020"
+    }
+   },
+   {
+    "label": "FY2022",
+    "value": 424.50276360528,
+    "period": {
+     "type": "fiscal_year",
+     "value": "2022"
+    }
+   },
+   {
+    "label": "FY2025",
+    "value": 501.6682566824,
+    "period": {
+     "type": "fiscal_year",
+     "value": "2025"
+    }
+   }
+  ],
+  "sourceContext": [
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2018",
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025"
+  ],
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Forecast refused because required historical fetches failed"
+   },
+   {
+    "kind": "text",
+    "text": "Historical observations were requested using the exact registered agency 097 awards query. Successful responses were echoed and obligations were multiplied by 1e-9."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2018",
+    "result": "The echoed JSON response reported obligations = 365943407392.36 USD, yielding 365.94340739236 billions USD."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "result": "The echoed JSON response reported obligations = 431883640157.45 USD, yielding 431.88364015745 billions USD."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "result": "The echoed JSON response reported obligations = 424502763605.28 USD, yielding 424.50276360528 billions USD."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "result": "The echoed JSON response reported obligations = 501668256682.4 USD, yielding 501.6682566824 billions USD."
+   },
+   {
+    "kind": "text",
+    "text": "Registered-query curl requests for FY2017, FY2019, FY2021, FY2023, FY2024, and FY2026 each exited with code 35 and echoed: curl: (35) Recv failure: Connection reset by peer."
+   },
+   {
+    "kind": "text",
+    "text": "Only four distinct historical observations were successfully fetched. This does not satisfy the mandatory six-print reference class and does not establish that the official source exposes fewer than six prints. The prompt requires stopping after a failed fetch."
+   },
+   {
+    "kind": "text",
+    "text": "The resolution date was not verified from readable official schedule evidence. No point estimate, sigma, interval, or verified resolution date is asserted."
+   }
+  ]
+ }
+]

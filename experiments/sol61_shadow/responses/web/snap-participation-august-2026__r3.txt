@@ -1,0 +1,155 @@
+{
+  "slug": "snap-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation in August 2026",
+  "question": "What will USDA FNS report for national SNAP Persons participation in August 2026, without seasonal adjustment, in the first official monthly print, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 35.669571,
+  "ciLow": 35.253651,
+  "ciHigh": 36.08549,
+  "confidence": 0.8,
+  "resolutionDate": "2027-01-11",
+  "resolutionSource": "USDA FNS SNAP national monthly participation table, Persons",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve using national Persons participation for August 2026 in the first official SNAP monthly publication containing that month. Use the unadjusted administrative count, including disaster assistance when included by the agency. Convert thousands of persons to millions by multiplying by 0.001; when the table displays whole persons, divide by 1000000. Preserve the displayed precision and express the result in millions to six decimal places. Ignore subsequent corrections and revisions, including same-day corrections; there is no grace period. The resolutionDate is a provisional scheduling placeholder taken from the registered window's end, not an officially verified release date.",
+  "dataPointId": "usda.fns.snap.persons.august_2026",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 38.54773
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": 37.870817
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 37.298271
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 37.011096
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 36.562128
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Continuing eligibility losses at recertification",
+    "Slowing declines in recent initial prints",
+    "Expanded ABAWD time limits and narrower waiver criteria",
+    "State reporting variation in initial participation counts"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://www.usda.gov/sites/default/files/guidance-documents/fns.snap-obbb-abawd-exceptions-implementation.pdf",
+    "https://www.usda.gov/sites/default/files/guidance-documents/fns.snap-obbb-abawd-waivers-implementation.pdf"
+  ],
+  "runAt": "2026-10-07T11:57:28Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 SNAP participation: forecast from initial-print history"
+    },
+    {
+      "kind": "text",
+      "text": "The target is national monthly SNAP Persons, ledger series fns.snap.total_persons, for August 2026. The relevant tables are SNAP Number of Persons Participating and the national SNAP monthly summary. All historicalContext values use the national TOTAL column marked Initial for their respective months, without seasonal adjustment. Annual fiscal-year quality-control statistics are a different series."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official initial participation columns from snap-persons-4.pdf through web search and snap-persons-5.pdf through direct web retrieval.",
+      "result": "The indexed official April 10, 2026 table reports January 2026 Initial TOTAL of 38,547,730 persons. The May 8, 2026 table reports February 2026 Initial TOTAL of 37,870,817 persons. These equal 38.547730 and 37.870817 million. Direct retrieval of snap-persons-4.pdf returned 404; its full indexed official table was fetched through web search."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf and snap-persons-7.pdf.",
+      "result": "The June 12, 2026 table reports March 2026 Initial TOTAL of 37,298,271 persons. The July 10, 2026 table reports April 2026 Initial TOTAL of 37,011,096 persons. These equal 37.298271 and 37.011096 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf and snap-persons-9.pdf.",
+      "result": "The August 14, 2026 table reports May 2026 Initial TOTAL of 36,562,128 persons. The September 11, 2026 table reports June 2026 Initial TOTAL of 36,352,716 persons. These equal 36.562128 and 36.352716 million. The tables warn that recent data are preliminary and subject to significant revision."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is six consecutive national initial prints, January through June 2026. All five successive changes are negative. Their base rate is a decline of 0.4390028 million per month. Applying that full-sample drift for two months to June would imply 35.474710 million in August, before allowing for the more recent slowing of losses."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch USDA's ABAWD exceptions and waiver implementation memoranda.",
+      "result": "The exceptions memorandum expands the time-limit age range from 18–54 to 18–64 and narrows the dependent-child exception from under 18 to under 14, applied at initial application and recertification. The waiver memorandum requires unemployment above 10% and terminates qualifying insufficient-jobs waivers by November 2, 2025. These mechanisms support continuing participation losses but provide no quantified August effect."
+    },
+    {
+      "kind": "text",
+      "text": "The policy interpretation is an inference: staggered recertifications can sustain declines after implementation. Those effects are already reflected in recent participation momentum, so no additional numerical policy deduction is added. No separately quantified one-off or seasonal adjustment is applied."
+    },
+    {
+      "kind": "text",
+      "text": "Two ledger discrepancies are retained for audit. The fetched tables display whole-person counts rather than the ledger's stated thousands, requiring division by 1000000 to preserve the registered millions unit. The registered www.fns.usda.gov page returned 403; official tables were fetched from its CDN, which now displays Food and Nutrition Administration branding. The registered resolution URL and target identity remain unchanged."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification failed: official-source searches and the fetched program-data overview supplied no applicable future calendar or announcement date. The overview identifies June 2026 as its latest month and September 18, 2026 as its update date. The emitted resolutionDate, 2027-01-11, is only the supplied registration window's end, retained as a provisional scheduling placeholder. It is not an officially verified release date, and the calendar-verification requirement remains unmet."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use June initial participation as the level prior and a persistence model with shrunk recent drift. The six January–June initial prints yield five changes in millions: [-0.676913, -0.572546, -0.287175, -0.448968, -0.209412]. Their mean is -0.4390028; sigma = 0.193841411, calculated as sqrt(0.150297971 / 4) using the sample denominator. The latest four changes average -0.37952525 million per month. Retain 90% of that momentum, with the 10% shrinkage toward persistence representing a judgment that losses continue slowing: drift = -0.341572725. Additional one-off and policy adjustments are zero. Point = 36.352716 + 2 * (-0.341572725) = 35.66957055. The one-month normal 80% half-width is 1.28 * sigma = 0.248117007. Allowing for two forecast months and uncertainty in the four-change drift estimate gives half-width = 1.28 * sigma * sqrt(2 + 0.9^2 * 4/4) = 0.415919893, or 1.676 times the one-month half-width. Rounded final bounds are [35.253651, 36.085490] million."
+    },
+    {
+      "kind": "text",
+      "text": "This is an approximate nominal 80% model interval. It assumes approximately independent monthly innovations and uses initial-print changes as an uncertainty proxy. Five observed changes do not establish calibrated forecast-error coverage, and an implementation or reporting regime shift could exceed this dispersion."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: recertification losses slow substantially or administrative reinstatements raise participation; August above 36.085490 million would land outside the interval. Downside risk: remaining eligibility enforcement accelerates removals or initial state reporting omits substantial participation; August below 35.253651 million would land outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 35.669571,
+      "ciLow": 35.253651,
+      "ciHigh": 36.08549
+    }
+  ]
+}

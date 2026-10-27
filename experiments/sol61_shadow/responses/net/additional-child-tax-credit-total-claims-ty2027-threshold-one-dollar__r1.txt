@@ -1,0 +1,62 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "title": "Additional Child Tax Credit claiming returns, TY2027",
+  "question": "What will the first official IRS Publication 1304, Table 3.3 print report for total Additional Child Tax Credit claiming returns for tax year 2027, conditional on the registered legislation?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Use the first official tax-year 2027 Table 3.3 all-returns total for the number of returns claiming the total Additional Child Tax Credit concept. Multiply returns by 0.000001 to express millions, preserving published precision. Exclude separate refundable-portion and used-to-offset-other-taxes subsets. Ignore subsequent revisions.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls"
+  ],
+  "runAt": "2026-10-07T12:48:39Z",
+  "status": "failed",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Canonical history extraction failed; no forecast issued"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target concerns total ACTC claiming returns, rather than credit amounts or either subset column."
+    },
+    {
+      "kind": "text",
+      "text": "The opened official IRS Table 3.3 index exposes workbooks for tax years 2023, 2022, 2021, 2020, 2019, and 2018, as well as earlier years. This is not a fewer-than-six-prints exception."
+    },
+    {
+      "kind": "text",
+      "text": "All six workbook requests through the web tool failed with: (400) Unsupported content-type: application/vnd.ms-excel. No table statistics were extracted."
+    },
+    {
+      "kind": "text",
+      "text": "The required fetch_source and extract_irs_soi tools are unavailable in this session. The failures do not establish that the official workbooks are unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The mandatory canonical reference class and base rate could not be extracted. Consequently sigma, policy adjustments, and an 80% interval cannot be calculated audibly from fetched history. Null estimates indicate failure, not zero claiming returns."
+    },
+    {
+      "kind": "text",
+      "text": "The resolutionDate retains the registered target deadline; it was not verified against an official release schedule in this run. Following the explicit stop-on-fetch-failure instruction, no substitute history, remembered statistics, or numerical forecast is supplied."
+    }
+  ]
+}

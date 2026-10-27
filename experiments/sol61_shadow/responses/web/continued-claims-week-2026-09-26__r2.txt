@@ -1,0 +1,152 @@
+{
+  "slug": "continued-claims-week-2026-09-26",
+  "country": "US",
+  "type": "data",
+  "title": "Continued claims, week ending September 26, 2026",
+  "question": "What will the U.S. Department of Labor's first advance print of seasonally adjusted insured unemployment be for the week ending September 26, 2026?",
+  "unit": "millions",
+  "pointEstimate": 1.689,
+  "ciLow": 1.662,
+  "ciHigh": 1.716,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-08",
+  "resolutionSource": "U.S. Department of Labor, Employment and Training Administration, Unemployment Insurance Weekly Claims",
+  "resolutionSourceUrl": "https://www.dol.gov/ui/data.pdf",
+  "resolutionRule": "Resolve the 2026-09-26 observation of CCSA using the earliest ALFRED vintage containing its advance value, under the registered advance_vintage policy. Multiply the published count by 0.000001 to express millions, preserving the original thousand-person precision, equivalent to 0.001 million. Cite the DOL advance seasonally adjusted Insured Unemployment table for that week, expected in the October 8, 2026 release. Subsequent revisions, seasonal-factor recomputations, and corrections do not replace the original first print.",
+  "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "week_ending", "value": "2026-07-18"},
+      "label": "week ending 2026-07-18",
+      "value": 1.782
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-07-25"},
+      "label": "week ending 2026-07-25",
+      "value": 1.801
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-01"},
+      "label": "week ending 2026-08-01",
+      "value": 1.777
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-08"},
+      "label": "week ending 2026-08-08",
+      "value": 1.799
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-15"},
+      "label": "week ending 2026-08-15",
+      "value": 1.778
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-22"},
+      "label": "week ending 2026-08-22",
+      "value": 1.779
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-29"},
+      "label": "week ending 2026-08-29",
+      "value": 1.774
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-05"},
+      "label": "week ending 2026-09-05",
+      "value": 1.73
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-12"},
+      "label": "week ending 2026-09-12",
+      "value": 1.719
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-19"},
+      "label": "week ending 2026-09-19",
+      "value": 1.701
+    }
+  ],
+  "drivers": [
+    "Persistence from the latest advance continued-claims level",
+    "Recent declines support a modest downward momentum adjustment",
+    "Momentum shrinkage limits extrapolation of early-September volatility",
+    "First-print weekly dispersion determines interval width"
+  ],
+  "sourceContext": [
+    "https://oui.doleta.gov/unemploy/claims_arch.asp",
+    "https://fred.stlouisfed.org/releases/calendar?ob=rd&od=asc&rid=180&ve=2026-12-31&view=week&vs=2026-01-01",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261273.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261307.pdf",
+    "https://oui.doleta.gov/press/2026/081326.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261413.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261430.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf",
+    "https://oui.doleta.gov/press/2026/091026.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261529.pdf",
+    "https://oui.doleta.gov/press/2026/092426.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf",
+    "https://www.dol.gov/ui/data.pdf",
+    "https://alfred.stlouisfed.org/series?seid=CCSA"
+  ],
+  "runAt": "2026-10-07T11:43:38Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 26 continued-claims first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is regular-state-program seasonally adjusted insured unemployment, series CCSA, for week ending 2026-09-26. Every historical level and forecasting anchor uses this same variant; historicalContext contains original advance prints rather than subsequently revised observations. Resolution preserves the registered earliest ALFRED advance vintage and cites DOL's seasonally adjusted Insured Unemployment table."
+    },
+    {
+      "kind": "text",
+      "text": "DOL's publication schedule specifies Thursday publication at 8:30 a.m. Eastern, corroborated by the official Fed calendar explicitly listing October 8, 2026 at 7:30 a.m. Central. The October 1 report's latest continued-claims week is September 19, so September 26 is expected in the October 8 report. The registered October 14-18 expected window is one week late; the target period and first-print policy remain intact. Sources: [DOL publication schedule](https://oui.doleta.gov/unemploy/claims_arch.asp), [agency-sourced release calendar](https://fred.stlouisfed.org/releases/calendar?ob=rd&od=asc&rid=180&ve=2026-12-31&view=week&vs=2026-01-01), [October 1 report](https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch DOL's July 30, August 6, and August 13 releases; extract advance seasonally adjusted insured unemployment and its observation week.",
+      "result": "Week ending July 18: 1,782,000, released July 30; July 25: 1,801,000, released August 6; August 1: 1,777,000, released August 13. Sources: [July 30](https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261273.pdf), [August 6](https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261307.pdf), [August 13](https://oui.doleta.gov/press/2026/081326.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch DOL's August 20, August 27, and September 3 releases; extract original advance seasonally adjusted insured unemployment.",
+      "result": "Week ending August 8: 1,799,000, released August 20; August 15: 1,778,000, released August 27; August 22: 1,779,000, released September 3. Sources: [August 20](https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261413.pdf), [August 27](https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261430.pdf), [September 3](https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch DOL's September 10, September 17, and September 24 releases; extract original advance seasonally adjusted insured unemployment.",
+      "result": "Week ending August 29: 1,774,000, released September 10; September 5: 1,730,000, released September 17; September 12: 1,719,000, released September 24. Sources: [September 10](https://oui.doleta.gov/press/2026/091026.pdf), [September 17](https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261529.pdf), [September 24](https://oui.doleta.gov/press/2026/092426.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch DOL's October 1 release and ALFRED's CCSA series page to verify the latest advance observation and units.",
+      "result": "DOL reports September 19 advance seasonally adjusted insured unemployment of 1,701,000. September 12 was revised from 1,719,000 to 1,712,000; the historical sample retains 1,719,000. ALFRED CCSA independently displays September 19 at 1,701,000, with units Number, Seasonally Adjusted, Weekly Ending Saturday. Sources: [October 1 release](https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf), [ALFRED CCSA](https://alfred.stlouisfed.org/series?seid=CCSA)."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is ten consecutive first-print SA continued-claims levels from July 18 through September 19. Their mean is 1.764 million; nine successive changes average -0.009 million. A persistence prior anchors on the latest 1.701 million level, while the sample's changes provide the base rate for weekly uncertainty."
+    },
+    {
+      "kind": "text",
+      "text": "Level effect: retain the latest advance observation. Momentum effect: apply half of the last three weekly changes' average. One-off effects: possible holiday and seasonal noise motivate shrinking the recent decline toward persistence; no additional numerical offset is assigned. Policy mechanism: these fetched releases establish no separately quantified policy effect for the target week, so the policy adjustment is zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use persistence plus a chosen 50% momentum weight, with ten fetched first-print levels and nine successive changes. Changes in millions are [0.019, -0.024, 0.022, -0.021, 0.001, -0.005, -0.044, -0.011, -0.018], with mean -0.009. Their centered squared deviations sum to 0.003540, so sigma = 0.021035684 million = sqrt(0.003540/8). Level 1.701 plus momentum 0.5*((1.701-1.774)/3) = -0.012166667, plus one-off 0 and policy 0, gives 1.688833333, rounded to 1.689. The normal-approximation 80% half-width is 1.28*sigma = 0.026925675 million. Applying it to the rounded point gives [1.662074325, 1.715925675], rounded to final bounds [1.662, 1.716]. No additional interval widening or narrowing is applied."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: slower exits from benefits or a reversal of recent declines could lift the first print above 1.716 million, outside the interval. Downside risk: another first-print decline comparable to the sample's 0.044 million fall would take the latest 1.701 million level to 1.657 million, below the interval. Reporting disruptions or unusually large seasonal-adjustment errors could also produce an outcome outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.689,
+      "ciLow": 1.662,
+      "ciHigh": 1.716
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "us-eci-private-wages-salaries-q3-2026",
+      "ok": false,
+      "errors": [
+        "resolutionSourceUrl host 'www.bls.gov' is not among the preregistered source binding hosts ['alfred.stlouisfed.org']"
+      ]
+    }
+  ]
+}

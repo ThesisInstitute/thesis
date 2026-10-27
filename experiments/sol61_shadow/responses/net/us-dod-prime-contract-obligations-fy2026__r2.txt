@@ -1,0 +1,167 @@
+{
+  "slug": "us-dod-prime-contract-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD prime contract obligations snapshot",
+  "question": "What will USAspending API v2 report for agency 097's nominal, unadjusted FY2026 contracts aggregated_amount in the first registered query snapshot during October 15-22, 2026, expressed in billions USD?",
+  "unit": "billions USD",
+  "pointEstimate": 389.84,
+  "ciLow": 334,
+  "ciHigh": 445.68,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-22",
+  "resolutionSource": "U.S. Treasury USAspending API v2, agency 097, contracts category",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+  "resolutionRule": "Use the first official response preserved by the registered query snapshot resolver for FY2026 during the registered October 15-22, 2026 window. Select results[category=contracts].aggregated_amount and multiply by 1e-09. Retain the API's monetary precision; subsequent updates and revisions do not replace the captured result. No correction grace period applies. The displayed resolutionDate is the registered window's endpoint, not a verified official publication date; the official-calendar verification requirement remains unmet.",
+  "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2018"
+      },
+      "label": "FY2018",
+      "value": 359.31560282399
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2019"
+      },
+      "label": "FY2019",
+      "value": 383.55116663862
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 422.45159091179
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 386.95395091016
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 414.367528187
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 456.94774642082
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 445.75875280384
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 491.78218191641
+    }
+  ],
+  "drivers": [
+    "Current registered query total",
+    "Delayed publication of DoD contracts",
+    "Newly visible obligations during the snapshot window",
+    "Backfills, revisions, and deobligations",
+    "Dispersion of historical annual contract flows"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2018",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2019",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T11:58:03Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FY2026 DoD registered query snapshot forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is sourceSeriesId usaspending.agency.097.obligations_by_award_category.contracts. Every numerical anchor uses the exact registered GET query and contracts row, transformed from dollars to billions USD. Historical observations are the prior fiscal years' API totals fetched today, not reconstructed original October vintages. The target resolves on its registered snapshot rather than a subsequently completed annual total."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2018 and the identical registered query with fiscal_year=2019 and fiscal_year=2020; read the echoed contracts rows.",
+      "result": "Fetched contracts aggregated_amount: FY2018 USD 359315602823.99; FY2019 USD 383551166638.62; FY2020 USD 422451590911.79. Multiplication by 1e-09 gives 359.31560282399, 383.55116663862, and 422.45159091179 billions USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET the exact registered agency/097/obligations_by_award_category query with fiscal_year=2021, fiscal_year=2022, and fiscal_year=2023; read the echoed contracts rows.",
+      "result": "Fetched contracts aggregated_amount: FY2021 USD 386953950910.16; FY2022 USD 414367528187.0; FY2023 USD 456947746420.82. Transformed values are 386.95395091016, 414.367528187, and 456.94774642082 billions USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET the exact registered agency/097/obligations_by_award_category query with fiscal_year=2024, fiscal_year=2025, and fiscal_year=2026; read the echoed contracts rows.",
+      "result": "Fetched contracts aggregated_amount: FY2024 USD 445758752803.84; FY2025 USD 491782181916.41; FY2026 USD 374564688285.93. Transformed values are 445.75875280384, 491.78218191641, and 374.56468828593 billions USD."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class consists of eight fetched annual contract flows, FY2018-FY2025. Their base rate is a mean of 420.1410650766 billion USD, with a range of 359.31560282399-491.78218191641. The mean successive annual change is 18.9237970132 billion USD. These completed annual totals establish scale and dispersion, but their reporting maturity differs from the October FY2026 snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "USAspending documents a 90-day publication delay for DoD procurement data. Consequently, an October snapshot can omit substantial late-fiscal-year activity; the current total's gap from FY2025 does not establish an equivalent decline in completed annual obligations. [USAspending About the Data](https://www.usaspending.gov/data/about-the-data-download.pdf)"
+    },
+    {
+      "kind": "text",
+      "text": "Date validation limitation: USAspending describes daily updates, and no fixed publication date for this exact query was verified. Treasury's resources page links a FY2026 monthly submission calendar, but the spreadsheet fetch was rejected as an unsupported content type; no dates were read from it. The supplied ledger provides an expected window, not an exact capture timestamp. October 22 is retained solely as that window's deadline. This run therefore does not satisfy the official-calendar verification condition. [USAspending data sources](https://www.usaspending.gov/data/data-sources-download.pdf), [Treasury reporting resources](https://tfx.treasury.gov/data-transparency/resources)"
+    },
+    {
+      "kind": "text",
+      "text": "Fetch limitation: an optional supplemental GET to https://api.usaspending.gov/api/v2/agency/097/sub_agency/?fiscal_year=2026&limit=5 returned an empty body. It supplied no evidence, and supplemental fetching stopped. All eight mandatory historical registered queries and the current FY2026 registered query succeeded."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence-plus-reporting-arrivals model, with eight exact-query FY2018-FY2025 annual flows as the historical sample. The annual mean supplies the scale prior; the fetched FY2026 total supplies the updated level. Momentum extrapolates its approximate visible-period average pace. No separate one-off or policy premium is assumed. The 90-day publication mechanism implies an approximate July 9 cutoff on October 7, covering 282 inclusive fiscal-year days. An October 15-22 capture adds approximately 8-15 visible days; equal weighting across the unspecified window gives 11.5 days. Thus point = 374.56468828593 + (374.56468828593/282)*11.5 = 389.839489404. For this flow series, sigma = 43.6251265551, calculated from the annual values themselves using sample standard deviation. The normal-approximation half-width is 1.28*sigma = 55.8401619905. Retaining this unscaled annual dispersion conservatively accommodates unmatched reporting vintages and backfills. Implied bounds are 333.9993274135-445.6796513944, displayed as 334.00-445.68 billion USD."
+    },
+    {
+      "kind": "math",
+      "text": "Historical mean = sum(FY2018...FY2025)/8 = 420.1410650766. Sample sigma = sqrt(sum((value-420.1410650766)^2)/7) = 43.6251265551. Point = 374.56468828593*(1+11.5/282) = 389.839489404. 80% half-width = 1.28*43.6251265551 = 55.8401619905. Rounded forecast: 389.84, with interval [334.00, 445.68] billions USD."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is faster publication or a substantial backfill of previously withheld obligations; a large catch-up batch could land above the interval at 445.68 billion USD. Downside risk is net deobligations, removal of erroneous records, or a reporting interruption. A substantial downward correction could land below 334.00 billion USD, outside the interval. The unknown capture timestamp and unavailable historical October vintages limit calibration."
+    },
+    {
+      "kind": "forecast",
+      "point": 389.84,
+      "ciLow": 334,
+      "ciHigh": 445.68
+    }
+  ]
+}

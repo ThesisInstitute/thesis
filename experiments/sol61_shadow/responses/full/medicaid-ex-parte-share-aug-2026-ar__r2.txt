@@ -1,0 +1,86 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ar",
+  "country": "US",
+  "type": "data",
+  "title": "Arkansas ex parte renewal share, August 2026",
+  "question": "What will Arkansas's unadjusted ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using the original (O) submission and rounding the computed percentage to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Arkansas's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ar.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Official Arkansas history could not be fetched",
+    "Original submission required",
+    "Registered release date not officially verified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv"
+  ],
+  "runAt": "2026-10-07T12:19:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Cell dropped: mandatory official history unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The supplied canonical target identifiers and resolver are preserved. No Arkansas historical renewal counts or shares were retrieved through the permitted web tools. Null estimates record an unavailable forecast; this object does not satisfy the numeric forecast contract."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Search the exact CMS dataset identifier on data.medicaid.gov.",
+      "result": "The official dataset search extract reports an update on September 25, 2026, 3,876 rows and 22 columns. Its displayed observations were Alaska rows, not Arkansas history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the official Data.gov catalog record and its CMS data-dictionary link.",
+      "result": "Catalog metadata identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c and the September 2026 CSV distribution. The fetched CMS dictionary identifies original_updated, O=Original, U=Updated; ex parte renewals are Metric 5a1, total renewed Metric 5a, and renewals due Metric 5."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the official CMS monthly snapshot publication page and June 2026 snapshot.",
+      "result": "CMS lists June 2026 released September 25, 2026; May released August 28; April released July 31. The June snapshot defines ex parte percentages relative to individuals due for renewal. These publication dates and definitions are not Arkansas historical observations."
+    },
+    {
+      "kind": "text",
+      "text": "The official catalog's exact CSV download returned Cache miss. The datastore API and filtered dataset pages also failed, including a corrected original_updated=O filter. This is a retrieval failure, not evidence that CMS exposes fewer than six prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without fetched Arkansas original-submission history, persistence, panel shrinkage, walk-forward comparisons and thesis_model_candidate_v1 numeric candidates cannot be grounded. No remembered values or adjacent-series observations are substituted."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the intended prior is Arkansas last-print persistence, with panel shrinkage tested against it. The historical sample could not be fetched, so sigma = unavailable. Consequently the required half-width 1.28*sigma, the point estimate and both implied bounds cannot be computed. No numerical adjustments or calibrated interval are asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: the supplied 2026-12-15 date is retained, but no official CMS calendar or announcement fetched this run verifies it as a scheduled release date. The registered rule also omits an explicit denominator; CMS's published convention is Metric 5a1 divided by Metric 5. No release day is inferred from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Outside the interval scenarios cannot be assigned auditable thresholds without observed first-print dispersion. The evidence requirements therefore require dropping the numeric cell. The prohibited catalog check was omitted under the independence override."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

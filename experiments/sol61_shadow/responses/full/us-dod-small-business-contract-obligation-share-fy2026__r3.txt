@@ -1,0 +1,68 @@
+{
+  "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD small-business contract obligation share FY2026",
+  "question": "What percentage of FY2026 Department of Defense prime-contract transaction obligations is attributable to small_business recipients in the registered USAspending API query snapshot, using award types A, B, C and D, awarding agency Department of Defense at the toptier level, and fiscal_year grouping?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": null,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered advanced-search query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the registered_query_snapshot of POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with group=fiscal_year, spendingLevel=transactions, FY2026, awardTypeCodes=[A,B,C,D], and agency={name:Department of Defense,tier:toptier,type:awarding}. Read results[time_period.fiscal_year=2026].aggregated_amount from the numerator query with recipientTypeNames=[small_business] and the denominator query with recipientTypeNames=[], then apply the registered ratio_percent operation with factor=1. The provided target context does not specify an exact snapshot date or rounding convention; neither is invented here.",
+  "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints"
+  ],
+  "runAt": "2026-10-07T12:36:12Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: the exact registered historical query could not be executed."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is a query-defined FY2026 snapshot. Its pinned identity and resolver are preserved. Agency profile totals, published small-business scorecards and search summaries cannot substitute for this series."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "The web fetch failed with HTTP 405 Method Not Allowed. This was a web open, not execution of the required POST query; no obligation amounts or historical shares were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "find https://api.usaspending.gov/docs/endpoints for /api/v2/search/spending_over_time/",
+      "result": "The official USAspending API v2 endpoint index lists /api/v2/search/spending_over_time/ with method POST and describes transaction-amount aggregation. This establishes the required method, not any historical observation."
+    },
+    {
+      "kind": "text",
+      "text": "Inspection of the available tool schemas found no general HTTP POST capability. The web tools accept URL opens and searches without a request-body argument. The run instructions prohibit shell networking, so the numerator and denominator POST requests cannot be executed within this run."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate unavailable: no numeric historical observations of the exact registered series were fetched. Persistence, model candidates, walk-forward scores, sigma and interval bounds therefore cannot be computed honestly. The empty history records fetch failure, not an official series with insufficient available prints."
+    },
+    {
+      "kind": "text",
+      "text": "The target context supplies an expected release window but no explicit resolutionDate or registered outer deadline. No official calendar date was verified. Setting a date from the window alone would invent a resolution date."
+    },
+    {
+      "kind": "tool",
+      "tool": "exec_command",
+      "call": "date -u +%Y-%m-%dT%H:%M:%SZ",
+      "result": "2026-10-07T12:36:12Z"
+    },
+    {
+      "kind": "text",
+      "text": "The registered-query instructions explicitly require refusal when the query cannot be executed. This JSON records that refusal and fetch evidence; it is not a valid numerical forecast cell. Null estimates, bounds, confidence and resolutionDate indicate unavailable fields. No numerical history, model candidates or activity receipts were fabricated."
+    }
+  ]
+}
