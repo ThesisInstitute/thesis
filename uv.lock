@@ -169,7 +169,7 @@ requires-dist = [
     { name = "anthropic", marker = "extra == 'experiments'", specifier = ">=0.86.0" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=26.3.1" },
     { name = "httpx", marker = "extra == 'bills'", specifier = ">=0.27" },
-    { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.140" },
+    { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.168.1" },
     { name = "matplotlib", marker = "extra == 'experiments'", specifier = ">=3.10.8" },
     { name = "mcp", extras = ["cli"], marker = "extra == 'mcp'", specifier = ">=1.26.0" },
     { name = "numpy", marker = "extra == 'experiments'", specifier = ">=2.2.6" },

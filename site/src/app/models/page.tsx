@@ -274,8 +274,9 @@ export default async function ModelsPage() {
             style={{ color: "var(--theme-text-muted)" }}
           >
             The gpt-5.6 comparison waves published on 2026-07-10 resolve from
-            mid-July onward; per-model paired CRPS ratios against the
-            persistence baseline appear on Calibration as those targets print.
+            mid-July onward; per-model paired normalized-CRPS differences
+            against the persistence baseline appear on Calibration as those
+            targets print.
           </p>
         </section>
       </main>
