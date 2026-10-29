@@ -344,7 +344,47 @@ Resolution and scoring code should preserve these invariants:
 - unresolved rows have null reward;
 - resolved rows link to official observations;
 - training cannot see future official outcomes;
-- reward rows include provenance hashes and activity-artifact count.
+- reward rows include provenance hashes and activity-artifact count;
+- a superseded Chronicle row never grades.
+
+Chronicle is append-only, so a correction is a new row whose
+`assertionVersion.supersedes` names the version it replaces. The site grades
+on the ledger's current view (`site/src/data/ledger-current-view.ts`, a port
+of receipt 0.6.2's `effective_current_rows`), which works as follows:
+
+- The correction grades in place of the row it supersedes, and it still has to
+  pass `getResolutionContractViolation`.
+- A pre-versioning row is addressed by its recomputed `av2` content address,
+  as the append gate addresses it.
+- Chronology comes from the earliest print in the correction's chain, and
+  ledger membership (finding N5) from the chain's first acceptance. A
+  later-dated correction therefore cannot admit a late run, and a correction
+  cannot launder a print the registration's pinned state already held. This
+  holds when the superseded row recorded a later vintage than the correction
+  (the first-vintage claims corrections): a later vintage in the pinned state
+  means the first print was public even earlier.
+- Cutoff histories (baselines and normalization scales) use the view as of
+  the cutoff, so a correction accepted later never rewrites them. A
+  superseded row leaves every history, even when its correction fails the
+  history's unit or series filter. A correction that takes its record out of
+  a history that held it (a unit change, say) must be listed with its reason
+  in `INTENDED_HISTORY_DROP_OUTS` (`site/src/__tests__/ledger-corrections.test.ts`).
+  Any other drop-out fails CI, because it looks exactly like a filter that has
+  started rejecting corrections.
+- A correction's resolution event is `<historical id>.<its own assertion
+  version>`, so an event id never names two outcomes. Every other row keeps
+  the id it always had. A pin that brings a correction of a graded row
+  changes that forecast's event, score ids and the hashes over them. Its
+  scores change only if the correction changes the value.
+
+The build also re-runs the append gate's assertion-version checks on the pinned
+rows. Every explicit id must equal its recomputed content address, and every
+supersede must name the active version of its record. If the port drifted from
+receipt anywhere it could change what grades, the build fails before any score
+is published.
+`scripts/generate_receipt_current_view_fixture.py` runs receipt itself over
+seeded ledgers to produce the fixture the port is tested against. Regenerate
+it whenever the `receipt` pin in `pyproject.toml` moves.
 
 A published target whose registration no resolver leg can execute is
 witnessed, not resolved. `witness-registered-windows.yml` asks the Internet
