@@ -1,0 +1,23 @@
+{
+ "captureUrl": "https://web.archive.org/web/20250821075801/https://www.bls.gov/news.release/cpi.nr0.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
+ "stamp": "20250821075801",
+ "indexDigest": "I6MNCVJYYAQPC2EMHL4L63ZWP74CWSBY",
+ "gzipEncoded": false,
+ "title": "Consumer Price Index Summary - 2025 M07 Results",
+ "note": "Corpus capture of the 2025-07 release, captured 2025-08-21. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {
+  "cpi_headline_mom": {
+   "value": 0.1966,
+   "printedPrecision": 0.1,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CPIAUCSL&vintage_date=2025-08-21",
+   "how": "2025-07 over 2025-06 in the 2025-08-21 vintage (322.132 / 321.500), in percent; the page prints it to 0.1"
+  },
+  "cpi_core_mom": {
+   "value": 0.3223,
+   "printedPrecision": 0.1,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CPILFESL&vintage_date=2025-08-21",
+   "how": "2025-07 over 2025-06 in the 2025-08-21 vintage (328.656 / 327.600), in percent; the page prints it to 0.1"
+  }
+ }
+}

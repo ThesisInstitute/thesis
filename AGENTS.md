@@ -74,8 +74,11 @@ runtime question; whether any code could ever read it is not.
 
 - `generic-url` names a page, not an executor, and is always refused,
   whatever the main loop would do with it: the weekly claims, A-19 and CMS
-  provider-data legs would execute such a contract today, and the gate
-  refuses it anyway, on purpose. A seed with no adapter
+  provider-data legs would execute such a contract today, as would the
+  legacy release-capture leg for the twelve BLS target hashes listed in
+  `scripts/legacy_release_contracts.py` (admitted by ruling d1633, which also
+  voided the cells in `scripts/voided_targets.py`), and the gate refuses it
+  anyway, on purpose. A seed with no adapter
   still binds to `generic-url`, so a docket series needs a `sourceBinding`
   template for an admitted adapter before it can mint targets. The two weekly
   claims series are the exception: `register_targets.SERIES_BINDINGS` binds

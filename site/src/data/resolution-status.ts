@@ -7,7 +7,8 @@
 // the fact that the resolver has no route for its reference. Such a row
 // may also carry `registration`: registration facts (an adapter other than
 // generic-url, a registered series spelled differently from the
-// reference), never resolver output.
+// reference), never resolver output. A row with code `VOIDED` carries
+// `ruling`: why a recorded ruling voided the target, and when.
 // Nothing here decides anything: a forecast is "overdue" only because it
 // is still pending after the date it said it would resolve.
 import rawStatus from "./resolution-status.json";
@@ -23,7 +24,12 @@ export interface OverdueStatus {
   detail?: string;
   /** Registration facts (adapter, series), never resolver output. */
   registration?: string;
+  /** Why a recorded ruling voided this target, and when (code VOIDED). */
+  ruling?: string;
 }
+
+/** The code of a target a recorded ruling voided: terminal, never scored. */
+export const VOIDED_CODE = "VOIDED";
 
 interface StatusFile {
   schemaVersion: string;
@@ -68,6 +74,7 @@ export interface OverdueNotice {
   reason: string;
   detail?: string;
   registration?: string;
+  ruling?: string;
 }
 
 /** The overdue notice for a forecast, or null when it is not overdue.
@@ -94,6 +101,7 @@ export function overdueNotice(
     reason: row.reason,
     ...(row.detail ? { detail: row.detail } : {}),
     ...(row.registration ? { registration: row.registration } : {}),
+    ...(row.ruling ? { ruling: row.ruling } : {}),
   };
 }
 

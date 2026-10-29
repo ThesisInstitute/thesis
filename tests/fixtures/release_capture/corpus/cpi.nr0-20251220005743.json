@@ -1,0 +1,14 @@
+{
+ "captureUrl": "https://web.archive.org/web/20251220005743/https://www.bls.gov/news.release/cpi.nr0.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
+ "stamp": "20251220005743",
+ "indexDigest": "OIFCNEUVVTK4BHIRUZDKILHKCZCJP2NG",
+ "gzipEncoded": true,
+ "title": "Consumer Price Index Summary - 2025 M11 Results",
+ "note": "Corpus capture of the 2025-11 release, captured 2025-12-20. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {},
+ "expectedRefusal": {
+  "cpi_headline_mom": "Table A prints \"-\" for the October and November 2025 one-month changes: BLS collected no October 2025 data (a lapse in appropriations), and the release states only the change over the two months to November.",
+  "cpi_core_mom": "Table A prints \"-\" for the October and November 2025 one-month changes: BLS collected no October 2025 data (a lapse in appropriations), and the release states only the change over the two months to November."
+ }
+}
