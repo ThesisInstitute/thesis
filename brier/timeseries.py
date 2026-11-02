@@ -598,6 +598,33 @@ def utc_now() -> str:
     )
 
 
+def replay_stanli_records(path: Path) -> int:
+    """Replay the stanli candidates in a candidate or candidate-set JSON file.
+
+    Returns 0 when every candidate reproduces its quantiles exactly.
+    """
+
+    from brier.stan_candidates import replay_stanli_candidate
+
+    payload = json.loads(path.read_text())
+    records = [
+        record
+        for record in payload.get("candidates", [payload])
+        if record.get("library") == "stanli"
+    ]
+    if not records:
+        print(f"no stanli candidates in {path}")
+        return 1
+    failed = 0
+    for record in records:
+        replayed = replay_stanli_candidate(record)
+        matches = replayed == record["posteriorPredictive"]["quantiles"]
+        failed += not matches
+        verdict = "replayed exactly" if matches else "MISMATCH"
+        print(f"{record['candidateId']}: {verdict}")
+    return 1 if failed else 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     if argv is None:
         import sys
@@ -612,6 +639,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         printer.add_argument("--print-stan-program", choices=sorted(STAN_PROGRAMS))
         print(STAN_PROGRAMS[printer.parse_args(argv).print_stan_program], end="")
         return 0
+    if any(arg.split("=", 1)[0] == "--replay-stanli" for arg in argv):
+        replayer = argparse.ArgumentParser(
+            description="Refit recorded stanli candidates and compare their quantiles.",
+        )
+        replayer.add_argument("--replay-stanli", type=Path, required=True)
+        return replay_stanli_records(replayer.parse_args(argv).replay_stanli)
 
     parser = argparse.ArgumentParser(
         description="Emit Thesis time-series model candidates with intervals.",

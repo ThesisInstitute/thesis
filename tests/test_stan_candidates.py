@@ -499,3 +499,98 @@ def test_cli_emits_stanli_candidates(tmp_path):
         assert candidate["intervalMethod"] == "posterior_predictive"
         assert candidate["posteriorPredictive"]["draws"] == 4000
         assert candidate["pointEstimate"] == round(candidate["pointEstimate"], 1)
+
+
+@requires_stanli
+@pytest.mark.parametrize(
+    "model, program",
+    [
+        *[(model, None) for model in STAN_PROGRAMS],
+        (CUSTOM_MODEL, STAN_PROGRAMS["stanli-ar1-t"]),
+    ],
+)
+def test_replay_reproduces_every_quantile_from_the_json_alone(model, program):
+    # A rounded forecast still records unrounded quantiles, and the JSON round
+    # trip stands in for reading the candidate back out of a trace.
+    candidate = build(
+        model,
+        history=rounded_walk(30),
+        program=program,
+        round_increment=0.1,
+        backtest=False,
+    )
+    record = json.loads(json.dumps(candidate.as_dict()))
+
+    assert (
+        stan_candidates.replay_stanli_candidate(record)
+        == record["posteriorPredictive"]["quantiles"]
+    )
+
+
+@requires_stanli
+@pytest.mark.parametrize(
+    "tamper",
+    [
+        lambda record: record["posteriorPredictive"].update(
+            seed=record["posteriorPredictive"]["seed"] + 1
+        ),
+        lambda record: record["history"][-1].update(
+            value=record["history"][-1]["value"] + 0.1
+        ),
+        lambda record: record["posteriorPredictive"]["standardization"].update(
+            yGrid=0.5
+        ),
+    ],
+    ids=["seed", "data", "grid"],
+)
+def test_replay_detects_a_changed_seed_or_data(tamper):
+    record = json.loads(
+        json.dumps(build(history=rounded_walk(30), backtest=False).as_dict())
+    )
+    tamper(record)
+
+    assert (
+        stan_candidates.replay_stanli_candidate(record)
+        != record["posteriorPredictive"]["quantiles"]
+    )
+
+
+@requires_stanli
+def test_replay_refuses_a_source_that_does_not_match_its_hash():
+    record = json.loads(
+        json.dumps(build(history=rounded_walk(30), backtest=False).as_dict())
+    )
+    record["posteriorPredictive"]["program"]["source"] += "\n"
+
+    with pytest.raises(ValueError, match="does not match its recorded hash"):
+        stan_candidates.replay_stanli_candidate(record)
+
+
+@requires_stanli
+def test_cli_replays_a_candidate_set_and_flags_a_changed_record(tmp_path, capsys):
+    candidate_set = build_candidate_set(
+        target_data_point_id="test.series",
+        target_period="next",
+        history=rounded_walk(30),
+        models=["persistence", "stanli-rw-drift-t", "stanli-ar1-t"],
+        generated_at=GENERATED_AT,
+    )
+    path = tmp_path / "candidates.json"
+    path.write_text(json.dumps(candidate_set))
+
+    assert main(["--replay-stanli", str(path)]) == 0
+    assert capsys.readouterr().out.count("replayed exactly") == 2
+
+    candidate_set["candidates"][1]["posteriorPredictive"]["seed"] += 1
+    path.write_text(json.dumps(candidate_set))
+
+    assert main([f"--replay-stanli={path}"]) == 1
+    assert capsys.readouterr().out.count("MISMATCH") == 1
+
+
+def test_cli_replay_says_when_a_file_holds_no_stanli_candidate(tmp_path, capsys):
+    path = tmp_path / "candidates.json"
+    path.write_text(json.dumps({"candidates": [{"library": "statsmodels"}]}))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    assert "no stanli candidates" in capsys.readouterr().out

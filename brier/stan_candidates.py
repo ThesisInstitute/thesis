@@ -432,6 +432,36 @@ def sample_next(
     return draws, sampler
 
 
+def replay_stanli_candidate(record: dict[str, Any]) -> list[dict[str, float]]:
+    """Refit a stanli candidate from its own JSON and return its quantiles.
+
+    The record carries everything the fit depends on: the program source, the
+    history, the standardization, the grid and the seed. A source that does not
+    match its recorded hash raises a ``ValueError``.
+    """
+
+    block = record["posteriorPredictive"]
+    source = block["program"]["source"]
+    if program_sha256(source) != block["program"]["sha256"]:
+        raise ValueError("recorded Stan source does not match its recorded hash")
+    scaling = block["standardization"]
+    draws, _ = sample_next(
+        source,
+        normalize_history(record["history"]),
+        loc=scaling["yLoc"],
+        scale=scaling["yScale"],
+        grid=scaling["yGrid"],
+        seed=block["seed"],
+    )
+    return [
+        {
+            "probability": row["probability"],
+            "value": empirical_quantile(draws, row["probability"]),
+        }
+        for row in block["quantiles"]
+    ]
+
+
 def empirical_quantile(values: Sequence[float], probability: float) -> float:
     ordered = sorted(values)
     position = (len(ordered) - 1) * probability
