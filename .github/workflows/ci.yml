@@ -101,7 +101,11 @@ jobs:
           lscpu | grep -E 'Model name|^CPU\(s\)|Thread|MHz'
 
       - name: Run tests
-        run: uv run pytest tests/ -q -n auto --durations=0 --durations-min=0.5
+        run: uv run pytest tests/ -v -n auto --dist loadgroup --durations=0 --durations-min=0.5
+
+      - name: In-tree writes (temporary)
+        if: always()
+        run: git status --porcelain --ignored | grep -v -E '^!! (\.venv|\.pytest_cache|\.hypothesis|.*__pycache__)' | head -60
 
   # TEMPORARY measurement job; dropped before this PR leaves draft.
   timeline-profile:
@@ -119,18 +123,46 @@ jobs:
         run: |
           lscpu | grep -E 'Model name|^CPU\(s\)'
           uv run python - <<'PY'
-          import cProfile, pstats, sys, time
+          import cProfile, pstats, sys, tempfile, time
           from pathlib import Path
           sys.path.insert(0, "scripts")
+          sys.path.insert(0, "tests")
+          import sba_loan_performance as sba
+          import test_strategy_targets as selection_tests
           import verify_record_chain as chain
           import witnessed_timeline as timeline
           records = Path("records").resolve()
+          memos = []
+          class Captured(timeline.VerificationMemo):
+              def __post_init__(self):
+                  memos.append(self)
+          timeline.VerificationMemo = Captured
           t = time.perf_counter()
           verification = chain.verify_chain(records)
           print(f"verify_chain {time.perf_counter() - t:.1f}s, {len(verification.ordered)} snapshots", flush=True)
+          print("certificate identities", chain._identity_of_certificate.cache_info(), flush=True)
+          chain._identity_of_certificate.cache_clear()
           t = time.perf_counter()
           timeline.extract_timeline(records)
           print(f"extract_timeline {time.perf_counter() - t:.1f}s", flush=True)
+          print("certificate identities", chain._identity_of_certificate.cache_info(), flush=True)
+          print("pdf geometry", sba._sba_pdf_geometry.cache_info(), flush=True)
+          print(f"memo: {len(memos[-1].runs)} runs, {len(memos[-1].registrations)} registrations, {len(memos[-1].chunks)} chunks", flush=True)
+          with tempfile.TemporaryDirectory() as directory:
+              t = time.perf_counter()
+              selection_tests.selection(Path(directory))
+              print(f"explicit selection {time.perf_counter() - t:.1f}s", flush=True)
+              t = time.perf_counter()
+              selection_tests.selection(Path(directory), auto_select=True)
+              print(f"auto selection {time.perf_counter() - t:.1f}s", flush=True)
+              profiler = cProfile.Profile()
+              profiler.enable()
+              selection_tests.selection(Path(directory), auto_select=True)
+              profiler.disable()
+              stats = pstats.Stats(profiler, stream=sys.stdout)
+              stats.sort_stats("cumulative").print_stats(25)
+          chain._identity_of_certificate.cache_clear()
+          sba._sba_pdf_geometry.cache_clear()
           profiler = cProfile.Profile()
           profiler.enable()
           timeline.extract_timeline(records)
