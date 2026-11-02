@@ -227,9 +227,10 @@ DOL prints the number.
 The docket roll used to propose only the successor of the latest published
 week. That successor was terminally expired, so neither weekly series
 registered a new week after 2026-09-28. The roller now steps past any week whose
-release window has opened (`advance_past_opened_weekly_claims_windows`), and the
-weekly series roll on every run again. A week it skips stays unforecast: its
-print is known or about to be.
+release window has opened (`advance_past_opened_weekly_claims_windows`). The
+walker never reads the expired list, so an expired week cannot hold a series
+back, and each weekly series registers a new week every week again. A week it
+skips stays unforecast: its print is known or about to be.
 
 ## The same ratchet on monthly series
 
