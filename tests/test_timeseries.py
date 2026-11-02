@@ -76,14 +76,15 @@ def test_statsmodels_candidate_uses_native_interval_metadata():
     assert candidate["calibrationN"] == len(SAMPLE_HISTORY) - 1
     assert candidate["backtestScore"]["method"] == "walk_forward_1_step"
     # Pinned from the recursive backtest this replaced (origin/main 6c9704eb):
-    # skipping the nested backtests changes no score.
+    # skipping the nested backtests changes no score. The fit reads
+    # 0.9444455 on macOS and 0.9444467 on CI's ubuntu, so the pins allow 1e-4.
     assert candidate["backtestScore"]["rows"] == 3
     assert candidate["backtestScore"]["meanAbsoluteError"] == pytest.approx(
-        0.9444455381418541, rel=1e-6
+        0.9444455381418541, rel=1e-4
     )
     assert candidate["backtestScore"]["interval80Coverage"] == pytest.approx(1 / 3)
     assert candidate["backtestScore"]["meanInterval80Width"] == pytest.approx(
-        0.8299296295780513, rel=1e-6
+        0.8299296295780513, rel=1e-4
     )
 
 
