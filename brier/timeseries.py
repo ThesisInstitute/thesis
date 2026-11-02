@@ -27,6 +27,7 @@ IntervalMethod = Literal[
     "native_state_space",
     "residual_quantile",
     "fallback_prior",
+    "posterior_predictive",
 ]
 
 
@@ -96,9 +97,12 @@ class ForecastModelCandidate:
     history: tuple[TimeSeriesObservation, ...]
     diagnostics: tuple[str, ...]
     backtest_score: BacktestScore | None = None
+    # Bayesian candidates only: predictive quantile grid, sampler settings and
+    # diagnostics, and the Stan program source, so anyone can replay the fit.
+    posterior_predictive: dict[str, Any] | None = None
 
     def as_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "schemaVersion": SCHEMA_VERSION,
             "candidateId": self.candidate_id,
             "targetDataPointId": self.target_data_point_id,
@@ -124,6 +128,9 @@ class ForecastModelCandidate:
             ),
             "diagnostics": list(self.diagnostics),
         }
+        if self.posterior_predictive is not None:
+            payload["posteriorPredictive"] = self.posterior_predictive
+        return payload
 
 
 def build_candidate_set(
@@ -134,8 +141,13 @@ def build_candidate_set(
     models: Sequence[str] = ("persistence", "statsmodels-local-level"),
     generated_at: str | None = None,
     round_increment: float | None = None,
+    stan_program: str | None = None,
 ) -> dict[str, Any]:
-    """Build model candidates under the common Thesis candidate-set schema."""
+    """Build model candidates under the common Thesis candidate-set schema.
+
+    ``stan_program`` is the Stan source for the ``stanli-custom`` model; see
+    :mod:`brier.stan_candidates` for its data contract.
+    """
 
     normalized_history = normalize_history(history)
     effective_generated_at = generated_at or utc_now()
@@ -159,6 +171,20 @@ def build_candidate_set(
                     history=normalized_history,
                     generated_at=effective_generated_at,
                     round_increment=round_increment,
+                )
+            )
+        elif model.startswith("stanli-"):
+            from brier.stan_candidates import build_stanli_candidate
+
+            candidates.append(
+                build_stanli_candidate(
+                    model=model,
+                    target_data_point_id=target_data_point_id,
+                    target_period=target_period,
+                    history=normalized_history,
+                    generated_at=effective_generated_at,
+                    round_increment=round_increment,
+                    program=stan_program if model == "stanli-custom" else None,
                 )
             )
         else:
@@ -564,6 +590,20 @@ def utc_now() -> str:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    if argv is None:
+        import sys
+
+        argv = sys.argv[1:]
+    if "--print-stan-program" in argv:
+        from brier.stan_candidates import STAN_PROGRAMS
+
+        printer = argparse.ArgumentParser(
+            description="Print a built-in stanli program to start a custom one.",
+        )
+        printer.add_argument("--print-stan-program", choices=sorted(STAN_PROGRAMS))
+        print(STAN_PROGRAMS[printer.parse_args(argv).print_stan_program], end="")
+        return 0
+
     parser = argparse.ArgumentParser(
         description="Emit Thesis time-series model candidates with intervals.",
     )
@@ -577,7 +617,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--models",
         default="persistence,statsmodels-local-level",
-        help="Comma-separated candidate models.",
+        help=(
+            "Comma-separated candidate models: persistence, "
+            "statsmodels-local-level, stanli-rw-drift-t, stanli-ar1-t, "
+            "stanli-ar1-diff-t, or stanli-custom with --stan-file."
+        ),
+    )
+    parser.add_argument(
+        "--stan-file",
+        type=Path,
+        help="Stan program for the stanli-custom model; it must define y_next.",
     )
     parser.add_argument("--round-increment", type=float)
     parser.add_argument("--generated-at")
@@ -586,6 +635,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if bool(args.history_json) == bool(args.history_file):
         parser.error("provide exactly one of --history-json or --history-file")
+    models = [model.strip() for model in args.models.split(",") if model.strip()]
+    if ("stanli-custom" in models) != (args.stan_file is not None):
+        parser.error("--stan-file and the stanli-custom model go together")
 
     raw_history = (
         json.loads(args.history_json)
@@ -596,9 +648,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         target_data_point_id=args.target_id,
         target_period=args.target_period,
         history=raw_history,
-        models=[model.strip() for model in args.models.split(",") if model.strip()],
+        models=models,
         generated_at=args.generated_at,
         round_increment=args.round_increment,
+        stan_program=args.stan_file.read_text() if args.stan_file else None,
     )
     output = json.dumps(candidate_set, indent=2)
     if args.output:
