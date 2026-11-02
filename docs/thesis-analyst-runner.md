@@ -281,8 +281,8 @@ panel, or fallback-prior intervals and label `intervalMethod` accordingly.
 With the `stan` extra, `stanli-rw-drift-t`, `stanli-ar1-t`,
 `stanli-ar1-diff-t` and `stanli-custom` (with `--stan-file`) fit Bayesian
 candidates whose intervals come from posterior predictive draws
-(`intervalMethod` `posterior_predictive`). They are opt-in and await a pack
-ablation; see [`stanli-candidates.md`](stanli-candidates.md).
+(`intervalMethod` `posterior_predictive`). Analyst runs leave them off until a
+pack ablation passes; see [`stanli-candidates.md`](stanli-candidates.md).
 
 ## Activity artifacts
 

@@ -77,9 +77,9 @@ mcp = [
 ]
 stan = [
     # Bayesian model candidates (brier/stan_candidates.py). stanli runs Stan
-    # programs with no per-model C++ compile and no file writes, so a fit
-    # works inside the analyst's read-only sandbox. Exact-pinned: a bump must
-    # pass tests/test_stan_candidates.py at the new pin first.
+    # programs with no per-model C++ compile, and a fit ran under a macOS
+    # deny-write sandbox, so it should suit the analyst's read-only sandbox.
+    # Exact-pinned: a bump must pass tests/test_stan_candidates.py first.
     "stanli==0.25.0",
 ]
 bills = [
