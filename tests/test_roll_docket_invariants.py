@@ -17,6 +17,7 @@ import json
 import pathlib
 import re
 import sys
+from collections.abc import Iterable
 
 import pytest
 from hypothesis import given, settings
@@ -35,6 +36,10 @@ from register_targets import (  # noqa: E402
 
 REGISTRY = json.loads((ROOT / "scripts" / "docket_series.json").read_text())["series"]
 ENTRIES = {entry["series"]: entry for entry in REGISTRY}
+COMMITTED_EXPIRED = roll_docket.expired_unforecast_registrations(ROOT)
+COMMITTED_REGISTERED = frozenset(
+    roll_docket.load_registered_targets(ROOT / "records" / "targets")
+)
 DATED = [
     entry
     for entry in REGISTRY
@@ -121,7 +126,17 @@ def roll(
     published: set[str],
     *args: str,
     forecasts: dict[str, dict] | None = None,
+    expired: Iterable[str] = (),
+    registered: Iterable[str] = (),
 ) -> tuple[int, list[dict]]:
+    """Run the real roller on stated state.
+
+    Every roll adds registrations to the committed records, and the expired
+    list grows too, so a test that names a target must not read either: the
+    2026-11-02 roll registered November payrolls and would have failed the
+    test that expects the roller to select them.
+    """
+
     registry = workdir / "docket_series.json"
     registry.write_text(json.dumps({"series": entries}))
     output = workdir / "targets.json"
@@ -131,6 +146,14 @@ def roll(
     monkeypatch.setattr(roll_docket.dt, "date", fixed_date(today))
     monkeypatch.setattr(
         roll_docket, "live_catalog", lambda: (published, forecasts or {}, set())
+    )
+    monkeypatch.setattr(
+        roll_docket,
+        "expired_unforecast_registrations",
+        lambda _root: frozenset(expired),
+    )
+    monkeypatch.setattr(
+        roll_docket, "load_registered_targets", lambda _path: registered
     )
     monkeypatch.setattr(sys, "argv", ["roll_docket.py", "--out", str(output), *args])
     exit_code = roll_docket.main()
@@ -304,6 +327,82 @@ def test_weekly_claims_step_past_a_week_whose_window_opened(
     assert "its release window opens 2026-10-27" in capsys.readouterr().err
 
 
+@pytest.mark.parametrize(
+    ("series", "cursor", "terminal_id", "first_open"),
+    [
+        (
+            "us.dol.initial_claims.sa",
+            "week_2026-09-19",
+            "us.dol.initial_claims.sa.week_2026-09-26",
+            "week_2026-10-31",
+        ),
+        (
+            "dol.eta.continued_claims.sa",
+            "week_2026-09-26",
+            "dol.eta.continued_claims.sa.week_2026-10-03.first_print",
+            "week_2026-10-24",
+        ),
+    ],
+)
+def test_the_expired_claims_weeks_no_longer_freeze_their_series(
+    series: str,
+    cursor: str,
+    terminal_id: str,
+    first_open: str,
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    # The cursor's successor sits on the expired list, so the roller without
+    # the walker stopped on it and logged the skip at every run, as the
+    # 2026-10-30 and 2026-11-02 logs show.
+    assert terminal_id in COMMITTED_EXPIRED
+    entry = ENTRIES[series]
+    published = {roll_docket.format_slug(entry["slug"], cursor, entry["cadence"])}
+
+    exit_code, targets = roll(
+        monkeypatch,
+        tmp_path,
+        dt.date(2026, 11, 2),
+        [entry],
+        published,
+        expired={terminal_id},
+    )
+
+    assert exit_code == 0
+    assert [target["period"] for target in targets] == [first_open]
+    assert "terminally expired" not in capsys.readouterr().out
+
+
+def test_an_expired_monthly_period_holds_its_series_only_until_its_print(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    entry = ENTRIES["bls.cpi.u.headline_mom"]
+    assert entry["releaseDates"]["2026-10"] == "2026-11-10"
+    published = {roll_docket.format_slug(entry["slug"], "2026-09", entry["cadence"])}
+    expired = {"bls.cpi.u.headline_mom.2026_10.first_print"}
+
+    _, held = roll(
+        monkeypatch,
+        tmp_path,
+        dt.date(2026, 11, 9),
+        [entry],
+        published,
+        expired=expired,
+    )
+    _, moved = roll(
+        monkeypatch,
+        tmp_path,
+        dt.date(2026, 11, 10),
+        [entry],
+        published,
+        expired=expired,
+    )
+
+    assert held == []
+    assert [target["period"] for target in moved] == ["2026-11"]
+
+
 def test_weekly_claims_keep_thanksgivings_listed_release_day() -> None:
     entry = ENTRIES["us.dol.initial_claims.sa"]
     assert weekly_claims_release_day(entry["series"], "week_2026-11-21") == dt.date(
@@ -402,6 +501,63 @@ def test_claims_walker_never_moves_back_as_the_docket_date_moves_on(
         assert after >= before
 
 
+def _claims_id(series: str, day: dt.date) -> str:
+    return register_targets.derive_data_point_id(
+        {"series": series, "period": _week(day)}, None
+    )
+
+
+@settings(max_examples=100, deadline=None)
+@given(
+    series=CLAIMS_SERIES,
+    cursor=st.integers(0, 40).map(
+        lambda weeks: dt.date(2026, 9, 5) + dt.timedelta(days=7 * weeks)
+    ),
+    days_after=st.integers(0, 60),
+    terminal_weeks=st.frozensets(st.integers(1, 12), max_size=6),
+)
+def test_an_expired_claims_week_costs_its_series_that_week_and_no_other(
+    series: str,
+    cursor: dt.date,
+    days_after: int,
+    terminal_weeks: frozenset[int],
+    tmp_path_factory: pytest.TempPathFactory,
+) -> None:
+    # The walker never reads the expired list, so no expired week can hold the
+    # cursor behind it. A selected week on the list stays out, because an
+    # expired id never comes back, and its window opening moves the walker on.
+    entry = ENTRIES[series]
+    today = cursor + dt.timedelta(days=days_after)
+    following = cursor + dt.timedelta(days=7)
+    walked = roll_docket.advance_past_opened_weekly_claims_windows(
+        entry, _week(following), today
+    )
+    assert walked is not None
+    terminal = {
+        _claims_id(series, cursor + dt.timedelta(days=7 * week))
+        for week in terminal_weeks
+    }
+    walked_id = _claims_id(series, dt.date.fromisoformat(walked.removeprefix("week_")))
+    published = {
+        roll_docket.format_slug(entry["slug"], _week(cursor), entry["cadence"])
+    }
+
+    with pytest.MonkeyPatch.context() as patch:
+        exit_code, targets = roll(
+            patch,
+            tmp_path_factory.mktemp("roll"),
+            today,
+            [entry],
+            published,
+            expired=terminal,
+        )
+
+    assert exit_code == 0
+    assert [target["period"] for target in targets] == (
+        [] if walked_id in terminal else [walked]
+    )
+
+
 @settings(max_examples=400, deadline=None)
 @given(
     st.sampled_from(DATED),
@@ -477,19 +633,17 @@ def test_the_registrar_accepts_every_target_the_roller_selects(
             published,
             "--max-targets",
             str(cap),
+            expired=COMMITTED_EXPIRED,
+            registered=COMMITTED_REGISTERED,
         )
         assert exit_code == 0
         assert len(targets) <= cap
         assert not {target["catalogSlug"] for target in targets} & published
 
-        expired = roll_docket.expired_unforecast_registrations(ROOT)
-        registered = frozenset(
-            roll_docket.load_registered_targets(ROOT / "records" / "targets")
-        )
         for target in targets:
             contract = register_targets.build_contract(target, today)
-            assert contract["dataPointId"] not in expired
-            assert contract["dataPointId"] not in registered
+            assert contract["dataPointId"] not in COMMITTED_EXPIRED
+            assert contract["dataPointId"] not in COMMITTED_REGISTERED
             window = contract["sourceBinding"]["expectedReleaseWindow"]
             assert dt.date.fromisoformat(window["start"]) > today
             entry = ENTRIES[target["series"]]
@@ -562,6 +716,8 @@ def test_the_registrar_accepts_successors_of_the_registered_contracts(
             "--max-targets",
             str(cap),
             forecasts=REGISTERED_CONTRACTS,
+            expired=COMMITTED_EXPIRED,
+            registered=COMMITTED_REGISTERED,
         )
         assert exit_code == 0
         assert len(targets) <= cap
