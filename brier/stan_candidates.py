@@ -393,7 +393,9 @@ def sample_next(
     try:
         stan_model = stanli.Model(stan_code=source, data=data, seed=seed)
     except RuntimeError as exc:
-        raise ValueError(f"Stan program failed to compile: {exc}") from exc
+        # stanli raises RuntimeError for a parse or type error and for data that
+        # does not match the data block.
+        raise ValueError(f"Stan program failed to compile or bind data: {exc}") from exc
     fit = stan_model.sample(
         chains=CHAINS,
         seed=seed,
@@ -403,6 +405,8 @@ def sample_next(
     )
     if "y_next" not in fit.variables:
         raise ValueError("Stan program must define the generated quantity y_next")
+    if tuple(fit.variables["y_next"]) != ():
+        raise ValueError("y_next must be a scalar, one draw of the next print")
     draws = [float(value) for value in fit["y_next"]]
     if not draws or not all(math.isfinite(value) for value in draws):
         raise ValueError("y_next draws must all be finite")

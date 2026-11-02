@@ -603,7 +603,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         import sys
 
         argv = sys.argv[1:]
-    if "--print-stan-program" in argv:
+    if any(arg.split("=", 1)[0] == "--print-stan-program" for arg in argv):
         from brier.stan_candidates import STAN_PROGRAMS
 
         printer = argparse.ArgumentParser(
