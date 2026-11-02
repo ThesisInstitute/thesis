@@ -231,7 +231,7 @@ def test_real_recurring_seeds_are_reviewable_and_register_exact_dates() -> None:
         and (entry.get("extras") or {}).get("resolutionDateBasis") != "resolve-by-bound"
     ]
 
-    assert len(entries) == 25
+    assert len(entries) == 27
     undated = {
         entry["series"]
         for entry in entries
@@ -284,7 +284,7 @@ def test_wave1_pnfi_registry_pins_the_reviewed_bea_release() -> None:
     )
 
     assert entry["seedPeriod"] == "2026-Q3"
-    assert entry["releaseDates"] == {"2026-Q3": "2026-10-29"}
+    assert entry["releaseDates"]["2026-Q3"] == "2026-10-29"
     assert entry["releaseCalendarUrl"] == "https://www.bea.gov/news/schedule"
     # The seed becomes selectable on the first day inside the 75-day horizon.
     target = recurring_seed_target(entry, set(), dt.date(2026, 8, 15))
@@ -301,7 +301,7 @@ def test_wave1_bea_rd_registry_pins_the_reviewed_bea_release() -> None:
     )
 
     assert entry["seedPeriod"] == "2026-Q3"
-    assert entry["releaseDates"] == {"2026-Q3": "2026-10-29"}
+    assert entry["releaseDates"]["2026-Q3"] == "2026-10-29"
     assert entry["releaseCalendarUrl"] == "https://www.bea.gov/news/schedule"
     # The seed becomes selectable on the first day inside the 75-day horizon.
     target = recurring_seed_target(entry, set(), dt.date(2026, 8, 15))
@@ -318,7 +318,7 @@ def test_waveb_bea_ita_registry_pins_the_reviewed_release_and_anchor() -> None:
     )
 
     assert entry["seedPeriod"] == "2026-Q2"
-    assert entry["releaseDates"] == {"2026-Q2": "2026-09-24"}
+    assert entry["releaseDates"]["2026-Q2"] == "2026-09-24"
     assert entry["releaseCalendarUrl"] == "https://www.bea.gov/news/schedule"
     assert entry["extras"]["anchors"] == {"2026-Q1": 18511}
     assert "resolutionDate" not in entry["extras"]
@@ -816,6 +816,7 @@ def test_main_skips_bea_post_seed_successor_without_official_slot_literal(
 ) -> None:
     registry_data = json.loads((ROOT / "scripts" / "docket_series.json").read_text())
     entry = next(row for row in registry_data["series"] if row["series"] == series)
+    del entry["releaseDates"]["2026-Q4"]
     registry = tmp_path / "docket_series.json"
     registry.write_text(json.dumps({"series": [entry]}))
     output = tmp_path / "targets.json"

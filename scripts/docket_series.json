@@ -94,7 +94,8 @@
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
    "releaseDates": {
     "2026-10": "2026-11-06",
-    "2026-11": "2026-12-04"
+    "2026-11": "2026-12-04",
+    "2026-12": "2027-01-08"
    },
    "extras": {
     "targetUnit": "thousands",
@@ -347,7 +348,14 @@
    "releaseDates": {
     "2026-06": "2026-07-29",
     "2026-07": "2026-08-26",
-    "2026-08": "2026-09-30"
+    "2026-08": "2026-09-30",
+    "2026-09": "2026-10-28",
+    "2026-10": "2026-11-25",
+    "2026-11": "2027-01-06",
+    "2026-12": "2027-01-27",
+    "2027-01": "2027-02-24",
+    "2027-02": "2027-03-24",
+    "2027-03": "2027-04-28"
    },
    "extras": {
     "sourceBinding": {
@@ -376,7 +384,14 @@
    "releaseDates": {
     "2026-06": "2026-07-23",
     "2026-07": "2026-08-20",
-    "2026-08": "2026-09-24"
+    "2026-08": "2026-09-24",
+    "2026-09": "2026-10-15",
+    "2026-10": "2026-11-19",
+    "2026-11": "2026-12-17",
+    "2026-12": "2027-01-21",
+    "2027-01": "2027-02-18",
+    "2027-02": "2027-03-25",
+    "2027-03": "2027-04-15"
    },
    "extras": {
     "sourceBinding": {
@@ -620,7 +635,20 @@
    "ledger": {
     "uuid": "dbfd5050-e5df-40af-8922-dc8927d6363a",
     "concept": "fed.g17.industrial_production.total_index_mom"
-   }
+   },
+   "releaseDates": {
+    "2026-08": "2026-09-18",
+    "2026-09": "2026-10-16",
+    "2026-10": "2026-11-17",
+    "2026-11": "2026-12-16",
+    "2026-12": "2027-01-15",
+    "2027-01": "2027-02-17",
+    "2027-02": "2027-03-15",
+    "2027-03": "2027-04-15",
+    "2027-04": "2027-05-17",
+    "2027-05": "2027-06-16"
+   },
+   "releaseCalendarUrl": "https://www.federalreserve.gov/releases/g17/release_dates.htm"
   },
   {
    "series": "fed.g17.manufacturing_production_mom",
@@ -629,7 +657,17 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.federalreserve.gov/releases/g17/release_dates.htm",
    "releaseDates": {
-    "2026-07": "2026-08-18"
+    "2026-07": "2026-08-18",
+    "2026-08": "2026-09-18",
+    "2026-09": "2026-10-16",
+    "2026-10": "2026-11-17",
+    "2026-11": "2026-12-16",
+    "2026-12": "2027-01-15",
+    "2027-01": "2027-02-17",
+    "2027-02": "2027-03-15",
+    "2027-03": "2027-04-15",
+    "2027-04": "2027-05-17",
+    "2027-05": "2027-06-16"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -673,7 +711,20 @@
    "ledger": {
     "uuid": "9668ecdb-5f61-422d-a653-8e8956257ade",
     "concept": "fed.g17.capacity_utilization.total_industry"
-   }
+   },
+   "releaseDates": {
+    "2026-08": "2026-09-18",
+    "2026-09": "2026-10-16",
+    "2026-10": "2026-11-17",
+    "2026-11": "2026-12-16",
+    "2026-12": "2027-01-15",
+    "2027-01": "2027-02-17",
+    "2027-02": "2027-03-15",
+    "2027-03": "2027-04-15",
+    "2027-04": "2027-05-17",
+    "2027-05": "2027-06-16"
+   },
+   "releaseCalendarUrl": "https://www.federalreserve.gov/releases/g17/release_dates.htm"
   },
   {
    "series": "fed.g17.capacity_utilization.manufacturing",
@@ -682,7 +733,17 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.federalreserve.gov/releases/g17/release_dates.htm",
    "releaseDates": {
-    "2026-07": "2026-08-18"
+    "2026-07": "2026-08-18",
+    "2026-08": "2026-09-18",
+    "2026-09": "2026-10-16",
+    "2026-10": "2026-11-17",
+    "2026-11": "2026-12-16",
+    "2026-12": "2027-01-15",
+    "2027-01": "2027-02-17",
+    "2027-02": "2027-03-15",
+    "2027-03": "2027-04-15",
+    "2027-04": "2027-05-17",
+    "2027-05": "2027-06-16"
    },
    "extras": {
     "targetUnit": "percent",
@@ -727,7 +788,20 @@
    "ledger": {
     "uuid": "8c999902-84e2-4e90-b49c-325cd535062a",
     "concept": "census.housing_starts.saar"
-   }
+   },
+   "releaseDates": {
+    "2026-08": "2026-09-17",
+    "2026-09": "2026-10-20",
+    "2026-10": "2026-11-18",
+    "2026-11": "2026-12-17",
+    "2026-12": "2027-01-20",
+    "2027-01": "2027-02-18",
+    "2027-02": "2027-03-17",
+    "2027-03": "2027-04-20",
+    "2027-04": "2027-05-18",
+    "2027-05": "2027-06-17"
+   },
+   "releaseCalendarUrl": "https://www.census.gov/construction/soc/schedule.html"
   },
   {
    "series": "census.housing.permits_saar",
@@ -736,7 +810,17 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.census.gov/construction/soc/schedule.html",
    "releaseDates": {
-    "2026-07": "2026-08-18"
+    "2026-07": "2026-08-18",
+    "2026-08": "2026-09-17",
+    "2026-09": "2026-10-20",
+    "2026-10": "2026-11-18",
+    "2026-11": "2026-12-17",
+    "2026-12": "2027-01-20",
+    "2027-01": "2027-02-18",
+    "2027-02": "2027-03-17",
+    "2027-03": "2027-04-20",
+    "2027-04": "2027-05-18",
+    "2027-05": "2027-06-17"
    },
    "extras": {
     "targetUnit": "thousands",
@@ -765,7 +849,17 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.census.gov/construction/soc/schedule.html",
    "releaseDates": {
-    "2026-07": "2026-08-18"
+    "2026-07": "2026-08-18",
+    "2026-08": "2026-09-17",
+    "2026-09": "2026-10-20",
+    "2026-10": "2026-11-18",
+    "2026-11": "2026-12-17",
+    "2026-12": "2027-01-20",
+    "2027-01": "2027-02-18",
+    "2027-02": "2027-03-17",
+    "2027-03": "2027-04-20",
+    "2027-04": "2027-05-18",
+    "2027-05": "2027-06-17"
    },
    "extras": {
     "targetUnit": "thousands",
@@ -809,7 +903,20 @@
    "ledger": {
     "uuid": "5654403e-f6c5-412e-94e0-feeda778ad81",
     "concept": "census.new_residential_sales.new_single_family_houses_sold_saar"
-   }
+   },
+   "releaseDates": {
+    "2026-08": "2026-09-24",
+    "2026-09": "2026-10-27",
+    "2026-10": "2026-11-25",
+    "2026-11": "2026-12-23",
+    "2026-12": "2027-01-27",
+    "2027-01": "2027-02-24",
+    "2027-02": "2027-03-23",
+    "2027-03": "2027-04-23",
+    "2027-04": "2027-05-25",
+    "2027-05": "2027-06-24"
+   },
+   "releaseCalendarUrl": "https://www.census.gov/construction/soc/schedule.html"
   },
   {
    "series": "census.m3.durable_goods_new_orders_mom",
@@ -818,7 +925,18 @@
    "seedPeriod": "2026-06",
    "releaseCalendarUrl": "https://www.census.gov/manufacturing/m3/release_schedule.html",
    "releaseDates": {
-    "2026-06": "2026-07-27"
+    "2026-06": "2026-07-27",
+    "2026-07": "2026-08-26",
+    "2026-08": "2026-09-25",
+    "2026-09": "2026-10-27",
+    "2026-10": "2026-11-25",
+    "2026-11": "2026-12-23",
+    "2026-12": "2027-01-27",
+    "2027-01": "2027-02-25",
+    "2027-02": "2027-03-25",
+    "2027-03": "2027-04-27",
+    "2027-04": "2027-05-27",
+    "2027-05": "2027-06-25"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -847,7 +965,18 @@
    "seedPeriod": "2026-06",
    "releaseCalendarUrl": "https://www.census.gov/manufacturing/m3/release_schedule.html",
    "releaseDates": {
-    "2026-06": "2026-07-27"
+    "2026-06": "2026-07-27",
+    "2026-07": "2026-08-26",
+    "2026-08": "2026-09-25",
+    "2026-09": "2026-10-27",
+    "2026-10": "2026-11-25",
+    "2026-11": "2026-12-23",
+    "2026-12": "2027-01-27",
+    "2027-01": "2027-02-25",
+    "2027-02": "2027-03-25",
+    "2027-03": "2027-04-27",
+    "2027-04": "2027-05-27",
+    "2027-05": "2027-06-25"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -876,7 +1005,17 @@
    "seedPeriod": "2026-06",
    "releaseCalendarUrl": "https://www.census.gov/construction/c30/release.html",
    "releaseDates": {
-    "2026-06": "2026-08-03"
+    "2026-06": "2026-08-03",
+    "2026-07": "2026-09-01",
+    "2026-08": "2026-10-01",
+    "2026-09": "2026-11-02",
+    "2026-10": "2026-12-01",
+    "2026-11": "2027-01-04",
+    "2026-12": "2027-02-01",
+    "2027-01": "2027-03-01",
+    "2027-02": "2027-04-01",
+    "2027-03": "2027-05-03",
+    "2027-04": "2027-06-01"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -921,7 +1060,12 @@
    "ledger": {
     "uuid": "26bb1475-8685-4142-8472-7bcd6d998fcc",
     "concept": "census.mtis.total_business_inventories_level"
-   }
+   },
+   "releaseDates": {
+    "2026-10": "2026-12-16"
+   },
+   "releaseCalendarUrl": "https://www.census.gov/economic-indicators/calendar-listview-2026.html",
+   "seedPeriod": "2026-10"
   },
   {
    "series": "bea.trade.goods_services_deficit",
@@ -946,7 +1090,19 @@
    "ledger": {
     "uuid": "7be75093-832c-4734-a002-a0ff19c610ce",
     "concept": "bea.trade.goods_services_deficit"
-   }
+   },
+   "releaseDates": {
+    "2026-08": "2026-10-06",
+    "2026-09": "2026-11-04",
+    "2026-10": "2026-12-08",
+    "2026-11": "2027-01-07",
+    "2026-12": "2027-02-04",
+    "2027-01": "2027-03-09",
+    "2027-02": "2027-04-06",
+    "2027-03": "2027-05-05",
+    "2027-04": "2027-06-09"
+   },
+   "releaseCalendarUrl": "https://www.bea.gov/news/schedule"
   },
   {
    "series": "bea.private_nonresidential_fixed_investment",
@@ -955,7 +1111,8 @@
    "seedPeriod": "2026-Q3",
    "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
    "releaseDates": {
-    "2026-Q3": "2026-10-29"
+    "2026-Q3": "2026-10-29",
+    "2026-Q4": "2027-01-28"
    },
    "extras": {
     "targetUnit": "usd_billions",
@@ -984,7 +1141,8 @@
    "seedPeriod": "2026-Q3",
    "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
    "releaseDates": {
-    "2026-Q3": "2026-10-29"
+    "2026-Q3": "2026-10-29",
+    "2026-Q4": "2027-01-28"
    },
    "extras": {
     "targetUnit": "usd_billions",
@@ -1013,7 +1171,8 @@
    "seedPeriod": "2026-Q2",
    "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
    "releaseDates": {
-    "2026-Q2": "2026-09-24"
+    "2026-Q2": "2026-09-24",
+    "2026-Q3": "2026-12-18"
    },
    "extras": {
     "targetUnit": "usd_millions",
@@ -1072,7 +1231,20 @@
    "ledger": {
     "uuid": "1d271205-0e71-4a74-9d5f-47e77577e2b2",
     "concept": "bls.import_price_index.all_imports_mom"
-   }
+   },
+   "releaseDates": {
+    "2026-08": "2026-09-16",
+    "2026-09": "2026-10-16",
+    "2026-10": "2026-11-17",
+    "2026-11": "2026-12-17",
+    "2026-12": "2027-01-15",
+    "2027-01": "2027-02-17",
+    "2027-02": "2027-03-17",
+    "2027-03": "2027-04-16",
+    "2027-04": "2027-05-14",
+    "2027-05": "2027-06-16"
+   },
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/ximpim.htm"
   },
   {
    "series": "bls.export_prices.all_commodities_mom",
@@ -1081,7 +1253,17 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/ximpim.htm",
    "releaseDates": {
-    "2026-07": "2026-08-18"
+    "2026-07": "2026-08-18",
+    "2026-08": "2026-09-16",
+    "2026-09": "2026-10-16",
+    "2026-10": "2026-11-17",
+    "2026-11": "2026-12-17",
+    "2026-12": "2027-01-15",
+    "2027-01": "2027-02-17",
+    "2027-02": "2027-03-17",
+    "2027-03": "2027-04-16",
+    "2027-04": "2027-05-14",
+    "2027-05": "2027-06-16"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1135,7 +1317,8 @@
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/eci.htm",
    "releaseDates": {
     "2026-Q2": "2026-07-31",
-    "2026-Q3": "2026-10-30"
+    "2026-Q3": "2026-10-30",
+    "2026-Q4": "2027-01-29"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1165,7 +1348,8 @@
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/eci.htm",
    "releaseDates": {
     "2026-Q2": "2026-07-31",
-    "2026-Q3": "2026-10-30"
+    "2026-Q3": "2026-10-30",
+    "2026-Q4": "2027-01-29"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1194,7 +1378,9 @@
    "seedPeriod": "2026-Q2",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/prod2.htm",
    "releaseDates": {
-    "2026-Q2": "2026-08-06"
+    "2026-Q2": "2026-08-06",
+    "2026-Q3": "2026-11-05",
+    "2026-Q4": "2027-02-04"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1221,9 +1407,13 @@
    "cadence": "monthly",
    "slug": "us-consumer-credit-annual-rate-{month}-{year}",
    "seedPeriod": "2026-06",
-   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/2026-august.htm",
+   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/calendar.htm",
    "releaseDates": {
-    "2026-06": "2026-08-07"
+    "2026-06": "2026-08-07",
+    "2026-07": "2026-09-08",
+    "2026-08": "2026-10-07",
+    "2026-09": "2026-11-06",
+    "2026-10": "2026-12-07"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1250,9 +1440,13 @@
    "cadence": "monthly",
    "slug": "us-revolving-consumer-credit-annual-rate-{month}-{year}",
    "seedPeriod": "2026-06",
-   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/2026-august.htm",
+   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/calendar.htm",
    "releaseDates": {
-    "2026-06": "2026-08-07"
+    "2026-06": "2026-08-07",
+    "2026-07": "2026-09-08",
+    "2026-08": "2026-10-07",
+    "2026-09": "2026-11-06",
+    "2026-10": "2026-12-07"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1279,9 +1473,13 @@
    "cadence": "monthly",
    "slug": "us-nonrevolving-consumer-credit-annual-rate-{month}-{year}",
    "seedPeriod": "2026-06",
-   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/2026-august.htm",
+   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/calendar.htm",
    "releaseDates": {
-    "2026-06": "2026-08-07"
+    "2026-06": "2026-08-07",
+    "2026-07": "2026-09-08",
+    "2026-08": "2026-10-07",
+    "2026-09": "2026-11-06",
+    "2026-10": "2026-12-07"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1310,7 +1508,12 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
    "releaseDates": {
-    "2026-07": "2026-08-12"
+    "2026-07": "2026-08-12",
+    "2026-08": "2026-09-11",
+    "2026-09": "2026-10-14",
+    "2026-10": "2026-11-10",
+    "2026-11": "2026-12-10",
+    "2026-12": "2027-01-13"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1339,7 +1542,12 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
    "releaseDates": {
-    "2026-07": "2026-08-12"
+    "2026-07": "2026-08-12",
+    "2026-08": "2026-09-11",
+    "2026-09": "2026-10-14",
+    "2026-10": "2026-11-10",
+    "2026-11": "2026-12-10",
+    "2026-12": "2027-01-13"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1368,7 +1576,12 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
    "releaseDates": {
-    "2026-07": "2026-08-12"
+    "2026-07": "2026-08-12",
+    "2026-08": "2026-09-11",
+    "2026-09": "2026-10-14",
+    "2026-10": "2026-11-10",
+    "2026-11": "2026-12-10",
+    "2026-12": "2027-01-13"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1397,7 +1610,12 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
    "releaseDates": {
-    "2026-07": "2026-08-12"
+    "2026-07": "2026-08-12",
+    "2026-08": "2026-09-11",
+    "2026-09": "2026-10-14",
+    "2026-10": "2026-11-10",
+    "2026-11": "2026-12-10",
+    "2026-12": "2027-01-13"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1426,7 +1644,12 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
    "releaseDates": {
-    "2026-07": "2026-08-12"
+    "2026-07": "2026-08-12",
+    "2026-08": "2026-09-11",
+    "2026-09": "2026-10-14",
+    "2026-10": "2026-11-10",
+    "2026-11": "2026-12-10",
+    "2026-12": "2027-01-13"
    },
    "extras": {
     "targetUnit": "percent_growth",
@@ -1455,7 +1678,11 @@
    "seedPeriod": "2026-06",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
    "releaseDates": {
-    "2026-06": "2026-08-04"
+    "2026-06": "2026-08-04",
+    "2026-07": "2026-09-01",
+    "2026-08": "2026-09-29",
+    "2026-09": "2026-11-03",
+    "2026-10": "2026-12-01"
    },
    "extras": {
     "targetUnit": "percent",
@@ -1499,7 +1726,13 @@
    "ledger": {
     "uuid": "0edb7ad9-0541-4bd2-9597-bffc9e73cd92",
     "concept": "bls.ces.average_hourly_earnings_private_monthly_change"
-   }
+   },
+   "releaseDates": {
+    "2026-11": "2026-12-04",
+    "2026-12": "2027-01-08"
+   },
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "seedPeriod": "2026-11"
   },
   {
    "series": "bls.lns11300000",
@@ -1532,7 +1765,11 @@
    "seedPeriod": "2026-07",
    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
    "releaseDates": {
-    "2026-07": "2026-08-07"
+    "2026-07": "2026-08-07",
+    "2026-08": "2026-09-04",
+    "2026-09": "2026-10-02",
+    "2026-10": "2026-11-06",
+    "2026-11": "2026-12-04"
    },
    "extras": {
     "targetUnit": "percent",
