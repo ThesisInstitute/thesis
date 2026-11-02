@@ -1154,6 +1154,14 @@ export function buildPolicyEngineLedgerExport(
 ): PolicyEngineLedgerExport {
   const targets = entries.filter(isTargetRegisteredLedgerEntry);
   const observations = entries.filter(isObservationRecordedLedgerEntry);
+  // supersededContentAddress indexes the current view inside the site. It is
+  // recomputable from the row, so a correction does not change what the export
+  // says about the row it replaces.
+  const published = entries.map((entry) => {
+    if (!isObservationRecordedLedgerEntry(entry)) return entry;
+    const { supersededContentAddress: _internal, ...row } = entry;
+    return row;
+  });
 
   return {
     schemaVersion: "policyengine_ledger_v1",
@@ -1168,7 +1176,7 @@ export function buildPolicyEngineLedgerExport(
       targets: targets.length,
       observations: observations.length,
     },
-    entries,
+    entries: published,
   };
 }
 

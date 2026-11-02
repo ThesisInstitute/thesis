@@ -375,7 +375,9 @@ of receipt 0.6.2's `effective_current_rows`), which works as follows:
   version>`, so an event id never names two outcomes. Every other row keeps
   the id it always had. A pin that brings a correction of a graded row
   changes that forecast's event, score ids and the hashes over them. Its
-  scores change only if the correction changes the value.
+  observed value changes only if the correction changes the value. Its
+  published `observedAt` changes only if the correction prints earlier than
+  the rest of its chain, which also moves the chronology boundary.
 
 The build also re-runs the append gate's assertion-version checks on the pinned
 rows. Every explicit id must equal its recomputed content address, and every

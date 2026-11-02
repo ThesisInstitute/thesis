@@ -161,12 +161,17 @@ function historyDropOuts(
       const previous = chain[index - 1];
       const correction = chain[index];
       const accepted = instant(correction.acceptedAtUtc);
-      if (accepted <= instant(previous.acceptedAtUtc)) {
+      const previousAccepted = instant(previous.acceptedAtUtc);
+      if (accepted < previousAccepted) {
         throw new Error(
-          `${correction.observationId}: a correction accepted no later ` +
-            "than the row it supersedes",
+          `${correction.observationId}: a correction accepted before the ` +
+            "row it supersedes",
         );
       }
+      // One Chronicle commit stamps both rows with its time, and the gate
+      // allows that. No cutoff ever held the superseded row without its
+      // correction, so no history can lose it.
+      if (accepted === previousAccepted) continue;
       const before = new Date(accepted - 1).toISOString();
       const at = new Date(accepted).toISOString();
       for (const forecast of FORECAST_CELLS) {
@@ -587,6 +592,10 @@ describe("Chronicle corrections on the pinned ledger", () => {
       const target = getLedgerTargetByDataPointId(forecast.dataPointId ?? "");
       if (typeof target?.ledgerPinLineCount !== "number") continue;
       membershipChecks += 1;
+      // No corrected chain on this pin sits inside its registration's pinned
+      // state, so the first branch below guards later pins. The example "keeps
+      // a correction of a pre-registration print out of grading (N5)" in
+      // ledger-current-view.test.ts executes that rule.
       const member = firstAcceptance < target.ledgerPinLineCount;
       const where =
         `${forecast.slug}: chain first accepted at sequence ` +
@@ -720,6 +729,31 @@ describe("Chronicle corrections on the pinned ledger", () => {
       expect(checks, shape).toBe(holders);
       expect(dropOuts, shape).toEqual([]);
     }
+  });
+
+  it("finds no drop-out when one commit accepts a row and its correction", () => {
+    const [record] = mostHeldRecord();
+    const { correction, extended, replaced } = withCorrection(record, {
+      value: record.value + 5,
+    });
+    const sameCommit = { ...correction, acceptedAtUtc: replaced.acceptedAtUtc };
+    const sameCommitLedger = extended.map((entry) =>
+      entry === correction ? sameCommit : entry,
+    );
+    expect(historyDropOuts(sameCommitLedger, [[replaced, sameCommit]])).toEqual(
+      { checks: 0, dropOuts: [] },
+    );
+    let holders = 0;
+    for (const forecast of FORECAST_CELLS) {
+      const history = ledgerHistoryAtCutoff(
+        forecast,
+        sameCommitLedger,
+        replaced.acceptedAtUtc!,
+      );
+      expect(history).not.toContain(replaced);
+      if (history.includes(sameCommit)) holders += 1;
+    }
+    expect(holders).toBeGreaterThan(0);
   });
 
   it("reports a unit-changing correction as a drop-out until it is listed", () => {

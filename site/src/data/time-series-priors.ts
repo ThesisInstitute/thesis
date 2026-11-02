@@ -18,6 +18,7 @@ import type {
 import type { TargetRegisteredLedgerEntry } from "./ledger-targets";
 import {
   firstAcceptedSequence,
+  firstObservedAt,
   observationViewAsOf,
 } from "./ledger-current-view";
 
@@ -439,7 +440,8 @@ export function ledgerHistoryAtCutoff(
   );
   return [...byObservationId.values()].sort((left, right) => {
     const timeDelta =
-      Date.parse(left.observedAt) - Date.parse(right.observedAt);
+      Date.parse(firstObservedAt(left, ledger)) -
+      Date.parse(firstObservedAt(right, ledger));
     return timeDelta || left.observationId.localeCompare(right.observationId);
   });
 }

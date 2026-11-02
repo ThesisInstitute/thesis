@@ -28,6 +28,7 @@ import {
   getResolvedObservationForForecast,
   getResolvedOutcomeForForecast,
   mapPolicyEngineLedgerRows,
+  buildPolicyEngineLedgerExport,
   parsePolicyEngineLedgerFacts,
   type ObservationRecordedLedgerEntry,
   type PolicyEngineLedgerEntry,
@@ -435,7 +436,13 @@ describe("current view properties", () => {
 
 type AppendOp =
   | { kind: "new"; preVersioning: boolean; value: number }
-  | { kind: "correct"; record: number; delta: number; changeUnit: boolean };
+  | {
+      kind: "correct";
+      record: number;
+      delta: number;
+      changeUnit: boolean;
+      shiftDays: number;
+    };
 
 const appendOp: fc.Arbitrary<AppendOp> = fc.oneof(
   fc.record({
@@ -448,6 +455,7 @@ const appendOp: fc.Arbitrary<AppendOp> = fc.oneof(
     record: fc.nat(),
     delta: fc.integer({ min: 1, max: 9 }),
     changeUnit: fc.boolean(),
+    shiftDays: fc.integer({ min: -5, max: 5 }),
   }),
 );
 
@@ -489,6 +497,11 @@ function buildGatedRows(ops: AppendOp[]): Json[] {
     const correction: Json = {
       ...previous,
       value: (previous.value as number) + op.delta,
+      observed_at: new Date(
+        Date.parse(previous.observed_at as string) + op.shiftDays * 86_400_000,
+      )
+        .toISOString()
+        .slice(0, 10),
       measure: op.changeUnit
         ? { ...(previous.measure as Json), unit: "thousands" }
         : previous.measure,
@@ -575,19 +588,49 @@ describe("gated ledgers", () => {
         const entries = withAcceptance(
           mapPolicyEngineLedgerRows(buildGatedRows(ops)),
         );
-        for (const entry of entries) {
-          const first = entries.find(
-            (other) => other.dataPointId === entry.dataPointId,
-          )!;
+        entries.forEach((entry, index) => {
           // Later rows never join a chain, whatever ledger is passed.
+          const chain = entries
+            .slice(0, index + 1)
+            .filter((other) => other.dataPointId === entry.dataPointId);
           expect(firstAcceptedSequence(entry, entries)).toBe(
-            first.acceptedSequence,
+            chain[0].acceptedSequence,
           );
-          expect(firstObservedAt(entry, entries)).toBe(first.observedAt);
-        }
+          const earliest = Math.min(
+            ...chain.map((row) => Date.parse(row.observedAt)),
+          );
+          expect(Date.parse(firstObservedAt(entry, entries))).toBe(earliest);
+        });
       }),
       { numRuns: 200 },
     );
+  });
+
+  it("refuses a correction that restores an earlier version's exact content", () => {
+    // A -> B -> A': the gate's effective ids stay unique, so a record cannot
+    // return to a version it has already replaced.
+    const first = buildGatedRows([
+      { kind: "new", preVersioning: false, value: 1 },
+    ])[0];
+    const second: Json = { ...first, value: 2 };
+    delete second.assertionVersion;
+    second.assertionVersion = {
+      id: expectedAssertionVersionId(second),
+      supersedes: effectiveAssertionId(first),
+    };
+    const restored: Json = {
+      ...first,
+      assertionVersion: {
+        id: effectiveAssertionId(first),
+        supersedes: effectiveAssertionId(second),
+      },
+    };
+    expect(() =>
+      assertAppendGateAssertionVersions([first, second]),
+    ).not.toThrow();
+    expect(() =>
+      assertAppendGateAssertionVersions([first, second, restored]),
+    ).toThrow(/restates assertion version/);
   });
 
   it("refuses a tampered id, a silent duplicate, or a stale supersede", () => {
@@ -954,6 +997,39 @@ describe("scoring on the current view", () => {
     expect(corrected.score?.chronology).toBe("claimed_time_verified");
   });
 
+  it("fails membership closed when any row of the chain has no acceptance record", () => {
+    const ledger = ledgerOf([original, correction]);
+    const unaccepted = ledger.map((entry) =>
+      entry.kind === "observation_recorded" && entry.value === 225
+        ? { ...entry, acceptedSequence: undefined }
+        : entry,
+    );
+    const resolving = getResolvedObservationForForecast(cell, unaccepted)!;
+    expect(resolving.value).toBe(231);
+    expect(typeof resolving.acceptedSequence).toBe("number");
+    expect(firstAcceptedSequence(resolving, unaccepted)).toBeNull();
+    const evaluation = evaluateResolvedForecastRun(cell, run(), unaccepted);
+    expect(evaluation.exclusion?.reason).toBe("contract_violation");
+    expect(evaluation.exclusion?.detail).toMatch(/no ledger acceptance record/);
+  });
+
+  it("publishes no internal address when a correction names a pre-versioning row", () => {
+    const { assertionVersion: _none, ...preVersioning } = original;
+    const fix = versioned(boundRow({ value: 231 }), preVersioning);
+    const ledger = ledgerOf([preVersioning, fix]);
+    const held = ledger.filter(
+      (entry) =>
+        entry.kind === "observation_recorded" &&
+        entry.supersededContentAddress !== undefined,
+    );
+    expect(held).toHaveLength(1);
+    const published = JSON.stringify(buildPolicyEngineLedgerExport(ledger));
+    expect(published).not.toContain("supersededContentAddress");
+    expect(buildPolicyEngineLedgerExport(ledger).entries).toHaveLength(
+      ledger.length,
+    );
+  });
+
   it("keeps a correction of a pre-registration print out of grading (N5)", () => {
     // The original was already inside the pinned state (sequence 1 < 2);
     // appending a correction later must not launder it.
@@ -1004,6 +1080,31 @@ describe("cutoff histories on the as-of view", () => {
     );
     expect(history([original, late], acceptedAt(2))).toEqual([225]);
     expect(history([original, late], acceptedAt(3))).toEqual([231]);
+  });
+
+  it("keeps a later-dated correction in its record's place, so the last print stays last", () => {
+    // Order follows the chain's earliest print. Dating a correction of an
+    // older week after a newer week's print must not make that older week the
+    // "last print" a persistence baseline reads.
+    const newer = versioned(
+      boundRow({
+        source_record_id: "test.corrected.series.2026_07.first_print",
+        value: 197,
+        observed_at: "2026-07-22",
+        period: { type: "month", value: "2026-07" },
+        sourceBindingProjection: {
+          ...(boundRow().sourceBindingProjection as Json),
+          period: "2026-07",
+        },
+      }),
+      null,
+    );
+    const lateFix = versioned(
+      boundRow({ value: 210, observed_at: "2026-07-27" }),
+      original,
+    );
+    const cutoff = acceptedAt(4);
+    expect(history([original, newer, lateFix], cutoff)).toEqual([210, 197]);
   });
 
   it("keeps a correction of a pre-registration print out of histories (N5)", () => {
