@@ -7,18 +7,31 @@ analyst's read-only sandbox in milliseconds. It is an optional dependency (the
 ``stan`` extra) and is imported inside the builder.
 
 Every program receives the same data: ``N``, the raw history ``y``, its
-standardized form ``y_std = (y - y_loc) / y_scale``, and ``y_loc`` and
-``y_scale``. ``y_loc`` is the last print and ``y_scale`` a robust scale of the
-one-step changes. A program must define the generated quantity ``y_next``: one
+standardized form ``y_std = (y - y_loc) / y_scale``, ``y_loc``, ``y_scale`` and
+``y_grid``. ``y_loc`` is the last print, ``y_scale`` a robust scale of the
+one-step changes, and ``y_grid`` the increment the prints are reported on (0
+when unknown). A program must define the generated quantity ``y_next``: one
 posterior predictive draw of the next print, in raw units. The built-in
 programs fit ``y_std`` under fixed priors, so a positive rescaling or a shift
-of the history moves their forecast by the same rescaling or shift.
+of the history (and its grid) moves their forecast by the same rescaling or
+shift.
+
+Official prints are rounded, and rounded series repeat a print often. When
+more than half of the one-step changes are exactly zero, a Student-t
+likelihood grows without bound as its scale shrinks to zero, and NUTS returns
+a point mass at the last print that can still pass R-hat and ESS checks. The
+built-in programs therefore treat each print as the latent value plus rounding
+error uniform on half a grid step either way (variance ``y_grid**2 / 12``) and
+add that error's variance to the residual scale, which keeps the likelihood
+bounded. The rounding errors enter as independent noise; their serial
+correlation within a residual is ignored.
 """
 
 from __future__ import annotations
 
 import hashlib
 import math
+from decimal import Decimal
 from statistics import median
 from typing import Any, Sequence
 
@@ -52,6 +65,7 @@ _DATA_BLOCK = """data {
   vector[N] y_std;
   real y_loc;
   real<lower=0> y_scale;
+  real<lower=0> y_grid;
 }"""
 
 STAN_PROGRAMS: dict[str, str] = {
@@ -62,20 +76,26 @@ STAN_PROGRAMS: dict[str, str] = {
     + """
 transformed data {
   vector[N - 1] d = y_std[2:N] - y_std[1:(N - 1)];
+  // Rounding variance of one print, in standardized units.
+  real round_var = square(y_grid / y_scale) / 12;
 }
 parameters {
   real delta;
   real<lower=0> sigma;
   real<lower=1> nu;
 }
+transformed parameters {
+  // A one-step change carries the rounding errors of two prints.
+  real<lower=0> tau = sqrt(square(sigma) + 2 * round_var);
+}
 model {
   delta ~ normal(0, 1);
   sigma ~ normal(0, 2);
   nu ~ gamma(2, 0.1);
-  d ~ student_t(nu, delta, sigma);
+  d ~ student_t(nu, delta, tau);
 }
 generated quantities {
-  real y_next = y_loc + y_scale * (y_std[N] + student_t_rng(nu, delta, sigma));
+  real y_next = y_loc + y_scale * (y_std[N] + student_t_rng(nu, delta, tau));
 }
 """,
     # Stationary AR(1) around a fitted mean with Student-t errors, for rates
@@ -85,6 +105,7 @@ generated quantities {
 transformed data {
   real y_bar = mean(y_std);
   real y_spread = sd(y_std) + 1;
+  real round_var = square(y_grid / y_scale) / 12;
 }
 parameters {
   real m;
@@ -92,15 +113,19 @@ parameters {
   real<lower=0> sigma;
   real<lower=1> nu;
 }
+transformed parameters {
+  // The residual carries this print's rounding error and phi times the last.
+  real<lower=0> tau = sqrt(square(sigma) + (1 + square(phi)) * round_var);
+}
 model {
   m ~ normal(y_bar, 2 * y_spread);
   sigma ~ normal(0, 2 * y_spread);
   nu ~ gamma(2, 0.1);
-  y_std[2:N] ~ student_t(nu, m + phi * (y_std[1:(N - 1)] - m), sigma);
+  y_std[2:N] ~ student_t(nu, m + phi * (y_std[1:(N - 1)] - m), tau);
 }
 generated quantities {
   real y_next = y_loc
-                + y_scale * student_t_rng(nu, m + phi * (y_std[N] - m), sigma);
+                + y_scale * student_t_rng(nu, m + phi * (y_std[N] - m), tau);
 }
 """,
     # AR(1) on the one-step changes with drift and Student-t errors
@@ -109,6 +134,7 @@ generated quantities {
     + """
 transformed data {
   vector[N - 1] d = y_std[2:N] - y_std[1:(N - 1)];
+  real round_var = square(y_grid / y_scale) / 12;
 }
 parameters {
   real delta;
@@ -116,17 +142,23 @@ parameters {
   real<lower=0> sigma;
   real<lower=1> nu;
 }
+transformed parameters {
+  // The residual carries r[t] - (1 + phi) r[t-1] + phi r[t-2] of rounding
+  // errors r.
+  real<lower=0> tau
+      = sqrt(square(sigma) + (1 + square(1 + phi) + square(phi)) * round_var);
+}
 model {
   delta ~ normal(0, 1);
   sigma ~ normal(0, 2);
   nu ~ gamma(2, 0.1);
-  d[2:(N - 1)] ~ student_t(nu, delta + phi * (d[1:(N - 2)] - delta), sigma);
+  d[2:(N - 1)] ~ student_t(nu, delta + phi * (d[1:(N - 2)] - delta), tau);
 }
 generated quantities {
   real y_next = y_loc
                 + y_scale * (y_std[N]
                              + student_t_rng(nu, delta + phi * (d[N - 1] - delta),
-                                             sigma));
+                                             tau));
 }
 """,
 }
@@ -169,6 +201,22 @@ def standardization(values: Sequence[float]) -> tuple[float, float]:
     return loc, scale
 
 
+def observation_grid(values: Sequence[float]) -> float:
+    """Infer the increment the prints are reported on.
+
+    The grid is ``10**-d`` for the most decimal places any print shows, trailing
+    zeros dropped, so whole-number prints give 1. Prints that carry float noise
+    give a negligible grid, which leaves the rounding term near zero.
+    """
+
+    places = 0
+    for value in values:
+        exponent = Decimal(repr(float(value))).normalize().as_tuple().exponent
+        if isinstance(exponent, int):
+            places = max(places, -exponent)
+    return 10.0**-places
+
+
 def stanli_seed(identifier: str) -> int:
     """Derive a stable sampler seed from a candidate id."""
 
@@ -185,12 +233,15 @@ def build_stanli_candidate(
     generated_at: str | None = None,
     round_increment: float | None = None,
     program: str | None = None,
+    grid: float | None = None,
     backtest: bool = True,
 ) -> ForecastModelCandidate:
     """Fit a stanli program and summarize its posterior predictive draws.
 
     ``model`` names a built-in program, or ``stanli-custom`` with ``program``
-    holding Stan source that follows the module's data contract.
+    holding Stan source that follows the module's data contract. ``grid`` is
+    the increment the history is reported on; by default it is inferred from
+    the prints' decimal places.
     """
 
     source = resolve_program(model, program)
@@ -207,14 +258,25 @@ def build_stanli_candidate(
         normalized_history,
     )
     seed = stanli_seed(identifier)
-    loc, scale = standardization([observation.value for observation in normalized_history])
+    values = [observation.value for observation in normalized_history]
+    loc, scale = standardization(values)
+    if grid is None:
+        grid = observation_grid(values)
+    elif not (math.isfinite(grid) and grid >= 0):
+        raise ValueError("grid must be a finite non-negative increment")
     draws, sampler = sample_next(
-        source, normalized_history, loc=loc, scale=scale, seed=seed
+        source, normalized_history, loc=loc, scale=scale, grid=grid, seed=seed
     )
 
     quantiles = {level: empirical_quantile(draws, level) for level in QUANTILE_LEVELS}
     point, p10, p90, p05, p95 = round_values(
-        [quantiles[0.5], quantiles[0.1], quantiles[0.9], quantiles[0.05], quantiles[0.95]],
+        [
+            quantiles[0.5],
+            quantiles[0.1],
+            quantiles[0.9],
+            quantiles[0.05],
+            quantiles[0.95],
+        ],
         round_increment,
     )
     if p10 == p90:
@@ -258,7 +320,7 @@ def build_stanli_candidate(
         calibration_n=len(normalized_history),
         history=tuple(normalized_history),
         backtest_score=(
-            backtest_stanli(model, normalized_history, program=source)
+            backtest_stanli(model, normalized_history, program=source, grid=grid)
             if backtest
             else None
         ),
@@ -273,7 +335,7 @@ def build_stanli_candidate(
                 {"probability": level, "value": quantiles[level]}
                 for level in QUANTILE_LEVELS
             ],
-            "standardization": {"yLoc": loc, "yScale": scale},
+            "standardization": {"yLoc": loc, "yScale": scale, "yGrid": grid},
             "sampler": sampler,
             "program": {
                 "name": model,
@@ -306,6 +368,7 @@ def sample_next(
     *,
     loc: float,
     scale: float,
+    grid: float,
     seed: int,
 ) -> tuple[list[float], dict[str, Any]]:
     """Sample ``y_next`` and return its draws with sampler diagnostics."""
@@ -325,6 +388,7 @@ def sample_next(
         "y_std": [(value - loc) / scale for value in values],
         "y_loc": loc,
         "y_scale": scale,
+        "y_grid": grid,
     }
     try:
         stan_model = stanli.Model(stan_code=source, data=data, seed=seed)
@@ -353,9 +417,12 @@ def sample_next(
     ess_bulk = [float(summary.ess_bulk[index]) for index in parameter_rows]
     sampler = {
         "divergences": int(sum(int(count) for count in fit.divergences)),
-        "maxRhat": max((value for value in r_hats if math.isfinite(value)), default=1.0),
+        "maxRhat": max(
+            (value for value in r_hats if math.isfinite(value)), default=1.0
+        ),
         "minEssBulk": min(
-            (value for value in ess_bulk if math.isfinite(value)), default=float(len(draws))
+            (value for value in ess_bulk if math.isfinite(value)),
+            default=float(len(draws)),
         ),
     }
     return draws, sampler
@@ -377,9 +444,16 @@ def backtest_stanli(
     history: Sequence[TimeSeriesObservation],
     *,
     program: str | None = None,
+    grid: float | None = None,
     max_rows: int = BACKTEST_MAX_ROWS,
 ) -> BacktestScore | None:
-    """Walk forward one step over the most recent ``max_rows`` cutoffs."""
+    """Walk forward one step over the most recent ``max_rows`` cutoffs.
+
+    Every cutoff fits with the full history's grid when ``grid`` is None.
+    """
+
+    if grid is None:
+        grid = observation_grid([observation.value for observation in history])
 
     minimum = MIN_OBSERVATIONS[model]
     first_cutoff = max(minimum, len(history) - max_rows)
@@ -398,6 +472,7 @@ def backtest_stanli(
             history=history[:cutoff],
             generated_at=DEFAULT_GENERATED_AT,
             program=program if model == CUSTOM_MODEL else None,
+            grid=grid,
             backtest=False,
         )
         errors.append(abs(actual - candidate.point_estimate))
