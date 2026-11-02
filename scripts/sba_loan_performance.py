@@ -9,6 +9,7 @@ family design note.
 from __future__ import annotations
 
 import datetime as dt
+import functools
 import hashlib
 import io
 import math
@@ -797,9 +798,13 @@ def _reviewed_clip(clip: tuple[_PdfRectangle, ...] | None) -> bool:
     )
 
 
+@functools.lru_cache(maxsize=32)
 def _sba_pdf_geometry(
     raw: bytes, *, series: str
 ) -> tuple[_SbaPdfGeometry | None, str | None]:
+    # A pure function of the PDF bytes, and the answer is immutable. The 87 SBA
+    # witnesses in the chain on 2026-11-02 share one ZIP archive, so one
+    # verification replay parsed the same three PDFs 86 times each.
     spec = _spec(series)
     if not raw.startswith(b"%PDF-"):
         return _layout_refusal("response does not start with %PDF-")
