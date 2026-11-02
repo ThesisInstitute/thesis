@@ -103,6 +103,43 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -q --durations=0 --durations-min=0.5
 
+  # TEMPORARY measurement job; dropped before this PR leaves draft.
+  timeline-profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+      - name: Install package with all extras
+        run: uv sync --all-extras
+      - name: Time and profile one extraction on the real records
+        run: |
+          lscpu | grep -E 'Model name|^CPU\(s\)'
+          uv run python - <<'PY'
+          import cProfile, pstats, sys, time
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          import verify_record_chain as chain
+          import witnessed_timeline as timeline
+          records = Path("records").resolve()
+          t = time.perf_counter()
+          verification = chain.verify_chain(records)
+          print(f"verify_chain {time.perf_counter() - t:.1f}s, {len(verification.ordered)} snapshots", flush=True)
+          t = time.perf_counter()
+          timeline.extract_timeline(records)
+          print(f"extract_timeline {time.perf_counter() - t:.1f}s", flush=True)
+          profiler = cProfile.Profile()
+          profiler.enable()
+          timeline.extract_timeline(records)
+          profiler.disable()
+          stats = pstats.Stats(profiler, stream=sys.stdout)
+          stats.sort_stats("cumulative").print_stats(45)
+          stats.sort_stats("tottime").print_stats(30)
+          PY
+
   # Give the bill extraction and paired-publication boundary fast feedback
   # while the complete Python suite continues to verify the entire archive.
   bill-pipeline:
