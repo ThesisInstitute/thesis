@@ -1288,7 +1288,16 @@ for payroll change, job openings and the quits rate), so the test counts only
 registrations made under another adapter and requires a single `bls-api`
 target per period.
 The schedule is finite: when BLS posts later dates, they are added here by a
-reviewed edit.
+reviewed edit. `scripts/docket_health.py` raises an issue 21 days before a
+series' committed dates run out.
+
+The 2026-11-02 refresh gave these series only one new date: 2026-12 for the
+payroll change, which still ends before the CES benchmark. The Employment
+Situation and CPI pages read that day hashed the same as the 2026-10-12 reads.
+Unemployment still ends at 2026-11, and CPI headline and core at 2026-12, so the
+calendars here still end before all three annual revisions. Extending any of
+them needs the re-verification above. `docs/seed-verifications.md` holds the
+full table for that refresh.
 
 ## What this does not decide or prove
 

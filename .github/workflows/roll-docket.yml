@@ -718,8 +718,17 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           title="Docket roll failed $(date -u +%F)"
+          body="$RUNNER_TEMP/docket-roll-failed.md"
+          {
+            echo "The auto-roll loop failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
+            echo
+            echo "Jobs: register ${{ needs.register.result }}, generate ${{ needs.generate.result }}, publish failure."
+            echo
+            echo "Targets this run registered have seven days of orphan grace, and the validated batch stays in the run's artifact for the same seven days. If generate succeeded, fix the cause on main, then run: gh run rerun ${{ github.run_id }} --failed"
+            echo
+            echo "That publishes the same batch. If register failed, no batch exists and the next roll tries again."
+          } > "$body"
           existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number' || true)
           if [ -z "$existing" ]; then
-            gh issue create --title "$title" \
-              --body "The auto-roll loop failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
+            gh issue create --title "$title" --body-file "$body"
           fi

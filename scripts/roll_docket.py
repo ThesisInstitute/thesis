@@ -884,6 +884,27 @@ def recurring_seed_target(
     }
 
 
+def previous_target_block(previous: dict, period: str) -> dict:
+    """The fields of a published contract its successor builds from."""
+    block = {
+        key: previous[key]
+        for key in (
+            "country",
+            "unit",
+            "dataPointId",
+            "resolutionDate",
+            "resolutionSource",
+            "resolutionSourceUrl",
+            "resolutionRule",
+            "resolutionPolicy",
+            "sourceContext",
+        )
+        if previous.get(key) not in (None, "")
+    }
+    block["period"] = period
+    return block
+
+
 def target_extras_for_period(entry: dict, period: str) -> dict | None:
     """Return target extras, requiring a dated slot for calendar-gated sources.
 
@@ -1334,22 +1355,7 @@ def main() -> int:
         }
         previous = published_forecasts.get(latest_slug)
         if previous:
-            target["previousTarget"] = {
-                key: previous[key]
-                for key in (
-                    "country",
-                    "unit",
-                    "dataPointId",
-                    "resolutionDate",
-                    "resolutionSource",
-                    "resolutionSourceUrl",
-                    "resolutionRule",
-                    "resolutionPolicy",
-                    "sourceContext",
-                )
-                if previous.get(key) not in (None, "")
-            }
-            target["previousTarget"]["period"] = previous_period
+            target["previousTarget"] = previous_target_block(previous, previous_period)
         # One-shot snapshots get the middle lane so a permanently busy
         # monthly docket cannot starve their finite preregistration window.
         priority = 1 if entry["cadence"] == "weekly" else 3
