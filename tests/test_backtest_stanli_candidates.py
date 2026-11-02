@@ -268,3 +268,146 @@ def test_stanli_quantiles_form_a_valid_analyst_ladder():
         },
     }
     assert analyst.ladder_validation_errors(cell) == []
+
+
+SCORES = st.dictionaries(
+    st.sampled_from(["a", "b", "c", "d"]),
+    st.fixed_dictionaries(
+        {
+            "warned": st.booleans(),
+            "meanAbsoluteError": st.floats(min_value=0, max_value=5),
+            "coverage80": st.sampled_from([0.0, 0.5, 0.75, 0.8, 0.875, 1.0]),
+        }
+    ),
+    min_size=1,
+)
+
+
+@given(SCORES)
+def test_select_model_takes_the_lowest_error_among_models_without_warnings(scores):
+    picked = backtest.select_model(scores)
+    usable = {m: s for m, s in scores.items() if not s["warned"]} or scores
+
+    assert picked in usable
+    assert usable[picked]["meanAbsoluteError"] == min(
+        score["meanAbsoluteError"] for score in usable.values()
+    )
+
+
+def test_select_model_breaks_ties_by_coverage_then_name():
+    tied = {"warned": False, "meanAbsoluteError": 1.0}
+    assert (
+        backtest.select_model(
+            {
+                "a": {**tied, "coverage80": 1.0},
+                "b": {**tied, "coverage80": 0.75},
+                "c": {**tied, "coverage80": 0.75},
+            }
+        )
+        == "b"
+    )
+
+
+def test_select_model_falls_back_when_every_model_warns():
+    assert (
+        backtest.select_model(
+            {
+                "a": {"warned": True, "meanAbsoluteError": 2.0, "coverage80": 0.8},
+                "b": {"warned": True, "meanAbsoluteError": 1.0, "coverage80": 0.8},
+            }
+        )
+        == "b"
+    )
+
+
+@pytest.mark.skipif(find_spec("stanli") is None, reason="stan extra missing")
+@pytest.mark.skipif(find_spec("statsmodels") is None, reason="statsmodels missing")
+def test_selected_arms_copy_the_picked_program_and_leave_the_others_alone():
+    history = [round(4.0 + 0.1 * ((index * 7) % 5 - 2), 1) for index in range(10)]
+    models = ["stanli-rw-drift-t", "stanli-ar1-t"]
+
+    def arms(walk_forward):
+        return backtest.forecast_arms(
+            history,
+            stan_models=models,
+            interval_distribution=analyst.interval_distribution,
+            ladder_distribution=analyst.ladder_distribution,
+            walk_forward=walk_forward,
+        )
+
+    fixed = arms(False)
+    selected = arms(True)
+    picked = selected["stanli-selected"]["selected"]
+
+    assert "stanli-selected" not in fixed
+    assert picked in models
+    assert selected["stanli-selected-ladder"]["selected"] == picked
+    assert selected["stanli-selected"]["cdf"] == selected[picked]["cdf"]
+    assert (
+        selected["stanli-selected-ladder"]["cdf"] == selected[f"{picked}-ladder"]["cdf"]
+    )
+    # Seeds derive from the candidate id, so the walk-forward fits cannot move
+    # the forecast the arm itself publishes.
+    for arm, forecast in fixed.items():
+        assert selected[arm]["cdf"] == forecast["cdf"]
+
+
+def transform_rows():
+    rows = []
+    for series, ratio, count in (
+        ("A:level", 0.5, 2),
+        ("B:level", 1.0, 2),
+        ("C:mom_diff", 2.0, 4),
+    ):
+        for period in range(count):
+            for arm, crps in (("persistence", 2.0), ("half", 2.0 * ratio)):
+                rows.append(
+                    {
+                        "series": series,
+                        "period": f"p{period}",
+                        "arm": arm,
+                        "crps": crps,
+                        "normalizedCrps": crps / 4,
+                        "covered80": series == "A:level",
+                        "samplerFailed": False,
+                    }
+                )
+    return rows
+
+
+def test_by_transform_recombines_the_series_in_each_transform():
+    table = backtest.by_transform(transform_rows())
+
+    assert set(table) == {"level", "mom_diff"}
+    level = table["level"]["half"]
+    assert (level["series"], level["targets"]) == (2, 4)
+    assert level["geometricMeanCrpsRatio"] == pytest.approx(0.5**0.5)
+    assert level["coverage80"] == 0.5
+    assert table["mom_diff"]["half"]["geometricMeanCrpsRatio"] == pytest.approx(2.0)
+
+
+def test_leave_one_series_out_names_the_series_that_moves_the_ratio_most():
+    table = backtest.leave_one_series_out(transform_rows())["half"]
+
+    # Dropping the 0.5 series leaves the 1.0 and 2.0 series; dropping the 2.0
+    # series leaves the 0.5 and 1.0 series.
+    assert table["highestRatioDrops"] == "A:level"
+    assert table["highestRatio"] == pytest.approx(2 ** (4 / 6))
+    assert table["lowestRatioDrops"] == "C:mom_diff"
+    assert table["lowestRatio"] == pytest.approx(0.5**0.5)
+
+
+def test_leave_one_series_out_skips_an_arm_with_one_series():
+    rows = [row for row in transform_rows() if row["series"] == "C:mom_diff"]
+    assert backtest.leave_one_series_out(rows) == {}
+
+
+def test_selection_counts_read_the_selected_arm_alone():
+    rows = [
+        {"arm": "stanli-selected", "selected": "b"},
+        {"arm": "stanli-selected", "selected": "a"},
+        {"arm": "stanli-selected", "selected": "b"},
+        {"arm": "stanli-selected-ladder", "selected": "b"},
+        {"arm": "persistence"},
+    ]
+    assert backtest.selection_counts(rows) == {"a": 1, "b": 2}

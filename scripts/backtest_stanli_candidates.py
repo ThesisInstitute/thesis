@@ -29,6 +29,9 @@ Arms:
   interval_anchor_v1 CDF (what a fast-mode agent publishes).
 - ``stanli-*-ladder``: the same program's 19 posterior quantiles as an
   agent_cdf_v1 threshold ladder (what a ladder-mode agent publishes).
+- ``stanli-selected`` and ``stanli-selected-ladder``, with ``--walk-forward``:
+  for each target, the program that select_model picks from its walk-forward
+  score over the training history's last 24 cutoffs, as both CDF shapes.
 
 The grid samples vintages on the 1st and 16th of each month, so a "first print"
 is the print as of the first grid date after release; a revision inside that
@@ -37,12 +40,14 @@ target's reporting precision.
 
 Usage:
   uv run --extra stan --extra experiments python \\
-    scripts/backtest_stanli_candidates.py --output-dir experiments/stanli_backtest
+    scripts/backtest_stanli_candidates.py --output-dir experiments/stanli_backtest \\
+    --walk-forward --jobs 4
 """
 
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import csv
 import datetime as dt
 import io
@@ -62,6 +67,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from brier.stan_candidates import (  # noqa: E402
+    MAX_RHAT,
     QUANTILE_LEVELS,
     STAN_PROGRAMS,
     build_stanli_candidate,
@@ -392,12 +398,40 @@ def ladder_cdf(
     )
 
 
+def sampler_warned(sampler: dict[str, Any] | None) -> bool:
+    return bool(
+        sampler and (sampler["divergences"] > 0 or sampler["maxRhat"] > MAX_RHAT)
+    )
+
+
+def select_model(scores: dict[str, dict[str, Any]]) -> str:
+    """Apply the draft pack skill's rule to each model's walk-forward score.
+
+    Skip a model with a sampler warning, take the lowest walk-forward MAE, and
+    break exact ties by coverage nearest 0.8, then by name. When every model
+    warns, the rule has nothing left, so it considers them all.
+    """
+
+    usable = {
+        model: score for model, score in scores.items() if not score["warned"]
+    } or scores
+    return min(
+        usable,
+        key=lambda model: (
+            usable[model]["meanAbsoluteError"],
+            abs(usable[model]["coverage80"] - 0.8),
+            model,
+        ),
+    )
+
+
 def forecast_arms(
     history: Sequence[float],
     *,
     stan_models: Sequence[str],
     interval_distribution,
     ladder_distribution,
+    walk_forward: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Each arm's CDF and 80% interval for the next print."""
 
@@ -438,6 +472,7 @@ def forecast_arms(
             "quantiles": gaussian,
         }
 
+    scores: dict[str, dict[str, Any]] = {}
     for model in stan_models:
         candidate = build_stanli_candidate(
             model=model,
@@ -445,7 +480,7 @@ def forecast_arms(
             target_period="next",
             history=observations,
             generated_at=GENERATED_AT,
-            backtest=False,
+            backtest=walk_forward,
         )
         quantiles = [
             row["value"] for row in candidate.posterior_predictive["quantiles"]
@@ -465,6 +500,19 @@ def forecast_arms(
             "interval80": (low, high),
             "sampler": sampler,
             "quantiles": quantiles,
+        }
+        score = candidate.backtest_score
+        scores[model] = {
+            "warned": sampler_warned(sampler),
+            "meanAbsoluteError": score.mean_absolute_error if score else math.inf,
+            "coverage80": score.interval80_coverage if score else math.inf,
+        }
+    if walk_forward and scores:
+        selected = select_model(scores)
+        arms["stanli-selected"] = {**arms[selected], "selected": selected}
+        arms["stanli-selected-ladder"] = {
+            **arms[f"{selected}-ladder"],
+            "selected": selected,
         }
     return arms
 
@@ -496,16 +544,49 @@ def score_target(target: Target, arms: dict[str, dict[str, Any]]) -> list[dict]:
                 "normalizedCrps": crps / scale if scale else None,
                 "pit": pit,
                 "covered80": low <= target.outcome <= high,
-                "samplerFailed": bool(
-                    forecast.get("sampler")
-                    and (
-                        forecast["sampler"]["divergences"] > 0
-                        or forecast["sampler"]["maxRhat"] > 1.01
-                    )
+                "samplerFailed": sampler_warned(forecast.get("sampler")),
+                **(
+                    {"selected": forecast["selected"]} if "selected" in forecast else {}
                 ),
             }
         )
     return rows
+
+
+def run_series(
+    spec: SeriesSpec,
+    *,
+    dates: Sequence[dt.date],
+    cache_dir: pathlib.Path,
+    window: int,
+    max_targets: int,
+    stan_models: Sequence[str],
+    walk_forward: bool,
+) -> tuple[list[dict], int]:
+    """Every arm's scored rows for one series, and its target count."""
+
+    import resolve_pending
+    import run_thesis_analyst
+
+    targets = real_time_targets(
+        spec,
+        fetch_vintages(spec.fred, dates, cache_dir),
+        window=window,
+        max_targets=max_targets,
+        apply_transform=resolve_pending.apply_transform,
+        prior_period=resolve_pending.prior_period_date,
+    )
+    rows: list[dict] = []
+    for target in targets:
+        arms = forecast_arms(
+            target.history,
+            stan_models=stan_models,
+            interval_distribution=run_thesis_analyst.interval_distribution,
+            ladder_distribution=run_thesis_analyst.ladder_distribution,
+            walk_forward=walk_forward,
+        )
+        rows.extend(score_target(target, arms))
+    return rows, len(targets)
 
 
 # Summaries.
@@ -650,6 +731,63 @@ def per_series(rows: Sequence[dict], baseline: str = "persistence") -> dict:
     return table
 
 
+def by_transform(rows: Sequence[dict], baseline: str = "persistence") -> dict:
+    """Each arm's statistics within each transform (the series key's suffix)."""
+
+    grouped: dict[str, dict[str, list[dict[str, float]]]] = {}
+    for (arm, series), total in series_sums(rows, baseline).items():
+        transform = series.split(":", 1)[1]
+        grouped.setdefault(transform, {}).setdefault(arm, []).append(total)
+    return {
+        transform: {
+            arm: {
+                "series": len(totals),
+                "targets": int(sum(item["targets"] for item in totals)),
+                **combine(totals),
+            }
+            for arm, totals in sorted(arms.items())
+        }
+        for transform, arms in sorted(grouped.items())
+    }
+
+
+def leave_one_series_out(rows: Sequence[dict], baseline: str = "persistence") -> dict:
+    """How far dropping any one series moves each arm's CRPS ratio."""
+
+    by_arm: dict[str, dict[str, dict[str, float]]] = {}
+    for (arm, series), total in series_sums(rows, baseline).items():
+        by_arm.setdefault(arm, {})[series] = total
+    table: dict[str, dict[str, Any]] = {}
+    for arm, totals in sorted(by_arm.items()):
+        ratios = {
+            dropped: combine(
+                [total for series, total in totals.items() if series != dropped]
+            )["geometricMeanCrpsRatio"]
+            for dropped in totals
+            if len(totals) > 1
+        }
+        if ratios:
+            highest = max(sorted(ratios), key=ratios.__getitem__)
+            lowest = min(sorted(ratios), key=ratios.__getitem__)
+            table[arm] = {
+                "highestRatio": ratios[highest],
+                "highestRatioDrops": highest,
+                "lowestRatio": ratios[lowest],
+                "lowestRatioDrops": lowest,
+            }
+    return table
+
+
+def selection_counts(rows: Sequence[dict]) -> dict[str, int]:
+    """How often select_model picked each program."""
+
+    counts: dict[str, int] = {}
+    for row in rows:
+        if row["arm"] == "stanli-selected":
+            counts[row["selected"]] = counts.get(row["selected"], 0) + 1
+    return dict(sorted(counts.items()))
+
+
 def markdown_table(summary: dict[str, Any]) -> str:
     lines = [
         "| arm | targets | mean normalized CRPS | difference vs persistence "
@@ -693,10 +831,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Comma-separated built-in stanli programs.",
     )
     parser.add_argument("--bootstrap-draws", type=int, default=2000)
+    parser.add_argument(
+        "--walk-forward",
+        action="store_true",
+        help="Score every program's last 24 cutoffs per target and add the "
+        "stanli-selected arms (72 more fits per target).",
+    )
+    parser.add_argument("--jobs", type=int, default=1, help="Series run in parallel.")
     args = parser.parse_args(argv)
 
     import resolve_pending
-    import run_thesis_analyst
 
     specs = adapter_series(resolve_pending.ALFRED_ADAPTERS)
     if args.series:
@@ -707,37 +851,40 @@ def main(argv: Sequence[str] | None = None) -> int:
         dt.date.fromisoformat(args.grid_start), dt.date.fromisoformat(args.grid_end)
     )
 
-    rows: list[dict] = []
     failures: dict[str, str] = {}
+    outcomes: dict[str, list[dict]] = {}
     started = time.perf_counter()
-    for number, spec in enumerate(specs, start=1):
-        try:
-            vintages = fetch_vintages(spec.fred, dates, args.cache_dir)
-            targets = real_time_targets(
+    with concurrent.futures.ProcessPoolExecutor(max_workers=args.jobs) as pool:
+        futures = {
+            pool.submit(
+                run_series,
                 spec,
-                vintages,
+                dates=dates,
+                cache_dir=args.cache_dir,
                 window=args.window,
                 max_targets=args.max_targets,
-                apply_transform=resolve_pending.apply_transform,
-                prior_period=resolve_pending.prior_period_date,
-            )
-            for target in targets:
-                arms = forecast_arms(
-                    target.history,
-                    stan_models=stan_models,
-                    interval_distribution=run_thesis_analyst.interval_distribution,
-                    ladder_distribution=run_thesis_analyst.ladder_distribution,
+                stan_models=stan_models,
+                walk_forward=args.walk_forward,
+            ): spec
+            for spec in specs
+        }
+        for number, future in enumerate(
+            concurrent.futures.as_completed(futures), start=1
+        ):
+            spec = futures[future]
+            try:
+                outcomes[spec.key], target_count = future.result()
+                print(
+                    f"[{number}/{len(specs)}] {spec.key}: {target_count} targets "
+                    f"({time.perf_counter() - started:.0f}s)",
+                    file=sys.stderr,
+                    flush=True,
                 )
-                rows.extend(score_target(target, arms))
-            print(
-                f"[{number}/{len(specs)}] {spec.key}: {len(targets)} targets "
-                f"({time.perf_counter() - started:.0f}s)",
-                file=sys.stderr,
-                flush=True,
-            )
-        except Exception as exc:  # noqa: BLE001 - record and keep going
-            failures[spec.key] = f"{type(exc).__name__}: {exc}"
-            print(f"[{number}/{len(specs)}] {spec.key}: {exc}", file=sys.stderr)
+            except Exception as exc:  # noqa: BLE001 - record and keep going
+                failures[spec.key] = f"{type(exc).__name__}: {exc}"
+                print(f"[{number}/{len(specs)}] {spec.key}: {exc}", file=sys.stderr)
+    # Series order, not completion order, so the output does not depend on --jobs.
+    rows = [row for spec in specs for row in outcomes.get(spec.key, [])]
 
     summary = summarize(rows, draws=args.bootstrap_draws)
     summary.update(
@@ -751,10 +898,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "stanModels": stan_models,
                 "bootstrapDraws": args.bootstrap_draws,
                 "stanliChains": 4,
+                "walkForward": args.walk_forward,
             },
             "series": [{"key": spec.key, "stems": list(spec.stems)} for spec in specs],
             "failures": failures,
             "perSeriesCrpsRatio": per_series(rows),
+            "byTransform": by_transform(rows),
+            "leaveOneSeriesOut": leave_one_series_out(rows),
+            "selectionCounts": selection_counts(rows),
         }
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
