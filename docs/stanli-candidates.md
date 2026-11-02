@@ -3,10 +3,10 @@
 `brier/stan_candidates.py` adds Bayesian model candidates to
 `scripts/run_time_series_models.py`. Each candidate fits a Stan program with
 [stanli](https://github.com/seantalts/stanli) and reports the posterior
-predictive distribution of the next print. The candidates are opt-in: the
-default models stay `persistence,statsmodels-local-level`, and no agent prompt
-or skill names them. `docs/pack-promotion.md` requires a pack ablation before
-any of this becomes default analyst behavior.
+predictive distribution of the next print. The default models stay
+`persistence,statsmodels-local-level`, and no agent prompt or skill names these
+candidates. `docs/pack-promotion.md` requires a pack ablation before any of this
+becomes default analyst behavior.
 
 ## Why stanli
 
@@ -57,7 +57,7 @@ not declare:
 | `y_loc` | the last print |
 | `y_scale` | 1.4826 times the median absolute deviation of the one-step changes, falling back to the mean absolute deviation, then 1% of the last print, then 1 |
 | `y_std` | `(y - y_loc) / y_scale` |
-| `y_grid` | the increment the prints are reported on, 0 when unknown |
+| `y_grid` | the prints' reporting increment, 0 when unknown |
 
 A program must define the generated quantity `y_next`: one scalar draw of the
 next print, in raw units. A program that fails to parse, declares data the
@@ -70,21 +70,21 @@ rounding error. `tests/test_stan_candidates.py` checks both.
 
 ## Reporting grid
 
-Official prints are rounded, and rounded series repeat a print often. When
-more than half of the one-step changes are exactly zero, a Student-t
-likelihood grows without bound as its scale goes to zero. Without a fix, NUTS
+Agencies round official prints, and rounded series repeat a print often. When
+more than half of the one-step changes equal zero, a Student-t likelihood
+grows without bound as its scale goes to zero. Without a fix, NUTS
 returned a point mass at the last print on such a series, and for
 `stanli-ar1-t` it still reported R-hat 1.000 and bulk ESS 4,000.
 
 The built-in programs treat each print as the latent value plus rounding error
 uniform on half a grid step either way (variance `y_grid^2 / 12`) and add that
 variance to the residual scale, for every print the residual involves. That
-keeps the likelihood bounded. The rounding errors enter as independent noise;
-their correlation across neighbouring residuals is ignored.
+keeps the likelihood bounded. The rounding errors enter as independent noise,
+and the programs ignore their correlation across neighboring residuals.
 
-The grid is `10^-d` for the most decimal places any print shows, with trailing
-zeros dropped, so whole-number prints get a grid of 1. Python callers can pass
-`grid=` to `build_stanli_candidate` instead.
+The runner sets the grid to `10^-d`, where d counts the most decimal places any
+print shows after dropping trailing zeros, so whole-number prints get a grid of
+1. Python callers can pass `grid=` to `build_stanli_candidate` instead.
 
 ## Output
 
@@ -128,11 +128,12 @@ cutoffs, fitted with the full history's grid.
 
 - **Fast mode** publishes a point and an 80% interval. Use the candidate's
   point, p10 and p90; Thesis seeds an `interval_anchor_v1` CDF from them.
-- **Ladder mode** publishes a threshold ladder. The 19 posterior quantiles are
-  a valid ladder as they stand: thresholds are the quantile values,
-  cumulative probabilities 0.05 to 0.95, and the stated point and interval
-  are the ladder's own q50, q10 and q90. Keep the thresholds unrounded;
-  rounding can tie neighbouring rungs, which the ladder rejects.
+- **Ladder mode** publishes a threshold ladder. The 19 posterior quantiles
+  form a valid ladder as they stand: the quantile values set the thresholds,
+  probabilities 0.05 to 0.95 set the cumulative probabilities, and the
+  ladder's own q50, q10 and q90 set the stated point and interval. Keep the
+  thresholds unrounded; rounding can tie neighboring rungs, which the ladder
+  rejects.
   `tests/test_backtest_stanli_candidates.py` runs a stanli ladder through
   `ladder_validation_errors`.
 
@@ -147,12 +148,12 @@ real time:
 - For each period it trains on the vintage just before the period's first
   print, transformed as the resolver transforms prints, and scores against
   that first print.
-- Every arm forecasts one step ahead from the same last `--window` prints and
-  is scored by CRPS on the site's 201-point CDF. The Python CRPS port matches
+- Every arm forecasts one step ahead from the same last `--window` prints, and
+  the script scores it by CRPS on the site's 201-point CDF. The Python CRPS port matches
   the site's `scoreNumericCdfDistribution` exactly in
   `tests/test_backtest_stanli_candidates.py`.
-- CRPS is divided by the sample standard deviation of the training window's
-  one-step changes.
+- The script divides CRPS by the sample standard deviation of the training
+  window's one-step changes.
 - The 95% intervals come from a bootstrap that resamples whole series.
 
 ```bash
@@ -162,16 +163,23 @@ uv run --extra stan --extra experiments python scripts/backtest_stanli_candidate
 
 `--walk-forward` adds the `stanli-selected` arms. For each target they apply the
 draft skill's rule below to the training history: skip programs with a sampler
-warning, then take the lowest MAE over the last 24 cutoffs. The rule, the programs
-and their priors all predate these runs.
+warning, then take the lowest MAE over the last 24 cutoffs, with coverage nearest
+80% breaking exact ties.
+
+We wrote the programs, their priors and the rule's criteria before any full run
+finished: commit 33a078aa states the criteria as "the best walk-forward MAE and 80%
+coverage closest to 0.8". We set two details after a first full run scored the fixed
+arms on these same targets: coverage breaking only exact ties, and the skill's
+36-print floor and 60-print window, to match the windows tested.
 
 ### Results
 
 Each run covers 46 series and 1,047 targets, for periods from 2024-04 through
 2026-09, and no series failed. Each cell gives the estimate and its 95% interval.
-A CRPS ratio is the geometric mean of the arm's CRPS over persistence's. A
-difference is the arm's mean normalized CRPS minus persistence's, which only
-compares within a window because the windows normalize differently.
+A CRPS ratio takes the geometric mean of the arm's CRPS over persistence's. A
+difference subtracts persistence's mean normalized CRPS from the arm's, and it compares
+only within a window because the windows normalize differently. The summaries
+also hold `stanli-ar1-diff-t` and `stanli-rw-drift-t` in their non-ladder shape.
 
 | arm | CRPS ratio, 60 prints | CRPS ratio, 36 prints | difference, 60 prints | difference, 36 prints | series beating persistence (of 46), 60 / 36 | 80% coverage, 60 / 36 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -185,8 +193,6 @@ compares within a window because the windows normalize differently.
 | `statsmodels` | 1.175 (1.066, 1.294) | 1.000 (0.929, 1.063) | -0.009 (-0.079, +0.033) | -0.048 (-0.141, +0.008) | 6 / 13 | 84% / 79% |
 | persistence | 1 | 1 | 0 | 0 | | 82% / 79% |
 
-What the runs show:
-
 - **The selection rule leads, and one series supplies its lead over a fixed AR(1).**
   W824RC1, Medicare benefits, accounts for the whole gap between
   `stanli-selected-ladder` and `stanli-ar1-t-ladder`: `stanli-ar1-diff-t` scores
@@ -195,20 +201,25 @@ What the runs show:
   leads on normalized CRPS (-0.057 against -0.051, -0.076 against -0.059).
 - **`stanli-ar1-t` holds across series.** Dropping any one series keeps its ladder
   ratio between 0.810 and 0.824 with 60 prints and between 0.805 and 0.820 with 36.
-  The same check moves `stanli-selected-ladder` between 0.765 and 0.819.
+  The same check moves `stanli-selected-ladder` between 0.765 and 0.819 with 60 prints
+  and between 0.769 and 0.820 with 36.
 - **Ladder mode adds 4 to 7 points of CRPS ratio to the same program.** Its mean
-  normalized CRPS moves by at most 0.004, so a run's gain from the format depends on
-  which of the two metrics the run reports.
+  normalized CRPS moves by at most 0.009, and by at most 0.004 on the stanli programs,
+  so a run's gain from the format depends on which of the two metrics the run reports.
 - **The default `statsmodels` candidate moves with the window, and the stanli arms
   barely do.** It scores 1.175 with 60 prints and 1.000 with 36. No stanli arm's
   ratio moves by more than 0.02.
 - **Average coverage hides a split by transform.** `stanli-selected-ladder` covers
   74% (60 prints) and 71% (36) on levels, and 86% and 81% on percent changes. With 36
   prints its overall coverage falls to 76% (interval 71% to 80%).
-- **A sampler warning predicts a worse forecast for `stanli-ar1-t`.** It warned on
-  27 and 35 targets, which scored 0.965 and 0.977 against 0.811 and 0.805 for the
-  rest. At least one program stayed clean on every target, so the rule never ran out
-  of candidates.
+- **A sampler warning predicts a worse forecast on one AR(1) program and a better one
+  on the other.**
+  `stanli-ar1-t` warned on 27 and 35 targets, where its ladder arm scored 0.965 and
+  0.977 against 0.811 and 0.805 on the rest. `stanli-ar1-diff-t` warned on 10 and 15
+  targets, most of them on W055RC1 and W824RC1, where its ladder arm scored 0.292 and
+  0.245 against 0.820 and 0.841 on the rest. `stanli-selected-ladder` skipped it there
+  and scored 0.680 and 0.466. At least one program stayed clean on every target, so
+  the rule never ran out of candidates.
 
 `experiments/stanli_backtest/` holds both runs' summaries, per-series ratios and
 per-transform tables.
@@ -222,8 +233,9 @@ per-transform tables.
 - The series overlap (CPI and PCE components, BEA benefit lines, consumer credit).
   The bootstrap resamples them as independent, so its intervals understate the
   uncertainty when they move together.
-- The table compares 11 arms over two windows with no multiple-comparison
-  correction. The reading about W824RC1 came after the runs.
+- The runs compare 11 arms over two windows with no multiple-comparison
+  correction. We read W824RC1's effect and the split on sampler warnings only after
+  the runs.
 - Persistence here uses the same window of ALFRED prints as the other arms. The
   site's baseline reads the ledger's history.
 
@@ -244,7 +256,8 @@ To test the pack on agents:
 The spread seen here sets the scale. The target-level standard deviation of the log
 CRPS ratio runs from 0.37 (`stanli-ar1-t-ladder`) to 0.66
 (`stanli-selected-ladder`). If agent pairs spread like that, detecting a 10% change
-at 80% power takes about 100 to 300 matched targets per prompt mode.
+at 80% power takes about 100 to 300 matched targets per prompt mode. That count treats
+targets as independent, so clustering within a series raises it.
 
 Draft pack skill:
 
