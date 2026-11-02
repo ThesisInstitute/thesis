@@ -852,7 +852,11 @@ def select_targets(
 
     candidates: dict[str, dict[str, Any]] = {}
     failures: dict[str, str] = {}
-    for slug in sorted(known_slugs):
+    # Only auto-selection weighs other targets. Judging all of them takes five
+    # git runs per target, about 8 seconds per call on 2026-11-02, and an explicit
+    # request reads only what it named.
+    considered = known_slugs if auto_select else set(selected_slugs)
+    for slug in sorted(considered):
         try:
             target = published_target(
                 root,
