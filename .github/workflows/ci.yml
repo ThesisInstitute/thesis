@@ -101,7 +101,7 @@ jobs:
           lscpu | grep -E 'Model name|^CPU\(s\)|Thread|MHz'
 
       - name: Run tests
-        run: uv run pytest tests/ -q --durations=0 --durations-min=0.5
+        run: uv run pytest tests/ -q -n auto --durations=0 --durations-min=0.5
 
   # TEMPORARY measurement job; dropped before this PR leaves draft.
   timeline-profile:
