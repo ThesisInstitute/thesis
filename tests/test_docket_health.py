@@ -196,7 +196,9 @@ def test_the_gate_judges_a_successor_from_its_published_contract() -> None:
     # Producer prices keep a legacy id stem on the published contract, and no
     # resolver family routes it, so new dates would not let the series register.
     entry = next(
-        row for row in REGISTRY if row["series"] == "bls.ppi.final_demand_monthly_change"
+        row
+        for row in REGISTRY
+        if row["series"] == "bls.ppi.final_demand_monthly_change"
     )
     slug = roll_docket.format_slug(entry["slug"], "2026-07", entry["cadence"])
     previous = {

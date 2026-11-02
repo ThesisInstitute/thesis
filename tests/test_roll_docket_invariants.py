@@ -689,6 +689,6 @@ def test_the_calendar_url_on_every_dated_entry_is_not_a_single_month_page() -> N
     # A page for one month goes stale on the first date past it, as the G.19
     # entries' 2026-august.htm did.
     for entry in DATED:
-        assert not re.search(
-            r"/20\d\d-[a-z]+\.htm$", entry["releaseCalendarUrl"]
-        ), entry["series"]
+        assert not re.search(r"/20\d\d-[a-z]+\.htm$", entry["releaseCalendarUrl"]), (
+            entry["series"]
+        )
