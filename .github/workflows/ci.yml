@@ -94,8 +94,14 @@ jobs:
       - name: Install package with all extras
         run: uv sync --all-extras
 
+      - name: Runner hardware
+        run: |
+          nproc
+          free -g | head -2
+          lscpu | grep -E 'Model name|^CPU\(s\)|Thread|MHz'
+
       - name: Run tests
-        run: uv run pytest tests/ -q
+        run: uv run pytest tests/ -q --durations=0 --durations-min=0.5
 
   # Give the bill extraction and paired-publication boundary fast feedback
   # while the complete Python suite continues to verify the entire archive.
