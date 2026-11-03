@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import datetime as dt
+import gzip
 import importlib.util
+import io
 import json
+import math
 import random
 import shutil
+import statistics
 import subprocess
 import sys
 from importlib.util import find_spec
@@ -180,6 +184,7 @@ def test_targets_train_on_the_vintage_before_release():
         ("2024-03", (1.0, 2.0), 3.5),
         ("2024-04", (1.0, 2.1, 3.5), 4.0),
     ]
+    assert [t.window_start for t in targets] == ["2024-01", "2024-01"]
     assert [(t.info_vintage, t.release_vintage) for t in targets] == [
         ("2024-03-16", "2024-04-16"),
         ("2024-04-16", "2024-06-16"),
@@ -411,3 +416,299 @@ def test_selection_counts_read_the_selected_arm_alone():
         {"arm": "persistence"},
     ]
     assert backtest.selection_counts(rows) == {"a": 1, "b": 2}
+
+
+class FakeResponse(io.BytesIO):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def alfred_csv(dates) -> str:
+    stamps = [date.isoformat().replace("-", "") for date in dates]
+    header = ",".join(["observation_date", *(f"TEST_{stamp}" for stamp in stamps)])
+    return f"{header}\n2024-01-01,{','.join('1.0' for _ in stamps)}\n"
+
+
+def test_fetch_vintages_caches_a_download_only_after_it_parses(tmp_path):
+    dates = backtest.vintage_grid(dt.date(2025, 1, 1), dt.date(2025, 2, 1))
+    today = dt.date(2025, 3, 1)
+
+    def html_page(request, timeout):
+        return FakeResponse(b"<html>try again later</html>")
+
+    with pytest.raises(ValueError, match="unexpected ALFRED header"):
+        backtest.fetch_vintages(
+            "TEST", dates, tmp_path, pause=0, today=today, opener=html_page
+        )
+    assert list(tmp_path.iterdir()) == []
+
+    def wrong_vintages(request, timeout):
+        return FakeResponse(alfred_csv(dates[:-1]).encode())
+
+    with pytest.raises(ValueError, match="ALFRED sent vintages"):
+        backtest.fetch_vintages(
+            "TEST", dates, tmp_path, pause=0, today=today, opener=wrong_vintages
+        )
+    assert list(tmp_path.iterdir()) == []
+
+    def good(request, timeout):
+        return FakeResponse(alfred_csv(dates).encode())
+
+    vintages = backtest.fetch_vintages(
+        "TEST", dates, tmp_path, pause=0, today=today, opener=good
+    )
+    assert sorted(vintages) == [date.isoformat() for date in dates]
+    assert [path.name for path in tmp_path.iterdir()] == [
+        "TEST_2025-01-01_2025-02-01_3.csv"
+    ]
+
+    def offline(request, timeout):
+        raise AssertionError("a cached chunk must not download again")
+
+    assert (
+        backtest.fetch_vintages(
+            "TEST", dates, tmp_path, pause=0, today=today, opener=offline
+        )
+        == vintages
+    )
+
+
+def test_fetch_vintages_refuses_a_vintage_that_may_still_change(tmp_path):
+    with pytest.raises(ValueError, match="may still change"):
+        backtest.fetch_vintages(
+            "TEST",
+            [dt.date(2025, 3, 1)],
+            tmp_path,
+            today=dt.date(2025, 3, 1),
+            opener=None,
+        )
+
+
+@given(st.lists(st.integers(min_value=-30, max_value=30), min_size=2, max_size=60))
+def test_persistence_ladder_rises_strictly_from_the_last_print(steps):
+    history = [4.0]
+    for step in steps:
+        history.append(round(history[-1] + step / 10, 1))
+    rungs = backtest.persistence_ladder(history)
+    changes = [b - a for a, b in zip(history, history[1:])]
+    nudge = backtest.observation_grid(history) / 1000
+
+    assert len(rungs) == len(backtest.QUANTILE_LEVELS)
+    assert all(upper > lower for lower, upper in zip(rungs, rungs[1:]))
+    # A rung sits at its quantile unless a tie pushed it up, and never by more
+    # than a thousandth of the grid per rung below it.
+    for index, (level, rung) in enumerate(zip(backtest.QUANTILE_LEVELS, rungs)):
+        target = history[-1] + backtest.ts_quantile(changes, level)
+        assert target - 1e-9 <= rung <= target + index * nudge + 1e-9
+
+
+def test_persistence_ladder_passes_the_analyst_ladder_check():
+    history = [4.0, 4.0, 4.1, 4.1, 4.1, 4.0, 4.0, 4.0, 4.2, 4.2, 4.2, 4.2]
+    rungs = backtest.persistence_ladder(history)
+    levels = list(backtest.QUANTILE_LEVELS)
+    cell = {
+        "pointEstimate": rungs[levels.index(0.5)],
+        "ciLow": rungs[levels.index(0.1)],
+        "ciHigh": rungs[levels.index(0.9)],
+        "thresholdLadder": {"thresholds": rungs, "cumulativeProbabilities": levels},
+    }
+
+    assert analyst.ladder_validation_errors(cell) == []
+
+
+@given(SCORES)
+def test_select_model_without_the_skip_takes_the_lowest_error_overall(scores):
+    picked = backtest.select_model(scores, skip_warned=False)
+
+    assert scores[picked]["meanAbsoluteError"] == min(
+        score["meanAbsoluteError"] for score in scores.values()
+    )
+
+
+@pytest.mark.skipif(find_spec("stanli") is None, reason="stan extra missing")
+@pytest.mark.skipif(find_spec("statsmodels") is None, reason="statsmodels missing")
+def test_each_target_draws_its_own_seeds_and_rows_carry_the_selection_inputs():
+    history = [round(4.0 + 0.1 * ((index * 7) % 5 - 2), 1) for index in range(10)]
+
+    def arms(target_id):
+        return backtest.forecast_arms(
+            history,
+            target_id=target_id,
+            stan_models=["stanli-rw-drift-t", "stanli-ar1-t"],
+            interval_distribution=analyst.interval_distribution,
+            ladder_distribution=analyst.ladder_distribution,
+            walk_forward=True,
+        )
+
+    first, again, other = arms("a"), arms("a"), arms("b")
+    assert first["stanli-ar1-t"]["cdf"] == again["stanli-ar1-t"]["cdf"]
+    assert first["stanli-ar1-t"]["cdf"] != other["stanli-ar1-t"]["cdf"]
+    assert first["persistence"]["cdf"] == other["persistence"]["cdf"]
+    assert {"stanli-selected-noskip", "stanli-selected-noskip-ladder"} <= set(first)
+
+    target = backtest.Target(
+        series="TEST:level",
+        period="2025-01",
+        info_vintage="2025-01-16",
+        release_vintage="2025-02-01",
+        history=tuple(history),
+        outcome=4.1,
+        window_start="2024-03",
+    )
+    rows = {row["arm"]: row for row in backtest.score_target(target, first)}
+    program = rows["stanli-ar1-t"]
+    assert program["windowStart"] == "2024-03"
+    assert program["warned"] in (True, False)
+    assert program["walkForwardMae"] >= 0
+    assert 0 <= program["walkForwardCoverage80"] <= 1
+    assert "warned" not in rows["persistence"]
+    assert rows["stanli-selected"]["selected"] in ("stanli-rw-drift-t", "stanli-ar1-t")
+
+
+def arm_rows(
+    ratios: dict[tuple[str, str], dict[str, float]],
+    extra: dict[tuple[str, str, str], dict] | None = None,
+) -> list[dict]:
+    """Rows for persistence (CRPS 1) and each arm at its ratio, per target."""
+
+    extra = extra or {}
+
+    rows = []
+    for (series, period), by_arm in ratios.items():
+        for arm, crps in {"persistence": 1.0, **by_arm}.items():
+            rows.append(
+                {
+                    "series": series,
+                    "period": period,
+                    "arm": arm,
+                    "crps": crps,
+                    "normalizedCrps": crps,
+                    "covered80": True,
+                    "samplerFailed": False,
+                    **extra.get((series, period, arm), {}),
+                }
+            )
+    return rows
+
+
+def test_compare_pairs_two_arms_and_counts_the_ratio_targets():
+    rows = arm_rows(
+        {
+            ("A", "2025-01"): {"x": 0.5, "y": 1.0},
+            ("A", "2025-02"): {"x": 0.5, "y": 0.0},
+            ("B", "2025-01"): {"x": 2.0, "y": 1.0},
+        }
+    )
+    stats = backtest.compare(rows, baseline="y", arms=["x"], draws=20)["x"]
+
+    # The zero-CRPS target drops out of the ratio but not out of the count.
+    assert (stats["targets"], stats["ratioTargets"]) == (3, 2)
+    assert stats["geometricMeanCrpsRatio"] == pytest.approx(1.0)
+    pairs = backtest.paired_comparisons(rows, [("x", "y")], draws=20)
+    assert pairs["x vs y"]["geometricMeanCrpsRatio"] == pytest.approx(1.0)
+
+
+def test_warning_split_scores_every_arm_where_each_program_warned():
+    rows = arm_rows(
+        {
+            ("A", "2025-01"): {"stanli-ar1-t": 0.5, "z": 0.25},
+            ("A", "2025-02"): {"stanli-ar1-t": 2.0, "z": 4.0},
+        },
+        {
+            ("A", "2025-01", "stanli-ar1-t"): {"warned": True},
+            ("A", "2025-02", "stanli-ar1-t"): {"warned": False},
+        },
+    )
+    split = backtest.warning_split(rows)["stanli-ar1-t"]
+
+    assert split["stanli-ar1-t"]["warned"] == {
+        "targets": 1,
+        "geometricMeanCrpsRatio": pytest.approx(0.5),
+    }
+    assert split["z"]["warned"]["geometricMeanCrpsRatio"] == pytest.approx(0.25)
+    assert split["z"]["clean"]["geometricMeanCrpsRatio"] == pytest.approx(4.0)
+
+
+def test_period_halves_and_late_windows_split_the_targets():
+    rows = arm_rows(
+        {
+            ("A", "2025-01"): {"x": 0.5},
+            ("A", "2025-02"): {"x": 0.5},
+            ("A", "2025-03"): {"x": 2.0},
+            ("A", "2025-04"): {"x": 2.0},
+        },
+        {
+            ("A", period, "persistence"): {"windowStart": start}
+            for period, start in (
+                ("2025-01", "2020-01"),
+                ("2025-02", "2020-02"),
+                ("2025-03", "2021-07"),
+                ("2025-04", "2021-08"),
+            )
+        },
+    )
+    halves = backtest.by_period_half(rows)
+
+    assert halves["laterHalfFrom"] == "2025-03"
+    assert halves["earlier"]["x"]["geometricMeanCrpsRatio"] == pytest.approx(0.5)
+    assert halves["later"]["x"]["geometricMeanCrpsRatio"] == pytest.approx(2.0)
+    late = backtest.windows_starting_from(rows, "2021-07")["arms"]["x"]
+    assert (late["targets"], late["geometricMeanCrpsRatio"]) == (
+        2,
+        pytest.approx(2.0),
+    )
+
+
+def test_ablation_power_matches_a_hand_computed_design_effect():
+    # Three series of two targets with log ratios (0, 0), (1, 1), (2, 2): all the
+    # spread is between series, so the ICC is 1 and the design effect 2.
+    ratios = {}
+    for series, log_ratio in (("A", 0.0), ("B", 1.0), ("C", 2.0)):
+        for period in ("p1", "p2"):
+            ratios[(series, period)] = {"x": math.exp(log_ratio)}
+    power = backtest.ablation_power(arm_rows(ratios), "x")
+
+    z = statistics.NormalDist().inv_cdf(0.975) + statistics.NormalDist().inv_cdf(0.8)
+    independent = (z * statistics.stdev([0, 0, 1, 1, 2, 2]) / -math.log(0.9)) ** 2
+    assert power["intraclassCorrelation"] == pytest.approx(1.0)
+    assert power["designEffect"] == pytest.approx(2.0)
+    assert power["independentTargetsNeeded"] == pytest.approx(independent)
+    assert power["clusteredTargetsNeeded"] == pytest.approx(2 * independent)
+    assert power["seriesNeeded"] == pytest.approx((z * 1.0 / -math.log(0.9)) ** 2)
+
+
+@given(
+    st.lists(
+        st.lists(st.floats(min_value=-2, max_value=2), min_size=1, max_size=6),
+        min_size=3,
+        max_size=8,
+    )
+)
+def test_ablation_power_keeps_the_icc_in_range(groups):
+    ratios = {
+        (f"S{group}", f"p{index}"): {"x": math.exp(value)}
+        for group, values in enumerate(groups)
+        for index, value in enumerate(values)
+    }
+    power = backtest.ablation_power(arm_rows(ratios), "x")
+    if power is None:
+        assert sum(len(values) for values in groups) <= len(groups)
+        return
+
+    assert 0 <= power["intraclassCorrelation"] <= 1
+    assert power["designEffect"] >= 1
+    assert power["clusteredTargetsNeeded"] >= power["independentTargetsNeeded"]
+
+
+def test_written_rows_round_trip_and_repeat_byte_for_byte(tmp_path):
+    rows = [{"arm": "persistence", "crps": 0.5}, {"arm": "x", "crps": None}]
+    first, second = tmp_path / "a.jsonl.gz", tmp_path / "b.jsonl.gz"
+    backtest.write_rows(first, rows)
+    backtest.write_rows(second, rows)
+
+    assert first.read_bytes() == second.read_bytes()
+    with gzip.open(first, "rt") as handle:
+        assert [json.loads(line) for line in handle] == rows
