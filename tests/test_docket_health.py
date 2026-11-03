@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
+import copy
 import datetime as dt
+import io
 import json
 import pathlib
 import shutil
@@ -18,13 +21,16 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import docket_health  # noqa: E402
+import retry_batch_targets  # noqa: E402
 import roll_docket  # noqa: E402
 import verify_records_attestations as provenance  # noqa: E402
 from docket_health import (  # noqa: E402
     CALENDAR,
+    GAP,
     IN_GRACE,
     PAST_GRACE,
     RUNWAY_DAYS,
+    SEED,
     STALL,
     STALL_DAYS,
     Finding,
@@ -32,6 +38,7 @@ from docket_health import (  # noqa: E402
     fingerprint,
     registration_stall,
     render_issue,
+    roller_period,
     unforecast_findings,
 )
 
@@ -42,14 +49,20 @@ HASH = "0" * 64
 REGISTRY = json.loads((ROOT / "scripts" / "docket_series.json").read_text())["series"]
 
 
-@pytest.fixture
-def fixed_today(monkeypatch: pytest.MonkeyPatch) -> None:
+def pin_docket_day(patch: pytest.MonkeyPatch, day: dt.date) -> None:
+    """Pin the date the roller's gate reads: build_contract registers today."""
+
     class FixedDate(dt.date):
         @classmethod
         def today(cls) -> dt.date:
-            return cls(TODAY.year, TODAY.month, TODAY.day)
+            return cls(day.year, day.month, day.day)
 
-    monkeypatch.setattr(roll_docket.dt, "date", FixedDate)
+    patch.setattr(roll_docket.dt, "date", FixedDate)
+
+
+@pytest.fixture
+def fixed_today(monkeypatch: pytest.MonkeyPatch) -> None:
+    pin_docket_day(monkeypatch, TODAY)
 
 
 @pytest.fixture
@@ -146,6 +159,18 @@ def test_a_calendar_with_no_dates_alarms_from_the_published_cursor() -> None:
     assert finding.detail.startswith("It has no committed date, and 2026-10 has")
 
 
+@pytest.mark.usefixtures("fixed_today", "resolver_admits")
+def test_a_date_the_roller_cannot_read_counts_as_no_date() -> None:
+    entry = gated_entry(
+        releaseDates={"2026-10": "2026-11-15", "2026-11": None, "2026-12": "TBD"}
+    )
+    [finding], _ = calendar_findings([entry], {"fixture-september-2026"}, {}, TODAY)
+    assert finding.kind == CALENDAR
+    assert "ends 2026-11-15, 13 days from now, and 2026-11 has no date" in (
+        finding.detail
+    )
+
+
 @pytest.mark.usefixtures("fixed_today")
 def test_a_series_a_date_cannot_help_stays_out_of_the_alarm(
     monkeypatch: pytest.MonkeyPatch,
@@ -187,8 +212,202 @@ def test_only_recurring_calendar_gated_series_can_alarm(entry: dict) -> None:
 
 
 @pytest.mark.usefixtures("fixed_today", "resolver_admits")
-def test_a_series_with_no_published_cursor_cannot_alarm() -> None:
+def test_a_series_with_no_published_period_and_no_seed_stays_quiet() -> None:
+    # It waits on a reviewed edit to give it a seed. That is a choice, not a
+    # stall, and the euro flash HICP and LFPR sit there on purpose.
     assert calendar_findings([gated_entry()], set(), {}, TODAY) == ([], {})
+
+
+def registry_entry(series: str) -> dict:
+    return copy.deepcopy(next(row for row in REGISTRY if row["series"] == series))
+
+
+def test_a_skipped_next_period_alarms_however_far_the_calendar_runs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # The review's counterexample: October CPI loses its date while November
+    # and December keep theirs. The roller stops at October, and the runway
+    # check alone stays quiet because December prints in January.
+    day = dt.date(2026, 11, 3)
+    pin_docket_day(monkeypatch, day)
+    entry = registry_entry("bls.cpi.u.headline_mom")
+    del entry["releaseDates"]["2026-10"]
+    published = {roll_docket.format_slug(entry["slug"], "2026-09", "monthly")}
+    assert roller_period(entry, published, set(), day) == "2026-10"
+    with contextlib.redirect_stderr(io.StringIO()):
+        assert roll_docket.target_extras_for_period(entry, "2026-10") is None
+
+    [finding], refused = calendar_findings([entry], published, {}, day)
+    assert refused == {}
+    assert finding.kind == GAP
+    assert finding.subject == "bls.cpi.u.headline_mom"
+    assert "skips 2026-10 though it dates later periods" in finding.detail
+    assert "has stopped at 2026-10" in finding.detail
+    assert entry["releaseCalendarUrl"] in finding.detail
+
+
+@pytest.mark.usefixtures("fixed_today", "resolver_admits")
+def test_a_skipped_period_ahead_alarms_before_the_roll_reaches_it() -> None:
+    entry = gated_entry(
+        releaseDates={
+            "2026-10": "2026-11-15",
+            "2026-12": "2027-01-15",
+            "2027-02": "2027-03-15",
+        }
+    )
+    [finding], _ = calendar_findings([entry], {"fixture-september-2026"}, {}, TODAY)
+    assert finding.kind == GAP
+    assert "skips 2026-11, 2027-01 though" in finding.detail
+    assert "stops at 2026-11 when it gets there" in finding.detail
+
+
+@pytest.mark.usefixtures("fixed_today", "resolver_admits")
+def test_a_pending_seed_stays_quiet() -> None:
+    entry = gated_entry(seedPeriod="2026-11", releaseDates={"2026-11": "2026-12-15"})
+    assert calendar_findings([entry], set(), {}, TODAY) == ([], {})
+
+
+@pytest.mark.usefixtures("resolver_admits")
+def test_a_seed_alarms_from_its_print_day(monkeypatch: pytest.MonkeyPatch) -> None:
+    entry = gated_entry(seedPeriod="2026-11", releaseDates={"2026-11": "2026-12-15"})
+    pin_docket_day(monkeypatch, dt.date(2026, 12, 14))
+    assert calendar_findings([entry], set(), {}, dt.date(2026, 12, 14)) == ([], {})
+
+    pin_docket_day(monkeypatch, dt.date(2026, 12, 15))
+    [finding], refused = calendar_findings([entry], set(), {}, dt.date(2026, 12, 15))
+    assert refused == {}
+    assert finding.kind == SEED
+    assert finding.detail.startswith(
+        "Its seed 2026-11 printed 2026-12-15 with no published forecast, so the "
+        "series has no published period to roll from."
+    )
+
+
+@pytest.mark.usefixtures("fixed_today", "resolver_admits")
+def test_an_undated_seed_alarms() -> None:
+    entry = gated_entry(seedPeriod="2026-11", releaseDates={"2026-12": "2027-01-15"})
+    [finding], _ = calendar_findings([entry], set(), {}, TODAY)
+    assert finding.kind == SEED
+    assert finding.detail.startswith("Its seed 2026-11 has no committed date")
+
+
+@pytest.mark.usefixtures("fixed_today", "resolver_admits")
+def test_a_seed_whose_registration_expired_alarms() -> None:
+    entry = gated_entry(seedPeriod="2026-11", releaseDates={"2026-11": "2026-12-15"})
+    seed = roll_docket.recurring_seed_target(entry, set(), TODAY)
+    assert seed is not None
+    expired = frozenset({roll_docket.derive_data_point_id(seed, None)})
+    [finding], _ = calendar_findings([entry], set(), {}, TODAY, expired_ids=expired)
+    assert finding.kind == SEED
+    assert "registered, went unforecast and expired" in finding.detail
+    other = frozenset({"some.other.id"})
+    assert calendar_findings([entry], set(), {}, TODAY, expired_ids=other) == ([], {})
+
+
+@pytest.mark.usefixtures("fixed_today")
+def test_a_seed_a_date_cannot_help_stays_out_of_the_alarm(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        roll_docket, "execution_plan_refusal", lambda registration: "on hold"
+    )
+    entry = gated_entry(seedPeriod="2026-09", releaseDates={"2026-09": "2026-10-15"})
+    findings, refused = calendar_findings([entry], set(), {}, TODAY)
+    assert findings == []
+    assert refused == {"fixture.series": "on hold"}
+
+
+@pytest.mark.parametrize(
+    "series",
+    [
+        "census.mtis.total_business_inventories_level",
+        "bls.ces.average_hourly_earnings_private",
+    ],
+)
+def test_the_new_seeds_alarm_once_their_prints_pass(
+    series: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The review's second counterexample: on 2027-02-01 both seeds have
+    # printed, and with no published period the old check said nothing.
+    entry = registry_entry(series)
+    seed = entry["seedPeriod"]
+    pin_docket_day(monkeypatch, dt.date(2026, 11, 3))
+    assert calendar_findings([entry], set(), {}, dt.date(2026, 11, 3)) == ([], {})
+
+    pin_docket_day(monkeypatch, dt.date(2027, 2, 1))
+    [finding], refused = calendar_findings([entry], set(), {}, dt.date(2027, 2, 1))
+    assert refused == {}
+    assert finding.kind == SEED
+    assert f"Its seed {seed} printed {entry['releaseDates'][seed]}" in finding.detail
+
+
+MONTHS_AFTER_SEPTEMBER = [
+    f"{2026 + (9 + offset) // 12}-{(9 + offset) % 12 + 1:02d}" for offset in range(12)
+]
+
+
+def _print_after(period: str) -> str:
+    year, month = map(int, period.split("-"))
+    return dt.date(year + month // 12, month % 12 + 1, 15).isoformat()
+
+
+@settings(max_examples=150, deadline=None)
+@given(
+    kept=st.lists(st.booleans(), min_size=12, max_size=12),
+    day=st.dates(dt.date(2026, 10, 1), dt.date(2027, 12, 31)),
+)
+def test_a_series_the_roller_cannot_date_always_alarms(
+    kept: list[bool], day: dt.date
+) -> None:
+    dates = {
+        period: _print_after(period)
+        for period, keep in zip(MONTHS_AFTER_SEPTEMBER, kept)
+        if keep
+    }
+    entry = gated_entry(releaseDates=dates)
+    published = {"fixture-september-2026"}
+    with pytest.MonkeyPatch.context() as patch:
+        pin_docket_day(patch, day)
+        patch.setattr(roll_docket, "execution_plan_refusal", lambda registration: None)
+        findings, refused = calendar_findings([entry], published, {}, day)
+        tried = roller_period(entry, published, set(), day)
+        with contextlib.redirect_stderr(io.StringIO()):
+            blocked = (
+                tried is not None
+                and roll_docket.target_extras_for_period(entry, tried) is None
+            )
+    assert refused == {}
+    kinds = [finding.kind for finding in findings]
+    assert len(kinds) == len(set(kinds))
+    if blocked:
+        assert {GAP, CALENDAR} & set(kinds)
+
+    last = max((index for index, keep in enumerate(kept) if keep), default=-1)
+    skipped = [MONTHS_AFTER_SEPTEMBER[i] for i in range(last) if not kept[i]]
+    gaps = [finding for finding in findings if finding.kind == GAP]
+    assert bool(gaps) == bool(skipped)
+    if gaps:
+        assert f"skips {', '.join(skipped)} though" in gaps[0].detail
+        assert ("has stopped at" in gaps[0].detail) == (tried == skipped[0])
+
+
+def test_the_issue_says_why_retry_batch_cannot_reach_calendar_targets() -> None:
+    # The in-grace advice says retry_batch refuses every calendar-gated target.
+    # That holds while the selector refuses rows with an expectedReleaseDate
+    # and the roller gives one to every calendar-gated target.
+    assert "expectedReleaseDate" in retry_batch_targets.UNRECONSTRUCTABLE_ROW_KEYS
+    for entry in REGISTRY:
+        extras = entry.get("extras")
+        binding = extras.get("sourceBinding") if isinstance(extras, dict) else None
+        adapter = binding.get("adapter") if isinstance(binding, dict) else None
+        dated = entry.get("releaseDates")
+        if adapter not in roll_docket.CALENDAR_GATED_SOURCE_ADAPTERS or not dated:
+            continue
+        period = next(iter(dated))
+        with contextlib.redirect_stderr(io.StringIO()):
+            target = roll_docket.target_extras_for_period(entry, period)
+        if target is not None:
+            assert target["expectedReleaseDate"] == dated[period]
 
 
 @pytest.mark.usefixtures("fixed_today")
@@ -288,6 +507,8 @@ def test_the_issue_carries_its_marker_and_says_what_to_do() -> None:
         Finding(STALL, "records/targets", "Fourteen days."),
         Finding(PAST_GRACE, "x.past", "Past."),
         Finding(IN_GRACE, "x.grace", "Inside."),
+        Finding(SEED, "x.seed", "Missed."),
+        Finding(GAP, "x.gap", "Skips."),
         Finding(CALENDAR, "x.calendar", "Ends."),
     ]
     body = render_issue(findings, NOW, "https://github.example/run/1")
@@ -297,10 +518,14 @@ def test_the_issue_carries_its_marker_and_says_what_to_do() -> None:
         ("## Registrations stopped", "`register` log"),
         ("## Past grace with no forecast", "expired-unforecast-registrations.ts"),
         ("## Inside grace with no forecast", "gh run rerun <run id> --failed"),
+        ("## Inside grace with no forecast", "a fix on main does not reach it"),
+        ("## Seeds that can no longer register", "`seedPeriod`"),
+        ("## Release calendars that skip a period", "nothing moves the roller"),
         ("## Release calendars running out", "Never infer a date from cadence"),
     ):
         assert heading in body
         assert action in body
+    assert "use the workflow's `retry_batch` input when" not in body
 
 
 def test_the_issue_leaves_out_sections_with_nothing_to_report() -> None:

@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """Report a docket that has stalled while its roll stays green.
 
-A roll with nothing to register exits 0, which is right on a quiet day. Three
+A roll with nothing to register exits 0, which is right on a quiet day. These
 things can then go wrong with no failed run to show for it:
 
 - Registrations stop. The roll registers weekly claims on every run, so a gap
   over STALL_DAYS means it has stopped working or stopped running.
-- A series' release dates run out. Nothing refreshes scripts/docket_series.json:
-  someone reads the agency's calendar and commits the dates by a reviewed edit.
-  Until then the roller skips the series with a warning on a log nobody reads,
-  which left most monthly series unregistered through October 2026.
+- A series' release dates run out, or skip a period. Nothing refreshes
+  scripts/docket_series.json: someone reads the agency's calendar and commits
+  the dates by a reviewed edit. The roller stops at the first period with no
+  date and says so on a log nobody reads, which left most monthly series
+  unregistered through October 2026.
+- A series with no published forecast misses its seed. The roller registers a
+  reviewed seed only before its print, so the series never starts.
 - A registered target gets no forecast. Inside its orphan grace the batch can
-  still be recovered. Past grace, the site suite's "forecasts every registered
-  ledger target" fails every later publish until the id goes on
+  sometimes still be recovered. Past grace, the site suite's "forecasts every
+  registered ledger target" fails every later publish until the id goes on
   site/src/data/expired-unforecast-registrations.ts.
 
 The job reads state and writes only its report and issue body. Findings leave
@@ -23,10 +26,12 @@ standing issue. A nonzero exit means the check could not read its state.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import copy
 import dataclasses
 import datetime as dt
 import hashlib
+import io
 import json
 import pathlib
 import re
@@ -50,6 +55,8 @@ UNFORECAST_WARNING_AGE = dt.timedelta(days=1)
 
 STALL = "registration-stall"
 CALENDAR = "calendar-runway"
+GAP = "calendar-gap"
+SEED = "seed-missed"
 IN_GRACE = "unforecast-in-grace"
 PAST_GRACE = "unforecast-past-grace"
 
@@ -102,13 +109,14 @@ def successor_refusal(
     period: str,
     today: dt.date,
     published_forecasts: dict[str, dict],
-    published: tuple[str, str],
+    published: tuple[str, str] | None,
 ) -> str | None:
     """Why a date alone would not let this period register.
 
     The answer comes from the roller's own gate, given a placeholder date held
     in memory. Refused series, such as those on a registration hold, stay out of
-    the alarm: a new date cannot help them.
+    the alarm: a new date cannot help them. A series with no published period
+    is judged as the seed it would need.
     """
 
     probe = copy.deepcopy(entry)
@@ -123,13 +131,147 @@ def successor_refusal(
         "catalogSlug": roll_docket.format_slug(entry["slug"], period, entry["cadence"]),
         **extras,
     }
-    published_period, published_slug = published
-    previous = published_forecasts.get(published_slug)
-    if previous:
-        target["previousTarget"] = roll_docket.previous_target_block(
-            previous, published_period
-        )
+    if published is None:
+        target["seedPeriod"] = period
+    else:
+        published_period, published_slug = published
+        previous = published_forecasts.get(published_slug)
+        if previous:
+            target["previousTarget"] = roll_docket.previous_target_block(
+                previous, published_period
+            )
     return roll_docket.roll_execution_plan_refusal(target)
+
+
+def _release_dates(entry: dict) -> dict:
+    dates = entry.get("releaseDates")
+    return dates if isinstance(dates, dict) else {}
+
+
+def _dated(value: object) -> bool:
+    """Whether target_extras_for_period would accept this committed date."""
+
+    if not isinstance(value, str):
+        return False
+    try:
+        dt.date.fromisoformat(value)
+    except ValueError:
+        return False
+    return True
+
+
+def _calendar(entry: dict) -> str:
+    return f"Calendar: {entry.get('releaseCalendarUrl', 'none recorded')}"
+
+
+def runway_shortfall(
+    entry: dict, published_period: str, today: dt.date
+) -> tuple[str, str] | None:
+    """The period past a committed calendar that ends inside the runway."""
+
+    cadence = entry["cadence"]
+    dates = {
+        period: value
+        for period, value in _release_dates(entry).items()
+        if _dated(value)
+    }
+    last_print = max(map(dt.date.fromisoformat, dates.values()), default=None)
+    if last_print is not None and last_print - today >= dt.timedelta(days=RUNWAY_DAYS):
+        return None
+    last_period = max(
+        [published_period, *dates],
+        key=lambda period: roll_docket.period_key(period, cadence) or (),
+    )
+    following = roll_docket.step_period(last_period, cadence)
+    if following is None:
+        return None
+    ends = (
+        "It has no committed date"
+        if last_print is None
+        else f"Its committed calendar ends {last_print}, "
+        f"{(last_print - today).days} days from now"
+    )
+    return following, f"{ends}, and {following} has no date. {_calendar(entry)}"
+
+
+def undated_periods(entry: dict, published_period: str) -> list[str]:
+    """Periods past the cursor that the calendar skips before its last date.
+
+    The roller never steps past a period with no date, so the first of these
+    holds the series however far the later dates run, and the runway check
+    cannot see it.
+    """
+
+    cadence = entry["cadence"]
+    dates = _release_dates(entry)
+    dated_keys = [
+        roll_docket.period_key(period, cadence)
+        for period, value in dates.items()
+        if _dated(value)
+    ]
+    last = max((key for key in dated_keys if key is not None), default=None)
+    skipped: list[str] = []
+    period = roll_docket.step_period(published_period, cadence)
+    while last is not None and period is not None:
+        key = roll_docket.period_key(period, cadence)
+        if key is None or key >= last:
+            break
+        if not _dated(dates.get(period)):
+            skipped.append(period)
+        period = roll_docket.step_period(period, cadence)
+    return skipped
+
+
+def roller_period(
+    entry: dict,
+    published_slugs: set[str],
+    observed_slugs: set[str] | frozenset[str],
+    today: dt.date,
+) -> str | None:
+    """The period roll_docket.main tries for this series today."""
+
+    chosen = roll_docket.next_roll_period(
+        entry, published_slugs, set(observed_slugs), today
+    )
+    if chosen is None:
+        return None
+    with contextlib.redirect_stderr(io.StringIO()):
+        return roll_docket.advance_past_released_native_periods(entry, chosen[0], today)
+
+
+def seed_shortfall(
+    entry: dict,
+    published_slugs: set[str],
+    today: dt.date,
+    expired_ids: frozenset[str],
+) -> tuple[str, str] | None:
+    """The seed of a series with no published period, when it cannot register.
+
+    Such a series rolls only from its reviewed seed, and the roller registers a
+    seed only before its print. A series with no seed waits on a reviewed edit
+    to give it one, which is a choice and not a stall, so it stays quiet.
+    """
+
+    period = entry.get("seedPeriod")
+    if not isinstance(period, str):
+        return None
+    release = _release_dates(entry).get(period)
+    if not _dated(release):
+        problem = f"Its seed {period} has no committed date"
+    elif dt.date.fromisoformat(release) <= today:
+        problem = f"Its seed {period} printed {release} with no published forecast"
+    else:
+        with contextlib.redirect_stderr(io.StringIO()):
+            seed = roll_docket.recurring_seed_target(entry, published_slugs, today)
+        if seed is None or (
+            roll_docket.derive_data_point_id(seed, None) not in expired_ids
+        ):
+            return None
+        problem = f"Its seed {period} registered, went unforecast and expired"
+    return period, (
+        f"{problem}, so the series has no published period to roll from. "
+        f"{_calendar(entry)}"
+    )
 
 
 def calendar_findings(
@@ -137,8 +279,11 @@ def calendar_findings(
     published_slugs: set[str],
     published_forecasts: dict[str, dict],
     today: dt.date,
+    *,
+    observed_slugs: set[str] | frozenset[str] = frozenset(),
+    expired_ids: frozenset[str] = frozenset(),
 ) -> tuple[list[Finding], dict[str, str]]:
-    """Series whose committed dates run out soon, and those a date cannot help."""
+    """Series the roller cannot carry forward, and those a date cannot help."""
 
     findings: list[Finding] = []
     refused: dict[str, str] = {}
@@ -146,43 +291,44 @@ def calendar_findings(
         if not _gated_rolling_entry(entry):
             continue
         published = roll_docket.latest_published_period(entry, published_slugs)
+        alarms: list[tuple[str, str, str]] = []
         if published is None:
-            continue
-        cadence = entry["cadence"]
-        dates = entry.get("releaseDates")
-        dates = dates if isinstance(dates, dict) else {}
-        last_print = max(map(dt.date.fromisoformat, dates.values()), default=None)
-        if last_print is not None and last_print - today >= dt.timedelta(
-            days=RUNWAY_DAYS
-        ):
-            continue
-        last_period = max(
-            [published[0], *dates],
-            key=lambda period: roll_docket.period_key(period, cadence) or (),
-        )
-        following = roll_docket.step_period(last_period, cadence)
-        if following is None:
-            continue
-        refusal = successor_refusal(
-            entry, following, today, published_forecasts, published
-        )
-        if refusal is not None:
-            refused[entry["series"]] = refusal
-            continue
-        ends = (
-            "It has no committed date"
-            if last_print is None
-            else f"Its committed calendar ends {last_print}, "
-            f"{(last_print - today).days} days from now"
-        )
-        findings.append(
-            Finding(
-                CALENDAR,
-                entry["series"],
-                f"{ends}, and {following} has no date. Calendar: "
-                f"{entry.get('releaseCalendarUrl', 'none recorded')}",
+            seed = seed_shortfall(entry, published_slugs, today, expired_ids)
+            if seed is not None:
+                alarms.append((SEED, *seed))
+        else:
+            shortfall = runway_shortfall(entry, published[0], today)
+            if shortfall is not None:
+                alarms.append((CALENDAR, *shortfall))
+            skipped = undated_periods(entry, published[0])
+            if skipped:
+                stopped = (
+                    roller_period(entry, published_slugs, observed_slugs, today)
+                    == skipped[0]
+                )
+                where = (
+                    f"has stopped at {skipped[0]}"
+                    if stopped
+                    else f"stops at {skipped[0]} when it gets there"
+                )
+                alarms.append(
+                    (
+                        GAP,
+                        skipped[0],
+                        f"The committed calendar skips {', '.join(skipped)} "
+                        "though it dates later periods, and the roller cannot "
+                        f"pass an undated period, so the series {where}. "
+                        f"{_calendar(entry)}",
+                    )
+                )
+        for kind, period, detail in alarms:
+            refusal = successor_refusal(
+                entry, period, today, published_forecasts, published
             )
-        )
+            if refusal is not None:
+                refused[entry["series"]] = refusal
+                continue
+            findings.append(Finding(kind, entry["series"], detail))
     return findings, refused
 
 
@@ -272,11 +418,34 @@ def render_issue(findings: list[Finding], now: dt.datetime, run_url: str) -> str
             "Inside grace with no forecast",
             "Find the roll that registered them with "
             "`gh run list --workflow roll-docket.yml --created <date>`. If its "
-            "`generate` job passed, fix the cause on main and run "
-            "`gh run rerun <run id> --failed`: the batch stays in the run's "
-            "artifact for 7 days, the same length as the grace. If it did not "
-            "pass, use the workflow's `retry_batch` input when a batch manifest "
-            "exists.",
+            "`generate` job passed and `publish` failed, fix the cause on main "
+            "and run `gh run rerun <run id> --failed`: publish checks out main, "
+            "and the batch stays in the run's artifact for 7 days, the same "
+            "length as the grace. If `generate` failed, the same command runs it "
+            "again from the registration commit, so a fix on main does not reach "
+            "it. A target that failed inside a published batch has no such path: "
+            "the workflow's `retry_batch` input refuses every batch row with an "
+            "`expectedReleaseDate`, and the roller gives one to every "
+            "calendar-gated target.",
+        ),
+        (
+            SEED,
+            "Seeds that can no longer register",
+            "A series with no published forecast rolls only from its reviewed "
+            "seed, and the roller registers a seed only before its print. Pick a "
+            "period whose print is still ahead, read its date from the official "
+            "calendar, and set `seedPeriod` and that date in "
+            "`scripts/docket_series.json` by a reviewed edit, recording the read "
+            "in `docs/seed-verifications.md`.",
+        ),
+        (
+            GAP,
+            "Release calendars that skip a period",
+            "Read the official calendar for each skipped period and add its date "
+            "to `scripts/docket_series.json` by a reviewed edit, recording the "
+            "read in `docs/seed-verifications.md`. Never infer a date from "
+            "cadence. A period the agency will never print needs a reviewed fix "
+            "to the entry, because nothing moves the roller past it.",
         ),
         (
             CALENDAR,
@@ -306,6 +475,8 @@ def collect(
     registration_names: Iterable[str],
     published_slugs: set[str],
     published_forecasts: dict[str, dict],
+    observed_slugs: set[str],
+    expired_ids: frozenset[str],
     unforecast: list[dict],
     now: dt.datetime,
 ) -> tuple[list[Finding], dict[str, str]]:
@@ -316,7 +487,12 @@ def collect(
         findings.append(stall)
     findings += unforecast_findings(unforecast, now)
     calendars, refused = calendar_findings(
-        registry, published_slugs, published_forecasts, today
+        registry,
+        published_slugs,
+        published_forecasts,
+        today,
+        observed_slugs=observed_slugs,
+        expired_ids=expired_ids,
     )
     return findings + calendars, refused
 
@@ -329,7 +505,7 @@ def main() -> int:
     args = parser.parse_args()
 
     now = dt.datetime.now(dt.timezone.utc)
-    published_slugs, published_forecasts, _ = roll_docket.live_catalog()
+    published_slugs, published_forecasts, observed_slugs = roll_docket.live_catalog()
     findings, refused = collect(
         registry=json.loads(roll_docket.REGISTRY.read_text())["series"],
         registration_names=[
@@ -337,6 +513,8 @@ def main() -> int:
         ],
         published_slugs=published_slugs,
         published_forecasts=published_forecasts,
+        observed_slugs=observed_slugs,
+        expired_ids=roll_docket.expired_unforecast_registrations(ROOT),
         unforecast=unforecast_rows(now),
         now=now,
     )

@@ -79,6 +79,10 @@ jobs:
       target_content_hash: ${{ steps.sync.outputs.target_content_hashes }}
       registration_set_hash: ${{ steps.sync.outputs.registration_set_hash }}
       registration_artifact: ${{ steps.targets.outputs.registration_artifact }}
+      # The failure alert reads these two to tell a run whose registrations
+      # reached main from one that left nothing behind.
+      committed: ${{ steps.registration_commit.outputs.committed }}
+      pushed: ${{ steps.sync.outputs.pushed }}
     steps:
       - uses: astral-sh/setup-uv@v5
       # Retry selection evaluates the published-cell catalog with bun
@@ -217,6 +221,8 @@ jobs:
             if git -c credential.helper= -c credential.helper="$auth_helper" push origin main; then
               REMOTE=$(git ls-remote origin refs/heads/main | awk '{print $1}')
               if [ "$REMOTE" = "$LOCAL" ]; then
+                # First, before any later command can fail and end the job.
+                echo "pushed=1" >> "$GITHUB_OUTPUT"
                 install -m 0644 \
                   /tmp/registration-candidate.json /tmp/registration.json
                 pushed=1
@@ -716,17 +722,36 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_ID: ${{ github.run_id }}
+          REGISTER_RESULT: ${{ needs.register.result }}
+          GENERATE_RESULT: ${{ needs.generate.result }}
+          REGISTERED_COUNT: ${{ needs.register.outputs.count }}
+          REGISTRATIONS_PUSHED: ${{ needs.register.outputs.committed == '1' && needs.register.outputs.pushed == '1' }}
+          RETRY_BATCH: ${{ github.event.inputs.retry_batch }}
         run: |
           title="Docket roll failed $(date -u +%F)"
           body="$RUNNER_TEMP/docket-roll-failed.md"
           {
-            echo "The auto-roll loop failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}."
+            echo "The auto-roll loop failed: $RUN_URL."
             echo
-            echo "Jobs: register ${{ needs.register.result }}, generate ${{ needs.generate.result }}, publish failure."
+            echo "Jobs: register $REGISTER_RESULT, generate $GENERATE_RESULT, publish failure."
             echo
-            echo "Targets this run registered have seven days of orphan grace, and the validated batch stays in the run's artifact for the same seven days. If generate succeeded, fix the cause on main, then run: gh run rerun ${{ github.run_id }} --failed"
-            echo
-            echo "That publishes the same batch. If register failed, no batch exists and the next roll tries again."
+            if [ "$GENERATE_RESULT" = "success" ]; then
+              echo "The validated batch stays in the run's artifact for seven days, the length of its targets' orphan grace. Publish checks out main, so fix the cause there, then run: gh run rerun $RUN_ID --failed"
+              echo
+              echo "That publishes the same batch."
+            elif [ -n "$RETRY_BATCH" ]; then
+              echo "This run retried $RETRY_BATCH and registered nothing. Once the cause is fixed, dispatch the same retry_batch again while its targets stay inside their grace."
+            elif [ "$REGISTER_RESULT" = "success" ] && [ "$REGISTERED_COUNT" = "0" ]; then
+              echo "This run registered nothing, so no target waits on a rerun."
+            elif [ "$REGISTER_RESULT" = "success" ]; then
+              echo "This run's registrations reached main, but generate did not succeed. gh run rerun $RUN_ID --failed runs generate again on the same registrations. It checks out their registration commit, so a fix on main does not reach it, and their registration artifact lasts seven days, the length of their grace."
+            elif [ "$REGISTRATIONS_PUSHED" = "true" ]; then
+              echo "Register pushed this run's registrations to main and then failed, so generate never ran. The next roll refuses these targets as already registered, and retry_batch needs a committed batch manifest, so nothing in this workflow forecasts them. Once their seven days of grace pass, each id goes on site/src/data/expired-unforecast-registrations.ts by a reviewed change, or the site suite fails every publish."
+            else
+              echo "Register failed before any registration of this run reached main, so nothing persisted and the next roll starts afresh."
+            fi
           } > "$body"
           existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number' || true)
           if [ -z "$existing" ]; then

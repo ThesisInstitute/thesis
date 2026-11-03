@@ -58,10 +58,13 @@ by the ordinary cursor.
 Nothing refreshes `releaseDates`. Someone reads each agency's calendar and
 commits the dates by a reviewed edit. Before this refresh, 25 of the 51
 calendar-gated series had published nothing after 2026-07, and only 3 could roll
-on 2026-11-02. The roller skips a calendar-gated period that has no date, so
-those series stopped registering, and the rolls of 2026-10-23, 2026-10-26 and
+on 2026-11-02. The roller stops at the first calendar-gated period that has no
+date and registers nothing for that series until someone dates it, so those
+series stopped registering, and the rolls of 2026-10-23, 2026-10-26 and
 2026-10-30 selected nothing the registrar would keep. `scripts/docket_health.py`
-now raises an issue 21 days before a series' committed dates run out.
+now raises an issue when fewer than 21 days remain before a series' last
+committed print, when the calendar skips a period between a series' cursor and
+its last date, and when a seed can no longer register.
 
 This refresh only adds dates: every date already in the registry stayed as it
 was, and every read that covered an existing date agreed with it. BLS answers
