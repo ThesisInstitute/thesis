@@ -113,7 +113,12 @@ def test_observation_grid_reads_the_finest_decimal_place():
     assert observation_grid([150.0, 160.0, 171.0]) == 1.0
     assert observation_grid([1.25, 1.5, 2.0]) == pytest.approx(0.01)
     assert observation_grid([0.00001, 0.00002]) == pytest.approx(1e-5)
-    assert observation_grid([0.1 + 0.2]) < 1e-15
+    # Float noise does not shrink the grid, near zero or elsewhere.
+    assert observation_grid([0.1 + 0.2]) == pytest.approx(0.1)
+    assert observation_grid([5.1, 0.3 - (0.1 + 0.2)]) == pytest.approx(0.1)
+    assert observation_grid([5.0] * 30 + [5.1, 5.000000000000001]) == (
+        observation_grid([5.0] * 30 + [5.1, 5.0])
+    )
 
 
 @given(
@@ -129,6 +134,21 @@ def test_observation_grid_divides_every_print(places, units):
     assert grid >= 10.0**-places * (1 - 1e-12)
     for value in values:
         assert abs(value - round(value / grid) * grid) <= 1e-9 * max(1, abs(value))
+
+
+@given(
+    places=st.integers(min_value=0, max_value=6),
+    units=st.lists(
+        st.integers(min_value=-(10**6), max_value=10**6), min_size=1, max_size=20
+    ),
+    noise=st.lists(st.integers(min_value=-4, max_value=4), min_size=20, max_size=20),
+)
+def test_float_noise_leaves_the_grid_alone(places, units, noise):
+    values = [float(f"{unit / 10**places:.{places}f}") for unit in units]
+    largest = max(abs(value) for value in values)
+    noisy = [value + step * 1e-15 * largest for value, step in zip(values, noise)]
+
+    assert observation_grid(noisy) == observation_grid(values)
 
 
 @given(
@@ -201,6 +221,31 @@ def test_default_models_leave_stanli_opt_in():
     assert default == ("persistence", "statsmodels-local-level")
 
 
+@requires_statsmodels
+def test_cli_default_models_leave_stanli_opt_in(capsys):
+    assert (
+        main(
+            [
+                "--target-id",
+                "test.series",
+                "--target-period",
+                "next",
+                "--history-json",
+                json.dumps(rounded_walk(12)),
+                "--generated-at",
+                GENERATED_AT,
+            ]
+        )
+        == 0
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert [candidate["modelName"] for candidate in payload["candidates"]] == [
+        "persistence.last_print",
+        "sarimax_local_level_drift",
+    ]
+
+
 def test_cli_prints_a_builtin_program(capsys):
     assert main(["--print-stan-program", "stanli-ar1-t"]) == 0
     assert capsys.readouterr().out == STAN_PROGRAMS["stanli-ar1-t"]
@@ -266,6 +311,8 @@ def test_candidate_reports_ordered_posterior_predictive_quantiles(model):
     )
     assert posterior["draws"] == 4000
     assert posterior["standardization"]["yGrid"] == pytest.approx(0.1)
+    assert posterior["standardization"]["gridInferred"] is True
+    assert posterior["roundIncrement"] is None
     assert posterior["program"]["source"] == STAN_PROGRAMS[model]
     assert (
         posterior["program"]["sha256"]
@@ -353,7 +400,9 @@ def test_repeated_prints_do_not_collapse_the_forecast(model):
 
     assert quantiles[0.95] - quantiles[0.05] >= 0.1
     assert sampler["divergences"] == 0
+    assert sampler["nonFiniteRhat"] == 0
     assert sampler["maxRhat"] <= stan_candidates.MAX_RHAT
+    assert not stan_candidates.sampler_failed(sampler)
 
 
 @requires_stanli
@@ -501,6 +550,15 @@ def test_cli_emits_stanli_candidates(tmp_path):
         assert candidate["pointEstimate"] == round(candidate["pointEstimate"], 1)
 
 
+def replay_record(model: str = "stanli-rw-drift-t", program=None, **kwargs) -> dict:
+    """A candidate as a trace would hold it, after a JSON round trip."""
+
+    candidate = build(
+        model, history=rounded_walk(30), program=program, backtest=False, **kwargs
+    )
+    return json.loads(json.dumps(candidate.as_dict()))
+
+
 @requires_stanli
 @pytest.mark.parametrize(
     "model, program",
@@ -509,61 +567,135 @@ def test_cli_emits_stanli_candidates(tmp_path):
         (CUSTOM_MODEL, STAN_PROGRAMS["stanli-ar1-t"]),
     ],
 )
-def test_replay_reproduces_every_quantile_from_the_json_alone(model, program):
-    # A rounded forecast still records unrounded quantiles, and the JSON round
-    # trip stands in for reading the candidate back out of a trace.
-    candidate = build(
-        model,
-        history=rounded_walk(30),
-        program=program,
-        round_increment=0.1,
-        backtest=False,
-    )
-    record = json.loads(json.dumps(candidate.as_dict()))
+def test_replay_reproduces_every_published_field_from_the_json_alone(model, program):
+    # A rounded forecast still records unrounded quantiles.
+    record = replay_record(model, program, round_increment=0.1)
 
-    assert (
-        stan_candidates.replay_stanli_candidate(record)
-        == record["posteriorPredictive"]["quantiles"]
-    )
+    assert stan_candidates.replay_mismatches(record) == []
+    replayed = stan_candidates.replay_stanli_candidate(record)
+    assert replayed == stan_candidates.recorded_fields(record)
+
+
+def drop_quantiles(record):
+    record["posteriorPredictive"]["quantiles"] = []
+
+
+def keep_one_quantile(record):
+    block = record["posteriorPredictive"]
+    block["quantiles"] = block["quantiles"][9:10]
+
+
+def pick_a_seed(record):
+    record["posteriorPredictive"]["seed"] = 123
+
+
+def rename_the_candidate(record):
+    record["candidateId"] = "model_candidate.0000000000000000"
+
+
+def triple_the_scale(record):
+    record["posteriorPredictive"]["standardization"]["yScale"] *= 3
+
+
+def move_the_last_print(record):
+    record["history"][-1]["value"] += 0.1
+
+
+def coarsen_the_inferred_grid(record):
+    record["posteriorPredictive"]["standardization"]["yGrid"] = 0.5
+
+
+def relabel_the_program(record):
+    record["posteriorPredictive"]["program"]["name"] = "stanli-ar1-t"
+
+
+def edit_the_source(record):
+    record["posteriorPredictive"]["program"]["source"] += "\n"
 
 
 @requires_stanli
 @pytest.mark.parametrize(
-    "tamper",
+    "tamper, message",
     [
-        lambda record: record["posteriorPredictive"].update(
-            seed=record["posteriorPredictive"]["seed"] + 1
-        ),
-        lambda record: record["history"][-1].update(
-            value=record["history"][-1]["value"] + 0.1
-        ),
-        lambda record: record["posteriorPredictive"]["standardization"].update(
-            yGrid=0.5
-        ),
+        (drop_quantiles, "19 levels"),
+        (keep_one_quantile, "19 levels"),
+        (pick_a_seed, "seed does not follow"),
+        (rename_the_candidate, "candidate id does not follow"),
+        (triple_the_scale, "standardization does not follow"),
+        (move_the_last_print, "standardization does not follow"),
+        (coarsen_the_inferred_grid, "inferred grid does not follow"),
+        (relabel_the_program, "program name"),
+        (edit_the_source, "does not match its recorded hash"),
     ],
-    ids=["seed", "data", "grid"],
 )
-def test_replay_detects_a_changed_seed_or_data(tamper):
-    record = json.loads(
-        json.dumps(build(history=rounded_walk(30), backtest=False).as_dict())
-    )
+def test_replay_refuses_a_record_no_build_could_produce(tamper, message):
+    # Each check runs before the refit, so copying a forged fit's quantiles
+    # into the record cannot get past it.
+    record = replay_record()
     tamper(record)
 
-    assert (
+    with pytest.raises(ValueError, match=message):
         stan_candidates.replay_stanli_candidate(record)
-        != record["posteriorPredictive"]["quantiles"]
-    )
 
 
 @requires_stanli
-def test_replay_refuses_a_source_that_does_not_match_its_hash():
-    record = json.loads(
-        json.dumps(build(history=rounded_walk(30), backtest=False).as_dict())
-    )
-    record["posteriorPredictive"]["program"]["source"] += "\n"
+@pytest.mark.parametrize(
+    "field, tamper",
+    [
+        ("pointEstimate", lambda record: record.update(pointEstimate=0.0)),
+        ("quantiles", lambda record: record["quantiles"].update(p10=0.0)),
+        ("interval80", lambda record: record["interval80"].update(lower=0.0)),
+        ("interval90", lambda record: record["interval90"].update(upper=99.0)),
+        (
+            "diagnostics",
+            lambda record: record["diagnostics"].append(
+                stan_candidates.SAMPLER_WARNING
+            ),
+        ),
+        (
+            "posteriorPredictive.quantiles",
+            lambda record: record["posteriorPredictive"]["quantiles"][0].update(
+                value=0.0
+            ),
+        ),
+        (
+            "posteriorPredictive.sampler",
+            lambda record: record["posteriorPredictive"]["sampler"].update(
+                divergences=0, maxRhat=1.0
+            ),
+        ),
+    ],
+)
+def test_replay_names_each_edited_field(field, tamper):
+    record = replay_record()
+    tamper(record)
 
-    with pytest.raises(ValueError, match="does not match its recorded hash"):
-        stan_candidates.replay_stanli_candidate(record)
+    assert stan_candidates.replay_mismatches(record) == [field]
+
+
+@requires_stanli
+def test_replay_never_passes_an_edited_earlier_print():
+    record = replay_record()
+    record["history"][5]["value"] += 0.1
+
+    try:
+        mismatched = stan_candidates.replay_mismatches(record)
+    except ValueError:
+        return
+    assert mismatched
+
+
+@requires_stanli
+def test_replay_refits_with_a_supplied_grid_and_flags_an_edited_one():
+    history = as_history(dyadic_walk([1, -2, 0, 3, 1, 0, -1, 2, 0, 1]))
+    record = json.loads(
+        json.dumps(build(history=history, grid=0.125, backtest=False).as_dict())
+    )
+
+    assert record["posteriorPredictive"]["standardization"]["gridInferred"] is False
+    assert stan_candidates.replay_mismatches(record) == []
+    record["posteriorPredictive"]["standardization"]["yGrid"] = 0.5
+    assert "posteriorPredictive.quantiles" in stan_candidates.replay_mismatches(record)
 
 
 @requires_stanli
@@ -582,10 +714,99 @@ def test_cli_replays_a_candidate_set_and_flags_a_changed_record(tmp_path, capsys
     assert capsys.readouterr().out.count("replayed exactly") == 2
 
     candidate_set["candidates"][1]["posteriorPredictive"]["seed"] += 1
+    candidate_set["candidates"][2]["pointEstimate"] += 1
     path.write_text(json.dumps(candidate_set))
 
     assert main([f"--replay-stanli={path}"]) == 1
-    assert capsys.readouterr().out.count("MISMATCH") == 1
+    out = capsys.readouterr().out
+    assert "REFUSED: seed does not follow from the candidate id" in out
+    assert "MISMATCH in pointEstimate" in out
+
+    del candidate_set["candidates"][2]["posteriorPredictive"]["roundIncrement"]
+    path.write_text(json.dumps(candidate_set))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    assert "REFUSED: missing field 'roundIncrement'" in capsys.readouterr().out
+
+
+@requires_stanli
+def test_a_non_finite_r_hat_on_a_varying_parameter_fails_the_fit(monkeypatch):
+    import stanli
+
+    original = stanli.Fit.summary
+
+    def nan_r_hats(self, params=None):
+        summary = original(self, params)
+        summary.r_hat[:] = math.nan
+        return summary
+
+    monkeypatch.setattr(stanli.Fit, "summary", nan_r_hats)
+    candidate = build(backtest=False)
+    sampler = candidate.posterior_predictive["sampler"]
+
+    # delta, sigma, nu and tau vary; y_next and the sampler's columns drop out.
+    assert sampler["nonFiniteRhat"] == 4
+    assert sampler["maxRhat"] is None
+    assert stan_candidates.sampler_failed(sampler)
+    assert stan_candidates.SAMPLER_WARNING in candidate.diagnostics
+
+
+CONSTANT_TRANSFORMED = (
+    stan_candidates._DATA_BLOCK
+    + """
+parameters {
+  real mu;
+}
+transformed parameters {
+  real fixed = y_loc;
+}
+model {
+  mu ~ normal(0, 1);
+}
+generated quantities {
+  real y_next = y_loc + y_scale * (mu + normal_rng(0, 1));
+}
+"""
+)
+
+
+@requires_stanli
+def test_a_constant_transformed_parameter_does_not_fail_the_fit():
+    candidate = build(CUSTOM_MODEL, program=CONSTANT_TRANSFORMED, backtest=False)
+    sampler = candidate.posterior_predictive["sampler"]
+
+    assert sampler["nonFiniteRhat"] == 0
+    assert sampler["maxRhat"] <= stan_candidates.MAX_RHAT
+    assert not any(line.startswith("WARNING") for line in candidate.diagnostics)
+
+
+DISCRETE_NEXT = (
+    stan_candidates._DATA_BLOCK
+    + CUSTOM_PARAMETERS
+    + "generated quantities { real y_next = y_loc + poisson_rng(1); }"
+)
+
+
+@requires_stanli
+def test_tied_quantiles_carry_a_warning():
+    candidate = build(CUSTOM_MODEL, program=DISCRETE_NEXT, backtest=False)
+    values = predictive_quantiles(candidate)
+
+    assert any(upper <= lower for lower, upper in zip(values, values[1:]))
+    assert stan_candidates.TIE_WARNING in candidate.diagnostics
+
+
+@requires_stanli
+def test_walk_forward_seeds_differ_between_targets():
+    history = normalize_history(rounded_walk(30))
+
+    def score(target):
+        return backtest_stanli(
+            "stanli-rw-drift-t", history, max_rows=3, target_data_point_id=target
+        )
+
+    assert score("a") == score("a")
+    assert score("a") != score("b")
 
 
 def test_cli_replay_says_when_a_file_holds_no_stanli_candidate(tmp_path, capsys):

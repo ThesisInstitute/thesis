@@ -601,10 +601,11 @@ def utc_now() -> str:
 def replay_stanli_records(path: Path) -> int:
     """Replay the stanli candidates in a candidate or candidate-set JSON file.
 
-    Returns 0 when every candidate reproduces its quantiles exactly.
+    Returns 0 when every candidate's published forecast, quantiles and
+    diagnostics come out exactly as recorded.
     """
 
-    from brier.stan_candidates import replay_stanli_candidate
+    from brier.stan_candidates import replay_mismatches
 
     payload = json.loads(path.read_text())
     records = [
@@ -617,11 +618,19 @@ def replay_stanli_records(path: Path) -> int:
         return 1
     failed = 0
     for record in records:
-        replayed = replay_stanli_candidate(record)
-        matches = replayed == record["posteriorPredictive"]["quantiles"]
-        failed += not matches
-        verdict = "replayed exactly" if matches else "MISMATCH"
-        print(f"{record['candidateId']}: {verdict}")
+        label = record.get("candidateId", "candidate without an id")
+        try:
+            mismatched = replay_mismatches(record)
+        except (KeyError, ValueError) as exc:
+            failed += 1
+            reason = f"missing field {exc}" if isinstance(exc, KeyError) else exc
+            print(f"{label}: REFUSED: {reason}")
+            continue
+        failed += bool(mismatched)
+        verdict = (
+            f"MISMATCH in {', '.join(mismatched)}" if mismatched else "replayed exactly"
+        )
+        print(f"{label}: {verdict}")
     return 1 if failed else 0
 
 
@@ -641,7 +650,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if any(arg.split("=", 1)[0] == "--replay-stanli" for arg in argv):
         replayer = argparse.ArgumentParser(
-            description="Refit recorded stanli candidates and compare their quantiles.",
+            description="Refit recorded stanli candidates and check what they publish.",
         )
         replayer.add_argument("--replay-stanli", type=Path, required=True)
         return replay_stanli_records(replayer.parse_args(argv).replay_stanli)
