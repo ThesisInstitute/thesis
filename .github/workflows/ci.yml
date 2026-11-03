@@ -118,11 +118,13 @@ jobs:
       - name: Report what needs saw
         env:
           NEEDS: ${{ toJSON(needs) }}
-          FAILED: ${{ failure() }}
-          CANCELLED: ${{ cancelled() }}
-        run: |
-          echo "$NEEDS"
-          echo "failure()=$FAILED cancelled()=$CANCELLED"
+        run: echo "$NEEDS"
+      - name: failure() is true
+        if: failure()
+        run: echo "failure() true"
+      - name: cancelled() is true
+        if: cancelled()
+        run: echo "cancelled() true"
 
   timeout-probe-if-failure:
     runs-on: ubuntu-latest
