@@ -382,6 +382,26 @@ of receipt 0.6.2's `effective_current_rows`), which works as follows:
   published `observedAt` changes only if the correction prints earlier than
   the rest of its chain, which also moves the chronology boundary.
 
+Chronicle's Thesis ledger moves to plain numbers (Max, 2026-10-21): a row says
+`7716000` in `count`, not `7.716` in `millions`. A registered contract keeps
+the unit it registered, so the site still grades in that unit
+(`site/src/data/ledger-restatements.ts` and `ledger-units.ts`; the resolver's
+copy of the unit table is `scripts/ledger_units.py`):
+
+- A row the resolver writes in base units carries the pair it recorded, in
+  `source.recorded_value` and `source.recorded_unit`. Its entry reads that
+  pair and keeps what Chronicle stores as `ledgerValue` and `ledgerUnit`. A
+  pair that doesn't state the stored value exactly fails the build.
+- A `unit_restatement` row (its `assertionVersion.relation`) says one scaled
+  row in base units and changes nothing else. The site checks it against the
+  exact line it names and goes on grading that line, so no score, baseline,
+  event id or hash moves. A correction of a restatement grades in place of the
+  row the restatement names (`gradedSupersedes`).
+- `/forecasts/ledger.json` keeps each restated row in `entries` and lists the
+  restatements apart, under `restatements`, once the pin holds one. A consumer
+  that wants Chronicle's current view must apply them: `entries` alone holds
+  the registered-unit values the site grades.
+
 The build also re-runs the append gate's assertion-version checks on the pinned
 rows. Every explicit id must equal its recomputed content address, and every
 supersede must name the active version of its record. If the port drifted from
