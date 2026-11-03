@@ -30,10 +30,13 @@ def test_register_reports_its_push_before_anything_else_can_fail() -> None:
     script = sync["run"]
     marker = 'echo "pushed=1" >> "$GITHUB_OUTPUT"'
     assert script.count(marker) == 1
-    pushed = script.index(marker)
-    assert script.index("push origin main") < pushed
-    assert script.index('if [ "$REMOTE" = "$LOCAL" ]; then') < pushed
-    assert pushed < script.index("install -m 0644")
+    [_, after_push] = script.split("push origin main; then\n")
+    commands = [
+        line.strip()
+        for line in after_push.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
+    assert commands[0] == marker
 
 
 def test_the_alert_reads_the_run_only_through_its_environment() -> None:

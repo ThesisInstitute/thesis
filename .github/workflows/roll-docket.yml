@@ -219,10 +219,11 @@ jobs:
               --metadata-out /tmp/registration-candidate.json
             LOCAL=$(git rev-parse HEAD)
             if git -c credential.helper= -c credential.helper="$auth_helper" push origin main; then
+              # Main now holds this run's registrations. Say so first, before
+              # any later command can fail and end the job.
+              echo "pushed=1" >> "$GITHUB_OUTPUT"
               REMOTE=$(git ls-remote origin refs/heads/main | awk '{print $1}')
               if [ "$REMOTE" = "$LOCAL" ]; then
-                # First, before any later command can fail and end the job.
-                echo "pushed=1" >> "$GITHUB_OUTPUT"
                 install -m 0644 \
                   /tmp/registration-candidate.json /tmp/registration.json
                 pushed=1
