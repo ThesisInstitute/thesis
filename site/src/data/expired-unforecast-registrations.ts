@@ -121,6 +121,23 @@ export const EXPIRED_UNFORECAST_REGISTRATIONS = [
   // twelve days stale, the chronology violation the entries above
   // terminate on.
   "dol.eta.continued_claims.sa.week_2026-10-03.first_print",
+  // The 2026-10-19T21:11:01Z registrations of the October CPI, core CPI and
+  // unemployment rate first prints crossed their seven-day orphan grace on
+  // 2026-10-26 unforecast. Their registering roll (run 39325379866) generated
+  // three candidate cells that passed validation, but the publish leg failed
+  // the site suite before committing anything: `retains official outcomes
+  // while excluding unverified forecast scores` counted 245 distinct
+  // observation ids against 251 ledger rows, which #378 fixed the next day.
+  // No cell or batch manifest reached main. The 2026-10-23 and 2026-10-26
+  // rolls (runs 40015811469, 40401561201), the only ones inside grace,
+  // skipped them as already registered, and nothing retried the generation.
+  // The registered windows (unemployment 2026-11-06, both CPI series
+  // 2026-11-10) have not opened, but a forecast now would run against the
+  // 2026-10-19 pin, fourteen days stale, the chronology violation the entries
+  // above terminate on.
+  "bls.cpi.u.headline_mom.2026_10.first_print",
+  "bls.cpi.u.core_mom.2026_10.first_print",
+  "bls.cps.unemployment_rate.2026_10.first_print",
 ] as const;
 
 export const EXPIRED_UNFORECAST_SET: ReadonlySet<string> = new Set(
