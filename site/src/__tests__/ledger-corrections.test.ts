@@ -149,7 +149,8 @@ interface HistoryDropOut {
 }
 
 // At each correction's acceptance, every forecast history that held the row
-// it supersedes just before must hold the correction from then on.
+// it supersedes just before must hold the record's row as of then: the
+// correction, or a correction of it that the same commit accepted.
 function historyDropOuts(
   ledger: PolicyEngineLedgerEntry[],
   chains: ObservationRecordedLedgerEntry[][],
@@ -161,19 +162,21 @@ function historyDropOuts(
       const previous = chain[index - 1];
       const correction = chain[index];
       const accepted = instant(correction.acceptedAtUtc);
-      const previousAccepted = instant(previous.acceptedAtUtc);
-      if (accepted < previousAccepted) {
+      if (accepted < instant(previous.acceptedAtUtc)) {
         throw new Error(
           `${correction.observationId}: a correction accepted before the ` +
             "row it supersedes",
         );
       }
-      // One Chronicle commit stamps both rows with its time, and the gate
-      // allows that. No cutoff ever held the superseded row without its
-      // correction, so no history can lose it.
-      if (accepted === previousAccepted) continue;
+      // One Chronicle commit can accept a row and its correction, and the gate
+      // allows that. Such a row is in no history just before the commit, so
+      // the check below passes over it.
       const before = new Date(accepted - 1).toISOString();
       const at = new Date(accepted).toISOString();
+      const holder = chain
+        .slice(index)
+        .filter((row) => instant(row.acceptedAtUtc) <= accepted)
+        .at(-1)!;
       for (const forecast of FORECAST_CELLS) {
         if (
           !ledgerHistoryAtCutoff(forecast, ledger, before).includes(previous)
@@ -181,13 +184,13 @@ function historyDropOuts(
           continue;
         }
         checks += 1;
-        if (ledgerHistoryAtCutoff(forecast, ledger, at).includes(correction)) {
+        if (ledgerHistoryAtCutoff(forecast, ledger, at).includes(holder)) {
           continue;
         }
         dropOuts.push({
           forecastSlug: forecast.slug,
-          record: correction.observationId,
-          correction: observationAssertionId(correction) ?? "(none)",
+          record: holder.observationId,
+          correction: observationAssertionId(holder) ?? "(none)",
           series:
             registeredTargetSeriesIdentity(
               forecast.dataPointId ?? "",
@@ -754,6 +757,42 @@ describe("Chronicle corrections on the pinned ledger", () => {
       if (history.includes(sameCommit)) holders += 1;
     }
     expect(holders).toBeGreaterThan(0);
+  });
+
+  it("finds no drop-out when one later commit accepts a correction and a correction of it", () => {
+    // Just after that commit the record's row is the second correction, so
+    // every history that held the original holds it.
+    const [record, holders] = mostHeldRecord();
+    const { correction, extended, fix, replaced } = withCorrection(record, {
+      value: record.value + 5,
+    });
+    const refix: Record<string, unknown> = {
+      ...structuredClone(fix),
+      value: record.value + 7,
+    };
+    delete refix.assertionVersion;
+    refix.assertionVersion = {
+      id: expectedAssertionVersionId(refix),
+      supersedes: effectiveAssertionId(fix),
+    };
+    assertAppendGateAssertionVersions([...rawRows, fix, refix]);
+    const [mapped] = mapPolicyEngineLedgerRows([refix]);
+    const recorrection: ObservationRecordedLedgerEntry = {
+      ...correction,
+      ...mapped,
+      acceptedSequence: rawRows.length + 1,
+      acceptedAtUtc: correction.acceptedAtUtc,
+      acceptedCommit: correction.acceptedCommit,
+      ledgerCustody: correction.ledgerCustody,
+      legacyQuarantined: false,
+      resolutionRecordedAt: correction.resolutionRecordedAt,
+    };
+    const { checks, dropOuts } = historyDropOuts(
+      [...extended, recorrection],
+      [[replaced, correction, recorrection]],
+    );
+    expect(checks).toBe(holders);
+    expect(dropOuts).toEqual([]);
   });
 
   it("reports a unit-changing correction as a drop-out until it is listed", () => {

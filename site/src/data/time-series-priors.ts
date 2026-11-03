@@ -438,12 +438,21 @@ export function ledgerHistoryAtCutoff(
   const byObservationId = new Map(
     observations.map((observation) => [observation.observationId, observation]),
   );
-  return [...byObservationId.values()].sort((left, right) => {
-    const timeDelta =
-      Date.parse(firstObservedAt(left, ledger)) -
-      Date.parse(firstObservedAt(right, ledger));
-    return timeDelta || left.observationId.localeCompare(right.observationId);
-  });
+  // Each row's first print, read once: for a correction, firstObservedAt
+  // walks its chain through the whole ledger.
+  return [...byObservationId.values()]
+    .map((entry) => ({
+      entry,
+      firstPrint: Date.parse(firstObservedAt(entry, ledger)),
+    }))
+    .sort((left, right) => {
+      const timeDelta = left.firstPrint - right.firstPrint;
+      return (
+        timeDelta ||
+        left.entry.observationId.localeCompare(right.entry.observationId)
+      );
+    })
+    .map(({ entry }) => entry);
 }
 
 interface LegacyObservationSeriesIdentity {
