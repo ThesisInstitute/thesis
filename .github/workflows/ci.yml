@@ -132,11 +132,6 @@ jobs:
           import verify_record_chain as chain
           import witnessed_timeline as timeline
           records = Path("records").resolve()
-          memos = []
-          class Captured(timeline.VerificationMemo):
-              def __post_init__(self):
-                  memos.append(self)
-          timeline.VerificationMemo = Captured
           t = time.perf_counter()
           verification = chain.verify_chain(records)
           print(f"verify_chain {time.perf_counter() - t:.1f}s, {len(verification.ordered)} snapshots", flush=True)
@@ -147,7 +142,6 @@ jobs:
           print(f"extract_timeline {time.perf_counter() - t:.1f}s", flush=True)
           print("certificate identities", chain._identity_of_certificate.cache_info(), flush=True)
           print("pdf geometry", sba._sba_pdf_geometry.cache_info(), flush=True)
-          print(f"memo: {len(memos[-1].runs)} runs, {len(memos[-1].registrations)} registrations, {len(memos[-1].chunks)} chunks", flush=True)
           with tempfile.TemporaryDirectory() as directory:
               t = time.perf_counter()
               selection_tests.selection(Path(directory))
