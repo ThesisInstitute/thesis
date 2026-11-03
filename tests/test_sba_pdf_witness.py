@@ -693,6 +693,18 @@ def test_capture_refuses_unapproved_or_ambiguous_page_links(
         (b"PK malformed", "not a ZIP archive"),
         (b"not a ZIP", "not a ZIP archive"),
     ],
+    # Without ids pytest names each case after its bytes, ZIP timestamps
+    # included, and xdist stops the run if two workers collect different names.
+    ids=[
+        "parent_path",
+        "dot_segment",
+        "dot_member",
+        "missing_report",
+        "duplicate_member",
+        "encrypted_member",
+        "malformed_header",
+        "not_a_zip",
+    ],
 )
 def test_capture_refuses_unsafe_or_incomplete_zip(
     tmp_path: pathlib.Path,
