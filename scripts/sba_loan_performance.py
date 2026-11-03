@@ -802,9 +802,8 @@ def _reviewed_clip(clip: tuple[_PdfRectangle, ...] | None) -> bool:
 def _sba_pdf_geometry(
     raw: bytes, *, series: str
 ) -> tuple[_SbaPdfGeometry | None, str | None]:
-    # A pure function of the PDF bytes, and the answer is immutable. The 87 SBA
-    # witnesses in the chain on 2026-11-02 share one ZIP archive, so one
-    # verification replay parsed the same three PDFs 86 times each.
+    # A pure function of the PDF bytes, and the answer is immutable. One timeline
+    # extraction on 2026-11-02 asked for 258 parses, and only 3 PDFs differed.
     spec = _spec(series)
     if not raw.startswith(b"%PDF-"):
         return _layout_refusal("response does not start with %PDF-")

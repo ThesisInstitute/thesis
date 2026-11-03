@@ -440,10 +440,10 @@ def _certificate_identity(path: Path) -> dict[str, str]:
 def _identity_of_certificate(pem: bytes) -> dict[str, str]:
     """The identity fields of one certificate, a pure function of its bytes.
 
-    Every RFC 3161 token in the chain names one of a few certificates, and
-    each identity takes four openssl runs: 4,880 of the 6,468 that one
-    verify_chain made on 2026-11-02. All four read these bytes from stdin, so
-    they cannot see different files. A failed run raises and is not kept.
+    One verify_chain on 2026-11-02 read 1,220 identities from 5 certificates at
+    four openssl runs each: 4,880 of its 6,468 openssl runs. All four read these
+    bytes from stdin, so they cannot see different files. A failed run raises
+    and is not kept.
     """
 
     certificate_der = _run_openssl(
