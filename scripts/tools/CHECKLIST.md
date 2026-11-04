@@ -81,7 +81,7 @@ CTC earnings threshold:
 
 | Source | 10-yr cost | ~annual | notes |
 |--------|-----------:|--------:|-------|
-| **This run — build P, certified stack** (Modal, 2026-07-31, federal aggregation) | **$17.07B** | **$1.83B (2026)** | child poverty −1.2%; 6.5% gain; Gini −0.02%; per-year cost declines $1.86B→$1.53B as nominal earnings clear the old floor |
+| **This run — build P, certified stack** (Modal, 2026-07-31; re-run 2026-10-22 with versions measured in-container, identical to the cent; federal aggregation) | **$17.07B** | **$1.83B (2026)** | child poverty −1.2%; 6.5% gain; Gini −0.02%; per-year cost declines $1.86B→$1.53B as nominal earnings clear the old floor |
 | PolicyEngine published (older data build) | $14.6B | $1.6B (2026) | child poverty −0.4%; 5.9% benefit — **stale, superseded** |
 | Tax Policy Center | ~$9.5B | ~$1.0B/yr | ~$100 avg gain, bottom quintile; 3.5M families |
 

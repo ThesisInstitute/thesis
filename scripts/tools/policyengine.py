@@ -55,51 +55,94 @@ def populace_dataset_uri(build: str = POPULACE_BUILD) -> str:
     return f"hf://datasets/policyengine/populace-us/populace_us_2024.h5@{build}"
 
 
-_CERT_CACHE: dict[str, Optional[str]] = {}
+_CERT_CACHE: dict[str, Optional[dict]] = {}
+
+MODEL_PACKAGE = "policyengine-us"
+CORE_PACKAGE = "policyengine-core"
 
 
-def certified_model_version(build: str = POPULACE_BUILD) -> Optional[str]:
-    """The policyengine-us version a Populace build is CERTIFIED for, read from the
-    build's own release_manifest.json. Running any other model version against the
-    build is an uncertified pairing — the #45 audit's core check. Build P certifies
-    us==1.764.6; us==1.784.3 has no released certified build."""
+def _exact_pin(packages: Any) -> Optional[str]:
+    """The version an exact `==x.y.z` specifier names, else None. A range or a
+    missing specifier certifies nothing."""
+    spec = ((packages or [{}])[0] or {}).get("specifier", "")
+    return spec[2:] if isinstance(spec, str) and spec.startswith("==") and spec[2:] else None
+
+
+def certified_stack(build: str = POPULACE_BUILD) -> Optional[dict]:
+    """The package versions a Populace build is CERTIFIED for, read from the
+    build's own release_manifest.json: {"policyengine-us": x, "policyengine-core":
+    y or None}. None when the manifest is unreachable or names no exact model pin.
+    Build P certifies us==1.764.6 + core==3.26.11; us==1.784.3 has no released
+    certified build."""
     if build not in _CERT_CACHE:
         url = ("https://huggingface.co/datasets/policyengine/populace-us/raw/main/"
                f"releases/{build}/release_manifest.json")
         try:
             with urllib.request.urlopen(urllib.request.Request(url), timeout=60) as r:
                 man = json.loads(r.read())
-            spec = (man.get("compatible_model_packages") or [{}])[0].get("specifier", "")
-            _CERT_CACHE[build] = spec.lstrip("=") or None
+            model = _exact_pin(man.get("compatible_model_packages"))
+            core = _exact_pin(man.get("compatible_core_packages"))
+            _CERT_CACHE[build] = {MODEL_PACKAGE: model, CORE_PACKAGE: core} if model else None
         except Exception:
             _CERT_CACHE[build] = None
     return _CERT_CACHE[build]
 
 
-def certification_note(build: str, running_version: Optional[str]) -> dict:
-    """Compare the running model version to the build's certified version.
-    FAIL-CLOSED: certification is granted only on a positive match. An
-    unreachable manifest or an unknown running version REFUSES with an explicit
-    reason — it never yields certified with a silent None warning."""
-    certified = certified_model_version(build)
-    match = bool(certified and running_version and running_version == certified)
-    if match:
-        warning = None
-    elif certified is None:
-        warning = (f"CANNOT CERTIFY: release manifest for {build} unreachable — "
-                   "refusing to certify; retry with network access to the build manifest.")
+def certified_model_version(build: str = POPULACE_BUILD) -> Optional[str]:
+    """The policyengine-us version a Populace build is CERTIFIED for. Running any
+    other model version against the build is an uncertified pairing — the #45
+    audit's core check."""
+    stack = certified_stack(build)
+    return stack[MODEL_PACKAGE] if stack else None
+
+
+def certification_note(build: str, running_version: Optional[str], *,
+                       running_core_version: Optional[str] = None,
+                       validated_against: Optional[str] = None) -> dict:
+    """Certify a run's model/data pairing. FAIL-CLOSED: certified only when ALL hold —
+      1. the build's release manifest is reachable and pins a policyengine-us version;
+      2. the MEASURED running policyengine-us equals that pin;
+      3. the measured running policyengine-core equals the manifest's core pin
+         (when the manifest pins one);
+      4. the reform was validated against that same running model
+         (validated_against == "policyengine-us@<running>") — a reform checked on
+         another version can name a parameter the running model silently ignores.
+    Every refusal carries an explicit reason; nothing yields certified by default.
+    `running_*` must be measured in the process that computed (importlib.metadata
+    there), never the version a driver asked its installer for."""
+    stack = certified_stack(build)
+    certified = stack[MODEL_PACKAGE] if stack else None
+    certified_core = stack[CORE_PACKAGE] if stack else None
+    reasons: list[str] = []
+    if certified is None:
+        reasons.append(f"CANNOT CERTIFY: release manifest for {build} unreachable or pins no "
+                       "exact policyengine-us version — refusing to certify; retry with "
+                       "network access to the build manifest.")
     elif running_version is None:
-        warning = (f"CANNOT CERTIFY: running model version unknown (build certifies "
-                   f"policyengine-us=={certified}) — refusing to certify.")
-    else:
-        warning = (f"UNCERTIFIED PAIRING: build certifies policyengine-us=={certified}, "
-                   f"running {running_version}. Install the certified version.")
+        reasons.append(f"CANNOT CERTIFY: running model version unknown (build certifies "
+                       f"policyengine-us=={certified}) — refusing to certify.")
+    elif running_version != certified:
+        reasons.append(f"UNCERTIFIED PAIRING: build certifies policyengine-us=={certified}, "
+                       f"running {running_version}. Install the certified version.")
+    if certified_core is not None:
+        if running_core_version is None:
+            reasons.append(f"CANNOT CERTIFY: running policyengine-core version unknown (build "
+                           f"certifies policyengine-core=={certified_core}).")
+        elif running_core_version != certified_core:
+            reasons.append(f"UNCERTIFIED PAIRING: build certifies policyengine-core=={certified_core}, "
+                           f"running {running_core_version}. Install the certified version.")
+    if running_version is not None and validated_against != f"{MODEL_PACKAGE}@{running_version}":
+        reasons.append(f"CANNOT CERTIFY: reform validated against {validated_against or 'nothing'}, "
+                       f"not the running {MODEL_PACKAGE}@{running_version}.")
     return {
         "build": build,
         "certified_model_version": certified,
         "running_model_version": running_version,
-        "certified": match,
-        "warning": warning,
+        "certified_core_version": certified_core,
+        "running_core_version": running_core_version,
+        "validated_against": validated_against,
+        "certified": not reasons,
+        "warning": " ".join(reasons) or None,
     }
 
 
@@ -159,6 +202,36 @@ def policyengine_us_version() -> Optional[str]:
             return getattr(policyengine_us, "__version__", "unknown")
         except Exception:
             return None
+
+
+def runtime_stack() -> dict[str, Optional[str]]:
+    """The policyengine-us / policyengine-core versions INSTALLED in this process,
+    measured from package metadata. None means not measurable — never a guess, and
+    never a `__version__` fallback. This is the only admissible source for a
+    certification's running versions: a driver's own pin constant is what it asked
+    the installer for, not what ran."""
+    from importlib.metadata import PackageNotFoundError, version
+
+    out: dict[str, Optional[str]] = {}
+    for package in (MODEL_PACKAGE, CORE_PACKAGE):
+        try:
+            out[package] = version(package)
+        except PackageNotFoundError:
+            out[package] = None
+    return out
+
+
+def require_runtime_stack(expected: dict[str, str]) -> dict[str, Optional[str]]:
+    """Measure the running stack and REFUSE (raise) unless every expected package
+    is installed at exactly the expected version. Compute drivers call this in the
+    process that prices the reform, before any microsim, and record what it
+    returns."""
+    stack = runtime_stack()
+    bad = {p: (want, stack.get(p)) for p, want in expected.items() if stack.get(p) != want}
+    if bad:
+        raise PolicyEngineError("runtime stack differs from the certified pins: " + ", ".join(
+            f"{p} expected {want}, running {got or 'not installed'}" for p, (want, got) in bad.items()))
+    return stack
 
 
 def _collect_param_names(node, acc: set[str]) -> None:
@@ -349,9 +422,10 @@ class EconomyRun:
     # audit provenance: how the reform was validated + what microdata priced it
     param_source: str = ""            # policyengine-us@x.y | metadata-api | structural-only
     checked_existence: bool = False
-    pe_us_version: Optional[str] = None
-    engine: str = "api"               # "api" (hosted, opaque dataset) | "local" (pinned build)
+    pe_us_version: Optional[str] = None   # MEASURED in the computing process; None when unknowable
+    engine: str = "api"               # "api" (hosted, opaque dataset) | "local" | "modal" (pinned build)
     dataset: Optional[str] = None     # Populace build id when engine == "local"
+    pe_core_version: Optional[str] = None  # MEASURED, like pe_us_version
 
 
 def economy_impact(
@@ -384,9 +458,11 @@ def economy_impact(
     v = validate_reform(reform, country) if validate else ValidationResult(True, [], "unvalidated", False)
 
     def _finish(status: str, **kw) -> EconomyRun:
+        # pe_us_version stays None: the hosted service's model version is not
+        # knowable from here, and this process's installed version did not price it.
         run = EconomyRun(status, year, country, region, reform, kw.pop("reform_id", None), base,
                          param_source=v.param_source, checked_existence=v.checked_existence,
-                         pe_us_version=policyengine_us_version(), engine="api", dataset=dataset,
+                         pe_us_version=None, engine="api", dataset=dataset,
                          computed_at=stamp, **kw)
         _log_call(run, log_dir)
         return run
@@ -446,11 +522,14 @@ def economy_local(
     stamp = now or datetime.now(timezone.utc).isoformat()
     v = validate_reform(reform, COUNTRY) if validate else ValidationResult(True, [], "unvalidated", False)
 
+    stack = runtime_stack()
+
     def _finish(status: str, **kw) -> EconomyRun:
         run = EconomyRun(status, year, COUNTRY, "us", reform, None, baseline_id(COUNTRY),
                          param_source=v.param_source, checked_existence=v.checked_existence,
-                         pe_us_version=policyengine_us_version(), engine="local",
-                         dataset=build, computed_at=stamp, **kw)
+                         pe_us_version=stack[MODEL_PACKAGE], engine="local",
+                         dataset=build, computed_at=stamp,
+                         pe_core_version=stack[CORE_PACKAGE], **kw)
         _log_call(run, log_dir)
         return run
 
@@ -573,11 +652,16 @@ def compute_block(run: EconomyRun, provision_title: str = "") -> dict:
         summary = f"{run.year}: PolicyEngine run pending — interval widened, not blocked"
     else:
         summary = f"{run.year}: PolicyEngine {run.status} — {run.message}"
+    # local/modal runs measure their model + core versions in the process that
+    # computed; the hosted API's model version is NOT knowable from api_version
+    # (that is the service version) — pass None so certification REFUSES explicitly.
+    measured = run.engine in ("local", "modal")
     return {
         "model": "policyengine-us",
         "engine": run.engine,
         "dataset": run.dataset,
         "pe_us_version": run.pe_us_version,
+        "pe_core_version": run.pe_core_version,
         "reform": run.reform,
         "year": run.year,
         "region": run.region,
@@ -591,10 +675,9 @@ def compute_block(run: EconomyRun, provision_title: str = "") -> dict:
         "param_source": run.param_source,
         "certification": certification_note(
             run.dataset,
-            # local/modal runs know their model version; the hosted API's model
-            # version is NOT knowable from api_version (that is the service
-            # version) — pass None so certification REFUSES explicitly.
-            run.pe_us_version if run.engine in ("local", "modal") else None,
+            run.pe_us_version if measured else None,
+            running_core_version=run.pe_core_version if measured else None,
+            validated_against=run.param_source if run.checked_existence else None,
         ) if run.dataset else None,
         "caveat": "Static microsim; differs from CBO/JCT by behavioral+timing effects. One evidence stream with its own error bars.",
     }
