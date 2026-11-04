@@ -34,6 +34,10 @@ class OfficialParseError(ValueError):
     pass
 
 
+class NoValuePublishedError(OfficialParseError):
+    """The release's table shows no value for the period (a dash)."""
+
+
 @dataclasses.dataclass(frozen=True)
 class OfficialPrint:
     statistic: str
@@ -89,7 +93,7 @@ def release_instant(hour: str, minute: str, meridiem: str, date_text: str) -> st
 BLS_RELEASE_TIME = re.compile(
     r"(?:embargoed until|For"
     r" release)\s+(?:USDL-[\d-]+\s+)?(\d{1,2}):(\d{2})\s*([ap])\.m\.\s*"
-    r"\((?:ET|EDT|EST)\)\s*[A-Za-z]+,\s*([A-Za-z]+ \d{1,2}, \d{4})",
+    r"\((?:ET|EDT|EST)\)\s*(?:[A-Za-z]+,\s*)?([A-Za-z]+ \d{1,2}, \d{4})",
     re.I,
 )
 VERB_SIGN = {
@@ -139,20 +143,39 @@ def parse_bls_cpi(text: str, row: str) -> tuple[str, Decimal, Decimal | None, st
     table = re.sub(
         rf"12-mos\.?\s+ended\s+{MONTH_WORD}\.?\s+20\d\d", " ", table, flags=re.I
     )
-    header = re.findall(rf"({MONTH_WORD})\.?\s+(20\d\d)", table[:600], re.I)
+    header = [
+        month_period(*h)
+        for h in re.findall(rf"({MONTH_WORD})\.?\s+(20\d\d)", table[:600], re.I)
+    ]
     if len(header) < 7:
-        raise OfficialParseError("CPI Table A header has fewer than seven months")
-    if month_period(*header[6]) != period:
+        # Releases through early 2022 print the seven months, then "ended",
+        # then their seven years: "Dec. Jan. ... June ended 2020 2021 ... 2021".
+        split = re.search(
+            rf"((?:{MONTH_WORD}\.?\s+){{7}})ended\s+((?:20\d\d\s+){{7}})",
+            table[:600],
+            re.I,
+        )
+        if not split:
+            raise OfficialParseError("CPI Table A header has fewer than seven months")
+        months = re.findall(MONTH_WORD, split.group(1), re.I)
+        header = [month_period(m, y) for m, y in zip(months, split.group(2).split())]
+    if header[6] != period:
         raise OfficialParseError(
             f"CPI Table A's seventh column is {header[6]}, not {period}"
         )
     label = "All items" if row == "headline" else "All items less food and energy"
-    values = re.search(
-        rf"\b{re.escape(label)}\s+((?:-?\d+\.\d\s+){{7}}-?\d+\.\d)", table
-    )
+    # Older releases write ".2" and pad labels with dots; a dash marks a month
+    # with no published value (the 2025 lapse in appropriations).
+    cell = r"(?:-?\d*\.\d|-(?=\s))"
+    values = re.search(rf"\b{re.escape(label)}\.*\s+((?:{cell}\s+){{7}}{cell})", table)
     if not values:
         raise OfficialParseError(f"CPI Table A row {label!r} not found")
-    table_value = Decimal(values.group(1).split()[6])
+    cells = values.group(1).split()
+    if cells[6] == "-":
+        raise NoValuePublishedError(
+            f"CPI Table A shows no {label!r} value for {period}"
+        )
+    table_value = Decimal(cells[6])
     if row == "headline":
         lead = re.search(
             r"\(CPI-U\)\s+(increased|rose|decreased|declined|fell|was unchanged)"
@@ -207,12 +230,15 @@ def parse_bls_empsit(
             else None
         )
         return period, value, lead_value, bls_release_at(text)
+    # The row is the table's first "Unemployment rate" row; a dash marks a
+    # month with no published value (October 2025, during the 2025 lapse in
+    # appropriations), so a cell is a one-decimal number or a dash.
+    cell = r"(\d+\.\d|-(?=\s))"
     table = re.search(
         r"Summary table A\. Household data, seasonally adjusted \[Numbers in"
         r" thousands\] "
-        r"Category (.*?) Employment status .*? Unemployment"
-        r" rate\s+(\d+\.\d)\s+(\d+\.\d)\s+"
-        r"(\d+\.\d)\s+(\d+\.\d)",
+        r"Category (.*?) Employment status .{0,800}? Unemployment"
+        rf" rate\s+{cell}\s+{cell}\s+{cell}\s+{cell}",
         text,
     )
     if not table:
@@ -221,6 +247,10 @@ def parse_bls_empsit(
     if month_period(*header[3]) != period:
         raise OfficialParseError(
             "Summary table A's fourth column is not the reference month"
+        )
+    if table.group(5) == "-":
+        raise NoValuePublishedError(
+            f"Summary table A shows no unemployment rate for {period}"
         )
     value = Decimal(table.group(5))
     lead = re.search(
@@ -447,20 +477,46 @@ def parse_abs_unemployment(text: str) -> tuple[str, Decimal, Decimal | None, str
     release_at = (local - dt.timedelta(hours=ABS_OFFSETS[zone.upper()])).strftime(
         "%Y-%m-%dT%H:%M:%SZ"
     )
-    lead = re.search(
-        rf"In seasonally adjusted terms, in {reference.group(1)} {reference.group(2)}:"
-        r".{0,400}?the unemployment rate (?:was|remained at|"
-        r"(?:rose|increased|fell|decreased|declined)(?: marginally| [\d.]+ ?ppts?)? to)"
-        r"\s+(\d+\.\d)%",
+    # The seasonally adjusted paragraph ends where the trend one begins; a
+    # window that ran on would read the trend rate (the April 2026 page).
+    opening = re.search(
+        rf"In seasonally adjusted terms, in {reference.group(1)} {reference.group(2)}:",
         text,
+        re.I,
+    )
+    paragraph = (
+        text[opening.end() : opening.end() + 400].split("In trend terms")[0]
+        if opening
+        else ""
+    )
+    lead = re.search(
+        r"(?:the )?unemployment rate (?:was|remained at|"
+        r"(?:rose|increased|fell|decreased|declined)"
+        r"(?: marginally| by [\d.]+ ?ppts?| [\d.]+ ?ppts?)? to)"
+        r"\s+(\d+\.\d)%",
+        paragraph,
         re.I,
     )
     if not lead:
         raise OfficialParseError(
             "ABS seasonally adjusted unemployment sentence not found"
         )
-    table = re.search(r"Unemployment rate\s+(\d+\.\d)%\s+(\d+\.\d)%", text)
-    second = Decimal(table.group(2)) if table else None
+    # The key statistics tables come in either order; read the one labelled
+    # seasonally adjusted, whose second column is the reference month.
+    table = re.search(
+        r"Key statistics - Seasonally adjusted (\w{3})-(\d{2}) (\w{3})-(\d{2})"
+        r".{0,600}?Unemployment rate\s+(\d+\.\d)%\s+(\d+\.\d)%",
+        text,
+    )
+    if table:
+        if month_period(table.group(3), f"20{table.group(4)}") != period:
+            raise OfficialParseError(
+                "ABS table's second column is not the reference month"
+            )
+        second = Decimal(table.group(6))
+    else:
+        table = re.search(r"Unemployment rate\s+(\d+\.\d)%\s+(\d+\.\d)%", text)
+        second = Decimal(table.group(2)) if table else None
     return period, Decimal(lead.group(1)), second, release_at
 
 
