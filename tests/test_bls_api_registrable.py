@@ -1130,9 +1130,12 @@ def test_the_guard_follows_chronicles_supersede_links() -> None:
     # A later row with the same record id replaces nothing: Chronicle keeps
     # both, so the thousands row still counts.
     assert verdict([june, millions])
-    # A row written before versioning cannot be superseded yet: the generator
-    # refuses the link ("supersedes unknown version"), so it keeps counting.
+    # A row written before versioning drops out once a link names its av2
+    # content address, as the append gate addresses it (chronicle#306 taught
+    # the generator the same), and keeps counting for any other link.
+    address = resolve_pending.assertion_version(june)["id"]
     assert verdict([june, _versioned(millions, "v2", supersedes="content-address")])
+    assert verdict([june, _versioned(millions, "v2", supersedes=address)]) is None
     # A versioned row drops out once a link names it, whatever record id or
     # concept the replacement carries (a split).
     v1 = _versioned(june, "v1")
@@ -1143,6 +1146,38 @@ def test_the_guard_follows_chronicles_supersede_links() -> None:
     split["measure"]["concept"] = "another.series.june_2026"
     split["measure"]["unit"] = "thousands"
     assert verdict([v1, split]) is None
+
+
+def test_the_guard_compares_the_unit_chronicle_stores_once_migrated() -> None:
+    # Once the ledger holds no scale, the resolver stores a millions spec's
+    # fact in count, so the June row restated in count is the same unit and
+    # the row still in thousands is not.
+    june = _chronicle_june_row()
+    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    restated, _ = resolve_pending.restatement_row(
+        june,
+        line,
+        run_dir=resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z"),
+        retrieved_at="2026-11-04T00:00:00Z",
+        ledger_repo_sha="f" * 40,
+    )
+    assert restated["measure"]["unit"] == "count"
+    assert restated["value"] == resolve_pending.ledger_units.to_base(
+        june["value"], "thousands"
+    )
+
+    def verdict(rows: list[dict], *, base_units: bool) -> str | None:
+        return resolve_pending.bls_ledger_unit_conflict(
+            rows, PRODUCTION, spec, base_units=base_units
+        )
+
+    assert verdict([june, restated], base_units=True) is None
+    # As recorded, the spec emits millions, which the restated row is not.
+    assert verdict([june, restated], base_units=False)
+    refusal = verdict([june], base_units=True)
+    assert refusal is not None and "['thousands']" in refusal
+    assert "this spec emits 'millions', which Chronicle stores as 'count'" in refusal
 
 
 def test_the_guard_matches_the_concept_under_another_record_id() -> None:

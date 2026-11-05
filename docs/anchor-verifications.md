@@ -1520,11 +1520,14 @@ read in its code:
   series plus a spelling of the row's own month (`2026_06`, `2026-06`,
   `june_2026`, `jun_2026`). Chronicle strips those spellings and may strip or
   merge more, so its identity holds at least these rows.
-- A row drops out of the current view only when another row's
-  `assertionVersion.supersedes` names its version id. A row written before
-  versioning always counts, because Chronicle's generator refuses a link to
-  one (below). If Chronicle changes that, the guard keeps refusing until a
-  reviewed change follows it.
+- A row drops out of the current view when another row's
+  `assertionVersion.supersedes` names its effective id, as receipt's append
+  gate reads it: its explicit id, or, for a row written before versioning,
+  its av2 content address. Chronicle's generator follows the same rule since
+  chronicle#306.
+- Once the ledger holds no current scaled row, the resolver stores a fact in
+  its unit's base unit, so the guard compares that unit: `count` for a spec
+  that emits millions.
 
 So a refusal means Chronicle would refuse the same fact; the guard can miss a
 conflict but not invent one. `test_every_other_registrable_lineage_already_holds_the_unit_it_emits`
@@ -1541,24 +1544,19 @@ closes. A registered target in conflict would therefore raise the alert every
 day, and before #269 stop publishing every day. That is why registration is
 held rather than left to the guard.
 
-**What this needs.** The obvious curation does not work yet. The six June rows
-sit in the ledger's immutable prefix (lines 119 to 124) and were written
-before assertion versioning, so they carry no `assertionVersion`.
-`build_series_catalog.py` learns version ids only from rows that carry one, so
-a correction that supersedes a June row exits 1 with "supersedes unknown
-version", although receipt's append gate would accept it. Chronicle therefore
-needs one of two changes first. Either the generator addresses rows written
-before versioning by their content-address id, as receipt does, and six
-corrections then restate June in millions. Or one identity may hold units that
-convert by scale. That is Max's decision, d397. Either way, the change that
-lifts the hold must also update `bls_ledger_unit_conflict`: it always counts
-the six pre-versioning June rows, so it would keep refusing after corrections
-restate them, and it compares units strictly. Lifting the hold without that
-brings back the daily refusals. If
+**What lifts the hold.** Max ruled on 2026-10-21, superseding d397, that
+Chronicle stores plain numbers. The six June rows sit in the ledger's
+immutable prefix (lines 119 to 124), in thousands, and carry no
+`assertionVersion`. The resolver's restatement run (`--restate-base-units`,
+AGENTS.md) restates them in `count`, each superseding its row's content
+address, which chronicle#306 taught the generator to read. From then on the
+resolver stores the specs' millions in `count` too, and the guard compares
+the units Chronicle stores, so an A-19 fact no longer conflicts with June.
+The change that lifts the hold follows that run. If
 it lifts in time for the roller to mint October before its 2026-11-06 release,
 October is the first A-19 target on this route. Otherwise the roller skips the
 released months, and the first target is the next unreleased one. The 18
-`generic-url` registrations are also in millions and wait on the same change.
+`generic-url` registrations also carry millions and wait on the same run.
 
 ## Fixtures
 
