@@ -463,7 +463,8 @@ def test_the_alert_reads_the_refused_gate_and_keeps_its_place() -> None:
 def test_no_step_before_the_gate_can_hide_a_failure_from_it() -> None:
     # The gate's failure means "the loop worked" only while every earlier
     # step that publishes fails the job when it fails. The one exception is
-    # the status page, which runs always() and may not fail the job.
+    # the status page, which runs always() and may not fail the job. A
+    # restatement run examines no reference, so it publishes no status.
     status_page = "Publish why each overdue forecast has not resolved"
     for step in _steps():
         if step.get("name") == "Fail the run on refused rows":
@@ -471,7 +472,7 @@ def test_no_step_before_the_gate_can_hide_a_failure_from_it() -> None:
         condition = str(step.get("if", ""))
         if step.get("name") == status_page:
             assert step.get("continue-on-error") is True
-            assert condition == "always()"
+            assert condition == "always() && inputs.restate_base_units != true"
             continue
         assert not step.get("continue-on-error"), step.get("name")
         assert not re.search(r"\b(always|failure|cancelled)\(\)", condition), step

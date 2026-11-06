@@ -71,6 +71,7 @@ from urllib.parse import quote, urlparse
 from xml.etree import ElementTree as ET
 from zoneinfo import ZoneInfo
 
+import ledger_units
 import ssa_official_pages
 import va_mmwr
 import verify_records_attestations as records_provenance
@@ -9150,7 +9151,11 @@ def bls_api_verified_anchors(spec: Mapping[str, Any]) -> dict[str, float] | None
 
 
 def bls_ledger_unit_conflict(
-    ledger_rows: list[Mapping[str, Any]], stem: str, spec: Mapping[str, Any]
+    ledger_rows: list[Mapping[str, Any]],
+    stem: str,
+    spec: Mapping[str, Any],
+    *,
+    base_units: bool = False,
 ) -> str | None:
     """Why a fact for ``stem`` would break Chronicle's catalog, or None.
 
@@ -9164,12 +9169,12 @@ def bls_ledger_unit_conflict(
     keyless request.) The Table A-19 lineages hold a June 2026 observation in
     thousands, and these specs emit millions.
 
-    Current rows follow Chronicle's rule. A row drops out only when another
-    row's ``assertionVersion.supersedes`` names its version id. A row written
-    before assertion versioning carries no id, and the generator refuses a
-    link to one ("supersedes unknown version"), so such a row always counts.
-    If Chronicle later accepts those links, this check keeps refusing until a
-    reviewed change follows it: it fails closed.
+    Current rows follow Chronicle's append gate (receipt 0.6.2), which the
+    generator follows too since chronicle#306: a row drops out when another
+    row's ``assertionVersion.supersedes`` names its effective id, its explicit
+    id or, for a row written before assertion versioning, its av2 content
+    address. With ``base_units`` the fact is stored in its unit's base unit
+    (``base_unit_row``), so the check compares that unit.
 
     A row belongs to the series when its measure concept is ``stem`` itself or
     ``stem`` plus a spelling of the row's own month (``2026_06``,
@@ -9187,16 +9192,11 @@ def bls_ledger_unit_conflict(
         (entity.get("name"), entity.get("role")),
         (US_GEOGRAPHY["level"], US_GEOGRAPHY["id"], US_GEOGRAPHY["vintage"]),
     )
-    superseded = set()
-    for row in ledger_rows:
-        version = row.get("assertionVersion")
-        if isinstance(version, Mapping) and version.get("supersedes"):
-            superseded.add(str(version["supersedes"]))
+    stored = spec["unit"]
+    if base_units:
+        stored = ledger_units.base_unit(stored) or stored
     units = set()
-    for row in ledger_rows:
-        version = row.get("assertionVersion")
-        if isinstance(version, Mapping) and str(version.get("id")) in superseded:
-            continue
+    for row in current_ledger_rows([dict(row) for row in ledger_rows]):
         concept = (row.get("measure") or {}).get("concept")
         if not isinstance(concept, str) or not _concept_names_series(
             concept, stem, row.get("period")
@@ -9209,13 +9209,16 @@ def bls_ledger_unit_conflict(
             (geography.get("level"), geography.get("id"), geography.get("vintage")),
         )
         unit = (row.get("measure") or {}).get("unit")
-        if row_identity == identity and unit is not None and unit != spec["unit"]:
+        if row_identity == identity and unit is not None and unit != stored:
             units.add(str(unit))
     if not units:
         return None
+    emits = repr(spec["unit"])
+    if stored != spec["unit"]:
+        emits += f", which Chronicle stores as {stored!r}"
     return (
         f"Chronicle already holds {sorted(units)} observations of {stem}, and "
-        f"this spec emits {spec['unit']!r}: the catalog would refuse the "
+        f"this spec emits {emits}: the catalog would refuse the "
         "whole append with a unit conflict. Chronicle must curate the lineage "
         "to one unit first"
     )
@@ -12916,9 +12919,11 @@ def claims_corrections(
     active row (the latest row for that id, as Chronicle's append gate reads
     it) and that row was read from a later DOL release than the first print.
     An entry whose version is already superseded is done and is skipped, as
-    is one whose record the ledger does not hold. Runs with nothing pending
-    exit before reading the ledger, so corrections ride on runs that have
-    pending work.
+    is one whose record the ledger does not hold. A base-unit restatement
+    supersedes a version without correcting it, so an entry that lists a
+    restated version is refused: it must list the restatement. Runs with
+    nothing pending exit before reading the ledger, so corrections ride on
+    runs that have pending work.
     """
 
     if corrections is None:
@@ -12926,16 +12931,25 @@ def claims_corrections(
     vintages = vintages or ClaimsVintages()
     active: dict[str, dict[str, Any]] = {}
     superseded: set[str] = set()
+    restated_by: dict[str, str] = {}
     for row in ledger_rows:
         version = row.get("assertionVersion")
         if isinstance(version, Mapping) and version.get("supersedes"):
             superseded.add(str(version["supersedes"]))
+            if version.get("relation") == UNIT_RESTATEMENT:
+                restated_by[str(version["supersedes"])] = str(version.get("id"))
         active[str(row.get("source_record_id"))] = row
     fetched: list[ClaimsFetched] = []
     supersedes_by_ref: dict[str, str] = {}
     refusals: list[str] = []
     for ref, version_id in sorted(corrections.items()):
         row = active.get(ref)
+        if version_id in restated_by:
+            refusals.append(
+                f"{ref} — listed version {version_id} was restated in base units "
+                f"by {restated_by[version_id]}; list that version instead"
+            )
+            continue
         if version_id in superseded or row is None:
             # Done, or a ledger that never held the record (a fixture).
             continue
@@ -16167,6 +16181,7 @@ def propose_ledger_append(
     target_contracts: Mapping[str, Mapping[str, Any]] | None = None,
     arch_checks_policy: str = ARCH_CHECKS_POLICY,
     run_url: str | None = None,
+    what: str = "first-print observation(s)",
 ) -> str:
     """Publish one fully witnessed commit through the reviewed append gate.
 
@@ -16174,7 +16189,8 @@ def propose_ledger_append(
     (catalog_curation), so Chronicle's Arch checks can pass on it, and the
     merge awaits Arch checks under ``arch_checks_policy``: "refuse" treats
     it as a required gate, "land" merges on the two append gates and files
-    a red verdict as curation work.
+    a red verdict as curation work. ``what`` names the appended rows in the
+    commit and the pull request.
     """
 
     environment_signing_key = os.environ.pop(PRODUCER_SIGNING_KEY_ENV, None)
@@ -16231,7 +16247,7 @@ def propose_ledger_append(
         print(f"  catalog curation note: {line}")
     for line in curation.residual:
         print(f"  CATALOG CURATION NEEDED (Arch checks will fail): {line}")
-    title = f"Record {added} first-print observation(s) via resolve_pending.py"
+    title = f"Record {added} {what} via resolve_pending.py"
     message = title
     if curation.files:
         message += (
@@ -16286,7 +16302,7 @@ def propose_ledger_append(
                     "base": branch,
                     "body": (
                         "Automated witnessed append proposal from "
-                        f"resolve_pending.py: {added} first-print observation(s) "
+                        f"resolve_pending.py: {added} {what} "
                         f"built against {base_sha}. The proposal commit contains "
                         "the ledger append and its complete four-sibling release, "
                         "and "
@@ -16708,6 +16724,31 @@ def source_binding_projection(
     }
 
 
+def response_archive_reference(
+    run_dir: pathlib.Path,
+    *,
+    series_id: str,
+    vintage: str,
+    raw: bytes,
+    extension: str = "csv",
+) -> tuple[dict[str, Any], bytes]:
+    """One deterministic gzip archive's hash reference and bytes, unwritten."""
+    raw_sha256 = hashlib.sha256(raw).hexdigest()
+    compressed = gzip.compress(raw, mtime=0)
+    gzip_sha256 = hashlib.sha256(compressed).hexdigest()
+    name = f"{series_id.lower()}-{vintage}-{raw_sha256[:16]}.{extension}.gz"
+    path = run_dir / "responses" / name
+    reference = {
+        "path": path.relative_to(ROOT).as_posix(),
+        "sha256": raw_sha256,
+        "bytes": len(raw),
+        "gzipSha256": gzip_sha256,
+        "gzipBytes": len(compressed),
+        "contentEncoding": "gzip",
+    }
+    return reference, compressed
+
+
 def archive_response(
     run_dir: pathlib.Path,
     *,
@@ -16717,21 +16758,13 @@ def archive_response(
     extension: str = "csv",
 ) -> dict[str, Any]:
     """Write one deterministic gzip archive and return its hash reference."""
-    raw_sha256 = hashlib.sha256(raw).hexdigest()
-    compressed = gzip.compress(raw, mtime=0)
-    gzip_sha256 = hashlib.sha256(compressed).hexdigest()
-    name = f"{series_id.lower()}-{vintage}-{raw_sha256[:16]}.{extension}.gz"
-    path = run_dir / "responses" / name
+    reference, compressed = response_archive_reference(
+        run_dir, series_id=series_id, vintage=vintage, raw=raw, extension=extension
+    )
+    path = ROOT / reference["path"]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(compressed)
-    return {
-        "path": path.relative_to(ROOT).as_posix(),
-        "sha256": raw_sha256,
-        "bytes": len(raw),
-        "gzipSha256": gzip_sha256,
-        "gzipBytes": len(compressed),
-        "contentEncoding": "gzip",
-    }
+    return reference
 
 
 def attach_resolution_provenance(
@@ -16745,6 +16778,7 @@ def attach_resolution_provenance(
     ledger_repo_sha: str,
     target_contracts: dict[str, dict[str, Any]],
     extension: str = "csv",
+    base_units: bool = False,
 ) -> dict[str, Any]:
     registration = target_contracts.get(str(row["source_record_id"]))
     projection = None
@@ -16752,6 +16786,11 @@ def attach_resolution_provenance(
         # Projection is a refusal gate. Run it before writing any response so
         # a rejected row cannot leave an orphan archive in a mixed run.
         projection = source_binding_projection(registration, row, raw)
+    if base_units:
+        # After the contract check, which reads the registered unit, and
+        # before the archive, so a value with no exact base form is refused
+        # as a contract mismatch is.
+        row = base_unit_row(row)
     response_archive = archive_response(
         run_dir,
         series_id=series_id,
@@ -16769,8 +16808,673 @@ def attach_resolution_provenance(
     output["assertionVersion"] = assertion_version(output)
     if registration:
         output["targetContentHash"] = registration["targetContentHash"]
-        output["sourceBindingProjection"] = projection
+        # The append gate holds a projection's unit to its row's, so a row
+        # stored in base units carries its base unit here too. The site reads
+        # the registered unit back from the recorded pair.
+        output["sourceBindingProjection"] = {
+            **projection,
+            "unit": (output.get("measure") or {}).get("unit"),
+        }
     return output
+
+
+# Chronicle stores plain numbers (Max, 2026-10-21): a row says 7716000 in
+# count, not 7.716 in millions, and keeps the pair it was recorded as in
+# source.recorded_value and source.recorded_unit. Registered contracts keep
+# their units, and so do the adapters, plausibility gates and the contract
+# check above; only the appended row converts. The resolver writes base units
+# once the ledger holds no current row in a scaled unit, which the restatement
+# run (--restate-base-units) brings about, so no series ever holds both
+# vocabularies. The site reads both shapes (site/src/data/ledger-restatements.ts)
+# and this section mirrors its checks.
+
+UNIT_RESTATEMENT = "unit_restatement"
+
+
+def _json_object(value: object) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def effective_assertion_id(row: Mapping[str, Any]) -> str:
+    """The id Chronicle's append gate gives a row (receipt 0.6.2).
+
+    The row's explicit ``assertionVersion.id``, else, for a row written before
+    assertion versioning, its av2 content address. A correction names this id.
+    """
+
+    version = row.get("assertionVersion")
+    if isinstance(version, dict) and version.get("id"):
+        return str(version["id"])
+    return assertion_version(dict(row))["id"]
+
+
+def current_ledger_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The rows no other row supersedes, as receipt's effective_current_rows."""
+
+    superseded = set()
+    for row in rows:
+        version = row.get("assertionVersion")
+        if isinstance(version, dict) and version.get("supersedes"):
+            superseded.add(str(version["supersedes"]))
+    return [row for row in rows if effective_assertion_id(row) not in superseded]
+
+
+def scaled_current_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The current rows whose unit carries a scale word, such as thousands."""
+
+    return [
+        row
+        for row in current_ledger_rows(rows)
+        if ledger_units.base_unit(_json_object(row.get("measure")).get("unit"))
+        is not None
+    ]
+
+
+def base_unit_row(row: dict[str, Any]) -> dict[str, Any]:
+    """The row in its unit's base unit, with the pair it was recorded as.
+
+    A row in a unit with no scale word comes back unchanged. A value with no
+    exact form in the base unit raises ``ledger_units.LedgerUnitError``, a
+    ValueError, so the caller refuses that row alone.
+    """
+
+    measure = _json_object(row.get("measure"))
+    unit = measure.get("unit")
+    base = ledger_units.base_unit(unit)
+    if base is None:
+        return row
+    source = _json_object(row.get("source"))
+    if "recorded_value" in source or "recorded_unit" in source:
+        raise ledger_units.LedgerUnitError(
+            f"{row.get('source_record_id')} already records a pair"
+        )
+    return {
+        **row,
+        "value": ledger_units.to_base(row.get("value"), unit),
+        "measure": {**measure, "unit": base},
+        "source": {**source, "recorded_value": row["value"], "recorded_unit": unit},
+    }
+
+
+def check_recorded_pair(row: Mapping[str, Any]) -> None:
+    """Refuse a recorded pair that does not state the stored value exactly.
+
+    ledger-restatements.ts ``recordedPair``: a pair is a number in a scaled
+    unit, the row stores that unit's base unit, and the value converts to the
+    stored value exactly. A row with neither key passes.
+    """
+
+    source = _json_object(row.get("source"))
+    if "recorded_value" not in source and "recorded_unit" not in source:
+        return
+    name = row.get("source_record_id")
+    value = source.get("recorded_value")
+    unit = source.get("recorded_unit")
+    if type(value) not in (int, float) or ledger_units.base_unit(unit) is None:
+        raise ledger_units.LedgerUnitError(
+            f"{name} records {value!r} {unit!r}, which is not a number in a "
+            "scaled unit"
+        )
+    stored = _json_object(row.get("measure")).get("unit")
+    if stored != ledger_units.base_unit(unit):
+        raise ledger_units.LedgerUnitError(
+            f"{name} records {unit} but stores {stored!r}"
+        )
+    stored_value = row.get("value")
+    if (
+        type(stored_value) not in (int, float)
+        or ledger_units.to_base(value, unit) != stored_value
+    ):
+        raise ledger_units.LedgerUnitError(
+            f"{name} records {value!r} {unit} but stores {stored_value!r}"
+        )
+
+
+def _without(value: object, keys: tuple[str, ...]) -> dict[str, Any]:
+    return {key: item for key, item in _json_object(value).items() if key not in keys}
+
+
+def restated_content(row: Mapping[str, Any]) -> dict[str, Any]:
+    """The row with every field a restatement may change taken out.
+
+    ledger-restatements.ts ``restatedContent``: the stated value and unit, the
+    row's own provenance, and text that names the old scale.
+    """
+
+    content = _without(
+        row,
+        (
+            "value",
+            "assertionVersion",
+            "retrievedAt",
+            "ledgerRepoSha",
+            "sourceVintage",
+            "responseArchive",
+        ),
+    )
+    content["measure"] = _without(row.get("measure"), ("unit",))
+    content["source"] = _without(
+        row.get("source"), ("recorded_value", "recorded_unit", "method_notes")
+    )
+    if "sourceBindingProjection" in row:
+        content["sourceBindingProjection"] = _without(
+            row["sourceBindingProjection"], ("unit", "responseSha256")
+        )
+    return content
+
+
+def assert_restates(
+    prior: Mapping[str, Any], prior_line: str, restatement: Mapping[str, Any]
+) -> None:
+    """Refuse a restatement that says anything but its row, in base units.
+
+    ledger-restatements.ts ``assertRestates``, check for check. The site goes
+    on grading the row a restatement names, which is safe only because the
+    two state one quantity.
+    """
+
+    name = restatement.get("source_record_id")
+
+    def refuse(why: str) -> ledger_units.LedgerUnitError:
+        return ledger_units.LedgerUnitError(f"restatement of {name} {why}")
+
+    unit = _json_object(prior.get("measure")).get("unit")
+    base = ledger_units.base_unit(unit)
+    if base is None:
+        raise refuse(f"names a row in {unit!r}, which holds no scale")
+    stored = _json_object(restatement.get("measure")).get("unit")
+    if stored != base:
+        raise refuse(f"stores {stored!r}, not the base unit of {unit}")
+    source = _json_object(restatement.get("source"))
+    recorded = source.get("recorded_value")
+    if (
+        type(recorded) not in (int, float)
+        or recorded != prior.get("value")
+        or source.get("recorded_unit") != unit
+    ):
+        raise refuse(
+            f"records {recorded!r} {source.get('recorded_unit')!r} but the row "
+            f"says {prior.get('value')!r} {unit}"
+        )
+    expected = ledger_units.to_base(prior.get("value"), unit)
+    value = restatement.get("value")
+    if type(value) not in (int, float) or value != expected:
+        raise refuse(f"stores {value!r}, not {expected!r}")
+    line_sha256 = hashlib.sha256(prior_line.encode("utf-8")).hexdigest()
+    if _json_object(restatement.get("responseArchive")).get("sha256") != line_sha256:
+        raise refuse("does not archive the exact line it restates")
+    if canonical_bytes(restated_content(restatement)) != canonical_bytes(
+        restated_content(prior)
+    ):
+        raise refuse("changes more than the value and unit")
+
+
+def check_restatements(lines: list[str]) -> list[dict[str, Any]]:
+    """Check a ledger's restatements and recorded pairs as the site does.
+
+    ledger-restatements.ts ``foldLedgerRestatements``: a restatement names an
+    earlier row by its effective id and passes ``assert_restates`` against
+    that row's exact line, any other ``relation`` is refused, and a recorded
+    pair on any other row must state its value. Returns the restatements.
+    """
+
+    line_of_id: dict[str, int] = {}
+    restatements: list[dict[str, Any]] = []
+    for index, line in enumerate(lines):
+        row = json.loads(line)
+        version = _json_object(row.get("assertionVersion"))
+        if "relation" in version:
+            if version["relation"] != UNIT_RESTATEMENT:
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} has assertionVersion.relation "
+                    f"{version['relation']!r}, which the site does not read"
+                )
+            replaced = version.get("supersedes")
+            # The site refuses a supersedes that is not a string rather than
+            # coercing it (ledger-current-view.ts stringOrRefuse).
+            prior = line_of_id.get(replaced) if isinstance(replaced, str) else None
+            if prior is None:
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} restates {replaced!r}, which no earlier "
+                    "row holds"
+                )
+            assert_restates(json.loads(lines[prior]), lines[prior], row)
+            restatements.append(row)
+        else:
+            check_recorded_pair(row)
+        line_of_id[effective_assertion_id(row)] = index
+    return restatements
+
+
+# The clause a few rows' method notes use to name their scale ("expressed in
+# thousands", "billions of dollars"). A restatement drops it, because its
+# value carries no scale, and refuses notes that still name one, so a phrasing
+# this misses is fixed here before it reaches the ledger.
+_SCALE_CLAUSE = re.compile(
+    r",? (?:expressed in (?:GBP |USD )?(?:thousands|millions|billions)"
+    r"|(?:millions|billions) of dollars)(?=\.|;|$)",
+    re.IGNORECASE,
+)
+_SCALE_WORD = re.compile(r"\b(?:thousands?|millions?|billions?)\b", re.IGNORECASE)
+
+
+def restated_method_notes(
+    notes: object, value: object, unit: str, prior_id: str
+) -> str:
+    text = _SCALE_CLAUSE.sub("", notes if isinstance(notes, str) else "").strip()
+    if _SCALE_WORD.search(text):
+        raise ledger_units.LedgerUnitError(
+            f"method notes still name a scale once restated: {text!r}"
+        )
+    if text and not text.endswith("."):
+        text += "."
+    sentence = (
+        f"Restates {value!r} {unit} (assertion {prior_id}) in base units; the "
+        "quantity does not change."
+    )
+    return f"{text} {sentence}".strip()
+
+
+def restatement_row(
+    prior: dict[str, Any],
+    prior_line: str,
+    *,
+    run_dir: pathlib.Path,
+    retrieved_at: str,
+    ledger_repo_sha: str,
+) -> tuple[dict[str, Any], bytes]:
+    """The row that states a scaled row in base units, and its archive's bytes.
+
+    A deep copy of the row with its value and unit in base units, the pair it
+    was recorded as, this run's provenance and an archive of the row's exact
+    line: a restatement rests on the row it restates, not on a new fetch. A
+    row written before provenance has no source vintage, so it takes the
+    row's ``observed_at``, which the gate requires to be a date.
+    """
+
+    unit = _json_object(prior.get("measure")).get("unit")
+    base = ledger_units.base_unit(unit)
+    if base is None:
+        raise ledger_units.LedgerUnitError(
+            f"{prior.get('source_record_id')} is in {unit!r}, which holds no scale"
+        )
+    prior_id = effective_assertion_id(prior)
+    vintage = str(prior.get("sourceVintage") or prior["observed_at"])
+    archive, compressed = response_archive_reference(
+        run_dir,
+        series_id=str(prior["source_record_id"]),
+        vintage=vintage,
+        raw=prior_line.encode("utf-8"),
+        extension="json",
+    )
+    row = copy.deepcopy(prior)
+    row["value"] = ledger_units.to_base(prior["value"], unit)
+    row["measure"]["unit"] = base
+    source = row.setdefault("source", {})
+    source["recorded_value"] = prior["value"]
+    source["recorded_unit"] = unit
+    source["method_notes"] = restated_method_notes(
+        source.get("method_notes"), prior["value"], unit, prior_id
+    )
+    row["ledgerRepoSha"] = ledger_repo_sha
+    row["sourceVintage"] = vintage
+    row["retrievedAt"] = retrieved_at
+    row["responseArchive"] = archive
+    if "sourceBindingProjection" in prior:
+        row["sourceBindingProjection"] = {
+            **prior["sourceBindingProjection"],
+            "unit": base,
+            "responseSha256": archive["sha256"],
+        }
+    row["assertionVersion"] = {
+        "id": assertion_version(row)["id"],
+        "supersedes": prior_id,
+        "relation": UNIT_RESTATEMENT,
+    }
+    return row, compressed
+
+
+def ledger_line(row: Mapping[str, Any]) -> str:
+    """The line the resolver appends for a row."""
+
+    return json.dumps(row, separators=(",", ":"))
+
+
+def restatement_rows(
+    lines: list[str], *, retrieved_at: str, ledger_repo_sha: str
+) -> list[tuple[dict[str, Any], bytes]]:
+    """The restatement of every current scaled row, in ledger order.
+
+    Each comes with its archive's bytes. ``lines`` are the ledger's exact
+    lines, which the archives hold.
+    """
+
+    rows = [json.loads(line) for line in lines]
+    scaled = {id(row) for row in scaled_current_rows(rows)}
+    run_dir = resolution_run_dir(retrieved_at)
+    return [
+        restatement_row(
+            row,
+            line,
+            run_dir=run_dir,
+            retrieved_at=retrieved_at,
+            ledger_repo_sha=ledger_repo_sha,
+        )
+        for row, line in zip(rows, lines)
+        if id(row) in scaled
+    ]
+
+
+def restatement_manifest(
+    rows: list[dict[str, Any]], *, ledger_repo: str, ledger_branch: str
+) -> dict[str, Any]:
+    """A restatement run's manifest: a function of its rows alone."""
+
+    return {
+        "schemaVersion": "thesis_resolution_run_v1",
+        "retrievedAt": rows[0]["retrievedAt"],
+        # A restatement records no first print: its response is the row it
+        # restates, which carries its own evidence.
+        "firstPrintEvidenceRequired": False,
+        "ledgerRepo": ledger_repo,
+        "ledgerBranch": ledger_branch,
+        "ledgerRepoSha": rows[0]["ledgerRepoSha"],
+        "facts": [
+            {
+                "dataPointId": row["source_record_id"],
+                "sourceVintage": row["sourceVintage"],
+                "retrievedAt": row["retrievedAt"],
+                "targetContentHash": row.get("targetContentHash"),
+                "responseArchive": row["responseArchive"],
+                "supersedes": row["assertionVersion"]["supersedes"],
+            }
+            for row in rows
+        ],
+    }
+
+
+def restore_restatement_runs(
+    lines: list[str], *, ledger_repo: str, ledger_branch: str, write: bool = True
+) -> list[pathlib.Path]:
+    """Rebuild the records of restatement runs whose archives Thesis lacks.
+
+    A run's archives and manifest live only on its runner until the marker
+    commit, so a run that merged into Chronicle and then failed would leave
+    rows naming archives no record holds. A restatement's archive is its
+    row's exact line, gzipped with mtime 0, and its manifest is a function of
+    its rows, so the run rebuilds to the byte. Refuses an archive that would
+    differ from the one its row names, and a run directory that exists in
+    part. Returns the run directories it rebuilt, or would rebuild.
+    """
+
+    rows = [json.loads(line) for line in lines]
+    line_of_id: dict[str, int] = {}
+    missing: dict[pathlib.Path, list[tuple[dict[str, Any], str]]] = {}
+    for index, row in enumerate(rows):
+        version = _json_object(row.get("assertionVersion"))
+        if version.get("relation") == UNIT_RESTATEMENT:
+            run_dir = resolution_run_dir(str(row.get("retrievedAt")))
+            path = ROOT / str(_json_object(row.get("responseArchive")).get("path"))
+            if path.parent != run_dir / "responses":
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} archives {path} outside its run, {run_dir}"
+                )
+            if not path.exists():
+                prior = line_of_id.get(str(version.get("supersedes")))
+                if prior is None:
+                    raise ledger_units.LedgerUnitError(
+                        f"line {index + 1} restates a row no earlier line holds"
+                    )
+                missing.setdefault(run_dir, []).append((row, lines[prior]))
+        line_of_id[effective_assertion_id(row)] = index
+    for run_dir, members in missing.items():
+        if run_dir.exists():
+            raise ledger_units.LedgerUnitError(
+                f"{run_dir} lacks {len(members)} restatement archive(s); "
+                "refusing to rebuild a run directory in part"
+            )
+        if not write:
+            continue
+        try:
+            for row, prior_line in members:
+                reference, compressed = response_archive_reference(
+                    run_dir,
+                    series_id=str(row["source_record_id"]),
+                    vintage=str(row["sourceVintage"]),
+                    raw=prior_line.encode("utf-8"),
+                    extension="json",
+                )
+                if reference != row["responseArchive"]:
+                    raise ledger_units.LedgerUnitError(
+                        f"the rebuilt archive of {row['source_record_id']} is "
+                        f"{reference}, not the {row['responseArchive']} its row names"
+                    )
+                path = ROOT / reference["path"]
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(compressed)
+            finalize_resolution_manifest(
+                run_dir,
+                restatement_manifest(
+                    [row for row, _ in members],
+                    ledger_repo=ledger_repo,
+                    ledger_branch=ledger_branch,
+                ),
+            )
+        except BaseException:
+            shutil.rmtree(run_dir, ignore_errors=True)
+            raise
+    return list(missing)
+
+
+def restatement_catalog_failure(
+    repo: str,
+    base_sha: str,
+    path: str,
+    base_content: str,
+    rows: list[dict[str, Any]],
+) -> str | None:
+    """Why Chronicle's series catalog would refuse these restatements, or None.
+
+    All or nothing, unlike ``ledger_catalog_refusals``: the generator must
+    exist at the base and pass on the base plus every restatement, the UUID
+    registry must not move, and each series must keep every field but its
+    unit, which moves to that unit's base unit.
+    """
+
+    tree = _fetch_repository_tree(repo, base_sha, path)
+    catalog_path = "ledger/series_catalog.json"
+    base_catalog = tree.files.get(catalog_path)
+    base_registry = tree.files.get(_SERIES_UUID_REGISTRY)
+    if base_catalog is None or base_registry is None:
+        return f"{repo}@{base_sha} holds no series catalog or UUID registry"
+    candidate = (
+        base_content.rstrip("\n")
+        + "\n"
+        + "\n".join(ledger_line(row) for row in rows)
+        + "\n"
+    )
+    with tempfile.TemporaryDirectory(prefix="thesis-restatement-preflight-") as name:
+        stage = pathlib.Path(name)
+        _materialize_repository_tree(stage, tree)
+        generator = stage / "scripts" / "build_series_catalog.py"
+        if not generator.is_file():
+            return f"{repo}@{base_sha} holds no series-catalog generator"
+        (stage / _validated_repository_path(path)).write_text(
+            candidate, encoding="utf-8"
+        )
+        completed = subprocess.run(
+            [sys.executable, str(generator)],
+            cwd=stage,
+            capture_output=True,
+            text=True,
+        )
+        if completed.returncode != 0:
+            output = completed.stderr.strip() or completed.stdout.strip()
+            return (
+                f"series-catalog generator exit {completed.returncode}: "
+                f"{' '.join(output.splitlines())[-500:]}"
+            )
+        registry = (stage / _SERIES_UUID_REGISTRY).read_bytes()
+        catalog = json.loads((stage / catalog_path).read_text(encoding="utf-8"))
+    if registry != base_registry:
+        return "restating would move the series UUID registry"
+    return restatement_catalog_drift(json.loads(base_catalog), catalog)
+
+
+def restatement_catalog_drift(
+    before: Mapping[str, Any], after: Mapping[str, Any]
+) -> str | None:
+    """How a restatement moved the catalog beyond units, or None."""
+
+    moving = {"observations_sha256", "observation_rows", "series"}
+    for key in sorted(set(before) | set(after)):
+        if key not in moving and before.get(key) != after.get(key):
+            return f"restating would change the catalog's {key}"
+    old = {series["uuid"]: series for series in before.get("series", [])}
+    new = {series["uuid"]: series for series in after.get("series", [])}
+    if set(old) != set(new):
+        return "restating would change which series the catalog holds"
+    for uuid in sorted(old):
+        for key in sorted(set(old[uuid]) | set(new[uuid])):
+            was, now = old[uuid].get(key), new[uuid].get(key)
+            if was == now or (key == "unit" and now == ledger_units.base_unit(was)):
+                continue
+            return (
+                f"restating would change {key} of series {uuid} "
+                f"({old[uuid].get('concept')}): {was!r} -> {now!r}"
+            )
+    return None
+
+
+def print_ledger_units_mode(ledger_rows: list[dict[str, Any]]) -> bool:
+    """Say which units this run writes; True means base units."""
+
+    scaled = scaled_current_rows(ledger_rows)
+    if scaled:
+        print(
+            f"ledger units: as recorded; {len(scaled)} current row(s) still "
+            "carry a scale word, so new rows keep theirs until "
+            "--restate-base-units restates them"
+        )
+        return False
+    print("ledger units: base; no current row carries a scale word")
+    return True
+
+
+def restate_base_units(
+    args: argparse.Namespace,
+    *,
+    producer_signing_key: str | None,
+    gate_timeout_seconds: float,
+) -> int:
+    """``--restate-base-units``: one release that restates every scaled row.
+
+    First rebuilds any restatement run whose records Thesis lacks, then
+    restates every current row in a scaled unit, all or none. The site's
+    checks run on the exact lines Chronicle will hold, the catalog preflight
+    must pass for the whole set, and the proposal merges only once
+    Chronicle's Arch checks pass too. With nothing left to restate it appends
+    nothing. It never returns EXIT_REFUSED_ROWS, so the workflow commits
+    records only after an append or a rebuild.
+    """
+
+    content, blob_sha, ledger_repo_sha = ledger_state(
+        args.ledger_repo, args.ledger_branch, args.ledger_path
+    )
+    retrieved_at = utc_now()
+    lines = [line for line in content.split("\n") if line.strip()]
+    for index, line in enumerate(lines):
+        if line != line.strip():
+            raise ledger_units.LedgerUnitError(
+                f"ledger line {index + 1} carries surrounding whitespace, which "
+                "the site trims, so no archive of it would match"
+            )
+    rows = [json.loads(line) for line in lines]
+    check_restatements(lines)
+    for run_dir in restore_restatement_runs(
+        lines,
+        ledger_repo=args.ledger_repo,
+        ledger_branch=args.ledger_branch,
+        write=not args.dry_run,
+    ):
+        print(
+            f"{'dry-run: would restore' if args.dry_run else 'restored'} "
+            f"{run_dir.relative_to(ROOT).as_posix()}, the records of a "
+            "restatement run that never reached Thesis"
+        )
+
+    built = restatement_rows(
+        lines, retrieved_at=retrieved_at, ledger_repo_sha=ledger_repo_sha
+    )
+    if not built:
+        print("restate: no current row carries a scale word; nothing to restate")
+        return 0
+    run_dir = resolution_run_dir(retrieved_at)
+    candidates = [row for row, _ in built]
+    candidate_lines = [ledger_line(row) for row in candidates]
+    # The site's checks, on the exact bytes Chronicle will hold.
+    check_restatements(lines + candidate_lines)
+    left = scaled_current_rows(rows + [json.loads(line) for line in candidate_lines])
+    if left:
+        raise ledger_units.LedgerUnitError(
+            f"restating would leave {len(left)} current row(s) in a scaled unit"
+        )
+    moves: dict[str, int] = {}
+    for row in candidates:
+        move = f"{row['source']['recorded_unit']} -> {row['measure']['unit']}"
+        moves[move] = moves.get(move, 0) + 1
+    print(
+        f"restate: {len(candidates)} current row(s) carry a scale word ("
+        + ", ".join(f"{count} {move}" for move, count in sorted(moves.items()))
+        + ")"
+    )
+    failure = restatement_catalog_failure(
+        args.ledger_repo, ledger_repo_sha, args.ledger_path, content, candidates
+    )
+    if failure is not None:
+        print(f"RESTATEMENT REFUSED (nothing appended): {failure}")
+        return 1
+    if args.dry_run:
+        print(f"dry-run: would restate {len(candidates)} row(s)")
+        for line in candidate_lines:
+            print(f"candidate {line}")
+        return 0
+
+    run_dir.mkdir(parents=True, exist_ok=False)
+    for row, compressed in built:
+        path = ROOT / row["responseArchive"]["path"]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(compressed)
+    finalize_resolution_manifest(
+        run_dir,
+        restatement_manifest(
+            candidates, ledger_repo=args.ledger_repo, ledger_branch=args.ledger_branch
+        ),
+    )
+    updated = content.rstrip("\n") + "\n" + "\n".join(candidate_lines) + "\n"
+    merged_sha = propose_ledger_append(
+        args.ledger_repo,
+        args.ledger_branch,
+        args.ledger_path,
+        updated,
+        blob_sha,
+        ledger_repo_sha,
+        len(candidates),
+        producer_signing_key=producer_signing_key,
+        gate_timeout_seconds=gate_timeout_seconds,
+        target_contracts=registration_contracts(),
+        # Chronicle's own tests read every row; a red verdict on this one
+        # would leave its branch red for every other pull request into it.
+        arch_checks_policy=ARCH_CHECKS_POLICY_REFUSE,
+        run_url=_workflow_run_url(),
+        what="base-unit restatement(s)",
+    )
+    print(
+        f"appended {len(candidates)} observation(s) to "
+        f"{args.ledger_repo}@{args.ledger_branch}:{args.ledger_path} "
+        f"via reviewed proposal (merged at {merged_sha})"
+    )
+    return 0
 
 
 FAMILY_ADAPTERS = {
@@ -17324,12 +18028,27 @@ def _main() -> int:
             f"{DEFAULT_APPEND_GATE_TIMEOUT_MINUTES:g})"
         ),
     )
+    parser.add_argument(
+        "--restate-base-units",
+        action="store_true",
+        help=(
+            "restate every current ledger row in a scaled unit in base units, "
+            "in one release, or rebuild a restatement run's missing records; "
+            "resolve nothing"
+        ),
+    )
     args = parser.parse_args()
     # Resolve and validate the budget before any fetch, so a bad value fails
     # the run at startup instead of after the TSA round trip.
     gate_timeout_seconds = append_gate_timeout_seconds(
         args.append_gate_timeout_minutes, os.environ
     )
+    if args.restate_base_units:
+        return restate_base_units(
+            args,
+            producer_signing_key=producer_signing_key,
+            gate_timeout_seconds=gate_timeout_seconds,
+        )
 
     log = load_thesis_log(LOG_URL)
     todo = pending_claims_refs(log)
@@ -17344,6 +18063,7 @@ def _main() -> int:
     )
     ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
+    write_base_units = print_ledger_units_mode(ledger_rows)
     # References refused because their fact would give a Chronicle lineage a
     # second unit. The rest of the run still appends; the run then exits
     # EXIT_REFUSED_ROWS, the refused-rows status the workflow publishes past.
@@ -17943,7 +18663,10 @@ def _main() -> int:
                 # Refused before the keyless request is spent, and only this
                 # reference: every other row in the run still appends.
                 unit_conflict = bls_ledger_unit_conflict(
-                    ledger_rows, spec["series_stem"], spec
+                    ledger_rows,
+                    spec["series_stem"],
+                    spec,
+                    base_units=write_base_units,
                 )
                 if unit_conflict:
                     print(f"  LEDGER UNIT CONFLICT (refusing): {ref} — {unit_conflict}")
@@ -19212,6 +19935,7 @@ def _main() -> int:
                 ledger_repo_sha=ledger_repo_sha,
                 target_contracts=target_contracts,
                 extension=extension,
+                base_units=write_base_units,
             )
             record_id = str(row.get("source_record_id"))
             evidence = claims_vintages.evidence.get(record_id)

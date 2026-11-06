@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a19ea4-42d9-7713-8913-676dd8878f0b"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"summary\":\"Draft is publishable: it matches the registered BLS first-print CES resolver, states a recent-CES base-rate prior, gives a transparent update and volatility-based 80% interval, and has coherent JSON fields.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Consider splitting the +25 thousand adjustment into named numeric components if you want the update to be more auditable.\",\"Mention explicitly that no formal time-series model beyond recent-change persistence was used.\"]}"}}
+{"type":"turn.completed","usage":{"input_tokens":21141,"cached_input_tokens":0,"output_tokens":605,"reasoning_output_tokens":506}}
