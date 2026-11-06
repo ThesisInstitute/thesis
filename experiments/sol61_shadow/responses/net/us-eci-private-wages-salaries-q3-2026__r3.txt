@@ -1,0 +1,143 @@
+{
+  "slug": "us-eci-private-wages-salaries-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US private wages and salaries, Q3 2026",
+  "question": "What will the first BLS Employment Cost Index release report for private industry workers' wages and salaries, seasonally adjusted percent change for the three months ending September 2026, in Table 2?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.83,
+  "ciLow": 0.7,
+  "ciHigh": 0.96,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "BLS Employment Cost Index release, Table 2",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/eci.t02.htm",
+  "resolutionRule": "Use the first officially published September 2026 observation in BLS Employment Cost Index Table 2, Private industry workers—All workers, wages and salaries, seasonally adjusted three-month percent change. Record the published percentage to one decimal place without annualizing. Exclude subsequent revisions and corrections, including later same-day changes. Retain the registered first-print policy; the registered ECIWAG multiply-by-one binding has the unit discrepancy documented in reasoning and requires repair for automated quarterly-growth resolution.",
+  "dataPointId": "bls.eci.private_wages_salaries_qoq.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q2"},
+      "label": "2024-Q2",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 0.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 1
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 0.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 0.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 0.9
+    }
+  ],
+  "drivers": [
+    "Recent first-print quarterly growth clustered around 0.8%",
+    "Latest-quarter rebound balanced against weaker recent momentum",
+    "Uneven wage growth across construction and services",
+    "Employment-weight changes begin after the target quarter"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/2026/10_sched.htm",
+    "https://www.bls.gov/news.release/eci.t02.htm",
+    "https://fred.stlouisfed.org/series/ECIWAG",
+    "https://www.bls.gov/news.release/archives/eci_07312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_10312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_01312025.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302025.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312025.htm",
+    "https://www.bls.gov/news.release/archives/eci_12102025.htm",
+    "https://www.bls.gov/news.release/archives/eci_02102026.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302026.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312026.htm"
+  ],
+  "runAt": "2026-10-07T12:28:29Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Q3 2026 private-industry wage growth forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is BLS ECI Table 2, Private industry workers—All workers, wages and salaries, seasonally adjusted three-month percentage growth ending September 2026. Every historical growth observation and forecasting anchor uses this same variant. HistoricalContext contains original release observations fetched from BLS archives, rather than later revised history."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched BLS October 2026 release calendar explicitly schedules Third Quarter 2026 Employment Cost Index for October 30 at 08:30 Eastern Time. The July 31, 2026 archived ECI announcement independently confirms that date."
+    },
+    {
+      "kind": "text",
+      "text": "Concrete ledger discrepancy: the fetched FRED ECIWAG page identifies an index, December 2005=100, with Q1 2026=177.498 and Q2 2026=179.010. Consequently, the registered ALFRED ECIWAG multiply-by-one transform returns an index level rather than percent_growth. These levels are diagnostic evidence only. This forecast preserves the registered slug, dataPointId, unit and quarterly-growth concept; the automated source binding needs correction."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the BLS original releases at https://www.bls.gov/news.release/archives/eci_07312024.htm, https://www.bls.gov/news.release/archives/eci_10312024.htm and https://www.bls.gov/news.release/archives/eci_01312025.htm; inspect Table A's seasonally adjusted three-month private-industry wages row.",
+      "result": "Original quarterly growth prints: 2024-Q2=0.8%, 2024-Q3=0.8%, 2024-Q4=0.9%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Table A headers and private-industry wages rows from https://www.bls.gov/news.release/archives/eci_04302025.htm, https://www.bls.gov/news.release/archives/eci_07312025.htm, https://www.bls.gov/news.release/archives/eci_12102025.htm and https://www.bls.gov/news.release/archives/eci_02102026.htm.",
+      "result": "Original seasonally adjusted quarterly growth prints: 2025-Q1=0.8%, 2025-Q2=1.0%, 2025-Q3=0.8%, 2025-Q4=0.7%. BLS states percentage changes continue to be published to one decimal place."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Inspect the private-industry wages observations in https://www.bls.gov/news.release/archives/eci_04302026.htm and https://www.bls.gov/news.release/archives/eci_07312026.htm, and sector growth in https://www.bls.gov/news.release/eci.t02.htm.",
+      "result": "Original aggregate growth prints: 2026-Q1=0.7%, 2026-Q2=0.9%. Q2 2026 seasonally adjusted wage growth: construction=1.5%, service-providing industries=0.8%, leisure and hospitality=0.4%."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the mean of nine original quarterly growth prints from 2024-Q2 through 2026-Q2: 7.4/9=0.822222%. Their median is 0.8%, and the latest four average 0.775%. This reference class anchors the forecast before adjustments."
+    },
+    {
+      "kind": "text",
+      "text": "Separate effects: the level anchor is the historical mean; persistence in the latest rebound raises it, while the lower recent-four-quarter mean offsets that increase. Uneven sector growth does not justify a separate one-off adjustment. The fetched July 2026 release places updated employment weights in December 2026 data, so the mechanical policy adjustment for September is zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a shrinkage-persistence model with nine original prints. Starting from the 0.822222% base rate, the latest-print component is 0.25*(0.9-0.822222)=+0.019444 percentage points; the recent-momentum component is 0.25*(0.775-0.822222)=-0.011806; one-off and policy components are zero. Equivalently, point=0.50*0.822222+0.25*0.9+0.25*0.775=0.829861%, rounded to 0.83%. Because the target is already a change series, dispersion uses the growth values themselves: sigma = 0.09718253 percentage points = sqrt(0.07555556/(9-1)). The normal 80% half-width is 1.28*sigma=0.12439364. Allowing for estimated-mean uncertainty gives 0.12439364*sqrt(1+1/9)=0.13112241. Bounds around the reported point are 0.69887759% and 0.96112241%, rounded to final bounds of 0.70% and 0.96%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: strong construction wage increases persist and spread to services, producing a print of 1.0% or higher, outside the interval. Downside risk: the latest rebound reverses while weak leisure and hospitality wage growth broadens, producing 0.6% or lower, outside the interval. These scenarios would invalidate the assumed recent stable-growth regime."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.83,
+      "ciLow": 0.7,
+      "ciHigh": 0.96
+    }
+  ]
+}

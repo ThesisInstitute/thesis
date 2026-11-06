@@ -1,0 +1,100 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ky",
+  "country": "US",
+  "type": "data",
+  "title": "Kentucky ex parte renewal share, August 2026",
+  "question": "What percentage of Kentucky Medicaid and CHIP beneficiaries with a renewal due in August 2026 had their coverage renewed on an ex parte basis, calculated from Kentucky's original (O) row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c at its FIRST PRINT, without seasonal adjustment and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Kentucky's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Select state_abbreviation=KY, reporting_period=202608, original_updated=O. Compute 100 times beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis divided by beneficiaries_with_a_renewal_due, rounded to one decimal. Later revisions and updated (U) submissions do not resolve this first-print target. The registered resolutionDate is retained, but no official scheduled public release date supporting it was verified.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ky.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original-submission history could not be retrieved",
+    "First-publication vintage required",
+    "Exact numerator and denominator required",
+    "Registered publication date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:43:52Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast dropped: required Kentucky first-print history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Kentucky's August 2026 original-submission ex parte renewal share. The official dictionary and snapshot identify the numerator as ex parte renewals and the denominator as all beneficiaries due for renewal. No Kentucky numeric original rows were retrieved from the registered dataset. Null forecast fields disclose this failure; this object is an audit record, not a valid scored forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact CMS dataset identifier, restricted to data.medicaid.gov.",
+      "result": "The official indexed dataset page reports modification on September 25, 2026, 3,876 rows and 22 columns. Its displayed first 25 rows are Alaska observations, not Kentucky history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "Official catalog metadata identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified 2026-09-25T18:00:00Z, and its download https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. Direct download and catalog-link fetches failed with inaccessible or Cache miss responses."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click",
+      "call": "Open the catalog's official data dictionary link: https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+      "result": "The fetched dictionary maps beneficiaries_with_a_renewal_due to Metric 5 and beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis to Metric 5a1. It distinguishes O=Original from U=Updated. These are schema identifiers, not fetched Kentucky outcomes."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "CMS lists June 2026 released September 25, 2026; May released August 28; April released July 31; March released June 26; February released May 29; January released April 24. The fetched index does not announce an August 2026 public release date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.find",
+      "call": "Find Kentucky in https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf and reporting schedules in https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+      "result": "The June snapshot reports Kentucky renewals due of 56,235 and a rounded ex parte share of 85%, with the percentage denominator explicitly defined as all renewals due. These summary values are excluded from historicalContext because they cannot substitute for the required exact dataset artifact. Specifications set original state submissions due by the 8th calendar day and updated submissions by the 15th; these are submission deadlines, not CMS public release dates."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failure: the exact CSV, datastore requests and filtered dataset pages did not return Kentucky rows through the available web tools. The source exposes extensive history; this is a retrieval failure, not evidence that fewer than six prints exist. No history-floor exception is claimed. The prohibited catalog-slug check was skipped under the independence override."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable from the required exact first-print artifact. Last-print persistence and persistence-plus-panel-shrinkage cannot be quantified. No thesis_model_candidate_v1 candidates or walk-forward scores are fabricated, and the rounded snapshot value is not adopted as a prior."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the intended prior is the strongest validated persistence or panel benchmark using fetched original-submission history. Historical sample unavailable; adjustment components unestimated; sigma = unavailable. Without successive rate changes, neither the empirical dispersion nor 1.28 times sigma can be computed. Point estimate and implied interval bounds are therefore null."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: retain the registered 2026-12-15 date, but its interpretation as an official scheduled release day remains unverified. The specifications permit corrections to submitted reports, so original O status alone would not authenticate first-publication vintage even if current rows had been retrieved."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would arise from broader successful automatic data matching; downside risk would arise from verification failures or a renewal cohort with more beneficiaries requiring forms. Without an estimated interval, neither scenario can honestly be assigned a numerical tail threshold."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

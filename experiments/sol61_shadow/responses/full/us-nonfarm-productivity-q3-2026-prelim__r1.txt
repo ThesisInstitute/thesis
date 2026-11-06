@@ -1,0 +1,170 @@
+{
+  "slug": "us-nonfarm-productivity-q3-2026-prelim",
+  "country": "US",
+  "type": "data",
+  "title": "US nonfarm productivity, Q3 2026 preliminary",
+  "question": "What will the FIRST PRINT of U.S. BLS nonfarm business sector labor productivity growth be for 2026-Q3, seasonally adjusted percent change from the previous quarter at a compound annual rate, in Productivity and Costs Table 2?",
+  "unit": "percent_growth",
+  "pointEstimate": 2.5,
+  "ciLow": -2.2,
+  "ciHigh": 7.2,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-05",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, Productivity and Costs, Third Quarter 2026, Preliminary",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/prod2.t02.htm",
+  "resolutionRule": "Resolve on the Labor productivity column for the 2026 III row in Table 2, Nonfarm business sector, in the section Percent change from previous quarter at annual rate, seasonally adjusted, of the FIRST preliminary Productivity and Costs release for 2026-Q3. Use the published annualized percent growth rounded to one decimal place. The official BLS calendar schedules the preliminary release for November 5, 2026 at 8:30 AM Eastern. Preserve that first publication, including its archived release at https://www.bls.gov/news.release/archives/; later revisions and corrections do not replace the resolving value. Do not use the year-over-year change, index level, business-sector Table 1, or subsequent revised print.",
+  "dataPointId": "bls.productivity.nonfarm_qoq_prelim.2026_q3.first_print",
+  "historicalContext": [
+    {"period":{"type":"quarter","value":"2020-Q3"},"label":"2020-Q3","value":4.9},
+    {"period":{"type":"quarter","value":"2020-Q4"},"label":"2020-Q4","value":-4.8},
+    {"period":{"type":"quarter","value":"2021-Q1"},"label":"2021-Q1","value":5.4},
+    {"period":{"type":"quarter","value":"2021-Q2"},"label":"2021-Q2","value":2.3},
+    {"period":{"type":"quarter","value":"2021-Q3"},"label":"2021-Q3","value":-5.0},
+    {"period":{"type":"quarter","value":"2021-Q4"},"label":"2021-Q4","value":6.6},
+    {"period":{"type":"quarter","value":"2022-Q1"},"label":"2022-Q1","value":-7.5},
+    {"period":{"type":"quarter","value":"2022-Q2"},"label":"2022-Q2","value":-4.6},
+    {"period":{"type":"quarter","value":"2022-Q3"},"label":"2022-Q3","value":0.3},
+    {"period":{"type":"quarter","value":"2022-Q4"},"label":"2022-Q4","value":3.0},
+    {"period":{"type":"quarter","value":"2023-Q1"},"label":"2023-Q1","value":-2.7},
+    {"period":{"type":"quarter","value":"2023-Q2"},"label":"2023-Q2","value":3.7},
+    {"period":{"type":"quarter","value":"2023-Q3"},"label":"2023-Q3","value":4.7},
+    {"period":{"type":"quarter","value":"2023-Q4"},"label":"2023-Q4","value":3.2},
+    {"period":{"type":"quarter","value":"2024-Q1"},"label":"2024-Q1","value":0.3},
+    {"period":{"type":"quarter","value":"2024-Q2"},"label":"2024-Q2","value":2.3},
+    {"period":{"type":"quarter","value":"2024-Q3"},"label":"2024-Q3","value":2.2},
+    {"period":{"type":"quarter","value":"2024-Q4"},"label":"2024-Q4","value":1.2},
+    {"period":{"type":"quarter","value":"2025-Q1"},"label":"2025-Q1","value":-0.8},
+    {"period":{"type":"quarter","value":"2025-Q2"},"label":"2025-Q2","value":2.4},
+    {"period":{"type":"quarter","value":"2025-Q3"},"label":"2025-Q3","value":4.9},
+    {"period":{"type":"quarter","value":"2025-Q4"},"label":"2025-Q4","value":2.8},
+    {"period":{"type":"quarter","value":"2026-Q1"},"label":"2026-Q1","value":0.8},
+    {"period":{"type":"quarter","value":"2026-Q2"},"label":"2026-Q2","value":1.4}
+  ],
+  "drivers": [
+    "Four-quarter mean beats persistence in the full walk-forward evaluation",
+    "Current output and hours proxy corroborates the historical benchmark",
+    "Coverage differences limit further adjustment",
+    "Pandemic-era first-print swings keep the interval broad"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/news.release/prod2.t02.htm",
+    "https://www.bls.gov/schedule/news_release/prod2.htm",
+    "https://www.bls.gov/news.release/prod2.tn.htm",
+    "https://www.bls.gov/bls/news-release/prod.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11052020.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02042021.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05062021.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08102021.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11042021.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02032022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05052022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08092022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11032022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02022023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05042023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08032023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11022023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05022024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11072024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02062025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05082025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08072025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_01082026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_03052026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05072026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08062026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_07022026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_08072026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_09042026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+    "https://www.atlantafed.org/research-and-data/data/gdpnow",
+    "https://www.bea.gov/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd"
+  ],
+  "runAt": "2026-10-07T10:41:16Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Q3 2026 preliminary nonfarm business labor productivity"
+    },
+    {
+      "kind": "text",
+      "text": "Forecast the United States BLS Productivity and Costs Table 2 nonfarm business labor productivity growth for 2026-Q3: seasonally adjusted percent change from the previous quarter at a compound annual rate, rounded to one decimal, resolving on the first preliminary print. The registered table, unit, concept identifier and slug are retained. The catalog lookup is omitted under this run's independence restriction; catalog uniqueness was not independently checked."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/schedule/news_release/prod2.htm, https://www.bls.gov/news.release/prod2.t02.htm and https://www.bls.gov/news.release/prod2.tn.htm.",
+      "result": "BLS schedules Third Quarter 2026 (P) for November 5, 2026 at 08:30 AM Eastern and (R) for December 8, 2026. Table 2 explicitly identifies the seasonally adjusted nonfarm business sector; its previous-quarter annual-rate Labor productivity column currently reports 2026 II = 1.4. Technical notes specify growth rates rounded to 1 decimal place. The target resolves from the 2026 III row in the first preliminary version, not the corresponding-year-change or index sections."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/news.release/archives/prod2_11052020.htm, https://www.bls.gov/news.release/archives/prod2_02042021.htm, https://www.bls.gov/news.release/archives/prod2_05062021.htm, https://www.bls.gov/news.release/archives/prod2_08102021.htm, https://www.bls.gov/news.release/archives/prod2_11042021.htm, https://www.bls.gov/news.release/archives/prod2_02032022.htm, https://www.bls.gov/news.release/archives/prod2_05052022.htm, https://www.bls.gov/news.release/archives/prod2_08092022.htm, https://www.bls.gov/news.release/archives/prod2_11032022.htm and https://www.bls.gov/news.release/archives/prod2_02022023.htm; inspect original preliminary Table 2, target-quarter Labor productivity, previous-quarter annual rate. Check preliminary-release identities against https://www.bls.gov/bls/news-release/prod.htm.",
+      "result": "Original preliminary Table 2 annualized productivity growth, percent: 2020-Q3 4.9; 2020-Q4 -4.8; 2021-Q1 5.4; 2021-Q2 2.3; 2021-Q3 -5.0; 2021-Q4 6.6; 2022-Q1 -7.5; 2022-Q2 -4.6; 2022-Q3 0.3; 2022-Q4 3.0. Each number is the target-quarter row in its own preliminary archive, not a revised historical row."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/news.release/archives/prod2_05042023.htm, https://www.bls.gov/news.release/archives/prod2_08032023.htm, https://www.bls.gov/news.release/archives/prod2_11022023.htm, https://www.bls.gov/news.release/archives/prod2_02012024.htm, https://www.bls.gov/news.release/archives/prod2_05022024.htm, https://www.bls.gov/news.release/archives/prod2_08012024.htm, https://www.bls.gov/news.release/archives/prod2_11072024.htm and https://www.bls.gov/news.release/archives/prod2_02062025.htm; inspect original preliminary Table 2, target-quarter Labor productivity, previous-quarter annual rate.",
+      "result": "Original preliminary Table 2 annualized productivity growth, percent: 2023-Q1 -2.7; 2023-Q2 3.7; 2023-Q3 4.7; 2023-Q4 3.2; 2024-Q1 0.3; 2024-Q2 2.3; 2024-Q3 2.2; 2024-Q4 1.2. These are original preliminary vintages fetched from the exact resolver table."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/news.release/archives/prod2_05082025.htm, https://www.bls.gov/news.release/archives/prod2_08072025.htm, https://www.bls.gov/news.release/archives/prod2_01082026.htm, https://www.bls.gov/news.release/archives/prod2_03052026.htm, https://www.bls.gov/news.release/archives/prod2_05072026.htm and https://www.bls.gov/news.release/archives/prod2_08062026.htm; inspect original preliminary Table 2, target-quarter Labor productivity, previous-quarter annual rate.",
+      "result": "Original preliminary Table 2 annualized productivity growth, percent: 2025-Q1 -0.8; 2025-Q2 2.4; 2025-Q3 4.9; 2025-Q4 2.8; 2026-Q1 0.8; 2026-Q2 1.4. The 2026-Q1 row comes from the May 7 archive and the 2026-Q2 row from the August 6 archive. The latest preliminary quarter also reports output growth 1.7 and hours growth 0.3."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate / reference class: the 24 original preliminary quarterly growth prints from 2020-Q3 through 2026-Q2 have arithmetic mean 1.125%, median 2.25%, sample standard deviation 3.683128 percentage points and range -7.5% to 6.6%. Last-print persistence is 1.4%. The four-quarter mean benchmark is (4.9 + 2.8 + 0.8 + 1.4)/4 = 2.475%, or 2.5% at published precision. All reference-class observations use original preliminary vintages."
+    },
+    {
+      "kind": "text",
+      "text": "Generated model candidates before selecting the forecast, using arithmetic on the fetched first-print history, without creating files. Intervals are fallback-prior wrappers, not native model intervals. {\"schema\":\"thesis_model_candidate_v1\",\"series\":\"bls.productivity.nonfarm_qoq_prelim\",\"target_period\":\"2026-Q3\",\"selected_candidate_id\":\"mean4\",\"candidates\":[{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"persistence\",\"point\":1.4,\"p10\":-3.3,\"p50\":1.4,\"p90\":6.1,\"ci80\":{\"low\":-3.3,\"high\":6.1},\"ci90\":{\"low\":-4.7,\"high\":7.5},\"interval_method\":\"Gaussian fallback-prior wrapper; sample standard deviation of 24 archived first-print growth rates; z80=1.28 and z90=1.645; no additional scaling\",\"calibration_n\":24,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"n\":20,\"first_test_period\":\"2021-Q3\",\"last_test_period\":\"2026-Q2\",\"rmse\":5.223744,\"mae\":3.825}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"mean4\",\"point\":2.5,\"p10\":-2.2,\"p50\":2.5,\"p90\":7.2,\"ci80\":{\"low\":-2.2,\"high\":7.2},\"ci90\":{\"low\":-3.6,\"high\":8.5},\"interval_method\":\"Gaussian fallback-prior wrapper; sample standard deviation of 24 archived first-print growth rates; z80=1.28 and z90=1.645; no additional scaling\",\"calibration_n\":24,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"n\":20,\"first_test_period\":\"2021-Q3\",\"last_test_period\":\"2026-Q2\",\"rmse\":3.890292,\"mae\":2.9675}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"half_persistence_half_mean4\",\"point\":1.9,\"p10\":-2.8,\"p50\":1.9,\"p90\":6.7,\"ci80\":{\"low\":-2.8,\"high\":6.7},\"ci90\":{\"low\":-4.1,\"high\":8.0},\"interval_method\":\"Gaussian fallback-prior wrapper; sample standard deviation of 24 archived first-print growth rates; z80=1.28 and z90=1.645; no additional scaling\",\"calibration_n\":24,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"n\":20,\"first_test_period\":\"2021-Q3\",\"last_test_period\":\"2026-Q2\",\"rmse\":4.385612,\"mae\":3.0925}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"exponential_smoothing_alpha025\",\"point\":1.9,\"p10\":-2.9,\"p50\":1.9,\"p90\":6.6,\"ci80\":{\"low\":-2.9,\"high\":6.6},\"ci90\":{\"low\":-4.2,\"high\":7.9},\"interval_method\":\"Gaussian fallback-prior wrapper; sample standard deviation of 24 archived first-print growth rates; z80=1.28 and z90=1.645; no additional scaling\",\"calibration_n\":24,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"n\":20,\"first_test_period\":\"2021-Q3\",\"last_test_period\":\"2026-Q2\",\"rmse\":3.902426,\"mae\":2.995644}}]}"
+    },
+    {
+      "kind": "text",
+      "text": "Select mean4 as the outside-view prior. With four initial observations, the common expanding walk-forward evaluation forecasts 20 quarters from 2021-Q3 through 2026-Q2 using only earlier first prints: mean4 RMSE 3.890292 and MAE 2.9675 percentage points, versus persistence RMSE 5.223744 and MAE 3.825, exponential smoothing with fixed alpha 0.25 RMSE 3.902426, and the equal persistence/mean4 blend RMSE 4.385612. Mean4 reduces RMSE versus persistence by 25.53%. Selection is uncertain: in the latest 12 folds the blend has RMSE 1.708271 versus mean4 1.915140 and persistence 1.956400. Retain the full-evaluation winner and broad uncertainty rather than optimizing the point to the recent subset."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/news.release/archives/empsit_07022026.htm, https://www.bls.gov/news.release/archives/empsit_08072026.htm, https://www.bls.gov/news.release/archives/empsit_09042026.htm and https://www.bls.gov/news.release/archives/empsit_10022026.htm; inspect Table B-4, Total private, seasonally adjusted aggregate weekly hours index.",
+      "result": "Table B-4 aggregate weekly hours, 2007=100: April 2026 116.6 from the July 2 release; May 116.7 from August 7; June 116.7 from September 4. The October 2 release gives July 116.7, August 117.2 and September 117.2. Its Table B-2 private average weekly hours are July 34.3, August 34.4 and September 34.4. These are current source-vintage proxies, not productivity first-print observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.atlantafed.org/research-and-data/data/gdpnow and https://www.bea.gov/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd.",
+      "result": "Atlanta Fed GDPNow directly reports 2026-Q3 total real GDP growth of 3.7% SAAR, updated October 6, 2026. The page identifies this as a model estimate rather than an official Atlanta Fed forecast. BEA's September 30 release reports Q2 real GDP growth 2.2%, revised from 1.5%, and revised Q1 growth 2.5%. These are total-GDP measures, not the exact nonfarm-business output series."
+    },
+    {
+      "kind": "math",
+      "text": "Current-mechanics cross-check, not an exact target nowcast: Q2 CES hours-index mean = (116.6 + 116.7 + 116.7)/3 = 116.666667; Q3 mean = (116.7 + 117.2 + 117.2)/3 = 117.033333. Implied hours SAAR = 100*((117.033333/116.666667)^4 - 1) = 1.263082%. Combining with GDPNow gives output/hour proxy = 100*(1.037/1.01263082 - 1) = 2.406522%. This corroborates the 2.475% model prior. Total GDP includes sectors excluded by the target, and CES hours omit proprietors and productivity-specific adjustments; therefore this proxy receives zero additive adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Update decomposition: the growth-rate level is the selected four-quarter mean; recent momentum is already included in those four observations and receives zero extra extrapolation. The October output/hours signals postdate the latest preliminary productivity release but corroborate the prior, giving zero further adjustment. No fetched release-specific one-off or decomposed policy effect justifies an additional shift. Final raw point remains 2.475%, a 1.075 percentage-point increase over persistence entirely attributable to the stronger historical benchmark."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = mean4, trained through 2026-Q2 on the archived first-print history; point = 1.00*2.475 + 0 momentum adjustment + 0 proxy adjustment + 0 one-off adjustment + 0 policy adjustment = 2.475%, rounded to 2.5%. For interval calibration use all 24 growth-rate observations from 2020-Q3 through 2026-Q2, not their successive differences: mean = 27/24 = 1.125; sum((x-1.125)^2) = 312.005; sigma = sqrt(312.005/23) = 3.683128 percentage points. Gaussian fallback-prior 80% half-width = 1.28*sigma = 4.714404; raw bounds = 2.475 +/- 4.714404 = [-2.239404, 7.189404], rounded to [-2.2, 7.2]. The 90% half-width = 1.645*sigma = 6.058746, producing rounded bounds [-3.6, 8.5]. Scaling factor is 1.00: retain the pandemic-era dispersion and first-print volatility, with no regime narrowing."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: the final bounds contain 19 of the 24 fetched first prints, or 79.17%. A separate walk-forward check recomputes the four-quarter mean and sample sigma from earlier observations at each fold; its rounded 1.28*sigma bands cover 17 of 20 outcomes, or 85%, including 10 of the last 10. Recent coverage exceeds the nominal 8 of 10 because the full-history volatility retains the earlier large swings. These limited checks do not establish exact Gaussian tail calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Disconfirming evidence and tails: higher measured nonfarm-business output or downward revisions to all-person hours would raise the point; weaker business output or upward hours revisions would lower it. Upside risk outside the interval: an unexpectedly large output gain combined with declining all-person hours could produce productivity growth above 7.2%. Downside risk outside the interval: a contraction in business output while all-person hours expand could produce growth below -2.2%. GDPNow coverage differences and revisions to the preceding quarter's output denominator could also defeat the proxy cross-check."
+    },
+    {
+      "kind": "forecast",
+      "point": 2.5,
+      "ciLow": -2.2,
+      "ciHigh": 7.2
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "slug": "us-dod-prime-award-transactions-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 prime award transactions: forecast withheld",
+  "question": "What is USAspending API v2 agency 097 (Department of Defense) transaction_count for fiscal_year=2026, without seasonal adjustment, expressed in millions and captured under the registered_query_snapshot policy?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+  "resolutionRule": "GET the exact registered URL for fiscal_year=2026, read transaction_count, and apply the registered multiplication factor of 0.000001. Resolve against the original registered query snapshot, excluding subsequent API updates. The supplied target context omits the resolution date and precise snapshot capture rule; neither can be inferred from its expected release window.",
+  "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Exact registered historical queries inaccessible",
+    "Reference class and interval cannot be computed",
+    "Registered snapshot date and capture rule absent"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://api.usaspending.gov/",
+    "https://api.usaspending.gov/docs/endpoints/"
+  ],
+  "runAt": "2026-10-07T10:32:48Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered FY2026 agency 097 transaction_count snapshot. Identity and transformation metadata come from the supplied target context."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open exact registered GET URLs with fiscal_year=2025, 2024, 2023, 2022, 2021, and 2020",
+      "result": "Every requested URL returned Internal Error and a message that the URL 'is not accessible via this tool.' No JSON response or transaction_count was obtained for any requested fiscal year."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "retry open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025 and the corresponding exact URLs for 2024 and 2023",
+      "result": "The exact fiscal_year=2025, fiscal_year=2024, and fiscal_year=2023 URLs again returned Internal Error: 'is not accessible via this tool.' No historical counts were fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "retry open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022 and the corresponding exact URLs for 2021 and 2020",
+      "result": "The exact fiscal_year=2022, fiscal_year=2021, and fiscal_year=2020 URLs again returned Internal Error: 'is not accessible via this tool.' No historical counts were fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+      "result": "The fiscal_year=2026 query returned Internal Error. No current transaction_count was obtained. Fiscal-year numerals in these error records identify attempted queries; they are not observed series values."
+    },
+    {
+      "kind": "text",
+      "text": "Official documentation confirms that the agency awards endpoint uses GET and returns transaction counts and award obligations. It does not supply the required observed historical responses. Source: https://api.usaspending.gov/docs/endpoints/."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class unavailable: the exact historical query could not be executed successfully. No persistence benchmark, historical distribution, walk-forward score, or thesis_model_candidate_v1 candidate can be grounded in fetched observations. The empty historicalContext records missing evidence, not a claim that the official source exposes fewer than the required prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No numerical prior is available; no updates are applied. Sigma and the required interval arithmetic cannot be computed without historical counts. Point estimate and interval bounds are null to avoid inventing evidence. Upside risk and downside risk cannot be quantified against an unavailable interval."
+    },
+    {
+      "kind": "text",
+      "text": "The target context supplies an expected window but no resolutionDate, resolutionDateBasis, or exact snapshot capture time. Selecting a day from that window would invent a resolver detail. The prohibition on Thesis access also prevents the requested catalog slug check; the supplied catalogSlug is preserved."
+    },
+    {
+      "kind": "text",
+      "text": "The registered-query instruction explicitly requires refusal with fetch evidence when the query cannot be executed. This object documents that refusal and is not a valid numerical forecast cell. No historical values, forecast values, model scores, or activity receipts have been fabricated. JSON parsing was verified."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

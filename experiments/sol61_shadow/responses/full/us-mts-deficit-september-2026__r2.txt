@@ -1,0 +1,166 @@
+{
+  "slug": "us-mts-deficit-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US budget deficit, September 2026",
+  "question": "What will be the September 2026 U.S. federal unified-budget monthly deficit/surplus, not seasonally adjusted, in the FIRST PRINT of Treasury's Monthly Treasury Statement Table 1, reported in USD billions with deficits positive and surpluses negative?",
+  "unit": "usd_billions",
+  "pointEstimate": 40.339,
+  "ciLow": -218.025,
+  "ciHigh": 298.703,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-13",
+  "resolutionSource": "U.S. Department of the Treasury, Bureau of the Fiscal Service, Monthly Treasury Statement, Table 1",
+  "resolutionSourceUrl": "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+  "resolutionRule": "Use the current-fiscal-year September 2026 row and Deficit/Surplus (-) column of Monthly Treasury Statement Table 1, Summary of Receipts, Outlays, and the Deficit/Surplus of the U.S. Government. Include total on-budget and off-budget results for the United States, not seasonally adjusted. Resolve on the first official publication of the September 2026 statement; disregard subsequent revisions, replacements, and corrections. Divide the published USD millions by 1,000 and report to 0.001 USD billion; deficits are positive and surpluses negative. The displayed resolutionDate is a FRED-calendar fallback whose direct Treasury confirmation remains unavailable, as disclosed in reasoning.",
+  "dataPointId": "treasury.mts.monthly_deficit.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": { "type": "month", "value": "2018-09" },
+      "label": "2018-09",
+      "value": -119.116
+    },
+    {
+      "period": { "type": "month", "value": "2019-09" },
+      "label": "2019-09",
+      "value": -82.768
+    },
+    {
+      "period": { "type": "month", "value": "2020-09" },
+      "label": "2020-09",
+      "value": 124.611
+    },
+    {
+      "period": { "type": "month", "value": "2021-09" },
+      "label": "2021-09",
+      "value": 61.544
+    },
+    {
+      "period": { "type": "month", "value": "2022-09" },
+      "label": "2022-09",
+      "value": 429.673
+    },
+    {
+      "period": { "type": "month", "value": "2023-09" },
+      "label": "2023-09",
+      "value": 170.982
+    },
+    {
+      "period": { "type": "month", "value": "2024-09" },
+      "label": "2024-09",
+      "value": -64.263
+    },
+    {
+      "period": { "type": "month", "value": "2025-09" },
+      "label": "2025-09",
+      "value": -197.950
+    }
+  ],
+  "drivers": [
+    "September receipts and outlays seasonality",
+    "Year-end credit accounting adjustments",
+    "Benefit-payment timing",
+    "Weak distinction between seasonal benchmarks"
+  ],
+  "sourceContext": [
+    "https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/summary-of-receipts-outlays-and-the-deficit-surplus-of-the-u-s-government",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0918.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0919.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0920.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0921.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0922.pdf",
+    "https://fiscaldata.treasury.gov/static-data/published-reports/mts/MonthlyTreasuryStatement_202309.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0924.pdf",
+    "https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0925.pdf",
+    "https://fred.stlouisfed.org/series/MTSDS133FMS",
+    "https://fred.stlouisfed.org/releases/calendar?m=&ob=rd&od=asc&rid=363&ve=2026-12-31&vs=2026-01-01&y=",
+    "https://home.treasury.gov/news/press-releases/sb0584",
+    "https://home.treasury.gov/system/files/136/Sources-Uses-Public-Table-August-2026.pdf",
+    "https://fiscaldata.treasury.gov/static-data/published-reports/mts/MonthlyTreasuryStatement_202608.pdf"
+  ],
+  "runAt": "2026-10-07T12:16:37Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 MTS first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is a monthly flow, not the fiscal-year cumulative deficit. Preserve the supplied slug, unit, dataPointId, resolver table, and first-print policy. The independence override prohibits catalog lookup, and no local files were accessed. HistoricalContext contains original current-year September Table 1 rows, normalized from USD millions to USD billions."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the Federal Reserve Bank of St. Louis MTS release calendar and MTSDS133FMS series page.",
+      "result": "The [official Federal Reserve calendar](https://fred.stlouisfed.org/releases/calendar?m=&ob=rd&od=asc&rid=363&ve=2026-12-31&vs=2026-01-01&y=) lists October 13, 2026, at 1:00 PM Central. The [FRED series page](https://fred.stlouisfed.org/series/MTSDS133FMS) also displays next release October 13, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar limitation: direct Treasury calendar and current-statement fetches failed, including HTTP 403 from the registered Fiscaldata page and the August statement. The supplied target context gives a release window but no exact resolutionDate. The FRED date conflicts with that window. resolutionDate uses the literal public Federal Reserve calendar entry, not an inferred cadence or the window endpoint; direct agency-calendar verification remains unmet. The first-print outcome identity is unchanged."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Find original September current-year Table 1 rows in Treasury mts0918.pdf, mts0919.pdf, mts0920.pdf, mts0921.pdf, and mts0922.pdf under the migrated system/files/files/reports-statements/mts/ archive.",
+      "result": "USD millions, Deficit/Surplus (-): [September 2018](https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0918.pdf) -119,116; [September 2019](https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0919.pdf) -82,768; [September 2020](https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0920.pdf) 124,611; [September 2021](https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0921.pdf) 61,544; [September 2022](https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0922.pdf) 429,673. The 2022 statement's prior-year September row is 64,940; exclude that revision and retain the original 2021 value. The 2022 statement's Table 5 reports Federal Direct Student Loans current-month net outlays of 409,713 USD millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official Treasury domains for September 2023 Monthly Treasury Statement Table 1; inspect the official indexed original PDF.",
+      "result": "The [September 2023 official statement](https://fiscaldata.treasury.gov/static-data/published-reports/mts/MonthlyTreasuryStatement_202309.pdf), FY 2023 September Table 1 row, reports receipts 467,473, outlays 638,455, and deficit 170,982 USD millions. Direct Fiscaldata PDF opening failed; the official-source search response exposed the complete table. This is 170.982 USD billions, rather than later revised September values."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open original Treasury September 2024 and September 2025 PDFs; inspect Table 1 current-year September rows and explanatory highlights.",
+      "result": "[September 2024](https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0924.pdf): receipts 527,620, outlays 463,357, deficit/surplus -64,263 USD millions. [September 2025](https://fiscal.treasury.gov/system/files/files/reports-statements/mts/mts0925.pdf): receipts 543,663, outlays 345,713, deficit/surplus -197,950 USD millions. Both statements document September payments accelerated into August. The 2025 statement's Table 3 reports Department of Education monthly outlays -105,279 USD millions, illustrating the accounting component of that surplus."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fred.stlouisfed.org/series/MTSDS133FMS for the latest monthly persistence benchmark.",
+      "result": "The [sanctioned Treasury mirror](https://fred.stlouisfed.org/series/MTSDS133FMS), updated September 11, 2026, reports August 2026 Federal Surplus or Deficit [-] -166,796.95228 USD millions and July -432,307.87462 USD millions, not seasonally adjusted. Its sign is opposite Treasury Table 1's deficit-positive convention. Normalized August deficit is 166.79695228 USD billions, rounded to 166.797. Original August PDF verification failed; this mirror observation is not substituted into the original-print September reference class."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: eight original September first prints, 2018-2025, are [-119.116, -82.768, 124.611, 61.544, 429.673, 170.982, -64.263, -197.950] USD billions. Computed mean = 40.339125, median = -1.3595, sample standard deviation = 201.602308, range = [-197.950, 429.673]; four deficits and four surpluses. Use this same-calendar-month distribution because adjacent-month persistence confounds seasonality."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmarks before agent forecast: raw latest-print persistence = 166.797; September seasonal persistence = -197.950; seasonal sample mean = 40.339125. Walk forward over September 2021-2025, using only preceding September observations and at least three training years: expanding-mean MAE = 208.636242 and RMSE = 246.471205; seasonal-persistence MAE = 211.763800 and RMSE = 236.486729; expanding-median MAE = 222.173900 and RMSE = 252.486308. Select the seasonal expanding mean by MAE. Its advantage is only 3.127558 USD billions across five predictions; RMSE favors persistence, so superiority is weak and metric-sensitive. Raw monthly persistence lacks a comparable original-print monthly walk-forward sample in this run."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates computed in memory before selecting the agent forecast; all numeric outputs are arithmetic on fetched official history or the sanctioned latest observation. Intervals are fallback-prior wrappers, not native model intervals or demonstrated out-of-sample calibration. Candidate calibration_n is the dispersion sample size; walk-forward n is separately reported. [{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"raw_monthly_persistence\",\"point\":166.797,\"p10\":-91.567,\"p50\":166.797,\"p90\":425.161,\"interval80\":{\"low\":-91.567,\"high\":425.161},\"interval90\":{\"low\":-164.809,\"high\":498.403},\"interval_method\":\"gaussian_fallback_prior: sample standard deviation of eight original September monthly flows; normal central quantiles; no extra widening\",\"calibration_n\":8,\"train_cutoff\":\"2026-08\",\"walk_forward_score\":null},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"seasonal_persistence\",\"point\":-197.950,\"p10\":-456.314,\"p50\":-197.950,\"p90\":60.414,\"interval80\":{\"low\":-456.314,\"high\":60.414},\"interval90\":{\"low\":-529.556,\"high\":133.656},\"interval_method\":\"gaussian_fallback_prior: sample standard deviation of eight original September monthly flows; normal central quantiles; no extra widening\",\"calibration_n\":8,\"train_cutoff\":\"2025-09\",\"walk_forward_score\":{\"n\":5,\"minimum_training_n\":3,\"mae\":211.7638,\"rmse\":236.486729}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"seasonal_expanding_mean\",\"point\":40.339,\"p10\":-218.025,\"p50\":40.339,\"p90\":298.703,\"interval80\":{\"low\":-218.025,\"high\":298.703},\"interval90\":{\"low\":-291.267,\"high\":371.945},\"interval_method\":\"gaussian_fallback_prior: sample standard deviation of eight original September monthly flows; normal central quantiles; no extra widening\",\"calibration_n\":8,\"train_cutoff\":\"2025-09\",\"walk_forward_score\":{\"n\":5,\"minimum_training_n\":3,\"mae\":208.636242,\"rmse\":246.471205}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open Treasury's August 3, 2026 borrowing announcement and its official sources-and-uses table.",
+      "result": "The [Treasury announcement](https://home.treasury.gov/news/press-releases/sb0584) projects July-September privately held borrowing of 739 USD billions, 68 above its May estimate, with September closing cash assumed at 950. The [official sources-and-uses table](https://home.treasury.gov/system/files/136/Sources-Uses-Public-Table-August-2026.pdf) raises quarterly financing need from 557 to 633 USD billions, a 76 increase, and reports a cash-balance increase of 31. These are quarterly financing quantities, not the September MTS deficit."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: the latest quarterly Treasury financing signal suggests fiscal pressure, but no fetched release-specific mapping converts it into September's budget deficit. Historical timing and credit adjustments already enter the September sample. Apply no separate momentum, policy, timing, or accounting adjustment; retain the selected mean benchmark. Delta from the selected benchmark = 0. The departure from seasonal persistence is a model-selection decision, not a discretionary news adjustment."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = seasonal_expanding_mean of the eight original September flows from 2018-2025; prior weight = 1, momentum/policy/one-off adjustment weights = 0. Sum = 322.713, so point = 322.713/8 = 40.339125. For this flow series use the values themselves: sum of squared deviations = 284504.435413; sigma = sqrt(284504.435413/7) = 201.602308 USD billions. Nominal 80% normal half-width = 1.281551566*sigma = 258.363754, approximately 1.28*sigma; widening factor = 1. Bounds = 40.339125 - 258.363754 = -218.024629 and 40.339125 + 258.363754 = 298.702879. Round to the published million-dollar precision: point 40.339, ciLow -218.025, ciHigh 298.703. The nominal 90% half-width = 1.644853627*sigma = 331.606288, giving [-291.267, 371.945]."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: seven of the eight historical September prints lie within the final interval; the 2022 deficit is outside it. This is descriptive in-sample coverage, not an out-of-sample calibration result, and the small sample plus year-end accounting makes the nominal 80% interval uncertain."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a large new student-loan credit charge like the one reflected in September 2022, combined with weak tax receipts, would land above the interval's 298.703 deficit bound. Downside risk: unusually strong September receipts combined with another large negative credit adjustment could produce a surplus exceeding 218.025 and land below the interval. New official evidence of weaker receipts or higher outlays would raise the point; stronger receipts or lower outlays would lower it."
+    },
+    {
+      "kind": "forecast",
+      "point": 40.339,
+      "ciLow": -218.025,
+      "ciHigh": 298.703
+    }
+  ]
+}

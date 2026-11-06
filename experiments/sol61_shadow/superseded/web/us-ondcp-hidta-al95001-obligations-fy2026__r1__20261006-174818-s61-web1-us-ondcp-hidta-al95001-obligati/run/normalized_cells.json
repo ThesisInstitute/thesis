@@ -1,0 +1,59 @@
+[
+ {
+  "slug": "us-ondcp-hidta-al95001-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 HIDTA obligations: forecast refused",
+  "question": "What are FY2026 financial-assistance transaction obligations for Assistance Listing 95.001 in the first registered USAspending query snapshot, expressed in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the first registered-query snapshot for FY2026: POST the specified financial-assistance award-type and Assistance Listing 95.001 filters, spending level transactions, grouped by fiscal year; read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Preserve returned precision and exclude subsequent updates. The exact snapshot date could not be verified from an official schedule.",
+  "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+   "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+   "https://api.usaspending.gov/docs/endpoints",
+   "https://www.usaspending.gov/data/data-sources-download.pdf",
+   "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-06T22:13:46Z",
+  "status": "refused",
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Mandatory registered-query evidence unavailable"
+   },
+   {
+    "kind": "text",
+    "text": "Refusal: the exact historical POST queries could not be executed with the available web tools. No historical obligations values were fetched, so estimates and interval bounds are withheld."
+   },
+   {
+    "kind": "text",
+    "text": "Fetch evidence: the initial web access attempt to the registered endpoint failed with 'Fatal error: connection failed: error sending request'. A subsequent web open returned '405 Method Not Allowed'. These were access attempts, not executions of the required POST query."
+   },
+   {
+    "kind": "text",
+    "text": "Official documentation fetched at https://api.usaspending.gov/docs/endpoints explicitly lists /api/v2/search/spending_over_time/ as POST. The available web tools expose no request-method or request-body parameter; shell networking is outside this run's authorized scope."
+   },
+   {
+    "kind": "text",
+    "text": "The mandatory reference class could not be fetched. Empty historicalContext denotes unavailable fetch evidence, not a finding that the official source exposes fewer than six prints. Agency totals, appropriations and search summaries cannot substitute for this registered-query series."
+   },
+   {
+    "kind": "text",
+    "text": "Official USAspending documentation states that data update daily after a nightly pipeline and describes financial-assistance reporting within two weeks, followed by publication the next day. These timing statements do not verify an exact FY2026 snapshot date within the supplied release window."
+   },
+   {
+    "kind": "text",
+    "text": "Prior/update/interval: no numeric persistence prior, historical sigma, adjustment components or 80% bounds can be calculated without the required fetched history. No valid forecast is emitted."
+   }
+  ]
+ }
+]

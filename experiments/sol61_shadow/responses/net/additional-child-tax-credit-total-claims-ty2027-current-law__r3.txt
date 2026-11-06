@@ -1,0 +1,72 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "title": "ACTC claiming returns, tax year 2027",
+  "question": "What will the first official IRS SOI Publication 1304 Table 3.3 print report for total Additional Child Tax Credit claiming returns for tax year 2027, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Use the first official tax year 2027 Publication 1304 Table 3.3 all-returns total for the number of returns under the total Additional child tax credit or corresponding refundable child tax credit concept. Do not substitute the separate refundable-portion or used-to-offset-other-taxes subsets. Divide the official return count by 1,000,000 without intermediate rounding. Ignore subsequent revisions. The supplied resolution deadline is retained but was not verified from an official announcement schedule.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases"
+  ],
+  "runAt": "2026-10-07T12:33:42Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Run failed: mandatory canonical history could not be extracted"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is total ACTC claiming returns for tax year 2027 in IRS Publication 1304 Table 3.3, first print, measured in millions. Its conditional text and ledger identifiers are preserved."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official Basic Tables Part 3 page lists Table 3.3 workbooks for 2023, 2022, 2021, 2020, 2019, and 2018, as well as earlier years. Six official years therefore exist; an availability waiver would be inappropriate."
+    },
+    {
+      "kind": "text",
+      "text": "Web fetches of all six canonical workbook URLs failed with error 400: Unsupported content-type: application/vnd.ms-excel. These are access or extraction failures, not evidence that the official years are unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "The required fetch_source, extract_irs_soi, and calculate tools are not available in this session. No parsed canonical return counts were obtained. No remembered values, search-summary statistics, rounded bulletin figures, or binary excerpts were substituted."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate and reference class remain unfetched. historicalContext is empty deliberately; populating it would invent evidence."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched IRS Upcoming Data Releases page covers a 2026 schedule and does not verify a tax year 2027 Publication 1304 release deadline of 2029-12-31. That date remains supplied ledger context, not an officially verified release date."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, adjustment components, sigma, or 80% interval can be calculated from extracted history. The run stops under the instructed failure rule. Null estimates indicate that no forecast was produced; they are not zero claims."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

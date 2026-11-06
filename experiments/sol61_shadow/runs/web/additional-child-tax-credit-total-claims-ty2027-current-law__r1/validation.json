@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+      "ok": false,
+      "errors": [
+        "anchor '2023': no historicalContext entry mentions this period \u2014 anchored periods must appear in the fetched base rate"
+      ]
+    }
+  ]
+}

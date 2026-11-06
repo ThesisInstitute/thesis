@@ -1,0 +1,146 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-hi",
+  "country": "US",
+  "type": "data",
+  "title": "Hawaii ex parte renewal share, August 2026",
+  "question": "What percentage of Hawaii Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, using the unadjusted original (O) submission row first published in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 71.0,
+  "ciLow": 58.4,
+  "ciHigh": 83.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Hawaii's ex parte renewal share for August 2026 using the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes that reporting period. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.hi.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 85.6
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 76.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 68.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 76.6
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 74.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 72.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 69.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 56.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 64.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 70.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 70.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 74.5
+    }
+  ],
+  "drivers": [
+    "June 2026 persistence anchor of 74.5%",
+    "Partial repetition of the prior June-to-August cohort decline",
+    "Lower ex parte rate than June 2025",
+    "Renewal cohort composition and reporting classification"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:33:10Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Hawaii August 2026 ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Hawaii's state-level original-submission cohort rate for August 2026. CMS's current presentation establishes the denominator as all beneficiaries due for renewal: metric 5a(1) divided by metric 5. Dataset ID is 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. All historical anchors use retrieved O rows and the same unadjusted definition. These current O rows are not independently archived first-publication observations; CMS specifications permit corrections to submitted data."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS against https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0, filtering state_abbreviation=HI, original_or_updated=O, reporting_period>=202507, limit=20; raw JSON echoed.",
+      "result": "Fetched ex parte numerator / renewal-due denominator: 2025-07 30910/36119; 2025-08 27648/36003; 2025-09 27839/40547; 2025-10 29647/38684; 2025-11 27323/36753; 2025-12 29294/40422; 2026-01 18514/26831; 2026-02 10444/18463; 2026-03 15329/23602; 2026-04 18323/26046; 2026-05 27529/38958; 2026-06 26918/36142. All twelve returned O rows had blank numerator and denominator footnotes."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS against the same CMS datastore endpoint, filtering HI, O, and reporting_period between 202407 and 202506, limit=20; raw JSON echoed.",
+      "result": "Fetched twelve earlier rows. Relevant anchors: August 2024 24764/32850=75.3851%; June 2025 31509/36856=85.4922%; December 2024 10/10=100%. December's denominator footnote states that Hawaii modified its scheduled renewal distribution plan, resulting in few renewals due."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Opened the official June 2026 snapshot at https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf and retrieved the coverage-retention table on PDF page 31.",
+      "result": "Hawaii: 36142 beneficiaries due for renewal, 88% total renewed, 9% disenrolled, 3% pending, and 74% renewed ex parte. The table explicitly expresses these percentages relative to the total number due for renewal. Its whole-percent ex parte value corroborates the API-derived 74.4784%."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the unweighted mean of the twelve fetched monthly Hawaii O-row rates from July 2025 through June 2026: 71.7075%. The range is 56.5672% to 85.5782%; the latest three-month mean is 71.8301%. Monthly cohort variation is substantial, so the forecast combines persistence with a partially weighted seasonal analogue."
+    },
+    {
+      "kind": "text",
+      "text": "Level is anchored on June 2026's 74.4784%. Momentum receives no additional extrapolation because the recent recovery may reflect cohort composition. The one-off December 2024 result, based on only 10 renewals due, is excluded from the recent twelve-month dispersion sample. No separate policy adjustment is imposed. CMS notes that renewals completed using data after a form is sent can be classified as form renewals, creating reporting-mechanism risk."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification limitation: the fetched official snapshot index lists June 2026 released September 25, 2026, May released August 28, and April released July 31, but supplies no future announcement confirming December 15, 2026. CMS specifications distinguish original state-submission deadlines on the eighth from updated-submission deadlines on the fifteenth; their August 2024 example gives December 15 for an updated submission, not public publication. The registered resolutionDate of 2026-12-15 is retained, but the required official verification could not be completed. One guessed monthly-reports URL was inaccessible; the official dataset API, snapshot index, PDF, and specifications fetched successfully."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior blended with a seasonal analogue, with analyst-selected weights of 60% and 40%. Update August 2025's 76.7936% by the June year-over-year level change: 74.4784-85.4922=-11.0137 percentage points, giving 65.7799%. Point=0.60*74.4784+0.40*65.7799=70.9990%, rounded to 71.0%. Equivalently, the latest-level anchor receives a partially weighted seasonal adjustment of -3.4794 points; additional momentum, one-off, and policy adjustments are zero. From the eleven successive changes in the twelve unrounded July 2025-June 2026 rates, mean change=-1.0091 and sum of squared deviations=485.3295; sigma = 6.9666 percentage points = sqrt(485.3295/10). The normal-approximation 80% one-month half-width is 1.28*sigma=8.9172. For the two-month June-to-August horizon, multiply by sqrt(2), giving 12.6108. Bounds=70.9990 +/- 12.6108=58.3882 to 83.6098%, rounded to 58.4%-83.6%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is an unusually easy renewal cohort or improved automated matching; an ex parte rate above 83.6% would land outside the interval. Downside risk is a difficult cohort, matching disruption, or more renewals classified as form-based; a rate below 58.4% would land outside the interval. A renewal-distribution change producing a tiny denominator, resembling the fetched December 2024 10/10 observation, could also put the result above the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 71.0,
+      "ciLow": 58.4,
+      "ciHigh": 83.6
+    }
+  ]
+}

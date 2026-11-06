@@ -1,0 +1,5 @@
+{
+  "phase": "seal",
+  "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+  "command": null
+}

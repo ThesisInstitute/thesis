@@ -1,0 +1,43 @@
+{
+  "slug": "wic-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation, September 2026",
+  "question": "What will USDA FNS report for total WIC participation in September 2026 in its first official monthly print, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Use the first official September 2026 monthly total WIC participation print, converted to millions at the published precision. Exclude subsequent revisions and do not apply a correction grace period.",
+  "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program"
+  ],
+  "runAt": "2026-10-07T12:28:51Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast run failed: official evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The official WIC source fetch returned HTTP 403 Forbidden. Following the instruction to stop after a failed fetch, this run stopped without substituting remembered values."
+    },
+    {
+      "kind": "text",
+      "text": "No participation history or base rate was fetched, and no official resolution date was verified. A point estimate, sigma, and 80% interval therefore cannot be calculated. Null fields indicate an unsuccessful run, not a completed forecast."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

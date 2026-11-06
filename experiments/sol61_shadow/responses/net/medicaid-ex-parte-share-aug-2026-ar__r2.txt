@@ -1,0 +1,161 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ar",
+  "country": "US",
+  "type": "data",
+  "title": "Arkansas August 2026 ex parte renewal share",
+  "question": "What percentage of Arkansas beneficiaries due for Medicaid or CHIP renewal in August 2026 were renewed on an ex parte basis, calculated from the first officially published original (O) state row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 72.8,
+  "ciLow": 70.0,
+  "ciHigh": 75.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Arkansas's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Calculate 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the published counts and rounding the share to one decimal. Later corrections, revisions, and updated (U) submissions do not change the resolved value.",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 73.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 75.4
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 75.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 76.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 77.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 77.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 77.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 74.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 72.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 71.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 71.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 72.2
+    }
+  ],
+  "drivers": [
+    "June original-submission share of 72.2%",
+    "Modest reversion toward the 12-month Arkansas average",
+    "Renewal cohort composition and electronic verification success",
+    "Two reporting months beyond the latest observed cohort"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://download.medicaid.gov/data/renewal-dataset-october-2025-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-november-2025-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-december-2025-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-january-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-february-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-march-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-april-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-may-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-june-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-july-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-august-2026-release.csv",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf"
+  ],
+  "runAt": "2026-10-07T12:07:02Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Arkansas August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Arkansas's state row, not a national total or weighted average. CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c defines O as Original and U as Updated. The numerator is ex parte renewals, Metric 5a(1), and the denominator is all beneficiaries due for renewal, Metric 5. All historical anchors use O rows from their initial-cohort release files; their counts also match the current September 2026 file. Release filenames alone do not establish immutable publication-time timestamps."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official October, November, and December 2025 and January 2026 renewal-release CSVs with curl -sS; echo the Arkansas O rows for July through October 2025.",
+      "result": "Fetched ex parte numerator / renewal-due denominator: July 2025 37,569/50,949 = 73.738444%; August 40,524/53,723 = 75.431379%; September 39,251/52,006 = 75.473984%; October 39,424/51,893 = 75.971711%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official February through May 2026 renewal-release CSVs with curl -sS; echo the Arkansas O rows for November 2025 through February 2026.",
+      "result": "Fetched ex parte numerator / renewal-due denominator: November 2025 37,902/49,192 = 77.049114%; December 41,824/54,096 = 77.314404%; January 2026 43,355/55,651 = 77.905159%; February 35,966/48,463 = 74.213317%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official June through September 2026 renewal-release CSVs with curl -sS; echo the Arkansas O rows for March through June 2026.",
+      "result": "Fetched ex parte numerator / renewal-due denominator: March 2026 41,760/57,641 = 72.448431%; April 40,551/56,883 = 71.288434%; May 38,053/53,416 = 71.238955%; June 38,596/53,431 = 72.235219%. These selected O rows contain no footnotes."
+    },
+    {
+      "kind": "text",
+      "text": "The official May 2026 snapshot corroborates the denominator: its state table reports percentages of all beneficiaries due for renewal, with Arkansas due renewals of 53,416 and a displayed ex parte share of 71%. Forecast calculations use the CSV counts rather than the snapshot's whole-percent rounding."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the 12 monthly Arkansas original-cohort observations from July 2025 through June 2026. Their unweighted mean share, the base rate, is 74.525713%; the latest observation is 72.235219%. June increased 0.996265 percentage points after May's 0.049480-point decline, so a persistent directional momentum adjustment is not supported."
+    },
+    {
+      "kind": "text",
+      "text": "Official release-date verification remains unmet. CMS's fetched release page lists January 2026 released April 24, February May 29, March June 26, April July 31, May August 28, and June September 25. No official calendar or announcement confirming December 15, 2026 for the August reporting period was found. The required ledger resolutionDate is retained as 2026-12-15, but it is not presented as a CMS-confirmed publication date."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior with an analyst-selected 75% weight on June's 72.235219% level and 25% on the 12-month base rate of 74.525713%, giving a mean-reversion adjustment of +0.572623 percentage points. Momentum, one-off, and policy adjustments are each zero: the recent rebound is not extrapolated, January's high is not treated as a recurring shock, and no verified new Arkansas intervention is assumed. From the 11 successive changes in the fetched, unrounded shares, sigma = 1.535429 percentage points, calculated as their sample standard deviation. The one-month normal 80% half-width is 1.28*sigma = 1.965349 points. For the two-month June-to-August horizon, assuming independent monthly innovations, multiply by sqrt(2), yielding 2.779423 points. The implied bounds are 70.028419% and 75.587266%, rounded to 70.0% and 75.6%."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 0.75*(100*38,596/53,431) + 0.25*74.525713 = 72.807843%, rounded to 72.8%. Successive changes in percentage points are 1.692935, 0.042604, 0.497727, 1.077403, 0.265290, 0.590755, -3.691842, -1.764887, -1.159997, -0.049480, and 0.996265. Sample standard deviation uses denominator 11-1. Interval = 72.807843 +/- 1.28*1.535429*sqrt(2), producing the rounded 80% interval [70.0%, 75.6%]."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: better electronic verification or an easier-to-verify renewal cohort could restore January's 77.9% share, which would land above the interval. Downside risk: disrupted data matching, a harder-to-verify cohort, or more renewals requiring forms could push the share below 70.0%. Either outcome would be outside the interval and would challenge the persistence model's stable-process assumption."
+    },
+    {
+      "kind": "forecast",
+      "point": 72.8,
+      "ciLow": 70.0,
+      "ciHigh": 75.6
+    }
+  ]
+}

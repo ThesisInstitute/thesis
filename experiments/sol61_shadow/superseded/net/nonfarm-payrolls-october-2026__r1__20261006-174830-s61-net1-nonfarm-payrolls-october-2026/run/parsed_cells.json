@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "nonfarm-payrolls-october-2026",
+    "country": "US",
+    "type": "data",
+    "title": "October 2026 US nonfarm payroll change",
+    "question": "What will the first BLS print report for the October 2026 seasonally adjusted change in total nonfarm payroll employment?",
+    "unit": "thousands",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": "2026-11-06",
+    "resolutionSource": "BLS Employment Situation, Table B-1",
+    "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+    "resolutionRule": "Use the first official October 2026 print of seasonally adjusted total nonfarm employment, series CES0000000001, minus the September 2026 level published in that same vintage. Report the difference in integer thousands. Exclude subsequent revisions and corrections.",
+    "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+    "historicalContext": [],
+    "drivers": [],
+    "sourceContext": [
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001?startyear=2025&endyear=2026",
+      "https://www.bls.gov/news.release/empsit.nr0.htm"
+    ],
+    "runAt": "2026-10-06T22:16:24Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast unavailable: official-source fetch failed"
+      },
+      {
+        "kind": "text",
+        "text": "The registered target is the October 2026 first-print seasonally adjusted total nonfarm payroll change, in thousands, from BLS series CES0000000001 and Employment Situation Table B-1."
+      },
+      {
+        "kind": "text",
+        "text": "The web request opening the BLS API history and Employment Situation release failed with: Fatal error: connection failed: error sending request. Neither source returned evidence. The sourceContext URLs document attempted requests, not successful retrievals."
+      },
+      {
+        "kind": "text",
+        "text": "The UTC date command succeeded and returned 2026-10-06T22:16:24Z. No files were inspected or modified."
+      },
+      {
+        "kind": "text",
+        "text": "No historical prints or base rate were obtained. The November 6, 2026 resolutionDate is retained from the supplied target contract but was not independently verified against an official release calendar."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: No numerical prior, adjustment, sigma, or 80% interval can be calculated without fetched history. Null estimates indicate an unavailable forecast; the required confidence field does not establish a calculated interval."
+      },
+      {
+        "kind": "text",
+        "text": "Following the instruction to stop after a failed fetch, this run ends without a numerical forecast. It does not satisfy the evidence validation requirements."
+      }
+    ]
+  }
+]

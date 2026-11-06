@@ -1,0 +1,39 @@
+{
+  "slug": "us-dod-prime-award-transactions-fy2026",
+  "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+  "unit": "millions",
+  "runAt": "2026-10-07T12:09:48Z",
+  "historicalContext": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused"
+    },
+    {
+      "kind": "text",
+      "text": "The exact registered queries could not be fetched. No transaction_count observations were returned, so no admissible history, model candidates, point estimate, or interval can be produced. The forecast cell is dropped rather than populated with invented values or substitute aggregates."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+      "result": "Each exact URL returned Internal Error: URL is not accessible via this tool. No response body or transaction_count was fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+      "result": "Each exact URL returned Internal Error: URL is not accessible via this tool. No response body or transaction_count was fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+      "result": "The exact URL returned Internal Error: URL is not accessible via this tool. No response body or transaction_count was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target context also omits resolutionDate and an exact snapshot timestamp. Its registered window, 2026-10-15 through 2026-10-22, does not authorize inferring a resolution date. The registered_query_snapshot policy must be preserved rather than replaced by an annual first-print rule."
+    }
+  ]
+}

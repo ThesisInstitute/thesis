@@ -1,0 +1,145 @@
+{
+  "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DHS Title VI FY2026 award obligations",
+  "question": "What will USAspending report for FY2026 nominal, unadjusted award-transaction obligations under the exact registered DHS Title VI Treasury-account query at its first registered query snapshot?",
+  "unit": "usd",
+  "pointEstimate": 34908401624.97,
+  "ciLow": 31406821886.55,
+  "ciHigh": 38409981363.39,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-22",
+  "resolutionSource": "U.S. Treasury USAspending API registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Apply the registered_query_snapshot policy to the first official response captured by the registered resolver. POST with group=fiscal_year, spending_level=transactions, transaction dates 2025-10-01 through 2026-09-30, all registered awardTypeCodes, and the six registered treasuryAccountComponents unchanged. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 1. Preserve dollar-and-cent precision and exclude subsequent revisions or corrections. Timing discrepancy: 2026-10-22 is the supplied registration window's end; an official announcement establishing that resolution date was not verified this run, so the mandatory timing-validation requirement remains unmet.",
+  "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 4628047.15
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 241016385.43
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 498351355.26
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 796066298.53
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 1270763628.14
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 7175144178.55
+    }
+  ],
+  "drivers": [
+    "Persistence of the observed FY2026 query total",
+    "Large increase already reflected in current obligations",
+    "Monthly Treasury-account linkage and late reporting",
+    "Possible deobligations and account reclassification"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/api/v2/awards/last_updated/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/?use_cache=false",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov"
+  ],
+  "runAt": "2026-10-07T12:29:34Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "DHS Title VI FY2026 registered-query forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered transaction-obligations query, in nominal USD, rather than an agency total or appropriation amount. Every historical request retained the five 2025–2029 account components and the unrestricted 070-0722 component exactly as registered; only the fiscal-year date range changed. Historical observations are current API snapshots, not recovered original vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Executed separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ for FY2020, FY2021, and FY2022, with group=fiscal_year, spending_level=transactions, the complete registered award-type list and Treasury-account components, and each year's October-through-September date range. Read each matching fiscal_year aggregated_amount from the echoed JSON.",
+      "result": "FY2020: 4628047.15 USD; FY2021: 241016385.43 USD; FY2022: 498351355.26 USD. Each response confirmed spending_level=transactions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Executed the same exact registered-query POST separately for FY2023, FY2024, and FY2025, changing only the fiscal-year date range.",
+      "result": "FY2023: 796066298.53 USD; FY2024: 1270763628.14 USD; FY2025: 7175144178.55 USD."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the six fetched FY2020–FY2025 annual flows: mean 1664328315.51 USD and median 647208826.895 USD. The account basket's historical composition and the sharp latest-year increase make a stationary historical-mean forecast unsuitable; the history supplies the dispersion benchmark."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POSTed the registered FY2026 request with dates 2025-10-01 through 2026-09-30 and otherwise identical parameters. Also fetched https://api.usaspending.gov/api/v2/awards/last_updated/.",
+      "result": "FY2026 aggregated_amount: 34908401624.97 USD, comprising Contract_Obligations of 34033401624.97 USD and Grant_Obligations of 875000000.00 USD. The last_updated endpoint returned 10/07/2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched a diagnostic FY2026 monthly breakdown using the identical dates, spending level, award types, and account components, changing only group to month.",
+      "result": "Fiscal month 12, September 2026: 1909276998.23 USD. Fiscal month 11, August 2026: 581887233.69 USD. These diagnostic observations do not replace the registered annual historical anchors."
+    },
+    {
+      "kind": "text",
+      "text": "Level: use the current FY2026 observation. Momentum: assume no additional drift without observed revision history. One-off and policy effects: the large increase is already included in that observation. Reporting mechanism: monthly File C submissions establish Treasury-account linkages, so additional linked transactions can enter this account-filtered total after year-end. Daily award updates alone do not establish completeness. [USAspending data sources](https://www.usaspending.gov/data/data-sources-download.pdf)"
+    },
+    {
+      "kind": "text",
+      "text": "Timing validation could not be completed. The official submission-periods API's latest exposed monthly period ended 2026-08-31 and had a reveal timestamp of 2026-10-02T01:20:25.895652Z; it exposed no September 2026 release record establishing the registered October 15–22 window. The FY2026 reporting spreadsheet could not be parsed by the web tool. The resolutionDate therefore retains the supplied window's endpoint as a registration deadline, without claiming official verification. This forecast remains tied to the same target but does not satisfy the mandatory official-calendar validation. [Official submission periods](https://api.usaspending.gov/api/v2/references/submission_periods/?use_cache=false)"
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence nowcast updated from the six-print FY2020–FY2025 annual-flow reference class to the fetched FY2026 level of 34908401624.97 USD. Additional momentum, one-off, and policy adjustments are zero because their realized effects are already reflected in the query and no reporting-lag correction was estimated. Compute dispersion from the historical flow values themselves: sigma = 2735609170.6435065 USD = sqrt(37417787672544264000 / 5). The normal approximation gives an 80% half-width of 1.28*sigma = 3501579738.4236884 USD. Retain that full width because monthly account linkage can still change the snapshot. Final implied bounds, rounded to cents, are 31406821886.55 and 38409981363.39 USD."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 34033401624.97 + 875000000.00 = 34908401624.97 USD. Lower bound = 34908401624.97 - 3501579738.4236884 = 31406821886.55 USD after rounding. Upper bound = 34908401624.97 + 3501579738.4236884 = 38409981363.39 USD after rounding."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is late September awards or newly established Treasury-account linkages adding more than 3501579738.42 USD before capture. The downside risk is deobligations, corrections, or account reclassification removing more than that amount. Either scenario would land outside the interval. The interval is a history-based judgmental approximation; its coverage is not calibrated on realized snapshot revisions."
+    },
+    {
+      "kind": "forecast",
+      "point": 34908401624.97,
+      "ciLow": 31406821886.55,
+      "ciHigh": 38409981363.39
+    }
+  ]
+}

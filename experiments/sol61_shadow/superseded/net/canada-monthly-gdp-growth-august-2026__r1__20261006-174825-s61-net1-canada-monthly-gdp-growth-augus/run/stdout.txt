@@ -1,0 +1,102 @@
+{
+  "slug": "canada-monthly-gdp-growth-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, August 2026",
+  "question": "What will Statistics Canada's first official print show for August 2026 month-over-month real GDP growth by industry, all industries, seasonally adjusted, in chained 2017 dollars?",
+  "unit": "percent_growth",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Statistics Canada, GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Resolve using vector v65201210 at the first official publication of August 2026 data: 100*(August level/July level-1), using both levels from that first-release vintage. Retain the precision of the published levels without additional rounding. The advance estimate does not resolve this target. Ignore subsequent revisions.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 0.3
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-07"
+      },
+      "label": "July 2026",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "August advance estimate indicates growth",
+    "Mining and quarrying and retail trade increased",
+    "Oil and gas extraction decreased"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+    "https://www150.statcan.gc.ca/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods"
+  ],
+  "runAt": "2026-10-06T21:59:34Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast not produced: official history retrieval failed"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is the first official August 2026 monthly release for all-industries real GDP, seasonally adjusted at annual rates, chained 2017 dollars, Table 36-10-0434-01, vector v65201210. The fetched historical headlines use this same monthly GDP variant. The August advance estimate is a predictor, not the resolving print."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's June 2026 GDP release, https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm.",
+      "result": "The release dated 2026-08-28 reports June 2026 real GDP growth of 0.3% month over month, with 13 of 20 industrial sectors contributing to growth."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's July 2026 GDP release, https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm, and inspect its headline.",
+      "result": "The release dated 2026-09-29 reports July 2026 real GDP growth of 0.0% month over month. Construction increased 1.3%, while manufacturing decreased 0.9%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Inspect the August advance-estimate section of the opened July 2026 GDP release.",
+      "result": "Statistics Canada estimates August 2026 real GDP growth at 0.2%. Mining and quarrying and retail trade increased, partially offset by decreases in oil and gas extraction."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official release calendar explicitly lists October 30, 2026 for GDP by industry, reference period August 2026. The July release's announcement independently confirms that date."
+    },
+    {
+      "kind": "text",
+      "text": "The table-page fetch failed with a timeout. The WDS request for vector 65201210 and 13 periods failed with curl exit code 7, reporting that it could not connect to www150.statcan.gc.ca. The independent history search also failed with a connection error. Under the instruction to stop after a failed fetch, this run stops without producing a numerical forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate could not be established: only two distinct original monthly prints were successfully fetched. This is a retrieval failure, not evidence that the official source exposes fewer than six prints. No history-availability exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No model prior or adjustment was calculated because the required historical sample was not fetched. The August advance estimate is available, but using it alone would bypass the required base rate. Sigma and final implied bounds remain uncomputed."
+    },
+    {
+      "kind": "math",
+      "text": "No sigma or 1.28*sigma half-width is reported. A point estimate and 80% interval cannot be calculated under the required evidence rules; null values denote this failed run."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

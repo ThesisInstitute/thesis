@@ -1,0 +1,106 @@
+{
+  "slug": "canada-cpi-annual-rate-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada CPI annual rate, October 2026",
+  "question": "What will Statistics Canada's first published, not seasonally adjusted, all-items Consumer Price Index year-over-year percentage change for Canada be for October 2026?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-16",
+  "resolutionSource": "Statistics Canada Consumer Price Index release and Table 18-10-0004-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+  "resolutionRule": "Resolve to the first official published October 2026 Canada all-items CPI year-over-year percentage change, not seasonally adjusted, from Table 18-10-0004-01, vector v41690973, using the registered percent-change-year-ago transform. Express the result in percent rounded to one decimal. Exclude subsequent revisions and corrections; no release-day grace exception applies.",
+  "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 3.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 3.0
+    }
+  ],
+  "drivers": [],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260720/dq260720a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.htm"
+  ],
+  "runAt": "2026-10-07T12:03:14Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast not issued: official-source fetch failure"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the October 2026 first-print Canada all-items CPI annual percentage change, not seasonally adjusted, from Table 18-10-0004-01, vector v41690973. Retrieved headline historical rates use this same variant."
+    },
+    {
+      "kind": "text",
+      "text": "The official 2026-2027 release-calendar PDF was opened and explicitly lists November 16, 2026 as the release date for October 2026 CPI. This agrees with the registered resolution date."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's May 2026 CPI release at https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm.",
+      "result": "Fetched text reports May 2026 CPI increased 3.2% year over year, up from 2.8% in April. The release date is June 22, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's June 2026 CPI release at https://www150.statcan.gc.ca/n1/daily-quotidien/260720/dq260720a-eng.htm.",
+      "result": "Fetched text reports June 2026 CPI increased 2.8% year over year, following 3.2% in May. All-items excluding gasoline increased 2.2% year over year."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's July 2026 CPI release at https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.htm.",
+      "result": "Fetched text reports July 2026 CPI increased 3.0% year over year, following 2.8% in June. Gasoline increased 25.7% year over year and shelter increased 1.3%."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate could not be completed: only four distinct monthly headline rates were retrieved. This does not establish that the official source exposes fewer than six prints, so no history-availability exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Opening https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm failed with '400 Timeout fetching'; a March release lookup also failed. Following the explicit fail-stop instruction, further fetching stopped. Search-summary numbers were not used."
+    },
+    {
+      "kind": "math",
+      "text": "No point estimate, sigma, or 80% interval was calculated because the required fetched historical sample was incomplete. Null forecast fields denote an unissued forecast, not numerical predictions."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior was fitted, adjustment components were not combined, and no interval method or final implied bounds were produced because the official-source fetch failure terminated the run."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and scenarios outside the interval were not quantified because no forecast interval was issued."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

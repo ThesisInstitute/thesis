@@ -1,0 +1,128 @@
+{
+  "slug": "snap-participation-june-2026",
+  "country": "US",
+  "type": "data",
+  "title": "June 2026 SNAP participation diagnostic",
+  "question": "What is USDA FNS national monthly SNAP total Persons participation for June 2026, unadjusted, expressed in millions, on the first official print?",
+  "unit": "millions",
+  "pointEstimate": 36.100463,
+  "ciLow": 35.798746,
+  "ciHigh": 36.40218,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-03",
+  "resolutionSource": "USDA FNS SNAP national monthly participation table",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/sites/default/files/resource-files/snap-4fymonthly-9.pdf",
+  "resolutionRule": "Resolve June 2026 using the national monthly table's Persons value on its first official publication, retaining the official total including any disaster assistance. Normalize whole-person counts to thousands before applying the registered multiplication factor of 0.001, yielding millions. Report to six decimal places. Subsequent revisions do not replace the first print.",
+  "dataPointId": "usda.fns.snap.persons.june_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 41.09666
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 39.99989
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 39.207898
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 38.552133
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 37.947123
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 37.531152
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 37.078596
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 36.562128
+    }
+  ],
+  "drivers": [
+    "Persistent monthly participation declines",
+    "Recent contraction slower than the full-sample average",
+    "Large state enrollment changes",
+    "Preliminary reporting and revision uncertainty",
+    "June initial print already publicly available"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/overview"
+  ],
+  "runAt": "2026-10-07T11:52:38Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "June 2026 SNAP participation: retrospective model diagnostic"
+    },
+    {
+      "kind": "text",
+      "text": "The target's June initial print is already public and was observed during this run. This projection therefore cannot qualify as an independent ex ante forecast for the research comparison. The model uses only the August-vintage history ending in May; it excludes June and subsequent historical revisions from its calculations."
+    },
+    {
+      "kind": "text",
+      "text": "Retain the registered June target and first-print resolver. These are unadjusted monthly administrative Persons totals, separate from annual quality-control statistics and Pandemic EBT. The fetched tables contain whole-person counts, contrary to the ledger's description of thousands; dividing by 1,000,000 is equivalent to normalizing to thousands and applying its registered 0.001 factor. Canonical www.fns.usda.gov requests failed; evidence was retrieved from USDA's public CDN."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf and read national monthly Persons.",
+      "result": "Data as of August 14, 2026: October 2025 41,096,660; November 39,999,890; December 39,207,898; January 2026 38,552,133; February 37,947,123; March 37,531,152; April 37,078,596; May 36,562,128 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf to verify the latest pre-June observation and state composition.",
+      "result": "May 2026 Initial national total is 36,562,128 persons; April Preliminary is 37,078,596. May participation fell 1.4% nationally. Georgia recorded 1,187,277 persons and a 12.2% monthly decline; Illinois recorded 1,565,308 and a 5.4% decline."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf to audit whether the registered target remains unpublished.",
+      "result": "June 2026 is explicitly labeled Initial, with 36,352,716 persons. May Preliminary is 36,685,024 persons. The table reports June changes of -0.9% monthly and -12.8% annually. These observed June figures are excluded from the model."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar validation could not be completed: no official release calendar or announcement schedule was retrievable. The SNAP table page and Program Data Overview identify June as available and are dated September 18, 2026. That establishes an existing publication vintage, not the exact first-publication date. The emitted resolutionDate retains the supplied expected-window endpoint, November 3, 2026, solely as unverified ledger metadata. The calendar requirement remains unmet, and the expected window conflicts with already published June data."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is eight monthly observations from one pre-June-release vintage, yielding seven successive declines. Earlier observations are preliminary or revised, not an archive of eight original first prints. The base rate is a mean monthly change of -0.647790286 million; the last three changes average -0.461665 million, indicating slower recent contraction."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use May persistence plus the mean of the last three monthly changes. Level = 36.562128 million; momentum = (-0.415971 - 0.452556 - 0.516468)/3 = -0.461665; separate one-off and policy adjustments = 0 because no independently quantified adjustment was fetched. Point = 36.562128 - 0.461665 = 36.100463. For all seven successive changes, sigma = 0.235716219718 million, calculated as sqrt(0.333372817429/6). The normal-approximation 80% half-width is 1.28*sigma = 0.301716761239. Bounds = 36.100463 +/- 0.301716761239 = [35.798746, 36.402180] after rounding. No additional widening or narrowing is applied."
+    },
+    {
+      "kind": "text",
+      "text": "For this retrospective diagnostic, upside risk would be faster stabilization or administrative back-reporting that produces participation above 36.402180 million. Downside risk would be broader state enrollment losses producing participation below 35.798746 million. Reporting omissions or unusually large corrections could put a first print outside the interval. Subsequent revisions would not change the registered first-print outcome."
+    },
+    {
+      "kind": "forecast",
+      "point": 36.100463,
+      "ciLow": 35.798746,
+      "ciHigh": 36.40218
+    }
+  ]
+}

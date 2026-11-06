@@ -1,0 +1,159 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+  "title": "FY2027 DoD award obligations without a year-end NDAA",
+  "question": "What will USAspending API v2 agency 097 report for FY2027 nominal prime award obligations in the first registered query snapshot during October 15–22, 2027, conditional on the registered NDAA condition?",
+  "unit": "billions USD",
+  "pointEstimate": 452.498,
+  "ciLow": 350.715,
+  "ciHigh": 554.281,
+  "confidence": 0.8,
+  "resolutionDate": "2027-10-22",
+  "resolutionSource": "USAspending API v2, U.S. Treasury Bureau of the Fiscal Service",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+  "resolutionRule": "Conditional on the registered condition holding, use the obligations field from the first official response captured for the exact registered FY2027 query in the registered October 15–22, 2027 snapshot window. Multiply the returned USD amount by 1e-9, preserving its decimal precision. Freeze that observation and ignore subsequent revisions and reporting backfills. October 22 is retained as the ledger window-end date; official verification of that exact resolution date was not achieved.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2019"},
+      "label": "FY2019",
+      "value": 391.23538542457
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 431.88364015745
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 395.33443647687
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 424.50276360528
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 467.27708690212
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 456.6531220443
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 501.6682566824
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2026"},
+      "label": "FY2026",
+      "value": 384.21991432142
+    }
+  ],
+  "drivers": [
+    "Recent annual obligation growth",
+    "Large proposed procurement and research funding increases",
+    "Continuing-resolution restrictions on new awards",
+    "Separate appropriations remain possible without an NDAA",
+    "DoD reporting delay and October snapshot timing"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2019",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.cbo.gov/publication/62546",
+    "https://www.congress.gov/crs_external_products/R/PDF/R48057/R48057.1.pdf",
+    "https://www.govinfo.gov/content/pkg/PLAW-119publ103/html/PLAW-119publ103.htm",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T12:07:23Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Conditional FY2027 DoD prime award obligations"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is USAspending agency 097 awards, field obligations, transformed from USD to billions USD. The target is a nominal, unadjusted registered query snapshot. Every historical anchor was fetched by executing that same query with its fiscal year substituted. Historical values are current API vintages, not reconstructed original October snapshots."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2019 and the identical registered query for 2020 and 2021; read obligations from echoed JSON.",
+      "result": "Fetched obligations in USD: FY2019 391235385424.57; FY2020 431883640157.45; FY2021 395334436476.87. Multiplication by 1e-9 gives 391.23538542457, 431.88364015745, and 395.33443647687 billions USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022 and the identical registered query for 2023 and 2024; read obligations from echoed JSON.",
+      "result": "Fetched obligations in USD: FY2022 424502763605.28; FY2023 467277086902.12; FY2024 456653122044.3. Multiplication by 1e-9 gives 424.50276360528, 467.27708690212, and 456.6531220443 billions USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025 and the identical registered query for 2026; read obligations from echoed JSON.",
+      "result": "Fetched FY2025 obligations 501668256682.4 USD and transaction_count 4516581; FY2026 obligations 384219914321.42 USD and transaction_count 3218036. Transformed obligations are 501.6682566824 and 384.21991432142 billions USD. FY2026 latest_action_date is 2026-09-30T00:00:00."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate uses seven older fiscal-year observations, FY2019–FY2025: mean 438.364955899 billions USD and mean successive annual increase 18.405478543 billions USD. The latest FY2026 observation supplies the persistence level because its October observation timing is closer to the target's snapshot timing. Its latest action date does not establish reporting completeness."
+    },
+    {
+      "kind": "text",
+      "text": "USAspending updates after its nightly pipeline and documents a 90-day DoD procurement reporting delay. Consequently, an October fiscal-year snapshot can remain substantially below the subsequently backfilled annual total. The forecast preserves this snapshot variant. [Official data-source documentation](https://www.usaspending.gov/data/data-sources-download.pdf)"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.cbo.gov/publication/62546; read Table 2 and the proposed defense appropriations discussion.",
+      "result": "CBO reports enacted FY2026 defense discretionary budget authority of 903 billion USD and requested FY2027 authority of 1154 billion USD, an increase of 251 billion USD. Proposed discretionary increases include procurement 94 billion, RDT&E 75 billion, and operation and maintenance 48 billion. The separate proposed mandatory defense funding is 350 billion USD."
+    },
+    {
+      "kind": "text",
+      "text": "The budget request supports an upward adjustment, but these amounts are proposed budget authority and are broader than this award series. I assume half of the requested discretionary percentage increase passes through to reported prime obligations. I assign no separate central uplift to the proposed mandatory funding. These are forecast assumptions, not fetched outcomes. [CBO analysis](https://www.cbo.gov/publication/62546)"
+    },
+    {
+      "kind": "text",
+      "text": "CRS explains that the NDAA generally supplies authorizations without budget authority and cites GAO's conclusion that separately enacted appropriations can remain available for obligation despite missing authorization. The condition permits subsequent NDAA enactment and separate appropriations. I therefore assume a modest additional delay drag rather than cessation of contracting. [CRS R48057](https://www.congress.gov/crs_external_products/R/PDF/R48057/R48057.1.pdf)"
+    },
+    {
+      "kind": "text",
+      "text": "Public Law 119-103 already funds FY2027 continuing operations at FY2026 rates until December 11, 2026, unless superseded earlier. Its defense provisions restrict new production, production increases, and new projects. This supports uncertainty about award timing; the specified NDAA condition does not itself require those funding restrictions to persist throughout FY2027. [Enacted continuing appropriations](https://www.govinfo.gov/content/pkg/PLAW-119publ103/html/PLAW-119publ103.htm)"
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date verification was not achieved. Official documentation establishes daily updates, but no fetched official announcement establishes October 22, 2027 as this query's release date. Treasury's FY27 DABS workbook fetch returned an unsupported-content-type error. I retain the supplied ledger date and snapshot window while flagging this verification gap; the forecast does not fully satisfy the official-calendar validation requirement. [Treasury reporting resources](https://tfx.treasury.gov/data-transparency/resources)"
+    },
+    {
+      "kind": "math",
+      "text": "Level = 384.21991432142. Momentum = (501.6682566824 - 391.23538542457)/6 = 18.40547854297. Budget adjustment = 384.21991432142 × (251/903) × 0.5 = 53.39933471466. Assumed conditional delay adjustment = -0.03 × 384.21991432142 = -11.52659742964. Assumed later-October reporting adjustment = +8.0. Separate mandatory-funding uplift = 0. Point = 384.21991432142 + 18.40547854297 + 53.39933471466 - 11.52659742964 + 8.0 = 452.49813014941 billions USD."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence-plus-drift prior anchored on the fetched October FY2026 snapshot, with FY2019–FY2025 as the seven-observation historical sample. Add historical momentum, partial proposed-budget pass-through, and later-October reporting; subtract an assumed conditional delay drag. For this annual flow series, use dispersion of the fetched annual values: mean = 438.364955899; sum of squared deviations = 9484.666073946; sigma = 39.7589949444 = sqrt(9484.666073946/6). The baseline 80% half-width is 1.28 × sigma = 50.891513529. Widen by 2.0 to 101.783027058 because the unusually large proposed funding change, conditional legislative delay, and unavailable historical October vintages create additional regime and reporting uncertainty. Final implied bounds are 452.498130149 ± 101.783027058, rounded to [350.715, 554.281] billions USD."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is separate appropriations or later NDAA enactment enabling procurement catch-up, with substantial additional mandatory funding obligated promptly; that could land above 554.281 and outside the interval. The downside risk is prolonged continuing appropriations, procurement restrictions, or unusually slow reporting and execution; a sufficiently persistent combination could land below 350.715 and outside the interval. Absence of an NDAA by December alone does not select either extreme."
+    },
+    {
+      "kind": "forecast",
+      "point": 452.498,
+      "ciLow": 350.715,
+      "ciHigh": 554.281
+    }
+  ]
+}

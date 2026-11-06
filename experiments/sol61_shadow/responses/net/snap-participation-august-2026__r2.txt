@@ -1,0 +1,42 @@
+{
+  "slug": "snap-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "August 2026 SNAP participation",
+  "question": "What will USDA FNS first publish for August 2026 national monthly SNAP participation, Persons, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS national monthly SNAP participation table",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Use the first official published August 2026 Persons value in the national monthly SNAP participation table. Multiply the reported value in thousands by 0.001 to obtain millions, retaining its published precision. Ignore subsequent revisions; no correction grace period applies.",
+  "dataPointId": "usda.fns.snap.persons.august_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://www.fns.usda.gov/pd/data-release-schedule"
+  ],
+  "runAt": "2026-10-07T12:03:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official evidence fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The official SNAP program-data page returned HTTP 403 through the web tool. curl -sS against the same URL returned an empty body. No official participation history was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The attempted official-domain data-release-schedule URL also returned an empty body and was not established as the correct calendar endpoint. No resolution date was verified. The registered January 3–11, 2027 window cannot establish an exact release date."
+    },
+    {
+      "kind": "text",
+      "text": "Stopped under the fetch-failure instruction. The base rate, historical sigma, point estimate, and 80% interval cannot be calculated from fetched evidence. Null values explicitly represent an unsuccessful run, not a numeric forecast."
+    }
+  ]
+}

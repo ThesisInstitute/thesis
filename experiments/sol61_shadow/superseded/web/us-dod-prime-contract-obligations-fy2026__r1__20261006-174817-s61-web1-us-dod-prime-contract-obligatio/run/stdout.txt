@@ -1,0 +1,79 @@
+{
+  "slug": "us-dod-prime-contract-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 prime contract obligations",
+  "question": "What will FY2026 Department of Defense prime contract obligations equal in the first registered USAspending agency 097 obligations-by-award-category query snapshot, using the contracts row's aggregated_amount multiplied by 1e-9?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097, obligations by award category",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+  "resolutionRule": "Use results[category=contracts].aggregated_amount from the registered FY2026 query snapshot and multiply by 1e-9. Preserve the returned precision without additional rounding. Subsequent API refreshes or revisions do not replace the registered snapshot. The exact snapshot date could not be verified from an official schedule in this run.",
+  "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Required registered-query history could not be fetched",
+    "Exact registered snapshot date remains unverified"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-06T22:34:43Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory official evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The prompt requires refusal when the exact registered history query cannot execute. No numeric forecast is supplied; null estimates and empty historicalContext record unavailable evidence, not zero obligations or an authorized history exception."
+    },
+    {
+      "kind": "text",
+      "text": "The target is usaspending.agency.097.obligations_by_award_category.contracts for FY2026 under registered_query_snapshot. Broader agency totals, search summaries, and other obligation aggregates cannot substitute for the contracts-row aggregated_amount."
+    },
+    {
+      "kind": "text",
+      "text": "Exact registered-query opens for FY2020, FY2021, and FY2022 each returned Internal Error and reported that the requested URL was not accessible via this tool. An individual FY2022 retry failed identically. No contracts amounts were fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Exact registered-query opens for FY2023, FY2024, and FY2025 also reported that their URLs were not accessible via this tool. Individual FY2025 retries failed, so batching alone does not explain the failures. No historical numeric anchors were obtained."
+    },
+    {
+      "kind": "text",
+      "text": "The exact FY2026 query likewise returned an inaccessible-URL error. A separate batched request failed with a connection error. No current-period contracts amount was obtained."
+    },
+    {
+      "kind": "text",
+      "text": "The official Treasury resources page linked the FY2026 Data Broker reporting schedule, but opening its spreadsheet returned '(400) Unsupported content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'. The fetched USAspending data-sources document describes nightly updates but does not announce a precise date for this registered snapshot. No official resolutionDate was verified; the supplied expected window does not establish one."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate and reference class cannot be established because none of the six requested historical fiscal-year values was fetched. This is an access failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sample statistics, adjustment components, or interval can be estimated from verified target data. Sigma and the approximately 1.28*sigma half-width remain uncomputed. Quantifying upside risk, downside risk, or outcomes outside the interval would require inventing an anchor."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

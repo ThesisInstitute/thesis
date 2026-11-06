@@ -1,0 +1,129 @@
+[
+ {
+  "slug": "continued-claims-week-2026-09-26",
+  "country": "US",
+  "type": "data",
+  "title": "US continued claims, week ending September 26, 2026",
+  "question": "What will the first official DOL ETA print of seasonally adjusted continued unemployment insurance claims be for the week ending September 26, 2026, in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "DOL ETA Unemployment Insurance Weekly Claims",
+  "resolutionSourceUrl": "https://www.dol.gov/ui/data.pdf",
+  "resolutionRule": "Use the first official advance seasonally adjusted insured-unemployment count for the week ending 2026-09-26, corresponding to the registered ALFRED CCSA advance-vintage target. Multiply persons by 0.000001 to express millions, preserve published precision, and disregard subsequent revisions.",
+  "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+  "historicalContext": [
+   {
+    "label": "week ending 2026-08-08",
+    "value": 1.796,
+    "period": {
+     "type": "week_ending",
+     "value": "2026-08-08"
+    }
+   },
+   {
+    "label": "week ending 2026-08-15",
+    "value": 1.771,
+    "period": {
+     "type": "week_ending",
+     "value": "2026-08-15"
+    }
+   },
+   {
+    "label": "week ending 2026-08-22",
+    "value": 1.775,
+    "period": {
+     "type": "week_ending",
+     "value": "2026-08-22"
+    }
+   },
+   {
+    "label": "week ending 2026-08-29",
+    "value": 1.765,
+    "period": {
+     "type": "week_ending",
+     "value": "2026-08-29"
+    }
+   },
+   {
+    "label": "week ending 2026-09-05",
+    "value": 1.717,
+    "period": {
+     "type": "week_ending",
+     "value": "2026-09-05"
+    }
+   },
+   {
+    "label": "week ending 2026-09-12",
+    "value": 1.712,
+    "period": {
+     "type": "week_ending",
+     "value": "2026-09-12"
+    }
+   },
+   {
+    "label": "week ending 2026-09-19",
+    "value": 1.701,
+    "period": {
+     "type": "week_ending",
+     "value": "2026-09-19"
+    }
+   }
+  ],
+  "drivers": [],
+  "sourceContext": [
+   "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf",
+   "https://oui.doleta.gov/unemploy/claims_arch.asp/claims.asp"
+  ],
+  "runAt": "2026-10-06T21:54:53Z",
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Run failed: exact release date could not be verified"
+   },
+   {
+    "kind": "text",
+    "text": "The target is seasonally adjusted continued claims, series CCSA, for the week ending 2026-09-26, resolved on its first official print. All historical anchors below use the same seasonally adjusted insured-unemployment variant. Older observations are the October 1 release's revised vintage; September 19 is its advance print."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "Open the official October 1 DOL release PDF and read its seasonally adjusted insured-unemployment table, August observations.",
+    "result": "Fetched values, in thousands: August 8: 1796; August 15: 1771; August 22: 1775; August 29: 1765."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "Read September observations from the same fetched official DOL table.",
+    "result": "Fetched values, in thousands: September 5: 1717; September 12: 1712; September 19: 1701."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "Read the advance level, revision, and four-week average from the same fetched official release.",
+    "result": "September 19 advance insured unemployment was 1,701,000. September 12 was revised from 1,719,000 to 1,712,000. The latest four-week average was 1,723,750."
+   },
+   {
+    "kind": "text",
+    "text": "The fetched reference class contains seven distinct recent weekly levels. These observations establish an available base rate, but they do not verify the exact target release date."
+   },
+   {
+    "kind": "text",
+    "text": "The official OUI publication-schedule page states Thursday publication at 8:30 AM and lists a November 25 exception. It did not provide date-specific verification for this target. The DOL economic calendar returned 403 Forbidden, the FRED calendar was inaccessible, and other requests returned network errors. No resolution date is inferred from cadence or the registered October 14\u201318 window."
+   },
+   {
+    "kind": "text",
+    "text": "Prior/update/interval: The run stopped following fetch failures, as instructed. An already-running request subsequently supplied the history, but required release-date verification remained unavailable. No numerical forecast, sigma, adjustment, or interval is asserted; null fields explicitly mark the failed run."
+   },
+   {
+    "kind": "forecast",
+    "point": null,
+    "ciLow": null,
+    "ciHigh": null
+   }
+  ]
+ }
+]

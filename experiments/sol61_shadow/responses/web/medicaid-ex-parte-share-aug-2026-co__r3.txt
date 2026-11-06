@@ -1,0 +1,142 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-co",
+  "country": "US",
+  "type": "data",
+  "title": "Colorado ex parte renewal share, August 2026",
+  "question": "What percentage of Colorado Medicaid and CHIP beneficiaries due for renewal in August 2026 will be reported renewed on an ex parte basis in CMS's first published original (O) submission, computed as 100 times metric 5a1 divided by metric 5 and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 60.3,
+  "ciLow": 54.6,
+  "ciHigh": 66.0,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Colorado's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes that row. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using numerator and denominator as first published, and round to one decimal. Subsequent corrections, revisions, and updated (U) submissions do not affect resolution.",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 61
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": 59
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 55
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 57
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 61
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 61
+    }
+  ],
+  "drivers": [
+    "Persistence of the latest Colorado renewal share",
+    "Partial shrinkage toward the recent historical mean",
+    "Monthly renewal-cohort composition",
+    "Administrative data matching and renewal classification"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T11:56:57Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Colorado August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Colorado's state row, not a national total or weighted national average. CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c distinguishes original (O) and updated (U) submissions. CMS specifications identify metric 5a1 as ex parte renewals and metric 5 as renewals due; CMS's snapshot tables express the share using renewals due as the denominator."
+    },
+    {
+      "kind": "text",
+      "text": "History limitation: the raw dataset API was inaccessible through the web tool. The six fetched anchors therefore use Colorado's original current-month outcome tables in the contemporaneous CMS snapshots, excluding the separately presented updated outcomes. These preliminary original-outcome shares are published rounded to whole percentage points. Exact one-decimal O-row history and immutable first-publication vintages could not be independently verified; no missing numerators were invented."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch January and February 2026 CMS snapshots at https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf; inspect Colorado in Coverage Retention and Disenrollment Rates by State.",
+      "result": "January 2026: 87,086 beneficiaries due for renewal; 61% renewed ex parte. February 2026: 89,314 due; 59% renewed ex parte. Both shares are CMS's whole-percentage-point published values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch March and April 2026 CMS snapshots at https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf; inspect the corresponding Colorado renewal-outcome rows.",
+      "result": "March 2026: 97,700 beneficiaries due for renewal; 55% renewed ex parte. April 2026: 92,499 due; 57% renewed ex parte. Both shares are CMS's whole-percentage-point published values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch May and June 2026 CMS snapshots at https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf; inspect the corresponding Colorado renewal-outcome rows.",
+      "result": "May 2026: 78,955 beneficiaries due for renewal; 61% renewed ex parte. June 2026: 85,937 due; 61% renewed ex parte. Both shares are CMS's whole-percentage-point published values."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the six fetched Colorado original-outcome monthly shares from January through June 2026: 61, 59, 55, 57, 61, 61 percent. Their base rate is an unweighted monthly mean of 59%, with a range of 55% to 61%. The latest two observations both equal 61%."
+    },
+    {
+      "kind": "text",
+      "text": "Separate adjustment components: the level prior is the six-month mean; recency favors persistence at June's higher level. Momentum receives no additional trend adjustment because May-to-June was unchanged and January-to-June net movement was zero. One-off and policy-mechanism adjustments are zero assumptions: the fetched evidence does not establish a quantified August-specific Colorado change. Cohort composition and administrative matching remain sources of uncertainty."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: use a persistence prior partially shrunk toward the January-June 2026 reference class. Point = round((2/3)*61 + (1/3)*59, 1) = 60.3%; additional momentum, one-off, and policy adjustments = 0. Successive changes are -2, -4, +2, +4, 0 percentage points, with mean 0 and squared deviations summing to 40. Sample sigma = 3.1623 percentage points = sqrt(40/(5-1)). The normal-innovation 80% one-month half-width is 1.28*sigma = 4.0477 points. For the two-month June-to-August horizon, assume independent monthly innovations and multiply by sqrt(2), giving 5.7243 points. Final implied bounds are round(60.3-5.7243, 1) = 54.6% and round(60.3+5.7243, 1) = 66.0%. This nominal interval uses rounded history and a small sample."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is improved income-data matching or an August cohort that is easier to renew automatically. The downside risk is failed data matches, a harder renewal cohort, or renewals classified as form-based after forms have been sent. A substantial automation gain producing a share above 66.0%, or a system disruption producing a share below 54.6%, would land outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification limitation: the official CMS snapshot release page lists June 2026 data released September 25, 2026, but no fetched official announcement or forward calendar verifies December 15, 2026 for August 2026. The specifications' day-8 original-report and day-15 updated-report deadlines concern state submissions, not public release dates. The registered resolutionDate 2026-12-15 is retained as the ledger contract and remains officially unverified; resolution still uses the first published August O row."
+    },
+    {
+      "kind": "forecast",
+      "point": 60.3,
+      "ciLow": 54.6,
+      "ciHigh": 66.0
+    }
+  ]
+}

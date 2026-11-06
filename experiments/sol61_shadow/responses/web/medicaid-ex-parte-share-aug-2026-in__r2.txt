@@ -1,0 +1,149 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-in",
+  "country": "US",
+  "type": "data",
+  "title": "Indiana ex parte renewal share, August 2026",
+  "question": "What percentage of Indiana beneficiaries due for Medicaid or CHIP renewal in August 2026 will be reported renewed on an ex parte basis in CMS's first-published original (O) submission?",
+  "unit": "percent",
+  "pointEstimate": 9.5,
+  "ciLow": 3.7,
+  "ciHigh": 15.3,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Indiana's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Using the published counts, compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, rounded to one decimal. Later updated submissions and revisions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.in.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 18
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 18
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 18
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 19
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 18
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 18
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 11
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 5
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 7
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 8
+    }
+  ],
+  "drivers": [
+    "Low recent Indiana ex parte renewal share",
+    "Modest rebound after April's trough",
+    "Eligibility verification and administrative data matching",
+    "Renewal cohort composition and processing delays"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.in.gov/gov/files/25-60.pdf"
+  ],
+  "runAt": "2026-10-07T11:45:45Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Indiana August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is an Indiana state row, not a national average. Dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c identifies original submissions as O. The ledger does not explicitly name the denominator; this forecast uses CMS's published percent-of-renewals-due definition: metric 5a1 divided by metric 5. All historical anchors use original monthly outcomes, excluding updated submissions. Sources: [dataset](https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c) and [June table](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf)."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification limitation: the [official snapshot index](https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot) confirms June 2026 was released September 25, 2026, but provides no announced August 2026 publication date. The registered resolutionDate of 2026-12-15 is retained; it could not be verified from an official forward schedule this run, so that validation requirement remains unmet."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read Indiana original monthly outcomes in the official [September](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf), [October](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf), [November](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf), and [December](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf) 2025 snapshots.",
+      "result": "September: 116,660 due, 18% renewed ex parte; October: 112,784 due, 18%; November: 115,273 due, 18%; December: 119,279 due, 19%. These are CMS's printed whole-percentage shares of beneficiaries due for renewal."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read Indiana original monthly outcomes in the official [January](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf), [February](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf), and [March](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf) 2026 snapshots.",
+      "result": "January: 108,259 due, 18% renewed ex parte; February: 115,539 due, 18%; March: 103,975 due, 11%. Total renewed shares were respectively 26%, 27%, and 22%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read Indiana original monthly outcomes in the official [April](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf), [May](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf), and [June](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf) 2026 snapshots.",
+      "result": "April: 87,136 due, 5% renewed ex parte; May: 98,256 due, 7%; June: 110,131 due, 8%. June also reported 21% total renewed, 45% disenrolled, and 34% pending."
+    },
+    {
+      "kind": "text",
+      "text": "Precision limitation: the exact underlying CSV/API counts could not be fetched through the web tool. The ten historical values are genuine official first-publication percentages rounded to whole percentage points, not reconstructed numerator counts. Resolution still uses the exact published O-row counts and one-decimal rounding."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is 14.0% across the ten September 2025-June 2026 original prints. The recent April-June reference class averages 6.7%, with June at 8%. This lower recent level supports updating the historical mean downward before considering momentum."
+    },
+    {
+      "kind": "text",
+      "text": "Policy/mechanism: [Indiana Executive Order 25-60](https://www.in.gov/gov/files/25-60.pdf) directs verified enrollment information, periodic administrative data reviews, and redeterminations following eligibility-related changes. I infer these processes can constrain automatic renewals, but the order does not establish the cause of the observed monthly decline. Existing policy effects are incorporated in the recent level; no additional policy or one-off adjustment is applied."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior with damped momentum and the ten fetched September 2025-June 2026 original prints. Start at the 14.0% base rate; level adjustment = 8.0-14.0 = -6.0 points. April-June changes are +2 and +1; a judgmental 50% damping over the two-month June-August horizon gives momentum = 0.5*((2+1)/2)*2 = +1.5. One-off = 0 and additional policy adjustment = 0. Point = 14.0-6.0+1.5 = 9.5. Successive changes are [0,0,1,-1,0,-7,-6,2,1], with mean -1.111111; sigma = 3.179797 percentage points, computed as sqrt(80.888889/8). The one-month 80% half-width is 1.28*sigma = 4.070141. For two months, multiply by sqrt(2): half-width = 5.756048. Bounds = 9.5 +/- 5.756048 = [3.743952,15.256048], rounded to [3.7,15.3]."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: improved electronic matching or a cohort with more readily verified beneficiaries raises automatic renewals; a substantial restoration of automation would land above 15.3%, outside the interval. Downside risk: tighter verification, poor data matches, or processing interruptions reduce completed ex parte renewals; an interruption that nearly stops automatic renewals would land below 3.7%, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 9.5,
+      "ciLow": 3.7,
+      "ciHigh": 15.3
+    }
+  ]
+}

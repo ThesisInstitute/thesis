@@ -1,0 +1,142 @@
+{
+  "slug": "canada-cpi-annual-rate-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada CPI inflation, September 2026",
+  "question": "What will Statistics Canada first report for the September 2026 year-over-year percentage change in Canada's all-items Consumer Price Index, not seasonally adjusted?",
+  "unit": "percent",
+  "pointEstimate": 3.0,
+  "ciLow": 2.46,
+  "ciHigh": 3.54,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-19",
+  "resolutionSource": "Statistics Canada Consumer Price Index release and Table 18-10-0004-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+  "resolutionRule": "Resolve to the first officially published September 2026 year-over-year percentage change in the Canada all-items, not seasonally adjusted CPI, using Table 18-10-0004-01, vector v41690973. Calculate 100 times the September 2026 index divided by the September 2025 index minus 100, expressed to one decimal place as in the official release. Preserve the first print; subsequent corrections and revisions do not change resolution.",
+  "dataPointId": "statcan.cpi.allitems.yoy.2026_09.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 2.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 1.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 2.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 3.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 3.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 3.0
+    }
+  ],
+  "drivers": [
+    "Stable recent headline inflation",
+    "Slower gasoline inflation against firmer inflation excluding gasoline",
+    "Small September 2025 all-items base increase",
+    "Volatile travel prices and petroleum supply",
+    "Continuing federal fuel excise suspension"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260217/dq260217a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260316/dq260316a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260519/dq260519a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260720/dq260720a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm?indgeo=0&indid=3665-1",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm",
+    "https://natural-resources.canada.ca/domestic-international-markets/fuel-consumption-levies-canada"
+  ],
+  "runAt": "2026-10-07T11:43:14Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September headline inflation persistence forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first official September 2026 Canada all-items CPI annual change. Table 18-10-0004-01 and registered vector v41690973 identify the underlying index. Every headline historical print and index anchor here uses the not seasonally adjusted variant; component statistics inform drivers separately."
+    },
+    {
+      "kind": "text",
+      "text": "The official calendar fetched at https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf explicitly pairs September 2026 CPI with October 19, 2026. The August Daily announcement independently confirms that date. The ledger release date agrees."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada's January and February 2026 Daily releases and March 2026 release PDF: https://www150.statcan.gc.ca/n1/daily-quotidien/260217/dq260217a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260316/dq260316a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.pdf",
+      "result": "Headline CPI annual changes: January 2026 2.3%; February 2026 1.8%; March 2026 2.4%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada's April, May and June 2026 Daily releases: https://www150.statcan.gc.ca/n1/daily-quotidien/260519/dq260519a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260720/dq260720a-eng.htm",
+      "result": "Headline CPI annual changes: April 2026 2.8%; May 2026 3.2%; June 2026 2.8%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada's July release PDF and August Daily release: https://www150.statcan.gc.ca/n1/daily-quotidien/260817/dq260817a-eng.pdf ; https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm?indgeo=0&indid=3665-1",
+      "result": "Headline annual CPI was 3.0% in both July and August 2026. CPI excluding gasoline rose 2.4% annually in August versus 2.2% in July; gasoline slowed to 22.8% from 25.7%."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is eight consecutive official headline prints from January through August 2026. Their mean is 2.6625%, with the latest two prints at 3.0%. This base rate supports a persistence anchor near the latest level. The historical mean monthly rate change of +0.1 percentage point is noisy and includes tax and energy shifts, so the model does not extrapolate that drift."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the official August 2026 and September 2025 NSA CPI tables: https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm",
+      "result": "August 2026 all-items index was 169.8 versus July 169.9, a 0.1% monthly decline. September 2025 all-items was 164.9 versus August 164.8, a 0.1% monthly increase. September 2025 gasoline rose 1.9% monthly; August 2026 gasoline fell 0.9% monthly. August 2026 shelter inflation was 1.5% annually."
+    },
+    {
+      "kind": "text",
+      "text": "Level: recent headline inflation is stable. Momentum: firmer inflation excluding gasoline offsets moderating gasoline inflation. One-off effects: last year's September gasoline increase creates downward base pressure unless matched, while travel prices remain volatile. Policy mechanism: the official NRCan page fetched through web search states that federal gasoline excise falls from its regular 10 cents per litre to zero from April 20, 2026 through January 31, 2027, so no September federal reset is assumed. No September national pump-price statistic was fetched; September gasoline direction remains uncertain."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a zero-drift random-walk persistence prior at August's 3.0%, with January-August 2026 as the historical sample. The level anchor is 3.0%; opposing momentum, one-off gasoline/travel effects and continuing fuel-tax relief warrant a net discretionary adjustment of 0.0 percentage points. A flat September NSA index gives 100*(169.8/164.9-1) = 2.9715%, which rounds to 3.0%. Successive annual-rate changes are [-0.5, 0.6, 0.4, 0.4, -0.4, 0.2, 0.0] percentage points, with mean 0.1 and sum of squared deviations 1.06. Sample sigma = 0.4203 percentage points, computed as sqrt(1.06/(7-1)). The Gaussian 80% half-width is 1.28*0.42031734 = 0.5380062. Bounds are 3.0 +/- 0.5380062 = [2.4619938, 3.5380062], reported as [2.46, 3.54]. Coverage is conditional on this estimated dispersion, without additional widening or narrowing."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a renewed petroleum supply disruption that sharply increases pump prices and travel fuel surcharges. A 3.6% or higher print would land above the interval. The downside risk is a large gasoline-price decline combined with falling travel prices; a 2.4% or lower print would land below the interval. Either scenario would be outside the interval and challenge the persistence assumption."
+    },
+    {
+      "kind": "forecast",
+      "point": 3.0,
+      "ciLow": 2.46,
+      "ciHigh": 3.54
+    }
+  ]
+}

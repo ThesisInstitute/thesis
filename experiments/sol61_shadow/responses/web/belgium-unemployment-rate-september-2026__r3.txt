@@ -1,0 +1,140 @@
+{
+  "slug": "belgium-unemployment-rate-september-2026",
+  "country": "BE",
+  "type": "data",
+  "title": "Belgium unemployment rate, September 2026",
+  "question": "What will Eurostat first publish for Belgium's seasonally adjusted unemployment rate, both sexes aged 15–74, for September 2026 in une_rt_m?",
+  "unit": "percent",
+  "pointEstimate": 5.9,
+  "ciLow": 5.7,
+  "ciHigh": 6.1,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Eurostat monthly unemployment euro-indicators release and une_rt_m",
+  "resolutionSourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+  "resolutionRule": "Resolve to the first officially published September 2026 observation for Belgium in Eurostat une_rt_m: monthly, seasonally adjusted, both sexes, ages 15–74, unemployment as a percentage of the labour force. Use the rate at its published one-decimal precision. Preserve that original observation and disregard subsequent revisions or corrections, including later changes on the publication date.",
+  "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 6.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 6.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 6.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 6.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 6.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 6.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 6.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 5.9
+    }
+  ],
+  "drivers": [
+    "Persistence near the latest national seasonally adjusted rate",
+    "Modest downward first-print momentum",
+    "Quarterly LFS benchmarking and monthly administrative inputs",
+    "September regional registration growth tempers extrapolation"
+  ],
+  "sourceContext": [
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-04032026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30042026-cp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01062026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap",
+    "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+    "https://ec.europa.eu/eurostat/cache/metadata/en/une_rt_m_esms.htm",
+    "https://ec.europa.eu/eurostat/cache/metadata/Annexes/une_rt_m_esms_an_Sources_and_methods_for_MUR.pdf",
+    "https://press.actiris.be/les-chiffres-mensuels-des-personnes-inscrites-chez-actiris-swm8gp"
+  ],
+  "runAt": "2026-10-07T11:51:44Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Belgium September 2026 unemployment first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Belgium's national seasonally adjusted total unemployment rate in une_rt_m, both sexes aged 15–74, expressed as percent of the labour force. Every rate anchor and historical entry uses this same variant and each month's original release observation. Country BE follows the registered ledger despite its omission from the example country menu."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the Belgium row and newest reference-month rate from the original January–April 2026 Eurostat releases.",
+      "result": "January 2026: 6.4% [January release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-04032026-ap); February: 6.4% [February release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap); March: 6.3% [March release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-30042026-cp); April: 6.2% [April release](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01062026-ap)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the Belgium seasonally adjusted totals from the original May–July 2026 Eurostat releases.",
+      "result": "May 2026: 6.3% [May release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap); June: 6.3% [June release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp); July: 6.0% [July release](https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the latest unemployment release for Belgium's August observation and the explicit next-release announcement.",
+      "result": "August 2026 Belgium unemployment was 5.9%, with 324 thousand unemployed, compared with July's 6.0% and 329 thousand. The release was published on 1 October 2026 and explicitly announces the next release for 30 October 2026. [August release and schedule](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap)."
+    },
+    {
+      "kind": "text",
+      "text": "The official announcement verifies resolutionDate 2026-10-30. This contradicts the registered expected window of 2026-11-01 through 2026-11-09. The forecast retains the registered September target, slug, unit, dataPointId and strict first-print policy. [Official announcement](https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-01102026-ap)."
+    },
+    {
+      "kind": "text",
+      "text": "Reference class and base rate: the eight fetched January–August original prints average 6.225%. Their seven successive changes are 0.0, -0.1, -0.1, +0.1, 0.0, -0.3 and -0.1 percentage points; six of seven changes have magnitude at most 0.1. This supports a persistence prior around the latest 5.9%, with limited downward drift rather than anchoring the forecast on the higher historical mean."
+    },
+    {
+      "kind": "text",
+      "text": "Eurostat combines Belgium's quarterly LFS benchmarks with monthly registered unemployment through Denton disaggregation and forecasts benchmark factors for provisional months. The administrative input is registered unemployed jobseekers, DEI, rather than paid benefit recipients. These mechanisms support persistence but allow estimation changes. [Eurostat metadata](https://ec.europa.eu/eurostat/cache/metadata/en/une_rt_m_esms.htm), [Belgium methods annex](https://ec.europa.eu/eurostat/cache/metadata/Annexes/une_rt_m_esms_an_Sources_and_methods_for_MUR.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Actiris's 6 October publication for September registrations and its benefit-reform methodological explanation.",
+      "result": "Brussels recorded 100,198 registered jobseekers in September 2026, up 740 people or 0.7% monthly and 5.8% annually. Actiris explains that benefit expiry initially changes registration categories, while later non-renewal could reduce registrations. These regional administrative figures provide contextual evidence, not a national seasonally adjusted rate anchor. [Actiris September publication](https://press.actiris.be/les-chiffres-mensuels-des-personnes-inscrites-chez-actiris-swm8gp)."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: use a persistence model with 50% shrinkage of historical mean drift, estimated from eight January–August original prints and seven successive changes. Level component = 5.9%; momentum component = 0.5*(-0.5/7) = -0.0357143 percentage points; separate one-off and policy adjustments = 0 because no quantified same-variant effect was fetched. Thus raw point = 5.8642857%, rounding to 5.9%. Regional registration growth supports limiting downward extrapolation. For the nominal normal 80% interval, sum of squared changes = 0.13 and mean change = -0.0714286; sigma = 0.1253566 percentage points, calculated as sqrt((0.13-7*(-0.5/7)^2)/6). Half-width = 1.28*sigma = 0.1604565. Raw bounds are 5.7038292% and 6.0247422%; outward rounding to the official one-decimal grid gives final implied bounds 5.7% and 6.1%. The displayed half-width is about 1.246 times the calculated half-width. Calibration is approximate because the sample contains only seven changes."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a national registration rebound or an upward change in Eurostat's estimation factors could produce 6.2% or higher, outside the interval. Downside risk: another July-sized 0.3 percentage-point decline from August, or unexpectedly rapid registration attrition associated with benefit reform, could produce 5.6% or lower, outside the interval. Later revisions do not change the first-print outcome."
+    },
+    {
+      "kind": "forecast",
+      "point": 5.9,
+      "ciLow": 5.7,
+      "ciHigh": 6.1
+    }
+  ]
+}

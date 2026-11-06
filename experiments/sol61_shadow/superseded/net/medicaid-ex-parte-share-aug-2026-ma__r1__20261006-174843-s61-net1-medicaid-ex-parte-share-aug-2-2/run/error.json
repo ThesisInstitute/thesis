@@ -1,0 +1,5 @@
+{
+  "phase": "normalize",
+  "message": "normalize_spawn_json.py failed:\nstdout:\n\n\nstderr:\nREFUSING: cell 0 (cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026) missing required keys: historicalContext\n",
+  "command": null
+}

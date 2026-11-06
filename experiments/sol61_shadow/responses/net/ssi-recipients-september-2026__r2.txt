@@ -1,0 +1,101 @@
+{
+  "slug": "ssi-recipients-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SSI recipients, September 2026",
+  "question": "What will SSA first publish for September 2026 total recipients of all federally administered SSI payments in Table 2, without seasonal adjustment, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Social Security Administration SSI Monthly Statistics, Table 2",
+  "resolutionSourceUrl": "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-09/table02.html",
+  "resolutionRule": "Use the September 2026 row, Total number of recipients, in the first official September 2026 Table 2 publication. Preserve the published integer-person precision when converting to millions. Ignore subsequent revisions and corrections.",
+  "dataPointId": "ssa.ssi.total_recipients.2026-09.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 7.351825
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 7.338132
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 7.322937
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 7.323731
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 7.300297
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 7.306182
+    }
+  ],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-03/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-04/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-05/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-06/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-07/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-08/table02.html",
+    "https://www.ssa.gov/policy/pub_schedule.html"
+  ],
+  "runAt": "2026-10-07T11:58:06Z",
+  "status": "failed",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: exact official release date could not be verified"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Table 2, Total number of recipients for all federally administered SSI payments, measured at September 2026 month-end. Historical anchors use this same published, unadjusted variant."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Opened SSA March and April 2026 Table 2 publications and read their respective latest-month rows.",
+      "result": "March 2026: 7,351,825 recipients. April 2026: 7,338,132 recipients."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Opened SSA May and June 2026 Table 2 publications and read their respective latest-month rows.",
+      "result": "May 2026: 7,322,937 recipients. June 2026: 7,323,731 recipients."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Opened SSA July and August 2026 Table 2 publications and read their respective latest-month rows.",
+      "result": "July 2026: 7,300,297 recipients. August 2026: 7,306,182 recipients."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched reference class contains six distinct monthly publications. History was available; the unresolved requirement is an officially verified calendar day for the target release."
+    },
+    {
+      "kind": "math",
+      "text": "Table 2 reports persons: 7,306,182 / 1,000,000 = 7.306182 million. The ledger's factor 0.001 would instead yield 7,306.182, which conflicts with its registered millions unit. The target identity and unit are retained, and this conversion discrepancy is explicitly recorded."
+    },
+    {
+      "kind": "text",
+      "text": "The opened official publishing schedule left the anticipated release date blank. A direct curl fetch of that schedule returned Access Denied. No exact resolutionDate was verified, and the supplied expected window cannot substitute for an official scheduled date. Following the fetch-failure instruction, the run stops without inventing a date, point estimate, or interval. Null forecast fields mark an unsuccessful run."
+    }
+  ]
+}

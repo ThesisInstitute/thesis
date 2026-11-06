@@ -1,0 +1,99 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "title": "Additional Child Tax Credit total claims, TY2027, current law",
+  "question": "Conditional on the registered current-law condition holding, how many millions of US individual income tax returns claim the Additional Child Tax Credit for tax year 2027 in the FIRST PRINT of IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all-returns total row, plain Additional child tax credit or refundable child tax credit concept, number of returns, without seasonal adjustment?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+  "resolutionRule": "Use the first published tax-year 2027 Table 3.3 workbook linked from IRS Publication 1304. Read the all-returns total row, plain Additional child tax credit or refundable child tax credit concept, number of returns. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Convert the published number of returns to millions by multiplying once by 0.000001, preserving precision to one return. Later revisions are irrelevant. Evaluate the exact registered condition against enacted legislation through 2027-12-31; if it fails, mark unresolved. Retain 2029-12-31 as the supplied registered outer deadline, not a verified scheduled IRS release day.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "historicalContext": [],
+  "drivers": [
+    "Canonical workbook extraction unavailable",
+    "Historical base rate uncomputed",
+    "Earned-income threshold mechanism verified",
+    "SSN eligibility change unquantified"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/instructions/i1040s8",
+    "https://www.govinfo.gov/content/pkg/PLAW-119publ21/html/PLAW-119publ21.htm"
+  ],
+  "runAt": "2026-10-07T12:41:30Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FAILED RUN: required canonical IRS history could not be extracted"
+    },
+    {
+      "kind": "text",
+      "text": "The target is total ACTC claiming returns, not the refundable-portion subset. Target identifiers, unit, condition and outer deadline are preserved from the supplied registration. No official release-calendar date was verified. No Thesis record or local file was accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the official IRS Publication 1304 page and follow its Basic tables part 3 link.",
+      "result": "The official Table 3.3 listing exposes tax years 2023, 2022, 2021, 2020, 2019 and 2018, plus earlier years. These are workbook availability labels, not extracted claimant counts. Source: https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.irs.gov/pub/irs-soi/23in33ar.xls and https://www.irs.gov/pub/irs-soi/22in33ar.xls.",
+      "result": "Both workbook fetches failed with tool error 400: Unsupported content-type: application/vnd.ms-excel. No numerical Table 3.3 cells were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.irs.gov/pub/irs-soi/21in33ar.xls, https://www.irs.gov/pub/irs-soi/20in33ar.xls, https://www.irs.gov/pub/irs-soi/19in33ar.xls and https://www.irs.gov/pub/irs-soi/18in33ar.xls.",
+      "result": "All four workbook fetches failed with tool error 400: Unsupported content-type: application/vnd.ms-excel. No numerical Table 3.3 cells were returned."
+    },
+    {
+      "kind": "text",
+      "text": "The required fetch_source, extract_irs_soi and calculate tools are absent from the available tool inventory. No extraction call IDs or captured workbook bytes exist. This is an extraction failure, not evidence that the IRS exposes fewer than the required historical prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open and inspect https://www.irs.gov/instructions/i1040s8, including Credit Limit Worksheet B.",
+      "result": "The IRS 2025 Schedule 8812 instructions subtract $2,500 from earned income and multiply the excess by 15%. They also state that the taxpayer SSN requirement begins in tax year 2025, with one spouse required to have a valid SSN on a joint return. These are policy parameters, not claimant counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.govinfo.gov/content/pkg/PLAW-119publ21/html/PLAW-119publ21.htm and inspect section 70104.",
+      "result": "Public Law 119-21, section 70104, removes the pre-2026 sunset from section 24(h), substitutes $2,200 for $2,000 in the CTC amount, and requires taxpayer and qualifying-child SSNs. No affected-return count was extracted from this law."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. The six required annual workbook values could not be extracted. Persistence, recent changes, realized dispersion and walk-forward comparisons cannot be computed from availability labels or legal parameters. No numerical model candidate is generated."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: the intended prior is last-print persistence with candidate comparison on canonical IRS history. The historical sample is empty because extraction failed; sigma and interval arithmetic are therefore unavailable. The SSN rule provides a possible downward eligibility mechanism, but no fetched affected-return count supports a numerical adjustment. Point and interval bounds remain null."
+    },
+    {
+      "kind": "text",
+      "text": "Downside risk would include exclusion of otherwise eligible claimants under the taxpayer SSN requirement. Upside risk would include increased eligible filing or earnings crossing the threshold. Without canonical history and a calibrated interval, neither scenario can be assigned a numerical effect or described as outside a computed interval."
+    },
+    {
+      "kind": "text",
+      "text": "Disposition: keep this run failed as instructed when canonical history cannot be extracted. Null estimates and empty historicalContext deliberately record the failure; this object is not a valid, publishable or scoreable forecast cell. The prescribed numeric-history, model and interval validation requirements remain unmet. activityLog is empty because no recorder artifacts were supplied and files were not created. The JSON was validated to parse."
+    }
+  ]
+}

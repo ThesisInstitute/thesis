@@ -1,0 +1,155 @@
+{
+  "slug": "continued-claims-week-2026-09-26",
+  "country": "US",
+  "type": "data",
+  "title": "Continued claims, week ending September 26, 2026",
+  "question": "What will the FIRST PRINT of US Department of Labor Employment and Training Administration seasonally adjusted continued claims (insured unemployment), CCSA, be for the week ending September 26, 2026, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 1.701,
+  "ciLow": 1.679,
+  "ciHigh": 1.723,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-08",
+  "resolutionSource": "US Department of Labor, ETA, Unemployment Insurance Weekly Claims Report; ALFRED CCSA advance vintage",
+  "resolutionSourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+  "resolutionRule": "Resolve the CCSA observation dated 2026-09-26 in its earliest numeric ALFRED advance release vintage, corresponding to DOL ETA's first published advance seasonally adjusted insured unemployment for that week in the Unemployment Insurance Weekly Claims Report. The underlying official resolving publication is https://www.dol.gov/ui/data.pdf, with original releases archived at https://oui.doleta.gov/press/2026/. Use the national regular-state-programs Insured Unemployment (SA) line, not initial claims, an insured unemployment rate, unadjusted claims, or all-program continued weeks. Multiply the published count by 0.000001 and report to 0.001 million, matching the published thousand-person precision. Later weekly or annual revisions and corrections are irrelevant; no grace period applies. October 8 is the source-published scheduled next release, verified on the St. Louis Fed calendar and corroborated by DOL's Thursday release notice. The registered October 14-18 expected window conflicts with that schedule; retain the September 26 observation and its first print.",
+  "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+  "historicalContext": [
+    {"period": {"type": "week_ending", "value": "2026-04-11"}, "label": "2026-04-11", "value": 1.821},
+    {"period": {"type": "week_ending", "value": "2026-04-18"}, "label": "2026-04-18", "value": 1.785},
+    {"period": {"type": "week_ending", "value": "2026-04-25"}, "label": "2026-04-25", "value": 1.766},
+    {"period": {"type": "week_ending", "value": "2026-05-02"}, "label": "2026-05-02", "value": 1.782},
+    {"period": {"type": "week_ending", "value": "2026-05-09"}, "label": "2026-05-09", "value": 1.782},
+    {"period": {"type": "week_ending", "value": "2026-05-16"}, "label": "2026-05-16", "value": 1.786},
+    {"period": {"type": "week_ending", "value": "2026-05-23"}, "label": "2026-05-23", "value": 1.777},
+    {"period": {"type": "week_ending", "value": "2026-05-30"}, "label": "2026-05-30", "value": 1.795},
+    {"period": {"type": "week_ending", "value": "2026-06-06"}, "label": "2026-06-06", "value": 1.810},
+    {"period": {"type": "week_ending", "value": "2026-06-13"}, "label": "2026-06-13", "value": 1.821},
+    {"period": {"type": "week_ending", "value": "2026-06-20"}, "label": "2026-06-20", "value": 1.814},
+    {"period": {"type": "week_ending", "value": "2026-06-27"}, "label": "2026-06-27", "value": 1.814},
+    {"period": {"type": "week_ending", "value": "2026-07-04"}, "label": "2026-07-04", "value": 1.805},
+    {"period": {"type": "week_ending", "value": "2026-07-11"}, "label": "2026-07-11", "value": 1.796},
+    {"period": {"type": "week_ending", "value": "2026-07-18"}, "label": "2026-07-18", "value": 1.782},
+    {"period": {"type": "week_ending", "value": "2026-07-25"}, "label": "2026-07-25", "value": 1.801},
+    {"period": {"type": "week_ending", "value": "2026-08-01"}, "label": "2026-08-01", "value": 1.777},
+    {"period": {"type": "week_ending", "value": "2026-08-08"}, "label": "2026-08-08", "value": 1.799},
+    {"period": {"type": "week_ending", "value": "2026-08-15"}, "label": "2026-08-15", "value": 1.778},
+    {"period": {"type": "week_ending", "value": "2026-08-22"}, "label": "2026-08-22", "value": 1.779},
+    {"period": {"type": "week_ending", "value": "2026-08-29"}, "label": "2026-08-29", "value": 1.774},
+    {"period": {"type": "week_ending", "value": "2026-09-05"}, "label": "2026-09-05", "value": 1.730},
+    {"period": {"type": "week_ending", "value": "2026-09-12"}, "label": "2026-09-12", "value": 1.719},
+    {"period": {"type": "week_ending", "value": "2026-09-19"}, "label": "2026-09-19", "value": 1.701}
+  ],
+  "drivers": [
+    "Last-print persistence has lowest tested walk-forward RMSE",
+    "Recent continued-claims declines already enter the prior",
+    "Latest initial claims show little change in inflows",
+    "State reporting and seasonal adjustment create weekly volatility"
+  ],
+  "sourceContext": [
+    "https://oui.doleta.gov/press/2026/042326.pdf",
+    "https://oui.doleta.gov/press/2026/043026.pdf",
+    "https://oui.doleta.gov/press/2026/050726.pdf",
+    "https://oui.doleta.gov/press/2026/051426.pdf",
+    "https://oui.doleta.gov/press/2026/052126.pdf",
+    "https://oui.doleta.gov/press/2026/052826.pdf",
+    "https://oui.doleta.gov/press/2026/060426.pdf",
+    "https://oui.doleta.gov/press/2026/061126.pdf",
+    "https://oui.doleta.gov/press/2026/061826.pdf",
+    "https://oui.doleta.gov/press/2026/062526.pdf",
+    "https://oui.doleta.gov/press/2026/070226.pdf",
+    "https://oui.doleta.gov/press/2026/070926.pdf",
+    "https://oui.doleta.gov/press/2026/071626.pdf",
+    "https://oui.doleta.gov/press/2026/072326.pdf",
+    "https://oui.doleta.gov/press/2026/073026.pdf",
+    "https://oui.doleta.gov/press/2026/080626.pdf",
+    "https://oui.doleta.gov/press/2026/081326.pdf",
+    "https://oui.doleta.gov/press/2026/082026.pdf",
+    "https://oui.doleta.gov/press/2026/082726.pdf",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261453.pdf",
+    "https://oui.doleta.gov/press/2026/091026.pdf",
+    "https://oui.doleta.gov/press/2026/091726.pdf",
+    "https://oui.doleta.gov/press/2026/092426.pdf",
+    "https://oui.doleta.gov/press/2026/100126.pdf",
+    "https://fred.stlouisfed.org/releases/calendar?m=&ob=n&od=&pageID=2&rid=180&ve=2018-12-31&vs=2018-01-01&y=",
+    "https://alfred.stlouisfed.org/series?seid=CCSA",
+    "https://www.dol.gov/ui/data.pdf",
+    "https://content.govdelivery.com/accounts/USDOL/bulletins/42c4a8a",
+    "https://alfred.stlouisfed.org/help/downloaddata"
+  ],
+  "runAt": "2026-10-07T10:38:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "First-print forecast for seasonally adjusted continued claims, week ending September 26, 2026"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the national DOL ETA insured-unemployment count, seasonally adjusted, for week ending 2026-09-26, converted to millions. The latest advance continued-claims observation is for September 19; the September 26 initial-claims figure is a different series. The target outcome has not been fetched. The supplied slug, unit and dataPointId are retained."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fred.stlouisfed.org/releases/calendar?m=&ob=n&od=&pageID=2&rid=180&ve=2018-12-31&vs=2018-01-01&y= and https://content.govdelivery.com/accounts/USDOL/bulletins/42c4a8a",
+      "result": "The official St. Louis Fed release calendar explicitly lists the Unemployment Insurance Weekly Claims Report on October 8, 2026 at 7:30 a.m. Central, then October 15. It states that dates are published by the data sources. DOL's September 24 notice says official reports continue every Thursday at 8:30 a.m. Eastern during the September 29-November 1 email transition. No date-specific DOL calendar was fetched. The verified source-supplied October 8 date conflicts with the registered October 14-18 expected window."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA and https://alfred.stlouisfed.org/series?seid=CCSA",
+      "result": "The registered CSV returned an accessibility error. The ALFRED series page successfully returned CCSA 2026-09-19 = 1,701,000, updated October 1, 2026. It also displayed 2026-09-12 = 1,712,000 and 2026-09-05 = 1,717,000, which are revised observations and are excluded from first-print calibration."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Delegated web opens of the 12 original DOL releases dated April 23 through July 9, 2026, at the corresponding sourceContext PDF URLs.",
+      "result": "Each original DOL release's page-one advance seasonally adjusted insured unemployment paragraph gives these week-ending first prints: 2026-04-11 1,821,000; 2026-04-18 1,785,000; 2026-04-25 1,766,000; 2026-05-02 1,782,000; 2026-05-09 1,782,000; 2026-05-16 1,786,000; 2026-05-23 1,777,000; 2026-05-30 1,795,000; 2026-06-06 1,810,000; 2026-06-13 1,821,000; 2026-06-20 1,814,000; 2026-06-27 1,814,000. These are separate original releases, not the revised historical table in the latest report."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Web opens, including delegated fetches, of the 12 original DOL releases dated July 16 through October 1, 2026, at the corresponding sourceContext PDF URLs; the September 3 release uses dol.gov's 20261453.pdf.",
+      "result": "Original DOL advance seasonally adjusted insured unemployment first prints: 2026-07-04 1,805,000; 2026-07-11 1,796,000; 2026-07-18 1,782,000; 2026-07-25 1,801,000; 2026-08-01 1,777,000; 2026-08-08 1,799,000; 2026-08-15 1,778,000; 2026-08-22 1,779,000; 2026-08-29 1,774,000; 2026-09-05 1,730,000; 2026-09-12 1,719,000; 2026-09-19 1,701,000. The September 3 original release was fetched from dol.gov's archived PDF after its usual OUI path failed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.dol.gov/ui/data.pdf and https://oui.doleta.gov/press/2026/100126.pdf",
+      "result": "The October 1 release reports advance SA continued claims of 1,701,000 for September 19, while revising September 12 from its original 1,719,000 to 1,712,000. September 26 advance initial claims are 197,000, against a revised previous-week 198,000; the initial-claims four-week average is 200,000. Idaho's advance unadjusted insured unemployment entry is 0, versus 4,041 in the preceding week. The release does not explain that zero."
+    },
+    {
+      "kind": "text",
+      "text": "Provenance limitation: the 24 historical values were fetched from the exact original DOL first-print publications underlying CCSA, named in the resolution rule. The pinned ALFRED CSV and historical-vintage queries could not be fetched, so ALFRED's historical capture timestamps and file contents were not verified. This primary-source substitution is disclosed and the registered ALFRED advance-vintage resolver is retained. No repository, catalog, prior forecast or comparison record was consulted."
+    },
+    {
+      "kind": "math",
+      "text": "Base rate/reference class: the 24 consecutive original first prints from 2026-04-11 through 2026-09-19 have mean level 1.783083 million, sample level SD 0.030248 and range 1.701-1.821. Their 23 successive first-print changes have mean -0.005217 million, sample SD 0.017490 and range -0.044 to +0.022. Last-print persistence is 1.701 million. The level mean is descriptive; uncertainty uses successive changes because this is a level target."
+    },
+    {
+      "kind": "text",
+      "text": "Generated arithmetic model candidates before selecting the agent forecast; all units are millions. The fallback intervals use the same fetched first-print change distribution, and walk-forward forecasts use only earlier observations, with six initial training prints and eighteen common one-step targets. Candidate set: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":1.701,\"p10\":1.6785854785312657,\"p50\":1.701,\"p90\":1.7234145214687344,\"interval80\":{\"low\":1.6785854785312657,\"high\":1.7234145214687344},\"interval90\":{\"low\":1.672231273149308,\"high\":1.729768726850692},\"interval_method\":\"Gaussian fallback-prior wrapper using sample SD of 23 successive first-print changes; no native model intervals\",\"calibration_n\":23,\"train_cutoff\":\"2026-09-19\",\"walk_forward\":{\"minimum_training_prints\":6,\"n\":18,\"mae\":0.014277777777777759,\"rmse\":0.017363755354185335,\"unit\":\"millions\"}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"mean3\",\"point\":1.7166666666666668,\"p10\":1.6942521451979324,\"p50\":1.7166666666666668,\"p90\":1.7390811881354011,\"interval80\":{\"low\":1.6942521451979324,\"high\":1.7390811881354011},\"interval90\":{\"low\":1.6878979398159748,\"high\":1.7454353935173588},\"interval_method\":\"Gaussian fallback-prior wrapper using sample SD of 23 successive first-print changes; no native model intervals\",\"calibration_n\":23,\"train_cutoff\":\"2026-09-19\",\"walk_forward\":{\"minimum_training_prints\":6,\"n\":18,\"mae\":0.017870370370370352,\"rmse\":0.022143889718201054,\"unit\":\"millions\"}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_drift\",\"point\":1.6957826086956522,\"p10\":1.6733680872269179,\"p50\":1.6957826086956522,\"p90\":1.7181971301643866,\"interval80\":{\"low\":1.6733680872269179,\"high\":1.7181971301643866},\"interval90\":{\"low\":1.6670138818449602,\"high\":1.7245513355463442},\"interval_method\":\"Gaussian fallback-prior wrapper using sample SD of 23 successive first-print changes; no native model intervals\",\"calibration_n\":23,\"train_cutoff\":\"2026-09-19\",\"walk_forward\":{\"minimum_training_prints\":6,\"n\":18,\"mae\":0.013944265225753871,\"rmse\":0.0173837600319077,\"unit\":\"millions\"}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select the persistence candidate by walk-forward RMSE: 0.017364 million versus 0.017384 for expanding drift and 0.022144 for the trailing-three-print mean. Drift has slightly lower MAE, 0.013944 versus persistence 0.014278, so persistence's advantage is narrow and metric-specific. The agent point equals the selected benchmark; delta = 0.000 million."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view updates: level is the latest 1.701 million print. Momentum adjustment = 0.000 million: the fall from 1.774 to 1.730 to 1.719 to 1.701 is already in the official history, and drift does not improve RMSE. Initial-claims adjustment = 0.000: the latest 197,000 versus revised 198,000 supplies no calibrated reason to alter the continued-claims level. One-off adjustment = 0.000: Idaho's zero entry raises a catch-up-reporting concern, but its cause and next-week persistence are unverified. Policy adjustment = 0.000; the target is unconditional. The email-distribution transition explicitly preserves official weekly publication and supplies no measured-claims effect."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = persistence at 1.701 million using 24 fetched original first prints, 2026-04-11 through 2026-09-19; weight 100% persistence, 0% other candidates. Momentum, initial-claims, one-off and policy adjustments each equal 0.000, so point = 1.701. For the 23 consecutive differences d, mean(d) = -0.005217391; sum[(d-mean(d))^2] = 0.006729913 million^2; sigma = 0.017490144 million = sqrt(0.006729913/22). Gaussian fallback-prior half-width = 1.281551566*sigma = 0.022414521, with widening factor 1.00: no verified policy condition or seasonal-methodology change justifies extra width. Unrounded 80% bounds = 1.701 +/- 0.022414521 = [1.678585479, 1.723414521]; rounded to published precision, [1.679, 1.723]. The corresponding 90% half-width is 1.644853627*sigma = 0.028768727, giving [1.672231273, 1.729768727]. This width covers 20/23 historical persistence changes and 8/10 latest changes; these are in-sample width checks, not independent interval calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and tails: persistence could overpredict if September's downward momentum continues; expanding drift points to 1.695783 million but has slightly worse tested RMSE. Upside risk: a reversal of recent declines in large states, combined with catch-up state reporting including Idaho, could produce a net increase exceeding 0.022 million and land above the interval at 1.723. Downside risk: renewed broad exits from insured unemployment or reporting gaps could repeat the fetched September 5 first-print decline of 0.044 million; 1.701-0.044 = 1.657 would land below the interval at 1.679. A direct new official state-reporting explanation would warrant reconsidering the one-off adjustment."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.701,
+      "ciLow": 1.679,
+      "ciHigh": 1.723
+    }
+  ]
+}

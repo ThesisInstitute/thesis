@@ -1,0 +1,58 @@
+{
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD unique prime-contract recipients",
+  "question": "How many distinct non-null recipient_id values will the first registered USAspending query snapshot report for FY2026 Department of Defense prime-contract transactions, award types A, B, C, and D, expressed in thousands?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "Use the first registered FY2026 query snapshot. POST the registered Department of Defense awarding-agency filter, award types A/B/C/D, transaction spending level, fiscal-year dates, and page size 100. Paginate completely, exclude null recipient_id values, count distinct recipient_id values, and multiply by 0.001. Preserve the initial snapshot without subsequent revisions. No official snapshot date was verified in this run.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-07T12:24:07Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused because required evidence is incomplete"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered query's distinct recipient count. Recipient spending amounts and agency profile totals cannot substitute for that count."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/ with FY2026 dates 2025-10-01 through 2026-09-30, Department of Defense awarding agency, award types A/B/C/D, spending_level transactions, limit 100, and page 1.",
+      "result": "The response contained 100 recipient rows and hasNext=true. This establishes a successful partial query, not the complete distinct-recipient total or any historical annual print."
+    },
+    {
+      "kind": "text",
+      "text": "Opening the recipient endpoint link from the official API documentation subsequently failed with HTTP 405 Method Not Allowed. That was a GET lookup failure; the earlier POST succeeded. I stopped further fetching under the prompt's failed-fetch rule."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate was not fetched: no complete counts for six prior fiscal years are available from this run. historicalContext is therefore empty, and no historical values have been invented."
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending documentation describes daily updates and a 90-day DoD procurement reporting delay. Neither fetched official PDF specifies a FY2026 registered-query snapshot date in the supplied October 15–22 window. Selecting resolutionDate from that window would be unverified."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sigma, adjustment components, or 80% interval can be calculated without the required complete historical counts. Point and interval fields are null to report refusal explicitly rather than manufacture a forecast."
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ct",
+  "country": "US",
+  "type": "data",
+  "title": "Connecticut August 2026 ex parte renewal share",
+  "question": "What percentage of Connecticut Medicaid and CHIP beneficiaries due for renewal in August 2026 will be renewed on an ex parte basis in CMS's first published original (O) submission row, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 82.0,
+  "ciLow": 78.5,
+  "ciHigh": 85.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Connecticut's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator in that first publication, rounded to one decimal. Subsequent corrections and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ct.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 82.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 82.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 82.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 78.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 83.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 83.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 84.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 84.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 83.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 81.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 82.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 81.6
+    }
+  ],
+  "drivers": [
+    "Recent original-submission shares average below the annual base rate",
+    "Renewal-cohort composition and administrative processing",
+    "Ex parte data matching and reporting classification",
+    "Two-month forecast horizon from the latest available period"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=100&conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=CT&conditions%5B0%5D%5Boperator%5D=%3D",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:06:49Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Connecticut August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Connecticut's state row for reporting_period=202608 and original_or_updated=O in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. Following CMS's published state-table definition, the share is Metric 5a1 divided by Metric 5: ex parte renewals divided by all beneficiaries due for renewal. It is an original monthly outcome, not an updated U outcome or national weighted average. Resolution freezes the first official publication."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the CMS datastore API for Connecticut; additionally filter original_or_updated=O and reporting_period>=202507 to retrieve the latest 12 original monthly observations.",
+      "result": "Fetched ex parte numerator / renewals-due denominator: 2025-07 78900/96159; 2025-08 73726/89089; 2025-09 73405/89231; 2025-10 90172/114550; 2025-11 88481/106526; 2025-12 86806/104099; 2026-01 69915/82990; 2026-02 85009/100412; 2026-03 85362/101908; 2026-04 63959/78137; 2026-05 71906/87434; 2026-06 68055/83450. The filtered response contained 12 rows, all O."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's June 2026 Eligibility Operations and Enrollment Snapshot, page 30, to check the denominator and latest published state outcome.",
+      "result": "Connecticut: 83,450 beneficiaries due for renewal; 82% renewed ex parte, 86% renewed in total, and 5% pending. The table explicitly expresses these percentages against total renewals due. Its whole-percent ex parte figure is consistent with 68055/83450*100=81.551827%, or 81.6% under the target's rounding."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's August 2025 Eligibility Operations and Enrollment Snapshot, page 28, to check the prior August original outcome.",
+      "result": "Connecticut: 89,089 beneficiaries due for renewal; 83% renewed ex parte, 88% renewed in total, and 4% pending. The whole-percent ex parte figure is consistent with the fetched O counts 73726/89089*100=82.755447%, rounded to 82.8% for historicalContext."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the arithmetic mean of the 12 fetched Connecticut O shares from July 2025 through June 2026: 82.5462%. Their range is 78.7185% to 84.6602%. The latest three-month mean is 81.8824%, and the latest observation is 81.5518%. All calculations use unrounded count-derived shares; historicalContext displays one decimal."
+    },
+    {
+      "kind": "text",
+      "text": "Level adjustment: place 75% weight on the latest three-month mean and 25% on the annual base rate. Momentum adjustment: zero beyond that recency weighting, because the fetched monthly movements alternate and do not establish a durable trend. One-off adjustment: zero; retain October's decline and November's rebound when estimating dispersion. Policy-mechanism adjustment: zero because the fetched evidence does not establish a Connecticut implementation change affecting August. CMS identifies cohort composition and ex parte reporting practices as sources of variation."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a smoothed persistence prior anchored to 12 Connecticut O observations, July 2025-June 2026. Annual prior 82.546175 plus recent-level adjustment -0.497858, momentum 0, one-off 0, and policy adjustment 0 gives 0.75*81.882364+0.25*82.546175=82.048317%, emitted as 82.0%. Estimate dispersion from the 11 successive unrounded share changes. Their mean is -0.045434 percentage points and centered squared deviations sum to 38.222184; sigma = 1.955049 percentage points = sqrt(38.222184/(11-1)). The one-month normal 80% half-width is 1.28*sigma=2.502463. August is two reporting months beyond June, so independent monthly innovations imply half-width 1.28*sigma*sqrt(2)=3.539018. Implied bounds are 78.509299%-85.587334%, emitted as 78.5%-85.6%. This model-based interval assumes recent dispersion remains relevant."
+    },
+    {
+      "kind": "text",
+      "text": "Publication-date audit limitation: The official CMS snapshot page lists June 2026 as released September 25, 2026, but supplies no announced August 2026 publication date. I could not verify December 15, 2026 from an official release calendar or announcement this run. The supplied ledger resolutionDate is retained as the target contract; the official-schedule verification requirement remains unmet. State submission deadlines in the specifications are not public release dates."
+    },
+    {
+      "kind": "text",
+      "text": "Historical-vintage audit limitation: CMS permits corrections to original reports. The fetched history consists of currently exposed O rows, which preserve the original reporting-month-end outcome variant but are not certified immutable first-publication vintages. The June 2026 and August 2025 publication tables corroborate their respective denominators and rounded shares. Exact first-publication vintages for all 12 historical observations were not independently reconstructed."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a cohort with more easily verified eligibility or improved automated data matching could raise the ex parte share; a sufficiently large improvement would land above 85.6%, outside the interval. Downside risk: failed data matches, processing delays, or a shift toward renewals requiring forms could lower the share; a substantial disruption would land below 78.5%, outside the interval. Reporting reclassification could also generate an unusually large first-print movement."
+    },
+    {
+      "kind": "forecast",
+      "point": 82.0,
+      "ciLow": 78.5,
+      "ciHigh": 85.6
+    }
+  ]
+}

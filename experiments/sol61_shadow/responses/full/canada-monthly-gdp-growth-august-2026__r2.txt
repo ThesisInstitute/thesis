@@ -1,0 +1,162 @@
+{
+  "slug": "canada-monthly-gdp-growth-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, August 2026",
+  "question": "What is the FIRST PRINT of August 2026 month-over-month growth in Canada's all-industries real GDP at basic prices, Statistics Canada Table 36-10-0434-01, vector v65201210, seasonally adjusted at annual rates in chained 2017 dollars, expressed as a percent change rounded to one decimal?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.2,
+  "ciLow": -0.1,
+  "ciHigh": 0.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Statistics Canada, Gross domestic product by industry, August 2026; Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+  "resolutionRule": "Resolve on the initial official August 2026 release of Statistics Canada Table 36-10-0434-01, Canada, All industries, vector v65201210, seasonally adjusted at annual rates, chained 2017 dollars. Compute 100*(August level/July level-1) using both levels in that first release and round to one decimal percent, equivalently its selected Table 1 All industries row, August month-to-month percent-change column. Annual-rate levels do not imply annualizing the monthly growth. The advance estimate does not resolve the target. Later revisions or corrections are irrelevant. The official calendar schedules release for October 30, 2026.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 0.2},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": -0.3},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 0.0},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 0.2},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 0.1},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 0.2},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": -0.1},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 0.5},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 0.3},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 0.3},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": 0.0}
+  ],
+  "drivers": [
+    "Official August GDP advance estimate +0.2%",
+    "Mining and retail expansion",
+    "Oil and gas extraction offsets",
+    "First-print estimation uncertainty",
+    "Trade rebound includes shipment timing"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251128/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251223/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251128/dq251128b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/dq260130a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260924/dq260924a-eng.htm"
+  ],
+  "runAt": "2026-10-07T12:16:41Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Canada August 2026 real GDP: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is monthly growth in the registered all-industries vector, not quarterly expenditure GDP. Preserve the supplied slug, unit, dataPointId and first-print resolver. The independence override prohibits the Thesis catalog lookup; no Thesis forecast or repository artifact was consulted."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf, GDP by industry calendar.",
+      "result": "The official calendar lists August 2026 GDP by industry on October 30, 2026; July 2026 on September 29, 2026. The target's registered window agrees with the official date."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm and https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401; attempt registered WDS URL.",
+      "result": "The official metadata identifies v65201210 as Canada, All industries, seasonally adjusted at annual rates, chained 2017 dollars, monthly. Table 36-10-0434-01 lists release date 2026-09-29. Opening the WDS endpoint returned HTTP 405 Method Not Allowed; no WDS numeric observations were obtained."
+    },
+    {
+      "kind": "text",
+      "text": "History was instead fetched from each original release's selected Table 1, All industries row, latest reference-month percent-change column, explicitly sourced to Table 36-10-0434-01. These are exact published snapshots of the resolving series, not narrative summaries. Revised earlier-month columns and ratios of levels from different release vintages were excluded. This preserves public first-print provenance but does not constitute a successful WDS POST fetch."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open original selected tables: https://www150.statcan.gc.ca/n1/daily-quotidien/251128/t001b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/251223/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260130/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260227/t001b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260331/t001a-eng.htm",
+      "result": "All industries latest-month FIRST PRINT growth: September 2025 +0.2%; October 2025 -0.3%; November 2025 -0.0%, normalized to 0.0%; December 2025 +0.2%; January 2026 +0.1%. Each value comes from its own table's preliminary latest-month column."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open original selected tables: https://www150.statcan.gc.ca/n1/daily-quotidien/260430/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260529/t001b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260630/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260731/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260828/t001b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm",
+      "result": "All industries latest-month FIRST PRINT growth: February 2026 +0.2%; March -0.1%; April +0.5%; May +0.3%; June +0.3%; July -0.0%, normalized to 0.0%. July's first-print annual-rate level is 2,371,771 million chained 2017 dollars. Older revised columns were not used."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/daily-quotidien/251128/dq251128b-eng.htm, methodology notes.",
+      "result": "The September 2025 release introduced NAICS Canada 2022 and revised industry classification, with 2022 industry weights. Revisions extended back to January 1997. The comparable first-print sample therefore starts with September 2025 and ends with July 2026: 11 prints."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the 11 comparable first-print monthly growth observations, September 2025-July 2026, are [0.2,-0.3,0.0,0.2,0.1,0.2,-0.1,0.5,0.3,0.3,0.0] percent. Their mean is 0.127273%, median 0.2%, sample standard deviation 0.219504 percentage points, and range -0.3% to +0.5%; 7 increases, 2 contractions and 2 zero prints. Last-print persistence is 0.0%. Before current evidence, the expanding-mean benchmark is the prior, 0.1% at published precision, because it beats persistence in the common walk-forward comparison."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read preceding releases' advance-estimate sections: https://www150.statcan.gc.ca/n1/daily-quotidien/260130/dq260130a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+      "result": "Advance estimates for December 2025-July 2026 were [0.1,0.0,0.2,0.0,0.4,0.1,0.2,0.0] percent, respectively. 'Essentially unchanged' is encoded as 0.0%. Matched official first prints from the exact tables were [0.2,0.1,0.2,-0.1,0.5,0.3,0.3,0.0] percent."
+    },
+    {
+      "kind": "math",
+      "text": "Walk-forward comparison uses December 2025-July 2026, 8 outcomes after an initial 3-print training sample; every prediction uses only previously available values or its preceding official advance estimate. MAE=mean(abs(actual-prediction)); RMSE=sqrt(mean((actual-prediction)^2)). Persistence: MAE 0.225000, RMSE 0.282843 pp; expanding mean: 0.201240, 0.227385; trailing-three mean: 0.212500, 0.247487; official advance: 0.087500, 0.106066. Expanding-mean scores use unrounded predictions. A 20% expanding-mean/80% advance blend has MAE 0.110248, worse than advance alone. These small-sample scores support selecting the direct official predictor without fitting a complex time-series adapter."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated before the agent forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"id\":\"persistence\",\"point\":0.0,\"p10\":-0.3,\"p50\":0.0,\"p90\":0.3,\"interval80\":{\"low\":-0.3,\"high\":0.3},\"interval90\":{\"low\":-0.4,\"high\":0.4},\"interval_method\":\"fallback_prior_normal_first_print_growth_sample_sd_outward_rounding\",\"calibration_n\":11,\"train_cutoff\":\"2026-07\",\"walk_forward_score\":{\"n\":8,\"mae\":0.225,\"rmse\":0.282842712474619}},{\"schema\":\"thesis_model_candidate_v1\",\"id\":\"expanding_mean\",\"point\":0.1,\"p10\":-0.2,\"p50\":0.1,\"p90\":0.4,\"interval80\":{\"low\":-0.2,\"high\":0.4},\"interval90\":{\"low\":-0.3,\"high\":0.5},\"interval_method\":\"fallback_prior_normal_first_print_growth_sample_sd_outward_rounding\",\"calibration_n\":11,\"train_cutoff\":\"2026-07\",\"walk_forward_score\":{\"n\":8,\"mae\":0.20124007936507937,\"rmse\":0.22738506776241976}},{\"schema\":\"thesis_model_candidate_v1\",\"id\":\"official_advance\",\"point\":0.2,\"p10\":-0.1,\"p50\":0.2,\"p90\":0.5,\"interval80\":{\"low\":-0.1,\"high\":0.5},\"interval90\":{\"low\":-0.2,\"high\":0.6},\"interval_method\":\"fallback_prior_normal_first_print_growth_sample_sd_outward_rounding\",\"calibration_n\":11,\"train_cutoff\":\"2026-07\",\"predictor_release_date\":\"2026-09-29\",\"walk_forward_score\":{\"n\":8,\"mae\":0.0875,\"rmse\":0.10606601717798211}}]. Scores concern 8 held-out outcomes; calibration_n=11 concerns the first-print dispersion wrapper. Train cutoff is the last resolved reference month, not an information timestamp; the August predictor became public September 29."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm, August advance-estimate section.",
+      "result": "Published September 29, 2026: August real GDP advance estimate +0.2%. Mining and quarrying and retail increased, partly offset by oil and gas extraction declines. The release confirms October 30, 2026 for August's official print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Official-source search fetch https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm; open https://www150.statcan.gc.ca/n1/daily-quotidien/260924/dq260924a-eng.htm.",
+      "result": "October 6 August trade release: real merchandise exports +2.5%, real imports -1.1%; tariff-related shipment timing may affect exports. September 24 retail release: August advance sales +1.3% in current dollars, based on 57.8% survey response. Trade text was fetched through web search; a separate direct-open attempt failed."
+    },
+    {
+      "kind": "text",
+      "text": "Update: select official_advance, which directly measures August and has the lowest historical error. Relative to the unrounded expanding-mean prior, the update is +0.072727 pp; relative to its displayed 0.1% it is +0.1 pp, and relative to persistence +0.2 pp. The current predictor was not part of July's resolved history. Level and prior momentum are captured by the benchmark; extra momentum adjustment is 0. Sector and one-off effects are incorporated in the official advance and receive no additional adjustment. The retail indicator predates that estimate. New trade data support positive activity but lack a calibrated mapping to industry value added, so trade and separate policy adjustments are 0. The point uses 100% official advance, justified by the direct-signal exception and the walk-forward comparison."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = expanding mean of 11 original prints from September 2025-July 2026, 1.4/11 = 0.127273%; selected current official_advance = 0.2%; net update = +0.072727 pp and all additional adjustments = 0. Point = 0.2%. This target is a change series, so use the growth values themselves, not successive differences of growth. Sum((x-mean)^2) = 0.481818; sigma = 0.219504 pp = sqrt(0.481818/(11-1)). The fallback-prior normal interval has 80% half-width = 1.28*sigma = 0.280965 pp, giving 0.2 +/- 0.280965 = [-0.080965,0.480965]%; rounding endpoints outward to one decimal gives [-0.1,0.5]%. The 90% half-width = 1.645*sigma = 0.361083 pp, giving [-0.161083,0.561083]%, rounded outward to [-0.2,0.6]%. No regime multiplier is applied: the sample already uses the current classification. Uncertainty is not narrowed to the advance-estimate residuals because the calibration sample is small and first-print estimation remains uncertain."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage sanity check: the unrounded base-rate mean +/- 1.28*sigma band, [-0.153692,0.408237]%, contains 8 of the last 10 first prints. The final rounded [-0.1,0.5]% interval contains 9 of the last 10. These are descriptive sample checks, not independent proof of 80% future coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: stronger mining recovery plus a manufacturing or refinery rebound missing from preliminary inputs could put growth above +0.5%, outside the interval. Downside risk: a larger oil-production disruption combined with weaker manufacturing and real retail activity could put growth below -0.1%, outside the interval. Stronger official August manufacturing volumes would move the point up; weak retail volumes or larger measured oil declines would move it down. Export shipment timing and changes to the same-release July denominator can disconnect trade news from the resolved growth rate."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.2,
+      "ciLow": -0.1,
+      "ciHigh": 0.5
+    }
+  ]
+}

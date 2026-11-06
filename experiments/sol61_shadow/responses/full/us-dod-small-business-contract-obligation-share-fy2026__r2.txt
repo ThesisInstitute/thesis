@@ -1,0 +1,76 @@
+{
+  "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD small-business contract obligation share, FY2026",
+  "question": "What percentage of Department of Defense prime-contract transaction obligations for FY2026 is attributable to small_business recipients in the registered USAspending API query snapshot?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered advanced-search query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the registered_query_snapshot of POST /api/v2/search/spending_over_time/ with group=fiscal_year, spendingLevel=transactions, awarding agency Department of Defense at toptier, award type codes A/B/C/D, and fiscalYear=2026. Read results[time_period.fiscal_year=2026].aggregated_amount separately for numerator recipient types [small_business] and denominator recipient types []; apply the registered ratio_percent operation with factor=1. Resolve against the registered query snapshot. The supplied target context does not specify an exact resolutionDate or rounding convention.",
+  "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Required POST request unavailable",
+    "Exact-query historical evidence unavailable",
+    "Exact snapshot resolution date unspecified"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints"
+  ],
+  "runAt": "2026-10-07T12:09:46Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target defines the series by its exact USAspending POST query. Agency profiles, SBA scorecards, search summaries, and remembered values cannot substitute for the required numerator and denominator observations. The registered target identity is preserved."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://api.usaspending.gov/api/v2/search/spending_over_time/ using web__run.",
+      "result": "The exact official endpoint returned HTTP 405 Method Not Allowed. No aggregated_amount observations were returned. This was a URL-open attempt, not a successful registered POST request."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://api.usaspending.gov/docs/endpoints using web__run.",
+      "result": "Official documentation identifies /api/v2/search/spending_over_time/ as POST. Its general status-code documentation lists 200 for success, 400 for malformed requests, and 500 for server-side errors. These are diagnostic numbers, not historical series values."
+    },
+    {
+      "kind": "tool",
+      "tool": "search_service.web.open",
+      "call": "Open https://api.usaspending.gov/api/v2/search/spending_over_time/ using the second available web interface.",
+      "result": "The exact official endpoint again returned HTTP 405 Method Not Allowed. No numerator, denominator, or historical share values were fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Both available web interfaces lack HTTP-method and request-body parameters. Tool discovery found no callable USAspending or generic HTTP POST tool. The run instructions prohibit shell networking, so the registered query could not be executed."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable because no admissible exact-query history was fetched. Persistence, model candidates, walk-forward scores, and realized historical dispersion cannot be grounded. The empty history represents a fetch failure, not an assertion that the official source exposes fewer prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no supported prior is available; no inside-view adjustments are applied; sigma and interval bounds cannot be computed from fetched history. Forecast fields remain null rather than contain invented estimates. No supported upside risk or downside risk threshold can be calculated."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied expected release window is 2026-10-15 through 2026-10-22, but the target context supplies no literal resolutionDate or resolutionDateBasis. Those dates are target metadata, not official-calendar evidence. No release day is inferred from the window."
+    },
+    {
+      "kind": "text",
+      "text": "This object records an explicit refusal and is not a valid publishable numeric forecast cell. The history, numeric forecast, interval, and resolution-date requirements remain unsatisfied. JSON parsing was verified. No Thesis forecast or catalog was accessed, and no files were read or modified."
+    }
+  ]
+}

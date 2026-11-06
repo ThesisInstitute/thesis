@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "prompt.md",
+      "bytes": 13257,
+      "sha256": "d1721e7df95c10c9584c25d924fd20ce456eab63632ef09f590795471d02c6a5"
+    },
+    {
+      "artifactType": "command",
+      "path": "command.json",
+      "bytes": 226,
+      "sha256": "7982955bd433652fef5682b8a4181c89bfefd293a4c58f8798fbe2e0ce66463a",
+      "canonicalJsonSha256": "9a72828d6759ee994f211f5cab88d9506a59503910f808c830b708525187ec6b"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "stdout.txt",
+      "bytes": 7995,
+      "sha256": "710d41921ddb8006aba64f0edf944be362310d9ccd34845f6f5b6076f0aa559b"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "stderr.txt",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "raw_response.txt",
+      "bytes": 7995,
+      "sha256": "710d41921ddb8006aba64f0edf944be362310d9ccd34845f6f5b6076f0aa559b"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "parsed_cells.json",
+      "bytes": 8384,
+      "sha256": "88af239d14ab97d0bdaea9d66244ae171fb09d985cb7a3233c74c7e610361999",
+      "canonicalJsonSha256": "3931e7e335b3d3fac7bbed26e73ac0574d60b2f61f7043634f31218a77b23e93"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "normalized_cells.json",
+      "bytes": 7939,
+      "sha256": "3248d073b400b810e37bd80e8692c1b8695a2c2dfcda49f2d29d22ccbeab243f",
+      "canonicalJsonSha256": "3931e7e335b3d3fac7bbed26e73ac0574d60b2f61f7043634f31218a77b23e93"
+    },
+    {
+      "artifactType": "error",
+      "path": "error.json",
+      "bytes": 134,
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "canonicalJsonSha256": "c87ae89776d5a1a2d27fee3a112da3d24502c988d8ba61dfcffde43e57fad4a4"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "4558bf0efb84e5d8de271ce0b9ae961644fa3a3741d935492003d3c046f09b68"
+  }
+}
