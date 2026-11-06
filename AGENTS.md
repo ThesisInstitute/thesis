@@ -371,9 +371,9 @@ of receipt 0.6.2's `effective_current_rows`), which works as follows:
   in `INTENDED_HISTORY_DROP_OUTS` (`site/src/__tests__/ledger-corrections.test.ts`).
   Any other drop-out fails CI, because it looks exactly like a filter that has
   started rejecting corrections. A history orders its rows by each record's
-  first print, the earliest `observedAt` in its chain, so a correction keeps
-  its record's place, and a persistence baseline's last print is the record
-  that printed last.
+  first print, the earliest `observedAt` in its chain, so a later-dated
+  correction keeps its record's place, and a persistence baseline's last print
+  is the record that printed last.
 - A correction's resolution event is `<historical id>.<its own assertion
   version>`, so an event id never names two outcomes. Every other row keeps
   the id it always had. A pin that brings a correction of a graded row
