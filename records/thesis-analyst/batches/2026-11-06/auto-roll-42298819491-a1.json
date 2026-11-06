@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-11-06T21:44:43Z",
+  "finishedAt": "2026-11-06T21:46:25Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 1,
+  "ok": 1,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "unemployment-rate-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cps.unemployment_rate.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-04",
+        "expectedReleaseWindow": {
+          "end": "2026-12-04",
+          "start": "2026-12-04"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-06T21:42:24Z",
+        "registeredAtUtc": "2026-11-06T21:42:24Z",
+        "registrationCommit": "84eab1908fd16adb97801361aea7256ef9d70f85",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.cps.unemployment_rate",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-04",
+            "start": "2026-12-04"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LNS14000000",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNS14000000",
+          "table": "Current Population Survey, unemployment rate, 16 years and over, seasonally adjusted (Employment Situation, Table A-1)",
+          "transform": {
+            "factor": 1,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "8358e2ebfe6499741830a52a58bab78d11dc9a134eeb3f971595cd66374212b4",
+        "targetRegistrationPath": "records/targets/2026-11-06-8358e2ebfe6499741830a52a58bab78d11dc9a134eeb3f971595cd66374212b4.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "startedAt": "2026-11-06T21:44:43Z",
+      "finishedAt": "2026-11-06T21:46:25Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-06/2026-11-06t21-44-43z-bls-cps-unemployment-rate-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-06/2026-11-06t21-44-43z-bls-cps-unemployment-rate-2026-11/cells.with_activity.json",
+      "stdoutTail": "6\",\n      \"bytes\": 24600,\n      \"createdAt\": \"2026-11-06T21:44:43Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-11-06/2026-11-06t21-44-43z-bls-cps-unemployment-rate-2026-11/distribution.json\",\n      \"sha256\": \"c340e60319037dc5daf22e6044a2bedb02d1ed3d5b2ff5c62d9a48b8a1127cef\",\n      \"bytes\": 13111,\n      \"createdAt\": \"2026-11-06T21:44:43Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-06/2026-11-06t21-44-43z-bls-cps-unemployment-rate-2026-11/validation.json\",\n      \"sha256\": \"53c7b2adab722b8614ff0b0c4aa4bcbb9c64f5a402a116ca901d9d05d2635068\",\n      \"bytes\": 132,\n      \"createdAt\": \"2026-11-06T21:44:43Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-06/2026-11-06t21-44-43z-bls-cps-unemployment-rate-2026-11/cells.with_activity.json\",\n      \"sha256\": \"0ac3efca2cd73f2cabe67978dc6cb3b2794e4353a712db4d0fed60e4b2d5bb4b\",\n      \"bytes\": 40327,\n      \"createdAt\": \"2026-11-06T21:44:43Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-06/2026-11-06t21-44-43z-bls-cps-unemployment-rate-2026-11/manifest.json\",\n      \"sha256\": \"37491ca68040a96f23acdff75b58c96f251eb811f913c1f13f4cc04c6d3289a4\",\n      \"bytes\": 15851,\n      \"createdAt\": \"2026-11-06T21:44:43Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"unemployment-rate-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"84eab1908fd16adb97801361aea7256ef9d70f85\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"d1e8fc6aed3dc659ab46976cc24023f027dcdf818197a9a917c5e9bc91b654f1\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}
