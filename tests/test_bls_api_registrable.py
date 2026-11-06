@@ -531,6 +531,8 @@ def _run_main(
     forecast_resolution_date: str | None = None,
     registered: bool = True,
     fetch_allowed: bool = True,
+    ledger: str = "",
+    dry_run: bool = True,
 ) -> tuple[str, str]:
     """Drive ``main()`` over one pending reference; returns (ref, stdout)."""
     spec = resolve_pending.BLS_API_ADAPTERS[series]
@@ -568,14 +570,15 @@ def _run_main(
         ],
     )
     monkeypatch.setattr(
-        resolve_pending, "ledger_state", lambda *_args: ("", "blob", "b" * 40)
+        resolve_pending, "ledger_state", lambda *_args: (ledger, "blob", "b" * 40)
     )
     monkeypatch.setattr(
         resolve_pending, "registration_contracts", lambda: registrations
     )
     monkeypatch.setattr(resolve_pending, "utc_now", lambda: now)
     monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
-    monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+    argv = ["resolve_pending.py", *(["--dry-run"] if dry_run else [])]
+    monkeypatch.setattr(sys, "argv", argv)
     assert resolve_pending.main() == 0
     return ref, capsys.readouterr().out
 
@@ -1178,6 +1181,95 @@ def test_the_guard_compares_the_unit_chronicle_stores_once_migrated() -> None:
     refusal = verdict([june], base_units=True)
     assert refusal is not None and "['thousands']" in refusal
     assert "this spec emits 'millions', which Chronicle stores as 'count'" in refusal
+
+
+def _restated_june_ledger() -> str:
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    restated, _ = resolve_pending.restatement_row(
+        _chronicle_june_row(),
+        line,
+        run_dir=resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z"),
+        retrieved_at="2026-11-04T00:00:00Z",
+        ledger_repo_sha="f" * 40,
+    )
+    return f"{line}\n{resolve_pending.ledger_line(restated)}\n"
+
+
+def _append_through_main(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    root: pathlib.Path,
+    ledger: str,
+) -> tuple[dict, str]:
+    """The row ``main()`` appends for an August A-19 print, and its stdout."""
+    updates: list[str] = []
+
+    def propose(*args: object, **_kwargs: object) -> str:
+        updates.append(str(args[3]))
+        return "e" * 40
+
+    monkeypatch.setattr(resolve_pending, "ROOT", root)
+    monkeypatch.setattr(resolve_pending, "propose_ledger_append", propose)
+    # Chronicle's catalog generator is not what these tests read.
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", lambda *_a, **_k: {}
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-08",
+        release="2026-09-04",
+        now="2026-09-25T13:40:00Z",
+        ledger=ledger,
+        dry_run=False,
+    )
+    (update,) = updates
+    assert update.startswith(ledger)
+    (appended,) = update[len(ledger) :].splitlines()
+    return json.loads(appended), out
+
+
+def test_main_stores_base_units_once_the_ledger_holds_no_scale(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # The June row still reads thousands in the raw file, and its restatement
+    # is what is current, so the guard passes and the writer converts.
+    row, out = _append_through_main(
+        monkeypatch, capsys, tmp_path, _restated_june_ledger()
+    )
+    assert "ledger units: base; no current row carries a scale word" in out
+    assert "LEDGER UNIT CONFLICT" not in out
+    assert row["measure"]["unit"] == "count"
+    assert row["source"]["recorded_unit"] == "millions"
+    assert row["value"] == resolve_pending.ledger_units.to_base(
+        row["source"]["recorded_value"], "millions"
+    )
+
+
+def test_main_keeps_recorded_units_while_the_ledger_holds_a_scale(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # A scaled row on another series leaves this one free of the guard, so
+    # the switch alone decides what the writer stores.
+    other = {
+        **_chronicle_june_row(),
+        "source_record_id": "bls.other_series.2026_06.first_print",
+        "measure": {
+            **_chronicle_june_row()["measure"],
+            "concept": "bls.other_series.2026_06",
+        },
+    }
+    row, out = _append_through_main(
+        monkeypatch, capsys, tmp_path, json.dumps(other) + "\n"
+    )
+    assert "ledger units: as recorded; 1 current row(s) still carry" in out
+    assert row["measure"]["unit"] == "millions"
+    assert "recorded_unit" not in row["source"]
 
 
 def test_the_guard_matches_the_concept_under_another_record_id() -> None:

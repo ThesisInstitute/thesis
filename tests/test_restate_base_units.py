@@ -668,6 +668,35 @@ def test_a_ledger_the_port_refuses_stops_the_run_before_it_writes(
     assert not (tmp_path / "records").exists()
 
 
+def test_a_candidate_the_port_refuses_stops_the_run_before_it_writes(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    built_by = resolve_pending.restatement_rows
+
+    def tampered(lines: list[str], **kwargs: object) -> list[tuple[dict, bytes]]:
+        (row, compressed), *others = built_by(lines, **kwargs)
+        return [({**row, "value": row["value"] + 1}, compressed), *others]
+
+    monkeypatch.setattr(resolve_pending, "restatement_rows", tampered)
+    with pytest.raises(ledger_units.LedgerUnitError):
+        _restate(tmp_path, monkeypatch, "\n".join(_sample()) + "\n")
+    assert not list(tmp_path.iterdir())
+
+
+def test_a_run_that_would_leave_a_scaled_row_stops_before_it_writes(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    built_by = resolve_pending.restatement_rows
+    monkeypatch.setattr(
+        resolve_pending,
+        "restatement_rows",
+        lambda lines, **kwargs: built_by(lines, **kwargs)[1:],
+    )
+    with pytest.raises(ledger_units.LedgerUnitError, match="would leave 1 current row"):
+        _restate(tmp_path, monkeypatch, "\n".join(_sample()) + "\n")
+    assert not list(tmp_path.iterdir())
+
+
 def test_a_line_with_surrounding_whitespace_is_refused(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
