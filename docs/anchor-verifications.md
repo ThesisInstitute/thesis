@@ -943,22 +943,22 @@ the ruling and is never read for a registered cell, because it is dated
 outside the window. August resolving and July refusing say nothing about any
 other `generic-url` registration.
 
-A resolved A-19 fact carries its contract's unit, millions. Chronicle's six
-A-19 lineages hold one observation each, June 2026, in thousands, and
-Chronicle's series-catalog generator refuses an identity with two units
-(checked 2026-09-25 on `codex/thesis-ledger-facts` at `3dd95a0`: an August
-row in millions exits 1 with a unit conflict, the same row in thousands exits
-0). The resolver runs that generator on the staged base before every append
+A resolved A-19 fact stores its contract's millions in `count`, the base unit.
+Chronicle's six A-19 lineages hold June 2026 in `count` since the base-unit
+restatement run, so the fact agrees with its lineage. Chronicle's series-catalog
+generator refuses an identity with two units (checked 2026-09-25 on
+`codex/thesis-ledger-facts` at `3dd95a0`, when the lineages held thousands: an
+August row in millions exits 1 with a unit conflict, the same row in thousands
+exits 0). The resolver runs that generator on the staged base before every append
 (`ledger_catalog_refusals`), and a row it refuses on its own is excluded and
 reported as `CATALOG REFUSED` while the other rows are appended; rows that
 fail only together stop the run before anything is written. A run that
 refused any row, by contract binding or by the catalog, exits 3
 (`EXIT_REFUSED_ROWS`), and `resolve-and-rebuild.yml` still commits and
 publishes what it appended before failing the job, so the alert fires. So
-until those lineages hold one unit in Chronicle (a Chronicle change, not a
-resolver one), the A-19 facts defer instead of blocking the day's other
-resolutions; the dated captures they rest on stay in the Archive, so a run
-after that change can still resolve them.
+until the restatement run, the A-19 facts deferred instead of blocking the
+day's other resolutions. The dated captures they rest on stayed in the Archive,
+so a run after it could still resolve them.
 
 A registered target looks up the Archive's index for captures dated inside its
 window, and makes no request before the window opens. From the day it opens (not the
@@ -1346,18 +1346,17 @@ age", which BLS prints not seasonally adjusted, in thousands. Until now they
 could bind only `generic-url`, and the resolver read them from Internet Archive
 captures of `cpseea19.htm` (the `a19` leg). Each row is also an official BLS
 series in the Public Data API. This change adds six registrable specs to
-`BLS_API_ADAPTERS` and switches the six docket templates to `bls-api`. Once
-registration opens (below), a new A-19 target registers and resolves the way
-the JOLTS and payroll series in the section above do. Max chose this route on 2026-09-25 over an
+`BLS_API_ADAPTERS` and switches the six docket templates to `bls-api`. A new
+A-19 target registers and resolves the way the JOLTS and payroll series in the
+section above do. Max chose this route on 2026-09-25 over an
 Archive-capture adapter (thesis#270, closed unmerged). The registrable BLS API
 specs go from six to twelve.
 
-**Registration is on hold until Chronicle can hold the six lineages in one
-unit.** See "Chronicle holds these lineages in thousands" below. Each spec
-carries `registration_hold`, and the execution-plan gate refuses it after every
-structural check. So the roller skips October with that reason, and nothing
-can register an A-19 target that would be refused every day from its release.
-A reviewed edit removes the hold once Max's decision d397 lands.
+**Registration waited until Chronicle could hold the six lineages in one
+unit.** See "Chronicle holds these lineages in count" below. Until then each
+spec carried a `registration_hold`, and the execution-plan gate refused it after
+every structural check. So nothing could register an A-19 target that would be
+refused every day from its release.
 
 ## Series identity
 
@@ -1480,20 +1479,20 @@ date is added by a reviewed edit when BLS posts it. On 2026-11-06, 08:30 ET is
 taken by the next one, while October is still the latest month, which lasts
 until 2026-12-04.
 
-## Chronicle holds these lineages in thousands
+## Chronicle holds these lineages in count
 
 Each of the six concepts has exactly one Chronicle lineage, `economy/aggregate`
-in the United States. It holds one observation: the June 2026 figure the `a19`
-leg recorded, in thousands. (Live catalog, PolicyEngine/chronicle branch
-`codex/thesis-ledger-facts`, fetched 2026-09-25.) The docket pins that lineage,
+in the United States. On 2026-09-25 it held one observation: the June 2026
+figure the `a19` leg recorded, in thousands. (Live catalog,
+PolicyEngine/chronicle branch `codex/thesis-ledger-facts`, fetched that day.)
+The base-unit restatement run moved it to `count`. The docket pins that lineage,
 and the containment gate re-derives the same pin, because there is one
-candidate. The docket's `targetUnit` "millions" agrees with the catalog's
-"thousands" under the unchanged `valueScale` 0.001. The containment tests
-pass against both the frozen fixture and the live catalog.
+candidate. The docket's `targetUnit` "millions" agrees with the catalog's `count`
+because `count` is the base unit Chronicle stores millions in.
 
-A fact must carry its contract's unit (`source_binding_projection`), and every
-A-19 contract is in millions: the 18 existing ones and every one this adapter
-registers. Chronicle's `scripts/build_series_catalog.py` groups observations by
+A fact's value must match its contract's unit before the writer converts it, and
+every A-19 contract is in millions: the 18 existing ones and every one this
+adapter registers. Chronicle's `scripts/build_series_catalog.py` groups observations by
 concept, geography and entity, and refuses to build when one identity holds two
 units. This was run on 2026-09-25 against a scratch copy of the ledger branch,
 Chronicle commit `3dd95a0d`, with one synthetic October production row added:
@@ -1510,8 +1509,8 @@ whole run's append, not only its own row. thesis#269 adds an exclusion at
 append time for any row the catalog refuses; the check below still refuses
 earlier, before the keyless request is spent.
 
-The hold stops registration. Behind it, `bls_ledger_unit_conflict` refuses a
-capture before the API request is spent, for any registrable series. It fires
+`bls_ledger_unit_conflict` refuses a capture before the API request is spent,
+for any registrable series. It fires
 when Chronicle's current view already holds the series in another unit, for
 the entity and geography the fact would carry. It follows Chronicle's rules as
 read in its code:
@@ -1525,14 +1524,13 @@ read in its code:
   gate reads it: its explicit id, or, for a row written before versioning,
   its av2 content address. Chronicle's generator follows the same rule since
   chronicle#306.
-- Once the ledger holds no current scaled row, the resolver stores a fact in
-  its unit's base unit, so the guard compares that unit: `count` for a spec
-  that emits millions.
+- The resolver stores a fact in its unit's base unit, so the guard compares
+  that unit: `count` for a spec that emits millions.
 
 So a refusal means Chronicle would refuse the same fact; the guard can miss a
-conflict but not invent one. `test_every_other_registrable_lineage_already_holds_the_unit_it_emits`
-checks the frozen catalog: every other registrable series' lineage is a
-placeholder or already in the unit its spec emits.
+conflict but not invent one. `test_every_registrable_lineage_already_holds_the_unit_it_stores`
+checks the frozen catalog: every registrable series' lineage is a placeholder or
+already in the unit the resolver stores for its spec.
 
 Only that reference is refused (`LEDGER UNIT CONFLICT`). The rest of the run
 appends, and the run exits `EXIT_REFUSED_ROWS` (3), the refused-rows status
@@ -1541,22 +1539,20 @@ and then fails the job, so the alert fires; before it, any non-zero exit skips
 publishing. The guard runs before the fetch and the first-print check, so it
 refuses even on a day no fact would be produced, including after the window
 closes. A registered target in conflict would therefore raise the alert every
-day, and before #269 stop publishing every day. That is why registration is
-held rather than left to the guard.
+day, and before #269 stop publishing every day. That is why registration waited
+for the restatement run rather than leaving this to the guard.
 
-**What lifts the hold.** Max ruled on 2026-10-21, superseding d397, that
+**What lifted the hold.** Max ruled on 2026-10-21, superseding d397, that
 Chronicle stores plain numbers. The six June rows sit in the ledger's
 immutable prefix (lines 119 to 124), in thousands, and carry no
 `assertionVersion`. The resolver's restatement run (`--restate-base-units`,
-AGENTS.md) restates them in `count`, each superseding its row's content
-address, which chronicle#306 taught the generator to read. From then on the
-resolver stores the specs' millions in `count` too, and the guard compares
-the units Chronicle stores, so an A-19 fact no longer conflicts with June.
-The change that lifts the hold follows that run. If
-it lifts in time for the roller to mint October before its 2026-11-06 release,
-October is the first A-19 target on this route. Otherwise the roller skips the
-released months, and the first target is the next unreleased one. The 18
-`generic-url` registrations also carry millions and wait on the same run.
+AGENTS.md) restated them in `count`, each superseding its row's content
+address, which chronicle#306 taught the generator to read. The resolver stores
+the specs' millions in `count` too, and the guard compares the units Chronicle
+stores, so an A-19 fact no longer conflicts with June. The roller skips released
+months, so the first target on this route is the next unreleased one: November
+2026, released 2026-12-04. The 18 `generic-url` registrations also carry millions
+and waited on the same run.
 
 ## Fixtures
 

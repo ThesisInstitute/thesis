@@ -1,9 +1,9 @@
 """The resolver's base-unit writer and its one-time restatement run.
 
 Chronicle stores plain numbers (Max, 2026-10-21). The resolver writes a new row
-in its unit's base unit once the ledger holds no current row in a scaled unit,
-and ``--restate-base-units`` brings that about: one release that restates every
-current scaled row, all or none. These tests hold both to the site's reader
+in its unit's base unit and stops on a ledger with a current row in a scaled
+unit. ``--restate-base-units`` left none: one release that restated every current
+scaled row, all or none. These tests hold both to the site's reader
 (site/src/data/ledger-restatements.ts), through the resolver's port of it, and
 to Chronicle's append gate (receipt 0.6.2).
 
@@ -278,7 +278,7 @@ WRITTEN_AT = "2030-01-02T12:00:00Z"
 
 
 def _attach(
-    tmp_path: pathlib.Path, monkeypatch, row: dict, *, base_units: bool
+    tmp_path: pathlib.Path, monkeypatch, row: dict, *, registered: str = "millions"
 ) -> dict:
     monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
     ref = row["source_record_id"]
@@ -290,28 +290,28 @@ def _attach(
         raw=RAW,
         retrieved_at=WRITTEN_AT,
         ledger_repo_sha="b" * 40,
-        target_contracts={ref: _registration(ref, "millions")},
-        base_units=base_units,
+        target_contracts={ref: _registration(ref, registered)},
     )
 
 
-def test_the_writer_keeps_recorded_units_while_the_ledger_holds_them(
+def test_the_writer_keeps_a_row_with_no_scale_as_it_is(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
-    scaled = _attach(tmp_path, monkeypatch, ROW, base_units=False)
-    assert {key: scaled[key] for key in ROW} == ROW
-    assert scaled["sourceBindingProjection"] == (
+    row = {**ROW, "measure": {"concept": "test.series", "unit": "percent"}}
+    plain = _attach(tmp_path, monkeypatch, row, registered="percent")
+    assert {key: plain[key] for key in row} == row
+    assert plain["sourceBindingProjection"] == (
         resolve_pending.source_binding_projection(
-            _registration(ROW["source_record_id"], "millions"), ROW, RAW
+            _registration(row["source_record_id"], "percent"), row, RAW
         )
     )
-    assert scaled["assertionVersion"] == resolve_pending.assertion_version(scaled)
+    assert plain["assertionVersion"] == resolve_pending.assertion_version(plain)
 
 
 def test_the_writer_stores_base_units_with_the_pair_it_recorded(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
-    based = _attach(tmp_path, monkeypatch, ROW, base_units=True)
+    based = _attach(tmp_path, monkeypatch, ROW)
     assert based["value"] == 7716000 and type(based["value"]) is int
     assert based["measure"] == {"concept": "test.series", "unit": "count"}
     assert based["source"] == {
@@ -339,7 +339,7 @@ def test_a_value_with_no_exact_base_form_is_refused_before_its_archive(
     # it does a contract mismatch, so the refusal must be a ValueError.
     assert issubclass(ledger_units.LedgerUnitError, ValueError)
     with pytest.raises(ledger_units.LedgerUnitError):
-        _attach(tmp_path, monkeypatch, {**ROW, "value": 1e13}, base_units=True)
+        _attach(tmp_path, monkeypatch, {**ROW, "value": 1e13})
     assert not (resolve_pending.resolution_run_dir(WRITTEN_AT) / "responses").exists()
 
 
@@ -348,25 +348,18 @@ def test_the_contract_check_still_reads_the_registered_unit(
 ) -> None:
     row = {**ROW, "measure": {"concept": "test.series", "unit": "count"}}
     with pytest.raises(ValueError, match="does not match registered unit"):
-        _attach(tmp_path, monkeypatch, row, base_units=True)
+        _attach(tmp_path, monkeypatch, row)
 
 
-def test_the_run_says_which_units_it_writes(capsys) -> None:
+def test_a_ledger_with_a_current_scaled_row_stops_the_run() -> None:
     sample = [json.loads(line) for line in _sample()]
-    assert resolve_pending.print_ledger_units_mode(sample) is False
-    assert capsys.readouterr().out == (
-        "ledger units: as recorded; 19 current row(s) still carry a scale "
-        "word, so new rows keep theirs until --restate-base-units restates "
-        "them\n"
-    )
+    with pytest.raises(ledger_units.LedgerUnitError, match="19 current ledger row"):
+        resolve_pending.refuse_a_scaled_ledger(sample)
     restated = sample + [json.loads(line) for line in _writer()]
-    assert resolve_pending.print_ledger_units_mode(restated) is True
-    assert capsys.readouterr().out == (
-        "ledger units: base; no current row carries a scale word\n"
-    )
+    assert resolve_pending.refuse_a_scaled_ledger(restated) is None
 
 
-# The current view the writer switch and the planner read.
+# The current view the scaled-ledger stop and the planner read.
 
 
 def test_the_current_view_is_receipts_on_every_ledger_receipt_reads() -> None:
