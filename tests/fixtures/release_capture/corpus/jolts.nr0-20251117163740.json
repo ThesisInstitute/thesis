@@ -1,0 +1,17 @@
+{
+ "captureUrl": "https://web.archive.org/web/20251117163740/https://www.bls.gov/news.release/jolts.nr0.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/jolts.nr0.htm",
+ "stamp": "20251117163740",
+ "indexDigest": "NOMZ5P3XPBFNNGBIYKPP25CAG6REKMGY",
+ "gzipEncoded": true,
+ "title": "Job Openings and Labor Turnover Summary - 2025 M08 Results",
+ "note": "Corpus capture of the 2025-08 release, captured 2025-11-17. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {
+  "jolts_job_openings": {
+   "value": 7.227,
+   "printedPrecision": 0.1,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=JTSJOL&vintage_date=2025-11-17",
+   "how": "the 2025-08 value in the 2025-11-17 vintage (7227 thousand), in millions; the page prints it rounded to 0.1 million"
+  }
+ }
+}

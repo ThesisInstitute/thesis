@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { resolutionVerb } from "@/components/ForecastCard";
 import { FORECAST_CELLS } from "@/data/forecast-cells";
+import { buildForecastListing } from "@/data/forecast-listing";
 import rawStatus from "@/data/resolution-status.json";
 import {
   NO_REPORT_REASON,
   RESOLUTION_STATUS_META,
+  VOIDED_CODE,
   overdueNotice,
   shortReason,
   type OverdueStatus,
@@ -89,6 +91,70 @@ describe("card wording", () => {
       "The resolver has no route for this target's reference.",
     );
     expect(shortReason("One sentence only.")).toBe("One sentence only.");
+  });
+});
+
+describe("voided targets", () => {
+  const voided: OverdueStatus = {
+    ...row,
+    state: "voided",
+    code: VOIDED_CODE,
+    reason:
+      "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written.",
+    ruling:
+      "The registered source is SSA's July 2026 table, so it cannot hold the August 2026 figure this forecast names. Voided by ruling on 2026-10-22.",
+  };
+  const notice = overdueNotice(
+    { slug: row.forecastSlug, status: "pending", resolutionDate: "2026-07-13" },
+    { asOf: "2026-10-22", lookup: () => voided },
+  );
+
+  it("carry the ruling, never as the resolver's words", () => {
+    expect(notice?.code).toBe(VOIDED_CODE);
+    expect(notice?.ruling).toBe(voided.ruling);
+    expect(notice && "detail" in notice).toBe(false);
+  });
+
+  it("lead the compact card with the void, not a refusal", () => {
+    expect(shortReason(voided.reason)).toBe(
+      "This forecast is void and will not resolve.",
+    );
+  });
+
+  const rows = Object.entries(rawStatus.targets) as [
+    string,
+    Omit<OverdueStatus, "dataPointId">,
+  ][];
+  const voidedRows = rows.filter(([, status]) => status.code === VOIDED_CODE);
+
+  it("are VOIDED in the committed file exactly when they carry a ruling", () => {
+    // Not vacuous: the file holds the voids a ruling recorded (d1633), and
+    // tests/test_voided_targets.py ties each one to the register.
+    expect(voidedRows.length).toBeGreaterThan(0);
+    for (const [dataPointId, status] of rows) {
+      const hasRuling = "ruling" in status && Boolean(status.ruling);
+      expect(status.code === VOIDED_CODE, dataPointId).toBe(hasRuling);
+    }
+    for (const [dataPointId, status] of voidedRows) {
+      expect(status.ruling, dataPointId).toMatch(
+        / Voided by ruling on \d{4}-\d{2}-\d{2}\.$/,
+      );
+    }
+  });
+
+  it("are the forecasts the listing marks Void, and no others", () => {
+    const listing = buildForecastListing(FORECAST_CELLS);
+    const marked = new Set(
+      listing.filter((item) => item.overdue?.voided).map((item) => item.slug),
+    );
+    expect(marked).toEqual(
+      new Set(voidedRows.map(([, status]) => status.forecastSlug)),
+    );
+    for (const item of listing) {
+      if (item.overdue && !item.overdue.voided) {
+        expect(item.overdue.reason, item.slug).not.toMatch(/void/i);
+      }
+    }
   });
 });
 
