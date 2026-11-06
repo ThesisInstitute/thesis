@@ -16931,9 +16931,7 @@ def check_recorded_pair(row: Mapping[str, Any]) -> None:
 
 
 def _without(value: object, keys: tuple[str, ...]) -> dict[str, Any]:
-    return {
-        key: item for key, item in _json_object(value).items() if key not in keys
-    }
+    return {key: item for key, item in _json_object(value).items() if key not in keys}
 
 
 def restated_content(row: Mapping[str, Any]) -> dict[str, Any]:
