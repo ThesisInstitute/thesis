@@ -3,6 +3,7 @@
   "integrityNote": "informational only; chain links are authoritative",
   "snapshots": [
     "digest-42283987187-1.json",
-    "digest-42288251396-1.json"
+    "digest-42288251396-1.json",
+    "digest-42301098641-1.json"
   ]
 }
