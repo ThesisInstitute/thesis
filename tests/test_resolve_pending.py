@@ -247,8 +247,12 @@ def test_archives_raw_response_and_attaches_append_provenance(
 
     archive = enriched["responseArchive"]
     assert enriched["targetContentHash"] == content_hash
+    assert enriched["value"] == 245000
+    assert enriched["measure"]["unit"] == "count"
+    assert enriched["source"]["recorded_value"] == 245.0
+    assert enriched["source"]["recorded_unit"] == "thousands"
     projection = enriched["sourceBindingProjection"]
-    assert projection["unit"] == "thousands"
+    assert projection["unit"] == "count"
     assert projection["field"] == "ICSA"
     assert projection["responseSha256"] == archive["sha256"]
     assert enriched["assertionVersion"]["id"].startswith("av2:")

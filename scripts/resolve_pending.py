@@ -2647,15 +2647,6 @@ A19_BLS_API_SERIES: dict[str, tuple[str, dict[str, float]]] = {
 }
 # Registration waits for Chronicle. Each A-19 lineage holds its June 2026
 # observation in thousands, every A-19 contract is in millions, and
-# Chronicle's catalog build refuses a lineage with two units. A registered
-# target would be refused every day from its release, so none is minted until
-# the Chronicle change in decision d397 lands and a reviewed edit removes this
-# hold (docs/anchor-verifications.md).
-A19_REGISTRATION_HOLD = (
-    "Chronicle holds each Table A-19 lineage's June 2026 observation in "
-    "thousands and its catalog refuses a second unit; registration waits for "
-    "the Chronicle change in decision d397"
-)
 for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
     BLS_API_ADAPTERS[f"{A19_STEM}.{_row}"] = {
         "series_id": _series_id,
@@ -2677,7 +2668,6 @@ for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
         "anchor_abs_tolerance": 0.001,
         "anchors": dict(_anchors),
         "binding_transform": {"operation": "multiply", "factor": 0.001},
-        "registration_hold": A19_REGISTRATION_HOLD,
         "evidence_notes": (
             "First print for {period} captured from {source_url} (BLS Public "
             "Data API v2, current estimates only), in thousands and divided by "
@@ -9154,8 +9144,6 @@ def bls_ledger_unit_conflict(
     ledger_rows: list[Mapping[str, Any]],
     stem: str,
     spec: Mapping[str, Any],
-    *,
-    base_units: bool = False,
 ) -> str | None:
     """Why a fact for ``stem`` would break Chronicle's catalog, or None.
 
@@ -9166,15 +9154,14 @@ def bls_ledger_unit_conflict(
     catalog for every append and sends all of a run's rows in one proposal, so
     on this base one conflicting fact fails the whole run's append.
     (thesis#269 adds an append-time exclusion; this check still saves the
-    keyless request.) The Table A-19 lineages hold a June 2026 observation in
-    thousands, and these specs emit millions.
+    keyless request.) The resolver stores a fact in its unit's base unit
+    (``base_unit_row``), so the check compares that unit.
 
     Current rows follow Chronicle's append gate (receipt 0.6.2), which the
     generator follows too since chronicle#306: a row drops out when another
     row's ``assertionVersion.supersedes`` names its effective id, its explicit
     id or, for a row written before assertion versioning, its av2 content
-    address. With ``base_units`` the fact is stored in its unit's base unit
-    (``base_unit_row``), so the check compares that unit.
+    address.
 
     A row belongs to the series when its measure concept is ``stem`` itself or
     ``stem`` plus a spelling of the row's own month (``2026_06``,
@@ -9183,8 +9170,7 @@ def bls_ledger_unit_conflict(
     merge more, so its identity holds at least these rows. A refusal here
     therefore means Chronicle would refuse the fact too; the check can miss a
     conflict, never invent one. It runs before the fetch, so it also refuses
-    on a day no fact would be produced; that is why Table A-19 registration
-    is held rather than left to this check.
+    on a day no fact would be produced.
     """
 
     entity = spec.get("entity", {"name": "economy", "role": "aggregate"})
@@ -9192,9 +9178,7 @@ def bls_ledger_unit_conflict(
         (entity.get("name"), entity.get("role")),
         (US_GEOGRAPHY["level"], US_GEOGRAPHY["id"], US_GEOGRAPHY["vintage"]),
     )
-    stored = spec["unit"]
-    if base_units:
-        stored = ledger_units.base_unit(stored) or stored
+    stored = ledger_units.base_unit(spec["unit"]) or spec["unit"]
     units = set()
     for row in current_ledger_rows([dict(row) for row in ledger_rows]):
         concept = (row.get("measure") or {}).get("concept")
@@ -16778,7 +16762,6 @@ def attach_resolution_provenance(
     ledger_repo_sha: str,
     target_contracts: dict[str, dict[str, Any]],
     extension: str = "csv",
-    base_units: bool = False,
 ) -> dict[str, Any]:
     registration = target_contracts.get(str(row["source_record_id"]))
     projection = None
@@ -16786,11 +16769,10 @@ def attach_resolution_provenance(
         # Projection is a refusal gate. Run it before writing any response so
         # a rejected row cannot leave an orphan archive in a mixed run.
         projection = source_binding_projection(registration, row, raw)
-    if base_units:
-        # After the contract check, which reads the registered unit, and
-        # before the archive, so a value with no exact base form is refused
-        # as a contract mismatch is.
-        row = base_unit_row(row)
+    # After the contract check, which reads the registered unit, and before
+    # the archive, so a value with no exact base form is refused as a contract
+    # mismatch is.
+    row = base_unit_row(row)
     response_archive = archive_response(
         run_dir,
         series_id=series_id,
@@ -16823,10 +16805,10 @@ def attach_resolution_provenance(
 # source.recorded_value and source.recorded_unit. Registered contracts keep
 # their units, and so do the adapters, plausibility gates and the contract
 # check above; only the appended row converts. The resolver writes base units
-# once the ledger holds no current row in a scaled unit, which the restatement
-# run (--restate-base-units) brings about, so no series ever holds both
-# vocabularies. The site reads both shapes (site/src/data/ledger-restatements.ts)
-# and this section mirrors its checks.
+# and stops on a ledger with a current row in a scaled unit. The restatement run
+# (--restate-base-units) left none, so no series holds both vocabularies. The
+# site reads both shapes (site/src/data/ledger-restatements.ts) and this section
+# mirrors its checks.
 
 UNIT_RESTATEMENT = "unit_restatement"
 
@@ -17346,19 +17328,21 @@ def restatement_catalog_drift(
     return None
 
 
-def print_ledger_units_mode(ledger_rows: list[dict[str, Any]]) -> bool:
-    """Say which units this run writes; True means base units."""
+def refuse_a_scaled_ledger(ledger_rows: list[dict[str, Any]]) -> None:
+    """Stop the run when a current ledger row carries a scale word.
+
+    The restatement run left none, so such a row is a defect this resolver must
+    not build on: a new row in base units would give that row's series a second
+    unit.
+    """
 
     scaled = scaled_current_rows(ledger_rows)
     if scaled:
-        print(
-            f"ledger units: as recorded; {len(scaled)} current row(s) still "
-            "carry a scale word, so new rows keep theirs until "
-            "--restate-base-units restates them"
+        raise ledger_units.LedgerUnitError(
+            f"{len(scaled)} current ledger row(s) carry a scale word, starting "
+            f"with {scaled[0].get('source_record_id')}. --restate-base-units "
+            "restates them"
         )
-        return False
-    print("ledger units: base; no current row carries a scale word")
-    return True
 
 
 def restate_base_units(
@@ -17636,10 +17620,6 @@ def _plan_bls_api(
             "the BLS API executor starts capturing on one official release "
             f"day; expectedReleaseWindow {window!r} is not a one-day window"
         )
-    # Checked last, so a structurally wrong contract gets its own refusal.
-    hold = spec.get("registration_hold")
-    if hold:
-        return f"registration of this BLS API series is on hold: {hold}"
     return None
 
 
@@ -17779,10 +17759,9 @@ EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
 # full-binding predicate above, and a first-print acquisition that needs no
 # per-period hand pin. BLS API left it on 2026-09-20, and only for the specs
 # that declare a ``binding_transform``: ``_plan_bls_api`` still refuses every
-# other stem. The six A-19 rows register through that family (2026-09-25),
-# once their ``registration_hold`` lifts: a contract that binds ``bls-api``
-# routes to it, and every other A-19 contract still routes here and is
-# refused.
+# other stem. The six A-19 rows register through that family: a contract that
+# binds ``bls-api`` routes to it, and every other A-19 contract still routes
+# here and is refused.
 EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
     {"a19", "cms_provider_data", "ssa_official", "va_mmwr"}
 )
@@ -18063,7 +18042,7 @@ def _main() -> int:
     )
     ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
-    write_base_units = print_ledger_units_mode(ledger_rows)
+    refuse_a_scaled_ledger(ledger_rows)
     # References refused because their fact would give a Chronicle lineage a
     # second unit. The rest of the run still appends; the run then exits
     # EXIT_REFUSED_ROWS, the refused-rows status the workflow publishes past.
@@ -18663,10 +18642,7 @@ def _main() -> int:
                 # Refused before the keyless request is spent, and only this
                 # reference: every other row in the run still appends.
                 unit_conflict = bls_ledger_unit_conflict(
-                    ledger_rows,
-                    spec["series_stem"],
-                    spec,
-                    base_units=write_base_units,
+                    ledger_rows, spec["series_stem"], spec
                 )
                 if unit_conflict:
                     print(f"  LEDGER UNIT CONFLICT (refusing): {ref} — {unit_conflict}")
@@ -19935,7 +19911,6 @@ def _main() -> int:
                 ledger_repo_sha=ledger_repo_sha,
                 target_contracts=target_contracts,
                 extension=extension,
-                base_units=write_base_units,
             )
             record_id = str(row.get("source_record_id"))
             evidence = claims_vintages.evidence.get(record_id)
