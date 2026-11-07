@@ -19,7 +19,7 @@ mapping and source-of-truth cutover path.
 
 ## Reward
 
-The first reward export is `/brier/reward.json`.
+The reward export is `/brier/reward.json` (schema `brier_reward_export_v3`).
 
 Each row is one recorded forecast run:
 
@@ -37,22 +37,37 @@ Each row is one recorded forecast run:
 Higher reward is better because normalized CRPS is negated. Unresolved rows
 have `reward.value = null` until the configured official resolver records an
 official fact; resolved rows also keep a null reward when no safe ledger scale
-is available.
+is available. A non-null `reward.value` always satisfies the same usable-scale
+rule the aggregates use, and always equals `-components.normalizedCrps`.
 
 Normalization uses the sample dispersion of successive changes in same-series,
 same-unit PolicyEngine Ledger observations available when the target was
 registered. Legacy targets use the primary run seal as that cutoff. The scale is
 shared by every run on a `dataPointId`; forecast-authored `historicalContext` and
 forecast interval widths are never normalization inputs. With fewer than three
-pre-cutoff ledger observations — or a dispersion of exactly zero — the scale is
-unavailable: raw CRPS and absolute error remain public while normalized CRPS,
-normalized absolute error, sharpness, and reward are null. A positive but
-sub-epsilon dispersion (binary-float residue from an exactly-linear series) is
-numerical zero with a different footprint: the normalized fields and reward
-publish their raw values, but every normalized aggregate — leaderboard means,
-the calibration and judge-calibration reports, Strategy Lab summaries —
-excludes the row. Paired skill compares raw CRPS against the persistence
-baseline and works either way.
+pre-cutoff ledger observations, or with no usable dispersion (below), the scale
+is unavailable. Raw CRPS and absolute error remain public, while normalized
+CRPS, normalized absolute error, sharpness, and reward are null. Every
+normalized aggregate excludes the row: leaderboard means and the paired
+ranking statistic, the calibration and judge-calibration reports, and Strategy
+Lab summaries. The judge and Strategy Lab aggregates also apply the shared
+usable-scale predicate themselves. The raw-CRPS paired win rate still counts
+the pair.
+
+Zero usable dispersion is judged relative to the history's own magnitude: a
+scale at or below `1e-12` of the largest absolute pre-cutoff value
+(`NORMALIZATION_SCALE_RELATIVE_FLOOR`) is unavailable. Exactly linear decimal
+histories have zero step dispersion, but binary floating point leaves a residue
+that grows with the values. `1.814, 1.805, 1.796` left `1.57e-16`, which put a
+`-7.08e13` reward in the 2026-09-23 export. The same shape near 215 leaves
+`2.0e-14`, which a fixed `Number.EPSILON` bound let through. The floor sits well
+above that residue (the worst of 750 exactly linear histories of up to
+10,001 prints was `1.3e-16` of the magnitude) and matches the 12
+significant digits every materialized distribution keeps. It is a
+conservative minimum, not a pure residue test: it would also refuse genuine
+variation confined to the 13th significant digit (a series at `1e11` whose one
+change is 1). No catalog series comes close: on 2026-09-27 the smallest usable
+scale was `1.6e-3` of its history's magnitude.
 
 Same-series membership comes from exact target registrations and each
 observation's matching contract hash and source-binding projection;
@@ -68,11 +83,78 @@ in that ledger history. At least two pre-cutoff ledger observations are
 required. Targets without that history carry an explicit unavailable baseline
 record; forecast-supplied `historicalContext` is never a baseline input.
 
-The leaderboard reports unpaired means as descriptive statistics, but ranks
-agents by the geometric mean of per-target raw CRPS ratios (agent over paired
-persistence baseline; below 1 beats persistence), tie-breaking on unpaired
-mean reward and then scored-run count. It also reports the share of paired
-targets where the agent's CRPS beats the baseline's on the same target.
+A baseline whose materialized CDF fails the scorer's own validator is also
+unavailable, and the record names the validator errors. A flat history gives
+a zero-width interval, which the transform spreads only `1.5e-9` either side.
+Whether that survives depends on magnitude:
+
+- At 1.5 it is a valid near-point mass and the baseline stays available.
+- At 9.999999999, 10, 215, 1e5 or 1e7 the 201-point grid collapses under
+  12-significant-digit rounding, so the baseline is unavailable.
+- From about 5e7 the `1.5e-9` spread vanishes in binary floating point, and
+  the transform's existing fallback widens the support to ±10% of the value.
+  That CDF validates, so the baseline stays available.
+
+## Leaderboard
+
+The leaderboard ranks forecasters, lowest first, by
+`pairedNormalizedCrpsDelta` (`leaderboardRankingStatistic` in
+`site/src/data/brier-lab.ts`). The statistic is built in three steps:
+
+1. On each target that has both a persistence baseline and a usable ledger
+   scale, average the forecaster's normalized CRPS across its runs on that
+   target.
+2. Subtract the baseline's normalized CRPS from that average.
+3. Average the result across targets.
+
+Below 0 beats persistence. `pairedNormalizedTargets` counts the targets that
+enter the statistic. `pairedNormalizedCrpsDeltaStdError` is the per-target
+standard error, which is null below two targets. Ties fall back to the
+unpaired mean reward. The same statistic for primary runs is the
+`pairedComparison` headline on `/calibration`.
+
+The ranking statistic must stay proper: in expectation, reporting the honest
+distribution must minimize it on every target. It is linear in every CRPS.
+Its weights (one over the scale, the target count and the run count) are
+fixed before the outcome, and the report cannot touch them. So it inherits
+the propriety of CRPS for any number of targets. Averaging within a target
+first keeps repeat runs on one target from outweighing the others.
+
+Three statistics fail this test, and the leaderboard must not rank by them:
+
+| Statistic | Why it is improper |
+|---|---|
+| Geometric mean of per-target raw CRPS ratios (ranked by until 2026-09-24) | As targets accumulate it minimizes `E[log CRPS]`, whose optimum ignores the baseline and is too narrow. Under a `N(0, 1)` belief, interval reports optimize at 0.386 of the truthful width (37.9% coverage) and Gaussian reports at σ = 0.461 (44.5% coverage of the stated 80%). On a single target it is a raw CRPS ratio, whose optimum moves with the baseline (σ = 0.69, 0.72 and 1.25 against `N(0, 1.2²)`, `N(0.3, 1.2²)` and `N(2, 1.2²)`) and is still not truthful. |
+| Ratio of means | Divides by the baseline's realized CRPS, which reweights outcomes. Proper only in the large-n limit. |
+| Mean of ratios | Same defect as the ratio of means. |
+
+`site/src/__tests__/leaderboard-propriety.test.ts` runs the real CRPS kernel
+through the real leaderboard function. It checks the statistic over one
+target, two targets and repeat runs. It also convicts the three statistics
+above on the same harness.
+
+`pairedWinRate` is the share of paired targets where the forecaster's raw CRPS
+is strictly below persistence. It is descriptive only, because a win rate is
+not a proper score. Unpaired means are descriptive too.
+
+Forecasters choose their own targets, so two leaderboard rows are usually
+scored on different target sets. Each row is paired with persistence on its
+own set. `headToHead` compares forecasters directly, and only on the targets
+both scored with a usable scale. Each row gives the mean per-target
+normalized-CRPS difference (left minus right, left ranked higher), the
+shared-target count and a standard error.
+
+### Interval reports
+
+Most runs report a point and an 80% interval, which the `interval_anchor_v1`
+transform turns into the scored CDF. CRPS is proper for the CDF it scores.
+The transform, however, is not proper for the interval itself. Under a
+`N(0, 1)` belief, the expected-CRPS-optimal "80%" half-width is about 0.85
+of the truthful one. That is roughly 72% true coverage, for an expected-score
+gain of about 0.7%.
+
+The leaderboard propriety test pins this figure, so any change to the
+transform has to revisit this disclosure.
 
 ## LLM Judges
 
