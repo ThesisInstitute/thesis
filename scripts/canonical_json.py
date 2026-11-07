@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import sys
 from decimal import Decimal
 from typing import Any
@@ -24,26 +25,25 @@ def utf16_sort_key(value: str) -> bytes:
     return value.encode("utf-16-be", errors="surrogatepass")
 
 
+_SHORT_ESCAPES = {
+    "\b": "\\b",
+    "\t": "\\t",
+    "\n": "\\n",
+    "\f": "\\f",
+    "\r": "\\r",
+    '"': '\\"',
+    "\\": "\\\\",
+}
+_NEEDS_ESCAPE = re.compile(r'[\x00-\x1f"\\\ud800-\udfff]')
+
+
+def _escape_char(match: re.Match[str]) -> str:
+    char = match.group()
+    return _SHORT_ESCAPES.get(char) or f"\\u{ord(char):04x}"
+
+
 def _serialize_string(value: str) -> str:
-    pieces = ['"']
-    short_escapes = {
-        "\b": "\\b",
-        "\t": "\\t",
-        "\n": "\\n",
-        "\f": "\\f",
-        "\r": "\\r",
-        '"': '\\"',
-        "\\": "\\\\",
-    }
-    for char in value:
-        if char in short_escapes:
-            pieces.append(short_escapes[char])
-        elif ord(char) < 0x20 or 0xD800 <= ord(char) <= 0xDFFF:
-            pieces.append(f"\\u{ord(char):04x}")
-        else:
-            pieces.append(char)
-    pieces.append('"')
-    return "".join(pieces)
+    return f'"{_NEEDS_ESCAPE.sub(_escape_char, value)}"'
 
 
 def _serialize_float(value: float) -> str:
