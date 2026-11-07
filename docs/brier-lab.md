@@ -182,10 +182,25 @@ their scores did not change with the label.
 - post-resolution rows tag likely failure modes after official facts arrive,
   from thresholds on the resolved score, the run's pack labels and whether
   the score names a data point; a run that trips none of those rules gets
-  `bad_baseline`
+  `bad_baseline` if its score has a usable ledger scale and `not_assessable`
+  if it has none
 
 Each trace-quality row also carries a `prompt`: the template a model judge
 would receive. No model has received it.
+
+A post-resolution tag needs evidence. Interval coverage and the signed error
+against the run's own 80% interval width count for every resolved run.
+Normalized CRPS and normalized absolute error count only when the target's
+ledger scale passes the usable-scale gate, which `forecast-judges.ts` also
+applies to every normalized aggregate. `well_calibrated` needs a covered
+outcome and a usable nCRPS of at most 0.25, so a run without a usable scale
+can never reach it, and missing it says nothing about that run. Such a run
+gets a failure tag only from raw-unit evidence: a missed interval, an error
+above 0.75 of the interval width, or a missing target binding (a projection
+pack counts only alongside one of the first two). A run with none of that
+evidence gets `not_assessable`, severity `none`. With a usable scale, a run
+that misses `well_calibrated` without firing any specific mode keeps the
+`bad_baseline` fallback.
 
 These rows are explicitly `rewardEligible: false`. They are process
 diagnostics for triage and prompt/pack iteration. Before any such signal can
