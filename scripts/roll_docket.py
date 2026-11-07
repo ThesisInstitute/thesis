@@ -19,9 +19,12 @@ Usage:
 Emits a run_thesis_batch.py-compatible targets file. Reviewed recurring seeds
 sort first by exact release date so the capped scheduler cannot defer them
 past their finite forecasting window. Weekly targets follow (they resolve
-fastest), then reviewed one-shot snapshot seeds and earliest next-period
+fastest), then reviewed one-shot snapshot seeds and earliest next print
 first. Exits 0 with an empty targets list when there is nothing to roll —
 idempotent by construction, so the schedule can fire as often as it likes.
+A series with nothing registrable is skipped with its reason on the log and
+takes no slot under the cap. scripts/docket_health.py watches for a roll that
+stays green while the docket stalls.
 """
 
 from __future__ import annotations
@@ -41,9 +44,13 @@ from ingest_challenge_submissions import (
     load_registered_targets,
 )
 from register_targets import (
+    SERIES_BINDINGS,
+    WEEKLY_CLAIMS_WINDOW_HALF_WIDTH_DAYS,
+    RegistrationError,
     build_contract,
     derive_data_point_id,
     execution_plan_refusal,
+    weekly_claims_release_day,
 )
 from thesis_log_client import load_thesis_log
 
@@ -877,6 +884,27 @@ def recurring_seed_target(
     }
 
 
+def previous_target_block(previous: dict, period: str) -> dict:
+    """The fields of a published contract its successor builds from."""
+    block = {
+        key: previous[key]
+        for key in (
+            "country",
+            "unit",
+            "dataPointId",
+            "resolutionDate",
+            "resolutionSource",
+            "resolutionSourceUrl",
+            "resolutionRule",
+            "resolutionPolicy",
+            "sourceContext",
+        )
+        if previous.get(key) not in (None, "")
+    }
+    block["period"] = period
+    return block
+
+
 def target_extras_for_period(entry: dict, period: str) -> dict | None:
     """Return target extras, requiring a dated slot for calendar-gated sources.
 
@@ -930,6 +958,9 @@ def advance_past_released_native_periods(
     generating a post-release forecast, then select the first still-unreleased
     period that has meaningfully begun.
     """
+    if entry.get("series") in SERIES_BINDINGS:
+        return advance_past_opened_weekly_claims_windows(entry, period, today)
+
     extras = entry.get("extras") or {}
     binding = extras.get("sourceBinding") if isinstance(extras, dict) else None
     adapter = binding.get("adapter") if isinstance(binding, dict) else None
@@ -952,6 +983,45 @@ def advance_past_released_native_periods(
         print(
             f"  skip {entry.get('series', '?')} {candidate}: official "
             f"release {release_day} is not after docket date {today}",
+            file=sys.stderr,
+        )
+        following = step_period(candidate, entry["cadence"])
+        if following is None or not not_too_far_ahead(
+            following, entry["cadence"], today
+        ):
+            return None
+        candidate = following
+
+
+def advance_past_opened_weekly_claims_windows(
+    entry: dict, period: str, today: dt.date
+) -> str | None:
+    """Step a weekly claims series to the first week it can still register.
+
+    The two claims series carry no releaseDates: DOL's schedule rule gives
+    each week's print day, and the registrar refuses a window that opens on or
+    before the registration date. A week that failed to publish keeps the
+    published cursor behind it, and that week's window only ever gets older,
+    so without this step one lost week stops the series for good, as it did
+    from 2026-09-28. A skipped week's print is known or about to be, so it can
+    only stay unforecast.
+    """
+    half_width = dt.timedelta(days=WEEKLY_CLAIMS_WINDOW_HALF_WIDTH_DAYS)
+    candidate = period
+    while True:
+        try:
+            release_day = weekly_claims_release_day(entry["series"], candidate)
+        except RegistrationError as exc:
+            print(
+                f"  warning: skip {entry['series']} {candidate}: {exc}",
+                file=sys.stderr,
+            )
+            return None
+        if release_day - half_width > today:
+            return candidate
+        print(
+            f"  skip {entry['series']} {candidate}: its release window opens "
+            f"{release_day - half_width}, not after docket date {today}",
             file=sys.stderr,
         )
         following = step_period(candidate, entry["cadence"])
@@ -991,16 +1061,19 @@ def select_capped_targets(
 def roll_execution_plan_refusal(target: dict) -> str | None:
     """Why registration would refuse this candidate for lack of an executor.
 
-    A target whose contract cannot even be built returns None and keeps its
-    cap slot, as it always has: registration's ``--skip-unbindable`` report
-    names the binding error. A contract that builds but that the resolver
-    cannot judge is a refusal here, as it is in prospect validation.
+    A target whose contract cannot be built is refused the same way. The
+    registrar builds the same contract for the same date, so such a target
+    could only spend a cap slot and then be pruned. When every selected
+    target went that way, the 2026-10 rolls failed on "no bindable targets"
+    while their cap slots hid nothing else. A contract that builds but that
+    the resolver cannot judge is a refusal here, as it is in prospect
+    validation.
     """
 
     try:
         contract = build_contract(target, dt.date.today())
-    except (AttributeError, KeyError, TypeError, ValueError):
-        return None
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:
+        return f"the contract cannot be built: {exc}"
     try:
         return execution_plan_refusal({"contract": contract, "targetContentHash": None})
     except (AttributeError, KeyError, TypeError, ValueError) as exc:
@@ -1282,29 +1355,18 @@ def main() -> int:
         }
         previous = published_forecasts.get(latest_slug)
         if previous:
-            target["previousTarget"] = {
-                key: previous[key]
-                for key in (
-                    "country",
-                    "unit",
-                    "dataPointId",
-                    "resolutionDate",
-                    "resolutionSource",
-                    "resolutionSourceUrl",
-                    "resolutionRule",
-                    "resolutionPolicy",
-                    "sourceContext",
-                )
-                if previous.get(key) not in (None, "")
-            }
-            target["previousTarget"]["period"] = previous_period
+            target["previousTarget"] = previous_target_block(previous, previous_period)
         # One-shot snapshots get the middle lane so a permanently busy
         # monthly docket cannot starve their finite preregistration window.
         priority = 1 if entry["cadence"] == "weekly" else 3
+        # Under the cap the nearest print goes first: a later one can wait
+        # for the next run, and a missed one is gone. A period string does
+        # not order prints, since 2026-Q3 sorts after 2026-11 and can print
+        # weeks before it.
         append_roll_candidate(
             candidates,
             priority,
-            nxt,
+            target.get("expectedReleaseDate") or nxt,
             target,
             expired_data_point_ids=expired_data_point_ids,
             registered_data_point_ids=registered_data_point_ids,
