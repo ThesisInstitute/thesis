@@ -15,6 +15,7 @@ import {
   firstObservedAt,
   observationAssertionId,
 } from "@/data/ledger-current-view";
+import { isUnitRestatement } from "@/data/ledger-restatements";
 import {
   POLICYENGINE_LEDGER_PIN,
   POLICYENGINE_LEDGER_SERIES_CATALOG_URL,
@@ -55,6 +56,12 @@ interface CorrectionView {
   superseded: ObservationRecordedLedgerEntry[];
 }
 
+// A correction of a restated row names the restatement, which is no entry, so
+// the site's chain runs through the row the restatement restates.
+function gradedSupersedes(entry: ObservationRecordedLedgerEntry) {
+  return entry.gradedSupersedes ?? entry.assertionVersion?.supersedes ?? null;
+}
+
 function correctionView(
   observations: ObservationRecordedLedgerEntry[],
 ): CorrectionView {
@@ -62,7 +69,7 @@ function correctionView(
   const versionIds = new Set<string>();
   for (const entry of observations) {
     const versionId = observationAssertionId(entry);
-    const supersedes = entry.assertionVersion?.supersedes ?? null;
+    const supersedes = gradedSupersedes(entry);
     // receipt reserves every row's version id, so no later row may restate
     // one (an A->B->A chain restoring a superseded value).
     if (versionId) {
@@ -226,7 +233,8 @@ describe("Chronicle corrections on the pinned ledger", () => {
   beforeAll(async () => {
     ledger = await loadPolicyEngineLedger();
     observations = ledger.filter(isObservationRecordedLedgerEntry);
-    // The pinned rows themselves, line for line with the observations.
+    // The pinned rows themselves, one per ledger line. An observation's
+    // acceptedSequence is its line; restatements hold lines and no observation.
     rawRows = (
       await fetchPinnedPolicyEngineLedgerBytes(POLICYENGINE_LEDGER_PIN)
     )
@@ -241,6 +249,10 @@ describe("Chronicle corrections on the pinned ledger", () => {
     resolvedForecastCells = withResolvedOutcomes(FORECAST_CELLS, ledger);
   });
 
+  function rawRowOf(entry: ObservationRecordedLedgerEntry) {
+    return rawRows[entry.acceptedSequence!];
+  }
+
   // The pinned ledger with one more row: a correction of `original` changed
   // by `changes`, accepted after every pinned row, as Chronicle's gate would
   // take it. A pre-versioning original also gets the content address its
@@ -249,20 +261,28 @@ describe("Chronicle corrections on the pinned ledger", () => {
     original: ObservationRecordedLedgerEntry,
     changes: Record<string, unknown>,
   ) {
-    const line = observations.indexOf(original);
-    const raw = rawRows[line];
+    const raw = rawRowOf(original);
     expect(raw.source_record_id).toBe(original.dataPointId);
     const fix: Record<string, unknown> = {
       ...structuredClone(raw),
       ...changes,
     };
     delete fix.assertionVersion;
+    // The gate takes a correction of the record's last line, which is a
+    // restatement once one exists; the site then reads it as correcting `raw`.
+    const active = rawRows.findLast(
+      (row) => row.source_record_id === raw.source_record_id,
+    )!;
     fix.assertionVersion = {
       id: expectedAssertionVersionId(fix),
-      supersedes: effectiveAssertionId(raw),
+      supersedes: effectiveAssertionId(active),
     };
     assertAppendGateAssertionVersions([...rawRows, fix]);
-    const [mapped] = mapPolicyEngineLedgerRows([fix]);
+    const [firstMapped] = mapPolicyEngineLedgerRows([fix]);
+    const mapped: ObservationRecordedLedgerEntry =
+      active === raw
+        ? firstMapped
+        : { ...firstMapped, gradedSupersedes: effectiveAssertionId(raw) };
     const acceptedAtUtc = new Date(
       Math.max(...observations.map((entry) => instant(entry.acceptedAtUtc))) +
         60_000,
@@ -297,17 +317,18 @@ describe("Chronicle corrections on the pinned ledger", () => {
     expect(view.current.length + view.superseded.length).toBe(
       observations.length,
     );
-    expect(rawRows.length).toBe(observations.length);
+    expect(rawRows.filter((row) => !isUnitRestatement(row)).length).toBe(
+      observations.length,
+    );
 
     // receipt's effective_current_rows drops every row whose version some
     // row supersedes. On a ledger that passes the chain rules, that is the
     // same set as the last row of each chain, and it is the site's view.
     const supersededIds = new Set(
-      observations.flatMap((entry) =>
-        entry.assertionVersion?.supersedes
-          ? [entry.assertionVersion.supersedes]
-          : [],
-      ),
+      observations.flatMap((entry) => {
+        const supersedes = gradedSupersedes(entry);
+        return supersedes ? [supersedes] : [];
+      }),
     );
     expect(
       observations.filter((entry) => {
@@ -370,13 +391,14 @@ describe("Chronicle corrections on the pinned ledger", () => {
     // #378 refused this case until the site could compute the address. A
     // correction names a pre-versioning row by the av2 address receipt
     // recomputes from its content; the gate accepts it, and the row drops out.
-    const index = observations.findIndex(
-      (entry, line) =>
-        !rawRows[line].assertionVersion &&
-        view.chains.get(entry.observationId)!.length === 1,
-    );
-    expect(index).toBeGreaterThanOrEqual(0);
-    const legacy = rawRows[index];
+    const legacy = rawRows.find(
+      (row) =>
+        !row.assertionVersion &&
+        rawRows.filter(
+          (other) => other.source_record_id === row.source_record_id,
+        ).length === 1,
+    )!;
+    expect(legacy).toBeDefined();
     const address = expectedAssertionVersionId(legacy);
     const fix: Record<string, unknown> = {
       ...structuredClone(legacy),
@@ -442,7 +464,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
     };
 
     expect(catalog.observations_sha256).toBe(pin.jsonlSha256);
-    expect(catalog.observation_rows).toBe(observations.length);
+    expect(catalog.observation_rows).toBe(rawRows.length);
     expect(catalog.current_assertion_rows).toBe(view.current.length);
     expect(
       currentLedgerView(ledger).filter(isObservationRecordedLedgerEntry).length,
@@ -485,8 +507,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
       const before = runs.map((run) =>
         evaluateResolvedForecastRun(forecast, run, ledger),
       );
-      const observedAt = rawRows[observations.indexOf(graded)]
-        .observed_at as string;
+      const observedAt = rawRowOf(graded).observed_at as string;
       for (const shape of [observedAt, daysLater(observedAt, 7)]) {
         const { correction, extended, fix } = withCorrection(graded, {
           value: graded.value + 5,
@@ -705,7 +726,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
         ledger,
         "2100-01-01T00:00:00.000Z",
       )) {
-        if (rawRows[observations.indexOf(entry)].sourceBindingProjection) {
+        if (rawRowOf(entry).sourceBindingProjection) {
           held.set(entry, (held.get(entry) ?? 0) + 1);
         }
       }
@@ -718,8 +739,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
     // correction of a held record replaces it everywhere and leaves nothing.
     const [record, holders] = mostHeldRecord();
     expect(holders).toBeGreaterThan(1);
-    const observedAt = rawRows[observations.indexOf(record)]
-      .observed_at as string;
+    const observedAt = rawRowOf(record).observed_at as string;
     // One day later keeps the print on or before the correction's acceptance.
     for (const shape of [observedAt, daysLater(observedAt, 1)]) {
       const { correction, extended, replaced } = withCorrection(record, {
@@ -800,7 +820,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
     // into another unit: every history that held it loses it, and the check
     // above would name each one.
     const [record, holders] = mostHeldRecord();
-    const raw = rawRows[observations.indexOf(record)];
+    const raw = rawRowOf(record);
     const unit = record.unit === "millions" ? "thousands" : "millions";
     const { correction, extended, replaced } = withCorrection(record, {
       measure: { ...(raw.measure as object), unit },

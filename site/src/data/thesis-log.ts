@@ -59,6 +59,12 @@ import {
   observationSupersedes,
   supersededContentAddresses,
 } from "./ledger-current-view";
+import {
+  foldLedgerRestatements,
+  isUnitRestatement,
+  recordedPair,
+  type LedgerRestatement,
+} from "./ledger-restatements";
 import ledgerPinJson from "./ledger-pin.json";
 import {
   LEDGER_AVAILABILITY,
@@ -151,6 +157,13 @@ export interface ObservationRecordedLedgerEntry extends ResolvedOutcome {
   // row is addressed by its explicit assertionVersion.id or cannot be
   // superseded at all (ledger-current-view.ts).
   supersededContentAddress?: string;
+  // Set only on a correction of a restated row: the id of the row it replaces
+  // on the site, where the restatement it names is no entry.
+  gradedSupersedes?: string;
+  // What Chronicle stores for a row the resolver wrote in base units. value and
+  // unit above read the pair it recorded in the registered unit.
+  ledgerValue?: number;
+  ledgerUnit?: Unit;
   sourceBindingProjection?: SourceBindingProjection;
   responseArchive?: {
     path: string;
@@ -305,6 +318,9 @@ export interface PolicyEngineLedgerExport {
     observations: number;
   };
   entries: PolicyEngineLedgerEntry[];
+  // Rows Chronicle holds that say an entry's value in base units. They sit
+  // apart from the entries because nothing grades on them.
+  restatements?: LedgerRestatement[];
 }
 
 export const THESIS_LOG_CHUNK_SIZE = 100;
@@ -464,13 +480,25 @@ interface PolicyEngineAggregateFactRow {
   };
 }
 
-let policyEngineLedgerPromise: Promise<PolicyEngineLedgerEntry[]> | null = null;
+interface PinnedPolicyEngineLedger {
+  entries: PolicyEngineLedgerEntry[];
+  restatements: LedgerRestatement[];
+}
+
+let policyEngineLedgerPromise: Promise<PinnedPolicyEngineLedger> | null = null;
 
 export async function loadPolicyEngineLedger(): Promise<
   PolicyEngineLedgerEntry[]
 > {
   policyEngineLedgerPromise ??= fetchPolicyEngineLedger();
-  return policyEngineLedgerPromise;
+  return (await policyEngineLedgerPromise).entries;
+}
+
+export async function loadPolicyEngineLedgerRestatements(): Promise<
+  LedgerRestatement[]
+> {
+  policyEngineLedgerPromise ??= fetchPolicyEngineLedger();
+  return (await policyEngineLedgerPromise).restatements;
 }
 
 export function resetPolicyEngineLedgerCache() {
@@ -480,23 +508,25 @@ export function resetPolicyEngineLedgerCache() {
 export function parsePolicyEngineLedgerFacts(
   jsonl: string,
 ): PolicyEngineLedgerEntry[] {
-  const rows = jsonl
+  const lines = jsonl
     .split("\n")
     .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as unknown);
+    .filter(Boolean);
+  const rows = lines.map((line) => JSON.parse(line) as unknown);
   assertAppendGateAssertionVersions(rows);
-  return mapPolicyEngineLedgerRows(rows);
+  return foldLedgerRestatements(mapPolicyEngineLedgerRows(rows), rows, lines)
+    .entries;
 }
 
-// Maps parsed Chronicle rows in ledger order. A pre-versioning row that a
-// correction supersedes also gets the content address that correction names,
-// so the current view can drop it after the raw row is gone. Callers verify
-// the append gate's assertion-version invariants first.
+// Maps parsed Chronicle rows in ledger order, one entry per line. A
+// pre-versioning row that a correction supersedes also gets the content address
+// that correction names, so the current view can drop it after the raw row is
+// gone. Callers verify the append gate's assertion-version invariants first and
+// fold restatements afterwards.
 export function mapPolicyEngineLedgerRows(
   rows: readonly unknown[],
 ): ObservationRecordedLedgerEntry[] {
-  const addresses = supersededContentAddresses(rows);
+  const addresses = supersededContentAddresses(rows, isUnitRestatement);
   return rows.map((row, index) => {
     const entry = mapPolicyEngineAggregateFactToObservation(
       row as PolicyEngineAggregateFactRow,
@@ -645,7 +675,7 @@ function mapPolicyEngineAggregateFactToObservation(
 ): ObservationRecordedLedgerEntry {
   assertPolicyEngineFactShape(fact);
 
-  return {
+  const entry: ObservationRecordedLedgerEntry = {
     kind: "observation_recorded",
     observationId: `obs.${fact.source_record_id}`,
     dataPointId: fact.source_record_id,
@@ -669,6 +699,19 @@ function mapPolicyEngineAggregateFactToObservation(
     sourceBindingProjection: fact.sourceBindingProjection,
     responseArchive: fact.responseArchive,
   };
+  const recorded = recordedPair(fact);
+  if (!recorded) return entry;
+  return {
+    ...entry,
+    value: recorded.value,
+    unit: recorded.unit,
+    sourceBindingProjection: fact.sourceBindingProjection && {
+      ...fact.sourceBindingProjection,
+      unit: recorded.unit,
+    },
+    ledgerValue: fact.value,
+    ledgerUnit: fact.measure.unit,
+  };
 }
 
 // The committed pin also closes a freshness hole the branch URL had:
@@ -677,7 +720,7 @@ function mapPolicyEngineAggregateFactToObservation(
 // was rebuilt for (live-caught 2026-07-10: 21 fresh resolutions, unchanged
 // scoreboard). A commit-pinned raw URL is content-addressed by path, and
 // the byte-hash check below fails closed on any anomaly.
-async function fetchPolicyEngineLedger(): Promise<PolicyEngineLedgerEntry[]> {
+async function fetchPolicyEngineLedger(): Promise<PinnedPolicyEngineLedger> {
   const pin = POLICYENGINE_LEDGER_PIN;
   if (LEDGER_AVAILABILITY_HEAD_SHA !== pin.sha) {
     throw new Error(
@@ -702,10 +745,15 @@ async function fetchPolicyEngineLedger(): Promise<PolicyEngineLedgerEntry[]> {
   // that drifted from receipt fails the build here instead of letting a
   // superseded row grade.
   assertAppendGateAssertionVersions(rows);
-  const facts = mapPolicyEngineLedgerRows(rows).map((entry, index) =>
-    enrichWithAcceptance(entry, lines[index], index),
+  // Every line needs its acceptance record, so restatements fold in afterwards.
+  const { entries, restatements } = foldLedgerRestatements(
+    mapPolicyEngineLedgerRows(rows).map((entry, index) =>
+      enrichWithAcceptance(entry, lines[index], index),
+    ),
+    rows,
+    lines,
   );
-  return [...THESIS_TARGET_LEDGER, ...facts];
+  return { entries: [...THESIS_TARGET_LEDGER, ...entries], restatements };
 }
 
 function assertPolicyEngineFactShape(
@@ -1151,15 +1199,20 @@ export function buildPredictionResolutionEvents(
 
 export function buildPolicyEngineLedgerExport(
   entries: PolicyEngineLedgerEntry[],
+  restatements: LedgerRestatement[] = [],
 ): PolicyEngineLedgerExport {
   const targets = entries.filter(isTargetRegisteredLedgerEntry);
   const observations = entries.filter(isObservationRecordedLedgerEntry);
-  // supersededContentAddress indexes the current view inside the site. It is
-  // recomputable from the row, so a correction does not change what the export
-  // says about the row it replaces.
+  // supersededContentAddress and gradedSupersedes index the current view inside
+  // the site. Both are recomputable from the rows, so a correction does not
+  // change what the export says about the row it replaces.
   const published = entries.map((entry) => {
     if (!isObservationRecordedLedgerEntry(entry)) return entry;
-    const { supersededContentAddress: _internal, ...row } = entry;
+    const {
+      supersededContentAddress: _address,
+      gradedSupersedes: _graded,
+      ...row
+    } = entry;
     return row;
   });
 
@@ -1177,6 +1230,7 @@ export function buildPolicyEngineLedgerExport(
       observations: observations.length,
     },
     entries: published,
+    ...(restatements.length > 0 ? { restatements } : {}),
   };
 }
 
