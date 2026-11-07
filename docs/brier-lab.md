@@ -54,20 +54,25 @@ Lab summaries. The judge and Strategy Lab aggregates also apply the shared
 usable-scale predicate themselves. The raw-CRPS paired win rate still counts
 the pair.
 
-Zero usable dispersion is judged relative to the history's own magnitude: a
-scale at or below `1e-12` of the largest absolute pre-cutoff value
+The floor that decides zero usable dispersion scales with the history's own
+magnitude: a scale at or below `1e-12` of the largest absolute pre-cutoff value
 (`NORMALIZATION_SCALE_RELATIVE_FLOOR`) is unavailable. Exactly linear decimal
 histories have zero step dispersion, but binary floating point leaves a residue
 that grows with the values. `1.814, 1.805, 1.796` left `1.57e-16`, which put a
 `-7.08e13` reward in the 2026-09-23 export. The same shape near 215 leaves
 `2.0e-14`, which a fixed `Number.EPSILON` bound let through. The floor sits well
-above that residue (the worst of 750 exactly linear histories of up to
-10,001 prints was `1.3e-16` of the magnitude) and matches the 12
-significant digits every materialized distribution keeps. It is a
-conservative minimum, not a pure residue test: it would also refuse genuine
-variation confined to the 13th significant digit (a series at `1e11` whose one
-change is 1). No catalog series comes close: on 2026-09-27 the smallest usable
-scale was `1.6e-3` of its history's magnitude.
+above that residue. Over a deterministic corpus of 1,728 exactly linear decimal
+histories (3 to 10,001 prints, magnitudes `1e-6` to `1.4e8`, both signs), the
+worst residue is `1.3e-16` of the magnitude, and `scoring-integrity.test.ts`
+fails if any exceeds `1e-15`. The floor also matches the 12 significant digits
+every materialized distribution keeps. It is a conservative minimum, not a pure
+residue test: it also refuses some genuine variation in a series' last digits.
+It refuses three prints at `1e12` whose one change is 1 (the 13th significant
+digit), and 101 prints at `1e11` whose one change is 1, since a lone unit step
+among 100 leaves a step dispersion of `0.1`, just under `1e-12` of the
+magnitude. Three prints at `1e11` with that change keep their scale. No catalog
+series comes close: on 2026-09-27 the smallest usable scale was `1.6e-3` of its
+history's magnitude.
 
 Same-series membership comes from exact target registrations and each
 observation's matching contract hash and source-binding projection;

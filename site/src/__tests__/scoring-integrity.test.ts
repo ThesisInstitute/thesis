@@ -6,6 +6,7 @@ import {
   classifyScoreChronology,
   evaluateResolvedForecastRun,
   getResolutionContractViolation,
+  ledgerStepDispersion,
   loadPolicyEngineLedger,
   scoreResolvedForecastRun,
   scoreResolvedForecasts,
@@ -387,16 +388,10 @@ describe("target normalization scale", () => {
     (_label, values) => {
       // The fixture really is residue: the unchanged variance arithmetic
       // yields a positive scale, below the relative floor.
-      const diffs = values
-        .slice(1)
-        .map((value, index) => value - values[index]);
-      const center = diffs.reduce((total, diff) => total + diff, 0) / 2;
-      const residue = Math.sqrt(
-        diffs.reduce((total, diff) => total + (diff - center) ** 2, 0),
-      );
+      const { scale: residue, magnitude } = ledgerStepDispersion(values);
       expect(residue).toBeGreaterThan(0);
       expect(residue).toBeLessThan(
-        Math.max(...values) * NORMALIZATION_SCALE_RELATIVE_FLOOR,
+        magnitude * NORMALIZATION_SCALE_RELATIVE_FLOOR,
       );
 
       const degenerateLedger: PolicyEngineLedgerEntry[] = [
@@ -468,29 +463,117 @@ describe("target normalization scale", () => {
     },
   );
 
-  // The floor is a conservative minimum, not a pure residue detector:
-  // genuine integer variation confined to the 13th significant digit is
-  // refused too. Intended — no catalog series comes within orders of
-  // magnitude — but pinned so the trade-off stays visible.
+  // Decimal prints (A + i*D) / 10^k, parsed from their strings the way
+  // ledger values arrive: every step is exactly D / 10^k in decimal, so the
+  // true dispersion is zero and the doubles leave pure residue.
+  function linearDecimalHistory(
+    length: number,
+    decimals: number,
+    intercept: number,
+    step: number,
+  ): number[] {
+    return Array.from({ length }, (_, index) => {
+      const units = intercept + index * step;
+      const digits = String(Math.abs(units)).padStart(decimals + 1, "0");
+      const text =
+        decimals === 0
+          ? digits
+          : `${digits.slice(0, -decimals)}.${digits.slice(-decimals)}`;
+      return Number(units < 0 ? `-${text}` : text);
+    });
+  }
+
+  // docs/brier-lab.md and the NORMALIZATION_SCALE_RELATIVE_FLOOR comment
+  // cite this corpus; the 2026-10-11 review found the figure they cited
+  // before had no corpus anyone could rerun.
+  it("keeps every exactly linear decimal history's residue far under the floor", () => {
+    let histories = 0;
+    let worst = 0;
+    let smallest = Infinity;
+    let largest = 0;
+    for (const length of [3, 4, 5, 8, 13, 50, 200, 1001, 10001]) {
+      for (const decimals of [0, 1, 3, 6]) {
+        for (const intercept of [1, 1814, 215300, 123456789]) {
+          for (const step of [1, 9, 1234]) {
+            for (const [interceptSign, stepSign] of [
+              [1, 1],
+              [1, -1],
+              [-1, 1],
+              [-1, -1],
+            ]) {
+              const values = linearDecimalHistory(
+                length,
+                decimals,
+                interceptSign * intercept,
+                stepSign * step,
+              );
+              const { scale, magnitude } = ledgerStepDispersion(values);
+              // targetNormalizationScale's own predicate refuses it.
+              expect(
+                scale > magnitude * NORMALIZATION_SCALE_RELATIVE_FLOOR,
+              ).toBe(false);
+              worst = Math.max(worst, scale / magnitude);
+              smallest = Math.min(smallest, magnitude);
+              largest = Math.max(largest, magnitude);
+              histories += 1;
+            }
+          }
+        }
+      }
+    }
+    expect(histories).toBe(1728);
+    expect([smallest, largest]).toEqual([1e-6, 135796789]);
+    expect(worst).toBeLessThan(1e-15);
+    // The figure the docs cite, to the precision they cite it.
+    expect(worst.toPrecision(2)).toBe("1.3e-16");
+  });
+
+  // The floor is a conservative minimum, not a pure residue detector: it
+  // also refuses some genuine variation in a series' last digits. Intended,
+  // since no catalog series comes within orders of magnitude, but pinned so
+  // the trade-off stays visible (docs/brier-lab.md cites these cases).
   it.each([
-    ["kept at 7.07e-12 of magnitude", 1e11, "ledger_dispersion"],
-    ["refused at 7.07e-13 of magnitude", 1e12, "unavailable"],
+    [
+      "three prints at 1e11, one unit change: kept",
+      [1e11, 1e11, 1e11 + 1],
+      Math.sqrt(0.5),
+    ],
+    [
+      "three prints at 1e12, one unit change: refused",
+      [1e12, 1e12, 1e12 + 1],
+      null,
+    ],
+    [
+      "101 prints at 1e11, one unit change: refused",
+      [...Array<number>(100).fill(1e11), 1e11 + 1],
+      null,
+    ],
   ] as const)(
-    "draws the relative floor between genuine 12th- and 13th-digit variation (%s)",
-    (_label, level, source) => {
+    "draws the relative floor through genuine last-digit variation (%s)",
+    (_label, values, scale) => {
+      const periods = values.map(
+        (_value, index) => `h${String(index).padStart(3, "0")}`,
+      );
       const ledger: PolicyEngineLedgerEntry[] = [
         target,
-        ...historyRegistrations,
-        observation("2022", level, "2026-02-01T00:00:00Z"),
-        observation("2023", level, "2026-03-01T00:00:00Z"),
-        observation("2024", level + 1, "2026-04-01T00:00:00Z"),
+        ...periods.map((period) => registration(period)),
+        ...values.map((value, index) =>
+          observation(
+            periods[index],
+            value,
+            new Date(Date.UTC(2020, 0, 1 + index)).toISOString(),
+          ),
+        ),
       ];
-      // Steps 0 and 1 are exact integers: sample SD sqrt(0.5), no residue.
+      // The steps are exact integers, so this is no residue: one unit
+      // step leaves a sample SD of sqrt(0.5) over two steps and 0.1 over
+      // a hundred.
       const normalization = targetNormalizationScale(baseCell, ledger);
-      expect(normalization.source).toBe(source);
-      expect(normalization.scale).toBe(
-        source === "unavailable" ? null : Math.sqrt(0.5),
+      expect(normalization.observationCount).toBe(values.length);
+      expect(normalization.source).toBe(
+        scale === null ? "unavailable" : "ledger_dispersion",
       );
+      expect(normalization.scale).toBe(scale);
     },
   );
 
