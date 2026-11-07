@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.search.spending_over_time.cdfi.program_obligations-2026-10-19-dcfaeba9d1c7c7b6.json.gz",
+      "sha256": "c01defeb739e22aea96beda2af3a4f1f80860cdcb148516aecae4786a5a59d43",
+      "bytes": 995,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.search.spending_over_time.usfs.minnesota_obligations-2026-10-19-1c341ef0e9c92465.json.gz",
+      "sha256": "e55efee9de7e349e6b8f2c454236406c90429ddd6ced06126bac1dfc76cc1e8f",
+      "bytes": 1091,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.search.spending_over_time.ntia.broadband_program_obligations-2026-10-19-ad21976f56dac0d5.json.gz",
+      "sha256": "c164de8acebf51f89d0f8aa134dbfb2543a71eee2533f4ef83ac2fef041e01d4",
+      "bytes": 952,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.agency.097.awards.obligations-2026-10-19-6a8c1b007ee9e9d2.json.gz",
+      "sha256": "7b03fa012c71b939395142c6ea0048800d0bb7dfaf8dec46559bbbe4ca0563bc",
+      "bytes": 145,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.search.spending_over_time.dhs.title_vi.award_transaction_obligations-2026-10-19-ecad1f42969ad82d.json.gz",
+      "sha256": "5c0b412de4a83aaa13a8f70a4cf554d5df2d061fa398207a09d66462bb43a182",
+      "bytes": 1063,
+      "createdAt": "2026-10-19T04:18:57Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "7e6e3b5ab4c2237e6054bbc61b814f51d26a5c0bceaa26dbd1a4e8957572e0c6"
+  }
+}

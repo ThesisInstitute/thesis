@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import functools
 import gzip
 import hashlib
 import io
@@ -8,11 +9,14 @@ import json
 import pathlib
 import subprocess
 import sys
+import tempfile
 import zipfile
 from collections.abc import Callable, Mapping
 from dataclasses import replace
 
 import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -1339,20 +1343,22 @@ def test_main_allows_closed_bound_only_to_reach_witnessed_custody(
         resolve_pending, "registration_contracts", lambda: {ref: registration}
     )
     monkeypatch.setattr(resolve_pending, "utc_now", lambda: "2026-08-07T12:00:00Z")
-    monkeypatch.setattr(
-        resolve_pending,
-        "extract_timeline",
-        lambda _records: {"runs": {}, "custodyRoots": {}},
-    )
+
+    def unexpected_timeline(_records: pathlib.Path) -> None:
+        raise AssertionError("main read the record timeline before it was needed")
+
+    monkeypatch.setattr(resolve_pending, "extract_timeline", unexpected_timeline)
 
     def custody_only(
         records: pathlib.Path,
         *,
         series: str,
         fiscal_year: int,
-        timeline: Mapping[str, object],
+        timeline_loader: Callable[[], Mapping[str, object]],
     ) -> tuple[None, str]:
-        assert timeline == {"runs": {}, "custodyRoots": {}}
+        # main hands over a loader and never reads the timeline itself.
+        assert isinstance(timeline_loader, resolve_pending._MemoizedTimeline)
+        assert timeline_loader.loads == 0
         calls.append((records, series, fiscal_year))
         return None, (
             f"{resolve_pending.SBA_CUSTODY_ABSENT} no witnessed capture in test"
@@ -1370,3 +1376,184 @@ def test_main_allows_closed_bound_only_to_reach_witnessed_custody(
     output = capsys.readouterr().out
     assert resolve_pending.SBA_CUSTODY_ABSENT in output
     assert "nothing new to record" in output
+    # Every routed reference had its turn, and main returned.
+    assert f"{resolve_pending.RESOLUTION_LOOP_COMPLETE} 1 reference(s) examined" in (
+        output
+    )
+    assert output.splitlines()[-1] == f"{resolve_pending.RESOLVER_FINISHED} 0"
+
+
+# --- The record timeline is read only for a year some capture covers ---
+#
+# Re-verifying the whole witnessed record chain took 49 minutes on
+# 2026-10-12 (Actions run 38322903406) and every later scheduled resolver run
+# hit the job's 60-minute cap inside it, before the targets after the SBA
+# ones. A year no retained capture covers is refused without it.
+
+
+@functools.cache
+def _one_capture_records() -> tuple[pathlib.Path, pathlib.Path]:
+    """One retained FY25Q3 capture, built once for the property below."""
+    records = pathlib.Path(tempfile.mkdtemp(prefix="sba-lazy-timeline-")) / "records"
+    manifest_path = _capture(
+        records,
+        retrieved_at="2026-08-07T12:00:00Z",
+        bundle=_bundle_bytes(),
+    )
+    return records, manifest_path
+
+
+@settings(
+    max_examples=40,
+    deadline=None,
+    suppress_health_check=[HealthCheck.function_scoped_fixture],
+)
+@given(
+    series=st.sampled_from(tuple(REPORTS)),
+    fiscal_year=st.integers(2010, 2032),
+    verifies=st.booleans(),
+)
+def test_the_timeline_is_read_exactly_when_a_capture_covers_the_year(
+    monkeypatch: pytest.MonkeyPatch,
+    series: str,
+    fiscal_year: int,
+    verifies: bool,
+) -> None:
+    """Differential against the eager path (the timeline handed in up
+    front, as main did before): the loader runs once exactly when some
+    capture covers the year, i.e. when the eager verdict is not ABSENT. If
+    the timeline verifies, both paths return the same verdict; if it does
+    not, a covered year is refused INVALID and nothing ever resolves."""
+    records, manifest_path = _one_capture_records()
+    timeline = _timeline(records, (manifest_path, "2026-08-07T13:00:00Z"))
+    _install_timeline(monkeypatch, timeline)
+
+    def no_default(_records: pathlib.Path) -> None:
+        raise AssertionError("the default extractor ran although a loader was given")
+
+    monkeypatch.setattr(resolve_pending, "extract_timeline", no_default)
+    eager = resolve_pending.resolve_sba_pdf_first_print(
+        records, series=series, fiscal_year=fiscal_year, timeline=timeline
+    )
+    loads: list[None] = []
+
+    def loader() -> Mapping[str, object]:
+        loads.append(None)
+        if not verifies:
+            raise resolve_pending.TimelineError("record chain does not verify")
+        return timeline
+
+    lazy = resolve_pending.resolve_sba_pdf_first_print(
+        records, series=series, fiscal_year=fiscal_year, timeline_loader=loader
+    )
+    covered = not (eager[1] or "").startswith(ABSENT)
+    assert len(loads) == (1 if covered else 0)
+    if verifies or not covered:
+        assert lazy == eager
+    else:
+        resolution, refusal = lazy
+        assert resolution is None
+        assert refusal is not None and refusal.startswith(INVALID)
+        assert "witnessed record timeline does not verify" in refusal
+
+
+def test_the_fixture_years_cover_both_branches_of_that_property(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The property above is only worth something if its range holds both a
+    year the capture covers and one it does not."""
+    records, manifest_path = _one_capture_records()
+    _install_timeline(
+        monkeypatch, _timeline(records, (manifest_path, "2026-08-07T13:00:00Z"))
+    )
+    covered = {
+        year
+        for year in range(2010, 2033)
+        if not (
+            resolve_pending.resolve_sba_pdf_first_print(
+                records, series=CHARGE_OFF_AMOUNT_SERIES, fiscal_year=year
+            )[1]
+            or ""
+        ).startswith(ABSENT)
+    }
+    assert 2024 in covered
+    assert 2030 not in covered
+
+
+def test_a_year_no_capture_covers_never_reads_the_timeline(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def unexpected(_records: pathlib.Path) -> None:
+        raise AssertionError("timeline read for a year no capture covers")
+
+    monkeypatch.setattr(resolve_pending, "extract_timeline", unexpected)
+    records = tmp_path / "records"
+    records.mkdir()
+    # No capture at all, then a capture that covers other years only.
+    for capture_first in (False, True):
+        if capture_first:
+            _capture(
+                records,
+                retrieved_at="2026-08-07T12:00:00Z",
+                bundle=_bundle_bytes(),
+            )
+        resolution, refusal = resolve_pending.resolve_sba_pdf_first_print(
+            records, series=CHARGE_OFF_AMOUNT_SERIES, fiscal_year=2030
+        )
+        assert resolution is None
+        assert refusal is not None and refusal.startswith(ABSENT)
+
+
+def test_a_covered_year_still_refuses_when_the_chain_does_not_verify(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    records = tmp_path / "records"
+    _capture(records, retrieved_at="2026-08-07T12:00:00Z", bundle=_bundle_bytes())
+
+    def broken(_records: pathlib.Path) -> None:
+        raise resolve_pending.TimelineError("record chain does not verify: gap")
+
+    monkeypatch.setattr(resolve_pending, "extract_timeline", broken)
+    resolution, refusal = resolve_pending.resolve_sba_pdf_first_print(
+        records, series=CHARGE_OFF_AMOUNT_SERIES, fiscal_year=2024
+    )
+    assert resolution is None
+    assert refusal == (
+        f"{INVALID} witnessed record timeline does not verify: "
+        "record chain does not verify: gap"
+    )
+
+
+@pytest.mark.parametrize(
+    "error", [None, resolve_pending.TimelineError, OSError, ValueError]
+)
+def test_one_run_reads_the_timeline_at_most_once(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    error: type[Exception] | None,
+) -> None:
+    """Three SBA targets, one chain: a timeline that verifies is read once
+    and shared; one that fails, with any error the callers catch, is not
+    re-verified for every target."""
+    reads: list[pathlib.Path] = []
+    timeline = {"runs": {}, "custodyRoots": {}}
+
+    def extract(records: pathlib.Path) -> Mapping[str, object]:
+        reads.append(records)
+        if error is not None:
+            raise error("record chain does not verify")
+        return timeline
+
+    monkeypatch.setattr(resolve_pending, "extract_timeline", extract)
+    memo = resolve_pending._MemoizedTimeline(tmp_path)
+    assert memo.loads == 0 and reads == []
+    for _target in range(3):
+        if error is None:
+            assert memo() is timeline
+        else:
+            with pytest.raises(error):
+                memo()
+    assert reads == [tmp_path]
+    assert memo.loads == 1

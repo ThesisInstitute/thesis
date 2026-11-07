@@ -122,9 +122,11 @@ export default async function PolicyEngineLedgerPage() {
             </span>
           </div>
           <div className="grid grid-cols-1 gap-3">
-            {observationEntries.map((observation) => (
+            {observationEntries.map((observation, index) => (
               <ObservationRow
-                key={observation.observationId}
+                // A correction shares its observationId with the row it
+                // supersedes; the ledger line keeps each physical row apart.
+                key={`${observation.observationId}:${observation.acceptedSequence ?? `entry-${index}`}`}
                 observation={observation}
               />
             ))}

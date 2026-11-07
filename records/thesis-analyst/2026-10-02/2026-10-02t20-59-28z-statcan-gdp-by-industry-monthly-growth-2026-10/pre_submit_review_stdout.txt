@@ -1,0 +1,21 @@
+{
+  "summary": "Draft is mostly publishable, but the resolver URL and denominator wording should be tightened to match the ledger contract exactly.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "warning",
+      "summary": "The draft's resolutionSourceUrl uses getDataFromVectorByReferencePeriodRange, while the ledger sourceBinding.sourceUrl is the StatCan WDS getDataFromVectorsAndLatestNPeriods endpoint.",
+      "actionRequested": "Set or explain the resolver source against the canonical ledger sourceUrl and keep the StatCan WDS adapter/table/vector identity explicit."
+    },
+    {
+      "rubricItem": "resolver",
+      "severity": "warning",
+      "summary": "The resolutionRule says to compute October over September first-print level, which may be ambiguous if the October release revises September; the ledger contract only fixes October 2026 first_print with percent_change_previous_period.",
+      "actionRequested": "Clarify that the resolver follows the registered StatCan WDS first-print contract for dataPointId statcan.gdp_by_industry.monthly_growth.2026_10.first_print, avoiding an unintended alternate vintage rule for the September denominator."
+    }
+  ],
+  "optionalSuggestions": [
+    "State that the cited 2026 history is the available official WDS vintage used for the prior, not necessarily each month's original first print.",
+    "Keep the compact prior/update/interval paragraph; it satisfies the review rubric well."
+  ]
+}

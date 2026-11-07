@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.agency.097.obligations_by_award_category.contracts-2026-10-17-43f483f9a81057e1.json.gz",
+      "sha256": "750f85030356f7488065d7f11f35dd1a8d19f57b82f892ee2ba71c1bfd437433",
+      "bytes": 178,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.agency.097.awards.new_award_count-2026-10-17-b203ae989270c7a2.json.gz",
+      "sha256": "c542b5bd6246bc978d3f00cbb31abafeeaf7262cf6855dfb670fa1be8053845b",
+      "bytes": 113,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.agency.097.awards.transaction_count-2026-10-17-6a8c1b007ee9e9d2.json.gz",
+      "sha256": "7b03fa012c71b939395142c6ea0048800d0bb7dfaf8dec46559bbbe4ca0563bc",
+      "bytes": 145,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.search.spending_by_category.recipient.dod.contracts.distinct-2026-10-17-ada3c88388e7dcea.json.gz",
+      "sha256": "86a918186c1106d689403acb11317543ae2e1e45fd79cad2476afea35ff150ab",
+      "bytes": 2250126,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/usaspending.search.spending_over_time.dod.contracts.small_business_obligation_share-2026-10-17-f7a20125e05ed9fa.json.gz",
+      "sha256": "eebd77dfe7a81407dfccc07b1d15bab723e85da4e0695d55b4723eb85b9c8e5b",
+      "bytes": 1113,
+      "createdAt": "2026-10-17T13:29:34Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "2b943ffa08c303435eea5192c610e35caed101bc9ed711040872a7faf9ed79b0"
+  }
+}

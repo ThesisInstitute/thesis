@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-11-06T20:05:42Z",
+  "firstPrintEvidenceRequired": true,
+  "weeklyClaimsSchedule": {
+    "source": "https://oui.doleta.gov/unemploy/claims_arch.asp",
+    "releaseExceptions": {
+      "2026-11-26": "2026-11-25"
+    }
+  },
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "d08416272401ae71ed28af497981ba833bf5bbbf",
+  "facts": [
+    {
+      "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+      "sourceVintage": "2026-11-06",
+      "retrievedAt": "2026-11-06T20:05:42Z",
+      "targetContentHash": "63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-06/2026-11-06t20-05-42z-resolve-pending/responses/ces0000000001-2026-11-06-4fbaf24c1be4e1a7.json.gz",
+        "sha256": "4fbaf24c1be4e1a74a41c74d016b1b36fd3904b1070f37842661bd1e369c72b3",
+        "bytes": 1070,
+        "gzipSha256": "230955b55e11f1a13d3120c51471751a49668df21c1339fe4c8ca88cc8d7a513",
+        "gzipBytes": 337,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-06/2026-11-06t20-05-42z-resolve-pending/responses/ces0000000001-2026-11-06-4fbaf24c1be4e1a7.json.gz",
+      "sha256": "230955b55e11f1a13d3120c51471751a49668df21c1339fe4c8ca88cc8d7a513",
+      "bytes": 337,
+      "createdAt": "2026-11-06T20:05:42Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-11-06/2026-11-06t20-05-42z-resolve-pending/manifest.json",
+      "sha256": "28aa2604d581349f271356ae20d8121d97bdd8f78389fc875114f5b0e62c8fa4",
+      "bytes": 1478,
+      "createdAt": "2026-11-06T20:05:42Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "a52c4bb96559fa7b0e2679af12b3ea87da08e9e12a0d0c9f3dd839181a8f6f5e"
+}

@@ -1,4 +1,7 @@
 import { BENEFIT_PROGRAM_EXAMPLES } from "./forecast-examples/benefits";
+import { AUTO_2026_11_06_A2E193EBD7905544C955F9EA994FE8313BEA40BD3F8F5169C8A477E1407AEF63_WAVE } from "./forecast-examples/auto-2026-11-06-a2e193ebd7905544c955f9ea994fe8313bea40bd3f8f5169c8a477e1407aef63";
+import { AUTO_2026_11_02_BB3B51ACDA66820A67172B20055F518E9F3D0EF245128A21391DC9F3C889151F_WAVE } from "./forecast-examples/auto-2026-11-02-bb3b51acda66820a67172b20055f518e9f3d0ef245128a21391dc9f3c889151f";
+import { AUTO_2026_10_02_F41606B046E0DB9C8F95431DAF4298248CAB256E3FAC87BD35029EFC4B836A3C_WAVE } from "./forecast-examples/auto-2026-10-02-f41606b046e0db9c8f95431daf4298248cab256e3fac87bd35029efc4b836a3c";
 import { AUTO_2026_09_21_2BB50B199A447D17071EB2004498B2C0108F1E3F494A09F4610DE14E0767CB5F_WAVE } from "./forecast-examples/auto-2026-09-21-2bb50b199a447d17071eb2004498b2c0108f1e3f494a09f4610de14e0767cb5f";
 import { AUTO_2026_09_14_1F51F8F1E0284F9806BA60CCC14724EB0905FB43418733BB6E698620528F917B_WAVE } from "./forecast-examples/auto-2026-09-14-1f51f8f1e0284f9806ba60ccc14724eb0905fb43418733bb6e698620528f917b";
 import { AUTO_2026_09_11_393E84484652C64E9317E0406BED7B440B62E87796D1A96DB83272419EDD0D11_WAVE } from "./forecast-examples/auto-2026-09-11-393e84484652c64e9317e0406bed7b440b62e87796d1a96db83272419edd0d11";
@@ -85,6 +88,7 @@ export type {
   NumericCdfPoint,
   PredictionDistribution,
 } from "./prediction-distribution";
+import type { Unit } from "./units";
 
 // Forecast-cell definitions and AI analyst reasoning scripts.
 // Each cell is a self-contained record with a pre-written reasoning stream
@@ -96,26 +100,8 @@ export type {
 
 export type ForecastCellType = "data" | "policy" | "conditional";
 
-export type Unit =
-  | "count"
-  | "percent"
-  | "gbp_billions"
-  | "usd"
-  | "usd_millions"
-  | "usd_billions"
-  // Non-canonical variant admitted by the 2026-08-03 auto-roll — registered
-  // snapshots are immutable, so the site tolerates it. Canonical is
-  // "usd_billions" and registration-side enum validation is the follow-up.
-  | "billions USD"
-  | "usd_monthly"
-  | "thousands"
-  | "millions"
-  | "million_cubic_feet"
-  | "per_1000_live_births"
-  | "ratio"
-  | "minutes"
-  | "percent_growth"
-  | "index_points";
+// The unit list lives in units.ts so runtime checks share it.
+export type { Unit };
 
 export interface HistoricalPoint {
   // Optional only for already-published pre-2.5.10 cells. Current generated
@@ -5151,6 +5137,9 @@ const FORECAST_CELL_DEFINITIONS: ForecastCell[] = [
   },
 
   ...LAUNCH_CADENCE_EXAMPLES,
+  ...AUTO_2026_11_06_A2E193EBD7905544C955F9EA994FE8313BEA40BD3F8F5169C8A477E1407AEF63_WAVE,
+  ...AUTO_2026_11_02_BB3B51ACDA66820A67172B20055F518E9F3D0EF245128A21391DC9F3C889151F_WAVE,
+  ...AUTO_2026_10_02_F41606B046E0DB9C8F95431DAF4298248CAB256E3FAC87BD35029EFC4B836A3C_WAVE,
   ...AUTO_2026_09_21_2BB50B199A447D17071EB2004498B2C0108F1E3F494A09F4610DE14E0767CB5F_WAVE,
   ...AUTO_2026_09_14_1F51F8F1E0284F9806BA60CCC14724EB0905FB43418733BB6E698620528F917B_WAVE,
   ...AUTO_2026_09_11_393E84484652C64E9317E0406BED7B440B62E87796D1A96DB83272419EDD0D11_WAVE,

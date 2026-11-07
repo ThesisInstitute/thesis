@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a1b2d3-626c-7771-8a51-c9a5cd22d2b0"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"summary\":\"Draft is publication-ready under the rubric, with coherent target binding, prior/update logic, interval construction, and JSON fields.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Mention that the ledger registration itself supplies the December 4, 2026 release-date basis since the live BLS schedule fetch returned 403.\",\"Consider adding a one-line longer-history monthly-change volatility cross-check to support the modest interval widening.\"]}"}}
+{"type":"turn.completed","usage":{"input_tokens":21720,"cached_input_tokens":0,"output_tokens":429,"reasoning_output_tokens":338}}

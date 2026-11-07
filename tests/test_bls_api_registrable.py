@@ -5,8 +5,9 @@ the six Table A-19 rows, 2026-09-25 and 2026-09-26 (see
 ``tests/fixtures/bls_api/README.md``). They prove the parser, the transforms
 and the binding; they are never resolution evidence.
 
-Twelve specs are registrable. Nine have docket templates. The other three wait
-on a Chronicle lineage decision (``LINEAGE_BLOCKED`` below).
+Twelve specs are registrable, and all twelve have docket templates. Three of
+them (``FOLDED_BY_D353`` below) waited until Chronicle folded their duplicate
+lineages (Max's ruling d353; PolicyEngine/chronicle#344).
 """
 
 from __future__ import annotations
@@ -111,16 +112,18 @@ CAPTURES = {
     ),
 }
 REGISTRABLE = sorted(CAPTURES)
-# Chronicle holds two observed lineages for each of these concepts, and a
-# declared BLS series id appears in neither, so the docket-to-Ledger
-# containment gate cannot re-derive the pin. They get a docket template only
-# after Chronicle resolves the duplicate (docs/anchor-verifications.md).
-LINEAGE_BLOCKED = {
+# Chronicle held two observed lineages for each of these concepts: the
+# hand-recorded May 2026 print with a bespoke entity and every resolver print
+# with economy/aggregate. Chronicle folded them into the economy/aggregate
+# lineage (Max's ruling d353, PolicyEngine/chronicle#344), the docket pins
+# moved there, and the series took their templates
+# (docs/anchor-verifications.md).
+FOLDED_BY_D353 = (
     "bls.cps.unemployment_rate",
     "bls.cpi.u.headline_mom",
     "bls.cpi.u.core_mom",
-}
-DOCKETED = sorted(set(REGISTRABLE) - LINEAGE_BLOCKED)
+)
+DOCKETED = REGISTRABLE
 
 
 def _rows(series: str) -> dict[str, dict]:
@@ -687,7 +690,12 @@ def test_docket_templates_are_the_executor_templates() -> None:
         )
 
 
-def test_lineage_blocked_series_stay_templateless_until_chronicle_is_fixed() -> None:
+def test_bls_api_facts_join_the_lineage_the_docket_pins() -> None:
+    # The fold is what makes these templates sound: Chronicle now holds one
+    # observed lineage per concept, a fact the bls_api executor writes lands in
+    # it, and the docket pins it. If a spec ever sets another entity, or the
+    # catalog splits again, this fails before a fact lands in an unpinned
+    # lineage.
     registry = json.loads((ROOT / "scripts" / "docket_series.json").read_text())
     entries = {entry["series"]: entry for entry in registry["series"]}
     waived = json.loads((ROOT / "waivers.json").read_text())["waivers"][
@@ -696,30 +704,40 @@ def test_lineage_blocked_series_stay_templateless_until_chronicle_is_fixed() -> 
     catalog = json.loads(
         (ROOT / "tests" / "fixtures" / "ledger_series_catalog.json").read_text()
     )["series"]
-    for series in sorted(LINEAGE_BLOCKED):
-        assert "sourceBinding" not in (entries[series].get("extras") or {})
-        assert series in waived
+    for series in FOLDED_BY_D353:
+        spec = resolve_pending.BLS_API_ADAPTERS[series]
+        entry = entries[series]
+        assert entry["extras"]["sourceBinding"] == (
+            resolve_pending.bls_api_binding_template(spec)
+        )
+        assert series not in waived
         lineages = [
             row
             for row in catalog
             if row.get("concept") == series and row.get("status") != "docket-only"
         ]
-        series_id = resolve_pending.BLS_API_ADAPTERS[series]["series_id"]
-        # This is the blocking condition itself. When Chronicle merges the
-        # duplicate, or a lineage gains the BLS id, this assertion fails: that
-        # is the signal to give the series its docket template.
-        assert len(lineages) > 1, series
-        assert not any(
-            series_id in (row.get("source_concepts") or []) for row in lineages
-        ), series
-        # The pinned lineage is not the one a default-entity fact would join.
-        pinned = entries[series]["ledger"]["uuid"]
-        default_entity = [
-            row["uuid"]
-            for row in lineages
-            if (row.get("entity") or {}).get("name") == "economy"
-        ]
-        assert default_entity and pinned not in default_entity, series
+        assert len(lineages) == 1, series
+        (lineage,) = lineages
+        assert entry["ledger"]["uuid"] == lineage["uuid"], series
+        url = resolve_pending.BLS_API_URL.format(
+            series=spec["series_id"], start=2029, end=2030
+        )
+        fact = resolve_pending.generic_fact(
+            f"{series}.2030_01.first_print",
+            spec,
+            "month",
+            "2030-01",
+            0.1,
+            dt.date(2030, 2, 8),
+            url,
+            "timeseries/data (BLS Public Data API v2)",
+        )
+        assert fact["entity"] == lineage["entity"], series
+        assert {
+            key: fact["geography"].get(key) for key in ("level", "id", "vintage")
+        } == {
+            key: lineage["geography"].get(key) for key in ("level", "id", "vintage")
+        }, series
 
 
 def test_docket_templates_pass_the_prospector_binding_schema() -> None:
@@ -733,19 +751,34 @@ def test_docket_templates_pass_the_prospector_binding_schema() -> None:
         assert prospect_targets._source_binding_errors(binding) == []
 
 
-def test_docket_calendar_never_covers_an_already_registered_period() -> None:
+def test_docket_calendar_never_covers_a_period_another_adapter_registered() -> None:
     # The immutable generic-url registrations for these series stay as they
     # are. The roller skips a calendar-gated period without a committed date,
     # so leaving those periods out means this adapter cannot mint a second
     # target for one of them.
-    registered: dict[str, set[str]] = {}
+    #
+    # A period the roller has registered FROM this calendar is not such a
+    # period: it is the adapter's own target, and the calendar keeps naming
+    # it. The roll of 2026-10-02 registered October 2026 for payroll change,
+    # job openings and the quits rate that way. What must hold for those is
+    # that the period has one target, not two.
+    elsewhere: dict[str, set[str]] = {}
+    own: dict[tuple[str, str], set[str]] = {}
     for path in glob.glob(str(ROOT / "records" / "targets" / "*.json")):
         for contract in json.loads(pathlib.Path(path).read_text()).get("targets", []):
-            registered.setdefault(contract["series"], set()).add(contract["period"])
+            series, period = contract["series"], contract["period"]
+            adapter = contract["sourceBinding"]["adapter"]
+            if adapter == resolve_pending.BLS_API_BINDING_ADAPTER:
+                own.setdefault((series, period), set()).add(contract["dataPointId"])
+            else:
+                elsewhere.setdefault(series, set()).add(period)
     for entry in _bls_api_docket_entries():
         assert entry["releaseDates"]
-        overlap = set(entry["releaseDates"]) & registered.get(entry["series"], set())
+        overlap = set(entry["releaseDates"]) & elsewhere.get(entry["series"], set())
         assert not overlap, (entry["series"], sorted(overlap))
+    for (series, period), ids in sorted(own.items()):
+        assert len(ids) == 1, (series, period, sorted(ids))
+        assert period not in elsewhere.get(series, set()), (series, period)
 
 
 def test_roller_rolls_only_a_period_with_an_official_date(
@@ -963,6 +996,15 @@ def test_the_roller_mints_an_october_target_once_the_hold_lifts(
             "period": "2026-09",
         },
     }
+    # The roller builds a contract as of today, and October's release date
+    # would refuse any day from 2026-11-06 on. Hold today at this test's
+    # registration date.
+    build_contract = roll_docket.build_contract
+    monkeypatch.setattr(
+        roll_docket,
+        "build_contract",
+        lambda target, _today: build_contract(target, dt.date(2026, 10, 1)),
+    )
     # While the hold stands, the roller skips October with the hold as reason.
     held = roll_docket.roll_execution_plan_refusal(target) or ""
     assert "is on hold" in held
