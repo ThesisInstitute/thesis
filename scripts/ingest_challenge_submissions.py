@@ -259,7 +259,14 @@ def load_registered_targets(targets_dir: Path) -> dict[str, RegisteredTarget]:
 
 
 def validate_quantiles(payload: dict[str, Any]) -> list[dict[str, Any]]:
-    """Validate the required seven-rung grid without rewriting it."""
+    """Validate the required seven-rung grid and return its schema keys.
+
+    Each rung comes back as exactly {"p", "value"}, both as parsed. Any
+    other key on a rung is dropped, like an unknown top-level field: a
+    rung's extra keys were the one unchecked place a record carried
+    submitted JSON, so a NaN kept there came back out of json.dump as a
+    literal no JSON parser reads.
+    """
 
     quantiles = payload.get("quantiles")
     if not isinstance(quantiles, list):
@@ -282,23 +289,10 @@ def validate_quantiles(payload: dict[str, Any]) -> list[dict[str, Any]]:
         )
     if any(left >= right for left, right in zip(values, values[1:])):
         raise ChallengeSubmissionError("quantile values must be strictly increasing")
-    return quantiles
-
-
-def _refuse_json_constant(name: str) -> Any:
-    # Python's json accepts NaN and the infinities, which JSON does not;
-    # kept in an unchecked field (a quantile's extra keys), they came back
-    # out of json.dump as literals no JSON parser reads.
-    raise ValueError(f"non-standard JSON constant {name}")
-
-
-def _finite_json_float(text: str) -> float:
-    # An overflowing literal such as 1e400 parses to inf and would be
-    # re-emitted as Infinity, the same defect as the constants above.
-    value = float(text)
-    if not math.isfinite(value):
-        raise ValueError(f"number {text} overflows a double")
-    return value
+    return [
+        {"p": probability, "value": value}
+        for probability, value in zip(probabilities, values)
+    ]
 
 
 def parse_submission_bytes(raw: bytes) -> Any:
@@ -313,16 +307,19 @@ def parse_submission_bytes(raw: bytes) -> Any:
     batch abort: pathological nesting raises RecursionError, and an
     integer past CPython's int-digit limit raises a bare ValueError that
     is not a JSONDecodeError — either escaping would stop the recorder.
-    NaN, the infinities, and overflowing floats are refused too: accepted
-    into an unchecked field, they were re-emitted as invalid JSON.
+
+    The number grammar stays Python's, NaN, the infinities and
+    overflowing literals included, because the history walk binds each
+    key under this parse (first_accepted_content). Refusing those
+    literals here released keys: an accepted first shot that carried one
+    in a discarded field stopped counting, and a later replacement became
+    the challenger's second shot (2026-10-11 review). Records stay strict
+    JSON regardless, since every number a record carries passes
+    _finite_number and validate_quantiles keeps only p and value.
     """
 
     try:
-        return json.loads(
-            raw.decode("utf-8"),
-            parse_constant=_refuse_json_constant,
-            parse_float=_finite_json_float,
-        )
+        return json.loads(raw.decode("utf-8"))
     except (RecursionError, ValueError) as error:
         # ValueError covers JSONDecodeError and UnicodeDecodeError too.
         raise ChallengeSubmissionError(
@@ -441,6 +438,13 @@ def first_accepted_content(
     which content wins. The release check is per-content: a post-release
     first shot therefore binds its key even though adapt_submission
     refuses it, and a backdated re-submission cannot replace it.
+
+    The predicate itself is part of the one-shot contract. Tightening
+    parse_submission_bytes or validate_submission_content can unbind a
+    key that an accepted submission consumed and hand its challenger a
+    second shot; loosening either can bind a key to bytes the intake once
+    refused. Fix an output defect where the record is built, as
+    validate_quantiles does, and leave the predicate alone.
     """
 
     inbox_rel = (
@@ -629,8 +633,9 @@ def adapt_submission(
             "lower": quantiles[1]["value"],
             "upper": quantiles[5]["value"],
         },
-        # Keep the submitted rungs and values exactly as parsed; do not sort,
-        # interpolate, or materialize a replacement distribution here.
+        # The submitted rungs and values exactly as parsed (only their p
+        # and value keys); do not sort, interpolate, or materialize a
+        # replacement distribution here.
         "quantiles": quantiles,
         "generatedAtUtc": content.generated_value,
         "recordedAt": content.generated_value,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import pathlib
 import shutil
 import subprocess
@@ -1052,48 +1053,104 @@ def test_repo_root_below_the_git_toplevel_keeps_one_shot(
         b'{"a": "\xff"}',
         b'{"n": 1' + b"0" * 5000 + b"}",
         b"{",
-        b'{"n": NaN}',
-        b'{"n": -Infinity}',
-        b'{"n": 1e400}',
     ],
-    ids=[
-        "bom",
-        "utf-16",
-        "invalid-utf-8",
-        "digit-limit",
-        "truncated",
-        "nan",
-        "infinity",
-        "overflow",
-    ],
+    ids=["bom", "utf-16", "invalid-utf-8", "digit-limit", "truncated"],
 )
 def test_parse_submission_bytes_refuses_unreadable_json(raw: bytes) -> None:
     with pytest.raises(ingest.ChallengeSubmissionError, match="not readable JSON"):
         ingest.parse_submission_bytes(raw)
 
 
-@pytest.mark.parametrize("literal", [b"NaN", b"Infinity", b"1e400"])
+@pytest.mark.parametrize(
+    ("literal", "expected"),
+    [(b"NaN", None), (b"-Infinity", -math.inf), (b"1e400", math.inf)],
+    ids=["nan", "infinity", "overflow"],
+)
+def test_parse_submission_bytes_keeps_the_historical_number_grammar(
+    literal: bytes, expected: float | None
+) -> None:
+    # The history walk binds keys under this parse, so it reads every
+    # number literal Python's json always has. Records never carry these:
+    # _finite_number refuses them in every field a record keeps.
+    value = ingest.parse_submission_bytes(b'{"n": ' + literal + b"}")["n"]
+    assert math.isnan(value) if expected is None else value == expected
+
+
+NON_FINITE_LITERALS = [b"NaN", b"Infinity", b"-Infinity", b"1e400"]
+# Where a submission may carry JSON the intake discards: an unknown
+# top-level field, or an extra key on a quantile rung.
+EXTENSION_SITES = ["top-level field", "rung key"]
+
+
+def _with_extension(payload: dict[str, Any], site: str, literal: bytes) -> bytes:
+    raw = payload_bytes(payload)
+    if site == "top-level field":
+        marker = b'"pointEstimate": ' + json.dumps(payload["pointEstimate"]).encode()
+        assert raw.count(marker) == 1
+        return raw.replace(marker, b'"ignoredExtension": ' + literal + b", " + marker)
+    marker = b'"p": 0.05,'
+    assert raw.count(marker) == 1
+    return raw.replace(marker, marker + b' "metadata": ' + literal + b",")
+
+
+@pytest.mark.parametrize("site", EXTENSION_SITES)
+@pytest.mark.parametrize("literal", NON_FINITE_LITERALS)
 def test_non_finite_extension_values_never_reach_the_records(
     submission_repo: dict[str, Any],
     literal: bytes,
+    site: str,
 ) -> None:
-    # validate_quantiles checks p and value but keeps each rung's other keys
-    # as submitted; a NaN there used to survive into the record and come
-    # back out of json.dump as a literal no JSON parser accepts.
-    raw = payload_bytes(
-        {**submission_repo["submission"], "challenger": "github:nan-user"}
-    )
-    marker = b'"p": 0.05,'
-    assert raw.count(marker) == 1
+    # The shot is valid, so it is accepted; the discarded JSON never
+    # reaches its record. Before the 2026-09-24 fix validate_quantiles kept
+    # a rung's other keys as submitted, and a NaN there came back out of
+    # json.dump as a literal no JSON parser accepts.
+    payload = {**submission_repo["submission"], "challenger": "github:nan-user"}
     path = submission_repo["inbox_dir"] / "nan-user" / "fixture-rate.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(raw.replace(marker, marker + b' "metadata": ' + literal + b","))
-    commit_all(submission_repo["repo"], "Add a rung carrying a non-finite extra key")
+    path.write_bytes(_with_extension(payload, site, literal))
+    commit_all(submission_repo["repo"], f"Add a shot with a non-finite {site}")
 
     records = run_ingest(submission_repo)
-    assert challengers_of(records) == ["github:fixture-user"]
-    # Whatever is recorded serializes as strict JSON.
+    assert challengers_of(records) == ["github:fixture-user", "github:nan-user"]
+    row = next(record for record in records if record["challenger"] == "github:nan-user")
+    assert row["quantiles"] == submission_repo["quantiles"]
+    assert "ignoredExtension" not in row
     json.loads(json.dumps(records, allow_nan=False))
+
+
+@pytest.mark.parametrize("site", EXTENSION_SITES)
+@pytest.mark.parametrize("literal", NON_FINITE_LITERALS)
+def test_accepted_shot_with_a_non_finite_extension_keeps_its_key(
+    submission_repo: dict[str, Any],
+    literal: bytes,
+    site: str,
+) -> None:
+    # 2026-10-11 review: refusing these literals in the parse unbound the
+    # key such a shot had consumed, and its replacement became a second
+    # shot. Every intake before af8b38f5 accepted the shot below and
+    # recorded strict JSON for it; the replacement must stay refused.
+    payload = {**submission_repo["submission"], "challenger": "github:legacy-user"}
+    path = submission_repo["inbox_dir"] / "legacy-user" / "fixture-rate.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(_with_extension(payload, site, literal))
+    commit_all(submission_repo["repo"], f"Accept a shot with a non-finite {site}")
+    first = [
+        record
+        for record in run_ingest(submission_repo)
+        if record["challenger"] == "github:legacy-user"
+    ]
+    assert [record["pointEstimate"] for record in first] == [3.0]
+    json.loads(json.dumps(first, allow_nan=False))
+
+    write_json(path, {**payload, "pointEstimate": 3.1})
+    commit_all(submission_repo["repo"], "Replace it with a clean second shot")
+    assert challengers_of(run_ingest(submission_repo)) == ["github:fixture-user"]
+    canonical = ingest.first_accepted_content(
+        submission_repo["inbox_dir"], submission_repo["repo"]
+    )
+    raw, landed = canonical[("github:legacy-user", payload["dataPointId"])]
+    assert landed == "challenge/inbox/legacy-user/fixture-rate.json"
+    assert ingest.parse_submission_bytes(raw)["pointEstimate"] == 3.0
 
 
 def test_recursion_error_is_a_submission_error_not_a_batch_abort(
@@ -1156,6 +1213,9 @@ MODEL_UNREGISTERED = "agency.fixture.missing.2030_01.first_print"
 MODEL_KINDS: dict[str, tuple[bool, bool]] = {
     "valid": (True, True),
     "revised": (True, True),
+    # Valid shots carrying discarded non-finite JSON (2026-10-11 review).
+    "extended": (True, True),
+    "rung-extra": (True, True),
     "post-release": (True, False),
     "unregistered": (True, False),
     "bad": (False, False),
@@ -1209,7 +1269,12 @@ def model_payload(challenger: str, kind: str) -> dict[str, Any]:
 def model_content(challenger: str, kind: str) -> bytes:
     if kind == "unparseable":
         return b"{ not json\n"
-    return payload_bytes(model_payload(challenger, kind))
+    payload = model_payload(challenger, kind)
+    if kind == "extended":
+        return _with_extension(payload, "top-level field", b"1e400")
+    if kind == "rung-extra":
+        return _with_extension(payload, "rung key", b"NaN")
+    return payload_bytes(payload)
 
 
 def model_reads(relative: str) -> bool:
@@ -1404,13 +1469,15 @@ class OneShotLedgerMachine(RuleBasedStateMachine):
         )
         accepted = [record["provenance"]["submissionPath"] for record in records]
         assert accepted == self._expected()
+        json.loads(json.dumps(records, allow_nan=False))
 
 
 def test_one_shot_ledger_matches_the_reference_model() -> None:
     # Stateful fuzzing over real git repositories: adds, edits, renames
     # (with and without rewrites), deletes, re-adds, surplus copies,
     # merge-borne writes, case-variant challengers, invalid and
-    # unparseable shots. Before the 2026-09-24 fix it shrank to an
+    # unparseable shots, and valid shots carrying discarded non-finite
+    # JSON. Before the 2026-09-24 fix it shrank to an
     # invalid first shot followed by its correction.
     run_state_machine_as_test(
         OneShotLedgerMachine,
