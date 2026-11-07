@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-10-18T16:55:44Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "dd929cba4570000175575166274c313465d56a68",
+  "facts": [
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+      "sourceVintage": "2026-10-18",
+      "retrievedAt": "2026-10-18T16:55:44Z",
+      "targetContentHash": "bb7989449716310b2815ec2be2cc3cf62f20abaccd2e258bc322bf40721774f2",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-18/2026-10-18t16-55-44z-resolve-pending/responses/ccsa-2026-10-18-c10ea83f6367ce95.csv.gz",
+        "sha256": "c10ea83f6367ce95d4b4061d8e5ffb4a8761daa7e45138d3ff37297b2e010d02",
+        "bytes": 59296,
+        "gzipSha256": "a9d0754d0ec5eea9cb904180775316a6e55385178f31b4612e9cc0bf982eb797",
+        "gzipBytes": 15690,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-18/2026-10-18t16-55-44z-resolve-pending/responses/ccsa-2026-10-18-c10ea83f6367ce95.csv.gz",
+      "sha256": "a9d0754d0ec5eea9cb904180775316a6e55385178f31b4612e9cc0bf982eb797",
+      "bytes": 15690,
+      "createdAt": "2026-10-18T16:55:44Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-10-18/2026-10-18t16-55-44z-resolve-pending/manifest.json",
+      "sha256": "974f425d826d6a284584aac2c3d62b3bae6012f896a39c344f6ad98d8cdba1a8",
+      "bytes": 1301,
+      "createdAt": "2026-10-18T16:55:44Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "848cb9ba8ce0f92792147a1bd7efe6f47f6dbb177054abe682bb62dac7ed48f6"
+}

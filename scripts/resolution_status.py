@@ -61,7 +61,16 @@ _LINE_RULES: tuple[tuple[re.Pattern[str], str, str], ...] = tuple(
         ),
         # "fetch/parse failed" is not matched: it may be a parse failure.
         (r"(?i)\bfetch failed\b", "fetch_failed", "SOURCE_UNREACHABLE"),
+        # "A-19 CAPTURE READ FAILED (deferring)": the Archive did not serve
+        # the exact capture asked for (a transport error, or bytes that are
+        # not that capture). A read failure, never a parse of what it holds.
+        (
+            r"^A-19 CAPTURE READ FAILED \(deferring\)$",
+            "fetch_failed",
+            "SOURCE_UNREACHABLE",
+        ),
         (r"^UNIT MISMATCH \(refusing\)$", "refused", "UNIT_MISMATCH"),
+        (r"^IMPLAUSIBLE VALUE \(refusing", "refused", "IMPLAUSIBLE_VALUE"),
         (r"^LEDGER UNIT CONFLICT \(refusing\)$", "refused", "LEDGER_UNIT_CONFLICT"),
         (
             r"^CATALOG REFUSED \(excluded from append\)$",
@@ -128,6 +137,11 @@ REASONS = {
         "The resolver's last attempt to fetch data it needs for this target "
         "(its source, a check against the source, or an archive record of "
         "it) did not return usable data."
+    ),
+    "IMPLAUSIBLE_VALUE": (
+        "The resolver read a figure for this target and refused it: the "
+        "figure lies outside the range the resolver accepts for this target, "
+        "which it reads as a wrong series or transform, not an outcome."
     ),
     "UNIT_MISMATCH": (
         "The forecast is in a different unit from the one the resolver's "
@@ -196,6 +210,11 @@ REASONS = {
         "The resolver routes this target's reference, but its last run "
         "printed no line naming this target."
     ),
+    "NOT_REACHED": (
+        "The resolver routes this target's reference, but its last run "
+        "stopped before it had printed a line about every target, and no "
+        "line it printed names this one."
+    ),
     "NO_RESOLVER_RUN": ("No resolver log was available when this status was written."),
 }
 
@@ -245,6 +264,14 @@ _SUMMARY_HEADS = {
 }
 # A run that stops on this line appended nothing (resolve_pending.main).
 _ENVIRONMENT_STOP = "environment failures left admitted references unresolvable"
+# resolve_pending prints the first once every routed reference has had its
+# turn, and the second whenever main() returns. A run that timed out or was
+# cancelled prints neither, and leaves no traceback either: before these
+# lines, the 2026-10-13 to 10-15 runs, each stopped at the job's 60-minute
+# cap, read as completed (resolve_pending.RESOLUTION_LOOP_COMPLETE and
+# RESOLVER_FINISHED; a test holds the spellings together).
+_LOOP_COMPLETE = "resolution loop complete:"
+_FINISHED = "resolver finished with exit code"
 # resolve_pending.main prints this after the reviewed proposal merged; every
 # row it resolved and did not refuse afterwards is then in the ledger.
 _APPENDED_RE = re.compile(
@@ -370,6 +397,8 @@ def parse_resolver_log(
     lines = text.splitlines()
     crashed = "Traceback (most recent call last):" in text
     stopped = any(line.startswith(_ENVIRONMENT_STOP) for line in lines)
+    loop_completed = any(line.startswith(_LOOP_COMPLETE) for line in lines)
+    finished = any(line.startswith(_FINISHED) for line in lines)
     error = ""
     if crashed:
         tail_lines = [line for line in lines if line and not line.startswith(" ")]
@@ -385,7 +414,8 @@ def parse_resolver_log(
                 )
     run = {
         "logAvailable": bool(text.strip()),
-        "completed": bool(text.strip()) and not crashed and not stopped,
+        "completed": bool(text.strip()) and finished and not crashed and not stopped,
+        "loopCompleted": bool(text.strip()) and loop_completed,
         "error": error,
     }
     return targets, run
@@ -423,7 +453,10 @@ def build_status(
         elif not run["logAvailable"]:
             state, code = "unknown", "NO_RESOLVER_RUN"
         elif ref in claimed_refs:
-            state, code = "unknown", "NO_REPORT"
+            # A routed target with no line was passed over only if the loop
+            # finished; a run that stopped first may never have reached it.
+            state = "unknown"
+            code = "NO_REPORT" if run.get("loopCompleted", True) else "NOT_REACHED"
         else:
             # Only routing is known here. What follows is the registration's
             # own adapter and series, shown as registration facts and never

@@ -290,8 +290,14 @@ def build_statsmodels_local_level_candidate(
     history: Sequence[TimeSeriesObservation | dict[str, Any]],
     generated_at: str | None = None,
     round_increment: float | None = None,
+    backtest: bool = True,
 ) -> ForecastModelCandidate:
-    """Statsmodels random-walk-with-drift candidate with native intervals."""
+    """Statsmodels random-walk-with-drift candidate with native intervals.
+
+    ``backtest=False`` skips the walk-forward score. The backtest itself builds
+    its per-cutoff candidates that way: a nested backtest at every cutoff made
+    a history of n points cost 2**(n - 3) fits.
+    """
 
     normalized_history = normalize_history(history)
     if len(normalized_history) < 3:
@@ -360,7 +366,9 @@ def build_statsmodels_local_level_candidate(
         interval_method="native_state_space",
         calibration_n=max(len(normalized_history) - 1, 0),
         history=tuple(normalized_history),
-        backtest_score=backtest_statsmodels_local_level(normalized_history),
+        backtest_score=(
+            backtest_statsmodels_local_level(normalized_history) if backtest else None
+        ),
         diagnostics=(
             "statsmodels SARIMAX(0,1,0) with drift",
             "intervals from statsmodels state-space forecast covariance",
@@ -437,6 +445,7 @@ def backtest_statsmodels_local_level(
                 target_period=history[cutoff].period,
                 history=train,
                 generated_at=DEFAULT_GENERATED_AT,
+                backtest=False,
             )
         except Exception:
             continue

@@ -6,8 +6,11 @@ import subprocess
 import sys
 from importlib.util import find_spec
 from pathlib import Path
+from unittest import mock
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from brier.timeseries import (
     SCHEMA_VERSION,
@@ -72,6 +75,125 @@ def test_statsmodels_candidate_uses_native_interval_metadata():
     assert candidate["interval80"]["upper"] > candidate["pointEstimate"]
     assert candidate["calibrationN"] == len(SAMPLE_HISTORY) - 1
     assert candidate["backtestScore"]["method"] == "walk_forward_1_step"
+    # Pinned from the recursive backtest this replaced (origin/main 6c9704eb):
+    # skipping the nested backtests changes no score. The fit reads
+    # 0.9444455 on macOS and 0.9444467 on CI's ubuntu, so the pins allow 1e-4.
+    assert candidate["backtestScore"]["rows"] == 3
+    assert candidate["backtestScore"]["meanAbsoluteError"] == pytest.approx(
+        0.9444455381418541, rel=1e-4
+    )
+    assert candidate["backtestScore"]["interval80Coverage"] == pytest.approx(1 / 3)
+    assert candidate["backtestScore"]["meanInterval80Width"] == pytest.approx(
+        0.8299296295780513, rel=1e-4
+    )
+
+
+def count_sarimax_fits():
+    """Return a patch of SARIMAX.fit that counts calls, and the call list."""
+
+    from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+    calls: list[int] = []
+    original = SARIMAX.fit
+
+    def counting_fit(self, *args, **kwargs):
+        calls.append(len(self.endog))
+        return original(self, *args, **kwargs)
+
+    return mock.patch.object(SARIMAX, "fit", counting_fit), calls
+
+
+def random_walk(steps: list[float], start: float = 100.0) -> list[dict]:
+    values = [start]
+    for step in steps:
+        values.append(values[-1] + step)
+    return [
+        {"period": f"p{index:03d}", "value": value}
+        for index, value in enumerate(values)
+    ]
+
+
+@pytest.mark.skipif(
+    find_spec("statsmodels") is None, reason="statsmodels extra missing"
+)
+@settings(max_examples=10, deadline=None)
+@given(
+    steps=st.lists(
+        st.floats(min_value=-5, max_value=5, allow_nan=False, allow_infinity=False),
+        min_size=2,
+        max_size=23,
+    )
+)
+def test_statsmodels_backtest_fits_once_per_cutoff(steps):
+    # Invariant: n observations cost 1 + max(n - 3, 0) fits (the candidate plus
+    # one per backtest cutoff), never a nested backtest per cutoff.
+    history = random_walk(steps)
+    patch, calls = count_sarimax_fits()
+    with patch:
+        candidate = build_statsmodels_local_level_candidate(
+            target_data_point_id="test.series",
+            target_period="next",
+            history=history,
+            generated_at="2026-06-26T00:00:00Z",
+        )
+    assert len(calls) == 1 + max(len(history) - 3, 0)
+    if candidate.backtest_score is not None:
+        assert candidate.backtest_score.rows <= len(history) - 3
+
+
+@pytest.mark.skipif(
+    find_spec("statsmodels") is None, reason="statsmodels extra missing"
+)
+@settings(max_examples=10, deadline=None)
+@given(
+    steps=st.lists(
+        st.floats(min_value=-5, max_value=5, allow_nan=False, allow_infinity=False),
+        min_size=2,
+        max_size=12,
+    ),
+    round_increment=st.sampled_from([None, 0.1, 1.0]),
+)
+def test_statsmodels_backtest_flag_changes_only_the_backtest_score(
+    steps, round_increment
+):
+    history = random_walk(steps)
+    kwargs = dict(
+        target_data_point_id="test.series",
+        target_period="next",
+        history=history,
+        generated_at="2026-06-26T00:00:00Z",
+        round_increment=round_increment,
+    )
+    with_backtest = build_statsmodels_local_level_candidate(**kwargs).as_dict()
+    without_backtest = build_statsmodels_local_level_candidate(
+        **kwargs, backtest=False
+    ).as_dict()
+
+    assert without_backtest.pop("backtestScore") is None
+    with_backtest.pop("backtestScore")
+    assert with_backtest == without_backtest
+
+
+@pytest.mark.skipif(
+    find_spec("statsmodels") is None, reason="statsmodels extra missing"
+)
+def test_default_models_stay_linear_on_a_long_history():
+    # 60 prints took 2**57 fits before the backtest stopped recursing; the
+    # analyst runner's default model list must finish on long monthly series.
+    history = random_walk([0.1 * ((index % 7) - 3) for index in range(59)])
+    patch, calls = count_sarimax_fits()
+    with patch:
+        candidate_set = build_candidate_set(
+            target_data_point_id="test.series",
+            target_period="next",
+            history=history,
+            generated_at="2026-06-26T00:00:00Z",
+        )
+
+    assert len(calls) == 1 + (len(history) - 3)
+    statsmodels_candidate = candidate_set["candidates"][1]
+    assert statsmodels_candidate["library"] == "statsmodels"
+    assert statsmodels_candidate["backtestScore"]["rows"] == len(history) - 3
 
 
 def test_candidate_set_can_emit_persistence_without_optional_extras():

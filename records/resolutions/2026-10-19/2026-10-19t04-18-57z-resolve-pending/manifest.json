@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-10-19T04:18:57Z",
+  "firstPrintEvidenceRequired": true,
+  "weeklyClaimsSchedule": {
+    "source": "https://oui.doleta.gov/unemploy/claims_arch.asp",
+    "releaseExceptions": {
+      "2026-11-26": "2026-11-25"
+    }
+  },
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "7adcc72f9478edd01c7d3c6079a6420c3931ac48",
+  "facts": [
+    {
+      "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-10-19T04:23:23Z",
+      "targetContentHash": "6e45cb2f4898f951845f89900e3c0befff43d9dc3bc3a0f7749231020fb88f32",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.search.spending_over_time.cdfi.program_obligations-2026-10-19-dcfaeba9d1c7c7b6.json.gz",
+        "sha256": "dcfaeba9d1c7c7b610d854ecf9ae5fb6bcd43a070a8353cd4d760ca44ab84444",
+        "bytes": 1927,
+        "gzipSha256": "c01defeb739e22aea96beda2af3a4f1f80860cdcb148516aecae4786a5a59d43",
+        "gzipBytes": 995,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-10-19T04:23:23Z",
+      "targetContentHash": "c9df27cac6ec6a78de1e5b7db1e881dacef14cb4d0f607f328e49f5b8cf836c3",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.search.spending_over_time.usfs.minnesota_obligations-2026-10-19-1c341ef0e9c92465.json.gz",
+        "sha256": "1c341ef0e9c924654c338fd58de93c3c9dae77c59c13e8ff28bfcf0c99c34fe2",
+        "bytes": 2106,
+        "gzipSha256": "e55efee9de7e349e6b8f2c454236406c90429ddd6ced06126bac1dfc76cc1e8f",
+        "gzipBytes": 1091,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-10-19T04:23:24Z",
+      "targetContentHash": "e04d264d1888de22891b4b0a6aa7e0f8f3ae8b937613de7e3ee9242f726e37e9",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.search.spending_over_time.ntia.broadband_program_obligations-2026-10-19-ad21976f56dac0d5.json.gz",
+        "sha256": "ad21976f56dac0d5094cf4c294f91a874a9896003c327253fd05adaf7daef184",
+        "bytes": 1850,
+        "gzipSha256": "c164de8acebf51f89d0f8aa134dbfb2543a71eee2533f4ef83ac2fef041e01d4",
+        "gzipBytes": 952,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-10-19T04:23:24Z",
+      "targetContentHash": "59b334c6612eaf1c20be70ad587590901539f4fc2a11749e9f6a8f1ef2927907",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.agency.097.awards.obligations-2026-10-19-6a8c1b007ee9e9d2.json.gz",
+        "sha256": "6a8c1b007ee9e9d2acb0e8fd32ea3c8248ec2484ce7190c014c5bed8530c6271",
+        "bytes": 156,
+        "gzipSha256": "7b03fa012c71b939395142c6ea0048800d0bb7dfaf8dec46559bbbe4ca0563bc",
+        "gzipBytes": 145,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-10-19T04:25:25Z",
+      "targetContentHash": "50f66b4f2d7088ad7e74b611f9286b87c6ad34463a87fea873bbcbb15ddddf46",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.search.spending_over_time.dhs.title_vi.award_transaction_obligations-2026-10-19-ecad1f42969ad82d.json.gz",
+        "sha256": "ecad1f42969ad82dfaf7bd87a2873672268c3eb59aa46929973998c39d4c46c1",
+        "bytes": 2323,
+        "gzipSha256": "5c0b412de4a83aaa13a8f70a4cf554d5df2d061fa398207a09d66462bb43a182",
+        "gzipBytes": 1063,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.search.spending_over_time.cdfi.program_obligations-2026-10-19-dcfaeba9d1c7c7b6.json.gz",
+      "sha256": "c01defeb739e22aea96beda2af3a4f1f80860cdcb148516aecae4786a5a59d43",
+      "bytes": 995,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.search.spending_over_time.usfs.minnesota_obligations-2026-10-19-1c341ef0e9c92465.json.gz",
+      "sha256": "e55efee9de7e349e6b8f2c454236406c90429ddd6ced06126bac1dfc76cc1e8f",
+      "bytes": 1091,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.search.spending_over_time.ntia.broadband_program_obligations-2026-10-19-ad21976f56dac0d5.json.gz",
+      "sha256": "c164de8acebf51f89d0f8aa134dbfb2543a71eee2533f4ef83ac2fef041e01d4",
+      "bytes": 952,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.agency.097.awards.obligations-2026-10-19-6a8c1b007ee9e9d2.json.gz",
+      "sha256": "7b03fa012c71b939395142c6ea0048800d0bb7dfaf8dec46559bbbe4ca0563bc",
+      "bytes": 145,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/responses/usaspending.search.spending_over_time.dhs.title_vi.award_transaction_obligations-2026-10-19-ecad1f42969ad82d.json.gz",
+      "sha256": "5c0b412de4a83aaa13a8f70a4cf554d5df2d061fa398207a09d66462bb43a182",
+      "bytes": 1063,
+      "createdAt": "2026-10-19T04:18:57Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-10-19/2026-10-19t04-18-57z-resolve-pending/manifest.json",
+      "sha256": "939488efbb18dd5ee802b3678e9b71e70dc50cbdfae8cae47c09a6ba17f5ba6f",
+      "bytes": 5696,
+      "createdAt": "2026-10-19T04:18:57Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "4487f39353b7fa01b64cd790f353b93984bab6ad4e1e642f4f6ab1fd21ca5692"
+}

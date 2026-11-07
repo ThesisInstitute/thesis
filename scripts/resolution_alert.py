@@ -195,6 +195,14 @@ def build_alert(
         lines.append(
             "The resolver printed nothing: it did not start or its log was lost."
         )
+    elif resolve_outcome == "cancelled":
+        # The job's timeout-minutes cancels the step in flight and leaves no
+        # traceback: 2026-10-01 to 10-15 went silent this way.
+        lines.append(
+            "The resolve step was cancelled before the resolver finished (the "
+            "job's timeout, or a manual cancel). Targets it had not yet printed "
+            "a line for got no verdict this run."
+        )
     elif resolve_outcome == "success" and appended:
         lines.append(
             f"The resolver appended {appended.group(1)} observation(s) (merged "

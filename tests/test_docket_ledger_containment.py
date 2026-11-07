@@ -33,13 +33,23 @@ CATALOG_TOP_LEVEL_KEYS = {
     "ambiguous_aliases",
     "series",
 }
-CATALOG_OPTIONAL_TOP_LEVEL_KEYS = {"comment"}
+# entity_folds_sha256: Chronicle's commitment to its curated cross-entity
+# fold seed (ledger/seeds/entity_folds.json, Max's ruling d353, 2026-09-27).
+# Absent on catalogs built without a seed.
+CATALOG_OPTIONAL_TOP_LEVEL_KEYS = {"comment", "entity_folds_sha256"}
+# Docket cadence -> Ledger period type. Equal to the stamper's
+# CADENCE_TO_PERIOD_TYPE, which also names fiscal_year.
 CADENCE_MAP = {
     "weekly": "week_ending",
     "monthly": "month",
     "quarterly": "quarter",
     "annual": "year",
+    "fiscal_year": "fiscal_year",
 }
+# The docket cadences scripts/roll_docket.py can roll. Being in CADENCE_MAP
+# does not make a cadence a valid docket cadence: the roller has no
+# fiscal_year step, so a docket entry may not declare it.
+DOCKET_CADENCES = frozenset({"weekly", "monthly", "quarterly", "annual"})
 CATALOG_ROW_KEYS = {
     "uuid",
     "concept",
@@ -104,6 +114,27 @@ def _target_period_identity(entry: dict[str, Any]) -> tuple[str, object]:
     return ("literal", period)
 
 
+def _observed_cadence(entry: dict[str, Any]) -> str | None:
+    """The period type an observed Ledger row for this entry must carry.
+
+    A registered-query snapshot of a fiscal year is an annual docket entry,
+    but the USAspending leg writes its rows with period type fiscal_year,
+    and the catalog derives an observed row's cadence from its rows. So such
+    an entry may pin only a fiscal_year lineage, never a calendar-year one.
+    A docket-only placeholder keeps the docket's own cadence: it was seeded
+    from this entry, not from rows.
+    """
+
+    cadence = entry.get("cadence")
+    expected = CADENCE_MAP.get(cadence) if isinstance(cadence, str) else None
+    if (
+        expected == "year"
+        and _target_period_identity(entry)[0] == "registered_query_snapshot_fiscal_year"
+    ):
+        return "fiscal_year"
+    return expected
+
+
 def _object(raw: bytes, label: str) -> dict[str, Any]:
     try:
         value = json.loads(raw)
@@ -151,6 +182,10 @@ def _assert_containment(
         assert type(catalog[digest_key]) is str and re.fullmatch(
             r"[0-9a-f]{64}", catalog[digest_key]
         ), f"{label}.{digest_key} must be a SHA-256 digest"
+    if "entity_folds_sha256" in catalog:
+        assert type(catalog["entity_folds_sha256"]) is str and re.fullmatch(
+            r"[0-9a-f]{64}", catalog["entity_folds_sha256"]
+        ), f"{label}.entity_folds_sha256 must be a SHA-256 digest when present"
     assert (
         type(catalog["observation_rows"]) is int and catalog["observation_rows"] >= 0
     ), f"{label}.observation_rows must be a non-negative integer"
@@ -261,16 +296,21 @@ def _assert_containment(
             )
 
         docket_cadence = entry.get("cadence")
-        expected_cadence = CADENCE_MAP.get(docket_cadence)
+        expected_cadence = (
+            CADENCE_MAP.get(docket_cadence)
+            if isinstance(docket_cadence, str) and docket_cadence in DOCKET_CADENCES
+            else None
+        )
         if expected_cadence is None:
             cadence_mismatches.append(
                 f"{series}: unsupported docket cadence {docket_cadence!r}"
             )
         elif catalog_row["status"] == "observed":
-            if catalog_row["cadence"] != expected_cadence:
+            observed_cadence = _observed_cadence(entry)
+            if catalog_row["cadence"] != observed_cadence:
                 cadence_mismatches.append(
                     f"{series}: docket {docket_cadence} maps to "
-                    f"{expected_cadence}, catalog has {catalog_row['cadence']}"
+                    f"{observed_cadence}, catalog has {catalog_row['cadence']}"
                 )
         else:
             # Docket-only rows were minted from this registry, so their
@@ -540,7 +580,7 @@ def _derive_expected_pin(
         if (r.get("geography") or {}).get("level") == "country"
         and (expected_id is None or (r.get("geography") or {}).get("id") == expected_id)
     ]
-    expected_cadence = CADENCE_MAP.get(entry.get("cadence"))
+    expected_cadence = _observed_cadence(entry)
     if expected_cadence is not None:
         pool = [r for r in pool if r.get("cadence") == expected_cadence]
     pool = [
@@ -585,11 +625,12 @@ def _docket_file(tmp_path: pathlib.Path, entries: list[dict[str, Any]]):
 
 def test_docket_is_contained_in_frozen_catalog_fixture() -> None:
     raw = FIXTURE_PATH.read_bytes()
-    # Copied byte-for-byte from Chronicle #167's deterministically regenerated
-    # post-EIA catalog.
-    assert len(raw) == 190_855
+    # Copied byte-for-byte from PolicyEngine/chronicle#344's regenerated
+    # catalog: seven entity-drift lineages folded into economy/aggregate
+    # (Max's ruling d353), 221 series over the ledger at d7e45bc5.
+    assert len(raw) == 199_465
     assert hashlib.sha256(raw).hexdigest() == (
-        "92f51a2181d0b26276e59fda6309bd8f849dc1f2050c26ddb38d9f6ad392082a"
+        "b055a7aed092ae5c436a634faf6472e8d19d5ca1388f851028c06c1b88a5c441"
     )
     _assert_containment(_object(raw, "frozen catalog fixture"), "fixture")
 
@@ -613,6 +654,46 @@ def test_containment_rejects_unrelated_catalog_reference(
     )
     catalog = _catalog_shell([_catalog_row()])
     with pytest.raises(AssertionError, match="neither canonical concept nor alias"):
+        _assert_containment(catalog, "test catalog", docket_path=docket_path)
+
+
+def _single_series_docket(tmp_path: pathlib.Path) -> pathlib.Path:
+    return _docket_file(
+        tmp_path,
+        [
+            {
+                "series": "unrelated.series",
+                "cadence": "monthly",
+                "slug": "unrelated-series-{month}-{year}",
+                "ledger": {
+                    "uuid": "00000000-0000-4000-8000-000000000001",
+                    "concept": "unrelated.series",
+                },
+            }
+        ],
+    )
+
+
+def test_containment_accepts_an_entity_fold_commitment(
+    tmp_path: pathlib.Path,
+) -> None:
+    # A catalog built with Chronicle's curated entity-fold seed commits to
+    # it; the key is optional so catalogs built without a seed still pass.
+    docket_path = _single_series_docket(tmp_path)
+    catalog = _catalog_shell([_catalog_row()])
+    _assert_containment(catalog, "catalog without folds", docket_path=docket_path)
+    catalog["entity_folds_sha256"] = "3" * 64
+    _assert_containment(catalog, "catalog with folds", docket_path=docket_path)
+
+
+@pytest.mark.parametrize("digest", [None, "", "3" * 63, "G" * 64, 3])
+def test_containment_rejects_a_malformed_entity_fold_commitment(
+    tmp_path: pathlib.Path, digest: object
+) -> None:
+    docket_path = _single_series_docket(tmp_path)
+    catalog = _catalog_shell([_catalog_row()])
+    catalog["entity_folds_sha256"] = digest
+    with pytest.raises(AssertionError, match="entity_folds_sha256 must be a SHA-256"):
         _assert_containment(catalog, "test catalog", docket_path=docket_path)
 
 
@@ -998,4 +1079,200 @@ def test_residual_polish_from_final_review(tmp_path: pathlib.Path) -> None:
     with pytest.raises(AssertionError, match="placeholder cadence"):
         _assert_containment(
             _catalog_shell([ph]), "t", docket_path=_docket_file(tmp_path, [entry])
+        )
+
+
+def _fiscal_year_snapshot_entry(
+    row: dict[str, Any], **overrides: Any
+) -> dict[str, Any]:
+    entry = {
+        "series": row["concept"],
+        "cadence": "annual",
+        "period": "FY2026",
+        "slug": "snapshot-fy2026",
+        "extras": {
+            "targetUnit": "millions",
+            "sourceBinding": {"releasePolicy": "registered_query_snapshot"},
+        },
+        "ledger": {"uuid": row["uuid"], "concept": row["concept"]},
+    }
+    entry.update(overrides)
+    return entry
+
+
+def test_fiscal_year_snapshot_pins_its_fiscal_year_lineage(
+    tmp_path: pathlib.Path,
+) -> None:
+    # 2026-10-17: the five DoD USAspending FY2026 snapshots became observed
+    # rows with cadence fiscal_year (the resolver writes period type
+    # fiscal_year); the gate expected the annual docket cadence's "year".
+    row = _catalog_row(
+        uuid="00000000-0000-4000-8000-0000000000f1",
+        concept="usaspending.test.series",
+        unit="millions",
+        cadence="fiscal_year",
+        first_observed_period="2026",
+        last_observed_period="2026",
+    )
+    for period in ("FY2026", "fy_2026", "2026", "Fy2026"):
+        entry = _fiscal_year_snapshot_entry(row, period=period)
+        _assert_containment(
+            _catalog_shell([row]),
+            "test catalog",
+            docket_path=_docket_file(tmp_path, [entry]),
+        )
+
+
+def test_fiscal_year_snapshot_refuses_a_calendar_year_lineage(
+    tmp_path: pathlib.Path,
+) -> None:
+    calendar = _catalog_row(
+        uuid="00000000-0000-4000-8000-0000000000f2",
+        concept="usaspending.test.series",
+        unit="millions",
+        cadence="year",
+        first_observed_period="2026",
+        last_observed_period="2026",
+    )
+    entry = _fiscal_year_snapshot_entry(calendar)
+    with pytest.raises(AssertionError, match="maps to fiscal_year, catalog has year"):
+        _assert_containment(
+            _catalog_shell([calendar]),
+            "test catalog",
+            docket_path=_docket_file(tmp_path, [entry]),
+        )
+
+
+def test_fiscal_year_snapshot_placeholder_keeps_the_seeded_cadence(
+    tmp_path: pathlib.Path,
+) -> None:
+    # Placeholders were seeded from the annual docket entry, so their
+    # cadence is "year" until rows arrive (cdfi, dhs, ntia, ondcp and usfs
+    # at Chronicle dd929cba).
+    def placeholder(cadence: str) -> dict[str, Any]:
+        return _catalog_row(
+            uuid="00000000-0000-4000-8000-0000000000f3",
+            concept="usaspending.test.placeholder",
+            status="docket-only",
+            cadence=cadence,
+            unit="millions",
+            entity=None,
+            sources=[],
+            rid_patterns=[],
+            first_observed_period=None,
+            last_observed_period=None,
+            observation_count=0,
+        )
+
+    seeded = placeholder("year")
+    entry = _fiscal_year_snapshot_entry(seeded)
+    _assert_containment(
+        _catalog_shell([seeded]),
+        "test catalog",
+        docket_path=_docket_file(tmp_path, [entry]),
+    )
+    misseeded = placeholder("month")
+    with pytest.raises(AssertionError, match="placeholder cadence"):
+        _assert_containment(
+            _catalog_shell([misseeded]),
+            "test catalog",
+            docket_path=_docket_file(
+                tmp_path, [_fiscal_year_snapshot_entry(misseeded)]
+            ),
+        )
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        # Not a registered-query snapshot: an annual first print stays "year".
+        {"extras": {"targetUnit": "millions"}},
+        {
+            "extras": {
+                "targetUnit": "millions",
+                "sourceBinding": {"releasePolicy": "first_print"},
+            }
+        },
+        # A snapshot whose period is not a fiscal year.
+        {"period": "2026-05"},
+        {"period": None},
+        # Not an annual entry.
+        {"cadence": "monthly"},
+    ],
+)
+def test_only_fiscal_year_snapshots_take_the_fiscal_year_cadence(
+    tmp_path: pathlib.Path, overrides: dict[str, Any]
+) -> None:
+    row = _catalog_row(
+        uuid="00000000-0000-4000-8000-0000000000f4",
+        concept="usaspending.test.series",
+        unit="millions",
+        cadence="fiscal_year",
+        first_observed_period="2026",
+        last_observed_period="2026",
+    )
+    entry = _fiscal_year_snapshot_entry(row, **overrides)
+    with pytest.raises(AssertionError, match="cadence mismatches"):
+        _assert_containment(
+            _catalog_shell([row]),
+            "test catalog",
+            docket_path=_docket_file(tmp_path, [entry]),
+        )
+
+
+def test_usaspending_snapshots_are_contained_in_the_dd929cba_rows(
+    tmp_path: pathlib.Path,
+) -> None:
+    # Offline regression for 2026-10-17: Chronicle dd929cba holds five
+    # observed DoD FY2026 snapshot rows (cadence fiscal_year) and six
+    # placeholders seeded "year". Every committed usaspending.* docket entry
+    # must be contained in them.
+    frozen = _load(
+        ROOT / "tests" / "fixtures" / "usaspending_catalog_rows_dd929cba.json",
+        "usaspending catalog rows",
+    )
+    rows = frozen["series"]
+    assert {row["status"] for row in rows} == {"observed", "docket-only"}
+    assert {row["cadence"] for row in rows if row["status"] == "observed"} == {
+        "fiscal_year"
+    }
+    entries = [
+        entry
+        for entry in _load(DOCKET_PATH, "docket")["series"]
+        if entry["series"].startswith("usaspending.")
+    ]
+    assert len(entries) >= 12
+    _assert_containment(
+        _catalog_shell(rows),
+        "dd929cba usaspending rows",
+        docket_path=_docket_file(tmp_path, entries),
+    )
+
+
+@pytest.mark.parametrize("cadence", ["fiscal_year", "daily", None, ["annual"]])
+def test_docket_cadence_must_be_one_the_roller_rolls(
+    tmp_path: pathlib.Path, cadence: object
+) -> None:
+    # Review of #368: CADENCE_MAP names fiscal_year (to match the stamper),
+    # but roll_docket has no fiscal_year step, so a docket entry declaring it
+    # must still be refused even against a matching fiscal_year row.
+    row = _catalog_row(
+        uuid="00000000-0000-4000-8000-0000000000f5",
+        concept="test.fiscal.series",
+        cadence="fiscal_year",
+        first_observed_period="2027",
+        last_observed_period="2027",
+    )
+    entry = {
+        "series": "test.fiscal.series",
+        "cadence": cadence,
+        "period": "2027",
+        "slug": "test-{year}",
+        "ledger": {"uuid": row["uuid"], "concept": row["concept"]},
+    }
+    with pytest.raises(AssertionError, match="unsupported docket cadence"):
+        _assert_containment(
+            _catalog_shell([row]),
+            "test catalog",
+            docket_path=_docket_file(tmp_path, [entry]),
         )

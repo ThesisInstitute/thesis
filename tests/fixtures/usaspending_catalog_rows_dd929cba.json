@@ -1,0 +1,308 @@
+{
+  "comment": "The 11 usaspending.* rows of Chronicle's series catalog at dd929cba4570000175575166274c313465d56a68 (catalogSha256 bb033b07f71efb867d912a165ccf45be106b24ff302bb5dc74da8659bd65c591), copied verbatim.",
+  "series": [
+    {
+      "uuid": "69834e1f-1fbf-432c-9913-6b391321b3a8",
+      "concept": "usaspending.cdfi.assistance_transaction_obligations",
+      "family_patterns": [
+        "usaspending.cdfi.assistance_transaction_obligations"
+      ],
+      "status": "docket-only",
+      "unit": "usd_millions",
+      "cadence": "year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "name": "United States"
+      },
+      "entity": null,
+      "sources": [],
+      "aliases": [],
+      "source_concepts": [],
+      "rid_patterns": [],
+      "first_observed_period": null,
+      "last_observed_period": null,
+      "observation_count": 0
+    },
+    {
+      "uuid": "e64ea5db-b72a-4a46-8948-6142dbc59d91",
+      "concept": "usaspending.dhs.title_vi.award_transaction_obligations",
+      "family_patterns": [
+        "usaspending.dhs.title_vi.award_transaction_obligations"
+      ],
+      "status": "docket-only",
+      "unit": "usd",
+      "cadence": "year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "name": "United States"
+      },
+      "entity": null,
+      "sources": [],
+      "aliases": [],
+      "source_concepts": [],
+      "rid_patterns": [],
+      "first_observed_period": null,
+      "last_observed_period": null,
+      "observation_count": 0
+    },
+    {
+      "uuid": "8146ecb0-3ef3-49eb-b8a0-e61d15aa276e",
+      "concept": "usaspending.dod.new_prime_awards",
+      "family_patterns": [
+        "usaspending.dod.new_prime_awards"
+      ],
+      "status": "observed",
+      "unit": "millions",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
+      "aliases": [],
+      "source_concepts": [
+        "new_award_count"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.new_prime_awards.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
+    },
+    {
+      "uuid": "a2649fd9-f382-4003-ba70-01030bc93b5e",
+      "concept": "usaspending.dod.prime_award_obligations",
+      "family_patterns": [
+        "usaspending.dod.prime_award_obligations"
+      ],
+      "status": "docket-only",
+      "unit": "billions USD",
+      "cadence": "year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "name": "United States"
+      },
+      "entity": null,
+      "sources": [],
+      "aliases": [],
+      "source_concepts": [],
+      "rid_patterns": [],
+      "first_observed_period": null,
+      "last_observed_period": null,
+      "observation_count": 0
+    },
+    {
+      "uuid": "82ff2d7f-04ee-4366-8fe4-b8e919e6efa6",
+      "concept": "usaspending.dod.prime_award_transactions",
+      "family_patterns": [
+        "usaspending.dod.prime_award_transactions"
+      ],
+      "status": "observed",
+      "unit": "millions",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
+      "aliases": [],
+      "source_concepts": [
+        "transaction_count"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.prime_award_transactions.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
+    },
+    {
+      "uuid": "11ea0d3d-fab9-42bb-b679-3471d4b60323",
+      "concept": "usaspending.dod.prime_contract_obligations",
+      "family_patterns": [
+        "usaspending.dod.prime_contract_obligations"
+      ],
+      "status": "observed",
+      "unit": "billions USD",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
+      "aliases": [],
+      "source_concepts": [
+        "results[category=contracts].aggregated_amount"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.prime_contract_obligations.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
+    },
+    {
+      "uuid": "91e3b668-cb4b-4682-94a5-7ae404a6565d",
+      "concept": "usaspending.dod.small_business_contract_obligation_share",
+      "family_patterns": [
+        "usaspending.dod.small_business_contract_obligation_share"
+      ],
+      "status": "observed",
+      "unit": "percent",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
+      "aliases": [],
+      "source_concepts": [
+        "100 * small_business contract obligations / all contract obligations"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.small_business_contract_obligation_share.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
+    },
+    {
+      "uuid": "96d17026-b54c-4409-98c9-339b6725fde7",
+      "concept": "usaspending.dod.unique_prime_contract_recipients",
+      "family_patterns": [
+        "usaspending.dod.unique_prime_contract_recipients"
+      ],
+      "status": "observed",
+      "unit": "thousands",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
+      "aliases": [],
+      "source_concepts": [
+        "distinct non-null recipient_id"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.unique_prime_contract_recipients.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
+    },
+    {
+      "uuid": "f37307e0-91c6-49ee-afc7-2021e33ea863",
+      "concept": "usaspending.ntia.broadband_al11038_obligations",
+      "family_patterns": [
+        "usaspending.ntia.broadband_al11038_obligations"
+      ],
+      "status": "docket-only",
+      "unit": "usd_millions",
+      "cadence": "year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "name": "United States"
+      },
+      "entity": null,
+      "sources": [],
+      "aliases": [],
+      "source_concepts": [],
+      "rid_patterns": [],
+      "first_observed_period": null,
+      "last_observed_period": null,
+      "observation_count": 0
+    },
+    {
+      "uuid": "02662bfc-b77d-48f3-938b-7a5b2f9e5c73",
+      "concept": "usaspending.ondcp.hidta_al95001_obligations",
+      "family_patterns": [
+        "usaspending.ondcp.hidta_al95001_obligations"
+      ],
+      "status": "docket-only",
+      "unit": "usd_millions",
+      "cadence": "year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "name": "United States"
+      },
+      "entity": null,
+      "sources": [],
+      "aliases": [],
+      "source_concepts": [],
+      "rid_patterns": [],
+      "first_observed_period": null,
+      "last_observed_period": null,
+      "observation_count": 0
+    },
+    {
+      "uuid": "720be189-a4a5-4b0c-a25c-49233ff388a4",
+      "concept": "usaspending.usfs.minnesota_place_of_performance_obligations",
+      "family_patterns": [
+        "usaspending.usfs.minnesota_place_of_performance_obligations"
+      ],
+      "status": "docket-only",
+      "unit": "usd_millions",
+      "cadence": "year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "name": "United States"
+      },
+      "entity": null,
+      "sources": [],
+      "aliases": [],
+      "source_concepts": [],
+      "rid_patterns": [],
+      "first_observed_period": null,
+      "last_observed_period": null,
+      "observation_count": 0
+    }
+  ]
+}
