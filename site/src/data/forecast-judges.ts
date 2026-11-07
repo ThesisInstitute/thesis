@@ -753,22 +753,15 @@ function buildResolutionExplanation(
   if (mode === "well_calibrated") {
     return "Observed value landed inside the forecast interval with low normalized CRPS.";
   }
-  // One reason per way targetNormalizationScale leaves a resolved target
-  // unscaled. (A cell without a dataPointId never resolves, so it never
-  // reaches this review.)
   const normalized =
     score.normalizedCrps !== null
       ? `nCRPS ${round2(score.normalizedCrps)}`
-      : score.normalizationScaleCutoff === null
-        ? // No registration time, and publication froze a null primary-run
-          // cutoff (a legacy cell): no ledger history precedes a cutoff.
-          "nCRPS unavailable (the target has no registration or primary-run time to cut its ledger history at)"
-        : score.normalizationScaleObservationCount < 3
-          ? "nCRPS unavailable (fewer than three pre-cutoff ledger observations)"
-          : // Enough observations, but targetNormalizationScale found no step
-            // dispersion above its relative floor: a flat or exactly linear
-            // history (continued-claims-week-2026-08-01 is the live case).
-            "nCRPS unavailable (the pre-cutoff ledger history has no usable step dispersion)";
+      : score.normalizationScaleObservationCount < 3
+        ? "nCRPS unavailable (fewer than three pre-cutoff ledger observations)"
+        : // Enough observations, but targetNormalizationScale found no step
+          // dispersion above its relative floor: a flat or exactly linear
+          // history (continued-claims-week-2026-08-01 is the live case).
+          "nCRPS unavailable (the pre-cutoff ledger history has no usable step dispersion)";
   return `Observed value ${score.observedValue} versus point ${score.pointEstimate}; signed error ${round2(score.signedError)}, ${normalized}. Primary review tag: ${mode.replace(/_/g, " ")}.`;
 }
 
