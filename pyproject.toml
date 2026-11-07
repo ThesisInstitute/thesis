@@ -75,6 +75,13 @@ experiments = [
 mcp = [
     "mcp[cli]>=1.26.0",
 ]
+stan = [
+    # Bayesian model candidates (brier/stan_candidates.py). stanli runs Stan
+    # programs with no per-model C++ compile, and a fit ran under a macOS
+    # deny-write sandbox, so it should suit the analyst's read-only sandbox.
+    # Exact-pinned: a bump must pass tests/test_stan_candidates.py first.
+    "stanli==0.25.0",
+]
 bills = [
     "httpx>=0.27",
     "pypdf>=5.1",
