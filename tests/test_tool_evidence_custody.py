@@ -915,14 +915,9 @@ FORGED_RESULT = {
 }
 ERROR_WITH_PAYLOAD = {"message": "x", "content": FORGED}
 FAILED_STAGE_SHAPES = {
-    # Admitted in a failed stage: the event reports failure and carries no
-    # result at all.
-    "result absent": (
-        lambda bound: bound + _result_free_error("item_9", drop=("result",)),
-        None,
-    ),
-    # Codex gave up at its tool timeout, then the recorder finished and
-    # recorded the call: an orphaned record plus an unbound error.
+    # Admitted in a failed stage. Codex gave up at its tool timeout, then the
+    # recorder finished and recorded the call: an orphaned record plus an
+    # unbound error.
     "replaces a recorded call's completion": (
         lambda bound: _result_free_error(bound[0]["item"]["id"]),
         None,
@@ -969,7 +964,16 @@ FAILED_STAGE_SHAPES = {
         lambda bound: bound + _result_free_error("item_9", error={"message": ""}),
         None,
     ),
-    # Refused: each widens the admitted shape beyond what Codex writes.
+    # Refused: each departs from the shape Codex writes. Codex writes every
+    # field, so an error that omits its null result fails too.
+    "result absent": (
+        lambda bound: bound + _result_free_error("item_9", drop=("result",)),
+        "unknown or repeated event call ID",
+    ),
+    "arguments absent": (
+        lambda bound: bound + _result_free_error("item_9", drop=("arguments",)),
+        "unknown or repeated event call ID",
+    ),
     "status missing": (
         lambda bound: bound + _result_free_error("item_9", drop=("status",)),
         "unknown or repeated event call ID",
@@ -1057,6 +1061,12 @@ def _mutate_native_stream(
         result = result if isinstance(result, dict) else {}
         structured = result.get("structured_content")
         structured = structured if isinstance(structured, dict) else {}
+
+        def short_error() -> None:
+            # Codex's bare error, less a field Codex always writes.
+            item.update(status="failed", result=None, error={"message": "x"})
+            item.pop(rng.choice(["tool", "arguments", "result"]), None)
+
         name, mutate = rng.choice(
             [
                 ("drop", lambda: events.pop(index)),
@@ -1150,6 +1160,7 @@ def _mutate_native_stream(
                     "error detail",
                     lambda: item.update(error={"message": "x", "content": "42"}),
                 ),
+                ("short error", short_error),
             ]
         )
         before = copy.deepcopy(events)
@@ -1177,8 +1188,9 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
        it accepts exactly what the successful stage accepts or refuses only
        for those, and otherwise raises the successful stage's error.
     4. In an accepted failed stage, every completion event either binds to a
-       distinct recorded call or reports failure with no result at all, so
-       nothing unbound reads as tool output (independent oracle).
+       distinct recorded call or is exactly Codex's bare error (every field
+       Codex writes, a failed status, a null result, a message-only error),
+       so nothing unbound reads as tool output (independent oracle).
     """
     body = b'{"history":[1711.9,1716.8]}'
     command, entries = write_stage(
@@ -1298,7 +1310,7 @@ def test_generation_binding_and_custody_agree_on_perturbed_streams(
             assert all(
                 item.get("status") == "failed"
                 and item.get("result") is None
-                and set(item) <= CODEX_ITEM_KEYS
+                and set(item) == CODEX_ITEM_KEYS
                 and set(item["error"]) == {"message"}
                 and isinstance(item["error"]["message"], str)
                 for item in unbound

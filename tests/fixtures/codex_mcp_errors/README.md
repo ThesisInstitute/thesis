@@ -27,8 +27,8 @@ The message comes from `format!("tool call error: {e:?}")` in the same file,
 wrapping the ``tool call failed for `{server}/{tool}` `` context added in
 `codex-rs/codex-mcp/src/connection_manager.rs`.
 
-`scripts/tool_evidence.py` admits an unbound error only if its item has no
-field outside the ones these lines carry (`CODEX_MCP_ITEM_FIELDS`), and
+`scripts/tool_evidence.py` admits an unbound error only if its item carries
+exactly the fields these lines carry (`CODEX_MCP_ITEM_FIELDS`), and
 `test_codex_error_events_fixture_is_the_shape_codex_writes` asserts that the
 two sets are equal. Re-record these lines whenever the Codex version CI
 installs changes.
