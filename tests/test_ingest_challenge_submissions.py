@@ -1112,7 +1112,9 @@ def test_non_finite_extension_values_never_reach_the_records(
 
     records = run_ingest(submission_repo)
     assert challengers_of(records) == ["github:fixture-user", "github:nan-user"]
-    row = next(record for record in records if record["challenger"] == "github:nan-user")
+    row = next(
+        record for record in records if record["challenger"] == "github:nan-user"
+    )
     assert row["quantiles"] == submission_repo["quantiles"]
     assert "ignoredExtension" not in row
     json.loads(json.dumps(records, allow_nan=False))
