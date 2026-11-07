@@ -716,6 +716,16 @@ describe("target normalization scale", () => {
         expect(band.meanNormalizedCrps).toBeLessThan(1_000_000);
       }
     }
+    // The published review names the real reason. Three observations
+    // exist, so "fewer than three" would misstate why nCRPS is missing.
+    const degenerateReview = judgeExport.postResolution.find(
+      (row) => row.runId === degenerateScore?.runId,
+    );
+    expect(degenerateScore?.normalizationScaleObservationCount).toBe(3);
+    expect(degenerateReview?.explanation).toContain(
+      "nCRPS unavailable (the pre-cutoff ledger history has no usable step dispersion)",
+    );
+    expect(degenerateReview?.explanation).not.toContain("fewer than three");
   });
 
   it("keeps floating-point-zero dispersion out of Strategy Lab aggregates", () => {

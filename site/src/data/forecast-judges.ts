@@ -754,9 +754,14 @@ function buildResolutionExplanation(
     return "Observed value landed inside the forecast interval with low normalized CRPS.";
   }
   const normalized =
-    score.normalizedCrps === null
-      ? "nCRPS unavailable (fewer than three pre-cutoff ledger observations)"
-      : `nCRPS ${round2(score.normalizedCrps)}`;
+    score.normalizedCrps !== null
+      ? `nCRPS ${round2(score.normalizedCrps)}`
+      : score.normalizationScaleObservationCount < 3
+        ? "nCRPS unavailable (fewer than three pre-cutoff ledger observations)"
+        : // Enough observations, but targetNormalizationScale found no step
+          // dispersion above its relative floor: a flat or exactly linear
+          // history (continued-claims-week-2026-08-01 is the live case).
+          "nCRPS unavailable (the pre-cutoff ledger history has no usable step dispersion)";
   return `Observed value ${score.observedValue} versus point ${score.pointEstimate}; signed error ${round2(score.signedError)}, ${normalized}. Primary review tag: ${mode.replace(/_/g, " ")}.`;
 }
 
