@@ -9211,9 +9211,15 @@ def bls_ledger_unit_conflict(
 def _report_run_refusals(
     unit_refusals: list[str],
     claims_correction_refusals: list[str],
-    restore_refusals: Sequence[str] = (),
+    restore_refusals: Sequence[str],
 ) -> int:
-    """Report every refusal list; ``EXIT_REFUSED_ROWS`` if any has an entry."""
+    """Report every refusal list; ``EXIT_REFUSED_ROWS`` if any has an entry.
+
+    Every list is required: a call that dropped one would let that refusal
+    end the run green. A run that refused rows for other reasons exits
+    ``EXIT_REFUSED_ROWS`` on that path without this summary; each refusal
+    was printed as it happened.
+    """
 
     status = _report_ledger_unit_refusals(unit_refusals)
     if claims_correction_refusals:
@@ -9225,15 +9231,30 @@ def _report_run_refusals(
             print(f"  refused: {line}")
         status = EXIT_REFUSED_ROWS
     if restore_refusals:
+        # Each fault printed once, on its RESTORE REFUSED line; an indented
+        # copy here would read as a verdict on a target (_refuse_restore).
         print(
-            f"{len(restore_refusals)} fault(s) kept the run from rebuilding a "
-            "restatement run's records; fix what each names, and the next run "
-            "with pending work rebuilds them"
+            f"{len(restore_refusals)} RESTORE REFUSED fault(s) above kept the "
+            "run from rebuilding a restatement run's records; fix what each "
+            "names, and the next run with pending work rebuilds them"
         )
-        for line in restore_refusals:
-            print(f"  refused: {line}")
         status = EXIT_REFUSED_ROWS
     return status
+
+
+def _refuse_restore(exc: Exception, refusals: list[str]) -> None:
+    """Print a restore fault on one line and keep it for the run's summary.
+
+    resolution_status reads two-space-indented lines as verdicts on targets,
+    and resolution_alert names each RESTORE REFUSED line. So a fault prints
+    once, at the start of its line, with its line breaks joined: one that
+    quotes a reference, or carries a newline and an indented "resolve" line,
+    cannot pass for a target's line.
+    """
+
+    fault = " ".join(str(exc).splitlines())
+    print(f"{RESTORE_REFUSED} {fault}")
+    refusals.append(fault)
 
 
 def _report_ledger_unit_refusals(refusals: list[str]) -> int:
@@ -17049,46 +17070,82 @@ def assert_restates(
         raise refuse("changes more than the value and unit")
 
 
+def _restates(row: dict[str, Any], index: int) -> bool:
+    """Whether a row is a unit restatement; refuses any other ``relation``.
+
+    ledger-restatements.ts ``isUnitRestatement``: a row with no ``relation``
+    restates nothing, and ``null`` counts as a relation the site does not read.
+    """
+
+    version = _json_object(row.get("assertionVersion"))
+    if "relation" not in version:
+        return False
+    if version["relation"] != UNIT_RESTATEMENT:
+        raise ledger_units.LedgerUnitError(
+            f"line {index + 1} has assertionVersion.relation "
+            f"{version['relation']!r}, which the site does not read"
+        )
+    return True
+
+
+def _superseded_id(row: dict[str, Any], index: int) -> str | None:
+    """The id a row supersedes as the site reads it, or None for a falsy one.
+
+    ledger-current-view.ts ``supersededAssertionIdOf``: the site refuses a
+    truthy ``supersedes`` that is not a string rather than coerce it with
+    str(), as receipt would, and reads a falsy one as naming no row.
+    """
+
+    replaced = _json_object(row.get("assertionVersion")).get("supersedes")
+    if not replaced:
+        return None
+    if not isinstance(replaced, str):
+        raise ledger_units.LedgerUnitError(
+            f"line {index + 1} has assertionVersion.supersedes "
+            f"{replaced!r}, not a string, which the site refuses rather "
+            "than coerce"
+        )
+    return replaced
+
+
 def check_restatements(lines: list[str]) -> list[dict[str, Any]]:
     """Check a ledger's restatements and recorded pairs as the site does.
 
-    ledger-restatements.ts ``foldLedgerRestatements``: a restatement names an
-    earlier row by its effective id and passes ``assert_restates`` against
-    that row's exact line, any other ``relation`` is refused, and a recorded
-    pair on any other row must state its value. Returns the restatements.
+    In the site's order, so a ledger with more than one defect fails here for
+    the same first reason as there. thesis-log.ts
+    ``mapPolicyEngineLedgerRows`` reads every row first: its ``relation``
+    (any but ``unit_restatement`` is refused) and, on a row that restates
+    nothing, the version it supersedes (``supersededContentAddresses``); then
+    each such row's recorded pair, which must state its value
+    (``recordedPair``). ledger-restatements.ts ``foldLedgerRestatements``
+    then holds each restatement to an earlier row, named by its effective id,
+    and to ``assert_restates`` against that row's exact line. Returns the
+    restatements.
     """
 
+    rows = [json.loads(line) for line in lines]
+    restating: list[bool] = []
+    for index, row in enumerate(rows):
+        restating.append(_restates(row, index))
+        if not restating[index]:
+            _superseded_id(row, index)
+    for index, row in enumerate(rows):
+        if not restating[index]:
+            check_recorded_pair(row)
     line_of_id: dict[str, int] = {}
     restatements: list[dict[str, Any]] = []
-    for index, line in enumerate(lines):
-        row = json.loads(line)
-        version = _json_object(row.get("assertionVersion"))
-        if "relation" in version:
-            if version["relation"] != UNIT_RESTATEMENT:
-                raise ledger_units.LedgerUnitError(
-                    f"line {index + 1} has assertionVersion.relation "
-                    f"{version['relation']!r}, which the site does not read"
-                )
-            replaced = version.get("supersedes")
-            # The site refuses a truthy supersedes that is not a string rather
-            # than coerce it with str(), as receipt would, and reads a falsy one
-            # as naming no row (ledger-current-view.ts supersededAssertionIdOf).
-            if replaced and not isinstance(replaced, str):
-                raise ledger_units.LedgerUnitError(
-                    f"line {index + 1} has assertionVersion.supersedes "
-                    f"{replaced!r}, not a string, which the site refuses rather "
-                    "than coerce"
-                )
-            prior = line_of_id.get(replaced) if isinstance(replaced, str) else None
+    for index, row in enumerate(rows):
+        if restating[index]:
+            replaced = _superseded_id(row, index)
+            prior = None if replaced is None else line_of_id.get(replaced)
             if prior is None:
+                named = _json_object(row.get("assertionVersion")).get("supersedes")
                 raise ledger_units.LedgerUnitError(
-                    f"line {index + 1} restates {replaced!r}, which no earlier "
+                    f"line {index + 1} restates {named!r}, which no earlier "
                     "row holds"
                 )
-            assert_restates(json.loads(lines[prior]), lines[prior], row)
+            assert_restates(rows[prior], lines[prior], row)
             restatements.append(row)
-        else:
-            check_recorded_pair(row)
         line_of_id[effective_assertion_id(row)] = index
     return restatements
 
@@ -17230,6 +17287,11 @@ def restatement_manifest(
     }
 
 
+# The UTC timestamp utc_now stamps, in ASCII digits: the only retrievedAt a
+# restatement's run directory may come from.
+_RUN_STAMP = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
+
+
 def restore_restatement_runs(
     lines: list[str], *, ledger_repo: str, ledger_branch: str, write: bool = True
 ) -> list[pathlib.Path]:
@@ -17250,7 +17312,18 @@ def restore_restatement_runs(
     for index, row in enumerate(rows):
         version = _json_object(row.get("assertionVersion"))
         if version.get("relation") == UNIT_RESTATEMENT:
-            run_dir = resolution_run_dir(str(row.get("retrievedAt")))
+            retrieved_at = row.get("retrievedAt")
+            # The run directory comes from this timestamp, so only the shape
+            # utc_now stamps may name one: "/2026-11-04T00:00:00Z" would put
+            # it outside the repository.
+            if not isinstance(retrieved_at, str) or not _RUN_STAMP.fullmatch(
+                retrieved_at
+            ):
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} has retrievedAt {retrieved_at!r}, which "
+                    "names no run directory"
+                )
+            run_dir = resolution_run_dir(retrieved_at)
             path = ROOT / str(_json_object(row.get("responseArchive")).get("path"))
             if path.parent != run_dir / "responses":
                 raise ledger_units.LedgerUnitError(
@@ -18117,18 +18190,19 @@ def _main() -> int:
     ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
     # Like corrections, this rides on runs with pending work: a run with
-    # none exits above, before reading the ledger. A records fault costs no
-    # resolutions: the run reports it, resolves the rest, and exits
-    # EXIT_REFUSED_ROWS, so the workflow publishes what it appended and then
-    # fails the job.
+    # none exits above, before reading the ledger. A records, ledger or
+    # custody fault costs no resolutions: the run reports it, resolves the
+    # rest, and exits EXIT_REFUSED_ROWS, so the workflow publishes what it
+    # appended and then fails the job. The restore removes a run directory
+    # it built in part, so the next run starts clean. Anything else (a full
+    # disk, a bug) still stops the run.
     restore_refusals: list[str] = []
     try:
         report_restored_runs(
             [line for line in content.split("\n") if line.strip()], args
         )
-    except ledger_units.LedgerUnitError as exc:
-        print(f"{RESTORE_REFUSED} {exc}")
-        restore_refusals.append(str(exc))
+    except (ledger_units.LedgerUnitError, CustodyError) as exc:
+        _refuse_restore(exc, restore_refusals)
     refuse_a_scaled_ledger(ledger_rows)
     # References refused because their fact would give a Chronicle lineage a
     # second unit. The rest of the run still appends; the run then exits

@@ -54,6 +54,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from resolution_status import _plain, parse_resolver_log  # noqa: E402
 
 REFUSED_TITLE = "Resolution rows refused"
+# A refused-rows run whose only exit-3 cause was a restore fault.
+RESTORE_TITLE = "Resolution records not rebuilt"
 FAILED_TITLE = "Resolution loop failed"
 # The resolver lines whose rows make resolve_pending.main return
 # EXIT_REFUSED_ROWS, by the code resolution_status gives them.
@@ -192,7 +194,14 @@ def build_alert(
             head = "The resolve run published what was new"
         else:
             head = "The resolve run had nothing new to publish"
-        lines = [f"{head}, then failed on refused rows: {run_url}", ""]
+        # A run red only for a restore fault refused no row, so it says so.
+        fault_only = bool(faults) and not rows
+        why = (
+            "could not rebuild a restatement run's records"
+            if fault_only
+            else "failed on refused rows"
+        )
+        lines = [f"{head}, then {why}: {run_url}", ""]
         if appended:
             lines.append(
                 f"It appended {appended.group(1)} observation(s) to "
@@ -210,15 +219,18 @@ def build_alert(
             )
         if faults:
             lines += _fault_lines(faults)
-        lines += [
-            "",
-            "A refused row stays pending until its registration or the ledger "
-            "lineage is fixed. Every overdue forecast's reason is on the "
-            "resolution-status page.",
-        ]
+        lines.append("")
+        if not fault_only:
+            lines.append(
+                "A refused row stays pending until its registration or the "
+                "ledger lineage is fixed."
+            )
+        lines.append(
+            "Every overdue forecast's reason is on the resolution-status page."
+        )
         return {
             "kind": "refused_rows",
-            "title": f"{REFUSED_TITLE} {date}",
+            "title": f"{RESTORE_TITLE if fault_only else REFUSED_TITLE} {date}",
             "body": _bounded(lines),
             "refused": [ref for ref, _reason in rows],
         }

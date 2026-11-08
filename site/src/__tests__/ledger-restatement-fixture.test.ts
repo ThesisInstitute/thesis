@@ -69,10 +69,17 @@ const REFUSAL_KINDS: ReadonlyArray<readonly [string, RegExp]> = [
   ["restated pair", /^restatement of .+ records .+ but the row says .+$/],
   ["archive", /^restatement of .+ does not archive the exact line it restates$/],
   ["content", /^restatement of .+ changes more than the value and unit$/],
-  ["pair not a number", /records .+, which is not a number in a scaled unit$/],
-  ["pair unit", /records .+ but stores ["'][^"']*["']$/],
-  ["pair value", new RegExp(String.raw`records ${NUMBER} .+ but stores ${NUMBER}$`)],
+  ["pair not a number", /^\S+ records .+, which is not a number in a scaled unit$/],
+  ["pair unit", /^\S+ records .+ but stores ["'][^"']*["']$/],
+  ["pair value", new RegExp(String.raw`^\S+ records ${NUMBER} .+ but stores ${NUMBER}$`)],
 ];
+
+// Kinds whose messages name no row on the site's side: those checks read a
+// row's assertion version, not the row. Every other refusal names one.
+const UNNAMED_KINDS: ReadonlySet<string> = new Set([
+  "relation",
+  "supersedes not a string",
+]);
 
 // The site refuses a malformed supersedes where it reads assertion versions,
 // before the restatement checks, so with that module's error.
@@ -87,8 +94,7 @@ function refusalKind(message: string): string {
   return kinds[0][0];
 }
 
-// The row a refusal names: its line, or its record id. The site's relation
-// and supersedes messages name neither.
+// The row a refusal names: its line, or its record id.
 function subjectOf(message: string): string | null {
   const match =
     /^line (\d+) /.exec(message) ??
@@ -128,8 +134,10 @@ describe("the restatement fixture", () => {
         expect(thrown).toBeInstanceOf(errorOf(kind));
         const message = (thrown as Error).message;
         expect(refusalKind(message)).toBe(kind);
-        // Both refuse the same row, where the site's message names one.
-        if (subjectOf(message) !== null) {
+        // Both refuse the same row. The kind decides whether a message must
+        // name one, so a message that lost its row fails rather than skips.
+        if (!UNNAMED_KINDS.has(kind)) {
+          expect(subjectOf(message), message).not.toBeNull();
           expect(subjectOf(message)).toBe(subjectOf(item.port.refuses));
         }
         return;
