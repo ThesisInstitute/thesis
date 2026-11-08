@@ -1068,8 +1068,21 @@ def test_main_refuses_bea_current_table_after_registered_release_day_literal(
     monkeypatch.setattr(
         resolve_pending,
         "fetch_bea_release_page",
-        lambda *_args: pytest.fail("late capture must fail before any fetch"),
+        lambda *_args: pytest.fail("late capture must never read the live table"),
     )
+    # After the release day only BEA's Data Archive is read. Here the archive
+    # lists the release's folder but answers the workbook URL with a web page,
+    # so the archive leg refuses too (tests/test_bea_archive_first_print.py).
+    archive_index = (
+        ROOT / "tests" / "fixtures" / "bea_archive" / "index-2026-q2.json"
+    ).read_bytes()
+
+    def archive_get(url: str) -> tuple[bytes, dict[str, str], str, str]:
+        if url == resolve_pending.bea_archive_index_url("2026-04"):
+            return archive_index, {"content-type": "application/json"}, "t", url
+        return b"<!DOCTYPE html>", {"content-type": "text/html"}, "t", url
+
+    monkeypatch.setattr(resolve_pending, "bea_archive_http_get", archive_get)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
 
     assert resolve_pending.main() == 0
@@ -1077,7 +1090,9 @@ def test_main_refuses_bea_current_table_after_registered_release_day_literal(
     output = capsys.readouterr().out
     assert (
         f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — "
-        "registered release day was 2026-07-30"
+        "registered release day was 2026-07-30; BEA's archive gives no "
+        "first-print custody: the workbook URL answered with 'text/html', not "
+        "a workbook"
     ) in output
     assert "nothing new to record" in output
 

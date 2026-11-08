@@ -2141,6 +2141,653 @@ def bea_ita_release_snapshot_envelope(
     return canonical_bytes(envelope) + b"\n"
 
 
+# BEA Data Archive leg. The live leg above reads BEA's current tables, which
+# BEA replaces at each later estimate, so it captures a cell only on the
+# registered release day. BEA also keeps every GDP release's NIPA tables as
+# they were published. Its Data Archive holds one folder per estimate, named
+# for the estimate and the day BEA released it
+# (GDP_and_PI/2026/Q2/Advance_July-30-2026), and BEA's own description of the
+# archive says these folders "contain the NIPA tables that were published at
+# the time of the previous GDP news releases". A folder's section workbook is
+# official bytes that BEA itself dates: on 2026-11-08 each of the eight
+# Section 5 workbooks checked (the Advance folders for 2024 Q4, 2025 Q1,
+# 2025 Q4 and 2026 Q1-Q3, one Second and one Third) carried an HTTP
+# Last-Modified on its own release day (tests/fixtures/bea_archive/README.md).
+# Once a registered release day has passed with no live capture, a pending
+# cell reads that day's Advance folder, and refuses when the archive's index,
+# the workbook's dates or its table disagree with the registration.
+BEA_ARCHIVE_ALLOWED_HOSTS = ("apps.bea.gov",)
+BEA_ARCHIVE_LANDING_URL = "https://apps.bea.gov/histdata/"
+BEA_ARCHIVE_INDEX_URL = "https://apps.bea.gov/histdata/core/data/Fea_DisplayChildrenC/"
+BEA_ARCHIVE_FILES_URL = "https://apps.bea.gov/histdata/Files/Releases/GDP_and_PI"
+# The index names folders by their server path under this root.
+BEA_ARCHIVE_SERVER_ROOT = (
+    "/Inetpub/wwwroot/website/website/HistData/Files/Releases/GDP_and_PI"
+)
+# The archive's id for "National Accounts (NIPA)", whose folders follow
+# BEA_ARCHIVE_FOLDER_PATTERN. The index check authenticates both.
+BEA_ARCHIVE_NIPA_MAIN_ID = "7"
+BEA_ARCHIVE_MAIN_NAME = "National Accounts (NIPA)"
+BEA_ARCHIVE_FOLDER_PATTERN = "GDP_and_PI\\dataYear\\Quarter\\vintage_NewReleaseDate"
+# The registered BEA contracts name the GDP advance release as the first print.
+BEA_ARCHIVE_FIRST_ESTIMATE = "Advance"
+BEA_ARCHIVE_MAX_WORKBOOK_BYTES = 25_000_000
+BEA_ARCHIVE_MAX_EXPANDED_BYTES = 100_000_000
+BEA_ARCHIVE_USER_AGENT = "thesis-resolver/1 (app.thesisinstitute.org)"
+BEA_ARCHIVE_MISSED = "FIRST-PRINT WINDOW MISSED (refusing)"
+# Each archive row prints BEA's series code beside its line and label, which
+# ties the workbook row to the line the live leg reads from the iTable.
+BEA_ARCHIVE_ADAPTERS: dict[str, dict[str, str]] = {
+    "bea.private_nonresidential_fixed_investment": {
+        "table_title": "Table 5.3.5. Private Fixed Investment by Type",
+        "series_code": "A008RC",
+    },
+    "bea.research_and_development_fixed_investment": {
+        "table_title": "Table 5.3.5. Private Fixed Investment by Type",
+        "series_code": "Y006RC",
+    },
+}
+BEA_ARCHIVE_EVIDENCE_NOTES = (
+    "First print for {{period}} read from {{source_url}}, the workbook in BEA's "
+    "Data Archive folder for the GDP advance estimate released {release_day}. "
+    "BEA's archive index lists that folder as the quarter's only advance "
+    "estimate and lists no estimate dated earlier, the workbook states "
+    '"{published_line}", and BEA\'s server gives its last modification as '
+    "{last_modified}, on the release day. The resolver read it after the "
+    "release day because no live capture landed that day."
+)
+_BEA_ARCHIVE_ESTIMATE_FOLDER = re.compile(r"([A-Za-z]+)_([A-Za-z]+)-(\d{2})-(\d{4})")
+
+
+def bea_archive_estimate_folder(
+    release_day: dt.date, estimate: str = BEA_ARCHIVE_FIRST_ESTIMATE
+) -> str:
+    """BEA's folder name for one estimate, e.g. ``Advance_July-30-2026``."""
+
+    return f"{estimate}_{release_day:%B}-{release_day:%d}-{release_day.year}"
+
+
+def bea_archive_index_url(period: str) -> str:
+    """The archive's index of one quarter's estimate folders."""
+
+    year, quarter = _bea_quarter(period)
+    query = urllib.parse.urlencode(
+        {
+            "HistMainId": BEA_ARCHIVE_NIPA_MAIN_ID,
+            "thePath": f"{BEA_ARCHIVE_SERVER_ROOT}\\{year}\\Q{quarter}",
+            "getFiles": "false",
+            "getDirs": "true",
+        }
+    )
+    return f"{BEA_ARCHIVE_INDEX_URL}?{query}"
+
+
+def bea_archive_workbook_url(
+    spec: Mapping[str, Any], period: str, release_day: dt.date
+) -> str:
+    """The section workbook in the registered release day's Advance folder."""
+
+    match = re.fullmatch(r"T(\d)\d{4}", str(spec["table_id"]))
+    if match is None:
+        raise ValueError(f"not a NIPA table id: {spec['table_id']!r}")
+    year, quarter = _bea_quarter(period)
+    return (
+        f"{BEA_ARCHIVE_FILES_URL}/{year}/Q{quarter}/"
+        f"{bea_archive_estimate_folder(release_day)}/"
+        f"Section{match.group(1)}all_xls.xlsx"
+    )
+
+
+def bea_archive_index_check(
+    raw: bytes, period: str, release_day: dt.date
+) -> tuple[str | None, str | None]:
+    """(deferral, refusal) for BEA's index of one quarter's estimate folders.
+
+    It passes only when the index lists exactly one Advance folder, that
+    folder names the registered release day, and no estimate is dated
+    earlier. An index that lists no estimate for the quarter defers: BEA says
+    a release's archive copy is posted "shortly after the release".
+    """
+
+    try:
+        index = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError, RecursionError):
+        return None, "the archive index is not UTF-8 JSON"
+    if not isinstance(index, dict):
+        return None, "the archive index is not a JSON object"
+    if index.get("MainName") != BEA_ARCHIVE_MAIN_NAME:
+        return None, (
+            f"the archive index names {index.get('MainName')!r}, not "
+            f"{BEA_ARCHIVE_MAIN_NAME!r}"
+        )
+    if index.get("FolderPattern") != BEA_ARCHIVE_FOLDER_PATTERN:
+        return None, (
+            f"the archive index's folder pattern is "
+            f"{index.get('FolderPattern')!r}, not {BEA_ARCHIVE_FOLDER_PATTERN!r}"
+        )
+    paths = index.get("FileArray")
+    if paths is None:
+        paths = []
+    if not isinstance(paths, list) or not all(isinstance(p, str) for p in paths):
+        return None, "the archive index's folder list is malformed"
+    year, quarter = _bea_quarter(period)
+    root = f"{BEA_ARCHIVE_SERVER_ROOT}\\{year}\\Q{quarter}\\"
+    estimates: list[tuple[dt.date, str]] = []
+    for path in paths:
+        if not path.startswith(root):
+            return None, (
+                f"the archive index lists {path!r}, outside {year} Q{quarter}"
+            )
+        folder = path[len(root) :]
+        if "\\" in folder:
+            # A subfolder of an estimate, such as UND.
+            continue
+        match = _BEA_ARCHIVE_ESTIMATE_FOLDER.fullmatch(folder)
+        if match is None:
+            return None, f"archive folder {folder!r} names no estimate and day"
+        try:
+            day = dt.datetime.strptime(" ".join(match.group(2, 3, 4)), "%B %d %Y")
+        except ValueError:
+            return None, f"archive folder {folder!r} names no calendar day"
+        estimates.append((day.date(), folder))
+    if not estimates:
+        return f"the archive index lists no estimate for {year} Q{quarter} yet", None
+    expected = bea_archive_estimate_folder(release_day)
+    advance = sorted(
+        folder
+        for _day, folder in estimates
+        if folder.startswith(f"{BEA_ARCHIVE_FIRST_ESTIMATE}_")
+    )
+    if advance != [expected]:
+        return None, (
+            f"the archive index lists Advance folders {advance!r}, not exactly "
+            f"the registered {expected!r}"
+        )
+    earlier = sorted(folder for day, folder in estimates if day < release_day)
+    if earlier:
+        return None, (
+            "the archive index lists estimates dated before the registered "
+            f"release day: {earlier!r}"
+        )
+    return None, None
+
+
+def bea_archive_http_get(url: str) -> tuple[bytes, dict[str, str], str, str]:
+    """(body, lower-cased headers, retrievedAt, finalUrl), pinned to BEA."""
+
+    _require_allowed_host(url, BEA_ARCHIVE_ALLOWED_HOSTS)
+    request = urllib.request.Request(
+        url, headers={"User-Agent": BEA_ARCHIVE_USER_AGENT}
+    )
+    retrieved_at = utc_now()
+    opener = urllib.request.build_opener(
+        _PinnedRedirectHandler(BEA_ARCHIVE_ALLOWED_HOSTS)
+    )
+    with opener.open(request, timeout=120) as response:
+        final_url = response.geturl()
+        _require_allowed_host(final_url, BEA_ARCHIVE_ALLOWED_HOSTS)
+        headers = {key.lower(): value for key, value in response.headers.items()}
+        body = response.read(BEA_ARCHIVE_MAX_WORKBOOK_BYTES + 1)
+    return body, headers, retrieved_at, final_url
+
+
+def fetch_bea_archive(
+    url: str,
+) -> tuple[bytes | None, dict[str, str], str, str, str | None]:
+    """One archive read; a transport failure keeps its error and no body."""
+
+    retrieved_at = utc_now()
+    try:
+        body, headers, retrieved_at, final_url = bea_archive_http_get(url)
+    except (OSError, ValueError, http.client.HTTPException) as exc:
+        return None, {}, retrieved_at, url, f"{type(exc).__name__}: {exc}"
+    return body, headers, retrieved_at, final_url, None
+
+
+def bea_archive_posting_refusal(
+    last_modified: str | None, release_day: dt.date
+) -> str | None:
+    """Refuse a workbook that BEA's server does not date to the release day.
+
+    The day is the UTC calendar day, the reading of registered windows the
+    resolver and the custody witness use everywhere.
+    """
+
+    from email.utils import parsedate_to_datetime  # noqa: PLC0415 - stdlib
+
+    if not last_modified:
+        return "the archive workbook carries no Last-Modified header"
+    try:
+        modified = parsedate_to_datetime(last_modified)
+    except (TypeError, ValueError, IndexError):
+        return f"the archive workbook's Last-Modified {last_modified!r} is unreadable"
+    if modified.tzinfo is None:
+        modified = modified.replace(tzinfo=dt.timezone.utc)
+    modified_day = modified.astimezone(dt.timezone.utc).date()
+    if modified_day != release_day:
+        return (
+            f"the archive workbook was last modified {modified_day}, not on the "
+            f"registered release day {release_day}"
+        )
+    return None
+
+
+def bea_archive_sheet_cells(
+    raw: bytes, sheet_name: str
+) -> tuple[dict[tuple[int, int], Any] | None, str | None]:
+    """Read one worksheet of a BEA archive workbook, failing closed.
+
+    Keys are zero-based (row, column). Text cells read as str, numbers as
+    float; a formula cell refuses.
+    """
+
+    if len(raw) > BEA_ARCHIVE_MAX_WORKBOOK_BYTES:
+        return None, "the archive workbook exceeds the 25 MB adapter limit"
+    try:
+        archive = zipfile.ZipFile(io.BytesIO(raw))
+    except Exception as exc:  # noqa: BLE001 - malformed bytes refuse
+        return None, f"the archive workbook did not open: {exc}"
+    try:
+        with archive:
+            members = archive.infolist()
+            names = [member.filename for member in members]
+            if len(names) != len(set(names)):
+                return None, "the archive workbook contains duplicate ZIP members"
+            if any(member.flag_bits & 0x1 for member in members):
+                return None, "the archive workbook contains encrypted ZIP members"
+            if (
+                sum(member.file_size for member in members)
+                > BEA_ARCHIVE_MAX_EXPANDED_BYTES
+            ):
+                return None, "the archive workbook expands beyond the 100 MB limit"
+            for name in names:
+                member_path = pathlib.PurePosixPath(name)
+                if (
+                    "\\" in name
+                    or member_path.is_absolute()
+                    or ".." in member_path.parts
+                ):
+                    return None, (
+                        f"the archive workbook has an unsafe member path {name!r}"
+                    )
+            workbook = _xlsx_xml(archive, "xl/workbook.xml")
+            relationships = _xlsx_xml(archive, "xl/_rels/workbook.xml.rels")
+            sheets = [
+                sheet
+                for sheet in workbook.iter()
+                if _xlsx_local_name(sheet.tag) == "sheet"
+                and sheet.attrib.get("name") == sheet_name
+            ]
+            if len(sheets) != 1:
+                return None, (
+                    f"expected one {sheet_name!r} sheet in the archive workbook, "
+                    f"found {len(sheets)}"
+                )
+            relationship_id = next(
+                (
+                    value
+                    for key, value in sheets[0].attrib.items()
+                    if _xlsx_local_name(key) == "id"
+                ),
+                None,
+            )
+            relationship = [
+                item
+                for item in relationships.iter()
+                if _xlsx_local_name(item.tag) == "Relationship"
+                and item.attrib.get("Id") == relationship_id
+            ]
+            if len(relationship) != 1:
+                return None, f"sheet {sheet_name!r} has no single relationship"
+            if relationship[0].attrib.get("TargetMode") == "External":
+                return None, f"sheet {sheet_name!r} points outside the workbook"
+            target = relationship[0].attrib.get("Target", "")
+            if target.startswith("/"):
+                sheet_path = target.lstrip("/")
+            else:
+                sheet_path = posixpath.normpath(posixpath.join("xl", target))
+            if not sheet_path.startswith("xl/"):
+                return None, f"sheet {sheet_name!r} points outside xl/"
+            worksheet = _xlsx_xml(archive, sheet_path)
+            shared_strings: list[str] = []
+            if "xl/sharedStrings.xml" in names:
+                shared = _xlsx_xml(archive, "xl/sharedStrings.xml")
+                for item in shared.iter():
+                    if _xlsx_local_name(item.tag) == "si":
+                        shared_strings.append(
+                            "".join(
+                                node.text or ""
+                                for node in item.iter()
+                                if _xlsx_local_name(node.tag) == "t"
+                            )
+                        )
+            cells: dict[tuple[int, int], Any] = {}
+            for cell in worksheet.iter():
+                if _xlsx_local_name(cell.tag) != "c":
+                    continue
+                reference = cell.attrib.get("r", "")
+                row_index, column_index = _xlsx_cell_coordinates(reference)
+                if row_index >= 10_000 or column_index >= 2_000:
+                    return None, f"sheet {sheet_name!r} exceeds the adapter's size"
+                if (row_index, column_index) in cells:
+                    return None, f"duplicate cell reference {reference!r}"
+                if any(_xlsx_local_name(node.tag) == "f" for node in cell):
+                    return None, f"formula cell {reference!r} is not admissible"
+                value_node = next(
+                    (node for node in cell if _xlsx_local_name(node.tag) == "v"),
+                    None,
+                )
+                text = value_node.text if value_node is not None else None
+                cell_type = cell.attrib.get("t")
+                if cell_type == "s":
+                    value: Any = shared_strings[int(str(text))]
+                elif cell_type == "inlineStr":
+                    value = "".join(
+                        node.text or ""
+                        for node in cell.iter()
+                        if _xlsx_local_name(node.tag) == "t"
+                    )
+                elif cell_type in {"str", "e"}:
+                    value = text or ""
+                elif cell_type == "b":
+                    value = text == "1"
+                elif text in {None, ""}:
+                    value = ""
+                elif cell_type in {None, "n"}:
+                    value = float(str(text))
+                else:
+                    return None, f"cell {reference!r} has unknown type {cell_type!r}"
+                cells[(row_index, column_index)] = value
+    except Exception as exc:  # noqa: BLE001 - malformed bytes refuse
+        return None, f"the archive workbook did not parse: {exc}"
+    return cells, None
+
+
+def _bea_archive_text(value: Any) -> str:
+    if isinstance(value, bool):
+        return ""
+    if isinstance(value, float):
+        return str(int(value)) if value.is_integer() else repr(value)
+    return " ".join(str(value).split())
+
+
+def _bea_archive_row_label(value: Any) -> str:
+    # BEA marks a footnote at the end of a workbook label as "\6\".
+    return _bea_archive_text(re.sub(r"\\\d+\\\s*$", "", str(value)))
+
+
+def bea_archive_reading(
+    raw: bytes,
+    spec: Mapping[str, Any],
+    archive_spec: Mapping[str, str],
+    period: str,
+    release_day: dt.date,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Read one quarterly cell from an Advance-folder workbook, failing closed.
+
+    Returns the value with what identifies it: the sheet, row and column, the
+    printed millions, and the publication line the workbook states.
+    """
+
+    sheet_name = f"{spec['table_id']}-Q"
+    cells, refusal = bea_archive_sheet_cells(raw, sheet_name)
+    if refusal:
+        return None, refusal
+    assert cells is not None
+
+    def text(row: int, column: int) -> str:
+        return _bea_archive_text(cells.get((row, column), ""))
+
+    if text(0, 0) != archive_spec["table_title"]:
+        return None, f"unexpected archive table title {text(0, 0)!r}"
+    units = text(1, 0)
+    if "[Millions of dollars]" not in units or (
+        "Seasonally adjusted at annual rates" not in units
+    ):
+        return None, f"unexpected archive unit/basis line {units!r}"
+    year, quarter = _bea_quarter(period)
+    target = f"{year}Q{quarter}"
+    span = re.fullmatch(r"Quarterly data from \d{4}Q[1-4] to (\d{4}Q[1-4])", text(2, 0))
+    if span is None or span.group(1) != target:
+        # An advance estimate's newest quarter is the quarter it estimates.
+        return None, f"archive table span {text(2, 0)!r} does not end at {target}"
+    published_line = text(4, 0)
+    published = re.fullmatch(
+        r"Data published ([A-Za-z]+) (\d{1,2}), (\d{4})", published_line
+    )
+    published_day: dt.date | None = None
+    if published is not None:
+        try:
+            published_day = dt.datetime.strptime(
+                " ".join(published.group(1, 2, 3)), "%B %d %Y"
+            ).date()
+        except ValueError:
+            published_day = None
+    if published_day != release_day:
+        return None, (
+            f"archive workbook states {published_line!r}, not the registered "
+            f"release day {release_day}"
+        )
+    header_rows = sorted(
+        row for (row, column) in cells if column == 0 and text(row, 0) == "Line"
+    )
+    if len(header_rows) != 1:
+        return None, f"expected one archive header row, found {len(header_rows)}"
+    header = header_rows[0]
+    header_columns = sorted(
+        column for (row, column) in cells if row == header and text(row, column)
+    )
+    target_columns = [
+        column for column in header_columns if text(header, column) == target
+    ]
+    if len(target_columns) != 1:
+        return None, (
+            f"expected one {target} archive column, found {len(target_columns)}"
+        )
+    column = target_columns[0]
+    if column != header_columns[-1]:
+        return None, f"the {target} archive column is not the table's newest"
+    line = str(spec["line_number"])
+    rows = sorted(
+        row
+        for (row, cell_column) in cells
+        if cell_column == 0 and row > header and text(row, 0) == line
+    )
+    if len(rows) != 1:
+        return None, f"expected one archive line {line} row, found {len(rows)}"
+    row = rows[0]
+    label = _bea_archive_row_label(cells.get((row, 1), ""))
+    if label != spec["row_label"]:
+        return None, f"archive line {line} is {label!r}, not {spec['row_label']!r}"
+    if text(row, 2) != archive_spec["series_code"]:
+        return None, (
+            f"archive line {line} carries series code {text(row, 2)!r}, not "
+            f"{archive_spec['series_code']!r}"
+        )
+    printed = cells.get((row, column))
+    if isinstance(printed, bool) or not isinstance(printed, float):
+        return None, f"archive line {line} {target} cell is not numeric: {printed!r}"
+    if not math.isfinite(printed) or printed < 0:
+        return None, (
+            f"archive line {line} {target} cell is not a nonnegative finite "
+            f"value: {printed}"
+        )
+    transform = spec.get("value_transform")
+    if transform != {"operation": "multiply", "factor": 0.001}:
+        return None, f"unsupported BEA value transform {transform!r}"
+    return {
+        "value": round(printed * 0.001, 4) + 0.0,
+        "printedMillions": printed,
+        "sheet": sheet_name,
+        "row": row + 1,
+        "column": target,
+        "seriesCode": archive_spec["series_code"],
+        "publishedLine": published_line,
+    }, None
+
+
+def bea_archive_snapshot_envelope(
+    *,
+    spec: Mapping[str, Any],
+    period: str,
+    release_day: dt.date,
+    reading: Mapping[str, Any],
+    index_url: str,
+    index_raw: bytes,
+    index_headers: Mapping[str, str],
+    index_retrieved_at: str,
+    workbook_url: str,
+    workbook_raw: bytes,
+    workbook_headers: Mapping[str, str],
+    workbook_retrieved_at: str,
+) -> bytes:
+    """Archive BEA's index, the whole workbook, both headers and the read."""
+
+    envelope = {
+        "schemaVersion": "bea_archive_snapshot_v1",
+        "index": {
+            "url": index_url,
+            "landingPageUrl": BEA_ARCHIVE_LANDING_URL,
+            "retrievedAt": index_retrieved_at,
+            "headers": dict(sorted(index_headers.items())),
+            "sha256": hashlib.sha256(index_raw).hexdigest(),
+            "bodyBase64": base64.b64encode(index_raw).decode("ascii"),
+        },
+        "workbook": {
+            "url": workbook_url,
+            "landingPageUrl": BEA_ARCHIVE_LANDING_URL,
+            "retrievedAt": workbook_retrieved_at,
+            "headers": dict(sorted(workbook_headers.items())),
+            "bytes": len(workbook_raw),
+            "sha256": hashlib.sha256(workbook_raw).hexdigest(),
+            "bodyBase64": base64.b64encode(workbook_raw).decode("ascii"),
+        },
+        "derived": {
+            "period": period,
+            "releaseDay": release_day.isoformat(),
+            "estimateFolder": bea_archive_estimate_folder(release_day),
+            "sourceSeriesId": spec["series_id"],
+            **dict(reading),
+        },
+    }
+    return canonical_bytes(envelope) + b"\n"
+
+
+@dataclass(frozen=True)
+class BeaArchiveCapture:
+    value: float
+    raw: bytes
+    workbook_url: str
+    retrieved_at: str
+    source_file: str
+    evidence_notes: str
+
+
+def _format_literal(text: str) -> str:
+    return text.replace("{", "{{").replace("}", "}}")
+
+
+def bea_archive_first_print(
+    spec: Mapping[str, Any],
+    archive_spec: Mapping[str, str],
+    period: str,
+    release_day: dt.date,
+    cache: dict[str, tuple[bytes | None, dict[str, str], str, str, str | None]],
+) -> tuple[BeaArchiveCapture | None, str, str]:
+    """Read one cell's first print from BEA's Data Archive after its release day.
+
+    Returns (capture, head, detail). With no capture, the main loop prints
+    ``  <head>: <ref> — <detail>``. A transport failure, or a quarter the
+    index does not list yet, defers. Anything else refuses, because after the
+    release day the archive is the only route to the first print.
+    """
+
+    def missed(reason: str) -> tuple[None, str, str]:
+        return None, BEA_ARCHIVE_MISSED, (
+            f"registered release day was {release_day}; BEA's archive gives no "
+            f"first-print custody: {reason}"
+        )
+
+    index_url = bea_archive_index_url(period)
+    if index_url not in cache:
+        cache[index_url] = fetch_bea_archive(index_url)
+    index_raw, index_headers, index_retrieved_at, index_final_url, error = cache[
+        index_url
+    ]
+    if index_raw is None:
+        return None, "BEA ARCHIVE INDEX fetch failed (deferring)", str(error)
+    if index_final_url != index_url:
+        return missed(f"the index request landed on {index_final_url}")
+    deferral, refusal = bea_archive_index_check(index_raw, period, release_day)
+    if refusal:
+        return missed(refusal)
+    if deferral:
+        return None, "BEA ARCHIVE NOT YET POSTED (deferring)", deferral
+    workbook_url = bea_archive_workbook_url(spec, period, release_day)
+    if workbook_url not in cache:
+        cache[workbook_url] = fetch_bea_archive(workbook_url)
+    workbook_raw, workbook_headers, workbook_retrieved_at, workbook_final_url, error = (
+        cache[workbook_url]
+    )
+    if workbook_raw is None:
+        return None, "BEA ARCHIVE WORKBOOK fetch failed (deferring)", str(error)
+    if workbook_final_url != workbook_url:
+        return missed(f"the workbook request landed on {workbook_final_url}")
+    if not workbook_raw.startswith(b"PK\x03\x04"):
+        return missed(
+            "the workbook URL answered with "
+            f"{workbook_headers.get('content-type')!r}, not a workbook"
+        )
+    posting = bea_archive_posting_refusal(
+        workbook_headers.get("last-modified"), release_day
+    )
+    if posting:
+        return missed(posting)
+    reading, refusal = bea_archive_reading(
+        workbook_raw, spec, archive_spec, period, release_day
+    )
+    if refusal:
+        return missed(refusal)
+    assert reading is not None
+    raw = bea_archive_snapshot_envelope(
+        spec=spec,
+        period=period,
+        release_day=release_day,
+        reading=reading,
+        index_url=index_url,
+        index_raw=index_raw,
+        index_headers=index_headers,
+        index_retrieved_at=index_retrieved_at,
+        workbook_url=workbook_url,
+        workbook_raw=workbook_raw,
+        workbook_headers=workbook_headers,
+        workbook_retrieved_at=workbook_retrieved_at,
+    )
+    folder = bea_archive_estimate_folder(release_day)
+    return (
+        BeaArchiveCapture(
+            value=float(reading["value"]),
+            raw=raw,
+            workbook_url=workbook_url,
+            retrieved_at=max(index_retrieved_at, workbook_retrieved_at),
+            source_file=(
+                f"{posixpath.basename(workbook_url)} from BEA Data Archive folder "
+                f"{folder} (sheet {reading['sheet']}, row {reading['row']}, "
+                f"column {reading['column']}) + the archive index JSON"
+            ),
+            evidence_notes=BEA_ARCHIVE_EVIDENCE_NOTES.format(
+                release_day=release_day.isoformat(),
+                published_line=_format_literal(str(reading["publishedLine"])),
+                last_modified=_format_literal(
+                    str(workbook_headers.get("last-modified"))
+                ),
+            ),
+        ),
+        "resolve",
+        "",
+    )
+
+
 # CPS Table A-19 detail rows have no FRED mirror, so they resolve from an
 # immutable Wayback Machine snapshot of the cells' OWN bound source page
 # (bls.gov blocks non-browser fetches; web.archive.org serves the exact
@@ -17378,6 +18025,9 @@ def _main() -> int:
     alfred_cache: dict[tuple[str, str], tuple[dict, bytes | None, str, str]] = {}
     bea_release_page_cache: dict[str, tuple[bytes | None, str, str]] = {}
     bea_itable_cache: dict[bytes, tuple[bytes | None, str, dict[str, Any], str]] = {}
+    bea_archive_cache: dict[
+        str, tuple[bytes | None, dict[str, str], str, str, str | None]
+    ] = {}
     usaspending_cache: dict[
         tuple[str, bytes | None], tuple[Any, bytes | None, str]
     ] = {}
@@ -17584,6 +18234,15 @@ def _main() -> int:
             if window_verdict and not (kind == "sba_pdf" and window_state == "missed"):
                 print(window_verdict)
                 continue
+        archive_stem = longest_adapter_stem(ref, BEA_ARCHIVE_ADAPTERS)
+        if (
+            kind == "bea_release"
+            and archive_stem is not None
+            and dt.date.fromisoformat(utc_now()[:10]) > release_day
+        ):
+            # Past the registered release day the live leg can only refuse;
+            # BEA's Data Archive keeps that day's own tables.
+            kind = "bea_archive"
         sba_resolution: SbaPdfResolution | None = None
         archive_vintage = release_day.isoformat()
         if kind == "sba_pdf":
@@ -17674,6 +18333,45 @@ def _main() -> int:
             series_id = spec["series_id"]
             source_file = spec["source_file"]
             extension = spec["extension"]
+        elif kind == "bea_archive":
+            contract = (registration or {}).get("contract") or {}
+            binding = contract.get("sourceBinding") or {}
+            if not bea_release_binding_matches_spec(binding, spec):
+                print(
+                    "  BINDING/ADAPTER MISMATCH (refusing, full seven-key "
+                    f"registry drift?): {ref}"
+                )
+                continue
+            expected_window = {
+                "start": release_day.isoformat(),
+                "end": release_day.isoformat(),
+            }
+            if binding.get("expectedReleaseWindow") != expected_window:
+                print(
+                    "  FORECAST/REGISTERED RELEASE DATE MISMATCH "
+                    f"(refusing): {ref} — forecast {release_day} is outside "
+                    f"{binding.get('expectedReleaseWindow')!r}"
+                )
+                continue
+            assert archive_stem is not None
+            archive_capture, archive_head, archive_detail = bea_archive_first_print(
+                spec,
+                BEA_ARCHIVE_ADAPTERS[archive_stem],
+                period,
+                release_day,
+                bea_archive_cache,
+            )
+            if archive_capture is None:
+                print(f"  {archive_head}: {ref} — {archive_detail}")
+                continue
+            value = archive_capture.value
+            raw = archive_capture.raw
+            source_url = archive_capture.workbook_url
+            source_file = archive_capture.source_file
+            series_id = str(spec["series_id"]).replace(":", "-")
+            retrieved_at = archive_capture.retrieved_at
+            extension = "json"
+            spec = {**spec, "evidence_notes": archive_capture.evidence_notes}
         elif kind == "bea_release":
             contract = (registration or {}).get("contract") or {}
             binding = contract.get("sourceBinding") or {}
