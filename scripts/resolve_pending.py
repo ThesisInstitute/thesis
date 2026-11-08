@@ -61,7 +61,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 import zlib
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, replace
 from decimal import ROUND_HALF_UP, Decimal
 from html import unescape
@@ -9225,9 +9225,11 @@ def bls_ledger_unit_conflict(
 
 
 def _report_run_refusals(
-    unit_refusals: list[str], claims_correction_refusals: list[str]
+    unit_refusals: list[str],
+    claims_correction_refusals: list[str],
+    restore_refusals: Sequence[str] = (),
 ) -> int:
-    """Report both refusal lists; ``EXIT_REFUSED_ROWS`` if either has any."""
+    """Report every refusal list; ``EXIT_REFUSED_ROWS`` if any has an entry."""
 
     status = _report_ledger_unit_refusals(unit_refusals)
     if claims_correction_refusals:
@@ -9236,6 +9238,15 @@ def _report_run_refusals(
             "fix CLAIMS_FIRST_PRINT_CORRECTIONS to match the ledger"
         )
         for line in claims_correction_refusals:
+            print(f"  refused: {line}")
+        status = EXIT_REFUSED_ROWS
+    if restore_refusals:
+        print(
+            f"{len(restore_refusals)} fault(s) kept the run from rebuilding a "
+            "restatement run's records; fix what each names, and the next run "
+            "with pending work rebuilds them"
+        )
+        for line in restore_refusals:
             print(f"  refused: {line}")
         status = EXIT_REFUSED_ROWS
     return status
@@ -17105,8 +17116,9 @@ def restated_method_notes(
 ) -> str:
     """A restatement's method notes: the row's, then what the restatement did.
 
-    The row's other notes stay as they were (the gate holds them to the
-    row's), so the sentence warns that figures in them may be in the old unit.
+    The row's other notes stay as they were (the site's restatement check,
+    and ``check_restatements`` here, hold them to the row's), so the sentence
+    warns that figures in them may be in the old unit.
     """
 
     return base_unit_notes(
@@ -17260,7 +17272,9 @@ def restore_restatement_runs(
             path = ROOT / str(_json_object(row.get("responseArchive")).get("path"))
             if path.parent != run_dir / "responses":
                 raise ledger_units.LedgerUnitError(
-                    f"line {index + 1} archives {path} outside its run, {run_dir}"
+                    f"line {index + 1} archives "
+                    f"{_json_object(row.get('responseArchive')).get('path')!r} "
+                    f"outside its run, {run_dir.relative_to(ROOT).as_posix()}"
                 )
             if not path.exists():
                 prior = line_of_id.get(str(version.get("supersedes")))
@@ -17273,8 +17287,9 @@ def restore_restatement_runs(
     for run_dir, members in missing.items():
         if run_dir.exists():
             raise ledger_units.LedgerUnitError(
-                f"{run_dir} lacks {len(members)} restatement archive(s); "
-                "refusing to rebuild a run directory in part"
+                f"{run_dir.relative_to(ROOT).as_posix()} lacks {len(members)} "
+                "restatement archive(s); refusing to rebuild a run directory "
+                "in part"
             )
         if not write:
             continue
@@ -18052,6 +18067,10 @@ def finalize_resolution_manifest(
 # passed over. Without the second, main() never returned.
 RESOLUTION_LOOP_COMPLETE = "resolution loop complete:"
 RESOLVER_FINISHED = "resolver finished with exit code"
+# resolution_alert.py names the faults behind this line in the issue a
+# refused-rows run opens: a daily run that cannot rebuild the records of a
+# restatement run resolves the rest and exits EXIT_REFUSED_ROWS.
+RESTORE_REFUSED = "RESTORE REFUSED (resolving the rest):"
 
 
 def main() -> int:
@@ -18119,8 +18138,18 @@ def _main() -> int:
     ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
     # Like corrections, this rides on runs with pending work: a run with
-    # none exits above, before reading the ledger.
-    report_restored_runs([line for line in content.split("\n") if line.strip()], args)
+    # none exits above, before reading the ledger. A records fault costs no
+    # resolutions: the run reports it, resolves the rest, and exits
+    # EXIT_REFUSED_ROWS, so the workflow publishes what it appended and then
+    # fails the job.
+    restore_refusals: list[str] = []
+    try:
+        report_restored_runs(
+            [line for line in content.split("\n") if line.strip()], args
+        )
+    except ledger_units.LedgerUnitError as exc:
+        print(f"{RESTORE_REFUSED} {exc}")
+        restore_refusals.append(str(exc))
     write_base_units = print_ledger_units_mode(ledger_rows)
     # References refused because their fact would give a Chronicle lineage a
     # second unit. The rest of the run still appends; the run then exits
@@ -19967,12 +19996,16 @@ def _main() -> int:
         return 1
     if not fetched_rows:
         print("nothing new to record")
-        return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
+        return _report_run_refusals(
+            ledger_unit_refusals, claims_correction_refusals, restore_refusals
+        )
     if args.dry_run:
         print(f"dry-run: would append {len(fetched_rows)} row(s)")
         for row, *_ in fetched_rows:
             print(json.dumps(row)[:200])
-        return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
+        return _report_run_refusals(
+            ledger_unit_refusals, claims_correction_refusals, restore_refusals
+        )
 
     run_retrieved_at = min(item[4] for item in fetched_rows)
     run_dir = resolution_run_dir(run_retrieved_at)
@@ -20122,7 +20155,9 @@ def _main() -> int:
             "or curate the ledger's lineages named above"
         )
         return EXIT_REFUSED_ROWS
-    return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
+    return _report_run_refusals(
+        ledger_unit_refusals, claims_correction_refusals, restore_refusals
+    )
 
 
 if __name__ == "__main__":

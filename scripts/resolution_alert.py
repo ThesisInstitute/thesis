@@ -21,14 +21,16 @@ printed before the loop broke. The workflow comments on an open issue of the
 same title, so a second run on the same day is recorded too.
 
 The rows listed are the ones behind exit 3: CATALOG REFUSED, PROVENANCE
-REFUSED and LEDGER UNIT CONFLICT lines (see ``resolve_pending.main``). Other
-refusals (a missed first-print window, a binding mismatch) do not change the
-exit code and are on the public resolution-status page instead. The list
-is read from the resolver's log, so a line it cannot parse is not listed;
-the body then says how many it found and where the full log is. Resolver
-text is reprinted through ``resolution_status._plain`` and inside code
-spans, so a fetched page's words cannot mention anyone or link anywhere in
-the issue.
+REFUSED and LEDGER UNIT CONFLICT lines (see ``resolve_pending.main``). A
+daily run that cannot rebuild the records of a restatement run (RESTORE
+REFUSED) also exits 3, though it refuses no row; the body names each such
+fault. Other refusals (a missed first-print window, a binding mismatch) do
+not change the exit code and are on the public resolution-status page
+instead. The list is read from the resolver's log, so a line it cannot
+parse is not listed; the body then says how many it found and where the
+full log is. Resolver text is reprinted through ``resolution_status._plain``
+and inside code spans, so a fetched page's words cannot mention anyone or
+link anywhere in the issue.
 
 Usage:
     python3 scripts/resolution_alert.py --resolver-log /tmp/resolve-out.log \\
@@ -58,6 +60,11 @@ FAILED_TITLE = "Resolution loop failed"
 EXIT_REFUSED_CODES = frozenset(
     {"LEDGER_CATALOG_REFUSED", "PROVENANCE_REFUSED", "LEDGER_UNIT_CONFLICT"}
 )
+# resolve_pending prints this when a fault keeps a daily run from rebuilding
+# the records of a restatement run; it then resolves the rest and exits
+# EXIT_REFUSED_ROWS (resolve_pending.RESTORE_REFUSED; a test holds the
+# spellings together).
+_RESTORE_REFUSED = "RESTORE REFUSED (resolving the rest):"
 # GitHub refuses an issue or comment body over 65536 characters; the step
 # must not lose the alert to a long list.
 MAX_LISTED_ROWS = 50
@@ -85,6 +92,31 @@ def refused_rows(targets: dict[str, dict[str, str]]) -> list[tuple[str, str]]:
         for ref, row in targets.items()
         if row["code"] in EXIT_REFUSED_CODES
     )
+
+
+def restore_faults(log_text: str) -> list[str]:
+    """Each fault that kept a run from rebuilding a restatement run's records."""
+    return [
+        line[len(_RESTORE_REFUSED) :].strip()
+        for line in log_text.splitlines()
+        if line.startswith(_RESTORE_REFUSED)
+    ]
+
+
+def _fault_lines(faults: list[str]) -> list[str]:
+    lines = [
+        "",
+        f"{len(faults)} fault(s) kept the resolver from rebuilding a "
+        "restatement run's records. Once what each names is fixed, the next "
+        "run with pending work rebuilds them:",
+    ]
+    lines += [f"- {_code(fault)}" for fault in faults[:MAX_LISTED_ROWS]]
+    if len(faults) > MAX_LISTED_ROWS:
+        lines.append(
+            f'- and {len(faults) - MAX_LISTED_ROWS} more; see the "Resolve '
+            "pending cells\" step's log"
+        )
+    return lines
 
 
 def _row_lines(rows: list[tuple[str, str]]) -> list[str]:
@@ -149,6 +181,7 @@ def build_alert(
         raise ValueError(f"not an Actions run URL: {run_url!r}")
     targets, run = parse_resolver_log(log_text)
     rows = refused_rows(targets)
+    faults = restore_faults(log_text)
     appended = None
     for line in log_text.splitlines():
         match = _APPENDED_RE.match(line)
@@ -168,12 +201,15 @@ def build_alert(
             )
         else:
             lines.append("It appended nothing this run.")
-        lines += ["", f"The resolver refused {len(rows)} row(s):"]
-        lines += _row_lines(rows)
-        if not rows:
+        if rows or not faults:
+            lines += ["", f"The resolver refused {len(rows)} row(s):"]
+            lines += _row_lines(rows)
+        if not rows and not faults:
             lines.append(
                 '- none named in the log; read the "Resolve pending cells" step'
             )
+        if faults:
+            lines += _fault_lines(faults)
         lines += [
             "",
             "A refused row stays pending until its registration or the ledger "
@@ -223,6 +259,8 @@ def build_alert(
     if rows:
         lines += ["", f"Before that, the resolver refused {len(rows)} row(s):"]
         lines += _row_lines(rows)
+    if faults:
+        lines += _fault_lines(faults)
     return {
         "kind": "loop_failed",
         "title": f"{FAILED_TITLE} {date}",
