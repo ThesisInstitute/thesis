@@ -14,12 +14,15 @@ the resolver's own writer over real Chronicle rows and records:
 * ``writer``: the lines ``restatement_rows`` writes for the sample, in the
   order a restatement run appends them.
 * ``cases``: ledgers built from the sample, the writer's lines and copies of
-  them with one or two things changed. A copy with two defects, in one row
-  or in two, holds the site and the port to the same first refusal, so they
-  check in the same order. Each case records what the port returned, the id
-  each restatement it accepted supersedes or its refusal, and whether
-  Chronicle's append gate (receipt 0.6.2 ``check_rows`` and
-  ``check_binding_shapes``) accepts the ledger.
+  them with one or two things changed. A copy with two defects holds the
+  site and the port to the same first refusal, and together they pin each
+  step of the site's order. First, row by row, it reads each row's relation
+  and, on a row that restates nothing, its supersedes; then every recorded
+  pair; then the fold, which checks each restatement's supersedes and then
+  its content, in ``assert_restates``'s order. Each case records what the
+  port returned, the id each restatement it accepted supersedes or its
+  refusal, and whether Chronicle's append gate (receipt 0.6.2 ``check_rows``
+  and ``check_binding_shapes``) accepts the ledger.
 
 site/src/__tests__/ledger-restatement-fixture.test.ts replays every case
 through the site's reader, which must refuse exactly the cases the port
@@ -498,6 +501,54 @@ def build_fixture() -> dict[str, Any]:
     case(
         "a row that restates nothing supersedes 7",
         sample + writer + [resolve_pending.ledger_line(not_text)],
+    )
+    # The same order across two rows that are not restatements, and a
+    # restatement's supersedes, which only the fold reads.
+    pair_off = copy.deepcopy(base)
+    pair_off["value"] = base["value"] + 1
+    _reversioned(pair_off)
+    relation = copy.deepcopy(base)
+    relation["assertionVersion"]["relation"] = "correction"
+    _reversioned(relation)
+    for name, second in (
+        ("a relation", relation),
+        ("a row that restates nothing supersedes 7", not_text),
+    ):
+        case(
+            f"two rows: a base row's pair, then {name}",
+            sample
+            + writer
+            + [
+                resolve_pending.ledger_line(pair_off),
+                resolve_pending.ledger_line(second),
+            ],
+        )
+    index, seven = writer_row(PROJECTED_LINE)
+    seven["assertionVersion"]["supersedes"] = 7
+    _reversioned(seven)
+    seven_writer = list(writer)
+    seven_writer[index] = resolve_pending.ledger_line(seven)
+    case(
+        "two rows: a restatement supersedes 7, then a base row's pair",
+        sample + seven_writer + [resolve_pending.ledger_line(pair_off)],
+    )
+    # The first step goes row by row: a row's relation, then, on a row that
+    # restates nothing, its supersedes, before the next row's relation.
+    case(
+        "two rows: a row that restates nothing supersedes 7, then a relation",
+        sample
+        + writer
+        + [
+            resolve_pending.ledger_line(not_text),
+            resolve_pending.ledger_line(relation),
+        ],
+    )
+    both = copy.deepcopy(relation)
+    both["assertionVersion"]["supersedes"] = 7
+    _reversioned(both)
+    case(
+        "a relation and supersedes 7 in one row",
+        sample + writer + [resolve_pending.ledger_line(both)],
     )
     _, corrected = writer_row(CORRECTED_LINE)
     correction = _base_row(

@@ -212,6 +212,37 @@ def test_the_restore_line_is_the_one_resolve_pending_prints() -> None:
     assert 'print(f"{RESTORE_REFUSED} {fault}")' in source
 
 
+CLAIMS_REF = "us.dol.initial_claims.sa.week_2026-10-31"
+
+
+def test_a_restore_fault_beside_a_refused_correction_is_not_the_only_cause() -> None:
+    # A refused claims correction exits 3 too, and the alert lists no row for
+    # it, so the issue must not read as red only for the restore fault.
+    correction = (
+        f"{ra._CLAIMS_REFUSED} {CLAIMS_REF} — listed version av2:1 is not the "
+        "record's active row (active: av2:2)\n"
+    )
+    alert = ra.build_alert(
+        correction + RESTORE_LOG,
+        refused_gate="failure",
+        run_url=URL,
+        date=DATE,
+        resolve_outcome="success",
+        needs_publish="0",
+    )
+    assert alert["title"] == "Resolution rows refused 2026-09-29"
+    assert alert["body"].startswith(
+        "The resolve run had nothing new to publish, then failed on refused rows: "
+    )
+    assert f"- {ra._code(RESTORE_FAULT)}" in alert["body"].splitlines()
+    assert "A refused row stays pending" in alert["body"]
+
+
+def test_the_correction_line_is_the_one_resolve_pending_prints() -> None:
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    assert f'print(f"{ra._CLAIMS_REFUSED} {{line}}")' in source
+
+
 def test_the_receipt_crash_names_the_import_error() -> None:
     alert = ra.build_alert(
         CRASH_LOG,
@@ -403,9 +434,10 @@ EXIT_3_KINDS = {"catalog", "provenance", "unit"}
 
 
 @st.composite
-def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str], bool]:
+def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str], bool, bool]:
     """A log naming each reference once (plus the end-of-run restatements),
-    the references behind exit 3, and whether it holds a restore fault."""
+    the references behind exit 3, and whether it holds a restore fault and a
+    refused claims correction."""
     refs = draw(st.lists(REFS, unique=True, max_size=12))
     lines, expected = [], set()
     for ref in refs:
@@ -423,11 +455,19 @@ def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str], bool]:
     if has_fault:
         # A restore fault exits 3 too, but refuses no row.
         lines.insert(0, f"{ra._RESTORE_REFUSED} {draw(ONE_LINE)}")
+    has_correction = draw(st.booleans()) and CLAIMS_REF not in refs
+    if has_correction:
+        # So does a refused claims correction, which the parser gives no
+        # exit-3 code.
+        lines.insert(
+            draw(st.integers(0, len(lines))),
+            f"{ra._CLAIMS_REFUSED} {CLAIMS_REF} — {draw(ONE_LINE)}",
+        )
     if expected and draw(st.booleans()):
         # resolve_pending restates exit-3 rows at the end of some runs.
         lines.append("every fetched row was refused; nothing to append")
         lines += [f"  refused: {ref}: {draw(ONE_LINE)}" for ref in sorted(expected)]
-    return "\n".join(lines) + "\n", expected, has_fault
+    return "\n".join(lines) + "\n", expected, has_fault, has_correction
 
 
 GATES = st.sampled_from(["failure", "skipped", "success", "cancelled", "", "FAILURE"])
@@ -437,9 +477,12 @@ OUTCOMES = st.sampled_from(["success", "failure", "skipped", "cancelled", ""])
 @settings(max_examples=400, deadline=None)
 @given(resolver_logs(), GATES, OUTCOMES, st.sampled_from(["0", "1", ""]))
 def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
-    drawn: tuple[str, set[str], bool], gate: str, outcome: str, needs_publish: str
+    drawn: tuple[str, set[str], bool, bool],
+    gate: str,
+    outcome: str,
+    needs_publish: str,
 ) -> None:
-    log, expected, has_fault = drawn
+    log, expected, has_fault, has_correction = drawn
     alert = ra.build_alert(
         log,
         refused_gate=gate,
@@ -454,7 +497,7 @@ def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
         assert alert["kind"] == "refused_rows"
         title = (
             "Resolution records not rebuilt"
-            if has_fault and not expected
+            if has_fault and not expected and not has_correction
             else "Resolution rows refused"
         )
         assert alert["title"] == f"{title} {DATE}"
@@ -524,11 +567,11 @@ FAULT_TEXT = st.text(
 @given(st.lists(FAULT_TEXT, min_size=1, max_size=4), resolver_logs(), GATES, OUTCOMES)
 def test_every_restore_fault_is_named_in_the_body(
     faults: list[str],
-    drawn: tuple[str, set[str], bool],
+    drawn: tuple[str, set[str], bool, bool],
     gate: str,
     outcome: str,
 ) -> None:
-    log, _expected, _has_fault = drawn
+    log, _expected, _has_fault, _has_correction = drawn
     log = "".join(f"{ra._RESTORE_REFUSED} {fault}\n" for fault in faults) + log
     alert = ra.build_alert(
         log, refused_gate=gate, run_url=URL, date=DATE, resolve_outcome=outcome

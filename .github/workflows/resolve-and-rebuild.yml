@@ -377,11 +377,13 @@ jobs:
           exit 1
 
       - name: Alert on failure
-        # Two kinds of red get two titles (scripts/resolution_alert.py):
+        # Each kind of red gets its own title (scripts/resolution_alert.py):
         # "Resolution rows refused" when the step above failed (its `if`
         # names no status function, so every earlier step succeeded or was
         # skipped, the always-run status page aside: the loop worked),
-        # naming each refused row; "Resolution loop failed" otherwise. A
+        # naming each refused row, or "Resolution records not rebuilt" when
+        # a failed rebuild of a restatement run's records was its only
+        # cause; "Resolution loop failed" otherwise. A
         # second red run on the same day comments on the open issue instead
         # of vanishing. If the script fails, the old title and one-line body
         # go out; if the issue call fails, a one-line issue under the same

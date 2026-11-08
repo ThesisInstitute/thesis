@@ -17350,17 +17350,26 @@ def restore_restatement_runs(
             continue
         try:
             for row, prior_line in members:
-                reference, compressed = response_archive_reference(
-                    run_dir,
-                    series_id=str(row["source_record_id"]),
-                    vintage=str(row["sourceVintage"]),
-                    raw=prior_line.encode("utf-8"),
-                    extension="json",
-                )
+                record_id = row.get("source_record_id")
+                try:
+                    reference, compressed = response_archive_reference(
+                        run_dir,
+                        series_id=str(record_id),
+                        vintage=str(row.get("sourceVintage")),
+                        raw=prior_line.encode("utf-8"),
+                        extension="json",
+                    )
+                except ValueError as exc:
+                    # An absolute id resets the path's join, so the archive
+                    # would sit outside the repository.
+                    raise ledger_units.LedgerUnitError(
+                        f"the archive of {record_id!r} would sit outside the "
+                        "repository"
+                    ) from exc
                 if reference != row["responseArchive"]:
                     raise ledger_units.LedgerUnitError(
-                        f"the rebuilt archive of {row['source_record_id']} is "
-                        f"{reference}, not the {row['responseArchive']} its row names"
+                        f"the rebuilt archive of {record_id} is {reference}, "
+                        f"not the {row['responseArchive']} its row names"
                     )
                 path = ROOT / reference["path"]
                 path.parent.mkdir(parents=True, exist_ok=True)

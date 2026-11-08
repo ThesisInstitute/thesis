@@ -1460,6 +1460,31 @@ def test_a_restatement_whose_retrieved_at_names_no_run_directory_is_refused(
     assert list(tmp_path.iterdir()) == []
 
 
+def test_a_restatement_whose_archive_would_leave_the_repository_is_refused(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    # The archive's name starts with the row's source_record_id, and an
+    # absolute one resets the path's join. Chronicle would have to hold a
+    # hand-made row for this, since restatement_row refuses one; the rebuild
+    # refuses it as a ledger fault rather than raise a ValueError the daily
+    # run does not catch.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    june_line, restated_line = _restated_june_ledger().splitlines()
+    june, restated = json.loads(june_line), json.loads(restated_line)
+    june["source_record_id"] = restated["source_record_id"] = "/abs/x"
+    restated["assertionVersion"]["supersedes"] = resolve_pending.effective_assertion_id(
+        june
+    )
+    with pytest.raises(resolve_pending.ledger_units.LedgerUnitError) as info:
+        resolve_pending.restore_restatement_runs(
+            [json.dumps(june), json.dumps(restated)],
+            ledger_repo="o/r",
+            ledger_branch="b",
+        )
+    assert str(info.value) == "the archive of '/abs/x' would sit outside the repository"
+    assert not resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z").exists()
+
+
 def test_the_run_directory_guard_admits_what_utc_now_stamps(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

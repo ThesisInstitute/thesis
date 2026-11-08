@@ -15,8 +15,10 @@ issue; the other three runs added nothing to it.
 
 This keeps the red and the issue, and says which kind of red it is:
 "Resolution rows refused <date>" names each row that set exit 3 and the
-resolver's reason; "Resolution loop failed <date>" keeps its title, adds
-the resolver's last error, and still names any exit-3 rows the resolver
+resolver's reason; "Resolution records not rebuilt <date>" names the fault
+when a failed rebuild of a restatement run's records was the run's only
+exit-3 cause; "Resolution loop failed <date>" keeps its title, adds the
+resolver's last error, and still names any exit-3 rows the resolver
 printed before the loop broke. The workflow comments on an open issue of the
 same title, so a second run on the same day is recorded too.
 
@@ -67,6 +69,10 @@ EXIT_REFUSED_CODES = frozenset(
 # EXIT_REFUSED_ROWS (resolve_pending.RESTORE_REFUSED; a test holds the
 # spellings together).
 _RESTORE_REFUSED = "RESTORE REFUSED (resolving the rest):"
+# resolve_pending prints this for each claims correction it refuses. The run
+# then exits EXIT_REFUSED_ROWS too, though the status parser gives the line
+# no exit-3 code (a test holds the spelling to resolve_pending's).
+_CLAIMS_REFUSED = "  CLAIMS CORRECTION REFUSED (refusing):"
 # GitHub refuses an issue or comment body over 65536 characters; the step
 # must not lose the alert to a long list.
 MAX_LISTED_ROWS = 50
@@ -195,7 +201,12 @@ def build_alert(
         else:
             head = "The resolve run had nothing new to publish"
         # A run red only for a restore fault refused no row, so it says so.
-        fault_only = bool(faults) and not rows
+        # A refused claims correction also exits 3 with no row listed, so a
+        # run with one is not red only for its fault.
+        corrections = any(
+            line.startswith(_CLAIMS_REFUSED) for line in log_text.splitlines()
+        )
+        fault_only = bool(faults) and not rows and not corrections
         why = (
             "could not rebuild a restatement run's records"
             if fault_only
