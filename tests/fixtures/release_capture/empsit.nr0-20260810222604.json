@@ -1,0 +1,21 @@
+{
+  "captureUrl": "https://web.archive.org/web/20260810222604/https://www.bls.gov/news.release/empsit.nr0.htm",
+  "sourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+  "stamp": "20260810222604",
+  "indexDigest": "H7URBYLA7QUTDT6NI7AOSC56IK6DIUQG",
+  "gzipEncoded": true,
+  "title": "Employment Situation Summary - 2026 M07 Results",
+  "note": "July 2026 release (published 2026-08-07). Not a target month: the reviewed contracts forecast August and September. Selected from the Archive's index alone and fetched 2026-10-22 from the id_ form over verified TLS; the bytes are exactly what the Archive stored. The page prints no table: the release is one preformatted block of prose.",
+  "independentFirstPrint": {
+    "empsit_unemployment_rate": {
+      "value": 4.1,
+      "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=UNRATE&vintage_date=2026-08-07",
+      "how": "the 2026-07 value in the 2026-08-07 vintage"
+    },
+    "empsit_payroll_change": {
+      "value": -23,
+      "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2026-08-07",
+      "how": "2026-07 minus 2026-06 in the 2026-08-07 vintage (158858 - 158881), in thousands"
+    }
+  }
+}

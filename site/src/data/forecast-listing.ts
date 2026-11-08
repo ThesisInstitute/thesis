@@ -6,7 +6,7 @@ import {
   type ForecastCellType,
 } from "./forecast-display";
 import { publisherForCell, type PublisherInfo } from "./forecast-publishers";
-import { overdueNotice, shortReason } from "./resolution-status";
+import { overdueNotice, shortReason, VOIDED_CODE } from "./resolution-status";
 
 /** The only catalog fields allowed across the /forecasts page boundary. */
 export interface ForecastListingItem {
@@ -25,8 +25,9 @@ export interface ForecastListingItem {
   /** Set only while the forecast is pending past its resolution date: the
    * first sentence of why it has not resolved, as the resolver last
    * reported it. The full reason is on the forecast's own page; this list
-   * crosses to the client, so it stays one sentence. */
-  overdue: { since: string; reason: string } | null;
+   * crosses to the client, so it stays one sentence. `voided` marks a
+   * target a recorded ruling voided: it will never resolve. */
+  overdue: { since: string; reason: string; voided?: true } | null;
 }
 
 export function buildForecastListing(
@@ -73,7 +74,11 @@ function compactOverdue(
     resolutionDate: forecast.resolutionDate,
   });
   return notice
-    ? { since: notice.since, reason: shortReason(notice.reason) }
+    ? {
+        since: notice.since,
+        reason: shortReason(notice.reason),
+        ...(notice.code === VOIDED_CODE ? { voided: true as const } : {}),
+      }
     : null;
 }
 

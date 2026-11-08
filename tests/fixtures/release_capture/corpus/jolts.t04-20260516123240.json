@@ -1,0 +1,16 @@
+{
+ "captureUrl": "https://web.archive.org/web/20260516123240/https://www.bls.gov/news.release/jolts.t04.htm",
+ "sourceUrl": "https://www.bls.gov/news.release/jolts.t04.htm",
+ "stamp": "20260516123240",
+ "indexDigest": "7PXCTFE7EMMGJ2VF2RN6Q2JIONEBSUKL",
+ "gzipEncoded": false,
+ "title": "Table 4. Quits levels and rates by industry and region, seasonally adjusted - 2026 M03 Results",
+ "note": "Corpus capture of the 2026-03 release, captured 2026-05-16. Not a target month. Selected from the Archive's index alone (queried only before a cutoff preceding every target window for this page) and fetched 2026-10-23 from the id_ form over verified TLS.",
+ "independentFirstPrint": {
+  "jolts_quits_rate": {
+   "value": 2.0,
+   "source": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=JTSQUR&vintage_date=2026-05-16",
+   "how": "the 2026-03 value in the 2026-05-16 vintage"
+  }
+ }
+}

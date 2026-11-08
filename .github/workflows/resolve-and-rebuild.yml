@@ -308,6 +308,11 @@ jobs:
         # along and the attested marker push above is left alone. The file
         # is outside records/**, so the push needs no attestation; it does
         # touch site/, so Vercel rebuilds and the reasons reach the page.
+        # The file is built by main's own builder and register, from the
+        # copy of main it is committed on, never by this job's checkout: a
+        # run that started before either changed must not publish what the
+        # older code says. A push that races rebuilds from the newer main
+        # instead of rebasing a file an older main wrote.
         if: always()
         continue-on-error: true
         env:
@@ -315,28 +320,30 @@ jobs:
         run: |
           set -euo pipefail
           [ -f /tmp/resolve-out.log ] || : > /tmp/resolve-out.log
-          git fetch origin main
-          git worktree add --detach /tmp/status-tree origin/main
-          python3 scripts/resolution_status.py \
-            --resolver-log /tmp/resolve-out.log \
-            --workflow-run "${GITHUB_RUN_ID}" \
-            --out /tmp/status-tree/site/src/data/resolution-status.json
-          cd /tmp/status-tree
-          if [ -z "$(git status --porcelain -- site/src/data/resolution-status.json)" ]; then
-            echo "overdue backlog unchanged; nothing to publish"
-            exit 0
-          fi
-          git config user.name "thesis-resolver"
-          git config user.email "recorder@thesisinstitute.org"
-          git add -- site/src/data/resolution-status.json
-          git commit -m "Resolution status $(date -u +%F)"
           auth_helper="!f() { echo username=x-access-token; echo \"password=\$GH_TOKEN\"; }; f"
           for attempt in 1 2 3; do
+            cd "$GITHUB_WORKSPACE"
+            rm -rf /tmp/status-tree
+            git worktree prune
+            git fetch origin main
+            git worktree add --detach /tmp/status-tree origin/main
+            cd /tmp/status-tree
+            python3 scripts/resolution_status.py \
+              --resolver-log /tmp/resolve-out.log \
+              --workflow-run "${GITHUB_RUN_ID}" \
+              --out site/src/data/resolution-status.json
+            if [ -z "$(git status --porcelain -- site/src/data/resolution-status.json)" ]; then
+              echo "overdue backlog unchanged; nothing to publish"
+              exit 0
+            fi
+            git config user.name "thesis-resolver"
+            git config user.email "recorder@thesisinstitute.org"
+            git add -- site/src/data/resolution-status.json
+            git commit -m "Resolution status $(date -u +%F)"
             if git -c credential.helper= -c credential.helper="$auth_helper" \
                 push origin HEAD:main; then
               exit 0
             fi
-            git pull --rebase origin main
           done
           echo "::warning::resolution status was not published (push raced three times)"
 
