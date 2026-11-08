@@ -402,6 +402,49 @@ copy of the unit table is `scripts/ledger_units.py`):
   that wants Chronicle's current view must apply them: `entries` alone holds
   the registered-unit values the site grades.
 
+The resolver writes both shapes (`scripts/resolve_pending.py`):
+
+- A run writes new rows in base units only when the ledger it read holds no
+  current row in a scaled unit. Until then it writes the unit its adapter
+  parsed, so no series holds both. Each run's log says which
+  (`ledger units: as recorded` or `ledger units: base`). The writer converts
+  after the contract check, which reads the registered unit. It refuses a
+  value with no exact base form as it refuses a contract mismatch, that row
+  alone. It converts the value its adapter parsed and adds no precision to it,
+  so 3189.0 thousands becomes 3189000 though BLS printed 3,189,009. The row's
+  `source.method_notes` says so: the value carries that figure's precision,
+  and the archived response may hold more digits.
+- A row's `sourceBindingProjection.transform` still maps the source's response
+  to the contract's registered unit, while the projection's `unit` is the unit
+  the row stores, which the append gate holds to the row's. A claims row in
+  `count` keeps ICSA's `{"factor": 0.001, "operation": "multiply"}`, which
+  yields thousands, the registered unit its recorded pair names.
+- `--restate-base-units` (the workflow's `restate_base_units` input) appends a
+  `unit_restatement` row for every current scaled row, in one release or not
+  at all. Before it proposes, it runs `check_restatements`, its port of the
+  site's checks, on the exact lines Chronicle will hold. It also runs
+  Chronicle's series-catalog generator on them: the catalog may change only
+  units, each to its base unit, and the UUID registry must not move. The
+  proposal merges only once Chronicle's Arch checks pass. A restatement
+  archives the exact line it restates, and its projection's `responseSha256`
+  hashes that line, not a source response. Its method notes add that it
+  carries the old figure's precision and that the row's other notes predate
+  it, since the site's restatement check and its port, `check_restatements`,
+  keep every other note as it was. The records of a run that merged but never
+  reached Thesis rebuild to the byte: the next dispatch, or the next daily run
+  with pending work, rebuilds them first (`restored`), and the workflow
+  publishes them. If a records, ledger or custody fault stops a daily run's
+  rebuild, the rebuild removes any directory it wrote, and the run prints
+  `RESTORE REFUSED`, resolves the rest and exits 3; the run's issue names the
+  fault. GitHub keeps one waiting run per concurrency group, so dispatch
+  a restatement only when no other run of the workflow is waiting. A
+  restatement resolves nothing, so it leaves the status page alone.
+- `scripts/generate_ledger_restatement_fixture.py` runs the writer and the
+  port over real Chronicle rows, and
+  `site/src/__tests__/ledger-restatement-fixture.test.ts` holds the site's
+  reader to them. The reader refuses exactly what the port refuses, and the
+  writer's rows leave every entry in place.
+
 The build also re-runs the append gate's assertion-version checks on the pinned
 rows. Every explicit id must equal its recomputed content address, and every
 supersede must name the active version of its record. If the port drifted from
