@@ -87,6 +87,16 @@ function refusalKind(message: string): string {
   return kinds[0][0];
 }
 
+// The row a refusal names: its line, or its record id. The site's relation
+// and supersedes messages name neither.
+function subjectOf(message: string): string | null {
+  const match =
+    /^line (\d+) /.exec(message) ??
+    /^restatement of (\S+) /.exec(message) ??
+    /^(\S+) records /.exec(message);
+  return match ? match[1] : null;
+}
+
 function caseNamed(name: string): FixtureCase {
   const found = fixture.cases.find((item) => item.name === name);
   if (!found) throw new Error(`fixture has no case ${name}`);
@@ -116,7 +126,12 @@ describe("the restatement fixture", () => {
         }
         const kind = refusalKind(item.port.refuses);
         expect(thrown).toBeInstanceOf(errorOf(kind));
-        expect(refusalKind((thrown as Error).message)).toBe(kind);
+        const message = (thrown as Error).message;
+        expect(refusalKind(message)).toBe(kind);
+        // Both refuse the same row, where the site's message names one.
+        if (subjectOf(message) !== null) {
+          expect(subjectOf(message)).toBe(subjectOf(item.port.refuses));
+        }
         return;
       }
       const { restatements } = read(lines);
