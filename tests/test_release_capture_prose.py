@@ -65,6 +65,7 @@ import sys
 from collections.abc import Callable
 from dataclasses import replace
 from decimal import Decimal
+from html.parser import commentabruptclose, commentclose
 
 import pytest
 from hypothesis import assume, event, given, settings
@@ -3126,7 +3127,7 @@ def test_round_10_review_pages_are_refused() -> None:
     assert parse_release(f"{_ROUND_10_REFRESH}{shown}", rate) is None
     assert not _plain(f"{_ROUND_10_REFRESH}{shown}")
     # The first of a repeated attribute is the one a browser keeps.
-    swapped = '<meta http-equiv=content-type http-equiv=refresh content="0">'
+    swapped = '<meta http-equiv=x-ua-compatible http-equiv=refresh content="0">'
     assert parse_release(f"{swapped}{shown}", rate) == ("2026-07", 4.8)
     upper = '<meta HTTP-EQUIV=Refresh http-equiv=content-type content="0">'
     assert parse_release(f"{upper}{shown}", rate) is None
@@ -3184,6 +3185,199 @@ def test_a_name_inside_a_head_element_is_refused() -> None:
     page = html.replace(name, f"<head>{name}</head>")
     assert parse_release(page, _EMPSIT_IDS[1]) is None
     assert _plain(page)
+
+
+_ROUND_11_REPEATED = (
+    "<title>Employment Situation Summary - 2026 M07 Results</title>\n"
+    "<h1>Employment Situation Summary</h1>\n"
+    '<template><noscript><br a=safe a="</noscript></template>Not seasonally '
+    'adjusted:<br a=x"></noscript></template>\n'
+    "<pre>THE EMPLOYMENT SITUATION -- JULY 2026\n"
+    "The unemployment rate was 4.8 percent in July.\n"
+    "The unemployment rate was 4.8 percent.\n"
+    "The seasonally adjusted unemployment rate for July was 4.1 percent.</pre>"
+)
+_ROUND_11_AFTER = '<noscript><br a="</noscript><body hidden>"></noscript>'
+
+
+def test_round_11_review_pages_are_refused() -> None:
+    """Round-11 review, findings 1 and 2, verbatim: each returned 4.8. With
+    scripts on, a browser ends a <noscript>'s content, which it reads as raw
+    text, at the first "</noscript>", here inside an attribute, and reads
+    what follows as markup. The same markup with no "</noscript>" in it
+    reads."""
+    rate = "empsit_unemployment_rate"
+    assert parse_release(_ROUND_11_REPEATED, rate) is None
+    assert not _plain(_ROUND_11_REPEATED)
+    lines = _ROUND_11_REPEATED.splitlines(keepends=True)
+    shown = "".join(lines[:2] + lines[3:])
+    assert parse_release(shown, rate) == ("2026-07", 4.8)
+    repeated = "<template><noscript><br a=safe a=x></noscript></template>\n"
+    page = "".join(lines[:2] + [repeated] + lines[3:])
+    assert parse_release(page, rate) == ("2026-07", 4.8)
+    for after in (f"{shown}\n{_ROUND_11_AFTER}", f"{page}\n{_ROUND_11_AFTER}"):
+        assert parse_release(after, rate) is None
+        assert not _plain(after)
+    assert parse_release(f'{shown}\n<noscript><br a="x"></noscript>', rate) == (
+        "2026-07",
+        4.8,
+    )
+
+
+# Markup after which a browser splits the page into tags otherwise than
+# this parser: it reads "<body hidden>" as a tag where this parser reads
+# raw text, a comment or an attribute.
+_SPLIT_OTHERWISE = (
+    # With scripts on, a <noscript> ends at the first "</noscript>", even
+    # one inside an end tag, whose attributes a browser drops.
+    '<noscript><br a="</noscript><body hidden>"></noscript>',
+    '<noscript></br a="</noscript><body hidden>"></noscript>',
+    '<noscript><br a="</noscript><Body hidden>"></noscript>',
+    '<noscript><br a="</noscript><head hidden>"></noscript>',
+    '<noscript><br a="</noscript><template shadowrootmode=open>"></noscript>',
+    '<noscript><br a="</noscript><math>"></noscript>',
+    # In SVG and MathML a browser reads <style>, <script>, <title> and
+    # <xmp> as elements holding markup.
+    "<svg><style><body hidden></style></svg>",
+    "<svg><script><body hidden></script></svg>",
+    "<svg><title><body hidden></title></svg>",
+    "<math><xmp><body hidden></xmp></math>",
+    # A browser leaves the SVG at <p>, and a column group a <template>
+    # holds ignores <style>, where this parser reads raw text.
+    "<svg><foreignObject><p></svg></p></foreignObject><style><body hidden></style>",
+    "<template><col><style></template><body hidden></style>",
+    # In a <select>, a browser following the standard's "in select"
+    # insertion mode ignores <style>.
+    "<select><style></select><body hidden></style>",
+    # "<![CDATA[" outside SVG and MathML, a browser ends at the first ">".
+    "<![CDATA[ x > <body hidden> ]]>",
+    # "/>" opens a script, which runs on to the next "</script>".
+    "<script/><!--</script><body hidden>-->",
+    # A script that runs on past its first "</script>".
+    "<script><!--<script></script><!--</script><body hidden>-->",
+    # Never read as a tag, so never checked.
+    '<script>document.write("<body hidden>")</script>',
+    "<!-- <meta http-equiv=refresh content=0> -->",
+    '<p title="<svg>"></p>',
+    "<textarea><html hidden></textarea>",
+)
+
+
+@pytest.mark.parametrize("markup", _SPLIT_OTHERWISE)
+@pytest.mark.parametrize("at", ("<p>Footer", None))
+def test_a_page_tag_this_parser_does_not_read_refuses_the_page(
+    markup: str, at: str | None
+) -> None:
+    """After the block, the page's tags matter only for what they do to the
+    whole page (_PAGE_TAGS). Every <html>, <head>, <body>, <meta>,
+    <template>, <svg> or <math> in the source must be one this parser reads
+    as a tag, so none a browser may read goes unchecked."""
+    html, reading = _july()
+    page = f"{html}{markup}" if at is None else html.replace(at, f"{markup}{at}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+    assert not _plain(page)
+    # With a <p> for each page tag, the page reads, unless it holds an
+    # element real pages never use, or a second title.
+    harmless = re.sub(
+        r"<(body|head|html|meta|svg|template)\b", "<p", markup, flags=re.I
+    )
+    page = f"{html}{harmless}" if at is None else html.replace(at, f"{harmless}{at}", 1)
+    if not re.search(r"<(col|math|select|title)\b", harmless):
+        assert parse_release(page, _EMPSIT_IDS[1]) == reading
+
+
+@pytest.mark.parametrize(
+    ("svg", "read"),
+    (
+        (
+            '<svg aria-hidden="true" focusable="false" data-prefix="fab" '
+            'data-icon="x" class="icon" xmlns="http://www.w3.org/2000/svg" '
+            'viewBox="0 0 512 512"><path fill="currentColor" d="M0 0z"></path></svg>',
+            True,
+        ),
+        ('<svg><path d="M0 0"/><path xmlns="http://www.w3.org/2000/svg"/></svg>', True),
+        ("<svg></svg>", True),
+        # Each could paint outside the svg's box, over the release.
+        ('<svg overflow="visible"><path d="M0-9999H9999V9999H0Z"/></svg>', False),
+        ('<svg transform="translate(0 -500)"></svg>', False),
+        ('<svg style="overflow: visible"></svg>', False),
+        ('<svg width="9999" height="9999"></svg>', False),
+        ('<svg><path transform="scale(99)" d="M0 0"/></svg>', False),
+        ('<svg><path style="fill: white" d="M0 0"/></svg>', False),
+        # Real pages hold only paths in an svg.
+        ('<svg><g><path d="M0 0"/></g></svg>', False),
+        ("<svg><rect/></svg>", False),
+        ("<svg><svg></svg></svg>", False),
+        ("<svg><desc>x</desc></svg>", False),
+        ("<svg><foreignObject></foreignObject></svg>", False),
+        ("<svg></g></svg>", False),
+        ('<svg><path d="M0 0"></p></svg>', False),
+    ),
+)
+@pytest.mark.parametrize("at", ("<div><p>Navigation", "<p>Footer"))
+def test_an_svg_holds_only_paths_with_attributes_real_pages_use(
+    svg: str, read: bool, at: str
+) -> None:
+    html, reading = _july()
+    page = html.replace(at, f"{svg}{at}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+    assert _plain(page) is read
+
+
+@pytest.mark.parametrize(
+    ("meta", "read"),
+    (
+        ('<meta charset="utf-8">', True),
+        ('<meta charset=" UTF-8 ">', True),
+        ('<meta http-equiv="X-UA-Compatible" content="IE=edge">', True),
+        ('<meta name="viewport" content="width=device-width">', True),
+        # Of a repeated attribute a browser keeps the first: an empty pragma.
+        ("<meta http-equiv http-equiv=refresh content=0>", True),
+        ('<meta http-equiv="" http-equiv=refresh content=0>', True),
+        ('<meta charset="utf-8" charset="iso-2022-kr">', True),
+        # Another encoding could show the page as other text, or as one
+        # replacement character.
+        ('<meta charset="iso-2022-kr">', False),
+        ('<meta charset="windows-1252">', False),
+        ("<meta charset>", False),
+        ('<meta charset="iso-2022-kr" charset="utf-8">', False),
+        ('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">', False),
+        ('<meta http-equiv="refresh" content="0">', False),
+        ('<meta http-equiv="default-style" content="other">', False),
+        # Padded, it is no pragma a browser knows, and none this parser
+        # allows.
+        ('<meta http-equiv=" X-UA-Compatible " content="IE=edge">', False),
+    ),
+)
+@pytest.mark.parametrize("at", ("<title>", "<p>Footer"))
+def test_a_meta_tag_changes_neither_the_encoding_nor_the_page(
+    meta: str, read: bool, at: str
+) -> None:
+    html, reading = _july()
+    page = html.replace(at, f"{meta}{at}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+@pytest.mark.parametrize(
+    "markup",
+    (
+        "<select></select>",
+        "<math></math>",
+        "<table><col></table>",
+        "<table><colgroup></colgroup></table>",
+        "<frameset></frameset>",
+    ),
+)
+@pytest.mark.parametrize("at", ("<div><p>Navigation", "<p>Footer", None))
+def test_elements_real_pages_never_use_refuse_the_page(
+    markup: str, at: str | None
+) -> None:
+    """After MathML, a <select> or a column group, a browser may read
+    "<style>" as an element holding markup; real pages use none of them."""
+    html, _ = _july()
+    page = f"{html}{markup}" if at is None else html.replace(at, f"{markup}{at}", 1)
+    assert parse_release(page, _EMPSIT_IDS[1]) is None
+    assert not _plain(page)
 
 
 # A real Employment Situation preamble, item by item, and a JOLTS one with
@@ -3644,6 +3838,8 @@ def test_up_to_the_block_every_end_tag_closes_the_element_last_opened(
         ('<noscript><link rel="stylesheet" href="x.css"></noscript>', True),
         ("<!-- THE EMPLOYMENT SITUATION -- JULY 2026 -->", True),
         ('<?xml version="1.0"?>', True),
+        ('<?xml version="1.0" encoding="iso-2022-kr"?>', False),
+        ('<?xml version="1.0" ENCODING="utf-8"?>', False),
         ("<style>a</stylex>b</style>", True),
         ('<script>var a = "<!--";</script><script>var b = "<script";</script>', True),
         ("<![CDATA[x>y]]>", False),
@@ -3654,11 +3850,37 @@ def test_up_to_the_block_every_end_tag_closes_the_element_last_opened(
         ("<script><!--<script></script>", False),
         ("<script><!--<SCRIPT></script>", False),
         # With scripts on, a browser reads a <noscript>'s content as raw
-        # text up to "</noscript>", wherever that stands.
+        # text up to "</noscript>", wherever that stands: in a comment, an
+        # attribute (a repeated one too), or an end tag, whose attributes it
+        # drops.
         ("<noscript><!-- </noscript> --></noscript>", False),
         ("<noscript><div>x</div></noscript>", False),
         ('<noscript><img alt="</noscript><div hidden>"></noscript>', False),
         ("<noscript><script></script></noscript>", False),
+        ('<noscript><br a=x a="</noscript><div hidden>"></noscript>', False),
+        ('<noscript></br a="</noscript><div hidden>"></noscript>', False),
+        ('<noscript><br a="</NOSCRIPT/><div hidden>"></noscript>', False),
+        ('<noscript><br a="</noscript\t><div hidden>"></noscript>', False),
+        ('<noscript><img alt="<b>"></noscript>', True),
+        ('<noscript><br a="</noscripts>"></noscript>', True),
+        ("<noscript></br></noscript>", True),
+        # It holds void elements only, so a comment refuses too, though only
+        # one holding "</noscript" (above) changes what a browser shows.
+        ("<noscript><!-- x --></noscript>", False),
+        # Its content starts after its own start tag, and each one's ends
+        # at its own end tag.
+        ('<noscript title="</noscript>"><br></noscript>', True),
+        ("<noscript><br></noscript><noscript><br></noscript>", True),
+        # In SVG and MathML a browser reads <style>, <title> and <xmp> as
+        # elements holding markup, and leaves them at a tag such as <p>. In a
+        # <select>, or in a column group a <template> holds, it ignores
+        # <style>.
+        ("<svg><style><div hidden></style></svg>", False),
+        ("<svg><title><div hidden></title></svg>", False),
+        ("<math><xmp><div hidden></xmp></math>", False),
+        ("<svg><p></p><div hidden/></svg>", False),
+        ("<select><style></select><div hidden></style></select>", False),
+        ("<template><col><style></template><div hidden></style></template>", False),
     ),
 )
 def test_markup_tokenizers_read_alike_up_to_the_block(markup: str, read: bool) -> None:
@@ -3779,6 +4001,70 @@ def test_a_comment_ends_where_a_browser_ends_it(comment: str, read: bool) -> Non
     html, reading = _july()
     page = html.replace("</h2>", f"</h2>{comment}", 1)
     assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+def _parse_comment_before_the_fix(self, i: int, report: bool = True) -> int:
+    """HTMLParser.parse_comment as CPython 3.14.4 has it, before the July
+    2026 fix for gh-135661: a later "-->" or "--!>" ends a comment before
+    an abrupt ">" or "->" can. The resolver's python3 runs this code."""
+    rawdata = self.rawdata
+    match = commentclose.search(rawdata, i + 4)
+    if not match:
+        match = commentabruptclose.match(rawdata, i + 4)
+        if not match:
+            return -1
+    if report:
+        self.handle_comment(rawdata[i + 4 : match.start()])
+    return match.end()
+
+
+@pytest.mark.parametrize(
+    ("comment", "read"),
+    (
+        ("<!-- Not seasonally adjusted: -->", True),
+        ("<!-- a -- > Not seasonally adjusted: -->", True),
+        ("<!---->", True),
+        ("<!-->", True),
+        ("<!--->", True),
+        ("<!-->Not seasonally adjusted:-->", False),
+        ("<!--->Not seasonally adjusted:-->", False),
+        ("<!-->Not seasonally adjusted:--!>", False),
+    ),
+)
+@pytest.mark.parametrize(
+    ("at", "into"), (("</h2>", "</h2>{}"), ("<p>Footer", "{}<p>Footer"))
+)
+def test_a_comment_python_before_the_fix_reads_on_defers_the_page(
+    monkeypatch: pytest.MonkeyPatch, comment: str, read: bool, at: str, into: str
+) -> None:
+    """Where a Python from before the fix reads a comment past the ">" at
+    which a browser ends it, the page defers: wherever it stands, the
+    comment may hold what a browser shows."""
+    html, reading = _july()
+    assert html.count(at) == 1
+    page = html.replace(at, into.format(comment))
+    monkeypatch.setattr(
+        legacy_release_parsers._Page, "parse_comment", _parse_comment_before_the_fix
+    )
+    assert _plain(page) is read
+    assert parse_release(page, _EMPSIT_IDS[1]) == (reading if read else None)
+
+
+def test_the_old_comment_order_reads_on_where_a_browser_stops(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The replayed parse_comment splits as Python before the fix does, and
+    this runtime splits one of the two ways Pythons do."""
+    assert legacy_release_parsers._tokens("<!-->a-->") in (
+        [("comment", ""), ("data", "a-->")],
+        [("comment", ">a")],
+    )
+    monkeypatch.setattr(
+        legacy_release_parsers._Tokens, "parse_comment", _parse_comment_before_the_fix
+    )
+    assert legacy_release_parsers._tokens("<!-->a-->") == [("comment", ">a")]
+    assert legacy_release_parsers._tokens("<!--->a-->") == [("comment", "->a")]
+    assert legacy_release_parsers._tokens("<!-->a") == [("comment", ""), ("data", "a")]
 
 
 def test_the_tokenizer_splits_markup_as_browsers_do() -> None:

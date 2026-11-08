@@ -293,8 +293,29 @@ _PLAIN_TAGS = frozenset(
     | {"html", "main", "p", "section", "span"}
 )
 _PLAIN_ATTRIBUTES = frozenset({"class", "id", "lang", "role"})
-# Only inside these does "/>" close an element that is not void.
-_FOREIGN = frozenset({"math", "svg"})
+# Inside an <svg>, real pages use only <path> elements, and these
+# attributes on the two: none of them moves or paints anything outside the
+# svg's own box, and a browser splits all of it into the tags this parser
+# reads. Only there does "/>" close an element that is not void.
+_SVG_ATTRIBUTES = frozenset(
+    {"aria-hidden", "class", "data-icon", "data-prefix", "focusable", "viewbox"}
+    | {"xmlns"}
+)
+_PATH_ATTRIBUTES = frozenset({"d", "fill", "xmlns"})
+# Elements real pages never use. After MathML, a <select> or a column
+# group a <template> holds, a browser may read "<style>" as an element with
+# markup in it, where this parser reads raw text; frames and <plaintext>
+# change the whole page.
+_REFUSED = frozenset(
+    {"col", "colgroup", "frame", "frameset", "math", "plaintext", "select"}
+)
+# Tags that change the whole page wherever they stand. Each one in the
+# page's source must be one this parser reads as a tag, for a browser may
+# read one where this parser reads raw text, a comment or an attribute.
+_PAGE_TAGS = ("body", "head", "html", "math", "meta", "svg", "template")
+# Where a browser running scripts ends a <noscript>'s content, read as raw
+# text.
+_NOSCRIPT_END = re.compile(r"</noscript[\t\n\f\r />]", re.IGNORECASE | re.ASCII)
 # Inside the block, real releases use only these elements and attributes
 # (the January and February Employment Situations hold tables there).
 _BLOCK_TAGS = frozenset(
@@ -328,18 +349,30 @@ class _Page(HTMLParser):
     - anywhere: an <html>, <head> or <body> with an attribute that is not
       plain, or a second one (wherever it stands, a browser adds its
       attributes to the page's one root of that kind, even one it made
-      itself), frames, <plaintext>, a declarative shadow root, or a
-      refresh (of an attribute given twice, a browser keeps the first);
+      itself); an <html>, <head>, <body>, <meta>, <template>, <svg> or
+      <math> in the source that this parser does not read as a tag (a
+      browser may: _PAGE_TAGS); one of _REFUSED (MathML, <select>, <col>,
+      <colgroup>, frames, <plaintext>); an <svg> holding anything but
+      <path> elements, or either with an attribute real pages do not use
+      there (one could paint outside the svg's box); a declarative shadow
+      root; a <meta> that refreshes the page, names an encoding other
+      than UTF-8, or gives any http-equiv but X-UA-Compatible (of an
+      attribute given twice, a browser keeps the first); an XML
+      declaration naming any encoding; or a comment opened by "<!-->" or
+      "<!--->" that this parser reads past that ">" (a browser ends it
+      there; Python before its July 2026 fix, 3.14.4 for one, reads on to
+      a later "-->");
     - up to the end of the block: an end tag that does not close the
       element last opened (a void element's aside), "/>" on an element
-      that is not void outside SVG or MathML (a browser ignores it, so
+      that is not void outside an <svg> (a browser ignores it, so
       "<script/>" opens a script), a marked section ("<![CDATA[", which a
       browser ends at the first ">"), a NUL (which a browser drops), a
       script a browser would run on past its first "</script>" ("<!--"
-      then "<script"), a <noscript> holding anything but void elements
-      (with scripts on, a browser reads its content as raw text up to
-      "</noscript>"), or a heading opened inside a heading (a browser may
-      close the first);
+      then "<script"), a <noscript> holding anything but void elements, or
+      holding "</noscript" anywhere before the end tag that closes it here
+      (with scripts on, a browser reads its content as raw text up to the
+      first "</noscript>", even one inside a tag), or a heading opened
+      inside a heading (a browser may close the first);
     - the block in an element that is not plain, or its <pre> tag with
       attributes;
     - inside the block: an element or attribute releases do not use there,
@@ -348,8 +381,9 @@ class _Page(HTMLParser):
       at its end.
 
     How this parser splits a page into tags, comments and text is checked
-    once, against _PROBES (_TOKENIZES_AS_BROWSERS). The page's stylesheets
-    and scripts are not run.
+    once, against _PROBES (_TOKENIZES_AS_BROWSERS), and on each page for
+    the one split the probes cannot settle (the comment rule above). The
+    page's stylesheets and scripts are not run.
     """
 
     def __init__(self) -> None:
@@ -372,10 +406,33 @@ class _Page(HTMLParser):
         self.heading_from = 0
         self.heading: tuple[int, int] | None = None
         self.raw: list[str] = []
-        self.roots: dict[str, int] = {}
+        # How many start tags of each kind this parser read.
+        self.tags: dict[str, int] = {}
+        self.svg = False
+        # Where the content of the open <noscript> starts in the source.
+        self.noscript_from = 0
+        self.source = ""
+        self.lines = [0]
+
+    def feed(self, data: str) -> None:
+        self.source += data
+        self.lines = [0, *(match.end() for match in re.finditer("\n", self.source))]
+        super().feed(data)
+
+    def close(self) -> None:
+        super().close()
+        for tag in _PAGE_TAGS:
+            found = re.findall(rf"<{tag}[\t\n\f\r />]", self.source, re.I | re.A)
+            if len(found) != self.tags.get(tag, 0):
+                self.plain = False
+
+    def _here(self) -> int:
+        """Where in the source the tag being handled starts."""
+        line, column = self.getpos()
+        return self.lines[line - 1] + column
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag in _VOID or any(name in _FOREIGN for name, _ in self.open):
+        if tag in _VOID or self.svg:
             super().handle_startendtag(tag, attrs)
             return
         if self.where == "before":
@@ -387,16 +444,26 @@ class _Page(HTMLParser):
         values: dict[str, str] = {}
         for name, value in attrs:
             values.setdefault(name, value or "")
+        self.tags[tag] = self.tags.get(tag, 0) + 1
         if tag in ("html", "head", "body"):
-            self.roots[tag] = self.roots.get(tag, 0) + 1
-            if self.roots[tag] > 1 or not names <= _PLAIN_ATTRIBUTES:
+            if self.tags[tag] > 1 or not names <= _PLAIN_ATTRIBUTES:
+                self.plain = False
+        if self.svg:
+            if tag != "path" or not names <= _PATH_ATTRIBUTES:
+                self.plain = False
+        elif tag == "svg":
+            self.svg = True
+            if not names <= _SVG_ATTRIBUTES:
                 self.plain = False
         if (
-            tag in ("frame", "frameset", "plaintext")
+            tag in _REFUSED
             or tag == "template"
             and any(name.startswith("shadowroot") for name in names)
             or tag == "meta"
-            and values.get("http-equiv", "").strip().lower() == "refresh"
+            and (
+                values.get("http-equiv", "").lower() not in ("", "x-ua-compatible")
+                or values.get("charset", "utf-8").strip().lower() != "utf-8"
+            )
         ):
             self.plain = False
         if tag == "title":
@@ -417,10 +484,10 @@ class _Page(HTMLParser):
             self.where = "block"
             self.open = []
         else:
-            if any(name == "noscript" for name, _ in self.open) and (
-                tag not in _VOID or any("<" in value for value in values.values())
-            ):
+            if any(name == "noscript" for name, _ in self.open) and tag not in _VOID:
                 self.plain = False
+            if tag == "noscript":
+                self.noscript_from = self._here() + len(self.get_starttag_text() or "")
             if tag in _HEADINGS:
                 if any(name in _HEADINGS for name, _ in self.open):
                     self.plain = False
@@ -489,6 +556,11 @@ class _Page(HTMLParser):
     def handle_endtag(self, tag: str) -> None:
         if tag == "title":
             self.in_title = False
+        if self.svg:
+            if tag == "svg":
+                self.svg = False
+            elif tag != "path":
+                self.plain = False
         if self.where == "block":
             self._block_end(tag)
             return
@@ -499,6 +571,10 @@ class _Page(HTMLParser):
             self.plain = False
             return
         self.open.pop()
+        if tag == "noscript" and _NOSCRIPT_END.search(
+            self.source, self.noscript_from, self._here()
+        ):
+            self.plain = False
         if tag in _HEADINGS:
             self.heading = (self.heading_from, len(self.shown))
         if tag == "script":
@@ -538,6 +614,13 @@ class _Page(HTMLParser):
         self.open.pop()
 
     def handle_comment(self, data: str) -> None:
+        # A browser ends a comment that opens "<!-->" or "<!--->" at that
+        # ">". Python's parser tried a later "-->" first until CPython fixed
+        # gh-135661 in July 2026 (3.14.7 is the first 3.14 release with the
+        # fix), so only there does such a comment hold anything, and this
+        # parser would miss what the browser shows.
+        if data and self.source.startswith(("<!-->", "<!--->"), self._here()):
+            self.plain = False
         if self.where == "after":
             return
         if any(name == "noscript" for name, _ in self.open):
@@ -547,6 +630,12 @@ class _Page(HTMLParser):
 
     def unknown_decl(self, data: str) -> None:
         if self.where != "after":
+            self.plain = False
+
+    def handle_pi(self, data: str) -> None:
+        # Like a <meta>, an XML declaration may name an encoding; real pages
+        # carry none.
+        if "encoding" in data.lower():
             self.plain = False
 
     def handle_data(self, data: str) -> None:

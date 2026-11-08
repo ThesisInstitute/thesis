@@ -35,6 +35,10 @@ from legacy_release_contracts import LEGACY_RELEASE_CAPTURE_CONTRACTS  # noqa: E
 from legacy_release_parsers import LABELS as LEGACY_RELEASE_LABELS  # noqa: E402
 from legacy_release_parsers import parse_release  # noqa: E402
 
+from tests.test_release_capture_prose import (  # noqa: E402
+    _parse_comment_before_the_fix,
+)
+
 FIXTURES = ROOT / "tests" / "fixtures" / "release_capture"
 CORPUS = sorted((FIXTURES / "corpus").glob("*.json"))
 CAPTURES = sorted(FIXTURES.glob("*.json")) + CORPUS
@@ -1042,9 +1046,74 @@ def test_round_10_review_markup_on_a_real_page_defers_it(
         '<meta http-equiv=refresh http-equiv=content-type content="0;url=about:blank">'
     )
     _defers(f"{html[:top]}{refresh}{html[top:]}", sidecar)
-    swapped = '<meta http-equiv=content-type http-equiv=refresh content="0">'
+    swapped = '<meta http-equiv=x-ua-compatible http-equiv=refresh content="0">'
     _resolves(f"{html[:top]}{swapped}{html[top:]}", sidecar)
     _resolves(f"{html[:end]}<p></p>{html[end:]}", sidecar)
+
+
+@pytest.mark.parametrize("sidecar", _REAL_SUMMARIES, ids=lambda p: p.stem)
+def test_round_11_review_markup_on_a_real_page_defers_it(
+    sidecar: pathlib.Path,
+) -> None:
+    """Round-11 review, on the real captures: a <noscript> a browser running
+    scripts ends inside an attribute, between the release's name and its
+    block (finding 1) or after the block (finding 2), other markup a browser
+    splits into tags otherwise than this parser, an svg that could paint
+    outside its box, and another encoding each refuse the page. The same
+    markup without the "</noscript>" or the attribute leaves the reading as
+    it was."""
+    _meta, _raw, html = _load(sidecar)
+    assert html.count("</h1>") == 1
+    assert html.count("</pre>") == 1
+    name = html.index("</h1>") + len("</h1>")
+    end = html.index("</pre>") + len("</pre>")
+    top = html.index("<html")
+    repeated = (
+        '<template><noscript><br a=safe a="</noscript></template>Not seasonally '
+        'adjusted:<br a=x"></noscript></template>'
+    )
+    _defers(f"{html[:name]}{repeated}{html[name:]}", sidecar)
+    harmless = "<template><noscript><br a=safe a=x></noscript></template>"
+    _resolves(f"{html[:name]}{harmless}{html[name:]}", sidecar)
+    for markup in (
+        '<noscript><br a="</noscript><body hidden>"></noscript>',
+        '<noscript></br a="</noscript><body hidden>"></noscript>',
+        "<svg><style><body hidden></style></svg>",
+        "<![CDATA[ x > <body hidden> ]]>",
+        '<svg overflow="visible"><path d="M0-9999H9999V9999H0Z"/></svg>',
+    ):
+        _defers(f"{html[:end]}{markup}{html[end:]}", sidecar)
+        _defers(f"{html}{markup}", sidecar)
+    _resolves(f'{html[:end]}<noscript><br a="x"></noscript>{html[end:]}', sidecar)
+    _resolves(f'{html[:end]}<svg><path d="M0 0"/></svg>{html[end:]}', sidecar)
+    for markup in (
+        "<select><style></select><div hidden></style></select>",
+        "<template><col><style></template><div hidden></style></template>",
+        '<meta charset="iso-2022-kr">',
+    ):
+        _defers(f"{html[:top]}{markup}{html[top:]}", sidecar)
+    _resolves(f'{html[:top]}<meta charset="utf-8">{html[top:]}', sidecar)
+
+
+@pytest.mark.parametrize("sidecar", _REAL_SUMMARIES, ids=lambda p: p.stem)
+def test_a_comment_python_before_the_fix_reads_on_defers_a_real_page(
+    monkeypatch: pytest.MonkeyPatch, sidecar: pathlib.Path
+) -> None:
+    """With the comment order of Python before its July 2026 fix (the
+    resolver's 3.14.4), a comment opened by "<!-->" that runs on to a later
+    "-->" defers the real page, between the name and the block or after the
+    block; one with no later "-->" is empty there too, and the page reads."""
+    _meta, _raw, html = _load(sidecar)
+    name = html.index("</h1>") + len("</h1>")
+    end = html.index("</pre>") + len("</pre>")
+    last = html.index("</html>")
+    monkeypatch.setattr(
+        legacy_release_parsers._Page, "parse_comment", _parse_comment_before_the_fix
+    )
+    _defers(f"{html[:name]}<!-->Not seasonally adjusted:-->{html[name:]}", sidecar)
+    _defers(f"{html[:end]}<!--->Footnote-->{html[end:]}", sidecar)
+    assert "-->" not in html[last:]
+    _resolves(f"{html[:last]}<!-->{html[last:]}", sidecar)
 
 
 _SUMMARY_READERS = {
@@ -1058,14 +1127,22 @@ _SUMMARIES = [
 ]
 
 
+@pytest.mark.parametrize("order", ("this Python's", "before the fix"))
 @pytest.mark.parametrize("sidecar", _SUMMARIES, ids=lambda p: p.stem)
 def test_every_real_summary_is_plain_with_its_block_right_after_its_name(
-    sidecar: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch, sidecar: pathlib.Path, order: str
 ) -> None:
     """What the prose readers require of a page holds of every real summary
     capture: a plain page, one block, shown right after the release's name,
     and before the heading only the release's metadata, which every one
-    prints."""
+    prints. It holds in either order a Python's parser tries a comment's
+    ends in (CPython changed it in July 2026)."""
+    if order == "before the fix":
+        monkeypatch.setattr(
+            legacy_release_parsers._Page,
+            "parse_comment",
+            _parse_comment_before_the_fix,
+        )
     meta, _raw, html = _load(sidecar)
     spec = legacy_release_parsers.PROSE_PARSERS[_SUMMARY_READERS[meta["sourceUrl"]]]
     doc = legacy_release_parsers._Page()
@@ -1077,7 +1154,10 @@ def test_every_real_summary_is_plain_with_its_block_right_after_its_name(
     assert len(doc.pres) == 1
     assert doc.name is not None
     assert re.fullmatch(spec.title, doc.name)
-    assert doc.roots == {"html": 1, "head": 1, "body": 1}
+    assert [doc.tags.get(tag) for tag in ("html", "head", "body")] == [1, 1, 1]
+    # Every one holds svg icons after the block, of paths only.
+    assert doc.tags.get("svg", 0) >= 3
+    assert doc.tags.get("path", 0) == doc.tags["svg"]
     text = " ".join("".join(doc.pres[0]).split())
     heading = re.search(rf"{spec.heading}\W+", text)
     assert heading is not None

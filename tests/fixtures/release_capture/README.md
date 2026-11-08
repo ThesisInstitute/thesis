@@ -106,10 +106,22 @@ from a plain page (`_Page`). Nothing may change the whole page: an
 `<html>`, `<head>` or `<body>` tag with any attribute but a class, id,
 lang or role, or a second one, wherever it stands (a browser gives every
 such tag's attributes to the page's one root of that kind, even one it
-made itself), a frame, `<plaintext>`, a declarative shadow root or a
-refresh. Of an attribute given twice, the first counts, as in a browser.
-Up to the end of the block, every end tag must close the element opened
-last, and no heading may open inside another. The block's ancestors must
+made itself), a frame, `<plaintext>`, a declarative shadow root, or a
+`<meta>` that refreshes the page, names an encoding other than UTF-8, or
+gives any `http-equiv` but X-UA-Compatible, or an XML declaration naming
+any encoding. Of an attribute given twice,
+the first counts, as in a browser. Each `<html`, `<head`, `<body`, `<meta`,
+`<template`, `<svg` or `<math` in the source must be a tag the parser
+reads, since a browser may read one where the parser reads raw text, a
+comment or an attribute (`_PAGE_TAGS`). An `<svg>` may hold only `<path>`
+elements, each with only the attributes real pages give it, so nothing in
+it paints outside its box. MathML, `<select>`, `<col>` and `<colgroup>`,
+after which a browser may read `<style>` as an element holding markup,
+refuse the page; no real page uses them. Up to the end of the block, every
+end tag must close the element opened last, no heading may open inside
+another, and a `<noscript>` must hold no "`</noscript`" before its own end
+tag (a browser running scripts ends it at the first one, even inside an
+attribute). The block's ancestors must
 be plain containers (`div`, `p`, `span`, `main` and the like, with only a
 class, id, lang or role), and the block may hold only the table and text
 markup BLS prints in it. The block follows a heading whose whole text is
@@ -120,7 +132,7 @@ that heading and the block, any shown text, or any element but a plain
 container or a line break, refuses the page as well. A comment, a script
 or a stylesheet there does not, since a browser shows none of them. Every
 one of the 32 summary captures is such a page, with one `<html lang>`, one
-`<head>` and one `<body>`
+`<head>`, one `<body>`, and after the block svg icons of paths only
 (`test_every_real_summary_is_plain_with_its_block_right_after_its_name`).
 The readers run no stylesheet or script, so text hidden or moved by either
 is read where the markup puts it. How Python's `HTMLParser` splits a page
@@ -129,8 +141,14 @@ the HTML standard fixes (`_PROBES`). On a runtime that splits any of them
 otherwise, the readers read no summary page, and the resolver fails the
 run for those cells ("LEGACY RELEASE ENVIRONMENT FAILURE (fatal)"), as it
 does for a missing parser. The resolver's runner image (ubuntu-26.04,
-20261012) ships Python 3.14.4, and CPython 3.14.4 passes them all;
-3.14.0 does not.
+20261101.186 on 2026-11-07) ships Python 3.14.4, and CPython 3.14.4 and
+3.14.7 pass them all; 3.14.0 and 3.13.9 do not. The probes pass whichever
+way a parser ends a comment opened by "`<!-->`" or "`<!--->`". A browser
+ends it at that "`>`", and so does CPython from its July 2026 fix
+(gh-135661; 3.14.7 is the first 3.14 release with it), but 3.14.4 reads on
+to a later "`-->`", hiding from the readers what a browser shows. So a
+comment opened that way that holds anything refuses the page. No capture
+opens one.
 
 The Employment Situation and JOLTS summaries print no table. Their figures
 are read from the release's prose (`PROSE_PARSERS` in
