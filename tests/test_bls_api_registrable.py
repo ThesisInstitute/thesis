@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import glob
+import gzip
 import hashlib
 import itertools
 import json
@@ -30,6 +31,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import register_targets  # noqa: E402
 import resolve_pending  # noqa: E402
 import roll_docket  # noqa: E402
+from verify_custody import verify_run  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures" / "bls_api"
 
@@ -525,6 +527,7 @@ def _run_main(
     fetch_allowed: bool = True,
     ledger: str = "",
     dry_run: bool = True,
+    exit_code: int = 0,
 ) -> tuple[str, str]:
     """Drive ``main()`` over one pending reference; returns (ref, stdout)."""
     spec = resolve_pending.BLS_API_ADAPTERS[series]
@@ -571,7 +574,7 @@ def _run_main(
     monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
     argv = ["resolve_pending.py", *(["--dry-run"] if dry_run else [])]
     monkeypatch.setattr(sys, "argv", argv)
-    assert resolve_pending.main() == 0
+    assert resolve_pending.main() == exit_code
     return ref, capsys.readouterr().out
 
 
@@ -1177,6 +1180,8 @@ def _append_through_main(
     capsys: pytest.CaptureFixture[str],
     root: pathlib.Path,
     ledger: str,
+    *,
+    exit_code: int = 0,
 ) -> tuple[dict, str]:
     """The row ``main()`` appends for an August A-19 print, and its stdout."""
     updates: list[str] = []
@@ -1200,6 +1205,7 @@ def _append_through_main(
         now="2026-09-25T13:40:00Z",
         ledger=ledger,
         dry_run=False,
+        exit_code=exit_code,
     )
     (update,) = updates
     assert update.startswith(ledger)
@@ -1223,6 +1229,89 @@ def test_main_stores_base_units(
     assert row["value"] == resolve_pending.ledger_units.to_base(
         row["source"]["recorded_value"], "millions"
     )
+
+
+def test_a_daily_run_rebuilds_a_restatement_run_that_never_reached_thesis(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # The restatement merged into Chronicle, then its marker commit failed, so
+    # no record here holds its archive. The next daily run with pending work
+    # rebuilds that run and prints "restored", which makes the workflow commit
+    # and publish it, and still appends its own row.
+    row, out = _append_through_main(
+        monkeypatch, capsys, tmp_path, _restated_june_ledger()
+    )
+    run_dir = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    assert (
+        f"restored {run_dir.relative_to(tmp_path).as_posix()}, the records of a "
+        "restatement run that never reached Thesis"
+    ) in out.splitlines()
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    (archive,) = (run_dir / "responses").iterdir()
+    assert archive.read_bytes() == gzip.compress(line.encode(), mtime=0)
+    verify_run(run_dir)
+    assert row["measure"]["unit"] == "count"
+
+
+def test_a_records_fault_costs_the_daily_run_no_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # A run directory that exists in part is a records fault: rebuilding it
+    # would mix bytes this run wrote with bytes it did not. The daily run says
+    # so, still appends its own row, and exits EXIT_REFUSED_ROWS, so the
+    # workflow publishes that row and then fails the job.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    run_dir = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    run_dir.mkdir(parents=True)
+    row, out = _append_through_main(
+        monkeypatch,
+        capsys,
+        tmp_path,
+        _restated_june_ledger(),
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    fault = (
+        f"{run_dir.relative_to(tmp_path).as_posix()} lacks 1 restatement "
+        "archive(s); refusing to rebuild a run directory in part"
+    )
+    lines = out.splitlines()
+    assert f"{resolve_pending.RESTORE_REFUSED} {fault}" in lines
+    assert (
+        "1 fault(s) kept the run from rebuilding a restatement run's records; "
+        "fix what each names, and the next run with pending work rebuilds them"
+    ) in lines
+    assert f"  refused: {fault}" in lines
+    assert not any(line.startswith("restored") for line in lines)
+    assert row["measure"]["unit"] == "count"
+    # The partial directory is left for a person to fix.
+    assert list(run_dir.iterdir()) == []
+
+
+def test_a_daily_dry_run_names_the_restatement_run_it_would_rebuild(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", lambda *_a, **_k: {}
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-08",
+        release="2026-09-04",
+        now="2026-09-25T13:40:00Z",
+        ledger=_restated_june_ledger(),
+    )
+    assert "dry-run: would restore records/resolutions/2026-11-04/" in out
+    assert not any(line.startswith("restored") for line in out.splitlines())
+    assert not resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z").exists()
 
 
 def test_the_guard_matches_the_concept_under_another_record_id() -> None:

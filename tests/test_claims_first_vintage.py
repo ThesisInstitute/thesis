@@ -479,7 +479,9 @@ def test_the_row_a_late_run_appended_on_2026_10_18_is_corrected() -> None:
     assert supersedes == {ref: row["assertionVersion"]["id"]}
     note = corrected["measure"]["concept_evidence_notes"]
     assert f"Supersedes {row['assertionVersion']['id']}" in note
-    assert "read from ALFRED vintage 2026-10-18" in note and "recorded 1.714" in note
+    assert "read from ALFRED vintage 2026-10-18" in note
+    # With its unit, since the row it supersedes may be stored in another.
+    assert "recorded 1.714 millions." in note
     assert [
         (role, day.isoformat()) for role, day, _raw, _at in vintages.evidence[ref]
     ] == [
@@ -488,6 +490,31 @@ def test_the_row_a_late_run_appended_on_2026_10_18_is_corrected() -> None:
         ("vintage_after_release", "2026-10-09"),
         ("superseded_row_vintage", "2026-10-18"),
     ]
+
+
+def test_a_correction_of_a_restated_row_cites_its_value_in_count() -> None:
+    # Once Chronicle stores base units the record's active row is its
+    # restatement, in count, while the correction is built in millions, so
+    # the note names the superseded value's unit.
+    ref = "dol.eta.continued_claims.sa.week_2026-09-26.first_print"
+    row = next(row for row in LATE_ROWS if row["source_record_id"] == ref)
+    restated, _ = resolve_pending.restatement_row(
+        row,
+        resolve_pending.ledger_line(row),
+        run_dir=resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z"),
+        retrieved_at="2026-11-04T00:00:00Z",
+        ledger_repo_sha="f" * 40,
+    )
+    restated_id = restated["assertionVersion"]["id"]
+    fetched, supersedes, refusals = resolve_pending.claims_corrections(
+        [row, restated], real_vintages(), {ref: restated_id}
+    )
+    assert refusals == []
+    assert supersedes == {ref: restated_id}
+    [(corrected, *_rest)] = fetched
+    assert (corrected["value"], corrected["measure"]["unit"]) == (1.716, "millions")
+    note = corrected["measure"]["concept_evidence_notes"]
+    assert "and recorded 1714000 count. Resolved at" in note
 
 
 def test_a_row_read_inside_the_first_release_is_refused() -> None:

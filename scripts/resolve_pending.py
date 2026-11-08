@@ -61,7 +61,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 import zlib
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, replace
 from decimal import ROUND_HALF_UP, Decimal
 from html import unescape
@@ -9209,9 +9209,11 @@ def bls_ledger_unit_conflict(
 
 
 def _report_run_refusals(
-    unit_refusals: list[str], claims_correction_refusals: list[str]
+    unit_refusals: list[str],
+    claims_correction_refusals: list[str],
+    restore_refusals: Sequence[str] = (),
 ) -> int:
-    """Report both refusal lists; ``EXIT_REFUSED_ROWS`` if either has any."""
+    """Report every refusal list; ``EXIT_REFUSED_ROWS`` if any has an entry."""
 
     status = _report_ledger_unit_refusals(unit_refusals)
     if claims_correction_refusals:
@@ -9220,6 +9222,15 @@ def _report_run_refusals(
             "fix CLAIMS_FIRST_PRINT_CORRECTIONS to match the ledger"
         )
         for line in claims_correction_refusals:
+            print(f"  refused: {line}")
+        status = EXIT_REFUSED_ROWS
+    if restore_refusals:
+        print(
+            f"{len(restore_refusals)} fault(s) kept the run from rebuilding a "
+            "restatement run's records; fix what each names, and the next run "
+            "with pending work rebuilds them"
+        )
+        for line in restore_refusals:
             print(f"  refused: {line}")
         status = EXIT_REFUSED_ROWS
     return status
@@ -12981,11 +12992,14 @@ def claims_corrections(
                 "to correct"
             )
             continue
+        # The unit too: once the ledger is in base units the superseded row
+        # may be in count while this row is built in thousands or millions.
+        recorded = f"{row.get('value')} {_json_object(row.get('measure')).get('unit')}"
         note = (
             f"Supersedes {version_id}, which was read from ALFRED vintage "
             f"{read_day}, a later DOL release than the first print, and "
-            f"recorded {row.get('value')}. Resolved at the first ALFRED "
-            f"vintage that holds the week, {first_day}, DOL's release day. "
+            f"recorded {recorded}. Resolved at the first ALFRED vintage that "
+            f"holds the week, {first_day}, DOL's release day. "
             f"See {CLAIMS_DRIFT_RECORD_URL}."
         )
         _rows, read_raw, read_at = vintages.read(series_id, read_day)
@@ -12996,8 +13010,9 @@ def claims_corrections(
         ]
         corrected = claims_fact(ref, week, raw_value, kind, first_day, note=note)
         print(
-            f"  correct: {ref} — {row.get('value')} (vintage {read_day}) -> "
-            f"{corrected['value']} (first vintage {first_day})"
+            f"  correct: {ref} — {recorded} (vintage {read_day}) -> "
+            f"{corrected['value']} {corrected['measure']['unit']} "
+            f"(first vintage {first_day})"
         )
         fetched.append(
             (corrected, series_id, first_day.isoformat(), raw, retrieved_at, "csv")
@@ -16852,12 +16867,44 @@ def scaled_current_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+# The clause a few rows' method notes use to name their scale ("expressed in
+# thousands", "billions of dollars"). A row stored in base units drops it,
+# because its value carries no scale, and refuses notes that still name one,
+# so a phrasing this misses is fixed here before it reaches the ledger.
+_SCALE_CLAUSE = re.compile(
+    r",? (?:expressed in (?:GBP |USD )?(?:thousands|millions|billions)"
+    r"|(?:millions|billions) of dollars)(?=\.|;|$)",
+    re.IGNORECASE,
+)
+_SCALE_WORD = re.compile(r"\b(?:thousands?|millions?|billions?)\b", re.IGNORECASE)
+
+
+def base_unit_notes(notes: object, sentence: str) -> str:
+    """Method notes for a row stored in base units, ending with ``sentence``.
+
+    A base value is only as precise as the figure it was recorded as: 3189.0
+    thousands becomes 3189000 though BLS printed 3,189,009. The recorded pair
+    implies that, and ``sentence`` says it, since a bare 3189000 reads as
+    exact.
+    """
+
+    text = _SCALE_CLAUSE.sub("", notes if isinstance(notes, str) else "").strip()
+    if _SCALE_WORD.search(text):
+        raise ledger_units.LedgerUnitError(
+            f"method notes still name a scale in base units: {text!r}"
+        )
+    if text and not text.endswith("."):
+        text += "."
+    return f"{text} {sentence}".strip()
+
+
 def base_unit_row(row: dict[str, Any]) -> dict[str, Any]:
     """The row in its unit's base unit, with the pair it was recorded as.
 
     A row in a unit with no scale word comes back unchanged. A value with no
     exact form in the base unit raises ``ledger_units.LedgerUnitError``, a
-    ValueError, so the caller refuses that row alone.
+    ValueError, so the caller refuses that row alone, as it does notes that
+    name a scale ``_SCALE_CLAUSE`` cannot drop.
     """
 
     measure = _json_object(row.get("measure"))
@@ -16870,11 +16917,22 @@ def base_unit_row(row: dict[str, Any]) -> dict[str, Any]:
         raise ledger_units.LedgerUnitError(
             f"{row.get('source_record_id')} already records a pair"
         )
+    value = ledger_units.to_base(row.get("value"), unit)
+    notes = base_unit_notes(
+        source.get("method_notes"),
+        f"Stores {row['value']!r} {unit} in base units, at that figure's "
+        "precision, so the archived response may hold more digits.",
+    )
     return {
         **row,
-        "value": ledger_units.to_base(row.get("value"), unit),
+        "value": value,
         "measure": {**measure, "unit": base},
-        "source": {**source, "recorded_value": row["value"], "recorded_unit": unit},
+        "source": {
+            **source,
+            "recorded_value": row["value"],
+            "recorded_unit": unit,
+            "method_notes": notes,
+        },
     }
 
 
@@ -17012,8 +17070,15 @@ def check_restatements(lines: list[str]) -> list[dict[str, Any]]:
                     f"{version['relation']!r}, which the site does not read"
                 )
             replaced = version.get("supersedes")
-            # The site refuses a supersedes that is not a string rather than
-            # coercing it (ledger-current-view.ts stringOrRefuse).
+            # The site refuses a truthy supersedes that is not a string rather
+            # than coerce it with str(), as receipt would, and reads a falsy one
+            # as naming no row (ledger-current-view.ts supersededAssertionIdOf).
+            if replaced and not isinstance(replaced, str):
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} has assertionVersion.supersedes "
+                    f"{replaced!r}, not a string, which the site refuses rather "
+                    "than coerce"
+                )
             prior = line_of_id.get(replaced) if isinstance(replaced, str) else None
             if prior is None:
                 raise ledger_units.LedgerUnitError(
@@ -17028,33 +17093,23 @@ def check_restatements(lines: list[str]) -> list[dict[str, Any]]:
     return restatements
 
 
-# The clause a few rows' method notes use to name their scale ("expressed in
-# thousands", "billions of dollars"). A restatement drops it, because its
-# value carries no scale, and refuses notes that still name one, so a phrasing
-# this misses is fixed here before it reaches the ledger.
-_SCALE_CLAUSE = re.compile(
-    r",? (?:expressed in (?:GBP |USD )?(?:thousands|millions|billions)"
-    r"|(?:millions|billions) of dollars)(?=\.|;|$)",
-    re.IGNORECASE,
-)
-_SCALE_WORD = re.compile(r"\b(?:thousands?|millions?|billions?)\b", re.IGNORECASE)
-
-
 def restated_method_notes(
     notes: object, value: object, unit: str, prior_id: str
 ) -> str:
-    text = _SCALE_CLAUSE.sub("", notes if isinstance(notes, str) else "").strip()
-    if _SCALE_WORD.search(text):
-        raise ledger_units.LedgerUnitError(
-            f"method notes still name a scale once restated: {text!r}"
-        )
-    if text and not text.endswith("."):
-        text += "."
-    sentence = (
-        f"Restates {value!r} {unit} (assertion {prior_id}) in base units; the "
-        "quantity does not change."
+    """A restatement's method notes: the row's, then what the restatement did.
+
+    The row's other notes stay as they were (the site's restatement check,
+    and ``check_restatements`` here, hold them to the row's), so the sentence
+    warns that figures in them may be in the old unit.
+    """
+
+    return base_unit_notes(
+        notes,
+        f"Restates {value!r} {unit} (assertion {prior_id}) in base units, at "
+        "that figure's precision, so the source may print more digits; the "
+        "quantity does not change. The row's other notes predate this "
+        f"restatement and may give figures in {unit}.",
     )
-    return f"{text} {sentence}".strip()
 
 
 def restatement_row(
@@ -17199,7 +17254,9 @@ def restore_restatement_runs(
             path = ROOT / str(_json_object(row.get("responseArchive")).get("path"))
             if path.parent != run_dir / "responses":
                 raise ledger_units.LedgerUnitError(
-                    f"line {index + 1} archives {path} outside its run, {run_dir}"
+                    f"line {index + 1} archives "
+                    f"{_json_object(row.get('responseArchive')).get('path')!r} "
+                    f"outside its run, {run_dir.relative_to(ROOT).as_posix()}"
                 )
             if not path.exists():
                 prior = line_of_id.get(str(version.get("supersedes")))
@@ -17212,8 +17269,9 @@ def restore_restatement_runs(
     for run_dir, members in missing.items():
         if run_dir.exists():
             raise ledger_units.LedgerUnitError(
-                f"{run_dir} lacks {len(members)} restatement archive(s); "
-                "refusing to rebuild a run directory in part"
+                f"{run_dir.relative_to(ROOT).as_posix()} lacks {len(members)} "
+                "restatement archive(s); refusing to rebuild a run directory "
+                "in part"
             )
         if not write:
             continue
@@ -17328,6 +17386,28 @@ def restatement_catalog_drift(
     return None
 
 
+def report_restored_runs(lines: list[str], args: argparse.Namespace) -> None:
+    """Rebuild the records of restatement runs that never reached Thesis.
+
+    Prints ``restored <run directory>`` for each, which the workflow reads to
+    commit and publish them even when the ledger has not moved. Both modes
+    call it, so a daily run with pending work heals a restatement run whose
+    marker commit failed, as the next dispatch would.
+    """
+
+    for run_dir in restore_restatement_runs(
+        lines,
+        ledger_repo=args.ledger_repo,
+        ledger_branch=args.ledger_branch,
+        write=not args.dry_run,
+    ):
+        print(
+            f"{'dry-run: would restore' if args.dry_run else 'restored'} "
+            f"{run_dir.relative_to(ROOT).as_posix()}, the records of a "
+            "restatement run that never reached Thesis"
+        )
+
+
 def refuse_a_scaled_ledger(ledger_rows: list[dict[str, Any]]) -> None:
     """Stop the run when a current ledger row carries a scale word.
 
@@ -17375,17 +17455,7 @@ def restate_base_units(
             )
     rows = [json.loads(line) for line in lines]
     check_restatements(lines)
-    for run_dir in restore_restatement_runs(
-        lines,
-        ledger_repo=args.ledger_repo,
-        ledger_branch=args.ledger_branch,
-        write=not args.dry_run,
-    ):
-        print(
-            f"{'dry-run: would restore' if args.dry_run else 'restored'} "
-            f"{run_dir.relative_to(ROOT).as_posix()}, the records of a "
-            "restatement run that never reached Thesis"
-        )
+    report_restored_runs(lines, args)
 
     built = restatement_rows(
         lines, retrieved_at=retrieved_at, ledger_repo_sha=ledger_repo_sha
@@ -17976,6 +18046,10 @@ def finalize_resolution_manifest(
 # passed over. Without the second, main() never returned.
 RESOLUTION_LOOP_COMPLETE = "resolution loop complete:"
 RESOLVER_FINISHED = "resolver finished with exit code"
+# resolution_alert.py names the faults behind this line in the issue a
+# refused-rows run opens: a daily run that cannot rebuild the records of a
+# restatement run resolves the rest and exits EXIT_REFUSED_ROWS.
+RESTORE_REFUSED = "RESTORE REFUSED (resolving the rest):"
 
 
 def main() -> int:
@@ -18042,6 +18116,19 @@ def _main() -> int:
     )
     ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
+    # Like corrections, this rides on runs with pending work: a run with
+    # none exits above, before reading the ledger. A records fault costs no
+    # resolutions: the run reports it, resolves the rest, and exits
+    # EXIT_REFUSED_ROWS, so the workflow publishes what it appended and then
+    # fails the job.
+    restore_refusals: list[str] = []
+    try:
+        report_restored_runs(
+            [line for line in content.split("\n") if line.strip()], args
+        )
+    except ledger_units.LedgerUnitError as exc:
+        print(f"{RESTORE_REFUSED} {exc}")
+        restore_refusals.append(str(exc))
     refuse_a_scaled_ledger(ledger_rows)
     # References refused because their fact would give a Chronicle lineage a
     # second unit. The rest of the run still appends; the run then exits
@@ -19885,12 +19972,16 @@ def _main() -> int:
         return 1
     if not fetched_rows:
         print("nothing new to record")
-        return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
+        return _report_run_refusals(
+            ledger_unit_refusals, claims_correction_refusals, restore_refusals
+        )
     if args.dry_run:
         print(f"dry-run: would append {len(fetched_rows)} row(s)")
         for row, *_ in fetched_rows:
             print(json.dumps(row)[:200])
-        return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
+        return _report_run_refusals(
+            ledger_unit_refusals, claims_correction_refusals, restore_refusals
+        )
 
     run_retrieved_at = min(item[4] for item in fetched_rows)
     run_dir = resolution_run_dir(run_retrieved_at)
@@ -20039,7 +20130,9 @@ def _main() -> int:
             "or curate the ledger's lineages named above"
         )
         return EXIT_REFUSED_ROWS
-    return _report_run_refusals(ledger_unit_refusals, claims_correction_refusals)
+    return _report_run_refusals(
+        ledger_unit_refusals, claims_correction_refusals, restore_refusals
+    )
 
 
 if __name__ == "__main__":

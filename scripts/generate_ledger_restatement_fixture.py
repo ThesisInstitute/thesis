@@ -14,7 +14,9 @@ the resolver's own writer over real Chronicle rows and records:
 * ``writer``: the lines ``restatement_rows`` writes for the sample, in the
   order a restatement run appends them.
 * ``cases``: ledgers built from the sample, the writer's lines and copies of
-  them with one thing changed. Each records what the port returned, the id
+  them with one or two things changed. A copy with two defects holds the
+  site and the port to the same first refusal, so they check in the same
+  order. Each case records what the port returned, the id
   each restatement it accepted supersedes or its refusal, and whether
   Chronicle's append gate (receipt 0.6.2 ``check_rows`` and
   ``check_binding_shapes``) accepts the ledger.
@@ -382,6 +384,43 @@ def build_fixture() -> dict[str, Any]:
         UNVERSIONED_LINE,
         set_in("source", "method_notes", "Rewritten notes."),
     )
+
+    # Falsy supersedes values: neither reader may coerce one into a row id.
+    for name, value in (("empty", ""), ("zero", 0), ("false", False)):
+        changed(
+            f"supersedes is {name}",
+            PROJECTED_LINE,
+            set_in("assertionVersion", "supersedes", value),
+        )
+
+    # Two defects in one row: both readers must name the same one.
+    def both(
+        *changes: Callable[[dict[str, Any]], None],
+    ) -> Callable[[dict[str, Any]], None]:
+        def change(row: dict[str, Any]) -> None:
+            for one in changes:
+                one(row)
+
+        return change
+
+    unit_kept = set_in("measure", "unit", projected["measure"]["unit"])
+    pair_off = set_in("source", "recorded_value", projected["value"] + 1)
+    value_off = set_value(base_value + 1)
+    archive_other = set_in(
+        "responseArchive",
+        "sha256",
+        hashlib.sha256(line_of[UNSCALED_LINE].encode()).hexdigest(),
+    )
+    content_moved = lambda row: row.__setitem__(  # noqa: E731
+        "observed_at", "2026-10-31"
+    )
+    for name, first, second in (
+        ("unit and pair", unit_kept, pair_off),
+        ("pair and value", pair_off, value_off),
+        ("value and archive", value_off, archive_other),
+        ("archive and content", archive_other, content_moved),
+    ):
+        changed(f"two defects: {name}", PROJECTED_LINE, both(first, second))
 
     # Where a restatement sits and what it names.
     index, row = writer_row(PROJECTED_LINE)

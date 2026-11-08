@@ -16,6 +16,8 @@ Invariants (property-tested below):
   refused list is exactly the references whose line is one of the three
   exit-3 lines (the generator's own labels are the expectation; a separate
   test ties those three line heads to ``resolve_pending.py``'s source);
+- a fault that kept the resolver from rebuilding a restatement run's records
+  is named in the body and never listed as a refused row;
 - resolver text reaches the issue only inside single-line code spans;
 - the body stays under GitHub's limit however many rows are refused;
 - it never raises on any log text.
@@ -124,6 +126,78 @@ def test_the_gate_crash_keeps_its_title_and_still_names_the_refused_rows() -> No
     assert "append gate did not pass for PolicyEngine/chronicle 300" in alert["body"]
     assert "Before that, the resolver refused 6 row(s):" in alert["body"]
     assert len(alert["refused"]) == 6
+
+
+RESTORE_FAULT = (
+    "records/resolutions/2026-11-09 lacks 2 restatement archive(s); refusing "
+    "to rebuild a run directory in part"
+)
+RESTORE_LINE = f"{ra._RESTORE_REFUSED} {RESTORE_FAULT}\n"
+# What resolve_pending prints when a restore fault is the run's only refusal.
+RESTORE_LOG = RESTORE_LINE + (
+    "  release 2026-12-04 not reached: "
+    "bls.cps.unemployment_rate.2026_11.first_print\n"
+    "resolution loop complete: 1 reference(s) examined\n"
+    "nothing new to record\n"
+    "1 fault(s) kept the run from rebuilding a restatement run's records; fix "
+    "what each names, and the next run with pending work rebuilds them\n"
+    f"  refused: {RESTORE_FAULT}\n"
+    "resolver finished with exit code 3\n"
+)
+
+
+def test_a_run_red_only_for_a_restore_fault_names_it_and_no_row() -> None:
+    alert = ra.build_alert(
+        RESTORE_LOG,
+        refused_gate="failure",
+        run_url=URL,
+        date=DATE,
+        resolve_outcome="success",
+        needs_publish="0",
+    )
+    assert alert["kind"] == "refused_rows"
+    assert alert["refused"] == []
+    body = alert["body"]
+    # Before, this read "The resolver refused 0 row(s): - none named in the
+    # log", which sent the reader to the log for a fault the log named.
+    assert "row(s):" not in body and "none named" not in body
+    assert "1 fault(s) kept the resolver from rebuilding a restatement run's" in body
+    assert f"- {ra._code(RESTORE_FAULT)}" in body.splitlines()
+
+
+def test_a_restore_fault_is_named_after_the_refused_rows() -> None:
+    alert = ra.build_alert(
+        RESTORE_LINE + PUBLISHED_LOG,
+        refused_gate="failure",
+        run_url=URL,
+        date=DATE,
+        resolve_outcome="success",
+        needs_publish="1",
+    )
+    assert len(alert["refused"]) == 2
+    body = alert["body"]
+    assert "The resolver refused 2 row(s):" in body
+    assert f"- {ra._code(RESTORE_FAULT)}" in body.splitlines()
+    assert body.index("refused 2 row(s):") < body.index("1 fault(s) kept")
+
+
+def test_a_broken_loop_still_names_a_restore_fault() -> None:
+    alert = ra.build_alert(
+        RESTORE_LINE + GATE_LOG,
+        refused_gate="skipped",
+        run_url=URL,
+        date=DATE,
+        resolve_outcome="failure",
+    )
+    assert alert["kind"] == "loop_failed"
+    assert len(alert["refused"]) == 6
+    assert f"- {ra._code(RESTORE_FAULT)}" in alert["body"].splitlines()
+
+
+def test_the_restore_line_is_the_one_resolve_pending_prints() -> None:
+    source = (ROOT / "scripts" / "resolve_pending.py").read_text()
+    assert f'RESTORE_REFUSED = "{ra._RESTORE_REFUSED}"' in source
+    assert 'print(f"{RESTORE_REFUSED} {exc}")' in source
 
 
 def test_the_receipt_crash_names_the_import_error() -> None:
@@ -333,6 +407,9 @@ def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str]]:
             f"appended {len(refs)} observation(s) to o/r@b:l.jsonl via "
             f"reviewed proposal (merged at {sha})"
         )
+    if draw(st.booleans()):
+        # A restore fault exits 3 too, but refuses no row.
+        lines.insert(0, f"{ra._RESTORE_REFUSED} {draw(ONE_LINE)}")
     if expected and draw(st.booleans()):
         # resolve_pending restates exit-3 rows at the end of some runs.
         lines.append("every fetched row was refused; nothing to append")
@@ -389,6 +466,7 @@ def test_resolver_text_reaches_the_issue_only_inside_code_spans(
         f"  CATALOG REFUSED (excluded from append): {ref} — {why}\n"
         for ref, why in refusals
     )
+    log += f"{ra._RESTORE_REFUSED} {tail}\n"
     log += f"{tail}\nTraceback (most recent call last):\nValueError: {tail}\n"
     alert = ra.build_alert(
         log, refused_gate=gate, run_url=URL, date=DATE, resolve_outcome=outcome
@@ -401,7 +479,8 @@ def test_resolver_text_reaches_the_issue_only_inside_code_spans(
         assert re.fullmatch(f"{SAFE}*", span), span
     for line in body.splitlines():
         if line.startswith("- `"):
-            assert re.fullmatch(f"- `{SAFE}*`: `{SAFE}*`", line), line
+            # A refused row (reference: reason) or a restore fault.
+            assert re.fullmatch(f"- `{SAFE}*`(: `{SAFE}*`)?", line), line
 
 
 @settings(max_examples=300, deadline=None)
