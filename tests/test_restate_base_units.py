@@ -10,7 +10,9 @@ to Chronicle's append gate (receipt 0.6.2).
 Invariants:
 
 * A row written in base units, and every restatement, states the quantity its
-  recorded pair states: ``to_base(recorded_value, recorded_unit) == value``.
+  recorded pair states: the stored value is the recorded value's shortest
+  decimal with its digits moved by the unit's power of ten.
+* Its method notes say the stored value is only as precise as that figure.
 * A restatement differs from the row it restates only in the fields the site
   lets it change, and archives that row's exact line.
 * After a restatement run no current row holds a scale, so a second run
@@ -23,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import decimal
 import gzip
 import hashlib
 import json
@@ -52,6 +55,39 @@ RECEIPT_FIXTURE = ROOT / "site/src/__tests__/fixtures/receipt-current-view.json"
 RETRIEVED_AT = fixture_gen.RETRIEVED_AT
 SAMPLE_SHA = "fd83eec28bf90d852d6495fd0c1f8e0fa47291d1"
 UNITS = sorted(ledger_units.SCALED_UNITS)
+
+# Each scaled unit's power of ten, written out rather than read from
+# ledger_units, so the value checks below do not grade the converter by itself.
+POWERS = {
+    "thousands": 3,
+    "millions": 6,
+    "usd_millions": 6,
+    "usd_billions": 9,
+    "billions USD": 9,
+    "gbp_billions": 9,
+    "million_cubic_feet": 6,
+}
+
+
+def _moved(value: float | int, unit: str) -> decimal.Decimal:
+    """``value`` in its unit's base unit: its shortest decimal's digits, moved.
+
+    Chronicle's ``_moved_by_power_of_ten`` reads a pair the same way.
+    """
+
+    sign, digits, exponent = decimal.Decimal(repr(value)).as_tuple()
+    return decimal.Decimal((sign, digits, exponent + POWERS[unit]))
+
+
+def _stores(value: float | int, moved: decimal.Decimal) -> bool:
+    """``value`` is ``moved``, an int when ``moved`` is whole, else a float."""
+
+    whole = moved == moved.to_integral_value()
+    return (
+        type(value) is (int if whole else float)
+        and decimal.Decimal(repr(value)) == moved
+    )
+
 
 # Every decimal of at most 15 significant digits reads back from a double.
 short_decimals = st.builds(
@@ -123,6 +159,12 @@ def test_the_sample_holds_every_scaled_unit_the_ledger_restates() -> None:
 # Writing a row in base units.
 
 
+def test_the_powers_are_the_converters() -> None:
+    assert POWERS == {
+        unit: power for unit, (_base, power) in ledger_units.SCALED_UNITS.items()
+    }
+
+
 @given(
     st.sampled_from(UNITS),
     st.one_of(short_decimals, st.integers(-(10**12), 10**12)),
@@ -144,12 +186,16 @@ def test_a_base_row_states_the_quantity_it_was_recorded_as(
         return
     based = resolve_pending.base_unit_row(row)
     assert based["value"] == expected
-    assert type(based["value"]) is type(expected)
+    assert _stores(based["value"], _moved(value, unit))
     assert based["measure"] == {"concept": "test", "unit": ledger_units.base_unit(unit)}
     assert based["source"] == {
         "url": "https://official.example/",
         "recorded_value": value,
         "recorded_unit": unit,
+        "method_notes": (
+            f"Stores {value!r} {unit} in base units, at that figure's "
+            "precision, so the archived response may hold more digits."
+        ),
     }
     assert based["source_record_id"] == "test.series"
     resolve_pending.check_recorded_pair(based)
@@ -160,6 +206,31 @@ def test_a_base_row_states_the_quantity_it_was_recorded_as(
 def test_a_row_without_a_scale_is_written_as_it_is() -> None:
     row = {"value": 4.2, "measure": {"unit": "percent"}, "source": {}}
     assert resolve_pending.base_unit_row(row) is row
+
+
+def test_a_base_rows_notes_drop_the_scale_they_named() -> None:
+    row = {
+        "source_record_id": "test.series",
+        "value": 3189.0,
+        "measure": {"unit": "thousands"},
+        "source": {"method_notes": "Labor force, expressed in thousands"},
+    }
+    assert resolve_pending.base_unit_row(row)["source"]["method_notes"] == (
+        "Labor force. Stores 3189.0 thousands in base units, at that figure's "
+        "precision, so the archived response may hold more digits."
+    )
+
+
+def test_a_base_row_refuses_notes_that_still_name_a_scale() -> None:
+    # A ValueError, so the run refuses this row alone.
+    row = {
+        "source_record_id": "test.series",
+        "value": 3189.0,
+        "measure": {"unit": "thousands"},
+        "source": {"method_notes": "Labor force, in thousands."},
+    }
+    with pytest.raises(ledger_units.LedgerUnitError, match="still name a scale"):
+        resolve_pending.base_unit_row(row)
 
 
 def test_a_row_that_already_records_a_pair_is_refused() -> None:
@@ -318,6 +389,10 @@ def test_the_writer_stores_base_units_with_the_pair_it_recorded(
         **ROW["source"],
         "recorded_value": 7.716,
         "recorded_unit": "millions",
+        "method_notes": (
+            "Level. Stores 7.716 millions in base units, at that figure's "
+            "precision, so the archived response may hold more digits."
+        ),
     }
     projection = based["sourceBindingProjection"]
     assert projection["unit"] == "count"
@@ -462,11 +537,18 @@ def test_the_writers_restatements_pass_the_site_port_and_the_gate() -> None:
             "supersedes": resolve_pending.effective_assertion_id(prior),
             "relation": "unit_restatement",
         }
-        assert (
-            ledger_units.to_base(
-                row["source"]["recorded_value"], row["source"]["recorded_unit"]
-            )
-            == row["value"]
+        # The pair is the row's own value and unit, and the stored value is
+        # its digits moved: checked here without ledger_units.
+        recorded, unit = row["source"]["recorded_value"], row["source"]["recorded_unit"]
+        assert recorded == prior["value"] and type(recorded) is type(prior["value"])
+        assert unit == prior["measure"]["unit"]
+        assert _stores(row["value"], _moved(recorded, unit))
+        assert row["source"]["method_notes"].endswith(
+            f"Restates {recorded!r} {unit} (assertion "
+            f"{resolve_pending.effective_assertion_id(prior)}) in base units, at "
+            "that figure's precision, so the source may print more digits; the "
+            "quantity does not change. The row's other notes predate this "
+            f"restatement and may give figures in {unit}."
         )
         assert row["retrievedAt"] == RETRIEVED_AT
         assert row["sourceVintage"] == str(
@@ -518,8 +600,10 @@ def test_a_restatement_refuses_a_row_with_no_scale() -> None:
 )
 def test_restated_notes_drop_the_scale_they_named(notes: object, expected: str) -> None:
     sentence = (
-        "Restates 226 thousands (assertion v1) in base units; the quantity does "
-        "not change."
+        "Restates 226 thousands (assertion v1) in base units, at that figure's "
+        "precision, so the source may print more digits; the quantity does not "
+        "change. The row's other notes predate this restatement and may give "
+        "figures in thousands."
     )
     assert resolve_pending.restated_method_notes(notes, 226, "thousands", "v1") == (
         f"{expected} {sentence}".strip()

@@ -2,10 +2,12 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  AssertionVersionError,
   assertAppendGateAssertionVersions,
   effectiveAssertionId,
 } from "@/data/ledger-current-view";
 import { foldLedgerRestatements } from "@/data/ledger-restatements";
+import { LedgerUnitError } from "@/data/ledger-units";
 import { mapPolicyEngineLedgerRows } from "@/data/thesis-log";
 
 // The resolver's restatement mode (scripts/resolve_pending.py
@@ -47,6 +49,44 @@ function read(lines: readonly string[]) {
   return foldLedgerRestatements(mapPolicyEngineLedgerRows(rows), rows, lines);
 }
 
+// Why a reader refused, so the site and the port must refuse for one reason,
+// not merely both throw. The port prints Python reprs where the site prints
+// JSON, so each pattern accepts either quoting.
+const NUMBER = String.raw`-?[\d.e+-]+`;
+const REFUSAL_KINDS: ReadonlyArray<readonly [string, RegExp]> = [
+  [
+    "relation",
+    /assertionVersion\.relation .+ (?:is not one the site reads|which the site does not read)$/,
+  ],
+  ["supersedes not a string", /assertionVersion\.supersedes .+, not a string\b/],
+  ["no earlier row", /^line \d+ restates .+, which no earlier row holds$/],
+  ["unscaled row", /^restatement of .+ names a row in .+, which holds no scale$/],
+  ["restated unit", /^restatement of .+ stores .+, not the base unit of .+$/],
+  [
+    "restated value",
+    new RegExp(String.raw`^restatement of .+ stores ${NUMBER}, not ${NUMBER}$`),
+  ],
+  ["restated pair", /^restatement of .+ records .+ but the row says .+$/],
+  ["archive", /^restatement of .+ does not archive the exact line it restates$/],
+  ["content", /^restatement of .+ changes more than the value and unit$/],
+  ["pair not a number", /records .+, which is not a number in a scaled unit$/],
+  ["pair unit", /records .+ but stores ["'][^"']*["']$/],
+  ["pair value", new RegExp(String.raw`records ${NUMBER} .+ but stores ${NUMBER}$`)],
+];
+
+// The site refuses a malformed supersedes where it reads assertion versions,
+// before the restatement checks, so with that module's error.
+const errorOf = (kind: string) =>
+  kind === "supersedes not a string" ? AssertionVersionError : LedgerUnitError;
+
+function refusalKind(message: string): string {
+  const kinds = REFUSAL_KINDS.filter(([, pattern]) => pattern.test(message));
+  if (kinds.length !== 1) {
+    throw new Error(`${kinds.length} refusal kinds match ${JSON.stringify(message)}`);
+  }
+  return kinds[0][0];
+}
+
 function caseNamed(name: string): FixtureCase {
   const found = fixture.cases.find((item) => item.name === name);
   if (!found) throw new Error(`fixture has no case ${name}`);
@@ -68,7 +108,15 @@ describe("the restatement fixture", () => {
     (_name, item) => {
       const lines = linesOf(item.lines);
       if ("refuses" in item.port) {
-        expect(() => read(lines)).toThrow();
+        let thrown: unknown;
+        try {
+          read(lines);
+        } catch (error) {
+          thrown = error;
+        }
+        const kind = refusalKind(item.port.refuses);
+        expect(thrown).toBeInstanceOf(errorOf(kind));
+        expect(refusalKind((thrown as Error).message)).toBe(kind);
         return;
       }
       const { restatements } = read(lines);
@@ -77,6 +125,15 @@ describe("the restatement fixture", () => {
       );
     },
   );
+
+  it("names every kind of refusal at least once", () => {
+    const seen = new Set(
+      fixture.cases.flatMap((item) =>
+        "refuses" in item.port ? [refusalKind(item.port.refuses)] : [],
+      ),
+    );
+    expect([...seen].sort()).toEqual(REFUSAL_KINDS.map(([kind]) => kind).sort());
+  });
 
   it("holds each ledger the gate accepts to the site's assertion versions", () => {
     const accepted = fixture.cases.filter((item) => item.gate === "accept");

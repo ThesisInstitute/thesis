@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import glob
+import gzip
 import hashlib
 import itertools
 import json
@@ -30,6 +31,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import register_targets  # noqa: E402
 import resolve_pending  # noqa: E402
 import roll_docket  # noqa: E402
+from verify_custody import verify_run  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures" / "bls_api"
 
@@ -1247,6 +1249,53 @@ def test_main_stores_base_units_once_the_ledger_holds_no_scale(
     assert row["value"] == resolve_pending.ledger_units.to_base(
         row["source"]["recorded_value"], "millions"
     )
+
+
+def test_a_daily_run_rebuilds_a_restatement_run_that_never_reached_thesis(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # The restatement merged into Chronicle, then its marker commit failed, so
+    # no record here holds its archive. The next daily run with pending work
+    # rebuilds that run and prints "restored", which makes the workflow commit
+    # and publish it, and still appends its own row.
+    row, out = _append_through_main(
+        monkeypatch, capsys, tmp_path, _restated_june_ledger()
+    )
+    run_dir = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    assert (
+        f"restored {run_dir.relative_to(tmp_path).as_posix()}, the records of a "
+        "restatement run that never reached Thesis"
+    ) in out.splitlines()
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    (archive,) = (run_dir / "responses").iterdir()
+    assert archive.read_bytes() == gzip.compress(line.encode(), mtime=0)
+    verify_run(run_dir)
+    assert row["measure"]["unit"] == "count"
+
+
+def test_a_daily_dry_run_names_the_restatement_run_it_would_rebuild(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", lambda *_a, **_k: {}
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-08",
+        release="2026-09-04",
+        now="2026-09-25T13:40:00Z",
+        ledger=_restated_june_ledger(),
+    )
+    assert "dry-run: would restore records/resolutions/2026-11-04/" in out
+    assert not any(line.startswith("restored") for line in out.splitlines())
+    assert not resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z").exists()
 
 
 def test_main_keeps_recorded_units_while_the_ledger_holds_a_scale(
