@@ -17,8 +17,12 @@ Invariants (property-tested below):
   exit-3 lines (the generator's own labels are the expectation; a separate
   test ties those three line heads to ``resolve_pending.py``'s source);
 - a fault that kept the resolver from rebuilding a restatement run's records
-  is named in the body and never listed as a refused row;
-- resolver text reaches the issue only inside single-line code spans;
+  is named in the body and never listed as a refused row, and a refused-rows
+  run red only for such a fault takes its own title;
+- each fault resolve_pending's own printer writes, whatever line breaks it
+  carries, is one line the alert names once;
+- resolver text reaches the issue only inside single-line code spans, and
+  each listed row or fault is code spans and nothing else;
 - the body stays under GitHub's limit however many rows are refused;
 - it never raises on any log text.
 """
@@ -139,9 +143,9 @@ RESTORE_LOG = RESTORE_LINE + (
     "bls.cps.unemployment_rate.2026_11.first_print\n"
     "resolution loop complete: 1 reference(s) examined\n"
     "nothing new to record\n"
-    "1 fault(s) kept the run from rebuilding a restatement run's records; fix "
-    "what each names, and the next run with pending work rebuilds them\n"
-    f"  refused: {RESTORE_FAULT}\n"
+    "1 RESTORE REFUSED fault(s) above kept the run from rebuilding a "
+    "restatement run's records; fix what each names, and the next run with "
+    "pending work rebuilds them\n"
     "resolver finished with exit code 3\n"
 )
 
@@ -156,11 +160,17 @@ def test_a_run_red_only_for_a_restore_fault_names_it_and_no_row() -> None:
         needs_publish="0",
     )
     assert alert["kind"] == "refused_rows"
+    assert alert["title"] == "Resolution records not rebuilt 2026-09-29"
     assert alert["refused"] == []
     body = alert["body"]
+    assert body.startswith(
+        "The resolve run had nothing new to publish, then could not rebuild a "
+        "restatement run's records: "
+    )
     # Before, this read "The resolver refused 0 row(s): - none named in the
     # log", which sent the reader to the log for a fault the log named.
     assert "row(s):" not in body and "none named" not in body
+    assert "refused row" not in body
     assert "1 fault(s) kept the resolver from rebuilding a restatement run's" in body
     assert f"- {ra._code(RESTORE_FAULT)}" in body.splitlines()
 
@@ -175,7 +185,9 @@ def test_a_restore_fault_is_named_after_the_refused_rows() -> None:
         needs_publish="1",
     )
     assert len(alert["refused"]) == 2
+    assert alert["title"] == "Resolution rows refused 2026-09-29"
     body = alert["body"]
+    assert "then failed on refused rows" in body
     assert "The resolver refused 2 row(s):" in body
     assert f"- {ra._code(RESTORE_FAULT)}" in body.splitlines()
     assert body.index("refused 2 row(s):") < body.index("1 fault(s) kept")
@@ -197,7 +209,7 @@ def test_a_broken_loop_still_names_a_restore_fault() -> None:
 def test_the_restore_line_is_the_one_resolve_pending_prints() -> None:
     source = (ROOT / "scripts" / "resolve_pending.py").read_text()
     assert f'RESTORE_REFUSED = "{ra._RESTORE_REFUSED}"' in source
-    assert 'print(f"{RESTORE_REFUSED} {exc}")' in source
+    assert 'print(f"{RESTORE_REFUSED} {fault}")' in source
 
 
 def test_the_receipt_crash_names_the_import_error() -> None:
@@ -391,9 +403,9 @@ EXIT_3_KINDS = {"catalog", "provenance", "unit"}
 
 
 @st.composite
-def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str]]:
+def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str], bool]:
     """A log naming each reference once (plus the end-of-run restatements),
-    and the references behind exit 3."""
+    the references behind exit 3, and whether it holds a restore fault."""
     refs = draw(st.lists(REFS, unique=True, max_size=12))
     lines, expected = [], set()
     for ref in refs:
@@ -407,14 +419,15 @@ def resolver_logs(draw: st.DrawFn) -> tuple[str, set[str]]:
             f"appended {len(refs)} observation(s) to o/r@b:l.jsonl via "
             f"reviewed proposal (merged at {sha})"
         )
-    if draw(st.booleans()):
+    has_fault = draw(st.booleans())
+    if has_fault:
         # A restore fault exits 3 too, but refuses no row.
         lines.insert(0, f"{ra._RESTORE_REFUSED} {draw(ONE_LINE)}")
     if expected and draw(st.booleans()):
         # resolve_pending restates exit-3 rows at the end of some runs.
         lines.append("every fetched row was refused; nothing to append")
         lines += [f"  refused: {ref}: {draw(ONE_LINE)}" for ref in sorted(expected)]
-    return "\n".join(lines) + "\n", expected
+    return "\n".join(lines) + "\n", expected, has_fault
 
 
 GATES = st.sampled_from(["failure", "skipped", "success", "cancelled", "", "FAILURE"])
@@ -424,9 +437,9 @@ OUTCOMES = st.sampled_from(["success", "failure", "skipped", "cancelled", ""])
 @settings(max_examples=400, deadline=None)
 @given(resolver_logs(), GATES, OUTCOMES, st.sampled_from(["0", "1", ""]))
 def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
-    drawn: tuple[str, set[str]], gate: str, outcome: str, needs_publish: str
+    drawn: tuple[str, set[str], bool], gate: str, outcome: str, needs_publish: str
 ) -> None:
-    log, expected = drawn
+    log, expected, has_fault = drawn
     alert = ra.build_alert(
         log,
         refused_gate=gate,
@@ -439,7 +452,12 @@ def test_the_kind_follows_the_gate_and_the_list_is_exactly_the_exit_3_rows(
     assert alert["refused"] == sorted(alert["refused"])
     if gate == "failure":
         assert alert["kind"] == "refused_rows"
-        assert alert["title"] == f"Resolution rows refused {DATE}"
+        title = (
+            "Resolution records not rebuilt"
+            if has_fault and not expected
+            else "Resolution rows refused"
+        )
+        assert alert["title"] == f"{title} {DATE}"
     else:
         assert alert["kind"] == "loop_failed"
         assert alert["title"] == f"Resolution loop failed {DATE}"
@@ -477,10 +495,48 @@ def test_resolver_text_reaches_the_issue_only_inside_code_spans(
     assert "](" not in fixed and "<" not in fixed and "`" not in fixed
     for span in re.findall(r"`([^`\n]*)`", body):
         assert re.fullmatch(f"{SAFE}*", span), span
+    # Every item of both lists is code spans and nothing else: a restore
+    # fault is one span; a refused row is two, the reference and its reason.
+    shapes = {"faults": f"- `{SAFE}*`", "rows": f"- `{SAFE}*`: `{SAFE}*`"}
+    checked = {"faults": 0, "rows": 0}
+    section = None
     for line in body.splitlines():
-        if line.startswith("- `"):
-            # A refused row (reference: reason) or a restore fault.
-            assert re.fullmatch(f"- `{SAFE}*`(: `{SAFE}*`)?", line), line
+        if "fault(s) kept the resolver from rebuilding" in line:
+            section = "faults"
+        elif re.search(r"refused [0-9]+ row\(s\):$", line):
+            section = "rows"
+        elif not line.startswith("- "):
+            section = None
+        elif section and not line.startswith(("- and ", "- none named")):
+            assert re.fullmatch(shapes[section], line), line
+            checked[section] += 1
+    assert checked == {"faults": 1, "rows": len(alert["refused"])}
+
+
+FAULT_TEXT = st.text(
+    st.characters(whitelist_categories=("L", "N", "P", "Zs"), blacklist_characters="`"),
+    min_size=1,
+    max_size=60,
+)
+
+
+@settings(max_examples=200, deadline=None)
+@given(st.lists(FAULT_TEXT, min_size=1, max_size=4), resolver_logs(), GATES, OUTCOMES)
+def test_every_restore_fault_is_named_in_the_body(
+    faults: list[str],
+    drawn: tuple[str, set[str], bool],
+    gate: str,
+    outcome: str,
+) -> None:
+    log, _expected, _has_fault = drawn
+    log = "".join(f"{ra._RESTORE_REFUSED} {fault}\n" for fault in faults) + log
+    alert = ra.build_alert(
+        log, refused_gate=gate, run_url=URL, date=DATE, resolve_outcome=outcome
+    )
+    lines = alert["body"].splitlines()
+    for fault in faults:
+        assert f"- {ra._code(fault.strip())}" in lines, fault
+    assert not set(alert["refused"]) & set(faults)
 
 
 @settings(max_examples=300, deadline=None)
@@ -719,3 +775,45 @@ def test_if_the_issue_call_fails_a_one_line_issue_still_goes_out(
     assert last[last.index("--body") + 1] == (
         f"The alert body could not be posted; see {URL}"
     )
+
+
+# Fault text as an exception may carry it: a reference and a colon, any line
+# break str.splitlines() knows, and indented resolver lines after one.
+RESTORE_FAULT_TEXT = st.one_of(
+    st.text(max_size=80),
+    st.text(max_size=40).map(
+        lambda text: f"{text}\n  resolve bls.x.y.first_print -> 1 count"
+    ),
+    st.sampled_from(["\r\n", "\x85", "\u2028", "\x1c", "\v"]).map(
+        lambda brk: f"bls.x.y.first_print: torn{brk}  refused: bls.x.y.first_print: z"
+    ),
+)
+
+
+@settings(max_examples=300, deadline=None)
+@given(st.lists(RESTORE_FAULT_TEXT, min_size=1, max_size=4), GATES, OUTCOMES)
+def test_the_alert_names_each_fault_resolve_pending_prints_once(
+    faults: list[str], gate: str, outcome: str
+) -> None:
+    import contextlib
+    import io
+
+    import resolve_pending
+
+    printed = io.StringIO()
+    refusals: list[str] = []
+    with contextlib.redirect_stdout(printed):
+        for fault in faults:
+            resolve_pending._refuse_restore(ValueError(fault), refusals)
+        status = resolve_pending._report_run_refusals([], [], refusals)
+    assert status == resolve_pending.EXIT_REFUSED_ROWS
+    log = printed.getvalue()
+    expected = [" ".join(fault.splitlines()).strip() for fault in faults]
+    assert ra.restore_faults(log) == expected
+    alert = ra.build_alert(
+        log, refused_gate=gate, run_url=URL, date=DATE, resolve_outcome=outcome
+    )
+    assert alert["refused"] == []
+    lines = alert["body"].splitlines()
+    for fault in expected[: ra.MAX_LISTED_ROWS]:
+        assert f"- {ra._code(fault)}" in lines, fault

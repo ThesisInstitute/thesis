@@ -14,9 +14,9 @@ the resolver's own writer over real Chronicle rows and records:
 * ``writer``: the lines ``restatement_rows`` writes for the sample, in the
   order a restatement run appends them.
 * ``cases``: ledgers built from the sample, the writer's lines and copies of
-  them with one or two things changed. A copy with two defects holds the
-  site and the port to the same first refusal, so they check in the same
-  order. Each case records what the port returned, the id
+  them with one or two things changed. A copy with two defects, in one row
+  or in two, holds the site and the port to the same first refusal, so they
+  check in the same order. Each case records what the port returned, the id
   each restatement it accepted supersedes or its refusal, and whether
   Chronicle's append gate (receipt 0.6.2 ``check_rows`` and
   ``check_binding_shapes``) accepts the ledger.
@@ -472,6 +472,33 @@ def build_fixture() -> dict[str, Any]:
         change(other)
         _reversioned(other)
         case(name, sample + writer + [resolve_pending.ledger_line(other)])
+
+    # Defects in two rows: the site reads every row's relation and pair
+    # before it folds restatements, so both readers must name the row the
+    # site reaches first, not the earlier line.
+    index, value_off = writer_row(PROJECTED_LINE)
+    value_off["value"] = base_value + 1
+    _reversioned(value_off)
+    off_writer = list(writer)
+    off_writer[index] = resolve_pending.ledger_line(value_off)
+    for name, change in (
+        ("a base row's pair", set_value(base["value"] + 1)),
+        ("a relation", set_in("assertionVersion", "relation", "correction")),
+    ):
+        other = copy.deepcopy(base)
+        change(other)
+        _reversioned(other)
+        case(
+            f"two rows: a restated value, then {name}",
+            sample + off_writer + [resolve_pending.ledger_line(other)],
+        )
+    not_text = copy.deepcopy(base)
+    not_text["assertionVersion"]["supersedes"] = 7
+    _reversioned(not_text)
+    case(
+        "a row that restates nothing supersedes 7",
+        sample + writer + [resolve_pending.ledger_line(not_text)],
+    )
     _, corrected = writer_row(CORRECTED_LINE)
     correction = _base_row(
         {**row_of[CORRECTED_LINE], "value": row_of[CORRECTED_LINE]["value"] + 1},

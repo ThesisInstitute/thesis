@@ -31,7 +31,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import register_targets  # noqa: E402
 import resolve_pending  # noqa: E402
 import roll_docket  # noqa: E402
-from verify_custody import verify_run  # noqa: E402
+from verify_custody import CustodyError, verify_run  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures" / "bls_api"
 
@@ -1314,10 +1314,14 @@ def test_a_records_fault_costs_the_daily_run_no_resolution(
     lines = out.splitlines()
     assert f"{resolve_pending.RESTORE_REFUSED} {fault}" in lines
     assert (
-        "1 fault(s) kept the run from rebuilding a restatement run's records; "
-        "fix what each names, and the next run with pending work rebuilds them"
+        "1 RESTORE REFUSED fault(s) above kept the run from rebuilding a "
+        "restatement run's records; fix what each names, and the next run with "
+        "pending work rebuilds them"
     ) in lines
-    assert f"  refused: {fault}" in lines
+    # Printed once: an indented copy would read as a verdict on a target.
+    assert [line for line in lines if fault in line] == [
+        f"{resolve_pending.RESTORE_REFUSED} {fault}"
+    ]
     assert not any(line.startswith("restored") for line in lines)
     assert row["measure"]["unit"] == "count"
     # The partial directory is left for a person to fix.
@@ -1345,6 +1349,158 @@ def test_a_daily_dry_run_names_the_restatement_run_it_would_rebuild(
     assert "dry-run: would restore records/resolutions/2026-11-04/" in out
     assert not any(line.startswith("restored") for line in out.splitlines())
     assert not resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z").exists()
+
+
+def _partial_restatement_run() -> pathlib.Path:
+    """The restated June row's run directory, made empty: a records fault."""
+    run_dir = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    run_dir.mkdir(parents=True)
+    return run_dir
+
+
+def _restore_refusals(out: str) -> list[str]:
+    prefix = f"{resolve_pending.RESTORE_REFUSED} "
+    return [line[len(prefix) :] for line in out.splitlines() if line.startswith(prefix)]
+
+
+def test_a_restore_fault_reds_a_run_with_nothing_new_to_record(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # November's print is not out, so the run fetches and appends nothing.
+    # The fault alone must still end it red, or no issue would name it.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    run_dir = _partial_restatement_run()
+    monkeypatch.setattr(
+        resolve_pending,
+        "propose_ledger_append",
+        lambda *_a, **_k: pytest.fail("a run with nothing new proposed an append"),
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-11",
+        release="2026-12-04",
+        now="2026-09-25T13:40:00Z",
+        fetch_allowed=False,
+        ledger=_restated_june_ledger(),
+        dry_run=False,
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    assert "nothing new to record" in out.splitlines()
+    (fault,) = _restore_refusals(out)
+    assert fault.endswith("refusing to rebuild a run directory in part")
+    assert list(run_dir.iterdir()) == []
+
+
+def test_a_restore_fault_reds_a_daily_dry_run(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # A dry run says what the daily run would do, so the same fault reds it.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    run_dir = _partial_restatement_run()
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", lambda *_a, **_k: {}
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-08",
+        release="2026-09-04",
+        now="2026-09-25T13:40:00Z",
+        ledger=_restated_june_ledger(),
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    assert "dry-run: would append 1 row(s)" in out.splitlines()
+    (fault,) = _restore_refusals(out)
+    assert fault.endswith("refusing to rebuild a run directory in part")
+    assert list(run_dir.iterdir()) == []
+
+
+def test_a_custody_fault_in_a_rebuild_costs_the_daily_run_no_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # A rebuilt run that fails custody (a rule the old run no longer meets,
+    # say) is a records fault too. The rebuild removes what it wrote, and the
+    # run appends its own row, whose run passes custody, then exits
+    # EXIT_REFUSED_ROWS.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    restated = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    verified: list[pathlib.Path] = []
+
+    def verify(run_dir: pathlib.Path) -> object:
+        verified.append(run_dir)
+        if run_dir == restated:
+            raise CustodyError("a rule the rebuilt run does not meet")
+        return verify_run(run_dir)
+
+    monkeypatch.setattr(resolve_pending, "verify_run", verify)
+    row, out = _append_through_main(
+        monkeypatch,
+        capsys,
+        tmp_path,
+        _restated_june_ledger(),
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    assert _restore_refusals(out) == ["a rule the rebuilt run does not meet"]
+    assert not any(line.startswith("restored") for line in out.splitlines())
+    assert not restated.exists()
+    # The rebuild ran custody first, then the run's own records passed it.
+    assert verified[0] == restated and len(verified) == 2
+    assert row["measure"]["unit"] == "count"
+
+
+@pytest.mark.parametrize(
+    "retrieved_at",
+    [
+        "/2026-11-04T00:00:00Z",
+        "../2026-11-04T00:00:00Z",
+        "2026-11-04T00:00:00Z/../..",
+        "2026-11-04T00:00:00",
+        "2026-11-04T00:00:00+00:00",
+        "2026-11-04T00:00:00.5Z",
+        "2026-11-04 00:00:00Z",
+        "\u0662026-11-04T00:00:00Z",
+        20261104,
+        None,
+    ],
+)
+def test_a_restatement_whose_retrieved_at_names_no_run_directory_is_refused(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path, retrieved_at: object
+) -> None:
+    # The run directory comes from retrievedAt, so only the shape utc_now
+    # stamps may name one. "/2026-11-04T00:00:00Z" named a directory outside
+    # the repository, and the refusal then died on a ValueError the daily
+    # run does not catch.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    june_line, restated_line = _restated_june_ledger().splitlines()
+    row = json.loads(restated_line)
+    row["retrievedAt"] = retrieved_at
+    with pytest.raises(resolve_pending.ledger_units.LedgerUnitError) as info:
+        resolve_pending.restore_restatement_runs(
+            [june_line, json.dumps(row)], ledger_repo="o/r", ledger_branch="b"
+        )
+    assert str(info.value) == (
+        f"line 2 has retrievedAt {retrieved_at!r}, which names no run directory"
+    )
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_the_run_directory_guard_admits_what_utc_now_stamps(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    stamp = resolve_pending.utc_now()
+    assert resolve_pending._RUN_STAMP.fullmatch(stamp), stamp
+    monkeypatch.setattr(resolve_pending, "ROOT", pathlib.Path("/repo"))
+    run_dir = resolve_pending.resolution_run_dir(stamp)
+    assert run_dir.parent == pathlib.Path("/repo/records/resolutions") / stamp[:10]
 
 
 def test_main_keeps_recorded_units_while_the_ledger_holds_a_scale(

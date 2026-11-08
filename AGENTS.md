@@ -433,9 +433,10 @@ The resolver writes both shapes (`scripts/resolve_pending.py`):
   keep every other note as it was. The records of a run that merged but never
   reached Thesis rebuild to the byte: the next dispatch, or the next daily run
   with pending work, rebuilds them first (`restored`), and the workflow
-  publishes them. If a fault stops a daily run's rebuild, the run prints
-  `RESTORE REFUSED`, resolves the rest and exits 3, and the run's issue names
-  the fault. GitHub keeps one waiting run per concurrency group, so dispatch
+  publishes them. If a records, ledger or custody fault stops a daily run's
+  rebuild, the rebuild removes any directory it wrote, and the run prints
+  `RESTORE REFUSED`, resolves the rest and exits 3; the run's issue names the
+  fault. GitHub keeps one waiting run per concurrency group, so dispatch
   a restatement only when no other run of the workflow is waiting. A
   restatement resolves nothing, so it leaves the status page alone.
 - `scripts/generate_ledger_restatement_fixture.py` runs the writer and the
