@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-10-30T18:52:21Z",
+  "firstPrintEvidenceRequired": true,
+  "weeklyClaimsSchedule": {
+    "source": "https://oui.doleta.gov/unemploy/claims_arch.asp",
+    "releaseExceptions": {
+      "2026-11-26": "2026-11-25"
+    }
+  },
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "5f398217c4109f4b443b6914c22e351546e98694",
+  "facts": [
+    {
+      "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+      "sourceVintage": "2026-10-30",
+      "retrievedAt": "2026-10-30T18:52:35Z",
+      "targetContentHash": "778113191d1d7e73b43cd7e74053741e8877f59bae7e55d100ed2fc1206efee3",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-30/2026-10-30t18-52-21z-resolve-pending/responses/statcan-v65201210-2026-10-30-2d9d39406f128bbb.json.gz",
+        "sha256": "2d9d39406f128bbb0033b3196f2eceabc7817e5395d2425e1977710eae648282",
+        "bytes": 8540,
+        "gzipSha256": "ec465ce6c5aaf6fa0b18a656448882876a97f5b718d77ec3a8cb2dc0d7b315fa",
+        "gzipBytes": 648,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.eci.private_wages_salaries_qoq.2026_q3.first_print",
+      "sourceVintage": "2026-10-30",
+      "retrievedAt": "2026-10-30T18:54:05Z",
+      "targetContentHash": "2c36c5c31274178a05853fc5716e0ea00060cceeb591cc495a2f9dd286451d0c",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-30/2026-10-30t18-52-21z-resolve-pending/responses/eciwag-2026-10-30-26948893ba8f887a.csv.gz",
+        "sha256": "26948893ba8f887aab0259d94fe75bfa3d2d1e0ad0f74869dc636e36638d06d5",
+        "bytes": 1971,
+        "gzipSha256": "492ee3747782b9a985c032814b59141af955ba438f678b18b0b54050f0ea4f83",
+        "gzipBytes": 549,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-30/2026-10-30t18-52-21z-resolve-pending/responses/statcan-v65201210-2026-10-30-2d9d39406f128bbb.json.gz",
+      "sha256": "ec465ce6c5aaf6fa0b18a656448882876a97f5b718d77ec3a8cb2dc0d7b315fa",
+      "bytes": 648,
+      "createdAt": "2026-10-30T18:52:21Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-30/2026-10-30t18-52-21z-resolve-pending/responses/eciwag-2026-10-30-26948893ba8f887a.csv.gz",
+      "sha256": "492ee3747782b9a985c032814b59141af955ba438f678b18b0b54050f0ea4f83",
+      "bytes": 549,
+      "createdAt": "2026-10-30T18:52:21Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-10-30/2026-10-30t18-52-21z-resolve-pending/manifest.json",
+      "sha256": "80aea36b26edeec42f20124e63bee55dcdd5bcf2f715460fe243f7305745a4e6",
+      "bytes": 2367,
+      "createdAt": "2026-10-30T18:52:21Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "77c0ceef158757e826c2f5547f4c35a7e2c4932ca75175baa5515d7c74ae678c"
+}

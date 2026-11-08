@@ -996,6 +996,15 @@ def test_the_roller_mints_an_october_target_once_the_hold_lifts(
             "period": "2026-09",
         },
     }
+    # The roller builds a contract as of today, and October's release date
+    # would refuse any day from 2026-11-06 on. Hold today at this test's
+    # registration date.
+    build_contract = roll_docket.build_contract
+    monkeypatch.setattr(
+        roll_docket,
+        "build_contract",
+        lambda target, _today: build_contract(target, dt.date(2026, 10, 1)),
+    )
     # While the hold stands, the roller skips October with the hold as reason.
     held = roll_docket.roll_execution_plan_refusal(target) or ""
     assert "is on hold" in held
