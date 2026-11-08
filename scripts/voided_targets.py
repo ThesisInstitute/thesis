@@ -1,7 +1,7 @@
 """Registered targets a recorded ruling voided: terminal, with their reasons.
 
 A void is not a resolution. The forecast and its trace stay on the record
-and the target never gets an outcome, so it is never scored. The resolver
+and the target never gets an outcome, so it never gets a score. The resolver
 never routes a voided reference (``pending_claims_refs`` and
 ``pending_adapter_refs`` skip it), and ``resolution_status.py`` reports it
 as ``VOIDED`` with the ruling and the reason, in place of a refusal or a
@@ -115,8 +115,8 @@ VOIDED_TARGETS: dict[str, VoidedTarget] = {
     "bls.cps.telework_share.2026-09.first_print": _d1633(
         "0bc190e7fe95e2a7812ba70143f1394069f3cc59c61671e6021c2283181fc418",
         "On 2026-10-16 an agent building the resolver opened the live "
-        "registered page, which showed this figure, before any resolution "
-        "rule was committed, so the rule cannot be shown to have been set "
-        "without sight of the figure.",
+        "registered page, which showed this figure, before anyone had "
+        "committed a resolution rule, so no one can show that whoever wrote "
+        "the rule had not seen the figure.",
     ),
 }

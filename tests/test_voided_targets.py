@@ -281,7 +281,9 @@ def test_an_overdue_voided_target_reports_voided_with_its_ruling(
     assert row["state"] == "voided"
     assert row["code"] == "VOIDED"
     assert row["reason"] == rs.REASONS["VOIDED"]
-    assert row["ruling"] == f"{voided.reason} Voided by ruling on {voided.ruled_on}."
+    assert row["ruling"] == (
+        f"{voided.reason} A ruling voided this forecast on {voided.ruled_on}."
+    )
     assert row["ruling"] == rs.voided_ruling(voided)
     assert "detail" not in row and "registration" not in row
 

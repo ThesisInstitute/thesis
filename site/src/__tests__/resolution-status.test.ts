@@ -100,9 +100,9 @@ describe("voided targets", () => {
     state: "voided",
     code: VOIDED_CODE,
     reason:
-      "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written.",
+      "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract.",
     ruling:
-      "The registered source is SSA's July 2026 table, so it cannot hold the August 2026 figure this forecast names. Voided by ruling on 2026-10-22.",
+      "The registered source is SSA's July 2026 table, so it cannot hold the August 2026 figure this forecast names. A ruling voided this forecast on 2026-10-22.",
   };
   const notice = overdueNotice(
     { slug: row.forecastSlug, status: "pending", resolutionDate: "2026-07-13" },
@@ -137,7 +137,7 @@ describe("voided targets", () => {
     }
     for (const [dataPointId, status] of voidedRows) {
       expect(status.ruling, dataPointId).toMatch(
-        / Voided by ruling on \d{4}-\d{2}-\d{2}\.$/,
+        / A ruling voided this forecast on \d{4}-\d{2}-\d{2}\.$/,
       );
     }
   });

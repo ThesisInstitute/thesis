@@ -209,9 +209,9 @@ REASONS = {
     ),
     "VOIDED": (
         "This forecast is void and will not resolve. A recorded ruling found "
-        "that its registered contract cannot be resolved as written. The "
-        "forecast and its trace stay on the record, and with no outcome it is "
-        "never scored."
+        "that nothing can resolve it under its registered contract. The "
+        "forecast and its trace stay on the record, and with no outcome it "
+        "never gets a score."
     ),
     "ENVIRONMENT_FAILURE": (
         "The resolver reported an environment failure for this target on its last run."
@@ -446,7 +446,7 @@ def parse_resolver_log(
 
 def voided_ruling(voided: VoidedTarget) -> str:
     """The ``ruling`` of a VOIDED row: the ruling's reason, then its date."""
-    return f"{voided.reason} Voided by ruling on {voided.ruled_on}."
+    return f"{voided.reason} A ruling voided this forecast on {voided.ruled_on}."
 
 
 def build_status(

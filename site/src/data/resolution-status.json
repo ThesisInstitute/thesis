@@ -70,16 +70,16 @@
       "resolutionDate": "2026-07-29",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. A ruling voided this forecast on 2026-10-22."
     },
     "bea.personal_current_taxes.level.june_2026.first_print": {
       "forecastSlug": "bea-personal-current-taxes-level-june-2026",
       "resolutionDate": "2026-07-29",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. A ruling voided this forecast on 2026-10-22."
     },
     "bls.bed.private_gross_job_gains.opening_establishments.2025_q4.first_print": {
       "forecastSlug": "bls-bed-opening-establishment-gross-job-gains-q4-2025",
@@ -100,48 +100,48 @@
       "resolutionDate": "2026-07-30",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. A ruling voided this forecast on 2026-10-22."
     },
     "bea.government_social_benefits.level.june_2026.first_print": {
       "forecastSlug": "bea-government-social-benefits-level-june-2026",
       "resolutionDate": "2026-07-30",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. A ruling voided this forecast on 2026-10-22."
     },
     "bea.government_social_benefits.medicaid.june_2026.first_print": {
       "forecastSlug": "bea-government-social-benefits-medicaid-june-2026",
       "resolutionDate": "2026-07-30",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. A ruling voided this forecast on 2026-10-22."
     },
     "bea.government_social_benefits.medicare.june_2026.first_print": {
       "forecastSlug": "bea-government-social-benefits-medicare-june-2026",
       "resolutionDate": "2026-07-30",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. A ruling voided this forecast on 2026-10-22."
     },
     "bea.pce.core_mom.june_2026.first_print": {
       "forecastSlug": "bea-pce-core-mom-june-2026",
       "resolutionDate": "2026-07-30",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. A ruling voided this forecast on 2026-10-22."
     },
     "bea.government_social_benefits.social_security.june_2026.first_print": {
       "forecastSlug": "bea-government-social-benefits-social-security-june-2026",
       "resolutionDate": "2026-07-31",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is the ALFRED vintage of 2026-06-25, a month before the release window the same registration names (2026-07-21 to 2026-07-29), so it cannot hold the June 2026 first print. A ruling voided this forecast on 2026-10-22."
     },
     "bea.trade.goods_services_deficit.2026_06.first_print": {
       "forecastSlug": "us-goods-services-trade-deficit-june-2026",
@@ -203,8 +203,8 @@
       "resolutionDate": "2026-08-12",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered page (realer.t01.htm) has no Internet Archive capture dated inside the registered release window (2026-08-10 to 2026-08-18): the Archive's index, read on 2026-10-22 and 2026-10-24, lists none. Such a capture is the only record of the first print the ruling admits, so this forecast has none to resolve from. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered page (realer.t01.htm) has no Internet Archive capture dated inside the registered release window (2026-08-10 to 2026-08-18): the Archive's index, read on 2026-10-22 and 2026-10-24, lists none. Such a capture is the only record of the first print the ruling admits, so this forecast has none to resolve from. A ruling voided this forecast on 2026-10-22."
     },
     "bls.wp.WPSFD4.2026-07.first_print": {
       "forecastSlug": "bls-ppi-final-demand-monthly-change-july-2026",
@@ -394,8 +394,8 @@
       "resolutionDate": "2026-09-04",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered page (cpseea41.htm) has no Internet Archive capture dated inside the registered release window (2026-09-03 to 2026-09-11): the Archive's index, read on 2026-10-22 and 2026-10-24, lists none. Such a capture is the only record of the first print the ruling admits, so this forecast has none to resolve from. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered page (cpseea41.htm) has no Internet Archive capture dated inside the registered release window (2026-09-03 to 2026-09-11): the Archive's index, read on 2026-10-22 and 2026-10-24, lists none. Such a capture is the only record of the first print the ruling admits, so this forecast has none to resolve from. A ruling voided this forecast on 2026-10-22."
     },
     "bls.cps.unemployment_rate.august_2026.first_print": {
       "forecastSlug": "unemployment-rate-august-2026",
@@ -470,8 +470,8 @@
       "resolutionDate": "2026-09-11",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered page (realer.t01.htm) has no Internet Archive capture dated inside the registered release window (2026-09-08 to 2026-09-16): the Archive's index, read on 2026-10-22 and 2026-10-24, lists none. Such a capture is the only record of the first print the ruling admits, so this forecast has none to resolve from. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered page (realer.t01.htm) has no Internet Archive capture dated inside the registered release window (2026-09-08 to 2026-09-16): the Archive's index, read on 2026-10-22 and 2026-10-24, lists none. Such a capture is the only record of the first print the ruling admits, so this forecast has none to resolve from. A ruling voided this forecast on 2026-10-22."
     },
     "ons.production.total_index.2026_07.first_print": {
       "forecastSlug": "uk-production-output-index-july-2026",
@@ -643,8 +643,8 @@
       "resolutionDate": "2026-10-04",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "The registered source is SSA's July 2026 table (ssi_monthly/2026-07/table02.html), so it cannot hold the August 2026 figure this forecast names. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "The registered source is SSA's July 2026 table (ssi_monthly/2026-07/table02.html), so it cannot hold the August 2026 figure this forecast names. A ruling voided this forecast on 2026-10-22."
     },
     "bls.jolts.job_openings.august_2026.first_print": {
       "forecastSlug": "jolts-openings-august-2026",
@@ -711,8 +711,8 @@
       "resolutionDate": "2026-10-08",
       "state": "voided",
       "code": "VOIDED",
-      "reason": "This forecast is void and will not resolve. A recorded ruling found that its registered contract cannot be resolved as written. The forecast and its trace stay on the record, and with no outcome it is never scored.",
-      "ruling": "On 2026-10-16 an agent building the resolver opened the live registered page, which showed this figure, before any resolution rule was committed, so the rule cannot be shown to have been set without sight of the figure. Voided by ruling on 2026-10-22."
+      "reason": "This forecast is void and will not resolve. A recorded ruling found that nothing can resolve it under its registered contract. The forecast and its trace stay on the record, and with no outcome it never gets a score.",
+      "ruling": "On 2026-10-16 an agent building the resolver opened the live registered page, which showed this figure, before anyone had committed a resolution rule, so no one can show that whoever wrote the rule had not seen the figure. A ruling voided this forecast on 2026-10-22."
     },
     "bls.cpi.u.core_mom.september_2026.first_print": {
       "forecastSlug": "us-core-cpi-mom-september-2026",
