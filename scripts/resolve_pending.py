@@ -2175,6 +2175,13 @@ BEA_ARCHIVE_MAX_WORKBOOK_BYTES = 25_000_000
 BEA_ARCHIVE_MAX_EXPANDED_BYTES = 100_000_000
 BEA_ARCHIVE_USER_AGENT = "thesis-resolver/1 (app.thesisinstitute.org)"
 BEA_ARCHIVE_MISSED = "FIRST-PRINT WINDOW MISSED (refusing)"
+BEA_ARCHIVE_INDEX_FAILED = "BEA ARCHIVE INDEX fetch failed (deferring)"
+BEA_ARCHIVE_NOT_POSTED = "BEA ARCHIVE NOT YET POSTED (deferring)"
+BEA_ARCHIVE_WORKBOOK_FAILED = "BEA ARCHIVE WORKBOOK fetch failed (deferring)"
+# The main loop prints each of these heads as literal text.
+# tests/test_resolution_status.py reads every target line from this file's
+# f-strings and fills each field with free text, so a head printed from a
+# variable could not be read back.
 # Each archive row prints BEA's series code beside its line and label, which
 # ties the workbook row to the line the live leg reads from the iTable.
 BEA_ARCHIVE_ADAPTERS: dict[str, dict[str, str]] = {
@@ -2696,16 +2703,23 @@ def bea_archive_first_print(
 ) -> tuple[BeaArchiveCapture | None, str, str]:
     """Read one cell's first print from BEA's Data Archive after its release day.
 
-    Returns (capture, head, detail). With no capture, the main loop prints
-    ``  <head>: <ref> — <detail>``. A transport failure, or a quarter the
-    index does not list yet, defers. Anything else refuses, because after the
-    release day the archive is the only route to the first print.
+    Returns (capture, head, detail). With no capture, the head is one of
+    BEA_ARCHIVE_INDEX_FAILED, BEA_ARCHIVE_NOT_POSTED,
+    BEA_ARCHIVE_WORKBOOK_FAILED and BEA_ARCHIVE_MISSED, and the main loop
+    prints ``  <head>: <ref> — <detail>`` with the head as literal text. A
+    transport failure, or a quarter the index does not list yet, defers.
+    Anything else refuses, because after the release day the archive is the
+    only route to the first print.
     """
 
     def missed(reason: str) -> tuple[None, str, str]:
-        return None, BEA_ARCHIVE_MISSED, (
-            f"registered release day was {release_day}; BEA's archive gives no "
-            f"first-print custody: {reason}"
+        return (
+            None,
+            BEA_ARCHIVE_MISSED,
+            (
+                f"registered release day was {release_day}; BEA's archive gives no "
+                f"first-print custody: {reason}"
+            ),
         )
 
     index_url = bea_archive_index_url(period)
@@ -2715,14 +2729,14 @@ def bea_archive_first_print(
         index_url
     ]
     if index_raw is None:
-        return None, "BEA ARCHIVE INDEX fetch failed (deferring)", str(error)
+        return None, BEA_ARCHIVE_INDEX_FAILED, str(error)
     if index_final_url != index_url:
         return missed(f"the index request landed on {index_final_url}")
     deferral, refusal = bea_archive_index_check(index_raw, period, release_day)
     if refusal:
         return missed(refusal)
     if deferral:
-        return None, "BEA ARCHIVE NOT YET POSTED (deferring)", deferral
+        return None, BEA_ARCHIVE_NOT_POSTED, deferral
     workbook_url = bea_archive_workbook_url(spec, period, release_day)
     if workbook_url not in cache:
         cache[workbook_url] = fetch_bea_archive(workbook_url)
@@ -2730,7 +2744,7 @@ def bea_archive_first_print(
         cache[workbook_url]
     )
     if workbook_raw is None:
-        return None, "BEA ARCHIVE WORKBOOK fetch failed (deferring)", str(error)
+        return None, BEA_ARCHIVE_WORKBOOK_FAILED, str(error)
     if workbook_final_url != workbook_url:
         return missed(f"the workbook request landed on {workbook_final_url}")
     if not workbook_raw.startswith(b"PK\x03\x04"):
@@ -18362,7 +18376,27 @@ def _main() -> int:
                 bea_archive_cache,
             )
             if archive_capture is None:
-                print(f"  {archive_head}: {ref} — {archive_detail}")
+                # One literal head per outcome (see BEA_ARCHIVE_MISSED).
+                if archive_head == BEA_ARCHIVE_INDEX_FAILED:
+                    print(
+                        "  BEA ARCHIVE INDEX fetch failed (deferring): "
+                        f"{ref} — {archive_detail}"
+                    )
+                elif archive_head == BEA_ARCHIVE_WORKBOOK_FAILED:
+                    print(
+                        "  BEA ARCHIVE WORKBOOK fetch failed (deferring): "
+                        f"{ref} — {archive_detail}"
+                    )
+                elif archive_head == BEA_ARCHIVE_NOT_POSTED:
+                    print(
+                        "  BEA ARCHIVE NOT YET POSTED (deferring): "
+                        f"{ref} — {archive_detail}"
+                    )
+                else:
+                    print(
+                        "  FIRST-PRINT WINDOW MISSED (refusing): "
+                        f"{ref} — {archive_detail}"
+                    )
                 continue
             value = archive_capture.value
             raw = archive_capture.raw

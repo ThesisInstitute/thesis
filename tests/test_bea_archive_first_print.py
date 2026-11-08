@@ -972,3 +972,42 @@ def test_main_refuses_a_registration_whose_window_is_not_the_release_day(
 
     output = capsys.readouterr().out
     assert f"  FORECAST/REGISTERED RELEASE DATE MISMATCH (refusing): {ref}" in output
+
+
+@pytest.mark.parametrize(
+    ("head", "state"),
+    [
+        (resolve_pending.BEA_ARCHIVE_INDEX_FAILED, "fetch_failed"),
+        (resolve_pending.BEA_ARCHIVE_WORKBOOK_FAILED, "fetch_failed"),
+        (resolve_pending.BEA_ARCHIVE_NOT_POSTED, "deferred"),
+        (resolve_pending.BEA_ARCHIVE_MISSED, "refused"),
+    ],
+)
+def test_main_prints_each_archive_outcome_under_its_own_literal_head(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    head: str,
+    state: str,
+) -> None:
+    """Each head the leg returns reaches the log as the literal the main loop
+    prints for it, and the status parser reads the line back whatever the
+    detail holds."""
+    ref, envelope, forecast = _registration(NONRES)
+    detail = "why: a reason — with the separators a head must never hold"
+    _run_main(
+        monkeypatch,
+        [(ref, envelope, forecast)],
+        today=dt.date(2026, 8, 7),
+        now="2026-08-07T15:00:00Z",
+        archive=lambda *_args: pytest.fail("the archive outcome is faked"),
+    )
+    monkeypatch.setattr(
+        resolve_pending, "bea_archive_first_print", lambda *_args: (None, head, detail)
+    )
+
+    assert resolve_pending.main() == 0
+
+    line = f"  {head}: {ref} — {detail}"
+    assert line + "\n" in capsys.readouterr().out
+    statuses, _summary = resolution_status.parse_resolver_log(line + "\n", {ref})
+    assert statuses[ref]["state"] == state
