@@ -12,7 +12,6 @@ lineages (Max's ruling d353; PolicyEngine/chronicle#344).
 
 from __future__ import annotations
 
-import contextlib
 import copy
 import datetime as dt
 import glob
