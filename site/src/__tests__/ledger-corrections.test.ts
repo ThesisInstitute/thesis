@@ -15,7 +15,8 @@ import {
   firstObservedAt,
   observationAssertionId,
 } from "@/data/ledger-current-view";
-import { isUnitRestatement } from "@/data/ledger-restatements";
+import { isUnitRestatement, recordedPair } from "@/data/ledger-restatements";
+import { toBase } from "@/data/ledger-units";
 import {
   POLICYENGINE_LEDGER_PIN,
   POLICYENGINE_LEDGER_SERIES_CATALOG_URL,
@@ -116,6 +117,12 @@ function correctionView(
     current: observations.filter(isCurrent),
     superseded: observations.filter((entry) => !isCurrent(entry)),
   };
+}
+
+// A value moved by this amount, at a decimal a ledger row can state: 12.318 + 5
+// is 17.317999999999998 in doubles, and no scaled pair can record that.
+function plus(value: number, amount: number): number {
+  return Number((value + amount).toFixed(9));
 }
 
 function instant(value: string | undefined): number {
@@ -267,6 +274,17 @@ describe("Chronicle corrections on the pinned ledger", () => {
       ...structuredClone(raw),
       ...changes,
     };
+    // A row that records a scaled figure states it twice, and the site refuses
+    // a pair that disagrees with the value. A correction changes the recorded
+    // figure, and the stored base value follows.
+    const pair = recordedPair(raw);
+    if (pair && typeof changes.value === "number") {
+      fix.source = {
+        ...(fix.source as Record<string, unknown>),
+        recorded_value: changes.value,
+      };
+      fix.value = toBase(changes.value, pair.unit);
+    }
     delete fix.assertionVersion;
     // The gate takes a correction of the record's last line, which is a
     // restatement once one exists; the site then reads it as correcting `raw`.
@@ -510,7 +528,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
       const observedAt = rawRowOf(graded).observed_at as string;
       for (const shape of [observedAt, daysLater(observedAt, 7)]) {
         const { correction, extended, fix } = withCorrection(graded, {
-          value: graded.value + 5,
+          value: plus(graded.value, 5),
           observed_at: shape,
         });
         expect(getResolvedObservationForForecast(forecast, extended)).toBe(
@@ -518,7 +536,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
         );
         expect(
           withResolvedOutcomes([forecast], extended)[0].resolvedOutcome?.value,
-        ).toBe(graded.value + 5);
+        ).toBe(plus(graded.value, 5));
         const fixId = (fix.assertionVersion as { id: string }).id;
         runs.forEach((run, index) => {
           const was = before[index].score;
@@ -542,7 +560,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
           }
           scoredRuns += 1;
           expect(now.score.contractBinding, where).toBe(was.contractBinding);
-          expect(now.score.observedValue, where).toBe(graded.value + 5);
+          expect(now.score.observedValue, where).toBe(plus(graded.value, 5));
           // The chain's first print is unchanged, so is the ex-ante boundary.
           expect(now.score?.observedAt, where).toBe(was.observedAt);
           expect(now.score?.chronology, where).toBe(was.chronology);
@@ -743,7 +761,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
     // One day later keeps the print on or before the correction's acceptance.
     for (const shape of [observedAt, daysLater(observedAt, 1)]) {
       const { correction, extended, replaced } = withCorrection(record, {
-        value: record.value + 5,
+        value: plus(record.value, 5),
         observed_at: shape,
       });
       const { checks, dropOuts } = historyDropOuts(extended, [
@@ -757,7 +775,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
   it("finds no drop-out when one commit accepts a row and its correction", () => {
     const [record] = mostHeldRecord();
     const { correction, extended, replaced } = withCorrection(record, {
-      value: record.value + 5,
+      value: plus(record.value, 5),
     });
     const sameCommit = { ...correction, acceptedAtUtc: replaced.acceptedAtUtc };
     const sameCommitLedger = extended.map((entry) =>
@@ -784,11 +802,11 @@ describe("Chronicle corrections on the pinned ledger", () => {
     // every history that held the original holds it.
     const [record, holders] = mostHeldRecord();
     const { correction, extended, fix, replaced } = withCorrection(record, {
-      value: record.value + 5,
+      value: plus(record.value, 5),
     });
     const refix: Record<string, unknown> = {
       ...structuredClone(fix),
-      value: record.value + 7,
+      value: plus(record.value, 7),
     };
     delete refix.assertionVersion;
     refix.assertionVersion = {
