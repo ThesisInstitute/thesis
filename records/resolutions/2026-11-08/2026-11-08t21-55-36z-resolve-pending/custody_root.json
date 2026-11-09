@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-transportation_material_moving-2026-10-06-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-computer_mathematical-2026-10-02-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-healthcare_support-2026-10-02-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-production-2026-10-06-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-business_financial_operations-2026-10-07-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-office_administrative_support-2026-10-07-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-computer_mathematical-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-office_administrative_support-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-healthcare_support-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-production-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-transportation_material_moving-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/cpseea19-business_financial_operations-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "9dfefe2e8d91d5cedacfc21a36ce290acc191531545a043416d086e1cef69f76"
+  }
+}

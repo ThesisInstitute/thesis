@@ -1,0 +1,1851 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-11-08T21:42:58Z",
+  "firstPrintEvidenceRequired": false,
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "1f9ecafac9de3401e7491949e610779298b9f791",
+  "facts": [
+    {
+      "dataPointId": "bls.ces.total_nonfarm_payroll_change.may_2026.first_print",
+      "sourceVintage": "2026-06-05",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.total_nonfarm_payroll_change.may_2026.first_print-2026-06-05-e2a8133842e64bf9.json.gz",
+        "sha256": "e2a8133842e64bf975354a3da02105cf542961a826440db5dfcdb8c1eba3df66",
+        "bytes": 1516,
+        "gzipSha256": "a94ac6c2a07bc5d8ce05b5d144974b9db59e01b910a16387451cd0a94480ba8d",
+        "gzipBytes": 641,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:d803eb49438195718fd878fdb02a06c0cf59928622caa4c39759100748be848c"
+    },
+    {
+      "dataPointId": "statcan.lfs.employment_change.canada.may_2026.first_print",
+      "sourceVintage": "2026-06-05",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/statcan.lfs.employment_change.canada.may_2026.first_print-2026-06-05-7137623b15da972e.json.gz",
+        "sha256": "7137623b15da972e19cbce0c4ff341449c0c59bec91ee42c783ef061d22faa78",
+        "bytes": 1500,
+        "gzipSha256": "1701b8ba7765b614a90413340711d54205bbc8d7f2e7febb680bdaeeaabb1c45",
+        "gzipBytes": 651,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:6f0d7ccbf684797ff1ce46ef63c159e72fe66cc35ec62edf5dd03567bb390101"
+    },
+    {
+      "dataPointId": "treasury.mts.monthly_deficit.may_2026.first_print",
+      "sourceVintage": "2026-06-10",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/treasury.mts.monthly_deficit.may_2026.first_print-2026-06-10-f3866a032b569f37.json.gz",
+        "sha256": "f3866a032b569f37b2d17738141adb9c474f27a4138f7a152341e01eaf23a9da",
+        "bytes": 1637,
+        "gzipSha256": "4ef31839bbfbf7b0820f5bccf1606d20ece2284731305487c17f9daff63b1bc8",
+        "gzipBytes": 652,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:b0a2c0316d824d69e7e61110fbe0567f5fd85b6e953510aa847c835937e57e7a"
+    },
+    {
+      "dataPointId": "dol.eta.initial_claims.sa.week_ending_2026_06_06",
+      "sourceVintage": "2026-06-11",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.initial_claims.sa.week_ending_2026_06_06-2026-06-11-5d91209a45770367.json.gz",
+        "sha256": "5d91209a457703679fed8c4d0aa493216f6781183b7a8283d17a451e4c91d4b2",
+        "bytes": 1572,
+        "gzipSha256": "153d846a8d983a91ca0013277af7f81801138813bc380a62be155a7873d901c6",
+        "gzipBytes": 644,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:9f7d885045739b2bf2319e0467fccd92792d8640ee0b61256c83a8ce6d42202c"
+    },
+    {
+      "dataPointId": "census.housing_starts.saar.may_2026.first_print",
+      "sourceVintage": "2026-06-16",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing_starts.saar.may_2026.first_print-2026-06-16-dd658d16ffbe64ae.json.gz",
+        "sha256": "dd658d16ffbe64ae0dc6d527e6863ebb5cb2f283d185f95f6f0cdbc946c47d3c",
+        "bytes": 1551,
+        "gzipSha256": "fadfa59eb48f9521d4ad5de09fcd7e49a1b5b011189fecf3074cb47aff3f6ef5",
+        "gzipBytes": 660,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:ffcea638fc2de02e494b83f5362d77a7593bff7077e9ed1d97dd15962784bcaf"
+    },
+    {
+      "dataPointId": "us.census.housing_starts.total_saar.2026-05",
+      "sourceVintage": "2026-06-16",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.census.housing_starts.total_saar.2026-05-2026-06-16-d238afd394cad210.json.gz",
+        "sha256": "d238afd394cad210dfb11d3163a10defd0ad0013f8ba16af53d76e20fc79c47b",
+        "bytes": 1545,
+        "gzipSha256": "c201c24d72cb02e80799445b4eaafe3f852ce3530ec627f5e6f16368341f9fd8",
+        "gzipBytes": 673,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:9466abc58233811a6b4118a697a3d3b974da2c3bc53e6254df7c0268e0f8961b"
+    },
+    {
+      "dataPointId": "census.mtis.total_business_inventories_level.april_2026.first_print",
+      "sourceVintage": "2026-06-17",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.mtis.total_business_inventories_level.april_2026.first_print-2026-06-17-1da9308a0aff1040.json.gz",
+        "sha256": "1da9308a0aff1040dc07df4950d82ffa8aad24cabbf41021f36135f785d4075f",
+        "bytes": 1584,
+        "gzipSha256": "95345a7c79ac59bf1fde839ba8fd6e5740b3a32d0183a57b472353ccab93846d",
+        "gzipBytes": 669,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:60410cdd5dde4c28ecb9e624be6549a868208f4af26e74e8bec44cd790495ff8"
+    },
+    {
+      "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.april_2026.first_print",
+      "sourceVintage": "2026-06-18",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/statcan.employment_insurance.regular_beneficiaries.canada.april_2026.first_print-2026-06-18-558bbeb5f09a045e.json.gz",
+        "sha256": "558bbeb5f09a045e0cf2450b17339b26137e37530102f564acdb944097dd93f3",
+        "bytes": 1582,
+        "gzipSha256": "d8c8b7da826debafe760a9574ba8780c2a6fd90b96bf772b0e4037db0bbe89e7",
+        "gzipBytes": 639,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:2e36bf9b8f6457e065673ef9770b69a9f68174103648fdb18f16078f16a8ac73"
+    },
+    {
+      "dataPointId": "ons.hmrc.paye_payrolled_employees.may_2026.first_print",
+      "sourceVintage": "2026-06-18",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ons.hmrc.paye_payrolled_employees.may_2026.first_print-2026-06-18-511790ed1f505693.json.gz",
+        "sha256": "511790ed1f50569353c083db9cab6ece7d7995110d4ad960f0a21a9e8635e127",
+        "bytes": 1756,
+        "gzipSha256": "5823376d25bfd480060da4b0091dfc3d826ca8287ec92057660c127666580d12",
+        "gzipBytes": 734,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:1a260382a4f0b066b405974aa9bb7b9baa69b8b2748a09c3e33738dfbba7ae12"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-06-13",
+      "sourceVintage": "2026-06-18",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-06-13-2026-06-18-caa86ea0c2405496.json.gz",
+        "sha256": "caa86ea0c24054963dc8c4bc71e7bfb50f7187e74c8b10b6a60b288dbc095039",
+        "bytes": 1441,
+        "gzipSha256": "b6563a203c5dab71b98cce2ec8660fd4dcb3a629cd007f946e67974c04cbfb96",
+        "gzipBytes": 650,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:d6f0a6745d2ea4e4e8db240a98efb01471d8750ff551812411c88db513935bf7"
+    },
+    {
+      "dataPointId": "ons.pusf.j5ii.public_sector_net_borrowing_ex_banks.may_2026.first_print",
+      "sourceVintage": "2026-06-19",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ons.pusf.j5ii.public_sector_net_borrowing_ex_banks.may_2026.first_print-2026-06-19-13ef76a4002d12a5.json.gz",
+        "sha256": "13ef76a4002d12a5fa9d39a4bac78dd34d7656e6a3ccbd33c19172b01149edbb",
+        "bytes": 1700,
+        "gzipSha256": "ef145e67949db2999ce20f871af5a289309d3f985124e0fcffda346edd047c5e",
+        "gzipBytes": 652,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:da87aca149a2da27a3504cb7ca7c43c4bf5577ee7bd8c0b85ba7725a753c3f44"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-06-20",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-06-20-2026-06-25-3c1c71a7ab428cb2.json.gz",
+        "sha256": "3c1c71a7ab428cb21ba9d5ddf41c6f66aecf77c8748ceacbf8e5eed6e20b9b16",
+        "bytes": 1325,
+        "gzipSha256": "28770339f3b8d49886674dcf44d432f609d26b7181d2f616a7d05ca51ac80761",
+        "gzipBytes": 647,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:14d07110e30f8f5f5d36d7ab72f07deae4252c58aa57ba235e70681ca8ebb497"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-07-04",
+      "sourceVintage": "2026-07-09",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-07-04-2026-07-09-656367d0d5e186e6.json.gz",
+        "sha256": "656367d0d5e186e6d3be064bdfa3e11d4c9913f73b2ec67db639f3fef47cb2e5",
+        "bytes": 1325,
+        "gzipSha256": "195a09c050a3529ba98023cfeec31c1ab80dba74c77bf11df370246fad710075",
+        "gzipBytes": 645,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:90e3a9db34d6b21ae84d8f1192cc0ef583d8100932b19f581bacfe52dde39615"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-06-27.first_print",
+      "sourceVintage": "2026-07-09",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-06-27.first_print-2026-07-09-8bc27e4b6473edfa.json.gz",
+        "sha256": "8bc27e4b6473edfa003a73453936e9c97ff0ca86d6980259b3b029201dc88d88",
+        "bytes": 1348,
+        "gzipSha256": "08c644c203d4bc886df933771b8126174d5c45ef6c5322bb466ce2d63a575bcb",
+        "gzipBytes": 661,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:d01d5199d4748faedd3f331f652a7575e09cd162c6e57803185e0c2c0d0fd876"
+    },
+    {
+      "dataPointId": "bls.jolts.job_openings_total.may_2026.first_print",
+      "sourceVintage": "2026-06-30",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.jolts.job_openings_total.may_2026.first_print-2026-06-30-db4cd63aada9c790.json.gz",
+        "sha256": "db4cd63aada9c790a36b7171e220b8ed5b71e8e048b2f82540fec6029ff2c971",
+        "bytes": 1813,
+        "gzipSha256": "34778a22e846f51764d5126be27e2778b419b5cc5388503462adcd851d24a43b",
+        "gzipBytes": 893,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:9da3864582333bff52f3b19500af348bd992e142bbc440dadc623b764cfcc86b"
+    },
+    {
+      "dataPointId": "bea.government_social_benefits.level.may_2026.first_print",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.government_social_benefits.level.may_2026.first_print-2026-06-25-29cc2cf12b0a77e5.json.gz",
+        "sha256": "29cc2cf12b0a77e55e8077c532b84a340a672fa68c3d78eba994642bb3edfa2e",
+        "bytes": 1864,
+        "gzipSha256": "5198702d84022c3e42908ba796e5515a85010ee09f74aefb49b74aacb75da8cc",
+        "gzipBytes": 910,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:efb66d3007e214033210fc30a590dde5deefbbc0db816c2bd564303bcedf9373"
+    },
+    {
+      "dataPointId": "bea.government_social_benefits.social_security.may_2026.first_print",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.government_social_benefits.social_security.may_2026.first_print-2026-06-25-433b9d966940b90d.json.gz",
+        "sha256": "433b9d966940b90d1ba8395d055618f410141e142a71536eb90359bc9b93be28",
+        "bytes": 1871,
+        "gzipSha256": "efc92b740ef9c1ce9daf32d0a63de84742d78864d9d1ef2a6ffbc9c54068380a",
+        "gzipBytes": 913,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:4e6a0dc3118cecc2c368093519a731fc43e57e5d5a28e16c9f7f7e16c3501df4"
+    },
+    {
+      "dataPointId": "bea.government_social_benefits.medicare.may_2026.first_print",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.government_social_benefits.medicare.may_2026.first_print-2026-06-25-1bae0e820264f23e.json.gz",
+        "sha256": "1bae0e820264f23e1fde5ada356b221dee69fab02cd22345ddec21a52c69429b",
+        "bytes": 1850,
+        "gzipSha256": "54b955e8029d0e707878e62ce4009b26acc2c89fae5353338da0ea4055294d21",
+        "gzipBytes": 909,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:f81d3f54567266d5a6731396723fba2f33718b9f37ff90567dd983cd74a32446"
+    },
+    {
+      "dataPointId": "bea.government_social_benefits.medicaid.may_2026.first_print",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.government_social_benefits.medicaid.may_2026.first_print-2026-06-25-07341d6bf64234c3.json.gz",
+        "sha256": "07341d6bf64234c320a53c80f3d77e9884b6e8cd48c3a67849b281c2416ab056",
+        "bytes": 1850,
+        "gzipSha256": "63800c69284a8cda1c77bfd93e86442381569675ae801c4b0ca4b51d4a8a5da1",
+        "gzipBytes": 908,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:32d20358954e29c0fce4af4582110045e61b72ddde4558cf971b65bfff8b4b5a"
+    },
+    {
+      "dataPointId": "bea.wages_and_salaries.level.may_2026.first_print",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.wages_and_salaries.level.may_2026.first_print-2026-06-25-07d4f32877754b9f.json.gz",
+        "sha256": "07d4f32877754b9fa1ba33a2a327586b4c1a13b9ed70cf4d4be4d2ef98a71b05",
+        "bytes": 1830,
+        "gzipSha256": "c6da5def6505f5a9feaff7ba515ad4140082c1980fe2df0b5eb7cb563e574084",
+        "gzipBytes": 898,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:23aa08dfc583125387b7d8a8ef032916ecbaa9cd16ffdeb056b31918aea1a34c"
+    },
+    {
+      "dataPointId": "bea.personal_current_taxes.level.may_2026.first_print",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.personal_current_taxes.level.may_2026.first_print-2026-06-25-4172d67c6ebcde89.json.gz",
+        "sha256": "4172d67c6ebcde89b0dbb243ad8de9e4286db297a04e0442cc89c84384ee9a50",
+        "bytes": 1841,
+        "gzipSha256": "242baf90c103d59ce6a18fe9b8b425aae519ed7982eb1b4c78de28037d057da7",
+        "gzipBytes": 900,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:dead84e172cdf4b80fbf5e22717a6e95237efd03c6817ef3acbdb523304ac383"
+    },
+    {
+      "dataPointId": "bea.disposable_personal_income.level.may_2026.first_print",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.disposable_personal_income.level.may_2026.first_print-2026-06-25-ab713d202baaa406.json.gz",
+        "sha256": "ab713d202baaa40659786805d785b0e811119e061faf9d8c48269cc39e8c879c",
+        "bytes": 1836,
+        "gzipSha256": "6cc15fb46a79225dbabe4a97a4a6da7a172f1deee78823688cdd48b128dc9246",
+        "gzipBytes": 900,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:115b92ea8e255944c50eda0afc96e8b866769481af009b233549be5ecd6fb3ef"
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.business_financial_operations.june_2026.first_print",
+      "sourceVintage": "2026-07-02",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.business_financial_operations.june_2026.first_print-2026-07-02-796b7756d683df21.json.gz",
+        "sha256": "796b7756d683df21b41cb9179787417bbd3470295ec258156ce17717e7fa0310",
+        "bytes": 2058,
+        "gzipSha256": "b4f776173d65797cd7831a0a6f4e0e53ea3fc776ee593d87c4aef7579392d037",
+        "gzipBytes": 944,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:c82edb42150003637e85acad6affc7578caf8b07f8dcbe38f2ef19407a08909f"
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.computer_mathematical.june_2026.first_print",
+      "sourceVintage": "2026-07-02",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.computer_mathematical.june_2026.first_print-2026-07-02-5fe58d7d6cf789ac.json.gz",
+        "sha256": "5fe58d7d6cf789accc366c7cef8ce6567ab9c5f3892fb2517c1553c46c94633c",
+        "bytes": 2010,
+        "gzipSha256": "73275f695930ef8f11201e0dde87b80b11a6a8d4b94b2414787917fc781124b8",
+        "gzipBytes": 940,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:993fb0be6c12037cfe070390b809c59636e2cc877da4bd53625b07bc28d03be3"
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.healthcare_support.june_2026.first_print",
+      "sourceVintage": "2026-07-02",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.healthcare_support.june_2026.first_print-2026-07-02-12f062118d475e68.json.gz",
+        "sha256": "12f062118d475e68989ede947700c703ed61af565a9f76dd6804cdb9abf7ae4b",
+        "bytes": 1980,
+        "gzipSha256": "716b1530aa3fe1cc9e5bff46cec7f7a8841e2ffe430649102337486dbf3e5cf9",
+        "gzipBytes": 935,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:17d590c1387053e8d8253dc8ed57773f3964ca3436445f661233841bcad27224"
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.office_administrative_support.june_2026.first_print",
+      "sourceVintage": "2026-07-02",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.office_administrative_support.june_2026.first_print-2026-07-02-9f7e2cc8a5ce9f79.json.gz",
+        "sha256": "9f7e2cc8a5ce9f79ac7d8f4110fa1d03a8df8d16c572703125db2d41127952a9",
+        "bytes": 2059,
+        "gzipSha256": "9cea4c229e67cfae90c05d52704e2a546f2011a370da8196abff4129938b584f",
+        "gzipBytes": 947,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:1d04a7b19014be438ee72e7d1cd8a026f94cdba31ffa79704ec05c7e9cee337e"
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.production.june_2026.first_print",
+      "sourceVintage": "2026-07-02",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.production.june_2026.first_print-2026-07-02-fb4235d5327e3358.json.gz",
+        "sha256": "fb4235d5327e3358c0cda0528308068650ca5d0a1cc828abf4b2af048c48da69",
+        "bytes": 1932,
+        "gzipSha256": "4a92df98007d8b2e2cc616d64acd48d3985d171a3c077eebf3e1671d0f9c8c88",
+        "gzipBytes": 922,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:91a8a9ae24fe7bdfaa7f29e606e16787d5b25e958d6acb847a084802c819a0c5"
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.transportation_material_moving.june_2026.first_print",
+      "sourceVintage": "2026-07-02",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.transportation_material_moving.june_2026.first_print-2026-07-02-40576bb94b8bb1ac.json.gz",
+        "sha256": "40576bb94b8bb1ac7c2ff4b8f7d03bb3063527846856184f1a7e92a69ff090a6",
+        "bytes": 2065,
+        "gzipSha256": "a17392daa549f96e2fed0f90d03375f32750f0de7230dd4a1cb08476ef727767",
+        "gzipBytes": 945,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:853ed7296e16422470fd8947d250491c296f4badb4ddda8c770f4795891002db"
+    },
+    {
+      "dataPointId": "bls.jolts.job_openings.may_2026.first_print",
+      "sourceVintage": "2026-06-30",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.jolts.job_openings.may_2026.first_print-2026-06-30-8922880ebeee41ec.json.gz",
+        "sha256": "8922880ebeee41ec9664e665470a6f8972ae25d83a2b2de17e5c7a42cd814f45",
+        "bytes": 1799,
+        "gzipSha256": "40c0782fbb1d8ba08ab24e0c2f6c5bf319576f76d70bd699fca27ec55cf0e1cd",
+        "gzipBytes": 889,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:6270b2a48b2dc3cf466920f5b4b3fb8a329172eb0648e23038681ac0dac7d412"
+    },
+    {
+      "dataPointId": "bls.ces.total_nonfarm_payroll_change.june_2026.first_print",
+      "sourceVintage": "2026-07-02",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.total_nonfarm_payroll_change.june_2026.first_print-2026-07-02-8d07bf462ebe371c.json.gz",
+        "sha256": "8d07bf462ebe371c812348a11a29dc1685d21df18875f1fe2d00f1e789cbad30",
+        "bytes": 1843,
+        "gzipSha256": "2921c846bdbaea9c1efcfb827e19e02d2e32022d07bb2326f78aae3d9b0aa8fc",
+        "gzipBytes": 904,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:0724c8182567d82e11a5ded79ac564f52546f5d67f50b795573668754041b74a"
+    },
+    {
+      "dataPointId": "abs.labour.employment_change.australia.may_2026.first_print",
+      "sourceVintage": "2026-06-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/abs.labour.employment_change.australia.may_2026.first_print-2026-06-25-18b41f1a6132bb98.json.gz",
+        "sha256": "18b41f1a6132bb987222cfde1088137fd18153bb79a0c04c6c34b0dfb689fd6d",
+        "bytes": 2103,
+        "gzipSha256": "20d8476a9829665b84d3313468cfe1431793bc3252fd8e22cb950501e223f1b1",
+        "gzipBytes": 1044,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:3941fb6bf3839900500bd282ac9c18386bd7619e1434da8b869a5bdc53e79bd8"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-07-11",
+      "sourceVintage": "2026-07-16",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "6ae54e1d0cfa93b1751e7ea2f13d556c78ee00e0bd159f6e8d1d4c5fca03f5fe",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-07-11-2026-07-16-8f8aad9c2c06d850.json.gz",
+        "sha256": "8f8aad9c2c06d850ffd9b28bd3315cef0bbc1d51d1e9adeb3d23f21f0c29c058",
+        "bytes": 2469,
+        "gzipSha256": "dc9b08d75b893ed1f1c969ce6ba7f04707a83793f3407878c8cfc2f3d6b6822e",
+        "gzipBytes": 1167,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:c7e16b7755905b9b54382a5cbab485188b4c0410ca76ef3d824c3e0f20646fbb"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-07-04.first_print",
+      "sourceVintage": "2026-07-16",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-07-04.first_print-2026-07-16-8d5b542ca9a54710.json.gz",
+        "sha256": "8d5b542ca9a5471099ccb8fbb396f78e2a48d33c3be8b1935511ee18374f01f3",
+        "bytes": 1948,
+        "gzipSha256": "96faf45221e8ec208a0d3b1bcc72f4f75c210d1c38ff046180521de115fd3ce9",
+        "gzipBytes": 1008,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:bad658100e0211b38dfc3e0302964627de51cf6d491f2a3db27f60d6d92e2a79"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-07-18",
+      "sourceVintage": "2026-07-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "744098c1b345176f966ba181700538215eeef034556de85c3664a099ad0ebe9f",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-07-18-2026-07-23-149c0252e21bee54.json.gz",
+        "sha256": "149c0252e21bee548d2028477a2617b484426c3eb508c265698617fbc4a9da3e",
+        "bytes": 2469,
+        "gzipSha256": "8e2965b3c2c4fc17e0f0fce5212f2cb8cba6c3b58682808cf37ed09eab1a633d",
+        "gzipBytes": 1167,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:c52398b976877e68ebb610e0f2bac014c93acb36ae7fc882653cb2e299c18213"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-07-11.first_print",
+      "sourceVintage": "2026-07-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "6ae54e1d0cfa93b1751e7ea2f13d556c78ee00e0bd159f6e8d1d4c5fca03f5fe",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-07-11.first_print-2026-07-23-5233adead8a5c85f.json.gz",
+        "sha256": "5233adead8a5c85ff027c5d5f4e71124980555e753366206d901186b90e537b6",
+        "bytes": 2497,
+        "gzipSha256": "67daddd8a116c3d0f486e4bee116fb7312d72169411c0667677ee25a658e50f7",
+        "gzipBytes": 1178,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:b8a1aa9545f515d17d0d9eaebc140f53026e8c73626adf24ce83d4f139dd6083"
+    },
+    {
+      "dataPointId": "abs.labour.employment_change.australia.june_2026.first_print",
+      "sourceVintage": "2026-07-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "9a4cf7b9cebbebe4e882759f230d2b8ffe00c7c7a45533ba7e10642ad8e46eb5",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/abs.labour.employment_change.australia.june_2026.first_print-2026-07-23-0926017a113035e7.json.gz",
+        "sha256": "0926017a113035e7dfba5787b83cb172aa368629a89694ad1fd521a8136464d8",
+        "bytes": 2797,
+        "gzipSha256": "29d511af65661a4952f6f0412d0133ed6182b32d483dbdca781a32e347797030",
+        "gzipBytes": 1198,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:2f0784cd7cecb6a1932e7f216793c6e27b2749d14856429f90a7df39198d2137"
+    },
+    {
+      "dataPointId": "census.housing_starts.saar.2026-06.first_print",
+      "sourceVintage": "2026-07-17",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing_starts.saar.2026-06.first_print-2026-07-17-b1b4176e5948c874.json.gz",
+        "sha256": "b1b4176e5948c874d6f37f6c8edf5f11ca53e4e7c7da3268613b0cc2dc3134cc",
+        "bytes": 1978,
+        "gzipSha256": "50fc8b2d1315db159e6542995e973afc88459438a24cdcad9bbab881e2d3b727",
+        "gzipBytes": 974,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:3f74745ad948ea5faa3d0032ad57c8d15e07a587ff1af6b6276018d2e0da82c7"
+    },
+    {
+      "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.may_2026.first_print",
+      "sourceVintage": "2026-07-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/statcan.employment_insurance.regular_beneficiaries.canada.may_2026.first_print-2026-07-23-14b4e6b8a3209f93.json.gz",
+        "sha256": "14b4e6b8a3209f939ef138bd4c9d334631cce5b472f0411e72eda8e43ae47699",
+        "bytes": 2305,
+        "gzipSha256": "f4e79b986798872215e2f3f99de11c00de58aabe5c8e360f0a697365d29d6059",
+        "gzipBytes": 1056,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:fb8f6cd0edd093f2ca0dad587727635af5d3dce88d31c8156882096b1efa7fee"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-07-25",
+      "sourceVintage": "2026-07-30",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "14230433262478cb1134d42fc94b9c1eab391028cc750beb6151ad05ce20889a",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-07-25-2026-07-30-3ce704f2ea794d2a.json.gz",
+        "sha256": "3ce704f2ea794d2a9033a902b6fa8b72422fed8a6fedbdaf4c7011fc6c32a84e",
+        "bytes": 2469,
+        "gzipSha256": "4bfdde3112834ea0b52792f42e85b2af234938ed8f1f71a47d31dfd64ffac30b",
+        "gzipBytes": 1165,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:dd50c74187b747ab8a52e7ea0db000ec3b43925da049dc01c797c2c087250e6d"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-07-18.first_print",
+      "sourceVintage": "2026-07-30",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "303f08a03edb98ea7f4d37396fa9d9285464d3539e074f49a39462ce133153f7",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-07-18.first_print-2026-07-30-48f2c946ebe5eed5.json.gz",
+        "sha256": "48f2c946ebe5eed52e791ee9fd3001cbea24d300c7c5b680feda6c423616e069",
+        "bytes": 2497,
+        "gzipSha256": "7e2ceb45f4265d231b295da1b3e016fd76ecd18c5a3cce76bd01b5c47b9c7b82",
+        "gzipBytes": 1182,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:48d8cfdebe7039941d491e17a6734bf7265c2fdbea6614b9e0c0181a77d78e08"
+    },
+    {
+      "dataPointId": "bls.jolts.job_openings.june_2026.first_print",
+      "sourceVintage": "2026-08-04",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.jolts.job_openings.june_2026.first_print-2026-08-04-f8f43734e8945b26.json.gz",
+        "sha256": "f8f43734e8945b2629afbe889e9ce970cc46e109554432626138995b3cd1632c",
+        "bytes": 1916,
+        "gzipSha256": "b43ba20930923d4b54fb96df61741f8aafe1ac962b7a844adf58c71b49b5b317",
+        "gzipBytes": 955,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:f29658ab0abbc0a0d18bb2a870bd46857b5f4f7c180f0c5c12a01267ce43286c"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-08-01",
+      "sourceVintage": "2026-08-06",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "6e0ad0d5532c36de0d6033677fb36ba655a6101adf114529c3badc8dbb9307c4",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-01-2026-08-06-7df9a37fb5727f2a.json.gz",
+        "sha256": "7df9a37fb5727f2a87807773c705753cfe8ac1b98e5412d5b21aaab3fc3d6b69",
+        "bytes": 2469,
+        "gzipSha256": "39e9cb1ab298722e5d03a6c0ff365a5eb6e77f50cb724fe8b3aca33c3a19ba03",
+        "gzipBytes": 1163,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:94cef1be2b70d9d9f63402189e207544b93089ee8c20090dbff671b68c98ab35"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-07-25.first_print",
+      "sourceVintage": "2026-08-06",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "82a45fed9df897ee19347cc693acb49e6673d01de85ae86071b718f3815b01c5",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-07-25.first_print-2026-08-06-d443f210f3d138c5.json.gz",
+        "sha256": "d443f210f3d138c5ced8be2a3d969e774a4894e948851f0e12c8ccffe94321dc",
+        "bytes": 2497,
+        "gzipSha256": "f03f853c9c66eb55b14d2c9f5efb4bac66b43d4726f06a9e0364633ccf424ad2",
+        "gzipBytes": 1178,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:7d20001cec6c3461447bb558f4925d86cddff4d1c764ad7189e73e0abfb37c2f"
+    },
+    {
+      "dataPointId": "bls.ces.aerospace_product_and_parts_employment.june_2026.first_print",
+      "sourceVintage": "2026-08-10",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.aerospace_product_and_parts_employment.june_2026.first_print-2026-08-10-400eee22744839d0.json.gz",
+        "sha256": "400eee22744839d09cfb46f444308ca0ae09df284904a6986f1d81e77955535f",
+        "bytes": 2238,
+        "gzipSha256": "f557dd5b72d0895ee2316653943a99b8c306ff6f97be0e0e1248165f783136bc",
+        "gzipBytes": 1088,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:21d7af9853bb68b3e047b1d6700a994164afaee1f11962f164fb2a9558980f1d"
+    },
+    {
+      "dataPointId": "bls.ces.ship_and_boat_building_employment.june_2026.first_print",
+      "sourceVintage": "2026-08-10",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.ship_and_boat_building_employment.june_2026.first_print-2026-08-10-01dbf208163cd208.json.gz",
+        "sha256": "01dbf208163cd20873f6de253e989bc24c174839b1290bc541fd614a1960a342",
+        "bytes": 2204,
+        "gzipSha256": "8f9ae64628d10ff86b4640e4a9d1a7e6c0dbc2f776b5f2c34b2102f1d6d347d3",
+        "gzipBytes": 1076,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:eb15d1525226df66f9488d44e9452092af89bb96ef1de31370ab6dc66bb2adb4"
+    },
+    {
+      "dataPointId": "bls.ces.federal_department_of_defense_employment.june_2026.first_print",
+      "sourceVintage": "2026-08-10",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.federal_department_of_defense_employment.june_2026.first_print-2026-08-10-43ff29e751d7112e.json.gz",
+        "sha256": "43ff29e751d7112e3d33003064d291fc7f4be6c4ce9195de75a430c96d6a3285",
+        "bytes": 2244,
+        "gzipSha256": "ee2ad244f06ccc049b1a3dfced3e3b14097e774a7ac196051406339333b2a61f",
+        "gzipBytes": 1094,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:779f436ef2a642c4c16a4c9f95cb4b64b9dbb03f925b86db33b2b630837135c9"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-08-01.first_print",
+      "sourceVintage": "2026-08-13",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "34bc635d2137eb8e4f54b05bf6ddeecbc656287bf63e1fa518e2c6bc346a8fdc",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-01.first_print-2026-08-13-328be3d76868a1a5.json.gz",
+        "sha256": "328be3d76868a1a52921f526b54e4bd3f0763ca4f2917d81aaab98aee6d69906",
+        "bytes": 2497,
+        "gzipSha256": "6aeba2d61075df65976ef6cf683282fc43848fc761331dda9ac7fb1220fae78a",
+        "gzipBytes": 1180,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:cbf7570767c7f8efb0ce16273d02ae936d48400c8641d00348834ee29f46c5e3"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-08-08",
+      "sourceVintage": "2026-08-15",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "4cff4a29721acfdd28e02ddf0cf36d714abf61da5a3632f76c0058756c03630f",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-08-2026-08-15-9e9502c838dd9c37.json.gz",
+        "sha256": "9e9502c838dd9c373d0e27f1a6c6dbf341add648064c1899e188436a12c8138a",
+        "bytes": 2469,
+        "gzipSha256": "dd9ae5ad4f26344db85a823d7d80895d2222d4bf190daacf5e0e9754a0a4c6f2",
+        "gzipBytes": 1165,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:52d99e0595ab155b03a5320c1e5372e8be4aa6022df21c60612ff5bac49a0588"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-08-08.first_print",
+      "sourceVintage": "2026-08-20",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "372cf19297c3d53584417cc2b1f7d1eff504012040e6194c4028225348b0049a",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-08.first_print-2026-08-20-c50d03b1e06f1f0f.json.gz",
+        "sha256": "c50d03b1e06f1f0f52d84b3e75f080926f109682437cfee221bf862a08c06bb9",
+        "bytes": 2497,
+        "gzipSha256": "87858db6cf67d7dd3ec37e896d30c3c87550bf520cefc2f8207aed24f1bf7b4b",
+        "gzipBytes": 1184,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:27dfcf384c877ae0e66b82e8d5aa60923f3efba7f2aa637a0b4e7c3b74169b86"
+    },
+    {
+      "dataPointId": "census.housing.completions_saar.2026_07.first_print",
+      "sourceVintage": "2026-08-18",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "d575eb38110952504acebd0ba3e773df5327cd1eb860702d961a00d0b2d45a82",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing.completions_saar.2026_07.first_print-2026-08-18-774f38832beb9250.json.gz",
+        "sha256": "774f38832beb9250226953ef820ce43a413b6c9833645b822ea03472f9971058",
+        "bytes": 2617,
+        "gzipSha256": "50f1aa0650a5e2cb325a93e512f68134de12e3b625ce633417dd64faf51eaef8",
+        "gzipBytes": 1139,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:06f9f4bb4c76d11621a9f6487ae5229e6714d61c317e90552aeb3d02bfe428a7"
+    },
+    {
+      "dataPointId": "census.housing.permits_saar.2026_07.first_print",
+      "sourceVintage": "2026-08-18",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "c7a4e40bb0cd9b0e5c28fbfbb3441e05bf8245b1c02cc5b13590b8e7d0f72cd2",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing.permits_saar.2026_07.first_print-2026-08-18-c2a171e7a16609cf.json.gz",
+        "sha256": "c2a171e7a16609cf58a84a338055e1c3a196a0fc7cdfe40a6e48078d8fbbd72f",
+        "bytes": 2582,
+        "gzipSha256": "da0ec73c524550a84e22e2de295dab7d3aaa6d2ebed13c037f44b4c2e9cea4d8",
+        "gzipBytes": 1134,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:251cc2b5145668ef4783b0225487124371adb126ba5a005d3d9b2c2eb6ccb2c6"
+    },
+    {
+      "dataPointId": "census.housing_starts.saar.2026-07.first_print",
+      "sourceVintage": "2026-08-18",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "073e7fcf7886b8c861d413549339410a956f2eb86554266f89fbeea6aa7bc373",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing_starts.saar.2026-07.first_print-2026-08-18-01cb93afb96860a3.json.gz",
+        "sha256": "01cb93afb96860a3174b3b02443f337be39152ec287912ca515343ae71eff208",
+        "bytes": 2569,
+        "gzipSha256": "ac3531ac80caf87c02ed12bf0c50c54aa2586c2d0b4c368bb22512e96c4616c4",
+        "gzipBytes": 1127,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:c5d523dbbfbc2eeed56ccdb4b7637ed2d9cde1dd7b9fefa5af50c14b3ad6473e"
+    },
+    {
+      "dataPointId": "va.vba.mmwr.claims_inventory.week_2026-07-13.first_print",
+      "sourceVintage": "2026-07-13",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/va.vba.mmwr.claims_inventory.week_2026-07-13.first_print-2026-07-13-c17020497aaceea0.json.gz",
+        "sha256": "c17020497aaceea096be4dbafacdbd9fbdd7fc17601d3632420ada276efdb5f9",
+        "bytes": 2703,
+        "gzipSha256": "18010b51625a9f56b7131019cb592ff842b18e2ed6421251f66c29673b52a9ef",
+        "gzipBytes": 1260,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:439428e3dec636bca820cf29a3cb547e78837f1d85c6df6b3fe6d31818c118c6"
+    },
+    {
+      "dataPointId": "ssa.ssi.recipients_aged_65_plus.2026_06.first_print",
+      "sourceVintage": "2026-08-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ssa.ssi.recipients_aged_65_plus.2026_06.first_print-2026-08-23-6eb281f2ff91aa5b.json.gz",
+        "sha256": "6eb281f2ff91aa5bbef5f231e81560d8f4e2b02f9d6537af9fc24e45f91581ee",
+        "bytes": 2508,
+        "gzipSha256": "0ba52a7b810085af848d18a17011ba3d17935086a9be9bd0fa6e2fe6cf41dd99",
+        "gzipBytes": 1237,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:003789bcb079f78b9f7dcdb40c0021361afd31f6fab0bd6116b3d4bb987437f1"
+    },
+    {
+      "dataPointId": "ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print",
+      "sourceVintage": "2026-08-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print-2026-08-23-5fa13b73bcb89826.json.gz",
+        "sha256": "5fa13b73bcb8982696f289ea9c365b1850a8e85a3a25d7b4235dd6c78cc1fb4d",
+        "bytes": 2625,
+        "gzipSha256": "788b112239ed55aa1f7d3177cea4ba7b1b37688c00cc8e22f9780ef062bde3ec",
+        "gzipBytes": 1257,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:5f0974ad1f549c2abb00cc63e4f2ebe0532f573d88470203d41c3f4df810528f"
+    },
+    {
+      "dataPointId": "bls.ces.home_health_care_services.employment.2026-07.first_print",
+      "sourceVintage": "2026-08-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.home_health_care_services.employment.2026-07.first_print-2026-08-23-ccc5f3e13cf11e21.json.gz",
+        "sha256": "ccc5f3e13cf11e21c044e637b0fab6b68a9c51b61003372e224d882944a53865",
+        "bytes": 2242,
+        "gzipSha256": "2d4725fd9a03251158d2c1990cd5b1812302f48857aabb5022ecfc5bedd80c4a",
+        "gzipBytes": 1096,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:abe68c90febe7fbb8035b00ae7bb68eb022a60f955effbd85bd839f9cea3837e"
+    },
+    {
+      "dataPointId": "ssa.ssi.recipients.colorado.2026-07.first_print",
+      "sourceVintage": "2026-08-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ssa.ssi.recipients.colorado.2026-07.first_print-2026-08-23-53681bed87d34a62.json.gz",
+        "sha256": "53681bed87d34a62d8750ea4bf681bd4aa84dd21d764b97411e4b260a7cd2efc",
+        "bytes": 2454,
+        "gzipSha256": "7d3f683aedeaf8fcd28c2a8339da65a200c5483a959d390e243884ffc735351b",
+        "gzipBytes": 1211,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:c8c147c7936a636199df77d6513b9a20dafe996029b993bc8274390c66357656"
+    },
+    {
+      "dataPointId": "bls.laus.colorado.labor_force.2026-07.first_print",
+      "sourceVintage": "2026-08-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.laus.colorado.labor_force.2026-07.first_print-2026-08-23-c4b645091ae5a378.json.gz",
+        "sha256": "c4b645091ae5a378df19ec2196db4f3ec3a39c4535511ec09128900b5051c14a",
+        "bytes": 2272,
+        "gzipSha256": "fb3bfe99cadc81c7ee4a1a8ff765839255dc8978efae7589bda7e6999e9915f9",
+        "gzipBytes": 1102,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:72a6a2144d5424230a34bbae473e5be1268d60f78b7150cb2ba2831e7e5e77e1"
+    },
+    {
+      "dataPointId": "ssa.ssi.total_recipients.2026-07.first_print",
+      "sourceVintage": "2026-08-23",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": null,
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ssa.ssi.total_recipients.2026-07.first_print-2026-08-23-ef710ec5ecf9bd65.json.gz",
+        "sha256": "ef710ec5ecf9bd65a59c15d74a51889dc132f9860da25f2877891a14f484fa17",
+        "bytes": 2457,
+        "gzipSha256": "4cab62e560aeb8fd24d80e76dee2f07ef715f326ee30f9f2a5565f0a88cd2ac3",
+        "gzipBytes": 1201,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:f6c3955cbabac9ad7d293aa3fa7b7fc8dcd192d6afaa63760b7f87b809eba02e"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-08-15",
+      "sourceVintage": "2026-08-24",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "ba7909136ce260dfbd43442621dd88fdef9abd8d2b02c81dfcb114251a76b8bd",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-15-2026-08-24-ed23817edf17b10e.json.gz",
+        "sha256": "ed23817edf17b10e4376ba478735b7071d17cd8efefa5399433a913c0e140070",
+        "bytes": 2469,
+        "gzipSha256": "8a31b9a7496044f7f1ef626448bfcb57603a337f7fb496444db22acfcccf0223",
+        "gzipBytes": 1166,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:c84cc0d2eb6a805786983b17ae97e278dee82566cb1ab26cd65153df72f76eef"
+    },
+    {
+      "dataPointId": "census.new_residential_sales.new_single_family_houses_sold_saar.2026_07.first_print",
+      "sourceVintage": "2026-08-25",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "0f2d2e4dcfee851ef8eef4f673d139bc9935d1db55456076f8a6694d439db399",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.new_residential_sales.new_single_family_houses_sold_saar.2026_07.first_print-2026-08-25-6a4996cd5275236a.json.gz",
+        "sha256": "6a4996cd5275236a923f7a752134ee4f5c4e4cda4349a25dafd3cb6e20e8bb99",
+        "bytes": 2672,
+        "gzipSha256": "1e3deb1273c698f1009b7ddc405bbc770cb9e9c55d5466c78467fdbb215c0c7a",
+        "gzipBytes": 1155,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:ba056ff4a86199bcddd71b8e66bc472c3cebbd885f07de0d940208f53b835545"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-08-15.first_print",
+      "sourceVintage": "2026-08-27",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "88d9a299ea398bb463f4263048ae7ca91aec787c14c3e41d2307180fda4ac9fb",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-15.first_print-2026-08-27-f8846865e00c8736.json.gz",
+        "sha256": "f8846865e00c873629fa97681231998b4023f3ad4d0cf8a6012a79252f62db82",
+        "bytes": 2497,
+        "gzipSha256": "c78c759c936f7244b643a52675965c9656b2c52052d236de4acf35fc541ffa09",
+        "gzipBytes": 1178,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:f0d2df4839037712d7334da67498e86803fcad24a188cf26ea140e16bbeb8f20"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-08-22",
+      "sourceVintage": "2026-09-02",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "b7bb77145b8edef4ff29945f0d8bfc726658bb5eee39b118a1177aa2f020928b",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-22-2026-09-02-8c2f59e90202607c.json.gz",
+        "sha256": "8c2f59e90202607c0e101cdf0eedff63e90c038cc3f03a017888ed7202e02404",
+        "bytes": 2469,
+        "gzipSha256": "a98800ed3609dcf516b2b0f06208b0a230c34c2d24608d2339ffd57abefe43ed",
+        "gzipBytes": 1171,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:5427f45306bba4dd53e45a56d21e859381f90386fd911e9f392aa019368bfba3"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-08-22.first_print",
+      "sourceVintage": "2026-09-03",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "8aed8abb263c72b5f3047e785d78a9a285c92820da192cadb03ffcaf826ddf0c",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-22.first_print-2026-09-03-bad0bcaeff1059dd.json.gz",
+        "sha256": "bad0bcaeff1059dd606daef82b2a7e86f2f3530188d7f75d555136f5eceb8a0f",
+        "bytes": 2497,
+        "gzipSha256": "eb3a60a983c519b3fb55cd28e66d527ecacae283bd959a2b35f84f0164d31dd5",
+        "gzipBytes": 1182,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:0121aa1d6c5a9bbc90771255b85b35a1f06019dac6043bad0b5325673737b2a5"
+    },
+    {
+      "dataPointId": "bea.trade.goods_services_deficit.2026_07.first_print",
+      "sourceVintage": "2026-09-03",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "406ea378939f61f263dd2ddc4e3ffd7534f5b5e6e0e8c94a228cbbeb28e7c8ac",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.trade.goods_services_deficit.2026_07.first_print-2026-09-03-954bdb68fc62f17d.json.gz",
+        "sha256": "954bdb68fc62f17ddf391dbe16e3e04b6b976dbc1eb64f46cd33a35afa31d806",
+        "bytes": 2607,
+        "gzipSha256": "0812e896469563bf47caa551a7c4260465d3fdcdec055708468fa191554c515c",
+        "gzipBytes": 1148,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:dcdaee742fdd45c58ca822025bdfedfba326b2afab783aa8170255bdd066289c"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-05.first_print",
+      "sourceVintage": "2026-09-21",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "b665b98ad6cd565d23ce2c9701de4b4fbd8fea1034a3ee54ddc96d1c0c16df2d",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-09-05.first_print-2026-09-21-997e1cf28f781203.json.gz",
+        "sha256": "997e1cf28f7812035eff268768fec4670932f21f3148ce37df386f1a0e6696df",
+        "bytes": 2496,
+        "gzipSha256": "911ab2c799b251aebbeec5e79661b1bf4549f42a3dec36dcf90c332c275b2b9b",
+        "gzipBytes": 1181,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:a9e58ef9ca55e6cf055874158eb657b12fa89f74981f31d44164a9aadf2f4032"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-08-29.first_print",
+      "sourceVintage": "2026-09-12",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "ab58a41c310021ec7a48d81d9878f9deae33a02b87c597ed806e2f7e8448ed4d",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-29.first_print-2026-09-12-7057db07bb48c843.json.gz",
+        "sha256": "7057db07bb48c843c0b3b146bf851174f3d7e9c776d9507b5ce8338ce8af2833",
+        "bytes": 2497,
+        "gzipSha256": "ceae08b663d00249b1a146fa046753173de6358525e4d4e8b5eb96fe55b8fca0",
+        "gzipBytes": 1181,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:0fe16e81070fbfe2b86ee9c425027e895e0288af3a0bf6abb35c71cdec07e28c"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-12.first_print",
+      "sourceVintage": "2026-09-30",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "a9fff83718fdc4ddf079ad54fafe085940047485c1554591da145d1399d98f4e",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-09-12.first_print-2026-09-30-f50c24947289a68d.json.gz",
+        "sha256": "f50c24947289a68d8cee1c66cd35c8ffa825667ed9c9c87bec42c1cc24141e5f",
+        "bytes": 2497,
+        "gzipSha256": "dc3033595d32d55a9c5c4a6fafd343da423172a54669104ac4df924fb14c1421",
+        "gzipBytes": 1183,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:4d48be8e50401a682188e4115a384bfc81ec98205778b5a70b9b3e32766ee908"
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "8b3a9c297b91e44b81cdda9bca2c64337b021348fba63395c4b5879b6e3e94be",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot-2026-10-17-7df7e5976fe3e862.json.gz",
+        "sha256": "7df7e5976fe3e862078d71d0d4d744c274a39efe1f49e51fc6fba52bd3ab3a9a",
+        "bytes": 3155,
+        "gzipSha256": "f31a6c00ff2ad60d9ddb27666070d3964e1c03bb53864986ba56a318bf9cc62e",
+        "gzipBytes": 1292,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:835db047dfadc381cddca270eb24691f0a2156a23e13d9ad6122e1b303424b00"
+    },
+    {
+      "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "e6964d48e8a09276874f5990a6155deca11583fde07f94e731a8355b70cb4f47",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot-2026-10-17-bf460cc9d9ec0c4e.json.gz",
+        "sha256": "bf460cc9d9ec0c4e150e3f1cdc788986dcb61e6cf00962b84c0a5e2c7dd50ae8",
+        "bytes": 2880,
+        "gzipSha256": "ce453ccf7402575c828e1db04f34b4001e8d32c9542cea44d394748821d181e3",
+        "gzipBytes": 1251,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:7c13cf80ad3cdff0fa3a631e8d0e9fa1aea5cde2b59d558043f34f5751668ca3"
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "41dd79f388ca4e5be3ffe71c6c375afc0cc75e0393ae1cb4d6347241b5637d8c",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot-2026-10-17-1ba5d4167f7d2ec9.json.gz",
+        "sha256": "1ba5d4167f7d2ec913008291a929d901d5fb65b18f2a9ec6bf3ee35605ef041d",
+        "bytes": 2922,
+        "gzipSha256": "ba70f2afbbd3d2372cfbfc0fcf5fd0d343dc7cc77949c6e152497479f4022e71",
+        "gzipBytes": 1252,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:0598f25a6a931703b129391a0f4553be78e8eda80cd5c6cdfba25a7624499eb0"
+    },
+    {
+      "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "41650d52985f5a06fb5d4757aff12dff8b07f6451c3e7add3159b0791b50a391",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot-2026-10-17-cb24569c675adf5b.json.gz",
+        "sha256": "cb24569c675adf5b7423dfac76d73d20cb2c7b7662b3797780a595d12733cb39",
+        "bytes": 3377,
+        "gzipSha256": "774cd21d196b741f5b62c1d32473e8d71b446cc3dbbe15b220b0e9f016956233",
+        "gzipBytes": 1446,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:1644b127bd14ecb2b0322422095a68aec941ceb1a9c6a366381c449c3b9c74c8"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-19.first_print",
+      "sourceVintage": "2026-10-01",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "75a1aa15e93e29e83eb184f6b3af1b67c83c0bd5890038ce9f51827d8afba59e",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-09-19.first_print-2026-10-01-839e7fbb712f0ac1.json.gz",
+        "sha256": "839e7fbb712f0ac103eec30cb8b5ca0183447325e0151fc329f318ad8071779f",
+        "bytes": 2994,
+        "gzipSha256": "71bf7557aee88dd2342fe2a6114f10d7e225e897f67ff4c86ab1dfaafb34fcdc",
+        "gzipBytes": 1390,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:bc2ba1bd026d1e7de4768717ad8ee66e95f532946ee4b798fceb5b2236d34256"
+    },
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+      "sourceVintage": "2026-10-08",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "bb7989449716310b2815ec2be2cc3cf62f20abaccd2e258bc322bf40721774f2",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-09-26.first_print-2026-10-08-1b03ded65a267a7f.json.gz",
+        "sha256": "1b03ded65a267a7f5a7a0499196dfbe3b19180af97b41adc8d56549e38c9ef6d",
+        "bytes": 2994,
+        "gzipSha256": "72de37871f0c7b0bc10c94e1baa5030383b028c3228eff08044c3d692eee6578",
+        "gzipBytes": 1393,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:33cdf8d1ac3f474f63aecf043c4352e364074d50f6870ee8bbe6d66adc8097eb"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-08-29",
+      "sourceVintage": "2026-09-03",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "b49b4c8de44e5d0f9f33d84f31bfef810666ef10c691abffc487cc41c48bbdbc",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-29-2026-09-03-4169711a5c969398.json.gz",
+        "sha256": "4169711a5c969398ef6df247cc4497560336a9a9ce2fa843b7c40c9f3ecf5273",
+        "bytes": 2966,
+        "gzipSha256": "54c453ab3296410f251e24ca24ada10112dd7cc5a13b99a53fb9f71bbd616e37",
+        "gzipBytes": 1381,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:5ebe4e3f446b8a967f2dd79575a69c27374a615c0829c3d70f5fde398602d5db"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-09-05",
+      "sourceVintage": "2026-09-10",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "309a1b08a210a0e9ba97c3f79d88a28d7e7e84448b1413d351bbbbd5ffab1271",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-09-05-2026-09-10-8ca7df4da8520686.json.gz",
+        "sha256": "8ca7df4da85206868dc0e9b7ab141997d66d18731346b7fb7fe482c79a77c174",
+        "bytes": 2966,
+        "gzipSha256": "257849017914e917ee32c0997e6ac776c2b4a95dc6e3eee402179797e1cf8647",
+        "gzipBytes": 1377,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:4df38b1796d822271039996279e510a2b52c81e8ce9579d5f587c58d64f445d1"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-09-12",
+      "sourceVintage": "2026-09-17",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "258f273174f320907d3b0c6615b97556066de9ef341f697df1840f5003c015dc",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-09-12-2026-09-17-bd925852ec0e7166.json.gz",
+        "sha256": "bd925852ec0e7166f609a60e5c9da1e5f16c8ddeecc1ee8b2467e850f47c4ff2",
+        "bytes": 2966,
+        "gzipSha256": "051ed241aa41ba3a5678568041accb016adec28862879c9fcb5f4fc941f337cf",
+        "gzipBytes": 1377,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:8edb84ea31b60a8c2feba802674f6dcdaa5a56b31051de8abd41f48f1a9afbf7"
+    },
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-09-19",
+      "sourceVintage": "2026-09-24",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "6d82b49122ffb4cd1f0060be0af0e24dfc09633440999e0cfaf4d15c45183d94",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-09-19-2026-09-24-d65184bec50ea3eb.json.gz",
+        "sha256": "d65184bec50ea3eb561890c54e972dea3437ec2491a5923f68ca4afa3027d326",
+        "bytes": 2966,
+        "gzipSha256": "1e6126abd693b6bc13d5838e082cafeac034b2de7b7f7b36da8ceb631050df0b",
+        "gzipBytes": 1383,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:a54770c427ff8219c9996e596cb9f39da3ad5f6d6596b4d44f7f97f3c4d426ab"
+    },
+    {
+      "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "6e45cb2f4898f951845f89900e3c0befff43d9dc3bc3a0f7749231020fb88f32",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot-2026-10-19-0407907ab303ae65.json.gz",
+        "sha256": "0407907ab303ae656d63d588937ca11b9c73defa558317ba8a0d8cfe56813309",
+        "bytes": 4134,
+        "gzipSha256": "532f5ad35c8a5de57153eba8a36660c0574bde5e972afc6b38083a8db32eb04f",
+        "gzipBytes": 1659,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:4e93f0f6f2feda44b8f8c761109c8a6897c159b2ac2efc0d94b9c90df691b6e8"
+    },
+    {
+      "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "c9df27cac6ec6a78de1e5b7db1e881dacef14cb4d0f607f328e49f5b8cf836c3",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot-2026-10-19-1f5085e488f93a54.json.gz",
+        "sha256": "1f5085e488f93a54e7766b40db8efd29f8caff725e5d7aa0ac6225989d7590af",
+        "bytes": 4846,
+        "gzipSha256": "3dbcf2ad7bf6a58587412a8501bf322b579db0863fc1fdd1295de803e725926f",
+        "gzipBytes": 1918,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:e610f50f5e0125798b1186f32ddb44adb61f2784aded18789435d4aa226a7c15"
+    },
+    {
+      "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "e04d264d1888de22891b4b0a6aa7e0f8f3ae8b937613de7e3ee9242f726e37e9",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot-2026-10-19-183c1571f837af1d.json.gz",
+        "sha256": "183c1571f837af1d502c10f7b62070eb6471fe8be722a6d7e07b657e7649938a",
+        "bytes": 4380,
+        "gzipSha256": "805812cff9f8ae86bad70087cd0ce1d4f7de7cc29af5a8254d0066283d1cdaa0",
+        "gzipBytes": 1837,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:631322621347cc58f2196037576747304829b209b2393626d51683d7e6192d43"
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-19",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "59b334c6612eaf1c20be70ad587590901539f4fc2a11749e9f6a8f1ef2927907",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot-2026-10-19-7ceac936d139c7a6.json.gz",
+        "sha256": "7ceac936d139c7a61fbc7d5c237ca4d17ff544b2ec4911d628110f21f9cfc594",
+        "bytes": 2913,
+        "gzipSha256": "6db917bd7e0d904988fabf9748af32be7b7e1b95cd20f818f59ec5893483897e",
+        "gzipBytes": 1248,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:85f3342b062974e7ba716e8df0d024aeeaecbbe132a17fbe48b72ec477ac5cb8"
+    },
+    {
+      "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+      "sourceVintage": "2026-11-06",
+      "retrievedAt": "2026-11-08T21:42:58Z",
+      "targetContentHash": "63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.nonfarm_payrolls.change.2026_10.first_print-2026-11-06-065fe4644179c86c.json.gz",
+        "sha256": "065fe4644179c86c4f12658e3f84722f90b8f111c02057f4754b0c44114c6fdf",
+        "bytes": 3093,
+        "gzipSha256": "ec26e2253f47547bf239caf656267c7cc56fb38f62b81834fc91af57ee1c3d43",
+        "gzipBytes": 1337,
+        "contentEncoding": "gzip"
+      },
+      "supersedes": "av2:bce5a29be23cfac1eb40f688c23331c27291daf5b10f8cdea954b4d148236750"
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.total_nonfarm_payroll_change.may_2026.first_print-2026-06-05-e2a8133842e64bf9.json.gz",
+      "sha256": "a94ac6c2a07bc5d8ce05b5d144974b9db59e01b910a16387451cd0a94480ba8d",
+      "bytes": 641,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/statcan.lfs.employment_change.canada.may_2026.first_print-2026-06-05-7137623b15da972e.json.gz",
+      "sha256": "1701b8ba7765b614a90413340711d54205bbc8d7f2e7febb680bdaeeaabb1c45",
+      "bytes": 651,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/treasury.mts.monthly_deficit.may_2026.first_print-2026-06-10-f3866a032b569f37.json.gz",
+      "sha256": "4ef31839bbfbf7b0820f5bccf1606d20ece2284731305487c17f9daff63b1bc8",
+      "bytes": 652,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.initial_claims.sa.week_ending_2026_06_06-2026-06-11-5d91209a45770367.json.gz",
+      "sha256": "153d846a8d983a91ca0013277af7f81801138813bc380a62be155a7873d901c6",
+      "bytes": 644,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing_starts.saar.may_2026.first_print-2026-06-16-dd658d16ffbe64ae.json.gz",
+      "sha256": "fadfa59eb48f9521d4ad5de09fcd7e49a1b5b011189fecf3074cb47aff3f6ef5",
+      "bytes": 660,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.census.housing_starts.total_saar.2026-05-2026-06-16-d238afd394cad210.json.gz",
+      "sha256": "c201c24d72cb02e80799445b4eaafe3f852ce3530ec627f5e6f16368341f9fd8",
+      "bytes": 673,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.mtis.total_business_inventories_level.april_2026.first_print-2026-06-17-1da9308a0aff1040.json.gz",
+      "sha256": "95345a7c79ac59bf1fde839ba8fd6e5740b3a32d0183a57b472353ccab93846d",
+      "bytes": 669,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/statcan.employment_insurance.regular_beneficiaries.canada.april_2026.first_print-2026-06-18-558bbeb5f09a045e.json.gz",
+      "sha256": "d8c8b7da826debafe760a9574ba8780c2a6fd90b96bf772b0e4037db0bbe89e7",
+      "bytes": 639,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ons.hmrc.paye_payrolled_employees.may_2026.first_print-2026-06-18-511790ed1f505693.json.gz",
+      "sha256": "5823376d25bfd480060da4b0091dfc3d826ca8287ec92057660c127666580d12",
+      "bytes": 734,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-06-13-2026-06-18-caa86ea0c2405496.json.gz",
+      "sha256": "b6563a203c5dab71b98cce2ec8660fd4dcb3a629cd007f946e67974c04cbfb96",
+      "bytes": 650,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ons.pusf.j5ii.public_sector_net_borrowing_ex_banks.may_2026.first_print-2026-06-19-13ef76a4002d12a5.json.gz",
+      "sha256": "ef145e67949db2999ce20f871af5a289309d3f985124e0fcffda346edd047c5e",
+      "bytes": 652,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-06-20-2026-06-25-3c1c71a7ab428cb2.json.gz",
+      "sha256": "28770339f3b8d49886674dcf44d432f609d26b7181d2f616a7d05ca51ac80761",
+      "bytes": 647,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-07-04-2026-07-09-656367d0d5e186e6.json.gz",
+      "sha256": "195a09c050a3529ba98023cfeec31c1ab80dba74c77bf11df370246fad710075",
+      "bytes": 645,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-06-27.first_print-2026-07-09-8bc27e4b6473edfa.json.gz",
+      "sha256": "08c644c203d4bc886df933771b8126174d5c45ef6c5322bb466ce2d63a575bcb",
+      "bytes": 661,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.jolts.job_openings_total.may_2026.first_print-2026-06-30-db4cd63aada9c790.json.gz",
+      "sha256": "34778a22e846f51764d5126be27e2778b419b5cc5388503462adcd851d24a43b",
+      "bytes": 893,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.government_social_benefits.level.may_2026.first_print-2026-06-25-29cc2cf12b0a77e5.json.gz",
+      "sha256": "5198702d84022c3e42908ba796e5515a85010ee09f74aefb49b74aacb75da8cc",
+      "bytes": 910,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.government_social_benefits.social_security.may_2026.first_print-2026-06-25-433b9d966940b90d.json.gz",
+      "sha256": "efc92b740ef9c1ce9daf32d0a63de84742d78864d9d1ef2a6ffbc9c54068380a",
+      "bytes": 913,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.government_social_benefits.medicare.may_2026.first_print-2026-06-25-1bae0e820264f23e.json.gz",
+      "sha256": "54b955e8029d0e707878e62ce4009b26acc2c89fae5353338da0ea4055294d21",
+      "bytes": 909,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.government_social_benefits.medicaid.may_2026.first_print-2026-06-25-07341d6bf64234c3.json.gz",
+      "sha256": "63800c69284a8cda1c77bfd93e86442381569675ae801c4b0ca4b51d4a8a5da1",
+      "bytes": 908,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.wages_and_salaries.level.may_2026.first_print-2026-06-25-07d4f32877754b9f.json.gz",
+      "sha256": "c6da5def6505f5a9feaff7ba515ad4140082c1980fe2df0b5eb7cb563e574084",
+      "bytes": 898,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.personal_current_taxes.level.may_2026.first_print-2026-06-25-4172d67c6ebcde89.json.gz",
+      "sha256": "242baf90c103d59ce6a18fe9b8b425aae519ed7982eb1b4c78de28037d057da7",
+      "bytes": 900,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.disposable_personal_income.level.may_2026.first_print-2026-06-25-ab713d202baaa406.json.gz",
+      "sha256": "6cc15fb46a79225dbabe4a97a4a6da7a172f1deee78823688cdd48b128dc9246",
+      "bytes": 900,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.business_financial_operations.june_2026.first_print-2026-07-02-796b7756d683df21.json.gz",
+      "sha256": "b4f776173d65797cd7831a0a6f4e0e53ea3fc776ee593d87c4aef7579392d037",
+      "bytes": 944,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.computer_mathematical.june_2026.first_print-2026-07-02-5fe58d7d6cf789ac.json.gz",
+      "sha256": "73275f695930ef8f11201e0dde87b80b11a6a8d4b94b2414787917fc781124b8",
+      "bytes": 940,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.healthcare_support.june_2026.first_print-2026-07-02-12f062118d475e68.json.gz",
+      "sha256": "716b1530aa3fe1cc9e5bff46cec7f7a8841e2ffe430649102337486dbf3e5cf9",
+      "bytes": 935,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.office_administrative_support.june_2026.first_print-2026-07-02-9f7e2cc8a5ce9f79.json.gz",
+      "sha256": "9cea4c229e67cfae90c05d52704e2a546f2011a370da8196abff4129938b584f",
+      "bytes": 947,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.production.june_2026.first_print-2026-07-02-fb4235d5327e3358.json.gz",
+      "sha256": "4a92df98007d8b2e2cc616d64acd48d3985d171a3c077eebf3e1671d0f9c8c88",
+      "bytes": 922,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.cps.employed_people_by_occupation.transportation_material_moving.june_2026.first_print-2026-07-02-40576bb94b8bb1ac.json.gz",
+      "sha256": "a17392daa549f96e2fed0f90d03375f32750f0de7230dd4a1cb08476ef727767",
+      "bytes": 945,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.jolts.job_openings.may_2026.first_print-2026-06-30-8922880ebeee41ec.json.gz",
+      "sha256": "40c0782fbb1d8ba08ab24e0c2f6c5bf319576f76d70bd699fca27ec55cf0e1cd",
+      "bytes": 889,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.total_nonfarm_payroll_change.june_2026.first_print-2026-07-02-8d07bf462ebe371c.json.gz",
+      "sha256": "2921c846bdbaea9c1efcfb827e19e02d2e32022d07bb2326f78aae3d9b0aa8fc",
+      "bytes": 904,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/abs.labour.employment_change.australia.may_2026.first_print-2026-06-25-18b41f1a6132bb98.json.gz",
+      "sha256": "20d8476a9829665b84d3313468cfe1431793bc3252fd8e22cb950501e223f1b1",
+      "bytes": 1044,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-07-11-2026-07-16-8f8aad9c2c06d850.json.gz",
+      "sha256": "dc9b08d75b893ed1f1c969ce6ba7f04707a83793f3407878c8cfc2f3d6b6822e",
+      "bytes": 1167,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-07-04.first_print-2026-07-16-8d5b542ca9a54710.json.gz",
+      "sha256": "96faf45221e8ec208a0d3b1bcc72f4f75c210d1c38ff046180521de115fd3ce9",
+      "bytes": 1008,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-07-18-2026-07-23-149c0252e21bee54.json.gz",
+      "sha256": "8e2965b3c2c4fc17e0f0fce5212f2cb8cba6c3b58682808cf37ed09eab1a633d",
+      "bytes": 1167,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-07-11.first_print-2026-07-23-5233adead8a5c85f.json.gz",
+      "sha256": "67daddd8a116c3d0f486e4bee116fb7312d72169411c0667677ee25a658e50f7",
+      "bytes": 1178,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/abs.labour.employment_change.australia.june_2026.first_print-2026-07-23-0926017a113035e7.json.gz",
+      "sha256": "29d511af65661a4952f6f0412d0133ed6182b32d483dbdca781a32e347797030",
+      "bytes": 1198,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing_starts.saar.2026-06.first_print-2026-07-17-b1b4176e5948c874.json.gz",
+      "sha256": "50fc8b2d1315db159e6542995e973afc88459438a24cdcad9bbab881e2d3b727",
+      "bytes": 974,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/statcan.employment_insurance.regular_beneficiaries.canada.may_2026.first_print-2026-07-23-14b4e6b8a3209f93.json.gz",
+      "sha256": "f4e79b986798872215e2f3f99de11c00de58aabe5c8e360f0a697365d29d6059",
+      "bytes": 1056,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-07-25-2026-07-30-3ce704f2ea794d2a.json.gz",
+      "sha256": "4bfdde3112834ea0b52792f42e85b2af234938ed8f1f71a47d31dfd64ffac30b",
+      "bytes": 1165,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-07-18.first_print-2026-07-30-48f2c946ebe5eed5.json.gz",
+      "sha256": "7e2ceb45f4265d231b295da1b3e016fd76ecd18c5a3cce76bd01b5c47b9c7b82",
+      "bytes": 1182,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.jolts.job_openings.june_2026.first_print-2026-08-04-f8f43734e8945b26.json.gz",
+      "sha256": "b43ba20930923d4b54fb96df61741f8aafe1ac962b7a844adf58c71b49b5b317",
+      "bytes": 955,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-01-2026-08-06-7df9a37fb5727f2a.json.gz",
+      "sha256": "39e9cb1ab298722e5d03a6c0ff365a5eb6e77f50cb724fe8b3aca33c3a19ba03",
+      "bytes": 1163,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-07-25.first_print-2026-08-06-d443f210f3d138c5.json.gz",
+      "sha256": "f03f853c9c66eb55b14d2c9f5efb4bac66b43d4726f06a9e0364633ccf424ad2",
+      "bytes": 1178,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.aerospace_product_and_parts_employment.june_2026.first_print-2026-08-10-400eee22744839d0.json.gz",
+      "sha256": "f557dd5b72d0895ee2316653943a99b8c306ff6f97be0e0e1248165f783136bc",
+      "bytes": 1088,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.ship_and_boat_building_employment.june_2026.first_print-2026-08-10-01dbf208163cd208.json.gz",
+      "sha256": "8f9ae64628d10ff86b4640e4a9d1a7e6c0dbc2f776b5f2c34b2102f1d6d347d3",
+      "bytes": 1076,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.federal_department_of_defense_employment.june_2026.first_print-2026-08-10-43ff29e751d7112e.json.gz",
+      "sha256": "ee2ad244f06ccc049b1a3dfced3e3b14097e774a7ac196051406339333b2a61f",
+      "bytes": 1094,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-01.first_print-2026-08-13-328be3d76868a1a5.json.gz",
+      "sha256": "6aeba2d61075df65976ef6cf683282fc43848fc761331dda9ac7fb1220fae78a",
+      "bytes": 1180,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-08-2026-08-15-9e9502c838dd9c37.json.gz",
+      "sha256": "dd9ae5ad4f26344db85a823d7d80895d2222d4bf190daacf5e0e9754a0a4c6f2",
+      "bytes": 1165,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-08.first_print-2026-08-20-c50d03b1e06f1f0f.json.gz",
+      "sha256": "87858db6cf67d7dd3ec37e896d30c3c87550bf520cefc2f8207aed24f1bf7b4b",
+      "bytes": 1184,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing.completions_saar.2026_07.first_print-2026-08-18-774f38832beb9250.json.gz",
+      "sha256": "50f1aa0650a5e2cb325a93e512f68134de12e3b625ce633417dd64faf51eaef8",
+      "bytes": 1139,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing.permits_saar.2026_07.first_print-2026-08-18-c2a171e7a16609cf.json.gz",
+      "sha256": "da0ec73c524550a84e22e2de295dab7d3aaa6d2ebed13c037f44b4c2e9cea4d8",
+      "bytes": 1134,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.housing_starts.saar.2026-07.first_print-2026-08-18-01cb93afb96860a3.json.gz",
+      "sha256": "ac3531ac80caf87c02ed12bf0c50c54aa2586c2d0b4c368bb22512e96c4616c4",
+      "bytes": 1127,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/va.vba.mmwr.claims_inventory.week_2026-07-13.first_print-2026-07-13-c17020497aaceea0.json.gz",
+      "sha256": "18010b51625a9f56b7131019cb592ff842b18e2ed6421251f66c29673b52a9ef",
+      "bytes": 1260,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ssa.ssi.recipients_aged_65_plus.2026_06.first_print-2026-08-23-6eb281f2ff91aa5b.json.gz",
+      "sha256": "0ba52a7b810085af848d18a17011ba3d17935086a9be9bd0fa6e2fe6cf41dd99",
+      "bytes": 1237,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print-2026-08-23-5fa13b73bcb89826.json.gz",
+      "sha256": "788b112239ed55aa1f7d3177cea4ba7b1b37688c00cc8e22f9780ef062bde3ec",
+      "bytes": 1257,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.home_health_care_services.employment.2026-07.first_print-2026-08-23-ccc5f3e13cf11e21.json.gz",
+      "sha256": "2d4725fd9a03251158d2c1990cd5b1812302f48857aabb5022ecfc5bedd80c4a",
+      "bytes": 1096,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ssa.ssi.recipients.colorado.2026-07.first_print-2026-08-23-53681bed87d34a62.json.gz",
+      "sha256": "7d3f683aedeaf8fcd28c2a8339da65a200c5483a959d390e243884ffc735351b",
+      "bytes": 1211,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.laus.colorado.labor_force.2026-07.first_print-2026-08-23-c4b645091ae5a378.json.gz",
+      "sha256": "fb3bfe99cadc81c7ee4a1a8ff765839255dc8978efae7589bda7e6999e9915f9",
+      "bytes": 1102,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/ssa.ssi.total_recipients.2026-07.first_print-2026-08-23-ef710ec5ecf9bd65.json.gz",
+      "sha256": "4cab62e560aeb8fd24d80e76dee2f07ef715f326ee30f9f2a5565f0a88cd2ac3",
+      "bytes": 1201,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-15-2026-08-24-ed23817edf17b10e.json.gz",
+      "sha256": "8a31b9a7496044f7f1ef626448bfcb57603a337f7fb496444db22acfcccf0223",
+      "bytes": 1166,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/census.new_residential_sales.new_single_family_houses_sold_saar.2026_07.first_print-2026-08-25-6a4996cd5275236a.json.gz",
+      "sha256": "1e3deb1273c698f1009b7ddc405bbc770cb9e9c55d5466c78467fdbb215c0c7a",
+      "bytes": 1155,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-15.first_print-2026-08-27-f8846865e00c8736.json.gz",
+      "sha256": "c78c759c936f7244b643a52675965c9656b2c52052d236de4acf35fc541ffa09",
+      "bytes": 1178,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-22-2026-09-02-8c2f59e90202607c.json.gz",
+      "sha256": "a98800ed3609dcf516b2b0f06208b0a230c34c2d24608d2339ffd57abefe43ed",
+      "bytes": 1171,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-22.first_print-2026-09-03-bad0bcaeff1059dd.json.gz",
+      "sha256": "eb3a60a983c519b3fb55cd28e66d527ecacae283bd959a2b35f84f0164d31dd5",
+      "bytes": 1182,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bea.trade.goods_services_deficit.2026_07.first_print-2026-09-03-954bdb68fc62f17d.json.gz",
+      "sha256": "0812e896469563bf47caa551a7c4260465d3fdcdec055708468fa191554c515c",
+      "bytes": 1148,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-09-05.first_print-2026-09-21-997e1cf28f781203.json.gz",
+      "sha256": "911ab2c799b251aebbeec5e79661b1bf4549f42a3dec36dcf90c332c275b2b9b",
+      "bytes": 1181,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-08-29.first_print-2026-09-12-7057db07bb48c843.json.gz",
+      "sha256": "ceae08b663d00249b1a146fa046753173de6358525e4d4e8b5eb96fe55b8fca0",
+      "bytes": 1181,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-09-12.first_print-2026-09-30-f50c24947289a68d.json.gz",
+      "sha256": "dc3033595d32d55a9c5c4a6fafd343da423172a54669104ac4df924fb14c1421",
+      "bytes": 1183,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot-2026-10-17-7df7e5976fe3e862.json.gz",
+      "sha256": "f31a6c00ff2ad60d9ddb27666070d3964e1c03bb53864986ba56a318bf9cc62e",
+      "bytes": 1292,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot-2026-10-17-bf460cc9d9ec0c4e.json.gz",
+      "sha256": "ce453ccf7402575c828e1db04f34b4001e8d32c9542cea44d394748821d181e3",
+      "bytes": 1251,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot-2026-10-17-1ba5d4167f7d2ec9.json.gz",
+      "sha256": "ba70f2afbbd3d2372cfbfc0fcf5fd0d343dc7cc77949c6e152497479f4022e71",
+      "bytes": 1252,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot-2026-10-17-cb24569c675adf5b.json.gz",
+      "sha256": "774cd21d196b741f5b62c1d32473e8d71b446cc3dbbe15b220b0e9f016956233",
+      "bytes": 1446,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-09-19.first_print-2026-10-01-839e7fbb712f0ac1.json.gz",
+      "sha256": "71bf7557aee88dd2342fe2a6114f10d7e225e897f67ff4c86ab1dfaafb34fcdc",
+      "bytes": 1390,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/dol.eta.continued_claims.sa.week_2026-09-26.first_print-2026-10-08-1b03ded65a267a7f.json.gz",
+      "sha256": "72de37871f0c7b0bc10c94e1baa5030383b028c3228eff08044c3d692eee6578",
+      "bytes": 1393,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-08-29-2026-09-03-4169711a5c969398.json.gz",
+      "sha256": "54c453ab3296410f251e24ca24ada10112dd7cc5a13b99a53fb9f71bbd616e37",
+      "bytes": 1381,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-09-05-2026-09-10-8ca7df4da8520686.json.gz",
+      "sha256": "257849017914e917ee32c0997e6ac776c2b4a95dc6e3eee402179797e1cf8647",
+      "bytes": 1377,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-09-12-2026-09-17-bd925852ec0e7166.json.gz",
+      "sha256": "051ed241aa41ba3a5678568041accb016adec28862879c9fcb5f4fc941f337cf",
+      "bytes": 1377,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/us.dol.initial_claims.sa.week_2026-09-19-2026-09-24-d65184bec50ea3eb.json.gz",
+      "sha256": "1e6126abd693b6bc13d5838e082cafeac034b2de7b7f7b36da8ceb631050df0b",
+      "bytes": 1383,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot-2026-10-19-0407907ab303ae65.json.gz",
+      "sha256": "532f5ad35c8a5de57153eba8a36660c0574bde5e972afc6b38083a8db32eb04f",
+      "bytes": 1659,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot-2026-10-19-1f5085e488f93a54.json.gz",
+      "sha256": "3dbcf2ad7bf6a58587412a8501bf322b579db0863fc1fdd1295de803e725926f",
+      "bytes": 1918,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot-2026-10-19-183c1571f837af1d.json.gz",
+      "sha256": "805812cff9f8ae86bad70087cd0ce1d4f7de7cc29af5a8254d0066283d1cdaa0",
+      "bytes": 1837,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot-2026-10-19-7ceac936d139c7a6.json.gz",
+      "sha256": "6db917bd7e0d904988fabf9748af32be7b7e1b95cd20f818f59ec5893483897e",
+      "bytes": 1248,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/responses/bls.ces.nonfarm_payrolls.change.2026_10.first_print-2026-11-06-065fe4644179c86c.json.gz",
+      "sha256": "ec26e2253f47547bf239caf656267c7cc56fb38f62b81834fc91af57ee1c3d43",
+      "bytes": 1337,
+      "createdAt": "2026-11-08T21:42:58Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-42-58z-resolve-pending/manifest.json",
+      "sha256": "58f3a63017fee4f8bf28a17cf556f3223e420ee0d61a716c307c270939b22008",
+      "bytes": 86260,
+      "createdAt": "2026-11-08T21:42:58Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "2da5eb152da5b3f0f7b494db452beab2a8fd4c3609fdcab29b80e2eeec644520"
+}
