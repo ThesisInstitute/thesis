@@ -8,6 +8,9 @@ export const UNITS = [
   "percent",
   "gbp_billions",
   "usd",
+  // Base units of gbp_billions and million_cubic_feet (ledger-units.ts).
+  "gbp",
+  "cubic_feet",
   "usd_millions",
   "usd_billions",
   // Non-canonical variant, tolerated since 2026-08-03 (5c6bc9d1). The DoD

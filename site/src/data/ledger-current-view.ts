@@ -285,13 +285,16 @@ export function assertAppendGateAssertionVersions(
  * is addressed by that id, and a pre-versioning row nothing names cannot drop
  * out of any view of this ledger, so neither carries anything new. With no
  * corrections in a ledger, its entries are exactly what they were before the
- * current view existed.
+ * current view existed. A row `ignoring` picks out names nothing here: a
+ * restatement leaves the row it names on the site's current view.
  */
 export function supersededContentAddresses(
   rows: readonly unknown[],
+  ignoring: (row: unknown) => boolean = () => false,
 ): (string | undefined)[] {
   const named = new Set<string>();
   for (const row of rows) {
+    if (ignoring(row)) continue;
     const replaced = supersededAssertionId(row);
     if (replaced !== null) named.add(replaced);
   }
@@ -323,11 +326,17 @@ export function observationAssertionId(
   );
 }
 
-/** The assertion version an observation supersedes, or null for none. */
+/**
+ * The assertion version an observation supersedes, or null for none. A
+ * correction of a restated row names the restatement, which is not an entry, so
+ * it reads the id of the row the site grades (ledger-restatements.ts).
+ */
 export function observationSupersedes(
   entry: ObservationRecordedLedgerEntry,
 ): string | null {
-  return supersededAssertionIdOf(entry.assertionVersion);
+  return (
+    entry.gradedSupersedes ?? supersededAssertionIdOf(entry.assertionVersion)
+  );
 }
 
 /**
