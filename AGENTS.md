@@ -106,9 +106,8 @@ runtime question; whether any code could ever read it is not.
   (`CATALOG REFUSED`) and appends the rest. If the rest of the run succeeds,
   the run ends red with a "Resolution rows refused" issue naming the row; if
   a later step fails, the "Resolution loop failed" issue names it. Do not
-  register a series whose facts would do that: the six Table A-19 specs carry
-  `registration_hold` until the Chronicle change in decision d397. Behind the
-  hold, the BLS API leg refuses such a capture (`LEDGER UNIT CONFLICT`).
+  register a series whose facts would do that. The BLS API leg also refuses
+  such a capture before it spends a request (`LEDGER UNIT CONFLICT`).
 - Existing snapshots are never re-judged: retries reuse them, and what happens
   to already-published targets with no executor is a disposition decision, not
   a registration one. The run-time exceptions for two reviewed legacy contracts
@@ -402,18 +401,19 @@ copy of the unit table is `scripts/ledger_units.py`):
   that wants Chronicle's current view must apply them: `entries` alone holds
   the registered-unit values the site grades.
 
-The resolver writes both shapes (`scripts/resolve_pending.py`):
+The resolver writes base units (`scripts/resolve_pending.py`):
 
-- A run writes new rows in base units only when the ledger it read holds no
-  current row in a scaled unit. Until then it writes the unit its adapter
-  parsed, so no series holds both. Each run's log says which
-  (`ledger units: as recorded` or `ledger units: base`). The writer converts
-  after the contract check, which reads the registered unit. It refuses a
-  value with no exact base form as it refuses a contract mismatch, that row
-  alone. It converts the value its adapter parsed and adds no precision to it,
-  so 3189.0 thousands becomes 3189000 though BLS printed 3,189,009. The row's
+- A run writes every new row in its unit's base unit. The writer converts after
+  the contract check, which reads the registered unit. It refuses a value with
+  no exact base form as it refuses a contract mismatch, that row alone. It
+  converts the value its adapter parsed and adds no precision to it, so 3189.0
+  thousands becomes 3189000 though BLS printed 3,189,009. The row's
   `source.method_notes` says so: the value carries that figure's precision,
   and the archived response may hold more digits.
+- A run with pending work stops after it reads the ledger and before it
+  fetches any source if a current ledger row carries a scale word
+  (`refuse_a_scaled_ledger`), because a new row in base units would give that
+  row's series a second unit. `--restate-base-units` restates such a row.
 - A row's `sourceBindingProjection.transform` still maps the source's response
   to the contract's registered unit, while the projection's `unit` is the unit
   the row stores, which the append gate holds to the row's. A claims row in
@@ -421,8 +421,10 @@ The resolver writes both shapes (`scripts/resolve_pending.py`):
   yields thousands, the registered unit its recorded pair names.
 - `--restate-base-units` (the workflow's `restate_base_units` input) appends a
   `unit_restatement` row for every current scaled row, in one release or not
-  at all. Before it proposes, it runs `check_restatements`, its port of the
-  site's checks, on the exact lines Chronicle will hold. It also runs
+  at all. It restated 83 rows on 2026-11-08 (run
+  [42526506760](https://github.com/ThesisInstitute/thesis/actions/runs/42526506760)).
+  Before it proposes, it runs `check_restatements`, its port of the site's
+  checks, on the exact lines Chronicle will hold. It also runs
   Chronicle's series-catalog generator on them: the catalog may change only
   units, each to its base unit, and the UUID registry must not move. The
   proposal merges only once Chronicle's Arch checks pass. A restatement

@@ -639,12 +639,12 @@ def _docket_file(tmp_path: pathlib.Path, entries: list[dict[str, Any]]):
 
 def test_docket_is_contained_in_frozen_catalog_fixture() -> None:
     raw = FIXTURE_PATH.read_bytes()
-    # Copied byte-for-byte from PolicyEngine/chronicle#344's regenerated
-    # catalog: seven entity-drift lineages folded into economy/aggregate
-    # (Max's ruling d353), 221 series over the ledger at d7e45bc5.
-    assert len(raw) == 199_465
+    # Copied byte-for-byte from Chronicle's catalog at 810b8c7b: the ledger
+    # after the base-units migration (83 restatements) and the 12 Table A-19
+    # rows that it unblocked, 221 series.
+    assert len(raw) == 206_499
     assert hashlib.sha256(raw).hexdigest() == (
-        "b055a7aed092ae5c436a634faf6472e8d19d5ca1388f851028c06c1b88a5c441"
+        "8baaf600dfcaf76598ef8c3b700f9ef72843c39cb2a725b3f8bd7230eb198f25"
     )
     _assert_containment(_object(raw, "frozen catalog fixture"), "fixture")
 

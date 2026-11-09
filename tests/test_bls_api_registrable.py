@@ -319,15 +319,7 @@ def _refusal(contract: dict) -> str | None:
 
 
 @pytest.mark.parametrize("series", REGISTRABLE)
-def test_registrar_builds_the_contract_the_executor_admits(
-    series: str, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    spec = resolve_pending.BLS_API_ADAPTERS[series]
-    if "registration_hold" in spec:
-        # Table A-19 waits for Chronicle (decision d397). Lifting the hold is
-        # all it takes: the contract below is otherwise admitted.
-        assert "is on hold" in (_refusal(_contract(series)) or "")
-        monkeypatch.delitem(spec, "registration_hold")
+def test_registrar_builds_the_contract_the_executor_admits(series: str) -> None:
     contract = _contract(series)
     binding = contract["sourceBinding"]
     # Canonical id, not an edit of the previous target's alias.
@@ -953,24 +945,8 @@ def test_a19_docket_entries_commit_the_employment_situation_dates() -> None:
         assert entry["extras"]["targetUnit"] == "millions"
 
 
-def test_a19_registration_is_held_until_chronicle_can_hold_one_unit() -> None:
-    for series in A19_SERIES:
-        spec = resolve_pending.BLS_API_ADAPTERS[series]
-        assert spec["registration_hold"] == resolve_pending.A19_REGISTRATION_HOLD
-        refusal = _refusal(_contract(series)) or ""
-        assert refusal.startswith("registration of this BLS API series is on hold")
-        assert "d397" in refusal
-    # No other registrable series is held.
-    held = {
-        s
-        for s in REGISTRABLE
-        if "registration_hold" in resolve_pending.BLS_API_ADAPTERS[s]
-    }
-    assert held == set(A19_SERIES)
-
-
 @pytest.mark.parametrize("series", A19_SERIES)
-def test_the_roller_mints_an_october_target_once_the_hold_lifts(
+def test_the_roller_mints_an_a19_target_after_a_generic_url_registration(
     series: str, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     entry = _a19_docket_entries()[series]
@@ -1006,19 +982,16 @@ def test_the_roller_mints_an_october_target_once_the_hold_lifts(
             "period": "2026-09",
         },
     }
+
     # The roller builds a contract as of today, and October's release date
     # would refuse any day from 2026-11-06 on. Hold today at this test's
     # registration date.
-    build_contract = roll_docket.build_contract
-    monkeypatch.setattr(
-        roll_docket,
-        "build_contract",
-        lambda target, _today: build_contract(target, dt.date(2026, 10, 1)),
-    )
-    # While the hold stands, the roller skips October with the hold as reason.
-    held = roll_docket.roll_execution_plan_refusal(target) or ""
-    assert "is on hold" in held
-    monkeypatch.delitem(resolve_pending.BLS_API_ADAPTERS[series], "registration_hold")
+    class FixedDate(dt.date):
+        @classmethod
+        def today(cls) -> FixedDate:
+            return cls(2026, 10, 1)
+
+    monkeypatch.setattr(roll_docket.dt, "date", FixedDate)
     assert roll_docket.roll_execution_plan_refusal(target) is None
     contract = register_targets.build_contract(target, dt.date(2026, 10, 1))
     assert contract["dataPointId"] == f"{series}.2026_10.first_print"
@@ -1139,38 +1112,48 @@ def test_the_guard_follows_chronicles_supersede_links() -> None:
     june = _chronicle_june_row()
     assert "assertionVersion" not in june  # written before versioning
     spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
-    millions = copy.deepcopy(june)
-    millions["value"] = 7.759
-    millions["measure"]["unit"] = "millions"
+    counted = copy.deepcopy(june)
+    counted["value"] = 7759000
+    counted["measure"]["unit"] = "count"
 
     def verdict(rows: list[dict]) -> str | None:
         return resolve_pending.bls_ledger_unit_conflict(rows, PRODUCTION, spec)
 
     # A later row with the same record id replaces nothing: Chronicle keeps
     # both, so the thousands row still counts.
-    assert verdict([june, millions])
+    assert verdict([june, counted])
     # A row written before versioning drops out once a link names its av2
     # content address, as the append gate addresses it (chronicle#306 taught
     # the generator the same), and keeps counting for any other link.
     address = resolve_pending.assertion_version(june)["id"]
-    assert verdict([june, _versioned(millions, "v2", supersedes="content-address")])
-    assert verdict([june, _versioned(millions, "v2", supersedes=address)]) is None
+    assert verdict([june, _versioned(counted, "v2", supersedes="content-address")])
+    assert verdict([june, _versioned(counted, "v2", supersedes=address)]) is None
     # A versioned row drops out once a link names it, whatever record id or
     # concept the replacement carries (a split).
     v1 = _versioned(june, "v1")
     assert verdict([v1])
-    assert verdict([v1, _versioned(millions, "v2", supersedes="v1")]) is None
-    split = _versioned(millions, "v2", supersedes="v1")
+    assert verdict([v1, _versioned(counted, "v2", supersedes="v1")]) is None
+    split = _versioned(counted, "v2", supersedes="v1")
     split["source_record_id"] = "another.series.june_2026.first_print"
     split["measure"]["concept"] = "another.series.june_2026"
     split["measure"]["unit"] = "thousands"
     assert verdict([v1, split]) is None
 
 
-def test_the_guard_compares_the_unit_chronicle_stores_once_migrated() -> None:
-    # Once the ledger holds no scale, the resolver stores a millions spec's
-    # fact in count, so the June row restated in count is the same unit and
-    # the row still in thousands is not.
+def test_the_guard_passes_a_lineage_in_a_unit_with_no_base_form() -> None:
+    # Three of the twelve registrable series store the unit they emit.
+    stem = "bls.cps.unemployment_rate"
+    spec = resolve_pending.BLS_API_ADAPTERS[stem]
+    row = copy.deepcopy(_chronicle_june_row())
+    row["source_record_id"] = f"{stem}.june_2026.first_print"
+    row["measure"]["concept"] = f"{stem}.june_2026"
+    row["measure"]["unit"] = "percent"
+    assert resolve_pending.bls_ledger_unit_conflict([row], stem, spec) is None
+
+
+def test_the_guard_compares_the_unit_chronicle_stores() -> None:
+    # The resolver stores a millions spec's fact in count, so the June row
+    # restated in count is the same unit and the row still in thousands is not.
     june = _chronicle_june_row()
     spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
     (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
@@ -1186,15 +1169,11 @@ def test_the_guard_compares_the_unit_chronicle_stores_once_migrated() -> None:
         june["value"], "thousands"
     )
 
-    def verdict(rows: list[dict], *, base_units: bool) -> str | None:
-        return resolve_pending.bls_ledger_unit_conflict(
-            rows, PRODUCTION, spec, base_units=base_units
-        )
+    def verdict(rows: list[dict]) -> str | None:
+        return resolve_pending.bls_ledger_unit_conflict(rows, PRODUCTION, spec)
 
-    assert verdict([june, restated], base_units=True) is None
-    # As recorded, the spec emits millions, which the restated row is not.
-    assert verdict([june, restated], base_units=False)
-    refusal = verdict([june], base_units=True)
+    assert verdict([june, restated]) is None
+    refusal = verdict([june])
     assert refusal is not None and "['thousands']" in refusal
     assert "this spec emits 'millions', which Chronicle stores as 'count'" in refusal
 
@@ -1249,7 +1228,7 @@ def _append_through_main(
     return json.loads(appended), out
 
 
-def test_main_stores_base_units_once_the_ledger_holds_no_scale(
+def test_main_stores_base_units(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
     tmp_path: pathlib.Path,
@@ -1259,7 +1238,6 @@ def test_main_stores_base_units_once_the_ledger_holds_no_scale(
     row, out = _append_through_main(
         monkeypatch, capsys, tmp_path, _restated_june_ledger()
     )
-    assert "ledger units: base; no current row carries a scale word" in out
     assert "LEDGER UNIT CONFLICT" not in out
     assert row["measure"]["unit"] == "count"
     assert row["source"]["recorded_unit"] == "millions"
@@ -1941,29 +1919,6 @@ def test_the_run_directory_guard_admits_what_utc_now_stamps(
     assert run_dir.parent == pathlib.Path("/repo/records/resolutions") / stamp[:10]
 
 
-def test_main_keeps_recorded_units_while_the_ledger_holds_a_scale(
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
-    tmp_path: pathlib.Path,
-) -> None:
-    # A scaled row on another series leaves this one free of the guard, so
-    # the switch alone decides what the writer stores.
-    other = {
-        **_chronicle_june_row(),
-        "source_record_id": "bls.other_series.2026_06.first_print",
-        "measure": {
-            **_chronicle_june_row()["measure"],
-            "concept": "bls.other_series.2026_06",
-        },
-    }
-    row, out = _append_through_main(
-        monkeypatch, capsys, tmp_path, json.dumps(other) + "\n"
-    )
-    assert "ledger units: as recorded; 1 current row(s) still carry" in out
-    assert row["measure"]["unit"] == "millions"
-    assert "recorded_unit" not in row["source"]
-
-
 def test_the_guard_matches_the_concept_under_another_record_id() -> None:
     # Chronicle keys identity on the measure concept, not the record id. A
     # row filed under another id whose concept is the series plus its own
@@ -2018,7 +1973,7 @@ def test_the_guard_ignores_other_identities_and_other_series() -> None:
     openings = copy.deepcopy(june)
     openings["source_record_id"] = "bls.jolts.job_openings.june_2026.first_print"
     openings["measure"]["concept"] = "bls.jolts.job_openings.june_2026"
-    openings["measure"]["unit"] = "millions"
+    openings["measure"]["unit"] = "count"
     assert (
         resolve_pending.bls_ledger_unit_conflict(
             [openings],
@@ -2029,12 +1984,15 @@ def test_the_guard_ignores_other_identities_and_other_series() -> None:
     )
 
 
-def test_resolver_refuses_an_a19_capture_before_spending_a_request(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
-    # The same run as the real-router test above, against a ledger that holds
-    # Chronicle's June row: the reference is refused, nothing is fetched,
-    # nothing is proposed, and the run exits EXIT_REFUSED_ROWS.
+def _dry_run_an_august_a19_print(
+    monkeypatch: pytest.MonkeyPatch, ledger: str
+) -> tuple[str, list[str]]:
+    """Set up the real-router run above against ``ledger``.
+
+    Returns the reference, and the list the run's BLS fetches land in. Each
+    fetch raises, so a caller's run must stop before it.
+    """
+
     series = PRODUCTION
     contract = register_targets.build_contract(
         _target(series, period="2026-08", release="2026-09-04"), dt.date(2026, 8, 13)
@@ -2044,7 +2002,7 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
 
     def fetch(series_id: str, start: int, end: int):
         fetched.append(series_id)
-        raise AssertionError("the guard must refuse before the keyless request")
+        raise AssertionError("the run must stop before the keyless request")
 
     log = {
         "entries": [
@@ -2059,7 +2017,6 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
             {"status": "pending", "targetFactRef": ref, "forecastSlug": "slug"}
         ],
     }
-    ledger = CHRONICLE_JUNE_ROW.read_text()
     monkeypatch.setattr(resolve_pending, "load_thesis_log", lambda _url: log)
     monkeypatch.setattr(
         resolve_pending, "ledger_state", lambda *_args: (ledger, "blob", "b" * 40)
@@ -2072,6 +2029,17 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
     monkeypatch.setattr(resolve_pending, "utc_now", lambda: "2026-09-25T13:40:00Z")
     monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+    return ref, fetched
+
+
+def test_resolver_refuses_a_capture_before_spending_a_request(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # A June row in another plain unit: the reference is refused, nothing is
+    # fetched, nothing is proposed, and the run exits EXIT_REFUSED_ROWS.
+    june = copy.deepcopy(_chronicle_june_row())
+    june["measure"]["unit"] = "rate"
+    ref, fetched = _dry_run_an_august_a19_print(monkeypatch, json.dumps(june) + "\n")
     # A clean run that refused rows: the workflow publishes what was appended
     # and then fails the job, so the alarm fires.
     assert resolve_pending.main() == resolve_pending.EXIT_REFUSED_ROWS == 3
@@ -2080,6 +2048,25 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
     assert "nothing new to record" in out
     assert "1 reference(s) refused for a Chronicle unit conflict" in out
     assert fetched == []
+
+
+def test_a_scaled_row_of_any_series_stops_the_run_before_a_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    june = _chronicle_june_row()
+    other = {
+        **june,
+        "source_record_id": "bls.other_series.2026_06.first_print",
+        "measure": {**june["measure"], "concept": "bls.other_series.2026_06"},
+    }
+    for row in (june, other):
+        _, fetched = _dry_run_an_august_a19_print(monkeypatch, json.dumps(row) + "\n")
+        with pytest.raises(
+            resolve_pending.ledger_units.LedgerUnitError,
+            match="1 current ledger row",
+        ):
+            resolve_pending.main()
+        assert fetched == []
 
 
 # --- invariants, checked exhaustively over their whole realistic domain -------
@@ -2120,13 +2107,13 @@ def test_invariant_only_a_bls_api_binding_leaves_the_archive_leg() -> None:
 
 def test_invariant_the_guard_does_not_depend_on_row_order() -> None:
     # Over every ordering of a ledger with a versioned thousands row, its
-    # correction in millions, an unrelated July row and a legacy thousands
-    # row, the verdict is the same: Chronicle's current view is a set.
+    # correction in count, an unrelated July row and a legacy thousands row,
+    # the verdict is the same: Chronicle's current view is a set.
     june = _chronicle_june_row()
     spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
     v1 = _versioned(june, "v1")
     correction = _versioned(june, "v2", supersedes="v1")
-    correction["measure"]["unit"] = "millions"
+    correction["measure"]["unit"] = "count"
     july = copy.deepcopy(correction)
     july["assertionVersion"] = {"id": "v3"}
     july["source_record_id"] = f"{PRODUCTION}.2026_07.first_print"
@@ -2146,11 +2133,11 @@ def test_invariant_the_guard_does_not_depend_on_row_order() -> None:
                 assert refusal is not None and expected in refusal, order
 
 
-def test_every_other_registrable_lineage_already_holds_the_unit_it_emits() -> None:
+def test_every_registrable_lineage_already_holds_the_unit_it_stores() -> None:
     # The guard runs for every registrable series. In Chronicle's frozen
     # catalog each one's economy/aggregate lineage in the United States is
-    # either a placeholder or already in the unit its spec emits, so the guard
-    # refuses none of them. The six A-19 lineages are the known exception.
+    # either a placeholder or already in the unit the resolver stores for its
+    # spec, so the guard refuses none of them.
     catalog = json.loads(
         (ROOT / "tests" / "fixtures" / "ledger_series_catalog.json").read_text()
     )["series"]
@@ -2165,8 +2152,5 @@ def test_every_other_registrable_lineage_already_holds_the_unit_it_emits() -> No
             and (row.get("geography") or {}).get("id") == "0100000US"
             and row["unit"] is not None
         }
-        if "registration_hold" in spec:
-            # Held until its lineage can take the unit; lifting the hold
-            # before then makes this test fail.
-            continue
-        assert units <= {spec["unit"]}, (stem, units)
+        stored = resolve_pending.ledger_units.base_unit(spec["unit"]) or spec["unit"]
+        assert units <= {stored}, (stem, units)
