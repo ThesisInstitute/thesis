@@ -13,6 +13,8 @@ Invariants these tests hold the leg to:
   workbook's last modification to that UTC day. Anything else refuses, except
   a transport failure or a quarter the index does not list yet, which defer.
 - No input bytes raise: every malformed index or workbook is a refusal.
+- A run's append gate accepts both cells in either writer mode. In base units
+  the ledger stores exactly the printed dollars, with the pair the leg read.
 """
 
 from __future__ import annotations
@@ -40,6 +42,7 @@ from hypothesis import strategies as st
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import ledger_units  # noqa: E402
 import register_targets  # noqa: E402
 import resolution_status  # noqa: E402
 import resolve_pending  # noqa: E402
@@ -550,6 +553,12 @@ def test_every_printed_value_converts_by_the_registered_transform(
     assert refusal is None and reading is not None
     assert reading["printedMillions"] == float(printed)
     assert reading["value"] == round(printed * 0.001, 4) + 0.0
+    dollars = printed * 10**6
+    if dollars <= ledger_units.MAX_SAFE_INTEGER:
+        assert ledger_units.to_base(reading["value"], "usd_billions") == dollars
+    else:
+        with pytest.raises(ledger_units.LedgerUnitError):
+            ledger_units.to_base(reading["value"], "usd_billions")
 
 
 @settings(max_examples=100, deadline=None)
@@ -1011,3 +1020,97 @@ def test_main_prints_each_archive_outcome_under_its_own_literal_head(
     assert line + "\n" in capsys.readouterr().out
     statuses, _summary = resolution_status.parse_resolver_log(line + "\n", {ref})
     assert statuses[ref]["state"] == state
+
+
+# --- the record a real run appends -------------------------------------------
+
+
+def _rows_a_run_would_append(
+    monkeypatch: pytest.MonkeyPatch,
+    registrations: list[tuple[str, dict[str, Any], dict[str, Any]]],
+) -> list[tuple[dict[str, Any], Any]]:
+    """(row, archive capture) for each cell a dry run resolves."""
+    rows: list[dict[str, Any]] = []
+    captures: list[Any] = []
+    real_fact = resolve_pending.generic_fact
+    real_first_print = resolve_pending.bea_archive_first_print
+
+    def record_fact(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        row = real_fact(*args, **kwargs)
+        rows.append(row)
+        return row
+
+    def record_first_print(*args: Any, **kwargs: Any) -> Any:
+        result = real_first_print(*args, **kwargs)
+        captures.append(result[0])
+        return result
+
+    _run_main(
+        monkeypatch,
+        registrations,
+        today=dt.date(2026, 8, 7),
+        now="2026-08-07T15:00:00Z",
+        archive=FakeArchive(),
+    )
+    monkeypatch.setattr(resolve_pending, "generic_fact", record_fact)
+    monkeypatch.setattr(resolve_pending, "bea_archive_first_print", record_first_print)
+    assert resolve_pending.main() == 0
+    return list(zip(rows, captures, strict=True))
+
+
+@pytest.mark.parametrize("base_units", [False, True])
+def test_the_append_gate_accepts_both_archive_rows_in_either_writer_mode(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, base_units: bool
+) -> None:
+    """``--dry-run`` stops before the append gate, so this carries what a dry
+    run resolved through it: the contract check, the base-unit writer and the
+    response archive."""
+    registrations = [_registration(NONRES), _registration(RD)]
+    resolved = _rows_a_run_would_append(monkeypatch, registrations)
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    contracts = {ref: envelope for ref, envelope, _forecast in registrations}
+    expected = {
+        registrations[0][0]: (NONRES, 4623.657, 4_623_657_000_000),
+        registrations[1][0]: (RD, 937.772, 937_772_000_000),
+    }
+    assert [row["source_record_id"] for row, _capture in resolved] == list(expected)
+
+    for row, capture in resolved:
+        ref = row["source_record_id"]
+        series, recorded, dollars = expected[ref]
+        attached = resolve_pending.attach_resolution_provenance(
+            row,
+            run_dir=resolve_pending.resolution_run_dir(capture.retrieved_at),
+            series_id=str(_spec(series)["series_id"]).replace(":", "-"),
+            vintage=RELEASE_DAY.isoformat(),
+            raw=capture.raw,
+            retrieved_at=capture.retrieved_at,
+            ledger_repo_sha="b" * 40,
+            target_contracts=contracts,
+            extension="json",
+            base_units=base_units,
+        )
+
+        projection = attached["sourceBindingProjection"]
+        response_sha256 = hashlib.sha256(capture.raw).hexdigest()
+        assert attached["sourceVintage"] == RELEASE_DAY.isoformat()
+        assert attached["observed_at"] == RELEASE_DAY.isoformat()
+        assert attached["retrievedAt"] == capture.retrieved_at
+        assert attached["targetContentHash"] == "a" * 64
+        assert attached["responseArchive"]["sha256"] == response_sha256
+        assert projection["responseSha256"] == response_sha256
+        assert projection["sourceUrl"] == WORKBOOK_URL
+        assert (
+            attached["assertionVersion"]["id"]
+            == resolve_pending.assertion_version(attached)["id"]
+        )
+        resolve_pending.check_recorded_pair(attached)
+        if base_units:
+            assert attached["value"] == dollars and type(attached["value"]) is int
+            assert attached["measure"]["unit"] == projection["unit"] == "usd"
+            assert attached["source"]["recorded_value"] == recorded
+            assert attached["source"]["recorded_unit"] == "usd_billions"
+        else:
+            assert attached["value"] == recorded
+            assert attached["measure"]["unit"] == projection["unit"] == "usd_billions"
+            assert "recorded_value" not in attached["source"]
