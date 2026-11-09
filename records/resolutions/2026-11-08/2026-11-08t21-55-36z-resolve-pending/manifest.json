@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-11-08T21:55:36Z",
+  "firstPrintEvidenceRequired": true,
+  "weeklyClaimsSchedule": {
+    "source": "https://oui.doleta.gov/unemploy/claims_arch.asp",
+    "releaseExceptions": {
+      "2026-11-26": "2026-11-25"
+    }
+  },
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "d4fc2a4f1bf5cbd23a38d87a2447e71a0b26f98e",
+  "facts": [
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.transportation_material_moving.september_2026.first_print",
+      "sourceVintage": "2026-10-06",
+      "retrievedAt": "2026-11-08T21:55:36Z",
+      "targetContentHash": "d6e9c92086ea70e8b59790dcc9ac070c7eb079e22a59c17d88d559ebccc62072",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-transportation_material_moving-2026-10-06-fcb2036b157cfd1d.html.gz",
+        "sha256": "fcb2036b157cfd1d9d3ca399cceb2cce5b8046a34c0c1c3a6e23687cebb0cb92",
+        "bytes": 104876,
+        "gzipSha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+        "gzipBytes": 17785,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.computer_mathematical.september_2026.first_print",
+      "sourceVintage": "2026-10-02",
+      "retrievedAt": "2026-11-08T21:55:38Z",
+      "targetContentHash": "3e69defa241ea595910e482ed0a288e50f49998dd98964e02e055b8419053926",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-computer_mathematical-2026-10-02-fcb2036b157cfd1d.html.gz",
+        "sha256": "fcb2036b157cfd1d9d3ca399cceb2cce5b8046a34c0c1c3a6e23687cebb0cb92",
+        "bytes": 104876,
+        "gzipSha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+        "gzipBytes": 17785,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.healthcare_support.september_2026.first_print",
+      "sourceVintage": "2026-10-02",
+      "retrievedAt": "2026-11-08T21:55:38Z",
+      "targetContentHash": "b1aecf400204f8c11eab1e73433ad74b308fcd147b28e0f8727fdda9787cde9b",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-healthcare_support-2026-10-02-fcb2036b157cfd1d.html.gz",
+        "sha256": "fcb2036b157cfd1d9d3ca399cceb2cce5b8046a34c0c1c3a6e23687cebb0cb92",
+        "bytes": 104876,
+        "gzipSha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+        "gzipBytes": 17785,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.production.september_2026.first_print",
+      "sourceVintage": "2026-10-06",
+      "retrievedAt": "2026-11-08T21:55:36Z",
+      "targetContentHash": "509aaff9e5589d155465f734902b0c02b366eb09226d957107fa7091bf786808",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-production-2026-10-06-fcb2036b157cfd1d.html.gz",
+        "sha256": "fcb2036b157cfd1d9d3ca399cceb2cce5b8046a34c0c1c3a6e23687cebb0cb92",
+        "bytes": 104876,
+        "gzipSha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+        "gzipBytes": 17785,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.business_financial_operations.september_2026.first_print",
+      "sourceVintage": "2026-10-07",
+      "retrievedAt": "2026-11-08T21:55:39Z",
+      "targetContentHash": "4a874f0646368ee8601b3024fdbb32c0d0c49672cb9facd396ffca1e87f35626",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-business_financial_operations-2026-10-07-fcb2036b157cfd1d.html.gz",
+        "sha256": "fcb2036b157cfd1d9d3ca399cceb2cce5b8046a34c0c1c3a6e23687cebb0cb92",
+        "bytes": 104876,
+        "gzipSha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+        "gzipBytes": 17785,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.office_administrative_support.september_2026.first_print",
+      "sourceVintage": "2026-10-07",
+      "retrievedAt": "2026-11-08T21:55:39Z",
+      "targetContentHash": "10f4f7438b667b1f32e0e88a703dd95f27dbe44a6f2754ec09627e470eca77b3",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-office_administrative_support-2026-10-07-fcb2036b157cfd1d.html.gz",
+        "sha256": "fcb2036b157cfd1d9d3ca399cceb2cce5b8046a34c0c1c3a6e23687cebb0cb92",
+        "bytes": 104876,
+        "gzipSha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+        "gzipBytes": 17785,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print",
+      "sourceVintage": "2026-09-04",
+      "retrievedAt": "2026-11-08T21:55:40Z",
+      "targetContentHash": "83c7957c7a7a20d3b18b8babe138f2a1751bf02acd6f799a9246036fb456f038",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-computer_mathematical-2026-09-04-de8c3051667136d9.html.gz",
+        "sha256": "de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915",
+        "bytes": 104872,
+        "gzipSha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+        "gzipBytes": 17800,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print",
+      "sourceVintage": "2026-09-04",
+      "retrievedAt": "2026-11-08T21:55:40Z",
+      "targetContentHash": "97182edc98810caf5f7cc705f823bcd9a54c5944671d801e01b57605272a7458",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-office_administrative_support-2026-09-04-de8c3051667136d9.html.gz",
+        "sha256": "de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915",
+        "bytes": 104872,
+        "gzipSha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+        "gzipBytes": 17800,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print",
+      "sourceVintage": "2026-09-04",
+      "retrievedAt": "2026-11-08T21:55:40Z",
+      "targetContentHash": "379f132f92ac8164f175e5ca35b77424cdf1ac3f6c9c674bc0add108c7721930",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-healthcare_support-2026-09-04-de8c3051667136d9.html.gz",
+        "sha256": "de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915",
+        "bytes": 104872,
+        "gzipSha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+        "gzipBytes": 17800,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.production.august_2026.first_print",
+      "sourceVintage": "2026-09-04",
+      "retrievedAt": "2026-11-08T21:55:40Z",
+      "targetContentHash": "3bee3d472cab7a604ea2ac39aa1831fdc4ca8031670d649664e9e804dde9106a",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-production-2026-09-04-de8c3051667136d9.html.gz",
+        "sha256": "de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915",
+        "bytes": 104872,
+        "gzipSha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+        "gzipBytes": 17800,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print",
+      "sourceVintage": "2026-09-04",
+      "retrievedAt": "2026-11-08T21:55:40Z",
+      "targetContentHash": "5e45cb7c24096d5bf9d923f4e6c376d3ef8f27cdc78f26616b90e35848c3bb7d",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-transportation_material_moving-2026-09-04-de8c3051667136d9.html.gz",
+        "sha256": "de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915",
+        "bytes": 104872,
+        "gzipSha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+        "gzipBytes": 17800,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print",
+      "sourceVintage": "2026-09-04",
+      "retrievedAt": "2026-11-08T21:55:40Z",
+      "targetContentHash": "7f9e2805bbd169b63cf804785f639e8a770a559cb5b29578b6467da0e454c6cd",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-business_financial_operations-2026-09-04-de8c3051667136d9.html.gz",
+        "sha256": "de8c3051667136d95cf3311f221f060752f970666414e9e556c98dd4c90fb915",
+        "bytes": 104872,
+        "gzipSha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+        "gzipBytes": 17800,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-transportation_material_moving-2026-10-06-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-computer_mathematical-2026-10-02-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-healthcare_support-2026-10-02-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-production-2026-10-06-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-business_financial_operations-2026-10-07-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-office_administrative_support-2026-10-07-fcb2036b157cfd1d.html.gz",
+      "sha256": "98fd8093c910f5d5c31cff9848ab016103e47043a646e98f2e9a96f0623b139e",
+      "bytes": 17785,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-computer_mathematical-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-office_administrative_support-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-healthcare_support-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-production-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-transportation_material_moving-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/responses/cpseea19-business_financial_operations-2026-09-04-de8c3051667136d9.html.gz",
+      "sha256": "d60e3a868e8c984271e73b357f5e4b8dbcef467b6452157f0387a1a7740233cb",
+      "bytes": 17800,
+      "createdAt": "2026-11-08T21:55:36Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-11-08/2026-11-08t21-55-36z-resolve-pending/manifest.json",
+      "sha256": "271a8a952fa6b0c0dbec2068570aeddf0b15a40e9f7de886d4ff53c94146698b",
+      "bytes": 12183,
+      "createdAt": "2026-11-08T21:55:36Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "80be435831a83815fe74067bc4f8f74ce0657d046c33937e4d986822531d6469"
+}
