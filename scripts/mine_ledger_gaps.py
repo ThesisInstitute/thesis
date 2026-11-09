@@ -57,6 +57,18 @@ def fetch(url: str) -> str:
         return response.read().decode()
 
 
+def registrable_unit(row: dict) -> str | None:
+    """The unit a target on this row's feed registers.
+
+    A proposal binds an identity transform over the publisher's feed, so it needs
+    the unit the feed prints. A row in base units keeps that unit in
+    ``source.recorded_unit``.
+    """
+
+    recorded = (row.get("source") or {}).get("recorded_unit")
+    return recorded or (row.get("measure") or {}).get("unit")
+
+
 def period_token(period: dict) -> str | None:
     """The period token as it appears inside a source_record_id."""
     ptype, value = period.get("type"), period.get("value")
@@ -197,7 +209,7 @@ def main() -> int:
         slug = slug_for(series, nxt)
         if slug in existing_slugs:
             continue
-        unit = (entry["row"].get("measure") or {}).get("unit")
+        unit = registrable_unit(entry["row"])
         geo = ((entry["row"].get("geography") or {}).get("name") or "").lower()
         country = COUNTRY_BY_NAME.get(geo, "US")
         target = {

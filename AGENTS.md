@@ -371,9 +371,9 @@ of receipt 0.6.2's `effective_current_rows`), which works as follows:
   in `INTENDED_HISTORY_DROP_OUTS` (`site/src/__tests__/ledger-corrections.test.ts`).
   Any other drop-out fails CI, because it looks exactly like a filter that has
   started rejecting corrections. A history orders its rows by each record's
-  first print, the earliest `observedAt` in its chain, so a correction keeps
-  its record's place, and a persistence baseline's last print is the record
-  that printed last.
+  first print, the earliest `observedAt` in its chain, so a later-dated
+  correction keeps its record's place, and a persistence baseline's last print
+  is the record that printed last.
 - A correction's resolution event is `<historical id>.<its own assertion
   version>`, so an event id never names two outcomes. Every other row keeps
   the id it always had. A pin that brings a correction of a graded row
@@ -381,6 +381,69 @@ of receipt 0.6.2's `effective_current_rows`), which works as follows:
   observed value changes only if the correction changes the value. Its
   published `observedAt` changes only if the correction prints earlier than
   the rest of its chain, which also moves the chronology boundary.
+
+Chronicle's Thesis ledger moves to plain numbers (Max, 2026-10-21): a row says
+`7716000` in `count`, not `7.716` in `millions`. A registered contract keeps
+the unit it registered, so the site still grades in that unit
+(`site/src/data/ledger-restatements.ts` and `ledger-units.ts`; the resolver's
+copy of the unit table is `scripts/ledger_units.py`):
+
+- A row the resolver writes in base units carries the pair it recorded, in
+  `source.recorded_value` and `source.recorded_unit`. Its entry reads that
+  pair and keeps what Chronicle stores as `ledgerValue` and `ledgerUnit`. A
+  pair that doesn't state the stored value exactly fails the build.
+- A `unit_restatement` row (its `assertionVersion.relation`) says one scaled
+  row in base units and changes nothing else. The site checks it against the
+  exact line it names and goes on grading that line, so no score, baseline,
+  event id or hash moves. A correction of a restatement grades in place of the
+  row the restatement names (`gradedSupersedes`).
+- `/forecasts/ledger.json` keeps each restated row in `entries` and lists the
+  restatements apart, under `restatements`, once the pin holds one. A consumer
+  that wants Chronicle's current view must apply them: `entries` alone holds
+  the registered-unit values the site grades.
+
+The resolver writes both shapes (`scripts/resolve_pending.py`):
+
+- A run writes new rows in base units only when the ledger it read holds no
+  current row in a scaled unit. Until then it writes the unit its adapter
+  parsed, so no series holds both. Each run's log says which
+  (`ledger units: as recorded` or `ledger units: base`). The writer converts
+  after the contract check, which reads the registered unit. It refuses a
+  value with no exact base form as it refuses a contract mismatch, that row
+  alone. It converts the value its adapter parsed and adds no precision to it,
+  so 3189.0 thousands becomes 3189000 though BLS printed 3,189,009. The row's
+  `source.method_notes` says so: the value carries that figure's precision,
+  and the archived response may hold more digits.
+- A row's `sourceBindingProjection.transform` still maps the source's response
+  to the contract's registered unit, while the projection's `unit` is the unit
+  the row stores, which the append gate holds to the row's. A claims row in
+  `count` keeps ICSA's `{"factor": 0.001, "operation": "multiply"}`, which
+  yields thousands, the registered unit its recorded pair names.
+- `--restate-base-units` (the workflow's `restate_base_units` input) appends a
+  `unit_restatement` row for every current scaled row, in one release or not
+  at all. Before it proposes, it runs `check_restatements`, its port of the
+  site's checks, on the exact lines Chronicle will hold. It also runs
+  Chronicle's series-catalog generator on them: the catalog may change only
+  units, each to its base unit, and the UUID registry must not move. The
+  proposal merges only once Chronicle's Arch checks pass. A restatement
+  archives the exact line it restates, and its projection's `responseSha256`
+  hashes that line, not a source response. Its method notes add that it
+  carries the old figure's precision and that the row's other notes predate
+  it, since the site's restatement check and its port, `check_restatements`,
+  keep every other note as it was. The records of a run that merged but never
+  reached Thesis rebuild to the byte: the next dispatch, or the next daily run
+  with pending work, rebuilds them first (`restored`), and the workflow
+  publishes them. If a records, ledger or custody fault stops a daily run's
+  rebuild, the rebuild removes any directory it wrote, and the run prints
+  `RESTORE REFUSED`, resolves the rest and exits 3; the run's issue names the
+  fault. GitHub keeps one waiting run per concurrency group, so dispatch
+  a restatement only when no other run of the workflow is waiting. A
+  restatement resolves nothing, so it leaves the status page alone.
+- `scripts/generate_ledger_restatement_fixture.py` runs the writer and the
+  port over real Chronicle rows, and
+  `site/src/__tests__/ledger-restatement-fixture.test.ts` holds the site's
+  reader to them. The reader refuses exactly what the port refuses, and the
+  writer's rows leave every entry in place.
 
 The build also re-runs the append gate's assertion-version checks on the pinned
 rows. Every explicit id must equal its recomputed content address, and every
