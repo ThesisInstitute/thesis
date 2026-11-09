@@ -958,7 +958,8 @@ refused any row, by contract binding or by the catalog, exits 3
 publishes what it appended before failing the job, so the alert fires. So
 until the restatement run, the A-19 facts deferred instead of blocking the
 day's other resolutions. The dated captures they rest on stayed in the Archive,
-so a run after it could still resolve them.
+so the next run could still resolve them: run [42527530846](https://github.com/ThesisInstitute/thesis/actions/runs/42527530846) appended the August and
+September rows of all six lineages on 2026-11-08.
 
 A registered target looks up the Archive's index for captures dated inside its
 window, and makes no request before the window opens. From the day it opens (not the
@@ -1485,7 +1486,8 @@ Each of the six concepts has exactly one Chronicle lineage, `economy/aggregate`
 in the United States. On 2026-09-25 it held one observation: the June 2026
 figure the `a19` leg recorded, in thousands. (Live catalog,
 PolicyEngine/chronicle branch `codex/thesis-ledger-facts`, fetched that day.)
-The base-unit restatement run moved it to `count`. The docket pins that lineage,
+The base-unit restatement run ([42526506760](https://github.com/ThesisInstitute/thesis/actions/runs/42526506760), 2026-11-08) moved it to `count`. The
+docket pins that lineage,
 and the containment gate re-derives the same pin, because there is one
 candidate. The docket's `targetUnit` "millions" agrees with the catalog's `count`
 because `count` is the base unit Chronicle stores millions in.

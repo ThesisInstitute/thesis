@@ -421,7 +421,7 @@ The resolver writes base units (`scripts/resolve_pending.py`):
   yields thousands, the registered unit its recorded pair names.
 - `--restate-base-units` (the workflow's `restate_base_units` input) appends a
   `unit_restatement` row for every current scaled row, in one release or not
-  at all. Before it proposes, it runs `check_restatements`, its port of the
+  at all. It restated 83 rows on 2026-11-08 (run [42526506760](https://github.com/ThesisInstitute/thesis/actions/runs/42526506760)). Before it proposes, it runs `check_restatements`, its port of the
   site's checks, on the exact lines Chronicle will hold. It also runs
   Chronicle's series-catalog generator on them: the catalog may change only
   units, each to its base unit, and the UUID registry must not move. The
