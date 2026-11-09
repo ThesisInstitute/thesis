@@ -20,6 +20,7 @@ import hashlib
 import itertools
 import json
 import pathlib
+import shutil
 import sys
 import tempfile
 from decimal import Decimal
@@ -1141,7 +1142,7 @@ def test_the_guard_follows_chronicles_supersede_links() -> None:
 
 
 def test_the_guard_passes_a_lineage_in_a_unit_with_no_base_form() -> None:
-    # Three of the twelve registrable series store the unit they emit.
+    # A series whose unit holds no scale stores the unit it emits.
     stem = "bls.cps.unemployment_rate"
     spec = resolve_pending.BLS_API_ADAPTERS[stem]
     row = copy.deepcopy(_chronicle_june_row())
@@ -1826,8 +1827,82 @@ def test_a_rebuild_writes_every_run_inside_it_or_refuses_and_writes_nothing(
             assert all(any(run in path.parents for run in runs) for path in written)
 
 
+# What the writer carries from the row it restates into the fields the rebuild
+# reads. A row with no sourceVintage takes its observed_at.
+_WRITER_CARRIES = (
+    "source_record_id",
+    "sourceVintage",
+    "observed_at",
+    "targetContentHash",
+    "assertionVersion.id",
+)
+
+
+@settings(max_examples=200, deadline=None)
+@given(spoils=st.lists(st.tuples(st.sampled_from(_WRITER_CARRIES), _JUNK), max_size=3))
+@example(spoils=[])
+@example(spoils=[("targetContentHash", 7)])
+@example(spoils=[("assertionVersion.id", chr(0xD800))])
+def test_a_run_the_writer_finishes_rebuilds_from_its_rows_to_the_byte(
+    spoils: list[tuple[str, object]],
+) -> None:
+    # Whatever the row it restates holds in those fields, the writer refuses
+    # with a fault its run reports, or the rebuild reproduces the writer's run
+    # from the ledger's lines, byte for byte. An untouched row must rebuild.
+    stamp = "2026-11-04T00:00:00Z"
+    with (
+        tempfile.TemporaryDirectory() as tmp,
+        mock.patch.object(resolve_pending, "ROOT", pathlib.Path(tmp)),
+    ):
+        prior = _chronicle_june_row()
+        prior["assertionVersion"] = {"id": "av2:prior", "supersedes": None}
+        for field, value in spoils:
+            _spoil(prior, field, value)
+        try:
+            resolve_pending.assertion_version(dict(prior))
+        except ValueError:
+            # The writer content-addresses the row it writes, so a field no
+            # content address can hold stops its run there, before any write.
+            return
+        line = json.dumps(prior)
+        run_dir = resolve_pending.resolution_run_dir(stamp)
+        try:
+            restated, compressed = resolve_pending.restatement_row(
+                prior,
+                line,
+                run_dir=run_dir,
+                retrieved_at=stamp,
+                ledger_repo_sha="f" * 40,
+            )
+            archive = resolve_pending.ROOT / restated["responseArchive"]["path"]
+            archive.parent.mkdir(parents=True)
+            archive.write_bytes(compressed)
+            resolve_pending.finalize_resolution_manifest(
+                run_dir,
+                resolve_pending.restatement_manifest(
+                    [restated], ledger_repo="o/r", ledger_branch="b"
+                ),
+            )
+        except (resolve_pending.ledger_units.LedgerUnitError, CustodyError):
+            assert spoils, "the writer refused an untouched row"
+            return
+
+        def files() -> dict[pathlib.Path, bytes]:
+            return {p: p.read_bytes() for p in run_dir.rglob("*") if p.is_file()}
+
+        written = files()
+        shutil.rmtree(run_dir)
+        rebuilt = resolve_pending.restore_restatement_runs(
+            [line, resolve_pending.ledger_line(restated)],
+            ledger_repo="o/r",
+            ledger_branch="b",
+        )
+        assert rebuilt == [run_dir]
+        assert files() == written
+
+
 @pytest.mark.parametrize(
-    "fault", ["archive differs", "run in part", "manifest refused"]
+    "fault", ["archive differs", "run in part", "manifest refused", "disk full"]
 )
 def test_a_fault_in_a_later_run_leaves_no_earlier_run(
     monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path, fault: str
@@ -1836,8 +1911,25 @@ def test_a_fault_in_a_later_run_leaves_no_earlier_run(
     first_line, first = _restated_record("bls.ok-1", "2026-11-04T00:00:00Z")
     second_line, second = _restated_record("bls.ok-2", "2026-11-05T00:00:00Z")
     second_run = resolve_pending.resolution_run_dir(second["retrievedAt"])
+    # A run this call did not write, in the dated directory of one it did.
+    sibling = (
+        second_run.parent / "2026-11-05t09-00-00z-resolve-pending" / "manifest.json"
+    )
+    sibling.parent.mkdir(parents=True)
+    sibling.write_text("{}")
     kept: list[pathlib.Path] = []
-    if fault == "archive differs":
+    if fault == "disk full":
+        write_bytes = pathlib.Path.write_bytes
+        calls: list[pathlib.Path] = []
+
+        def full_on_the_second(path: pathlib.Path, data: bytes) -> int:
+            calls.append(path)
+            if len(calls) == 2:
+                raise OSError(28, "No space left on device")
+            return write_bytes(path, data)
+
+        monkeypatch.setattr(pathlib.Path, "write_bytes", full_on_the_second)
+    elif fault == "archive differs":
         second["responseArchive"]["gzipBytes"] += 1
     elif fault == "run in part":
         second_run.mkdir(parents=True)
@@ -1854,13 +1946,16 @@ def test_a_fault_in_a_later_run_leaves_no_earlier_run(
         monkeypatch.setattr(
             resolve_pending, "finalize_resolution_manifest", refuse_the_second
         )
-    with pytest.raises((resolve_pending.ledger_units.LedgerUnitError, CustodyError)):
+    with pytest.raises(
+        (resolve_pending.ledger_units.LedgerUnitError, CustodyError, OSError)
+    ):
         resolve_pending.restore_restatement_runs(
             [first_line, json.dumps(first), second_line, json.dumps(second)],
             ledger_repo="o/r",
             ledger_branch="b",
         )
-    assert [path for path in tmp_path.rglob("*") if path.is_file()] == kept
+    left = {path for path in tmp_path.rglob("*") if path.is_file()}
+    assert left == {sibling, *kept}
 
 
 def test_a_dry_run_refuses_an_archive_a_rebuild_would_refuse(

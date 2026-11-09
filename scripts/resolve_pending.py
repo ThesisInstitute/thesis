@@ -17196,15 +17196,14 @@ def restatement_row(
     vintage = str(prior.get("sourceVintage") or prior["observed_at"])
     # restore_restatement_runs refuses a run it could not rebuild, so the
     # writer refuses to write one.
-    for field, part in (
-        ("source_record_id", prior.get("source_record_id")),
-        ("sourceVintage", vintage),
-    ):
-        fault = _archive_part_fault(field, part)
-        if fault:
-            raise ledger_units.LedgerUnitError(
-                f"{prior.get('source_record_id')!r} has {fault}"
-            )
+    fault = _restatement_field_fault(
+        {**prior, "sourceVintage": vintage, "ledgerRepoSha": ledger_repo_sha},
+        {"supersedes": prior_id},
+    )
+    if fault:
+        raise ledger_units.LedgerUnitError(
+            f"{prior.get('source_record_id')!r} has {fault}"
+        )
     archive, compressed = response_archive_reference(
         run_dir,
         series_id=prior["source_record_id"],
