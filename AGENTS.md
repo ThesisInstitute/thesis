@@ -438,9 +438,10 @@ The resolver writes base units (`scripts/resolve_pending.py`):
   publishes them. If a records, ledger or custody fault stops a daily run's
   rebuild, the rebuild removes any directory it wrote, and the run prints
   `RESTORE REFUSED`, resolves the rest and exits 3; the run's issue names the
-  fault. GitHub keeps one waiting run per concurrency group, so dispatch
-  a restatement only when no other run of the workflow is waiting. A
-  restatement resolves nothing, so it leaves the status page alone.
+  fault. A restatement that leaves a scaled row current still stops the run, at
+  `refuse_a_scaled_ledger`. GitHub keeps one waiting run per concurrency group,
+  so dispatch a restatement only when no other run of the workflow is waiting.
+  A restatement resolves nothing, so it leaves the status page alone.
 - `scripts/generate_ledger_restatement_fixture.py` runs the writer and the
   port over real Chronicle rows, and
   `site/src/__tests__/ledger-restatement-fixture.test.ts` holds the site's
