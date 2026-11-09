@@ -574,7 +574,7 @@ def test_a_correction_row_passes_chronicles_append_gate(tmp_path, monkeypatch) -
     with pytest.raises(append_gate.AppendError, match="corrections must be explicit"):
         append_gate.check_rows([old_line, unlinked], 1, GATE_SPEC)
     current = append_gate.effective_current_rows([old, attached], GATE_SPEC)
-    assert [(r["value"], r["observed_at"]) for r in current] == [(206.0, "2026-09-03")]
+    assert [(r["value"], r["observed_at"]) for r in current] == [(206000, "2026-09-03")]
 
 
 HTML = b"<!DOCTYPE html><html><body>Service temporarily unavailable</body></html>"

@@ -146,6 +146,10 @@ describe("restating the pinned ledger", () => {
     resetPolicyEngineLedgerCache();
   }
 
+  it("holds no current scaled row in the pinned ledger", () => {
+    expect(currentScaledLines(pinnedLines)).toEqual([]);
+  });
+
   it("restates rows in every scaled unit the ledger holds", () => {
     expect(restatedLines.length).toBeGreaterThan(plainLines.length);
     const restatements = restatedLines.filter((line) =>
