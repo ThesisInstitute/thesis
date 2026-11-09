@@ -1136,6 +1136,17 @@ def test_the_guard_follows_chronicles_supersede_links() -> None:
     assert verdict([v1, split]) is None
 
 
+def test_the_guard_passes_a_lineage_in_a_unit_with_no_base_form() -> None:
+    # Three of the twelve registrable series store the unit they emit.
+    stem = "bls.cps.unemployment_rate"
+    spec = resolve_pending.BLS_API_ADAPTERS[stem]
+    row = copy.deepcopy(_chronicle_june_row())
+    row["source_record_id"] = f"{stem}.june_2026.first_print"
+    row["measure"]["concept"] = f"{stem}.june_2026"
+    row["measure"]["unit"] = "percent"
+    assert resolve_pending.bls_ledger_unit_conflict([row], stem, spec) is None
+
+
 def test_the_guard_compares_the_unit_chronicle_stores() -> None:
     # The resolver stores a millions spec's fact in count, so the June row
     # restated in count is the same unit and the row still in thousands is not.

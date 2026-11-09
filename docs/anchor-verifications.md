@@ -958,8 +958,9 @@ refused any row, by contract binding or by the catalog, exits 3
 publishes what it appended before failing the job, so the alert fires. So
 until the restatement run, the A-19 facts deferred instead of blocking the
 day's other resolutions. The dated captures they rest on stayed in the Archive,
-so the next run could still resolve them: run [42527530846](https://github.com/ThesisInstitute/thesis/actions/runs/42527530846) appended the August and
-September rows of all six lineages on 2026-11-08.
+so the next run could still resolve them: run
+[42527530846](https://github.com/ThesisInstitute/thesis/actions/runs/42527530846)
+appended the August and September rows of all six lineages on 2026-11-08.
 
 A registered target looks up the Archive's index for captures dated inside its
 window, and makes no request before the window opens. From the day it opens (not the
@@ -1356,8 +1357,8 @@ specs go from six to twelve.
 **Registration waited until Chronicle could hold the six lineages in one
 unit.** See "Chronicle holds these lineages in count" below. Until then each
 spec carried a `registration_hold`, and the execution-plan gate refused it after
-every structural check. So nothing could register an A-19 target that would be
-refused every day from its release.
+every structural check. So nothing could register an A-19 target that the
+catalog would refuse every day from its release.
 
 ## Series identity
 
@@ -1486,18 +1487,20 @@ Each of the six concepts has exactly one Chronicle lineage, `economy/aggregate`
 in the United States. On 2026-09-25 it held one observation: the June 2026
 figure the `a19` leg recorded, in thousands. (Live catalog,
 PolicyEngine/chronicle branch `codex/thesis-ledger-facts`, fetched that day.)
-The base-unit restatement run ([42526506760](https://github.com/ThesisInstitute/thesis/actions/runs/42526506760), 2026-11-08) moved it to `count`. The
-docket pins that lineage,
-and the containment gate re-derives the same pin, because there is one
-candidate. The docket's `targetUnit` "millions" agrees with the catalog's `count`
-because `count` is the base unit Chronicle stores millions in.
+The base-unit restatement run
+([42526506760](https://github.com/ThesisInstitute/thesis/actions/runs/42526506760),
+2026-11-08) moved it to `count`. The docket pins that lineage, and the
+containment gate re-derives the same pin, because there is one candidate. The
+docket's `targetUnit` "millions" agrees with the catalog's `count` because
+`count` is the base unit Chronicle stores millions in.
 
-A fact's value must match its contract's unit before the writer converts it, and
-every A-19 contract is in millions: the 18 existing ones and every one this
-adapter registers. Chronicle's `scripts/build_series_catalog.py` groups observations by
-concept, geography and entity, and refuses to build when one identity holds two
-units. This was run on 2026-09-25 against a scratch copy of the ledger branch,
-Chronicle commit `3dd95a0d`, with one synthetic October production row added:
+A fact must carry its contract's unit until the writer converts it, and every
+A-19 contract registers millions: the 18 existing ones and every one this
+adapter registers. Chronicle's `scripts/build_series_catalog.py` groups
+observations by concept, geography and entity, and refuses to build when one
+identity holds two units. This was run on 2026-09-25 against a scratch copy of
+the ledger branch, Chronicle commit `3dd95a0d`, with one synthetic October
+production row added:
 
 - in millions, the generator exited 1 with "unit conflict within identity
   ('bls.cps.employed_people_by_occupation.production', ... ['economy',
@@ -1512,10 +1515,9 @@ append time for any row the catalog refuses; the check below still refuses
 earlier, before the keyless request is spent.
 
 `bls_ledger_unit_conflict` refuses a capture before the API request is spent,
-for any registrable series. It fires
-when Chronicle's current view already holds the series in another unit, for
-the entity and geography the fact would carry. It follows Chronicle's rules as
-read in its code:
+for any registrable series. It fires when Chronicle's current view already
+holds the series in another unit, for the entity and geography the fact would
+carry. It follows Chronicle's rules as read in its code:
 
 - A row belongs to the series when its measure concept is the series, or the
   series plus a spelling of the row's own month (`2026_06`, `2026-06`,

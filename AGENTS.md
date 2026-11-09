@@ -410,10 +410,10 @@ The resolver writes base units (`scripts/resolve_pending.py`):
   thousands becomes 3189000 though BLS printed 3,189,009. The row's
   `source.method_notes` says so: the value carries that figure's precision,
   and the archived response may hold more digits.
-- A run stops before it fetches anything if a current ledger row carries a
-  scale word (`refuse_a_scaled_ledger`), because a new row in base units would
-  give that row's series a second unit. `--restate-base-units` restates such a
-  row.
+- A run with pending work stops after it reads the ledger and before it
+  fetches any source if a current ledger row carries a scale word
+  (`refuse_a_scaled_ledger`), because a new row in base units would give that
+  row's series a second unit. `--restate-base-units` restates such a row.
 - A row's `sourceBindingProjection.transform` still maps the source's response
   to the contract's registered unit, while the projection's `unit` is the unit
   the row stores, which the append gate holds to the row's. A claims row in
@@ -421,8 +421,10 @@ The resolver writes base units (`scripts/resolve_pending.py`):
   yields thousands, the registered unit its recorded pair names.
 - `--restate-base-units` (the workflow's `restate_base_units` input) appends a
   `unit_restatement` row for every current scaled row, in one release or not
-  at all. It restated 83 rows on 2026-11-08 (run [42526506760](https://github.com/ThesisInstitute/thesis/actions/runs/42526506760)). Before it proposes, it runs `check_restatements`, its port of the
-  site's checks, on the exact lines Chronicle will hold. It also runs
+  at all. It restated 83 rows on 2026-11-08 (run
+  [42526506760](https://github.com/ThesisInstitute/thesis/actions/runs/42526506760)).
+  Before it proposes, it runs `check_restatements`, its port of the site's
+  checks, on the exact lines Chronicle will hold. It also runs
   Chronicle's series-catalog generator on them: the catalog may change only
   units, each to its base unit, and the UUID registry must not move. The
   proposal merges only once Chronicle's Arch checks pass. A restatement

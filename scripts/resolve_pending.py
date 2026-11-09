@@ -2645,8 +2645,6 @@ A19_BLS_API_SERIES: dict[str, tuple[str, dict[str, float]]] = {
         {"2026-06": 12.010, "2026-07": 12.223, "2026-08": 12.011},
     ),
 }
-# Registration waits for Chronicle. Each A-19 lineage holds its June 2026
-# observation in thousands, every A-19 contract is in millions, and
 for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
     BLS_API_ADAPTERS[f"{A19_STEM}.{_row}"] = {
         "series_id": _series_id,
@@ -13013,8 +13011,8 @@ def claims_corrections(
                 "to correct"
             )
             continue
-        # The unit too: once the ledger is in base units the superseded row
-        # may be in count while this row is built in thousands or millions.
+        # The unit too: the superseded row may be in count while this row,
+        # until the writer converts it, is in thousands or millions.
         recorded = f"{row.get('value')} {_json_object(row.get('measure')).get('unit')}"
         note = (
             f"Supersedes {version_id}, which was read from ALFRED vintage "
@@ -20060,6 +20058,10 @@ def _main() -> int:
         )
     if args.dry_run:
         print(f"dry-run: would append {len(fetched_rows)} row(s)")
+        print(
+            "dry-run: each row below shows what its adapter parsed; the writer "
+            "stores it in its unit's base unit"
+        )
         for row, *_ in fetched_rows:
             print(json.dumps(row)[:200])
         return _report_run_refusals(

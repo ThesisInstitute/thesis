@@ -349,7 +349,11 @@ WRITTEN_AT = "2030-01-02T12:00:00Z"
 
 
 def _attach(
-    tmp_path: pathlib.Path, monkeypatch, row: dict, *, registered: str = "millions"
+    tmp_path: pathlib.Path,
+    monkeypatch,
+    row: dict,
+    *,
+    registered: str | None = "millions",
 ) -> dict:
     monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
     ref = row["source_record_id"]
@@ -361,7 +365,7 @@ def _attach(
         raw=RAW,
         retrieved_at=WRITTEN_AT,
         ledger_repo_sha="b" * 40,
-        target_contracts={ref: _registration(ref, registered)},
+        target_contracts={ref: _registration(ref, registered)} if registered else {},
     )
 
 
@@ -405,6 +409,18 @@ def test_the_writer_stores_base_units_with_the_pair_it_recorded(
     receipt_append_gate.check_binding_shapes([line], 0)
     run_dir = resolve_pending.resolution_run_dir(WRITTEN_AT)
     assert len(list((run_dir / "responses").iterdir())) == 1
+
+
+def test_the_writer_converts_a_row_no_contract_registers(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    # A row with no registered contract would give its lineage a second unit
+    # just as a registered one would.
+    based = _attach(tmp_path, monkeypatch, ROW, registered=None)
+    assert based["value"] == 7716000 and based["measure"]["unit"] == "count"
+    assert based["source"]["recorded_value"] == 7.716
+    assert based["source"]["recorded_unit"] == "millions"
+    assert "sourceBindingProjection" not in based
 
 
 def test_a_value_with_no_exact_base_form_is_refused_before_its_archive(
