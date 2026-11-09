@@ -17212,13 +17212,31 @@ def restatement_row(
         )
     prior_id = effective_assertion_id(prior)
     vintage = str(prior.get("sourceVintage") or prior["observed_at"])
+    # restore_restatement_runs refuses a run it could not rebuild, so the
+    # writer refuses to write one.
+    for field, part in (
+        ("source_record_id", prior.get("source_record_id")),
+        ("sourceVintage", vintage),
+    ):
+        fault = _archive_part_fault(field, part)
+        if fault:
+            raise ledger_units.LedgerUnitError(
+                f"{prior.get('source_record_id')!r} has {fault}"
+            )
     archive, compressed = response_archive_reference(
         run_dir,
-        series_id=str(prior["source_record_id"]),
+        series_id=prior["source_record_id"],
         vintage=vintage,
         raw=prior_line.encode("utf-8"),
         extension="json",
     )
+    name = pathlib.PurePosixPath(archive["path"]).name
+    fault = _file_name_fault(name)
+    if fault:
+        raise ledger_units.LedgerUnitError(
+            f"{prior['source_record_id']!r} would archive as {name!r}, a name "
+            f"that {fault}"
+        )
     row = copy.deepcopy(prior)
     row["value"] = ledger_units.to_base(prior["value"], unit)
     row["measure"]["unit"] = base
@@ -17309,6 +17327,43 @@ def restatement_manifest(
 # restatement's run directory may come from.
 _RUN_STAMP = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
 
+# The most bytes one file name may hold on Linux (NAME_MAX), where the
+# workflow runs.
+_NAME_MAX = 255
+
+
+def _archive_part_fault(field: str, value: object) -> str | None:
+    """Why a restatement's archive could not be named after this, or None.
+
+    The archive takes its name from the row's source_record_id and
+    sourceVintage, inside its run's responses directory. A part that is not
+    text names nothing, and a "/" would put the archive in another directory
+    (a leading one, outside the repository).
+    """
+
+    if not isinstance(value, str):
+        return f"{field} {value!r}, which is not text"
+    if "/" in value:
+        return (
+            f"{field} {value!r}, whose '/' would put its archive outside its "
+            "run's responses"
+        )
+    return None
+
+
+def _file_name_fault(name: str) -> str | None:
+    """Why a file system would refuse this file name, or None."""
+
+    if "\x00" in name:
+        return "holds a NUL byte"
+    try:
+        size = len(name.encode("utf-8"))
+    except UnicodeEncodeError:
+        return "is not valid UTF-8"
+    if size > _NAME_MAX:
+        return f"runs to {size} bytes, past the {_NAME_MAX} one file name may hold"
+    return None
+
 
 def restore_restatement_runs(
     lines: list[str], *, ledger_repo: str, ledger_branch: str, write: bool = True
@@ -17319,9 +17374,11 @@ def restore_restatement_runs(
     commit, so a run that merged into Chronicle and then failed would leave
     rows naming archives no record holds. A restatement's archive is its
     row's exact line, gzipped with mtime 0, and its manifest is a function of
-    its rows, so the run rebuilds to the byte. Refuses an archive that would
-    differ from the one its row names, and a run directory that exists in
-    part. Returns the run directories it rebuilt, or would rebuild.
+    its rows, so the run rebuilds to the byte. Before it writes anything, it
+    refuses a restatement whose record id, vintage, ledger sha or archive
+    name the rebuild could not use, and a run directory that exists in part;
+    while it writes, an archive that would differ from the one its row
+    names. Returns the run directories it rebuilt, or would rebuild.
     """
 
     rows = [json.loads(line) for line in lines]
@@ -17341,6 +17398,17 @@ def restore_restatement_runs(
                     f"line {index + 1} has retrievedAt {retrieved_at!r}, which "
                     "names no run directory"
                 )
+            # The rebuild names the archive after these and writes them, and
+            # the ledger sha, into the run's manifest.
+            for field in ("source_record_id", "sourceVintage"):
+                fault = _archive_part_fault(field, row.get(field))
+                if fault:
+                    raise ledger_units.LedgerUnitError(f"line {index + 1} has {fault}")
+            if not isinstance(row.get("ledgerRepoSha"), str):
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} has ledgerRepoSha "
+                    f"{row.get('ledgerRepoSha')!r}, which is not text"
+                )
             run_dir = resolution_run_dir(retrieved_at)
             path = ROOT / str(_json_object(row.get("responseArchive")).get("path"))
             if path.parent != run_dir / "responses":
@@ -17348,6 +17416,13 @@ def restore_restatement_runs(
                     f"line {index + 1} archives "
                     f"{_json_object(row.get('responseArchive')).get('path')!r} "
                     f"outside its run, {run_dir.relative_to(ROOT).as_posix()}"
+                )
+            # Checked before the file system sees the name, since exists()
+            # itself can fail on one it refuses.
+            fault = _file_name_fault(path.name)
+            if fault:
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} archives {path.name!r}, a name that {fault}"
                 )
             if not path.exists():
                 prior = line_of_id.get(str(version.get("supersedes")))
@@ -17368,26 +17443,17 @@ def restore_restatement_runs(
             continue
         try:
             for row, prior_line in members:
-                record_id = row.get("source_record_id")
-                try:
-                    reference, compressed = response_archive_reference(
-                        run_dir,
-                        series_id=str(record_id),
-                        vintage=str(row.get("sourceVintage")),
-                        raw=prior_line.encode("utf-8"),
-                        extension="json",
-                    )
-                except ValueError as exc:
-                    # An absolute id resets the path's join, so the archive
-                    # would sit outside the repository.
-                    raise ledger_units.LedgerUnitError(
-                        f"the archive of {record_id!r} would sit outside the "
-                        "repository"
-                    ) from exc
+                reference, compressed = response_archive_reference(
+                    run_dir,
+                    series_id=row["source_record_id"],
+                    vintage=row["sourceVintage"],
+                    raw=prior_line.encode("utf-8"),
+                    extension="json",
+                )
                 if reference != row["responseArchive"]:
                     raise ledger_units.LedgerUnitError(
-                        f"the rebuilt archive of {record_id} is {reference}, "
-                        f"not the {row['responseArchive']} its row names"
+                        f"the rebuilt archive of {row['source_record_id']} is "
+                        f"{reference}, not the {row['responseArchive']} its row names"
                     )
                 path = ROOT / reference["path"]
                 path.parent.mkdir(parents=True, exist_ok=True)

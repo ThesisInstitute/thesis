@@ -15,14 +15,18 @@ the resolver's own writer over real Chronicle rows and records:
   order a restatement run appends them.
 * ``cases``: ledgers built from the sample, the writer's lines and copies of
   them with one or two things changed. A copy with two defects holds the
-  site and the port to the same first refusal, and together they pin each
-  step of the site's order. First, row by row, it reads each row's relation
-  and, on a row that restates nothing, its supersedes; then every recorded
-  pair; then the fold, which checks each restatement's supersedes and then
-  its content, in ``assert_restates``'s order. Each case records what the
-  port returned, the id each restatement it accepted supersedes or its
-  refusal, and whether Chronicle's append gate (receipt 0.6.2 ``check_rows``
-  and ``check_binding_shapes``) accepts the ledger.
+  site and the port to the same first refusal. The site checks in three
+  steps, each in ledger order: row by row, each row's relation and, on a row
+  that restates nothing, its supersedes; then each recorded pair; then the
+  fold, which checks one restatement's supersedes and then its content, in
+  ``assert_restates``'s order, before it moves to the next. Two defects in
+  one row pin the order of that row's checks. Across rows, cases set
+  defects for every two steps, and two defects within each step, so that a
+  reader that took the steps in another order, or reached the later row of
+  a step first, would refuse for the other defect. Each case records what
+  the port returned, the id each restatement it accepted supersedes or its
+  refusal, and whether Chronicle's append gate (receipt 0.6.2
+  ``check_rows`` and ``check_binding_shapes``) accepts the ledger.
 
 site/src/__tests__/ledger-restatement-fixture.test.ts replays every case
 through the site's reader, which must refuse exactly the cases the port
@@ -549,6 +553,34 @@ def build_fixture() -> dict[str, Any]:
     case(
         "a relation and supersedes 7 in one row",
         sample + writer + [resolve_pending.ledger_line(both)],
+    )
+    # Within the pair step the site takes rows in ledger order, so the
+    # earlier of two base rows decides.
+    unscaled_pair = copy.deepcopy(base)
+    unscaled_pair["source"]["recorded_unit"] = "percent"
+    _reversioned(unscaled_pair)
+    case(
+        "two rows: a base row's pair, then another base row's pair",
+        sample
+        + writer
+        + [
+            resolve_pending.ledger_line(pair_off),
+            resolve_pending.ledger_line(unscaled_pair),
+        ],
+    )
+    # The fold finishes one restatement, content and all, before it looks up
+    # the next.
+    index, content_off = writer_row(PROJECTED_LINE)
+    content_off["observed_at"] = "2026-10-31"
+    _reversioned(content_off)
+    content_writer = list(writer)
+    content_writer[index] = resolve_pending.ledger_line(content_off)
+    orphan = json.loads(writer[0])
+    orphan["assertionVersion"]["supersedes"] = "av2:" + "0" * 64
+    _reversioned(orphan)
+    case(
+        "two rows: a restatement's content, then a restatement of no earlier row",
+        sample + content_writer + [resolve_pending.ledger_line(orphan)],
     )
     _, corrected = writer_row(CORRECTED_LINE)
     correction = _base_row(
