@@ -18301,12 +18301,13 @@ def _main() -> int:
     ledger_rows = [json.loads(line) for line in ledger_lines]
     existing_ids = {row["source_record_id"] for row in ledger_rows}
     # Like corrections, this rides on runs with pending work: a run with
-    # none exits above, before reading the ledger. A fault the rebuild names
-    # costs no resolutions: the run reports it, resolves the rest, and exits
-    # EXIT_REFUSED_ROWS, so the workflow publishes what it appended and then
-    # fails the job. The rebuild leaves no run it wrote behind a fault, so the
-    # next run starts clean. Anything else (a full disk, a bug, a ledger line
-    # the run cannot read at all) still stops the run.
+    # none exits above, before reading the ledger. The run reports a fault the
+    # rebuild names, resolves the rest, and exits EXIT_REFUSED_ROWS, so the
+    # workflow publishes what it appended and then fails the job. The rebuild
+    # leaves no run it wrote behind a fault, so the next run starts clean. A
+    # fault that leaves a scaled row current still stops the run, at the guard
+    # below, and so does anything else (a full disk, a bug, a ledger line the
+    # run cannot read at all).
     restore_refusals: list[str] = []
     try:
         report_restored_runs(ledger_lines, args)

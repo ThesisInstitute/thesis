@@ -1440,6 +1440,30 @@ def test_a_custody_fault_in_a_rebuild_costs_the_daily_run_no_resolution(
     assert row["measure"]["unit"] == "count"
 
 
+def test_a_restatement_that_leaves_a_scaled_row_current_is_reported_then_stops(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # Its supersedes names no row, so the June row stays current in thousands.
+    # The rebuild's fault prints first, and the guard then stops the run: a new
+    # row in base units would give that series a second unit.
+    june, restated = _restated_june_rows()
+    restated["assertionVersion"]["supersedes"] = "av2:" + "0" * 64
+    with pytest.raises(
+        resolve_pending.ledger_units.LedgerUnitError, match="carry a scale word"
+    ):
+        _append_through_main(
+            monkeypatch,
+            capsys,
+            tmp_path,
+            f"{json.dumps(june)}\n{json.dumps(restated)}\n",
+        )
+    assert _restore_refusals(capsys.readouterr().out) == [
+        "line 2 restates a row no earlier line holds"
+    ]
+
+
 @pytest.mark.parametrize(
     "retrieved_at",
     [
@@ -1691,6 +1715,21 @@ def test_the_writer_refuses_a_restatement_the_rebuild_would_refuse(
         )
 
 
+@pytest.mark.parametrize("sha", [None, 7, chr(0xD800)])
+def test_the_writer_refuses_a_ledger_sha_the_rebuild_would_refuse(sha: object) -> None:
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    with pytest.raises(
+        resolve_pending.ledger_units.LedgerUnitError, match="ledgerRepoSha"
+    ):
+        resolve_pending.restatement_row(
+            _chronicle_june_row(),
+            line,
+            run_dir=resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z"),
+            retrieved_at="2026-11-04T00:00:00Z",
+            ledger_repo_sha=sha,
+        )
+
+
 @pytest.mark.parametrize(
     ("name", "fault"),
     [
@@ -1843,6 +1882,7 @@ _WRITER_CARRIES = (
 @example(spoils=[])
 @example(spoils=[("targetContentHash", 7)])
 @example(spoils=[("assertionVersion.id", chr(0xD800))])
+@example(spoils=[("observed_at", float("inf"))])
 def test_a_run_the_writer_finishes_rebuilds_from_its_rows_to_the_byte(
     spoils: list[tuple[str, object]],
 ) -> None:
@@ -1858,22 +1898,28 @@ def test_a_run_the_writer_finishes_rebuilds_from_its_rows_to_the_byte(
         prior["assertionVersion"] = {"id": "av2:prior", "supersedes": None}
         for field, value in spoils:
             _spoil(prior, field, value)
-        try:
-            resolve_pending.assertion_version(dict(prior))
-        except ValueError:
-            # The writer content-addresses the row it writes, so a field no
-            # content address can hold stops its run there, before any write.
-            return
         line = json.dumps(prior)
         run_dir = resolve_pending.resolution_run_dir(stamp)
-        try:
-            restated, compressed = resolve_pending.restatement_row(
+
+        def restate() -> tuple[dict, bytes]:
+            return resolve_pending.restatement_row(
                 prior,
                 line,
                 run_dir=run_dir,
                 retrieved_at=stamp,
                 ledger_repo_sha="f" * 40,
             )
+
+        try:
+            resolve_pending.assertion_version(dict(prior))
+        except ValueError:
+            # The writer content-addresses the row it writes, so a field no
+            # content address can hold stops its run there, before any write.
+            with pytest.raises(ValueError):
+                restate()
+            return
+        try:
+            restated, compressed = restate()
             archive = resolve_pending.ROOT / restated["responseArchive"]["path"]
             archive.parent.mkdir(parents=True)
             archive.write_bytes(compressed)
