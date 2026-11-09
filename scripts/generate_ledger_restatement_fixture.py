@@ -15,12 +15,15 @@ the resolver's own writer over real Chronicle rows and records:
   order a restatement run appends them.
 * ``cases``: ledgers built from the sample, the writer's lines and copies of
   them with one or two things changed. A copy with two defects holds the
-  site and the port to the same first refusal. The site checks in three
-  steps, each in ledger order: row by row, each row's relation and, on a row
-  that restates nothing, its supersedes; then each recorded pair; then the
-  fold, which checks one restatement's supersedes and then its content, in
+  site and the port to the same first refusal, for the defects the port
+  models: it leaves out the site's checks of a fact's shape and of each
+  assertion id. The site reads those defects in three steps, each in ledger
+  order: row by row, each row's relation and, on a row that restates
+  nothing, its supersedes; then each recorded pair; then the fold, which
+  checks one restatement's supersedes and then its content, in
   ``assert_restates``'s order, before it moves to the next. Two defects in
-  one row pin the order of that row's checks. Across rows, cases set
+  one row pin the order of that row's checks, and two in one pair the order
+  of that pair's. Across rows, cases set
   defects for every two steps, and two defects within each step, so that a
   reader that took the steps in another order, or reached the later row of
   a step first, would refuse for the other defect. Each case records what
@@ -156,7 +159,7 @@ def _restatement_of(prior: dict[str, Any], prior_line: str) -> dict[str, Any]:
 
 
 def _base_row(prior: dict[str, Any], record_id: str) -> dict[str, Any]:
-    """A new print in base units, as the resolver writes one once migrated."""
+    """A new print in base units, as the resolver writes one."""
 
     row = copy.deepcopy(prior)
     row["source_record_id"] = record_id
@@ -459,7 +462,7 @@ def build_fixture() -> dict[str, Any]:
         sample + writer + [resolve_pending.ledger_line(superseded)],
     )
 
-    # Rows the resolver writes in base units once the ledger holds no scale.
+    # Rows the resolver writes in base units.
     base = _base_row(
         row_of[BASE_ROW_LINE], "bls.jolts.job_openings_total.june_2026.first_print"
     )
@@ -568,6 +571,25 @@ def build_fixture() -> dict[str, Any]:
             resolve_pending.ledger_line(unscaled_pair),
         ],
     )
+    # Within one pair the site checks the pair's shape, then the stored unit,
+    # then the stored value, so each case's earlier defect decides.
+    for name, first_defect, second_defect in (
+        (
+            "one pair: a recorded value that is no number, then the stored unit",
+            set_in("source", "recorded_value", "12"),
+            set_in("measure", "unit", base["source"]["recorded_unit"]),
+        ),
+        (
+            "one pair: the stored unit, then the stored value",
+            set_in("measure", "unit", base["source"]["recorded_unit"]),
+            set_value(base["value"] + 1),
+        ),
+    ):
+        other = copy.deepcopy(base)
+        first_defect(other)
+        second_defect(other)
+        _reversioned(other)
+        case(name, sample + writer + [resolve_pending.ledger_line(other)])
     # The fold finishes one restatement, content and all, before it looks up
     # the next.
     index, content_off = writer_row(PROJECTED_LINE)
