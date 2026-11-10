@@ -1,0 +1,163 @@
+[
+  {
+    "slug": "cps-computer-math-employment-november-2026",
+    "country": "US",
+    "type": "data",
+    "title": "US computer and mathematical employment, November 2026",
+    "question": "What will BLS first print for Current Population Survey employed people in computer and mathematical occupations, total 16 years and over, not seasonally adjusted, for November 2026?",
+    "unit": "millions",
+    "pointEstimate": 7.05,
+    "ciLow": 6.919404275040192,
+    "ciHigh": 7.180595724959808,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-04",
+    "resolutionSource": "U.S. Bureau of Labor Statistics public API, Current Population Survey Table A-19 series LNU02032455",
+    "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455",
+    "resolutionRule": "Resolve to the first official BLS public API value for series LNU02032455 for 2026 M11, Current Population Survey Table A-19, not seasonally adjusted, in thousands, multiplied by 0.001 to millions. Use the first print available after the Employment Situation for November 2026 is released on 2026-12-04; do not use later revisions, same-day corrections, or alternative adjusted series.",
+    "dataPointId": "bls.cps.employed_people_by_occupation.computer_mathematical.2026_11.first_print",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        },
+        "label": "2026-01",
+        "value": 6.632
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        },
+        "label": "2026-02",
+        "value": 6.692
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "2026-03",
+        "value": 6.574
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "2026-04",
+        "value": 6.834
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "2026-05",
+        "value": 6.903
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "2026-06",
+        "value": 6.95
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        },
+        "label": "2026-07",
+        "value": 6.924
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        },
+        "label": "2026-08",
+        "value": 7.01
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-09"
+        },
+        "label": "2026-09",
+        "value": 7.004
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-10"
+        },
+        "label": "2026-10",
+        "value": 7.03
+      }
+    ],
+    "drivers": [
+      "October 2026 level was 7.030 million after the registered transform",
+      "Recent three-month mean was 7.0147 million",
+      "Occupation employment has risen versus November 2025 but remains monthly-noisy in the NSA CPS series",
+      "November target is not seasonally adjusted, so month-specific sampling and seasonal noise matter"
+    ],
+    "sourceContext": [
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455",
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455?startyear=2016&endyear=2026",
+      "https://www.bls.gov/schedule/news_release/empsit.htm"
+    ],
+    "runAt": "2026-11-10T00:31:31Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast for CPS computer and mathematical employment, November 2026"
+      },
+      {
+        "kind": "text",
+        "text": "Resolver framing: the target is BLS CPS series LNU02032455, Current Population Survey Table A-19, employed people in computer and mathematical occupations, total 16 years and over, not seasonally adjusted. The registered source value is in thousands and the target unit is millions, so each API value is multiplied by 0.001. The official BLS Employment Situation schedule for this run lists November 2026 for release on 2026-12-04 at 08:30 Eastern; an evidence fetch to the schedule page was blocked with HTTP 403, so the date verification used the official BLS schedule result available to the run and the sealed ledger registration rather than a captured full-page receipt."
+      },
+      {
+        "kind": "tool",
+        "tool": "mcp__thesis_tool_evidence.fetch_source",
+        "call": "fetch_source https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455",
+        "result": "call-0001 captured the official BLS API response for LNU02032455: October 2026=7030 thousand, September 2026=7004 thousand, August 2026=7010 thousand, July 2026=6924 thousand, June 2026=6950 thousand, May 2026=6903 thousand, April 2026=6834 thousand."
+      },
+      {
+        "kind": "tool",
+        "tool": "mcp__thesis_tool_evidence.fetch_source",
+        "call": "fetch_source https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455?startyear=2016&endyear=2026",
+        "result": "call-0010 captured the longer official BLS API history, including November 2025=6632 thousand and November 2024=6483 thousand; the API message reported the year range was reduced to the system-allowed 10-year limit."
+      },
+      {
+        "kind": "tool",
+        "tool": "mcp__thesis_tool_evidence.calculate",
+        "call": "calculate recent level, year-over-year, and volatility from captured BLS values",
+        "result": "call-0012 calculated the recent three-month mean from 7.010, 7.004, and 7.030 million as 7.014666666666667; call-0017 calculated October 2026 minus November 2025 as 0.3980000000000006 million; call-0024 calculated November 2025 minus November 2024 as 149 thousand."
+      },
+      {
+        "kind": "text",
+        "text": "Reference class and base rate: for this level series, the practical base rate is persistence around the latest official level with CPS sampling and NSA seasonal noise. The current October level of 7.030 million is above the April-October 2026 mean of 6.9507 million and above November 2025 by about 0.398 million, so I start from October persistence and allow a small positive November update rather than reverting all the way to the spring average."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior = October 2026 level 7.030 million; historical sample = January-October 2026 official BLS values after the registered transform [6.632, 6.692, 6.574, 6.834, 6.903, 6.950, 6.924, 7.010, 7.004, 7.030]; adjustment components = +0.015 million for recent level momentum above the spring/summer mean and +0.005 million for the November reference-class/seasonal tendency, with no policy mechanism adjustment; interval method = sample standard deviation of successive monthly changes from call-0013, sigma = 0.10202791012484985 million, so 1.28*sigma from call-0018 = 0.1305957249598078 million; final point from call-0025 = 7.050 million, final implied bounds from call-0022 and call-0023 = 6.919404275040192 to 7.180595724959808 million."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk would come from another strong CPS occupation sample or continued tech/professional hiring that pushes the first print above 7.1806 million. Downside risk would come from mean reversion after October, a weaker November household-survey sample, or occupation reclassification noise that would land below 6.9194 million. A large CPS sampling surprise is the main outside the interval scenario."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the optional critique to separate the +0.020 million update into a recent-level momentum component and a smaller November seasonal/reference-class component, and clarified that the blocked schedule-page receipt leaves release-date grounding to the official BLS schedule result available in the run plus the sealed ledger registration; no forecast numbers changed."
+      },
+      {
+        "kind": "forecast",
+        "point": 7.05,
+        "ciLow": 6.919404275040192,
+        "ciHigh": 7.180595724959808
+      }
+    ]
+  }
+]
